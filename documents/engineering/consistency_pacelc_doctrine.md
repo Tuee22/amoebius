@@ -1,14 +1,26 @@
 # Consistency, Availability & the PACELC Posture
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Single Source of Truth for amoebius's PACELC posture — which consistency / availability /
 > latency directions are fixed by construction and which are configurable magnitudes on the one boundary that
 > admits a tradeoff (the asynchronous cross-cluster gateway) — and the unified deployment-rules surface that
 > carries those magnitudes into the `InForceSpec`.
+> **Read this if**: a consistency or availability trade-off has to be made explicit rather than assumed.
+
+This document owns the consistency framing: which trade-off is actually configurable, which are fixed by the
+systems amoebius delegates to, and where each choice is recorded. It owns no protocol — the delegated systems
+own theirs, and the one cross-cluster obligation is owned by
+[gateway_migration_doctrine.md](./gateway_migration_doctrine.md). Reading it presumes the delegation argument
+in [chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
 
 ---
 
@@ -18,8 +30,7 @@
 2010/2012: under a **P**artition choose **A**vailability or **C**onsistency; **E**lse, in the healthy case,
 choose **L**atency or **C**onsistency), but the choices are scattered across five doctrines that never meet.
 No single document states whether, under partition, amoebius chooses availability or consistency, or where;
-an author or reviewer must reconstruct it from R7/R8/R9 ([`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need),
-[§18](./chaos_failover_doctrine.md#18-the-rules-scale-to-the-boundary)), the `<Planned | Failover>` taxonomy
+an author or reviewer must reconstruct it from R7/R8/R9 ([`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need), [§18](./chaos_failover_second_axis.md#18-the-rules-scale-to-the-boundary)), the `<Planned | Failover>` taxonomy
 ([`gateway_migration_doctrine.md`](./gateway_migration_doctrine.md)), the consistency-boundary invariant
 ([`single_logical_data_plane_doctrine.md` §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)),
 fail-closed Vault ([`vault_pki_doctrine.md`](./vault_pki_doctrine.md)), and the odd-quorum union
@@ -32,7 +43,7 @@ posture chosen" in its cross-boundary ledger, but the whole-stance statement has
 **Why the obvious alternatives fail.** Hardcoding the entire posture with no surface contradicts R9, which
 requires the data-loss and recovery budgets to be **declared as deployment-rules values** — amoebius has no
 basis to pick a given business's tolerance for lost work
-([`chaos_failover_doctrine.md` §18](./chaos_failover_doctrine.md#18-the-rules-scale-to-the-boundary)).
+([`chaos_failover_second_axis.md` §18](./chaos_failover_second_axis.md#18-the-rules-scale-to-the-boundary)).
 Exposing a general "consistency level" knob fails the opposite way: it re-admits the states physics and the
 delegated substrates forbid — a strongly-consistent store spanning two clusters, a synchronous cross-cluster
 write, an even-quorum control plane, a plaintext-fallback Vault — breaking the "if it decodes, it is
@@ -64,7 +75,7 @@ restates ([`documentation_standards.md` §5](../documentation_standards.md#5-dup
 | **In-cluster** (P and E) | **Consistency** (PC/EC), delegated to MinIO / Pulsar-BookKeeper / Patroni Postgres / etcd | No arm weakens it — there is no in-cluster consistency-level field | [`single_logical_data_plane_doctrine.md` §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere) |
 | **Vault** (P) | **Consistency over Availability** (fail-closed) | No plaintext-fallback constructor — a sealed Vault bricks the cluster | [`vault_pki_doctrine.md`](./vault_pki_doctrine.md) |
 | **Control-plane quorum** (E) | **Consistency** at a bounded write-latency cost | Closed odd-quorum union `<Single \| Ha3 \| Ha5>`; even/zero split-brain has no arm | [`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) |
-| **Cross-cluster** (E) | **Latency** — asynchronous replication only | No synchronous-strong cross-cluster arm; sync cross-cluster RPC is anti-doctrinal | [`chaos_failover_doctrine.md` Appendix B](./chaos_failover_doctrine.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question), [`network_fabric_doctrine.md`](./network_fabric_doctrine.md) |
+| **Cross-cluster** (E) | **Latency** — asynchronous replication only | No synchronous-strong cross-cluster arm; sync cross-cluster RPC is anti-doctrinal | [`chaos_failover_worked_examples.md` Appendix B](./chaos_failover_worked_examples.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question), [`network_fabric_doctrine.md`](./network_fabric_doctrine.md) |
 | **Cross-cluster gateway** (P) | **Availability-first**, bounded and self-healing | The one boundary amoebius owns; realized as `<Planned \| Failover>` | [`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need) (R7) + [`gateway_migration_doctrine.md`](./gateway_migration_doctrine.md) |
 | **Cross-cluster cold-DR seed** (P) | **Consistency over Availability** — a `ColdSeedFromBackup` secondary stays down until its seeded state is proven fresh | No availability-first arm; the gateway-take guard admits only a proven-fresh seed ([§3.7](#37-the-cold-dr-seed-recovery-source)) | [`backup_recovery_doctrine.md` §8](./backup_recovery_doctrine.md#8-the-gateway-dovetail-seed-from-backup-under-consistency-over-availability) + [`gateway_migration_model_doctrine.md`](./gateway_migration_model_doctrine.md) |
 
@@ -143,8 +154,7 @@ data MigrationMode = Planned | Failover
 Three total decode-time folds (`Dhall.inputFile auto -> Either DecodeError`): (a) **`active ≠ standby`**
 distinctness — the weaker floor `mkRke2` already uses to reject a reused host
 ([`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md)); a degenerate one-cluster "geo pair" owing
-a budget but crossing no boundary is rejected. (b) **`GeoReplicated` ⇒ the app's parent owns a
-`GatewayFailover` relation** — an app cannot elect geo-replication into a pairing that does not exist. (c)
+a budget but crossing no boundary is rejected. (b) **`GeoReplicated` ⇒ the app's parent owns a `GatewayFailover` relation** — an app cannot elect geo-replication into a pairing that does not exist. (c)
 **resource independence** — no cluster is reused as `active` or `standby` across two `dnsRecord`s. This is the
 strict reading of the structural-fit fold's independence predicate
 ([`gateway_migration_model_doctrine.md §5`](./gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)):
@@ -185,15 +195,14 @@ live signal is consulted (the illegal state is [illegal_state_multicluster.md](.
 It shares the capacity fold's *total checked-rejection* technique, not its locus: this local scalar relation is
 Gate 2, whereas whole-deployment capacity is post-bind `provision-seal`.
 This complements the `lagBound` feasibility push-back above, which needs a monitored signal; the
-`rto ≥ dnsTtl + headroom` relation needs none. The premise that clients and resolvers actually **honor the
-record TTL** — JVM/OS resolver caches, clamping resolvers, and pinned connections can all exceed it — is a
+`rto ≥ dnsTtl + headroom` relation needs none. The premise that clients and resolvers actually **honor the record TTL** — JVM/OS resolver caches, clamping resolvers, and pinned connections can all exceed it — is a
 named **R8 assumed** premise, monitored, never proven by the fold.
 
 ### 3.6 The cross-boundary disposition
 
 A mutable multi-record invariant that crosses the boundary active-active carries a disposition drawn from a
 closed union, defaulting an unclassified invariant to non-confluent held by bounded authority
-([`chaos_failover_doctrine.md` §17](./chaos_failover_doctrine.md#17-the-boundary-and-its-classifier)):
+([`chaos_failover_second_axis.md` §17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier)):
 
 ```dhall
 let CrossBoundaryDisposition =
@@ -254,13 +263,13 @@ Per the proven/tested/assumed discipline
   failover budget unrepresentable; it cannot prove the field lag stays within the declared `lagBound`.
 - **`lagBound` and the derived RPO window are `assumed`** — named, bounded, and monitored (the observed maximum
   is exported), never proven, under real disaster; **RTO is `tested`** — validated by failover drill, not
-  assertion (R8/R9, [`chaos_failover_doctrine.md` §18](./chaos_failover_doctrine.md#18-the-rules-scale-to-the-boundary)).
+  assertion (R8/R9, [`chaos_failover_second_axis.md` §18](./chaos_failover_second_axis.md#18-the-rules-scale-to-the-boundary)).
 - **`Planned`'s RPO=0 is a `runtime-observed` caught-up edge, not a constructive proof** — the ordering is
   type-foreclosed, but the caught-up edge is observed at reconcile time
   ([`gateway_migration_doctrine.md` §6](./gateway_migration_doctrine.md#6-honesty-and-layer-markers)).
 - **The async cross-cluster posture is the recorded price**, not a defect: synchronous cross-cluster
   replication would pay cross-cluster RTT per publish
-  ([`chaos_failover_doctrine.md` Appendix B](./chaos_failover_doctrine.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)).
+  ([`chaos_failover_worked_examples.md` Appendix B](./chaos_failover_worked_examples.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)).
 - Everything here is **design intent** (Phase 0). The Dhall types land at Gate 1 (`dhall type`) and the
   GADT-indexed decoder + folds at Gate 2; the upload-time feasibility push-back and the availability-first
   failover are the one cross-cluster proof obligation. Phase order and status live only in
@@ -274,14 +283,13 @@ Per the proven/tested/assumed discipline
 |---|---|
 | The whole-stance PACELC posture statement (the [§2](#2-the-r7-classification-applied-once-per-boundary) four-leg table) | Each leg's normative rule — the consistency boundary, fail-closed Vault, the odd quorum, the async substrate — stays with its owner |
 | The **unified deployment-rules PACELC surface** ([§3](#3-the-one-configurable-axis--the-deployment-rules-pacelc-surface)): the `ReplicationLink` / `FailoverBudget` / `Distribution` types and the derived-RPO rule | The `GatewayFailover` pairing relation shape and the `<Planned \| Failover>` taxonomy → [`gateway_migration_doctrine.md`](./gateway_migration_doctrine.md) |
-| That the mode is world-triggered, not an authored field ([§3.4](#34-the-mode-is-world-triggered-not-authored)) | R7/R8/R9, the I-confluence classifier, and the failover proof obligation → [`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need), [[§16](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)–[§19](./chaos_failover_doctrine.md#19-the-cross-boundary-ledger-and-conformance-rows)](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest) |
+| That the mode is world-triggered, not an authored field ([§3.4](#34-the-mode-is-world-triggered-not-authored)) | R7/R8/R9, the I-confluence classifier, and the failover proof obligation → [`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need), [[§16](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)–[§19](./chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows)](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest) |
 | The upload-time feasibility push-back as a hybrid decode+runtime gate ([§3.5](#35-the-upload-time-feasibility-push-back)) | The refuse-on-unsatisfiable reconciler posture it mirrors → [`cluster_lifecycle_doctrine.md`](./cluster_lifecycle_doctrine.md) |
-| The no-`Confluent`-arm rule on the authorable disposition ([§3.6](#36-the-cross-boundary-disposition)) | The confluence classification itself (a model obligation) → [`chaos_failover_doctrine.md` §17](./chaos_failover_doctrine.md#17-the-boundary-and-its-classifier) |
+| The no-`Confluent`-arm rule on the authorable disposition ([§3.6](#36-the-cross-boundary-disposition)) | The confluence classification itself (a model obligation) → [`chaos_failover_second_axis.md` §17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier) |
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) — R7/R8/R9, the Second-Axis classifier, and the availability-first posture this doc states once.
 - [`gateway_migration_doctrine.md`](./gateway_migration_doctrine.md) — the `<Planned \| Failover>` taxonomy and the parent-owned `GatewayFailover` relation this surface gathers.
 - [`single_logical_data_plane_doctrine.md`](./single_logical_data_plane_doctrine.md) — a cluster is *the* consistency boundary (the in-cluster leg).

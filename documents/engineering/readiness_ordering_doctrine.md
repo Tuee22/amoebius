@@ -1,13 +1,36 @@
 # Readiness Ordering: Event-Driven Sequences, Not Timed Waits
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Single Source of Truth for how amoebius sequences bring-up — a dependent starts on a
 > *dependency's observed readiness edge*, never on an elapsed duration — and the honest limit that the spec
 > forecloses the *sequence shape*, while the *running port coming up* is a reconcile-time fact owned elsewhere.
+> **Read this if**: one thing has to come up before another, or a timeout is being considered as a substitute.
+
+This document owns the ordering discipline: readiness is an observed condition and never an elapsed
+duration, and the order itself is derived from declared dependencies rather than hand-sequenced. It does not
+own the bring-up sequence that instantiates it, owned by
+[bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md), nor the reconciler that enacts it, owned
+by [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. The load-bearing limit: the spec forecloses the sequence *shape*, not the port's *liveness*](#2-the-load-bearing-limit-the-spec-forecloses-the-sequence-shape-not-the-ports-liveness)
+- [3. Readiness is a condition, never a duration](#3-readiness-is-a-condition-never-a-duration)
+- [4. Ordering is a derived readiness DAG, not a hand-sequenced script](#4-ordering-is-a-derived-readiness-dag-not-a-hand-sequenced-script)
+- [5. The bootstrap tier: local observed witnesses, never timers](#5-the-bootstrap-tier-local-observed-witnesses-never-timers)
+- [6. The runtime enactor: the reconciler observes, never sleeps](#6-the-runtime-enactor-the-reconciler-observes-never-sleeps)
+- [7. One discipline, many instances](#7-one-discipline-many-instances)
+- [8. Planning ownership](#8-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -24,8 +47,7 @@ port in a `sleep`-loop; a bootstrap script runs `sleep 30 && kubectl apply` on t
 apiserver answered within the delay. Each is a **duration standing in for a condition** — it passes on a fast
 machine and flakes on a slow one, and the failure surfaces at runtime as a half-applied cluster.
 
-amoebius refuses the substitution. **A bring-up sequence is a DAG of readiness edges, never a schedule of
-durations.** A dependent is constructed *from* its dependency's readiness — so "start B after 30 seconds" has
+amoebius refuses the substitution. **A bring-up sequence is a DAG of readiness edges, never a schedule of durations.** A dependent is constructed *from* its dependency's readiness — so "start B after 30 seconds" has
 no sanctioned way to be written, and "start B once A is ready" is the only shape the surface offers. This
 doctrine owns that discipline; the pieces that already embody it — the reconciler's observation loop, the
 `.ready` sentinel, Vault fail-closed, `FabricMember` reachability, the daemon `/readyz` contract, the
@@ -41,11 +63,11 @@ where a `sleep` is most likely to be reached for and this doctrine most necessar
 
 ## 2. The load-bearing limit: the spec forecloses the sequence *shape*, not the port's *liveness*
 
-This section is the readiness face
-of the catalog's [§2 load-bearing limit](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it):
-**a type-check cannot prove a port is responsive.** Whether Vault is unsealed, whether the apiserver answers,
-whether the LB has an address — these are eventually-consistent facts about a running world, settled only by
-*looking*. No Dhall value decides them.
+This section is the readiness face of the catalog's
+[§2 load-bearing limit](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it):
+**a type-check cannot prove a port is responsive.** Whether Vault is unsealed, whether the apiserver
+answers, whether the LB has an address — these are eventually-consistent facts about a running world,
+settled only by *looking*. No Dhall value decides them.
 
 So this doctrine does **not** claim to make a readiness race "impossible" in the running cluster. It makes
 two weaker, honest, and sufficient claims, graded on the catalog's
@@ -68,6 +90,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   spec["Bring-up spec: a readiness DAG"]:::intent -->|no AfterDuration arm, type-foreclosed| shape{{"Every edge is a condition, not a duration"}}:::gate
   spec -->|mkBringUpOrder acyclic + complete, decode-foreclosed| order{{"Order derived from the declared dependency graph"}}:::gate
   shape --> enact[/"Reconciler enacts"/]:::effect
@@ -165,8 +188,7 @@ ready*. The order is a theorem of the dependency graph, and every edge in it is 
 This is the section the vision's *"particularly in the initial cluster bootstrap"* demands. The in-cluster
 readiness machinery — the SSA reconciler's wait-for-ready, Pulsar Failover subscriptions — does not exist yet
 during first bring-up: the host daemon is standing the cluster *up*
-([`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap),
-[`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)).
+([`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap), [`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)).
 A `sleep` is most likely to be reached for here, precisely because no readiness signal is yet available to
 observe. The rule holds anyway, using the two primitives the host tier *does* have:
 
@@ -193,8 +215,7 @@ the singleton may acquire it. Only `ReconcilerLeaseHeld` for the authenticated s
 launching the pod (and never an
 "election" edge — the singleton runs no election; its single-instance is delegated to k8s/etcd,
 [`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)). Vault init is the canonical worked example:
-**no secret consumer runs before Vault reports reachable, initialized, and unsealed; a consumer that reaches
-a sealed Vault fails closed rather than racing it**
+**no secret consumer runs before Vault reports reachable, initialized, and unsealed; a consumer that reaches a sealed Vault fails closed rather than racing it**
 ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)) —
 `Unsealed` is a condition, and fail-closed is the event-driven resolution of the race, not a wait around it.
 
@@ -249,6 +270,15 @@ discipline once; each site keeps its own SSoT and is cited, never restated:
 | SSA wait-for-ready | a generation declared converged before it is | `runtime-checked` (observed from live object) | [manifest_generation §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) |
 | `RolloutPlan` / `ReadinessGate` | phase *n+1* before phase *n* is ready | `runtime-checked` gate on a `type-foreclosed` phase value | [release_lifecycle §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply) |
 | Daemon `/readyz`, no-`threadDelay` | a daemon self-reporting ready by a timer | `runtime-checked` discipline (forbids the timer) | [daemon_topology §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) |
+| `verify-caught-up` → `promote`, `drain-monitor` → `decommission` | cutting the wild ingress over to a target that is not caught up, or retiring the source endpoint while sessions still use it | `runtime-checked` observed edges on a `type-foreclosed` GADT-indexed state machine | [gateway_migration §5](./gateway_migration_doctrine.md#5-the-migration-as-a-typed-edge-observed-state-machine) |
+
+**A bounded window is not a gate.** One operand in that last row reads like a duration and is not one: the
+DNS TTL of a gateway cutover. A TTL bounds how long a stale resolution may persist; it never *authorizes* the
+next transition, which still waits on the observed `drain-monitor` edge. It appears in the spec only as an
+operand of a derived budget (`rto ≥ dnsTtl + headroom`,
+[consistency_pacelc_doctrine.md](./consistency_pacelc_doctrine.md)), never as a `Readiness` arm — which is
+exactly why the `Readiness` union has no `AfterDuration` constructor to put it in. The same distinction
+applies to every timeout in the suite: a bound on how long a thing may take is not permission to proceed.
 
 The catalog entry that turns "a duration-gated / hand-ordered bring-up sequence" into a foreclosed illegal
 state is [`illegal_state_catalog.md` §3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race).
@@ -273,8 +303,7 @@ states the target shape and links back for status.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race) the readiness race as a foreclosed illegal state; [§2](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)/[§6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the load-bearing limit and the three layers
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — [§2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap) init-follows-readiness, [§9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) the reconciler that enacts every edge

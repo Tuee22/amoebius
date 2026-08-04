@@ -1,12 +1,32 @@
 # Phase 22: UI server boundary
 
+> **Purpose**: Add the UI-server responsibility to the amoebius executable and test with boundary fakes that
+> every request is freshly authenticated, scoped, authorized, freshness-checked, and dispatched before effect.
+> **Read this if**: phase 22 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 22 delivers the UI server boundary; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), and the plan for reaching it is owned here.
+Register 2: a real boundary against fake tools.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Add the UI-server responsibility to the amoebius executable and test with boundary fakes that
-> every request is freshly authenticated, scoped, authorized, freshness-checked, and dispatched before effect.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 22.1: Authenticated scoped UI-server dispatch 📋](#sprint-221-authenticated-scoped-ui-server-dispatch-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -123,14 +143,18 @@ edge exclusivity, provider policy, storage isolation, and behavior after replica
 ## Sprint 22.1: Authenticated scoped UI-server dispatch 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Server/{Main,Dispatch,RequestContext,SecurityHeaders,WebSocket}.hs`, `src/Amoebius/Ui/Realtime/{Class,Envelope}.hs` and
-`test/ui/Phase22UiServerBoundarySpec.hs` (target authored sources; not yet built)
+**Implementation**:
+`src/Amoebius/Ui/Server/{Main,Dispatch,RequestContext,SecurityHeaders,WebSocket}.hs`,
+`src/Amoebius/Ui/Realtime/{Class,Envelope}.hs` and `test/ui/Phase22UiServerBoundarySpec.hs` (target authored
+sources; not yet built)
 **Blocked by**: Phase 20
-**Independent Validation**: `cabal test ui-server-boundary-spec` starts the authority/server/handler as
-separate processes, drives paired HTTP requests, reads independent raw effect/network observations, and
-requires every named mutant to fail.
+**Independent Validation**: `cabal test
+ui-server-boundary-spec` starts the authority/server/handler as separate processes, drives paired HTTP
+requests, reads independent raw effect/network observations, and requires every named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/daemon_topology_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/illegal_state/illegal_state_security.md`
+`documents/engineering/daemon_topology_doctrine.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`,
+`documents/illegal_state/illegal_state_security.md`
 
 ### Objective
 

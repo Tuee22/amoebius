@@ -1,13 +1,37 @@
 # Phase 32: Keycloak-owned ingress
 
+> **Purpose**: Wire the single Keycloak-owned wild-ingress door — LoadBalancer → Envoy/Gateway API →
+> Keycloak — on the standard service stack, prove no workload can publish its own wild ingress, and confirm the
+> retained-storage rebind regression still holds behind the new edge.
+> **Read this if**: phase 32 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 32 delivers the Keycloak-owned ingress; its design is owned by [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [pulumi_iac_doctrine.md](../documents/engineering/pulumi_iac_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Wire the single Keycloak-owned wild-ingress door — LoadBalancer → Envoy/Gateway API →
-> Keycloak — on the standard service stack, prove no workload can publish its own wild ingress, and confirm the
-> retained-storage rebind regression still holds behind the new edge.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — the edge / Patroni / ACME envelope](#resource-provision--the-edge--patroni--acme-envelope)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 32.1: The Keycloak-owned edge — LoadBalancer → Envoy/Gateway API → Keycloak 📋](#sprint-321-the-keycloak-owned-edge--loadbalancer--envoygateway-api--keycloak-)
+- [Sprint 32.2: No self-published wild ingress + public-edge TLS 📋](#sprint-322-no-self-published-wild-ingress--public-edge-tls-)
+- [Sprint 32.3: East-west NetworkPolicy posture — derived default-deny 📋](#sprint-323-east-west-networkpolicy-posture--derived-default-deny-)
+- [Sprint 32.4: The single-door + storage-rebind regression gate 📋](#sprint-324-the-single-door--storage-rebind-regression-gate-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -56,8 +80,7 @@ impossibility of a self-published ingress was already golden-locked pre-cluster 
 
 **Gate:** on the live `linux-cpu` cluster carrying the standard service stack, every wild route — WAN, LAN,
 and localhost-browser — reaches a platform or app surface **only** through `LoadBalancer → Envoy/Gateway API →
-Keycloak`; an unauthenticated request to any surface is rejected at that edge; **no workload or chart can
-publish its own wild ingress** or open a backdoor NodePort (the sole exception being the host-origin,
+Keycloak`; an unauthenticated request to any surface is rejected at that edge; **no workload or chart can publish its own wild ingress** or open a backdoor NodePort (the sole exception being the host-origin,
 localhost-only NodePort, a distinct endpoint type); and the **Phase-28 storage-rebind regression still holds**
 — a marker row in the Keycloak Patroni DB and a marker object in MinIO survive a cluster delete + recreate
 byte-for-byte.
@@ -72,10 +95,8 @@ cluster came up (see [Gate integrity](#gate-integrity)).
 
 ### Representative set (concrete corpus, §M.7)
 
-The gate's "every wild route / every surface" quantifies over an **explicitly enumerated, Phase-0-committed
-route inventory** — `test/fixtures/phase32/route-inventory.golden` — listing every browser surface on the
-Phase-30/31 standard service stack that the edge fronts: **Grafana, the Keycloak admin console, the Vault UI, the
-MinIO console, the platform API surface, and a platform-owned authenticated-WebSocket upgrade probe** (the exact set is the golden; if the stack's surface set changes,
+The gate's "every wild route / every surface" quantifies over an **explicitly enumerated, Phase-0-committed route inventory** — `test/fixtures/phase32/route-inventory.golden` — listing every browser surface on the
+Phase-30/31 standard service stack that the edge fronts: **Grafana, the Keycloak admin console, the Vault UI, the MinIO console, the platform API surface, and a platform-owned authenticated-WebSocket upgrade probe** (the exact set is the golden; if the stack's surface set changes,
 the golden is re-authored and re-committed, never regenerated from the running edge). The three origin classes
 — WAN, LAN, localhost-browser — are each probed from a **distinct Linux network namespace / sidecar container**
 attached to a separate veth with a non-loopback source address for WAN/LAN and the host loopback for
@@ -107,10 +128,31 @@ three. The "test-realm user" is the Phase-0-committed `phase32-tester` realm/use
   recording shim on the ACME client, a readiness-withholding harness), never a compliance trace the edge emits
   about itself.
 
+```mermaid
+flowchart LR
+  %% register: algebra
+  fx["committed fixtures"]:::intent
+  or["independently authored oracle"]:::intent
+  mu["seeded mutant"]:::intent
+  g{{"the phase 32 gate command"}}:::gate
+  ok((("phase seal: the ledger this gate emits"))):::seal
+  no>"the mutant must turn it red"]:::refuse
+  fx -->|"binds the corpus"| g
+  or -->|"binds the expectation"| g
+  mu -->|"binds the defect"| g
+  g -->|"fixtures green, oracle agrees"| ok
+  g -->|"mutant green means the gate is not one"| no
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+```
+*Design intent. Phase 32's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+
 ## Resource provision — the edge / Patroni / ACME envelope
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
-[`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+[`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
 and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting);
 the names below are phase-specific source composites that must flatten to those canonical execution atoms.
 
@@ -165,15 +207,13 @@ before the first effect, while their exact-fit twins render and reconcile.
 
 - [`platform_services_doctrine.md` §9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
   — **the LoadBalancer and the single wild-ingress path**: this phase materializes the one sanctioned ingress
-  shape (`LoadBalancer → Envoy/Gateway API → Keycloak`), its **east-west connectivity derived from the declared
-  dependency graph** subsection, and the [§11 bring-up ordering edges](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
+  shape (`LoadBalancer → Envoy/Gateway API → Keycloak`), its **east-west connectivity derived from the declared dependency graph** subsection, and the [§11 bring-up ordering edges](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
   that place the LB address before the Gateway listener and Keycloak before the edge admits wild traffic.
 - [`illegal_state_catalog.md` §3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)
   — **accidental insecure / backdoor ingress**: a workload cannot publish its own wild ingress because
   `WildIngress` is a Keycloak-edge-only construct and the host-origin, localhost-only NodePort is a distinct
   `HostLocalPeer` endpoint that does not interconvert; this phase is the live realization of that
-  render-foreclosed impossibility (and of [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other),
-  the derived-allow-edge NetworkPolicy rule).
+  render-foreclosed impossibility (and of [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other), the derived-allow-edge NetworkPolicy rule).
 - [`pulumi_iac_doctrine.md` §5](../documents/engineering/pulumi_iac_doctrine.md#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns)
   — **DNS (route53) and TLS (zerossl)**: the public-edge TLS wired through the edge is *referenced*, not
   re-specified here; certificate provisioning is owned by the Pulumi/IaC doctrine, and the ZeroSSL EAB material
@@ -187,11 +227,20 @@ before the first effect, while their exact-fit twins render and reconcile.
 ## Sprint 32.1: The Keycloak-owned edge — LoadBalancer → Envoy/Gateway API → Keycloak 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Keycloak.hs` (target paths; not yet built)
-**Blocked by**: Phase 30 gate (external prereq — the backbone is HA-up and publishes a MetalLB address), Phase
-24 gate (external prereq — the Percona/Patroni database layer is HA-up), Phase 29 gate (external prereq — Vault
-serves Keycloak's DB password and the edge TLS material as `SecretRef`s)
-**Independent Validation**: for every surface in the committed `route-inventory.golden`, a real OIDC login as the Phase-0 `phase32-tester` user yields the surface's content (2xx) **only** after traversing Keycloak, while an unauthenticated probe to the same route is rejected/redirected to the Keycloak login (positive enforcement, not a vacuous deny-all); the only reachable wild path is `LoadBalancer → Envoy/Gateway API → Keycloak`, confirmed per origin class from a distinct netns probe; the readiness DAG is proven by an **enforced-gating** experiment — the LB address and Keycloak readiness are withheld and the dependent step is observed (by an external harness) to block rather than proceed — not by post-hoc reading the implementation's own event log.
+**Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Keycloak.hs`
+(target paths; not yet built)
+**Blocked by**: Phase 30 gate (external prereq — the backbone is HA-up and
+publishes a MetalLB address), Phase 24 gate (external prereq — the Percona/Patroni database layer is HA-up),
+Phase 29 gate (external prereq — Vault serves Keycloak's DB password and the edge TLS material as
+`SecretRef`s)
+**Independent Validation**: for every surface in the committed `route-inventory.golden`, a
+real OIDC login as the Phase-0 `phase32-tester` user yields the surface's content (2xx) **only** after
+traversing Keycloak, while an unauthenticated probe to the same route is rejected/redirected to the Keycloak
+login (positive enforcement, not a vacuous deny-all); the only reachable wild path is `LoadBalancer →
+Envoy/Gateway API → Keycloak`, confirmed per origin class from a distinct netns probe; the readiness DAG is
+proven by an **enforced-gating** experiment — the LB address and Keycloak readiness are withheld and the
+dependent step is observed (by an external harness) to block rather than proceed — not by post-hoc reading
+the implementation's own event log.
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`
 
@@ -249,9 +298,20 @@ The whole sprint (📋 Planned).
 ## Sprint 32.2: No self-published wild ingress + public-edge TLS 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Tls.hs` (target paths; not yet built)
+**Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Tls.hs`
+(target paths; not yet built)
 **Blocked by**: Sprint 32.1
-**Independent Validation**: the live scan is itself validated against a **committed seeded violation** — an out-of-band NodePort/`Ingress` applied via raw `kubectl` (bypassing the DSL) makes the scan go red and the ledger record it, and its removal restores green — so a scan that greps a label the renderer never emits cannot pass vacuously; with the seed removed, the scan finds no non-Keycloak wild path (no service exposes a backdoor NodePort reachable from a WAN/LAN netns probe); the render layer cannot express a workload-owned wild `Ingress` (`WildIngress` is a Keycloak-edge-only construct); the sole carve-out is the host-origin, localhost-only NodePort, proven unreachable by a **real probe from a non-host source IP** (a distinct netns with a non-loopback address), not by inspecting the Service/listener bind config; public-edge TLS chains through an ACME issuance whose EAB material is proven — by an **argv/env-recording shim on the ACME client** — to be read from a Vault `SecretRef`, with the rendered Dhall grepped to confirm no EAB literal.
+**Independent Validation**: the live scan is
+itself validated against a **committed seeded violation** — an out-of-band NodePort/`Ingress` applied via
+raw `kubectl` (bypassing the DSL) makes the scan go red and the ledger record it, and its removal restores
+green — so a scan that greps a label the renderer never emits cannot pass vacuously; with the seed removed,
+the scan finds no non-Keycloak wild path (no service exposes a backdoor NodePort reachable from a WAN/LAN
+netns probe); the render layer cannot express a workload-owned wild `Ingress` (`WildIngress` is a
+Keycloak-edge-only construct); the sole carve-out is the host-origin, localhost-only NodePort, proven
+unreachable by a **real probe from a non-host source IP** (a distinct netns with a non-loopback address),
+not by inspecting the Service/listener bind config; public-edge TLS chains through an ACME issuance whose
+EAB material is proven — by an **argv/env-recording shim on the ACME client** — to be read from a Vault
+`SecretRef`, with the rendered Dhall grepped to confirm no EAB literal.
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/illegal_state/illegal_state_catalog.md`, `documents/engineering/pulumi_iac_doctrine.md`
 
@@ -285,12 +345,10 @@ one carve-out really is a *different type* of endpoint, not a wild one.
    DSL) that opens a WAN/LAN-reachable bypass; assert the scan turns **red** and the ledger records the
    violation; remove the seed and assert **green**. Then, with no seed present, scan the live cluster and assert
    no exposed backdoor NodePort and no non-Keycloak wild route.
-2. Assert the host-origin, localhost-only NodePort is unreachable off the host by an **actual probe from a
-   distinct network namespace with a non-loopback source IP** (which must fail/time out) paired with a
+2. Assert the host-origin, localhost-only NodePort is unreachable off the host by an **actual probe from a distinct network namespace with a non-loopback source IP** (which must fail/time out) paired with a
    host-loopback probe that succeeds — differing only in origin; inspecting the bind config alone is not
    sufficient.
-3. Assert the ACME client obtained its EAB material from a Vault `SecretRef`, observed via an **argv/env
-   recording shim** on the client process (the shim shows the SecretRef path, never a literal), and grep the
+3. Assert the ACME client obtained its EAB material from a Vault `SecretRef`, observed via an **argv/env recording shim** on the client process (the shim shows the SecretRef path, never a literal), and grep the
    rendered Dhall to assert no EAB literal appears. **Scope for the linux-cpu kind gate:** a staging/stand-in
    ACME chain is acceptable in place of live public ZeroSSL/route53 issuance (no public DNS zone is required);
    the load-bearing assertion is the **provenance of the EAB material (Vault, not Dhall)**, not that the cert
@@ -306,9 +364,17 @@ The whole sprint (📋 Planned).
 ## Sprint 32.3: East-west NetworkPolicy posture — derived default-deny 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Manifest/NetworkPolicy.hs`, `src/Amoebius/Platform/Edge.hs` (target paths; not yet built)
+**Implementation**: `src/Amoebius/Manifest/NetworkPolicy.hs`,
+`src/Amoebius/Platform/Edge.hs` (target paths; not yet built)
 **Blocked by**: Sprint 32.1
-**Independent Validation**: "derived" is oracled two ways that a hardcoded static allow-list cannot satisfy. (1) **Graph variation:** the gate deploys a scratch consumer workload, adds a declared consuming edge to a provider, re-renders/re-applies, and asserts both the applied policy set **and** live reachability flip on; then removes the edge and asserts denial returns — so the policy must be a total function of the graph, not the fixed Phase-30/31 service names. (2) **Independent set-equality:** the applied policies are compared for set equality against the Phase-0-committed `netpol-expected.json` and against a **separate graph-walker** over the declared dependency edges (a code path distinct from `renderAll`), never the reconciler's own fold. After apply, a pod declaring consumer of `B` reaches `B`, a pod that does not is denied, and a probe to an undeclared edge times out.
+**Independent Validation**: "derived" is oracled two ways that a hardcoded static allow-list cannot satisfy. (1) **Graph variation:** the gate deploys a scratch consumer workload, adds a declared consuming edge to a provider,
+re-renders/re-applies, and asserts both the applied policy set **and** live reachability flip on; then
+removes the edge and asserts denial returns — so the policy must be a total function of the graph, not the
+fixed Phase-30/31 service names. (2) **Independent set-equality:** the applied policies are compared for set
+equality against the Phase-0-committed `netpol-expected.json` and against a **separate graph-walker** over
+the declared dependency edges (a code path distinct from `renderAll`), never the reconciler's own fold.
+After apply, a pod declaring consumer of `B` reaches `B`, a pod that does not is denied, and a probe to an
+undeclared edge times out.
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/illegal_state/illegal_state_catalog.md`
 
@@ -348,21 +414,24 @@ The whole sprint (📋 Planned).
 ## Sprint 32.4: The single-door + storage-rebind regression gate 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Platform/Edge.hs`, `test/live/IngressRebindGate.hs` (target paths; not yet built)
-**Blocked by**: Sprint 32.1, Sprint 32.2, Sprint 32.3, Phase 28 gate (external prereq — the no-provisioner retained-storage lossless rebind the regression reuses)
-**Independent Validation**: the gate harness proves both halves in one run — the single-door invariant
-end-to-end (unauthenticated request rejected at the edge, positive OIDC round-trip served for the committed
-route inventory, no non-Keycloak wild path) and the marker-bytes round-trip surviving a **witnessed** cluster
+**Implementation**: `src/Amoebius/Platform/Edge.hs`, `test/live/IngressRebindGate.hs`
+(target paths; not yet built)
+**Blocked by**: Sprint 32.1, Sprint 32.2, Sprint 32.3, Phase 28 gate (external
+prereq — the no-provisioner retained-storage lossless rebind the regression reuses)
+**Independent Validation**: the gate harness proves both halves in one run — the single-door invariant end-to-end
+(unauthenticated request rejected at the edge, positive OIDC round-trip served for the committed route
+inventory, no non-Keycloak wild path) and the marker-bytes round-trip surviving a **witnessed** cluster
 delete + recreate. Before full cluster deletion, the harness performs Phase 28's intermediate PVC-delete
 observation against the still-running old apiserver: it quiesces the witnesses, drives each through its
 **owning resource's supported stop path** (the operator-owned Patroni witness through its
-`PerconaPGCluster`/operator path, never by mutating the operator's child StatefulSet; the directly owned MinIO
-witness through its StatefulSet), waits until no Pod references the PVCs, then deletes the PVCs; the PVCs
-disappear, the old-cluster PV objects report `Released`, and the backing bytes remain intact. It then performs
-`cluster delete` and confirms from the host boundary that the old cluster, node container, and apiserver are absent.
-After `cluster recreate`, it records a **recreate witness** in the ledger — the recreated cluster's identity
-differs (new cluster CA / kube-system pod UIDs / `kind` node container ID) — before the read-back counts. A
-harness that skips the delete or reads back from the same never-torn-down cluster fails this witness.
+`PerconaPGCluster`/operator path, never by mutating the operator's child StatefulSet; the directly owned
+MinIO witness through its StatefulSet), waits until no Pod references the PVCs, then deletes the PVCs; the
+PVCs disappear, the old-cluster PV objects report `Released`, and the backing bytes remain intact. It then
+performs `cluster delete` and confirms from the host boundary that the old cluster, node container, and
+apiserver are absent. After `cluster recreate`, it records a **recreate witness** in the ledger — the
+recreated cluster's identity differs (new cluster CA / kube-system pod UIDs / `kind` node container ID) —
+before the read-back counts. A harness that skips the delete or reads back from the same never-torn-down
+cluster fails this witness.
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/storage_lifecycle_doctrine.md`
 
@@ -433,8 +502,7 @@ The whole sprint (📋 Planned).
 ## Related Documents
 
 - [README.md](README.md) — the live tracker; its Phase 32 row is the authoritative one-line gate and status.
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
-  Register-3 honesty token: a passed gate is a live-substrate result, never a compile claim).
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the Register-3 honesty token: a passed gate is a live-substrate result, never a compile claim).
 - [overview.md](overview.md) — the target architecture and the cross-cutting "Keycloak owns all wild ingress"
   invariant this phase realizes.
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — [§9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) the single

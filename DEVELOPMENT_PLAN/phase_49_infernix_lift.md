@@ -1,12 +1,32 @@
 # Phase 49: infernix core artifact lift
 
+> **Purpose**: Lift the sibling infernix inference core behind one linked Haskell artifact adapter and test
+> live that only a committed, owned artifact can drive deterministic CPU inference through amoebius services.
+> **Read this if**: phase 49 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 49 delivers the infernix core artifact lift; its design is owned by [lift_and_compose_doctrine.md](../documents/engineering/lift_and_compose_doctrine.md), [app_vs_deployment_doctrine.md](../documents/engineering/app_vs_deployment_doctrine.md), [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Lift the sibling infernix inference core behind one linked Haskell artifact adapter and test
-> live that only a committed, owned artifact can drive deterministic CPU inference through amoebius services.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 49.1: Lift infernix through one scoped artifact adapter 📋](#sprint-491-lift-infernix-through-one-scoped-artifact-adapter-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -136,18 +156,20 @@ external observers, independent oracle, paired cases, and mutants are delegated 
 ## Sprint 49.1: Lift infernix through one scoped artifact adapter 📋
 
 **Status**: Planned
-**Implementation**: `infernix/src/Infernix/Adapter/{Core,Store,Pulsar,Secrets,Engine}.hs`,
+**Implementation**:
+`infernix/src/Infernix/Adapter/{Core,Store,Pulsar,Secrets,Engine}.hs`,
 `infernix/src/Infernix/Inference/Deterministic.hs`, `infernix/dhall/infernix.dhall`, and
 `test/live/Phase49InfernixArtifactLift.hs` (target paths; not yet built)
-**Blocked by**: Phase 29 gate; Phase 35 gate; Phase 37 gate; Phase 48 gate.
-**Independent Validation**: the one live gate compares two externally observed cold computations with the
-sibling golden and hand-authored identity/scope/readiness oracles, establishes that both denials have zero effect, and
-requires all four committed mutants to fail.
+**Blocked by**: Phase 29 gate;
+Phase 35 gate; Phase 37 gate; Phase 48 gate.
+**Independent Validation**: the one live gate compares two
+externally observed cold computations with the sibling golden and hand-authored identity/scope/readiness
+oracles, establishes that both denials have zero effect, and requires all four committed mutants to fail.
 **Docs to update**: `documents/engineering/lift_and_compose_doctrine.md`,
 `documents/engineering/app_vs_deployment_doctrine.md`,
-`documents/engineering/content_addressing_doctrine.md`,
-`documents/engineering/pulsar_client_doctrine.md`, `documents/engineering/vault_pki_doctrine.md`,
-`documents/engineering/tenancy_doctrine.md`, and `documents/engineering/testing_doctrine.md`.
+`documents/engineering/content_addressing_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`,
+`documents/engineering/vault_pki_doctrine.md`, `documents/engineering/tenancy_doctrine.md`, and
+`documents/engineering/testing_doctrine.md`.
 
 ### Objective
 

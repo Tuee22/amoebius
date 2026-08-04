@@ -1,20 +1,48 @@
 # System Components
 
+> **Purpose**: The target component inventory for amoebius — every surface mapped to its owning doctrine, its
+> planned Haskell module path, and the phase that builds it — honestly marked as intended layout, not
+> existing code.
+> **Read this if**: a component has to be traced to its owning doctrine or its intended module path.
+
+This document is a map of intent: the components amoebius is planned to have, what each is for, and which
+doctrine owns it. It is not a map of a source tree — none exists yet — and it carries no rule of its own;
+every row's authority is the doctrine it cites. Reading it presumes the system shape sketched in
+[overview.md §1](overview.md#1-the-everything-orchestrator-shape-one-runtime-binary-three-contexts).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: The target component inventory for amoebius — every surface mapped to its owning doctrine, its
-> planned Haskell module path, and the phase that builds it — honestly marked as intended layout, not
-> existing code.
+</details>
+
+## Contents
+- [How to read this inventory](#how-to-read-this-inventory)
+- [1. The single binary — three contexts, several typed roles](#1-the-single-binary--three-contexts-several-typed-roles)
+- [2. The DSL — Dhall decoder + chain/Step kernel](#2-the-dsl--dhall-decoder--chainstep-kernel)
+- [3. Manifests — typed renderer + the SSA reconciler](#3-manifests--typed-renderer--the-ssa-reconciler)
+- [4. Capabilities — the capability→provider→shape binder](#4-capabilities--the-capabilityprovidershape-binder)
+- [5. Platform services — baked binaries + the `distribution` registry](#5-platform-services--baked-binaries--the-distribution-registry)
+- [6. The native Pulsar client — `amoebius-pulsar`](#6-the-native-pulsar-client--amoebius-pulsar)
+- [7. The content-addressed store + determinism kernel](#7-the-content-addressed-store--determinism-kernel)
+- [8. Vault, secrets & PKI](#8-vault-secrets--pki)
+- [9. Substrate tool-ensure + base-image build](#9-substrate-tool-ensure--base-image-build)
+- [10. Pulumi backend (IaC)](#10-pulumi-backend-iac)
+- [11. Release lifecycle — the `amoebius-release` package](#11-release-lifecycle--the-amoebius-release-package)
+- [12. Network fabric — raw-kernel WireGuard](#12-network-fabric--raw-kernel-wireguard)
+- [13. The multi-cluster forest — spawn, geo-replication, gateway migration](#13-the-multi-cluster-forest--spawn-geo-replication-gateway-migration)
+- [14. The pre-cluster (Register 1–2) design-first validation surface](#14-the-pre-cluster-register-12-design-first-validation-surface)
+- [Related Documents](#related-documents)
 
 ---
 
 ## How to read this inventory
 
-This document is a **map of intent**, not a map of `src/`. The amoebius tree is greenfield: **nothing in the
-tables below is built**. Every "Planned module path" is the *target* layout this plan commits to — the path a
+This document is a **map of intent**, not a map of `src/`. The amoebius tree is greenfield: **nothing in the tables below is built**. Every "Planned module path" is the *target* layout this plan commits to — the path a
 sprint's `Implementation` field will name and that becomes concrete only when that sprint is ✅ Done
 ([`development_plan_standards.md` §F](development_plan_standards.md#f-the-sprint-block-format)). Where this inventory leans on the sibling **prodbox** project for a
 proven pattern, that is cited as *evidence* a shape works, never as amoebius proof.
@@ -71,6 +99,36 @@ architecture as *evidence* the shape holds; amoebius proof is each phase's gate.
 
 ---
 
+```mermaid
+flowchart TD
+  %% register: orientation
+  dhall["the authored InForceSpec, in Dhall"]
+  subgraph bin["one Haskell binary, three contexts"]
+    cli["CLI / command"]
+    host["sudo host daemon"]
+    pod["in-cluster pod"]
+  end
+  subgraph roles["the pod context selects one role"]
+    cp["control-plane singleton"]
+    sch["capacity scheduler"]
+    wrk["N unelected workers"]
+  end
+  subgraph plat["platform capabilities, one namespace each"]
+    store["ObjectStore, SecretStore, Registry"]
+    bus["MessageBus, Sql"]
+    edge["Identity, Edge, Observability"]
+  end
+  dhall -->|"decoded, bound, sealed"| bin
+  pod --> cp
+  pod --> sch
+  pod --> wrk
+  cp -->|"renders and reconciles into"| plat
+  sch -->|"places every pod in"| plat
+  host -->|"supervises accelerator work the cluster cannot host"| hw["host compute daemon"]
+  wrk -->|"consume capabilities, never products"| plat
+```
+*Orientation. Design intent. The whole part count in one picture: one authored value, one binary in three contexts, three in-cluster roles, and the capability set they operate. Each component's owning doctrine is named in the tables below, and the context-and-role grid by [daemon_topology_doctrine.md §2](../documents/engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid). Nothing here is built.*
+
 ## 2. The DSL — Dhall decoder + chain/Step kernel
 
 The DSL is a hard split between two languages, owned by
@@ -80,8 +138,7 @@ algebra. The composability guarantee — fragments nest without limit or leakage
 [`dsl_doctrine.md` §4 — Total composability](../documents/engineering/dsl_doctrine.md#4-total-composability),
 and the second of the typed spec gates (the one that turns Dhall into Haskell values) is
 [`dsl_doctrine.md` Gate 2 — the Haskell typed decoder](../documents/engineering/dsl_doctrine.md#gate-2--the-haskell-typed-decoder).
-The kernel itself — the `Step` algebra and `chain :: cfg -> [Step]` — is seeded from hostbootstrap in
-Phase 14 and is the spine every later phase composes onto.
+The kernel itself — the `Step` algebra and `chain :: cfg -> [Step]` — is seeded from hostbootstrap in Phase 14 and is the spine every later phase composes onto.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
@@ -106,10 +163,7 @@ Phase 14 and is the spine every later phase composes onto.
 
 Types render Kubernetes manifests; Helm does not. The renderer is the pure, total function owned by
 [`manifest_generation_doctrine.md` §2 — The typed manifest model: `renderAll` is the sole public pure function to objects](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects):
-`renderAll :: ProvisionedSpec -> [K8sObject]`, which privately total-maps the sealed equal-keyed
-`ProvisionedRenderSourceSet`; each object is a typed Haskell record serialized via Aeson — the record *is*
-the manifest. No public service-valued renderer exists. Making the cluster match that object set is owned by
-[`manifest_generation_doctrine.md` §5 — The apply/reconcile engine: snapshot-bound typed actions](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions):
+`renderAll :: ProvisionedSpec -> [K8sObject]`, which privately total-maps the sealed equal-keyed `ProvisionedRenderSourceSet`; each object is a typed Haskell record serialized via Aeson — the record *is* the manifest. No public service-valued renderer exists. Making the cluster match that object set is owned by [`manifest_generation_doctrine.md` §5 — The apply/reconcile engine: snapshot-bound typed actions](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions):
 server-side apply under a fixed `amoebius` field manager, ApplySet prune, wait-for-ready — run only by the
 control-plane singleton ([§1](#1-the-single-binary--three-contexts-several-typed-roles)), never by a CLI poke racing another writer.
 
@@ -347,8 +401,7 @@ Phase-37 store in Phase 39.
 
 ## 12. Network fabric — raw-kernel WireGuard
 
-The inter-node / inter-cluster wire is **raw kernel WireGuard configured directly by amoebius — never
-Netmaker**, owned by
+The inter-node / inter-cluster wire is **raw kernel WireGuard configured directly by amoebius — never Netmaker**, owned by
 [`network_fabric_doctrine.md` §2 — Raw WireGuard, not Netmaker](../documents/engineering/network_fabric_doctrine.md#2-raw-wireguard-not-netmaker).
 Peer keys are a **Vault-KV Curve25519 secret class** named by `SecretRef`, peer config is the pure
 `render(nodeInventory) -> [WireGuardPeerConfig]`, and distribution is the singleton's ordinary
@@ -378,7 +431,7 @@ with per-child unseal in two sanctioned modes owned by
 [`vault_pki_doctrine.md` §6 — Parent/child unseal](../documents/engineering/vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes).
 The two siblings geo-replicate a `command → event* → result` workflow across the asynchronous **Second-Axis**
 boundary, every crossing invariant sorted by the confluence classifier, owned by
-[`chaos_failover_doctrine.md` §16 — The Second Axis](../documents/engineering/chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
+[`chaos_failover_second_axis.md` §16 — The Second Axis](../documents/engineering/chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
 and [`content_addressing_doctrine.md` §5 — Confluence](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely).
 The one formal obligation — the cross-cluster gateway migration, both the `Planned` and `Failover` branches —
 is discharged live here as the built runtime of the Phase-3 model, owned by
@@ -388,15 +441,14 @@ the client-rebind protocol of
 [`§4`](../documents/engineering/gateway_migration_doctrine.md#4-client-rebind--a-live-session-must-always-find-the-gateway),
 as the typed, edge-observed state machine of
 [`§5`](../documents/engineering/gateway_migration_doctrine.md#5-the-migration-as-a-typed-edge-observed-state-machine).
-Spawn + geo-replication land in Phase 42 (reusing the [§10](#10-pulumi-backend-iac) Pulumi backend, Pulumi-from-inside first built
-there); the gateway-migration drills + model-correspondence in Phase 43. This is the live runtime counterpart
+Spawn + geo-replication land in Phase 42 (reusing the [§10](#10-pulumi-backend-iac) Pulumi backend, Pulumi-from-inside first built there); the gateway-migration drills + model-correspondence in Phase 43. This is the live runtime counterpart
 of the [§14](#14-the-pre-cluster-register-12-design-first-validation-surface)-listed Phase-3 design `Model`.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
 | Amoebic spawn + `project(subtree)` `ChildInForceSpec` | [cluster_lifecycle §3](../documents/engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest) | `src/Amoebius/Multicluster/Spawn.hs`, `src/Amoebius/Dsl/ChildInForceSpec.hs` (PLANNED) | [phase_42_multicluster_spawn_georepl.md](phase_42_multicluster_spawn_georepl.md) |
 | Per-child unseal + per-child Transit key + secret injection | [vault_pki §6](../documents/engineering/vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes) | `src/Amoebius/Multicluster/ChildUnseal.hs`, `src/Amoebius/Multicluster/SecretInjection.hs`, `src/Amoebius/Vault/TransitChildKey.hs` (PLANNED) | [phase_42_multicluster_spawn_georepl.md](phase_42_multicluster_spawn_georepl.md) |
-| Geo-replication + invariant-confluence classifier (Second-Axis boundary) | [chaos_failover §16](../documents/engineering/chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest) | `src/Amoebius/Multicluster/GeoReplication.hs`, `src/Amoebius/Multicluster/ConfluenceClass.hs` (PLANNED) | [phase_42_multicluster_spawn_georepl.md](phase_42_multicluster_spawn_georepl.md) |
+| Geo-replication + invariant-confluence classifier (Second-Axis boundary) | [chaos_failover §16](../documents/engineering/chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest) | `src/Amoebius/Multicluster/GeoReplication.hs`, `src/Amoebius/Multicluster/ConfluenceClass.hs` (PLANNED) | [phase_42_multicluster_spawn_georepl.md](phase_42_multicluster_spawn_georepl.md) |
 | Gateway-migration runtime (both branches) + client rebind/DNS repoint + model-correspondence | [gateway_migration §2](../documents/engineering/gateway_migration_doctrine.md#2-the-planned-branch--a-coordinated-strong-consistency-handover) / [§3](../documents/engineering/gateway_migration_doctrine.md#3-the-failover-branch--an-availability-first-emergency-takeover) / [§4](../documents/engineering/gateway_migration_doctrine.md#4-client-rebind--a-live-session-must-always-find-the-gateway) / [§5](../documents/engineering/gateway_migration_doctrine.md#5-the-migration-as-a-typed-edge-observed-state-machine) | `src/Amoebius/Multicluster/{GatewayMigration,PlannedHandover,ClientRebind,DnsRepoint,PromotionGate}.hs`, `src/Amoebius/Formal/GatewayMigration.hs` (PLANNED) | [phase_43_gateway_migration_drills.md](phase_43_gateway_migration_drills.md) |
 | Migration teardown + push-back (would-break-root-`InForceSpec` guard) | [cluster_lifecycle §6](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec) | `src/Amoebius/Multicluster/Teardown.hs`, `src/Amoebius/Multicluster/Pushback.hs` (PLANNED) | [phase_43_gateway_migration_drills.md](phase_43_gateway_migration_drills.md) |
 
@@ -437,7 +489,7 @@ the foreclosure layers + validation-locus by
 | Component / Surface | Owning doctrine | Planned module path (source; emitted artifacts not committed) | Phase |
 |---|---|---|---|
 | Formal-model EDSL (`Model` → `interpret` runtime fn + `emitTLA` generated `.tla`; safety `INVARIANT`s + fairness/temporal `PROPERTY`s; differential explorer↔TLC property) | [formal_model_doctrine](../documents/engineering/formal_model_doctrine.md) | `src/Amoebius/Formal/{Model,Interpret,EmitTLA,Explore}.hs` (the `Fairness`/`Temporal` fragment in `Model.hs`; the `.tla`/`.cfg` are generated, not committed) | [phase_02](phase_02_formal_model_kernel.md) |
-| Gateway-migration **design model**, both branches (TLC safety `UniqueGatewayOwner` / `SessionAlwaysRebindable` / `PlannedIsLossless` / `NoWriteAfterStaleFailover` + liveness `MergeConverges` / `SessionEventuallyRebinds` under fairness; proven-for-the-model at scope, argued cutoff) + io-sim + structural-fit fold | [gateway_migration_model_doctrine](../documents/engineering/gateway_migration_model_doctrine.md) | `src/Amoebius/Multicluster/{Model,GatewayDecision,StructuralFit}.hs`, `test/formal/*` (generated `spec/tla/*.tla` not committed) | [phase_03](phase_03_gateway_migration_model.md) |
+| Gateway-migration **design model**, both branches (TLC safety `UniqueGatewayOwner` / `SessionAlwaysRebindable` / `PlannedIsLossless` / `NoWriteAfterStaleFailover` / `NoTakeWithoutProvenFreshness` + liveness `MergeConverges` / `SessionEventuallyRebinds` / `PlannedMigrationTerminates` under fairness; proven-for-the-model at scope, argued cutoff) + io-sim + structural-fit fold | [gateway_migration_model_doctrine](../documents/engineering/gateway_migration_model_doctrine.md) | `src/Amoebius/Formal/GatewayMigration.hs`, `src/Amoebius/Multicluster/StructuralFit.hs`, `test/formal/*` (generated `gen/tla/*.tla` not committed) | [phase_03](phase_03_gateway_migration_model.md) |
 | Deterministic-simulation substrate — the `io-classes` effect interface + real/sim interpreters + modeled fault-injectable environment (Register 2.5) + `IOSim`/`IOSimPOR` trace-validator | [deterministic_simulation_doctrine](../documents/engineering/deterministic_simulation_doctrine.md) | `src/Amoebius/Sim/Env.hs`, `src/Amoebius/Sim/Interp/{Real,Sim}.hs`, `src/Amoebius/Sim/Fakes/{Pulsar,MinIO,ApiServer,Route53,Vault,Clock}.hs`, `test/sim/*` | [phase_15](phase_15_deterministic_sim_substrate.md) |
 | Test-topology DSL — `ChaosSchedule` / `FaultTarget` / `FaultSchedule` (a fault handle is a projection over the spec's declared components; a fault on an undeclared component is foreclosed) + `suggest-test` | [chaos_failover_doctrine §11.1](../documents/engineering/chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget), [testing_doctrine](../documents/engineering/testing_doctrine.md) | `src/Amoebius/Test/{Topology,Chaos}.hs` (PLANNED) | [phase_54_test_topology_dsl.md](phase_54_test_topology_dsl.md) |
 | Typed `Expectation` surface — a projection over the `FaultKind`→invariant map; a derived invariant with no `ExpectationWitness` → `coverage` UNVERIFIED, an invariant outside the map's range has no inhabitant | [chaos_failover_doctrine §11.2](../documents/engineering/chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation), [testing_doctrine §9](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) | `src/Amoebius/Test/Expectation.hs` (PLANNED) | [phase_54_test_topology_dsl.md](phase_54_test_topology_dsl.md) |

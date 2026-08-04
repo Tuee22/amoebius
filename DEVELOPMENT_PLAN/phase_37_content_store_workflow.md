@@ -1,14 +1,37 @@
 # Phase 37: Content store + workflow runtime (Pulsar-Failover single-writer)
 
+> **Purpose**: Stand up amoebius's durable-artifact substrate — the three-tier content-addressed MinIO store —
+> and the orchestrator/worker workflow runtime on top of the Phase-35 native Pulsar client, gated live on
+> linux-cpu by a store/fetch-by-manifest-SHA round-trip whose active worker fails over to a Pulsar
+> Failover standby with no bespoke election and a leak-free teardown.
+> **Read this if**: phase 37 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 37 delivers the content store + workflow runtime (Pulsar-Failover single-writer); its design is owned by [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), [resource_capacity_storage.md](../documents/engineering/resource_capacity_storage.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Stand up amoebius's durable-artifact substrate — the three-tier content-addressed MinIO store —
-> and the orchestrator/worker workflow runtime on top of the Phase-35 native Pulsar client, gated live on
-> linux-cpu by a store/fetch-by-manifest-SHA round-trip whose active worker fails over to a Pulsar
-> Failover standby with no bespoke election and a leak-free teardown.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Resource provision — the four-Pod runtime plus gateway/collector envelope](#resource-provision--the-four-pod-runtime-plus-gatewaycollector-envelope)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 37.1: Three-tier content-addressed MinIO store 📋](#sprint-371-three-tier-content-addressed-minio-store-)
+- [Sprint 37.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA 📋](#sprint-372-orchestratorworker-workflow-runtime--storefetch-by-manifest-sha-)
+- [Sprint 37.3: Pulsar Failover standby takeover + leak-free teardown (gate) 📋](#sprint-373-pulsar-failover-standby-takeover--leak-free-teardown-gate-)
+- [Sprint 37.4: Register-2.5 workflow failover takeover under simulated fault 📋](#sprint-374-register-25-workflow-failover-takeover-under-simulated-fault-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -38,8 +61,7 @@ Precondition Failed` treated as success), and the only mutable objects, `pointer
 object extents, bounded concurrent write sets, bounded failed writes, a positive finite orphan-GC horizon,
 required `StorageBudgetId`, and exclusive writer admission. Blob/manifest bytes uploaded before a failed pointer CAS stay
 charged until an observed GC deletion; the logical peak consumes Phase 30's MinIO erasure/healing and uniform
-claim-plan witness rather than assuming logical bytes equal physical disk. Second, an **orchestrator/worker
-workflow runtime** on top of the Phase-35 client: an orchestrator worker produces a workflow `command` on a
+claim-plan witness rather than assuming logical bytes equal physical disk. Second, an **orchestrator/worker workflow runtime** on top of the Phase-35 client: an orchestrator worker produces a workflow `command` on a
 derived topic; worker daemons attached over a Pulsar **Failover** subscription have one active
 consumer and the rest as name-ordered hot standbys; the active worker writes a content-addressed artifact and
 produces an `event` carrying the manifest SHA the orchestrator fetches back by that SHA.
@@ -53,8 +75,7 @@ readback → cleanup deadline plus scheduler release partition → authenticated
 ambiguous write retains the Pod and all modeled resident axes; an equal persisted completion yields
 `CompletedJobNoOp` and cannot recreate the Job until a new execution revision.
 
-The load-bearing property this phase proves live is that **standby takeover is delegated to Pulsar, not
-elected by amoebius**. Killing the active worker triggers the subscription's own ranked failover to the
+The load-bearing property this phase proves live is that **standby takeover is delegated to Pulsar, not elected by amoebius**. Killing the active worker triggers the subscription's own ranked failover to the
 name-ordered standby, with the Phase-35 at-least-once contract redelivering the un-acked command; the store's
 ETag-CAS single atomic commit point plus the typed `AdvancePredicate` keep the mutable pointer race-free, and
 content-addressed confluence makes the standby's re-fetch of the artifact by manifest SHA safe without any
@@ -70,18 +91,13 @@ protocol and worker failover are substrate-agnostic in design but validated only
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** an `InForceSpec` test topology on the linux-cpu kind cluster **stores and fetches a content-addressed
-artifact by its manifest SHA** — a worker writes the artifact into the three-tier MinIO store and the
-orchestrator reads it back by the manifest SHA carried in the workflow event — then **kills the active worker
-inside the critical window** (after the active worker's store write and *before* its `event` ack — the same
-window Sprint 37.4 injects in simulation) and **observes the lexically next-in-name-order standby take over the
-Pulsar Failover subscription** (single-writer delegated to Pulsar, never a bespoke amoebius election), reading
+**Gate:** an `InForceSpec` test topology on the linux-cpu kind cluster **stores and fetches a content-addressed artifact by its manifest SHA** — a worker writes the artifact into the three-tier MinIO store and the
+orchestrator reads it back by the manifest SHA carried in the workflow event — then **kills the active worker inside the critical window** (after the active worker's store write and *before* its `event` ack — the same
+window Sprint 37.4 injects in simulation) and **observes the lexically next-in-name-order standby take over the Pulsar Failover subscription** (single-writer delegated to Pulsar, never a bespoke amoebius election), reading
 the identity of the promoted consumer from the Pulsar admin `subscription/{sub}/consumers` API (not a
 self-emitted worker log), with at-least-once redelivery of the un-acked command. The gate asserts the
 load-bearing safety story *live*: the promoted standby re-fetches the artifact by manifest SHA, the resulting
-`pointers/latest` HEAD is **byte-identical to a committed no-fault reference run**, and an **external Pulsar
-consumer** (attached at the OS boundary, not the runtime under test) observes the workflow command **exactly
-once**. A separate failed-commit drill uploads the maximum blob/manifest write set and deliberately loses the
+`pointers/latest` HEAD is **byte-identical to a committed no-fault reference run**, and an **external Pulsar consumer** (attached at the OS boundary, not the runtime under test) observes the workflow command **exactly once**. A separate failed-commit drill uploads the maximum blob/manifest write set and deliberately loses the
 pointer CAS; an external MinIO inventory proves those orphan bytes remain resident and debited before the
 positive finite GC horizon, an over-capacity follow-on write is refused with zero object mutation, and capacity
 is credited only after the GC horizon has elapsed **and** a fresh inventory observes deletion. The independent
@@ -93,8 +109,7 @@ deadline/release-authorized Pod deletion; a forced gateway-write failure proves 
 recorded in the per-run ledger. The whole
 topology spins up, runs, and **tears down leak-free** — the postflight sweep inventories every resource class
 enumerated in Sprint 37.3 and fails hard on any non-empty remainder outside its explicitly named
-retained-by-design set — and **re-runs idempotently under a
-distinct `experiment-hash` namespace** (a cache-bypassing independent recompute, not a content-addressed
+retained-by-design set — and **re-runs idempotently under a distinct `experiment-hash` namespace** (a cache-bypassing independent recompute, not a content-addressed
 store-hit), emitting a per-run proven/tested/assumed ledger artifact. The gate is checked against the
 Phase-0-committed fixtures named in Sprints 37.1/37.3 and MUST turn red on the committed seeded mutants named
 there (e.g. the insertion-order-leaking CBOR encoder and the ack-before-store-write worker); the representative
@@ -177,6 +192,7 @@ and match live readback.
 
 ```mermaid
 flowchart LR
+%% register: orientation
   dhall[InForceSpec test topology] --> up[Bring up on linux-cpu kind: Pulsar plus MinIO already HA]
   up --> produce[Orchestrator worker produces workflow command on the derived topic]
   produce --> worker[Active worker consumes via Failover subscription]
@@ -187,6 +203,7 @@ flowchart LR
   failover --> fetch[Orchestrator fetches artifact by manifest SHA from the promoted standby]
   fetch --> teardown[Idempotent leak-free teardown plus per-run ledger]
 ```
+*Orientation. Design intent. The sequence this phase's gate exercises, including the kill inside the critical window; the acceptance condition itself is stated in [Phase Summary](#phase-summary), not by the picture. Nothing here has run.*
 
 ## Doctrine adopted
 
@@ -196,12 +213,10 @@ them.
 
 - [`content_addressing_doctrine.md §2`](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)
   — *the three-tier store: blobs ← manifests ← pointers*: the three object classes and two write protocols
-  ([`§2.1`](../documents/engineering/content_addressing_doctrine.md#21-three-object-classes-two-write-protocols)
-  three classes / two protocols; [`§2.2`](../documents/engineering/content_addressing_doctrine.md#22-why-this-shape-removes-the-races)
-  why the shape removes the write/write and write/read hazards), keyed under the
+  ([`§2.1`](../documents/engineering/content_addressing_doctrine.md#21-three-object-classes-two-write-protocols) three classes / two protocols; [`§2.2`](../documents/engineering/content_addressing_doctrine.md#22-why-this-shape-removes-the-races) why the shape removes the write/write and write/read hazards), keyed under the
   [`§3 experimentHash`](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
   namespace consumed here as an opaque pinned prefix. The same [§2.1](../documents/engineering/content_addressing_doctrine.md#21-three-object-classes-two-write-protocols) capacity contract and
-  [`resource_capacity_doctrine.md §5.1`](../documents/engineering/resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)
+  [`resource_capacity_storage.md §5.1`](../documents/engineering/resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry)
   require committed residents + bounded in-flight writes + every failed-write orphan through the finite
   positive GC horizon to remain charged through MinIO's physical and uniform-claim witness.
 - [`content_addressing_doctrine.md §5`](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)
@@ -238,7 +253,7 @@ them.
   (cross-reference) — *proven, tested, assumed*: each gate run emits a proven/tested/assumed ledger; skipping
   an applicable failover-injection move marks that layer UNVERIFIED, never green. The asynchronous
   **cross-cluster** failover boundary and its formal model are owned by
-  [`§16`](../documents/engineering/chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
+  [`§16`](../documents/engineering/chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
   and realized by Phase 42's geo-replication plus Phase 43's gateway-migration drills, not here — this phase
   exercises the intra-cluster subscription only.
 
@@ -251,32 +266,29 @@ them.
 `amoebius-store/src/Amoebius/Store/Manifest.hs`, `amoebius-store/src/Amoebius/Store/Pointer.hs`,
 `amoebius-store/src/Amoebius/Store/ControlPlaneState.hs`, and
 `amoebius-runtime/src/Amoebius/Execution/JobTerminalLive.hs` (target paths; not yet built)
-**Blocked by**: Phase 26 gate (the modeled typed Job-terminal protocol), Phase 30 gate (MinIO reachable as a standard HA platform service) and Phase 28 gate (the
-`no-provisioner` retained PV the MinIO bytes land on); Phase 34 gate (the `<app>/<bucket>` ObjectStore the
-store keys under) — all external earlier-phase prerequisites.
-**Live oracle and register**: run this suite at **Register 3** against the **single-node kind cluster's live MinIO**
-(the standing Phase-30 HA service on the Phase-28 retained PV), never an in-process or local S3 fake — the
-register is stated so its evidential weight is unambiguous. A gateway-admitted blob PUT under
-`If-None-Match: *` returns success
-on first write and treats the second write's `412` as success; a canonical-CBOR manifest encodes byte-identically
-from **two writers that first construct the manifest with distinct component insertion orders/permutations**, and
-both reproduce the **Phase-0-committed golden bytes and sha256 key** (cross-checked against an independent CBOR
-canonicalizer); a `pointers/latest` `If-Match` CAS commits the winner and returns `412` to the loser, who
-re-reads and reapplies the typed advance predicate; a reader always observes a 32-byte SHA naming an immutable
-manifest, never torn state. A capacity drill fills the declared maximum write set, forces the pointer CAS to
-lose after blob/manifest PUT success, and proves from an external MinIO inventory that the resulting orphan is
-charged until the finite positive GC horizon; an otherwise admissible follow-on write that would exceed the
-provision is refused before mutation, and deletion earns capacity credit only after a fresh observation.
-The writer's direct MinIO PUT credential/route is denied. The same SHA under two experiment namespaces is
-charged as two physical objects, an identical full object id deduplicates, and conflicting sizes reject.
-The live collector Job persists its exact `JobCompletion` variant through that gateway; an independent MinIO
-reader must match digest/outcome/revision before deadline/release-authorized terminal cleanup, while forced
-write failure retains the Pod and immediate rerun after success yields `CompletedJobNoOp` with no new object or
-Pod.
+**Blocked by**:
+Phase 26 gate (the modeled typed Job-terminal protocol), Phase 30 gate (MinIO reachable as a standard HA
+platform service) and Phase 28 gate (the `no-provisioner` retained PV the MinIO bytes land on); Phase 34
+gate (the `<app>/<bucket>` ObjectStore the store keys under) — all external earlier-phase prerequisites.
+**Live oracle and register**: run this suite at **Register 3** against the **single-node kind cluster's live MinIO** (the standing Phase-30 HA service on the Phase-28 retained PV), never an in-process or local S3 fake
+— the register is stated so its evidential weight is unambiguous. A gateway-admitted blob PUT under
+`If-None-Match: *` returns success on first write and treats the second write's `412` as success; a
+canonical-CBOR manifest encodes byte-identically from **two writers that first construct the manifest with distinct component insertion orders/permutations**, and both reproduce the **Phase-0-committed golden bytes and sha256 key** (cross-checked against an independent CBOR canonicalizer); a `pointers/latest` `If-Match`
+CAS commits the winner and returns `412` to the loser, who re-reads and reapplies the typed advance
+predicate; a reader always observes a 32-byte SHA naming an immutable manifest, never torn state. A capacity
+drill fills the declared maximum write set, forces the pointer CAS to lose after blob/manifest PUT success,
+and proves from an external MinIO inventory that the resulting orphan is charged until the finite positive
+GC horizon; an otherwise admissible follow-on write that would exceed the provision is refused before
+mutation, and deletion earns capacity credit only after a fresh observation. The writer's direct MinIO PUT
+credential/route is denied. The same SHA under two experiment namespaces is charged as two physical objects,
+an identical full object id deduplicates, and conflicting sizes reject. The live collector Job persists its
+exact `JobCompletion` variant through that gateway; an independent MinIO reader must match
+digest/outcome/revision before deadline/release-authorized terminal cleanup, while forced write failure
+retains the Pod and immediate rerun after success yields `CompletedJobNoOp` with no new object or Pod.
 **Docs to update**: `documents/engineering/content_addressing_doctrine.md` (§2),
-`documents/engineering/resource_capacity_doctrine.md` (§5.1 — the content-store logical peak this sprint provisions),
-`documents/engineering/storage_lifecycle_doctrine.md` (the retained-PV MinIO the bytes land on),
-`DEVELOPMENT_PLAN/system_components.md`, this document.
+`documents/engineering/resource_capacity_doctrine.md` (§5.1 — the content-store logical peak this sprint
+provisions), `documents/engineering/storage_lifecycle_doctrine.md` (the retained-PV MinIO the bytes land
+on), `DEVELOPMENT_PLAN/system_components.md`, this document.
 
 ### Objective
 Adopt [`content_addressing_doctrine.md §2 — the three-tier store: blobs ← manifests ← pointers`](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers),
@@ -318,8 +330,7 @@ store is a single one-object atomic pointer flip.
   `manifest_canonical.sha256` — the canonical-CBOR byte string and sha256 for one fixed logical manifest,
   computed by an **independent CBOR canonicalizer** (not the amoebius encoder) and committed in Phase 0; and a
   **specific-reason negative** `manifest_noncanonical.cbor` (the *same* logical manifest serialized in a
-  non-sorted component order) whose expected failure is a **byte mismatch at the first component-ordering
-  offset** and a key differing from the golden — paired with the positive that differs only in component
+  non-sorted component order) whose expected failure is a **byte mismatch at the first component-ordering offset** and a key differing from the golden — paired with the positive that differs only in component
   ordering. Committed seeded mutant (operator: dropped-normalization / effect swap):
   `mutant/insertion-order-encoder` — an encoder that emits map/component bytes in insertion order rather than
   sorted order; the gate MUST turn this mutant **red** against the golden vector. The independently authored
@@ -330,8 +341,7 @@ store is a single one-object atomic pointer flip.
 
 ### Validation
 1. Write the same blob twice and assert first-write success, second-write `412` treated as a no-op success.
-2. Encode the same logical manifest from **two writers that each first construct it with a distinct component
-   insertion order / permutation** (so byte-identity is not tautological single-encoder reuse), and assert both
+2. Encode the same logical manifest from **two writers that each first construct it with a distinct component insertion order / permutation** (so byte-identity is not tautological single-encoder reuse), and assert both
    emit CBOR **byte-identical to the Phase-0-committed golden `manifest_canonical.cbor`** and a key equal to the
    committed `manifest_canonical.sha256` — the golden being authored by an independent CBOR canonicalizer, never
    regenerated from the amoebius encoder. Assert the specific-reason negative `manifest_noncanonical.cbor` fails
@@ -378,14 +388,14 @@ The whole sprint (📋 Planned).
 `amoebius-runtime/src/Amoebius/Workflow/Worker.hs`, and
 `amoebius-runtime/src/Amoebius/Workflow/Resources.hs` (kind-indexed runnable sources and structural
 runtime-metadata sources consumed by the shared capacity provisioner) (target paths; not yet built)
-**Blocked by**: Sprint 37.1 (the content store the worker writes and the orchestrator fetches); Phase 35 gate
-(the native Pulsar client — the capability surface, CBOR codec, and broker-side dedup); Phase 33 gate (the live
-DSL deploy via the Deployment-`replicas=1` singleton that schedules the workflow).
-**Independent Validation**: the orchestrator produces a workflow `command` on the topic derived from the
-Phase-35 topology algebra and consumes the corresponding `event`; the active worker writes a content-addressed
-artifact to the store and emits an `event` carrying its manifest SHA; the orchestrator fetches the artifact by
-that SHA and it matches byte-for-byte; a retried produce or a redelivered consume is observed once downstream
-(Phase-35 dedup).
+**Blocked by**: Sprint 37.1 (the content store the worker writes and the orchestrator fetches); Phase 35
+gate (the native Pulsar client — the capability surface, CBOR codec, and broker-side dedup); Phase 33 gate
+(the live DSL deploy via the Deployment-`replicas=1` singleton that schedules the workflow).
+**Independent Validation**: the orchestrator produces a workflow `command` on the topic derived from the Phase-35 topology
+algebra and consumes the corresponding `event`; the active worker writes a content-addressed artifact to the
+store and emits an `event` carrying its manifest SHA; the orchestrator fetches the artifact by that SHA and
+it matches byte-for-byte; a retried produce or a redelivered consume is observed once downstream (Phase-35
+dedup).
 **Docs to update**: `documents/engineering/daemon_topology_doctrine.md` (§4, §5),
 `documents/engineering/content_addressing_doctrine.md` (§5), `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -421,8 +431,7 @@ artifact reference a content address.
    **two-part mechanism** (not code review): (a) a **static dependency/import audit** of the
    `amoebius-runtime` build plan asserting no leader-election or distributed-lock dependency is linked
    (no `etcd`/Raft lease client, no k8s `Lease`/`coordination.k8s.io` client, no ZooKeeper/consensus library)
-   — the reference list of forbidden packages committed as a Phase-0 hand table; and (b) an **OS-boundary
-   runtime trace** (`strace`/network capture at the pod boundary, not a self-emitted compliance log) over a full
+   — the reference list of forbidden packages committed as a Phase-0 hand table; and (b) an **OS-boundary runtime trace** (`strace`/network capture at the pod boundary, not a self-emitted compliance log) over a full
    round-trip asserting zero calls to a k8s `Lease`/`coordination.k8s.io` endpoint or any external lock API.
    Committed seeded mutant (operator: added-effect): `mutant/lease-election` — a worker that acquires a k8s
    `Lease` before consuming; both checks MUST turn it **red**.
@@ -438,25 +447,26 @@ The whole sprint (📋 Planned).
 ## Sprint 37.3: Pulsar Failover standby takeover + leak-free teardown (gate) 📋
 
 **Status**: Planned
-**Implementation**: `amoebius-runtime/dhall/test/round_trip_failover.dhall` (the gate topology),
-`amoebius-runtime/test/live/FailoverSpec.hs`, and
+**Implementation**: `amoebius-runtime/dhall/test/round_trip_failover.dhall` (the gate
+topology), `amoebius-runtime/test/live/FailoverSpec.hs`, and
 `amoebius-runtime/test/live/RuntimeStorageSpec.hs` (planned-slot→observed-Pod-UID equality, node
 scope/domain/ownership/grouping, reservation/observed no-double-debit, SplitRuntime one-byte-short and alias
 controls) (target paths; not yet built)
-**Blocked by**: Sprint 37.2 (the orchestrator/worker round-trip the injection acts on); Phase 35 gate (the
-`Exclusive`/`Failover` subscription type and the at-least-once redelivery); Phase 28 / Phase 24 gates (the
-cluster-lifecycle teardown the InForceSpec drives).
-**Independent Validation**: the gate `InForceSpec` stores and fetches a content-addressed artifact by manifest
-SHA, then kills the active worker **inside the critical window (after its store write, before its `event` ack)**,
-and observes that the **lexically next-in-name-order** standby — identified by reading the consumer list from the
-Pulsar admin `subscription/{sub}/consumers` API and asserting the specific expected consumer name became active,
-not merely "some standby" — takes over the subscription with the un-acked command redelivered and no command
-lost; the promoted standby's re-fetch drives `pointers/latest` to a HEAD **byte-identical to the committed
-no-fault reference run**, and an **external Pulsar consumer** observes the command exactly once. The topology
-tears down leak-free (the postflight sweep's full inventory empty outside the named retained set) and re-runs
-idempotently **under a distinct `experiment-hash` namespace** (independent recompute, cache-bypassed); each run
-emits a proven/tested/assumed ledger artifact recording the kill-window placement and the sweep inventory.
-**Docs to update**: `documents/engineering/pulsar_client_doctrine.md` (§5, §7),
+**Blocked by**: Sprint 37.2 (the orchestrator/worker round-trip the
+injection acts on); Phase 35 gate (the `Exclusive`/`Failover` subscription type and the at-least-once
+redelivery); Phase 28 / Phase 24 gates (the cluster-lifecycle teardown the InForceSpec drives).
+**Independent Validation**: the gate `InForceSpec` stores and fetches a content-addressed artifact by
+manifest SHA, then kills the active worker **inside the critical window (after its store write, before its `event` ack)**, and observes that the **lexically next-in-name-order** standby — identified by reading the
+consumer list from the Pulsar admin `subscription/{sub}/consumers` API and asserting the specific expected
+consumer name became active, not merely "some standby" — takes over the subscription with the un-acked
+command redelivered and no command lost; the promoted standby's re-fetch drives `pointers/latest` to a HEAD
+**byte-identical to the committed no-fault reference run**, and an **external Pulsar consumer** observes the
+command exactly once. The topology tears down leak-free (the postflight sweep's full inventory empty outside
+the named retained set) and re-runs idempotently **under a distinct `experiment-hash` namespace**
+(independent recompute, cache-bypassed); each run emits a proven/tested/assumed ledger artifact recording
+the kill-window placement and the sweep inventory.
+**Docs to update**:
+`documents/engineering/pulsar_client_doctrine.md` (§5, §7),
 `documents/engineering/daemon_topology_doctrine.md` (§5, §5.2),
 `documents/engineering/chaos_failover_doctrine.md` (§12), `DEVELOPMENT_PLAN/README.md`.
 
@@ -472,20 +482,16 @@ bespoke amoebius election — and assemble the phase gate.
   name-ordered hot standbys; single-writer liveness is the subscription, safety is the store's ETag-CAS commit
   point plus the typed `AdvancePredicate` (Sprint 37.1), so even a bounded failover overlap cannot regress
   HEAD.
-- The **critical-window kill-injection path**: the kill lands **after the active worker has completed its store
-  write and before it acks the `event`** (the same window Sprint 37.4 injects in simulation, restated for the
+- The **critical-window kill-injection path**: the kill lands **after the active worker has completed its store write and before it acks the `event`** (the same window Sprint 37.4 injects in simulation, restated for the
   live gate), so the load-bearing standby re-fetch + bounded failover overlap are actually exercised — not a kill
   against an idle, already-drained worker. Pulsar promotes the name-ordered standby, the Phase-35 at-least-once
   contract redelivers the un-acked command, and [§5](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely) confluence makes the standby's re-fetch of the artifact by
   manifest SHA safe without a distributed lock. The window placement is asserted from broker/consumer state
   (the store object exists; the `event` message is still unacked) and recorded in the per-run ledger.
 - The **postflight sweep's explicit inventory contract**: the sweep MUST inventory, and the ledger MUST record,
-  every one of these resource classes: (i) k8s objects the topology applied, enumerated by the run's **field
-  manager / ApplySet**; (ii) **Pulsar topics, subscriptions, consumers, and producers** created for the run;
+  every one of these resource classes: (i) k8s objects the topology applied, enumerated by the run's **field manager / ApplySet**; (ii) **Pulsar topics, subscriptions, consumers, and producers** created for the run;
   (iii) **MinIO objects under the run's `experiment-hash` prefix** outside a **named retained-by-design set**
-  (the durable test-flagged bytes reclaimed by Phase 54). The sweep emits its **full inventory list and the
-  named retained set** into the per-run ledger; **any non-empty remainder outside the retained set is a hard
-  gate failure**. (Durable-byte reclaim staying with Phase 54 is the *only* exemption, and only for the
+  (the durable test-flagged bytes reclaimed by Phase 54). The sweep emits its **full inventory list and the named retained set** into the per-run ledger; **any non-empty remainder outside the retained set is a hard gate failure**. (Durable-byte reclaim staying with Phase 54 is the *only* exemption, and only for the
   explicitly named retained set — not a blanket class exemption.)
 - **Phase-0-pinned oracles and committed mutants (authored before the runtime exists):** the committed no-fault
   reference `pointers/latest` HEAD bytes `test/golden/head_nofault.bin`; the expected promoted-consumer name
@@ -494,8 +500,7 @@ bespoke amoebius election — and assemble the phase gate.
   the `event` before the store write completes, so a mid-window kill loses the command) and
   `mutant/sweep-skips-pulsar` (operator: invariant-clause delete — the sweep omits the Pulsar topic/subscription
   class and thus reports leak-free vacuously while topics leak).
-- The gate `round_trip_failover.dhall` test topology — the named **representative service set: one orchestrator +
-  three workers (one active, two name-ordered standbys)** over the standing Pulsar + MinIO — and its
+- The gate `round_trip_failover.dhall` test topology — the named **representative service set: one orchestrator + three workers (one active, two name-ordered standbys)** over the standing Pulsar + MinIO — and its
   `FailoverSpec`: spin up, run the store/fetch-by-manifest-SHA round-trip, inject the critical-window worker
   kill, observe the specific name-ordered standby take over, and always tear down — emitting a per-run ledger
   artifact.
@@ -510,8 +515,7 @@ bespoke amoebius election — and assemble the phase gate.
    **lexically next-in-name-order** standby (read from the Pulsar admin `subscription/{sub}/consumers` API and
    matched against the committed `failover_rank.txt`) is promoted; (b) the un-acked command is redelivered with
    **none lost and none double-applied** — an **external Pulsar consumer** (OS-boundary, not the runtime) sees
-   it **exactly once**; and (c) the resulting `pointers/latest` HEAD is **byte-identical to the committed
-   `head_nofault.bin` no-fault reference run**. Assert the committed `mutant/ack-before-store-write` turns this
+   it **exactly once**; and (c) the resulting `pointers/latest` HEAD is **byte-identical to the committed `head_nofault.bin` no-fault reference run**. Assert the committed `mutant/ack-before-store-write` turns this
    validation **red** (a mid-window kill loses its command).
 2. **Idempotency and leak-free teardown, disambiguated.** "**Idempotent setup**" means a *second `apply` of the
    topology against the still-standing topology is a byte-stable no-op* (the Phase-26 sense — zero fields
@@ -521,8 +525,7 @@ bespoke amoebius election — and assemble the phase gate.
    store-hit of the first run) with the compute path asserted to have executed. Assert leak-free teardown: the
    postflight sweep emits its **full inventory across all three enumerated classes** (ApplySet k8s objects;
    Pulsar topics/subscriptions/consumers/producers; MinIO objects under the run's `experiment-hash` prefix) plus
-   the **named retained set** into the ledger, and **any non-empty remainder outside the retained set fails the
-   gate**. Assert the committed `mutant/sweep-skips-pulsar` turns this validation **red** (leaked Pulsar topics
+   the **named retained set** into the ledger, and **any non-empty remainder outside the retained set fails the gate**. Assert the committed `mutant/sweep-skips-pulsar` turns this validation **red** (leaked Pulsar topics
    go undetected under a class-omitting sweep).
 3. Assert the run emits a proven/tested/assumed ledger per
    [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed);
@@ -535,7 +538,7 @@ bespoke amoebius election — and assemble the phase gate.
 
 > **Honesty.** This sprint exercises the **intra-cluster** Failover subscription only; the
 > asynchronous cross-cluster failover boundary and its formal gateway-migration model are owned by
-> [`chaos_failover_doctrine.md §16`](../documents/engineering/chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
+> [`chaos_failover_second_axis.md §16`](../documents/engineering/chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
 > and realized by Phase 42's geo-replication plus Phase 43's gateway-migration drills, not here. Pulsar's own
 > broker/bookie consensus is delegated, not re-proven. The
 > Failover-subscription worker shape is proven over WebSockets in the sibling `infernix` — sibling evidence,
@@ -549,28 +552,29 @@ The whole sprint (📋 Planned).
 ## Sprint 37.4: Register-2.5 workflow failover takeover under simulated fault 📋
 
 **Status**: Planned
-**Implementation**: `amoebius-runtime/test/sim/WorkflowFailoverSimSpec.hs` (the `IOSimPOR` property harness),
-`amoebius-runtime/test/sim/WorkflowSimScenario.hs` (the injected kill/redelivery/partition schedule) — the
-*same* `Amoebius.Workflow.Runtime`/`Orchestrator`/`Worker` code from Sprints 37.2–37.3 run against the Phase-15
-modeled environment (`src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`), nothing forked or re-implemented
-(target paths; not yet built).
-**Blocked by**: Sprint 37.2 (the orchestrator/worker runtime the schedule drives) and Sprint 37.3 (the
-Failover-takeover + leak-free-teardown behaviour whose properties are replayed here); Phase 15 Sprint 15.2 (the
+**Implementation**: `amoebius-runtime/test/sim/WorkflowFailoverSimSpec.hs` (the
+`IOSimPOR` property harness), `amoebius-runtime/test/sim/WorkflowSimScenario.hs` (the injected
+kill/redelivery/partition schedule) — the *same* `Amoebius.Workflow.Runtime`/`Orchestrator`/`Worker` code
+from Sprints 37.2–37.3 run against the Phase-15 modeled environment (`src/Amoebius/Sim/Env.hs` +
+`src/Amoebius/Sim/Fakes/*`), nothing forked or re-implemented (target paths; not yet built).
+**Blocked by**:
+Sprint 37.2 (the orchestrator/worker runtime the schedule drives) and Sprint 37.3 (the Failover-takeover +
+leak-free-teardown behaviour whose properties are replayed here); Phase 15 Sprint 15.2 (the
 `Amoebius.Sim.Env` substrate and the fake Pulsar/MinIO the runtime binds against through `io-classes`).
 **Independent Validation**: the real workflow runtime, bound to `io-classes` and executed under `IOSimPOR`,
 takes the modeled fake Pulsar + fake MinIO with a `kill-worker-mid-workflow` fault injected inside the same
 critical window the live gate uses — after the store write and before the `event` ack (store object exists,
-`event` message still unacked) — un-acked-command **redelivery**, and a broker/consumer **partition**; over every
-schedule `IOSimPOR` explores it asserts (a) the Pulsar-Failover subscription takeover is **leak-free** — no
-orphaned consumer, producer, or in-flight artifact handle survives the promoted standby — and (b) there is **no
-double-application** of any effect: the content-addressed store makes a re-fetch a no-op and the log-fold dedup
-collapses the redelivered command, so the pointer HEAD and downstream state are byte-identical whether or not
-the fault fired; each run emits a Register-2.5 ledger listing the explored-schedule count and the properties
-discharged.
-**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (the Register-2.5 workflow
-failover simulation entry), `documents/engineering/chaos_failover_doctrine.md` (§12 — the Register-2.5 ledger
-feeding the same proven/tested/assumed ledger as the live gate), `DEVELOPMENT_PLAN/system_components.md`, this
-document.
+`event` message still unacked) — un-acked-command **redelivery**, and a broker/consumer **partition**; over
+every schedule `IOSimPOR` explores it asserts (a) the Pulsar-Failover subscription takeover is **leak-free**
+— no orphaned consumer, producer, or in-flight artifact handle survives the promoted standby — and (b) there
+is **no double-application** of any effect: the content-addressed store makes a re-fetch a no-op and the
+log-fold dedup collapses the redelivered command, so the pointer HEAD and downstream state are
+byte-identical whether or not the fault fired; each run emits a Register-2.5 ledger listing the
+explored-schedule count and the properties discharged.
+**Docs to update**:
+`documents/engineering/deterministic_simulation_doctrine.md` (the Register-2.5 workflow failover simulation
+entry), `documents/engineering/chaos_failover_doctrine.md` (§12 — the Register-2.5 ledger feeding the same
+proven/tested/assumed ledger as the live gate), `DEVELOPMENT_PLAN/system_components.md`, this document.
 
 ### Objective
 Adopt [`deterministic_simulation_doctrine.md §4 — Register 2.5 — where deterministic simulation sits`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits) at
@@ -589,8 +593,7 @@ adversarial schedules instead of a single live wall-clock trace.
   command, and a broker/consumer
   **partition** — modeled by the fake Pulsar/MinIO of Phase 15 Sprint 15.2, not a live cluster.
 - A property that, over *every* schedule `IOSimPOR` explores, asserts the Pulsar-Failover subscription takeover
-  is **leak-free** (no orphaned consumer/producer/artifact handle survives the promotion) and that **no effect
-  is double-applied** — content-addressed re-fetch is a no-op and log-fold dedup collapses the redelivery — so
+  is **leak-free** (no orphaned consumer/producer/artifact handle survives the promotion) and that **no effect is double-applied** — content-addressed re-fetch is a no-op and log-fold dedup collapses the redelivery — so
   the committed pointer HEAD and downstream state are identical across all explored interleavings.
 - A **Register-2.5 ledger** artifact per run, recording the explored-schedule count and the leak-free /
   no-double-application properties discharged, feeding the same proven/tested/assumed ledger
@@ -660,10 +663,8 @@ The whole sprint (📋 Planned).
 
 ## Related Documents
 - [README.md](README.md) — the live tracker; Phase 37 objective, gate, and substrate
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (skeleton,
-  sprint format, the doctrine-citation rule, the register + honesty + one-substrate disciplines)
-- [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election;
-  single-instance delegated to k8s/etcd; the content-addressed store)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (skeleton, sprint format, the doctrine-citation rule, the register + honesty + one-substrate disciplines)
+- [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election; single-instance delegated to k8s/etcd; the content-addressed store)
 - [system_components.md](system_components.md) — the target component inventory for the module paths above
 - [Content Addressing & Determinism Doctrine](../documents/engineering/content_addressing_doctrine.md) — the
   three-tier store, the two write protocols, confluence, and the honest ceiling adopted here

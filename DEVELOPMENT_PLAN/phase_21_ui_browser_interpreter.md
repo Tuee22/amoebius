@@ -1,13 +1,33 @@
 # Phase 21: UI browser interpreter
 
+> **Purpose**: Build the one generic PureScript browser interpreter for immutable `ClientPlan` values and
+> validate its bounded view, event, route, navigation, accessibility, and same-origin effect behavior against
+> an independent Haskell reference semantics and authored browser observations.
+> **Read this if**: phase 21 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 21 delivers the UI browser interpreter; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), and the plan for reaching it is owned here.
+Register 2: a real boundary against fake tools.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Build the one generic PureScript browser interpreter for immutable `ClientPlan` values and
-> validate its bounded view, event, route, navigation, accessibility, and same-origin effect behavior against
-> an independent Haskell reference semantics and authored browser observations.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 21.1: Generic `ClientPlan` interpreter and browser boundary gate 📋](#sprint-211-generic-clientplan-interpreter-and-browser-boundary-gate-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -116,8 +136,8 @@ authority-paired own/foreign enforcement is owned by the UI-server boundary and 
 `test/ui/{Phase21UiBrowserInterpreterSpec,ReferenceClientPlan}.hs`, `test/ui/browser/`, and
 `test/ui/scan-ui-artifact` (target authored sources; not yet built)
 **Blocked by**: Phase 20
-**Independent Validation**: `cabal test ui-browser-interpreter-spec` builds via `spago`, drives Chromium with
-authored Playwright interactions, reads DOM plus OS-boundary traffic, and requires every named mutant to fail.
+**Independent Validation**: `cabal test ui-browser-interpreter-spec` builds via `spago`, drives Chromium with authored
+Playwright interactions, reads DOM plus OS-boundary traffic, and requires every named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/generated_artifacts_doctrine.md`,
 `documents/engineering/ui_realtime_coordination_doctrine.md`,

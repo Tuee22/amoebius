@@ -1,14 +1,26 @@
 # The No-Cluster Conformance Harness
 
+> **Purpose**: Single source of truth for the discipline that lets amoebius validate the overwhelming majority
+> of its behaviour **before any cluster exists** — the pre-cluster conformance spine that exercises
+> decode → bind/expand → plan/resolve infrastructure → provision → `renderAll` → plan → dry-run end to end in Registers 1 and 2, and the
+> load-bearing invariant that **rendering a plan must never require live infrastructure**.
+> **Read this if**: the evidence a claim rests on has to be located, or a new claim has to be attached to a register.
+
+This document owns the harness that ties a claim to the register that establishes it, and the ledger rows a
+run emits. It does not own the registers themselves, owned by
+[testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing), nor the honesty
+vocabulary the rows are phrased in, owned by
+[documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md
 **Generated sections**: none
 
-> **Purpose**: Single source of truth for the discipline that lets amoebius validate the overwhelming majority
-> of its behaviour **before any cluster exists** — the pre-cluster conformance spine that exercises
-> decode → bind/expand → plan/resolve infrastructure → provision → `renderAll` → plan → dry-run end to end in Registers 1 and 2, and the
-> load-bearing invariant that **rendering a plan must never require live infrastructure**.
+</details>
 
 ---
 
@@ -19,14 +31,7 @@ manifests cannot be known correct until a cluster admits them. Taken at face val
 validation to the one setting that is slowest, most expensive, and least reproducible — a live cluster — and
 leaves the design unverifiable until late.
 
-That framing is false for amoebius because amoebius's behaviour is, by construction, **a pure value that is
-rendered**: the reconcile plan is `chain :: cfg -> [Step]`, the manifests are
-deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`, the DSL is decoded and then fully provisioned against its
-target by total functions, and the formal model is a `Model` value. Everything up to the point of *applying*
-an effect is a pure function of committed source plus an explicit authenticated observation fixture; no
-pure test contacts infrastructure. The sibling projects already prove
-this at scale — prodbox validates ~940 behaviours in a pure, no-process suite plus byte-for-byte dry-run
-goldens, with a single thin IO seam.
+That framing is false for amoebius because amoebius's behaviour is, by construction, **a pure value that is rendered**: the reconcile plan is `chain :: cfg -> [Step]`, the manifests are deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`, the DSL is decoded and then fully provisioned against its target by total functions, and the formal model is a `Model` value. Everything up to the point of *applying* an effect is a pure function of committed source plus an explicit authenticated observation fixture; no pure test contacts infrastructure. The sibling projects already prove this at scale — prodbox validates ~940 behaviours in a pure, no-process suite plus byte-for-byte dry-run goldens, with a single thin IO seam.
 
 amoebius adopts that as a rule: **build so that decode → bind/expand → `planInfrastructure` → either
 golden-lock the non-renderable infrastructure batch or supply its authenticated materialization fixture →
@@ -46,10 +51,8 @@ keeps them honest.
 
 Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing)):
 
-- **Register 1 — pure / golden (no cluster, no live infrastructure).** A **pinned, hermetic, deterministic
-  checker over committed source is Register 1 even though it is a separate process** — TLC through the pinned
-  `tla2tools.jar` is the case in point. What distinguishes Register 2 is not process count but a **fake tool
-  standing in for infrastructure**; TLC fakes nothing. DSL decode and every illegal-state foreclosure the
+- **Register 1 — pure / golden (no cluster, no live infrastructure).** A **pinned, hermetic, deterministic checker over committed source is Register 1 even though it is a separate process** — TLC through the pinned
+  `tla2tools.jar` is the case in point. What distinguishes Register 2 is not process count but a **fake tool standing in for infrastructure**; TLC fakes nothing. DSL decode and every illegal-state foreclosure the
   decoder enforces; whole-deployment `renderAll` and the correctness of the emitted objects (a hardened `securityContext`, a route
   from a live service handle, a derived NetworkPolicy — golden-tested on the *rendered* output); the `[Step]`
   plan and its `--dry-run`; the capability→provider→shape binder; the capacity/topology folds; the formal
@@ -66,8 +69,7 @@ Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_d
   Pulsar/MinIO/apiserver/route53/Vault/clock) — concurrent schedules and injected partition/reorder/redelivery/
   crash, deterministically replayable. This exercises the daemon's real *schedule* under faults, which Registers
   1 and 2 structurally cannot reach; owned by
-  [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md) (register definition in
-  [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing)).
+  [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md) (register definition in [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing)).
 - **Register 3 — live infrastructure only.** The residue that cannot be settled by inspecting source or by
   simulation: the apiserver admitting and the scheduler placing pods, the LoadBalancer coming up, etcd forming
   quorum, a VM interposing, a broker offloading, geo-replication lag, DNS propagation, chaos/partition healing —
@@ -78,8 +80,7 @@ part of the harness.
 
 ## 3. The load-bearing invariant: rendering never touches live infrastructure
 
-**Rendering a plan, a manifest set, a `--dry-run`, or a `.tla` MUST NOT require, contact, or depend on live
-infrastructure.** A render is a pure function of committed source and completes in-process with no apiserver, no
+**Rendering a plan, a manifest set, a `--dry-run`, or a `.tla` MUST NOT require, contact, or depend on live infrastructure.** A render is a pure function of committed source and completes in-process with no apiserver, no
 cloud credentials, no broker, no Vault. This is the invariant that makes Register 1 possible at all, and the
 sibling prodbox enforces it explicitly ("rendering a plan must not require live infrastructure — `charts
 reconcile --dry-run` renders without a cluster"). Prerequisite checks (is a cluster reachable, are credentials
@@ -127,18 +128,7 @@ For every feature, the harness exercises the full pure pipeline and locks it:
    expansion. Failure returns a structured `Left`; success alone constructs the opaque whole
    `ProvisionedSpec` and its sealed identity-keyed `ProvisionedRenderSourceSet`.
 5. **`renderAll`** — the sole public manifest function,
-   `renderAll :: ProvisionedSpec -> [K8sObject]`, privately total-maps that equal-keyed source set; a golden
-   test pins the complete typed
-   object set byte-for-byte and asserts the by-construction safety properties on the output. The root-ledger
-   CAS state and Lease holder/renewal state are absent from the generic SSA projection and remain typed-action
-   fields. `renderAll` contains all four `RenderActivation` classes; the plan preserves their disjoint
-   identity partition so later-stage objects are visible in desired output without becoming early-stage apply
-   actions.
-6. **Plan** — `chain` receives a checked plan config containing the whole `ProvisionedSpec`, produces the
-   `[Step]` value, and `--dry-run` renders it; a golden test pins the plan.
-7. **Fake apply (Register 2)** — the binary runs the plan against fake tools; the recorded commands and applied
-   bytes are asserted.
-8. **Simulate (Register 2.5)** — where a feature carries real concurrency (a reconcile loop, a failover
+   `renderAll :: ProvisionedSpec -> [K8sObject]`, privately total-maps that equal-keyed source set; a golden test pins the complete typed object set byte-for-byte and asserts the by-construction safety properties on the output. The root-ledger CAS state and Lease holder/renewal state are absent from the generic SSA projection and remain typed-action fields. `renderAll` contains all four `RenderActivation` classes; the plan preserves their disjoint identity partition so later-stage objects are visible in desired output without becoming early-stage apply actions. 6. **Plan** — `chain` receives a checked plan config containing the whole `ProvisionedSpec`, produces the `[Step]` value, and `--dry-run` renders it; a golden test pins the plan. 7. **Fake apply (Register 2)** — the binary runs the plan against fake tools; the recorded commands and applied bytes are asserted. 8. **Simulate (Register 2.5)** — where a feature carries real concurrency (a reconcile loop, a failover
    takeover, a dedup fold), the real code runs under `IOSim`/`IOSimPOR` against the modeled faulty environment,
    asserting its invariants under injected schedules and faults ([deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md)).
 
@@ -180,8 +170,7 @@ Every statement here is design intent, never a tested amoebius result.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Testing Doctrine](./testing_doctrine.md) — owns the register definitions ([§2](./testing_doctrine.md#2-the-registers-of-amoebius-testing))
 - [Generated Artifacts Doctrine](./generated_artifacts_doctrine.md) — why the render is pure and its output uncommitted

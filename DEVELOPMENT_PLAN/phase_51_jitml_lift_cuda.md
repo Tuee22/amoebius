@@ -1,14 +1,34 @@
 # Phase 51: Core jitML CUDA artifact lift
 
+> **Purpose**: Lift the sibling `jitML` numerical and training core into amoebius as a linked workload
+> extension and test that one scope-bound CUDA training request produces a pointer-committed checkpoint artifact
+> through the existing workflow, cache, accelerator-owner, and content-store seams, with no silent CPU
+> fallback.
+> **Read this if**: phase 51 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 51 delivers the core jitML CUDA artifact lift; its design is owned by [lift_and_compose_doctrine.md](../documents/engineering/lift_and_compose_doctrine.md), [capability_extension_doctrine.md](../documents/engineering/capability_extension_doctrine.md), [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cuda` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Lift the sibling `jitML` numerical and training core into amoebius as a linked workload
-> extension and test that one scope-bound CUDA training request produces a pointer-committed checkpoint artifact
-> through the existing workflow, cache, accelerator-owner, and content-store seams, with no silent CPU
-> fallback.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 51.1: Produce one committed jitML artifact on CUDA 📋](#sprint-511-produce-one-committed-jitml-artifact-on-cuda-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -153,20 +173,19 @@ The fixtures, oracle, observers, and mutants are delegated to [Gate integrity](#
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/JitML/{Library,CudaArtifactLift}.hs`,
-`src/Amoebius/JitML/Checkpoint/{Manifest,Store}.hs`,
-`src/Amoebius/JitML/Engine/Cuda.hs`, `src/Amoebius/Accelerator/Owner.hs`,
-`dhall/jitml/package.dhall`, and `test/live/Phase51JitMLCudaArtifactLift.hs`
-(target paths; not yet built)
-**Blocked by**: Phase 37 gate; Phase 48 gate; Phase 49 gate.
-**Independent Validation**: the single live command checks the positive CUDA-to-commit chain, both pre-effect
-capacity negatives, the pointer-conflict and command-id conflict negatives, and all four committed mutants
-against external evidence.
-**Docs to update**: `documents/engineering/lift_and_compose_doctrine.md`,
+`src/Amoebius/JitML/Checkpoint/{Manifest,Store}.hs`, `src/Amoebius/JitML/Engine/Cuda.hs`,
+`src/Amoebius/Accelerator/Owner.hs`, `dhall/jitml/package.dhall`, and
+`test/live/Phase51JitMLCudaArtifactLift.hs` (target paths; not yet built)
+**Blocked by**: Phase 37 gate;
+Phase 48 gate; Phase 49 gate.
+**Independent Validation**: the single live command checks the positive
+CUDA-to-commit chain, both pre-effect capacity negatives, the pointer-conflict and command-id conflict
+negatives, and all four committed mutants against external evidence.
+**Docs to update**:
+`documents/engineering/lift_and_compose_doctrine.md`,
 `documents/engineering/capability_extension_doctrine.md`,
-`documents/engineering/content_addressing_doctrine.md`,
-`documents/engineering/daemon_topology_doctrine.md`,
-`documents/engineering/resource_capacity_doctrine.md`, and
-`documents/engineering/testing_doctrine.md`.
+`documents/engineering/content_addressing_doctrine.md`, `documents/engineering/daemon_topology_doctrine.md`,
+`documents/engineering/resource_capacity_doctrine.md`, and `documents/engineering/testing_doctrine.md`.
 
 ### Objective
 

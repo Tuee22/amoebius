@@ -1,12 +1,35 @@
 # Phase 1: Toolchain spike
 
+> **Purpose**: Prove — before any later phase promises an executable decoder, simulator, or resolver — that
+> the pre-cluster Haskell surface builds on the pinned toolchain, or record the exact remediation or blocker.
+> **Read this if**: phase 1 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 1 delivers the toolchain spike; its design is owned by [conformance_harness_doctrine.md](../documents/engineering/conformance_harness_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), and the plan for reaching it is owned here.
+Register 1: an in-process battery, no cluster.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md
 **Generated sections**: none
 
-> **Purpose**: Prove — before any later phase promises an executable decoder, simulator, or resolver — that
-> the pre-cluster Haskell surface builds on the pinned toolchain, or record the exact remediation or blocker.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 1.1: Shared toolchain pin + `cabal.project` skeleton 📋](#sprint-11-shared-toolchain-pin--cabalproject-skeleton-)
+- [Sprint 1.2: `dhall` in-process decoder build probe (Gate-2 dependency) 📋](#sprint-12-dhall-in-process-decoder-build-probe-gate-2-dependency-)
+- [Sprint 1.3: `io-sim` + `io-classes` simulation build probe 📋](#sprint-13-io-sim--io-classes-simulation-build-probe-)
+- [Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate 📋](#sprint-14-jit-build-resolver-deps--purescript-bridge--consolidated-probe-gate-)
+- [Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe 📋](#sprint-15-supernova-fork--proto-lens-codegen-build-probe-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -31,8 +54,7 @@ historically lags new GHC releases — it pulls `template-haskell`, `aeson`, `me
 so `allow-newer` alone may be insufficient and a source patch or fork may be required. This phase stands up a
 throwaway probe package that depends on all of them, resolves them against one shared `index-state`, and either
 builds clean or records the precise `allow-newer`/patch/fork set. The TLA+/TLC side is a JVM toolchain, not a
-GHC-pin risk: the **`tla2tools.jar` release is pinned in Phase 2 and a JRE floor is recorded in the
-tracker's Toolchain section**, and both are located by the Phase-2/3 harness, so the Phase-2/3 TLC path has a
+GHC-pin risk: the **`tla2tools.jar` release is pinned in Phase 2 and a JRE floor is recorded in the tracker's Toolchain section**, and both are located by the Phase-2/3 harness, so the Phase-2/3 TLC path has a
 named acquisition path even though its buildability is not gated by this GHC probe.
 
 The whole check is a pure Register-1 in-process battery, analogous to the Phase-0 documentation lint: it
@@ -57,8 +79,7 @@ package store
 (`cabal build` run after `rm -rf dist-newstyle` and against a `--store-dir` that holds none of the probed
 packages, so a stale store hit cannot mask an unbuildable config), **and** the two committed executable probes
 run green: `cabal run probe:decode` in-process decodes the Phase-0-committed positive fixture
-`probe/fixtures/ok.dhall` into its committed expected Haskell value and exits 0, and `cabal run probe:sim` runs the named `IOSimPOR` schedule and **emits the terminal state it reaches on
-stdout in the committed serialization**, which the external harness `probe/oracle/check-sim-terminal` byte-diffs
+`probe/fixtures/ok.dhall` into its committed expected Haskell value and exits 0, and `cabal run probe:sim` runs the named `IOSimPOR` schedule and **emits the terminal state it reaches on stdout in the committed serialization**, which the external harness `probe/oracle/check-sim-terminal` byte-diffs
 against the Phase-0-committed oracle `probe/fixtures/sim-terminal.expected` — this leg greens **only** on a
 byte-exact match, never on the probe's self-reported exit 0 (a `main = exitSuccess` stub emits no terminal state
 and so fails the diff). Evidence, not prose, closes the gate: the green outcome
@@ -67,9 +88,7 @@ counts only with the retained `cabal build`/`cabal run` transcripts that echo `g
 and those transcripts are retained (committed under `DEVELOPMENT_PLAN/evidence/phase_01/` or CI-archived and
 linked) until Phase 5 supersedes them. **The disjunct is evidentiary, never prose:** (a) a build that greens
 **only** with `allow-newer`/patch/fork is a **branch-1 green** — it passes only when a transcript produced with
-exactly that recorded set is retained (a recorded set with no green transcript does not pass); (b) a **hard
-blocker** (branch 2) passes only when the record carries the verbatim failing `cabal build` output **plus one
-failing transcript per attempted remediation class** (bare `allow-newer`, source patch, and fork/pin), each
+exactly that recorded set is retained (a recorded set with no green transcript does not pass); (b) a **hard blocker** (branch 2) passes only when the record carries the verbatim failing `cabal build` output **plus one failing transcript per attempted remediation class** (bare `allow-newer`, source patch, and fork/pin), each
 naming the failing package and the compile-fail locus — a one-sentence "package X fails" does not pass. The
 Phase-0-seeded mutant `probe/mutants/drop-allow-newer` (the resolution's `allow-newer`/patch removed, or a
 bogus upper bound injected — this being a buildability gate, §M.2's mutation-operator set is applied here as a
@@ -86,11 +105,31 @@ gate emits the retained proven/tested/assumed ledger ([§K](development_plan_sta
 cluster, and Gate-2-semantics layer **UNVERIFIED** — a green build is a buildability result only, never a
 runtime or deployability claim (Register 1).
 
+```mermaid
+flowchart LR
+  %% register: algebra
+  fx["committed fixtures"]:::intent
+  or["independently authored oracle"]:::intent
+  mu["seeded mutant"]:::intent
+  g{{"the phase 1 gate command"}}:::gate
+  ok((("phase seal: the ledger this gate emits"))):::seal
+  no>"the mutant must turn it red"]:::refuse
+  fx -->|"binds the corpus"| g
+  or -->|"binds the expectation"| g
+  mu -->|"binds the defect"| g
+  g -->|"fixtures green, oracle agrees"| ok
+  g -->|"mutant green means the gate is not one"| no
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+```
+*Design intent. Phase 1's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+
 **Representative set (concrete corpus, §M.7):** the probe's third-party surface is exactly these named risks —
 (i) `dhall` and its transitive lag-prone deps `template-haskell`, `aeson`, `megaparsec`, `prettyprinter`;
 (ii) `io-sim` + `io-classes`; (iii) the `jit-build` resolver's Haskell dependencies, enumerated as the
-concrete Hackage packages **`cryptohash-sha256` (content-hashing), `http-client` + `http-client-tls`
-(download), `typed-process` (process control), `tar`, `zlib`, `directory`, and `filepath`**; (iv) the
+concrete Hackage packages **`cryptohash-sha256` (content-hashing), `http-client` + `http-client-tls` (download), `typed-process` (process control), `tar`, `zlib`, `directory`, and `filepath`**; (iv) the
 `purescript-bridge` contract generator (build-only, the SPA-composition phase's dependency); and (v) the native
 Pulsar client's `supernova` fork plus its `proto-lens` codegen (build-only, the Pulsar-client phase's
 dependency). This list is the
@@ -123,8 +162,7 @@ terminal-state positive it breaks — §M.2).
   dependency, while the version-stable JVM TLC half stays unaffected by the GHC pin.
 - [`formal_model_doctrine.md §7 — Prototype validation`](../documents/engineering/formal_model_doctrine.md#7-prototype-validation):
   the reifiable-`Model` mechanism — one value rendering both `interpret` (runtime) and `emitTLA` (a generated,
-  never-committed `.tla`) — was prototyped in a throwaway spike; that is **sibling evidence, not an amoebius
-  result**, and its Haskell side must build on the pin before Phase 2 authors it.
+  never-committed `.tla`) — was prototyped in a throwaway spike; that is **sibling evidence, not an amoebius result**, and its Haskell side must build on the pin before Phase 2 authors it.
 - [`content_addressing_doctrine.md §4.5 — the ML-asset lifecycle`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
   ML engines/models/kernels are never baked or URL-fetched — the shared `jit-build` resolver materializes each
   **named catalog identity** on first miss into a `CacheBudget`-bounded content-addressed cache; the resolver's
@@ -135,13 +173,15 @@ terminal-state positive it breaks — §M.2).
 ## Sprint 1.1: Shared toolchain pin + `cabal.project` skeleton 📋
 
 **Status**: Planned
-**Implementation**: `cabal.project`, `cabal.project.freeze` — target paths, not yet built.
+**Implementation**: `cabal.project`, `cabal.project.freeze` — target paths, not yet
+built.
 **Blocked by**: Phase 0 gate.
-**Independent Validation**: `cabal build` of a trivial library succeeds on **GHC 9.12.4 / Cabal 3.16.1.0** from
-a clean store (`rm -rf dist-newstyle` first), with the retained transcript echoing `ghc --version` and
-`cabal --version` in-band and showing the shell-observed exit 0; the compiler and a frozen Hackage `index-state`
-are captured in one shared committed project file.
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` (Toolchain — the shared pin), `DEVELOPMENT_PLAN/system_components.md`.
+**Independent Validation**: `cabal build` of a trivial library succeeds
+on **GHC 9.12.4 / Cabal 3.16.1.0** from a clean store (`rm -rf dist-newstyle` first), with the retained
+transcript echoing `ghc --version` and `cabal --version` in-band and showing the shell-observed exit 0; the
+compiler and a frozen Hackage `index-state` are captured in one shared committed project file.
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` (Toolchain — the shared pin),
+`DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt the shared-pin discipline recorded in the tracker's Toolchain note — one **GHC 9.12.4 / Cabal 3.16.1.0**
@@ -163,19 +203,21 @@ The whole sprint (📋 Planned).
 ## Sprint 1.2: `dhall` in-process decoder build probe (Gate-2 dependency) 📋
 
 **Status**: Planned
-**Implementation**: `probe/probe.cabal` (a `dhall` build-depends), `probe/app/Decode.hs` (decode a trivial
-`.dhall` in-process) — target paths, not yet built.
+**Implementation**: `probe/probe.cabal` (a `dhall` build-depends), `probe/app/Decode.hs`
+(decode a trivial `.dhall` in-process) — target paths, not yet built.
 **Blocked by**: Sprint 1.1.
-**Independent Validation**: a probe depending on `dhall` builds under the pin from a clean store, and
-`cabal run probe:decode` decodes the Phase-0-committed `probe/fixtures/ok.dhall` into its committed expected
-Haskell value and exits 0 (a green `cabal build` alone does **not** satisfy this — an executed, exit-checked run
-is required); paired with it, `probe/fixtures/bad-type.dhall` — a positive/negative pair differing only in one
-mistyped field — makes `cabal run probe:decode` fail with its committed `dhall` type-error tag (§M.8: the
-failure is asserted by its specific tag, not by "fails"). The exact `allow-newer`/source-patch/fork required by
-`dhall`'s transitive deps (`template-haskell`, `aeson`, `megaparsec`, `prettyprinter`) is recorded **together
-with** the green transcript produced with exactly that set (branch-1 evidentiary rule above); or the blocker is
-recorded with the verbatim failing output and one failing transcript per remediation class.
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` (the `allow-newer` set), `documents/engineering/dsl_doctrine.md` (§9 backlink).
+**Independent Validation**: a probe depending on `dhall` builds under the pin from a clean store, and `cabal
+run probe:decode` decodes the Phase-0-committed `probe/fixtures/ok.dhall` into its committed expected
+Haskell value and exits 0 (a green `cabal build` alone does **not** satisfy this — an executed, exit-checked
+run is required); paired with it, `probe/fixtures/bad-type.dhall` — a positive/negative pair differing only
+in one mistyped field — makes `cabal run probe:decode` fail with its committed `dhall` type-error tag (§M.8:
+the failure is asserted by its specific tag, not by "fails"). The exact `allow-newer`/source-patch/fork
+required by `dhall`'s transitive deps (`template-haskell`, `aeson`, `megaparsec`, `prettyprinter`) is
+recorded **together with** the green transcript produced with exactly that set (branch-1 evidentiary rule
+above); or the blocker is recorded with the verbatim failing output and one failing transcript per
+remediation class.
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` (the `allow-newer` set),
+`documents/engineering/dsl_doctrine.md` (§9 backlink).
 
 ### Objective
 Adopt [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note) with
@@ -206,23 +248,25 @@ recorded here; the JVM-only TLC path (Phases 2/3) is unaffected.
 ## Sprint 1.3: `io-sim` + `io-classes` simulation build probe 📋
 
 **Status**: Planned
-**Implementation**: extend `probe/probe.cabal` (`io-sim`, `io-classes` build-depends), `probe/app/Sim.hs` (a
-trivial `IOSimPOR` run that **emits the terminal state it reaches on stdout** in the committed serialization),
-the external harness `probe/oracle/check-sim-terminal`, the Phase-0 oracle `probe/fixtures/sim-terminal.expected`,
-and the seeded mutant `probe/mutants/perturb-sim-schedule` — target paths, not yet built.
+**Implementation**: extend `probe/probe.cabal` (`io-sim`, `io-classes` build-depends),
+`probe/app/Sim.hs` (a trivial `IOSimPOR` run that **emits the terminal state it reaches on stdout** in the
+committed serialization), the external harness `probe/oracle/check-sim-terminal`, the Phase-0 oracle
+`probe/fixtures/sim-terminal.expected`, and the seeded mutant `probe/mutants/perturb-sim-schedule` — target
+paths, not yet built.
 **Blocked by**: Sprint 1.1.
-**Independent Validation**: a probe depending on `io-sim`/`io-classes` builds under the pin from a clean store,
-and `cabal run probe:sim` runs the Phase-0-named `IOSimPOR` schedule and **emits the terminal state it reaches
-on stdout**, which the external harness `probe/oracle/check-sim-terminal` byte-diffs against the Phase-0-committed
-oracle `probe/fixtures/sim-terminal.expected` — the leg greens **only** on a byte-exact match, **not** on the
-probe's self-reported exit 0 (a `main = exitSuccess` stub emits no terminal state and fails the diff); paired
-with it, the seeded mutant `probe/mutants/perturb-sim-schedule` (the schedule's step ordering perturbed / one
-fairness step dropped) MUST turn `probe:sim` **red at a terminal-state mismatch** against the same oracle (§M.2:
-the mutant is named by path + operator and paired with the terminal-state positive it breaks); the exact
-`allow-newer`/pin is recorded together with the green transcript produced under it (branch-1 rule), or the
-blocker is recorded with verbatim failing output per remediation class.
-**Docs to update**: `DEVELOPMENT_PLAN/README.md`, `documents/engineering/gateway_migration_model_doctrine.md`
-(§4 backlink), `DEVELOPMENT_PLAN/system_components.md`.
+**Independent Validation**: a probe depending on
+`io-sim`/`io-classes` builds under the pin from a clean store, and `cabal run probe:sim` runs the
+Phase-0-named `IOSimPOR` schedule and **emits the terminal state it reaches on stdout**, which the external
+harness `probe/oracle/check-sim-terminal` byte-diffs against the Phase-0-committed oracle
+`probe/fixtures/sim-terminal.expected` — the leg greens **only** on a byte-exact match, **not** on the
+probe's self-reported exit 0 (a `main = exitSuccess` stub emits no terminal state and fails the diff);
+paired with it, the seeded mutant `probe/mutants/perturb-sim-schedule` (the schedule's step ordering
+perturbed / one fairness step dropped) MUST turn `probe:sim` **red at a terminal-state mismatch** against
+the same oracle (§M.2: the mutant is named by path + operator and paired with the terminal-state positive it
+breaks); the exact `allow-newer`/pin is recorded together with the green transcript produced under it
+(branch-1 rule), or the blocker is recorded with verbatim failing output per remediation class.
+**Docs to update**: `DEVELOPMENT_PLAN/README.md`, `documents/engineering/gateway_migration_model_doctrine.md` (§4
+backlink), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`gateway_migration_model_doctrine.md §4 — Simulate and prove`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
@@ -252,30 +296,31 @@ The whole sprint (📋 Planned).
 ## Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate 📋
 
 **Status**: Planned
-**Implementation**: extend `probe/probe.cabal` (the `jit-build` resolver's Haskell deps — content-hashing,
-download-or-build, process control — **plus** the build-only `purescript-bridge` contract generator, **plus**
-the `supernova` fork + `proto-lens` codegen whose recorded resolution Sprint 1.5 lands) and a single `probe`
-executable whose `build-depends` enumerates the **entire** Representative set — `dhall` + `io-sim` +
-`io-classes` + the eight resolver packages + `purescript-bridge` + `supernova`/`proto-lens`; the
-recorded-resolution ledger in `DEVELOPMENT_PLAN/README.md` — target paths, not yet built.
-**Blocked by**: Sprint 1.2, Sprint 1.3, Sprint 1.5 (the consolidated probe cannot link until every leaf leg —
-decoder, simulator, resolver deps, `purescript-bridge`, and the `supernova`/`proto-lens` fork+codegen — has its
+**Implementation**: extend `probe/probe.cabal` (the `jit-build` resolver's Haskell deps
+— content-hashing, download-or-build, process control — **plus** the build-only `purescript-bridge` contract
+generator, **plus** the `supernova` fork + `proto-lens` codegen whose recorded resolution Sprint 1.5 lands)
+and a single `probe` executable whose `build-depends` enumerates the **entire** Representative set — `dhall`
++ `io-sim` + `io-classes` + the eight resolver packages + `purescript-bridge` + `supernova`/`proto-lens`;
+the recorded-resolution ledger in `DEVELOPMENT_PLAN/README.md` — target paths, not yet built.
+**Blocked by**: Sprint 1.2, Sprint 1.3, Sprint 1.5 (the consolidated probe cannot link until every leaf leg — decoder,
+simulator, resolver deps, `purescript-bridge`, and the `supernova`/`proto-lens` fork+codegen — has its
 recorded resolution).
-**Independent Validation**: one probe package whose `build-depends` matches the "Representative set" list
-exactly — `dhall`, `io-sim`, `io-classes`, the eight enumerated resolver packages `cryptohash-sha256`,
-`http-client`, `http-client-tls`, `typed-process`, `tar`, `zlib`, `directory`, `filepath`, **the build-only
-`purescript-bridge` contract generator, and the `supernova` fork + `proto-lens` codegen** (all five clauses
-(i)–(v) of the Representative set; a category description or a set already in the stock closure does not satisfy
-this) — builds and links under GHC 9.12.4 / Cabal 3.16.1.0 from a clean store; `cabal run probe:decode` exits 0
-on its committed fixture; and `cabal run probe:sim` emits its reached terminal state, which the external
-`check-sim-terminal` harness confirms byte-exact against the committed `probe/fixtures/sim-terminal.expected`
-oracle (never the probe's self-exit). **Both** seeded mutants are re-run: `probe/mutants/drop-allow-newer` MUST
-turn `cabal build` red at a version-mismatch/compile-fail locus, and `probe/mutants/perturb-sim-schedule` MUST
-turn `probe:sim` red at a terminal-state mismatch (together proving the gate detects both an unbuildable config
-and a wrong-terminal-state sim, not just rubber-stamps a green one). The consolidated `allow-newer`/patch/fork
-set is recorded with its matching green transcripts (branch-1), or the exact blocker with verbatim
+**Independent Validation**: one probe package whose `build-depends` matches the
+"Representative set" list exactly — `dhall`, `io-sim`, `io-classes`, the eight enumerated resolver packages
+`cryptohash-sha256`, `http-client`, `http-client-tls`, `typed-process`, `tar`, `zlib`, `directory`,
+`filepath`, **the build-only `purescript-bridge` contract generator, and the `supernova` fork + `proto-lens` codegen** (all five clauses (i)–(v) of the Representative set; a category description or a set already in
+the stock closure does not satisfy this) — builds and links under GHC 9.12.4 / Cabal 3.16.1.0 from a clean
+store; `cabal run probe:decode` exits 0 on its committed fixture; and `cabal run probe:sim` emits its
+reached terminal state, which the external `check-sim-terminal` harness confirms byte-exact against the
+committed `probe/fixtures/sim-terminal.expected` oracle (never the probe's self-exit). **Both** seeded
+mutants are re-run: `probe/mutants/drop-allow-newer` MUST turn `cabal build` red at a
+version-mismatch/compile-fail locus, and `probe/mutants/perturb-sim-schedule` MUST turn `probe:sim` red at a
+terminal-state mismatch (together proving the gate detects both an unbuildable config and a
+wrong-terminal-state sim, not just rubber-stamps a green one). The consolidated `allow-newer`/patch/fork set
+is recorded with its matching green transcripts (branch-1), or the exact blocker with verbatim
 per-remediation-class failing output (branch-2), in the tracker's Toolchain section.
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` (Toolchain — the consolidated pin/`allow-newer` set),
+**Docs to update**:
+`DEVELOPMENT_PLAN/README.md` (Toolchain — the consolidated pin/`allow-newer` set),
 `documents/engineering/content_addressing_doctrine.md` (§4.5 resolver-deps backlink),
 `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -317,21 +362,22 @@ like the removed formal-model spike; nothing here is a durable amoebius module.
 ## Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe 📋
 
 **Status**: Planned
-**Implementation**: extend `probe/probe.cabal` (the native Pulsar client's `supernova` fork + its `proto-lens`
-codegen, build-only), plus the generated protobuf module the `proto-lens` codegen emits — target paths, not yet
-built.
+**Implementation**: extend `probe/probe.cabal` (the native Pulsar client's `supernova`
+fork + its `proto-lens` codegen, build-only), plus the generated protobuf module the `proto-lens` codegen
+emits — target paths, not yet built.
 **Blocked by**: Sprint 1.1.
-**Independent Validation**: the `supernova` fork and its `proto-lens` codegen resolve and compile under the pin
-from a clean store — the hardest single leg, a source **fork** plus a codegen step, not a stock Hackage pull —
-with the retained green `cabal build` transcript echoing `ghc --version`/`cabal --version` in-band and showing
-the shell-observed exit 0; the exact fork ref + `allow-newer`/patch/pin is recorded **together with** that green
-transcript (branch-1 evidentiary rule), **or** the blocker is recorded with the verbatim failing `cabal build`
-output **plus one failing transcript per remediation class** (bare `allow-newer`, source patch, fork/pin), each
-naming the failing package and the compile-fail locus. The consolidated gate's seeded mutant
+**Independent Validation**: the `supernova`
+fork and its `proto-lens` codegen resolve and compile under the pin from a clean store — the hardest single
+leg, a source **fork** plus a codegen step, not a stock Hackage pull — with the retained green `cabal build`
+transcript echoing `ghc --version`/`cabal --version` in-band and showing the shell-observed exit 0; the
+exact fork ref + `allow-newer`/patch/pin is recorded **together with** that green transcript (branch-1
+evidentiary rule), **or** the blocker is recorded with the verbatim failing `cabal build` output **plus one failing transcript per remediation class** (bare `allow-newer`, source patch, fork/pin), each naming the
+failing package and the compile-fail locus. The consolidated gate's seeded mutant
 `probe/mutants/drop-allow-newer` (a §M.2 dependency-resolution operator) covers this leg too: with the fork
-ref/patch removed, `cabal build` MUST turn red at the `supernova`/`proto-lens` resolution locus — the committed
-mutant this build-only leg is paired against.
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` (the `supernova` fork ref + codegen `allow-newer`/patch set),
+ref/patch removed, `cabal build` MUST turn red at the `supernova`/`proto-lens` resolution locus — the
+committed mutant this build-only leg is paired against.
+**Docs to update**: `DEVELOPMENT_PLAN/README.md`
+(the `supernova` fork ref + codegen `allow-newer`/patch set),
 `documents/engineering/content_addressing_doctrine.md` (the Pulsar-client dependency backlink),
 `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -383,8 +429,7 @@ deleted once its resolution is recorded; nothing here is a durable amoebius modu
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves; the sole home of the
   recorded Toolchain `allow-newer`/pin set.
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
-  Register-1 honesty token: a green build is a buildability result, never a runtime claim).
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the Register-1 honesty token: a green build is a buildability result, never a runtime claim).
 - [overview.md](overview.md) — target architecture and the GHC 9.12.4 / Cabal 3.16.1.0 toolchain pin.
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — the Register-1
   pre-cluster spine and the rendering-never-touches-live-infrastructure invariant.

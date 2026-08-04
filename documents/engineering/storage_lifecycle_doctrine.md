@@ -1,14 +1,39 @@
 # Storage Lifecycle
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Define amoebius's durable-storage contract — the single `no-provisioner` retained PV model,
 > the deterministic `<namespace>/<statefulset>/pv_<integer>` bind, explicit hard-capped sizes, host- and
 > EBS-backed volumes that outlive their node and their cluster — and the rule that deletion of
 > durable data is forbidden under normal operation.
+> **Read this if**: durable data has to survive something — a teardown, a rebuild, a resize, or a migration.
+
+This document owns the storage side of the system: why a volume's lifetime is independent of its cluster's,
+how a rebuilt cluster rebinds to the same bytes, and why shrinking is a verified migration rather than a
+truncation. It does not own the capacity arithmetic that admits a volume, owned by
+[resource_capacity_storage.md](./resource_capacity_storage.md), nor the cluster lifecycle it is deliberately
+decoupled from, owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Cluster and storage have independent lifetimes](#1-cluster-and-storage-have-independent-lifetimes)
+- [2. One storage class, and it provisions nothing](#2-one-storage-class-and-it-provisions-nothing)
+- [3. PVCs are born only from StatefulSets](#3-pvcs-are-born-only-from-statefulsets)
+- [4. Deterministic PV naming and the explicit bind](#4-deterministic-pv-naming-and-the-explicit-bind)
+- [5. Sizes are explicit, hard-capped, and one-volume-per-claim](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)
+- [6. The lossless-teardown guarantee: deterministic rebind](#6-the-lossless-teardown-guarantee-deterministic-rebind)
+- [7. Deleting durable data is forbidden under normal operation](#7-deleting-durable-data-is-forbidden-under-normal-operation)
+- [8. Shrinking storage without representing data destruction](#8-shrinking-storage-without-representing-data-destruction)
+- [9. What this doctrine deliberately does not own](#9-what-this-doctrine-deliberately-does-not-own)
+- [10. Planning ownership](#10-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -51,8 +76,7 @@ built the storage layer. Status and gates live only in
 
 Dynamic provisioning is the machinery that would let a cluster *create and destroy*
 volumes on its own initiative. amoebius wants the opposite — volumes that a human or the elevated harness
-created on purpose and that nothing in the normal cluster lifecycle can reclaim — so amoebius **deletes the
-dynamic machinery outright**.
+created on purpose and that nothing in the normal cluster lifecycle can reclaim — so amoebius **deletes the dynamic machinery outright**.
 
 Every amoebius cluster has exactly one StorageClass, and it is inert:
 
@@ -99,8 +123,7 @@ claim, retain state of its own, or run without the old+new+workspace capacity wi
   the finite verified transition and never becomes their owner. Shared
   state for such workloads lives in a platform service (MinIO, Postgres, Pulsar), never in an ad-hoc PV. The
   **control-plane singleton** is the canonical stateless case: it is a Deployment `replicas=1` with no PVC,
-  and its durable state is the MinIO bucket ([§7.2](#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc),
-  [daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)).
+  and its durable state is the MinIO bucket ([§7.2](#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc), [daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)).
 - **The DSL is the gate.** The amoebius Dhall DSL does not expose a "make me a loose PVC" primitive at all;
   durable storage is requested through the app/StatefulSet surface and nowhere else. The illegal-state
   framing — *a claim that cannot bind, or durable state owned by an ordinary non-StatefulSet, is
@@ -121,40 +144,49 @@ Rebinding can only be deterministic if both ends of the bind are computed from s
 identity, never assigned by a race. So amoebius names every PV from `(namespace, statefulset, ordinal)` and
 pins each PV to its claim *before the claim exists*.
 
-- **Naming convention**: every PV is named on the deterministic scheme whose **logical identity** is
-  **`<namespace>/<statefulset>/pv_<integer>`**, where the integer is the StatefulSet ordinal the volume
-  serves. That triple is the logical key, not the object's `metadata.name`: a PV `metadata.name` is an
-  RFC-1123 subdomain and admits neither `/` nor `_`, so the logical key is rendered to a legal
-  `metadata.name` of the form **`<namespace>.<statefulset>.pv-<n>`**. The rendering is a pure function of
-  identity; it carries no node id, no cluster id, no timestamp, and no allocation counter, so the *same*
-  StatefulSet ordinal computes the *same* PV name on every cluster and every rebuild.
+### Naming convention
 
-  **Why the separator is `.` and not `-`.** A PV is cluster-scoped, so the rendering must be **injective** —
-  two distinct logical keys may never collide on one name — or the `claimRef` pairing below and the
-  one-PVC/one-PV/one-backing identity of [§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)
-  silently bind the wrong pair. Hyphen-joining does not give that: `namespace = a-b` with
-  `statefulset = c`, and `namespace = a` with `statefulset = b-c`, both render `a-b-c-pv-0`, because a
-  hyphen is legal *inside* each component. amoebius therefore joins on `.`, which is legal in an RFC-1123
-  **subdomain** (the PV name) and illegal in an RFC-1123 **label** — and both a namespace name and a
-  StatefulSet name are labels, the latter because Kubernetes derives each Pod's hostname from it. The
-  separator cannot occur inside a component, so the join is injective by construction rather than by
-  convention. *(The alternative — keep the hyphen and append a digest of the canonical triple — is also
-  injective but makes the name unreadable and unreconstructable by an operator; amoebius prefers the
-  separator.)* **What this forecloses:** a namespace or StatefulSet name containing a `.` would break the
-  scheme, so the label constraint above is load-bearing rather than incidental, and the name is no longer
-  assemblable by eye without knowing it.
-- **Explicit `claimRef`**. Each PV carries a `claimRef` naming the exact `(namespace, PVC-name)` it serves, so the
-  pairing is fixed by amoebius rather than discovered by whichever unbound claim the scheduler happens to
-  match first. A `volumeClaimTemplate` claim and its `claimRef`-pinned PV are two halves of one identity.
-- **Node affinity for host-backed PVs.** A host-path volume lives on one specific node, so its PV declares
-  node affinity to that node and the consuming Pod schedules there. On a single-node cluster this is the
-  trivial case; on a multi-node kind/rke2 cluster each ordinal's PV is pinned to the node holding its
-  bytes. (Provider/EBS volumes are node-independent — [§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim).)
+Every PV is named on the deterministic scheme whose **logical identity** is
+**`<namespace>/<statefulset>/pv_<integer>`**, where the integer is the StatefulSet ordinal the volume
+serves. That triple is the logical key, not the object's `metadata.name`: a PV `metadata.name` is an
+RFC-1123 subdomain and admits neither `/` nor `_`, so the logical key is rendered to a legal
+`metadata.name` of the form **`<namespace>.<statefulset>.pv-<n>`**. The rendering is a pure function of
+identity; it carries no node id, no cluster id, no timestamp, and no allocation counter, so the *same*
+StatefulSet ordinal computes the *same* PV name on every cluster and every rebuild.
+
+**Why the separator is `.` and not `-`.** A PV is cluster-scoped, so the rendering must be **injective** —
+two distinct logical keys may never collide on one name — or the `claimRef` pairing below and the
+one-PVC/one-PV/one-backing identity of [§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)
+silently bind the wrong pair. Hyphen-joining does not give that: `namespace = a-b` with
+`statefulset = c`, and `namespace = a` with `statefulset = b-c`, both render `a-b-c-pv-0`, because a
+hyphen is legal *inside* each component. amoebius therefore joins on `.`, which is legal in an RFC-1123
+**subdomain** (the PV name) and illegal in an RFC-1123 **label** — and both a namespace name and a
+StatefulSet name are labels, the latter because Kubernetes derives each Pod's hostname from it. The
+separator cannot occur inside a component, so the join is injective by construction rather than by
+convention. *(The alternative — keep the hyphen and append a digest of the canonical triple — is also
+injective but makes the name unreadable and unreconstructable by an operator; amoebius prefers the
+separator.)* **What this forecloses:** a namespace or StatefulSet name containing a `.` would break the
+scheme, so the label constraint above is load-bearing rather than incidental, and the name is no longer
+assemblable by eye without knowing it.
+
+### Explicit `claimRef`
+
+Each PV carries a `claimRef` naming the exact `(namespace, PVC-name)` it serves, so the
+pairing is fixed by amoebius rather than discovered by whichever unbound claim the scheduler happens to
+match first. A `volumeClaimTemplate` claim and its `claimRef`-pinned PV are two halves of one identity.
+
+### Node affinity for host-backed PVs
+
+A host-path volume lives on one specific node, so its PV declares
+node affinity to that node and the consuming Pod schedules there. On a single-node cluster this is the
+trivial case; on a multi-node kind/rke2 cluster each ordinal's PV is pinned to the node holding its
+bytes. (Provider/EBS volumes are node-independent — [§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim).)
 
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   sts[StatefulSet volumeClaimTemplate]:::intent -->|renders one PVC per ordinal| pvc[PVC data-statefulset-ordinal]:::intent
   ident[Identity: namespace, statefulset, ordinal]:::intent -->|pure function| pvname[Logical key namespace/statefulset/pv_integer rendered to legal name namespace-statefulset-pv-n]:::intent
   ident -->|pure function| claimref[claimRef: namespace, PVC name]:::intent
@@ -382,14 +414,7 @@ EbsBackingMaterializationResult =
   policy; the private request is derived from volume demand and the provider's whole-GiB/minimum rules. It
   never contains a fabricated future volume id or an arbitrary raw-byte request.
 - **The identity path is total, not implied by matching byte counts.** A `HostDisk.id` resolves exactly once
-  to `PhysicalDiskPartition.retainedPools[].id`; its `carve` must equal that pool's globally scoped
-  `NamedDiskCarve.id`, and `capacity` is the carve's net allocatable extent. An EBS id resolves exactly once
-  to its `ProviderVolumeSlotId`; a cloud-quota id resolves exactly once to the named account/quota
-  ledger. BookKeeper/MinIO/PV demands carry this `BackingId`, never a free `Capacity`, so checked construction
-  can walk demand → logical backing → carve/provider owner → physical/account ceiling without inventing an
-  association. Before `CreateVolume`, provisioning derives required usable bytes from geometry, applies
-  `VolumePresentation`, rounds to the backing minimum/quantum (for AWS EBS, an integral GiB satisfying the
-  volume-type minimum), and derives the globally scoped slot from account + cluster + StatefulSet claim slot +
+  to `PhysicalDiskPartition.retainedPools[].id`; its `carve` must equal that pool's globally scoped `NamedDiskCarve.id`, and `capacity` is the carve's net allocatable extent. An EBS id resolves exactly once to its `ProviderVolumeSlotId`; a cloud-quota id resolves exactly once to the named account/quota ledger. BookKeeper/MinIO/PV demands carry this `BackingId`, never a free `Capacity`, so checked construction can walk demand → logical backing → carve/provider owner → physical/account ceiling without inventing an association. Before `CreateVolume`, provisioning derives required usable bytes from geometry, applies `VolumePresentation`, rounds to the backing minimum/quantum (for AWS EBS, an integral GiB satisfying the volume-type minimum), and derives the globally scoped slot from account + cluster + StatefulSet claim slot +
   request. It debits `provisionedBytes` and count against observed residual quota and stores
   `Promised` in the witness. After create it attaches and cross-checks the real `ProviderVolumeId`, moving only
   to `Materialized`; retained rebind keeps the same logical `BackingId`/slot. Reusing an id, mapping two ids to
@@ -406,8 +431,7 @@ EbsBackingMaterializationResult =
 - **The aggregate fold lives elsewhere.** This doc owns the *union shape* and the per-volume/uniform-template
   sizing ([§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)); the **aggregate arithmetic** —
   uniform claim-group debit followed by `Σ(PV caps) ≤ backing`, and the Pulsar two-ceiling fold — is owned by
-  [resource_capacity_doctrine.md §5](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm), [§7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total) (the [§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting
-  technique). An app that would consume more storage than its backing
+  [resource_capacity_doctrine.md §5](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm), [§7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total) (the [§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting technique). An app that would consume more storage than its backing
   ([illegal_state_catalog.md §3.19](../illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)) is rejected by that fold at the
   post-bind `provision-seal`; "unbounded"
   is representable **only** through a `Growable` scaling policy whose ceiling is itself a quota
@@ -438,6 +462,7 @@ no-provisioner PVC/PV policy, which guarantees identical rebinding by fresh-PV r
 
 ```mermaid
 flowchart TD
+%% register: algebra
   run1[Cluster running, PVC bound to PV]:::runtime -->|cluster delete: Retain preserves backing bytes| retained[Backing store preserved: EBS volume or host path. PV object may be gone kind delete cluster or Released with stale claimRef.uid]:::runtime
   retained -->|cluster recreate: amoebius makes a fresh uid-less pre-bound PV over the preserved bytes| freshpv[Fresh PV, claimRef namespace and PVC name, no uid, no resourceVersion]:::intent
   retained -->|same StatefulSet recomputes same PVC| pvc2[Identical PVC, same name and namespace]:::intent
@@ -497,8 +522,7 @@ normal circumstances." amoebius takes the strong reading: **forbid it.**
   deliberate, privileged deletion," never to "until the next teardown."
 - **No normal-operation code path destroys retained backing bytes.** Cluster deletion may remove the
   claim/PV API objects but leaves the durable backing intact
-  ([§2](#2-one-storage-class-and-it-provisions-nothing),
-  [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind)). `chart`/app delete removes the PVC/PV
+  ([§2](#2-one-storage-class-and-it-provisions-nothing), [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind)). `chart`/app delete removes the PVC/PV
   *objects* it owns but never the backing bytes on a retained volume. The DSL surface exposes **no** "delete
   this durable volume" primitive; a `.dhall` value cannot denote "destroy these bytes." This is the
   storage-side reading of the illegal-state contract owned by [dsl_doctrine.md](./dsl_doctrine.md) /
@@ -511,10 +535,7 @@ normal circumstances." amoebius takes the strong reading: **forbid it.**
   normal-operation credentials can *create* EBS but not *delete* it, so "accidentally delete durable
   storage" is unauthorized at the cloud API, not merely discouraged. The exact create-vs-delete credential
   model (and whether Pulumi creates under one credential set and the harness destroys under another) is
-  resolved by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) [§6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) (four locked decisions: durable-class
-  EBS carried outside the ephemeral cluster stack; normal-operation credentials create-but-not-delete; only
-  the elevated in-memory test credential deletes test-flagged volumes; static CSI attaches the
-  Pulumi-created ID without dynamic provisioning); this doc records only the requirement that the destroy
+  resolved by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) [§6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) (four locked decisions: durable-class EBS carried outside the ephemeral cluster stack; normal-operation credentials create-but-not-delete; only the elevated in-memory test credential deletes test-flagged volumes; static CSI attaches the Pulumi-created ID without dynamic provisioning); this doc records only the requirement that the destroy
   capability be withheld from normal operation.
 
 ### 7.1 The single exception: the elevated test harness
@@ -526,8 +547,7 @@ forever. Within amoebius automation, harness deletion is the **one** sanctioned 
   and only storage it flagged as test-owned.
 - The flag-and-elevated-sweep mechanism, the per-run leak ledger, and the always-tear-down test `.dhall`
   topology are owned by [testing_doctrine.md](./testing_doctrine.md). This doc owns only the boundary:
-  **normal operation cannot delete durable data; the elevated harness is the sole actor that can, on
-  test-flagged resources.**
+  **normal operation cannot delete durable data; the elevated harness is the sole actor that can, on test-flagged resources.**
 
 A deliberate privileged operator action is outside normal operation and outside the automated `.dhall`
 surface. A human may perform an audited external break-glass reclaim, but that is not an amoebius automation
@@ -549,21 +569,17 @@ bytes — MinIO's own backing disks, Pulsar/BookKeeper, Postgres/Patroni, and an
   `PulumiCheckpointObjectDemand`. Every object carries a `StorageBudgetId`, exact canonical-size inputs,
   retained old/new/failure/orphan bounds, and a mutation-admission identity before it can be written as a
   Vault-Transit-enveloped MinIO object
-  ([resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry),
-  [pulumi_iac_doctrine.md §2](./pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio),
-  [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)), decrypted
+  ([resource_capacity_storage.md §5.1](./resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry), [pulumi_iac_doctrine.md §2](./pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio), [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)), decrypted
   in-process and never written to a plaintext ConfigMap, to etcd, or to a control-plane PVC
   ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md), the plaintext-spec-at-rest entry).
   “Every other byte” is deliberately not an open escape hatch: a new persistent state kind first extends the
   closed union, its budget/peak model, source↔producer equality check, gateway policy, and one-byte-short tests.
 - **Why the distinction matters.** It keeps the singleton disposable — k8s can reschedule it anywhere with
-  no volume to re-attach and no data to lose ([§5.1](#51-storage-is-independent-of-the-node-lifecycle) applies
-  to platform-service volumes, not to the control plane, because the control plane has none). MinIO itself is
+  no volume to re-attach and no data to lose ([§5.1](#51-storage-is-independent-of-the-node-lifecycle) applies to platform-service volumes, not to the control plane, because the control plane has none). MinIO itself is
   a platform service and *does* sit on retained PVs per this doctrine; the control plane is a *client* of
   that bucket, not a holder of its own volume.
 
-This is the storage-side statement of the invariant **amoebius durable storage (for the control plane) is
-exclusively the MinIO bucket**; the object-store model MinIO provides is owned by
+This is the storage-side statement of the invariant **amoebius durable storage (for the control plane) is exclusively the MinIO bucket**; the object-store model MinIO provides is owned by
 [platform_services_doctrine.md](./platform_services_doctrine.md) and
 [content_addressing_doctrine.md](./content_addressing_doctrine.md).
 
@@ -623,6 +639,17 @@ ReclaimEligible =
   old or target state fits but the overlap is one byte, one pod slot, one CSI attachment, or one executor
   resource short performs zero creates/copies. Failed verification keeps both volumes and all partial
   workspace charged on the next observation.
+- **A killed copy re-enters at chunk granularity; it does not resume mid-chunk.** The copy runner is
+  idempotent at the granularity of the intent's declared **chunk**: a chunk is either fully written and
+  recorded or it is not, and a re-run copies exactly the chunks with no completion record. Crash recovery is
+  therefore the ordinary `discover → diff → enact → re-observe` re-entry
+  ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed))
+  and needs no bespoke resume protocol — but it is **not** free: the chunk in flight when the executor died is
+  re-copied from its start, so the chunk size is the bound on wasted work and is an authored operand of the
+  intent's copy policy rather than an implementation detail. Partial target bytes and workspace stay charged
+  across the restart, so a re-entering copy never has less headroom than the first attempt. The claim reaches
+  the **runtime-checked** layer only: that the completion records are durable and that a recorded chunk really
+  landed are observations, not type facts.
 
 > **Honesty.** This is a *design resolution* of an explicitly open question, not a built or tested
 > amoebius capability. The mechanism above (especially the verified-migrate gate, `ReclaimEligible` artifact,
@@ -661,8 +688,7 @@ result: the model generalizes behaviour proven in prodbox into amoebius design i
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)

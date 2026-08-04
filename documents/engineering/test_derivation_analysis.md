@@ -1,11 +1,35 @@
 # Test Derivation: what a spec may generate, and what must be authored against it
 
+> **Purpose**: Analyse the current amoebius testing corpus and recommend a derivation boundary — the spec generates the *enumeration* of surfaces requiring coverage; the operator authors the *expectations* asserted against them.
+> **Read this if**: the coverage a specification implies has to be derived rather than guessed.
+
+This document works through how a coverage enumeration is projected from committed source and joined against
+authored expectations. It is analysis supporting a rule owned elsewhere — the derivation rule itself is owned
+by [testing_doctrine.md §9](./testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) —
+and states no independent obligation.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Reference only
 **Supersedes**: N/A
 **Referenced by**: documents/engineering/README.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: Analyse the current amoebius testing corpus and recommend a derivation boundary — the spec generates the *enumeration* of surfaces requiring coverage; the operator authors the *expectations* asserted against them.
+</details>
+
+## Contents
+- [1. Why this analysis exists](#1-why-this-analysis-exists)
+- [2. What exists today](#2-what-exists-today)
+- [3. Generate the enumeration; author the expectation — adopted](#3-generate-the-enumeration-author-the-expectation--adopted)
+- [4. Recommended additions](#4-recommended-additions)
+- [5. Chaos, failover, and gateway testing](#5-chaos-failover-and-gateway-testing)
+- [6. Defects found in the current corpus](#6-defects-found-in-the-current-corpus)
+- [7. What this analysis does not own](#7-what-this-analysis-does-not-own)
+- [8. What was adopted](#8-what-was-adopted)
+- [Related Documents](#related-documents)
+
+---
 
 This document is the **analysis record** behind an adopted change, not an authoritative source. It owns no
 concept: the derivation boundary it argued for is owned by
@@ -16,8 +40,6 @@ It is retained because the reasoning, the rejected alternatives, and the defect 
 from the doctrine that resulted. Every claim here is design intent, never a proven amoebius result
 ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline));
 [§8](#8-what-was-adopted) records what landed where.
-
----
 
 ## 1. Why this analysis exists
 
@@ -76,6 +98,31 @@ Sequencing and status are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVE
 No phase delivering any of the above has started.
 
 ---
+
+```mermaid
+flowchart TD
+  %% register: algebra
+  src["committed typed source"]:::intent
+  proj[["pure projection"]]:::intent
+  enum["enumeration of surfaces requiring coverage, generated"]:::intent
+  exp["authored expectations, committed"]:::intent
+  join[["join by identity"]]:::intent
+  cov{{"every surface bound to an expectation?"}}:::gate
+  led((("per-run proven, tested, assumed ledger"))):::seal
+  un>"UNVERIFIED row: an unbound surface, never a silent pass"]:::refuse
+  src -->|"binds the source"| proj
+  proj --> enum
+  enum --> join
+  exp --> join
+  join --> cov
+  cov -->|"bound"| led
+  cov -->|"unbound"| un
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+```
+*Design intent, Tier-1. The specification generates the enumeration and a human authors the expectation, so a surface cannot be covered by the same artifact that defines it. The rule is normative in [testing_doctrine.md §9](./testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation); this document only works through its consequences. Vocabulary: [diagram_conventions.md](./diagram_conventions.md).*
 
 ## 3. Generate the enumeration; author the expectation — adopted
 
@@ -323,13 +370,12 @@ models the gateway migration only, while the same appendix's own summary table m
 only — no owning model or phase*.
 
 **Resolved:** editorial. The sentence now matches the table and points at
-[§17](./chaos_failover_doctrine.md#17-the-boundary-and-its-classifier) for the method it illustrates.
+[§17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier) for the method it illustrates.
 
 ### 6.5 One reported defect that was not real
 
 An earlier reading reported two stale anchors in the illegal-state index ([§3.27](../illegal_state/illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement) and [§3.30](../illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool)), on the grounds
-that both headings had been retitled without their inbound anchors being updated. **That report was a false
-positive.** The corpus uses explicit `<a id="old-slug">` tags to keep inbound links alive across a heading
+that both headings had been retitled without their inbound anchors being updated. **That report was a false positive.** The corpus uses explicit `<a id="old-slug">` tags to keep inbound links alive across a heading
 rename, and both entries — along with nine other retitled headings — carry one. A whole-repo check that
 honours explicit HTML anchors resolves all 6,300-odd internal links with zero failures. The pattern is
 deliberate and is recorded here so it is not "fixed" away by a later reader.
@@ -379,8 +425,7 @@ any other document.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Testing Doctrine](./testing_doctrine.md)
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)

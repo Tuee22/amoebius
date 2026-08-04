@@ -56,7 +56,36 @@ CHECKS = {
     "l": "honesty vocabulary: no coined tokens, no proven at a tested layer",
     "m": "a type is declared in exactly one doctrine document",
     "n": "a link label must not name a different file than its target",
+    "o1": "document shape: a Contents block where section-10 requires one",
+    "o2": "document shape: the Contents block matches the real heading set",
+    "o3": "orientation block: the Purpose line precedes the link-graph metadata",
+    "o4": "orientation block: a Read this if line names the reader",
+    "o5": "navigation: the link-list section is named Related Documents",
+    "q1": "diagram quota: a document over the floor carries a diagram",
+    "q3": "diagram balance: a long document carries an orientation diagram",
+    "q4": "diagram register: the declared register matches the block body",
+    "q5": "diagram caption: every mermaid block is followed by a caption",
+    "p1": "document shape: a section's own body stays under the section cap",
+    "p2": "document shape: a list item's own body stays under the item cap",
+    "p3": "sentence budget: a prose sentence stays under the word cap",
+    "p4": "document shape: a document stays under the document cap",
 }
+
+# Section-10 / section-13 caps and the diagram quota of the conventions doc.
+CONTENTS_MIN_H2 = 8       # >= this many `##` sections requires a Contents block
+CONTENTS_MIN_LINES = 300  # ... or this many non-fenced prose lines
+DIAGRAM_DOC_FLOOR = 300   # a document over this many prose lines carries a diagram
+DIAGRAM_ORIENT_FLOOR = 600  # ... and over this many, an orientation one
+SECTION_CAP = 140         # a section's own body, section 10.1
+ITEM_CAP = 20             # a list item's own body, section 10.3
+DOC_CAP = 700             # a whole document, section 10.2
+# Section 13.1 states 45 as the target. 90 is the enforced wave-one value: measured
+# over paragraphs rather than lines, the corpus carries 1,588 sentences over 45 and
+# 141 over 90. The number here tightens only once the corpus clears the new one.
+SENTENCE_CAP = 90         # words in one prose sentence, section 13.1
+
+# Reported, but not gate-failing, while the corpus cannot meet the stated rule.
+ADVISORY = {"p3"}
 
 LEGAL_STATUS = {"Authoritative source", "Reference only", "Deprecated"}
 HDR_FIELDS = ["Status", "Supersedes", "Referenced by", "Generated sections"]
@@ -470,8 +499,9 @@ SENT_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
 # across documents there is the cross-reference discipline working, not duplication.
 NON_NORMATIVE_SECTIONS = (
     "Related Documents",
-    "Cross-references",
-    "Cross-References",
+    # "Cross-references" is retired by documentation_standards section 14.1 and
+    # rejected by check o5; it is not whitelisted here.
+    "Contents",
     "Documentation Requirements",
     "Docs to update",
     "Document index",
@@ -825,8 +855,13 @@ def check_k_product_name(doc, v):
             v.append(Violation("k", doc.rel, i, "the product name is lowercase `amoebius` outside a title"))
 
 
+# A negated or disclaimed form is the honesty grammar working, not an overclaim:
+# "yields *tested*, never *proven*" and "does not prove real reclamation" both
+# say the layer is tested. Emphasis may be bold or italic, and the verb may be
+# either "prove" or "proven".
 NEGATED_PROVEN_RE = re.compile(
-    r"(not|never|rather than|instead of|cannot be|is not)\s+(\*\*)?proven", re.I
+    r"(not|never|rather than|instead of|cannot be|is not|without)\s+"
+    r"(\*{1,2})?prove[sn]?\b", re.I
 )
 
 
@@ -885,11 +920,302 @@ def check_m_type_uniqueness(docs, v):
             )
 
 
+H2_RE = re.compile(r"^##\s+(.*?)\s*#*$")
+CONTENTS_ENTRY_RE = re.compile(r"^\s*[-*+]\s+\[(.*)\]\(#")
+REGISTER_RE = re.compile(r"^\s*%%\s*register:\s*(algebra|orientation)\s*$")
+
+
+def _prose_lines(doc):
+    """Non-fenced, non-blank lines — the unit sections 10 and 7 are sized in.
+
+    Read from `stripped_lines`, where `strip_fences` has already blanked both the
+    fenced bodies and their ``` markers; `fence_langs` records the bodies only.
+
+    Markdown's *indented* code block — four spaces after a blank line, outside any
+    list — is code too, and is excluded on the same grounds. Inside a list those
+    same four spaces are item continuation, so list context is tracked.
+    """
+    out, in_list, in_indented_code, prev_blank = [], False, False, True
+    for i, l in enumerate(doc.stripped_lines, 1):
+        if not l.strip():
+            prev_blank = True
+            continue
+        indent = len(l) - len(l.lstrip())
+        if indent == 0:
+            in_list = LIST_ITEM_RE.match(l) is not None
+            in_indented_code = False
+        elif prev_blank and indent >= 4 and not in_list:
+            in_indented_code = True
+        elif indent < 4:
+            in_indented_code = False
+        prev_blank = False
+        if not in_indented_code:
+            out.append(i)
+    return out
+
+
+def _h2_headings(doc):
+    out = []
+    for i, line in enumerate(doc.stripped_lines, 1):
+        m = H2_RE.match(line)
+        if m:
+            out.append((i, m.group(2) if m.lastindex == 2 else m.group(1)))
+    return out
+
+
+def _mermaid_blocks(doc):
+    """[(open_line, close_line, body_lines)] for every ```mermaid fence."""
+    out, start, body = [], None, []
+    for i, line in enumerate(doc.lines, 1):
+        m = re.match(r"^\s*```(.*)$", line)
+        if m and start is None and m.group(1).strip() == "mermaid":
+            start, body = i, []
+        elif m and start is not None:
+            out.append((start, i, body))
+            start = None
+        elif start is not None:
+            body.append(line)
+    return out
+
+
+def _unescape_label(s):
+    # a nested ] must be escaped inside a link label; compare unescaped
+    return s.replace("\\[", "[").replace("\\]", "]")
+
+
+def check_o_shape(doc, v):
+    """Document shape and the orientation block (documentation_standards §10–§11, §14)."""
+    if os.path.basename(doc.rel) in EXEMPT_BASENAMES:
+        return
+    h2 = _h2_headings(doc)
+    prose_n = len(_prose_lines(doc))
+    has_contents = any(t.strip().lower() == "contents" for _, t in h2)
+
+    if (len(h2) >= CONTENTS_MIN_H2 or prose_n > CONTENTS_MIN_LINES) and not has_contents:
+        v.append(Violation("o1", doc.rel, 1,
+                           f"no '## Contents' ({len(h2)} h2 sections, {prose_n} prose lines)"))
+
+    if has_contents:
+        want = [t for _, t in h2 if t.strip().lower() != "contents"]
+        got, inside = [], False
+        for i, line in enumerate(doc.stripped_lines, 1):
+            m = H2_RE.match(line)
+            if m:
+                inside = (m.group(1).strip().lower() == "contents")
+                continue
+            if inside:
+                em = CONTENTS_ENTRY_RE.match(line)
+                if em:
+                    got.append(_unescape_label(em.group(1).strip()))
+        if got != want:
+            missing = [w for w in want if w not in got][:3]
+            extra = [g for g in got if g not in want][:3]
+            v.append(Violation("o2", doc.rel, 1,
+                               f"Contents out of sync: missing={missing} extra={extra}"))
+
+    pm = re.search(r"^>\s*\*\*Purpose\*\*:", doc.text, re.M)
+    fm = re.search(r"^\*\*(?:Status|Supersedes|Referenced by|Generated sections)\*\*:", doc.text, re.M)
+    if pm and fm and fm.start() < pm.start():
+        v.append(Violation("o3", doc.rel, doc.text[:fm.start()].count("\n") + 1,
+                           "header metadata precedes the > **Purpose**: line"))
+    if not re.search(r"^>\s*\*\*Read this if\*\*:", doc.text, re.M):
+        v.append(Violation("o4", doc.rel, 1, "no '> **Read this if**:' line"))
+    for i, t in h2:
+        if t.strip().lower().replace("-", " ") == "cross references":
+            v.append(Violation("o5", doc.rel, i,
+                               "'## Cross-references' is retired; use '## Related Documents'"))
+
+
+def check_q_diagrams(doc, v):
+    """The diagram quota and per-register conformance (diagram_conventions §10, §8)."""
+    if os.path.basename(doc.rel) in EXEMPT_BASENAMES:
+        return
+    blocks = _mermaid_blocks(doc)
+    prose_n = len(_prose_lines(doc))
+    registers = []
+
+    for start, close, body in blocks:
+        reg = None
+        for b in [x for x in body if x.strip()][:3]:
+            m = REGISTER_RE.match(b)
+            if m:
+                reg = m.group(1)
+                break
+        registers.append(reg)
+        joined = "\n".join(body)
+        if reg is None:
+            v.append(Violation("q4", doc.rel, start, "mermaid block declares no '%% register:'"))
+        elif reg == "algebra":
+            if "classDef" not in joined:
+                v.append(Violation("q4", doc.rel, start,
+                                   "algebra register but no classDef palette"))
+            if not joined.lstrip().startswith("flowchart"):
+                v.append(Violation("q4", doc.rel, start, "algebra register must be a flowchart"))
+        elif "classDef" in joined or ":::" in joined:
+            v.append(Violation("q4", doc.rel, start,
+                               "orientation register must carry no classDef or ::: class"))
+
+        caption = ""
+        for k in range(close, min(close + 3, len(doc.lines))):
+            if doc.lines[k].strip():
+                caption = doc.lines[k].strip()
+                break
+        if not (caption.startswith("*") and caption.endswith("*") and not caption.startswith("**")):
+            v.append(Violation("q5", doc.rel, close,
+                               "mermaid block is not followed by an italic caption"))
+        elif reg == "orientation" and not LINK_RE.search(caption):
+            v.append(Violation("q5", doc.rel, close,
+                               "orientation caption carries no link to the owning document"))
+
+    if prose_n > DIAGRAM_DOC_FLOOR and not blocks:
+        v.append(Violation("q1", doc.rel, 1,
+                           f"{prose_n} prose lines and no diagram (floor {DIAGRAM_DOC_FLOOR})"))
+    if prose_n > DIAGRAM_ORIENT_FLOOR and "orientation" not in registers:
+        v.append(Violation("q3", doc.rel, 1,
+                           f"{prose_n} prose lines and no orientation diagram "
+                           f"(floor {DIAGRAM_ORIENT_FLOOR})"))
+
+
+META_FIELD_RE = re.compile(
+    r"^\*\*(Status|Supersedes|Referenced by|Generated sections|Substrate|Register|"
+    r"Phase scope|Gate|Implementation|Blocked by|Independent Validation|Docs to update)"
+    r"(?:\*\*:|:\*\*)")
+
+
+def _doc_cap_exempt(doc):
+    """Section-10.2's two carve-outs. A plan-suite phase document cannot become a
+    family, and a document already in one has applied the remedy."""
+    base = os.path.basename(doc.rel)
+    if doc.rel.startswith("DEVELOPMENT_PLAN/") and base.startswith("phase_"):
+        return True
+    # Only the HUB is exempt. A slice is an ordinary document and meets the cap,
+    # which is what stops a family from becoming a way to escape the rule by
+    # splitting off one sibling.
+    if not base.endswith("_doctrine.md"):
+        return False
+    prefix = base[: -len("_doctrine.md")]
+    folder = os.path.dirname(doc.path)
+    return any(f.endswith(".md") and f != base and f.startswith(prefix + "_")
+               for f in os.listdir(folder))
+
+
+LIST_ITEM_RE = re.compile(r"^(\s*)([-*+]|\d+\.)\s")
+
+
+def _check_item_caps(doc, prose, v):
+    """Section 10.3. An item's OWN body runs to the next list item of any depth,
+    because the remedy is structure: an item already broken into sub-items has
+    applied it, exactly as a subdivided section has under section 10.1."""
+    lines = doc.stripped_lines
+    ordered = sorted(prose)
+    pos = {ln: k for k, ln in enumerate(ordered)}
+    k = 0
+    while k < len(ordered):
+        ln = ordered[k]
+        m = LIST_ITEM_RE.match(lines[ln - 1])
+        if not m:
+            k += 1
+            continue
+        indent = len(m.group(1))
+        span, j = 1, k + 1
+        while j < len(ordered):
+            nl = ordered[j]
+            if nl - ordered[j - 1] > 2:
+                break
+            nline = lines[nl - 1]
+            if LIST_ITEM_RE.match(nline) or HEADING_RE.match(nline):
+                break
+            if len(nline) - len(nline.lstrip()) <= indent and not nline.startswith(" "):
+                break
+            span += 1
+            j += 1
+        if span > ITEM_CAP:
+            v.append(Violation("p2", doc.rel, ln,
+                               f"list item's own body is {span} lines (cap {ITEM_CAP})"))
+        k = j
+
+
+def check_p_density(doc, v):
+    """The section, document and sentence caps (documentation_standards §10, §13)."""
+    if os.path.basename(doc.rel) in EXEMPT_BASENAMES:
+        return
+    prose = set(_prose_lines(doc))
+
+    # A section's OWN body runs to the next heading of any level: section 10.1's
+    # stated remedy is subdivision, so a section already divided has applied it.
+    heads = [(i, m) for i, l in enumerate(doc.stripped_lines, 1)
+             if (m := HEADING_RE.match(l))]
+    for k, (line, m) in enumerate(heads):
+        if len(m.group(1)) != 2:
+            continue
+        end = heads[k + 1][0] if k + 1 < len(heads) else len(doc.lines) + 1
+        own = sum(1 for i in prose if line < i < end)
+        if own > SECTION_CAP:
+            v.append(Violation("p1", doc.rel, line,
+                               f"section {m.group(2)[:40]!r} is {own} own prose lines "
+                               f"(cap {SECTION_CAP})"))
+
+    _check_item_caps(doc, prose, v)
+
+    if len(prose) > DOC_CAP and not _doc_cap_exempt(doc):
+        v.append(Violation("p4", doc.rel, 1,
+                           f"document is {len(prose)} prose lines (cap {DOC_CAP})"))
+
+    # Sentences are measured over the PARAGRAPH, not the physical line. The corpus
+    # hard-wraps at about 110 characters, so a per-line reading sees roughly
+    # eighteen words at a time and can never observe a sentence over the cap.
+    ordered = sorted(prose)
+    buf, start = [], None
+
+    def flush():
+        nonlocal buf, start
+        if buf:
+            clean = LINK_RE.sub(r"\1", strip_code_spans(" ".join(buf)))
+            for sentence in SENT_SPLIT_RE.split(clean):
+                n = len(sentence.split())
+                if n > SENTENCE_CAP:
+                    v.append(Violation("p3", doc.rel, start,
+                                       f"sentence is {n} words (cap {SENTENCE_CAP})"))
+        buf, start = [], None
+
+    prev = None
+    for i in ordered:
+        s = doc.lines[i - 1].strip()
+        excluded = s.startswith(("|", ">", "#", "*")) or META_FIELD_RE.match(s)
+        if excluded or (prev is not None and i != prev + 1):
+            flush()                       # a blank line or an excluded line ends the run
+        if excluded:
+            prev = i
+            continue
+        if LIST_ITEM_RE.match(doc.lines[i - 1]):
+            flush()                       # each item is its own prose unit
+        if start is None:
+            start = i
+        buf.append(s)
+        prev = i
+    flush()
+
+
 def check_n_label_target(doc, v):
     for i, line in enumerate(doc.stripped_lines, 1):
+        # the sanctioned `[file.md [§2](#anchor)](file.md)` form nests a same-page
+        # link inside a cross-file label, and LINK_RE reads the inner half as a link
+        # whose label carries the outer file name. That is check_i's shape, not a
+        # broken promise: blank the nested spans before reading the line.
+        line = NESTED_LINK_RE.sub(lambda x: " " * len(x.group(0)), line)
         for m in LINK_RE.finditer(line):
             label, target = m.group(1), m.group(2)
-            if target.startswith(("http", "mailto:", "#")):
+            if target.startswith(("http", "mailto:")):
+                continue
+            if target.startswith("#"):
+                # a same-page anchor under a label naming another file promises a
+                # document it never reaches; this is how the family hub stubs broke
+                own = os.path.basename(doc.rel)
+                for other in re.findall(r"\b([a-z0-9_]+\.md)\b", label):
+                    if other != own:
+                        v.append(Violation("n", doc.rel, i,
+                                           f"link label names {other} but the target is a "
+                                           f"same-document anchor"))
                 continue
             path_part, _, _ = target.partition("#")
             if not path_part.endswith(".md"):
@@ -949,6 +1275,9 @@ def run(root, only=None):
         check_k_product_name(doc, v)
         check_l_honesty(doc, v)
         check_n_label_target(doc, v)
+        check_o_shape(doc, v)
+        check_q_diagrams(doc, v)
+        check_p_density(doc, v)
 
     check_c_referenced_by(docs, docs_by_path, v)
     check_d_near_duplicate(docs, v)
@@ -960,7 +1289,13 @@ def run(root, only=None):
 
     if only:
         v = [x for x in v if x.check in only or x.check.rstrip("12345") in only]
-    return (1 if v else 0), v
+        return (1 if v else 0), v
+
+    # ADVISORY checks are reported but do not fail the gate. A check belongs here
+    # only while the corpus cannot meet the value its rule states, and the rule
+    # must record the measured backlog; see documentation_standards section 13.1.
+    blocking = [x for x in v if x.check not in ADVISORY]
+    return (1 if blocking else 0), v
 
 
 def main(argv):
@@ -987,15 +1322,22 @@ def main(argv):
             counts[x.check] += 1
         for cid in CHECKS:
             if counts[cid]:
-                print(f"{counts[cid]:6d}  {cid:<3} {CHECKS[cid]}")
+                tag = "  (advisory)" if cid in ADVISORY and not args.only else ""
+                print(f"{counts[cid]:6d}  {cid:<3} {CHECKS[cid]}{tag}")
         print(f"{sum(counts.values()):6d}  TOTAL")
     else:
         for x in sorted(violations, key=Violation.sort_key):
             print(x.render())
 
-    if violations:
-        checks_hit = sorted({x.check for x in violations})
-        print(f"\ndoc_lint: FAIL — {len(violations)} violation(s) across checks {', '.join(checks_hit)}", file=sys.stderr)
+    if code:
+        hit = sorted({x.check for x in violations if args.only or x.check not in ADVISORY})
+        n = sum(1 for x in violations if args.only or x.check not in ADVISORY)
+        print(f"\ndoc_lint: FAIL — {n} violation(s) across checks {', '.join(hit)}", file=sys.stderr)
+    elif violations:
+        # advisory only: the gate passes, but the backlog is stated rather than hidden
+        hit = sorted({x.check for x in violations})
+        print(f"\ndoc_lint: clean — {len(violations)} advisory violation(s) in "
+              f"{', '.join(hit)}, not gate-failing", file=sys.stderr)
     else:
         print("doc_lint: clean", file=sys.stderr)
     return code

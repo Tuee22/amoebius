@@ -1,12 +1,33 @@
 # Phase 36: Live subject/tenant isolation
 
+> **Purpose**: Prove on live `linux-cpu` infrastructure that authenticated subject and tenant scope is injected
+> by amoebius and enforced across SQL, object, and message data paths with zero foreign-scope effects.
+> **Read this if**: phase 36 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 36 delivers the live subject/tenant isolation; its design is owned by [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md), [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Prove on live `linux-cpu` infrastructure that authenticated subject and tenant scope is injected
-> by amoebius and enforced across SQL, object, and message data paths with zero foreign-scope effects.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — scoped live probe](#resource-provision--scoped-live-probe)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 36.1: Live scoped request and provider-isolation gate 📋](#sprint-361-live-scoped-request-and-provider-isolation-gate-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -100,13 +121,14 @@ compares authenticated pre/post inventories; a leaked test credential or resourc
 **Status**: Planned
 **Implementation**: `src/Amoebius/Ui/Server/ScopedAuthority.hs`,
 `test/live/UserTenantIsolationSpec.hs` (target authored sources; not yet built)
-**Blocked by**: Phase 32; Phase 34; Phase 35
-**Independent Validation**: the one gate command executes every pinned matrix row using Keycloak-minted
-credentials and checks fresh nonces plus read/access attempts through independent provider/audit/API/CNI
-observers; both mutants go red.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/tenancy_doctrine.md`, `documents/illegal_state/illegal_state_security.md`,
-`documents/engineering/testing_doctrine.md`
+**Blocked by**: Phase 32;
+Phase 34; Phase 35
+**Independent Validation**: the one gate command executes every pinned matrix row using
+Keycloak-minted credentials and checks fresh nonces plus read/access attempts through independent
+provider/audit/API/CNI observers; both mutants go red.
+**Docs to update**:
+`documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/tenancy_doctrine.md`,
+`documents/illegal_state/illegal_state_security.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 

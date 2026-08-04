@@ -1,14 +1,35 @@
 # Phase 15: Deterministic-simulation substrate
 
+> **Purpose**: Build the `io-classes` environment substrate and the modeled, fault-injectable
+> Pulsar/MinIO/apiserver/route53/Vault/clock so the *real* daemon/reconciler code, lifted onto `io-classes`, runs
+> under `IOSim`/`IOSimPOR` and replays an injected partition/redelivery/reorder/crash schedule **deterministically**
+> (same seed → byte-identical trace), gated in-process with no cluster.
+> **Read this if**: phase 15 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 15 delivers the deterministic-simulation substrate; its design is owned by [deterministic_simulation_doctrine.md](../documents/engineering/deterministic_simulation_doctrine.md), [conformance_harness_doctrine.md](../documents/engineering/conformance_harness_doctrine.md), [chaos_failover_doctrine.md](../documents/engineering/chaos_failover_doctrine.md), and the plan for reaching it is owned here.
+Register 2: a real boundary against fake tools.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: Build the `io-classes` environment substrate and the modeled, fault-injectable
-> Pulsar/MinIO/apiserver/route53/Vault/clock so the *real* daemon/reconciler code, lifted onto `io-classes`, runs
-> under `IOSim`/`IOSimPOR` and replays an injected partition/redelivery/reorder/crash schedule **deterministically**
-> (same seed → byte-identical trace), gated in-process with no cluster.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 15.1: The `io-classes` `Env` effect interface + its two interpreters + `sim-spec` skeleton 📋](#sprint-151-the-io-classes-env-effect-interface--its-two-interpreters--sim-spec-skeleton-)
+- [Sprint 15.2: The modeled fault-injectable substrates + the per-fake fault-contract corpus 📋](#sprint-152-the-modeled-fault-injectable-substrates--the-per-fake-fault-contract-corpus-)
+- [Sprint 15.3: The deterministic-replay battery — same-seed determinism + schedule-sensitivity + fault-mutant — the gate 📋](#sprint-153-the-deterministic-replay-battery--same-seed-determinism--schedule-sensitivity--fault-mutant--the-gate-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -49,17 +70,10 @@ substrate the live-band phases later use for their Register-2.5 activity; the ph
 never 2.5 ([`development_plan_standards.md §K`](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** `cabal test sim-spec` is green — the real daemon/reconciler code, lifted onto the `Env m` interface,
-replays the **committed schedule-fixture corpus** (Sprint 15.3, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7: a Phase-0-pinned set of injected
-partition/redelivery/reorder/crash schedules) under `IOSim`/`IOSimPOR` with each named per-fake fault contract
-asserted ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7: fake MinIO returns **412** on an `If-None-Match` conflict; fake apiserver yields a
-**resourceVersion conflict** and a **watch-gap**; fake route53 serves the **stale record during propagation
-delay** and offers **no CAS**; fake Vault **rejects ops while sealed**; a **partitioned Pulsar** link delivers
-nothing until healed, then **redelivers with dedup**; the reorder/duplicate/crash knobs each produce their stated
-observable). **Determinism is asserted by same-seed → byte-identical trace replay** (cache-bypass is N/A — an
-`IOSim` replay recomputes the whole program every run, it is not served from a store), **paired with a
+replays the **committed schedule-fixture corpus** (Sprint 15.3, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7: a Phase-0-pinned set of injected partition/redelivery/reorder/crash schedules) under `IOSim`/`IOSimPOR` with each named per-fake fault contract
+asserted ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7: fake MinIO returns **412** on an `If-None-Match` conflict; fake apiserver yields a **resourceVersion conflict** and a **watch-gap**; fake route53 serves the **stale record during propagation delay** and offers **no CAS**; fake Vault **rejects ops while sealed**; a **partitioned Pulsar** link delivers nothing until healed, then **redelivers with dedup**; the reorder/duplicate/crash knobs each produce their stated observable). **Determinism is asserted by same-seed → byte-identical trace replay** (cache-bypass is N/A — an `IOSim` replay recomputes the whole program every run, it is not served from a store), **paired with a
 schedule-sensitivity control ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-6): a distinct-seed / distinct-fault-schedule run MUST produce a *different*
-trace** — a same-trace result under a perturbed schedule is red (it proves the faults are ignored, so the replay
-assertion is a tautology about the library). The gate names **at least one committed seeded fault-mutant ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-2),
+trace** — a same-trace result under a perturbed schedule is red (it proves the faults are ignored, so the replay assertion is a tautology about the library). The gate names **at least one committed seeded fault-mutant ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-2),
 re-run every gate run** — a dropped-partition-handling mutant (the reconciler that fails to await partition-heal
 before acting on a stale read) — that MUST change the replayed invariant outcome to red; a green run against the
 mutant fails the gate. The gate emits a **Register-2 proven/tested/assumed ledger**: the invariant-under-the-
@@ -109,25 +123,27 @@ discriminating power.
 ## Sprint 15.1: The `io-classes` `Env` effect interface + its two interpreters + `sim-spec` skeleton 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Sim/Env.hs` (the typed effect interface — publish/consume, put/get-blob,
-apply-object, write-DNS, vault-op, now/delay — polymorphic over an `io-classes` monad `m`),
-`src/Amoebius/Sim/Interp/{Real,Sim}.hs` (the two interpreters: real clients under `IO`; the `IOSim s` model), and
-a `sim-spec` test-suite stanza in `amoebius.cabal` — target paths, not yet built.
-**Blocked by**: Phase 14 gate (the boundary fake-tool harness — its single `Exec/Tool.hs` IO seam is the seam
-this sprint generalizes into a typed effect interface); Phase 14 gate (the `chain :: cfg -> [Step]` plan the toy
-reconcile loop consumes); Phase 1's recorded `io-sim`/`io-classes` pin under GHC 9.12.4.
-**Independent Validation**: a toy reconcile loop written against the `Env` interface compiles and runs under both
-`m = IO` (no-op real clients) and `m = IOSim s`, producing an observable transition trace under each. A source
-gate confirms concurrency-touching code is polymorphic in `m`. The one interpretation (resolving the
+**Implementation**: `src/Amoebius/Sim/Env.hs` (the typed effect interface —
+publish/consume, put/get-blob, apply-object, write-DNS, vault-op, now/delay — polymorphic over an
+`io-classes` monad `m`), `src/Amoebius/Sim/Interp/{Real,Sim}.hs` (the two interpreters: real clients under
+`IO`; the `IOSim s` model), and a `sim-spec` test-suite stanza in `amoebius.cabal` — target paths, not yet
+built.
+**Blocked by**: Phase 14 gate (the boundary fake-tool harness — its single `Exec/Tool.hs` IO seam is
+the seam this sprint generalizes into a typed effect interface); Phase 14 gate (the `chain :: cfg -> [Step]`
+plan the toy reconcile loop consumes); Phase 1's recorded `io-sim`/`io-classes` pin under GHC 9.12.4.
+**Independent Validation**: a toy reconcile loop written against the `Env` interface compiles and runs under
+both `m = IO` (no-op real clients) and `m = IOSim s`, producing an observable transition trace under each. A
+source gate confirms concurrency-touching code is polymorphic in `m`. The one interpretation (resolving the
 "concurrency-touching" / scope ambiguity): scope is `src/Amoebius/Sim/**` plus any `src/` module importing
-`Control.Concurrent`, `Control.Concurrent.*`, or an `io-classes`/`io-sim` concurrency class; within that scope the
-gate is red on any bare-`IO`-typed signature or any `forkIO`/`Control.Concurrent` token that is not routed through
-the `MonadFork`/`io-classes` class methods. The gate is red if that scope is **empty** (the `Env` interface plus
-its two interpreters must be in it), guarding against a vacuously-green empty scope.
-**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-15 status backlink),
-`documents/engineering/testing_doctrine.md` (the Register-2.5 substrate),
-`documents/engineering/chaos_failover_doctrine.md` (§10 "build it pure; lift it whole" ladder, realized by the two
-interpreters), `DEVELOPMENT_PLAN/system_components.md`, this document.
+`Control.Concurrent`, `Control.Concurrent.*`, or an `io-classes`/`io-sim` concurrency class; within that
+scope the gate is red on any bare-`IO`-typed signature or any `forkIO`/`Control.Concurrent` token that is
+not routed through the `MonadFork`/`io-classes` class methods. The gate is red if that scope is **empty**
+(the `Env` interface plus its two interpreters must be in it), guarding against a vacuously-green empty
+scope.
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-15 status
+backlink), `documents/engineering/testing_doctrine.md` (the Register-2.5 substrate),
+`documents/engineering/chaos_failover_doctrine.md` (§10 "build it pure; lift it whole" ladder, realized by
+the two interpreters), `DEVELOPMENT_PLAN/system_components.md`, this document.
 
 ### Objective
 Adopt [`deterministic_simulation_doctrine.md §2`](../documents/engineering/deterministic_simulation_doctrine.md#2-the-io-classes-environment-abstraction--build-it-pure-lift-it-whole)
@@ -155,18 +171,19 @@ The whole sprint (📋 Planned).
 ## Sprint 15.2: The modeled fault-injectable substrates + the per-fake fault-contract corpus 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Sim/Fakes/{Pulsar,MinIO,ApiServer,Route53,Vault,Clock}.hs` (the in-`IOSim`
-modeled substrates, each with a typed fault model) and `test/sim/FaultContracts.hs` (the committed per-fake
-fault-contract assertions) — target paths, not yet built.
+**Implementation**:
+`src/Amoebius/Sim/Fakes/{Pulsar,MinIO,ApiServer,Route53,Vault,Clock}.hs` (the in-`IOSim` modeled substrates,
+each with a typed fault model) and `test/sim/FaultContracts.hs` (the committed per-fake fault-contract
+assertions) — target paths, not yet built.
 **Blocked by**: Sprint 15.1.
-**Independent Validation**: each modeled substrate honors its typed fault knob under a committed assertion — not
-merely that the ADT compiles. The **per-fake fault-contract corpus ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7, the named representative set)**: fake
-MinIO returns **412** on an `If-None-Match` conflict; fake apiserver yields a **resourceVersion conflict** and a
-**watch-gap**; fake route53 serves the **stale record during propagation delay** and offers **no CAS**; fake
-Vault **rejects ops while sealed**; a **partitioned Pulsar** link delivers nothing until healed, then
-**redelivers with dedup**; and the reorder/duplicate/crash knobs each produce their stated observable. Each named
-contract is paired with a positive that differs only in the fault knob ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-8): `sim-spec` is red if any named
-substrate's fault assertion is absent or passes with the knob disabled.
+**Independent Validation**: each
+modeled substrate honors its typed fault knob under a committed assertion — not merely that the ADT
+compiles. The **per-fake fault-contract corpus ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7, the named representative set)**: fake MinIO returns **412** on an `If-None-Match` conflict; fake apiserver yields a
+**resourceVersion conflict** and a **watch-gap**; fake route53 serves the **stale record during propagation delay** and offers **no CAS**; fake Vault **rejects ops while sealed**; a **partitioned Pulsar** link
+delivers nothing until healed, then **redelivers with dedup**; and the reorder/duplicate/crash knobs each
+produce their stated observable. Each named contract is paired with a positive that differs only in the
+fault knob ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-8):
+`sim-spec` is red if any named substrate's fault assertion is absent or passes with the knob disabled.
 **Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (§3 fault-model backlink),
 `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -195,30 +212,33 @@ The whole sprint (📋 Planned).
 ## Sprint 15.3: The deterministic-replay battery — same-seed determinism + schedule-sensitivity + fault-mutant — the gate 📋
 
 **Status**: Planned
-**Implementation**: `test/sim/SimSpec.hs` (the `IOSim`/`IOSimPOR` replay battery), `test/sim/schedules/` (the
-committed schedule-fixture corpus — injected partition/redelivery/reorder/crash schedules, Phase-0-pinned), and
-`test/sim/mutants/dropped_partition_handling/` (the committed seeded fault-mutant) — target paths, not yet built.
-**Blocked by**: Sprint 15.2, Sprint 15.1; Phase 14 gate (the boundary harness); Phase 14 gate (the `[Step]` plan
-the reconcile loop consumes).
-**Schedule-fixture corpus ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7):** the replayed schedules are named explicitly here — a committed corpus of
-injected partition/redelivery/reorder/crash schedules over the toy reconcile loop, each a `test/sim/schedules/`
-fixture pinned in Phase 0, so every fault axis the modeled substrates expose is driven, not just a single
-partition.
-**Independent Validation**: `cabal test sim-spec` is green — the real daemon/reconciler code, lifted onto `Env m`,
-replays the committed schedule-fixture corpus under `IOSim`/`IOSimPOR`. **Determinism is asserted by same-seed →
-byte-identical trace** (cache-bypass is N/A — an `IOSim` replay recomputes the whole program every run, it is not
-served from a content-addressed store; the honesty obligation is met instead by the schedule-sensitivity control).
-**Schedule-sensitivity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-6):** a distinct-seed / distinct-fault-schedule run over the same fixture produces a
-**different** trace; a same-trace result under a perturbed schedule is red (it proves the faults are ignored and
-the same-seed assertion is a tautology about the library). **Committed seeded fault-mutant ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-2), re-run every
+**Implementation**: `test/sim/SimSpec.hs` (the `IOSim`/`IOSimPOR` replay battery),
+`test/sim/schedules/` (the committed schedule-fixture corpus — injected partition/redelivery/reorder/crash
+schedules, Phase-0-pinned), and `test/sim/mutants/dropped_partition_handling/` (the committed seeded
+fault-mutant) — target paths, not yet built.
+**Blocked by**: Sprint 15.2, Sprint 15.1; Phase 14 gate (the
+boundary harness); Phase 14 gate (the `[Step]` plan the reconcile loop consumes). **Schedule-fixture corpus ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7):** the replayed
+schedules are named explicitly here — a committed corpus of injected partition/redelivery/reorder/crash
+schedules over the toy reconcile loop, each a `test/sim/schedules/` fixture pinned in Phase 0, so every
+fault axis the modeled substrates expose is driven, not just a single partition.
+**Independent Validation**:
+`cabal test sim-spec` is green — the real daemon/reconciler code, lifted onto `Env m`, replays the committed
+schedule-fixture corpus under `IOSim`/`IOSimPOR`. **Determinism is asserted by same-seed → byte-identical trace** (cache-bypass is N/A — an `IOSim` replay recomputes the whole program every run, it is not served
+from a content-addressed store; the honesty obligation is met instead by the schedule-sensitivity control).
+**Schedule-sensitivity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-6):** a
+distinct-seed / distinct-fault-schedule run over the same fixture produces a **different** trace; a
+same-trace result under a perturbed schedule is red (it proves the faults are ignored and the same-seed
+assertion is a tautology about the library). **Committed seeded fault-mutant
+([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-2), re-run every
 gate run:** a dropped-partition-handling mutant — the reconciler that acts on a stale read without awaiting
-partition-heal — MUST change the replayed invariant outcome to red; a green `sim-spec` against the mutant fails
-the gate. The suite emits a **Register-2 proven/tested/assumed ledger** marking the invariant result *tested
-against a modeled environment* and the modeled-env fidelity to the real substrate **ASSUMED / UNVERIFIED**
-([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)), discharged later by a Register-3 conformance check.
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` (flip the Phase-15 status when the gate passes),
-`documents/engineering/deterministic_simulation_doctrine.md`, `documents/engineering/testing_doctrine.md`,
-`documents/engineering/conformance_harness_doctrine.md` (§2 the Register-2.5 entry this substrate serves).
+partition-heal — MUST change the replayed invariant outcome to red; a green `sim-spec` against the mutant
+fails the gate. The suite emits a **Register-2 proven/tested/assumed ledger** marking the invariant result
+*tested against a modeled environment* and the modeled-env fidelity to the real substrate **ASSUMED / UNVERIFIED** ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)), discharged later by a
+Register-3 conformance check.
+**Docs to update**: `DEVELOPMENT_PLAN/README.md` (flip the Phase-15 status
+when the gate passes), `documents/engineering/deterministic_simulation_doctrine.md`,
+`documents/engineering/testing_doctrine.md`, `documents/engineering/conformance_harness_doctrine.md` (§2 the
+Register-2.5 entry this substrate serves).
 
 ### Objective
 Adopt [`deterministic_simulation_doctrine.md §4/§5`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
@@ -238,8 +258,7 @@ fidelity *assumed* — the honest premise this substrate buys
   yields a **different** trace ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-6); the named per-fake fault contracts fire ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7, from Sprint 15.2); and the
   fault-mutant turns the replayed invariant outcome red.
 - A Register-2 ledger: the invariant-under-the-modeled-schedules-and-faults result is *tested against a modeled
-  environment*; the modeled-env fidelity to the real Pulsar/apiserver/route53/Vault is marked **ASSUMED /
-  UNVERIFIED**, discharged later by a Register-3 conformance check — never quoted as *"the cluster is correct."*
+  environment*; the modeled-env fidelity to the real Pulsar/apiserver/route53/Vault is marked **ASSUMED / UNVERIFIED**, discharged later by a Register-3 conformance check — never quoted as *"the cluster is correct."*
 
 ### Validation
 1. `cabal test sim-spec` is green — the committed schedule-fixture corpus replays byte-identically under the same
@@ -273,8 +292,7 @@ The whole sprint (📋 Planned).
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed): a
-  `**Register:**` field is never `2.5`; 2.5 names the *activity*, not the gate register)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed): a `**Register:**` field is never `2.5`; 2.5 names the *activity*, not the gate register)
 - [overview.md](overview.md) — target architecture and the pre-cluster conformance vision
 - [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — [§2](../documents/engineering/deterministic_simulation_doctrine.md#2-the-io-classes-environment-abstraction--build-it-pure-lift-it-whole) the
   io-classes environment abstraction, [§3](../documents/engineering/deterministic_simulation_doctrine.md#3-the-simulated-environment-and-its-fault-model) the simulated environment and its fault model, [§4](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits) where Register 2.5

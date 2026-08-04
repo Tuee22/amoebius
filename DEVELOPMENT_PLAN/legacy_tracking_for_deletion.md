@@ -1,14 +1,24 @@
 # Legacy Tracking for Deletion
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/substrate_doctrine.md
-**Generated sections**: none
-
 > **Purpose**: The migration-removal ledger for the convergence — the single record of every sibling-project
 > artifact (standalone product, third-party chart, retired transport, single-arch image) that the amoebius
 > convergence deliberately does **not** carry forward, with the doctrine that supersedes it and the owning
 > phase that makes the removal real.
+> **Read this if**: an artifact of the earlier planning approach turns up and its status has to be settled.
+
+This document lists material retained only until its replacement lands, so that a reader meeting it elsewhere
+can tell it is superseded rather than current. It owns no design and no status; every live claim belongs to
+[README.md](README.md) or to the doctrine set under [`../documents/`](../documents/README.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/substrate_doctrine.md
+**Generated sections**: none
+
+</details>
 
 ---
 
@@ -23,8 +33,7 @@ graduates from 📋 Planned to ✅ Done only when its **owning phase** gate actu
 the superseding mechanism is the live one; until then every "removed" verb below is design intent, not a
 tested amoebius result.
 
-Where a row leans on the sibling prodbox/infernix/jitML system as justification, that is **evidence from a
-sibling system, not proof in amoebius** (the honesty rule, [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
+Where a row leans on the sibling prodbox/infernix/jitML system as justification, that is **evidence from a sibling system, not proof in amoebius** (the honesty rule, [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 ---
 

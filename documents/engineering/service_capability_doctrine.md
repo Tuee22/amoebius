@@ -1,28 +1,50 @@
 # Service Capabilities
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Single source of truth for the abstraction by which amoebius application logic names abstract
 > **capabilities** — ObjectStore, SecretStore, MessageBus, Sql, Identity, Observability, Registry, Edge —
 > never products, and by which the platform binds each capability to one canonical provider and a per-cluster
 > deployment shape.
+> **Read this if**: an application needs a service, or a provider behind a capability is being chosen or changed.
+
+This document owns the capability abstraction: the closed set of service roles an application may name, the
+binding from a capability to a concrete provider and per-cluster shape, and the rule that application logic
+never names a product. It does not own how those providers are deployed, owned by
+[platform_services_doctrine.md](./platform_services_doctrine.md), nor the namespaces they occupy, owned by
+[namespace_layout_doctrine.md](./namespace_layout_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Why capabilities, not products](#1-why-capabilities-not-products)
+- [2. The capability set](#2-the-capability-set)
+- [3. One canonical provider; the type admits alternates](#3-one-canonical-provider-the-type-admits-alternates)
+- [4. Capability → provider → shape: the binding](#4-capability--provider--shape-the-binding)
+- [5. Per-cluster structural shapes — beyond values](#5-per-cluster-structural-shapes--beyond-values)
+- [6. Fungibility, reconciled: app surface invariant, shape deployment-ruled](#6-fungibility-reconciled-app-surface-invariant-shape-deployment-ruled)
+- [7. Expressing a capability in the DSL](#7-expressing-a-capability-in-the-dsl)
+- [8. Capabilities and the illegal-state contract](#8-capabilities-and-the-illegal-state-contract)
+- [9. Planning ownership](#9-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
 ## 1. Why capabilities, not products
 
-**An app declares a need for an ObjectStore, never for
-MinIO.** Whether that object storage is served by MinIO, by a cloud S3, or by something amoebius has not
-written yet is an implementation detail of the *platform* — and the moment an app spec writes the word
-`minio`, it has welded itself to one realization and lost the right to run anywhere the platform decides to
-realize that capability differently.
+**An app declares a need for an ObjectStore, never for MinIO.** Whether that object storage is served by
+MinIO, by a cloud S3, or by something amoebius has not written yet is an implementation detail of the
+*platform* — and the moment an app spec writes the word `minio`, it has welded itself to one realization and
+lost the right to run anywhere the platform decides to realize that capability differently.
 
 This is the application-logic-vs-deployment-rules split ([app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md))
-applied to *services*. That doctrine's litmus test is: **if changing it changes what the app is to a user, it
-is application logic; if it changes only how, where, or how robustly the app runs, it is a deployment rule.**
+applied to *services*. That doctrine's litmus test is: **if changing it changes what the app is to a user, it is application logic; if it changes only how, where, or how robustly the app runs, it is a deployment rule.**
 A capability is what the app *is*: "this app keeps durable objects," "this app gates its surfaces behind an
 identity provider," "this app produces and consumes a stream of events." The *product* that satisfies the
 capability — and the *shape* in which that product is deployed — is how robustly and on what substrate the app
@@ -108,8 +130,7 @@ operator choice:
 | ObjectStore | **MinIO** | distributed/erasure-coded at steady state; single-node shape on small clusters ([§5](#5-per-cluster-structural-shapes--beyond-values)) |
 | SecretStore | **Vault** | the fail-closed secrets root; owned in full by [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | MessageBus | **Pulsar** (with ZooKeeper + BookKeeper) | native binary protocol, no WebSockets |
-| Sql | **Patroni**, via the Percona operator | one Patroni cluster *per consuming capability instance*, never a shared mega-DB. Patroni is the fixed failover engine amoebius depends on; the operator that stands it up is a swappable deployment-rules default — a Zalando/CloudNativePG substitution preserves the same capability/shape contract and ultimately reaches Kubernetes only through deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`; it is not app-visible |
-| Identity | **Keycloak** | owns all wild ingress through the Edge ([§7](#7-expressing-a-capability-in-the-dsl)); the single baked, offline-capable OSS identity provider that both **issues and validates** the OIDC/JWT tokens the Envoy ext-authz path enforces on every wild route, and performs realm/user-federation/RBAC administration in one binary — lighter proxies (Dex/oauth2-proxy) validate but do not manage identities, forcing a second identity store |
+| Sql | **Patroni**, via the Percona operator | one Patroni cluster *per consuming capability instance*, never a shared mega-DB. Patroni is the fixed failover engine amoebius depends on; the operator that stands it up is a swappable deployment-rules default — a Zalando/CloudNativePG substitution preserves the same capability/shape contract and ultimately reaches Kubernetes only through deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`; it is not app-visible | | Identity | **Keycloak** | owns all wild ingress through the Edge ([§7](#7-expressing-a-capability-in-the-dsl)); the single baked, offline-capable OSS identity provider that both **issues and validates** the OIDC/JWT tokens the Envoy ext-authz path enforces on every wild route, and performs realm/user-federation/RBAC administration in one binary — lighter proxies (Dex/oauth2-proxy) validate but do not manage identities, forcing a second identity store |
 | Observability | **Prometheus / Grafana** | reachable only through the Identity-owned edge; its pull/scrape model matches the no-wild-ingress posture (targets sit behind the Identity edge, nothing is pushed outward), and amoebius must run identically on an offline laptop kind cluster, which rules out any SaaS/push-agent stack |
 | Registry | **`distribution`** (the `registry:2` single-binary OCI registry) | **replaces Harbor** — see below |
 | Edge | **Envoy + Gateway API** | the L4 backend is derived from the materialized target: MetalLB for self-managed engines, provider LB for `Managed Eks`; detected substrate alone does not choose it |
@@ -130,8 +151,7 @@ doctrine owns only the *capability → provider* indirection over that set, plus
   single-binary OCI registry (`registry:2`) — a single baked binary on the same footing as MinIO and Vault —
   and **Harbor is retired**. amoebius drops Harbor's scanning, web UI, robot RBAC, and replication as separate
   concerns to be revisited only if ever needed, not steady-state requirements. The build pipeline, the
-  registry image refs, and the supply-chain rule that every third-party service binary is **baked into the
-  amoebius base container** (multi-arch `amd64`+`arm64`, no public-registry pulls at steady state) are owned
+  registry image refs, and the supply-chain rule that every third-party service binary is **baked into the amoebius base container** (multi-arch `amd64`+`arm64`, no public-registry pulls at steady state) are owned
   by [image_build_doctrine.md](./image_build_doctrine.md); this doctrine owns only that the Registry
   capability now binds to `distribution`.
 - **JVM providers are baked, not pulled.** Keycloak (Identity) and Pulsar+ZooKeeper+BookKeeper (MessageBus)
@@ -143,8 +163,7 @@ doctrine owns only the *capability → provider* indirection over that set, plus
 **The type leaves room for alternates; amoebius builds none it does not need.** The indirection makes a
 capability's provider a typed *union with one arm today* — `ObjectStore` could later admit an `S3`
 arm, `Sql` could admit a managed cloud Postgres — without any app spec changing, because the app never named
-the provider. But a union arm is not an adapter. amoebius **does not build a provider adapter it does not yet
-need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
+the provider. But a union arm is not an adapter. amoebius **does not build a provider adapter it does not yet need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
 would be reporting a designed extension point as a built one.
 
 > **Honesty.** "One canonical provider, type admits alternates" is Phase 10 design intent. The alternate arms
@@ -175,8 +194,7 @@ accelerator owners — and passed with the selected topology to
 context resolves those references, and all `Provisioned*` values remain private outputs under `ProvisionedSpec`.
 Those private service projections contribute to one sealed identity-keyed `ProvisionedRenderSourceSet`; only
 the opaque checked whole deployment crosses public
-`renderAll :: ProvisionedSpec -> [K8sObject]`. This ordering prevents a capacity
-check over a small pre-binding skeleton from missing resources introduced by the provider shape.
+`renderAll :: ProvisionedSpec -> [K8sObject]`. This ordering prevents a capacity check over a small pre-binding skeleton from missing resources introduced by the provider shape.
 
 ```dhall
 -- Illustrative only; the real grammar and the typed spec gates are owned by dsl_doctrine.md.
@@ -214,6 +232,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   app["Application logic: names a capability need, e.g. ObjectStore with buckets"]:::intent -->|written once, travels| need["Capability need"]:::intent
   rules["Deployment rules: pick provider default-canonical and shape"]:::intent -->|bind| need
   need -->|capability plus provider plus shape| bound["Bound capability"]:::intent
@@ -232,8 +251,7 @@ ML serving adds a **ninth capability, `InferenceEngine`** — the abstract inter
 declare it serves inference, exactly as an app names `ObjectStore` to declare it keeps durable objects. It
 exercises the [§4](#4-capability--provider--shape-the-binding) binding at its strictest: where a generic capability's provider *defaults* to the [§3](#3-one-canonical-provider-the-type-admits-alternates)
 canonical (part 2 above) and could later admit an alternate, an `InferenceEngine`'s provider is a union with
-**no arm to author a download** — it is **selected from an eligible target node/host offering derived from
-the detected substrate** and materialized by the shared jit-build resolver on first miss. In a heterogeneous
+**no arm to author a download** — it is **selected from an eligible target node/host offering derived from the detected substrate** and materialized by the shared jit-build resolver on first miss. In a heterogeneous
 cluster there is no single cluster-wide substrate to consult; selection must name a concrete eligible offering
 or an elastic candidate class.
 
@@ -268,10 +286,8 @@ arm through the target offering projected from the *detected* substrate (the sub
 it has no syntax with which to *author* an arbitrary download or build. This is the [§1](#1-why-capabilities-not-products) object-storage lesson taken to
 its limit: an app can no more write "curl this engine URL at boot" than it can write "deploy `minio`."
 
-**The engine offering is a quotient of one eligible target's detected substrate — a surjection, not an
-orthogonal cluster-wide axis — and this doctrine owns that mapping.** `EngineRuntime` is a *coarsening* of the four-member substrate catalog
-([substrate_doctrine.md §1](./substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob),
-[cluster_topology_doctrine.md §1](./cluster_topology_doctrine.md#1-two-axes-the-substrate-is-detected-the-engine-is-declared)):
+**The engine offering is a quotient of one eligible target's detected substrate — a surjection, not an orthogonal cluster-wide axis — and this doctrine owns that mapping.** `EngineRuntime` is a *coarsening* of the four-member substrate catalog
+([substrate_doctrine.md §1](./substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob), [cluster_topology_doctrine.md §1](./cluster_topology_doctrine.md#1-two-axes-the-substrate-is-detected-the-engine-is-declared)):
 `apple → AppleMetal`, `linux-cpu → LinuxCpu`, and — the one place two substrates collapse onto one arm —
 `{ linux-cuda, windows } → Cuda`. `Cuda` is therefore **OS-agnostic**: there is no Linux-vs-Windows split inside
 the union (that distinction has **no constructor** — type-foreclosed), and an eligible node/host's engine is
@@ -360,11 +376,9 @@ shard count cannot exceed wholesale owner devices. That the declared footprint a
 - **An engine named by arbitrary URL is type-foreclosed unrepresentable** — the `EngineRuntime` union is
   closed with no arbitrary-`Url`/`Download` arm, so "name the engine by URL" has no syntax and fails Gate 1
   (the Dhall typechecker) before any binary runs; the named identity is jit-resolved on first miss into the
-  bounded cache. (A `ModelArtifact` with no completed `.ready` **and no
-  provenance witness** is likewise type-foreclosed, owned with the content store in content_addressing
+  bounded cache. (A `ModelArtifact` with no completed `.ready` **and no provenance witness** is likewise type-foreclosed, owned with the content store in content_addressing
   [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).)
-- **A model/job whose engine family or accelerator provision is unavailable on the selected target is
-  checked before render.** Structural family×lane or malformed residency/policy shapes reject at their
+- **A model/job whose engine family or accelerator provision is unavailable on the selected target is checked before render.** Structural family×lane or malformed residency/policy shapes reject at their
   Gate-2 locus. CUDA-on-CPU, too few devices, source/workload-domain mismatch after expansion, and any derived
   epoch whose co-resident per-device aggregate exceeds net allocatable memory return distinct post-bind
   `ProvisionError`s at `provision-seal`, never a runtime `Unschedulable`.
@@ -406,8 +420,7 @@ The three-tier store, the `.ready` commit, the re-keying onto content addresses,
 by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss); the base image carrying the
 jit-build resolver + toolchain that materializes every `EngineRuntime` arm is owned by [image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain); the lift
 of these mistakes into unrepresentable states is owned by
-[illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model). This doctrine owns only that the **engine is a
-capability whose provider is substrate-selected and jit-resolved** — the resolver + toolchain are baked into the
+[illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model). This doctrine owns only that the **engine is a capability whose provider is substrate-selected and jit-resolved** — the resolver + toolchain are baked into the
 base container, the engine *payload* is not (it is materialized on first miss into the `CacheBudget`-bounded
 content-addressed cache, [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 
@@ -415,14 +428,11 @@ content-addressed cache, [content_addressing_doctrine.md §4.5](./content_addres
 > implementation like the rest of this doctrine. The sibling **infernix** project is *evidence* that the
 > select-don't-fetch engine binding is real code — **sibling evidence, not an amoebius result**:
 > `infernix/src/Infernix/Runtime/Worker.hs` (sibling source)
-> selects the engine by `adapterType` (`case engineBindingAdapterType engineBinding of …`) and **never fetches
-> it** — precisely the Tier-1 discipline above. But infernix also shows the exact divergences amoebius fixes:
-> its `infernix/docker/Dockerfile` **curl-tars native payloads and
-> installs per-engine Poetry venvs at image build**, and its
+> selects the engine by `adapterType` (`case engineBindingAdapterType engineBinding of …`) and **never fetches > it** — precisely the Tier-1 discipline above. But infernix also shows the exact divergences amoebius fixes:
+> its `infernix/docker/Dockerfile` **curl-tars native payloads and > installs per-engine Poetry venvs at image build**, and its
 > `infernix/python/adapters/model_cache.py` carries a
 > hardcoded `minioadmin/minioadmin123` fallback — a second secret store that violates the Vault-by-name rule
-> ([§7](#7-expressing-a-capability-in-the-dsl)). amoebius keeps infernix's engine-selection idiom but **replaces that image-build payload baking with
-> jit-resolution** — the payload is materialized on first miss into the *one* `CacheBudget`-bounded
+> ([§7](#7-expressing-a-capability-in-the-dsl)). amoebius keeps infernix's engine-selection idiom but **replaces that image-build payload baking with > jit-resolution** — the payload is materialized on first miss into the *one* `CacheBudget`-bounded
 > content-addressed cache, never baked; only the resolver + toolchain are baked into the base container
 > ([image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)), and routes every staging credential through Vault by name. amoebius has built
 > none of this; read it as the contract amoebius intends to satisfy, never a tested result. Status lives only
@@ -446,10 +456,8 @@ values.**
 This is strictly more than a Helm values flip. A values-only layer can vary numbers *within one chart shape*;
 it cannot hand a laptop a single-node provider and a production cluster a distributed one from the *same*
 capability declaration. amoebius's design handles this by construction: the shape is a typed choice that
-selects *which manifest graph to render*, and the rendering is pure Haskell rather than a template. The doc that **renders a chosen shape into
-typed Kubernetes manifests** — and applies them with amoebius's own idempotent typed reconciler (server-side
-apply under a fixed field manager, label/ApplySet pruning, wait-for-ready, rollback), with **no Helm and no
-templating layer** — is [manifest_generation_doctrine.md](./manifest_generation_doctrine.md). This doctrine
+selects *which manifest graph to render*, and the rendering is pure Haskell rather than a template. The doc that **renders a chosen shape into typed Kubernetes manifests** — and applies them with amoebius's own idempotent typed reconciler (server-side
+apply under a fixed field manager, label/ApplySet pruning, wait-for-ready, rollback), with **no Helm and no templating layer** — is [manifest_generation_doctrine.md](./manifest_generation_doctrine.md). This doctrine
 owns *that* a capability has a per-cluster shape; that doctrine owns *how* a shape becomes manifests.
 
 This generalizes, rather than abandons, the HA-always posture of
@@ -499,14 +507,14 @@ longer "every cluster runs the identical manifest graph"; it is:
   concern that legitimately differs per cluster. The shape is *supposed* to vary; that is what lets one app
   spec run on a laptop and across a production forest unchanged.
 
-**The substrate-equivalence lint is replaced by "app
-surface invariant; shape deployment-ruled."** The lint that forbade per-substrate divergence is retired *for
+**The substrate-equivalence lint is replaced by "app surface invariant; shape deployment-ruled."** The lint that forbade per-substrate divergence is retired *for
 shape*; what remains enforced is that the *eight-core capability set* and the *app requirement surface* do not
 vary. Optional extension offerings may vary and are checked during binding; amoebius still refuses a core
 "no-Registry" cluster while embracing a different deployment *shape* per cluster.
 
 ```mermaid
 flowchart TD
+%% register: orientation
   appspec[App spec: capability needs, written once] -->|invariant across all clusters| laptop[Laptop cluster]
   appspec -->|invariant across all clusters| prod[Production forest]
   laptop -->|deployment rules bind shape| s1[ObjectStore single-node, Sql one-member Patroni]
@@ -514,6 +522,7 @@ flowchart TD
   s1 -->|same capabilities, different shape| ok[Same app, both clusters]
   s2 -->|same capabilities, different shape| ok
 ```
+*Orientation. Design intent; the surface split this rests on is owned by [app_vs_deployment_doctrine.md §1](./app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once). The application spec is the same value on both paths — only the bound shape differs.*
 
 ---
 
@@ -599,9 +608,7 @@ surface, never asserted here.
 > `prodbox/src/Prodbox/Lib/Storage.hs` (sibling source)
 > renders storage objects from typed records; and
 > `prodbox/src/Prodbox/Lib/ChartPlatform.hs` (sibling source)
-> is a planner/dependency/values orchestration the capability binding generalizes. But prodbox **names
-> products**, still leans on a handful of third-party charts, and **enforces substrate-equivalence with a
-> lint** — the capability abstraction, the alternate-admitting provider type, and per-cluster shapes are
+> is a planner/dependency/values orchestration the capability binding generalizes. But prodbox **names > products**, still leans on a handful of third-party charts, and **enforces substrate-equivalence with a > lint** — the capability abstraction, the alternate-admitting provider type, and per-cluster shapes are
 > generalized *from* that evidence and are **not yet built or proven in amoebius**.
 
 ---
@@ -610,16 +617,13 @@ surface, never asserted here.
 
 This document is normative capability-model doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
-never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed
-reconciler that render and apply a chosen shape** land with platform services in **Phase 26**, and the
-**capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster
-shapes** — lands with the DSL type families in **Phase 10**. This doc states the target shape and links back for
+never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed reconciler that render and apply a chosen shape** land with platform services in **Phase 26**, and the
+**capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster shapes** — lands with the DSL type families in **Phase 10**. This doc states the target shape and links back for
 status.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — the application-logic-vs-deployment-rules split this model rides on
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the concrete provider set, the derived-connectivity rule ([§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), and the single wild-ingress path

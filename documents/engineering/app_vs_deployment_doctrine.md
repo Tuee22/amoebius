@@ -1,23 +1,48 @@
 # Application Logic vs Deployment Rules
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md
-**Generated sections**: none
-
 > **Purpose**: Define the hard separation between an app's **application logic** (what it *is* to a user)
 > and its **deployment rules** (how, where, and how robustly it runs), so one app spec is written once and
 > composes unchanged onto a single cluster or N geo-replicated clusters.
+> **Read this if**: it is unclear whether something belongs to an application or to the rules that deploy it.
+
+This document owns the split between the two authoring surfaces and the test that decides which side a given
+concern falls on. It owns neither surface's contents: the application surface is owned by
+[low_code_ui_runtime_doctrine.md](./low_code_ui_runtime_doctrine.md) and the deployment surface by the
+capacity, capability, and platform doctrines it cites. It presumes only that a specification exists.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/reading_order.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Two surfaces, one app written once](#1-two-surfaces-one-app-written-once)
+- [2. The application-logic surface — what an app *is*](#2-the-application-logic-surface--what-an-app-is)
+- [3. The deployment-rules surface — how the same app *runs*](#3-the-deployment-rules-surface--how-the-same-app-runs)
+- [4. The dividing line — a litmus test](#4-the-dividing-line--a-litmus-test)
+- [5. Why the split matters — cashing it out](#5-why-the-split-matters--cashing-it-out)
+- [6. The proof case: a low-code workflow UI as application-logic-only](#6-the-proof-case-a-low-code-workflow-ui-as-application-logic-only)
+- [7. infernix is a shared library; the inference substrate is a deployment rule](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)
+- [8. Shared-library use is application logic](#8-shared-library-use-is-application-logic)
+- [9. Composition: one cluster → N geo-replicated clusters, zero app change](#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change)
+- [10. Application-authored expectations are application logic](#10-application-authored-expectations-are-application-logic)
+- [11. What this document does not own](#11-what-this-document-does-not-own)
+- [12. Planning ownership](#12-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
 ## 1. Two surfaces, one app written once
 
-In amoebius, **an app does not know how many of it exist.**
-A developer describes *what their app is* — its UI, its users, the data it keeps, the libraries it leans on
-— and **never** writes down how many replicas run, in how many regions, behind what failover policy, under
-what chaos schedule. Those are someone else's decision, made later, in a separate place, and the app is none
-the wiser.
+In amoebius, **an app does not know how many of it exist.** A developer describes *what their app is* — its
+UI, its users, the data it keeps, the libraries it leans on — and **never** writes down how many replicas
+run, in how many regions, behind what failover policy, under what chaos schedule. Those are someone else's
+decision, made later, in a separate place, and the app is none the wiser.
 
 Concretely, amoebius splits the Dhall DSL into two **orthogonal surfaces**:
 
@@ -38,8 +63,7 @@ cross-cutting invariant "Application logic and deployment rules are separate DSL
 > `UiSource` checker, client interpreter, UI server, and infernix/jitML artifact interaction are not thereby
 > claimed as built or tested. Read every prescriptive statement here as design intent, never as a tested
 > amoebius result. Status and gates live only in
-> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
-> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
+> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
 
@@ -97,8 +121,7 @@ The app-spec surface declares:
 - **Use of shared libraries** — that the app consumes infernix, jitML, or a trusted Haskell adapter through
   typed ports is part of what the app *is* (see [§8](#8-shared-library-use-is-application-logic)).
 
-Two structural facts pin app identity to the cluster: an app's **name is unique per
-cluster**, and the app gets **its own namespace with that same name**. Secrets appear here **by name only** —
+Two structural facts pin app identity to the cluster: an app's **name is unique per cluster**, and the app gets **its own namespace with that same name**. Secrets appear here **by name only** —
 the app references a secret; it never contains one. The secret-by-name `SecretRef` contract and
 parent-injects-into-child model are owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md) and must not
 be restated here.
@@ -111,8 +134,7 @@ because the type does not have those fields.
 
 ## 3. The deployment-rules surface — how the same app *runs*
 
-The deployment-rules surface is the mirror image of [§2](#2-the-application-logic-surface--what-an-app-is): **everything on this surface is about robustness, scale, and
-placement — and none of it changes what the app is.** Turn every one of these dials and a user sees the
+The deployment-rules surface is the mirror image of [§2](#2-the-application-logic-surface--what-an-app-is): **everything on this surface is about robustness, scale, and placement — and none of it changes what the app is.** Turn every one of these dials and a user sees the
 identical app; they just see it survive more, scale wider, or run on different hardware.
 
 The deployment-rules surface declares:
@@ -135,9 +157,10 @@ The deployment-rules surface declares:
   owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), and the test-as-an-`InForceSpec`-topology
   model by [testing_doctrine.md](./testing_doctrine.md).
 - **Monitoring dials.** The SLO budget *numbers* (freshness, error-budget), the alert severities, and the
-  per-user `AuthRule` that scopes a `UserScoped` surface are deployment dials — a robustness/visibility
-  setting, never app logic — carrying **no** "off" arm and **no** "public" arm. Owned by
-  [monitoring_doctrine.md](./monitoring_doctrine.md).
+  derived `AuthPolicyRef` that scopes a `SubjectScoped` or `TenantRoleScoped` surface are deployment dials —
+  a robustness/visibility setting, never app logic — carrying **no** "off" arm and **no** "public" arm. The
+  `AccessScope` union and its three arms are owned by
+  [monitoring_doctrine.md §4](./monitoring_doctrine.md#4-access-one-admin-delegated-per-user-scope-no-public-arm).
 - **Inference substrate.** Whether an ML workload runs on Apple Metal on the host, CUDA on the cluster, or
   linux-cpu is a deployment decision, not app logic — this is the *serving* substrate (the *producing*
   substrate that made a model's weight bytes is provenance, not a deployment dial — see [§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)).
@@ -177,8 +200,7 @@ ways, with zero edits to its app spec.
 
 When it is unclear which surface a concern belongs to, apply one rule:
 
-> **If changing it changes what the app *is* to a user, it is application logic. If changing it changes only
-> how many copies run, where they run, or how robustly they run, it is a deployment rule.**
+> **If changing it changes what the app *is* to a user, it is application logic. If changing it changes only > how many copies run, where they run, or how robustly they run, it is a deployment rule.**
 
 App logic answers **WHAT**; deployment rules answer **HOW MANY / WHERE / HOW ROBUST**. Worked through some
 deliberately tricky cases:
@@ -280,8 +302,7 @@ This is the subtlest application of the litmus test, so make the distinction exp
   change to the app.
 - **Serving substrate vs producing substrate.** The substrate an inference workload is *placed on to serve*
   is this deployment-rule dial — and it **need not equal** the **producing substrate**, the accelerator whose
-  reduction order actually made a model's weight bytes. The producing substrate is **provenance, not a
-  placement choice**: this round's doctrine folds it into the checkpoint's `experimentHash` namespace so it
+  reduction order actually made a model's weight bytes. The producing substrate is **provenance, not a placement choice**: this round's doctrine folds it into the checkpoint's `experimentHash` namespace so it
   travels *with* the artifact, owned by [content_addressing_doctrine.md](./content_addressing_doctrine.md);
   the engine-family-on-serving-substrate landing check is owned by
   [service_capability_doctrine.md](./service_capability_doctrine.md). This section classifies only the
@@ -311,8 +332,7 @@ on the application-logic surface. The clean way to hold this with [§7](#7-infer
   at what replica count — is a deployment rule.
 
 The trusted Haskell shape behind that dependency is the **`ExtensionSpec`** contract. Each in-tree extension in the v1
-closed set — **{infernix, jitML}** — plugs in by contributing one `ExtensionSpec` — a typed Dhall sub-catalog **nested inside the
-`InForceSpec`** ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)), whose full record shape is owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability). These specs are
+closed set — **{infernix, jitML}** — plugs in by contributing one `ExtensionSpec` — a typed Dhall sub-catalog **nested inside the `InForceSpec`** ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)), whose full record shape is owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability). These specs are
 merged at **compile/link time into the single binary** — there is no per-extension image and no `dlopen`.
 The application's requirement for that linked workload is application logic; the workload's placement remains
 a deployment rule ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)). A pure
@@ -333,13 +353,13 @@ its classification.
 ## 9. Composition: one cluster → N geo-replicated clusters, zero app change
 
 The extreme case proves the doctrine: take an app running on a single kind cluster and replicate it across N
-geographically-distributed clusters with automatic gateway failover — **and change not one byte of the app
-spec.** Everything that makes that move happen lives in deployment rules and platform idioms.
+geographically-distributed clusters with automatic gateway failover — **and change not one byte of the app spec.** Everything that makes that move happen lives in deployment rules and platform idioms.
 
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   app["App spec Dhall written once: UiSource, typed ports, auth refs, durable data, workflows"]:::intent -->|joined with| r1["Deployment rules A: single cluster, replicas=1"]:::intent
   app -->|same bytes, joined with| r2["Deployment rules B: N clusters, geo-replicated, gateway failover"]:::intent
   r1 -->|renders| d1["Deployment: one cluster, one region"]:::runtime
@@ -436,8 +456,7 @@ status ledger; it states the target classification and links back for status.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [DSL Doctrine](./dsl_doctrine.md)
 - [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§2](./low_code_ui_runtime_doctrine.md#2-scope-and-single-source-ownership) owns the UI language/runtime boundary; [§14](./low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability) keeps UI-server HA on the deployment surface

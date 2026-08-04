@@ -1,14 +1,42 @@
 # Platform Services
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Define the fixed set of standard services every amoebius cluster runs (the concrete providers
 > behind the capabilities of [service_capability_doctrine.md](./service_capability_doctrine.md)), how each is
 > deployed (HA-always, image-from-the-in-cluster-registry, complete resource envelopes), and the single Keycloak-owned
 > wild-ingress path.
+> **Read this if**: a platform service has to be deployed, replaced, or reasoned about at cluster scale.
+
+This document owns the concrete service set every cluster runs, how each is deployed, and the single
+wild-ingress path in front of them all. It does not own the capability abstraction those services realize,
+owned by [service_capability_doctrine.md](./service_capability_doctrine.md), nor the namespaces they occupy,
+owned by [namespace_layout_doctrine.md](./namespace_layout_doctrine.md). Reading it presumes that capability
+set.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. The Invariant: every cluster is the same cluster](#1-the-invariant-every-cluster-is-the-same-cluster)
+- [2. HA always — including `replicas=1`](#2-ha-always--including-replicas1)
+- [3. The registry — the single image source](#3-the-registry--the-single-image-source)
+- [4. MinIO — the object substrate](#4-minio--the-object-substrate)
+- [5. Vault — the secrets root (reference-only)](#5-vault--the-secrets-root-reference-only)
+- [6. Pulsar — the event and workflow backbone (new vs prodbox)](#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)
+- [7. Prometheus / Grafana — observability is not an add-on](#7-prometheus--grafana--observability-is-not-an-add-on)
+- [8. Postgres — Patroni-via-Percona, one cluster per consumer, with pgAdmin](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)
+- [9. The LoadBalancer and the single wild-ingress path](#9-the-loadbalancer-and-the-single-wild-ingress-path)
+- [10. Every execution unit declares its complete resource envelope](#10-every-execution-unit-declares-its-complete-resource-envelope)
+- [11. Bring-up and dependency ordering](#11-bring-up-and-dependency-ordering)
+- [12. Substrate equivalence as a structural invariant](#12-substrate-equivalence-as-a-structural-invariant)
+- [13. Planning ownership](#13-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -90,9 +118,7 @@ Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
 > **Honesty.** The HA-always model is *specified* here and inherited from prodbox where parts of it are
 > proven; in amoebius it is design intent delivered across Phases 25–32 and the UI availability gate in Phase
 > 58, not a tested amoebius result. Status and gates live
-> only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
-> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
-> [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
+> only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
 
 ---
 
@@ -146,8 +172,7 @@ Vault is where secrets *actually live*; Dhall only ever holds a **name** for a s
 thin: [vault_pki_doctrine.md](./vault_pki_doctrine.md) is the SSoT for the Vault model, and this doc must
 not duplicate its normative content.
 
-What belongs here, and only here, is the platform-service fact: **Vault is a singleton HA platform service
-deployed on every cluster**, on the same footing as the registry, MinIO, Pulsar, and Postgres. The fail-closed
+What belongs here, and only here, is the platform-service fact: **Vault is a singleton HA platform service deployed on every cluster**, on the same footing as the registry, MinIO, Pulsar, and Postgres. The fail-closed
 secrets-root behaviour, the root password-encrypted unseal, the parent-injects-secrets-into-child model,
 the secret-by-name `SecretRef` contract, and the PKI trust anchor are all owned by
 [vault_pki_doctrine.md](./vault_pki_doctrine.md). Its durable PV is owned by
@@ -205,16 +230,22 @@ optional bolt-on. Prometheus scrapes platform and app workloads; Grafana is reac
 Keycloak-owned edge like every other browser surface ([§9](#9-the-loadbalancer-and-the-single-wild-ingress-path)), never via a private side-door. If Grafana is
 configured against a SQL backend, that database follows the per-service Patroni rule in [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin).
 
-The metrics are workflow-aware. Each workflow's mandatory SLO and each topic's liveness derive Prometheus
-recording/alert rules and a per-workflow Grafana dashboard — derived, never hand-authored — and each extension
-stands up its declared surfaces (jitML's `TensorBoard`, backed by MinIO). The single Grafana instance, the
-derived surfaces, and any extension surface reach the browser only through the Keycloak edge under a mandatory
-`AccessScope` with no `Public` arm (admin-global, or a per-user Keycloak-backed filter). An optional local
+The metrics cover everything deployed, not only the workflow surface. Each workflow's mandatory SLO, each
+topic's liveness, each extension's declared surfaces (jitML's `TensorBoard`, backed by MinIO), **and every bound execution unit's mandatory monitor** derive Prometheus recording/alert rules and Grafana dashboards —
+derived, never hand-authored. A platform service is therefore no more exempt from its monitor than it is from
+its `ResourceEnvelope` ([§10](#10-every-execution-unit-declares-its-complete-resource-envelope)); the
+capability's own units carry `DerivedForCapability` monitors the binder mints and an operator cannot
+hand-write. The single Grafana instance, the derived surfaces, and any extension surface reach the browser
+only through the Keycloak edge under a mandatory `AccessScope` with no `Public` arm (admin-global, subject-
+scoped, or tenant-role-scoped). The **alert receiver** that groups, deduplicates, and silences the firing set
+is part of this capability — one more baked binary beside Prometheus and Grafana, behind the same Keycloak
+edge, with no representable outbound delivery target; carrying a page beyond the cluster edge is an
+operator-owned out-of-band integration. An optional local
 Thanos companion beside the single Prometheus is the long-term/downsample store — a strictly cluster-local
 role, never a cross-cluster Query/Store/Receive. The pull/scrape posture ("nothing is pushed outward") is the
 scrape-wire stance, not a bar on the intra-forest async geo-replication a peer cluster already consumes. The
-obligation types, the derived surfaces, the access model, the Thanos role, and the parent-monitoring posture
-are owned by [monitoring_doctrine.md](./monitoring_doctrine.md).
+obligation types, the derived surfaces, the access model, the receiver's delivery boundary, the Thanos role,
+and the parent-monitoring posture are owned by [monitoring_doctrine.md](./monitoring_doctrine.md).
 
 ---
 
@@ -275,8 +306,7 @@ mechanics. The platform-services fact recorded here is only *where each provider
 each of the six arms persists onto that provider's own standard platform backing:
 
 - **Keycloak** and **Postgres** each persist onto their own per-consumer Patroni cluster
-  ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)), and remain **distinct
-  provider/persistence arms even though both are Patroni-backed** — one more instance of the
+  ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)), and remain **distinct provider/persistence arms even though both are Patroni-backed** — one more instance of the
   one-cluster-per-consumer rule.
 - **Vault** persists onto its Raft store (versions, logs, snapshots) ([§5](#5-vault--the-secrets-root-reference-only)).
 - **Pulsar** persists onto its explicit ZooKeeper metadata store ([§6](#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)).
@@ -285,7 +315,7 @@ each of the six arms persists onto that provider's own standard platform backing
 - **Kubernetes API** persists as serialized API objects with their etcd revisions and Events.
 
 The canonical demand shapes are owned by
-[resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry);
+[resource_capacity_storage.md §5.1](./resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry);
 the tenant-qualification, empty/diff planner, executor coalescing, target-change retention, MinIO physical fold,
 and sealed provider enactors are owned by [tenancy_doctrine.md §5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored).
 
@@ -342,13 +372,13 @@ is acceptable *precisely because* it is unreachable off the host.
 
 ```mermaid
 flowchart TD
-  wild[Wild traffic: WAN / LAN / localhost browser] -->|TLS| lb[LoadBalancer: MetalLB or cloud LB]
-  lb -->|Gateway API listener| envoy[Envoy Gateway data plane]
-  envoy -->|OIDC and JWT enforcement| kc[Keycloak identity]
-  kc -->|authenticated route| app[UI server and platform admin surfaces]
-  host[Host amoebius binary and host compute daemons] -->|distro mTLS| api[kube-apiserver]
-  host -->|host-only NodePort, no mTLS, localhost only| peers[In-cluster MinIO and Pulsar peers]
+%% register: orientation
+  wild["Wild traffic: WAN, LAN, or a localhost browser"] -->|"TLS"| lb["LoadBalancer: MetalLB or cloud LB"]
+  lb -->|"Gateway API listener"| envoy["Envoy Gateway data plane"]
+  envoy -->|"OIDC and JWT enforcement"| kc["Keycloak identity"]
+  kc -->|"authenticated route"| app["UI server and platform admin surfaces"]
 ```
+*Orientation. Design intent. The single path every request originating outside the host takes, with no bypass arm. Host-origin traffic uses none of these hops and is owned by [host_cluster_comms_doctrine.md §1](./host_cluster_comms_doctrine.md#1-the-host-origin-surface-two-channels-both-localhost-only); whether a live cluster admits no other route is runtime-checked.*
 
 ### East-west connectivity is derived from the dependency graph
 
@@ -394,6 +424,12 @@ copy/schema/Pulumi/ACME Jobs, and platform services — and
 neither is any host-level worker. Every execution unit carries the pure `ResourceEnvelope` owned by
 [resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget);
 the Kubernetes resource map is derived from that value after the whole deployment has passed `provision`.
+
+The same exemption-free rule governs observability: every execution unit carries a mandatory `UnitMonitor`
+beside its envelope, owned by
+[monitoring_doctrine.md §2.4](./monitoring_doctrine.md#24-per-execution-unit-obligation--boundexecutionunitmonitor).
+The two obligations are deliberately parallel — a unit that cannot state what it costs and a unit that cannot
+state how it is observed are the same class of defect — and neither admits an exempt arm.
 
 For every rendered container:
 
@@ -472,8 +508,7 @@ by [resource_capacity_doctrine.md](./resource_capacity_doctrine.md). There is no
 The services cannot all come up at once; a few **hard edges** constrain the order. This doc owns only those
 platform-service ordering edges — full cluster lifecycle, teardown ordering, and amoebic spawn are owned by
 [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md). These edges are the **derived readiness DAG**
-of [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md): each is a *condition* (the dependency is
-observed ready), never an elapsed duration, and the order is derived from the declared dependency graph — not a
+of [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md): each is a *condition* (the dependency is observed ready), never an elapsed duration, and the order is derived from the declared dependency graph — not a
 prose sequence an installer is trusted to honour. The catalog turns a duration-gated or hand-ordered bring-up
 into a foreclosed illegal state at
 [illegal_state_catalog.md §3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race).
@@ -508,6 +543,7 @@ into a foreclosed illegal state at
 
 ```mermaid
 flowchart TD
+%% register: orientation
   scheduler[ManagedCapacityReady: exact scheduler and writer authority] --> lb[LoadBalancer]
   scheduler --> minio[MinIO up: S3 on retained PVs]
   scheduler --> operator[Percona operator]
@@ -524,6 +560,7 @@ flowchart TD
   edge --> admitted[Authenticated wild traffic admitted]
   keycloak -->|current authentication ready| admitted
 ```
+*Orientation. Design intent. The bring-up order every cluster follows, derived from declared dependencies rather than hand-sequenced; the readiness discipline its edges obey is owned by [readiness_ordering_doctrine.md §3](./readiness_ordering_doctrine.md#3-readiness-is-a-condition-never-a-duration).*
 
 ---
 
@@ -566,14 +603,12 @@ invoked by full path — there is no `PATH`-based discovery anywhere in the brin
 
 This document is normative platform-services doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (the full service set lands across
-**Phase 25 and Phases 29–32**).
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (the full service set lands across **Phase 25 and Phases 29–32**).
 This doc never maintains a competing status ledger; it states the target shape and links back for status.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — whole-deployment provisioning across

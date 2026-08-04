@@ -1,12 +1,33 @@
 # Phase 34: Tenant/provider provisioning
 
+> **Purpose**: Materialize one checked tenant graph as tenant-qualified control-plane objects in every required
+> provider, and establish by independent provider readback that no arm was omitted, collapsed, or hand-authored.
+> **Read this if**: phase 34 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 34 delivers the tenant/provider provisioning; its design is owned by [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md), [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Materialize one checked tenant graph as tenant-qualified control-plane objects in every required
-> provider, and establish by independent provider readback that no arm was omitted, collapsed, or hand-authored.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — one sealed provider transaction](#resource-provision--one-sealed-provider-transaction)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 34.1: Derive, apply, and externally read back tenant provider policy 📋](#sprint-341-derive-apply-and-externally-read-back-tenant-provider-policy-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -131,13 +152,13 @@ cleanup inventories, substrate, and Register. It records no credential material.
 `src/Amoebius/Tenancy/ProviderTransaction.hs`,
 `src/Amoebius/Tenancy/Provider/{Keycloak,Vault,Pulsar,Minio,KubernetesApi,Postgres}.hs`, and
 `test/live/TenantProviderProvisioningSpec.hs` (target authored sources; not yet built)
-**Blocked by**: Phase 18; Phase 33
-**Independent Validation**: one command instantiates the pinned relation with fresh tenant challenges, observes
-all six control planes using read-only identities, establishes that both illegal twins have zero provider effects, kills
-both committed mutants, and verifies teardown inventory.
+**Blocked by**: Phase
+18; Phase 33
+**Independent Validation**: one command instantiates the pinned relation with fresh tenant
+challenges, observes all six control planes using read-only identities, establishes that both illegal twins
+have zero provider effects, kills both committed mutants, and verifies teardown inventory.
 **Docs to update**: `documents/engineering/tenancy_doctrine.md`,
-`documents/engineering/platform_services_doctrine.md`,
-`documents/engineering/testing_doctrine.md`, and
+`documents/engineering/platform_services_doctrine.md`, `documents/engineering/testing_doctrine.md`, and
 `documents/illegal_state/illegal_state_security.md`
 
 ### Objective

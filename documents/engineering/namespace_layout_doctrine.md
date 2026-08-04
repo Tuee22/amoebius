@@ -1,46 +1,74 @@
 # Namespace Layout
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, documents/engineering/README.md
-**Generated sections**: none
-
 > **Purpose**: Single source of truth for the Kubernetes namespace partition — one namespace per platform
 > capability, dedicated namespaces for the closed capacity-scheduler and singleton roles, plus one per app —
 > derived from typed identity so a workload's namespace is a pure function of what it is, never a free-text
 > field an operator or app writes.
+> **Read this if**: a workload needs to land in a namespace, or a policy, quota, or teardown boundary has to be
+> drawn along one.
+
+This document owns the *partition* — which namespaces exist, what each holds, and the rule that every one of
+them is computed rather than written. It does not own what is deployed into them, which belongs to
+[platform_services_doctrine.md](./platform_services_doctrine.md), nor the network policies drawn across the
+partition, which belong to [§5](#5-networkpolicy-default-deny--derived-allow-follows-the-dependency-graph-referenced)'s
+named owners. Reading it presumes the capability set of
+[service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set), since the platform
+half of the partition is derived directly from it.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. One namespace per platform capability — the derived set](#2-one-namespace-per-platform-capability--the-derived-set)
+- [3. The Postgres namespace holds the operator, not per-consumer databases](#3-the-postgres-namespace-holds-the-operator-not-per-consumer-databases)
+- [4. One namespace per app — per-app tenancy (referenced)](#4-one-namespace-per-app--per-app-tenancy-referenced)
+- [5. NetworkPolicy default-deny + derived-allow follows the dependency graph (referenced)](#5-networkpolicy-default-deny--derived-allow-follows-the-dependency-graph-referenced)
+- [6. The control-plane namespace — a stateless singleton, no PVC](#6-the-control-plane-namespace--a-stateless-singleton-no-pvc)
+- [7. What this doctrine does not own](#7-what-this-doctrine-does-not-own)
+- [8. Planning ownership](#8-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
 ## 1. Why this doctrine exists
 
-A Kubernetes namespace is the coarse isolation and blast-radius boundary every workload lands in: it scopes
-RBAC, NetworkPolicy, resource quota, and the per-namespace teardown that lets one service be removed without
-touching another. If the namespace a workload lands in is a **free-text field** the spec author fills in, then
-the failure surfaces at author time — a manifest can name `amoebius-vault` for a workload that has nothing to
-do with the secrets root, an app can place itself in a platform capability's namespace, and two unrelated
-capabilities can be collapsed into one namespace that dissolves the isolation boundary between them. None of
-those mistakes is caught until a policy leaks or a teardown deletes the wrong slice at runtime.
+**The problem.** A Kubernetes namespace is the coarse isolation and blast-radius boundary every workload lands
+in. It scopes role-based access control (RBAC), NetworkPolicy, resource quota, and the per-namespace teardown
+that lets one service be removed without touching another. If the namespace is a **free-text field** the spec
+author fills in, three failures become expressible at author time: a manifest can name `amoebius-vault` for a
+workload unrelated to the secrets root, an app can place itself inside a platform capability's namespace, and
+two unrelated capabilities can collapse into one namespace that dissolves the isolation boundary between them.
+None of the three is caught until a policy leaks or a teardown deletes the wrong slice, at runtime.
 
-The obvious alternative — a `namespace : Text` field on every manifest, or a single flat default namespace for
-everything — fails for the reason every hand-authored coordinate fails in amoebius: a free string cannot
-express the invariant *this workload belongs to exactly its own capability's slice*. A `Text` namespace admits
-`amoebius-minio` on a Postgres StatefulSet as readily as the correct value; a flat namespace has no boundary to
-enforce at all. Isolation would then rest on review, not on construction, which the amoebius contract
-([dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)) rejects for
-exactly this class of invariant.
+**Why the obvious alternative fails.** A `namespace : Text` field on every manifest, or a single flat default
+namespace, fails for the reason every hand-authored coordinate fails here: a free string cannot express the
+invariant *this workload belongs to exactly its own capability's slice*. A `Text` namespace admits
+`amoebius-minio` on a Postgres StatefulSet as readily as the correct value, and a flat namespace has no
+boundary to enforce at all. Isolation would rest on review rather than on construction, which the amoebius
+contract ([dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)) rejects for this class of invariant.
 
-The rule this doctrine states: **the namespace layout is DERIVED from the fixed capability and closed system-
-role sets — one namespace per platform capability, one for each of the scheduler/singleton roles, and one
-namespace per app — and a workload's namespace is computed from what the workload is, never authored.** A
-platform provider lands in its capability's namespace because it *is* that capability's
-realization; an app lands in its own namespace because it *is* that app. No spec surface accepts a namespace
-string, so a workload cannot name a foreign capability's namespace and two capabilities cannot share one.
+**The rule.** The namespace layout is **derived** from the fixed capability set and the closed system-role set
+— one namespace per platform capability, one for each of the scheduler and singleton roles, and one namespace
+per app — and a workload's namespace is computed from what the workload is, never authored. A platform
+provider lands in its capability's namespace because it *is* that capability's realization; an app lands in its
+own namespace because it *is* that app. No spec surface accepts a namespace string, so a workload cannot name
+a foreign capability's namespace and two capabilities cannot share one.
 
-What it forecloses: the freedom to invent a namespace, to co-locate two capabilities for convenience, or to
-place an app inside a platform namespace. That freedom is deliberately given up; the derived layout is fixed,
-identical on every substrate ([platform_services_doctrine.md §12](./platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)),
-and is the partition the derived NetworkPolicies ([§5](#5-networkpolicy-default-deny--derived-allow-follows-the-dependency-graph-referenced)) draw their default-deny boundary along.
+**What it forecloses.** The freedom to invent a namespace, to co-locate two capabilities for convenience, or
+to place an app inside a platform namespace. That freedom is deliberately given up. The derived layout is
+fixed and identical on every substrate
+([platform_services_doctrine.md §12](./platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)),
+and it is the partition along which the derived NetworkPolicies
+([§5](#5-networkpolicy-default-deny--derived-allow-follows-the-dependency-graph-referenced)) draw their
+default-deny boundary.
 
 ---
 
@@ -58,7 +86,7 @@ derived — not a layout an installer hand-maintains:
 | `amoebius-vault` | SecretStore | Vault — the fail-closed secrets root ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) |
 | `amoebius-pulsar` | MessageBus | Pulsar + ZooKeeper + BookKeeper ([platform_services_doctrine.md §6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)) |
 | `amoebius-postgres` | Sql | the Percona operator ([§3](#3-the-postgres-namespace-holds-the-operator-not-per-consumer-databases)) |
-| `amoebius-observability` | Observability | Prometheus / Grafana / Thanos / TensorBoard ([platform_services_doctrine.md §7](./platform_services_doctrine.md#7-prometheus--grafana--observability-is-not-an-add-on), [monitoring_doctrine.md](./monitoring_doctrine.md)) |
+| `amoebius-observability` | Observability | Prometheus / Grafana / alert receiver / Thanos / TensorBoard ([platform_services_doctrine.md §7](./platform_services_doctrine.md#7-prometheus--grafana--observability-is-not-an-add-on), [monitoring_doctrine.md](./monitoring_doctrine.md)) |
 | `amoebius-registry` | Registry | `distribution` (`registry:2`), blobs in MinIO, no PV ([platform_services_doctrine.md §3](./platform_services_doctrine.md#3-the-registry--the-single-image-source)) |
 | `amoebius-keycloak` | Identity | Keycloak — owns all wild ingress ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)) |
 | `amoebius-edge` | Edge | Envoy + Gateway API + the L4 LoadBalancer (MetalLB or cloud LB) |
@@ -93,18 +121,41 @@ partitioned one-namespace-per-capability plus the two closed control roles and t
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
-flowchart TD
-  capset["Fixed capability set: ObjectStore, SecretStore, MessageBus, Sql, Identity, Observability, Registry, Edge"]:::intent -->|pure function per capability| nsplat["One platform namespace each: amoebius-minio ... amoebius-edge"]:::intent
-  schedrole["Closed capacity-scheduler role"]:::intent -->|pure role-to-namespace function| nssched["amoebius-capacity-scheduler: exact pods=1"]:::intent
-  singleton["Control-plane singleton, not a capability"]:::intent -->|its own namespace| nscp["amoebius-control-plane"]:::intent
-  appset["Declared apps"]:::intent -->|one namespace per app, owned by service_capability and tenancy| nsapp["Per-app namespaces"]:::intent
-  nsplat -->|default-deny boundary| policy["Derived NetworkPolicies follow the dependency graph"]:::intent
-  nssched -->|default-deny plus derived apiserver edge| policy
-  nscp -->|default-deny boundary| policy
-  nsapp -->|default-deny boundary| policy
-  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+flowchart LR
+  %% register: orientation
+  capset["the fixed capability set"]
+  roles["the closed system-role set"]
+  apps["the declared apps"]
+
+  subgraph plat["platform namespaces — one per capability"]
+    minio["amoebius-minio"]
+    vault["amoebius-vault"]
+    pulsar["amoebius-pulsar"]
+    pg["amoebius-postgres"]
+    obs["amoebius-observability"]
+    reg["amoebius-registry"]
+    kc["amoebius-keycloak"]
+    edge["amoebius-edge"]
+  end
+
+  subgraph sys["system-role namespaces — not capabilities"]
+    sched["amoebius-capacity-scheduler"]
+    cp["amoebius-control-plane"]
+  end
+
+  subgraph appns["app namespaces — one per app"]
+    a1["one namespace per declared app"]
+  end
+
+  capset -->|"derives, one per capability"| plat
+  roles -->|"derives, one per closed role"| sys
+  apps -->|"derives, one per app identity"| appns
+
+  plat -->|"default-deny, allow edges derived from declared dependencies"| policy["the NetworkPolicy boundary"]
+  sys -->|"default-deny, plus only the derived apiserver and readiness edges"| policy
+  appns -->|"default-deny, allow edges derived from declared dependencies"| policy
 ```
-*Design intent. Each namespace and its default-deny boundary is a pure function of the fixed capability set, the closed scheduler role, the singleton, and the declared apps; the running cluster's actual east-west enforcement is runtime-checked, not proven here.*
+*Orientation. Design intent. Every namespace above is computed from the identity on its left and is never authored; the concrete providers deployed into the platform namespaces are owned by [platform_services_doctrine.md](./platform_services_doctrine.md), the app partition by [service_capability_doctrine.md §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding), and the policy derivation by [§5](#5-networkpolicy-default-deny--derived-allow-follows-the-dependency-graph-referenced). Whether a running cluster actually enforces the boundary is runtime-checked and is not shown here.*
 
 ---
 
@@ -183,16 +234,15 @@ and defines no NetworkPolicy of its own.
 
 `amoebius-control-plane` holds the control-plane singleton and nothing that needs durable local state. It is
 distinct from `amoebius-capacity-scheduler`; the latter's exact `pods=1` quota never constrains this
-namespace. The singleton is a Kubernetes **Deployment `replicas=1`**; its single-instance property is **delegated to
-k8s/etcd** through the mandatory reconciler `Lease`, never a bespoke amoebius election — owned by
+namespace. The singleton is a Kubernetes **Deployment `replicas=1`**; its single-instance property is **delegated to k8s/etcd** through the mandatory reconciler `Lease`, never a bespoke amoebius election — owned by
 [daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election).
 The namespace also owns that Lease and its namespaced RBAC. At cold start, a bootstrap capability limited to
 this Namespace and Lease may create/acquire them; no scheduler, platform, or workload write is authorized
 until the exact bootstrap holder/resourceVersion is read back.
 
-- **No PVC in the control-plane namespace.** The singleton mounts no durable volume and keeps nothing on local
-  disk; the namespace holds no StatefulSet and no retained PV. Its durable state is **exclusively the
-  Vault-enveloped MinIO bucket** in `amoebius-minio` — the `InForceSpec`, the Pulumi state, and every other
+- **No PersistentVolumeClaim (PVC) in the control-plane namespace.** The singleton mounts no durable volume
+  and keeps nothing on local disk; the namespace holds no StatefulSet and no retained PersistentVolume (PV).
+  Its durable state is **exclusively the Vault-enveloped MinIO bucket** in `amoebius-minio` — the `InForceSpec`, the Pulumi state, and every other
   persisted byte live as Vault-Transit-enveloped objects, decrypted in-process, never written to a
   control-plane PVC or a plaintext ConfigMap
   ([storage_lifecycle_doctrine.md §7.2](./storage_lifecycle_doctrine.md#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc)).
@@ -238,7 +288,7 @@ result.
 
 ---
 
-## Cross-references
+## Related Documents
 
 - [Engineering Doctrine Index](./README.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the concrete provider set, derived NetworkPolicy ([§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), and one-Patroni-per-consumer ([§8](./platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin))

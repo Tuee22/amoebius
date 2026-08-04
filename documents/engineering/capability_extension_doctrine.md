@@ -1,14 +1,35 @@
 # The Capability-Extension Graph
 
+> **Purpose**: Single source of truth for the amoebius capability-extension graph — how a linked
+> `ExtensionSpec` declares what it PROVIDES (`extCapabilities`) and REQUIRES (`extRequires`), how the two
+> capability-extension kinds the vendored ML libraries consume (`jit-build`, `coordination`) plug in, and how
+> the closed extension set merges into one binary by a total, acyclic, anti-shadow merge.
+> **Read this if**: a capability has to be added by an extension rather than by the core set.
+
+This document owns the extension mechanism: how an extension declares what it requires, why the merge is
+total and acyclic, and why an extension cannot shadow a core capability. It does not own the core capability
+set, owned by [service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set),
+nor the extensions themselves, owned by [lift_and_compose_doctrine.md](./lift_and_compose_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/monitoring_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: Single source of truth for the amoebius capability-extension graph — how a linked
-> `ExtensionSpec` declares what it PROVIDES (`extCapabilities`) and REQUIRES (`extRequires`), how the two
-> capability-extension kinds the vendored ML libraries consume (`jit-build`, `coordination`) plug in, and how
-> the closed extension set merges into one binary by a total, acyclic, anti-shadow merge.
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. Three extension kinds: workload, capability, and app](#2-three-extension-kinds-workload-capability-and-app)
+- [3. The PROVIDE and REQUIRE contract](#3-the-provide-and-require-contract)
+- [4. The two capability-extensions: `jit-build` and `coordination`](#4-the-two-capability-extensions-jit-build-and-coordination)
+- [5. The requirement edges](#5-the-requirement-edges)
+- [6. The merge: total, acyclic, anti-shadow](#6-the-merge-total-acyclic-anti-shadow)
+- [7. Planning ownership](#7-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -32,8 +53,7 @@ containment hierarchy cannot express one shared, single-owned resolver at all. A
 (`dlopen`, per-extension image) is the other default; it cannot be checked before it runs, so a missing
 requirement or a collision is a production failure, not a compile error.
 
-amoebius wires extensions as **flat peers in one linked binary along a typed acyclic PROVIDE/REQUIRE capability
-graph.** Each `ExtensionSpec` declares `extCapabilities` (what it PROVIDES into the capability surface) and
+amoebius wires extensions as **flat peers in one linked binary along a typed acyclic PROVIDE/REQUIRE capability graph.** Each `ExtensionSpec` declares `extCapabilities` (what it PROVIDES into the capability surface) and
 `extRequires` (what it CONSUMES from a peer extension or the core), and the closed extension set merges into one
 binary by a merge that is **total** (every required capability is provided), **acyclic** (no requirement cycle),
 and **anti-shadow** (no two extensions share an id or constructor). A cycle, a missing requirement, or a
@@ -64,8 +84,7 @@ The **vendored workload set is closed at `{infernix, jitML}`** and this doctrine
 closure is owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability). The closure is on the
 **`Workload` kind**, not on the linked set: the linked set already grew once when the capability-extension
 tier was added, and it may grow for an app that requires a trusted adapter. A low-code app whose ports all bind
-to existing handlers does not expand the linked set. What this doctrine adds is the **capability-extension
-tier**, the optional **App-adapter tier**, and the graph edges that wire the kinds together.
+to existing handlers does not expand the linked set. What this doctrine adds is the **capability-extension tier**, the optional **App-adapter tier**, and the graph edges that wire the kinds together.
 
 **The `App` kind is a strictly weaker optional leaf, and each absence is load-bearing.** An
 `ExtensionSpec 'App` carries trusted server configuration, its deploy-time `extChain`, typed UI-port handlers,
@@ -108,9 +127,7 @@ wired by the same graph every other extension is wired by.
 ## 3. The PROVIDE and REQUIRE contract
 
 [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability) owns the `ExtensionSpec` seam itself — `extDhall`,
-`extChain :: cfg -> [Step]`, `extCapabilities`, and the mandatory `extMonitoring` — and the fact that specs are
-merged at compile/link time into one binary. This doctrine owns one addition to that contract: extending the
-capability declaration from **export-only** to **PROVIDE + REQUIRE**.
+`extChain :: cfg -> [Step]`, `extCapabilities`, and the mandatory `extMonitoring` — and the fact that specs are merged at compile/link time into one binary. This doctrine owns one addition to that contract: extending the capability declaration from **export-only** to **PROVIDE + REQUIRE**.
 
     ExtensionSpec :
       { extDhall        : <a typed Dhall sub-catalog nested inside the InForceSpec>   -- dsl [§4](#4-the-two-capability-extensions-jit-build-and-coordination)
@@ -172,14 +189,12 @@ this doctrine records only its edges:
 
 ### 4.2 `coordination` — PROVIDES `Coordination`, REQUIRES `MessageBus`
 
-`coordination` is the single-writer / failover seam a Feed-sourced continuous trainer runs on. It is **not an
-election** and **not** the control-plane singleton: single-writer here is *delegated*, owned by
+`coordination` is the single-writer / failover seam a Feed-sourced continuous trainer runs on. It is **not an election** and **not** the control-plane singleton: single-writer here is *delegated*, owned by
 [daemon_topology_doctrine.md §4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated).
 This doctrine records only its edges:
 
 - **PROVIDES `Coordination`** — the daemon-workflow primitive by which at most one active writer holds a feed:
-  a Pulsar **Failover subscription** for liveness, plus the content-store **ETag-CAS single atomic
-  commit point** and the typed `AdvancePredicate` for safety
+  a Pulsar **Failover subscription** for liveness, plus the content-store **ETag-CAS single atomic commit point** and the typed `AdvancePredicate` for safety
   ([content_addressing_doctrine.md §2](./content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)).
   Authored once, consumed by the workload extensions that run trainers.
 - **REQUIRES `MessageBus`** — the Failover subscription is a Pulsar primitive, so `coordination`
@@ -214,8 +229,7 @@ check rejects.
 ([service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set)); `InferenceEngine`
 is the ninth arm of the closed union but **extension-provided** in provenance — the arm exists in the core
 surface, its provider comes from `infernix`
-([§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored),
-[§3](#3-the-provide-and-require-contract)); `JitBuild` and `Coordination` are extension-provided by the two
+([§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored), [§3](#3-the-provide-and-require-contract)); `JitBuild` and `Coordination` are extension-provided by the two
 capability-extensions. Every edge points
 from a consumer toward a provider, and the whole set is a directed acyclic graph: workload extensions depend on
 capability-extensions, capability-extensions depend on the core, and nothing points back. There is no
@@ -269,6 +283,7 @@ break — has no representation, because the only relation between extensions is
 
 ```mermaid
 flowchart TD
+%% register: orientation
   jitml[jitML workload extension] -->|extRequires JitBuild| jb[jit-build capability extension]
   jitml -->|extRequires Coordination| coord[coordination capability extension]
   jitml -->|extRequires InferenceEngine| ie[InferenceEngine core capability]
@@ -278,6 +293,7 @@ flowchart TD
   jb -->|extRequires Registry| reg[Registry core capability]
   coord -->|extRequires MessageBus| mb[MessageBus core capability]
 ```
+*Orientation. Design intent. The `extRequires` graph an extension declares, bottoming out in the core capabilities owned by [service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set). Totality, acyclicity, and the anti-shadow rule are stated in the prose above, not by the picture.*
 
 **Layer honesty.** Totality, acyclicity, and anti-shadow are **author/link-time, decode-foreclosed**
 properties — a spec that violates any of them cannot be merged into a binary. That a provided capability's
@@ -285,8 +301,7 @@ properties — a spec that violates any of them cannot be merged into a binary. 
 ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)) and the chaos/testing surface, never
 asserted by the merge. A green merge proves the graph composes, not that every provider is live.
 
-The `ProjectSpec` algebra and the `validateProjectSpec` anti-shadow validator are **sibling evidence, not an
-amoebius result**: hostbootstrap proves the additive stream algebra and the duplicate-id/constructor-collision
+The `ProjectSpec` algebra and the `validateProjectSpec` anti-shadow validator are **sibling evidence, not an amoebius result**: hostbootstrap proves the additive stream algebra and the duplicate-id/constructor-collision
 rejections; amoebius reuses that algebra, discards hostbootstrap's packaging (no per-extension binary, no
 image, no `dlopen`, [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability)), and adds the total/acyclic
 graph checks specified here. The graph checks themselves are net-new amoebius design intent.
@@ -301,9 +316,7 @@ validation gates, and remaining work are owned by
 only (the plan is authoritative): the `extRequires` field and the total/acyclic/anti-shadow merge land with the
 DSL type families and the extension seam of [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability); the
 capabilities the two capability-extensions provide are exercised by their owning doctrines
-([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
-for `jit-build`, [daemon_topology_doctrine.md §4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated)
-for `coordination`). This doc states the target shape and links back for status.
+([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) for `jit-build`, [daemon_topology_doctrine.md §4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated) for `coordination`). This doc states the target shape and links back for status.
 
 > **Honesty.** Everything in this doctrine is design intent, specified before implementation. The
 > `ProjectSpec` stream algebra and the anti-shadow `validateProjectSpec` are proven in the hostbootstrap
@@ -315,8 +328,7 @@ for `coordination`). This doc states the target shape and links back for status.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§6](./low_code_ui_runtime_doctrine.md#6-modules-and-total-composition) keeps declarative UI modules out of the linked-extension set; [§8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations) binds required ports to trusted Haskell handlers
 - [DSL Doctrine](./dsl_doctrine.md) — [§4](./dsl_doctrine.md#4-total-composability) the `ExtensionSpec` seam (linked-not-loaded), the anti-shadow `ProjectSpec` merge, and the closed vendored workload set `{infernix, jitML}` this graph extends

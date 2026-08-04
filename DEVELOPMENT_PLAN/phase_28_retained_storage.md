@@ -1,16 +1,38 @@
 # Phase 28: No-provisioner retained storage + lossless rebind
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/system_components.md
-**Generated sections**: none
-
 > **Purpose**: Install the single inert `no-provisioner`/`Retain` StorageClass and the deterministic
 > `<namespace>/<statefulset>/pv_<integer>` retained-PV bind on the live linux-cpu kind cluster, enforce
 > `Σ(ProvisionedVolumeDemand.provisionedBytes) <= DurableBacking` after presentation/allocation and uniform
 > StatefulSet claim-template grouping, enforce a real per-volume host-side hard ceiling, then prove the
 > lossless-teardown guarantee — durable bytes rebind across a cluster delete + recreate with a Postgres row
 > and a MinIO object marker round-tripping unchanged.
+> **Read this if**: phase 28 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 28 delivers the no-provisioner retained storage + lossless rebind; its design is owned by [storage_lifecycle_doctrine.md](../documents/engineering/storage_lifecycle_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [resource_capacity_storage.md](../documents/engineering/resource_capacity_storage.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/system_components.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 28.1: The one inert `no-provisioner` StorageClass 📋](#sprint-281-the-one-inert-no-provisioner-storageclass-)
+- [Sprint 28.2: Deterministic retained-PV generation + the explicit bind 📋](#sprint-282-deterministic-retained-pv-generation--the-explicit-bind-)
+- [Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip 📋](#sprint-283-the-lossless-rebind-gate--postgres-row--minio-marker-round-trip-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -147,6 +169,19 @@ This section pins the concrete corpus, the Phase-0-committed oracles, and the se
 sprint Validation above reference. Everything named here is authored and committed in Phase 0, before any
 implementation exists.
 
+```mermaid
+flowchart LR
+  %% register: orientation
+  s0["Sprint 28.1: The one inert no-provisioner StorageClass"]
+  s1["Sprint 28.2: Deterministic retained-PV generation + the explicit bind"]
+  s2["Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip"]
+  gate["the phase 28 gate"]
+  s0 -->|"produces what the next consumes"| s1
+  s1 -->|"produces what the next consumes"| s2
+  s2 -->|"the last seam the gate closes over"| gate
+```
+*Orientation. The seams phase 28 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+
 **Representative set (concrete corpus).** Exactly two witnesses, no more: (1) a single-ordinal Postgres
 StatefulSet in namespace `retained-witness` with one PVC `pgdata` on one retained PV, marker = a single row in
 table `rebind_witness(nonce text)`; (2) a single-ordinal MinIO StatefulSet in namespace `retained-witness` with
@@ -265,7 +300,7 @@ section it implements; individual sprints cite the same sections where they adop
   — *bounded storage with a single ceiling owner*: the entire post-reconcile retained inventory is checked as
   `Σ(provisionedBytes) <= DurableBacking` before allocation, counting existing/proposed identities once, with
   durable, cache, and pod-ephemeral pools disjoint so the same physical bytes cannot satisfy multiple budgets.
-  Its [`§5.1`](../documents/engineering/resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)
+  Its [`§5.1`](../documents/engineering/resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry)
   presentation/allocation and uniform-claim projection is enacted here: unequal usable ordinal requirements
   are presented and backing-rounded individually, then grouped per `volumeClaimTemplate`; the maximum private
   `provisionedBytes` times ordinal count is the retained debit.
@@ -299,9 +334,9 @@ section it implements; individual sprints cite the same sections where they adop
 **Blocked by**: Phase 26 gate (the typed renderer + live SSA reconciler that renders and applies the
 StorageClass object); Phase 24 gate (an idempotent single-node `kind` cluster to install it into).
 **Independent Validation**: after bring-up `kubectl get storageclass` shows **exactly one** class —
-`provisioner: kubernetes.io/no-provisioner`, `reclaimPolicy: Retain`, `volumeBindingMode: WaitForFirstConsumer`
-— and no other class and no `storageclass.kubernetes.io/is-default-class` annotation survives; a PVC created
-with no PV to bind stays `Pending` (never dynamically provisioned).
+`provisioner: kubernetes.io/no-provisioner`, `reclaimPolicy: Retain`, `volumeBindingMode:
+WaitForFirstConsumer` — and no other class and no `storageclass.kubernetes.io/is-default-class` annotation
+survives; a PVC created with no PV to bind stays `Pending` (never dynamically provisioned).
 **Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md`.
 
 ### Objective
@@ -326,8 +361,7 @@ only because amoebius placed them and nothing in the normal cluster lifecycle ca
    PVC with no matching PV stays `Pending` **with the specific event reason `WaitForFirstConsumer`** (no
    provisioner attempted) — asserting the reason string, not merely the `Pending` phase; the paired positive is
    an identical PVC that binds once its PV exists. (b) The negative fixture `two_storageclasses` (a second class
-   plus a default-class annotation, committed in Phase 0) makes assertion 1 fail with the **specific reason
-   `count != 1` / `default-class annotation present`**, distinguishing it from an unrelated golden mismatch.
+   plus a default-class annotation, committed in Phase 0) makes assertion 1 fail with the **specific reason `count != 1` / `default-class annotation present`**, distinguishing it from an unrelated golden mismatch.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -336,51 +370,53 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Storage/RetainedPV.hs`,
-`src/Amoebius/Storage/HostVolume.hs`, `src/Amoebius/Storage/RetainedScaling.hs` (retained-carve and verified-
-migration storage-scaling arms; target paths, not yet built)
-**Blocked by**: Sprint 28.1 (the inert class the retained PVs bind under); Phase 26 gate (the reconciler
-applies the rendered PVs and the witness StatefulSet).
-**Independent Validation**: before allocation, the desired post-reconcile retained inventory (existing
-images plus proposed additions, deduplicated by stable identity) is summed against the Phase-24/26-observed
-durable backing (excluding cache and node ephemeral pools); the over-backing negative fails before any host
-allocation or apiserver write. A multi-ordinal skew fixture proves the sum is built from each template's
-uniform post-presentation/post-allocation size and its member-derived
+`src/Amoebius/Storage/HostVolume.hs`, `src/Amoebius/Storage/RetainedScaling.hs` (retained-carve and
+verified- migration storage-scaling arms; target paths, not yet built)
+**Blocked by**: Sprint 28.1 (the
+inert class the retained PVs bind under); Phase 26 gate (the reconciler applies the rendered PVs and the
+witness StatefulSet).
+**Independent Validation**: before allocation, the desired post-reconcile retained
+inventory (existing images plus proposed additions, deduplicated by stable identity) is summed against the
+Phase-24/26-observed durable backing (excluding cache and node ephemeral pools); the over-backing negative
+fails before any host allocation or apiserver write. A multi-ordinal skew fixture proves the sum is built
+from each template's uniform post-presentation/post-allocation size and its member-derived
 `perBackingDebit[backing] = max(provisionedBytes) × membersOnBacking`, not a logical, usable, unequal
-pre-rounding, or ownership-erasing aggregate map; the skipped-rounding and collapsed-backing mutants turn that
-fixture red. For an accepted
-volume, a one-ordinal StatefulSet
-`volumeClaimTemplate` claim binds to the PV whose
-metadata and `claimRef` match the Phase-0-pinned independent oracle table `test/live/fixtures/claimref_table.csv`
-(hand-authored from `(namespace, statefulset, ordinal)`, never derived from the renderer's own naming helper).
-Because the logical identity `<namespace>/<statefulset>/pv_<integer>` is not a legal `metadata.name` (`/` and
-`_` are forbidden), the scheme is realized as: `metadata.name` is the RFC-1123 **subdomain** encoding
-`<namespace>.<statefulset>.pv-<integer>` — the `.` separator is illegal inside either label-shaped component,
-so the encoding is injective and two distinct identities can never collide on one cluster-scoped name
+pre-rounding, or ownership-erasing aggregate map; the skipped-rounding and collapsed-backing mutants turn
+that fixture red. For an accepted volume, a one-ordinal StatefulSet `volumeClaimTemplate` claim binds to the
+PV whose metadata and `claimRef` match the Phase-0-pinned independent oracle table
+`test/live/fixtures/claimref_table.csv` (hand-authored from `(namespace, statefulset, ordinal)`, never
+derived from the renderer's own naming helper). Because the logical identity
+`<namespace>/<statefulset>/pv_<integer>` is not a legal `metadata.name` (`/` and `_` are forbidden), the
+scheme is realized as: `metadata.name` is the RFC-1123 **subdomain** encoding
+`<namespace>.<statefulset>.pv-<integer>` — the `.` separator is illegal inside either label-shaped
+component, so the encoding is injective and two distinct identities can never collide on one cluster-scoped
+name
 ([`storage_lifecycle_doctrine.md` §4](../documents/engineering/storage_lifecycle_doctrine.md#4-deterministic-pv-naming-and-the-explicit-bind))
-— and the verbatim logical identity is carried in the label
-`amoebius.io/pv-identity`; the table pins **both**, and the assertion checks both against it. The `claimRef`
-names the exact `(namespace, PVC-name)`, and the PV capacity is **exactly equal** (`==`, not merely `>=`) to
-the PVC request and private `UniformClaimPlan.provisionedBytes` from the table; that raw rounded number may be
-larger than the logical or required usable demand. The PV path is a mounted fixed-raw-size filesystem image.
-An independent observer checks its raw length, mounted usable capacity, and fs type, then a fill plus one-byte
-write fails `ENOSPC` without growing the image or consuming a sibling volume/cache/ephemeral pool. Deleting the PVC
-leaves the PV `Released`; the suite then
-**re-creates the identical PVC** (via the same `volumeClaimTemplate` identity) and asserts it re-binds to the
-same identity-named PV — including whatever `claimRef.uid` reconciliation the reconciler performs to clear the
-stale bind — and that the bytes written before the delete read back through the re-bound claim. No bare PVC or
-Deployment-owned claim exists; the separately tested migration Job can mount only the two claims sealed into
-its private transition witness. Retained growth/shrink additionally proceeds only through a fresh
-`ValidatedStorageScalingAction`; stale allocation/backing/fingerprint readback or token reuse produces zero
-host, Job, PV, or PVC writes.
-**Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md`,
-`documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/manifest_generation_doctrine.md`.
+— and the verbatim logical identity is carried in the label `amoebius.io/pv-identity`; the table pins
+**both**, and the assertion checks both against it. The `claimRef` names the exact `(namespace, PVC-name)`,
+and the PV capacity is **exactly equal** (`==`, not merely `>=`) to the PVC request and private
+`UniformClaimPlan.provisionedBytes` from the table; that raw rounded number may be larger than the logical
+or required usable demand. The PV path is a mounted fixed-raw-size filesystem image. An independent observer
+checks its raw length, mounted usable capacity, and fs type, then a fill plus one-byte write fails `ENOSPC`
+without growing the image or consuming a sibling volume/cache/ephemeral pool. Deleting the PVC leaves the PV
+`Released`; the suite then **re-creates the identical PVC** (via the same `volumeClaimTemplate` identity)
+and asserts it re-binds to the same identity-named PV — including whatever `claimRef.uid` reconciliation the
+reconciler performs to clear the stale bind — and that the bytes written before the delete read back through
+the re-bound claim. No bare PVC or Deployment-owned claim exists; the separately tested migration Job can
+mount only the two claims sealed into its private transition witness. Retained growth/shrink additionally
+proceeds only through a fresh `ValidatedStorageScalingAction`; stale allocation/backing/fingerprint readback
+or token reuse produces zero host, Job, PV, or PVC writes.
+**Docs to update**:
+`documents/engineering/storage_lifecycle_doctrine.md`,
+`documents/engineering/resource_capacity_doctrine.md`,
+`documents/engineering/manifest_generation_doctrine.md`.
 
 ### Objective
 Adopt [`storage_lifecycle_doctrine.md §4 — deterministic PV naming and the explicit bind`](../documents/engineering/storage_lifecycle_doctrine.md#4-deterministic-pv-naming-and-the-explicit-bind),
 [`§5 — sizes are explicit, hard-capped, one-volume-per-claim`](../documents/engineering/storage_lifecycle_doctrine.md#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim),
 and [`§3 — PVCs are born only from StatefulSets`](../documents/engineering/storage_lifecycle_doctrine.md#3-pvcs-are-born-only-from-statefulsets),
 together with [`resource_capacity_doctrine.md §5`](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)
-and its [`§5.1`](../documents/engineering/resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)
+and its [`§5.1`](../documents/engineering/resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry)
 presentation/allocation and uniform-claim projection, and
 [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
 for applying the rendered PVs through the reconciler:
@@ -417,65 +453,45 @@ PVC creation path to exactly one shape.
   ordinal-varying rendered size, pre-allocation grouping shortcut, or aggregate that spends only a logical,
   usable, unequal rounded, or ownership-erased map rejects before render.
 - A pre-allocation aggregate fold over the complete post-reconcile retained inventory:
-  `∀ backing. Σ UniformClaimPlan.perBackingDebit[backing] <= observed[backing]`, where every named durable
-  backing is disjoint from cache and node ephemeral storage and existing/proposed volumes are keyed by stable
-  identity so an unchanged re-run is counted once. Spare bytes on one backing cannot cover another. A failed
-  fold has no continuation that can create an image, mount, PV, or PVC.
-- Host-retained resize enactment consumes only a private `ProvisionedStorageMigration`: the binder starts from
-  the still-live old private volume, replacement `DeclaredVolumeDemand`, and structural chunk/concurrency/
-  workspace policy; provisioning derives the new rounded volume, exact copy/verify Job
-  `PodResourceEnvelope`, and per-backing old+new+workspace high-water. The Phase-26 snapshot-bound reconciler
-  creates the replacement and renders/adopts that Job only when the complete transition still fits CPU,
-  memory, ephemeral storage, pod/CSI slots, and backing bytes. Independent byte verification gates cutover and
-  `ReclaimEligible`; failure keeps the old claim active and both volumes/partial workspace charged. Normal
-  operation never deletes either backing.
-- The Phase-28 enactors for `AllocateWithinRetainedCarve` and `ShrinkByVerifiedMigration`. They accept only
-  Phase 26's fresh, snapshot-bound `ValidatedStorageScalingAction`, immediately recheck the exact retained
-  allocation map/backing/fingerprint, consume its plan-id-indexed token once, and return a post-attempt
-  observed scaling snapshot. Allocation cannot exceed the witnessed residual carve; shrink delegates to the
-  private migration above and never credits the old extent before verified cutover and observed cleanup.
-  `CreateProviderCapacity` is absent from this host capability surface.
-- The invariant that a PVC is only ever born from a StatefulSet `volumeClaimTemplate` — no bare PVCs or
-  Deployment-owned claims — exercised with a minimal one-ordinal witness StatefulSet. The only Job mount
-  constructor consumes a private `ProvisionedStorageMigration` and is checked to name exactly its old and
-  replacement claims while creating none.
+  `∀ backing. Σ UniformClaimPlan.perBackingDebit[backing] <= observed[backing]`, where every named durable backing is disjoint from cache and node ephemeral storage and existing/proposed volumes are keyed by stable identity so an unchanged re-run is counted once. Spare bytes on one backing cannot cover another. A failed fold has no continuation that can create an image, mount, PV, or PVC. - Host-retained resize enactment consumes only a private `ProvisionedStorageMigration`: the binder starts from the still-live old private volume, replacement `DeclaredVolumeDemand`, and structural chunk/concurrency/ workspace policy; provisioning derives the new rounded volume, exact copy/verify Job `PodResourceEnvelope`, and per-backing old+new+workspace high-water. The Phase-26 snapshot-bound reconciler creates the replacement and renders/adopts that Job only when the complete transition still fits CPU, memory, ephemeral storage, pod/CSI slots, and backing bytes. Independent byte verification gates cutover and `ReclaimEligible`; failure keeps the old claim active and both volumes/partial workspace charged. Normal operation never deletes either backing. - The Phase-28 enactors for `AllocateWithinRetainedCarve` and `ShrinkByVerifiedMigration`. They accept only Phase 26's fresh, snapshot-bound `ValidatedStorageScalingAction`, immediately recheck the exact retained allocation map/backing/fingerprint, consume its plan-id-indexed token once, and return a post-attempt observed scaling snapshot. Allocation cannot exceed the witnessed residual carve; shrink delegates to the private migration above and never credits the old extent before verified cutover and observed cleanup. `CreateProviderCapacity` is absent from this host capability surface. - The invariant that a PVC is only ever born from a StatefulSet `volumeClaimTemplate` — no bare PVCs or Deployment-owned claims — exercised with a minimal one-ordinal witness StatefulSet. The only Job mount constructor consumes a private `ProvisionedStorageMigration` and is checked to name exactly its old and replacement claims while creating none.
 
 ### Validation
 1. Against the Phase-0-pinned durable-backing inventory, derive the complete post-reconcile PV inventory
-   (existing plus proposed, deduplicated by stable identity) and assert that every named backing independently
-   satisfies `Σ(perBackingDebit) <= observedBacking`; an unchanged re-run
-   produces the same map, not twice the debit. Run
-   `pv_aggregate_over_backing`; assert the specific
-   `durable-demand-exceeds-backing` error and, from independent host/apiserver observers, zero image creation,
-   zero mount, and zero PV/PVC writes. Then run three boundary fixtures: (a)
-   `presentation_overhead_over_backing`, whose usable demand fits but filesystem metadata/journal/reserved
-   space does not; (b) `allocation_quantum_over_backing`, whose raw need is one byte above a backing quantum
-   and therefore spends the next full quantum; and (c) `uniform_claim_skew_over_backing`, whose three ordinal
-   usable demands are intentionally unequal and whose per-slot rounded sum fits, but
-   `max(provisionedBytes) × 3` exceeds the backing. Its second committed case places ordinals on two named
-   backings whose aggregate bytes fit but one member backing is one byte short; it must reject rather than
-   transferring spare capacity. Assert each pinned rejection and the same zero-write
-   boundary; each positive differs only by sufficient backing or by one byte on the accepted side of the
-   boundary. The committed **M-skip-durable-aggregate**, **M-sum-unequal-ordinals**, and
-   **M-uniform-before-allocation**, and **M-collapse-uniform-backing-debits** mutants must turn these checks
-   red.
-   Run the migration boundary from the Phase-0 `test/live/fixtures/migration/` corpus with steady old and target
-   states each fitting but (d) `migration_backing_below_highwater` — backing one byte below old+new+workspace,
-   (e) `migration_copy_envelope_short` — copy Job CPU/memory/ephemeral or pod/CSI slots one unit short, and (f)
-   `migration_verify_mismatch` — an injected post-copy byte mismatch. Assert each against its pinned reason
-   (`old+new+workspace-exceeds-backing`, `copy-job-envelope-exceeds-headroom`, `byte-verification-mismatch`):
-   cases (d)/(e) perform zero replacement/Job writes; (f) leaves the old binding live, emits no `ReclaimEligible`,
-   and the next inventory charges both volumes and partial workspace — the fixture's pinned post-ledger, never a
-   bare "nothing happened". **Then drive the positive completion fixture `migration_shrink_complete` and assert
-   the full observed sequence in order:** the copy/verify Job runs, an independent byte verification of the
-   copied extent **passes**, the claim cuts over to the new volume, `ReclaimEligible` is emitted **only after**
-   that pass, the new volume serves the pre-migration nonce byte-for-byte, and the old extent is retired **only
-   after** its deletion is independently observed — never before. The committed migration mutants
-   **M-cutover-before-verify** (cuts over / emits `ReclaimEligible` before verification passes),
-   **M-credit-before-cleanup** (retires the old extent before observed deletion), and **M-fake-verify**
-   (verification always reports match) must each turn this positive assertion red, and **M-fake-verify** and
-   **M-cutover-before-verify** additionally turn `migration_verify_mismatch` red by admitting a corrupt copy;
-   a stubbed enactor that skips copy/verify/cutover fails the positive assertion, not just the negatives.
+   (existing plus proposed, deduplicated by stable identity) and assert that every named backing
+   independently satisfies `Σ(perBackingDebit) <= observedBacking`; an unchanged re-run produces the same
+   map, not twice the debit.
+   - Run `pv_aggregate_over_backing`; assert the specific `durable-demand-exceeds-backing` error and, from
+     independent host/apiserver observers, zero image creation, zero mount, and zero PV/PVC writes.
+   - Then run three boundary fixtures: (a) `presentation_overhead_over_backing`, whose usable demand fits
+     but filesystem metadata/journal/reserved space does not; (b) `allocation_quantum_over_backing`, whose
+     raw need is one byte above a backing quantum and therefore spends the next full quantum; and (c)
+     `uniform_claim_skew_over_backing`, whose three ordinal usable demands are intentionally unequal and
+     whose per-slot rounded sum fits, but `max(provisionedBytes) × 3` exceeds the backing.
+   - Its second committed case places ordinals on two named backings whose aggregate bytes fit but one
+     member backing is one byte short; it must reject rather than transferring spare capacity.
+   - Assert each pinned rejection and the same zero-write boundary; each positive differs only by sufficient
+     backing or by one byte on the accepted side of the boundary.
+   - The committed **M-skip-durable-aggregate**, **M-sum-unequal-ordinals**, and
+     **M-uniform-before-allocation**, and **M-collapse-uniform-backing-debits** mutants must turn these
+     checks red.
+   - Run the migration boundary from the Phase-0 `test/live/fixtures/migration/` corpus with steady old and
+     target states each fitting but (d) `migration_backing_below_highwater` — backing one byte below
+     old+new+workspace, (e) `migration_copy_envelope_short` — copy Job CPU/memory/ephemeral or pod/CSI slots
+     one unit short, and (f) `migration_verify_mismatch` — an injected post-copy byte mismatch.
+   - Assert each against its pinned reason (`old+new+workspace-exceeds-backing`,
+     `copy-job-envelope-exceeds-headroom`, `byte-verification-mismatch`): cases (d)/(e) perform zero
+     replacement/Job writes; (f) leaves the old binding live, emits no `ReclaimEligible`, and the next
+     inventory charges both volumes and partial workspace — the fixture's pinned post-ledger, never a bare
+     "nothing happened".
+   - **Then drive the positive completion fixture `migration_shrink_complete` and assert the full observed sequence in order:** the copy/verify Job runs, an independent byte verification of the copied extent
+     **passes**, the claim cuts over to the new volume, `ReclaimEligible` is emitted **only after** that
+     pass, the new volume serves the pre-migration nonce byte-for-byte, and the old extent is retired **only after** its deletion is independently observed — never before.
+   - The committed migration mutants **M-cutover-before-verify** (cuts over / emits `ReclaimEligible` before
+     verification passes), **M-credit-before-cleanup** (retires the old extent before observed deletion),
+     and **M-fake-verify** (verification always reports match) must each turn this positive assertion red,
+     and **M-fake-verify** and **M-cutover-before-verify** additionally turn `migration_verify_mismatch` red
+     by admitting a corrupt copy; a stubbed enactor that skips copy/verify/cutover fails the positive
+     assertion, not just the negatives.
 2. Render the accepted multi-ordinal counterpart and assert every PVC/PV projected from the same
    `volumeClaimTemplate` has byte-identical capacity equal to the fixture's maximum rounded private
    `provisionedBytes`, that this supplies the maximum `requiredUsableBytes`, and that the provision witness
@@ -492,8 +508,7 @@ PVC creation path to exactly one shape.
    fail the post-create observation before PV/PVC apply or workload start, then are swept by the elevated test
    harness. The committed **M-raw-host-directory** mutant must turn this red because the overflow succeeds or
    spills into shared backing.
-3. Write a nonce byte-string through the claim, then delete the PVC; assert the PV drops to `Released`. **Then
-   exercise re-bind for real:** re-create the identical PVC and assert it re-binds to the same
+3. Write a nonce byte-string through the claim, then delete the PVC; assert the PV drops to `Released`. **Then exercise re-bind for real:** re-create the identical PVC and assert it re-binds to the same
    identity-named/`claimRef`-pinned PV and that the nonce reads back unchanged through the re-bound claim.
    Assert no PVC exists outside a StatefulSet `volumeClaimTemplate`.
 4. The committed mutant **M-no-rebind** (a reconciler variant that leaves the PV `Released` but never clears the
@@ -518,24 +533,27 @@ The whole sprint (📋 Planned).
 ## Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Storage/Rebind.hs`, `test/live/RebindSpec.hs` (target paths; not yet built)
-**Blocked by**: Sprint 28.2 (the retained PVs + deterministic bind the round-trip depends on); Phase 25 gate
-(the baked-binary Postgres and MinIO images served only from the in-cluster `distribution` registry — the
-witnesses pull nothing from a public registry); Phase 24 gate (the midwife `cluster delete` + `recreate` the
-gate drives).
-**Independent Validation**: the marker (a fresh per-run random nonce) written as a Postgres row and as a MinIO
-object reads back byte-for-byte after a `cluster delete` + `recreate`. The nonce is asserted **absent** from
-both witnesses before the write and present after recreate, with **no witness write path executed
-post-recreate** (read from the apiserver audit log and a `strace`/argv observer on the witness process, never a
-self-emitted compliance trace). "Bytes intact between delete and recreate" is observed by inspecting the host
-retained-storage root `${RETAINED_ROOT}` **outside** any node container while `kind get clusters` is empty — a
-real `cluster delete` destroys the apiserver, so the PV `Released` *status* is observed only in Sprint 28.2's
-live PVC-delete step, not here. `recreate` is a fresh Phase-24 bootstrap (new apiserver/etcd, changed cluster
-UID) into which the PV objects are re-rendered and re-applied before rebind is asserted; the recreated cluster
-re-binds the *same backing bytes* through fresh PV objects computed by identity (matched against
-`test/live/fixtures/claimref_table.csv`). The only actor
-that ultimately deletes the test-flagged witness volumes is the elevated harness.
-**Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md`, `documents/engineering/cluster_lifecycle_doctrine.md`, `DEVELOPMENT_PLAN/README.md`.
+**Implementation**: `src/Amoebius/Storage/Rebind.hs`, `test/live/RebindSpec.hs` (target
+paths; not yet built)
+**Blocked by**: Sprint 28.2 (the retained PVs + deterministic bind the round-trip
+depends on); Phase 25 gate (the baked-binary Postgres and MinIO images served only from the in-cluster
+`distribution` registry — the witnesses pull nothing from a public registry); Phase 24 gate (the midwife
+`cluster delete` + `recreate` the gate drives).
+**Independent Validation**: the marker (a fresh per-run
+random nonce) written as a Postgres row and as a MinIO object reads back byte-for-byte after a `cluster
+delete` + `recreate`. The nonce is asserted **absent** from both witnesses before the write and present
+after recreate, with **no witness write path executed post-recreate** (read from the apiserver audit log and
+a `strace`/argv observer on the witness process, never a self-emitted compliance trace). "Bytes intact
+between delete and recreate" is observed by inspecting the host retained-storage root `${RETAINED_ROOT}`
+**outside** any node container while `kind get clusters` is empty — a real `cluster delete` destroys the
+apiserver, so the PV `Released` *status* is observed only in Sprint 28.2's live PVC-delete step, not here.
+`recreate` is a fresh Phase-24 bootstrap (new apiserver/etcd, changed cluster UID) into which the PV objects
+are re-rendered and re-applied before rebind is asserted; the recreated cluster re-binds the *same backing
+bytes* through fresh PV objects computed by identity (matched against
+`test/live/fixtures/claimref_table.csv`). The only actor that ultimately deletes the test-flagged witness
+volumes is the elevated harness.
+**Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md`,
+`documents/engineering/cluster_lifecycle_doctrine.md`, `DEVELOPMENT_PLAN/README.md`.
 
 ### Objective
 Adopt [`storage_lifecycle_doctrine.md §6 — the lossless-teardown guarantee: deterministic rebind`](../documents/engineering/storage_lifecycle_doctrine.md#6-the-lossless-teardown-guarantee-deterministic-rebind),
@@ -567,8 +585,7 @@ durable backing and no normal-operation path can.
   gate re-runs and requires red.
 
 ### Validation
-1. Run the cycle on the concrete representative set of [Gate integrity](#gate-integrity) (exactly two
-   witnesses): generate a per-run nonce, assert its absence, write it as the Postgres row and the MinIO object,
+1. Run the cycle on the concrete representative set of [Gate integrity](#gate-integrity) (exactly two witnesses): generate a per-run nonce, assert its absence, write it as the Postgres row and the MinIO object,
    `cluster delete`, confirm via the host OS-boundary observer that the cluster is genuinely absent
    (`kind get clusters` empty, no kind node container in `docker ps`, apiserver unreachable) while
    `${RETAINED_ROOT}` still holds the bytes, `cluster recreate` as a fresh Phase-24 bootstrap (new apiserver
@@ -582,8 +599,7 @@ durable backing and no normal-operation path can.
    non-harness module in `src/` issues a backing-store reclaim/destruction call (grep-level, committed as
    `test/ci/no_retained_delete.sh`; scoped PVC/PV binding-object deletion and whole-cluster deletion are
    allowed because neither deletes the external backing), and (b) post-cycle the fresh PV objects exist and
-   host bytes are present. The control-plane singleton is a Phase-33 subject with **no realized instance at
-   Phase 28**, so its "mounts
+   host bytes are present. The control-plane singleton is a Phase-33 subject with **no realized instance at Phase 28**, so its "mounts
    no PVC" property is **not asserted as passing here** — it is recorded **UNVERIFIED** in the honesty ledger,
    not treated as a vacuously-true pass.
 
@@ -616,8 +632,7 @@ The whole sprint (📋 Planned).
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase ordering this document sits under
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys
-- [overview.md](overview.md) — the target architecture and cross-cutting invariants (no-provisioner retained
-  PVs; no unbounded storage; the control plane holds no PVC)
+- [overview.md](overview.md) — the target architecture and cross-cutting invariants (no-provisioner retained PVs; no unbounded storage; the control plane holds no PVC)
 - [system_components.md](system_components.md) — the target component inventory for the module paths above
 - [Storage Lifecycle Doctrine](../documents/engineering/storage_lifecycle_doctrine.md) — the no-provisioner
   retained-PV model, the deterministic bind, and the lossless-rebind guarantee adopted here

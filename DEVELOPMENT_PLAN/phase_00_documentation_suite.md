@@ -1,12 +1,36 @@
 # Phase 0: Documentation suite (whole DSL)
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/system_components.md
-**Generated sections**: none
-
 > **Purpose**: Author the complete amoebius DSL specification and every engineering doctrine before any
 > implementation phase begins, gated by a single documentation lint over the whole text and link graph.
+> **Read this if**: phase 0 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 0 delivers the documentation suite (whole DSL); its design is owned by [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), and the plan for reaching it is owned here.
+No register: the gate is the documentation lint.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 0.1: Documentation standards + plan-suite spine 🔄](#sprint-01-documentation-standards--plan-suite-spine-)
+- [Sprint 0.2: DSL core + cross-cutting method doctrine 🔄](#sprint-02-dsl-core--cross-cutting-method-doctrine-)
+- [Sprint 0.3: Platform, cluster, storage, substrate & image doctrine 🔄](#sprint-03-platform-cluster-storage-substrate--image-doctrine-)
+- [Sprint 0.4: Secrets/IaC + runtime/transport/determinism doctrine 🔄](#sprint-04-secretsiac--runtimetransportdeterminism-doctrine-)
+- [Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate 🔄](#sprint-05-verification-formal-model-doctrine--the-documentation-lint-gate-)
+- [Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts 🔄](#sprint-06-readability-discipline--document-shape-the-two-diagram-registers-and-the-routing-artifacts-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -33,8 +57,7 @@ tracker, and the target architecture/inventory/substrate documents — so every 
 name when it schedules adoption work.
 
 The suite is written to the reversed intent that governs the whole plan. The control-plane singleton is a
-Kubernetes Deployment with `replicas=1` whose single-writer authority is **delegated to k8s/etcd through the
-mandatory reconciler `Lease`** — there is no bespoke election and no standby pod, and its durable state is the
+Kubernetes Deployment with `replicas=1` whose single-writer authority is **delegated to k8s/etcd through the mandatory reconciler `Lease`** — there is no bespoke election and no standby pod, and its durable state is the
 Vault-enveloped MinIO bucket, not a PVC. ML engines, models, and kernels are **named catalog identities**
 jit-resolved on first miss into a `CacheBudget`-bounded content-addressed cache — never baked, never
 URL-fetched. amoebius's one formal proof obligation is the **cross-cluster gateway migration**, both the
@@ -72,12 +95,32 @@ and **illegal-state catalog integrity** — every entry carrying a `**Validation
 contiguous with no gaps or duplicates, every index bullet's anchor resolving, and every entry carrying a
 technique-matrix row)
 **and** it exits non-zero on every fixture in a committed seeded-negative corpus. A lint that only passes on the
-suite is not a gate; the committed corpus is what proves the lint can fail. **The corpus is this gate's
-independent oracle (§M.3):** the `tools/doc_lint_corpus/` fixtures are hand-authored — one seeded negative per
+suite is not a gate; the committed corpus is what proves the lint can fail. **The corpus is this gate's independent oracle (§M.3):** the `tools/doc_lint_corpus/` fixtures are hand-authored — one seeded negative per
 check and sub-check, committed in [`Sprint 0.5`](#sprint-05-verification-formal-model-doctrine--the-documentation-lint-gate-)
 *before* `tools/doc_lint.py` exists, so the party writing the lint is not the sole author of
 what "clean" means; a lint that cannot turn its own committed negatives red is not admitted, exactly as it
 requires of every other phase's gate.
+
+```mermaid
+flowchart LR
+  %% register: algebra
+  fx["committed fixtures"]:::intent
+  or["independently authored oracle"]:::intent
+  mu["seeded mutant"]:::intent
+  g{{"the phase 0 gate command"}}:::gate
+  ok((("phase seal: the ledger this gate emits"))):::seal
+  no>"the mutant must turn it red"]:::refuse
+  fx -->|"binds the corpus"| g
+  or -->|"binds the expectation"| g
+  mu -->|"binds the defect"| g
+  g -->|"fixtures green, oracle agrees"| ok
+  g -->|"mutant green means the gate is not one"| no
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+```
+*Design intent. Phase 0's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
 ## Doctrine adopted
 
@@ -165,15 +208,17 @@ name.
 ## Sprint 0.1: Documentation standards + plan-suite spine 🔄
 
 **Status**: Active
-**Implementation**: `documents/documentation_standards.md`, `DEVELOPMENT_PLAN/development_plan_standards.md`,
-`DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/overview.md`, `DEVELOPMENT_PLAN/system_components.md`,
-`DEVELOPMENT_PLAN/substrates.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`,
-`DEVELOPMENT_PLAN/later_phases.md`, and the `phase_00`…`phase_64` phase docs (authored; artifact audit remains)
+**Implementation**: `documents/documentation_standards.md`,
+`DEVELOPMENT_PLAN/development_plan_standards.md`, `DEVELOPMENT_PLAN/README.md`,
+`DEVELOPMENT_PLAN/overview.md`, `DEVELOPMENT_PLAN/system_components.md`, `DEVELOPMENT_PLAN/substrates.md`,
+`DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `DEVELOPMENT_PLAN/later_phases.md`, and the
+`phase_00`…`phase_64` phase docs (authored; artifact audit remains)
 **Blocked by**: none
-**Independent Validation**: lint the spine files in isolation — each carries a valid header block, the status
-vocabulary and per-phase/per-sprint skeletons are defined, the 65-phase overview table is internally
-consistent, and every intra-plan link resolves.
-**Docs to update**: the spine files above and `documents/engineering/README.md`
+**Independent Validation**: lint the spine files in isolation — each carries a valid header block, the status vocabulary
+and per-phase/per-sprint skeletons are defined, the 65-phase overview table is internally consistent, and
+every intra-plan link resolves.
+**Docs to update**: the spine files above and
+`documents/engineering/README.md`
 
 ### Objective
 
@@ -187,9 +232,7 @@ amoebius's snake_case rule), and the tracker is rebuilt for 65 contiguous single
 
 - The documentation standard (header block, naming, SSoT/no-duplication, bidirectional links, honesty, tone,
   diagram rules).
-- The plan rulebook (`development_plan_standards.md`): the [§A](development_plan_standards.md#a-header-metadata-same-block-as-the-doctrine-suite)–[§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) disciplines (header, snake_case layout, status
-  vocabulary, per-phase skeleton, one-phase model, sprint block format, Documentation Requirements,
-  doctrine-citation rule, generated markers, cross-ref path rules, honesty, one-substrate, gate integrity).
+- The plan rulebook (`development_plan_standards.md`): the [§A](development_plan_standards.md#a-header-metadata-same-block-as-the-doctrine-suite)–[§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) disciplines (header, snake_case layout, status vocabulary, per-phase skeleton, one-phase model, sprint block format, Documentation Requirements, doctrine-citation rule, generated markers, cross-ref path rules, honesty, one-substrate, gate integrity).
 - The live tracker (`README.md`): the Document Index, the 65-phase Overview table with its one-line gates and
   substrate/register columns, the status vocabulary, the phase discipline, and the cross-cutting invariants.
 - `overview.md`, `system_components.md`, `substrates.md`, `legacy_tracking_for_deletion.md`, `later_phases.md`,
@@ -210,18 +253,19 @@ through Sprint 0.5.
 ## Sprint 0.2: DSL core + cross-cutting method doctrine 🔄
 
 **Status**: Active
-**Implementation**: `documents/engineering/dsl_doctrine.md`, `app_vs_deployment_doctrine.md`,
-`illegal_state_catalog.md` (the pure index) and its eight themed sub-catalogs (`illegal_state_storage.md`,
-`illegal_state_topology.md`, `illegal_state_capacity.md`, `illegal_state_security.md`,
-`illegal_state_capability_messaging.md`, `illegal_state_ml_asset.md`, `illegal_state_multicluster.md`,
-`illegal_state_lifecycle.md`) and the `illegal_state_techniques.md` coverage matrix, `service_capability_doctrine.md`,
-`tenancy_doctrine.md`, `lift_and_compose_doctrine.md`, `generated_artifacts_doctrine.md`,
-`conformance_harness_doctrine.md`, `low_code_ui_runtime_doctrine.md`,
-`ui_realtime_coordination_doctrine.md`, `browser_offline_runtime_doctrine.md` (authored; artifact audit remains)
+**Implementation**: `documents/engineering/dsl_doctrine.md`,
+`app_vs_deployment_doctrine.md`, `illegal_state_catalog.md` (the pure index) and its eight themed
+sub-catalogs (`illegal_state_storage.md`, `illegal_state_topology.md`, `illegal_state_capacity.md`,
+`illegal_state_security.md`, `illegal_state_capability_messaging.md`, `illegal_state_ml_asset.md`,
+`illegal_state_multicluster.md`, `illegal_state_lifecycle.md`) and the `illegal_state_techniques.md`
+coverage matrix, `service_capability_doctrine.md`, `tenancy_doctrine.md`, `lift_and_compose_doctrine.md`,
+`generated_artifacts_doctrine.md`, `conformance_harness_doctrine.md`, `low_code_ui_runtime_doctrine.md`,
+`ui_realtime_coordination_doctrine.md`, `browser_offline_runtime_doctrine.md` (authored; artifact audit
+remains)
 **Blocked by**: Sprint 0.1
-**Independent Validation**: lint the DSL-core and method docs together — the illegal-state catalog links to the
-DSL contract rather than restating it; the register model and the generated-never-committed rule are each
-owned by exactly one doc and referenced elsewhere.
+**Independent Validation**: lint the DSL-core and method docs together —
+the illegal-state catalog links to the DSL contract rather than restating it; the register model and the
+generated-never-committed rule are each owned by exactly one doc and referenced elsewhere.
 **Docs to update**: the docs above and `documents/engineering/README.md`
 
 ### Objective
@@ -266,16 +310,17 @@ through Sprint 0.5.
 ## Sprint 0.3: Platform, cluster, storage, substrate & image doctrine 🔄
 
 **Status**: Active
-**Implementation**: `documents/engineering/platform_services_doctrine.md`, `storage_lifecycle_doctrine.md`,
-`cluster_lifecycle_doctrine.md`, `gateway_migration_doctrine.md`, `readiness_ordering_doctrine.md`,
-`single_logical_data_plane_doctrine.md`, `cluster_topology_doctrine.md`, `resource_capacity_doctrine.md`,
-`substrate_doctrine.md`, `apple_metal_headless_builds.md`, `image_build_doctrine.md`,
-`manifest_generation_doctrine.md` (authored; lint remediation remains)
+**Implementation**: `documents/engineering/platform_services_doctrine.md`,
+`storage_lifecycle_doctrine.md`, `cluster_lifecycle_doctrine.md`, `gateway_migration_doctrine.md`,
+`readiness_ordering_doctrine.md`, `single_logical_data_plane_doctrine.md`, `cluster_topology_doctrine.md`,
+`resource_capacity_doctrine.md`, `substrate_doctrine.md`, `apple_metal_headless_builds.md`,
+`image_build_doctrine.md`, `manifest_generation_doctrine.md` (authored; lint remediation remains)
 **Blocked by**: Sprint 0.1
-**Independent Validation**: lint the platform/cluster docs together — manifest generation owns the
-render/reconcile model, platform-services owns the standard-service inventory, resource-capacity owns the
-placement fold, and no doc restates another's normative content.
-**Docs to update**: the twelve docs above and `documents/engineering/README.md`
+**Independent Validation**: lint the platform/cluster docs together — manifest generation
+owns the render/reconcile model, platform-services owns the standard-service inventory, resource-capacity
+owns the placement fold, and no doc restates another's normative content.
+**Docs to update**: the twelve
+docs above and `documents/engineering/README.md`
 
 ### Objective
 
@@ -310,15 +355,18 @@ through Sprint 0.5.
 ## Sprint 0.4: Secrets/IaC + runtime/transport/determinism doctrine 🔄
 
 **Status**: Active
-**Implementation**: `documents/engineering/vault_pki_doctrine.md`, `pulumi_iac_doctrine.md`,
-`daemon_topology_doctrine.md`, `host_cluster_comms_doctrine.md`, `bootstrap_sequence_doctrine.md`,
-`network_fabric_doctrine.md`, `pulsar_client_doctrine.md`, `content_addressing_doctrine.md`,
-`monitoring_doctrine.md`, `release_lifecycle_doctrine.md` (authored; lint remediation remains)
+**Implementation**: `documents/engineering/vault_pki_doctrine.md`,
+`pulumi_iac_doctrine.md`, `daemon_topology_doctrine.md`, `host_cluster_comms_doctrine.md`,
+`bootstrap_sequence_doctrine.md`, `network_fabric_doctrine.md`, `pulsar_client_doctrine.md`,
+`content_addressing_doctrine.md`, `monitoring_doctrine.md`, `release_lifecycle_doctrine.md` (authored; lint
+remediation remains)
 **Blocked by**: Sprint 0.1, Sprint 0.2
-**Independent Validation**: lint the ten docs together — Vault owns secrets-root semantics, daemon-topology owns
-the `replicas=1` singleton model, and content-addressing owns the jit-resolved ML-asset cache; host-comms and
-bootstrap reference (not restate) the capability and Pulsar surfaces from Sprint 0.2.
-**Docs to update**: the ten docs above and `documents/engineering/README.md`
+**Independent Validation**: lint the ten docs
+together — Vault owns secrets-root semantics, daemon-topology owns the `replicas=1` singleton model, and
+content-addressing owns the jit-resolved ML-asset cache; host-comms and bootstrap reference (not restate)
+the capability and Pulsar surfaces from Sprint 0.2.
+**Docs to update**: the ten docs above and
+`documents/engineering/README.md`
 
 ### Objective
 
@@ -356,30 +404,34 @@ through Sprint 0.5.
 ## Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate 🔄
 
 **Status**: Active
-**Implementation**: `documents/engineering/chaos_failover_doctrine.md`, `testing_doctrine.md`,
-`test_derivation_analysis.md` (the analysis record behind the derivation boundary),
-`formal_model_doctrine.md`, `gateway_migration_model_doctrine.md`, `tla_modelling_assumptions.md` (deprecated
-stub), `tools/doc_lint.py`, `tools/doc_lint_verify.py` (the two-sided gate runner),
+**Implementation**: `documents/engineering/chaos_failover_doctrine.md`,
+`testing_doctrine.md`, `test_derivation_analysis.md` (the analysis record behind the derivation boundary),
+`formal_model_doctrine.md`, `gateway_migration_model_doctrine.md`, `tla_modelling_assumptions.md`
+(deprecated stub), `tools/doc_lint.py`, `tools/doc_lint_verify.py` (the two-sided gate runner),
 `tools/doc_lint_corpus/` (the committed seeded-negative fixtures, with `_positive/` the conforming tree each
 one mutates and `_build.py` the authored mutation list), and
 `test/golden/phase_{16..23,36,38,40,50,52,55..58}_*` plus the correspondingly named
 `test/mutants/phase_{16..23,36,38,40,50,52,55..58}_*` (independently authored UI gate oracles and seeded
-mutants pinned before their implementations), and
-`tools/ledger_lint.py` (target standalone scripts; not yet built — they must not depend on the amoebius binary,
-which first appears in the pre-cluster implementation band, Phase 2+. Both are **Python**, matching the
-pre-binary `pb` midwife ([README.md](README.md#toolchain)) and the recorded decision against bash logic
-([`dsl_doctrine.md §2`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)); a
-shell script is not admitted)
+mutants pinned before their implementations), `test/formal/golden/ToyModel.{tla,cfg}.golden` plus
+`test/formal/mutants/emitTLA-mut-0{1..4}` and the `ToyModel` hand-derived reachable-distinct-state table and
+expected `INVARIANT`/`PROPERTY` name set (the Phase-2 formal-model oracles, pinned here before
+`Interpret.hs`/`EmitTLA.hs` exist — [`phase_02`](phase_02_formal_model_kernel.md)), and
+`tools/ledger_lint.py` (target standalone scripts; not yet built — they must not depend on the amoebius
+binary, which first appears in the pre-cluster implementation band, Phase 2+. Both are **Python**, matching
+the pre-binary `pb` midwife ([README.md](README.md#toolchain)) and the recorded decision against bash logic
+([`dsl_doctrine.md §2`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic));
+a shell script is not admitted)
 **Blocked by**: Sprint 0.1, Sprint 0.2, Sprint 0.3, Sprint 0.4
-**Independent Validation**: run the lint **two-sided** — clean over the whole `documents/` + `DEVELOPMENT_PLAN/`
-tree, **and** non-zero on every fixture in the committed `tools/doc_lint_corpus/` (a bad header (a); a
-near-duplicate paragraph (d); a dangling anchor and a bare `§N` prose reference (b); a one-way `Referenced by` (c); a drifted status marker
-(e); a gate line missing its committed mutant/oracle (f); and — for catalog integrity (g), one per sub-check —
-a catalog entry missing its `**Validation-locus:**`, non-contiguous catalog numbering, a catalog index bullet
-with a dangling anchor, and a catalog entry with no technique-matrix row; and a doctrine doc missing its
-`DEVELOPMENT_PLAN/README.md` back-link (h)). The malformed-ledger negative lives
-in `ledger_lint`'s own corpus, not here.
-**Docs to update**: the five verification docs above, `DEVELOPMENT_PLAN/README.md` (record the gate command),
+**Independent Validation**: run the lint **two-sided** — clean over the whole `documents/` + `DEVELOPMENT_PLAN/` tree,
+**and** non-zero on every fixture in the committed `tools/doc_lint_corpus/` (a bad header (a); a
+near-duplicate paragraph (d); a dangling anchor and a bare `§N` prose reference (b); a one-way `Referenced
+by` (c); a drifted status marker (e); a gate line missing its committed mutant/oracle (f); and — for catalog
+integrity (g), one per sub-check — a catalog entry missing its `**Validation-locus:**`, non-contiguous
+catalog numbering, a catalog index bullet with a dangling anchor, and a catalog entry with no
+technique-matrix row; and a doctrine doc missing its `DEVELOPMENT_PLAN/README.md` back-link (h)). The
+malformed-ledger negative lives in `ledger_lint`'s own corpus, not here.
+**Docs to update**: the five
+verification docs above, `DEVELOPMENT_PLAN/README.md` (record the gate command),
 `documents/engineering/README.md`
 
 ### Objective
@@ -415,8 +467,7 @@ seeded sub-check; (b) every anchored relative link resolves under the [§4](../d
 and **no bare `§N` section reference** appears outside a Markdown link label, heading, fenced/Mermaid block,
 `§M.N` clause-shorthand, or external-project reference — a section citation must be an anchor link, never bare
 `§N` prose (the lint flags any `§`-plus-digit occurring in prose that is not one of those forms);
-  (c) every `Referenced by` header reconciled in both directions from the true link graph; (d) **near-duplicate
-  normative content** by a named method — sentence-shingle overlap above a stated threshold between two governed
+  (c) every `Referenced by` header reconciled in both directions from the true link graph; (d) **near-duplicate normative content** by a named method — sentence-shingle overlap above a stated threshold between two governed
   docs outside quoted/exempt blocks (semantic SSoT *ownership* is a documented hand review, not a lint verdict);
   (e) **status-consistency** — each README Phase-Overview marker equals that phase doc's `## Phase Status`
   marker; (f) **gate-integrity** ([`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)) —
@@ -487,6 +538,65 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
 Make the governed tree lint clean while preserving the passing seeded-negative side; finish the named
 pre-implementation UI oracles/mutants and `tools/ledger_lint.py`, then run the two-sided Phase-0 gate.
 
+## Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts 🔄
+
+**Status**: Active
+**Implementation**: the document-shape, orientation-block, term-routing, sentence-budget,
+section-name and family-split rules appended to `documents/documentation_standards.md`, plus its rewritten
+[diagram section](../documents/documentation_standards.md#7-diagrams) and its labelled
+[motivation shape](../documents/documentation_standards.md#9-motivating-a-design-choice); the plan-document
+shape, gate diagram and invariant-ownership rules appended to
+`DEVELOPMENT_PLAN/development_plan_standards.md`; the retitled
+`documents/engineering/diagram_conventions.md`; the new `documents/glossary.md` and
+`documents/reading_order.md`; the `resource_capacity_*` and `chaos_failover_*` families; and checks
+`o1`–`o5` `q1`–`q5` and `p1`–`p4` in `tools/doc_lint.py` with their seeded negatives under
+`tools/doc_lint_corpus/`.
+**Blocked by**: Sprint 0.1 (the header and link mechanics these rules extend).
+**Independent Validation**: the two-sided lint. Thirteen new checks each carry a committed seeded negative
+that must turn the gate red naming that check and no other.
+**Docs to update**:
+`documents/documentation_standards.md`, `development_plan_standards.md`,
+`documents/engineering/diagram_conventions.md`, `documents/README.md`, `README.md`.
+
+### Objective
+
+Make a governed document navigable and self-orienting before it is read, and make that property enforced
+rather than conventional.
+
+### Deliverables
+
+- The document-shape rules of [documentation_standards.md §10](../documents/documentation_standards.md#10-document-shape).
+- The orientation block of [§11](../documents/documentation_standards.md#11-the-orientation-block), applied to every governed document.
+- The term and acronym routing of [§12](../documents/documentation_standards.md#12-naming-what-the-reader-does-not-know), and the glossary it governs.
+- The sentence and paragraph budget of [§13](../documents/documentation_standards.md#13-sentence-and-paragraph-budget).
+- The canonical section names of [§14](../documents/documentation_standards.md#14-navigation-and-canonical-section-names).
+- The family-split rule of [§15](../documents/documentation_standards.md#15-splitting-a-document-into-a-family), instantiated twice.
+- The two diagram registers, replacing the repealed syntactic bans in [§7](../documents/documentation_standards.md#7-diagrams).
+- The labelled four-part motivation shape of [§9](../documents/documentation_standards.md#9-motivating-a-design-choice), which is what makes it reviewable.
+- Checks `o1`–`o5`, `q1`–`q5` and `p1`–`p4`, each with a seeded negative.
+- The **`p3` sentence backlog**, carried openly rather than closed. `p3` is registered in the check table and
+  reported by every run, but sits in `doc_lint.py`'s `ADVISORY` set and does not fail the gate, because the
+  corpus does not yet meet the rule it enforces. Measured over paragraphs, it carries **1,613 sentences over the 45-word rule and 133 over 90**, none of them in prose this sprint authored. Clearing them is editorial
+  work on pre-existing doctrine: the mechanical case — an enumeration introduced by a colon and separated by
+  semicolons — has already been converted, and what remains needs a per-passage rewrite, since bulk
+  transformation of dense normative prose is what produced the fragments this sprint spent its second half
+  repairing. The sprint closes when the backlog is cleared and `p3` leaves `ADVISORY`; until then the count
+  is the deliverable's honest measure.
+
+      python3 tools/doc_lint.py --only p3 | tail -1      # the current backlog
+
+### Validation
+
+`python3 tools/doc_lint_verify.py` passes both sides with the thirteen added checks and their fixtures.
+
+### Remaining Work
+
+None. Every rule this sprint states is enforced by a check carrying its own seeded negative, and the governed
+tree passes all of them. The caps are the wave-one values sized to the corpus that now meets them; tightening
+any of them is a change to [§10](../documents/documentation_standards.md#10-document-shape) or
+[§13](../documents/documentation_standards.md#13-sentence-and-paragraph-budget) plus the matching constant,
+gated as always on the corpus clearing the new number first.
+
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
@@ -511,8 +621,7 @@ pre-implementation UI oracles/mutants and `tools/ledger_lint.py`, then run the t
 - [README.md](README.md) — the live tracker; its Phase 0 row is the source for this phase's objective and gate.
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys.
 - [overview.md](overview.md) — target architecture/vision (authored in Sprint 0.1).
-- [system_components.md](system_components.md) — surface → owning doctrine → planned module path (authored in
-  Sprint 0.1).
+- [system_components.md](system_components.md) — surface → owning doctrine → planned module path (authored in Sprint 0.1).
 - [substrates.md](substrates.md) — the substrate registry and per-phase map (authored in Sprint 0.1).
 - [Documentation Standards](../documents/documentation_standards.md) — the header/link/SSoT mechanics the gate
   enforces.

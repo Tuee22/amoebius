@@ -1,12 +1,32 @@
 # Phase 23: UI local composition
 
+> **Purpose**: Compose authored low-code applications through the generic browser and UI-server runtimes and
+> test locally that data, workflow, and ready-artifact interactions preserve authorization and tenant scope.
+> **Read this if**: phase 23 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 23 delivers the UI local composition; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [app_vs_deployment_doctrine.md](../documents/engineering/app_vs_deployment_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
+Register 2: a real boundary against fake tools.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Compose authored low-code applications through the generic browser and UI-server runtimes and
-> test locally that data, workflow, and ready-artifact interactions preserve authorization and tenant scope.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 23.1: Single-/multi-tenant workflow-to-artifact composition gate 📋](#sprint-231-single-multi-tenant-workflow-to-artifact-composition-gate-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -90,13 +110,13 @@ isolation, live ingress/identity, release rollout, replica failure, and HA remai
 **Status**: Planned
 **Implementation**: `test/ui/Phase23LocalCompositionSpec.hs`, `test/ui/local/`, and
 `test/fixtures/ui_local_composition/` (target authored test sources; not yet built)
-**Blocked by**: Phase 21, Phase 22
-**Independent Validation**: `cabal test ui-local-composition-spec` drives authored Playwright interactions,
-joins every generated surface, reads raw fake-process/network observations, and requires every named mutant to
-fail.
+**Blocked by**: Phase
+21, Phase 22
+**Independent Validation**: `cabal test ui-local-composition-spec` drives authored Playwright
+interactions, joins every generated surface, reads raw fake-process/network observations, and requires every
+named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/app_vs_deployment_doctrine.md`,
-`documents/engineering/testing_doctrine.md`
+`documents/engineering/app_vs_deployment_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 

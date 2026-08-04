@@ -1,14 +1,34 @@
 # Phase 50: infernix UI lift
 
+> **Purpose**: Lift infernix workflow and ready-artifact contracts into the generic amoebius UI runtime and
+> test that an authenticated own-tenant interaction succeeds while a tenant/scope-mismatched artifact handle
+> produces no inference effect, with workflow acceptance recoverable from the original durable command
+> receipt rather than a WebSocket or Redis acknowledgement.
+> **Read this if**: phase 50 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 50 re-homes infernix's existing operator surface onto the bounded application language, replacing a bespoke front end rather than adding one; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [lift_and_compose_doctrine.md](../documents/engineering/lift_and_compose_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Lift infernix workflow and ready-artifact contracts into the generic amoebius UI runtime and
-> test that an authenticated own-tenant interaction succeeds while a tenant/scope-mismatched artifact handle
-> produces no inference effect, with workflow acceptance recoverable from the original durable command
-> receipt rather than a WebSocket or Redis acknowledgement.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 50.1: Bind the infernix workflow-to-interaction UI adapter 📋](#sprint-501-bind-the-infernix-workflow-to-interaction-ui-adapter-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -112,15 +132,15 @@ inference dispatch with zero forbidden effect. The complete apparatus is delegat
 ## Sprint 50.1: Bind the infernix workflow-to-interaction UI adapter 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Infernix/UiAdapter.hs`,
-`dhall/ui/infernix.dhall`, and `test/live/Phase50InfernixUiLift.hs`
-(target paths; not yet built)
-**Blocked by**: Phase 38 gate; Phase 40 gate; Phase 49 gate.
-**Independent Validation**: the live harness checks the own/foreign scope matrix against Keycloak, Envoy,
-Pulsar, MinIO, worker, durable-receipt, and browser observations and requires both committed mutants to fail.
+**Implementation**: `src/Amoebius/Infernix/UiAdapter.hs`, `dhall/ui/infernix.dhall`, and
+`test/live/Phase50InfernixUiLift.hs` (target paths; not yet built)
+**Blocked by**: Phase 38 gate; Phase 40
+gate; Phase 49 gate.
+**Independent Validation**: the live harness checks the own/foreign scope matrix
+against Keycloak, Envoy, Pulsar, MinIO, worker, durable-receipt, and browser observations and requires both
+committed mutants to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/lift_and_compose_doctrine.md`,
-`documents/engineering/tenancy_doctrine.md`, and
+`documents/engineering/lift_and_compose_doctrine.md`, `documents/engineering/tenancy_doctrine.md`, and
 `documents/engineering/ui_realtime_coordination_doctrine.md`.
 
 ### Objective

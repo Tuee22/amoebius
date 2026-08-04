@@ -1,31 +1,36 @@
 # Illegal States — ML Assets & Training
 
+> **Purpose**: The themed slice of the illegal-state catalog covering the engine/model asset
+> lifecycle (jit-build cache), continuous-training cadence, feed merge order, cross-app model grants, and the
+> boundary between model output and authority-bearing UI actions — the ML-asset states a valid `InForceSpec`
+> cannot represent.
+> **Read this if**: a model, engine, or accelerator asset state has to be shown impossible to express.
+
+Machine-learning assets are the one place amoebius deliberately resolves content at runtime rather than baking
+it, so these entries bound what that exception may do. Their numbering is held by
+[illegal_state_catalog.md](./illegal_state_catalog.md), and the resolution mechanism by
+[content_addressing_doctrine.md](../engineering/content_addressing_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
-> **Purpose**: The themed slice of the illegal-state catalog covering the engine/model asset
-> lifecycle (jit-build cache), continuous-training cadence, feed merge order, cross-app model grants, and the
-> boundary between model output and authority-bearing UI actions — the ML-asset states a valid `InForceSpec`
-> cannot represent.
+</details>
 
 ---
 
 ## 1. Scope
 
 This document is a **themed slice** of the illegal-state catalog: it carries the deep treatment of the
-ML-asset and training illegal states ([§3.25](#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model),
-[§3.32](#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention),
-[§3.33](#333-a-multi-partition-training-feed-with-no-defined-merge-order),
-[§3.34](#334-an-app-serving-or-continuing-another-apps-model-without-a-grant),
-[§3.84](#384-a-model-output-used-as-an-authority-bearing-command-or-identity)) and nothing else.
+ML-asset and training illegal states ([§3.25](#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model), [§3.32](#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention), [§3.33](#333-a-multi-partition-training-feed-with-no-defined-merge-order), [§3.34](#334-an-app-serving-or-continuing-another-apps-model-without-a-grant), [§3.84](#384-a-model-output-used-as-an-authority-bearing-command-or-identity)) and nothing else.
 
 It is **not** the index of the catalog. The full catalog index, the SSoT split, and the load-bearing honesty
 limit (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
-[`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage
-matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure** model ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus
-axis** (the orthogonal `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` /
+[`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure** model ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` /
 `live-effect` axis added on top of the foreclosure layer; `provision-seal` means post-bind Phase-11 provision
 returns a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
 [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice **references** those — it does not
@@ -45,8 +50,7 @@ every "unrepresentable" as *design intent for the type discipline*, never as a t
 
 Three ML-asset illegal states ride together. **(a) An engine named by arbitrary URL.** Sibling ML
 runtimes curl-tar native payloads and install venvs at image *build* and then re-select per engine — amoebius
-makes the compute engine an `EngineRuntime`, a **closed union of substrate-tagged engine identities with no
-arbitrary-`Url`/`Download` arm**: the engine is *named* by a typed identity from a closed catalog, selected by
+makes the compute engine an `EngineRuntime`, a **closed union of substrate-tagged engine identities with no arbitrary-`Url`/`Download` arm**: the engine is *named* by a typed identity from a closed catalog, selected by
 the detected substrate, and the shared **jit-build resolver** materializes that named identity on first miss
 into a **`CacheBudget`-bounded content-addressed cache**
 ([content_addressing_doctrine.md §4.5](../engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
@@ -63,13 +67,10 @@ mirrors, [§3.26](./illegal_state_lifecycle.md#326-an-unverified-environment-pro
 gap, and naming a model for import IS an explicit content-addressed import-with-provenance (there is no bare
 stage-by-name-without-provenance constructor). The provenance-gated constructor is owned by
 [`content_addressing_doctrine.md` §4.5](../engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss); this refines the serve gate — it does
-**not** add a second catalog entry. **(c) A model with no landing
-engine.** A `ModelArtifact` must be servable by an `EngineRuntime` present on the deployment's substrate; an
+**not** add a second catalog entry. **(c) A model with no landing engine.** A `ModelArtifact` must be servable by an `EngineRuntime` present on the deployment's substrate; an
 unmatched model has no landing engine — a **decode-foreclosed total relation** ([§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)), the same relation-over-a-
 collection shape as the engine↔substrate fold ([§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)). **Owner:**
-[`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) (the `EngineRuntime`/`ModelArtifact` asset
-tiers + the content-addressed store) + [`service_capability_doctrine.md`](../engineering/service_capability_doctrine.md) (the
-engine as a substrate-selected capability). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `EngineRuntime` union — no arbitrary-`Url` arm) +
+[`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) (the `EngineRuntime`/`ModelArtifact` asset tiers + the content-addressed store) + [`service_capability_doctrine.md`](../engineering/service_capability_doctrine.md) (the engine as a substrate-selected capability). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `EngineRuntime` union — no arbitrary-`Url` arm) +
 [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (an `ArtifactRef` handle exists only once its `.ready` edge does) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the model↔engine relation).
 **Layer:** type-foreclosed for the no-arbitrary-URL engine identity and the `.ready`-**and-provenance-witness**-gated `ArtifactRef` (the
 committed-checkpoint arm and the *presence* of a provenance witness are genuine no-inhabitant constructors); decode-foreclosed
@@ -99,20 +100,15 @@ with no checkpoints and no retention" has **no constructor** — a **type-forecl
 The authoritative Continuous trainer is **single-cluster** (the existing jitML First-Axis coordinator, its
 single-writer *delegated* to a Pulsar Failover subscription + content-store CAS/`AdvancePredicate`, not
 a bespoke election); cross-cluster is serve-by-replication, never a second trainer on the same feed. **Owner:**
-[`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) (owns the `TrainInit`/`TrainData`/`TrainBudget`
-unions + the foreclosure; `dsl_doctrine.md` carries the field only), with retention bounded by the two-ceiling
-storage fold ([`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) +
-[`pulsar_client_doctrine.md` §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra)). **Technique:**
-[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `TrainBudget`/`Feed`
-unions with no unbounded arm) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
+[`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) (owns the `TrainInit`/`TrainData`/`TrainBudget` unions + the foreclosure; `dsl_doctrine.md` carries the field only), with retention bounded by the two-ceiling
+storage fold ([`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) + [`pulsar_client_doctrine.md` §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra)). **Technique:**
+[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `TrainBudget`/`Feed` unions with no unbounded arm) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (the retention room-fit). **Layer:** type-foreclosed for the mandatory-cadence / bounded-retention union shape; **runtime-checked**
-residue — that the trainer actually checkpoints at cadence and retention actually holds (mirroring [§3.21](illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)'s
-runtime-checked tail).
+residue — that the trainer actually checkpoints at cadence and retention actually holds (mirroring [§3.21](illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)'s runtime-checked tail).
 
 **Validation-locus:** `Gate-1-editor` (the closed `TrainBudget`/`Feed` unions with no unbounded arm, and the
 mandatory `checkpointCadence` / bounded-retention `StorageBudget` fields, fail `dhall type` at authoring time) +
-`provision-seal` (the [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) retention room-fit is a post-bind provision fold that returns a
-`ProvisionError` on overflow before any `ProvisionedSpec` exists) +
+`provision-seal` (the [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) retention room-fit is a post-bind provision fold that returns a `ProvisionError` on overflow before any `ProvisionedSpec` exists) +
 `live-effect` (the residue: the trainer actually checkpointing at cadence and retention actually holding).
 
 ### 3.33 A multi-partition training feed with no defined merge order
@@ -120,18 +116,7 @@ mandatory `checkpointCadence` / bounded-retention `StorageBudget` fields, fail `
 A Pulsar topic with multiple partitions has no total consume order, so "train from this feed" is
 non-deterministic unless the merge is pinned — a prose "must consume in order" degrades to an untyped runtime
 hope. This round makes `TrainData.Feed` carry a **typed single-partition-or-explicit-merge-function witness**, so
-a non-deterministically-ordered feed has **no constructor**. The consumed prefix `[from, to)` is materialized at
-consume time into an **immutable dataset blob keyed by the SHA(s) of the message bodies** (bodies are already
-CBOR content-addressed), and *that* content-address is the pinned training input — the Pulsar cursor is
-broker-assigned metadata, never an input to any content hash. **Owner:**
-[`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) (the `TrainData.Feed` merge witness + the
-materialized-prefix content-address) + [`pulsar_client_doctrine.md` §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra)
-(the topic as a cursor-anchored replayable feed). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
-(the closed merge-witness on `Feed`) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
-(a `Feed` handle exists only once its single-partition-or-merge witness does). **Layer:** type-foreclosed/decode-foreclosed — the merge
-witness forecloses the non-deterministic feed at two layers — type-foreclosed (uninhabitable) where the witness is a closed union arm,
-decode-foreclosed (a decode-time `Left`) where the explicit merge function is a decode-checked total order; runtime-checked residue — that the broker
-actually replays the pinned prefix within retention.
+a non-deterministically-ordered feed has **no constructor**. The consumed prefix `[from, to)` is materialized at consume time into an **immutable dataset blob keyed by the SHA(s) of the message bodies** (bodies are already CBOR content-addressed), and *that* content-address is the pinned training input — the Pulsar cursor is broker-assigned metadata, never an input to any content hash. **Owner:** [`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) (the `TrainData.Feed` merge witness + the materialized-prefix content-address) + [`pulsar_client_doctrine.md` §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) (the topic as a cursor-anchored replayable feed). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (the closed merge-witness on `Feed`) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a `Feed` handle exists only once its single-partition-or-merge witness does). **Layer:** type-foreclosed/decode-foreclosed — the merge witness forecloses the non-deterministic feed at two layers — type-foreclosed (uninhabitable) where the witness is a closed union arm, decode-foreclosed (a decode-time `Left`) where the explicit merge function is a decode-checked total order; runtime-checked residue — that the broker actually replays the pinned prefix within retention.
 
 **Validation-locus:** `Gate-1-editor` (where the merge witness is a closed union arm — single-partition or a
 named merge — the non-deterministic feed fails `dhall type`) + `Gate-2-decoder` (where the explicit merge
@@ -150,8 +135,7 @@ constructor that crosses). **Owner:** [`content_addressing_doctrine.md`](../engi
 (per-app pointer namespacing + the no-cross-app `parent` edge) + [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md)
 (the per-app upstream-pull credential). **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (a per-app ownership index — the fold rejects a cross-app model reference absent a grant) +
-[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (app-scoped tags, the same
-shape as the cross-tenant refs of [§3.8](./illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)). **Layer:** decode-foreclosed — a
+[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (app-scoped tags, the same shape as the cross-tenant refs of [§3.8](./illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)). **Layer:** decode-foreclosed — a
 total decode-time rejection; runtime-checked residue — that the running serve path honors the namespace.
 
 **Validation-locus:** `Gate-2-decoder` (the per-app ownership-index fold and the app-scoped phantom tags make a
@@ -201,15 +185,13 @@ protected action, or drop the inherited audience label; every mutant must fail b
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog index this slice is
   carved from: owns the SSoT split, the honesty limit ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)), and the full list of entries.
 - [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques, the coverage
   matrix, the three-layer foreclosure model, and the **validation-locus axis** these entries are classified
   against.
-- [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid `InForceSpec` cannot
-  represent illegal state"); carries the `TrainBudget`/`TrainData` fields, whose foreclosure is owned elsewhere.
+- [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid `InForceSpec` cannot represent illegal state"); carries the `TrainBudget`/`TrainData` fields, whose foreclosure is owned elsewhere.
 - [`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) — owner of the `EngineRuntime` /
   `ModelArtifact` asset tiers, the ML-asset lifecycle (one bounded content-addressed cache resolved on first
   miss), the `TrainInit` / `TrainData` / `TrainBudget` unions, the merge witness + materialized-prefix
@@ -219,8 +201,7 @@ protected action, or drop the inherited audience label; every mutant must fail b
 - [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) — the two-ceiling storage fold bounding
   feed retention ([§3.32](#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention)).
 - [`pulsar_client_doctrine.md`](../engineering/pulsar_client_doctrine.md) — topic retention and the topic as a
-  cursor-anchored replayable feed ([§3.32](#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention),
-  [§3.33](#333-a-multi-partition-training-feed-with-no-defined-merge-order)).
+  cursor-anchored replayable feed ([§3.32](#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention), [§3.33](#333-a-multi-partition-training-feed-with-no-defined-merge-order)).
 - [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) — the per-app upstream-pull credential
   ([§3.34](#334-an-app-serving-or-continuing-another-apps-model-without-a-grant)).
 - [`low_code_ui_runtime_doctrine.md`](../engineering/low_code_ui_runtime_doctrine.md) — the

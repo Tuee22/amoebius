@@ -1,15 +1,40 @@
 # Phase 46: Per-PV EBS decoupling + create-vs-delete credential
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
-**Generated sections**: none
-
 > **Purpose**: Make durable per-PV EBS **structurally** outside the ephemeral cluster's destroy set — carried in
 > its own `protect`/`Retain` durable-class Pulumi state and guarded by an operational credential that is
 > *denied `ec2:DeleteVolume` at the cloud API* — then complete the Pulumi-created-volume → mounted-claim path
 > through a static-only, baked AWS EBS CSI (no external provisioner, static PV over the volume's `volumeHandle`)
 > and realize the `CreateProviderCapacity` storage-scaling arm, gated live on `linux-cpu → provider`.
+> **Read this if**: phase 46 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 46 delivers the Per-PV EBS decoupling + create-vs-delete credential; its design is owned by [pulumi_iac_doctrine.md](../documents/engineering/pulumi_iac_doctrine.md), [storage_lifecycle_doctrine.md](../documents/engineering/storage_lifecycle_doctrine.md), [image_build_doctrine.md](../documents/engineering/image_build_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu → provider` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — the durable per-PV EBS slice](#resource-provision--the-durable-per-pv-ebs-slice)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 46.1: Per-PV durable EBS in its own state + node-vs-storage decoupling 📋](#sprint-461-per-pv-durable-ebs-in-its-own-state--node-vs-storage-decoupling-)
+- [Sprint 46.2: The create-vs-delete credential model (cloud-API delete-deny) 📋](#sprint-462-the-create-vs-delete-credential-model-cloud-api-delete-deny-)
+- [Sprint 46.3: Static-only baked AWS EBS CSI + static PV over volumeHandle 📋](#sprint-463-static-only-baked-aws-ebs-csi--static-pv-over-volumehandle-)
+- [Sprint 46.4: Provider-volume migration + the `CreateProviderCapacity` storage-scaling arm 📋](#sprint-464-provider-volume-migration--the-createprovidercapacity-storage-scaling-arm-)
+- [Sprint 46.5: Phase gate — durable EBS retained across teardown + cloud-API delete-deny + static-CSI reattach 📋](#sprint-465-phase-gate--durable-ebs-retained-across-teardown--cloud-api-delete-deny--static-csi-reattach-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -17,22 +42,16 @@
 
 📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
 statement is design intent, never a tested amoebius result. This phase opens after the
-[Phase 44](phase_44_provider_deploy_checkpoint.md) gate (the provider-cluster Pulumi deploy-from-inside +
-Vault-Transit-enveloped MinIO checkpoint + `observeProviderAccount` — the deploy this phase spins a cluster
-with and whose durable-class checkpoint/state machinery it reuses), the
-[Phase 28](phase_28_retained_storage.md) gate (`no-provisioner` retained PVs + lossless rebind — the storage
-substrate the EBS backs), and the [Phase 25](phase_25_base_image_registry.md) gate (the multi-arch baked-binary
-supply chain this phase extends with the provider-only CSI binaries). It runs on the **linux-cpu → provider**
+[Phase 44](phase_44_provider_deploy_checkpoint.md) gate (the provider-cluster Pulumi deploy-from-inside + Vault-Transit-enveloped MinIO checkpoint + `observeProviderAccount` — the deploy this phase spins a cluster with and whose durable-class checkpoint/state machinery it reuses), the
+[Phase 28](phase_28_retained_storage.md) gate (`no-provisioner` retained PVs + lossless rebind — the storage substrate the EBS backs), and the [Phase 25](phase_25_base_image_registry.md) gate (the multi-arch baked-binary supply chain this phase extends with the provider-only CSI binaries). It runs on the **linux-cpu → provider**
 substrate in **Register 3** (live infrastructure): the parent amoebius cluster is a single-node `kind` cluster
 on `linux-cpu`, from inside which the Pulumi engine issues the provider deploy over the cloud API; `→ provider`
 names the deploy target class (a cloud-managed EKS cluster), not a fifth hardware substrate, so the gate stays
-single-substrate. This sub-phase owns **the durable per-PV EBS class, its create-vs-delete credential, the
-static-only EBS CSI path, and the `CreateProviderCapacity` storage-scaling enactor** — never the provider
+single-substrate. This sub-phase owns **the durable per-PV EBS class, its create-vs-delete credential, the static-only EBS CSI path, and the `CreateProviderCapacity` storage-scaling enactor** — never the provider
 deploy itself (that is the [Phase 44](phase_44_provider_deploy_checkpoint.md) gate), never the hostless
 in-cluster control plane and Lease handoff ([Phase 45](phase_45_provider_child_bringup.md)), never dynamic node
 provisioning or the leak-free ephemeral teardown gate ([Phase 47](phase_47_provider_dynamic_nodes.md)), and
-never the elevated-harness *reclamation* of durable test-flagged EBS ([Phase 54](phase_54_test_topology_dsl.md),
-which completes the [§7](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles) model's full leak-free test *cycle*). Status transitions are recorded
+never the elevated-harness *reclamation* of durable test-flagged EBS ([Phase 54](phase_54_test_topology_dsl.md), which completes the [§7](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles) model's full leak-free test *cycle*). Status transitions are recorded
 reverse-chronologically here once work begins.
 
 ## Phase Summary
@@ -102,35 +121,31 @@ possible ([Phase 54](phase_54_test_topology_dsl.md)).
 
 ```mermaid
 flowchart LR
+%% register: orientation
   ebs["Amoebius.Pulumi.Ebs: durable EBS in its OWN protect/Retain state, one rounded volume per claim"] --> csi["Amoebius.Storage.EbsCsi: baked static-only CSI, PV over volumeHandle, no external provisioner"]
   cred["Amoebius.Pulumi.Credential: operational cred DENIED ec2:DeleteVolume at the cloud API"] --> ebs
   csi --> claim["single-replica StatefulSet claim ns/sts0/pv_0, run-unique marker"]
   scale["Amoebius.Storage.ProviderScaling: CreateProviderCapacity via a validated batch, token once"] --> ebs
   claim --> gate["Gate: cluster pulumi destroy leaves EBS intact; real ec2:DeleteVolume denied; second bring-up reattaches over same volumeHandle; marker byte-for-byte"]
 ```
+*Orientation. Design intent. The module seams this phase adds and the gate that closes over them; the gate's apparatus is owned by [Gate integrity](#gate-integrity). No part of it has run.*
 
 **Substrate:** linux-cpu → provider — the [§L](development_plan_standards.md#l-one-substrate-discipline) Parent-drives-provider escape form. The acceptance gate runs on
 exactly one hardware substrate, the `linux-cpu` parent `kind` cluster from inside which the Pulumi engine issues
 the deploy; `→ provider` (EKS) is the declared managed-engine deploy target, not a fifth hardware substrate
-([`substrates.md` §2](substrates.md#2-substrate-inventory),
-[`development_plan_standards.md` §L](development_plan_standards.md#l-one-substrate-discipline)).
+([`substrates.md` §2](substrates.md#2-substrate-inventory), [`development_plan_standards.md` §L](development_plan_standards.md#l-one-substrate-discipline)).
 
 **Register:** 3 (live infrastructure) — the gate spins up a real provider cluster with a real durable EBS
 volume, writes and reads a marker across a real `pulumi destroy` and re-attach, and issues a real
 `ec2:DeleteVolume` against the cloud API; no register-1/2 in-process check discharges it. The emitted ledger's
 acceptance token reads *tested on the EKS provider target from a `linux-cpu` parent*, with durable-EBS retention
-recorded *correct-by-class* and the elevated-harness durable-EBS *reclamation* marked **deferred to
-[Phase 54](phase_54_test_topology_dsl.md), not asserted here**.
+recorded *correct-by-class* and the elevated-harness durable-EBS *reclamation* marked **deferred to [Phase 54](phase_54_test_topology_dsl.md), not asserted here**.
 
 **Gate:** an `InForceSpec` that, from a **linux-cpu** parent, spins up a provider cluster (via the
-[Phase 44](phase_44_provider_deploy_checkpoint.md) deploy), creates **one per-PV durable EBS volume in separate
-`protect`/`Retain` state**, renders a **static `ebs.csi.aws.com` PV** whose `volumeHandle` is that exact
-Pulumi-created EBS ID with matching Availability-Zone affinity, observes the **baked EBS CSI
-controller/node become Ready without any external provisioner** and with `kubernetes.io/no-provisioner` as the
+[Phase 44](phase_44_provider_deploy_checkpoint.md) deploy), creates **one per-PV durable EBS volume in separate `protect`/`Retain` state**, renders a **static `ebs.csi.aws.com` PV** whose `volumeHandle` is that exact
+Pulumi-created EBS ID with matching Availability-Zone affinity, observes the **baked EBS CSI controller/node become Ready without any external provisioner** and with `kubernetes.io/no-provisioner` as the
 sole StorageClass, writes a **run-unique marker** through the bound `<ns>/sts0/pv_0` claim, records the EBS
-identity and AZ, then `pulumi destroy`s the ephemeral cluster stack and proves — by an **independent cloud-API
-`DescribeVolumes` sweep** — that the durable EBS **survives intact**. A **real `ec2:DeleteVolume` call issued
-under the operational credential** against a live test-flagged volume returns `AccessDenied`/`UnauthorizedOperation`
+identity and AZ, then `pulumi destroy`s the ephemeral cluster stack and proves — by an **independent cloud-API `DescribeVolumes` sweep** — that the durable EBS **survives intact**. A **real `ec2:DeleteVolume` call issued under the operational credential** against a live test-flagged volume returns `AccessDenied`/`UnauthorizedOperation`
 from AWS (the volume survives), while the paired positive `ec2:CreateVolume` under the same credential succeeds.
 A second full bring-up from the durable-EBS-retained, cluster-absent state, constrained to the recorded AZ,
 recreates a static PV over the **same `volumeHandle`**, re-attaches the volume, and reads the marker
@@ -140,7 +155,6 @@ representative topology slice, the Phase-0 oracle pins, and the seeded mutants �
 [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
 
 ## Gate integrity
-
 
 > **Provider corpus split (by design).** `test/dhall/phase_46_provider_provision.dhall` and the
 > `mut-36.*` mutant family are this sub-phase's own Phase-0 corpus. The four provider sub-phases
@@ -200,8 +214,7 @@ committed and re-run (not run once); the gate MUST turn each red when substitute
   the transition's `ValidatedCloudActionBatch` and its one-time token (dropped check). It MUST go **red**: only
   the validated batch may reach the cloud writer.
 
-**Independent reference predicates (§M.3).** Every check defines its reference side **independently of the code
-under test**:
+**Independent reference predicates (§M.3).** Every check defines its reference side **independently of the code under test**:
 
 1. **Cloud-API delete-deny (§M.5 external observer).** "Denied" is a **real `ec2:DeleteVolume` API call** issued
    under the operational credential against a **live dummy test-flagged EBS volume**, returning an
@@ -210,8 +223,7 @@ under test**:
    cloud API). It is paired with the positive `ec2:CreateVolume` succeeding under the same credential (§M.8), and
    the expected action → allow/deny reference is the committed hand table `test/goldens/ebs_credential_matrix.txt`.
 2. **Distinct checkpoint namespace by external read.** The durable volume's state is a distinct logical
-   checkpoint namespace from the ephemeral cluster stack's checkpoint, asserted by **distinct MinIO object keys
-   read from the store** (an independent `LIST`/`HEAD` against MinIO), not from the program that wrote them.
+   checkpoint namespace from the ephemeral cluster stack's checkpoint, asserted by **distinct MinIO object keys read from the store** (an independent `LIST`/`HEAD` against MinIO), not from the program that wrote them.
 3. **Pre-create witness and byte geometry.** The pre-create backing witness is asserted to contain the
    deterministic `Promised` `ProviderVolumeSlotId` and **no real volume id**; the integral-GiB `CreateVolume`
    request exactly matches it; the returned id is the **only** transition to `Materialized`. Independent cloud/OS
@@ -233,8 +245,7 @@ an integral GiB, proving rounding is performed once), the raw-equals-usable-insu
 metadata that forces upward rounding or rejection), the migration replacement/shrink fixture with its paired
 one-short variants (durable EBS bytes, durable volume count, workspace backing, executor
 CPU/memory/pod-ephemeral, pod slots, `ebs.csi.aws.com` attach slots), and the `Growable` durable-EBS
-threshold-crossing fixture that must select `CreateProviderCapacity`. Every negative asserts **its specific
-reason** and is paired with a positive differing only in the foreclosed dimension (§M.8).
+threshold-crossing fixture that must select `CreateProviderCapacity`. Every negative asserts **its specific reason** and is paired with a positive differing only in the foreclosed dimension (§M.8).
 
 ## Resource provision — the durable per-PV EBS slice
 
@@ -283,7 +294,7 @@ provider control plane, node group, and executor peaks are provisioned by
   implementation and required sidecars are consumed as baked binaries under typed manifests, never as a public
   image or Helm chart.
 - [`resource_capacity_doctrine.md §6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)
-  and [`§3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+  and [`§3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
   — *`Growable` / `ScalingPolicy`: the quota-bounded dynamic-provisioning arm* and *the systematic provision
   matrix*: the `CreateProviderCapacity` storage-scaling transition is the runtime enaction of a typed
   `ScalingPolicy` against the freshly observed durable byte/count residual; the provider quota is the outer
@@ -300,26 +311,25 @@ provider control plane, node group, and executor peaks are provisioned by
 ## Sprint 46.1: Per-PV durable EBS in its own state + node-vs-storage decoupling 📋
 
 **Status**: Planned
-**Implementation**: `amoebius-pulumi/src/Amoebius/Pulumi/Ebs.hs` (per-PV durable EBS program, own state,
-`protect`/`Retain`, `ProvisionedVolumeDemand` → `ProviderVolumeRequest` geometry, `ProviderVolumeSlotId`
-promised/materialized witness) — built on the `amoebius-pulumi` engine seam and the Vault-Transit-enveloped
-MinIO backend **first delivered by [Phase 44](phase_44_provider_deploy_checkpoint.md) and reused here, not
-rebuilt** (target path; not yet built)
-**Blocked by**: [Phase 44](phase_44_provider_deploy_checkpoint.md) gate (the provider deploy + encrypted-MinIO
-checkpoint machinery this reuses for the durable-class state); [Phase 28](phase_28_retained_storage.md) gate
-(`no-provisioner` retained PVs + lossless rebind — the storage substrate the EBS backs) — external
-earlier-phase prerequisites.
-**Independent Validation**: one per-PV EBS volume is created in **separate** durable state; its
-`ProvisionedVolumeDemand` derives an integral-GiB `ProviderVolumeRequest` retaining usable/raw geometry, and the
-same rounded `provisionedBytes` is rendered on PVC/PV from the ephemeral cluster stack; the pre-create witness
-contains the deterministic promised `ProviderVolumeSlotId` and no real volume id; the integer-GiB `CreateVolume`
-request exactly matches it and the returned id is the only transition to `Materialized`; a destroyed/replaced EC2
-node detaches its EBS and the volume survives; the next bring-up re-attaches the same volume to the same
-`<namespace>/<statefulset>/pv_<integer>` claim; the volume's state is a distinct logical checkpoint namespace
-from the ephemeral cluster stack's checkpoint (asserted by distinct MinIO object keys read from the store).
+**Implementation**: `amoebius-pulumi/src/Amoebius/Pulumi/Ebs.hs` (per-PV durable EBS
+program, own state, `protect`/`Retain`, `ProvisionedVolumeDemand` → `ProviderVolumeRequest` geometry,
+`ProviderVolumeSlotId` promised/materialized witness) — built on the `amoebius-pulumi` engine seam and the
+Vault-Transit-enveloped MinIO backend **first delivered by [Phase 44](phase_44_provider_deploy_checkpoint.md) and reused here, not rebuilt** (target path; not yet built)
+**Blocked by**: [Phase 44](phase_44_provider_deploy_checkpoint.md) gate (the provider deploy + encrypted-MinIO checkpoint machinery this reuses for the durable-class state);
+[Phase 28](phase_28_retained_storage.md) gate (`no-provisioner` retained PVs + lossless rebind — the storage substrate the EBS backs) — external earlier-phase prerequisites.
+**Independent Validation**: one per-PV EBS
+volume is created in **separate** durable state; its `ProvisionedVolumeDemand` derives an integral-GiB
+`ProviderVolumeRequest` retaining usable/raw geometry, and the same rounded `provisionedBytes` is rendered
+on PVC/PV from the ephemeral cluster stack; the pre-create witness contains the deterministic promised
+`ProviderVolumeSlotId` and no real volume id; the integer-GiB `CreateVolume` request exactly matches it and
+the returned id is the only transition to `Materialized`; a destroyed/replaced EC2 node detaches its EBS and
+the volume survives; the next bring-up re-attaches the same volume to the same
+`<namespace>/<statefulset>/pv_<integer>` claim; the volume's state is a distinct logical checkpoint
+namespace from the ephemeral cluster stack's checkpoint (asserted by distinct MinIO object keys read from
+the store).
 **Docs to update**: `documents/engineering/pulumi_iac_doctrine.md` (§3),
-`documents/engineering/storage_lifecycle_doctrine.md` (one PV/EBS per claim, rounded allocation + node-vs-storage
-decoupling), `DEVELOPMENT_PLAN/system_components.md`.
+`documents/engineering/storage_lifecycle_doctrine.md` (one PV/EBS per claim, rounded allocation +
+node-vs-storage decoupling), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 
@@ -380,21 +390,23 @@ The whole sprint (📋 Planned).
 ## Sprint 46.2: The create-vs-delete credential model (cloud-API delete-deny) 📋
 
 **Status**: Planned
-**Implementation**: `amoebius-pulumi/src/Amoebius/Pulumi/Credential.hs` (operational create-only vs elevated
-delete IAM policy split; the attach-only CSI runtime identity) (target path; not yet built)
-**Blocked by**: [Phase 44](phase_44_provider_deploy_checkpoint.md) gate (the operational-vs-elevated credential
-resolution path and the Vault-injected cloud keys — secrets are *names* in the `.dhall`, bytes injected by the
-parent); Sprint 46.1 (the durable retained volume the deny statement scopes to) — earlier-or-same-phase
-prerequisites.
-**Independent Validation**: a real `ec2:DeleteVolume` call issued under the operational credential against a live
-dummy test-flagged EBS volume returns an `AccessDenied`/`UnauthorizedOperation` response from AWS (the volume
-survives the attempt); the same operational credential *can* `ec2:CreateVolume` (a real create succeeds), so the
-deny is specific to the delete dimension; the CSI runtime identity is attach-only and denied both `CreateVolume`
-and `DeleteVolume`; the generated policy matches the committed reference matrix `test/goldens/ebs_credential_matrix.txt`
+**Implementation**: `amoebius-pulumi/src/Amoebius/Pulumi/Credential.hs` (operational
+create-only vs elevated delete IAM policy split; the attach-only CSI runtime identity) (target path; not yet
+built)
+**Blocked by**: [Phase 44](phase_44_provider_deploy_checkpoint.md) gate (the operational-vs-elevated
+credential resolution path and the Vault-injected cloud keys — secrets are *names* in the `.dhall`, bytes
+injected by the parent); Sprint 46.1 (the durable retained volume the deny statement scopes to) —
+earlier-or-same-phase prerequisites.
+**Independent Validation**: a real `ec2:DeleteVolume` call issued under
+the operational credential against a live dummy test-flagged EBS volume returns an
+`AccessDenied`/`UnauthorizedOperation` response from AWS (the volume survives the attempt); the same
+operational credential *can* `ec2:CreateVolume` (a real create succeeds), so the deny is specific to the
+delete dimension; the CSI runtime identity is attach-only and denied both `CreateVolume` and `DeleteVolume`;
+the generated policy matches the committed reference matrix `test/goldens/ebs_credential_matrix.txt`
 action-for-action.
 **Docs to update**: `documents/engineering/pulumi_iac_doctrine.md` (§6),
-`documents/engineering/storage_lifecycle_doctrine.md` (§7/§7.1 — deletion forbidden under normal operation; the
-single elevated-harness exception), `DEVELOPMENT_PLAN/system_components.md`.
+`documents/engineering/storage_lifecycle_doctrine.md` (§7/§7.1 — deletion forbidden under normal operation;
+the single elevated-harness exception), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 
@@ -402,8 +414,7 @@ Adopt [`pulumi_iac_doctrine.md §6 — The EBS create-vs-delete credential model
 and [`storage_lifecycle_doctrine.md §7 / §7.1`](../documents/engineering/storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation):
 make the authority to delete durable data **structurally** withheld from normal operation, so accidental
 durable-data destruction is *unauthorized at the cloud API*, not merely discouraged, and the only automated
-delete authority is the elevated test credential ([Phase 54](phase_54_test_topology_dsl.md), referenced not
-invoked here).
+delete authority is the elevated test credential ([Phase 54](phase_54_test_topology_dsl.md), referenced not invoked here).
 
 ### Deliverables
 
@@ -445,24 +456,24 @@ The whole sprint (📋 Planned).
 ## Sprint 46.3: Static-only baked AWS EBS CSI + static PV over volumeHandle 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Storage/EbsCsi.hs` (typed static-only EBS CSI controller/node + PV renderer;
-no external provisioner), `docker/base/Dockerfile`, `src/Amoebius/Image/BakeInventory.hs`,
-`test/fixtures/phase46/ebs_csi_bake_expected.dhall` (the Phase-0-pinned provider-driver binary/version oracle)
-(target paths; not yet built)
-**Blocked by**: [Phase 25](phase_25_base_image_registry.md) gate (the multi-arch baked-binary supply chain this
-sprint extends with provider-only CSI binaries); [Phase 26](phase_26_object_reconciler.md) gate (the typed SSA
-object reconciler that installs the CSI components from typed manifests); Sprint 46.1 (the durable EBS
-`volumeHandle` the static PV binds over) — earlier-or-same-phase prerequisites.
-**Independent Validation**: the baked/rendered AWS EBS CSI controller and node components become Ready without an
-external provisioner; each fresh PV names `spec.csi.driver: ebs.csi.aws.com`, the Pulumi EBS ID as
-`volumeHandle`, and node affinity for the volume's Availability Zone; the cluster has exactly one StorageClass,
-`kubernetes.io/no-provisioner`; the EBS CSI install contains no external-provisioner; an independent cloud audit
-records no `CreateVolume` call under the CSI runtime identity; and the provider-driver extension to
-`BakeInventory` matches `test/fixtures/phase46/ebs_csi_bake_expected.dhall`, each pinned controller/node/sidecar
-binary executing by absolute path with its expected version on both base-image architectures.
-**Docs to update**: `documents/engineering/image_build_doctrine.md` (the provider-only EBS CSI binaries in the
-base-image supply chain), `documents/engineering/storage_lifecycle_doctrine.md` (static CSI `volumeHandle` bind,
-sole `no-provisioner` StorageClass), `DEVELOPMENT_PLAN/system_components.md`.
+**Implementation**: `src/Amoebius/Storage/EbsCsi.hs` (typed static-only EBS CSI
+controller/node + PV renderer; no external provisioner), `docker/base/Dockerfile`,
+`src/Amoebius/Image/BakeInventory.hs`, `test/fixtures/phase46/ebs_csi_bake_expected.dhall` (the
+Phase-0-pinned provider-driver binary/version oracle) (target paths; not yet built)
+**Blocked by**:
+[Phase 25](phase_25_base_image_registry.md) gate (the multi-arch baked-binary supply chain this sprint extends with provider-only CSI binaries); [Phase 26](phase_26_object_reconciler.md) gate (the typed SSA object reconciler that installs the CSI components from typed manifests); Sprint 46.1 (the durable EBS `volumeHandle` the static PV binds over) — earlier-or-same-phase prerequisites.
+**Independent Validation**:
+the baked/rendered AWS EBS CSI controller and node components become Ready without an external provisioner;
+each fresh PV names `spec.csi.driver: ebs.csi.aws.com`, the Pulumi EBS ID as `volumeHandle`, and node
+affinity for the volume's Availability Zone; the cluster has exactly one StorageClass,
+`kubernetes.io/no-provisioner`; the EBS CSI install contains no external-provisioner; an independent cloud
+audit records no `CreateVolume` call under the CSI runtime identity; and the provider-driver extension to
+`BakeInventory` matches `test/fixtures/phase46/ebs_csi_bake_expected.dhall`, each pinned
+controller/node/sidecar binary executing by absolute path with its expected version on both base-image
+architectures.
+**Docs to update**: `documents/engineering/image_build_doctrine.md` (the provider-only EBS
+CSI binaries in the base-image supply chain), `documents/engineering/storage_lifecycle_doctrine.md` (static
+CSI `volumeHandle` bind, sole `no-provisioner` StorageClass), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 
@@ -516,27 +527,29 @@ The whole sprint (📋 Planned).
 **Implementation**: `src/Amoebius/Storage/ProviderScaling.hs` (`CreateProviderCapacity`
 validation/enactment), and the `StorageMigrationDemand`/`ProvisionedStorageMigration` witness in
 `amoebius-pulumi/src/Amoebius/Pulumi/Ebs.hs` (target paths; not yet built)
-**Blocked by**: Sprint 46.1; [Phase 8](phase_08_storage_geometry_folds.md) gate (the storage-scaling policy-only
-envelope and the observe-then-plan `Growable`/scaling fold); [Phase 26](phase_26_object_reconciler.md) gate (the
-generic fresh-snapshot validation and single-use dispatcher producing the `ValidatedStorageScalingAction`) —
+**Blocked by**: Sprint 46.1;
+[Phase 8](phase_08_storage_geometry_folds.md) gate (the storage-scaling policy-only envelope and the observe-then-plan `Growable`/scaling fold); [Phase 26](phase_26_object_reconciler.md) gate (the generic fresh-snapshot validation and single-use dispatcher producing the `ValidatedStorageScalingAction`) —
 earlier-or-same-phase prerequisites.
-**Independent Validation**: a provider-volume replacement/shrink consumes a `StorageMigrationDemand` instead of
-mutating a size in place; its private `ProvisionedStorageMigration` charges old+new raw rounded bytes, two
-provider volume-count slots, workspace, both `ebs.csi.aws.com` attachments, and the full copy/verify Job
-concurrently before creating the replacement; cutover occurs only after byte-for-byte verification, and a failed
-copy/verification or unobservable cleanup keeps both EBS volumes and checkpoints intact and charged. A `Growable`
-durable-EBS budget reaches `CreateProviderCapacity` only through [Phase 8](phase_08_storage_geometry_folds.md)'s
-`ScalingPolicy` selection and [Phase 26](phase_26_object_reconciler.md)'s fresh `ValidatedStorageScalingAction`,
-the transition's exact `ValidatedCloudActionBatch`, one-time token consumption, and receipt-bound EBS/checkpoint
-readback; stale quota/allocation/account/execution input records **zero** cloud mutation.
-**Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md` (provider old+new migration peak),
-`documents/engineering/resource_capacity_doctrine.md` (§6/§3.1 — the live `CreateProviderCapacity` storage-scaling
-enaction under the provider-quota ceiling), `DEVELOPMENT_PLAN/system_components.md`.
+**Independent Validation**: a provider-volume replacement/shrink
+consumes a `StorageMigrationDemand` instead of mutating a size in place; its private
+`ProvisionedStorageMigration` charges old+new raw rounded bytes, two provider volume-count slots, workspace,
+both `ebs.csi.aws.com` attachments, and the full copy/verify Job concurrently before creating the
+replacement; cutover occurs only after byte-for-byte verification, and a failed copy/verification or
+unobservable cleanup keeps both EBS volumes and checkpoints intact and charged. A `Growable` durable-EBS
+budget reaches `CreateProviderCapacity` only through [Phase 8](phase_08_storage_geometry_folds.md)'s
+`ScalingPolicy` selection and [Phase 26](phase_26_object_reconciler.md)'s fresh
+`ValidatedStorageScalingAction`, the transition's exact `ValidatedCloudActionBatch`, one-time token
+consumption, and receipt-bound EBS/checkpoint readback; stale quota/allocation/account/execution input
+records **zero** cloud mutation.
+**Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md`
+(provider old+new migration peak), `documents/engineering/resource_capacity_doctrine.md` (§6/§3.1 — the live
+`CreateProviderCapacity` storage-scaling enaction under the provider-quota ceiling),
+`DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 
 Adopt [`resource_capacity_doctrine.md §6 — Growable / ScalingPolicy`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)
-(with [`§3.1 — the systematic provision matrix`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix))
+(with [`§3.1 — the systematic provision matrix`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix))
 and [`storage_lifecycle_doctrine.md §7.1`](../documents/engineering/storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness):
 realize the provider-volume storage-scaling arm without adding a second create path — a policy-driven
 `CreateProviderCapacity` transition is an exact refinement of the same batch-owned EBS program, quota debit,
@@ -597,27 +610,28 @@ The whole sprint (📋 Planned).
 ## Sprint 46.5: Phase gate — durable EBS retained across teardown + cloud-API delete-deny + static-CSI reattach 📋
 
 **Status**: Planned
-**Implementation**: `test/dhall/phase_46_provider_provision.dhall` (the durable-EBS slice of the gate topology),
-a gate driver reusing the [Phase 44](phase_44_provider_deploy_checkpoint.md) provider deploy and the
-[Phase 26](phase_26_object_reconciler.md) reconciler (target paths; not yet built)
+**Implementation**: `test/dhall/phase_46_provider_provision.dhall` (the durable-EBS
+slice of the gate topology), a gate driver reusing the [Phase 44](phase_44_provider_deploy_checkpoint.md)
+provider deploy and the [Phase 26](phase_26_object_reconciler.md) reconciler (target paths; not yet built)
 **Blocked by**: Sprint 46.1, Sprint 46.2, Sprint 46.3, Sprint 46.4;
 [Phase 44](phase_44_provider_deploy_checkpoint.md) gate (the provider cluster this stands the EBS up in);
-[Phase 28](phase_28_retained_storage.md) gate (retained PVs); [Phase 25](phase_25_base_image_registry.md) gate
-(baked binaries).
-**Independent Validation**: from a `linux-cpu` parent, spin up a provider cluster; create one per-PV durable EBS
-in separate `protect`/`Retain` state; render a static `ebs.csi.aws.com` PV over its `volumeHandle` with matching
-AZ affinity; observe the baked EBS CSI Ready without an external provisioner and `kubernetes.io/no-provisioner`
-as the sole StorageClass; write a run-unique marker through the `<ns>/sts0/pv_0` claim; record the EBS identity
-and AZ; `pulumi destroy` the ephemeral cluster stack and prove — by an independent cloud-API `DescribeVolumes`
-sweep — that the durable EBS survives intact; issue a real `ec2:DeleteVolume` under the operational credential
-and observe `AccessDenied`/`UnauthorizedOperation` with the volume surviving (paired positive `ec2:CreateVolume`
-succeeds); then run a second full bring-up from the retained-EBS, cluster-absent state, constrained to the
-recorded AZ, recreating the static PV over the same `volumeHandle`, reattaching the volume, and reading the
-marker byte-for-byte; each cycle emits a proven/tested/assumed ledger artifact.
-**Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md` (node-vs-storage decoupling + the
-`protect`/`Retain` separation realized live; durable-EBS reclamation deferred to
-[Phase 54](phase_54_test_topology_dsl.md)), `documents/engineering/testing_doctrine.md` (the per-run ledger),
-`DEVELOPMENT_PLAN/README.md`.
+[Phase 28](phase_28_retained_storage.md) gate (retained PVs); [Phase 25](phase_25_base_image_registry.md)
+gate (baked binaries).
+**Independent Validation**: from a `linux-cpu` parent, spin up a provider cluster;
+create one per-PV durable EBS in separate `protect`/`Retain` state; render a static `ebs.csi.aws.com` PV
+over its `volumeHandle` with matching AZ affinity; observe the baked EBS CSI Ready without an external
+provisioner and `kubernetes.io/no-provisioner` as the sole StorageClass; write a run-unique marker through
+the `<ns>/sts0/pv_0` claim; record the EBS identity and AZ; `pulumi destroy` the ephemeral cluster stack and
+prove — by an independent cloud-API `DescribeVolumes` sweep — that the durable EBS survives intact; issue a
+real `ec2:DeleteVolume` under the operational credential and observe `AccessDenied`/`UnauthorizedOperation`
+with the volume surviving (paired positive `ec2:CreateVolume` succeeds); then run a second full bring-up
+from the retained-EBS, cluster-absent state, constrained to the recorded AZ, recreating the static PV over
+the same `volumeHandle`, reattaching the volume, and reading the marker byte-for-byte; each cycle emits a
+proven/tested/assumed ledger artifact.
+**Docs to update**:
+`documents/engineering/storage_lifecycle_doctrine.md` (node-vs-storage decoupling + the `protect`/`Retain`
+separation realized live; durable-EBS reclamation deferred to [Phase 54](phase_54_test_topology_dsl.md)),
+`documents/engineering/testing_doctrine.md` (the per-run ledger), `DEVELOPMENT_PLAN/README.md`.
 
 ### Objective
 
@@ -650,8 +664,7 @@ same volume through a freshly rendered static CSI PV and reads its data back unc
    `volumeHandle: <that EBS volume ID>`, and matching zone affinity, the EBS CSI components are Ready before the
    bind without an external provisioner, and the sole StorageClass is `kubernetes.io/no-provisioner`. Write a
    fresh run-unique marker through `<ns>/sts0/pv_0` and record the EBS volume ID and Availability Zone.
-2. `pulumi destroy` the ephemeral cluster stack. Assert — by an **independent read-only cloud-API `DescribeVolumes`
-   sweep** (a cloud-boundary observer, §M.5, explicitly **not** the emptied Pulumi checkpoint) — that the durable
+2. `pulumi destroy` the ephemeral cluster stack. Assert — by an **independent read-only cloud-API `DescribeVolumes` sweep** (a cloud-boundary observer, §M.5, explicitly **not** the emptied Pulumi checkpoint) — that the durable
    EBS **survives intact** (it is in separate, `protect`ed durable state); a retained durable volume is the sole
    permitted survivor by class, not a leak.
 3. Issue a **real `ec2:DeleteVolume`** under the operational credential against the live retained/test-flagged
@@ -679,8 +692,7 @@ The whole sprint (📋 Planned).
 > cloud-API delete-deny, and the static-CSI reattach; the full leak-free ephemeral teardown *sweep* is
 > [Phase 47](phase_47_provider_dynamic_nodes.md), and the leak-free durable-EBS *reclamation* under the elevated
 > credential — the move that makes a *full* leak-free test *cycle* possible — is
-> [Phase 54](phase_54_test_topology_dsl.md) and is **not** a dependency of this phase. Live AWS spend (EKS, EC2,
-> EBS) is the *expected* outcome of asking the harness to provision a provider cluster, exactly as in the prodbox
+> [Phase 54](phase_54_test_topology_dsl.md) and is **not** a dependency of this phase. Live AWS spend (EKS, EC2, > EBS) is the *expected* outcome of asking the harness to provision a provider cluster, exactly as in the prodbox
 > sibling; it is not a separate gate. The EKS reality is proven in prodbox; the amoebius Pulumi-tracked
 > durable-EBS lifecycle is validated here for the first time.
 
@@ -695,8 +707,7 @@ The whole sprint (📋 Planned).
 - `documents/engineering/storage_lifecycle_doctrine.md` — record the required-usable versus allocation-rounded
   raw per-PV EBS sizing (1:1), static CSI `volumeHandle` bind, provider old+new migration peak, and
   node-vs-storage decoupling realized by `Amoebius.Pulumi.Ebs` + `Amoebius.Storage.EbsCsi`, with durable-EBS
-  reclamation deferred to [Phase 54](phase_54_test_topology_dsl.md) (§7.1, the single elevated-harness
-  exception).
+  reclamation deferred to [Phase 54](phase_54_test_topology_dsl.md) (§7.1, the single elevated-harness exception).
 - `documents/engineering/image_build_doctrine.md` — record the upstream AWS EBS CSI controller/node
   implementation and required sidecars in the baked provider-infrastructure inventory; no public image or Helm
   path is introduced.
@@ -718,21 +729,17 @@ The whole sprint (📋 Planned).
 
 ## Related Documents
 - [README.md](README.md) — the live tracker; Phase 46 objective, gate, and substrate
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§F](development_plan_standards.md#f-the-sprint-block-format)
-  sprint format, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) gate integrity)
-- [overview.md](overview.md) — the target architecture and cross-cutting invariants (cluster infrastructure is
-  ephemeral; durable backing is retained independently; only `no-provisioner` retained PVs; 1:1:1 PVC/PV/EBS)
-- [system_components.md](system_components.md) — the target component inventory (the Implementation paths above
-  are its intended layout, not yet built)
-- [substrates.md](substrates.md) — the substrate registry and per-phase map (`linux-cpu` parent → `provider`
-  target)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§F](development_plan_standards.md#f-the-sprint-block-format) sprint format, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) gate integrity)
+- [overview.md](overview.md) — the target architecture and cross-cutting invariants (cluster infrastructure is ephemeral; durable backing is retained independently; only `no-provisioner` retained PVs; 1:1:1 PVC/PV/EBS)
+- [system_components.md](system_components.md) — the target component inventory (the Implementation paths above are its intended layout, not yet built)
+- [substrates.md](substrates.md) — the substrate registry and per-phase map (`linux-cpu` parent → `provider` target)
 - [Pulumi IaC Doctrine](../documents/engineering/pulumi_iac_doctrine.md) — [§3](../documents/engineering/pulumi_iac_doctrine.md#3-state-lifetime-matches-resource-lifetime-per-class) per-class state lifetime, [§6](../documents/engineering/pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) the EBS
   create-vs-delete credential model this phase implements
 - [Storage Lifecycle Doctrine](../documents/engineering/storage_lifecycle_doctrine.md) — per-PV EBS sizing,
   node-vs-storage decoupling, and the elevated-harness durable-delete exception
 - [Image Build Doctrine](../documents/engineering/image_build_doctrine.md) — [§2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§7](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) the baked provider-only EBS CSI
   binaries in the base-image supply chain
-- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — [§6](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)/[§3.1](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix) the
+- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — [§6](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)/[§3.1](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix) the
   `Growable`/`ScalingPolicy` `CreateProviderCapacity` storage-scaling arm
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — Register 3 (live), the spin-up → run →
   teardown contract, and the per-run ledger

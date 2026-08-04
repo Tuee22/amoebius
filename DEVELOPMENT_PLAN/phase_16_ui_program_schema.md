@@ -1,12 +1,32 @@
 # Phase 16: UI program schema
 
+> **Purpose**: Add the bounded `UiSource` Dhall algebra and total UI checker that seals structurally valid
+> application programs as `CheckedUiProgram` values without admitting executable browser escape hatches.
+> **Read this if**: phase 16 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 16 delivers the UI program schema; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), and the plan for reaching it is owned here.
+Register 1: an in-process battery, no cluster.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Add the bounded `UiSource` Dhall algebra and total UI checker that seals structurally valid
-> application programs as `CheckedUiProgram` values without admitting executable browser escape hatches.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 16.1: Bounded `UiSource` and total structural checker 📋](#sprint-161-bounded-uisource-and-total-structural-checker-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -92,8 +112,8 @@ noninterference.
 **Blocked by**: Phase 15
 **Independent Validation**: `cabal test ui-program-schema-spec` reads only the Phase-0 pins for expected
 decisions, verifies the generated coverage obligations, and requires every named mutant to fail.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/dsl_doctrine.md`, `documents/engineering/generated_artifacts_doctrine.md`
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/dsl_doctrine.md`,
+`documents/engineering/generated_artifacts_doctrine.md`
 
 ### Objective
 

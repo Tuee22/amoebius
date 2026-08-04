@@ -1,13 +1,34 @@
 # Phase 38: Owner-scoped UI projection runtime
 
+> **Purpose**: Materialize bounded workflow events into owner-qualified UI read models and durable command
+> receipts, then test on live infrastructure that projection keys, receipt keys, subscriptions, and query
+> handles cannot collapse command, subject, or tenant scope.
+> **Read this if**: phase 38 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 38 delivers the owner-scoped UI projection runtime; its design is owned by [pulsar_client_doctrine.md](../documents/engineering/pulsar_client_doctrine.md), [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Materialize bounded workflow events into owner-qualified UI read models and durable command
-> receipts, then test on live infrastructure that projection keys, receipt keys, subscriptions, and query
-> handles cannot collapse command, subject, or tenant scope.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — bounded owner projections](#resource-provision--bounded-owner-projections)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 38.1: Build and independently verify the owner-scoped live projection 📋](#sprint-381-build-and-independently-verify-the-owner-scoped-live-projection-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -135,12 +156,15 @@ mutant results.
 ## Sprint 38.1: Build and independently verify the owner-scoped live projection 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Projection/{Worker,OwnerKey,Watermark,StreamCursor,ReceiptFold}.hs` and
+**Implementation**:
+`src/Amoebius/Ui/Projection/{Worker,OwnerKey,Watermark,StreamCursor,ReceiptFold}.hs` and
 `test/live/Phase38UiProjectionRuntimeSpec.hs` (target authored sources; not yet built)
-**Blocked by**: Phase 22; Phase 36; Phase 37
-**Independent Validation**: one command recovers fresh per-owner challenges and durable receipts through a
-scoped server query and separately authenticated Pulsar/broker/edge observers, establishes foreign-scope
-non-disclosure and zero subscription effect, and kills all three key-collapse mutants.
+**Blocked by**: Phase
+22; Phase 36; Phase 37
+**Independent Validation**: one command recovers fresh per-owner challenges and
+durable receipts through a scoped server query and separately authenticated Pulsar/broker/edge observers,
+establishes foreign-scope non-disclosure and zero subscription effect, and kills all three key-collapse
+mutants.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/pulsar_client_doctrine.md`, `documents/engineering/tenancy_doctrine.md`,
 `documents/engineering/ui_realtime_coordination_doctrine.md`, and

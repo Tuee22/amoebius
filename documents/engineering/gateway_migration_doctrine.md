@@ -1,11 +1,24 @@
 # Gateway Migration
 
+> **Purpose**: Single Source of Truth for how amoebius moves the wild-ingress gateway between clusters — the typed `GatewayMigration = <Planned | Failover>` taxonomy, the planned strong-consistency handover, the unplanned survivor-wins failover, and the client-rebind protocol that keeps a live session bindable throughout.
+> **Read this if**: wild-ingress ownership has to move between clusters, planned or otherwise.
+
+This document owns the migration itself: both branches, the client rebind that keeps a live session findable,
+and the edge-observed state machine each branch runs. It does not own the formal model that discharges the
+obligation, owned by
+[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md), nor the method that produced
+it, owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). This is the one boundary where
+amoebius carries a formal proof obligation rather than delegating it.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
-> **Purpose**: Single Source of Truth for how amoebius moves the wild-ingress gateway between clusters — the typed `GatewayMigration = <Planned | Failover>` taxonomy, the planned strong-consistency handover, the unplanned survivor-wins failover, and the client-rebind protocol that keeps a live session bindable throughout.
+</details>
 
 ---
 
@@ -44,10 +57,19 @@ move), and `Failover` is the automatic, availability-first response to a vanishe
 operator-selected posture. The unified PACELC deployment-rules surface that carries the failover budget and
 the participation flag is owned by [`consistency_pacelc_doctrine.md`](./consistency_pacelc_doctrine.md).
 
+**Where this sits among the other migrations.** A `Planned` gateway change is the escalation path of an
+ordinary `InForceSpec` generation diff: the operator edits the parent-owned pairing, and that diff — which
+[`inforcespec_migration_doctrine.md §2`](./inforcespec_migration_doctrine.md#2-a-migration-is-a-typed-diff-not-a-new-operation)
+owns on the representational side — cannot be discharged by a same-cluster reconcile, because moving the wild
+ingress requires a drain, a freshness proof, and a client rebind. The two documents describe one operation
+from two ends. Both are instances of the general migration law
+([`migration_doctrine.md §2`](./migration_doctrine.md#2-the-law)), and the `Failover` arm is the one place that
+law's verify-before-retire clause is deliberately suspended
+([`migration_doctrine.md §4`](./migration_doctrine.md#4-the-two-stated-exceptions)).
+
 Across both arms one thing is invariant: the strong-consistency boundary *within* a cluster is unchanged —
 it is delegated to MinIO, Pulsar, and Percona/Patroni Postgres
-([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path);
-[chaos_failover_doctrine.md §17](./chaos_failover_doctrine.md#17-the-boundary-and-its-classifier)). What a
+([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path); [chaos_failover_second_axis.md §17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier)). What a
 `GatewayMigration` changes is only *which cluster owns the wild ingress*. The two prior vocabularies map onto
 the sum: graceful teardown's gateway-handoff step and a planned home→provider migration are both `Planned`;
 chaos-failover's emergency DNS repoint is `Failover`.
@@ -55,7 +77,7 @@ chaos-failover's emergency DNS repoint is `Failover`.
 | Arm | Trigger | Both clusters up? | Data-loss guarantee | Modelled? |
 |---|---|---|---|---|
 | `Planned` | A new `InForceSpec`, or amoebius automated logic (e.g. a `ScalingPolicy`) | Yes | RPO=0 — no committed write lost (the `PlannedIsLossless` model invariant, proven-for-the-model; [§6](#6-honesty-and-layer-markers)) | Yes — `PlannedIsLossless` (cutover reachable only after `verify-caught-up`); no *async* divergence |
-| `Failover` | The active gateway is down or unreachable | No — the active has vanished | RPO>0 — bounded by the declared data-loss budget | Yes — the async "Second Axis" (`NoWriteAfterStaleFailover`/`MergeConverges`; [chaos_failover_doctrine.md §16](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)) |
+| `Failover` | The active gateway is down or unreachable | No — the active has vanished | RPO>0 — bounded by the declared data-loss budget | Yes — the async "Second Axis" (`NoWriteAfterStaleFailover`/`MergeConverges`; [chaos_failover_second_axis.md §16](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)) |
 
 Both branches are modelled as one reifiable `Model` — simulated (io-sim) and proven (TLC) at design time — by
 [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md), amoebius's one proof obligation.
@@ -91,7 +113,7 @@ proper begins only from a target that already holds the source's state.
 at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 43;
 [§6](#6-honesty-and-layer-markers)) — because writes were frozen and the replica was verified
 caught-up before authority moved. This is a coordinated cross-cluster switchover (Patroni-style), **not** an
-asynchronous [Second-Axis](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
+asynchronous [Second-Axis](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
 event: it presents no async divergence to reconcile. Browser-session continuity comes from keeping the active
 origin unchanged while its protected host-only cookie is checked against caught-up/shared server-side session
 state after cutover; the Keycloak/session stores are part of the verified snapshot. Portable bearer semantics
@@ -102,8 +124,7 @@ premise.
 quiesce + verify-caught-up gate makes "authority moved to a target that had not received a committed write"
 a state the protocol does not enter; the typed migration relation ([§6](#6-honesty-and-layer-markers)) carries
 no arm that repoints before the caught-up edge is observed. The foreclosure technique is the GADT-indexed
-state machine ([§5](#5-the-migration-as-a-typed-edge-observed-state-machine);
-[illegal_state_catalog.md §4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)),
+state machine ([§5](#5-the-migration-as-a-typed-edge-observed-state-machine); [illegal_state_catalog.md §4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)),
 and the honest limit is that the caught-up edge is **runtime-observed**, not a constructive impossibility
 ([§6](#6-honesty-and-layer-markers)).
 
@@ -132,13 +153,13 @@ This is the asynchronous cross-cluster **"Second Axis"** — the one place a per
 concentrates on amoebius itself. Its correctness is owned, and must not be restated here: the fail-closed
 freshness promotion gate (R7), the failover budget (R9), the deterministic total merge of the CAS pointer,
 and the reconciliation of divergent histories are owned by
-[chaos_failover_doctrine.md §16–§19](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
+[chaos_failover_second_axis.md §16–§19](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
 and its
-[Appendix B](./chaos_failover_doctrine.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question);
+[Appendix B](./chaos_failover_worked_examples.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question);
 the formal model is [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) (Phase 3).
 
 **Reconciliation on the primary's return** (summarized; owned by
-[chaos_failover_doctrine.md Appendix B](./chaos_failover_doctrine.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)):
+[chaos_failover_worked_examples.md Appendix B](./chaos_failover_worked_examples.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)):
 Keycloak **configuration** state (realms, clients, roles, users) is a deterministic projection of the
 authoritative `InForceSpec` — re-derived on the survivor rather than merged. **Runtime session** state is
 held survivor-wins; sessions on the lost fork past the divergence point re-authenticate. Per Appendix B, the
@@ -186,12 +207,12 @@ and no browser-held bearer portability is assumed.
 
 ## 5. The migration as a typed, edge-observed state machine
 
-A `Planned` migration is a GADT-indexed state machine whose transitions are ordered and gated on **observed
-edges**, never elapsed timers
+A `Planned` migration is a GADT-indexed state machine whose transitions are ordered and gated on **observed edges**, never elapsed timers
 ([illegal_state_catalog.md §4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)):
 
 ```mermaid
 flowchart LR
+%% register: orientation
   A["stand-up-replica"] --> B["quiesce(source)"]
   B --> C["drain / verify-caught-up"]
   C --> D["promote(target)"]
@@ -199,14 +220,48 @@ flowchart LR
   E --> F["unfreeze(target)"]
   F --> G["drain-monitor: source traffic to 0"]
   G --> H["decommission(source-ingress)"]
+  A --> X["stand-down: unfreeze(source), retire the replica"]
+  B --> X
+  C --> X
 ```
+*Orientation. Design intent; the branch is owned by [§2](#2-the-planned-branch--a-coordinated-strong-consistency-handover) and the machine by [§5](#5-the-migration-as-a-typed-edge-observed-state-machine). Every transition is gated on an observed edge rather than a timer, and this branch holds a zero recovery-point objective.*
 
 The `decommission(source-ingress)` state is reachable **only** from an observed `drain-monitor` edge (source
-traffic ≈ 0), so no transition ever removes the last working endpoint for a live session. "A session in limbo
+traffic ≈ 0), so no transition ever removes the last working endpoint for a live session.
+
+### 5.1 Stand-down: a `Planned` migration that does not complete
+
+**The problem.** The forward path above is one-directional. A `Planned` migration can stall indefinitely
+before `promote` — a replica that never reaches `verify-caught-up` because replication cannot keep up, an
+operator who reconsiders, a target cluster that fails its own bring-up. Without a reverse edge the source is
+left quiesced and the target never promoted: a state in which **no** cluster serves the wild ingress, which
+`UniqueGatewayOwner` ("at most one") permits and no safety invariant forbids. A stalled handover would satisfy
+every stated property while the deployment is down.
+
+**Why the obvious alternative fails.** Treating a stall as a `Failover` is wrong on both arms: the source has
+not vanished, so the survivor-wins takeover has no survivor to elect, and `Failover` accepts RPO > 0 for an
+operation whose whole point was RPO = 0. Waiting instead — "it will catch up eventually" — makes the outage a
+function of a duration, which [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md) forbids as a
+gate anywhere else in the suite.
+
+**The chosen rule.** Every pre-`promote` state carries a **stand-down** edge back to the pre-migration shape:
+`unfreeze(source)` and retire the replica. The source never gave up the role, so stand-down restores service
+without a DNS change, without a rebind, and with **no** data loss — it is the clause-4 abort of
+[migration_doctrine.md §2](./migration_doctrine.md#2-the-law), instantiated for this branch. Stand-down is
+reachable from `stand-up-replica`, `quiesce(source)`, and `drain / verify-caught-up`, and from **nowhere after** `promote(target)`: once the target owns the role, returning to the source is not an abort but a second
+`Planned` migration in the other direction, with its own `verify-caught-up`. That asymmetry is deliberate —
+an "abort" that silently moved the role back would be an unverified cutover wearing the name of a rollback.
+
+**What it forecloses.** The migration can no longer be modelled as a monotone forward walk, and the model
+carries a liveness obligation it did not before: a `Planned` migration **reaches a terminal state** — either
+`decommission(source-ingress)` or stand-down — rather than resting quiesced forever. The property and its
+fairness premise are owned by
+[`gateway_migration_model_doctrine.md`](./gateway_migration_model_doctrine.md). What stand-down does not
+provide is an escape from a *post*-promote failure; that is the `Failover` arm's territory, and its
+consistency cost is stated there ([§3](#3-the-failover-branch--an-availability-first-emergency-takeover)). "A session in limbo
 that cannot rebind" therefore has no representable path — it is type-foreclosed by the state machine. The
 honest limit is that the `drain-complete` edge is runtime-observed, so the foreclosure is decode/runtime, not
-a constructive proof ([illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force);
-[§6](#6-honesty-and-layer-markers)).
+a constructive proof ([illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force); [§6](#6-honesty-and-layer-markers)).
 
 The `Planned` branch's promote precondition — cutover reachable only after `verify-caught-up` — is generalized
 in the model to a `FreshnessWitness` guard on the gateway-take transition, so a cluster takes the wild-ingress
@@ -228,8 +283,7 @@ status.
 
 - The `Planned` branch's **RPO=0** is the model invariant **`PlannedIsLossless`** — cutover is reachable only
   after a `verify-caught-up` edge, so no committed write is lost. It is **proven-for-the-model at scope 2**
-  ([gateway_migration_model_doctrine.md §3](./gateway_migration_model_doctrine.md#3-the-model),
-  [§6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)), not merely argued. What stays
+  ([gateway_migration_model_doctrine.md §3](./gateway_migration_model_doctrine.md#3-the-model), [§6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)), not merely argued. What stays
   **assumed** is the *runtime physics* the model abstracts — that the caught-up verification and the
   MinIO/Pulsar/Patroni lossless delegation actually hold live — a **runtime-observed** caught-up edge, not a
   constructive type-level impossibility, confirmed only by the Register-3 chaos injection of Phase 43. Per the
@@ -260,15 +314,13 @@ status.
   **both** the `Planned` and `Failover` branches — once at design time, parameterized over N clusters and
   reduced by the pairwise cutoff; a spec is validated only by the typed, decode-foreclosed check
   that it stays within the proven envelope
-  ([chaos_failover_doctrine.md §17](./chaos_failover_doctrine.md#17-the-boundary-and-its-classifier);
-  [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md)).
+  ([chaos_failover_second_axis.md §17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier); [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md)).
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — teardown-with-cleanup (a `Planned` trigger; [§5](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) and amoebic spawning / parent-owned forest relations ([§3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)).
-- [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — the `Failover` branch's proof obligation: the Second Axis ([§16](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)–[§19](./chaos_failover_doctrine.md#19-the-cross-boundary-ledger-and-conformance-rows)), the fail-closed freshness gate and data-loss budget, and the failover / reconciliation worked example (Appendix B).
+- [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — the `Failover` branch's proof obligation: the Second Axis ([§16](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)–[§19](./chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows)), the fail-closed freshness gate and data-loss budget, and the failover / reconciliation worked example (Appendix B).
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — the hub = gateway role and its move ([§4](./network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)); the Gateway-API `HTTPRoute` weight-shift traffic mechanic ([§6](./network_fabric_doctrine.md#6-the-service-mesh-verdict-no-linkerd-for-v1)).
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — the `RolloutPhase` / `HTTPRoute` weight shift used for the backend cutover.
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — the route53 DNS record this migration repoints ([§5.1](./pulumi_iac_doctrine.md#51-dns--route53)).

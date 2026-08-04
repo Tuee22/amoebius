@@ -1,12 +1,32 @@
 # Phase 19: UI effect binding
 
+> **Purpose**: Bind every checked UI port to exactly one trusted, scope-compatible handler, public contract,
+> capability, and retry/audit policy before sealing a `BoundUiProgram`.
+> **Read this if**: phase 19 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 19 delivers the UI effect binding; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), and the plan for reaching it is owned here.
+Register 1: an in-process battery, no cluster.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Bind every checked UI port to exactly one trusted, scope-compatible handler, public contract,
-> capability, and retry/audit policy before sealing a `BoundUiProgram`.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 19.1: Seal the effect-handler-capability relation 📋](#sprint-191-seal-the-effect-handler-capability-relation-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -89,12 +109,14 @@ prove a handler's implementation, current provider state, live authorization, or
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`,
-`test/ui/Phase19UiEffectBindingSpec.hs`, and
-`test/ui/EffectBindingReference.hs` (target authored sources; not yet built)
+`test/ui/Phase19UiEffectBindingSpec.hs`, and `test/ui/EffectBindingReference.hs` (target authored sources;
+not yet built)
 **Blocked by**: Phase 18
-**Independent Validation**: `cabal test ui-effect-binding-spec` compares the private binder's serialized result
-with the Phase-0 finite relation, verifies empty failure traces, and requires every named mutant to fail.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
+**Independent Validation**: `cabal test ui-effect-binding-spec`
+compares the private binder's serialized result with the Phase-0 finite relation, verifies empty failure
+traces, and requires every named mutant to fail.
+**Docs to update**:
+`documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/service_capability_doctrine.md`,
 `documents/illegal_state/illegal_state_capability_messaging.md`
 

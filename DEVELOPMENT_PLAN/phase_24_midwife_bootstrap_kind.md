@@ -1,15 +1,38 @@
 # Phase 24: Python midwife + substrate detect + single kind cluster
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_doctrine.md
-**Generated sections**: none
-
 > **Purpose**: Specify the first live phase — the Python `pb` midwife that ensures a toolchain and builds the
 > binary before any `PATH` discipline can run, live substrate detection, the absolute-path-only host tool-ensure,
 > and an idempotent `pb bootstrap --distro=kind` that brings up an empty single-node kind cluster, records its
 > complete observed resource inventory, cross-checks the declared topology against that inventory, and is a
 > no-op on re-run.
+> **Read this if**: phase 24 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 24 delivers the Python midwife + substrate detect + single kind cluster; its design is owned by [substrate_doctrine.md](../documents/engineering/substrate_doctrine.md), [bootstrap_sequence_doctrine.md](../documents/engineering/bootstrap_sequence_doctrine.md), [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_sources.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 24.1: Live substrate detection 📋](#sprint-241-live-substrate-detection-)
+- [Sprint 24.2: No-`PATH` lazy tool-ensure — closed enum, `AbsExe`, install-and-verify 📋](#sprint-242-no-path-lazy-tool-ensure--closed-enum-absexe-install-and-verify-)
+- [Sprint 24.3: The Python `pb` midwife (package-manager root → toolchain → build → `exec`) 📋](#sprint-243-the-python-pb-midwife-package-manager-root--toolchain--build--exec-)
+- [Sprint 24.4: The in-binary `bootstrap` command — idempotent single-node kind bring-up 📋](#sprint-244-the-in-binary-bootstrap-command--idempotent-single-node-kind-bring-up-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -65,8 +88,7 @@ is one CLI with two modes — **midwife** (bare host → toolchain → build →
 [phase_33](phase_33_live_dsl_singleton.md) Sprint 33.4) — so the
 per-substrate pre-binary surface is exactly the package-manager-root bootstrap and nothing else.
 
-**Substrate:** linux-cpu (the default validation substrate; tracked in [substrates.md](substrates.md), per
-[development_plan_standards.md §L](development_plan_standards.md)). The Apple/Windows package-manager roots and
+**Substrate:** linux-cpu (the default validation substrate; tracked in [substrates.md](substrates.md), per [development_plan_standards.md §L](development_plan_standards.md)). The Apple/Windows package-manager roots and
 the Lima/WSL2 providers named in the substrate doctrine are explicitly **not** exercised by this gate; they land
 in the Apple/Windows phases.
 
@@ -86,10 +108,8 @@ capacity/capability is no greater than and compatible with that inventory (the l
 CUDA offering);
 **re-running the identical command reports already-converged and changes nothing** — where "changes nothing"
 means the observable triple `(docker/podman container id/name/image/state, `kind get clusters`, kubeconfig file bytes)` — the container element compared as a normalized id/name/image/state projection, not the volatile uptime/status column — is
-byte-for-byte identical before and after the re-run, and the `execve` audit log for the re-run contains **zero
-mutating package-manager or `kind create` invocations**; from at least one named partially-converged start
-state the identical run **converges without recreating the cluster** (divergence-repair, Sprint 24.4); **every
-external tool invocation during the run resolved through an `AbsExe` absolute path** as witnessed by the
+byte-for-byte identical before and after the re-run, and the `execve` audit log for the re-run contains **zero mutating package-manager or `kind create` invocations**; from at least one named partially-converged start
+state the identical run **converges without recreating the cluster** (divergence-repair, Sprint 24.4); **every external tool invocation during the run resolved through an `AbsExe` absolute path** as witnessed by the
 `execve` audit log (every `argv[0]` absolute, drawn from the resolved tool map), no bare-name `PATH` lookup,
 and Helm is never ensured or invoked (no `helm` `execve`, no `helm` trap fired); and the gate ends by tearing
 the cluster down (`kind delete cluster`) and asserting a **leak-free postflight sweep** (no residual kind
@@ -101,8 +121,22 @@ The committed fixtures, seeded mutants, and independent observers this gate is c
 
 <a id="gate-integrity"></a>
 
-**Gate prerequisite (stated, not ensured):** a container runtime (Docker or Podman) is a **pre-installed host
-prerequisite** of this gate, *not* a member of the closed `HostTool` enum. `kind` cannot create a cluster
+```mermaid
+flowchart LR
+  %% register: orientation
+  s0["Sprint 24.1: Live substrate detection"]
+  s1["Sprint 24.2: No-PATH lazy tool-ensure — closed enum, AbsExe…"]
+  s2["Sprint 24.3: The Python pb midwife (package-manager root → toolchain →…"]
+  s3["Sprint 24.4: The in-binary bootstrap command — idempotent single-node…"]
+  gate["the phase 24 gate"]
+  s0 -->|"produces what the next consumes"| s1
+  s1 -->|"produces what the next consumes"| s2
+  s2 -->|"produces what the next consumes"| s3
+  s3 -->|"the last seam the gate closes over"| gate
+```
+*Orientation. The seams phase 24 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+
+**Gate prerequisite (stated, not ensured):** a container runtime (Docker or Podman) is a **pre-installed host prerequisite** of this gate, *not* a member of the closed `HostTool` enum. `kind` cannot create a cluster
 without one, but amoebius does not provision it; the enum stays exactly `ghcup`, `cabal`, `kubectl`, `kind`,
 and the package-manager root. The gate preflight records the runtime's presence in the ledger as an assumed
 input; the enum's closedness (no sixth member) is asserted structurally in Sprint 24.2.
@@ -172,8 +206,7 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
   parameters (substrate, distro, replicas), context (where the binary sits), and witnesses (locally-checkable
   runtime facts), adapted to the no-environment-variable invariant via file/socket-existence witnesses rather
   than `PATH`/env kinds. The pure Step/Chain kernel this rides on is already delivered pre-cluster.
-- **Resource-capacity doctrine [§8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime) — declared in pure input, provisioned before render, cross-checked at
-  runtime.** This phase establishes the
+- **Resource-capacity doctrine [§8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime) — declared in pure input, provisioned before render, cross-checked at runtime.** This phase establishes the
   first live inventory required by
   [`resource_capacity_doctrine.md` §8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime):
   allocatable CPU, memory, and logical local ephemeral storage; canonical kubelet filesystem backing and
@@ -186,20 +219,21 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
 ## Sprint 24.1: Live substrate detection 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Host/Substrate.hs` (target: the total `classify` plus the three-read `detect`)
-**Blocked by**: Phase 23 gate (the pre-cluster band closes; this is the first live phase).
-**Independent Validation**: a unit table of `classify` over the enumerated cross-product asserts each expected
-substrate and each expected hard failure with zero host I/O, checked against a **Phase-0-committed
-hand-authored decision table** (§M.1, §M.3) that is written independently of `classify` — never regenerated
-from it. The representative set is defined explicitly (§M.7): OS ∈ {`"linux"`, `"darwin"`, one unknown-OS
-sentinel e.g. `"freebsd"`}, arch ∈ {`"x86_64"`/`amd64`, `"aarch64"`/`arm64`, one unknown-arch sentinel e.g.
-`"ppc64le"`}, GPU ∈ {present, absent} — the full 3×3×2 = 18-cell product, so that the unknown-OS and
-unknown-arch `Left` cases are exercised, not merely the four known-good substrates. The committed table pins
-the expected `Right Substrate` or `Left <reason>` for all 18 cells, including the two load-bearing hard
-failures (Intel-Mac `darwin`+`amd64` → `Left`, and Linux+GPU → `linux-cuda`). No cell in this linux/darwin
-representative set produces the `windows` catalog member, so the `windows` output arm is pinned by the Windows
-phase's oracle, not this gate's. On the gate host, `detect`
-returns `linux-cpu`.
+**Implementation**: `src/Amoebius/Host/Substrate.hs` (target: the total `classify` plus
+the three-read `detect`)
+**Blocked by**: Phase 23 gate (the pre-cluster band closes; this is the first live
+phase).
+**Independent Validation**: a unit table of `classify` over the enumerated cross-product asserts
+each expected substrate and each expected hard failure with zero host I/O, checked against a
+**Phase-0-committed hand-authored decision table** (§M.1, §M.3) that is written independently of `classify`
+— never regenerated from it. The representative set is defined explicitly (§M.7): OS ∈ {`"linux"`,
+`"darwin"`, one unknown-OS sentinel e.g. `"freebsd"`}, arch ∈ {`"x86_64"`/`amd64`, `"aarch64"`/`arm64`, one
+unknown-arch sentinel e.g. `"ppc64le"`}, GPU ∈ {present, absent} — the full 3×3×2 = 18-cell product, so that
+the unknown-OS and unknown-arch `Left` cases are exercised, not merely the four known-good substrates. The
+committed table pins the expected `Right Substrate` or `Left <reason>` for all 18 cells, including the two
+load-bearing hard failures (Intel-Mac `darwin`+`amd64` → `Left`, and Linux+GPU → `linux-cuda`). No cell in
+this linux/darwin representative set produces the `windows` catalog member, so the `windows` output arm is
+pinned by the Windows phase's oracle, not this gate's. On the gate host, `detect` returns `linux-cpu`.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
 
 ### Objective
@@ -235,18 +269,17 @@ The whole sprint (📋 Planned).
 ## Sprint 24.2: No-`PATH` lazy tool-ensure — closed enum, `AbsExe`, install-and-verify 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs` (target: the `HostTool` enum
-+ `AbsExe` newtype + `HostConfig` tool map + the `installAndVerify` driver)
+**Implementation**: `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs`
+(target: the `HostTool` enum + `AbsExe` newtype + `HostConfig` tool map + the `installAndVerify` driver)
 **Blocked by**: Sprint 24.1.
-**Independent Validation**: pure `[InstallStep]` plan tests per substrate asserted against **Phase-0-committed
-golden plans** (authored independently of the reconciler, not regenerated from it — §M.1, §M.3), plus a
-property that `mkAbsExe` rejects every non-absolute path with `cover`/`classify` obligations (§M.4) forcing the
-reject branch; on the host, ensuring `kind`/`kubectl`/`cabal`/`ghcup` **from a machine-verified clean state**
-(a preflight probe, recorded in the phase ledger, shows ghc/cabal/ghcup/kind/kubectl all absent before the
-first run) then re-running is a **verified no-op — defined as zero mutating package-manager invocations on the
-re-run, read from the `execve` audit log** (§M.5, §M.6), never inferred from an exit-0 re-run of idempotent
-installers; and Helm is never ensured or invoked (no `helm` `execve`; the `helm` `PATH` trap never fires).
-**Docs to update**: `documents/engineering/substrate_doctrine.md`.
+**Independent Validation**: pure `[InstallStep]` plan tests per substrate asserted against **Phase-0-committed golden plans** (authored independently of the reconciler, not regenerated from it — §M.1, §M.3), plus a property that `mkAbsExe` rejects every non-absolute path with
+`cover`/`classify` obligations (§M.4) forcing the reject branch; on the host, ensuring
+`kind`/`kubectl`/`cabal`/`ghcup` **from a machine-verified clean state** (a preflight probe, recorded in the
+phase ledger, shows ghc/cabal/ghcup/kind/kubectl all absent before the first run) then re-running is a
+**verified no-op — defined as zero mutating package-manager invocations on the re-run, read from the `execve` audit log** (§M.5, §M.6), never inferred from an exit-0 re-run of idempotent installers; and Helm
+is never ensured or invoked (no `helm` `execve`; the `helm` `PATH` trap never fires).
+**Docs to update**:
+`documents/engineering/substrate_doctrine.md`.
 
 ### Objective
 Adopt [`substrate_doctrine.md` §3 — the no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract):
@@ -272,8 +305,7 @@ than merely discouraged.
   the same `BootstrapExecutionEnvelope` against CPU/memory and named `ToolInstall` disk residual, mints a
   single-use fingerprint token, and rechecks it immediately before the install. An overdraw/unknown backing or
   changed fingerprint performs zero package-manager mutations.
-- **Phase-0-committed oracles/mutants:** the per-substrate `[InstallStep]` golden plans, the `mkAbsExe`-reject
-  expected-error set, and the committed mutant M2 (`Ensure` resolves one tool by bare name) that Validation 4
+- **Phase-0-committed oracles/mutants:** the per-substrate `[InstallStep]` golden plans, the `mkAbsExe`-reject expected-error set, and the committed mutant M2 (`Ensure` resolves one tool by bare name) that Validation 4
   turns red under the `execve` observer.
 
 ### Validation
@@ -285,13 +317,10 @@ than merely discouraged.
    (§M.4); a **specific-reason negative (§M.8)** asserts the reject carries the expected non-absolute-path
    error tag, paired with an absolute-path positive that succeeds. The structural/CI check confirms no module
    outside `Ensure.hs` imports a process-spawn API.
-3. On the `linux-cpu` host, **record a preflight probe in the ledger showing ghc/cabal/ghcup/kind/kubectl all
-   absent**, ensure the four tools from clean, then re-run; assert the re-run is a **verified no-op = zero
-   mutating package-manager (`apt`/`ghcup`/`cabal`) invocations in the `execve` audit log** (§M.5), not merely
+3. On the `linux-cpu` host, **record a preflight probe in the ledger showing ghc/cabal/ghcup/kind/kubectl all absent**, ensure the four tools from clean, then re-run; assert the re-run is a **verified no-op = zero mutating package-manager (`apt`/`ghcup`/`cabal`) invocations in the `execve` audit log** (§M.5), not merely
    exit-0; and confirm Helm is never ensured or invoked (no `helm` `execve`; `helm` `PATH` trap silent).
 4. **Committed mutant M2 (§M.2):** re-run the host ensure under the `execve` observer against the committed
-   `Ensure` mutant that resolves one tool by bare name; assert a non-absolute `argv[0]` appears (or the bare-name
-   `PATH` trap fires) and the gate goes **red**. A run where M2 stays green is void.
+   `Ensure` mutant that resolves one tool by bare name; assert a non-absolute `argv[0]` appears (or the bare-name `PATH` trap fires) and the gate goes **red**. A run where M2 stays green is void.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -299,18 +328,17 @@ The whole sprint (📋 Planned).
 ## Sprint 24.3: The Python `pb` midwife (package-manager root → toolchain → build → `exec`) 📋
 
 **Status**: Planned
-**Implementation**: `pb/pyproject.toml`, `pb/pb/cli.py`, `pb/pb/midwife.py` (target: the two-mode `pb` CLI; this
-sprint delivers the **midwife** mode only — the admin-REST client mode lands with the singleton in
-[phase_33](phase_33_live_dsl_singleton.md) Sprint 33.4). No shell
-script: amoebius owns none.
+**Implementation**: `pb/pyproject.toml`, `pb/pb/cli.py`, `pb/pb/midwife.py` (target: the
+two-mode `pb` CLI; this sprint delivers the **midwife** mode only — the admin-REST client mode lands with
+the singleton in [phase_33](phase_33_live_dsl_singleton.md) Sprint 33.4). No shell script: amoebius owns
+none.
 **Blocked by**: Phase 1 gate (the pinned toolchain builds the binary).
-**Independent Validation**: on a bare `linux-cpu` host **whose cleanliness is machine-verified by a
-preflight probe recorded in the ledger (no GHC/cabal/ghcup present)**, `pb bootstrap --distro=kind` ensures the
-package-manager root (`apt`), `ghcup`, GHC 9.12.4 / Cabal 3.16.1.0, `cabal build`s the binary, and `exec`s
-`amoebius bootstrap --distro=kind`; a second run with the toolchain present is a verified no-op up to the
-`exec` — **no-op defined as zero mutating `apt`/`ghcup`/`cabal-install` invocations in the second run's
-`execve` audit log** (§M.5, §M.6), never an exit-0 re-run of idempotent installers; the repository tree
-contains no `bootstrap.sh` and no shell script.
+**Independent Validation**: on
+a bare `linux-cpu` host **whose cleanliness is machine-verified by a preflight probe recorded in the ledger (no GHC/cabal/ghcup present)**, `pb bootstrap --distro=kind` ensures the package-manager root (`apt`),
+`ghcup`, GHC 9.12.4 / Cabal 3.16.1.0, `cabal build`s the binary, and `exec`s `amoebius bootstrap
+--distro=kind`; a second run with the toolchain present is a verified no-op up to the `exec` — **no-op defined as zero mutating `apt`/`ghcup`/`cabal-install` invocations in the second run's `execve` audit log**
+(§M.5, §M.6), never an exit-0 re-run of idempotent installers; the repository tree contains no
+`bootstrap.sh` and no shell script.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`,
 `documents/engineering/bootstrap_sequence_doctrine.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`.
 
@@ -325,8 +353,7 @@ with the operator CLI as `pb`'s midwife mode, the second mode being the admin-RE
 ### Deliverables
 - A Python `pb` CLI (midwife mode) that, on `linux-cpu`, ensures the `apt` package-manager root pre-binary,
   ensures `ghcup`, installs the pinned GHC 9.12.4 / Cabal 3.16.1.0 toolchain, `cabal build`s the binary, and as
-  its final act `exec`s `amoebius bootstrap --distro={kind,rke2} [--replicas=n]` (replicas defaulting to `1` on
-  `kind`) — a thin driver that installs nothing beyond the toolchain root, holds no cluster logic, and never
+  its final act `exec`s `amoebius bootstrap --distro={kind,rke2} [--replicas=n]` (replicas defaulting to `1` on `kind`) — a thin driver that installs nothing beyond the toolchain root, holds no cluster logic, and never
   runs after the `exec`.
 - A committed pure `BootstrapExecutionEnvelope` readable before the Haskell binary exists: bounded installer
   CPU/memory; per-tool installed and peak download/unpack bytes on named `ToolInstall` pools; and a single-
@@ -343,8 +370,7 @@ with the operator CLI as `pb`'s midwife mode, the second mode being the admin-RE
 ### Validation
 1. On a `linux-cpu` host **with a ledger-recorded preflight probe confirming ghc/cabal/ghcup absent**,
    `pb bootstrap --distro=kind` completes steps 1–4 and `exec`s the binary.
-2. Re-run with the toolchain already present is a **verified no-op up to the `exec`, defined as zero mutating
-   `apt`/`ghcup`/`cabal-install` invocations in the re-run's `execve` audit log** (§M.5), not merely exit-0.
+2. Re-run with the toolchain already present is a **verified no-op up to the `exec`, defined as zero mutating `apt`/`ghcup`/`cabal-install` invocations in the re-run's `execve` audit log** (§M.5), not merely exit-0.
 3. Confirm the tree contains no `bootstrap.sh` / no `.sh` igniter.
 4. Independently overdraw installer disk, cabal CPU/RSS, build scratch, and cache-write headroom by one unit;
    make a backing unknown; and change one host commitment after validation. Each case records zero mutating
@@ -368,11 +394,8 @@ parameters/context/witness host context)
 **Independent Validation**: on a `linux-cpu` host, `amoebius bootstrap --distro=kind` yields exactly one `Ready`
 node; an immediate re-run reports already-converged and **changes nothing — the observable triple `(docker/
 podman container id/name/image/state, `kind get clusters`, kubeconfig file bytes)` is byte-identical before and after, and the
-re-run's `execve` audit log holds zero `kind create` or mutating package-manager calls**; from at least one
-**named partially-converged start state** the identical re-run **converges without recreating the cluster** and
-prints an explicit per-managed-resource discover/diff result showing an empty diff; and **every external
-invocation went through an `AbsExe` absolute path as witnessed by the `execve` audit log** (every `argv[0]`
-absolute, from the resolved tool map — §M.5), never a self-emitted `runTool` trace; the sprint ends by tearing
+re-run's `execve` audit log holds zero `kind create` or mutating package-manager calls**; from at least one **named partially-converged start state** the identical re-run **converges without recreating the cluster** and prints an explicit per-managed-resource discover/diff result showing an empty diff; and **every external
+invocation went through an `AbsExe` absolute path as witnessed by the `execve` audit log** (every `argv[0]` absolute, from the resolved tool map — §M.5), never a self-emitted `runTool` trace; the sprint ends by tearing
 the cluster down and asserting a leak-free postflight sweep. Before the first create, a distinct host reader
 proves the declared `KindEngineDemand` (ordinal node-container runtime, exact `NodeCapacity`, nested in-node
 reserve, separate host process reserve, structural host OCI/snapshot/data-root demand, and disk carves) fits
@@ -446,35 +469,36 @@ and discharging the live-inventory cross-check of
   because this v1 containerd engine cannot provide its required runtime/feature witness. A hidden alias,
   swapped root, soft-only quota, or capacity reported under two nominal ids is
   `BackingAlias | FilesystemLayoutMismatch`, never spare capacity.
-- A mandatory finite
-  `ControlPlaneStorageDemand { staticEngineBytes, etcd { backendQuotaBytes, maxWalFiles,
-  retainedSnapshots, maintenance = SerializedSnapshotAndDefrag, storageModel,
-  logical : EtcdLogicalDemand { desiredObjects,
-  churn { maxUpdatesPerWindow, updateWindow, revisionRetention, maxActiveLeases, maxLeaseBytes,
-  maxEventsPerWindow, eventWindow, maxEventBytes, eventRetention }, model } },
-  audit { maxBytesPerFile, maxBackups, retention },
-  kubeletRuntimeLogs { maxBytesPerFile, maxBackups, retention }, historyRequirement }` nested inside the
-  control-plane node system carve. Its private, version-pinned `etcdPhysicalPeak` derives the backend-at-quota;
-  the `maxWalFiles` resident set plus modelled WAL segment maximum/overshoot and preallocated-next segment;
-  retained snapshots plus snapshot-save temporary overlap; and defrag's old+new backend-copy peak. Because the
-  only v1 maintenance arm serializes snapshot and defrag, it takes the modelled maximum transition rather than
-  inventing concurrent workspace. There is no caller-authored WAL-byte aggregate, exact-segment assumption, or
-  quota-sized-snapshot shortcut. Before that physical expansion, the exact serialized desired/live
-  Kubernetes objects plus bounded old/new/apply revisions, Leases, and Events pass through the pinned MVCC
-  model and must fit `backendQuotaBytes`; a physically large system carve cannot excuse a logical quota
-  overflow. Every kube-system ConfigMap/Secret/projected/token volume also derives
-  `KubeletMappedFileDemand`; its AtomicWriter old+new/symlink/metadata bytes route to nodefs or memory and enter
-  the addon pod envelope. The four Event operands
-  `{ maxEventsPerWindow, eventWindow, maxEventBytes, eventRetention }` have exactly one
-  authority: `etcd.logical.churn`. They derive the logical Event peak and its controls; only
-  `eventRetention` projects the apiserver Event TTL. Events remain inside the backend quota; log rotation uses
-  `(maxBackups + 1) × maxBytesPerFile`; and Event/audit retention covers `historyRequirement` (at least the
-  longest live-gate observation window). Generated etcd/apiserver and maintenance-runner configuration projects
-  the exact backend quota, `maxWalFiles`, retained-snapshot count, serialized policy, Event TTL, and log
-  rotation/retention. Generated mounts place etcd data/WAL, retained snapshots and maintenance workspace,
-  apiserver audit, and kubelet/runtime system logs on the one named system carve. An external
-  process/config/path/mount/quota readback must equal those operands and backing identity. No control-plane byte
-  is hidden in pod ephemeral or node image storage.
+- A mandatory finite `ControlPlaneStorageDemand { staticEngineBytes, etcd { backendQuotaBytes, maxWalFiles,
+  retainedSnapshots, maintenance = SerializedSnapshotAndDefrag, storageModel, logical : EtcdLogicalDemand {
+  desiredObjects, churn { maxUpdatesPerWindow, updateWindow, revisionRetention, maxActiveLeases,
+  maxLeaseBytes, maxEventsPerWindow, eventWindow, maxEventBytes, eventRetention }, model } }, audit {
+  maxBytesPerFile, maxBackups, retention }, kubeletRuntimeLogs { maxBytesPerFile, maxBackups, retention },
+  historyRequirement }` nested inside the control-plane node system carve.
+  - Its private, version-pinned `etcdPhysicalPeak` derives the backend-at-quota; the `maxWalFiles` resident
+    set plus modelled WAL segment maximum/overshoot and preallocated-next segment; retained snapshots plus
+    snapshot-save temporary overlap; and defrag's old+new backend-copy peak.
+  - Because the only v1 maintenance arm serializes snapshot and defrag, it takes the modelled maximum
+    transition rather than inventing concurrent workspace.
+  - There is no caller-authored WAL-byte aggregate, exact-segment assumption, or quota-sized-snapshot
+    shortcut.
+  - Before that physical expansion, the exact serialized desired/live Kubernetes objects plus bounded
+    old/new/apply revisions, Leases, and Events pass through the pinned MVCC model and must fit
+    `backendQuotaBytes`; a physically large system carve cannot excuse a logical quota overflow.
+  - Every kube-system ConfigMap/Secret/projected/token volume also derives `KubeletMappedFileDemand`; its
+    AtomicWriter old+new/symlink/metadata bytes route to nodefs or memory and enter the addon pod envelope.
+  - The four Event operands `{ maxEventsPerWindow, eventWindow, maxEventBytes, eventRetention }` have
+    exactly one authority: `etcd.logical.churn`.
+  - They derive the logical Event peak and its controls; only `eventRetention` projects the apiserver Event
+    TTL.
+  - Events remain inside the backend quota; log rotation uses `(maxBackups + 1) × maxBytesPerFile`; and
+    Event/audit retention covers `historyRequirement` (at least the longest live-gate observation window).
+  - Generated etcd/apiserver and maintenance-runner configuration projects the exact backend quota,
+    `maxWalFiles`, retained-snapshot count, serialized policy, Event TTL, and log rotation/retention.
+  - Generated mounts place etcd data/WAL, retained snapshots and maintenance workspace, apiserver audit, and
+    kubelet/runtime system logs on the one named system carve.
+  - An external process/config/path/mount/quota readback must equal those operands and backing identity.
+  - No control-plane byte is hidden in pod ephemeral or node image storage.
 - An empty cluster as the end state: one node, `Ready`, with **no** platform services (those are Phase 25+).
 - A typed `ObservedInventory` assembled from an independent apiserver/OS-boundary read: net node allocatable
   CPU, memory, logical local ephemeral storage, `status.allocatable.pods`, remaining CNI/IP slots, and the
@@ -523,46 +547,53 @@ and discharging the live-inventory cross-check of
 2. **Pre-create host→engine admission.** Run the one-field `kind_engine_memory_exceeds_host` and
    `kind_engine_disk_exceeds_host` fixtures, plus `control_plane_storage_exceeds_system_carve_by_one` and
    `etcd_transition_peak_exceeds_system_carve_by_one`, `control_plane_history_too_short`, and a
-   `SplitRuntime` fixture that aliases nodefs/imagefs. Also run a host-runtime-root fixture whose nested
-   `NodeCapacity` fits but host OCI content + active snapshot + writable/log + pull workspace is one byte over,
-   and unknown/swapped graphroot/storage-model fixtures; removing one required static process envelope is
-   `UnknownCommitment`. Each must fail before mutation with its specific capacity/layout reason, and the
-   external `execve`/runtime observer must record zero `kind create` and zero new node containers/backing
-   allocations. The paired fitting engine differs only in the reduced demand and creates successfully.
-   The independent oracle proves for each ordinal
-   `NodeCapacity + inNodeReserve ≤ nodeContainer.runtime` and then
-   `Σ nodeContainer.runtime + KindHostEngineReserve ≤ host residual`; the committed double-add-in-node-reserve
-   mutant must go red. A fixture changes one observed host commitment after validation but before create; the
-   immediate fingerprint recheck invalidates the single-use token and records zero `kind create`/backing
-   effects.
-   A two-ordinal pure fixture proves equal kind-node image content is digest-deduplicated once while two active
-   snapshots/writable allowances are charged; dropping the second active snapshot turns it red.
-   Run isolated `Unified` and `SplitRuntime` positive creates. For `Unified`, assert nodefs, the containerd
-   content root, and the snapshotter root have one mount/device/quota identity and one hard ceiling. For
-   `SplitRuntime`, assert nodefs is distinct while content and snapshotter roots share the imagefs identity and
-   hard ceiling. Fill each physical backing to its admitted boundary and prove the kernel quota refuses the
-   next byte. The OS/CRI readback must equal the generated kind/kubelet/containerd paths and declared aliases;
-   committed swapped-root, soft-quota, unrecorded-alias, and one-byte-hard-limit renderer mutants each turn the
-   corresponding layout run red. `SplitImage` must fail before create as `UnsupportedEnforcement` for this
-   containerd engine.
-   After the positive create, read etcd's effective `--quota-backend-bytes` and `--max-wals`, the maintenance
-   runner's retained-snapshot count and `SerializedSnapshotAndDefrag` lock, apiserver Event TTL, and every log
-   rotation setting. Require the TTL to equal only `etcd.logical.churn.eventRetention`; require Event
-   rate/window and maximum-byte controls to equal the projections of `maxEventsPerWindow`, `eventWindow`, and
-   `maxEventBytes`. Prove all corresponding data,
-   WAL, snapshot/temp, audit, and system-log paths resolve to the declared system-carve mount/quota identity.
-   Independently fill/rotate each class to its boundary and exercise WAL rollover/overshoot plus
-   preallocated-next, snapshot-save temporary overlap, and defrag old+new copy. The observed high-water mark
-   must stay within the version-pinned
-   `etcdPhysicalPeak` plus the static/rotated-log formula, with Events not added again, and retained Event/audit
-   history must cover `historyRequirement`. One-byte-under-carve and committed transition mutants that replace
-   the model with an arbitrary WAL scalar, omit WAL overshoot/preallocation, omit snapshot-save temporary
-   bytes, assume in-place defrag, or permit snapshot and defrag concurrently under the serialized arm must each
-   go red. Mutants that add a sibling Event-retention authority, disagree with any of the four Event churn
-   operands, double-add Events, or treat `maxBackups` as the total file count also go red.
-   Drive one in-node static process and one host engine process past CPU/RSS ceilings; the process-level
-   cgroup/static-pod observer proves throttling or termination within its exact envelope. Mutants that omit a
-   per-process projection while preserving the aggregate container/host total must go red.
+   `SplitRuntime` fixture that aliases nodefs/imagefs.
+   - Also run a host-runtime-root fixture whose nested `NodeCapacity` fits but host OCI content + active
+     snapshot + writable/log + pull workspace is one byte over, and unknown/swapped graphroot/storage-model
+     fixtures; removing one required static process envelope is `UnknownCommitment`.
+   - Each must fail before mutation with its specific capacity/layout reason, and the external
+     `execve`/runtime observer must record zero `kind create` and zero new node containers/backing
+     allocations.
+   - The paired fitting engine differs only in the reduced demand and creates successfully.
+   - The independent oracle proves for each ordinal `NodeCapacity + inNodeReserve ≤ nodeContainer.runtime`
+     and then `Σ nodeContainer.runtime + KindHostEngineReserve ≤ host residual`; the committed
+     double-add-in-node-reserve mutant must go red.
+   - A fixture changes one observed host commitment after validation but before create; the immediate
+     fingerprint recheck invalidates the single-use token and records zero `kind create`/backing effects.
+   - A two-ordinal pure fixture proves equal kind-node image content is digest-deduplicated once while two
+     active snapshots/writable allowances are charged; dropping the second active snapshot turns it red.
+   - Run isolated `Unified` and `SplitRuntime` positive creates.
+   - For `Unified`, assert nodefs, the containerd content root, and the snapshotter root have one
+     mount/device/quota identity and one hard ceiling.
+   - For `SplitRuntime`, assert nodefs is distinct while content and snapshotter roots share the imagefs
+     identity and hard ceiling.
+   - Fill each physical backing to its admitted boundary and prove the kernel quota refuses the next byte.
+   - The OS/CRI readback must equal the generated kind/kubelet/containerd paths and declared aliases;
+     committed swapped-root, soft-quota, unrecorded-alias, and one-byte-hard-limit renderer mutants each
+     turn the corresponding layout run red. `SplitImage` must fail before create as `UnsupportedEnforcement`
+     for this containerd engine.
+   - After the positive create, read etcd's effective `--quota-backend-bytes` and `--max-wals`, the
+     maintenance runner's retained-snapshot count and `SerializedSnapshotAndDefrag` lock, apiserver Event
+     TTL, and every log rotation setting.
+   - Require the TTL to equal only `etcd.logical.churn.eventRetention`; require Event rate/window and
+     maximum-byte controls to equal the projections of `maxEventsPerWindow`, `eventWindow`, and
+     `maxEventBytes`.
+   - Prove all corresponding data, WAL, snapshot/temp, audit, and system-log paths resolve to the declared
+     system-carve mount/quota identity.
+   - Independently fill/rotate each class to its boundary and exercise WAL rollover/overshoot plus
+     preallocated-next, snapshot-save temporary overlap, and defrag old+new copy.
+   - The observed high-water mark must stay within the version-pinned `etcdPhysicalPeak` plus the
+     static/rotated-log formula, with Events not added again, and retained Event/audit history must cover
+     `historyRequirement`.
+   - One-byte-under-carve and committed transition mutants that replace the model with an arbitrary WAL
+     scalar, omit WAL overshoot/preallocation, omit snapshot-save temporary bytes, assume in-place defrag,
+     or permit snapshot and defrag concurrently under the serialized arm must each go red.
+   - Mutants that add a sibling Event-retention authority, disagree with any of the four Event churn
+     operands, double-add Events, or treat `maxBackups` as the total file count also go red.
+   - Drive one in-node static process and one host engine process past CPU/RSS ceilings; the process-level
+     cgroup/static-pod observer proves throttling or termination within its exact envelope.
+   - Mutants that omit a per-process projection while preserving the aggregate container/host total must go
+     red.
 3. **Declared-vs-observed resource/capability post-create cross-check.** Read the node and host through an
    observer distinct from the capacity fold; assert the recorded inventory contains CPU, memory, local
    ephemeral storage, allocatable pod slots, remaining CNI/IP capacity, per-driver `CSINode` attachment
@@ -580,8 +611,7 @@ and discharging the live-inventory cross-check of
    `declared_filesystem_layout_mismatch`, `declared_image_pull_policy_mismatch`, and
    `declared_cuda_on_linux_cpu`: each must fail with its pinned
    resource/capability reason, and an apiserver
-   audit plus host allocation observer must show **zero workload/storage API writes and zero durable/native-host-cache
-   backing allocations after the failed preflight begins**.
+   audit plus host allocation observer must show **zero workload/storage API writes and zero durable/native-host-cache backing allocations after the failed preflight begins**.
 4. **Idempotence (the gate's core claim).** Re-run the identical command; assert it reports already-converged
    and **changes nothing — the observable triple `(docker/podman container id/name/image/state, `kind get clusters`,
    kubeconfig file bytes)` is byte-identical before and after the re-run, and the re-run's `execve` audit log
@@ -594,9 +624,7 @@ and discharging the live-inventory cross-check of
    `execve` log; cluster UID/creation-timestamp unchanged), the printed diff was non-empty then re-observes
    empty.
 6. **External-observer absolute-path assertion (§M.5).** From the committed `execve` audit log of the whole run,
-   assert every `argv[0]` is an absolute path drawn from the resolved tool map — no bare name, no Helm `execve`,
-   and the bare-name `PATH` trap directory recorded no hits. A self-emitted `runTool` trace is inadmissible.
-7. **Committed mutants M3–M6 (§M.2).** Re-run Validation 5 against the committed one-shot-guard mutant; assert at
+   assert every `argv[0]` is an absolute path drawn from the resolved tool map — no bare name, no Helm `execve`, and the bare-name `PATH` trap directory recorded no hits. A self-emitted `runTool` trace is inadmissible. 7. **Committed mutants M3–M6 (§M.2).** Re-run Validation 5 against the committed one-shot-guard mutant; assert at
    least one divergent-start fixture goes **red** (the guard skips repair or recreates the cluster). A run where
    M3 stays green is void. Re-run Validation 2 against the pre-create-fold-drop mutant and require the external
    observer to catch its forbidden `kind create`; M4 staying green is void. Re-run Validation 2 against the
@@ -637,8 +665,7 @@ The whole sprint (📋 Planned).
 ## Related Documents
 
 - [README.md](README.md) — the live tracker; its Phase 24 row is the authoritative one-line gate and status.
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
-  Register-3 honesty token: a passed gate is a live-substrate result, never a compile claim).
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the Register-3 honesty token: a passed gate is a live-substrate result, never a compile claim).
 - [overview.md](overview.md) — target architecture, the GHC 9.12.4 / Cabal 3.16.1.0 pin, and the pre-cluster →
   live boundary this phase crosses.
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — detection, the no-`PATH` lazy

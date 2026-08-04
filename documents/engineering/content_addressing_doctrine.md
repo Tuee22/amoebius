@@ -1,15 +1,38 @@
 # Content Addressing & Determinism
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Define amoebius's cross-project content-addressed store (blobs ← manifests ← pointers), the
 > `experimentHash = sha256(resolved-dhall ‖ substrate-fingerprint)` identity, and the seed-derivation
 > determinism that makes an ML run reproducible *by construction* — the one mechanism shared by both the
 > `infernix` and `jitML` extension libraries — together with the honest ceiling on what types can and cannot
 > make deterministic.
+> **Read this if**: an artifact has to be named by its content, or a result has to be reproducible.
+
+This document owns content addressing and determinism: names that are total functions of bytes, the
+three-tier store, the identity that joins what was requested to where it ran, and the honest ceiling on what
+types can make deterministic. It does not own the message bus that carries the resulting payloads, owned by
+[pulsar_client_doctrine.md](./pulsar_client_doctrine.md), nor the cache budget bounding materialization,
+owned by [resource_capacity_storage.md](./resource_capacity_storage.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. A content-derived name that cannot be forged](#1-a-content-derived-name-that-cannot-be-forged)
+- [2. The three-tier store: blobs ← manifests ← pointers](#2-the-three-tier-store-blobs--manifests--pointers)
+- [3. `experimentHash`: identity is *what was requested* ‖ *where it ran*](#3-experimenthash-identity-is-what-was-requested--where-it-ran)
+- [4. Determinism by construction: pinned inputs + pure stages + derived seed](#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)
+- [5. Confluence: content-addressed data crosses cluster boundaries safely](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)
+- [6. The honest ceiling: types make the bookkeeping total, not the physics deterministic](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)
+- [7. What this doctrine deliberately does not own](#7-what-this-doctrine-deliberately-does-not-own)
+- [8. Planning ownership](#8-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -115,8 +138,7 @@ checkpoint-format deferral this doctrine records for checkpoints ([§7](#7-what-
   encoder is **canonical** — `encodeManifestCbor` sorts tensors by name, optimizer blobs by kind, RNG blobs by
   stream id, metrics by name, and so on — so two writers with equal *logical* content emit byte-identical CBOR
   and therefore the same key. Same `If-None-Match: *` protocol. The manifest SHA is the canonical *checkpoint
-  id* used in Pulsar events and `--resume <checkpoint-id>`. Those Pulsar events are themselves **CBOR
-  payloads** — the message-body encoding is owned by [pulsar_client_doctrine.md §3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor);
+  id* used in Pulsar events and `--resume <checkpoint-id>`. Those Pulsar events are themselves **CBOR payloads** — the message-body encoding is owned by [pulsar_client_doctrine.md §3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor);
   a payload carries this manifest SHA (a content-address reference), never the raw blob inline. So *this doc*
   owns the blob/manifest bytes (blobs raw, manifests canonical CBOR); the *Pulsar payload envelope* that
   references them is CBOR owned there — one format, two owners of two layers.
@@ -131,7 +153,7 @@ checkpoint-format deferral this doctrine records for checkpoints ([§7](#7-what-
 
 The atomic pointer makes the *reader* protocol simple; it does not make failed blob/manifest writes disappear.
 Every content-store namespace therefore carries the mandatory `ContentStoreLogicalDemand` from
-[`resource_capacity_doctrine.md` §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry):
+[`resource_capacity_storage.md` §5.1](./resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry):
 
 - **Budget and writer identity are mandatory operands.** The demand is the `Content` arm of the closed
   six-arm `ObjectStoreProducerDemand`, resolves exactly one `StorageBudgetId` to the chosen backing/quota, and
@@ -166,8 +188,7 @@ immediately or succeeds. The sibling checkpoint-format document still owns which
 objects are eligible for collection and the deletion algorithm; this doctrine owns the fact that their
 pre-deletion bytes remain provisioned.
 
-**The `If-Match` CAS is an assumed store premise, not a proven property — the single atomic commit point rests
-on it.** S3 conditional PUT with `If-Match` linearizes the pointer flip *only if* the object store honors the
+**The `If-Match` CAS is an assumed store premise, not a proven property — the single atomic commit point rests on it.** S3 conditional PUT with `If-Match` linearizes the pointer flip *only if* the object store honors the
 precondition. MinIO's conditional-write support is a recent addition, present only from the releases that
 implement it; an endpoint that predates or lacks it **silently ignores** the header and degrades the CAS to
 last-writer-wins — a torn `latest` with no error surfaced. That conditional-PUT atomicity holds under the
@@ -199,6 +220,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   parts["Checkpoint parts: weights, optimizer, rng, replay"]:::intent -->|"sha256(bytes), If-None-Match * (412 = success)"| blobs["blobs/sha256 write-once"]:::intent
   blobs -->|named by their SHAs inside| manifest["manifests/sha256 canonical CBOR"]:::intent
   manifest -->|"manifest-sha = sha256(canonical-cbor)"| ptr[/"pointers latest / best metric / trial id"/]:::effect
@@ -230,10 +252,8 @@ doc owns only the three-tier shape and the two write protocols.
 
 ### 2.3 The hash/pointer master table: four hash classes, three pointer kinds
 
-The store above uses two members of a wider family of identities. This subsection is the **authoritative
-registry** — the SSoT — for every content-address hash class and every mutable pointer kind amoebius uses;
-other doctrines reference this table rather than restating it. Two rules unify the whole family: **a hash class
-is a namespace that is never shared** (two different kinds of thing never collide because their formulas
+The store above uses two members of a wider family of identities. This subsection is the **authoritative registry** — the SSoT — for every content-address hash class and every mutable pointer kind amoebius uses;
+other doctrines reference this table rather than restating it. Two rules unify the whole family: **a hash class is a namespace that is never shared** (two different kinds of thing never collide because their formulas
 differ), and **a pointer is the only mutable object, advanced only by ETag-CAS, namespaced by kind.**
 
 **Hash classes** — immutable, self-naming, distinct namespaces, never shared:
@@ -269,6 +289,24 @@ Ownership and honesty for the registry:
   can pin it. Its format and build path are owned by [`image_build_doctrine.md`](./image_build_doctrine.md).
 
 ---
+
+```mermaid
+flowchart TD
+  %% register: orientation
+  subgraph store["the three-tier store"]
+    b["blobs: write-once, named by digest"]
+    m["manifests: canonical, named by digest"]
+    p["pointers: the only mutable tier"]
+  end
+  w["a writer"]
+  r["a reader"]
+  w -->|"puts, and a repeat put is a success"| b
+  b -->|"referenced by digest from"| m
+  m -->|"referenced by digest from"| p
+  r -->|"resolves a name through"| p
+  p -.->|"compare-and-swap; a lost race retries, never overwrites"| p
+```
+*Orientation. Immutability is per tier, not global: two of the three tiers are write-once and only the pointer moves, which is what makes a concurrent writer safe without a lock. The naming rule is owned by [§1](#1-a-content-derived-name-that-cannot-be-forged).*
 
 ## 3. `experimentHash`: identity is *what was requested* ‖ *where it ran*
 
@@ -306,8 +344,7 @@ experimentHash = sha256(resolved-dhall ‖ substrate-fingerprint)
   `linux-cuda` plus the toolchain witnesses that fix float semantics (the GHC 9.12.4 baseline, the
   kernel-compiler/runtime versions, ISA, ABI). It is gathered by full-path subprocess probes, never from
   environment variables or `PATH`, per the no-env/no-PATH contract owned by
-  [`substrate_doctrine.md`](./substrate_doctrine.md). The *composition* of this fingerprint (and the related,
-  finer-grained JIT cache key) is owned by `jitML/documents/engineering/determinism_contract.md`; this doc
+  [`substrate_doctrine.md`](./substrate_doctrine.md). The *composition* of this fingerprint (and the related, finer-grained JIT cache key) is owned by `jitML/documents/engineering/determinism_contract.md`; this doc
   treats it as an opaque pinned string.
 
 **The substrate is folded into identity because cross-substrate bit-equality is *not* guaranteed** ([§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)).
@@ -320,8 +357,7 @@ This is where the two DSL surfaces meet without colliding: the **application-log
 `resolved-dhall`'s model and config, the **deployment-rules** surface chooses the substrate, and the
 substrate-fingerprint folds the latter into the identity — the split itself is owned by
 [`app_vs_deployment_doctrine.md`](./app_vs_deployment_doctrine.md). `experimentHash` gives **identity**, not a
-guarantee that two runs sharing it produce equal bits; that stronger claim is [§4](#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) (when it holds) and [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) (where
-it stops).
+guarantee that two runs sharing it produce equal bits; that stronger claim is [§4](#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) (when it holds) and [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) (where it stops).
 
 ### 3.1 Producing substrate vs serving substrate: a distinct serving-run fingerprint
 
@@ -339,8 +375,7 @@ the split (it is not a distinction the existing digest already draws):
 **The serving substrate need not equal the producing substrate.** A `ModelArtifact`'s weight bytes are
 **substrate-portable (movable, content-addressed), not substrate-identical** — [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) is explicit that "the same
 program on a different accelerator produces different bytes," so the bytes move but are not guaranteed bit-equal
-or even loadable on a different lane. Cross-substrate serving is made representable by **new work this round
-adds**, never by a check that already existed:
+or even loadable on a different lane. Cross-substrate serving is made representable by **new work this round adds**, never by a check that already existed:
 
 1. An **engine-`family` tag** on `ModelArtifact` / manifest ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) / [§2.1](#21-three-object-classes-two-write-protocols)) — the model side carries no family
    field today.
@@ -373,6 +408,7 @@ separate, **tested/assumed** contract, scoped honestly in the determinism-ceilin
 
 ```mermaid
 flowchart TD
+%% register: algebra
   dhall["Resolved Dhall + substrate fingerprint"]:::intent -->|"sha256 join"| eh[["experimentHash"]]:::intent
   eh -->|namespaces| store["Content-addressed store"]:::intent
   store -->|"every input is a hash: re-run pins the same bytes"| stage[["Pure stages: no I/O in the math"]]:::intent
@@ -437,8 +473,7 @@ content-addressing/determinism *use* of it, the catalog owns the typing discipli
 The three legs above pin the *training/inference math*; this subsection pins the **asset axis** that feeds it —
 the three kinds of heavy thing a model-serving pod needs (a runtime engine, model weights, a compiled kernel).
 An earlier design gave each a *different* lifecycle (engine baked into the image, model eagerly staged, kernel
-lazily JIT'd). This round **collapses all three onto one shape**: a **bounded, content-addressed, ephemeral
-cache**, populated on first miss by `resolve = {download | build}`, shared across `infernix` and `jitML` through
+lazily JIT'd). This round **collapses all three onto one shape**: a **bounded, content-addressed, ephemeral cache**, populated on first miss by `resolve = {download | build}`, shared across `infernix` and `jitML` through
 the **`jit-build` capability-extension** ([`service_capability_doctrine.md`](./service_capability_doctrine.md)).
 The DRY win is one resolver and one bounded pool for all three asset kinds instead of three bespoke paths.
 
@@ -488,8 +523,7 @@ Two types carry the axis:
 
 - **`EngineRuntime`** — a **closed** union of substrate-tagged engine identities (the Apple-Metal bridge, the
   CUDA runtime, the linux-cpu runtime, plus per-family adapters — llama.cpp / whisper.cpp / ONNX / vLLM /
-  pytorch / diffusers / transformers / Audiveris — enumerated as a closed catalog). It has **no
-  `Url`/`Download`/`Fetch` arm**: the `.dhall` *names* an engine identity selected by substrate, it can never
+  pytorch / diffusers / transformers / Audiveris — enumerated as a closed catalog). It has **no `Url`/`Download`/`Fetch` arm**: the `.dhall` *names* an engine identity selected by substrate, it can never
   *author* a download; the `jit-build` resolver downloads-or-builds that named identity into the cache on first
   miss. An engine **named by arbitrary URL** is therefore **type-foreclosed unrepresentable**; the first-miss
   resolve is a bounded-cache act, not a startup URL fetch
@@ -538,16 +572,13 @@ The witness is recorded as a **content-addressed manifest field** ([§2.1](#21-t
 **Layer.** Foreclosing the **unwitnessed direct-stage path** and the **checkpoint arm (a)** is honestly
 **type-foreclosed** — a committed pointer is a genuine no-inhabitant-without-a-complete-checkpoint constructor.
 **Provenance-witness *presence* on arm (b)** is type-foreclosed; its **byte truthfulness** is not — arm (b) admits
-arbitrary bytes (including noise) by design. Fork A tightens this: the import constructor **requires a pinned
-expected content-address (or detached signature)**, and staging **verifies pulled bytes against the pin and fails
-closed before `.ready`** — so pin *presence* = type-foreclosed, pin *match* = decode-foreclosed (stage-time checked,
+arbitrary bytes (including noise) by design. Fork A tightens this: the import constructor **requires a pinned expected content-address (or detached signature)**, and staging **verifies pulled bytes against the pin and fails closed before `.ready`** — so pin *presence* = type-foreclosed, pin *match* = decode-foreclosed (stage-time checked,
 fail-closed), and "the pin names the *intended* model" = runtime-checked / assumed (ledgered in [§6.1](#61-proven--tested--assumed-spelled-out)).
 
 **The engine↔model relation.** A `ModelArtifact` must be servable by an `EngineRuntime` that is available on the
 deployment's substrate — an unmatched model has no landing engine. This is a **decode-foreclosed** total relation
 (technique [`illegal_state_catalog.md` §4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)); the substrate `InferenceEngine`
-capability a model must match is owned by [`service_capability_doctrine.md` §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding). **Cross-substrate serving is
-representable** ([§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint)): the `ModelArtifact` / manifest carries an **engine-`family` tag** ([§2.1](#21-three-object-classes-two-write-protocols)), and the landing
+capability a model must match is owned by [`service_capability_doctrine.md` §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding). **Cross-substrate serving is representable** ([§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint)): the `ModelArtifact` / manifest carries an **engine-`family` tag** ([§2.1](#21-three-object-classes-two-write-protocols)), and the landing
 predicate keys on that family being available on the **serving** substrate lane — so a CUDA-produced model may
 serve on Apple-Metal when the family is baked there, subject to the [§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint) runtime-checked weight-layout load residue.
 
@@ -565,10 +596,7 @@ The three asset kinds, **one cache shape** (`resolve = {download | build}` on fi
 - **Tier 2 — `ModelArtifact` = eager STAGE-THEN-SERVE, and *staging by name IS a provenance-carrying import*.**
   The parent-minted nested `infernix.dhall` names the model *set*; the in-cluster singleton stages each
   model into the shared bounded cache, and the `.ready` sentinel is written **last** so the `model` pointer ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)) commits only a complete
-  artifact. This round **closes the unwitnessed hole** the bare stage-by-name path left open: **naming a model in
-  `infernix.dhall` is an explicit content-addressed import (arm b above)** that carries a **pinned expected
-  content-address (or detached signature)**; staging **verifies the pulled bytes against the pin and fails closed
-  before `.ready`** (Fork A) — there is no constructor that stages bytes without a pin. Staging **re-keys** the
+  artifact. This round **closes the unwitnessed hole** the bare stage-by-name path left open: **naming a model in `infernix.dhall` is an explicit content-addressed import (arm b above)** that carries a **pinned expected content-address (or detached signature)**; staging **verifies the pulled bytes against the pin and fails closed before `.ready`** (Fork A) — there is no constructor that stages bytes without a pin. Staging **re-keys** the
   model off `infernix`'s name-addressed `infernix-models/<modelId>/…` layout onto the content-addressed
   **blob ← manifest ← pointer** store of [§2](#2-the-three-tier-store-blobs--manifests--pointers) — the same three-tier shape training already uses.
   **Staging credentials — object-store and upstream — resolve from Vault BY NAME** (a `SecretRef`, never a value
@@ -602,8 +630,7 @@ catalogued at [`illegal_state_catalog.md` §3.25](../illegal_state/illegal_state
 
 The training surface today models only a fixed dataset split + a finite budget with implicit from-scratch init
 ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)). This round **introduces** two new capabilities — fine-tune-from-an-arbitrary-model and
-train-forever-from-a-feed — unified by a single principle: **online training is an unbounded fine-tune chain over successive
-topic prefixes.** They are carried by three **closed** unions, **owned here** (matching the `EngineRuntime` /
+train-forever-from-a-feed — unified by a single principle: **online training is an unbounded fine-tune chain over successive topic prefixes.** They are carried by three **closed** unions, **owned here** (matching the `EngineRuntime` /
 `ModelArtifact` precedent, [`dsl_doctrine.md`](./dsl_doctrine.md) **carries the field only**, deferring
 unrepresentability to this doc + [`illegal_state_catalog.md`](../illegal_state/illegal_state_catalog.md)):
 
@@ -612,31 +639,16 @@ unrepresentability to this doc + [`illegal_state_catalog.md`](../illegal_state/i
   compose recursively with the [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) witness. Per the per-app isolation of [§2](#2-the-three-tier-store-blobs--manifests--pointers), a `Continue` chain's `parent`
   edge stays **within one app's namespace** — no cross-app DAG edge.
 - **`TrainData = Dataset ContentAddressedRef | Feed { topic : PulsarTopicRef, from : Cursor }`** — `Feed` consumes
-  a topic from a cursor. The consumed prefix `[from, to)` is **materialized at consume time into an immutable
-  dataset blob** keyed by the SHA(s) of the message **bodies** (bodies are already CBOR content-addressed, [§2.1](#21-three-object-classes-two-write-protocols)),
-  and **that blob content-address is the pinned input**. The cursor is an un-hashed convenience locator only — a
-  Pulsar cursor (`<ledgerId>:<entryId>:…`) is broker-assigned metadata, **never an input to any content hash**
-  ([§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)). Materializing the prefix makes the input genuinely immutable ("a SHA is forever," [§4.1](#41-leg-one--pinned-content-addressed-inputs)) and decouples
-  reproducibility from topic retention. A multi-partition feed has no total consume order, so `Feed` carries a
-  **typed single-partition-or-explicit-merge-function witness** — a non-deterministically-ordered feed has **no
-  constructor**.
-- **`TrainBudget = Bounded { steps | epochs } | Continuous { checkpointCadence }`** — `Continuous` commits a
-  **checkpoint** every cadence; each is a committed pointer ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) arm a) and thus **serveable** — serve-from-any-
-  committed-checkpoint of a still-running job (composes with [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) "committed checkpoint," **not** "finished run").
+  a topic from a cursor. The consumed prefix `[from, to)` is **materialized at consume time into an immutable dataset blob** keyed by the SHA(s) of the message **bodies** (bodies are already CBOR content-addressed, [§2.1](#21-three-object-classes-two-write-protocols)), and **that blob content-address is the pinned input**. The cursor is an un-hashed convenience locator only — a Pulsar cursor (`<ledgerId>:<entryId>:…`) is broker-assigned metadata, **never an input to any content hash** ([§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)). Materializing the prefix makes the input genuinely immutable ("a SHA is forever," [§4.1](#41-leg-one--pinned-content-addressed-inputs)) and decouples reproducibility from topic retention. A multi-partition feed has no total consume order, so `Feed` carries a **typed single-partition-or-explicit-merge-function witness** — a non-deterministically-ordered feed has **no constructor**. - **`TrainBudget = Bounded { steps | epochs } | Continuous { checkpointCadence }`** — `Continuous` commits a **checkpoint** every cadence; each is a committed pointer ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) arm a) and thus **serveable** — serve-from-any- committed-checkpoint of a still-running job (composes with [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) "committed checkpoint," **not** "finished run").
 
 **No bare-unbounded arm (mirrors `Growable`).** `Continuous` **requires** a `checkpointCadence`; `Feed` **requires**
 a bounded-retention `StorageBudget`. "Train forever with no checkpoints and no retention" has **no constructor** —
-**type-foreclosed union shape**, exactly the `Growable` / `ScalingPolicy` idiom. Paired with the honest **runtime-checked
-residue**: that the trainer *actually* checkpoints at cadence and retention *actually* holds is runtime, not typed.
+**type-foreclosed union shape**, exactly the `Growable` / `ScalingPolicy` idiom. Paired with the honest **runtime-checked residue**: that the trainer *actually* checkpoints at cadence and retention *actually* holds is runtime, not typed.
 
 **Determinism = a content-addressed training DAG (qualified).** Each checkpoint records its `parent` (base)
 content-address and its consumed-prefix content-address; **`experimentHash` keeps its 2-input formula** — the base
-and prefix addresses are folded **into `resolved-dhall`** ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)), **not** into a wider hash tuple (which would break
-the "existing (sibling)" framing of [§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)). Classify the headline honestly: DAG **identity / bookkeeping**
-(parent + prefix pinned) is **type-foreclosed**; **actual byte-replay** is **decode-foreclosed / tested** per [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) (SL / on-policy /
-AlphaZero-per-game tested-in-sibling; off-policy RL only the prefix); **cross-substrate is not asserted** (a
-cross-substrate `Continue` is a **new** run in a **new** `experimentHash` namespace with no reproducibility
-relation back to the base's substrate — the base is a pinned immutable input, not an anchor).
+and prefix addresses are folded **into `resolved-dhall`** ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)), **not** into a wider hash tuple (which would break the "existing (sibling)" framing of [§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)). Classify the headline honestly: DAG **identity / bookkeeping**
+(parent + prefix pinned) is **type-foreclosed**; **actual byte-replay** is **decode-foreclosed / tested** per [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) (SL / on-policy / AlphaZero-per-game tested-in-sibling; off-policy RL only the prefix); **cross-substrate is not asserted** (a cross-substrate `Continue` is a **new** run in a **new** `experimentHash` namespace with no reproducibility relation back to the base's substrate — the base is a pinned immutable input, not an anchor).
 
 **The continuous trainer reuses existing machinery (Fork C — no new election).** It is **not** a new elected
 worker kind and does **not** fold through the control-plane singleton; it is the existing
@@ -646,12 +658,9 @@ source. Single-writer is **delegated, not re-proved**: liveness (at most one act
 **ETag-CAS single atomic commit point** + the typed **`AdvancePredicate`** ([§2](#2-the-three-tier-store-blobs--manifests--pointers), [§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)) — a monotone / idempotent join, so
 even a bounded failover-overlap of two trainers cannot regress HEAD. Each committed checkpoint advances `latest`
 by CAS. Cross-cluster there is **no** second trainer on the same feed: a Continuous Feed trainer is
-**single-cluster** (the intra-cluster First-Axis single-writer coordinator); cross-cluster is **serve-by-
-replication** ([§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)), never a second authoritative trainer.
+**single-cluster** (the intra-cluster First-Axis single-writer coordinator); cross-cluster is **serve-by- replication** ([§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)), never a second authoritative trainer.
 
-**Type coherence to confirm (not asserted).** The DAG `parent` field stores a **namespace-independent manifest
-SHA** (`sha256(canonical-cbor)`, [§2.1](#21-three-object-classes-two-write-protocols)), and `ModelArtifactRef` and a checkpoint-manifest-SHA must **unify as one
-content-address type** before a cross-import / cross-substrate `Continue` resolves — carried as a confirm-item,
+**Type coherence to confirm (not asserted).** The DAG `parent` field stores a **namespace-independent manifest SHA** (`sha256(canonical-cbor)`, [§2.1](#21-three-object-classes-two-write-protocols)), and `ModelArtifactRef` and a checkpoint-manifest-SHA must **unify as one content-address type** before a cross-import / cross-substrate `Continue` resolves — carried as a confirm-item,
 tied to [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)'s cross-bucket adoption.
 
 The illegal states this subsection closes — "a Continuous run with no cadence / a Feed with no bounded retention"
@@ -680,8 +689,7 @@ union, and union over content-addressed objects is commutative, associative, and
   are commutative, associative, and idempotent — so two replicas that apply each other's pointer updates in any
   order land on the same HEAD. Convergence is built into the predicate, not bolted on by a merge script.
 
-The consequence for failover doctrine is precise: the content-addressed store carries **no per-system
-confluence proof obligation** — it is the *trivial* case of invariant-confluence, true by construction. The
+The consequence for failover doctrine is precise: the content-addressed store carries **no per-system confluence proof obligation** — it is the *trivial* case of invariant-confluence, true by construction. The
 hard proof obligations concentrate on the systems that are *not* content-addressed (the ones with genuine
 multi-writer mutable state), and that "Second Axis" of async cross-cluster geo-replication is owned by
 [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md). This doc owns only the claim that the store is the
@@ -709,8 +717,7 @@ binary protocol, **never** WebSockets — owned by [`pulsar_client_doctrine.md`]
 host compute daemon participates as a **Pulsar + MinIO peer over host-only NodePorts with no mTLS** (owned by
 [`host_cluster_comms_doctrine.md`](./host_cluster_comms_doctrine.md)); it reads and writes the *same*
 content-addressed store the in-cluster workers do, and confluence is what makes that safe without a distributed
-lock. One caveat carried from the determinism contract: **determinism applies to the durable message body
-only** — Pulsar message metadata (broker-assigned ids, timestamps) varies across runs and is never an input to
+lock. One caveat carried from the determinism contract: **determinism applies to the durable message body only** — Pulsar message metadata (broker-assigned ids, timestamps) varies across runs and is never an input to
 any content hash.
 
 **Honesty.** Confluence here is a property of the *store*: type-enforced immutability plus an argued
@@ -731,8 +738,7 @@ accelerator scheduling, and async I/O are runtime physics, outside the reach of 
 sibling `jitML` project's `jitML/documents/engineering/determinism_contract.md` is the SSoT for exactly where
 that ceiling sits, and amoebius adopts its contract verbatim rather than inventing a softer one:
 
-- **Same-substrate bit-equality is the contract; cross-substrate bit-equality is *not guaranteed* and *not
-  asserted*.** There is no numeric-parity check and no tolerance band across substrates — RNG draws and float
+- **Same-substrate bit-equality is the contract; cross-substrate bit-equality is *not guaranteed* and *not asserted*.** There is no numeric-parity check and no tolerance band across substrates — RNG draws and float
   reduction order differ. The substrate is folded into `experimentHash` ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) precisely so this is honest by
   construction rather than papered over.
 - **Off-policy RL is downgraded to a *tested* first-N-step prefix.** For DQN, DDPG, TD3, SAC, CrossQ, and TQC,
@@ -741,8 +747,7 @@ that ceiling sits, and amoebius adopts its contract verbatim rather than inventi
   `rl_steps / 10`), and — critically — it is asserted by comparing **two fresh runs against each other**, never
   against a stored trajectory fixture. That is *tested evidence in the sibling*, not a proof, and this doctrine
   reports it as such. On-policy algorithms (PPO, A2C, TRPO, MaskablePPO, RecurrentPPO) and SL training hold
-  full-run bit-equality; AlphaZero self-play holds per-game bit-equality. **For a `Continuous` run
-  ([§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) this prefix anchor is undefined** — a Continuous run has no terminal step to take a fraction of. Scope
+  full-run bit-equality; AlphaZero self-play holds per-game bit-equality. **For a `Continuous` run ([§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) this prefix anchor is undefined** — a Continuous run has no terminal step to take a fraction of. Scope
   it **per committed checkpoint-segment** (between two committed pointers), or state plainly "no reproducibility
   anchor beyond resume-from-checkpoint"; do **not** import the bounded-run `rl_steps / 10` prefix unchanged.
 - **Infernix inference inherits the same ceiling.** Same-substrate, seeded/greedy decoding is the reproducible
@@ -756,10 +761,8 @@ that ceiling sits, and amoebius adopts its contract verbatim rather than inventi
   **resume-from-checkpoint** (the immutable checkpoint replicates by [§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)), **not** re-derive-from-feed, unless the
   consuming cluster independently retains the prefix.
 - **The training-DAG headline is qualified, not a blanket "replay reproduces."** DAG **identity / bookkeeping**
-  (a checkpoint's `parent` + consumed-prefix content-addresses pinned, [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) is **type-foreclosed**; **actual
-  byte-replay of a DAG node** is **decode-foreclosed / tested** at the same ceiling as any run above (SL / on-policy /
-  AlphaZero-per-game tested-in-sibling; off-policy RL only the segment prefix), and **cross-substrate replay is
-  not asserted**.
+  (a checkpoint's `parent` + consumed-prefix content-addresses pinned, [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) is **type-foreclosed**; **actual byte-replay of a DAG node** is **decode-foreclosed / tested** at the same ceiling as any run above (SL / on-policy /
+  AlphaZero-per-game tested-in-sibling; off-policy RL only the segment prefix), and **cross-substrate replay is not asserted**.
 
 ### 6.1 Proven / tested / assumed, spelled out
 
@@ -818,8 +821,7 @@ design intent.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — content-address totality ([§4.5](../illegal_state/illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content))
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)

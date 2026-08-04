@@ -1,12 +1,35 @@
 # Phase 31: Platform services-2 (Redis/Sentinel + Percona/Patroni + observability + readiness-DAG)
 
+> **Purpose**: Stand up Redis/Sentinel, Percona/Patroni with pgAdmin, and Prometheus/Grafana, then bring the
+> whole standard stack up in the derived readiness-DAG order asserted from an external-observer trace.
+> **Read this if**: phase 31 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 31 delivers the platform services-2 (Redis/Sentinel + Percona/Patroni + observability + readiness-DAG); its design is owned by [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [chaos_failover_doctrine.md](../documents/engineering/chaos_failover_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Stand up Redis/Sentinel, Percona/Patroni with pgAdmin, and Prometheus/Grafana, then bring the
-> whole standard stack up in the derived readiness-DAG order asserted from an external-observer trace.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 31.1: Percona/Patroni Postgres per consumer + pgAdmin + Prometheus/Grafana 📋](#sprint-311-perconapatroni-postgres-per-consumer--pgadmin--prometheusgrafana-)
+- [Sprint 31.2: Ephemeral Redis/Sentinel realtime coordination 📋](#sprint-312-ephemeral-redissentinel-realtime-coordination-)
+- [Sprint 31.3: The full derived readiness-DAG bring-up + the standard-stack gate 📋](#sprint-313-the-full-derived-readiness-dag-bring-up--the-standard-stack-gate-)
+- [Sprint 31.4: Register-2.5 readiness-DAG bring-up under simulated partial failure 📋](#sprint-314-register-25-readiness-dag-bring-up-under-simulated-partial-failure-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -29,8 +52,7 @@ reconciles the cluster-wide **Percona operator**, one **Patroni Postgres cluster
 (each paired with its own **pgAdmin**), and the **Prometheus/Grafana** observability pair — each as the
 byte-identical **HA topology even at `replicas=1`** (Postgres is a Patroni-via-Percona cluster, never a bare
 `postgres` Pod), each rendered as typed Kubernetes objects by the Phase-26 `renderAll` path (no Helm, no
-third-party charts, manifests generated from Haskell and never committed), each served from binaries **baked
-into the multi-arch base image** with no public-registry pull, and each on the Phase-28 `no-provisioner`
+third-party charts, manifests generated from Haskell and never committed), each served from binaries **baked into the multi-arch base image** with no public-registry pull, and each on the Phase-28 `no-provisioner`
 retained PVs where it holds durable state. Every app, init, and sidecar container and every volume is rendered
 only from an opaque `ProvisionedServiceSpec`, with exact CPU/memory/ephemeral-storage requests and limits,
 bounded pod-local storage, exact durable capacities, and explicit cache `None` plus accelerator `None` for this
@@ -81,16 +103,12 @@ apple, linux-cuda, or windows substrate is touched in Phase 31.
 that names Register 3 and marks the runtime layer *tested*, not proved.
 
 **Gate:** on the Phase-30 backbone cluster the remaining standard services — the Percona operator, the
-per-consumer Patroni Postgres clusters with pgAdmin, Prometheus/Grafana, and Redis/Sentinel — **come up in
-their HA-capable topologies** (each its HA
-topology even at `replicas=1`; Postgres a Patroni-via-Percona cluster, never a bare Pod) **from generated
-manifests + baked binaries** (no public-registry pull), each Patroni cluster carrying the **mandated
-synchronous configuration** (`synchronous_mode: on`, `synchronous_mode_strict: on`, bounded
+per-consumer Patroni Postgres clusters with pgAdmin, Prometheus/Grafana, and Redis/Sentinel — **come up in their HA-capable topologies** (each its HA
+topology even at `replicas=1`; Postgres a Patroni-via-Percona cluster, never a bare Pod) **from generated manifests + baked binaries** (no public-registry pull), each Patroni cluster carrying the **mandated synchronous configuration** (`synchronous_mode: on`, `synchronous_mode_strict: on`, bounded
 `maximum_lag_on_failover`) asserted against a committed oracle, and every execution unit/volume carrying the
 exact complete provision derived by its `ProvisionedServiceSpec` — including Prometheus's exact
 budget-derived compute, evaluation/retention/WAL configuration, and TSDB claim/backing/capacity, with the
-one-byte-under and compaction/recovery high-water witnesses passing; **and the whole standard stack comes up in the
-[§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) derived readiness-DAG order** — the Percona operator before any Postgres
+one-byte-under and compaction/recovery high-water witnesses passing; **and the whole standard stack comes up in the [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) derived readiness-DAG order** — the Percona operator before any Postgres
 consumer, Vault initialized-and-unsealed before secret-dependent startup — each edge a condition observed by
 the reconciler's wait-for-ready, the bring-up order asserted a pure function of the declared edges from an
 **external-observer bring-up trace** (not a self-report), with a hardcoded sequential list foreclosed by a
@@ -100,9 +118,37 @@ no-persistence configuration, finite memory/client/output-buffer limits, and fai
 the committed oracle. A public Redis image, PVC/AOF/RDB arm, unbounded key/buffer value, or Redis-as-receipt
 mutant turns the gate red for its specific reason.
 
+```mermaid
+flowchart LR
+  %% register: algebra
+  fx["committed fixtures"]:::intent
+  or["independently authored oracle"]:::intent
+  mu["seeded mutant"]:::intent
+  g{{"the phase 31 gate command"}}:::gate
+  ok((("phase seal: the ledger this gate emits"))):::seal
+  no>"the mutant must turn it red"]:::refuse
+  fx -->|"binds the corpus"| g
+  or -->|"binds the expectation"| g
+  mu -->|"binds the defect"| g
+  g -->|"fixtures green, oracle agrees"| ok
+  g -->|"mutant green means the gate is not one"| no
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+```
+*Design intent. Phase 31's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+
 **Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate is closed to a stub by the pinned cross-checks below, all authored and
 committed in **Phase 0** before any `src/Amoebius/Platform/*` implementation exists (§M.1 oracle-pinning), and
-named as gate oracles in the Sprint 31.1–31.4 Deliverables:
+named as gate oracles in the Sprint 31.1–31.4 Deliverables.
+
+## Gate integrity
+
+The apparatus phase 31's gate closes over, in the slot
+[§D](development_plan_standards.md#d-the-per-phase-document-skeleton) reserves for it. Every clause it
+discharges is owned by
+[§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
 
 - **Derived-DAG order (§M.2 committed mutant, §M.3 independent oracle, §M.4 coverage floor, §M.5 external-observer trace).** The
   bring-up order is asserted a pure function of the *declared* dependency edges by a Register-1 property
@@ -147,8 +193,7 @@ named as gate oracles in the Sprint 31.1–31.4 Deliverables:
   and every service in this linux-cpu corpus carries cache `None` and accelerator `None` with no device
   extended-resource claim. An independent calculation combines app containers, both forms of init container,
   and pod/runtime overhead, then exact-matches the placement witness; a presence-only subset check is insufficient.
-- **Prometheus retained-state identity and boundary (§M.3 independent projection, §M.5 OS-boundary
-  observer).** A Phase-0-pinned monitoring oracle independently folds the bounded scrape-sample rate and
+- **Prometheus retained-state identity and boundary (§M.3 independent projection, §M.5 OS-boundary observer).** A Phase-0-pinned monitoring oracle independently folds the bounded scrape-sample rate and
   retention into resident blocks, WAL/head, old+new compaction overlap, and derives query/temp headroom from
   the structural query operands. The applied
   StatefulSet claim/backing and PVC/PV capacity plus effective evaluation interval,
@@ -192,9 +237,16 @@ Prometheus + Grafana, and Redis primary/replicas/Sentinel — no more, no fewer.
   intra-cluster failover cannot promote a replica missing acknowledged commits.
 - [`platform_services_doctrine.md §7 — Prometheus / Grafana, observability is not an add-on`](../documents/engineering/platform_services_doctrine.md#7-prometheus--grafana--observability-is-not-an-add-on)
   with [`monitoring_doctrine.md §3 — derivation and the operator read-model`](../documents/engineering/monitoring_doctrine.md#3-derivation-and-the-operator-read-model):
-  Prometheus scrapes platform workloads and the derived recording/alert rules and per-workflow dashboards are
-  generated, never hand-authored. Its mandatory finite work budget derives both CPU/memory and the exact
-  retained TSDB peak/configuration from workflow/rule/series/sample-rate, interval, retention, structural
+  Prometheus scrapes platform workloads and the derived recording/alert rules and dashboards are
+  generated, never hand-authored — for every bound execution unit's mandatory `UnitMonitor` as well as every
+  workflow SLO, so the monitored population is the execution set and a platform service is no more exempt from
+  its monitor than from its `ResourceEnvelope`
+  ([`monitoring_doctrine.md §2.4`](../documents/engineering/monitoring_doctrine.md#24-per-execution-unit-obligation--boundexecutionunitmonitor)).
+  The **alert receiver** that groups, deduplicates, and silences the firing set stands up here beside
+  Prometheus and Grafana as part of the same `Observability` capability, with its own complete envelope and a
+  finite in-memory bound; it declares no outbound delivery target, and carrying a page beyond the cluster edge
+  stays an operator-owned out-of-band integration. Its mandatory finite work budget derives both CPU/memory and the exact
+  retained TSDB peak/configuration from the monitored-population/rule/series/sample-rate, interval, retention, structural
   query concurrency/series/samples/range/timeout, claim/backing, and versioned cost models. All queries enter
   through the generated admission proxy; the browser surfaces gated behind the (Phase 32) Keycloak edge
   under a mandatory `AccessScope` with no `Public` arm.
@@ -205,14 +257,11 @@ Prometheus + Grafana, and Redis primary/replicas/Sentinel — no more, no fewer.
   observed-ready conditions, never a duration-gated or prose-ordered installer.
 - [`manifest_generation_doctrine.md §5 — the apply/reconcile engine: server-side apply, owned field manager, prune, wait`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
   and [`§2 — the typed manifest model (`renderAll` is the sole public pure function to objects)`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects):
-  Phase 31 reuses the Phase-26 pure `renderAll :: ProvisionedSpec -> [K8sObject]` and typed-action reconciler
-  whose **wait-for-ready is observed from the live object, never a `threadDelay`** to apply and sequence the
-  set.
-- [`image_build_doctrine.md §2 — the single distribution rule`](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster):
+  Phase 31 reuses the Phase-26 pure `renderAll :: ProvisionedSpec -> [K8sObject]` and typed-action reconciler whose **wait-for-ready is observed from the live object, never a `threadDelay`** to apply and sequence the set. - [`image_build_doctrine.md §2 — the single distribution rule`](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster):
   every service binary (Redis, Percona operator, Patroni, pgAdmin, Prometheus, Grafana) is baked into the Phase-25
   multi-arch base image and resolved only in-cluster; nothing in this bring-up pulls from a public registry.
 - [`platform_services_doctrine.md §10 — every execution unit declares its complete resource envelope`](../documents/engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)
-  and [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix):
+  and [`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix):
   every app/init/sidecar container and volume is the exact rendered projection of the checked CPU, memory,
   ephemeral-storage, durable-storage, cache, and accelerator fields; `None`/empty provisions remain explicit
   rather than silently omitted from the pure model.
@@ -233,9 +282,27 @@ Prometheus + Grafana, and Redis primary/replicas/Sentinel — no more, no fewer.
 ## Sprint 31.1: Percona/Patroni Postgres per consumer + pgAdmin + Prometheus/Grafana 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Platform/Postgres.hs`, `src/Amoebius/Platform/Observability.hs` (target paths; not yet built)
-**Blocked by**: Phase 30 (the MetalLB/MinIO/Pulsar backbone these services sit on), Phase 26 (reconciler), Phase 28 (retained PVs for the Patroni clusters and Prometheus), Phase 29 (each Patroni cluster's credentials are Vault secrets)
-**Independent Validation**: the in-scope database-consumer set is named concretely as **exactly `{Grafana}`** — Grafana configured with an external Postgres (Patroni-via-Percona) backing datastore for its config/dashboard store (Keycloak is Phase 32; the `distribution` registry takes no database, [§3](../documents/engineering/platform_services_doctrine.md#3-the-registry--the-single-image-source)); the cluster-wide Percona operator reconciles that consumer's `PerconaPGCluster` — an HA Patroni cluster even at one replica ("HA" meaning byte-identical modulo replica count to the multi-member Patroni topology), never a bare `postgres` Pod, paired with its own pgAdmin; each cluster carries the **mandated synchronous config** (`synchronous_mode: on`, `synchronous_mode_strict: on`, bounded `maximum_lag_on_failover`) asserted byte-equal to the committed `test/fixtures/phase31/patroni-sync-config.golden` oracle, with the committed `mutant/patroni-async-default` failing on the specific reason that `synchronous_mode_strict` is not `on`; the operator is up before any Postgres consumer; the consuming Grafana workload is observed to **use** the cluster end-to-end — it authenticates with the credential resolved from its Vault `SecretRef` and a SQL row it writes is read back from its own Patroni cluster (not merely that an unattached `PerconaPGCluster` reconciles); Prometheus scrapes platform workloads, the derived rules/dashboards are generated rather than hand-authored, and its exact retained-state projection plus one-byte-under/compaction boundary checks pass; every app/init/sidecar container and volume exactly matches its complete `ProvisionedServiceSpec` projection.
+**Implementation**: `src/Amoebius/Platform/Postgres.hs`,
+`src/Amoebius/Platform/Observability.hs` (target paths; not yet built)
+**Blocked by**: Phase 30 (the
+MetalLB/MinIO/Pulsar backbone these services sit on), Phase 26 (reconciler), Phase 28 (retained PVs for the
+Patroni clusters and Prometheus), Phase 29 (each Patroni cluster's credentials are Vault secrets)
+**Independent Validation**: the in-scope database-consumer set is named concretely as **exactly `{Grafana}`** — Grafana configured with an external Postgres (Patroni-via-Percona) backing datastore for its
+config/dashboard store (Keycloak is Phase 32; the `distribution` registry takes no database,
+[§3](../documents/engineering/platform_services_doctrine.md#3-the-registry--the-single-image-source)); the
+cluster-wide Percona operator reconciles that consumer's `PerconaPGCluster` — an HA Patroni cluster even at
+one replica ("HA" meaning byte-identical modulo replica count to the multi-member Patroni topology), never a
+bare `postgres` Pod, paired with its own pgAdmin; each cluster carries the **mandated synchronous config**
+(`synchronous_mode: on`, `synchronous_mode_strict: on`, bounded `maximum_lag_on_failover`) asserted
+byte-equal to the committed `test/fixtures/phase31/patroni-sync-config.golden` oracle, with the committed
+`mutant/patroni-async-default` failing on the specific reason that `synchronous_mode_strict` is not `on`;
+the operator is up before any Postgres consumer; the consuming Grafana workload is observed to **use** the
+cluster end-to-end — it authenticates with the credential resolved from its Vault `SecretRef` and a SQL row
+it writes is read back from its own Patroni cluster (not merely that an unattached `PerconaPGCluster`
+reconciles); Prometheus scrapes platform workloads, the derived rules/dashboards are generated rather than
+hand-authored, and its exact retained-state projection plus one-byte-under/compaction boundary checks pass;
+every app/init/sidecar container and volume exactly matches its complete `ProvisionedServiceSpec`
+projection.
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/monitoring_doctrine.md`,
 `documents/engineering/chaos_failover_doctrine.md`
@@ -245,7 +312,7 @@ Adopt [`platform_services_doctrine.md §8 — Postgres, Patroni-via-Percona, one
 [`§7 — Prometheus / Grafana`](../documents/engineering/platform_services_doctrine.md#7-prometheus--grafana--observability-is-not-an-add-on)
 with [`monitoring_doctrine.md §3`](../documents/engineering/monitoring_doctrine.md#3-derivation-and-the-operator-read-model),
 the lossless premise of [`chaos_failover_doctrine.md §6`](../documents/engineering/chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives),
-and [`resource_capacity_doctrine.md §3.1 — the systematic provision matrix`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+and [`resource_capacity_types.md §3.1 — the systematic provision matrix`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
 as the projection every execution unit and volume is checked against:
 stand up the Percona operator as a cluster-wide platform component reconciling per-consumer Patroni clusters —
 each with pgAdmin and the mandated synchronous configuration — and Prometheus/Grafana with derived rules and
@@ -255,8 +322,7 @@ dashboards.
 - The Percona operator rendered as a cluster-wide platform component (from the shared inventory so it installs
   identically on every substrate), reconciling the per-consumer `PerconaPGCluster` for the named
   database-consumer set **`{Grafana}`** — HA Patroni even at `replicas=1` — each paired with its own pgAdmin;
-  the `distribution` registry takes **no** database ([§3](../documents/engineering/platform_services_doctrine.md#3-the-registry--the-single-image-source)). The consumer set is pinned here (resolving the
-  `platform_services_doctrine.md §8` "Phase 30 delivery detail"); a `PerconaPGCluster` consumed by nothing does
+  the `distribution` registry takes **no** database ([§3](../documents/engineering/platform_services_doctrine.md#3-the-registry--the-single-image-source)). The consumer set is pinned here (resolving the `platform_services_doctrine.md §8` "Phase 30 delivery detail"); a `PerconaPGCluster` consumed by nothing does
   not satisfy this deliverable.
 - The **mandated Patroni configuration** on every rendered cluster: `synchronous_mode: on`,
   `synchronous_mode_strict: on` (the decided strict stance — no synchronous standby ⇒ the primary refuses new
@@ -265,27 +331,30 @@ dashboards.
   `test/fixtures/phase31/patroni-sync-config.golden`, with the committed seeded mutant
   `mutant/patroni-async-default` named as the mutant this invariant MUST turn red (on the specific reason that
   `synchronous_mode_strict` is not `on`).
-- Prometheus + Grafana scraping platform workloads, with the per-workflow recording/alert rules and dashboards
-  **derived, never hand-authored**. A mandatory finite `MonitoringWorkBudget` bounds workflow/rule/series
-  cardinality, maximum scrape samples/second, evaluation work/interval, finite retention, a structural
-  `QueryWorkBudget { maxConcurrentQueries, maxSeriesPerQuery, maxSamplesPerQuery, maxRange, timeout,
-  costModel }`, and one StatefulSet claim/backing/presentation. Version-pinned evaluation, TSDB, and query cost
-  folds derive Prometheus
-  CPU/memory requests+limits for evaluation overlapping maximum concurrent queries, the query-admission
-  proxy's complete pod envelope, plus retained blocks, WAL/head, old+new compaction overlap, and query/temp
-  headroom as required usable bytes; the private storage witness then adds filesystem overhead and backing
-  allocation rounding and supplies exact PVC/PV capacity, volumeMode, and fsType. Rendered Prometheus global and
-  rule-group intervals, `--storage.tsdb.retention.time`, `--storage.tsdb.retention.size`, Prometheus
-  query concurrency/sample/timeout flags, the sole-routable query-admission proxy series/range controls, and
-  model-selected WAL/config settings equal those operands. NetworkPolicy blocks direct query API access. The
-  live gate reads the effective configuration, argv, proxy controls, and claim
-  back and refuses any shorter default/override or smaller volume. A descriptor above a count/rate bound or a
-  mounted usable capacity one byte below the derived peak, or raw backing one allocation quantum below
-  `provisionedBytes`, rejects before any SSA or backing-allocation effect; fixed requests or
-  an arbitrary tiny PVC have no fallback arm. Optional local Thanos is a distinct bounded demand and cannot
-  borrow the Prometheus claim. The browser surfaces reach a user
-  only through the (Phase 32) Keycloak edge under a mandatory `AccessScope` with no `Public` arm — deferred
-  here, marked UNVERIFIED.
+- Prometheus + Grafana scraping platform workloads, with the per-workflow recording/alert rules and
+  dashboards **derived, never hand-authored**.
+  - A mandatory finite `MonitoringWorkBudget` bounds workflow/rule/series cardinality, maximum scrape
+    samples/second, evaluation work/interval, finite retention, a structural `QueryWorkBudget {
+    maxConcurrentQueries, maxSeriesPerQuery, maxSamplesPerQuery, maxRange, timeout, costModel }`, and one
+    StatefulSet claim/backing/presentation.
+  - Version-pinned evaluation, TSDB, and query cost folds derive Prometheus CPU/memory requests+limits for
+    evaluation overlapping maximum concurrent queries, the query-admission proxy's complete pod envelope,
+    plus retained blocks, WAL/head, old+new compaction overlap, and query/temp headroom as required usable
+    bytes; the private storage witness then adds filesystem overhead and backing allocation rounding and
+    supplies exact PVC/PV capacity, volumeMode, and fsType.
+  - Rendered Prometheus global and rule-group intervals, `--storage.tsdb.retention.time`,
+    `--storage.tsdb.retention.size`, Prometheus query concurrency/sample/timeout flags, the sole-routable
+    query-admission proxy series/range controls, and model-selected WAL/config settings equal those
+    operands.
+  - NetworkPolicy blocks direct query API access.
+  - The live gate reads the effective configuration, argv, proxy controls, and claim back and refuses any
+    shorter default/override or smaller volume.
+  - A descriptor above a count/rate bound or a mounted usable capacity one byte below the derived peak, or
+    raw backing one allocation quantum below `provisionedBytes`, rejects before any SSA or
+    backing-allocation effect; fixed requests or an arbitrary tiny PVC have no fallback arm.
+  - Optional local Thanos is a distinct bounded demand and cannot borrow the Prometheus claim.
+  - The browser surfaces reach a user only through the (Phase 32) Keycloak edge under a mandatory
+    `AccessScope` with no `Public` arm — deferred here, marked UNVERIFIED.
 - Exact CR→child-envelope projection for every supported operator arm. In particular, each
   `PerconaPGCluster` CR's replicas, container resources, PVC sizes, and rollout fields equal the provisioned
   child pod/PVC/transition bound; after readiness, the operator-created StatefulSets/Pods/PVCs are enumerated
@@ -350,10 +419,23 @@ The whole sprint (📋 Planned).
 ## Sprint 31.2: Ephemeral Redis/Sentinel realtime coordination 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Platform/Redis.hs`, `src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase31RedisSpec.hs` (target paths; not yet built)
-**Blocked by**: Phase 25 (the monocontainer containing `redis-server`/Sentinel mode and `redis-cli`), Phase 26 (typed renderer/reconciler), Phase 29 (Vault TLS and ACL credentials), Phase 30 (live backbone cluster)
-**Independent Validation**: generated manifests stand up one Redis primary, at least two replicas, and three Sentinel voters from the Phase-25 image; an independent TLS/ACL client observes replication and a forced Sentinel failover, while Kubernetes volume/config readback proves no PVC/AOF/RDB/backup, all key/client/output-buffer/memory/rate bounds exact-match the provision witness, and provider/Pulsar receipt observers prove Redis contains no authoritative outcome; `mutant/redis-pvc`, `mutant/redis-unbounded-buffer`, `mutant/redis-public-image`, and `mutant/redis-receipt-authority` turn the gate red.
-**Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/readiness_ordering_doctrine.md`
+**Implementation**: `src/Amoebius/Platform/Redis.hs`,
+`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase31RedisSpec.hs` (target paths; not yet
+built)
+**Blocked by**: Phase 25 (the monocontainer containing `redis-server`/Sentinel mode and `redis-cli`),
+Phase 26 (typed renderer/reconciler), Phase 29 (Vault TLS and ACL credentials), Phase 30 (live backbone
+cluster)
+**Independent Validation**: generated manifests stand up one Redis primary, at least two replicas,
+and three Sentinel voters from the Phase-25 image; an independent TLS/ACL client observes replication and a
+forced Sentinel failover, while Kubernetes volume/config readback proves no PVC/AOF/RDB/backup, all
+key/client/output-buffer/memory/rate bounds exact-match the provision witness, and provider/Pulsar receipt
+observers prove Redis contains no authoritative outcome; `mutant/redis-pvc`,
+`mutant/redis-unbounded-buffer`, `mutant/redis-public-image`, and `mutant/redis-receipt-authority` turn the
+gate red.
+**Docs to update**: `documents/engineering/platform_services_doctrine.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`,
+`documents/engineering/resource_capacity_doctrine.md`,
+`documents/engineering/readiness_ordering_doctrine.md`
 
 ### Objective
 Adopt [`ui_realtime_coordination_doctrine.md §5 — Redis is ephemeral platform-internal coordination`](../documents/engineering/ui_realtime_coordination_doctrine.md#5-redis-is-ephemeral-platform-internal-coordination):
@@ -384,10 +466,25 @@ The whole sprint (📋 Planned).
 ## Sprint 31.3: The full derived readiness-DAG bring-up + the standard-stack gate 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Platform/Services.hs`, `src/Amoebius/Platform/BringUp.hs` (target paths; not yet built)
-**Blocked by**: Sprint 31.1, Sprint 31.2, Phase 30 (the backbone the DAG folds in), Phase 29 (the Vault-initialized-and-unsealed → secret-dependent-startup edge)
-**Independent Validation**: the full standard stack (Phase-30 backbone + the Sprint-31.1 and Sprint-31.2 services) is assembled as one acyclic derived readiness DAG whose edges are the [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) hard edges; the reconciler brings the set up strictly in that order, each dependent starting on its dependency's observed-ready condition (never a `threadDelay`); the live bring-up order is read from an **external-observer trace** (the apiserver watch / pod-readiness event stream at the OS boundary), the derived order asserted a pure function of the declared edges against the committed `test/fixtures/phase31/dag-edges.golden` table (independent of the `BringUp` fold), the committed `mutant/dag-drop-edge` (deleting the `perconaOperator → PerconaPGCluster` edge) turning both the order property and the live precondition red; no image request leaves the cluster for a public registry; the whole set is up, HA-shaped, and reachable in-cluster.
-**Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/readiness_ordering_doctrine.md`
+**Implementation**: `src/Amoebius/Platform/Services.hs`,
+`src/Amoebius/Platform/BringUp.hs` (target paths; not yet built)
+**Blocked by**: Sprint 31.1, Sprint 31.2,
+Phase 30 (the backbone the DAG folds in), Phase 29 (the Vault-initialized-and-unsealed →
+secret-dependent-startup edge)
+**Independent Validation**: the full standard stack (Phase-30 backbone + the
+Sprint-31.1 and Sprint-31.2 services) is assembled as one acyclic derived readiness DAG whose edges are the
+[§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) hard
+edges; the reconciler brings the set up strictly in that order, each dependent starting on its dependency's
+observed-ready condition (never a `threadDelay`); the live bring-up order is read from an
+**external-observer trace** (the apiserver watch / pod-readiness event stream at the OS boundary), the
+derived order asserted a pure function of the declared edges against the committed
+`test/fixtures/phase31/dag-edges.golden` table (independent of the `BringUp` fold), the committed
+`mutant/dag-drop-edge` (deleting the `perconaOperator → PerconaPGCluster` edge) turning both the order
+property and the live precondition red; no image request leaves the cluster for a public registry; the whole
+set is up, HA-shaped, and reachable in-cluster.
+**Docs to update**:
+`documents/engineering/platform_services_doctrine.md`,
+`documents/engineering/readiness_ordering_doctrine.md`
 
 ### Objective
 Adopt [`platform_services_doctrine.md §11 — bring-up and dependency ordering`](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
@@ -404,8 +501,7 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
   [`vault_pki_doctrine.md §4`](../documents/engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init).
 - Live enactment by the Phase-26 reconciler's wait-for-ready — each dependent constructed to start on its
   dependency's observed-ready edge (a `runtime-checked` observation from the live object), never a duration;
-  the singleton that will later own this loop is [Phase 33](phase_33_live_dsl_singleton.md) (Deployment
-  `replicas=1`, no election).
+  the singleton that will later own this loop is [Phase 33](phase_33_live_dsl_singleton.md) (Deployment `replicas=1`, no election).
 - The phase-gate harness brings the standard stack onto Phase 30's live backbone and observes every required
   service in its HA-capable shape. It also verifies generated-manifest and baked-binary provenance, exact
   execution-unit/volume projection from `ProvisionedServiceSpec`, and a Register-3 ledger that labels only the
@@ -425,8 +521,7 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
 ### Validation
 1. Assert the bring-up honours the [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) DAG order — Percona operator
    before its Patroni consumers, Vault-unsealed before secret-dependent startup — with each edge an observed
-   condition and no timer standing in for a condition, and the **live order read from an external-observer
-   bring-up trace** (apiserver watch / pod-readiness event stream at the OS boundary), never a compliance trace
+   condition and no timer standing in for a condition, and the **live order read from an external-observer bring-up trace** (apiserver watch / pod-readiness event stream at the OS boundary), never a compliance trace
    amoebius emits about itself. Beyond the observed order, assert **derivation**: the Register-1 property
    `prop_bringUpOrderDerivedFromEdges` (checked against the committed `test/fixtures/phase31/dag-edges.golden`
    reference table, independent of the `BringUp` fold) holds — the order is a pure function of the declared
@@ -455,17 +550,44 @@ The whole sprint (📋 Planned).
 ## Sprint 31.4: Register-2.5 readiness-DAG bring-up under simulated partial failure 📋
 
 **Status**: Planned
-**Implementation**: `test/Amoebius/Platform/BringUpSim.hs` (the `IOSimPOR` harness driving the *unmodified* Sprint-31.3 `src/Amoebius/Platform/BringUp.hs` orchestration; target paths, not yet built) over the Phase-14.4 modeled substrate `src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`
-**Blocked by**: Sprint 31.3 (the derived readiness-DAG bring-up this sprint drives unchanged), Sprint 31.1, Sprint 31.2 (the services it assembles), Phase 14 Sprint 14.4 (the modeled fault-injectable environment — fake Pulsar/MinIO/apiserver/route53/Vault/clock — this runs against)
-**Independent Validation**: the exact Sprint-31.3 bring-up orchestration, written against `io-classes` with no real IO, runs under `IOSimPOR` against the Phase-14.4 fakes with injected partial failure / restart / partition on the modeled dependencies, and across the explored schedules asserts (a) no service starts before its readiness precondition, (b) the applicative-concurrent bring-up is deadlock-free and fail-closed on a missing/unhealthy dependency, (c) it never reports success until every service is Ready, and (d) a **concurrency witness** — on at least one explored schedule the bring-up intervals of two declared-dependency-independent services (MinIO and the Percona operator) **overlap**, demonstrating genuine applicative concurrency a hand-sequenced total order cannot produce; the committed seeded mutant `mutant/dag-drop-edge` (Sprint 31.3) is asserted to turn assertion (a) red under `IOSimPOR`; each run is deterministically replayable from its seed on substrate `none` and emits a Register-2.5 ledger.
+**Implementation**: `test/Amoebius/Platform/BringUpSim.hs` (the `IOSimPOR` harness
+driving the *unmodified* Sprint-31.3 `src/Amoebius/Platform/BringUp.hs` orchestration; target paths, not yet
+built) over the Phase-14.4 modeled substrate `src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`
+**Blocked by**: Sprint 31.3 (the derived readiness-DAG bring-up this sprint drives unchanged), Sprint 31.1,
+Sprint 31.2 (the services it assembles), Phase 14 Sprint 14.4 (the modeled fault-injectable environment —
+fake Pulsar/MinIO/apiserver/route53/Vault/clock — this runs against)
+**Independent Validation**: the exact
+Sprint-31.3 bring-up orchestration, written against `io-classes` with no real IO, runs under `IOSimPOR`
+against the Phase-14.4 fakes with injected partial failure / restart / partition on the modeled
+dependencies, and across the explored schedules asserts (a) no service starts before its readiness
+precondition, (b) the applicative-concurrent bring-up is deadlock-free and fail-closed on a
+missing/unhealthy dependency, (c) it never reports success until every service is Ready, and (d) a
+**concurrency witness** — on at least one explored schedule the bring-up intervals of two
+declared-dependency-independent services (MinIO and the Percona operator) **overlap**, demonstrating genuine
+applicative concurrency a hand-sequenced total order cannot produce; the committed seeded mutant
+`mutant/dag-drop-edge` (Sprint 31.3) is asserted to turn assertion (a) red under `IOSimPOR`; each run is
+deterministically replayable from its seed on substrate `none` and emits a Register-2.5 ledger.
 **Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md`
 
 ### Objective
-Adopt [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) as [Register 2.5](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) over this phase's own bring-up: take the *real* Sprint-31.3 readiness-DAG orchestration — the derived DAG with **applicative concurrent deploy where services are independent and sequential where they depend**, the HA-always readiness ordering this phase owns — and run it unchanged under `IOSimPOR` against the Phase-14.4 modeled substrates, validating the ordering and fail-closed invariants deterministically in-process before the Register-3 live gate ever runs.
+Adopt [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)
+as [Register 2.5](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) over this
+phase's own bring-up. The subject is the *real* Sprint-31.3 readiness-DAG orchestration: the derived graph
+that deploys concurrently where services are independent and sequentially where they depend, carrying the
+HA-always readiness ordering this phase owns. That orchestration runs unchanged under `IOSimPOR` against the
+Phase-14.4 modeled substrates, so the ordering and fail-closed invariants are validated deterministically
+in-process before the Register-3 live gate ever runs.
 
 ### Deliverables
 - An `IOSimPOR` harness that drives the *unmodified* Sprint-31.3 `BringUp` orchestration (written against `io-classes`, no real IO) against the Phase-14.4 fake Pulsar/MinIO/apiserver/route53/Vault/clock (`src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`), with injected **partial failure, restart, and network partition** on the modeled dependencies.
-- Schedule-exhaustive assertions over the partial-order search: (a) **no service starts before its readiness precondition** on any explored schedule, (b) the concurrent bring-up is **deadlock-free** and **fail-closed** — a missing or unhealthy dependency halts the dependent and is never silently proceeded past, (c) the orchestration **does not report success until every service is Ready**, and (d) a **concurrency witness**: on at least one explored schedule the bring-up intervals of two declared-dependency-independent services (MinIO and the Percona operator) overlap — an assertion a hardcoded sequential program cannot satisfy. The committed `mutant/dag-drop-edge` seeded mutant MUST turn assertion (a) red here.
+- Schedule-exhaustive assertions over the partial-order search, four in all.
+  (a) **No service starts before its readiness precondition**, on any explored schedule.
+  (b) The concurrent bring-up is **deadlock-free** and **fail-closed**: a missing or unhealthy dependency
+  halts the dependent and is never silently proceeded past.
+  (c) The orchestration **does not report success until every service is Ready**.
+  (d) A **concurrency witness**: on at least one explored schedule the bring-up intervals of two
+  declared-dependency-independent services overlap — an assertion a hardcoded sequential program cannot
+  satisfy. The committed `mutant/dag-drop-edge` seeded mutant MUST turn assertion (a) red here.
 - A deterministically replayable seed on any failing schedule and a Register-2.5 ledger recording substrate `none`, the register, and the honest limit that modeled-substrate fidelity is *assumed*.
 
 ### Validation

@@ -1,12 +1,35 @@
 # Phase 61: Offline replay and durable receipts
 
+> **Purpose**: Reconnect an encrypted browser outbox to current authority and prove that an accepted offline
+> command is established by its durable effect owner, never merely by Redis delivery.
+> **Read this if**: phase 61 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 61 delivers the offline replay and durable receipts; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu`` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Reconnect an encrypted browser outbox to current authority and prove that an accepted offline
-> command is established by its durable effect owner, never merely by Redis delivery.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — bounded reconnect and receipt recovery](#resource-provision--bounded-reconnect-and-receipt-recovery)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 61.1: Gate durable replay across replicas 📋](#sprint-611-gate-durable-replay-across-replicas-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
+
+---
 
 ## Phase Status
 
@@ -44,8 +67,7 @@ Mutants acknowledge on Redis publish, omit durable lookup, drop current-membersh
 tabs, discard pending after disconnect, and remove scope from idempotency keys. Direct service/provider probes
 must remain denied.
 
-**Committed fixtures/goldens:** the replay trace, outcome table, budgets, and access matrix. **Independent
-oracle:** provider/Pulsar readback and the separately authored command-to-effect/outcome table.
+**Committed fixtures/goldens:** the replay trace, outcome table, budgets, and access matrix. **Independent oracle:** provider/Pulsar readback and the separately authored command-to-effect/outcome table.
 
 ## Resource provision — bounded reconnect and receipt recovery
 
@@ -64,10 +86,15 @@ repair, and the declared reconnect storm. No unbounded outbox, output buffer, or
 ## Sprint 61.1: Gate durable replay across replicas 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Offline/{Replay,Receipt,Outcome}.hs`, `ui/src/Amoebius/Ui/Offline/Replay.purs`, `test/live/Phase61OfflineReplaySpec.hs` (planned; not built)
+**Implementation**: `src/Amoebius/Ui/Offline/{Replay,Receipt,Outcome}.hs`,
+`ui/src/Amoebius/Ui/Offline/Replay.purs`, `test/live/Phase61OfflineReplaySpec.hs` (planned; not built)
 **Blocked by**: Phases 58 and 60
-**Independent Validation**: `cabal test offline-replay-receipts-live` with provider/broker observers and Redis/socket fault injection
-**Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Independent Validation**: `cabal test offline-replay-receipts-live` with
+provider/broker observers and Redis/socket fault injection
+**Docs to update**:
+`documents/engineering/browser_offline_runtime_doctrine.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`,
+`documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 

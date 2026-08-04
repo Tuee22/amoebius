@@ -1,14 +1,34 @@
 # The Bootstrap Sequence & the Admin Control Plane
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Single Source of Truth for the ordered path from a bare host to a reconciling cluster — the
 > host-daemon→singleton handoff — and for the **admin control plane** that takes over at handoff: after
-> bootstrap the operator CLI drives the cluster **exclusively through the amoebius NodePort REST service on
-> the in-cluster singleton** (`vault init/unseal`, `dhall update`), never by touching kube-apiserver again.
+> bootstrap the operator CLI drives the cluster **exclusively through the amoebius NodePort REST service on > the in-cluster singleton** (`vault init/unseal`, `dhall update`), never by touching kube-apiserver again.
+> **Read this if**: a cluster has to come up from nothing, or the moment authority transfers has to be pinned down.
+
+This document owns the ordered bring-up from a bare host to a serving control plane, and the single instant
+at which the host stops being the authority. It does not own the readiness discipline its steps obey, owned
+by [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md), nor the services it brings up, owned
+by [platform_services_doctrine.md](./platform_services_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. Two régimes: host-driven bootstrap, then singleton-driven steady state](#2-two-régimes-host-driven-bootstrap-then-singleton-driven-steady-state)
+- [3. The ordered bootstrap sequence](#3-the-ordered-bootstrap-sequence)
+- [4. The host-daemon → singleton handoff](#4-the-host-daemon--singleton-handoff)
+- [5. The admin control plane: the CLI ↔ the singleton REST API](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)
+- [6. What this forecloses, and the honest limits](#6-what-this-forecloses-and-the-honest-limits)
+- [7. Planning ownership](#7-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -34,8 +54,7 @@ It resolves `notes.txt` lines 27/31/33.
 
 ## 2. Two régimes: host-driven bootstrap, then singleton-driven steady state
 
-A cluster's life has **two régimes with a single, one-way handoff between
-them**, and *who may touch the cluster's control surface* differs across them:
+A cluster's life has **two régimes with a single, one-way handoff between them**, and *who may touch the cluster's control surface* differs across them:
 
 - **Bootstrap régime — the host binary drives.** Before an in-cluster brain exists, the sudo host daemon is
   the only actor that can stand the cluster up. It talks to `kube-apiserver` directly over the distro's
@@ -57,6 +76,7 @@ interactions occur through the [amoebius] NodePort."* The one-way handoff is [§
 
 ```mermaid
 flowchart TD
+%% register: orientation
   pb[pb midwife CLI, Python: toolchain, build, exec binary] --> hb[Host binary / sudo host daemon]
   hb -->|channel 1: distro mTLS, BOOTSTRAP ONLY| api[kube-apiserver reachable]
   api --> lease[Bootstrap host holds mandatory reconciler Lease]
@@ -72,13 +92,13 @@ flowchart TD
   cli[Operator CLI] -->|vault init/unseal, then dhall update| rest
   rest --> reconcile[Singleton reconciles the cluster toward its InForceSpec]
 ```
+*Orientation. Design intent; the ordered steps are owned by [§3](#3-the-ordered-bootstrap-sequence) and the authority handoff by [§4](#4-the-host-daemon--singleton-handoff). Every edge is an observed readiness condition, never an elapsed interval.*
 
 ---
 
 ## 3. The ordered bootstrap sequence
 
-The sequence is a [`readiness_ordering_doctrine.md`](./readiness_ordering_doctrine.md) DAG — **every edge is
-an observed condition, never an elapsed wait** — enacted by the reconciler
+The sequence is a [`readiness_ordering_doctrine.md`](./readiness_ordering_doctrine.md) DAG — **every edge is an observed condition, never an elapsed wait** — enacted by the reconciler
 ([`cluster_lifecycle_doctrine.md` §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
 The ordered steps, each gated on the prior step's readiness:
 
@@ -122,16 +142,14 @@ The ordered steps, each gated on the prior step's readiness:
    `/readyz` Serving edge is the **handoff point** ([§4](#4-the-host-daemon--singleton-handoff)) and exposes the
    admin REST service ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
 9. **The operator initialises/unseals Vault through the admin REST** — `vault init/unseal`, authenticated by
-   the operator password; init-once / unseal-on-rebuild ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init),
-   [§5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)). No secret consumer ran before this — Vault fails closed until unsealed.
+   the operator password; init-once / unseal-on-rebuild ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init), [§5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)). No secret consumer ran before this — Vault fails closed until unsealed.
 10. **The operator delivers the `InForceSpec`** — `dhall update` (requires an **unsealed Vault + root token**,
     [§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)) — the spec delivery of
     [`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init). The singleton decrypts it in-process and reconciles the cluster toward it.
 
 This is the **root** bootstrap; a *child* cluster is spawned by a parent (the Pulumi handoff,
 [`cluster_lifecycle_doctrine.md` §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)),
-which injects the child's scoped `InForceSpec` + secrets rather than prompting a human. This ordered sequence **retires
-the open question** [`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
+which injects the child's scoped `InForceSpec` + secrets rather than prompting a human. This ordered sequence **retires the open question** [`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
 recorded (bootstrap config / first-manifest delivery): the first operator-supplied manifest is delivered by step 10's `dhall
 update`, and the transient bootstrap config is the binary-sibling `amoebius.dhall` the midwife establishes.
 
@@ -162,8 +180,7 @@ The handoff is **one-way, observed-gated, and transfers control-surface authorit
   reached only through the admin REST ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
   Channel 1 (host binary ↔ kube-apiserver) is **retired** — a bootstrap-only privilege.
 - **What does *not* transfer: host-worker supervision.** The sudo host daemon keeps supervising host-level
-  worker subprocesses (Apple-Metal / Windows-CUDA inference), which remain Pulsar/MinIO peers on **channel
-  2** ([`host_cluster_comms_doctrine.md` §3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)).
+  worker subprocesses (Apple-Metal / Windows-CUDA inference), which remain Pulsar/MinIO peers on **channel 2** ([`host_cluster_comms_doctrine.md` §3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)).
   "Midwife then defers" is about the *control* surface, not the host daemon's continued supervision role.
 - **Re-running is a no-op.** Because bring-up is a reconcile
   ([`cluster_lifecycle_doctrine.md` §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)),
@@ -178,77 +195,84 @@ The handoff is **one-way, observed-gated, and transfers control-surface authorit
 
 After handoff, the operator drives the cluster through **one surface**: the operator CLI (`pb`) → the
 **amoebius NodePort service** → a **REST API on the in-cluster singleton**. This is the vision's *"thin cli
-tool [that] interact[s] with the amoebius daemon api"* — and the answer is a thin Python frontend over the
-typed REST control plane, not a second runtime daemon or control plane.
+tool [that] interact[s] with the amoebius daemon api"* — and the answer is a thin Python frontend over the typed REST control plane, not a second runtime daemon or control plane.
 
-- **The endpoints.** The load-bearing ones:
-  - **`vault init/unseal`** — authenticated by the **operator password** (Argon2id→AEAD unlock material,
-    [`vault_pki_doctrine.md` §5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal));
-    this is the concrete channel that fills the *pluggable pre-Vault unseal seam* that doctrine explicitly
-    left open. The operator password crosses CLI → NodePort → singleton and is never persisted.
-  - **`dhall update`** — deliver a new `InForceSpec` to a running cluster. It **requires an unsealed Vault
-    and a root token**; the singleton decrypts/stores the envelope in-process
-    ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init))
-    and reconciles toward it. This is how a new desired-state Dhall value reaches an already-running root — the operator flow
-    the reconcile mechanics only hinted at ([`daemon_topology_doctrine.md` §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine), hot-reload).
-  - **`kv put/get/list/delete` — secret KV-CRUD.** The operator CRUDs Vault KV secrets **by name** over the same
-    admin REST (requires an unsealed Vault and the root token). This is how a production `InForceSpec`'s named
-    `SecretRef`s come to *exist in Vault before the `.dhall` is uploaded*: secret material crosses
-    CLI → NodePort → singleton **by value here** and is stored enveloped, while the `.dhall` itself never carries
-    a value, only the name ([`dsl_doctrine.md` §6](./dsl_doctrine.md#6-secrets-are-names-never-values),
-    [`vault_pki_doctrine.md` §3](./vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)). `dhall
-    update` then **actively proves each named secret before admitting the upload, and rejects fail-fast
-    otherwise**: the secret must exist in Vault, and its *capability* must hold against what the spec demands —
-    an SSH key must connect to each static host the spec names and that host's declared CPU, memory,
-    pod-ephemeral/durable/native-cache pools, accelerator device vector, and per-device memory must match
-    observation; an AWS credential must carry the IAM permissions and the compute/storage/accelerator quotas
-    to provision what the spec declares. An absent secret, an SSH key that cannot connect, a host short of its declared resources,
-    or a cloud credential lacking permission or quota is **rejected at upload, before any reconcile**. This is a
-    **runtime-checked** admission gate — it reaches real hosts and cloud APIs — honest about its layer: a name's
-    *existence* is a decode-time check, but a name's *capability* is proven live at `dhall update`. In tests
-    this operator interaction is *simulated* from
-    a single flagged `test-secrets.dhall`, the only place secret values live at rest
-    ([`testing_doctrine.md` §6](./testing_doctrine.md#6-flagged-test-credentials)).
-- **This is the admin plane, distinct from the workload plane.** [`host_cluster_comms_doctrine.md` §3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)'s
-  "no bespoke control channel — coordination *is* Pulsar + MinIO" governs the **worker/workload** plane (host
-  compute daemons + the host binary *coordinating* with workers). It is **not** an admin-plane rule: operator
-  administration of the cluster's own configuration is a *control* concern, not worker coordination, and rides
-  this REST channel. That doc's scope is clarified accordingly; this doc owns the admin channel.
-- **Privileged, not wild — so not a Keycloak bypass.** The admin REST is authenticated (operator password →
-  then root token + unsealed Vault) and **network-restricted to the operator's trusted reach**, never the
-  wild LB→Envoy→Keycloak door ([`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)).
-  Like channel 1, it is a privileged operator path, not wild ingress — so "Keycloak owns all *wild* ingress"
-  is untouched.
-- **The admin-plane reach class — this doc owns it.** The admin NodePort's reach is **regime-split**, and the
-  split is load-bearing because the endpoint fronts `vault init/unseal`. This is *not* the channel-2 loopback
-  NodePort ([`host_cluster_comms_doctrine.md` §6](./host_cluster_comms_doctrine.md#6-the-host-only-restriction-in-practice-and-its-sibling-precedent), the host-daemon↔Pulsar/MinIO wire); it is the distinct admin channel this doc owns.
-  - **Seal-critical operations** — `vault init/unseal`, including every reboot's unseal ([`vault_pki_doctrine.md` §5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)) — are reached
-    **node-local only**: the root operator drives them from the host that *is* the single node, and a parent
-    reaches a child over the floor channel below. This reach is **Vault-independent by construction** — it
-    needs no fabric, no gateway, and no secret from the very Vault it is about to unseal.
-  - **Post-unseal admin** — `dhall update`, KV-CRUD — *may additionally* be reached over the **authenticated
-    WireGuard fabric** once it exists (the same network-restriction pattern channel 2 reuses,
-    [`host_cluster_comms_doctrine.md` §5.1](./host_cluster_comms_doctrine.md#51-the-generalization-localhost-or-the-authenticated-wireguard-fabric); the fabric itself owned by [`network_fabric_doctrine.md`](./network_fabric_doctrine.md)).
-  - **Unseal is never over the fabric.** The fabric's peer keys are Vault-KV
-    ([`vault_pki_doctrine.md` §3.1](./vault_pki_doctrine.md#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)), so a fabric reach presupposes an *unsealed* Vault; routing unseal over it
-    would be circular. The seal-critical reach therefore stays node-local, whose transport trust before the
-    root PKI anchor exists rides the chicken-and-egg floor
-    ([`vault_pki_doctrine.md` §10](./vault_pki_doctrine.md#10-the-chicken-and-egg-floor-what-stays-outside-vault)).
-- **A parent reaches a child's admin REST over the floor channel — the `ParentReachChannel`.** After a child is
-  spawned, its parent delivers each subsequent `ChildInForceSpec`, and drives the child's own
-  `vault init/unseal`, through the child's admin REST — reached by a typed **`ParentReachChannel` projected from
-  the child's `ComputeEngine`**, never free-authored:
-  `ParentReachChannel = < SelfManagedSsh SshKeyRef | ManagedApi CloudCredRef | Fabric ApiserverVpnIp >`. For a
-  self-managed child the parent gets onto a child node over the SSH key it provisioned it with; for a managed
-  (EKS) child it uses the cloud-cred managed-apiserver access it *created* the cluster with; either way it then
-  hits the child's **node-local** admin NodePort — never the child's public gateway, and **independent of the
-  child's gateway/vpn/mesh state** (those are configured *by* the spec it delivers). The `Fabric` arm (the
-  role-bound apiserver VPN-IP, [`network_fabric_doctrine.md` §4](./network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)) is an **optional optimization once the mesh exists,
-  never the floor**. Because every forest node's `ParentReachChannel` is projected from its provisioning
-  method, **"a child its parent cannot reach" has no inhabitant** (type-foreclosed). A mode-(b) child's
-  unseal-authority reach to its parent rides this same floor channel
-  ([`vault_pki_doctrine.md` §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes)), never the data-plane fabric — the fabric it would need is itself gated on the very
-  unseal it is trying to perform.
+### The endpoints
+
+The load-bearing ones:
+- **`vault init/unseal`** — authenticated by the **operator password** (Argon2id→AEAD unlock material,
+  [`vault_pki_doctrine.md` §5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal));
+  this is the concrete channel that fills the *pluggable pre-Vault unseal seam* that doctrine explicitly
+  left open. The operator password crosses CLI → NodePort → singleton and is never persisted.
+- **`dhall update`** — deliver a new `InForceSpec` to a running cluster. It **requires an unsealed Vault and a root token**; the singleton decrypts/stores the envelope in-process
+  ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init))
+  and reconciles toward it. This is how a new desired-state Dhall value reaches an already-running root — the operator flow
+  the reconcile mechanics only hinted at ([`daemon_topology_doctrine.md` §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine), hot-reload).
+- **`kv put/get/list/delete` — secret KV-CRUD.** The operator CRUDs Vault KV secrets **by name** over the same
+  admin REST (requires an unsealed Vault and the root token). This is how a production `InForceSpec`'s named
+  `SecretRef`s come to *exist in Vault before the `.dhall` is uploaded*: secret material crosses
+  CLI → NodePort → singleton **by value here** and is stored enveloped, while the `.dhall` itself never carries
+  a value, only the name ([`dsl_doctrine.md` §6](./dsl_doctrine.md#6-secrets-are-names-never-values), [`vault_pki_doctrine.md` §3](./vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)). `dhall
+  update` then **actively proves each named secret before admitting the upload, and rejects fail-fast otherwise**: the secret must exist in Vault, and its *capability* must hold against what the spec demands —
+  an SSH key must connect to each static host the spec names and that host's declared CPU, memory,
+  pod-ephemeral/durable/native-cache pools, accelerator device vector, and per-device memory must match
+  observation; an AWS credential must carry the IAM permissions and the compute/storage/accelerator quotas
+  to provision what the spec declares. An absent secret, an SSH key that cannot connect, a host short of its declared resources,
+  or a cloud credential lacking permission or quota is **rejected at upload, before any reconcile**. This is a
+  **runtime-checked** admission gate — it reaches real hosts and cloud APIs — honest about its layer: a name's
+  *existence* is a decode-time check, but a name's *capability* is proven live at `dhall update`. In tests
+  this operator interaction is *simulated* from
+  a single flagged `test-secrets.dhall`, the only place secret values live at rest
+  ([`testing_doctrine.md` §6](./testing_doctrine.md#6-flagged-test-credentials)).
+
+### This is the admin plane, distinct from the workload plane
+
+[`host_cluster_comms_doctrine.md` §3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)'s
+"no bespoke control channel — coordination *is* Pulsar + MinIO" governs the **worker/workload** plane (host
+compute daemons + the host binary *coordinating* with workers). It is **not** an admin-plane rule: operator
+administration of the cluster's own configuration is a *control* concern, not worker coordination, and rides
+this REST channel. That doc's scope is clarified accordingly; this doc owns the admin channel.
+
+### Privileged, not wild — so not a Keycloak bypass
+
+The admin REST is authenticated (operator password → then root token + unsealed Vault) and
+**network-restricted to the operator's trusted reach**, never the wild LB→Envoy→Keycloak door
+([`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)).
+Like channel 1, it is a privileged operator path, not wild ingress — so "Keycloak owns all *wild* ingress"
+is untouched.
+
+### The admin-plane reach class — this doc owns it
+
+The admin NodePort's reach is **regime-split**, and the
+split is load-bearing because the endpoint fronts `vault init/unseal`. This is *not* the channel-2 loopback
+NodePort ([`host_cluster_comms_doctrine.md` §6](./host_cluster_comms_doctrine.md#6-the-host-only-restriction-in-practice-and-its-sibling-precedent), the host-daemon↔Pulsar/MinIO wire); it is the distinct admin channel this doc owns.
+- **Seal-critical operations** — `vault init/unseal`, including every reboot's unseal ([`vault_pki_doctrine.md` §5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)) — are reached
+  **node-local only**: the root operator drives them from the host that *is* the single node, and a parent
+  reaches a child over the floor channel below. This reach is **Vault-independent by construction** — it
+  needs no fabric, no gateway, and no secret from the very Vault it is about to unseal.
+- **Post-unseal admin** — `dhall update`, KV-CRUD — *may additionally* be reached over the **authenticated WireGuard fabric** once it exists (the same network-restriction pattern channel 2 reuses,
+  [`host_cluster_comms_doctrine.md` §5.1](./host_cluster_comms_doctrine.md#51-the-generalization-localhost-or-the-authenticated-wireguard-fabric); the fabric itself owned by [`network_fabric_doctrine.md`](./network_fabric_doctrine.md)).
+- **Unseal is never over the fabric.** The fabric's peer keys are Vault-KV
+  ([`vault_pki_doctrine.md` §3.1](./vault_pki_doctrine.md#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)), so a fabric reach presupposes an *unsealed* Vault; routing unseal over it
+  would be circular. The seal-critical reach therefore stays node-local, whose transport trust before the
+  root PKI anchor exists rides the chicken-and-egg floor
+  ([`vault_pki_doctrine.md` §10](./vault_pki_doctrine.md#10-the-chicken-and-egg-floor-what-stays-outside-vault)).
+
+### The `ParentReachChannel`: a parent's reach to a child's admin REST
+
+After a child is spawned, its parent delivers each subsequent `ChildInForceSpec`, and drives the child's own
+`vault init/unseal`, through the child's admin REST — reached by a typed **`ParentReachChannel` projected from the child's `ComputeEngine`**, never free-authored: `ParentReachChannel = < SelfManagedSsh SshKeyRef |
+ManagedApi CloudCredRef | Fabric ApiserverVpnIp >`. For a self-managed child the parent gets onto a child
+node over the SSH key it provisioned it with; for a managed (EKS) child it uses the cloud-cred
+managed-apiserver access it *created* the cluster with; either way it then hits the child's **node-local**
+admin NodePort — never the child's public gateway, and **independent of the child's gateway/vpn/mesh state**
+(those are configured *by* the spec it delivers). The `Fabric` arm (the role-bound apiserver VPN-IP,
+[`network_fabric_doctrine.md` §4](./network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it))
+is an **optional optimization once the mesh exists, never the floor**. Because every forest node's
+`ParentReachChannel` is projected from its provisioning method, **"a child its parent cannot reach" has no inhabitant** (type-foreclosed). A mode-(b) child's unseal-authority reach to its parent rides this same
+floor channel
+([`vault_pki_doctrine.md` §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes)), never the
+data-plane fabric — the fabric it would need is itself gated on the very unseal it is trying to perform.
 
 ---
 
@@ -259,8 +283,7 @@ The admin plane is a place to make illegal control actions **unrepresentable**, 
 
 - **A `dhall update` without an unsealed Vault + root token has no constructor** — the mutation is
   `type-foreclosed`: its handle is built only *from* a `RootToken` capability and an `Unsealed` witness
-  ([`illegal_state_catalog.md` §3.42](../illegal_state/illegal_state_security.md#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness),
-  the same capability + `.ready`-style edge discipline as the `PromotionGate` and the `Readiness` edge).
+  ([`illegal_state_catalog.md` §3.42](../illegal_state/illegal_state_security.md#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness), the same capability + `.ready`-style edge discipline as the `PromotionGate` and the `Readiness` edge).
 - **An admin action bypassing the singleton is unrepresentable** by construction: post-handoff there is no
   exported channel-1 verb; the only control-surface constructor is an admin-REST call.
 - **The honest limit** ([`illegal_state_catalog.md` §2](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)):
@@ -281,8 +304,7 @@ This document is normative bootstrap-sequence + admin-control-plane doctrine onl
 status, and gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never
 restated here. For orientation only (the plan is authoritative): the **chain/Step kernel** the ordered sequence
 is enacted through rides **Phase 14**, and the **midwife + single-node kind bring-up** rides **Phase 24**; the
-**host→singleton handoff** itself rides **Phase 33** (the control-plane singleton). The **whole admin REST
-surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — rides **Phase 33 Sprint 33.4**,
+**host→singleton handoff** itself rides **Phase 33** (the control-plane singleton). The **whole admin REST surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — rides **Phase 33 Sprint 33.4**,
 because [§3](#3-the-ordered-bootstrap-sequence) step 8 exposes the surface *at* the handoff point: there is no
 singleton to host an endpoint before it. **Phase 29** (root Vault/PKI) delivers the Vault, the
 password-sealed unlock-material envelope, and the built-in client that the `vault init/unseal` endpoint fronts —
@@ -296,8 +318,7 @@ early. This doc states the target shape and links back for status.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — [§2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap) the bring-up this sequences (its open question retired here), [§9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) the reconciler that enacts each edge
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) midwife-then-defers, [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) the singleton that exposes the admin REST

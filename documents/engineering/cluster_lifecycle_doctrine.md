@@ -1,11 +1,37 @@
 # Cluster Lifecycle
 
+> **Purpose**: Single Source of Truth for amoebius cluster bring-up and teardown across kind / rke2 / provider clusters — bootstrap, recursive **amoebic spawning**, graceful teardown-with-cleanup versus chaos-failover, push-back on an unsatisfiable root `InForceSpec`, dynamic node provisioning, and ephemeral spin-up/down with deterministic rebind.
+> **Read this if**: a cluster has to be brought up, torn down, spawned, or reconciled toward its specification.
+
+This document owns the lifecycle every amoebius-managed cluster follows, the recursive forest that spawning
+produces, and the reconciler that implements both. It does not own the durable storage whose lifetime is
+deliberately independent of a cluster's, owned by
+[storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md), nor emergency failover, owned by
+[chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
-> **Purpose**: Single Source of Truth for amoebius cluster bring-up and teardown across kind / rke2 / provider clusters — bootstrap, recursive **amoebic spawning**, graceful teardown-with-cleanup versus chaos-failover, push-back on an unsatisfiable root `InForceSpec`, dynamic node provisioning, and ephemeral spin-up/down with deterministic rebind.
+</details>
+
+## Contents
+- [1. Two cluster kinds, one lifecycle shape](#1-two-cluster-kinds-one-lifecycle-shape)
+- [2. Bring-up and bootstrap](#2-bring-up-and-bootstrap)
+- [3. Amoebic spawning — the recursive forest](#3-amoebic-spawning--the-recursive-forest)
+- [4. The root `InForceSpec` is the persistent contract](#4-the-root-inforcespec-is-the-persistent-contract)
+- [5. Teardown-with-cleanup vs chaos-failover (the central distinction)](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)
+- [6. Push-back when teardown would break the root `InForceSpec`](#6-push-back-when-teardown-would-break-the-root-inforcespec)
+- [7. Ephemeral spin-up/down with deterministic rebind](#7-ephemeral-spin-updown-with-deterministic-rebind)
+- [8. Dynamic node provisioning](#8-dynamic-node-provisioning)
+- [9. How bring-up and teardown are implemented: the reconciler, not a state machine](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)
+- [10. Planning ownership](#10-planning-ownership)
+- [11. RKE2 rollout as a reconcile](#11-rke2-rollout-as-a-reconcile)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -39,12 +65,10 @@ full member node hang off a provider-managed control plane? — rests on. A self
 is one amoebius **builds** end to end: the host binary owns bring-up from the midwife CLI through `bootstrap`
 ([§2](#2-bring-up-and-bootstrap)) and every node beneath it. A provider-managed cluster is one amoebius
 **surfaces** over the cloud provider's API — provisioned via Pulumi from inside an existing cluster, never
-touching a host amoebius does not have; amoebius wires up only what the provider itself exposes and **builds
-no capability the provider does not**, the same *surface, don't build* discipline owned by
+touching a host amoebius does not have; amoebius wires up only what the provider itself exposes and **builds no capability the provider does not**, the same *surface, don't build* discipline owned by
 [pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision)/[§4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog).
 One consequence rides on this axis: because a provider-managed control plane is **hostless** (no `LinuxHost`,
-and no host-level worker daemons — the table above), a **full member node stretched onto a provider-managed
-control plane** is representable only through a provider-native capability the `Managed` arm *surfaces* (e.g.
+and no host-level worker daemons — the table above), a **full member node stretched onto a provider-managed control plane** is representable only through a provider-native capability the `Managed` arm *surfaces* (e.g.
 EKS Hybrid Nodes, over the cloud API), never through an amoebius-built second control-plane fabric — which is
 why [cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation)
 forecloses that node absent such an arm. A host-level *worker* is the other case entirely: a non-member on its
@@ -71,11 +95,9 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   count is a deployment-rules knob; the HA-capable typed service projections keep the same shape across values of `n`
   ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)).
 - **The root cluster is single-node, on purpose.** A multi-node bring-up would need secrets — SSH keys or
-  cloud credentials for the additional nodes — and that would violate the secrets-never-in-Dhall rule. Constraining the root to a single node lets it be bootstrapped with **zero
-  secrets**, after which a small set of *root init commands* take over. (Whether the root may ever be multi-node is an open design question; this doctrine specifies
+  cloud credentials for the additional nodes — and that would violate the secrets-never-in-Dhall rule. Constraining the root to a single node lets it be bootstrapped with **zero secrets**, after which a small set of *root init commands* take over. (Whether the root may ever be multi-node is an open design question; this doctrine specifies
   the single-node answer the plan adopts.) The root's single-node init-to-password-encrypted-Vault-and-failover behaviour is the
-  **prodbox** constituent behaviour ([DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md): *prodbox = the
-  root single-node control-plane behaviour*).
+  **prodbox** constituent behaviour ([DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md): *prodbox = the root single-node control-plane behaviour*).
 - **Init follows readiness, never precedes it.** Once the standard services are up and reachable, the
   cluster is *initialized*: init Vault, then hand it its `.dhall`. The
   fail-closed Vault init, the root password-encrypted unseal that requires a human on first bring-up, and
@@ -83,8 +105,7 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   platform-service bring-up ordering edges (LB before edge, the registry before later pulls, Vault before
   secret-dependent startup) are owned by
   [platform_services_doctrine.md §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering).
-  "Follows readiness" is the *event-driven* discipline, never a timer: each init step gates on an **observed
-  condition** — a successful call, a `/readyz`, an unsealed Vault — not an elapsed wait, and the general
+  "Follows readiness" is the *event-driven* discipline, never a timer: each init step gates on an **observed condition** — a successful call, a `/readyz`, an unsealed Vault — not an elapsed wait, and the general
   readiness-edge rule (a condition never a duration; the bootstrap tier's `discover`/`RuntimeWitness` gates)
   is owned by [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md).
 - **Bring-up is itself a reconcile.** "Come up" is not a one-shot script; it is the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) reconciler driving
@@ -108,8 +129,7 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
 > **after** the singleton is up (never embedded in the igniter config), and the transient root config is the
 > binary-sibling `.dhall` the midwife establishes. Every deeper **child-frame** config is delivered by
 > in-place `stdin` streaming rather than a persistent file, per
-> [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness). (Whether the
-> root may ever be **multi-node** remains the one open sub-question, [§2](#2-bring-up-and-bootstrap) above.)
+> [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness). (Whether the > root may ever be **multi-node** remains the one open sub-question, [§2](#2-bring-up-and-bootstrap) above.)
 
 ---
 
@@ -123,6 +143,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   root["Root cluster: single-node kind or rke2, owns the PKI trust anchor"]:::intent -->|spawns via Pulumi, injects ChildInForceSpec and secrets| childa["Child cluster A: kind or rke2 or provider"]:::intent
   root -->|spawns via Pulumi, injects ChildInForceSpec and secrets| childb["Child cluster B"]:::intent
   childa -->|spawns its own child, injects GrandchildInForceSpec| grand["Grandchild cluster"]:::intent
@@ -184,9 +205,7 @@ Two encapsulation rules make the forest safe to reason about:
 
 > **Honesty.** Amoebic spawning, per-child unseal, and geo-replicated children are *specified* here and
 > scheduled for Phase 42; nothing in this section is a tested amoebius result. Status and gates live only in
-> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
-> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
-> [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
+> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
 
 ---
 
@@ -239,13 +258,10 @@ released, the cluster (driven by its control-plane singleton, [§9](#9-how-bring
    ingress (which Keycloak owns, [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)) and
    DNS repoints in an orderly way rather than as an emergency.
 4. **Releases ephemeral cluster resources, never durable backing.** Compute, control-plane infrastructure,
-   and cluster-local API objects are removed; durable backing is **preserved, never deleted by routine
-   teardown** ([§7](#7-ephemeral-spin-updown-with-deterministic-rebind);
-   [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md)).
+   and cluster-local API objects are removed; durable backing is **preserved, never deleted by routine teardown** ([§7](#7-ephemeral-spin-updown-with-deterministic-rebind); [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md)).
 
 **Chaos-failover, concretely.** A chaos-failover is what happens when the lead *vanishes* — no
-drain, no flush, no handoff. Surviving siblings with the same parent **detect the dead gateway and fail
-over on their own, repointing DNS (e.g. route53 migrations)**. Because there was
+drain, no flush, no handoff. Surviving siblings with the same parent **detect the dead gateway and fail over on their own, repointing DNS (e.g. route53 migrations)**. Because there was
 no synchronization event, the outcome is **not** lossless-by-construction: it is bounded by the declared
 data-loss budget, and proving that the behaviour is always well-defined — especially the case where a
 cluster goes down mid geo-sync and the gateway is failed over to it — is the one place a
@@ -279,6 +295,7 @@ make the root `InForceSpec` **unsatisfiable**. amoebius refuses to do that silen
 
 ```mermaid
 flowchart TD
+%% register: algebra
   start["Operator requests graceful teardown of cluster C"]:::intent --> check{"Can the remaining forest still satisfy the root InForceSpec without C?"}:::decision
   check -->|yes| proceed[/"Proceed: clean up, hand off, release compute, preserve storage"/]:::effect
   check -->|no| pushback["Push back: warn what stops working and which .dhall failback applies"]:::refuse
@@ -380,11 +397,9 @@ before mutation. This is the escape valve that lets a bounded
 budget grow, owned by [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm); "unbounded" node or
 storage growth is representable **only** through such a policy. The provider-side mechanics — provisioning EC2/managed
 nodes via Pulsar-driven Pulumi, and one provider-rounded per-PV EBS whose raw size matches the private PVC/PV
-provision (identity/cardinality 1:1:1, not logical-byte equality) and is **decoupled from the
-EC2/node lifecycle** so storage outlives the node — are owned by
+provision (identity/cardinality 1:1:1, not logical-byte equality) and is **decoupled from the EC2/node lifecycle** so storage outlives the node — are owned by
 [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) and
-[storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md). Mechanically, **node provisioning is just
-another reconcile** ([§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)): the desired node set is part of the `.dhall`, and the engine drives the live node
+[storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md). Mechanically, **node provisioning is just another reconcile** ([§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)): the desired node set is part of the `.dhall`, and the engine drives the live node
 set toward it.
 
 ---
@@ -393,13 +408,13 @@ set toward it.
 
 Every lifecycle action in this document — bring-up ([§2](#2-bring-up-and-bootstrap)), spawn ([§3](#3-amoebic-spawning--the-recursive-forest)), dynamic provisioning ([§8](#8-dynamic-node-provisioning)), and
 teardown ([§5](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) — is the **same shape**: *observe the world, compare it to the `.dhall`, enact the diff,
-re-observe.* There is no giant lifecycle state machine. This pattern is **generalized from the prodbox
-sibling's** reconciler-with-predicates doctrine
+re-observe.* There is no giant lifecycle state machine. This pattern is **generalized from the prodbox sibling's** reconciler-with-predicates doctrine
 (`/home/matthewnowak/prodbox/documents/engineering/lifecycle_reconciliation_doctrine.md`), lifted from
 "AWS-resource-leak prevention" to "any cluster / child / node / stack / PV the forest can create."
 
 ```mermaid
 flowchart TD
+%% register: algebra
   spec["Root InForceSpec: persistent desired state"]:::intent
   discover[["discover: query the live authority at the moment of use"]]:::provenPB
   obs{{"three-valued observation"}}:::gate
@@ -448,8 +463,7 @@ flowchart TD
   carries a declared network-locality `Site`
   ([substrate_doctrine.md §8.3](./substrate_doctrine.md#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts))
   on a *declared-at-decode / cross-checked-at-runtime* discipline: a host declared at a remote `Site` that
-  `discover` cannot actually reach over the fabric surfaces as **Unreachable**, so **`Unreachable → refuse`
-  applies unchanged** — a remote entity mis-declared local, or a stretched host whose WAN link is down, is
+  `discover` cannot actually reach over the fabric surfaces as **Unreachable**, so **`Unreachable → refuse` applies unchanged** — a remote entity mis-declared local, or a stretched host whose WAN link is down, is
   caught here, never silently admitted. This is the runtime residue behind the stretched-node reach witness
   ([cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation));
   the declared `Site` and the fabric wiring are owned by
@@ -475,8 +489,7 @@ flowchart TD
   control-plane singleton (total cluster + secret authority), whose single-instance delegation and worker-role model
   are owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md).
 
-> **Honesty.** This reconciler model is *proven in prodbox* for AWS teardown; that is **evidence from a
-> sibling system, not proof in amoebius**, which has not built Phases 2–3/13–14. Read every prescriptive
+> **Honesty.** This reconciler model is *proven in prodbox* for AWS teardown; that is **evidence from a > sibling system, not proof in amoebius**, which has not built Phases 2–3/13–14. Read every prescriptive
 > statement here as design intent, never as a tested amoebius result
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
@@ -497,8 +510,7 @@ A multi-node `rke2` cluster does not come up by a bespoke bring-up script — it
 everything else in this doctrine does: as a **reconcile** ([§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)) that drives the live node set toward a
 **declared, typed server/agent topology**. That topology — the closed `Rke2Servers` union
 `< Single | Ha3 | Ha5 >` (the only legal odd etcd quorums {1,3,5}) plus
-`agents : Fixed [Rke2AgentNode] | Autoscaled { floor : [Rke2AgentNode], policy : ScalingPolicy }` — is owned
-by [cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction); this doc owns only the lifecycle
+`agents : Fixed [Rke2AgentNode] | Autoscaled { floor : [Rke2AgentNode], policy : ScalingPolicy }` — is owned by [cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction); this doc owns only the lifecycle
 verbs that stand it up. There is no rke2 state machine, exactly as there is no lifecycle state machine ([§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
 
 This section is normative design, not a delivered live claim. Phases 4–9 own the pure node/reserve/template
@@ -506,23 +518,17 @@ model; live multi-node rke2 host admission, snapshot-bound join, and enforcement
 unassigned Phase-N gate. Phase 42's acceptance forest uses child `kind` clusters only.
 
 - **Root = the zero-secret degenerate.** The root cluster is
-  `{ servers = Rke2Servers.Single { host, capacity, systemReserve }, agents = Fixed [] }` — the target
-  single-node rke2 shape of [§2](#2-bring-up-and-bootstrap). One server, an empty
+  `{ servers = Rke2Servers.Single { host, capacity, systemReserve }, agents = Fixed [] }` — the target single-node rke2 shape of [§2](#2-bring-up-and-bootstrap). One server, an empty
   fixed agent pool, no join token minted, no SSH key required: the same **zero-secret** bring-up [§2](#2-bring-up-and-bootstrap) already depends
   on. Every larger cluster is this base plus a reconcile that adds nodes; the base is not a special case but
-  the `Single`/`[]` corner of the general shape.
-- **First server: `etcd cluster-init`, then mint the token.** On an empty control plane the reconcile's
-  first enacted step is `etcd cluster-init` on the first server, which brings up the single-member etcd
-  quorum and the kube-apiserver. **Only then** does the parent MINT the `Rke2NodeToken` — the shared join
-  secret — and inject it (below).
+  the `Single`/`[]` corner of the general shape. - **First server: `etcd cluster-init`, then mint the token.** On an empty control plane the reconcile's first enacted step is `etcd cluster-init` on the first server, which brings up the single-member etcd quorum and the kube-apiserver. **Only then** does the parent MINT the `Rke2NodeToken` — the shared join secret — and inject it (below).
 - **Every later node joins via `server:` URL + token.** The further servers (the `Ha3`/`Ha5` arms) and all
   `agents` join by pointing their config at the first server's `server:` URL and presenting the minted token.
   Server-join grows the etcd quorum; agent-join adds a worker. **Rejoin is idempotent**: a node already
   joined is a no-op; a node that dropped re-presents the same token and re-attaches — the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)
   `discover → diff → enact → re-observe` loop, keyed by node identity/tag, applied to rke2 membership.
 - **`config.yaml` is RENDERED read-only, not managed.** Each node's `/etc/rancher/rke2/config.yaml` is
-  `render(nodeInventory)` — computed wholesale by the parent from the typed topology and written **read-only,
-  never edited in place** — the same *render-not-manage* discipline as the WireGuard peer config. It is
+  `render(nodeInventory)` — computed wholesale by the parent from the typed topology and written **read-only, never edited in place** — the same *render-not-manage* discipline as the WireGuard peer config. It is
   delivered on the lift's **`stdin`** for the intra-host frame descent ([dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)),
   or as a **ConfigMap** for the in-cluster pod frame. The token appears in that rendered config as a
   name-resolved value **at render time**, never as a literal in any `.dhall`.
@@ -531,28 +537,23 @@ unassigned Phase-N gate. Phase 42's acceptance forest uses child `kind` clusters
   SSH keys and Curve25519 WireGuard keys, owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md). Dhall
   carries only the name; the bytes are injected out-of-band into the child's Vault, exactly as [§3](#3-amoebic-spawning--the-recursive-forest) already
   requires for every secret.
-- **Two enactors, one reconciler tier — tier (b).** The rke2 host rollout is the **checkpoint-free
-  tag-discovery HOST reconciler** — tier **(b)** of the reconciler taxonomy (create→tag→join-fabric→drain-by-tag),
+- **Two enactors, one reconciler tier — tier (b).** The rke2 host rollout is the **checkpoint-free tag-discovery HOST reconciler** — tier **(b)** of the reconciler taxonomy (create→tag→join-fabric→drain-by-tag),
   whose home is the spot-fleet reconciler in [pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision). It has
   **two enactors**: the **sudo host daemon** installs the *root* server on the host; the
-  Deployment-`replicas=1` **in-cluster
-  singleton** rolls out *child* servers and agents **over SSH** (the singleton's total cluster + secret
+  Deployment-`replicas=1` **in-cluster singleton** rolls out *child* servers and agents **over SSH** (the singleton's total cluster + secret
   authority is owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md)). It is **not** the
   tier-(a) Pulumi-checkpointed cloud reconciler and **not** the tier-(c) SSA reconciler.
 - **The SSA reconciler only fills the cluster *after* kube-apiserver is up.** The tier-(c) in-cluster
   **SSA/ApplySet** manifest reconciler ([manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions))
-  does **not** install rke2 — it applies workloads once the apiserver answers. The two tiers **compose in
-  sequence**: tier (b) stands up the machines + the etcd/apiserver control plane; tier (c) then fills the
+  does **not** install rke2 — it applies workloads once the apiserver answers. The two tiers **compose in sequence**: tier (b) stands up the machines + the etcd/apiserver control plane; tier (c) then fills the
   running cluster. Neither is a state machine; each is `discover → diff → enact`.
 - **A quorum change is a deliberate re-provision, never autoscale.** Changing the server arm
   (`Single`→`Ha3`, `Ha3`→`Ha5`) is a **declared topology change** reconciled toward — a deliberate
-  re-provision, **never** triggered by a `ScalingPolicy`. The `ScalingPolicy` escape valve ([§8](#8-dynamic-node-provisioning);
-  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)) exists only in
+  re-provision, **never** triggered by a `ScalingPolicy`. The `ScalingPolicy` escape valve ([§8](#8-dynamic-node-provisioning); [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)) exists only in
   `Rke2AgentPool.Autoscaled` and grows the **agent pool beyond its declared floor within its finite quota**; it
   can never mint or drop an etcd voter. A 0- or 2-server (no-quorum / split-brain) control plane has no
   constructor at all — **type-foreclosed unrepresentable** via the closed `Rke2Servers` union
-  ([cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction);
-  [illegal_state_catalog.md §3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). Host distinctness across `servers ∪ agentFloor`
+  ([cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction); [illegal_state_catalog.md §3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). Host distinctness across `servers ∪ agentFloor`
   is the **decode-foreclosed** `mkRke2` decode fold, likewise owned by cluster_topology.
 - **The server/agent axis is orthogonal.** Whether a host is a server or an agent is **DECLARED**, and it is
   independent of the **DETECTED** substrate and the selected runtime role (singleton, capacity scheduler, or
@@ -568,13 +569,11 @@ unassigned Phase-N gate. Phase 42's acceptance forest uses child `kind` clusters
 > wait_for_cluster_nodes_ready`. That is single-node `rke2-server` **only**. Multi-node server/agent +
 > etcd-HA + the `Rke2NodeToken` join is **net-new across the whole sibling family** — hostbootstrap has
 > **zero** rke2 code (its `HostTool` enum is Kubectl/Helm/Kind). Read this section as **design intent**, not
-> a tested amoebius result; the plan owns sequencing ([§10](#10-planning-ownership),
-> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
+> a tested amoebius result; the plan owns sequencing ([§10](#10-planning-ownership), > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)

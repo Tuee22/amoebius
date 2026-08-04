@@ -1,15 +1,34 @@
 # Release Lifecycle
 
+> **Purpose**: Single Source of Truth for delivery as **typed composition on primitives amoebius already > owns** — the immutable `Release` ledger keyed by `releaseHash`, the per-`Environment`
+> (`Dev`/`Staging`/`Prod`) ETag-CAS promotion pointer, the `PromotionGate` that makes promote-unverified→prod
+> **unrepresentable**, and the readiness-gated `RolloutPlan`/`RolloutPhase` apply — with **no external CI/CD > control plane** (no Argo, no Flux, no Tekton).
+> **Read this if**: something has to be promoted between environments, or a rollout or rollback has to be reasoned about.
+
+This document owns delivery: the immutable release ledger, the pointer that is the only mutable thing, the
+evidence a promotion requires, and the readiness-gated rollout. It does not own the evidence layers
+themselves, owned by [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing),
+nor the reconciler that applies a generation, owned by
+[manifest_generation_doctrine.md](./manifest_generation_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
-> **Purpose**: Single Source of Truth for delivery as **typed composition on primitives amoebius already
-> owns** — the immutable `Release` ledger keyed by `releaseHash`, the per-`Environment`
-> (`Dev`/`Staging`/`Prod`) ETag-CAS promotion pointer, the `PromotionGate` that makes promote-unverified→prod
-> **unrepresentable**, and the readiness-gated `RolloutPlan`/`RolloutPhase` apply — with **no external CI/CD
-> control plane** (no Argo, no Flux, no Tekton).
+</details>
+
+## Contents
+- [1. No external CI/CD control plane — delivery is typed composition on primitives amoebius owns](#1-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns)
+- [2. `Release` and the immutable release ledger (`releaseHash`)](#2-release-and-the-immutable-release-ledger-releasehash)
+- [3. `Environment` and the ETag-CAS promotion pointer](#3-environment-and-the-etag-cas-promotion-pointer)
+- [4. `PromotionGate`: promote-unverified→prod is unrepresentable](#4-promotiongate-promote-unverifiedprod-is-unrepresentable)
+- [5. `RolloutPlan` / `RolloutPhase`: the readiness-gated apply](#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
+- [6. What this doctrine deliberately does not own / Planning ownership](#6-what-this-doctrine-deliberately-does-not-own--planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -178,13 +197,11 @@ data Environment = Dev | Staging | Prod          -- closed union; no fourth, unn
 - **"Promote to prod" is a pointer CAS, then a converge.** Advancing an environment is not a redeploy and not
   a new build — it is a **compare-and-swap of that environment's pointer** from the old `releaseHash` to the
   new one, using the same ETag-CAS write protocol that advances a `trial` or `model` pointer
-  ([content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds),
-  where the `environment` pointer kind is registered as owned by this doctrine). Once the pointer moves, the
+  ([content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds), where the `environment` pointer kind is registered as owned by this doctrine). Once the pointer moves, the
   in-cluster SSA reconciler ([§5](#5-rolloutplan--rolloutphase-the-readiness-gated-apply)) resolves the selected
   release's `deploymentDhallRef`, recomputes the desired objects, and converges them for that environment. The
   CAS is the atomic, race-free commit; the reconcile is the enactment.
-- **App release inputs are byte-identical across environments.** Dev, staging, and prod run the **same image
-  digests**, checked UI program digests, contracts, and application logic — an app is
+- **App release inputs are byte-identical across environments.** Dev, staging, and prod run the **same image digests**, checked UI program digests, contracts, and application logic — an app is
   [written once](./app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once). Everything that
   differs between environments lives on the **deployment-rules surface**
   ([app_vs_deployment_doctrine.md §3](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)):
@@ -207,6 +224,18 @@ manifests); the `environment` pointer **reuses that exact protocol** for a new p
 evidence for the mechanism, not an amoebius result for environment promotion.
 
 ---
+
+```mermaid
+erDiagram
+  %% register: orientation
+  RELEASE ||--o{ ENVIRONMENT : "pointed at by zero or more"
+  RELEASE ||--|{ IMAGE_DIGEST : "pins every"
+  RELEASE ||--o{ UI_PROGRAM : "names each"
+  ENVIRONMENT ||--|| PROMOTION_GATE : "advances only through"
+  ENVIRONMENT ||--o| APPLIED_GENERATION : "records after convergence"
+  PROMOTION_GATE }|--|| EVIDENCE_WITNESS : "requires"
+```
+*Orientation. Design intent; the ledger is owned by [§2](#2-release-and-the-immutable-release-ledger-releasehash) and the pointer by [§3](#3-environment-and-the-etag-cas-promotion-pointer). The cardinalities carry the rule: many environments may point at one release, a release pins every digest it names, and the only mutable thing in the picture is the pointer.*
 
 ## 4. `PromotionGate`: promote-unverified→prod is unrepresentable
 
@@ -231,11 +260,9 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   the Protocol layer ***tested*** via Register-2.5 deterministic simulation against modeled substrates — a
   per-release, per-run result the ledger emits, not the design-time TLC token (a property of the model,
   invariant across releases, carrying no `Release`-specific witness); `Prod`
-  additionally requires the **Runtime/chaos layer *tested***, not merely assumed. *Tested* is the **highest
-  achievable** strength for that layer, not a concession: live fault injection samples the faults chosen and
+  additionally requires the **Runtime/chaos layer *tested***, not merely assumed. *Tested* is the **highest achievable** strength for that layer, not a concession: live fault injection samples the faults chosen and
   is therefore categorically *tested*, never *proven*
-  ([chaos_failover_doctrine.md §12](./chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed),
-  [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)).
+  ([chaos_failover_doctrine.md §12](./chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed), [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)).
   Requiring *proven* at the Runtime layer would demand a strength no applicable move can emit, making prod
   promotion unsatisfiable rather than strict. A layer the run recorded **UNVERIFIED** (a skipped-but-applicable
   move, [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact))
@@ -246,19 +273,16 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   decoder + QuickCheck + TLA+/TLC, **no live substrate** — a **Tier-1 (design-time) artifact** that
   establishes only that the spec composes and the protocol is sound in the abstract, with the Runtime/chaos
   (Tier-2) correspondence and enforcement left **UNVERIFIED**
-  ([testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) owns
-  this Tier-1-only variant). Because the strength mapping demands the Runtime/chaos layer *tested* for `Prod`,
+  ([testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) owns this Tier-1-only variant). Because the strength mapping demands the Runtime/chaos layer *tested* for `Prod`,
   such a ledger supplies **no Runtime `EvidenceWitness`** — there is no `advance` value to hand the CAS, so a
-  `Prod` `PromotionGate` **cannot be advanced on a Tier-1-only (in-process, correspondence/runtime-UNVERIFIED)
-  ledger**. This is the structural fence that keeps *in-process validation of the DSL* from ever meaning *the cluster enforces it*.
+  `Prod` `PromotionGate` **cannot be advanced on a Tier-1-only (in-process, correspondence/runtime-UNVERIFIED) ledger**. This is the structural fence that keeps *in-process validation of the DSL* from ever meaning *the cluster enforces it*.
 - **Promote-unverified→prod is type-foreclosed unrepresentable.** Because `advance` demands an `EvidenceWitness` and
   that witness exists only once the corresponding evidence edge exists, there is simply **no term** that
   promotes an under-verified `Release` to prod — not a runtime check that fires, but a value that cannot be
   constructed. This is the same idiom as infernix's `.ready`-gated `ArtifactRef` (an artifact handle exists
   only once the `.ready` sentinel does) and as amoebius's own `ModelArtifact` (§ content-addressing) — *a
   handle exists only once its evidence edge does*. This state is catalogued at
-  [illegal_state_catalog.md §3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) (an
-  unverified environment promotion), owned by this doctrine, technique "a handle exists only once its evidence
+  [illegal_state_catalog.md §3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) (an unverified environment promotion), owned by this doctrine, technique "a handle exists only once its evidence
   edge does."
 - **Generalizes the already-planned `Multicluster/PromotionGate.hs`.** amoebius already scopes a
   `PromotionGate` for the multicluster spawn path; this doctrine **generalizes** that single-purpose gate into
@@ -297,8 +321,7 @@ data ProvisionedRolloutWork       -- private constructors only
 - **Enacted by reconciler tier (c) — the in-cluster SSA/ApplySet reconciler.** A `RolloutPlan` is applied by
   the server-side-apply engine of
   [manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions):
-  each phase's objects are applied under the `amoebius` field manager, its readiness gate is **observed from
-  the live object** (rollout complete / `Ready` / CR `status` healthy — never a `threadDelay`), and only then
+  each phase's objects are applied under the `amoebius` field manager, its readiness gate is **observed from the live object** (rollout complete / `Ready` / CR `status` healthy — never a `threadDelay`), and only then
   does the next phase apply. This is tier (c) of the reconciler taxonomy; the host-level spot-fleet reconciler
   (tier b) and the Pulumi cloud-IaC reconciler (tier a) are unrelated and live in
   [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md).
@@ -363,8 +386,7 @@ data ProvisionedRolloutWork       -- private constructors only
 
 jitML's `src/JitML/Cluster/Helm.hs` defines exactly this shape — a `HelmPhase`
 (`HarborPhase | PlatformPhase | FinalPhase`), a `releasePhase :: HelmPhase` field on each release, and a
-`helmPhasedRolloutPlan` that applies them in readiness-gated phase order — the **`RolloutPhase` pattern,
-demonstrated in a sibling** (but bound to Helm, which amoebius drops). jitML's `src/JitML/Bootstrap.hs` splits its
+`helmPhasedRolloutPlan` that applies them in readiness-gated phase order — the **`RolloutPhase` pattern, demonstrated in a sibling** (but bound to Helm, which amoebius drops). jitML's `src/JitML/Bootstrap.hs` splits its
 rollout in two around the Postgres schema grant (`livePreGrantSubprocessesForPort → postgresSchemaGrantIO →
 livePostGrantSubprocessesForPort`), which is **the schema-migration-as-a-phase shape, LIVE in a sibling** and
 the concrete evidence behind the Phase-39 rollout shape. By contrast, hostbootstrap's only delivery gate
@@ -404,8 +426,7 @@ third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) the hash/pointer master registry (`releaseHash`, the `environment` pointer kind), [§4](./content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) determinism; the store the ledger writes into
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) the SSA/ApplySet reconciler `RolloutPlan` enacts, [§6.1](./manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional) the post-convergence `AppliedGeneration` append
@@ -427,9 +448,6 @@ third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything here is Phase-0 **reference-only design intent**. The `Release` ledger, the
-> `Environment` promotion pointer, the `PromotionGate`, and the `RolloutPlan`/`RolloutPhase` are **unbuilt in
-> amoebius** and compose primitives that are themselves Phase-26-and-later. The shapes are **generalized from
-> siblings** — jitML's phased readiness-gated rollout and its pre/post-grant schema phase, infernix's
-> `.ready`-gated artifact, the content store's ETag-CAS `trial` pointer — each of which is **sibling evidence,
-> not proof in amoebius**. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every
+> `Environment` promotion pointer, the `PromotionGate`, and the `RolloutPlan`/`RolloutPhase` are **unbuilt in > amoebius** and compose primitives that are themselves Phase-26-and-later. The shapes are **generalized from > siblings** — jitML's phased readiness-gated rollout and its pre/post-grant schema phase, infernix's
+> `.ready`-gated artifact, the content store's ETag-CAS `trial` pointer — each of which is **sibling evidence, > not proof in amoebius**. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every
 > prescriptive statement as the contract amoebius intends to satisfy, never as a tested amoebius result.

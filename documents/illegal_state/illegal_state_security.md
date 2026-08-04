@@ -1,15 +1,32 @@
 # Illegal States — Security, Ingress & Secrets
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: The themed slice of the illegal-state catalog covering gateway/DNS/NetworkPolicy wiring,
 > backdoor ingress, cross-tenant references and literal secrets, plaintext-at-rest, unsafe workloads, the
 > secure-gateway reach, admin mutations, derived RBAC bindings, and the low-code UI authorization, ownership,
 > information-flow, and plan-freshness boundary — the states amoebius makes unrepresentable so that ingress,
 > secrets, data access, and authority-bearing UI actions cannot be misconfigured into a leak.
+> **Read this if**: an authority, ingress, or isolation boundary has to be shown impossible to cross by construction.
+
+Security entries are the ones where a runtime residue is least acceptable, so each records not only what
+cannot be expressed but where an escape would surface if it could. Their numbering belongs to
+[illegal_state_catalog.md](./illegal_state_catalog.md), and the construction patterns behind them to
+[illegal_state_techniques.md](./illegal_state_techniques.md). The ingress boundary several of them protect is
+owned by [platform_services_doctrine.md](../engineering/platform_services_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Scope](#1-scope)
+- [2. The security, ingress & secrets illegal states](#2-the-security-ingress--secrets-illegal-states)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -18,12 +35,9 @@
 This document is a **themed slice** of the illegal-state catalog: the security, ingress, and secrets entries
 drawn from [`illegal_state_catalog.md`](./illegal_state_catalog.md) and reorganized as their own doc,
 reproducing each entry body faithfully. What this slice **authoritatively owns** is the per-entry
-**Validation-locus** classification it adds to each entry below. The **catalog index** (which states are illegal, in full) and the **load-bearing
-honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned
+**Validation-locus** classification it adds to each entry below. The **catalog index** (which states are illegal, in full) and the **load-bearing honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned
 by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
-**coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three foreclosure layers** ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the
-orthogonal `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect`
-classification each entry below carries) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice
+**coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three foreclosure layers** ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect` classification each entry below carries) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice
 **references** those; it does not restate them.
 
 Everything below is **design intent**, not a tested amoebius result. Per the honesty limit ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
@@ -38,11 +52,24 @@ correct manifests, whether the apiserver admits them, or whether the running clu
 
 Each entry keeps its **original catalog number and heading** (inbound links depend on the slug). The
 **Validation-locus** line added to each entry places it on the orthogonal validation-locus axis defined in
-[`illegal_state_techniques.md`](./illegal_state_techniques.md): `Gate-1-editor` (fails `dhall type` at
-authoring time), `Gate-2-decoder` (the total decoder returns `Left`), `provision-seal` (post-bind Phase-11
-provision returns a `ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by
-a golden test on the *rendered* manifest, not a live cluster), and `live-effect` (only observable at
-reconcile/runtime — the runtime-checked residue).
+[`illegal_state_techniques.md`](./illegal_state_techniques.md): `Gate-1-editor` (fails `dhall type` at authoring time), `Gate-2-decoder` (the total decoder returns `Left`), `provision-seal` (post-bind Phase-11 provision returns a `ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by a golden test on the *rendered* manifest, not a live cluster), and `live-effect` (only observable at reconcile/runtime — the runtime-checked residue).
+
+```mermaid
+flowchart LR
+  %% register: orientation
+  g1["Gate-1-editor<br/>2 entries"]
+  g2["Gate-2-decoder<br/>10 entries"]
+  g3["Gate-3-astcheck<br/>none in this slice"]
+  ps["provision-seal<br/>1 entry"]
+  rg["rendered-output-golden<br/>2 entries"]
+  le["live-effect<br/>none in this slice"]
+  g1 -->|"anything the typecheck admits"| g2
+  g2 -->|"linked extension source only"| g3
+  g2 -->|"anything the decoder admits"| ps
+  ps -->|"anything the seal admits"| rg
+  rg -->|"anything the golden admits"| le
+```
+*Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. Security concentrates at the decoder, and carries two of the corpus's three rendered-output-golden entries. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
 
 ### 3.3 Misconfigured gateway
 
@@ -50,8 +77,7 @@ A hand-written Gateway/HTTPRoute can listen on a port nothing serves, terminate 
 wrong host, or route to a backend that doesn't exist. In amoebius the gateway is not free-form: routes are
 emitted from the same value that declares the service, so a route to a non-existent backend, or a listener
 with no matching service, cannot be written. **Owner:**
-[`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (Envoy + Gateway API, the single
-wild-ingress path). **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (GADT-indexed: a route is constructed *from* a live service handle)
+[`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (Envoy + Gateway API, the single wild-ingress path). **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (GADT-indexed: a route is constructed *from* a live service handle)
 + [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) totality (the cert/host name is a function of the declared identity, not a free string).
 
 **Layer:** type-foreclosed at the Haskell IR — a route to a non-existent backend has no constructor; runtime-checked residue — that the live gateway actually routes.
@@ -64,12 +90,10 @@ and TLS actually terminates).
 ### 3.4 DNS that binds to the wrong IP
 
 Route53 (or any DNS) records are strings; nothing prevents pointing `app.example.com` at an address the
-cluster never owned. amoebius never lets the operator *type* the target IP: a DNS binding is a **total
-function of the allocated LoadBalancer address** — a name binds to a *service handle*, and the address is
+cluster never owned. amoebius never lets the operator *type* the target IP: a DNS binding is a **total function of the allocated LoadBalancer address** — a name binds to a *service handle*, and the address is
 computed from the realized LB, not supplied. A record pointing at an unowned address therefore has no
 representation. **Owner:** [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md) (route53 + zerossl) and
-[`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). **Technique:** [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) (content-address
-totality, applied to the name→address map).
+[`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). **Technique:** [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) (content-address totality, applied to the name→address map).
 
 **Layer:** type-foreclosed at the Haskell IR — a name binds only to an allocated address, so an unowned target has no constructor; runtime-checked residue — that DNS actually resolves to it.
 **Validation-locus:** `Gate-2-decoder` (the DNS binding is a total function of a service handle — there is no
@@ -85,9 +109,7 @@ Connectivity is **derived** from the declared dependency graph — if service A 
 B, the policy permitting A→B is generated, and a declared dependency can never be a connection the
 policy blocks. The "service stranded from a dependency it declared" state is not expressible because the
 human never writes the policy. **Owner:**
-[`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md). **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the dependency
-graph is the single owner of connectivity) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a consumer handle only exists once the dependency edge
-does).
+[`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md). **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the dependency graph is the single owner of connectivity) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a consumer handle only exists once the dependency edge does).
 
 **Layer:** type-foreclosed at the Haskell IR — NetworkPolicies are derived from the declared dependency graph and never hand-authored, so a severing policy has no constructor; runtime-checked residue — that the live CNI actually admits the traffic.
 **Validation-locus:** `rendered-output-golden` (the derived NetworkPolicy is checked in the emitted objects —
@@ -98,16 +120,14 @@ only once the dependency edge does; the ownership fold over the dependency graph
 ### 3.7 Accidental insecure / backdoor ingress
 
 The highest-severity entry: a chart that opens its own NodePort to the wild, or an Ingress that skips Keycloak, so
-an unauthenticated path exists that nobody meant to ship. amoebius enforces **Keycloak owns all wild
-ingress** structurally: an app cannot publish its own wild ingress, because the
+an unauthenticated path exists that nobody meant to ship. amoebius enforces **Keycloak owns all wild ingress** structurally: an app cannot publish its own wild ingress, because the
 only constructor that yields a wild-reachable endpoint routes through the Keycloak-owned edge. The sole
 carve-out — host-origin, localhost-only NodePorts with no mTLS — is a *different type* of endpoint
 (`HostLocalPeer`, not `WildIngress`), reachable only from the host and never from WAN/LAN, owned by
 [`host_cluster_comms_doctrine.md`](../engineering/host_cluster_comms_doctrine.md). There is no constructor that turns a
 host-local peer into a wild endpoint, and none that exposes a workload to the wild without the edge.
 **Owner:** [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
-(capability: only the edge holds the "expose-to-wild" capability) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct
-indices that do not interconvert).
+(capability: only the edge holds the "expose-to-wild" capability) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct indices that do not interconvert).
 
 **Layer:** type-foreclosed at the Haskell IR — only the Keycloak edge holds the expose-to-wild capability and endpoint kinds do not interconvert; runtime-checked residue — that the running cluster in fact exposes no unauthenticated path.
 **Validation-locus:** `rendered-output-golden` (the no-backdoor-ingress golden on the emitted objects — no
@@ -125,8 +145,7 @@ into the child's Vault. **(b) Tenant isolation** — a child cluster knows
 child *Y*'s resources or secrets. Both are foreclosed the same way: references are **tenant-tagged**, and
 there is no function that re-tags a reference from one tenant to another ([§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)). A `SecretRef` is a name
 under *this* tenant's tag; a cross-tenant reference has no inhabitant. **Owner:**
-[`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) (the `SecretRef`-by-name contract, parent→child
-injection, the trust tree). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant tags + capabilities).
+[`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) (the `SecretRef`-by-name contract, parent→child injection, the trust tree). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant tags + capabilities).
 
 **Layer:** type-foreclosed at the Haskell IR — phantom tenant tags admit no re-tagging function and a literal secret value has no constructor; runtime-checked residue — that the parent actually injects the referenced material.
 **Validation-locus:** `Gate-2-decoder` (phantom tenant tags — a literal secret value and a cross-tenant
@@ -144,8 +163,7 @@ materialized to a cluster-legible store is therefore not something a workload's 
 (a workload reads only the unencrypted-basics floor plus the Vault objects its policy allows). **Owner:**
 [`vault_pki_doctrine.md` §4](../engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) (decrypt-in-process, never-plaintext) and
 [`pulumi_iac_doctrine.md` §2](../engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) (the enveloped backend). **Technique:** [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
-(an envelope/handle, not a plaintext value) — note this row's *enforcement* is partly runtime (per the [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
-limit); the type only removes any plaintext-spec input.
+(an envelope/handle, not a plaintext value) — note this row's *enforcement* is partly runtime (per the [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) limit); the type only removes any plaintext-spec input.
 
 **Layer:** type-foreclosed at the Haskell IR — a workload's typed inputs can name only an envelope or handle; runtime-checked residue — that the bytes at rest are in fact enveloped.
 **Validation-locus:** `Gate-2-decoder` (a workload's typed inputs can only name an envelope/handle, never a
@@ -162,8 +180,7 @@ resources — the [§3.8](#38-cross-tenant-references-and-literal-secrets) tenan
 by per-child Transit keys (a child cannot even *decrypt* a sibling's subtree). **Owner:**
 [`cluster_lifecycle_doctrine.md` §3](../engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest) (the `project(subtree)` handoff),
 [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) (the `ChildInForceSpec` type), and
-[`vault_pki_doctrine.md` §6](../engineering/vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes) (per-child keys). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom
-tenant/subtree tags) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (ownership indices).
+[`vault_pki_doctrine.md` §6](../engineering/vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes) (per-child keys). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant/subtree tags) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (ownership indices).
 
 **Layer:** type-foreclosed at the Haskell IR — a `ChildInForceSpec` has no field in which a sibling or ancestor-only branch can appear; runtime-checked residue — that the running child reaches no further.
 **Validation-locus:** `Gate-2-decoder` (phantom subtree tags + ownership indices — a `ChildInForceSpec` has no
@@ -186,17 +203,11 @@ sizes. For the accelerator-owner pod it derives an integer extended-resource req
 container plus the pod's required affinity. It also attaches a hardened (non-root, no-privilege-escalation,
 dropped-capabilities, read-only-root-by-default) `securityContext`. Binding and
 provisioning must first construct the opaque whole-deployment `ProvisionedSpec`; only deployment-global
-`renderAll :: ProvisionedSpec -> [K8sObject]` crosses the seal, so neither an incomplete resource projection nor an
-unprovisionable target/workload pair can reach manifest generation. There is nothing to lint because there
-was never a renderable value to lint. The
-complete-resource-envelope rule is owned by
-[`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope);
+`renderAll :: ProvisionedSpec -> [K8sObject]` crosses the seal, so neither an incomplete resource projection nor an unprovisionable target/workload pair can reach manifest generation. There is nothing to lint because there was never a renderable value to lint. The complete-resource-envelope rule is owned by [`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope);
 the generation discipline that makes the unsafe shape unconstructible is owned by
 [`manifest_generation_doctrine.md` §3](../engineering/manifest_generation_doctrine.md#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible). **Owner:**
 [`manifest_generation_doctrine.md`](../engineering/manifest_generation_doctrine.md) (best-practice-by-construction) +
-[`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) (the complete resource-envelope
-rule) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the private checked
-provision boundary). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
+[`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) (the complete resource-envelope rule) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the private checked provision boundary). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (required-field-by-construction — a record without the field has no inhabitant).
 
 **Layer:** split — the missing-envelope and un-hardened-`securityContext` shapes are type-foreclosed (required fields, closed arms), while the capacity half is decode-foreclosed at the provision seal; runtime-checked residue — that the kubelet actually enforces the rendered limits.
@@ -213,20 +224,14 @@ ceilings).
 
 The new `Gateway` networking arm (`SecureGatewayReach c`, the authenticated secure-gateway wire a non-member host
 worker uses to reach the data plane + Vault) must not become a back-door into the wild — "Keycloak owns all wild
-ingress" ([§3.7](#37-accidental-insecure--backdoor-ingress)) must survive it. `SecureGatewayReach` is a **distinct
-`network_fabric` endpoint index** alongside `FabricPeer`/`ControlPlanePeer`/`HostLocalPeer`/`WildIngress`, with
+ingress" ([§3.7](#37-accidental-insecure--backdoor-ingress)) must survive it. `SecureGatewayReach` is a **distinct `network_fabric` endpoint index** alongside `FabricPeer`/`ControlPlanePeer`/`HostLocalPeer`/`WildIngress`, with
 **no constructor into `WildIngress`**, so a gateway reach cannot collapse into a wild endpoint — the same
 endpoint-kinds-do-not-interconvert shape as the host-local-peer carve-out ([§3.7](#37-accidental-insecure--backdoor-ingress)).
 The wild-ingress gateway (Keycloak/Envoy) stays wild-only. **Owner:**
 [`network_fabric_doctrine.md`](../engineering/network_fabric_doctrine.md) (the endpoint indices) +
-[`host_cluster_comms_doctrine.md`](../engineering/host_cluster_comms_doctrine.md) (channel 2 generalized to localhost /
-authenticated fabric / authenticated secure gateway). **Technique:**
-[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (only the wild edge holds the
-`ExposeToWild` capability — a `SecureGatewayReach` value cannot produce a wild endpoint) +
-[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct indices
-that do not interconvert). **Layer:** type-foreclosed uninhabitable. *(The K1 `Gateway`-arm authentication constructor itself
-is design intent this round names but defers — the witness type `FabricMember c` via `fabricMemberViaGateway` is
-named, the constructor not yet inhabited.)*
+[`host_cluster_comms_doctrine.md`](../engineering/host_cluster_comms_doctrine.md) (channel 2 generalized to localhost / authenticated fabric / authenticated secure gateway). **Technique:**
+[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (only the wild edge holds the `ExposeToWild` capability — a `SecureGatewayReach` value cannot produce a wild endpoint) +
+[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct indices that do not interconvert). **Layer:** type-foreclosed uninhabitable. *(The K1 `Gateway`-arm authentication constructor itself is design intent this round names but defers — the witness type `FabricMember c` via `fabricMemberViaGateway` is named, the constructor not yet inhabited.)*
 
 **Validation-locus:** `Gate-2-decoder` (only the wild edge holds the `ExposeToWild` capability, and
 `SecureGatewayReach` is a distinct endpoint index with no constructor into `WildIngress` — the collapse has no
@@ -237,8 +242,7 @@ runtime).
 ### 3.42 An admin mutation without a root-token capability + an unsealed-Vault witness
 
 Raw k8s hands anyone with a kubeconfig a mutating control surface — a new manifest, a config change — with no
-proof of authority beyond the cert, and no ordering against secret readiness. amoebius routes **all
-post-bootstrap admin through the singleton's REST API** (the singleton being a Deployment `replicas=1` with no
+proof of authority beyond the cert, and no ordering against secret readiness. amoebius routes **all post-bootstrap admin through the singleton's REST API** (the singleton being a Deployment `replicas=1` with no
 leader election) ([`bootstrap_sequence_doctrine.md` §5](../engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)),
 and the mutating endpoint (`dhall update`) is constructed **only** from a `RootToken` capability **and** an
 `Unsealed`-Vault witness — so "push a new spec to an unsealed-less or unauthenticated cluster" has no
@@ -251,8 +255,7 @@ only control-surface constructor is an admin-REST call — and retiring channel 
 *remotely* reachable: the admin-REST call still traverses the singleton's **node-local/private admin channel**
 ([`bootstrap_sequence_doctrine.md` §5](../engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api) admin-plane reach class), never the wild edge. **Owner:**
 [`bootstrap_sequence_doctrine.md`](../engineering/bootstrap_sequence_doctrine.md) (the admin control plane) +
-[`vault_pki_doctrine.md` §4](../engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) (the
-unsealed-Vault precondition). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+[`vault_pki_doctrine.md` §4](../engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) (the unsealed-Vault precondition). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (the `RootToken` capability — an admin verb has no inhabitant without it) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (a `dhall update` handle exists only once its `Unsealed`-Vault edge does; channel-1 verbs do not survive the
 handoff transition). **Layer:** `type-foreclosed` for the cap-and-witness-gated mutation and the retired
@@ -269,9 +272,7 @@ not survive the host-daemon→singleton handoff) + `live-effect` residue (that t
 
 Raw k8s (and Keycloak, Vault, Pulsar, and MinIO alongside it) lets an operator hand-write a `RoleBinding`,
 a realm-role grant, a Vault policy, a Pulsar ACL, or a bucket policy that grants one tenant reach into
-another's resources — or simply mis-scopes a grant — with nothing to catch it but review. amoebius has **no
-DSL surface with which to author a grant at all**: every concrete provider policy is the image of one **total
-function of the typed tenant→role graph**
+another's resources — or simply mis-scopes a grant — with nothing to catch it but review. amoebius has **no DSL surface with which to author a grant at all**: every concrete provider policy is the image of one **total function of the typed tenant→role graph**
 (`deriveTenantPolicies :: TenantSpec -> TenantPolicyDerivation`). This is an intermediate, never a renderer:
 it carries exact policy outputs plus the source-linked Keycloak SQL/WAL, Vault Raft, Pulsar ZooKeeper, MinIO
 system-metadata, and Kubernetes API/etcd persistence operands, along with exact provider action/executor
@@ -288,15 +289,13 @@ cross-tenant reference does — references are tenant-tagged and no function re-
 another. This is the RBAC lift of the derived-not-authored discipline that [§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)
 applies to tolerations and [§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other) applies to
 connectivity: the human never writes the policy, so the mis-scoped policy is unrepresentable. **Owner:**
-[`tenancy_doctrine.md` §5](../engineering/tenancy_doctrine.md#5-rbac-is-derived-never-authored) (RBAC is derived, never
-authored) + [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) (the per-tenant policy envelope). **Technique:**
-[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant tags — a
-grant is tagged under *this* tenant and no function re-tags it) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
+[`tenancy_doctrine.md` §5](../engineering/tenancy_doctrine.md#5-rbac-is-derived-never-authored) (RBAC is derived, never authored) + [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) (the per-tenant policy envelope). **Technique:**
+[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant tags — a grant is tagged under *this* tenant and no function re-tags it) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (the typed tenant→role graph is the single owner of every derived grant). **Layer:** `type-foreclosed`
 uninhabitable for the hand-authored and cross-tenant binding (no constructor); `runtime-checked` residue — that
 the derived Keycloak/Vault/Pulsar/MinIO policies *actually* refuse a live cross-tenant access. Source/key-set
 equality also makes an output/action whose persistence demand was dropped `decode-foreclosed` at whole
-provision ([resource_capacity_doctrine.md §5.1](../engineering/resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)); only private `ProvisionedSpec` projections
+provision ([resource_capacity_storage.md §5.1](../engineering/resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry)); only private `ProvisionedSpec` projections
 paired with the exact observation-bound `ValidatedLiveTarget` may render or act.
 
 **Validation-locus:** `Gate-2-decoder` (every provider policy is the image of one total derivation of the typed
@@ -333,8 +332,7 @@ rather than allow. **Owner:**
 [`low_code_ui_runtime_doctrine.md` §9](../engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge)
 (independent server authorization and the edge).
 **Technique:**
-[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (one port-registry
-owner plus exact-key parity) +
+[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (one port-registry owner plus exact-key parity) +
 [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (`Validated` becomes `Authorized` only through current request-context and policy witnesses) +
 [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
@@ -379,8 +377,7 @@ topic namespaces, workflow references, and cache keys preserve the same scope as
 (server-injected tenant/subject constraints). **Technique:**
 [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (`RequestContext`/`Handle` phantom scope, with no re-tag function) +
-[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (one ownership/grant
-fold resolves every reference).
+[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (one ownership/grant fold resolves every reference).
 
 **Layer:** `type-foreclosed` in the Haskell server IR for a provider operation over an unscoped/global id;
 `decode-foreclosed` for a declared data binding whose owner/audience has no matching grant; `runtime-checked`
@@ -454,12 +451,9 @@ immediately before effects; a mismatch is a fail-closed reload/conflict response
 (plan and contract compatibility), with request-time epoch validation owned by
 [`low_code_ui_runtime_doctrine.md` §13](../engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server).
 **Technique:**
-[§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) (plan
-identity is a total function of the complete source set) +
-[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (only a
-current-generation authorized action crosses the effect edge) +
-[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (exact source/key
-ownership).
+[§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) (plan identity is a total function of the complete source set) +
+[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (only a current-generation authorized action crosses the effect edge) +
+[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (exact source/key ownership).
 
 **Layer:** `type-foreclosed` for re-tagging a sealed plan across generations; `decode-foreclosed` at plan sealing
 for incomplete or mismatched sources; currentness at request arrival is necessarily `runtime-checked`, because a
@@ -479,41 +473,36 @@ declared source set remains executable, preventing an oracle that merely rejects
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog: the full index of
   illegal states and the load-bearing honesty limit ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)). This slice is carved from it.
 - [`illegal_state_techniques.md`](./illegal_state_techniques.md) — owns the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
   coverage matrix ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the foreclosure layers, and the **validation-locus axis** each entry above is
   classified against.
-- [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid `InForceSpec` cannot
-  represent illegal state") these entries instantiate.
-- Owning doctrines cited by the entries in this slice:
-  - [`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) — the LoadBalancer + single wild-ingress
-    path, derived NetworkPolicy, and the complete resource-envelope rule ([§3.3](#33-misconfigured-gateway), [§3.4](#34-dns-that-binds-to-the-wrong-ip), [§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other), [§3.7](#37-accidental-insecure--backdoor-ingress), [§3.11](#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)).
-  - [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md) — route53 + zerossl, and the Vault-enveloped backend
-    ([§3.4](#34-dns-that-binds-to-the-wrong-ip), [§3.9](#39-a-plaintext-spec-at-rest)).
-  - [`host_cluster_comms_doctrine.md`](../engineering/host_cluster_comms_doctrine.md) — the host-local-peer carve-out and
-    the channel taxonomy ([§3.7](#37-accidental-insecure--backdoor-ingress), [§3.40](#340-a-secure-gateway-reach-collapsing-into-wild-ingress)).
-  - [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) — the `SecretRef`-by-name contract, parent→child
-    injection, per-child keys, the fail-closed unsealed-Vault precondition, and the per-tenant policy envelope
-    ([§3.8](#38-cross-tenant-references-and-literal-secrets), [§3.9](#39-a-plaintext-spec-at-rest), [§3.10](#310-a-child-spec-that-reaches-beyond-its-own-subtree), [§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness), [§3.45](#345-a-cross-tenant-or-hand-authored-rbac-binding)).
-  - [`tenancy_doctrine.md`](../engineering/tenancy_doctrine.md) — RBAC is derived, never authored; the typed tenant→role
-    graph as the single owner of every derived grant ([§3.45](#345-a-cross-tenant-or-hand-authored-rbac-binding)).
-  - [`low_code_ui_runtime_doctrine.md`](../engineering/low_code_ui_runtime_doctrine.md) — the single action
-    registry, server-side authorization, subject/tenant scope, information-flow labels, and freshness-bound
-    client/server plans ([§3.79](#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration),
-    [§3.80](#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant),
-    [§3.81](#381-a-ui-value-flowing-to-an-incompatible-tenant-subject-or-audience-scope),
-    [§3.83](#383-a-ui-plan-executed-after-an-authority-bearing-source-changed)).
-  - [`cluster_lifecycle_doctrine.md`](../engineering/cluster_lifecycle_doctrine.md) — the `project(subtree)` handoff
-    ([§3.10](#310-a-child-spec-that-reaches-beyond-its-own-subtree)).
-  - [`manifest_generation_doctrine.md`](../engineering/manifest_generation_doctrine.md) — best-practice-by-construction, the
-    unconstructible unsafe manifest ([§3.11](#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)).
-  - [`network_fabric_doctrine.md`](../engineering/network_fabric_doctrine.md) — the endpoint indices, including
-    `SecureGatewayReach` ([§3.40](#340-a-secure-gateway-reach-collapsing-into-wild-ingress)).
-  - [`bootstrap_sequence_doctrine.md`](../engineering/bootstrap_sequence_doctrine.md) — the admin control plane and the
-    singleton REST API ([§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness)).
-  - [`daemon_topology_doctrine.md`](../engineering/daemon_topology_doctrine.md) and
-    [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) — the runtime-checked residue that the
-    singleton holds sole admin authority ([§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness)).
+- [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid `InForceSpec` cannot represent illegal state") these entries instantiate.
+Owning doctrines cited by the entries in this slice:
+- [`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) — the LoadBalancer + single wild-ingress
+  path, derived NetworkPolicy, and the complete resource-envelope rule ([§3.3](#33-misconfigured-gateway), [§3.4](#34-dns-that-binds-to-the-wrong-ip), [§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other), [§3.7](#37-accidental-insecure--backdoor-ingress), [§3.11](#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)).
+- [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md) — route53 + zerossl, and the Vault-enveloped backend
+  ([§3.4](#34-dns-that-binds-to-the-wrong-ip), [§3.9](#39-a-plaintext-spec-at-rest)).
+- [`host_cluster_comms_doctrine.md`](../engineering/host_cluster_comms_doctrine.md) — the host-local-peer carve-out and
+  the channel taxonomy ([§3.7](#37-accidental-insecure--backdoor-ingress), [§3.40](#340-a-secure-gateway-reach-collapsing-into-wild-ingress)).
+- [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) — the `SecretRef`-by-name contract, parent→child
+  injection, per-child keys, the fail-closed unsealed-Vault precondition, and the per-tenant policy envelope
+  ([§3.8](#38-cross-tenant-references-and-literal-secrets), [§3.9](#39-a-plaintext-spec-at-rest), [§3.10](#310-a-child-spec-that-reaches-beyond-its-own-subtree), [§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness), [§3.45](#345-a-cross-tenant-or-hand-authored-rbac-binding)).
+- [`tenancy_doctrine.md`](../engineering/tenancy_doctrine.md) — RBAC is derived, never authored; the typed tenant→role
+  graph as the single owner of every derived grant ([§3.45](#345-a-cross-tenant-or-hand-authored-rbac-binding)).
+- [`low_code_ui_runtime_doctrine.md`](../engineering/low_code_ui_runtime_doctrine.md) — the single action
+  registry, server-side authorization, subject/tenant scope, information-flow labels, and freshness-bound
+  client/server plans ([§3.79](#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration), [§3.80](#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant), [§3.81](#381-a-ui-value-flowing-to-an-incompatible-tenant-subject-or-audience-scope), [§3.83](#383-a-ui-plan-executed-after-an-authority-bearing-source-changed)).
+- [`cluster_lifecycle_doctrine.md`](../engineering/cluster_lifecycle_doctrine.md) — the `project(subtree)` handoff
+  ([§3.10](#310-a-child-spec-that-reaches-beyond-its-own-subtree)).
+- [`manifest_generation_doctrine.md`](../engineering/manifest_generation_doctrine.md) — best-practice-by-construction, the
+  unconstructible unsafe manifest ([§3.11](#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)).
+- [`network_fabric_doctrine.md`](../engineering/network_fabric_doctrine.md) — the endpoint indices, including
+  `SecureGatewayReach` ([§3.40](#340-a-secure-gateway-reach-collapsing-into-wild-ingress)).
+- [`bootstrap_sequence_doctrine.md`](../engineering/bootstrap_sequence_doctrine.md) — the admin control plane and the
+  singleton REST API ([§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness)).
+- [`daemon_topology_doctrine.md`](../engineering/daemon_topology_doctrine.md) and
+  [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) — the runtime-checked residue that the
+  singleton holds sole admin authority ([§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness)).

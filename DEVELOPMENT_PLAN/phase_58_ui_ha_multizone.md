@@ -1,12 +1,33 @@
 # Phase 58: Initial online UI multi-zone high availability
 
+> **Purpose**: Establish genuine end-to-end UI availability across provider failure domains with redundant
+> stateless UI servers, redundant projectors, resumable streams, and an externally observed live fault.
+> **Read this if**: phase 58 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 58 delivers the initial online UI multi-zone high availability; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu → provider` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md (HA/failover portion)
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Establish genuine end-to-end UI availability across provider failure domains with redundant
-> stateless UI servers, redundant projectors, resumable streams, and an externally observed live fault.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Resource provision — multi-zone UI fault envelope](#resource-provision--multi-zone-ui-fault-envelope)
+- [Sprints](#sprints)
+- [Sprint 58.1: Run the multi-zone UI failure campaign 📋](#sprint-581-run-the-multi-zone-ui-failure-campaign-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -124,12 +145,16 @@ buffer refuses before the first provider or Kubernetes mutation.
 ## Sprint 58.1: Run the multi-zone UI failure campaign 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Ha/MultiZone.hs`, `src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase58UiHaSpec.hs` (planned; not built)
+**Implementation**: `src/Amoebius/Ui/Ha/MultiZone.hs`,
+`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase58UiHaSpec.hs` (planned; not built)
 **Blocked by**: Phases 45, 47, 54, and 57
-**Independent Validation**: `cabal test phase58-ui-ha-multizone` from an off-cluster probe against provider-
-confirmed whole-zone isolation and pinned post-fault OIDC/membership/read/mutation/workflow/subscription/scope
-observations
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/daemon_topology_doctrine.md`, `documents/engineering/platform_services_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Independent Validation**: `cabal test phase58-ui-ha-multizone`
+from an off-cluster probe against provider- confirmed whole-zone isolation and pinned post-fault
+OIDC/membership/read/mutation/workflow/subscription/scope observations
+**Docs to update**:
+`documents/engineering/low_code_ui_runtime_doctrine.md`,
+`documents/engineering/daemon_topology_doctrine.md`, `documents/engineering/platform_services_doctrine.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 

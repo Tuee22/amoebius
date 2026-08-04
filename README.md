@@ -1,13 +1,29 @@
 # amoebius
 
+>
+**Purpose**: Entry point for amoebius — an everything-orchestrator and bounded low-code UI runtime whose
+> Dhall DSLs make illegal deployment and application states unrepresentable where their modeled boundaries
+> permit that claim.
+>
+**Read this if**: amoebius is unfamiliar, or a starting point into its documentation is needed.
+
+This page states what amoebius is and routes into the corpus; it owns no doctrine and no schedule. The design
+is owned by the doctrine set under [`documents/`](./documents/README.md), phase order and status by
+[`DEVELOPMENT_PLAN/README.md`](./DEVELOPMENT_PLAN/README.md), and the sequence in which to read either by
+[`documents/reading_order.md`](./documents/reading_order.md). **Nothing described below is built** — the
+repository currently holds the specification and its lint, and no source tree.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Reference only
 **Supersedes**: N/A
 **Referenced by**: documents/engineering/daemon_topology_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: Entry point for amoebius — an everything-orchestrator and bounded low-code UI runtime whose
-> Dhall DSLs make illegal deployment and application states unrepresentable where their modeled boundaries
-> permit that claim.
+</details>
+
+---
 
 amoebius has one Haskell **runtime binary** with closed responsibilities for its bootstrap/host command mode,
 **sudo-capable host daemon**, **in-cluster control-plane singleton**, **capacity scheduler**, and **unelected
@@ -38,11 +54,15 @@ Every amoebius-managed Kubernetes cluster — root, child, self-managed, or prov
 **ephemeral infrastructure** and independently retained durable backing. Ephemeral means replaceable, not
 TTL-bound or automatically torn down: a rebuilt cluster reconciles toward the persistent root `InForceSpec`
 and reattaches retained backing
-([cluster lifecycle](./documents/engineering/cluster_lifecycle_doctrine.md),
-[storage lifecycle](./documents/engineering/storage_lifecycle_doctrine.md)).
+([cluster lifecycle](./documents/engineering/cluster_lifecycle_doctrine.md), [storage lifecycle](./documents/engineering/storage_lifecycle_doctrine.md)).
 
 ## Where to start
 
+- **Never seen this before:** [`documents/reading_order.md`](./documents/reading_order.md) — the sequenced
+  path through the corpus. About three hours end to end; the first two stops, about forty minutes, are enough
+  to follow a design discussion.
+- **An unfamiliar term:** [`documents/glossary.md`](./documents/glossary.md) — the routing table from every
+  amoebius term and acronym to the section that owns it. It defines nothing; it routes.
 - **The plan:** [`DEVELOPMENT_PLAN/README.md`](./DEVELOPMENT_PLAN/README.md) — the single, authoritative,
   numerically-ordered phased plan that delivers the vision. Phase 0 is the complete documentation suite.
 - **The doctrine:** [`documents/README.md`](./documents/README.md) — the top-level index of all doctrine:

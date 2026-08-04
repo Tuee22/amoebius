@@ -1,12 +1,25 @@
 # Amoebius Overview
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md
-**Generated sections**: none
-
 > **Purpose**: The target-architecture / vision / current-baseline narrative — the "why and what" companion
 > to [README.md](README.md)'s "where and when" — for the everything-orchestrator amoebius is becoming.
+> **Read this if**: the shape of the whole system has to be understood before any single phase or doctrine makes sense.
+
+This document is the narrative entry point to amoebius: what it is, what it is assembled from, and the
+constraints every phase upholds. It owns the target-architecture narrative and the invariant set; it owns no
+phase status, which belongs to [README.md](README.md), and no subsystem doctrine, which belongs to the
+document each invariant cites. It presumes nothing.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/reading_order.md
+**Generated sections**: none
+
+</details>
+
+---
 
 This document explains *what amoebius is and why it is shaped that way*. It does not track status, order, or
 remaining work — that is [README.md](README.md)'s job, and per
@@ -17,11 +30,8 @@ detail of each subsystem; this overview summarizes and links, and **never restat
 vision; the plan is its binding, executable decomposition.
 
 > **Greenfield, read this first.** Nothing is implemented. Only the Phase 0 documentation suite exists; there
-> is no `src/` yet. Every phase and sprint is 📋 Planned and **every prescriptive sentence below is design
-> intent, not a tested result.** Where this overview leans on the sibling `prodbox` project, that is cited as
+> is no `src/` yet. Every phase and sprint is 📋 Planned and **every prescriptive sentence below is design > intent, not a tested result.** Where this overview leans on the sibling `prodbox` project, that is cited as
 > *evidence* that a shape works — never as amoebius proof.
-
----
 
 ## 1. The everything-orchestrator shape: one runtime binary, three contexts
 
@@ -56,6 +66,7 @@ fanout across pods, while Pulsar/projection/provider state remains authoritative
 
 ```mermaid
 flowchart TD
+%% register: orientation
   src[One Haskell binary] --> cli[CLI context: operator host]
   src --> host[Sudo host daemon: substrate detect, lazy tool-ensure, host workers]
   src --> pod[In-cluster pod context]
@@ -67,6 +78,7 @@ flowchart TD
   sched --> bind[Sealed placement, aggregate CAS ledger, Kubernetes Binding]
   ui --> redis[Redis: ephemeral cross-pod WebSocket routing]
 ```
+*Orientation. Design intent. One binary, three contexts, and the roles the in-cluster context selects; the grid is owned by [daemon_topology_doctrine.md §2](../documents/engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid). None of it is built.*
 
 The host daemon reaches the cluster only over localhost-restricted channels (kube-apiserver via the distro's
 own mTLS, and Pulsar/MinIO over host-only NodePorts), never the public ingress path — see
@@ -112,8 +124,7 @@ carried forward is the [`legacy_tracking_for_deletion.md`](legacy_tracking_for_d
 jitML join as the closed **workload-extension set** linked into trusted runtime variants — never a migration
 through hostbootstrap first — with their engines jit-resolved into a bounded content-addressed cache rather than baked.
 Low-code applications remain checked release data; only an optional reviewed server adapter joins the linked set
-([`capability_extension_doctrine.md`](../documents/engineering/capability_extension_doctrine.md),
-[`content_addressing_doctrine.md` §4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
+([`capability_extension_doctrine.md`](../documents/engineering/capability_extension_doctrine.md), [`content_addressing_doctrine.md` §4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 
 ## 3. The hard constraints (cross-cutting invariants)
 
@@ -155,8 +166,7 @@ inventoried in [system_components.md](system_components.md) and owned by
 ## 4. The phase index (one line per phase)
 
 Each phase ends in a single, checkable acceptance gate on **at most one** substrate (the one-substrate
-discipline, [development_plan_standards.md §L](development_plan_standards.md#l-one-substrate-discipline)). The **gate text is
-owned solely by [README.md](README.md)** and is deliberately not restated here — duplicating it is what let the
+discipline, [development_plan_standards.md §L](development_plan_standards.md#l-one-substrate-discipline)). The **gate text is owned solely by [README.md](README.md)** and is deliberately not restated here — duplicating it is what let the
 two copies drift ([documentation_standards.md §5](../documents/documentation_standards.md#5-duplication-rules)).
 The lines below name each phase and its substrate and link its document; read the gate in the tracker row.
 Pre-implementation, Phase 0 is 🔄 Active and every later phase is 📋 Planned (greenfield); the tracker is
@@ -169,8 +179,7 @@ opens, while the **Register-2.5 deterministic-simulation runs as a pre-cluster *
 phases' Register-3 gates. Front-loading a *design* proof ahead of the phase that
 builds the runtime it corresponds to is legitimate under the ledger discipline that marks correspondence and
 runtime fidelity UNVERIFIED until that phase discharges them
-([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed),
-[`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)).
+([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed), [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)).
 
 *Pre-cluster band (substrate `none`, Registers 1–2):*
 - **Phase 0 — Documentation suite (whole DSL)** (`none`, no validation register — the `—` exception) → [phase_00](phase_00_documentation_suite.md).

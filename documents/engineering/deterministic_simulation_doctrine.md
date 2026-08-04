@@ -1,16 +1,37 @@
 # Deterministic Simulation: the real code, run against a modeled world
 
+> **Purpose**: Single source of truth for **deterministic simulation testing (DST)** in amoebius — running the
+> *real* daemon/reconciler code, written once against `io-classes`, under `io-sim`/`IOSimPOR` against a
+> **modeled, fault-injectable environment** (fake Pulsar/MinIO/apiserver/route53/Vault/clock), so concurrent
+> schedules and environment faults are validated **in-process, deterministically replayable, before any live > deployment** — and the honest tradeoff this buys: it replaces a large *unvalidated-until-live* surface with a
+> small *modeled-environment-fidelity* premise — Register 2.5 of the conformance spine.
+> **Read this if**: real daemon code has to be exercised against controlled schedules rather than a live cluster.
+
+This document owns the simulation layer: the seam that lets one program run unchanged against modelled time
+and modelled failure, and the honest statement of what a passing simulation does and does not establish. It
+is an activity rather than a phase gate, and the registers that are gates are owned by
+[testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: Single source of truth for **deterministic simulation testing (DST)** in amoebius — running the
-> *real* daemon/reconciler code, written once against `io-classes`, under `io-sim`/`IOSimPOR` against a
-> **modeled, fault-injectable environment** (fake Pulsar/MinIO/apiserver/route53/Vault/clock), so concurrent
-> schedules and environment faults are validated **in-process, deterministically replayable, before any live
-> deployment** — and the honest tradeoff this buys: it replaces a large *unvalidated-until-live* surface with a
-> small *modeled-environment-fidelity* premise — Register 2.5 of the conformance spine.
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. The io-classes environment abstraction — build it pure, lift it whole](#2-the-io-classes-environment-abstraction--build-it-pure-lift-it-whole)
+- [3. The simulated environment and its fault model](#3-the-simulated-environment-and-its-fault-model)
+- [4. Register 2.5 — where deterministic simulation sits](#4-register-25--where-deterministic-simulation-sits)
+- [5. What DST establishes, and the one premise it buys](#5-what-dst-establishes-and-the-one-premise-it-buys)
+- [6. One determinism substrate, two uses](#6-one-determinism-substrate-two-uses)
+- [7. The boundary — what stays Register 3](#7-the-boundary--what-stays-register-3)
+- [8. Planning ownership](#8-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -57,8 +78,7 @@ as a **minimal, replayable counterexample** rather than a once-a-month flake. Th
 whole" ladder of [chaos_failover_doctrine.md §10](./chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim),
 carried to completion: not only the decision, but the whole concurrent program.
 
-The standing cost is named honestly: making the concurrency-touching signatures polymorphic in `m` is a **tax on
-all future change**, not a one-time edit. It is paid deliberately, in exchange for [§5](#5-what-dst-establishes-and-the-one-premise-it-buys).
+The standing cost is named honestly: making the concurrency-touching signatures polymorphic in `m` is a **tax on all future change**, not a one-time edit. It is paid deliberately, in exchange for [§5](#5-what-dst-establishes-and-the-one-premise-it-buys).
 
 ---
 
@@ -66,12 +86,10 @@ all future change**, not a one-time edit. It is paid deliberately, in exchange f
 
 The principal limit of a single-daemon io-sim run is that amoebius daemons coordinate through Pulsar + MinIO + the
 commit log, **not in-process shared state** ([chaos_failover_doctrine.md §10](./chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim)),
-so a run rests on stubbed peers. This doctrine's move is to make those substrates **first-class simulated
-components with a typed fault model**, rather than inert stubs — the FoundationDB approach. The modeled
+so a run rests on stubbed peers. This doctrine's move is to make those substrates **first-class simulated components with a typed fault model**, rather than inert stubs — the FoundationDB approach. The modeled
 environment provides deterministic, in-`IOSim` fakes of:
 
-- **Pulsar** — subscriptions, at-least-once delivery, broker-side dedup, geo-replication; fault knobs: **delay,
-  reorder, duplicate, partition (cut a link), broker crash**.
+- **Pulsar** — subscriptions, at-least-once delivery, broker-side dedup, geo-replication; fault knobs: **delay, reorder, duplicate, partition (cut a link), broker crash**.
 - **MinIO** — the content-addressed store with `If-None-Match`/`412` semantics; fault knobs: latency, partition,
   lost-write-before-ack.
 - **kube-apiserver** — server-side apply, admission, resourceVersion conflicts, watch; fault knobs: conflict,
@@ -129,8 +147,7 @@ The tradeoff is deliberate, and it is stated honestly: DST **replaces** a large 
 live cluster exists"* surface with a small *"the code is validated against a model of the environment, and the
 model's fidelity to the real substrate is assumed"* premise. That is strictly the better place to stand — a
 narrow, testable fidelity assumption in place of a broad unverified one — and it matches amoebius's own instinct
-everywhere else (make the load-bearing claim small and explicit). The fidelity premise is **discharged, not
-waved away**: a small Register-3 **conformance suite** checks each fake's contract against the real system (e.g.
+everywhere else (make the load-bearing claim small and explicit). The fidelity premise is **discharged, not waved away**: a small Register-3 **conformance suite** checks each fake's contract against the real system (e.g.
 the fake Pulsar's dedup/redelivery semantics against a real broker), and any divergence is a defect in the fake,
 recorded in the ledger. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline):
 a DST green is quoted as *"the code upholds the invariants under the modeled schedules and faults,"* never as
@@ -141,8 +158,7 @@ a DST green is quoted as *"the code upholds the invariants under the modeled sch
 ## 6. One determinism substrate, two uses
 
 DST and reproducible ML share **one** determinism substrate. The seed derivation and the `MonadTime`/`MonadTimer`
-clock seams that make an ML run bit-reproducible ([content_addressing_doctrine.md](./content_addressing_doctrine.md),
-the determinism kernel [phase_48](../../DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md)) are the **same** seams
+clock seams that make an ML run bit-reproducible ([content_addressing_doctrine.md](./content_addressing_doctrine.md), the determinism kernel [phase_48](../../DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md)) are the **same** seams
 that make a simulation deterministically replayable. Injecting time and randomness through typed seams rather
 than reading wall-clock or ambient entropy (rule R2) is what makes both "deterministic by construction"; the
 kernel builds the seams once, and DST and ML reproducibility are two readings of them.
@@ -177,8 +193,7 @@ design intent, never a tested amoebius result.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — [§10](./chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim) the io-sim "Simulate" move this doctrine adopts and completes; the R1–R9 hazards the fault model targets
 - [Formal Model Doctrine](./formal_model_doctrine.md) — [§8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge) trace validation, which first runs against the simulated daemon here

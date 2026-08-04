@@ -1,14 +1,37 @@
 # The Native Pulsar Client
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Define `amoebius-pulsar` — the one native-protocol Haskell Pulsar client (forked from
 > `cr-org/supernova`) that replaces every WebSocket transport, its capability surface (lookup / produce /
 > consume / subscribe / seek), the declarative topology algebra, and the at-least-once + broker-side-dedup
 > delivery contract.
+> **Read this if**: a typed value has to cross the message bus, or the client's wire behaviour has to be reasoned about.
+
+This document owns the native client: one wire, one encoding, and the total decode that makes a
+misinterpreted payload impossible rather than silent. It does not own the topics' storage bounds, owned by
+[resource_capacity_storage.md](./resource_capacity_storage.md), nor the workflow runtime above it, owned by
+[single_logical_data_plane_doctrine.md](./single_logical_data_plane_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. One client, one wire, no WebSockets](#1-one-client-one-wire-no-websockets)
+- [2. Scope — what this document owns](#2-scope--what-this-document-owns)
+- [3. The native binary protocol](#3-the-native-binary-protocol)
+- [4. Forked from supernova — what amoebius inherits and what it builds](#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds)
+- [5. The capability surface: lookup · produce · consume · subscribe · seek](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)
+- [6. The declarative topology algebra](#6-the-declarative-topology-algebra)
+- [7. Delivery: at-least-once with broker-side dedup (the robust default)](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)
+- [8. What this client replaces](#8-what-this-client-replaces)
+- [9. Planning ownership](#9-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -111,14 +134,14 @@ Implementation rules for `amoebius-pulsar`:
   `consumer_id` / `request_id`, as the protocol intends. This is the structural reason the
   per-publish-connection cost of the old WebSocket path vanishes ([§1](#1-one-client-one-wire-no-websockets)).
 - **Toolchain & discovery.** The fork builds on **GHC 9.12.4** (the repo-wide pin). Any code-generation
-  tool it needs (e.g. `protoc` for `proto-lens`) is discovered **lazily through the substrate's package
-  manager and invoked by full path**. Host-side code generation never searches `PATH`, and client configuration
+  tool it needs (e.g. `protoc` for `proto-lens`) is discovered **lazily through the substrate's package manager and invoked by full path**. Host-side code generation never searches `PATH`, and client configuration
   does not come from ambient environment variables. That no-env/no-`PATH` contract is owned by
   [substrate_doctrine.md](./substrate_doctrine.md); it is named here only because the supernova fork must
   conform to it.
 
 ```mermaid
 flowchart TD
+%% register: orientation
   app[amoebius caller] -->|connect over TCP| handshake[CONNECT then CONNECTED handshake]
   handshake -->|LOOKUP_TOPIC| lookup[Broker resolves topic owner]
   lookup -->|Connect or Redirect| owner[Owning broker session]
@@ -126,6 +149,7 @@ flowchart TD
   producer -->|SEND with sequence_id| broker[Broker]
   broker -->|SEND_RECEIPT with message_id| producer
 ```
+*Orientation. Design intent; the one-client-one-wire rule is owned by [§1](#1-one-client-one-wire-no-websockets). The exchange a produce takes from handshake to receipt, drawn against the published protocol and not against a running broker.*
 
 ### 3.1 Payloads are exclusively CBOR
 
@@ -147,16 +171,14 @@ is **unrepresentable** ([illegal_state_catalog.md §3.23](../illegal_state/illeg
 - **Canonical where content-addressed; fast elsewhere.** amoebius reuses — it does **not** restate — the
   canonical-CBOR discipline the content store already owns: the `encodeManifestCbor` canonical encoder
   ([content_addressing_doctrine.md §2.1](./content_addressing_doctrine.md#21-three-object-classes-two-write-protocols))
-  sorts components so equal logical content yields byte-identical CBOR. A payload that is **content-addressed
-  or hashed** (a result body, a manifest-SHA-bearing envelope) is encoded **canonically**; an ephemeral
+  sorts components so equal logical content yields byte-identical CBOR. A payload that is **content-addressed or hashed** (a result body, a manifest-SHA-bearing envelope) is encoded **canonically**; an ephemeral
   command/event is not required to be, because dedup keys on `(producer_name, sequence_id)`, never on payload
   bytes ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)), and determinism is scoped to the durable body only, never to broker-assigned ids/timestamps
   ([content_addressing_doctrine.md §5](./content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)).
 - **Big data is a reference, still CBOR.** Frames are ≤ 5 MiB ([§3](#3-the-native-binary-protocol)); a payload that must carry a large
   artifact carries the artifact's **manifest SHA** — a content-address reference — as a field of the CBOR
   envelope, never the raw blob inline. The *reference* is CBOR (here); the *blob bytes* and the *manifest
-  CBOR shape* stay owned by [content_addressing_doctrine.md](./content_addressing_doctrine.md) (blobs are raw
-  opaque bytes; only manifests are CBOR).
+  CBOR shape* stay owned by [content_addressing_doctrine.md](./content_addressing_doctrine.md) (blobs are raw opaque bytes; only manifests are CBOR).
 - **The broker sees opaque bytes.** amoebius owns the codec; it does **not** use Pulsar's schema registry.
   The Pulsar message schema is `BYTES`, and the CBOR body is opaque to the broker — so the codec, not a
   server-side schema, is the single source of truth for the wire body (the same "one client, one wire"
@@ -176,6 +198,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   value["Typed workflow value, Serialise a"]:::intent -->|encodeCbor, canonical if content-addressed| body["CBOR payload body"]:::intent
   body -->|becomes the raw payload tail| frame["Frame: protobuf command plus metadata, CRC32C, CBOR payload"]:::intent
   frame -->|SEND| broker[/"Broker sees opaque BYTES"/]:::effect
@@ -199,8 +222,7 @@ flowchart TD
 
 ## 4. Forked from supernova — what amoebius inherits and what it builds
 
-amoebius-pulsar starts as a fork of [`cr-org/supernova`](https://github.com/cr-org/supernova) (Apache-2.0,
-on [Hackage](https://hackage.haskell.org/package/supernova)). Supernova already implements the binary
+amoebius-pulsar starts as a fork of [`cr-org/supernova`](https://github.com/cr-org/supernova) (Apache-2.0, on [Hackage](https://hackage.haskell.org/package/supernova)). Supernova already implements the binary
 protocol foundation in Haskell: the `proto-lens`-generated `PulsarApi`, the CONNECT/CONNECTED handshake,
 LOOKUP-based service discovery, producing, consuming with the subscription types, acknowledgment, and
 seek — over dependencies amoebius already wants (`network`, `binary`, `crc32c`, `proto-lens`).
@@ -316,8 +338,7 @@ persistent://<tenant>/<namespace>/<workflow>.<phase>.<substrate>
 The single source of truth is a **typed descriptor**. A workflow is a
 `Workflow { name, routes : NonEmpty RouteEntry, monitor : WorkflowMonitor }`, where each
 `RouteEntry { workflow, phase, lanes, liveness }` names a routing lane — not a list of strings. The `monitor`
-(a per-workflow SLO) and each entry's `liveness` (a per-topic freshness/backlog obligation) are **mandatory
-and non-optional**, so an unmonitored workflow has no inhabitant; their shapes and the derived dashboards are
+(a per-workflow SLO) and each entry's `liveness` (a per-topic freshness/backlog obligation) are **mandatory and non-optional**, so an unmonitored workflow has no inhabitant; their shapes and the derived dashboards are
 owned by [monitoring_doctrine.md](./monitoring_doctrine.md). Adding a workflow or a lane edits the descriptor;
 the topic set is *derived* from it. The exact reconciled topic set, and a substrate-stripped *logical* topic family for anti-drift checking
 against the durable-state registry, both fall out of the same descriptor — so the per-substrate routing
@@ -350,6 +371,7 @@ The DSL *surface* that lets an app declare its topic lifecycles is owned by
 
 ```mermaid
 flowchart TD
+%% register: algebra
   descriptor["Typed RouteEntry descriptor"]:::intent -->|topicFor derivation| topics["Derived topic set"]:::intent
   descriptor -->|validateTopology| check{{"One-sided / duplicate / empty-lane check"}}:::gate
   check -->|Right unit| reconcile[/"Coordinator reconciles topics"/]:::effect
@@ -370,8 +392,7 @@ ledgers to S3 and does **not** free BookKeeper until retention deletes them (the
 currently-open ledger can never be offloaded. So a time-only trigger cannot cap occupancy: once retained hot
 data plus deletion lag exhausts BookKeeper capacity, writes stop and the topic becomes **unavailable**.
 amoebius makes that state unrepresentable
-([illegal_state_catalog.md §3.20](../illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)) by making a topic's lifecycle a **pure typed
-policy**, not an operator afterthought. This is the SSoT for that policy; the DSL *surface* that carries it is
+([illegal_state_catalog.md §3.20](../illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)) by making a topic's lifecycle a **pure typed policy**, not an operator afterthought. This is the SSoT for that policy; the DSL *surface* that carries it is
 owned by [dsl_doctrine.md](./dsl_doctrine.md), and the two-ceiling *arithmetic* by
 [resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total).
 
@@ -386,8 +407,7 @@ Every topic carries three mandatory, non-optional fields and folds against **two
 - **A mandatory `RetentionPolicy`.** There is no "keep forever" arm and no optional retention — a topic
   without a bounded retention (by time and/or size, on acknowledged messages) has no inhabitant (type-foreclosed
   shape). Backlog (unacknowledged) is bounded separately by the backlog quota below.
-- **A mandatory *size-triggered* S3 offload.** The offload trigger is a **size high-water mark on the primary
-  (BookKeeper) tier** — an optional time threshold may offload *sooner* for cost, but is **never** the sole
+- **A mandatory *size-triggered* S3 offload.** The offload trigger is a **size high-water mark on the primary (BookKeeper) tier** — an optional time threshold may offload *sooner* for cost, but is **never** the sole
   trigger, so a time-only policy is uninhabitable. This is the load-bearing difference: the size trigger is
   what bounds the hot tier.
 - **The hot-tier fit (availability-critical).** The per-topic hot-tier cap **plus headroom** — the open
@@ -401,7 +421,7 @@ Every topic carries three mandatory, non-optional fields and folds against **two
   `uniformProvisionedBytes × ordinalCount` debit is checked. `Σ(hot caps + headroom) ≤ Σ bookie disk` and the unequal raw
   physical sum are never sufficient. A logical-fit/physical-overflow, rounded-template overflow, or omitted
   required recovery case is a post-bind `provision-seal` rejection
-  ([resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)).
+  ([resource_capacity_storage.md §5.1](./resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry)).
 - **The durable-total fit.** Aggregate all retained topic bytes, then compare that demand with the bound owned by
   the selected offload target — a
   provider-S3 quota ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)) for cloud clusters, or the MinIO
@@ -430,6 +450,7 @@ broker-side dedup namespace policy ([§7](#7-delivery-at-least-once-with-broker-
 
 ```mermaid
 flowchart TD
+%% register: algebra
   produce[/"Producer writes to a topic"/]:::effect -->|hot tier| bk["BookKeeper closed ledgers, bounded by size high-water mark"]:::intent
   bk -->|size trigger, optionally sooner by time| offload[/"Offload closed ledgers to S3 target"/]:::effect
   offload -->|retention deletes after deletion lag| free["BookKeeper space reclaimed"]:::intent
@@ -457,8 +478,7 @@ content-address to their owner in [content_addressing_doctrine.md](./content_add
 - **The durable-retention tier IS the replayable history.** A feed's replay depth is exactly the topic's
   retained span — closed ledgers on BookKeeper plus the S3-offloaded tail
   ([§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows)). Because retention is **mandatory and bounded** (no keep-forever arm, [§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows)), a
-  feed is replayable **only within its declared retention window**, and **re-deriving a consumed prefix
-  directly from the live topic is bounded by the two-ceiling storage budget**
+  feed is replayable **only within its declared retention window**, and **re-deriving a consumed prefix directly from the live topic is bounded by the two-ceiling storage budget**
   ([resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)). A consumed prefix that must outlive retention is materialized
   into an immutable content-addressed blob by the content-addressing layer
   ([content_addressing_doctrine.md](./content_addressing_doctrine.md)) — that blob, not the broker cursor, is the "forever" input; a Pulsar cursor
@@ -524,9 +544,7 @@ elected after failover. The dedup cursor is the broker's, so it outlives any sin
 its retention is **bounded**, not eternal, and it does not extend to a seek/replay (that is the assumed
 premise below, and the reason the seek-rebuild case falls to the application fold, not the broker).
 
-> **Assumed premise (a named *assumed* physics, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), sibling to the R8
-> synchrony premise in [chaos_failover_doctrine.md §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need)).** Broker dedup state has a **bounded
-> retention**: the `(producer_name, sequence_id)` cursor is persisted only via periodic snapshots and is
+> **Assumed premise (a named *assumed* physics, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), sibling to the R8 > synchrony premise in [chaos_failover_doctrine.md §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need)).** Broker dedup state has a **bounded > retention**: the `(producer_name, sequence_id)` cursor is persisted only via periodic snapshots and is
 > **evicted after a producer-inactivity timeout** (Pulsar default ~6h). So a `SEEK`/replay or geo-replication
 > catch-up ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)) that **re-publishes derived events past that window is not collapsed by the broker** — a
 > producer key the broker has already forgotten re-produces as new. Effective-once across that boundary
@@ -591,8 +609,7 @@ is **Phases 49 (infernix) and 51 (jitML)**. This doc never maintains a competing
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Content Addressing Doctrine](./content_addressing_doctrine.md)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the two-ceiling topic-storage fold

@@ -1,12 +1,32 @@
 # Phase 55: Single-tenant low-code UI live path
 
+> **Purpose**: Prove one generic low-code application through the real authenticated edge, data capabilities,
+> workflow runtime, projection path, and infernix interaction without any application-specific browser code.
+> **Read this if**: phase 55 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 55 delivers the single-tenant low-code UI live path; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md (single-tenant portion)
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Prove one generic low-code application through the real authenticated edge, data capabilities,
-> workflow runtime, projection path, and infernix interaction without any application-specific browser code.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 55.1: Complete single-tenant UI slice 📋](#sprint-551-complete-single-tenant-ui-slice-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -98,10 +118,16 @@ CSRF/dispatch mutants create forbidden handler or audit bytes even if the public
 ## Sprint 55.1: Complete single-tenant UI slice 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Live/SingleTenant.hs`, `src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase55UiSingleTenantSpec.hs` (planned; not built)
+**Implementation**: `src/Amoebius/Ui/Live/SingleTenant.hs`,
+`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase55UiSingleTenantSpec.hs` (planned; not
+built)
 **Blocked by**: Phases 32, 33, 38, 40, and 50
-**Independent Validation**: `cabal test phase55-ui-single-tenant-live` against the pinned tables and provider-owned observations
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/platform_services_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Independent Validation**: `cabal test
+phase55-ui-single-tenant-live` against the pinned tables and provider-owned observations
+**Docs to update**:
+`documents/engineering/low_code_ui_runtime_doctrine.md`,
+`documents/engineering/platform_services_doctrine.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 

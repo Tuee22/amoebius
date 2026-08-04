@@ -1,11 +1,22 @@
 # Example Documentation Standards
 
+>
+**Purpose**: House rules for the fixture tree.
+>
+**Read this if**: a fixture document has to conform.
+
+This fixture standard owns naming and tone.
+Plan structure belongs to [the rulebook](../DEVELOPMENT_PLAN/development_plan_standards.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/example_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, documents/engineering/example_doctrine.md, documents/engineering/long_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: House rules for the fixture tree.
+</details>
 
 ## 1. Naming
 

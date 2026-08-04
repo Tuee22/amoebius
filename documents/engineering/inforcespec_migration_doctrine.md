@@ -1,14 +1,37 @@
 # InForceSpec Migrations and No-Destruction
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Single source of truth for how an `InForceSpec` evolves between generations — an ordered,
 > idempotent, readiness-gated typed diff whose DSL surface exposes no verb that represents destruction of
 > durable data, and whose sanctioned cross-tenant/cross-app sharing is an append-only, revocable capability
 > edge rather than a re-tag.
+> **Read this if**: a live specification has to move to a new shape without a window in which neither shape is valid.
+
+This document owns specification-schema evolution as an instance of the general law: expand, migrate,
+verify, then contract, with no representable destruction along the way. The law itself is owned by
+[migration_doctrine.md §2](./migration_doctrine.md#2-the-law); this document owns only what the law means for
+the specification.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. A migration is a typed diff, not a new operation](#2-a-migration-is-a-typed-diff-not-a-new-operation)
+- [3. The DSL exposes no destructive verb — the closed `StorageMutation` union](#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)
+- [4. `Shrink` is create-new → verified-migrate → retire-old; backing reclaim is external and privileged](#4-shrink-is-create-new--verified-migrate--retire-old-backing-reclaim-is-external-and-privileged)
+- [5. The decode-time no-orphan fold](#5-the-decode-time-no-orphan-fold)
+- [6. Migration `RolloutPhase`s: expand → migrate → contract](#6-migration-rolloutphases-expand--migrate--contract)
+- [7. Sanctioned sharing is an append-only, revocable capability edge](#7-sanctioned-sharing-is-an-append-only-revocable-capability-edge)
+- [8. The honest limit](#8-the-honest-limit)
+- [9. Planning ownership](#9-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -31,14 +54,15 @@ tenant isolation then rest on review and on the migration author's discipline, w
 amoebius illegal-state contract rejects for this class of invariant
 ([illegal_state_catalog.md §3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)).
 
-The rule this doctrine states: **a migration is the typed diff between the in-force `RootInForceSpec` and a
-newly-uploaded one, delivered through `dhall update` and realized by the ordinary reconcile — not a new
-operation — and the only verbs it may author over an existing durable coordinate live in a closed
-`StorageMutation = Retain | Offload | Grow | Shrink` union with no `Delete`/`Drop`/`Erase`/`Truncate` arm.**
-`Shrink` is *defined* as create-new → verified-migrate → retire-old; `retire-old` detaches the old coordinate
-from active use and records it `ReclaimEligible`, but deleting its backing is an external privileged operator
-act, never a spec verb or test-harness action; and sanctioned sharing is an append-only, revocable capability
-edge, never a re-tag.
+The rule this doctrine states:
+- **a migration is the typed diff between the in-force `RootInForceSpec` and a newly-uploaded one, delivered
+  through `dhall update` and realized by the ordinary reconcile — not a new operation — and the only verbs
+  it may author over an existing durable coordinate live in a closed `StorageMutation = Retain | Offload |
+  Grow | Shrink` union with no `Delete`/`Drop`/`Erase`/`Truncate` arm.** `Shrink` is *defined* as create-new
+  → verified-migrate → retire-old
+- `retire-old` detaches the old coordinate from active use and records it `ReclaimEligible`, but deleting
+  its backing is an external privileged operator act, never a spec verb or test-harness action
+- and sanctioned sharing is an append-only, revocable capability edge, never a re-tag.
 
 What it forecloses: the migration surface can no longer express an in-place truncation, an immediate
 destructive drop, or any spec-level reclaim of durable storage. Reclaim of a retired volume is deferred to a
@@ -73,17 +97,27 @@ There is no bespoke "migrate" verb bolted onto the control plane.
   a migration is undone by advancing the environment pointer back to the prior `releaseHash` and letting the
   reconciler converge — it finds data intact because no phase destroyed anything unverified ([§6](#6-migration-rolloutphases-expand--migrate--contract)).
 
-This doctrine owns the two guarantees that ride on the diff — **no destruction of durable data** ([§3](#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union), [§4](#4-shrink-is-create-new--verified-migrate--retire-old-backing-reclaim-is-external-and-privileged), [§5](#5-the-decode-time-no-orphan-fold)) and **no
-re-tag sharing** ([§7](#7-sanctioned-sharing-is-an-append-only-revocable-capability-edge)) — and defers the diff/apply machinery itself to release_lifecycle and
+This doctrine owns the two guarantees that ride on the diff — **no destruction of durable data** ([§3](#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union), [§4](#4-shrink-is-create-new--verified-migrate--retire-old-backing-reclaim-is-external-and-privileged), [§5](#5-the-decode-time-no-orphan-fold)) and **no re-tag sharing** ([§7](#7-sanctioned-sharing-is-an-append-only-revocable-capability-edge)) — and defers the diff/apply machinery itself to release_lifecycle and
 manifest_generation.
+
+- **Which diffs escalate into an ordered protocol.** Most generations converge by the ordinary reconcile
+  alone. A diff that moves the **wild-ingress gateway between clusters** does not: it escalates into the
+  typed `GatewayMigration` handover owned by
+  [gateway_migration_doctrine.md](./gateway_migration_doctrine.md), whose quiesce → drain →
+  `verify-caught-up` → cutover sequence, stand-down edge, and client-rebind protocol have no counterpart in a
+  same-cluster reconcile. That doctrine's `Planned` arm is triggered by exactly this surface — a new
+  `InForceSpec` (or a `ScalingPolicy` home→cloud move) editing the parent-owned pairing — so the two are one
+  operation seen from two ends: this document owns what the *spec* may represent, that one owns what the
+  *forest* then does. Both are instances of the same general law
+  ([migration_doctrine.md §3](./migration_doctrine.md#3-one-discipline-many-instances)).
 
 ---
 
 ## 3. The DSL exposes no destructive verb — the closed `StorageMutation` union
 
 Type-foreclosure comes first. The migration surface offers exactly one closed set of verbs over an existing
-durable coordinate (a PV, a bucket, a topic, a schema), and that set contains no arm that denotes destroying
-bytes:
+durable coordinate — a PV, a bucket, a topic, a schema, or a registry backend — and that set contains no arm
+that denotes destroying bytes:
 
 ```haskell
 -- Illustrative only; the storage prohibition the arms reduce to is owned by storage_lifecycle_doctrine.md.
@@ -137,7 +171,7 @@ old+new+workspace/temp/WAL high-water, provider byte/count overlap, and complete
 executor `PodResourceEnvelope`s. The Phase-26 live snapshot must fit those backings, CPU/memory/ephemeral,
 pod/CNI/CSI slots, and image bytes before the expand phase receives a mutation continuation. A steady old or
 target shape fitting alone is insufficient
-([resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)).
+([resource_capacity_storage.md §5.1](./resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry)).
 
 - **`Retire-old` marks eligibility; it does not delete backing.** After the copy verifies, the reconciler
   detaches the old coordinate from active use and records an immutable `ReclaimEligible` artifact naming the
@@ -174,8 +208,7 @@ old→new diff, the genuinely new mechanism this doctrine adds:
 - **Orphan rejection.** A `dhall update` is rejected at decode if the diff would **orphan** a retained
   coordinate — drop it from the active spec with no data-preserving disposition (`Retain`/`Offload`, or a
   `Shrink` that carries its verified-migrate). A silent drop is not a value the update accepts.
-- **Retention-floor rejection.** A diff that would shrink a retention span **below the currently-retained
-  span** without an offload-first phase is likewise rejected — retention cannot contract past live data
+- **Retention-floor rejection.** A diff that would shrink a retention span **below the currently-retained span** without an offload-first phase is likewise rejected — retention cannot contract past live data
   without first preserving it.
 - **This is decode-foreclosed, not type-foreclosed.** Because it compares two decoded generations rather than
   living inside one type, it is Gate 2 (the decoder), catalogued honestly as a decode-time rejection, using
@@ -199,6 +232,7 @@ The per-subsystem shapes:
 | DB schema | create-new → verified-migrate → retire-old |
 | Topic retention shrink | offload-before-shrink |
 | PV shrink | new-volume → copy → verify → `ReclaimEligible` → external privileged reclaim |
+| Registry-backend rehome | new-backend → transfer → verify every old digest → cut over → retire old backend |
 | Rename | dual-name → copy-verify → drop-alias |
 | Reader cutover | Pulsar subscription cutover, or Gateway-API `HTTPRoute` weight shift |
 
@@ -206,6 +240,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart LR
+%% register: algebra
   expand[/"Expand: stand up new coordinate"/]:::effect --> migrate[/"Migrate: copy live bytes"/]:::effect
   migrate --> verify{"Verify the copy"}:::runtime
   verify --> contract[/"Contract: retire old, elevated reclaim"/]:::effect
@@ -241,8 +276,7 @@ spec name a foreign tenant's resource.
 
 - **`TenantId` is minted once and travels with the bytes.** No migration re-tags a datum from `t1` to `t2`;
   the absence of any `Ref t1 a → Ref t2 a` coercion is the shared boundary between this doctrine and the
-  tenant surface ([tenancy_doctrine.md §3](./tenancy_doctrine.md#3-what-a-tenant-is),
-  [illegal_state_catalog.md §4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)).
+  tenant surface ([tenancy_doctrine.md §3](./tenancy_doctrine.md#3-what-a-tenant-is), [illegal_state_catalog.md §4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)).
   A migration inherits this invariant unchanged.
 - **A grant adds an edge; it never rewrites a tag.** The grantee gains a scoped capability to reach the
   owner's coordinate; the coordinate keeps its owning `(tenant, app, name)` identity. The grant is append-only
@@ -250,8 +284,7 @@ spec name a foreign tenant's resource.
   which a re-tag could offer neither of.
 - **Cross-tenant reference stays uninhabitable.** Because sharing is an edge and not a tag rewrite, a spec
   still has no syntax to *name* a foreign tenant's resource directly
-  ([illegal_state_catalog.md §3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets),
-  [illegal_state_catalog.md §3.10](../illegal_state/illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree)) —
+  ([illegal_state_catalog.md §3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets), [illegal_state_catalog.md §3.10](../illegal_state/illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree)) —
   the grant is the *only* sanctioned way one identity's data becomes reachable by another, and it is derived,
   not hand-authored ([tenancy_doctrine.md §5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored)).
 
@@ -278,8 +311,7 @@ The no-destruction guarantee is honest about the layer it reaches, per
 - **The orphan check is a hybrid decode+runtime gate.** The structural half of [§5](#5-the-decode-time-no-orphan-fold) is decode-foreclosed, but
   determining whether a dropped coordinate still holds live data may require consulting live retained-state —
   that half is runtime-checked and labelled honestly, never reported as a compile-time impossibility.
-- **Sibling evidence, not an amoebius result.** The schema-migration-as-a-phase shape is proven **live in the
-  sibling jitML** (its pre/post-grant Postgres phase, cited by
+- **Sibling evidence, not an amoebius result.** The schema-migration-as-a-phase shape is proven **live in the sibling jitML** (its pre/post-grant Postgres phase, cited by
   [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)),
   and the `.ready`-gated artifact idiom in infernix; these are **sibling evidence, not amoebius results**. The
   closed `StorageMutation` union, the decode-time no-orphan fold, and the sharing-as-capability-edge are
@@ -291,8 +323,7 @@ The no-destruction guarantee is honest about the layer it reaches, per
 
 This document is normative `InForceSpec`-migration doctrine only. It states the **target shape**: a migration
 is a typed diff whose verb surface admits no destruction, whose `Shrink` is a verified pipeline, whose orphan
-check is decode-time, and whose sharing is an append-only revocable edge. Every statement here is **design
-intent**, not a built or tested amoebius capability. Delivery sequencing, completion status, and validation
+check is decode-time, and whose sharing is an append-only revocable edge. Every statement here is **design intent**, not a built or tested amoebius capability. Delivery sequencing, completion status, and validation
 gates — including the DB schema-migration `RolloutPhase` (delivered in Phase 39 and
 [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
 homes), the verified-shrink migration
@@ -304,8 +335,7 @@ competing status ledger; it links back for status.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — [§7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation) the durable-data-deletion prohibition, [§7.1](./storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness) the sole automated test-owned deletion exception, [§8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) the verified-shrink and external-reclaim boundary the `Shrink` arm reduces to
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — [§5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply) the readiness-gated `RolloutPlan`/`RolloutPhase` a migration composes with; [§2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash) the immutable ledger that makes rollback free; [§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable) the `PromotionGate`

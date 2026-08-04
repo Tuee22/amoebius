@@ -1,11 +1,22 @@
 # TLA+ Modelling Assumptions (superseded)
 
+> **Purpose**: This document is **superseded**, its subject — the formal model of the cross-cluster failover boundary — now owned by [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md), authored against the model-as-data approach of [formal_model_doctrine.md](./formal_model_doctrine.md).
+> **Read this if**: a model-checking assumption has to be checked before a result is relied on.
+
+This document records the assumptions the model checker runs under, so that a green result can be read for
+what it actually covers. It owns no model — the model is owned by
+[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) — and no rule about how models
+are expressed, owned by [formal_model_doctrine.md](./formal_model_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Deprecated
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, documents/engineering/README.md
 **Generated sections**: none
 
-> **Purpose**: This document is **superseded**, its subject — the formal model of the cross-cluster failover boundary — now owned by [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md), authored against the model-as-data approach of [formal_model_doctrine.md](./formal_model_doctrine.md).
+</details>
 
 ---
 
@@ -17,8 +28,7 @@ completed later. That framing is retired for two reasons converged during the DS
 
 1. **The `.tla` is no longer hand-written.** A protocol is authored once as a reifiable Haskell **`Model`**;
    both the runtime decision function (`interpret`) and the generated, never-committed `.tla` (`emitTLA`) are
-   total renderings of that one value ([formal_model_doctrine.md](./formal_model_doctrine.md),
-   [generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md)). The model↔code correspondence is
+   total renderings of that one value ([formal_model_doctrine.md](./formal_model_doctrine.md), [generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md)). The model↔code correspondence is
    therefore **by construction** — there is **no correspondence table to maintain**, which is the entire
    artifact this document existed to track.
 
@@ -43,8 +53,7 @@ references resolve during the transition.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the successor
 - [Formal Model Doctrine](./formal_model_doctrine.md) — the model-as-data pattern
 - [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — the methodology

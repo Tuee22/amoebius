@@ -1,12 +1,33 @@
 # Phase 56: Multi-tenant low-code UI isolation
 
+> **Purpose**: Prove a multi-tenant low-code UI live through Keycloak/Envoy, including opaque scope selection,
+> epoch rotation, stale-handle refusal, server-side authorization, and zero cross-tenant effects.
+> **Read this if**: phase 56 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 56 delivers the multi-tenant low-code UI isolation; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Prove a multi-tenant low-code UI live through Keycloak/Envoy, including opaque scope selection,
-> epoch rotation, stale-handle refusal, server-side authorization, and zero cross-tenant effects.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — two-scope UI fixture](#resource-provision--two-scope-ui-fixture)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 56.1: Live opaque tenant switching and stale-scope refusal 📋](#sprint-561-live-opaque-tenant-switching-and-stale-scope-refusal-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -109,14 +130,17 @@ inventory equal to preflight. Phase 58, not this phase, owns whole-zone HA fault
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Ui/Server/TenantSession.hs`,
-`ui-runtime/src/Amoebius/Ui/TenantSwitch.purs`, `test/live/Phase56UiMultiTenantSpec.hs`
-(target authored sources; not yet built)
+`ui-runtime/src/Amoebius/Ui/TenantSwitch.purs`, `test/live/Phase56UiMultiTenantSpec.hs` (target authored
+sources; not yet built)
 **Blocked by**: Phase 36; Phase 55
-**Independent Validation**: the one gate command drives real Keycloak sessions and compares browser, server,
-network, and provider observations with the independent Phase-0 matrices; every named mutant must turn red.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/tenancy_doctrine.md`, `documents/illegal_state/illegal_state_security.md`,
-`documents/illegal_state/illegal_state_capability_messaging.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Independent Validation**: the one gate command
+drives real Keycloak sessions and compares browser, server, network, and provider observations with the
+independent Phase-0 matrices; every named mutant must turn red.
+**Docs to update**:
+`documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/tenancy_doctrine.md`,
+`documents/illegal_state/illegal_state_security.md`,
+`documents/illegal_state/illegal_state_capability_messaging.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 

@@ -1,16 +1,34 @@
 # Apple Metal Headless Builds
 
+> **Purpose**: Single Source of Truth for how the Apple-Metal host worker is **built and run on Apple > Silicon** — headless, directly on the macOS host, through a **fixed host Metal bridge** with **runtime > MSL compilation** — and the rationale for the design's **hard no-Tart / no-VM / no-keychain / no-full-Xcode > / no-per-kernel-Swift-build** commitment — the host substrate that hosts this worker, the no-`PATH`/no-env
+> lazy-tool-ensure contract, and the engine/provider-derived LoadBalancer choice are owned by
+> [substrate_doctrine.md](./substrate_doctrine.md); this doc owns only the **Apple build/run shape**.
+> **Read this if**: something has to be built or run on Apple hardware without a virtual machine in the way.
+
+This document owns the Apple-specific build and run path: why the accelerator cannot be containerized, what
+is built directly on the host instead, and why the obvious virtual-machine approach was rejected. It does not
+own substrate detection, owned by [substrate_doctrine.md](./substrate_doctrine.md), nor the channel the
+resulting daemon uses, owned by [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
-> **Purpose**: Single Source of Truth for how the Apple-Metal host worker is **built and run on Apple
-> Silicon** — headless, directly on the macOS host, through a **fixed host Metal bridge** with **runtime
-> MSL compilation** — and the rationale for the design's **hard no-Tart / no-VM / no-keychain / no-full-Xcode
-> / no-per-kernel-Swift-build** commitment — the host substrate that hosts this worker, the no-`PATH`/no-env
-> lazy-tool-ensure contract, and the engine/provider-derived LoadBalancer choice are owned by
-> [substrate_doctrine.md](./substrate_doctrine.md); this doc owns only the **Apple build/run shape**.
+</details>
+
+## Contents
+- [1. The commitment: headless, on-host, no VM](#1-the-commitment-headless-on-host-no-vm)
+- [2. Requirements the Apple build/run path satisfies](#2-requirements-the-apple-buildrun-path-satisfies)
+- [3. Architecture](#3-architecture)
+- [4. Build and prerequisite model](#4-build-and-prerequisite-model)
+- [5. Optional Swift lane (non-core)](#5-optional-swift-lane-non-core)
+- [6. Why Tart is not viable (the no-VM rationale)](#6-why-tart-is-not-viable-the-no-vm-rationale)
+- [7. Planning ownership](#7-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -34,6 +52,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   render["Host binary renders MSL plus launch metadata"]:::intent --> cache["Write content-addressed source-metadata cache record"]:::intent
   cache --> bridge[/"Call fixed host Metal bridge"/]:::effect
   bridge --> compile[/"Bridge calls MTLDevice.makeLibrary source options"/]:::runtime
@@ -152,8 +171,7 @@ SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 ```
 
 Homebrew Swift is keg-only and cannot import `Darwin`/Apple frameworks without `-sdk`/`SDKROOT` — so
-`swiftc` alone is *not* the whole prerequisite; a macOS SDK must also be discoverable. This lane is **never
-a VM** and **never** the core cache-miss path: Swift compilation drags host-toolchain discovery, SDK
+`swiftc` alone is *not* the whole prerequisite; a macOS SDK must also be discoverable. This lane is **never a VM** and **never** the core cache-miss path: Swift compilation drags host-toolchain discovery, SDK
 discovery, Swift-runtime linkage, and build-system behaviour into the critical path, whereas the core Metal
 path needs only the OS Metal runtime compiler.
 
@@ -209,8 +227,7 @@ shape and links back for status, per [documentation_standards.md §6](../documen
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the distinct "no VM for Metal *builds*" vs "an rke2/kind *cluster* on apple needs a Lima Linux VM" split

@@ -1,16 +1,40 @@
 # Substrates
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
-**Generated sections**: none
-
 > **Purpose**: Define the host substrates amoebius runs on (apple / linux-cpu / linux-cuda / windows),
 > the virtualized substrates that synthesize a Linux host (Lima / WSL2), the host worker nodes that
 > reach substrate-specific hardware as host subprocesses, the no-environment-variable / no-`PATH` lazy
 > tool-ensure contract, and the substrate-specific midwife CLI that builds and hands off to the binary —
 > while the Apple-Metal host worker's headless, on-host, **no-VM** build/run shape (fixed Metal bridge +
 > runtime MSL compilation) is owned by [apple_metal_headless_builds.md](./apple_metal_headless_builds.md).
+> **Read this if**: amoebius has to run on a particular host, or a host-specific capability has to be reached.
+
+This document owns the substrate: what it is, how it is detected rather than declared, the lazy tool-ensure
+contract that follows from taking no ambient configuration, and why some hardware forces a host worker. It
+does not own the cluster engine that runs on it, owned by
+[cluster_topology_doctrine.md](./cluster_topology_doctrine.md), nor the images it builds, owned by
+[image_build_doctrine.md](./image_build_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. The substrate is a fact about the host, not a knob](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)
+- [2. Detection: a pure classification over three reads](#2-detection-a-pure-classification-over-three-reads)
+- [3. The no-environment / no-`PATH` lazy tool-ensure contract](#3-the-no-environment--no-path-lazy-tool-ensure-contract)
+- [4. Virtualized substrates: synthesizing a Linux host where the host is not Linux](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
+- [5. Host worker nodes: substrate-specific hardware that cannot be containerized](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)
+- [6. The midwife contract: a Python CLI ensures a toolchain, builds the binary, hands off](#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)
+- [7. The LoadBalancer backend follows the materialized compute engine and provider](#7-the-loadbalancer-backend-follows-the-materialized-compute-engine-and-provider)
+- [8. The node inventory: the single owner of hosts, capacity, and taints](#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)
+- [9. Planning ownership](#9-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -133,10 +157,8 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 
 ## 3. The no-environment / no-`PATH` lazy tool-ensure contract
 
-**The Haskell host-invocation layer takes no configuration from ambient environment variables and never
-resolves an external tool against the host's `PATH`.** This is one of the project's locked invariants, and it
-has a precise positive form: when a host tool is needed, amoebius **lazily ensures and resolves it through the
-substrate's package manager, then invokes it by absolute path.** No bare host command name is handed to the OS
+**The Haskell host-invocation layer takes no configuration from ambient environment variables and never resolves an external tool against the host's `PATH`.** This is one of the project's locked invariants, and it
+has a precise positive form: when a host tool is needed, amoebius **lazily ensures and resolves it through the substrate's package manager, then invokes it by absolute path.** No bare host command name is handed to the OS
 for search-path resolution. Guest commands run after a VM/container boundary may use that guest's environment,
 as [the exact boundary](#the-exact-boundary-of-the-no-path-rule) states. This lazy package-manager scheme is proven
 prior art — the sibling ML projects already run a two-tiered version of it in which, on Apple silicon, a
@@ -183,6 +205,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   need["A reconcile step needs a host tool"]:::intent -->|probe| sat{"Already satisfied?"}:::decision
   sat -->|yes| noop((("Verified no-op"))):::seal
   sat -->|no| plan["Substrate-branched install plan via the package manager"]:::intent
@@ -201,8 +224,7 @@ flowchart TD
 ### The exact boundary of the no-`PATH` rule
 
 The rule governs **the host invocation surface**, and only that surface. When amoebius crosses a context
-boundary — running a subcommand of itself inside a VM or container ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux); the composition lift owned by
-[daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) — only the **outermost** host tool is
+boundary — running a subcommand of itself inside a VM or container ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux); the composition lift owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) — only the **outermost** host tool is
 resolved to an absolute path; every **nested** tool is the guest's *own* bare name run against the guest's
 own `PATH`, which is legitimate because it is that guest's environment, not the host's
 (`HostBootstrap.Lift.foldLeaf`). The invariant is "amoebius never resolves a tool against the *host's*
@@ -283,8 +305,7 @@ a host worker*.
 
 ## 5. Host worker nodes: substrate-specific hardware that cannot be containerized
 
-Containers and VMs are the default, but two classes of hardware **cannot be reached performantly through
-them**, and for those amoebius builds and manages a non-containerized **host worker node** — a long-running
+Containers and VMs are the default, but two classes of hardware **cannot be reached performantly through them**, and for those amoebius builds and manages a non-containerized **host worker node** — a long-running
 host subprocess of the host binary:
 
 | Hardware | Substrate | Why not a container / VM | What runs on the host |
@@ -324,11 +345,9 @@ one engine, two bootstraps (the substrate→engine quotient is owned by
 [service_capability_doctrine.md](./service_capability_doctrine.md); the worker-role taxonomy by
 [daemon_topology_doctrine.md](./daemon_topology_doctrine.md)). This is **role parity, not evidence parity**:
 the Apple path has a build-shape doc ([apple_metal_headless_builds.md](./apple_metal_headless_builds.md)) and
-sibling evidence, whereas the on-host Windows-CUDA build/run path is **forward design intent with no sibling
-evidence** and no build-shape doc — read it that way.
+sibling evidence, whereas the on-host Windows-CUDA build/run path is **forward design intent with no sibling evidence** and no build-shape doc — read it that way.
 
-**Co-resident *on* the host, not *in* the VM.** On Windows the CUDA worker runs on the **same physical host
-as** — never *inside* — the WSL2 distro that backs the in-cluster Linux node; on Apple it runs on the same
+**Co-resident *on* the host, not *in* the VM.** On Windows the CUDA worker runs on the **same physical host as** — never *inside* — the WSL2 distro that backs the in-cluster Linux node; on Apple it runs on the same
 host as the Lima VM. The worker keeps its "no VM, on-host, headless" property
 ([§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host)): the VM synthesizes the *in-cluster* Linux
 node, while the accelerator worker lives beside it on the bare host, precisely because the accelerator (Metal
@@ -348,11 +367,13 @@ in-cluster node, and is not a precondition for peering.
 
 ```mermaid
 flowchart TD
+%% register: orientation
   metal[Apple Metal GPU: needs unified memory] -->|cannot containerize| hostworker[Host worker node: built on host, subprocess of the host binary]
   wincuda[Windows CUDA: poor perf under WSL2] -->|cannot containerize| hostworker
   hostworker -->|host-only NodePort, no mTLS, localhost only| peers[In-cluster MinIO and Pulsar peers]
   linuxcuda[Linux CUDA: works in a container] -->|NVIDIA container runtime| pod[In-cluster GPU pod]
 ```
+*Orientation. Design intent. Why a host worker exists at all: two accelerator cases cannot be containerized and the third can. The host-only channel these workers use is owned by [host_cluster_comms_doctrine.md §1](./host_cluster_comms_doctrine.md#1-the-host-origin-surface-two-channels-both-localhost-only).*
 
 ---
 
@@ -381,11 +402,9 @@ The contract, on the canonical Apple lane (`pb bootstrap` mode):
    [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 4. **Build the project Haskell binary** (`cabal build`).
 5. **Hand off to the binary.** The midwife's final act is to `exec` the freshly built binary's `bootstrap`
-   subcommand with its mandatory distro flag — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]`
-   (`replicas` defaults to `1` on `kind`). From here the binary takes over: it installs further build tools
+   subcommand with its mandatory distro flag — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]` (`replicas` defaults to `1` on `kind`). From here the binary takes over: it installs further build tools
    and dependencies through the package manager **as needed and by full path** ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)) — including, on Apple,
-   source-building the fixed Metal bridge headless on the host with `/usr/bin/clang` ([§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host) /
-   [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), never in a VM — and drives cluster
+   source-building the fixed Metal bridge headless on the host with `/usr/bin/clang` ([§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host) / [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), never in a VM — and drives cluster
    bring-up.
 
 The midwife is **substrate-specific** because step 1 differs: brew on apple, the system package manager
@@ -396,12 +415,14 @@ packages beyond the toolchain root, holds no cluster logic, and never runs after
 
 ```mermaid
 flowchart TD
+%% register: orientation
   pb[pb midwife CLI, Python] -->|ensure package-manager root| pm[brew / apt / winget]
   pm -->|install| ghcup[ghcup]
   ghcup -->|install GHC 9.12.4 and Cabal 3.16.1.0| tc[Pinned toolchain on host]
   tc -->|cabal build| bin[amoebius Haskell binary on the host]
   bin -->|amoebius bootstrap --distro=kind or rke2| handoff[Binary owns the rest: lazy tool-ensure, VM providers, cluster bring-up]
 ```
+*Orientation. Design intent; the midwife contract is owned by [§6](#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off). Everything right of the handoff belongs to the binary, and the Python program does not return.*
 
 What the in-binary `bootstrap` command then *does* — substrate detection, VM-provider ensure, single-node
 cluster bring-up, the `--distro` / `--replicas` orchestration — is owned by
@@ -446,94 +467,105 @@ that the rest of amoebius reads. It is the **single owner** (an ownership index,
 *which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
 consumers read it, and each is a foreclosure that depends on there being exactly one such list.
 
-- **Per-host/node `Capacity` (allocatable).** Each inventory entry advertises declared CPU, memory,
-  logical pod-local ephemeral storage, and a closed `KubeletFilesystemLayout` with named physical backing(s):
-  `Unified` means `nodefs=imagefs=containerfs`; `SplitRuntime` means separate nodefs and
-  `imagefs=containerfs`; `SplitImage` means separate imagefs and `containerfs=nodefs`. The inventory also pins
-  `NodeImageStorageModelVersion`, `KubeletRuntimeMetadataModelVersion`, and finite
-  `CpuOvercommitPolicy = NoCpuOvercommit | BoundedCpuOvercommit RatioAtLeastOne` used to bound summed rendered
-  CPU limits. The runtime-metadata model is part of `NodeCapacity.localStorage`: it is the authoritative
-  kubelet/CRI versioned supply-side model under which provisioning derives sandbox, pod-directory, runtime,
-  CNI, volume, and mount components for each planned slot and distinct live Pod UID. The model assigns each
-  component a closed kubelet-nodefs or CRI-runtime-root role; the layout resolves that role to its actual
-  backing. It is not a pod-authored byte reserve or route.
-  Every elastic `PerInstanceNodeLocalStorageTemplate` pins the same field, which becomes the materialized
-  node's model and must match the live kubelet/CRI observation after that node joins.
-  A Kubernetes node carries
-  `None | CudaOffering { devices : NonEmpty AcceleratorDevice, links : List AcceleratorLink }`; a physical host additionally admits
-  `AppleMetalOffering MetalProfile`. CUDA devices carry stable identity/profile plus per-device
-  raw/reserved/net-allocatable VRAM plus the endpoint-validated peer/NVLink graph, while
-  `currentFreeVram : Residual Bytes` (including `Zero`) is observed for live admission; the Apple
-  offering carries no separate memory pool because its demand is charged to physical-host memory. The
-  accelerator-memory shape is
-  [§8.2](#82-accelerator-memory-vram-unified-on-apple-per-device-on-cudawindows); the physical-host total behind
-  a host worker is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand).
-  Kubernetes image bytes are not part of a pod's logical `ephemeral-storage` request, but they do consume the
-  layout's physical filesystem. The platform-selected OCI index/manifest/config/compressed-layer objects are
-  deduplicated by digest, snapshotter bytes by chain id, and pull/import workspace by the declared concurrency
-  policy; writable layers are routed to imagefs for `SplitRuntime` and nodefs otherwise. Per-Pod CRI components
-  follow the model-selected runtime role: on `SplitRuntime` the persistent CRI root resolves to
-  `containerfs=imagefs`, while kubelet/CNI/pod-directory components resolve to nodefs. `Unified` and
-  `SplitImage` resolve containerfs to nodefs. Distinct components whose roles alias are summed, then the one
-  physical backing is checked once. A node-level ownership witness proves the Pod metadata model and image
-  storage model partition runtime component ids exactly and disjointly. Each advertised quantity is the
-  **allocatable** (schedulable) capacity — the raw hardware total with kube/system-reserved and
-  the eviction threshold already netted out — **not** the raw figure, so the fold never trusts more than the
-  scheduler can hand out. This is the number the capacity fold ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting))
-  packs a workload/VM/engine `Demand` against, and the number the detection classifier ([§2](#2-detection-a-pure-classification-over-three-reads)) cross-checks against
-  reality at runtime — *allocatable against allocatable* (the declared value is a ceiling the fold trusts; a
-  host whose real allocatable is smaller than its declaration
-  refuses, [resource_capacity_doctrine.md §8](./resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)). Detection reads the *real*
-  numbers; the inventory *declares* them; the fold trusts the declaration and the reconcile checks it. The
-  CPU-overcommit arm is declared policy rather than a probed hardware fact, but its ratio is finite and enters
-  the same pure fold.
-- **The declared filesystem layout is an observed fact, not two labels over one disk.** At bootstrap and every
-  live preflight, the inventory records the kubelet/CRI-reported layout together with each role's mount id,
-  device/filesystem id, project/quota id where used, allocatable bytes, containerd content root, snapshotter
-  root, configured pull concurrency, the active `KubeletRuntimeMetadataModelVersion`, its component→role
-  catalog, and the disjoint Pod-metadata/image-model ownership domains. Only the aliases
-  required by the selected constructor are legal.
-  An unexpected alias, swapped root, unknown capacity, untracked extra mount below `/var/lib/kubelet`,
-  `/var/log`, or the runtime root, or a hard-cap probe that escapes its carve is
-  `FilesystemLayoutMismatch`, never spare capacity. Current v1 containerd engines can witness only `Unified`
-  or `SplitRuntime`; `SplitImage` requires a runtime/feature witness that containerd cannot provide.
-- **A closed `NodeTaintKind` set.** Taints are not free strings — the set of taint kinds a node may carry is a
-  **closed union** owned here, exactly as the substrate catalog and `HostTool` enum are closed ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob), [§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)). This
-  is what lets a **`Toleration` be *derived*, never hand-authored**: the platform derives a workload's
-  tolerations from the declared node taints ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)),
-  so "a toleration for a taint no node declares" is unrepresentable and "a taint no workload tolerates" leaves
-  the schedulability existence fold with no landable node
-  ([illegal_state_catalog.md §3.5, §3.22](../illegal_state/illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity)).
+### Per-host/node `Capacity` (allocatable)
 
-  ```text
-  NodeTaintKind =
-    < ControlPlane
-    | ManagedCapacity
-    >
+Each inventory entry advertises declared CPU, memory, logical pod-local ephemeral storage, and a closed
+`KubeletFilesystemLayout` with named physical backing(s): `Unified` means `nodefs=imagefs=containerfs`;
+`SplitRuntime` means separate nodefs and `imagefs=containerfs`; `SplitImage` means separate imagefs and
+`containerfs=nodefs`. The inventory also pins `NodeImageStorageModelVersion`,
+`KubeletRuntimeMetadataModelVersion`, and finite `CpuOvercommitPolicy = NoCpuOvercommit |
+BoundedCpuOvercommit RatioAtLeastOne` used to bound summed rendered CPU limits. The runtime-metadata model
+is part of `NodeCapacity.localStorage`: it is the authoritative kubelet/CRI versioned supply-side model
+under which provisioning derives sandbox, pod-directory, runtime, CNI, volume, and mount components for each
+planned slot and distinct live Pod UID. The model assigns each component a closed kubelet-nodefs or
+CRI-runtime-root role; the layout resolves that role to its actual backing. It is not a pod-authored byte
+reserve or route. Every elastic `PerInstanceNodeLocalStorageTemplate` pins the same field, which becomes the
+materialized node's model and must match the live kubelet/CRI observation after that node joins. A
+Kubernetes node carries `None | CudaOffering { devices : NonEmpty AcceleratorDevice, links : List
+AcceleratorLink }`; a physical host additionally admits `AppleMetalOffering MetalProfile`. CUDA devices
+carry stable identity/profile plus per-device raw/reserved/net-allocatable VRAM plus the endpoint-validated
+peer/NVLink graph, while `currentFreeVram : Residual Bytes` (including `Zero`) is observed for live
+admission; the Apple offering carries no separate memory pool because its demand is charged to physical-host
+memory. The accelerator-memory shape is
+[§8.2](#82-accelerator-memory-vram-unified-on-apple-per-device-on-cudawindows); the physical-host total
+behind a host worker is
+[§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand). Kubernetes image
+bytes are not part of a pod's logical `ephemeral-storage` request, but they do consume the layout's physical
+filesystem. The platform-selected OCI index/manifest/config/compressed-layer objects are deduplicated by
+digest, snapshotter bytes by chain id, and pull/import workspace by the declared concurrency policy;
+writable layers are routed to imagefs for `SplitRuntime` and nodefs otherwise. Per-Pod CRI components follow
+the model-selected runtime role: on `SplitRuntime` the persistent CRI root resolves to
+`containerfs=imagefs`, while kubelet/CNI/pod-directory components resolve to nodefs. `Unified` and
+`SplitImage` resolve containerfs to nodefs. Distinct components whose roles alias are summed, then the one
+physical backing is checked once. A node-level ownership witness proves the Pod metadata model and image
+storage model partition runtime component ids exactly and disjointly. Each advertised quantity is the
+**allocatable** (schedulable) capacity — the raw hardware total with kube/system-reserved and the eviction
+threshold already netted out — **not** the raw figure, so the fold never trusts more than the scheduler can
+hand out. This is the number the capacity fold
+([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting))
+packs a workload/VM/engine `Demand` against, and the number the detection classifier
+([§2](#2-detection-a-pure-classification-over-three-reads)) cross-checks against reality at runtime —
+*allocatable against allocatable* (the declared value is a ceiling the fold trusts; a host whose real
+allocatable is smaller than its declaration refuses,
+[resource_capacity_doctrine.md §8](./resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)).
+Detection reads the *real* numbers; the inventory *declares* them; the fold trusts the declaration and the
+reconcile checks it. The CPU-overcommit arm is declared policy rather than a probed hardware fact, but its
+ratio is finite and enters the same pure fold.
 
-  NodeTaint =
-    { kind   : NodeTaintKind
-    , key    : KubernetesTaintKey
-    , value  : KubernetesTaintValue
-    , effect : < NoSchedule >
-    }
+### The filesystem layout is an observed fact
 
-  nodeTaint ControlPlane =
-    { kind = ControlPlane, key = platform control-plane key, value = "true", effect = NoSchedule }
-  nodeTaint ManagedCapacity =
-    { kind = ManagedCapacity, key = "amoebius.dev/managed-capacity",
-      value = "reserved", effect = NoSchedule }
-  ```
+At bootstrap and every live preflight, the inventory records the kubelet/CRI-reported layout together with
+each role's mount id, device/filesystem id, project/quota id where used, allocatable bytes, containerd
+content root, snapshotter root, configured pull concurrency, the active
+`KubeletRuntimeMetadataModelVersion`, its component→role catalog, and the disjoint Pod-metadata/image-model
+ownership domains. Only the aliases required by the selected constructor are legal. An unexpected alias,
+swapped root, unknown capacity, untracked extra mount below `/var/lib/kubelet`, `/var/log`, or the runtime
+root, or a hard-cap probe that escapes its carve is `FilesystemLayoutMismatch`, never spare capacity.
+Current v1 containerd engines can witness only `Unified` or `SplitRuntime`; `SplitImage` requires a
+runtime/feature witness that containerd cannot provide.
 
-  The constructors, keys, values, and effects are a single mapping. In particular, `ManagedCapacity` is not a
-  second scheduler-local string: the capacity scheduler's taint projection, its derived toleration, admission
-  rule, and live Node readback all carry this exact `NodeTaint` value.
-- **The `LinuxHost` witnesses and substrate tags the topology relation reads.** The declared compute-engine
-  axis ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)) pairs an engine with a node only when
-  the relation permits it, and it reads *this* inventory for "what substrates exist" — so the compatibility
-  fold (I2) and the `LinuxHost`-witness gating (I1) are checked against one authoritative list. On apple and
-  windows the only `LinuxHost` constructor is the virtualization provider ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)), which is why an rke2/kind
-  cluster on those hosts must interpose a Lima/WSL2 Linux VM.
+### A closed `NodeTaintKind` set
+
+Taints are not free strings — the set of taint kinds a node may carry is a
+**closed union** owned here, exactly as the substrate catalog and `HostTool` enum are closed ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob), [§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)). This
+is what lets a **`Toleration` be *derived*, never hand-authored**: the platform derives a workload's
+tolerations from the declared node taints ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)),
+so "a toleration for a taint no node declares" is unrepresentable and "a taint no workload tolerates" leaves
+the schedulability existence fold with no landable node
+([illegal_state_catalog.md §3.5, §3.22](../illegal_state/illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity)).
+
+```text
+NodeTaintKind =
+  < ControlPlane
+  | ManagedCapacity
+  >
+
+NodeTaint =
+  { kind   : NodeTaintKind
+  , key    : KubernetesTaintKey
+  , value  : KubernetesTaintValue
+  , effect : < NoSchedule >
+  }
+
+nodeTaint ControlPlane =
+  { kind = ControlPlane, key = platform control-plane key, value = "true", effect = NoSchedule }
+nodeTaint ManagedCapacity =
+  { kind = ManagedCapacity, key = "amoebius.dev/managed-capacity",
+    value = "reserved", effect = NoSchedule }
+```
+
+The constructors, keys, values, and effects are a single mapping. In particular, `ManagedCapacity` is not a
+second scheduler-local string: the capacity scheduler's taint projection, its derived toleration, admission
+rule, and live Node readback all carry this exact `NodeTaint` value.
+
+### The `LinuxHost` witnesses and substrate tags the topology relation reads
+
+The declared compute-engine axis ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)) pairs an
+engine with a node only when the relation permits it, and it reads *this* inventory for "what substrates
+exist" — so the compatibility fold (I2) and the `LinuxHost`-witness gating (I1) are checked against one
+authoritative list. On apple and windows the only `LinuxHost` constructor is the virtualization provider
+([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)), which is why an
+rke2/kind cluster on those hosts must interpose a Lima/WSL2 Linux VM.
 
 This document owns the inventory *record*, the closed `NodeTaintKind` set, and the per-host `Capacity`
 *declaration* — including the **physical-host total and disjoint disk-pool partition** behind a host worker
@@ -593,8 +625,7 @@ substrate-specific — a fact this inventory declares so the capacity fold downs
   non-accelerator runtime memory, and system reserve
   ([§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)). It is a distinct
   demand field for explanation and validation, never a second supply pool.
-  An `apple` host declaring a separate `vram` Capacity is an **uninhabitable per-host `Capacity` shape —
-  type-foreclosed** (there is no unified-pool `vram` field to fill; the constructor does not exist).
+  An `apple` host declaring a separate `vram` Capacity is an **uninhabitable per-host `Capacity` shape — type-foreclosed** (there is no unified-pool `vram` field to fill; the constructor does not exist).
 - **linux-cuda / windows (CUDA, discrete memory).** The accelerator carries its own memory, not contended
   with the WSL2/Lima VM, so the per-host `Capacity` declares host `mem` plus a **non-empty device vector**.
   Every device entry carries a stable UUID/profile, `rawVram`, a non-optional
@@ -623,16 +654,12 @@ free-at-admission; unexplained use fails closed instead of being silently subtra
 
 `Site` is a declared per-host inventory field — an opaque network-locality label answering *where the host
 sits on the network* — and it is **orthogonal to the detected substrate** ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)):
-a machine's `Site` is *where it is*, not *what it is*. It follows the same **declared-at-decode /
-cross-checked-at-runtime** discipline as the rest of the `Capacity` above: the inventory declares each host's
+a machine's `Site` is *where it is*, not *what it is*. It follows the same **declared-at-decode / cross-checked-at-runtime** discipline as the rest of the `Capacity` above: the inventory declares each host's
 `Site`, and a host declaring a `Site` its reachability contradicts (a remote host mis-declared local) surfaces
 at reconcile as the three-valued `discover = Unreachable → refuse`
 ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine))
 — so a declared-vs-real `Site` mismatch is runtime-checked residue, the ceiling every [§8](#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints) declared fact lives
-at. Crucially this inventory carries a `Site` for **both** kinds of host it lists: **in-cluster cluster
-`Node`s** *and* the **host-worker physical hosts** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized),
-whose per-host `Capacity` is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)'s
-operand). The fold that **classifies stretchedness** from these declared `Site`s — which node or host worker
+at. Crucially this inventory carries a `Site` for **both** kinds of host it lists: **in-cluster cluster `Node`s** *and* the **host-worker physical hosts** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized), whose per-host `Capacity` is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)'s operand). The fold that **classifies stretchedness** from these declared `Site`s — which node or host worker
 is remote, and what reachability witness that demands — runs over **both** inventories and is owned by
 [cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation);
 this doc owns only the declared `Site` **fact**, not the classification.
@@ -650,8 +677,7 @@ and links back for status, per [documentation_standards.md §6](../documentation
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Apple Metal Headless Builds](./apple_metal_headless_builds.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)

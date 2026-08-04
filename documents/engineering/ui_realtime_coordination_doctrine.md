@@ -1,18 +1,42 @@
 # UI Realtime Coordination
 
+> **Purpose**: Define the browser transport, cross-pod WebSocket-routing protocol, ephemeral Redis topology,
+> and durable replay boundary that let replicated amoebius UI servers remain stateless for correctness.
+> **Read this if**: a live connection has to survive a reconnect, or cross-pod message routing has to be reasoned about.
+
+This document owns realtime coordination for replicated application servers: one authenticated same-origin
+connection, ephemeral cross-pod routing, and the resume envelope that makes sticky sessions unnecessary for
+correctness. It does not own durable truth, which never lives in the ephemeral plane and belongs to the
+message bus and projections; nor the application language above it, owned by
+[low_code_ui_runtime_doctrine.md](./low_code_ui_runtime_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: Define the browser transport, cross-pod WebSocket-routing protocol, ephemeral Redis topology,
-> and durable replay boundary that let replicated amoebius UI servers remain stateless for correctness.
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. Ownership and non-overlap](#2-ownership-and-non-overlap)
+- [3. One browser transport contract](#3-one-browser-transport-contract)
+- [4. Typed routing and resume envelope](#4-typed-routing-and-resume-envelope)
+- [5. Redis is ephemeral platform-internal coordination](#5-redis-is-ephemeral-platform-internal-coordination)
+- [6. Durable commands, receipts, and replay](#6-durable-commands-receipts-and-replay)
+- [7. Replicas, drain, rollout, and gateway migration](#7-replicas-drain-rollout-and-gateway-migration)
+- [8. Resource, observability, and failure obligations](#8-resource-observability-and-failure-obligations)
+- [9. Honesty and planning ownership](#9-honesty-and-planning-ownership)
+- [Related Documents](#related-documents)
+
+---
 
 Phase order, implementation status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). This doctrine states target architecture;
 it does not claim that the runtime or its failure behavior is implemented.
-
----
 
 ## 1. Why this doctrine exists
 
@@ -251,8 +275,7 @@ rule in [§6](#6-durable-commands-receipts-and-replay). Sibling code is evidence
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Low-Code UI Runtime](./low_code_ui_runtime_doctrine.md)
 - [Browser Offline Runtime](./browser_offline_runtime_doctrine.md)
 - [Platform Services](./platform_services_doctrine.md)

@@ -1,14 +1,34 @@
 # Phase 44: Provider Pulumi deploy-from-inside + enveloped checkpoint
 
+> **Purpose**: Stand up a provider-managed EKS control plane plus a base managed node group by a `pulumi up`
+> issued **only** from inside the linux-cpu parent by the Deployment-`replicas=1` singleton, with the entire
+> checkpoint held as a closed set of Vault-Transit-enveloped MinIO objects and the engine subprocess spawned by
+> absolute path with no `PULUMI_*`/`AWS_*`/`PATH` side-channel.
+> **Read this if**: phase 44 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 44 delivers the provider Pulumi deploy-from-inside + enveloped checkpoint; its design is owned by [pulumi_iac_doctrine.md](../documents/engineering/pulumi_iac_doctrine.md), [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu → provider` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Stand up a provider-managed EKS control plane plus a base managed node group by a `pulumi up`
-> issued **only** from inside the linux-cpu parent by the Deployment-`replicas=1` singleton, with the entire
-> checkpoint held as a closed set of Vault-Transit-enveloped MinIO objects and the engine subprocess spawned by
-> absolute path with no `PULUMI_*`/`AWS_*`/`PATH` side-channel.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 44.1: Provider-cluster Pulumi deploy from inside a parent 📋](#sprint-441-provider-cluster-pulumi-deploy-from-inside-a-parent-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -22,8 +42,7 @@ singleton — issues the EKS deploy over the cloud API. `→ provider` names the
 cloud-managed EKS cluster reached over the cloud API), not a fifth hardware substrate, so the gate stays
 single-substrate (`linux-cpu`) while exercising a provider target. The encrypted-MinIO Pulumi backend and a
 working EKS deploy are generalized from the sibling **prodbox** project (its `aws-eks` Pulumi stack,
-`Prodbox.Pulumi.EncryptedBackend`, and its Vault-gated apply/destroy) — read as **sibling evidence, not an
-amoebius result** (honesty rule, [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
+`Prodbox.Pulumi.EncryptedBackend`, and its Vault-gated apply/destroy) — read as **sibling evidence, not an amoebius result** (honesty rule, [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 Status transitions are recorded reverse-chronologically here once work begins.
 
 ## Phase Summary
@@ -78,6 +97,7 @@ the GADT decoder in Phase 5, and the capacity/topology folds in Phase 7).
 Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_conventions.md).
 ```mermaid
 flowchart LR
+%% register: algebra
   parent["linux-cpu parent: Deployment replicas=1 singleton runs the Pulumi engine, no election"]:::intent --> exec((("ProvisionedPulumiExecutionDemand: executor Job + plugin/workspace peaks placed first"))):::seal
   exec --> deploy[/"pulumi up via cloud keys over the cloud API"/]:::effect
   parent --> backend["PulumiCheckpointObjectDemand: Vault-Transit-enveloped checkpoint objects in MinIO, exclusive mutation gateway"]:::intent
@@ -103,16 +123,14 @@ managed node group) and writes real Vault-enveloped checkpoint objects into MinI
 check discharges it.
 
 **Gate:** an `InForceSpec` that, from a **linux-cpu** parent, issues a `pulumi up` under the
-Deployment-`replicas=1` singleton (no bespoke election) that stands up a provider-managed **EKS control plane +
-one base managed node group** from the fixture's named CPU-only base `ProviderNodeClass` (`accelerator = None`),
+Deployment-`replicas=1` singleton (no bespoke election) that stands up a provider-managed **EKS control plane + one base managed node group** from the fixture's named CPU-only base `ProviderNodeClass` (`accelerator = None`),
 whose observed joined node's allocatable CPU, memory, logical pod-ephemeral capacity, closed
 nodefs/imagefs/containerfs identities/capacities, resident OCI content/snapshot inventory, storage-model
 version, enforced pull policy, and accelerator absence meet the declared class. Before any checkpoint write or
 cloud effect the parent first places the complete `ProvisionedPulumiExecutionDemand` executor Job plus
 plugin/workspace peaks and provisions the exact `PulumiCheckpointObjectDemand` object peak against its
 `StorageBudgetId` and exclusive `ObjectStoreMutationAdmission`. The exact checkpoint object set lands in MinIO
-as opaque Vault-Transit-enveloped objects **decryptable only via a direct Vault Transit `decrypt` call with the
-per-child key** (asserted against the committed ciphertext-shape oracle) and **not** from any key material on
+as opaque Vault-Transit-enveloped objects **decryptable only via a direct Vault Transit `decrypt` call with the per-child key** (asserted against the committed ciphertext-shape oracle) and **not** from any key material on
 the engine pod's filesystem (OS-boundary filesystem observer records zero plaintext-data-key bytes); a deploy
 attempted with a **sealed Vault refuses before any cloud-side create**; the `pulumi` subprocess is spawned by
 absolute path with **no** `PULUMI_*`/`AWS_*`/`PULUMI_CONFIG_PASSPHRASE`/`PATH` in its environment (OS-boundary
@@ -125,9 +143,7 @@ Each run emits a proven/tested/assumed ledger artifact.
 
 ## Gate integrity
 
-
-> **Provider corpus split (by design).** Phases 44–47 (the provider split) share one provider **topology
-> shape**, but each sub-phase commits its own Phase-0 corpus and gates only its own slice: the topology
+> **Provider corpus split (by design).** Phases 44–47 (the provider split) share one provider **topology > shape**, but each sub-phase commits its own Phase-0 corpus and gates only its own slice: the topology
 > fixture is `test/dhall/phase_NN_provider_provision.dhall` and the mutant family is `mut-NN.*`, per
 > sub-phase (34 → `mut-44.1`; 35 → `mut-45.1`; 36 → `mut-46.1`; 37 → `mut-47.1`/`mut-47.2`). A sub-phase
 > cites a sibling's mutant by that sibling's own name. No two sub-phases own one fixture — the split is
@@ -202,8 +218,7 @@ audit.
   provider-cluster entry as a Pulumi deploy that obeys the one rule (engine under the singleton, no env vars, no
   `PATH`, logical checkpoint as a Vault-enveloped MinIO object set), holds the checkpoint as a lifetime-classed
   budgeted object set behind an exclusive mutation gateway, and enacts the deploy through the reconciler rather
-  than a bespoke state machine. (The EBS create-vs-delete credential arm of [§6](../documents/engineering/pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) is realized in
-  [phase_46_provider_ebs_credential.md](phase_46_provider_ebs_credential.md), not here.)
+  than a bespoke state machine. (The EBS create-vs-delete credential arm of [§6](../documents/engineering/pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) is realized in [phase_46_provider_ebs_credential.md](phase_46_provider_ebs_credential.md), not here.)
 - [`cluster_lifecycle_doctrine.md §3`](../documents/engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)
   — *amoebic spawning — the recursive forest*: provider-cluster spawn is the *cloud-keyed* sibling of Phase 42's
   *SSH-keyed* self-managed spawn over the same encrypted-MinIO backend and per-child Vault envelope, sharing the
@@ -222,7 +237,7 @@ audit.
   — *bake the binaries, pull only in-cluster*: the base node's launch template preloads the exact pinned
   amoebius base/scheduler OCI content into its CRI store so bring-up requires neither the not-yet-ready child
   registry nor a public pull.
-- [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+- [`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
   — *the systematic provision matrix*: the executor Jobs, plugin/workspace carriers, checkpoint-object budget,
   and the base node class's derived supply are provisioned before any effect; failure of any CPU, memory,
   pod-ephemeral, plugin-cache, workspace, checkpoint-object-budget, or provider-quota obligation rejects before
@@ -236,31 +251,34 @@ audit.
 ## Sprint 44.1: Provider-cluster Pulumi deploy from inside a parent 📋
 
 **Status**: Planned
-**Implementation**: `amoebius-pulumi/src/Amoebius/Pulumi/Provider/Eks.hs` (the EKS provider program — the
-phase-new module), built on the `amoebius-pulumi` engine seam (`.../Pulumi/Engine.hs`) and the
-Vault-Transit-enveloped MinIO backend (`.../Backend/EncryptedMinio.hs`) **first delivered by Phase 42 and reused
-here, not rebuilt**; the `observeProviderAccount` boundary and the `PulumiExecutionDemand` /
-`PulumiCheckpointObjectDemand` types land alongside (target paths from
+**Implementation**: `amoebius-pulumi/src/Amoebius/Pulumi/Provider/Eks.hs` (the EKS
+provider program — the phase-new module), built on the `amoebius-pulumi` engine seam
+(`.../Pulumi/Engine.hs`) and the Vault-Transit-enveloped MinIO backend (`.../Backend/EncryptedMinio.hs`)
+**first delivered by Phase 42 and reused here, not rebuilt**; the `observeProviderAccount` boundary and the
+`PulumiExecutionDemand` / `PulumiCheckpointObjectDemand` types land alongside (target paths from
 [system_components.md](system_components.md); not yet built)
-**Blocked by**: Phase 42 gate (amoebic spawning via Pulumi with the encrypted-MinIO backend + per-child
-Vault-envelope, the SSH-keyed spawn this generalizes); Phase 33 gate (the Deployment-`replicas=1` singleton
-live-deploy path that runs the engine); Phase 30 gate (MinIO reachable as a standard HA platform service);
-Phase 29 gate (root Vault + the Transit envelope) — all external earlier-phase prerequisites.
-**Independent Validation**: from a linux-cpu parent, a `pulumi up` issued by the in-cluster singleton reaches a
-ready EKS control plane + base node group built from the fixture's named base-node-class capacity/capability
-shape; the parent first places the complete executor Job plus plugin/workspace peaks and provisions the exact
-checkpoint state-field/revision object peak against its `StorageBudgetId` and exclusive mutation admission; the
-joined node's observed allocatable CPU, memory, logical pod-ephemeral capacity, closed
-nodefs/imagefs/containerfs identities and capacities, resident OCI content/snapshot inventory, storage-model
-version, and enforced image-pull policy meet the declared values and its accelerator offering is explicitly
-`None`; the exact checkpoint object set lands in MinIO as opaque Vault-enveloped objects unreadable without an
-unsealed Vault; a deploy attempted with a sealed Vault **refuses before any cloud mutation**; the deploy
-subprocess is spawned with no `PULUMI_*`/`AWS_*`/`PATH` in its environment and the `pulumi`/plugin paths are
-absolute.
-**Docs to update**: `documents/engineering/pulumi_iac_doctrine.md` (§1, §2, §4),
-`documents/engineering/cluster_lifecycle_doctrine.md` (§3), `documents/engineering/substrate_doctrine.md` (the
-no-env/no-`PATH` lazy discovery of `pulumi` + the cloud plugin), `documents/engineering/daemon_topology_doctrine.md`
-(§3.1 — the engine under the singleton), `DEVELOPMENT_PLAN/system_components.md`.
+**Blocked by**: Phase 42 gate (amoebic spawning
+via Pulumi with the encrypted-MinIO backend + per-child Vault-envelope, the SSH-keyed spawn this
+generalizes); Phase 33 gate (the Deployment-`replicas=1` singleton live-deploy path that runs the engine);
+Phase 30 gate (MinIO reachable as a standard HA platform service); Phase 29 gate (root Vault + the Transit
+envelope) — all external earlier-phase prerequisites.
+**Independent Validation**: from a linux-cpu parent, a
+`pulumi up` issued by the in-cluster singleton reaches a ready EKS control plane + base node group built
+from the fixture's named base-node-class capacity/capability shape; the parent first places the complete
+executor Job plus plugin/workspace peaks and provisions the exact checkpoint state-field/revision object
+peak against its `StorageBudgetId` and exclusive mutation admission; the joined node's observed allocatable
+CPU, memory, logical pod-ephemeral capacity, closed nodefs/imagefs/containerfs identities and capacities,
+resident OCI content/snapshot inventory, storage-model version, and enforced image-pull policy meet the
+declared values and its accelerator offering is explicitly `None`; the exact checkpoint object set lands in
+MinIO as opaque Vault-enveloped objects unreadable without an unsealed Vault; a deploy attempted with a
+sealed Vault **refuses before any cloud mutation**; the deploy subprocess is spawned with no
+`PULUMI_*`/`AWS_*`/`PATH` in its environment and the `pulumi`/plugin paths are absolute.
+**Docs to update**:
+`documents/engineering/pulumi_iac_doctrine.md` (§1, §2, §4),
+`documents/engineering/cluster_lifecycle_doctrine.md` (§3), `documents/engineering/substrate_doctrine.md`
+(the no-env/no-`PATH` lazy discovery of `pulumi` + the cloud plugin),
+`documents/engineering/daemon_topology_doctrine.md` (§3.1 — the engine under the singleton),
+`DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 
@@ -380,8 +398,7 @@ discovered lazily by full path, with no `PULUMI_*`/`AWS_*`/`PATH` side-channel e
    node CRI store and its import workspace as released/retained according to the model. A missing preload,
    public/child-registry scheduler pull, or uncharged import workspace fails.
 2. Cryptographic-dependence assertion (forecloses a locally-keyed envelope with a bolted-on seal precheck):
-   (a) every stored checkpoint revision/update object in MinIO is opaque ciphertext that **decrypts only via a
-   direct Vault Transit `decrypt` call with the per-child key** and is **not** decryptable from any key material
+   (a) every stored checkpoint revision/update object in MinIO is opaque ciphertext that **decrypts only via a direct Vault Transit `decrypt` call with the per-child key** and is **not** decryptable from any key material
    present on the engine pod's filesystem — asserted against the committed Phase-0 ciphertext-shape oracle
    `test/goldens/checkpoint_envelope.json` (envelope structure authored before the backend exists, §M.1/§M.3);
    (b) an **OS-boundary filesystem observer** (an `inotify`/`fanotify` or `strace` watch on the pod filesystem,
@@ -441,7 +458,7 @@ The whole sprint (📋 Planned).
   pinned amoebius base/scheduler OCI content into its CRI store (§2), so bring-up introduces no public-registry
   or Helm path.
 - `documents/engineering/resource_capacity_doctrine.md` — record that
-  [`§3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+  [`§3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
   (the systematic provision matrix) gains the live Pulumi executor/checkpoint/base-node-class supply
   provisioning; flip the relevant honest layer once the gate runs.
 - `documents/engineering/testing_doctrine.md` — record the Phase 44 per-run ledger artifact for the
@@ -459,14 +476,10 @@ The whole sprint (📋 Planned).
 ## Related Documents
 
 - [README.md](README.md) — the live tracker; the Phase 44 objective, gate, and substrate
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§F](development_plan_standards.md#f-the-sprint-block-format)
-  sprint format, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) gate integrity)
-- [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election;
-  single-instance delegated to k8s/etcd; Pulumi runs only from inside a cluster)
-- [system_components.md](system_components.md) — the target component inventory (the Implementation paths above
-  are its intended layout, not yet built)
-- [substrates.md](substrates.md) — the substrate registry and per-phase map (`linux-cpu` parent → `provider`
-  target)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§F](development_plan_standards.md#f-the-sprint-block-format) sprint format, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) gate integrity)
+- [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election; single-instance delegated to k8s/etcd; Pulumi runs only from inside a cluster)
+- [system_components.md](system_components.md) — the target component inventory (the Implementation paths above are its intended layout, not yet built)
+- [substrates.md](substrates.md) — the substrate registry and per-phase map (`linux-cpu` parent → `provider` target)
 - [Pulumi IaC Doctrine](../documents/engineering/pulumi_iac_doctrine.md) — the one rule, the Vault-enveloped
   MinIO backend and checkpoint object demand, and the provider-cluster catalog entry this phase implements
 - [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — the cloud-keyed amoebic

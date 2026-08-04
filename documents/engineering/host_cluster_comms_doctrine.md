@@ -1,13 +1,38 @@
 # Host ↔ Cluster Communication
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Define exactly how the host amoebius binary and any host-level worker daemons talk to the
 > cluster — the two localhost-only channels, and the resolved decision that a host compute daemon is a
 > plain Pulsar + MinIO peer over host-only NodePorts with no mTLS.
+> **Read this if**: something on the host has to reach something in the cluster, or a new channel is proposed.
+
+This document owns the host-origin communication surface: exactly two channels, both confined to localhost,
+and the argument for why the network restriction is the security boundary. It does not own the wild-ingress
+path that everything else uses, owned by
+[platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path).
+Reading it presumes the context and role grid of
+[daemon_topology_doctrine.md §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. The host-origin surface: two channels, both localhost-only](#1-the-host-origin-surface-two-channels-both-localhost-only)
+- [2. The decision that was open, and is now resolved](#2-the-decision-that-was-open-and-is-now-resolved)
+- [3. There is no bespoke control channel — coordination *is* Pulsar + MinIO](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)
+- [4. Channel 1 — the host binary ↔ kube-apiserver via distro mTLS](#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls)
+- [5. Why no mTLS is safe here: the network restriction *is* the security boundary](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary)
+- [6. The host-only restriction in practice (and its sibling precedent)](#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)
+- [7. What the DSL makes unrepresentable here](#7-what-the-dsl-makes-unrepresentable-here)
+- [8. Boundaries this doc does and does not own](#8-boundaries-this-doc-does-and-does-not-own)
+- [9. Planning ownership](#9-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -15,8 +40,7 @@
 
 Everything that reaches an amoebius cluster from the *wild* — WAN, LAN, even a
 browser on the same machine — traverses a single authenticated ingress edge that Keycloak owns
-([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)). This document owns the **one
-carve-out** from that rule: the traffic that originates *on the host itself* and never touches a network
+([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)). This document owns the **one carve-out** from that rule: the traffic that originates *on the host itself* and never touches a network
 anyone else can see.
 
 There are exactly two host-origin channels, and **both are strictly localhost** — these access points are
@@ -52,14 +76,13 @@ the wild-ingress door are unaffected.
 
 ```mermaid
 flowchart TD
-  wild[Wild traffic: WAN / LAN / localhost browser] -->|TLS| lb[LoadBalancer: MetalLB or cloud LB]
-  lb -->|Gateway API listener| envoy[Envoy Gateway data plane]
-  envoy -->|OIDC and JWT enforcement| kc[Keycloak: owns all wild ingress]
-  kc -->|authenticated route| workloads[App and platform admin surfaces]
-  binary[Host amoebius binary] -->|Channel 1: distro default mTLS, localhost| api[kube-apiserver]
-  binary -->|Channel 2: coordination as a peer| peers[In-cluster MinIO and Pulsar]
-  daemon[Host compute daemon: Apple-Metal inference] -->|Channel 2: host-only NodePort, no mTLS, localhost| peers
+%% register: orientation
+  binary["Host amoebius binary"] -->|"Channel 1: distro default mTLS, localhost, bootstrap only"| api["kube-apiserver"]
+  binary -->|"Channel 2: coordination as an ordinary peer"| peers["In-cluster MinIO and Pulsar"]
+  daemon["Host compute daemon: Apple-Metal inference"] -->|"Channel 2: host-only NodePort, no mTLS, localhost"| peers
+  wild["Everything not host-origin"] -->|"uses neither channel; enters only by the single wild-ingress path"| ingress["Keycloak-owned wild ingress"]
 ```
+*Orientation. Design intent. The two host-origin channels this document owns, and the fact that nothing else may use them. The wild-ingress path on the right is owned and drawn by [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path); whether a running cluster actually confines these channels to localhost is runtime-checked.*
 
 ---
 
@@ -81,8 +104,7 @@ This document **resolves it.** The three options as posed, and the verdict:
 | **(b)** Separate NodePort with **mTLS issued by root** | Network-level confidentiality + authenticity | The mTLS handshake and per-record encryption are real overhead on high-bandwidth bulk transfer (model weights, content-addressed blobs, Pulsar streams). Every channel-2 byte pays a tax to defend against an attacker who, by the network restriction ([§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary)), cannot reach the socket in the first place. |
 | **(c)** A **Unix domain socket** | A *hard* guarantee of no network traffic — attractive | One socket becomes the single pipe through which **all** MinIO and Pulsar I/O is funnelled and bottlenecked. It is also not cross-substrate-uniform: the loopback-NodePort shape generalizes cleanly across kind/rke2/Lima/WSL2, a single named socket does not. |
 
-**Resolution — chosen design: a host compute daemon is a plain Pulsar + MinIO *client/peer* over
-host-only NodePorts, with no mTLS, and the NodePorts are network-restricted to host-origin traffic only.**
+**Resolution — chosen design: a host compute daemon is a plain Pulsar + MinIO *client/peer* over host-only NodePorts, with no mTLS, and the NodePorts are network-restricted to host-origin traffic only.**
 This takes option (c)'s security goal — *no malicious network traffic can use this as a backdoor* — and
 achieves it by **network restriction** instead of by crypto or by a single bottlenecking socket, while
 keeping option (b)'s bandwidth headroom (a real socket per stream) without paying (b)'s mTLS tax.
@@ -90,16 +112,14 @@ keeping option (b)'s bandwidth headroom (a real socket per stream) without payin
 > **Honesty.** This is a *resolved design decision* for Phase 53, argued from the threat model and bandwidth
 > economics below — **not** a tested or proven amoebius result. The loopback-NodePort pattern has a sibling
 > precedent in prodbox ([§6](#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)), which is evidence from another system, not proof here. Status and gates live
-> only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
-> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
+> only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
 
 ## 3. There is no bespoke control channel — coordination *is* Pulsar + MinIO
 
 The cleanest part of the resolution is what it **removes**: there is no custom RPC, no side-channel
-protocol, and no "amoebius proxy" that a host daemon dials into. **All workload coordination flows through Pulsar
-and MinIO** — the same nervous system every in-cluster worker already uses.
+protocol, and no "amoebius proxy" that a host daemon dials into. **All workload coordination flows through Pulsar and MinIO** — the same nervous system every in-cluster worker already uses.
 
 Concretely:
 
@@ -143,8 +163,7 @@ this doc still owns in full.
 
 ## 4. Channel 1 — the host binary ↔ kube-apiserver via distro mTLS
 
-The host binary's privileged path is the kube-apiserver, reached over the **k8s distro's own default
-mTLS** — the client certificate kind or rke2 already mints during bring-up. amoebius does not reinvent this
+The host binary's privileged path is the kube-apiserver, reached over the **k8s distro's own default mTLS** — the client certificate kind or rke2 already mints during bring-up. amoebius does not reinvent this
 identity; it consumes the distro's kubeconfig and talks to the apiserver like any trusted admin client.
 
 - **Localhost only.** Like channel 2, this endpoint is host-origin and not exposed to LAN/WAN. On a
@@ -206,8 +225,7 @@ buys.
 The [§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) argument has one load-bearing premise — *no attacker can reach the wire* — and it is realized by
 localhost binding. Remote elastic compute breaks that premise: a spot node attached to the home cluster's one
 Pulsar/MinIO ([single_logical_data_plane_doctrine.md](./single_logical_data_plane_doctrine.md)) reaches
-channel 2 across the public internet, where "localhost-only" cannot hold. The invariant **generalizes rather
-than breaks**: channel 2 is reachable *either* from localhost *or* over the **authenticated WireGuard fabric**,
+channel 2 across the public internet, where "localhost-only" cannot hold. The invariant **generalizes rather than breaks**: channel 2 is reachable *either* from localhost *or* over the **authenticated WireGuard fabric**,
 and nowhere else.
 
 The three normative points of the generalization — the `wg0`-binding, the still-no-mTLS rationale, and the
@@ -247,8 +265,7 @@ only where each attaches and defers the wire itself to
   names but does not own. (Design intent for the stretched-cluster round; on `Managed Eks` control planes this
   span is representable only as a provider-native capability, per network_fabric / cluster_topology, never an
   amoebius-built second fabric.)
-- **Channel 2 for a host worker generalizes once more: localhost, authenticated fabric, *or* authenticated secure
-  gateway.** A *host worker* — a non-member Apple-Metal/Windows-CUDA subprocess
+- **Channel 2 for a host worker generalizes once more: localhost, authenticated fabric, *or* authenticated secure gateway.** A *host worker* — a non-member Apple-Metal/Windows-CUDA subprocess
   ([§3](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)) — that is stretched off-host is the
   attach-pool shape ([single_logical_data_plane_doctrine.md §4](./single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology)):
   it needs only channel 2's data-plane + Vault reach, never the apiserver. So this section's rule "localhost **or**
@@ -260,8 +277,7 @@ only where each attaches and defers the wire itself to
   ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path))
   still holds. The gateway *wire* — including the authentication/encryption a shared loopback did not need — is
   owned by [network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric);
-  this doc owns only that channel 2 may ride it. The `Gateway`-arm reach constructor is a **named seam this doctrine
-  introduces, not a built path** — its host-worker-through-a-gateway inhabitant is deferred.
+  this doc owns only that channel 2 may ride it. The `Gateway`-arm reach constructor is a **named seam this doctrine introduces, not a built path** — its host-worker-through-a-gateway inhabitant is deferred.
 
 ---
 
@@ -346,8 +362,7 @@ maintains a competing status ledger; it states the target shape and links back f
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)

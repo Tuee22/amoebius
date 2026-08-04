@@ -1,21 +1,52 @@
 # Tenancy
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Single source of truth for the amoebius tenant and subject axes — first-class immutable
 > `TenantId`, issuer-qualified `SubjectId`, explicit membership and owner indices, derived provider RBAC,
 > append-only revocable cross-tenant grants, and scope-narrowed tenant administration.
+> **Read this if**: an isolation boundary between tenants or subjects has to be drawn or checked.
+
+This document owns the tenant axis: what a tenant is, the typed shapes access control is derived from rather
+than authored, and the honest limit on what two isolation layers actually deliver. It does not own the
+namespace partition it composes with, owned by
+[namespace_layout_doctrine.md](./namespace_layout_doctrine.md), nor the identity provider realizing it,
+owned by [platform_services_doctrine.md](./platform_services_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. The tenant axis is orthogonal to the cluster axis](#2-the-tenant-axis-is-orthogonal-to-the-cluster-axis)
+- [3. What a tenant is](#3-what-a-tenant-is)
+- [4. The typed shapes: `TenantSpec` / `SubjectSpec` / `Membership` / `Owner` / `RoleBinding`](#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding)
+- [5. RBAC is derived, never authored](#5-rbac-is-derived-never-authored)
+- [6. The tenant-admin surface reduces to a scope-narrowed admin mutation](#6-the-tenant-admin-surface-reduces-to-a-scope-narrowed-admin-mutation)
+- [7. Two isolation layers, and the honest limit](#7-two-isolation-layers-and-the-honest-limit)
+- [8. What this doctrine owns, and what it defers](#8-what-this-doctrine-owns-and-what-it-defers)
+- [9. Planning ownership](#9-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
 ## 1. Why this doctrine exists
 
-A multi-tenant workload keeps more than one customer's data on shared platform services, and the load-bearing obligation is isolation: tenant B must never read, share, or destroy tenant A's data, and the guarantee must hold at the layer where a spec is authored, not only at the layer where a policy is enforced. The failure surfaces at **author time** — a spec that names a cross-tenant grant, or hand-writes a provider ACL that over-grants — and at **runtime** — a rendered policy that leaks.
+A multi-tenant workload keeps more than one customer's data on shared platform services, and the
+load-bearing obligation is isolation: tenant B must never read, share, or destroy tenant A's data. The
+guarantee has to hold at the layer where a spec is authored, not only at the layer where a policy is
+enforced. The failure surfaces at **author time** — a spec that names a cross-tenant grant, or hand-writes a provider ACL that over-grants — and at **runtime** — a rendered policy that leaks.
 
-The obvious alternative — model a tenant as an ordinary application record and enforce isolation with hand-authored Vault policies, Pulsar ACLs, and SQL grants — fails because a hand-authored grant is exactly the surface where a cross-tenant reference becomes representable: the author can write down a binding that names another tenant's bucket, and nothing in the type of that binding forbids it. Isolation then rests entirely on review and runtime enforcement, which the amoebius contract ([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)) rejects for exactly this class of invariant.
+The obvious alternative is to model a tenant as an ordinary application record and enforce isolation with
+hand-authored secret-store policies, message-bus access lists, and SQL grants. It fails because a
+hand-authored grant is exactly the surface where a cross-tenant reference becomes representable: an author
+can write down a binding that names another tenant's bucket, and nothing in the type of that binding forbids
+it. Isolation then rests entirely on review and runtime enforcement, which the amoebius contract ([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)) rejects for exactly this class of invariant.
 
 The rule this doctrine states: **a tenant is an immutable `TenantId`, a subject is an issuer-qualified
 immutable `SubjectId`, every datum and role binding carries mandatory tenant and owner indices, and provider
@@ -126,7 +157,7 @@ logs/snapshots; MinIO has dynamic storage-system metadata under an explicit budg
 Kubernetes objects have etcd revisions/Events. MinIO metadata is not an application object and does not add an
 arm to `ObjectStoreProducerDemand`. Exact source/provider/key-set equality joins each payload, apply intent,
 persistence row, and executor. These capacity shapes are owned by
-[resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry).
+[resource_capacity_storage.md §5.1](./resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry).
 
 ### 5.1 The transaction is tenant-qualified, exhaustive, and may become empty
 
@@ -182,13 +213,17 @@ tenant/namespace/ACL state only. The authenticated native-client produce/consume
 after `amoebius-pulsar` exists; Phase 34 must record that data-path check as unverified rather than inferring it
 from administrative convergence.
 
-There is no DSL surface with which to hand-author a Vault policy, a Pulsar ACL, or an SQL grant — precisely as there is none for a NetworkPolicy. A hand-authored, un-derived provider grant is the RBAC face of the derive-don't-author discipline catalogued for NetworkPolicies and tolerations ([illegal_state_catalog.md §4.4](../illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), [§3.22](../illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)); a *cross-tenant* binding is foreclosed as a cross-tenant reference ([§3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets), technique [§4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)).
+There is no DSL surface with which to hand-author a secret-store policy, a message-bus access list, or an
+SQL grant, precisely as there is none for a network policy. A hand-authored, un-derived provider grant is
+the access-control face of the derive-rather-than-author discipline catalogued for network policies and
+tolerations ([illegal_state_catalog.md §4.4](../illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), [§3.22](../illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)); a *cross-tenant* binding is foreclosed as a cross-tenant reference ([§3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets), technique [§4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)).
 
 ### 5.4 Cross-tenant sharing is an append-only, revocable capability edge
 
 Isolation forecloses an *accidental* cross-tenant reference, not a *deliberate* one. A tenant that intends to share a resource with another does so through exactly one sanctioned shape, and that shape is **not** a re-tag. There is no `Ref t1 owner a → Ref t2 owner a` and no ownership transfer ([§4](#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding), [illegal_state_catalog.md §3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)): the shared resource stays owned by, and tagged to, its minting tenant, and its single-owner index is byte-stable.
 
-Sharing is instead an **explicit capability grant** — the capability-as-a-held-token mechanism of [illegal_state_catalog.md §4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable). Tenant `t1` grants `t2` a capability scoped to a specific `Ref t1 r` with a specific `List Capability`, recorded as an **append-only, revocable edge** in the tenant→role graph: the grant is additive (a new edge, never a mutation of the owner index), and a revocation is a further append (a revoke entry, never a byte-rewrite of history). The derivation of [§5](#5-rbac-is-derived-never-authored) includes the corresponding cross-realm provider grant and its persistence demand from that edge — still derived, never hand-authored — and a revoked edge removes both from the next provisioned reconcile. The append-only migration machinery that realizes such an edge without ever representing an owner change or a data destruction is owned by [inforcespec_migration_doctrine.md](./inforcespec_migration_doctrine.md); this doctrine owns only that a cross-tenant grant is a capability edge over a fixed owner, never a re-tag.
+Sharing is instead an **explicit capability grant** — the capability-as-a-held-token mechanism of [illegal_state_catalog.md §4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable). Tenant `t1` grants `t2` a capability scoped to one specific `Ref t1 r`, carrying one specific
+`List Capability`. The grant is recorded as an **append-only, revocable edge** in the tenant→role graph: the grant is additive (a new edge, never a mutation of the owner index), and a revocation is a further append (a revoke entry, never a byte-rewrite of history). The derivation of [§5](#5-rbac-is-derived-never-authored) includes the corresponding cross-realm provider grant and its persistence demand from that edge — still derived, never hand-authored — and a revoked edge removes both from the next provisioned reconcile. The append-only migration machinery that realizes such an edge without ever representing an owner change or a data destruction is owned by [inforcespec_migration_doctrine.md](./inforcespec_migration_doctrine.md); this doctrine owns only that a cross-tenant grant is a capability edge over a fixed owner, never a re-tag.
 
 ## 6. The tenant-admin surface reduces to a scope-narrowed admin mutation
 
@@ -209,7 +244,9 @@ A browser front end for tenancy administration is a low-code program governed by
 server-authorization boundary as workload UIs. Its administrative ports differ in permission and effect; it
 does not receive the operator's private channel or a generic `dhall update` capability.
 
-**Reach, though, is not the operator's private channel.** The operator's admin NodePort is node-local and never wild ([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api), the admin-plane reach class); a tenant-admin using the generic UI runtime is a *remote* principal, so it reaches this surface as an **authenticated, Keycloak-fronted client of the wild edge** ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), whose scope-narrowed `dhall update` is mediated to the singleton by an in-cluster tenant-admin service — **never** by exposing the operator's node-local admin NodePort to the wild. "The *same* admin control plane" therefore means the same typed `dhall update` semantics and the same two DSL gates, **not** the same transport: the operator's reach is private/node-local, the tenant-admin's is Keycloak-authenticated wild ingress narrowed to `project(spec, t)`.
+**Reach, though, is not the operator's private channel.** The operator's admin NodePort is node-local and never wild
+([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api), the admin-plane reach class). A tenant-admin using the generic UI runtime is a *remote* principal, so it
+reaches this surface as an **authenticated, Keycloak-fronted client of the wild edge** ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), whose scope-narrowed `dhall update` is mediated to the singleton by an in-cluster tenant-admin service — **never** by exposing the operator's node-local admin NodePort to the wild. "The *same* admin control plane" therefore means the same typed `dhall update` semantics and the same two DSL gates, **not** the same transport: the operator's reach is private/node-local, the tenant-admin's is Keycloak-authenticated wild ingress narrowed to `project(spec, t)`.
 
 ## 7. Two isolation layers, and the honest limit
 
@@ -245,7 +282,23 @@ share one Vault, one broker set, one MinIO, and one Kubernetes control plane, so
 The **hardening dial** is to promote a
 hostile or regulated tenant onto its **own child cluster** — the same `TenantId`, now with its own Vault, PKI
 intermediate, and Transit root, so isolation rests on separate cryptographic roots. Because tenant identity is
-application logic and isolation shape is a deployment rule ([app_vs_deployment_doctrine.md §1](./app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once)), this promotion is a `RolloutPhase` ([release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)) that moves the tenant's buckets, topics, and database under the same `TenantId` into a new child cluster, with **no change to the tenant/user/RBAC surface** above.
+application logic and isolation shape is a deployment rule ([app_vs_deployment_doctrine.md §1](./app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once)), the promotion changes the deployment rule alone — the tenant's buckets, topics, and database move under the same `TenantId` into a new child cluster with **no change to the tenant/user/RBAC surface** above.
+
+**The mechanism is an open obligation, deliberately named as one.** This promotion is *not* a `RolloutPhase`:
+that type is the in-cluster server-side-apply of a rendered object slice
+([release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)),
+and moving durable bytes **across a cluster boundary** is outside every owner this document could defer to —
+`inforcespec_migration` owns the representational surface but not a cross-cluster byte move,
+`storage_lifecycle` owns the within-cluster verified shrink, and `gateway_migration` moves the *ingress role*,
+not a data plane. Under the general migration law
+([migration_doctrine.md §2](./migration_doctrine.md#2-the-law)) the promotion would have to state a
+create-new → verified-migrate → retire-old protocol across the boundary, a freshness gate before the tenant is
+cut over, and a stand-down path — none of which is specified, and no phase schedules it. It is recorded as an
+open instance in [migration_doctrine.md §3](./migration_doctrine.md#3-one-discipline-many-instances) rather
+than described as though a mechanism existed, per
+[documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
+Until it is designed, the hardening dial is available only by standing a tenant up on its own child cluster
+**from the start**, which needs no migration at all.
 
 ### 7.1 Offline browser partitions preserve scope but cannot prove revocation while disconnected
 
@@ -289,12 +342,13 @@ which tenant/owner invariants are type-foreclosed in the decoded Haskell IR vers
 value-level fold, stated honestly because Dhall lacks dependent types
 ([§7](#7-two-isolation-layers-and-the-honest-limit)).
 
-Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement here is a proven amoebius result. The service-native tenancy shapes this doctrine composes — Keycloak realms, a per-tenant Vault policy, Pulsar tenant-namespaces, a MinIO bucket policy, Kubernetes RBAC/NetworkPolicy, and Postgres roles/grants — have sibling precedents and are **sibling evidence, not an amoebius result**; amoebius has not built the tenant axis, and this document specifies the typed surface it intends to satisfy.
+Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement here is a proven amoebius result. The service-native tenancy shapes this doctrine composes are the identity realm, the per-tenant secret-store
+policy, the message-bus tenant namespace, the object-store bucket policy, Kubernetes access control and
+network policy, and SQL roles and grants. They have sibling precedents and are **sibling evidence, not an amoebius result**; amoebius has not built the tenant axis, and this document specifies the typed surface it intends to satisfy.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [DSL Doctrine](./dsl_doctrine.md) — the `InForceSpec` projection and the two illegal-state-unrepresentable gates the tenant surface rides
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — the cross-tenant-reference entry ([§3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)) and the capability/phantom-tenant-tag technique ([§4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable))

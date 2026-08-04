@@ -1,15 +1,35 @@
 # The Single Logical Data Plane & Remote Compute Attach
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Single Source of Truth for the distinction between *one data plane reached from many compute
 > locations* and *many data planes reached by gateway migration* — so that remote elastic compute (e.g. spot
-> ML) is modelled as **Pulsar + MinIO clients of the home cluster's one store over the fabric, never as a
-> second cluster** — and for the `DataPlane`/`FabricMember` binding that makes "a workload bound to a store
+> ML) is modelled as **Pulsar + MinIO clients of the home cluster's one store over the fabric, never as a > second cluster** — and for the `DataPlane`/`FabricMember` binding that makes "a workload bound to a store
 > it cannot reach" unrepresentable.
+> **Read this if**: compute in more than one place has to share one message bus and one object store.
+
+This document owns the rule that every fabric member joins one logical plane rather than standing up its
+own: one bus, one object store, wherever the compute physically sits. It does not own the fabric that makes
+remote members reachable, owned by [network_fabric_doctrine.md](./network_fabric_doctrine.md), nor the
+client that speaks to the bus, owned by [pulsar_client_doctrine.md](./pulsar_client_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Why this doctrine exists: two ways to say "run this elsewhere"](#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)
+- [2. The two topologies](#2-the-two-topologies)
+- [3. The binding: reachability is a type, not a runtime probe](#3-the-binding-reachability-is-a-type-not-a-runtime-probe)
+- [4. The elastic worker pool (the attach topology)](#4-the-elastic-worker-pool-the-attach-topology)
+- [5. The category error this doctrine forecloses](#5-the-category-error-this-doctrine-forecloses)
+- [6. Boundaries this doc owns vs defers](#6-boundaries-this-doc-owns-vs-defers)
+- [7. Planning ownership](#7-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -24,8 +44,7 @@ and "a single global view across clusters is a cross-cluster split-brain in wait
 span two clusters without either unbounded latency or divergence — that is physics, not a design
 choice.
 
-This doctrine resolves the collision by observing that **"run this elsewhere" names two structurally
-different things**, and making the difference a matter of *which type is reached for*:
+This doctrine resolves the collision by observing that **"run this elsewhere" names two structurally different things**, and making the difference a matter of *which type is reached for*:
 
 - **One data plane, many compute locations.** The remote compute is *not a cluster*. It is stateless
   compute that joins the home cluster's **one** Pulsar/MinIO as a client over the fabric. There is exactly
@@ -91,8 +110,7 @@ A `DataPlane` is a typed handle to **one cluster's one Pulsar + one object/KV st
 value (an ownership index, [illegal_state_catalog.md §4.4](../illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)) *projected* from the
 platform-service set, never authored — so "two logical stores for one cluster" has no constructor.
 
-The core illegal state — "a workload bound to a store it cannot reach" — is foreclosed by making **fabric membership a
-capability** ([illegal_state_catalog.md §4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)) phantom-indexed by the owning
+The core illegal state — "a workload bound to a store it cannot reach" — is foreclosed by making **fabric membership a capability** ([illegal_state_catalog.md §4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)) phantom-indexed by the owning
 cluster. A logical binding resolves to a physical handle *only* on presentation of that capability:
 
 ```haskell
@@ -123,18 +141,19 @@ Two illegal states die here:
 - **Cross-tenant reach** (type-foreclosed): the tenant tag `t` must unify; there is no `Ref t1 -> Ref t2` coercion
   ([illegal_state_catalog.md §4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)).
 
-The vision's "single logical store irrespective of how many nodes or where" then becomes **a theorem of the
-type**: the home CUDA node, the home Apple-Metal host worker, and every remote spot node each hold
+The vision's "single logical store irrespective of how many nodes or where" then becomes **a theorem of the type**: the home CUDA node, the home Apple-Metal host worker, and every remote spot node each hold
 `FabricMember home`, so each binds the **same** `DataPlane home t`. The number of `FabricMember home`
 witnesses is unbounded; the `DataPlane home t` they all resolve against is unique.
 
 ```mermaid
 flowchart LR
+%% register: orientation
   cuda[Home CUDA node] -->|FabricMember home| plane[DataPlane home: one Pulsar plus one MinIO]
   metal[Home Apple-Metal host worker] -->|FabricMember home| plane
   spot1[Remote spot node 1 over the fabric] -->|FabricMember home| plane
   spotN[Remote spot node N over the fabric] -->|FabricMember home| plane
 ```
+*Orientation. Design intent. Every fabric member joins one logical plane wherever it physically sits; the membership that makes a remote node reachable is owned by [network_fabric_doctrine.md](./network_fabric_doctrine.md).*
 
 **One data-plane witness, two off-host minting paths (this round's stretched-cluster refinement).**
 `FabricMember c` remains the *single* data-plane witness the resolvers consume —
@@ -144,8 +163,7 @@ it adds a **second off-host constructor** for the *same* `FabricMember c`, authe
 secure gateway rather than by WireGuard fabric-join. What differs between the two off-host paths is
 *how* a node reaches the plane — the [network_fabric_doctrine.md](./network_fabric_doctrine.md)
 endpoint index, fabric-peer vs secure-gateway-reach — never *that* it can reach it, so the one
-witness the resolvers gate on is unchanged. Both paths are gated on a declared **networking
-capability** (`Networking c`, a `Gateway | Vpn` sum owned by
+witness the resolvers gate on is unchanged. Both paths are gated on a declared **networking capability** (`Networking c`, a `Gateway | Vpn` sum owned by
 [network_fabric_doctrine.md](./network_fabric_doctrine.md)); the invariant generalizes from "no
 off-host `FabricMember` without a declared fabric" to "…without a declared networking capability."
 The gateway constructor's witness *type* is named this round; its constructor is design intent,
@@ -173,8 +191,7 @@ workload as Pulsar/MinIO clients. It is a **deployment rule**, not app logic
   **no storage arm at all**, so "auto-delete durable storage on teardown" is type-foreclosed uninhabitable on the
   normal path; within amoebius automation the sole deleter of durable backing is the elevated test harness,
   and only for test-owned resources. Production reclaim remains an external human break-glass action
-  ([storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md),
-  [testing_doctrine.md](./testing_doctrine.md)). The credential/`Retain` mechanics are owned there and by
+  ([storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md), [testing_doctrine.md](./testing_doctrine.md)). The credential/`Retain` mechanics are owned there and by
   [pulumi_iac_doctrine.md §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model); this doc only requires the storage-arm-free shape.
 
 ```haskell
@@ -196,8 +213,7 @@ data Deprovision = Deprovision { releaseCompute :: ComputeSet }  -- NO deleteSto
 
 - **Elastic growth stays capacity-checked.** When the price trigger fires and the `Growable` policy adds
   nodes, the `place` fold re-runs against the enlarged topology capacity
-  ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting) and
-  [§6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)), so "the pool grew but the job
+  ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting) and [§6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)), so "the pool grew but the job
   still does not fit" is caught at the same decode-foreclosed check. "Job too big for the hardware" is never
   representable, elastic or not.
 - **The wire is owned elsewhere.** *How* a remote node reaches the home Pulsar/MinIO — the WireGuard fabric,
@@ -285,8 +301,7 @@ host-compute-daemon peer model it generalizes (Phase 53), and cloud spot provisi
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — the WireGuard wire a remote pool joins
 - [Host ↔ Cluster Communication](./host_cluster_comms_doctrine.md) — the Pulsar/MinIO peer model this generalizes

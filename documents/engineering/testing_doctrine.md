@@ -1,26 +1,56 @@
 # Testing
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Define amoebius testing as a self-tearing-down `InForceSpec` topology — spin up resources, run a
 > workflow, **always** tear down — plus the `suggest-test` generator, flagged test credentials, the
 > elevated harness as the sole automated deleter of test-owned durable storage, and the per-run
 > proven/tested/assumed ledger
 > artifact.
+> **Read this if**: a validation has to be designed, or an existing claim has to be read for what it actually establishes.
+
+This document owns how amoebius validates itself: the registers of evidence, the test-topology contract, and
+the rule that a specification generates the coverage enumeration while a human authors the expectation. It
+does not own the honesty vocabulary those claims are phrased in, owned by
+[documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
+nor the phase gates that consume its registers, owned by
+[`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. A test is an amoebius spec](#1-a-test-is-an-amoebius-spec)
+- [2. The registers of amoebius testing](#2-the-registers-of-amoebius-testing)
+- [3. The test-topology contract: spin up → run → always tear down](#3-the-test-topology-contract-spin-up--run--always-tear-down)
+- [4. No skips, fail fast, and the per-run ledger artifact](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
+- [5. `suggest-test`: detect the world, emit a representative test `.dhall`](#5-suggest-test-detect-the-world-emit-a-representative-test-dhall)
+- [6. Flagged test credentials](#6-flagged-test-credentials)
+- [7. The elevated harness is the sole automated deleter of test-owned durable storage; leak-free cycles](#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles)
+- [8. One substrate per validation](#8-one-substrate-per-validation)
+- [9. Derivation: generated enumeration, authored expectation](#9-derivation-generated-enumeration-authored-expectation)
+- [10. What this doctrine does not own](#10-what-this-doctrine-does-not-own)
+- [11. Planning ownership](#11-planning-ownership)
+- [12. Spoof-resistant evidence: a gate observes an unforgeable fresh effect](#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect)
+- [Related Documents](#related-documents)
 
 ---
 
 ## 1. A test is an amoebius spec
 
-**amoebius has no separate test framework — a test *is* an
-amoebius deployment.** Everything amoebius already knows how to do — stand up a cluster, render typed
-manifests from Dhall, place workloads, inject secrets, fail a leader over — is exactly the machinery a test
-needs. So a test is not written in some second language with its own runner; it is written in the *same*
-Dhall DSL, and it inherits the *same* illegal-state-unrepresentable guarantee. There is no "test mode" of
-the type system that lets a test express a broken cluster the production DSL would reject. The test suite may itself be driven by an amoebius root cluster — the root stands up the test topology, runs the workflow, and tears it down, exactly as it rolls out any child manifest.
+**amoebius has no separate test framework — a test *is* an amoebius deployment.** Everything amoebius
+already knows how to do — stand up a cluster, render typed manifests from Dhall, place workloads, inject
+secrets, fail a leader over — is exactly the machinery a test needs. So a test is not written in some second
+language with its own runner; it is written in the *same* Dhall DSL, and it inherits the *same*
+illegal-state-unrepresentable guarantee. There is no "test mode" of the type system that lets a test express
+a broken cluster the production DSL would reject. The test suite may itself be driven by an amoebius root
+cluster — the root stands up the test topology, runs the workflow, and tears it down, exactly as it rolls
+out any child manifest.
 
 Concretely, amoebius tests are Dhall-authored `InForceSpec` topologies that spin up
 resources, run the workflow, and tear down resources — there is no need for an explicit list of tests; what
@@ -114,10 +144,10 @@ the Runtime-layer (Inject) move — the topology that injects faults against a l
 
 ## 3. The test-topology contract: spin up → run → always tear down
 
-**A test that can leak a resource cannot be
-run twice.** If a failed run could strand an EBS volume, a hosted zone, or a live cluster, then every test
-would silt up the substrate and the next run would start from a dirtier world than the last. amoebius
-forecloses that by making teardown **structural**, not a final step whose execution is merely hoped for.
+**A test that can leak a resource cannot be run twice.** If a failed run could strand an EBS volume, a
+hosted zone, or a live cluster, then every test would silt up the substrate and the next run would start
+from a dirtier world than the last. amoebius forecloses that by making teardown **structural**, not a final
+step whose execution is merely hoped for.
 
 The contract has four clauses (generalized from prodbox's Pulumi-orchestrated infrastructure-test rules:
 isolated ephemeral stacks, unique names per run, aggressive tagging, *always* teardown via
@@ -142,6 +172,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   spec["test .dhall topology (deployment-rules layer + chaos schedule + expectations + teardown)"]:::intent -->|spin up| up[/"allocate resources: cluster, PVs, stacks, workloads (tagged test-owned)"/]:::effect
   up -->|run workflow| run[/"exercise workflow + inject faults (HA failover, substrate quorum re-election)"/]:::effect
   run -->|success| down[/"teardown: idempotent destroy of every allocated resource"/]:::effect
@@ -164,8 +195,7 @@ clause. The teardown is a property of the topology *type*, so every value of it 
 
 ## 4. No skips, fail fast, and the per-run ledger artifact
 
-**A skipped test that reports success misrepresents coverage — it is worse than a failing test, because it
-passes while proving nothing.** amoebius adopts the prodbox skip policy verbatim in spirit — *skip/xfail is prohibited
+**A skipped test that reports success misrepresents coverage — it is worse than a failing test, because it passes while proving nothing.** amoebius adopts the prodbox skip policy verbatim in spirit — *skip/xfail is prohibited
 by default; a missing prerequisite fails fast with an actionable error* — and then makes the honesty
 machine-visible by emitting a ledger.
 
@@ -173,8 +203,7 @@ machine-visible by emitting a ledger.
   prerequisite validation, not in a silent skip. If a topology needs a substrate, a credential, or a tool
   that is absent, the run *fails with a message naming what is missing* — it does not pass-with-a-skip.
 - **Every run emits a proven/tested/assumed ledger artifact.** The development plan's phase discipline rule
-  is absolute ([../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
-  "Honest ledger"): *every validation emits a proven/tested/assumed ledger artifact*. This doc owns the
+  is absolute ([../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), "Honest ledger"): *every validation emits a proven/tested/assumed ledger artifact*. This doc owns the
   *artifact* — that a topology run produces, as a first-class output beside its pass/fail, a record of which
   correctness layers it actually reached and at what strength. The artifact is the deliverable: it is the
   run's record of *what is known and how it is known*.
@@ -219,8 +248,7 @@ machine-visible by emitting a ledger.
   The front-loaded pre-cluster formal-validation track
   ([../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md))
   emits this *same* proven/tested/assumed ledger, but from a purely **in-process** run — Dhall typecheck +
-  Haskell decoder + QuickCheck + TLA+/TLC, with **no live substrate**. That is a **Tier-1 (design-time)
-  artifact only**: it establishes that the spec composes and the protocol is sound in the abstract, and it
+  Haskell decoder + QuickCheck + TLA+/TLC, with **no live substrate**. That is a **Tier-1 (design-time) artifact only**: it establishes that the spec composes and the protocol is sound in the abstract, and it
   leaves the **Runtime/chaos (Tier-2) layer UNVERIFIED by construction**, because a run that injected no fault
   against a live cluster performed no applicable Runtime move. By the UNVERIFIED rule above, such a
   Tier-1-only ledger is therefore **structurally insufficient to advance a production `PromotionGate`** —
@@ -273,6 +301,7 @@ Per the original vision, `suggest-test`:
 
 ```mermaid
 flowchart TD
+%% register: algebra
   host["host inventory: CPU, memory, logical ephemeral, filesystem layout/content/snapshots, presented durable/native cache, accelerator memory"]:::intent -->|feeds| gen[["suggest-test generator"]]:::intent
   creds[/"SSH + AWS credentials: inspect permissions, candidate shapes, and quotas"/]:::effect -->|feeds| gen
   gen -->|sizes a representative topology| res["complete resource envelope within detected capacity + authority"]:::intent
@@ -288,8 +317,7 @@ Four boundaries keep `suggest-test` honest and within doctrine:
 
 - **The output is a proposal, not an oracle.** `suggest-test` emits a *starting-point* test `.dhall` the
   operator reads, edits, and runs — it is a generator of representative topologies, never a self-certifying
-  pass. The emitted topology is an ordinary test spec and inherits [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down) (always tears down) and [§8](#8-one-substrate-per-validation) (one
-  substrate) unconditionally.
+  pass. The emitted topology is an ordinary test spec and inherits [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down) (always tears down) and [§8](#8-one-substrate-per-validation) (one substrate) unconditionally.
 - **The proposal still passes the ordinary staged seal.** After provider shapes, replicas, sidecars, and the
   standard platform graph expand, `planInfrastructure` derives demand from that exact `BoundDeployment` and
   the declared supply or forest budget. `NoInfrastructureRequired` must witness the explicit
@@ -362,18 +390,15 @@ normal operation and granted only to the flagged elevated harness.
 
 ## 7. The elevated harness is the sole automated deleter of test-owned durable storage; leak-free cycles
 
-The elevated-harness exception resolves a real tension. On one side, amoebius **forbids deleting durable data
-under normal operation** — clusters are ephemeral, their storage is not, and an accidental delete loses
-data the next bring-up needs. On the other side, **leak-free test cycles must
-delete the storage they create**, or every run silts up the substrate forever. amoebius
+The elevated-harness exception resolves a real tension. On one side, amoebius **forbids deleting durable data under normal operation** — clusters are ephemeral, their storage is not, and an accidental delete loses
+data the next bring-up needs. On the other side, **leak-free test cycles must delete the storage they create**, or every run silts up the substrate forever. amoebius
 reconciles the two by making harness deletion the **one** sanctioned automated exception.
 This exception is test-scoped: it grants no authority over production backing. Any production break-glass
 reclaim is a human-operated external action owned by the storage/migration boundary, not this testing system.
 
 The cardinal "no normal-operation deletion of durable data" rule, the retained `no-provisioner` PV model,
 and the deterministic rebind it protects are **owned by**
-[storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) ([§7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation) and [§7.1](./storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness), which explicitly delegate the
-exception to this doc). This doc owns the **exception mechanism**:
+[storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) ([§7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation) and [§7.1](./storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness), which explicitly delegate the exception to this doc). This doc owns the **exception mechanism**:
 
 - **One deleter, one credential.** Only the **elevated test harness**, holding the flagged delete-capable
   credential of [§6](#6-flagged-test-credentials), may destroy durable backing — and only backing flagged
@@ -411,8 +436,7 @@ exception to this doc). This doc owns the **exception mechanism**:
 ## 8. One substrate per validation
 
 A test that silently falls back from one substrate to another proves nothing in particular —
-which world it validated is no longer known. amoebius forbids the fallback: **a validation targets exactly
-one substrate, named up front, and fails fast if that substrate's inputs are missing.**
+which world it validated is no longer known. amoebius forbids the fallback: **a validation targets exactly one substrate, named up front, and fails fast if that substrate's inputs are missing.**
 
 The canonical rule — *at most one substrate (`apple` | `linux-cuda` | `linux-cpu` | `windows`) per
 validation* — is **phase discipline owned by** [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
@@ -454,8 +478,7 @@ under test, passes for any output, a stub's included. This is the tautology
 [development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
 already forbids — an equivalence check defines its reference side independently of the code under test.
 
-**A test artifact divides into two halves with opposite correctness requirements, and the derivation
-boundary falls between them.**
+**A test artifact divides into two halves with opposite correctness requirements, and the derivation boundary falls between them.**
 
 | Half | Content | Requirement | Disposition |
 |---|---|---|---|
@@ -477,6 +500,7 @@ naming the surface — the `coverage` axis exists precisely so an uncovered surf
 
 ```mermaid
 flowchart TD
+%% register: algebra
   spec["committed typed source: InForceSpec, catalog, composed ADTs"]:::intent -->|pure projection| enum["enumeration: surfaces requiring coverage (generated, not committed)"]:::intent
   enum -->|join by identity| oblig[/"coverage obligation"\]:::intent
   auth["authored expectations: assertions, oracles, tagged fixtures (committed)"]:::intent -->|join by identity| oblig
@@ -535,8 +559,7 @@ To keep the SSoT boundaries crisp:
 This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates,
 and remaining work — the test-topology DSL, `suggest-test`, flagged credentials, the elevated
 storage-deleting harness, and the per-run ledger artifact — are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 54; with the cross-cluster
-failover proof artifacts in Phase 43). This doc never maintains a competing status ledger; it states the
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 54; with the cross-cluster failover proof artifacts in Phase 43). This doc never maintains a competing status ledger; it states the
 target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
 no statement here is a proven amoebius result: the model generalizes patterns proven in prodbox into
 amoebius design intent.
@@ -624,8 +647,7 @@ the inspected boundary, not proof that the browser/OS is uncompromised.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)

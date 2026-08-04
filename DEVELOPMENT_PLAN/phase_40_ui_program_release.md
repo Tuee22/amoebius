@@ -1,13 +1,33 @@
 # Phase 40: Atomic UI program release
 
+> **Purpose**: Atomically release an immutable bound UI program as a content-addressed `ClientPlan` /
+> `UiServerPlan` pair plus public-contract artifacts, without rebuilding the generic PureScript runtime image,
+> and reject stale, missing, or mixed plan identities before any action executes.
+> **Read this if**: phase 40 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 40 delivers the atomic UI program release; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md), [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Atomically release an immutable bound UI program as a content-addressed `ClientPlan` /
-> `UiServerPlan` pair plus public-contract artifacts, without rebuilding the generic PureScript runtime image,
-> and reject stale, missing, or mixed plan identities before any action executes.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 40.1: Release immutable UI plans without rebuilding the runtime 📋](#sprint-401-release-immutable-ui-plans-without-rebuilding-the-runtime-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -98,13 +118,16 @@ fixtures, observers, oracle, and mutants are delegated to [Gate integrity](#gate
 ## Sprint 40.1: Release immutable UI plans without rebuilding the runtime 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Release/{Projection,PlanPair,Compatibility,ArtifactManifest}.hs` and
+**Implementation**:
+`src/Amoebius/Ui/Release/{Projection,PlanPair,Compatibility,ArtifactManifest}.hs` and
 `test/live/Phase40UiProgramRelease.hs` (target paths; not yet built)
-**Blocked by**: Phase 20 gate; Phase 38 gate; Phase 39 gate.
-**Independent Validation**: the live gate compares both plan objects, release-ledger, action-journal, and
-containerd observations with Phase-0 hand-authored manifests; all three committed mutants must fail the
-unchanged command.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
+**Blocked by**: Phase 20 gate; Phase 38
+gate; Phase 39 gate.
+**Independent Validation**: the live gate compares both plan objects, release-ledger,
+action-journal, and containerd observations with Phase-0 hand-authored manifests; all three committed
+mutants must fail the unchanged command.
+**Docs to update**:
+`documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/generated_artifacts_doctrine.md`,
 `documents/engineering/release_lifecycle_doctrine.md`,
 `documents/engineering/ui_realtime_coordination_doctrine.md`, and

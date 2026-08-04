@@ -1,14 +1,35 @@
 # Phase 42: Multi-cluster spawn + geo-replication
 
+> **Purpose**: Turn the single-cluster control plane into a recursive forest — a parent spawns two children,
+> hands each only its own `project(subtree)`, and geo-replicates a `command → event* → result` workflow between
+> the siblings — establishing the asynchronous cross-cluster boundary (and its invariant-confluence classifier)
+> over which [Phase 43](phase_43_gateway_migration_drills.md) drives the gateway-migration runtime.
+> **Read this if**: phase 42 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 42 delivers the multi-cluster spawn + geo-replication; its design is owned by [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), [pulumi_iac_doctrine.md](../documents/engineering/pulumi_iac_doctrine.md), [vault_pki_doctrine.md](../documents/engineering/vault_pki_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Turn the single-cluster control plane into a recursive forest — a parent spawns two children,
-> hands each only its own `project(subtree)`, and geo-replicates a `command → event* → result` workflow between
-> the siblings — establishing the asynchronous cross-cluster boundary (and its invariant-confluence classifier)
-> over which [Phase 43](phase_43_gateway_migration_drills.md) drives the gateway-migration runtime.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 42.1: Amoebic spawn — `project(subtree)` handoff + per-child unseal / Transit key / secret injection 📋](#sprint-421-amoebic-spawn--projectsubtree-handoff--per-child-unseal--transit-key--secret-injection-)
+- [Sprint 42.2: Geo-replication of two siblings + invariant-confluence classification 📋](#sprint-422-geo-replication-of-two-siblings--invariant-confluence-classification-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -29,8 +50,7 @@ obligation runs over.
 
 This phase crosses the line the chaos/failover doctrine calls the **Second Axis**: the moment a parent spawns a
 child and the two geo-replicate, the system stops being one strongly-consistent cluster and becomes a forest
-with an **asynchronous** boundary between its clusters. It does two things and stops there. First, **amoebic
-spawn** — a parent provisions two child `kind` clusters via SSH-key Pulumi run from inside the parent against
+with an **asynchronous** boundary between its clusters. It does two things and stops there. First, **amoebic spawn** — a parent provisions two child `kind` clusters via SSH-key Pulumi run from inside the parent against
 a Vault-enveloped MinIO backend and hands each child exactly its own subtree:
 the value a child receives is, by construction, `project(subtree)` — a typed `ChildInForceSpec` in which no
 sibling or ancestor-only branch can appear — with the child's Vault unsealing in one of two sanctioned modes,
@@ -52,7 +72,7 @@ infrastructure pipeline, not a second forest-specific mutation protocol. After c
 bounded concurrency, and quota partition. Forest-named values below are opaque projections/refinements of
 that plan, batch, validated actions, and their canonical tokens—never parallel authorities. The Pulumi path
 is provisioned under the canonical
-[`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+[`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
 matrix and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
 sealed boundary, not treated as free control-plane work. The
 two child stacks produce exact `PulumiCheckpointObjectDemand` values whose state-entry/field and revision
@@ -103,24 +123,22 @@ neither child. The private provisioned execution/checkpoint witnesses live under
 `ProvisionedInfrastructurePlan.batch` before the first Pulumi, SSH, or object-write effect; exact rendered Job
 resources and live MinIO revision objects must read back to that same witness.
 
-Concretely: each
-child's delivered value is `project(subtree)` — discharged as a **committed compile-fail corpus** ([Gate integrity](#gate-integrity):
-`test/compile-fail/ChildInForceSpec/`, ≥ 2 negatives asserting a specific compile-fail locus + a paired
-positive) plus a runtime subtree-inspection assertion that the delivered `ChildInForceSpec` carries no sibling
-branch; each child unseals in **both** sanctioned modes and child A's subtree ciphertext fails to decrypt under
-child B's Transit key even with the parent unsealed; a named `SecretRef` resolves to parent-injected bytes,
-never a Dhall fragment or env var; the two siblings round-trip a workflow and a **duplicate or reordered
-cross-cluster batch produces the identical fold result and identical blob keys** (a committed content-addressed
-golden, [Gate integrity](#gate-integrity)); the invariant-confluence classifier sorts every crossing mutable invariant against a
-**committed independent classification table** ([Gate integrity](#gate-integrity)) with an unclassified invariant defaulting to non-confluent
-and active-active wiring on a non-confluent invariant **refused**; the gate turns red on **at least one
-committed seeded mutant** ([Gate integrity](#gate-integrity): the `classifier-default-confluent` and `project-identity` mutants); teardown is
-**leak-free by the OS-boundary observer of [Gate integrity](#gate-integrity)** (`pulumi stack ls` and kubeconfig-context enumeration, read
-outside the forest, report zero surviving child stacks and zero surviving child clusters, retained backing
-stores exempt); and the run emits a **machine-derived honesty ledger** ([Gate integrity](#gate-integrity)) that
-marks the spawn and geo-replication *tested* (drilled) on the linux-cpu runtime — not a proof claim — the
-projection type-safety a successful decode/type result, and every layer outside Register 3
-UNVERIFIED.
+Concretely:
+- each child's delivered value is `project(subtree)` — discharged as a **committed compile-fail corpus**
+  ([Gate integrity](#gate-integrity): `test/compile-fail/ChildInForceSpec/`, ≥ 2 negatives asserting a specific compile-fail locus + a paired positive) plus a runtime subtree-inspection assertion that the
+  delivered `ChildInForceSpec` carries no sibling branch
+- each child unseals in **both** sanctioned modes and child A's subtree ciphertext fails to decrypt under
+  child B's Transit key even with the parent unsealed
+- a named `SecretRef` resolves to parent-injected bytes, never a Dhall fragment or env var
+- the two siblings round-trip a workflow and a **duplicate or reordered cross-cluster batch produces the identical fold result and identical blob keys** (a committed content-addressed golden,
+  [Gate integrity](#gate-integrity))
+- the invariant-confluence classifier sorts every crossing mutable invariant against a **committed independent classification table** ([Gate integrity](#gate-integrity)) with an unclassified invariant
+  defaulting to non-confluent and active-active wiring on a non-confluent invariant **refused**
+- the gate turns red on **at least one committed seeded mutant** ([Gate integrity](#gate-integrity): the `classifier-default-confluent` and `project-identity` mutants)
+- teardown is **leak-free by the OS-boundary observer of [Gate integrity](#gate-integrity)** (`pulumi stack ls` and kubeconfig-context enumeration, read outside the forest, report zero surviving child stacks and zero surviving child clusters, retained backing stores exempt)
+- and the run emits a **machine-derived honesty ledger** ([Gate integrity](#gate-integrity)) that marks the
+  spawn and geo-replication *tested* (drilled) on the linux-cpu runtime — not a proof claim — the projection
+  type-safety a successful decode/type result, and every layer outside Register 3 UNVERIFIED.
 
 ## Gate integrity
 
@@ -135,8 +153,7 @@ the following named, committed artifacts so no self-authored harness or post-hoc
 - **Confluence-classification oracle (independent of the SUT).** `test/inject/confluence/expected_classes.dhall`
   — a committed, hand-authored table classifying every crossing mutable invariant of the gate workflow as
   *confluent* or *non-confluent*, authored in Phase 0. The classifier's output is checked against this table,
-  never against its own re-derivation; an invariant absent from the table (unclassified) **must default to
-  non-confluent** and be refused active-active wiring.
+  never against its own re-derivation; an invariant absent from the table (unclassified) **must default to non-confluent** and be refused active-active wiring.
 - **Idempotent-write golden.** A committed content-addressed golden: replaying a duplicate or reordered
   cross-cluster batch yields the **identical fold result and identical blob keys** (exactly-once for
   replicated-or-recovered effects), authored in Phase 0.
@@ -150,8 +167,7 @@ the following named, committed artifacts so no self-authored harness or post-hoc
   parent that fits one executor but not both is wrongly admitted, and the pre-effect provision oracle must go
   red. All mutants are committed under `test/inject/mutants/` and re-run every gate, not hand-run once.
 - **External-observer teardown check.** "Tears down leak-free" is scoped for Phase 42 (the flagged-credential +
-  postflight tag-sweep machinery of testing_doctrine [§6](../documents/engineering/testing_doctrine.md#6-flagged-test-credentials)–[§7](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles) is Phase 54) to: after teardown, an **OS-boundary
-  observer** — `pulumi stack ls` and kubeconfig-context enumeration, read outside the forest — reports zero
+  postflight tag-sweep machinery of testing_doctrine [§6](../documents/engineering/testing_doctrine.md#6-flagged-test-credentials)–[§7](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles) is Phase 54) to: after teardown, an **OS-boundary observer** — `pulumi stack ls` and kubeconfig-context enumeration, read outside the forest — reports zero
   surviving child stacks and zero surviving child clusters, while the retained backing stores the gate
   deliberately preserves are explicitly exempt (named in the fixture as the retained set).
 - **Machine-derived ledger + validator.** The ledger is generated from the run record (spawn stack IDs, the
@@ -160,6 +176,27 @@ the following named, committed artifacts so no self-authored harness or post-hoc
   committed validator cross-checks every ledger figure
   against the raw run record and the OS-boundary observer, failing the gate on any mismatch or hand-edited
   field.
+
+```mermaid
+flowchart LR
+  %% register: algebra
+  fx["committed fixtures"]:::intent
+  or["independently authored oracle"]:::intent
+  mu["seeded mutant"]:::intent
+  g{{"the phase 42 gate command"}}:::gate
+  ok((("phase seal: the ledger this gate emits"))):::seal
+  no>"the mutant must turn it red"]:::refuse
+  fx -->|"binds the corpus"| g
+  or -->|"binds the expectation"| g
+  mu -->|"binds the defect"| g
+  g -->|"fixtures green, oracle agrees"| ok
+  g -->|"mutant green means the gate is not one"| no
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+```
+*Design intent. Phase 42's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
 ## Doctrine adopted
 
@@ -186,16 +223,14 @@ the following named, committed artifacts so no self-authored harness or post-hoc
 - [`content_addressing_doctrine.md §5`](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)
   — the confluent data plane: content-addressed write-once blobs (identical content ⇒ identical key ⇒ idempotent
   cross-cluster write) and the work-id-keyed Pulsar fold land in bucket (i) and cross freely, leaving only the
-  gateway authority and any CAS "latest" pointer in bucket (ii) for the [Phase
-  33](phase_43_gateway_migration_drills.md) migration runtime.
-- [`chaos_failover_doctrine.md §16`](../documents/engineering/chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
-  and [`§17`](../documents/engineering/chaos_failover_doctrine.md#17-the-boundary-and-its-classifier)
-  — the Second Axis (one cluster becomes a forest) and the invariant-confluence classifier (R1/[§17](../documents/engineering/chaos_failover_doctrine.md#17-the-boundary-and-its-classifier)) that sorts
+  gateway authority and any CAS "latest" pointer in bucket (ii) for the [Phase 33](phase_43_gateway_migration_drills.md) migration runtime.
+- [`chaos_failover_second_axis.md §16`](../documents/engineering/chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
+  and [`§17`](../documents/engineering/chaos_failover_second_axis.md#17-the-boundary-and-its-classifier)
+  — the Second Axis (one cluster becomes a forest) and the invariant-confluence classifier (R1/[§17](../documents/engineering/chaos_failover_second_axis.md#17-the-boundary-and-its-classifier)) that sorts
   every crossing mutable invariant into confluent (crosses freely) or non-confluent (held by bounded authority),
   the unclassified default = non-confluent — with the
   [proven/tested/assumed ledger (§12)](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed) kept
-  honest. The R7/R8/R9 boundary rules and the [§19](../documents/engineering/chaos_failover_doctrine.md#19-the-cross-boundary-ledger-and-conformance-rows) cross-boundary ledger are consumed by [Phase
-  33](phase_43_gateway_migration_drills.md).
+  honest. The R7/R8/R9 boundary rules and the [§19](../documents/engineering/chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows) cross-boundary ledger are consumed by [Phase 33](phase_43_gateway_migration_drills.md).
 - [`testing_doctrine.md §3`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
   (the test-as-`InForceSpec` spin-up → run → always-tear-down contract) and
   [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
@@ -206,31 +241,32 @@ the following named, committed artifacts so no self-authored harness or post-hoc
 ## Sprint 42.1: Amoebic spawn — `project(subtree)` handoff + per-child unseal / Transit key / secret injection 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Multicluster/Spawn.hs`, `src/Amoebius/Dsl/ChildInForceSpec.hs`,
-`amoebius-pulumi/src/Amoebius/Pulumi/Engine.hs`, `src/Amoebius/Pulumi/Backend/EncryptedMinio.hs`,
-`pulumi/child-cluster/Pulumi.yaml`, `src/Amoebius/Multicluster/ChildUnseal.hs`,
-`src/Amoebius/Vault/TransitChildKey.hs`, `src/Amoebius/Multicluster/SecretInjection.hs` — target paths, not yet
-built.
-**Blocked by**: Phase 24 (bootstrap a `kind` cluster idempotently); Phase 29 (root Vault/PKI trust
-anchor); Phase 33 (the Dhall DSL deploy via the `replicas=1` singleton). **Pulumi-from-inside and its
-Vault-enveloped MinIO backend are first built in this phase** (Sprint 42.1) — no earlier phase provisions them,
-and [Phase 44](phase_44_provider_deploy_checkpoint.md) reuses this engine for provider-managed clusters rather than
-building its own.
-**Independent Validation**: a parent first runs `allocateForestSupply` over the observed single host and the
-parent + two child engine/backing demands, receiving three disjoint opaque `ClusterBudget`s; only then does it
-spawn two child `kind` clusters from inside itself. The same read-only prefix provisions an exact checkpoint
-object peak for each stack and a bounded-parallel Pulumi execution peak for both parent-side executor Jobs,
-plugins, and workspaces. A committed overdraw differing by one disk byte or one executor millicore fails with
-`SharedSupplyOvercommit`/`PulumiExecutionOvercommit` and the runtime/exec observer records zero child creates or
-checkpoint PUTs. Each admitted child comes up
-empty and reconciles toward its spec; the child's received value is shown — at the type level — to be
-`project(subtree)` with no field carrying a sibling or ancestor-only branch; each child unseals in each of the
-two sanctioned modes; child A's subtree ciphertext fails to decrypt under child B's Transit key even with the
-parent's Vault unsealed; a named `SecretRef` resolves to bytes the parent injected, never from a Dhall fragment
-or an env var; and each child, registered as a managed resource carrying its own `destroy`, tears down leak-free
-via one `reconcileAbsent` loop.
-**Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md`,
-`documents/engineering/vault_pki_doctrine.md`, `documents/engineering/pulumi_iac_doctrine.md`.
+**Implementation**: `src/Amoebius/Multicluster/Spawn.hs`,
+`src/Amoebius/Dsl/ChildInForceSpec.hs`, `amoebius-pulumi/src/Amoebius/Pulumi/Engine.hs`,
+`src/Amoebius/Pulumi/Backend/EncryptedMinio.hs`, `pulumi/child-cluster/Pulumi.yaml`,
+`src/Amoebius/Multicluster/ChildUnseal.hs`, `src/Amoebius/Vault/TransitChildKey.hs`,
+`src/Amoebius/Multicluster/SecretInjection.hs` — target paths, not yet built.
+**Blocked by**: Phase 24
+(bootstrap a `kind` cluster idempotently); Phase 29 (root Vault/PKI trust anchor); Phase 33 (the Dhall DSL
+deploy via the `replicas=1` singleton). **Pulumi-from-inside and its Vault-enveloped MinIO backend are first built in this phase** (Sprint 42.1) — no earlier phase provisions them, and
+[Phase 44](phase_44_provider_deploy_checkpoint.md) reuses this engine for provider-managed clusters rather
+than building its own.
+**Independent Validation**: a parent first runs `allocateForestSupply` over the
+observed single host and the parent + two child engine/backing demands, receiving three disjoint opaque
+`ClusterBudget`s; only then does it spawn two child `kind` clusters from inside itself. The same read-only
+prefix provisions an exact checkpoint object peak for each stack and a bounded-parallel Pulumi execution
+peak for both parent-side executor Jobs, plugins, and workspaces. A committed overdraw differing by one disk
+byte or one executor millicore fails with `SharedSupplyOvercommit`/`PulumiExecutionOvercommit` and the
+runtime/exec observer records zero child creates or checkpoint PUTs. Each admitted child comes up empty and
+reconciles toward its spec; the child's received value is shown — at the type level — to be
+`project(subtree)` with no field carrying a sibling or ancestor-only branch; each child unseals in each of
+the two sanctioned modes; child A's subtree ciphertext fails to decrypt under child B's Transit key even
+with the parent's Vault unsealed; a named `SecretRef` resolves to bytes the parent injected, never from a
+Dhall fragment or an env var; and each child, registered as a managed resource carrying its own `destroy`,
+tears down leak-free via one `reconcileAbsent` loop.
+**Docs to update**:
+`documents/engineering/cluster_lifecycle_doctrine.md`, `documents/engineering/vault_pki_doctrine.md`,
+`documents/engineering/pulumi_iac_doctrine.md`.
 
 ### Objective
 
@@ -548,8 +584,7 @@ managed-resource registry entry so teardown is a reconcile, not a state machine.
    the OS boundary via `pulumi stack ls`); the "no total function producing a `ChildInForceSpec` containing a
    sibling's branch" claim is discharged as a **committed compile-fail corpus** (not a
    code-review/parametricity argument): `test/compile-fail/ChildInForceSpec/` ([Gate integrity](#gate-integrity)) holds ≥ 2 negative fixtures
-   that each attempt to construct a `ChildInForceSpec` carrying a sibling or ancestor-only branch and **must
-   fail to typecheck**, each asserting its **specific expected compile-fail locus/message** (the type error
+   that each attempt to construct a `ChildInForceSpec` carrying a sibling or ancestor-only branch and **must fail to typecheck**, each asserting its **specific expected compile-fail locus/message** (the type error
    naming the absent constructor/field), paired with a positive fixture that differs only in projecting the
    child's own subtree and **must** compile — authored and committed in Phase 0 before `ChildInForceSpec.hs`
    exists; the committed `project-identity` mutant ([Gate integrity](#gate-integrity)) makes a sibling branch appear in a child's delivered
@@ -564,23 +599,26 @@ The whole sprint (📋 Planned).
 ## Sprint 42.2: Geo-replication of two siblings + invariant-confluence classification 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Multicluster/GeoReplication.hs`, `src/Amoebius/Multicluster/ConfluenceClass.hs`
-— target paths, not yet built.
-**Blocked by**: Sprint 42.1; Phase 41 (the WireGuard network fabric gate the cross-cluster replication rides
-on); Phase 35 (native Pulsar client, CBOR); Phase 37 (content-addressed store + workflow
-runtime); Phase 30 (MinIO); Phase 31 (Patroni Postgres).
-**Independent Validation**: two sibling children replicate a `command → event* → result` workflow over
-native-protocol Pulsar geo-replication, write-once content-addressed MinIO blobs, and Patroni Postgres; a
-duplicate cross-cluster write is shown idempotent against the committed content-addressed golden; every crossing
-mutable multi-record invariant is sorted by the [§17](../documents/engineering/chaos_failover_doctrine.md#17-the-boundary-and-its-classifier) classifier into confluent (crosses freely) or non-confluent
-(held by bounded authority) against the committed independent classification table, an unclassified invariant
-defaulting to non-confluent; and the forest tears down leak-free by the OS-boundary observer.
-**Docs to update**: `documents/engineering/chaos_failover_doctrine.md`,
-`documents/engineering/content_addressing_doctrine.md`.
+**Implementation**: `src/Amoebius/Multicluster/GeoReplication.hs`,
+`src/Amoebius/Multicluster/ConfluenceClass.hs` — target paths, not yet built.
+**Blocked by**: Sprint 42.1;
+Phase 41 (the WireGuard network fabric gate the cross-cluster replication rides on); Phase 35 (native Pulsar
+client, CBOR); Phase 37 (content-addressed store + workflow runtime); Phase 30 (MinIO); Phase 31 (Patroni
+Postgres).
+**Independent Validation**: two sibling children replicate a `command → event* → result` workflow
+over native-protocol Pulsar geo-replication, write-once content-addressed MinIO blobs, and Patroni Postgres;
+a duplicate cross-cluster write is shown idempotent against the committed content-addressed golden; every
+crossing mutable multi-record invariant is sorted by the
+[§17](../documents/engineering/chaos_failover_second_axis.md#17-the-boundary-and-its-classifier) classifier
+into confluent (crosses freely) or non-confluent (held by bounded authority) against the committed
+independent classification table, an unclassified invariant defaulting to non-confluent; and the forest
+tears down leak-free by the OS-boundary observer.
+**Docs to update**:
+`documents/engineering/chaos_failover_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`.
 
 ### Objective
 
-Adopt [`chaos_failover_doctrine.md §16`](../documents/engineering/chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)/[`§17`](../documents/engineering/chaos_failover_doctrine.md#17-the-boundary-and-its-classifier)
+Adopt [`chaos_failover_second_axis.md §16`](../documents/engineering/chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)/[`§17`](../documents/engineering/chaos_failover_second_axis.md#17-the-boundary-and-its-classifier)
 over the confluent data plane of
 [`content_addressing_doctrine.md §5`](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely):
 wire asynchronous geo-replication between two siblings and run the invariant-confluence test (R1) on every
@@ -602,9 +640,7 @@ Pulsar log cross freely, while the gateway authority and any CAS "latest" pointe
 ### Validation
 
 1. A workflow round-trips between the two siblings; replaying a duplicate or reordered batch produces the same
-   fold result **and identical blob keys against the committed content-addressed golden ([Gate integrity](#gate-integrity))** (exactly-once for
-   replicated-or-recovered effects); the classifier's output is checked against the **committed independent
-   classification table ([Gate integrity](#gate-integrity))**, not its own re-derivation, an unclassified invariant defaults to non-confluent,
+   fold result **and identical blob keys against the committed content-addressed golden ([Gate integrity](#gate-integrity))** (exactly-once for replicated-or-recovered effects); the classifier's output is checked against the **committed independent classification table ([Gate integrity](#gate-integrity))**, not its own re-derivation, an unclassified invariant defaults to non-confluent,
    and the classifier refuses active-active on a non-confluent invariant; the committed
    `classifier-default-confluent` mutant ([Gate integrity](#gate-integrity)) — which flips the unclassified default to confluent — wrongly
    admits the unclassified fixture and the classification oracle goes red; the forest tears down leak-free by

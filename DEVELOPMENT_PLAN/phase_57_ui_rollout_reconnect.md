@@ -1,12 +1,32 @@
 # Phase 57: UI rollout, projection catch-up, and reconnect
 
+> **Purpose**: Prove a checked UI program can roll from release A to B and roll back without stale-plan
+> effects, premature traffic shift, lost owner-scoped projections, or discarded reconnect cursors.
+> **Read this if**: phase 57 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 57 delivers the UI rollout, projection catch-up, and reconnect; its design is owned by [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [pulsar_client_doctrine.md](../documents/engineering/pulsar_client_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md (rollout/reconnect portion)
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Prove a checked UI program can roll from release A to B and roll back without stale-plan
-> effects, premature traffic shift, lost owner-scoped projections, or discarded reconnect cursors.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 57.1: Execute and verify the coherent UI release transition 📋](#sprint-571-execute-and-verify-the-coherent-ui-release-transition-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -97,11 +117,14 @@ fail the backend/Redis/cursor timeline.
 ## Sprint 57.1: Execute and verify the coherent UI release transition 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/ReleaseTransition.hs`, `src/Amoebius/Ui/Realtime/Drain.hs`, `test/live/Phase57UiRolloutSpec.hs` (planned; not built)
+**Implementation**: `src/Amoebius/Ui/ReleaseTransition.hs`,
+`src/Amoebius/Ui/Realtime/Drain.hs`, `test/live/Phase57UiRolloutSpec.hs` (planned; not built)
 **Blocked by**: Phases 40, 55, and 56
-**Independent Validation**: `cabal test phase57-ui-rollout-reconnect` against real Keycloak authority, pinned
-timeline/access/cursor tables, and broker/browser/API/CNI observations
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/release_lifecycle_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`
+**Independent Validation**: `cabal test phase57-ui-rollout-reconnect` against
+real Keycloak authority, pinned timeline/access/cursor tables, and broker/browser/API/CNI observations
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
+`documents/engineering/release_lifecycle_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`
 
 ### Objective
 

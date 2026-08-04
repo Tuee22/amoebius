@@ -1,15 +1,49 @@
 # Illegal States — Storage
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
-**Generated sections**: none
-
 > **Purpose**: The themed slice of the illegal-state catalog covering durable storage, bounded backing, and
 > Pulsar retention — the states a valid `InForceSpec` cannot represent for how data is stored, sized, and
 > retained.
+> **Read this if**: a volume, backing, or retention state has to be shown impossible to express.
+
+Storage carries the entries where the cost of being wrong is unrecoverable, so several are foreclosed twice —
+once in the type and again by a total check before any effect. The enumeration's numbering is held by
+[illegal_state_catalog.md](./illegal_state_catalog.md); the lifetimes these entries protect are owned by
+[storage_lifecycle_doctrine.md](../engineering/storage_lifecycle_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Scope](#1-scope)
+- [2. The storage illegal states](#2-the-storage-illegal-states)
+- [3. The backup & recovery illegal states](#3-the-backup--recovery-illegal-states)
+- [Related Documents](#related-documents)
 
 ---
+
+```mermaid
+flowchart LR
+  %% register: orientation
+  g1["Gate-1-editor<br/>8 entries"]
+  g2["Gate-2-decoder<br/>11 entries"]
+  g3["Gate-3-astcheck<br/>none in this slice"]
+  ps["provision-seal<br/>4 entries"]
+  rg["rendered-output-golden<br/>1 entry"]
+  le["live-effect<br/>none in this slice"]
+  g1 -->|"anything the typecheck admits"| g2
+  g2 -->|"linked extension source only"| g3
+  g2 -->|"anything the decoder admits"| ps
+  ps -->|"anything the seal admits"| rg
+  rg -->|"anything the golden admits"| le
+```
+*Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. Storage is the largest slice and the one caught earliest, with 79 per cent foreclosed before any provisioning fold runs. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
 
 ## 1. Scope
 
@@ -17,13 +51,10 @@ This document is a **themed slice** of the illegal-state catalog: the durable-st
 Pulsar-retention entries, faithfully reproduced with their original numbers and headings so inbound links
 stay stable. It is not self-contained framing — it owns only the deep treatment of its entries.
 
-- The **catalog index** (which states are illegal, the full [§3](#3-the-backup--recovery-illegal-states).x list) and the **honesty limit** (a
-  type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
+- The **catalog index** (which states are illegal, the full [§3](#3-the-backup--recovery-illegal-states).x list) and the **honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced here, not restated.
 - The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure**
-  ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal question of *where* each state is caught —
-  `Gate-1-editor`, `Gate-2-decoder`, `provision-seal` (post-bind Phase-11 provision returns a `ProvisionError`
-  before any `ProvisionedSpec` exists), `rendered-output-golden`, `live-effect`) are owned by
+  ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal question of *where* each state is caught — `Gate-1-editor`, `Gate-2-decoder`, `provision-seal` (post-bind Phase-11 provision returns a `ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden`, `live-effect`) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced here, not restated.
 
 Everything below is **design intent** (per [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
@@ -107,12 +138,10 @@ Raw Pulsar lets a topic keep bytes forever, or offload on a **time-only** trigge
 tier — so if ingest outpaces the offload lag, BookKeeper fills, bookies go read-only, and the topic (often
 the broker) goes **unavailable**. amoebius makes a topic's `RetentionPolicy` a **mandatory, non-optional**
 field with a **mandatory size-triggered S3 offload** (time may offload *sooner* for cost but is never the
-sole trigger — a time-only policy is uninhabitable), and folds two ceilings: the hot-tier cap **plus
-required open-ledger/in-flight/deletion headroom** through BookKeeper write-quorum placement and every derived
+sole trigger — a time-only policy is uninhabitable), and folds two ceilings: the hot-tier cap **plus required open-ledger/in-flight/deletion headroom** through BookKeeper write-quorum placement and every derived
 re-replication scenario against each bookie backing (the availability fit), and the retained total against the offload
 target (the durability fit). A mandatory backlog quota is the runtime fail-safe. **Owner:**
-[`pulsar_client_doctrine.md` §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) (the policy
-shape) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the two-ceiling fold).
+[`pulsar_client_doctrine.md` §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) (the policy shape) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the two-ceiling fold).
 **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (mandatory `RetentionPolicy` + mandatory size offload — no forever-local arm) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (retention-budget room-fit). **Layer:** type-foreclosed for the mandatory shape; decode-foreclosed for both room-fits; runtime-checked residue
 — the burst back-pressure actually holding.
@@ -125,13 +154,10 @@ residue (the burst back-pressure and backlog quota actually holding at runtime).
 ### 3.21 Capacity growth without an amoebius-owned scaling policy
 
 An unbounded autoscaling ceiling is how a bounded budget becomes unbounded. amoebius makes growth
-representable **only** through a `Growable = Bounded | Autoscaled ScalingPolicy` union with **no
-bare-unbounded arm**: the sole path past a fixed cap carries a typed `ScalingPolicy` (capacity thresholds,
+representable **only** through a `Growable = Bounded | Autoscaled ScalingPolicy` union with **no bare-unbounded arm**: the sole path past a fixed cap carries a typed `ScalingPolicy` (capacity thresholds,
 instance price-shopping, a quota cap), and amoebius owns that logic. The fold re-runs against the grown bound,
 so "unbounded" storage/compute exists only behind a policy whose ceiling is a quota. **Owner:**
-[`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (with enaction owned by
-[`cluster_lifecycle_doctrine.md` §8](../engineering/cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning) and
-[`pulumi_iac_doctrine.md` §4](../engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)).
+[`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (with enaction owned by [`cluster_lifecycle_doctrine.md` §8](../engineering/cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning) and [`pulumi_iac_doctrine.md` §4](../engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)).
 **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `Growable` union, no unbounded arm). **Layer:** type-foreclosed representation; runtime-checked that
 the autoscaler actually grows capacity and the cloud honors the quota.
 **Validation-locus:** `Gate-1-editor` (the closed `Growable = Bounded | Autoscaled ScalingPolicy` union with
@@ -279,8 +305,7 @@ Restoring one tenant's backup into another, or re-tagging a backup's owning iden
 foreign tenant's data. A backup's `source` is a phantom-tagged `Ref tenant DurableCoordinate`, and there is no
 `Ref t1 → Ref t2` coercion, so a cross-tenant backup or restore has no inhabitant; sharing a backup is the
 append-only revocable capability edge, never a re-tag. **Owner:** [`backup_recovery_doctrine.md` §6](../engineering/backup_recovery_doctrine.md#6-the-verified-content-addressed-backupartifact)
-(tenant tag owned by [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md), sharing edge by
-[`inforcespec_migration_doctrine.md` §7](../engineering/inforcespec_migration_doctrine.md#7-sanctioned-sharing-is-an-append-only-revocable-capability-edge)).
+(tenant tag owned by [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md), sharing edge by [`inforcespec_migration_doctrine.md` §7](../engineering/inforcespec_migration_doctrine.md#7-sanctioned-sharing-is-an-append-only-revocable-capability-edge)).
 **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (phantom tenant tags). **Layer:** type-foreclosed. **Validation-locus:** `Gate-2-decoder`.
 
@@ -324,13 +349,57 @@ exactly one `BackupPolicy` owner under a total ownership-index fold; a double-cl
 **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (single-owner ownership index). **Layer:** decode-foreclosed. **Validation-locus:** `Gate-2-decoder`.
 
+### 3.85 A spec verb that destroys durable bytes
+
+Every imperative infrastructure surface offers the destructive verb directly — `DROP`, `TRUNCATE`,
+`kubectl delete pvc`, a lifecycle rule that expires objects — so "no data loss" rests on the migration
+author's discipline and on review. amoebius removes the verb instead of guarding it: the only mutations a
+spec may author over an existing durable coordinate (a PV, a bucket, a topic, a schema, a registry backend)
+live in a closed `StorageMutation = Retain | Offload | Grow | Shrink` union with no `Delete`/`Drop`/`Erase`/
+`Truncate` arm, and `Shrink` is *defined* as the verified create-new → migrate → retire-old pipeline rather
+than a truncation. "Discard these bytes" therefore has no syntax and no inhabitant anywhere the spec can
+reach; physical reclaim of a retired backing is an external privileged operator act, outside the spec and
+outside every reconciler.
+**Owner:** [`inforcespec_migration_doctrine.md` §3](../engineering/inforcespec_migration_doctrine.md#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)
+(the verb union) + [`storage_lifecycle_doctrine.md` §7](../engineering/storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation)
+(the posture the arms preserve) + [`migration_doctrine.md` §2](../engineering/migration_doctrine.md#2-the-law)
+(the general law's clause 2).
+**Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(closed union with the arm absent).
+**Layer:** type-foreclosed for the absent arm — no `.dhall` value denotes destruction; runtime-checked residue
+— that the verified copy's bytes match and that the retired backing is still intact are observations, not
+type facts.
+**Validation-locus:** `Gate-1-editor` (a `Delete`/`Truncate` constructor does not exist, so the value fails
+`dhall type` at authoring time) + `live-effect` residue (copy equivalence and the non-destructive retirement
+transition). Per the validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md),
+orthogonal to the foreclosure layer above.
+
+### 3.86 A new generation that orphans a retained coordinate
+
+Removing the destructive verb ([§3.85](#385-a-spec-verb-that-destroys-durable-bytes)) leaves one way to
+destroy data by **omission**: upload a generation that simply stops naming a retained volume, bucket, topic,
+or schema the prior generation named. Nothing in either generation's *type* is wrong, and Dhall cannot compare
+two whole specs, so this residue is caught by a decode-time fold over the old→new diff. A `dhall update` is
+rejected when the diff drops a retained coordinate with no data-preserving disposition — a `Retain`, an
+`Offload`, or a `Shrink` carrying its verified-migrate — and likewise when it contracts a retention span below
+the currently-retained span without an offload-first phase. A silent drop is not a value the update accepts.
+**Owner:** [`inforcespec_migration_doctrine.md` §5](../engineering/inforcespec_migration_doctrine.md#5-the-decode-time-no-orphan-fold).
+**Technique:** [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
+(a relation over the two generations' coordinate collections, which per that section degrades to a
+decode-foreclosed fold and is never type-foreclosed) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
+(the coordinate identity the fold joins on).
+**Layer:** decode-foreclosed for the structural half — the diff either carries a disposition for every dropped
+coordinate or returns `Left`; runtime-checked for the hybrid half — whether a dropped coordinate still holds
+live data may require consulting live retained state, and that half is never reported as a compile-time
+impossibility.
+**Validation-locus:** `Gate-2-decoder` (the old→new orphan and retention-floor folds return `Left` at decode)
++ `live-effect` residue (the retained-state consultation). Per the validation-locus axis of
+[`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the foreclosure layer above.
+
 ---
 
-## Cross-references
-
-- [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog index (the full [§3](./illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent).x
-  list) and the load-bearing honesty limit (a type-check proves the spec composes, not that the cluster
-  enforces it); this document is the storage slice carved from it.
+## Related Documents
+- [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog index (the full [§3](./illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent).x list) and the load-bearing honesty limit (a type-check proves the spec composes, not that the cluster enforces it); this document is the storage slice carved from it.
 - [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
   coverage matrix ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the three-layer foreclosure ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the validation-locus axis referenced by every
   entry above.
@@ -346,5 +415,4 @@ exactly one `BackupPolicy` owner under a total ownership-index fold; a double-cl
 - [`pulsar_client_doctrine.md`](../engineering/pulsar_client_doctrine.md) — owner of topic retention and the
   `RetentionPolicy` shape with its mandatory size-triggered offload ([§3.19](#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar), [§3.20](#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)).
 - [`cluster_lifecycle_doctrine.md`](../engineering/cluster_lifecycle_doctrine.md) and
-  [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md) — owners of the enaction of a `ScalingPolicy` (dynamic
-  node provisioning, the provisioned resource catalog) that [§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy) gates.
+  [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md) — owners of the enaction of a `ScalingPolicy` (dynamic node provisioning, the provisioned resource catalog) that [§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy) gates.

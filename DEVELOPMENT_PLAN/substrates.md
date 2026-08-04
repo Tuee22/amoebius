@@ -1,13 +1,24 @@
 # Substrate Registry and Per-Phase Substrate Map
 
+> **Purpose**: The plan-side substrate registry and the per-phase substrate map — which single substrate each
+> phase's acceptance gate keys to (phases 0–64), keyed to the closed substrate catalog owned by the substrate
+> doctrine.
+> **Read this if**: a phase's substrate has to be established, or a new substrate is being considered.
+
+This document is the substrate registry and the per-phase map: which host platform each gate runs on, and why
+at most one may be named per gate. It owns the registry and the mapping; the substrate concept itself is owned
+by [`../documents/engineering/substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md), and
+phase order by [README.md](README.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: The plan-side substrate registry and the per-phase substrate map — which single substrate each
-> phase's acceptance gate keys to (phases 0–64), keyed to the closed substrate catalog owned by the substrate
-> doctrine.
+</details>
 
 ---
 
@@ -22,8 +33,7 @@ that map honest against the plan.
 
 The governing rule is the one-substrate discipline from
 [`development_plan_standards.md` §L — one-substrate discipline](development_plan_standards.md#l-one-substrate-discipline)
-and the [README.md Phase discipline](README.md#phase-discipline): **a phase's acceptance gate requires at
-most one substrate** (`apple` | `linux-cuda` | `linux-cpu` | `windows`), named in that phase's `Phase
+and the [README.md Phase discipline](README.md#phase-discipline): **a phase's acceptance gate requires at most one substrate** (`apple` | `linux-cuda` | `linux-cpu` | `windows`), named in that phase's `Phase
 Summary` and tracked here. This prevents cross-substrate flip-flopping mid-development — a phase whose work
 would touch several substrates is split until each gate is single-substrate. A phase that needs no host at all
 (pure documentation or pure type-checking) is `none`.
@@ -36,9 +46,7 @@ Two facts from the doctrine make this discipline enforceable rather than aspirat
   A `.dhall` therefore cannot assert a substrate a machine does not have.
 - **The standard service contract is target-independent.** The lower-layer LoadBalancer backend is derived from
   the materialized compute engine/provider, not from the detected substrate alone
-  ([`substrate_doctrine.md` §7 — the LoadBalancer backend mapping](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference),
-  reinforced by
-  [`platform_services_doctrine.md` §12 — substrate equivalence as a structural invariant](../documents/engineering/platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)).
+  ([`substrate_doctrine.md` §7 — the LoadBalancer backend mapping](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference), reinforced by [`platform_services_doctrine.md` §12 — substrate equivalence as a structural invariant](../documents/engineering/platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)).
   Thus a managed-provider gate retains the same core service set as a `linux-cpu` self-managed gate; provider
   LB/DNS integrations do not create a different platform inventory.
 
@@ -62,8 +70,7 @@ gates.
 > about the machine, never a knob). The **compute engine** — `kind` / `rke2` / `Managed EKS` — is a separate
 > **declared** axis owned by
 > [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md); EKS is therefore a
-> *managed provider entry* (below), **not** a fifth detected substrate. Each host entry also **advertises a
-> declared inventory** — a complete per-host/node `Capacity` (CPU/memory, pod-ephemeral capacity, the
+> *managed provider entry* (below), **not** a fifth detected substrate. Each host entry also **advertises a > declared inventory** — a complete per-host/node `Capacity` (CPU/memory, pod-ephemeral capacity, the
 > nodefs/imagefs/containerfs layout, disjoint disk pools, and the accelerator device vector or Apple
 > unified-memory shape) whose model is owned by
 > [`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
@@ -234,8 +241,7 @@ row's full objective, gate, and sprint breakdown lives in its phase document
 | 11 | Whole-deployment provision seal + expansion | `none` | Register 1: `planInfrastructure` derives the exact demand from the expanded `BoundDeployment` and the provision seal validates/CAS-enacts it; pure, no host or cluster. |
 | 12 | InferenceEngine capability + accelerator provision | `none` | Register 1: the `InferenceEngine` capability binds and provisions to an opaque `ProvisionedSpec` by selecting the matching CUDA target offering; pure planning, no host or cluster. |
 | 13 | Pure `renderAll` + rendered-output goldens | `none` | Register 1: sole public whole-deployment `renderAll` + byte-for-byte manifest goldens; rendering never touches live infra, and no service-valued render boundary exists. |
-| 14 | chain/Step kernel + `--dry-run` + boundary fake-tool harness | `none` | Registers 1/2: the pure `[Step]` plan + `--dry-run` golden, then the boundary harness runs that plan against fake `kubectl`/`docker`/`pulumi` by absolute path; recorded argv + applied bytes match the committed goldens; no cluster. |
-| 15 | Deterministic-simulation substrate | `none` | Register 2 (serves the Register-2.5 deterministic-simulation activity): the real daemon/reconciler code under `IOSim`/`IOSimPOR` against a modeled fault-injectable environment; same-seed → byte-identical trace; no cluster. |
+| 14 | chain/Step kernel + `--dry-run` + boundary fake-tool harness | `none` | Registers 1/2: the pure `[Step]` plan + `--dry-run` golden, then the boundary harness runs that plan against fake `kubectl`/`docker`/`pulumi` by absolute path; recorded argv + applied bytes match the committed goldens; no cluster. | | 15 | Deterministic-simulation substrate | `none` | Register 2 (serves the Register-2.5 deterministic-simulation activity): the real daemon/reconciler code under `IOSim`/`IOSimPOR` against a modeled fault-injectable environment; same-seed → byte-identical trace; no cluster. |
 | 16 | Bounded UI-program schema | `none` | Register 1: closed Dhall UI algebra, named external-link requirements, and normalization; no raw URL, browser, server, host, or cluster. |
 | 17 | Scoped identity kernel | `none` | Register 1: pure tenant/subject/membership/owner joins against an independent table. |
 | 18 | UI authorization kernel | `none` | Register 1: pure `CanRead`/`CanInvoke` decisions against an independent access matrix. |
@@ -300,8 +306,7 @@ This map owns only the **one substrate per gate** assignment.
 ([`development_plan_standards.md` §I](development_plan_standards.md#i-generated-section-markers)), but both
 tables above are **hand-authored** today and the header declares `Generated sections: none` accordingly. A
 future amoebius `dev docs generate` will own a generated **stack-surface table** (the per-substrate ×
-per-service provider/LB/arch matrix — and, alongside it, the **compute-engine × substrate compatibility
-matrix** that [`cluster_topology_doctrine.md` §5](../documents/engineering/cluster_topology_doctrine.md)
+per-service provider/LB/arch matrix — and, alongside it, the **compute-engine × substrate compatibility matrix** that [`cluster_topology_doctrine.md` §5](../documents/engineering/cluster_topology_doctrine.md)
 defines, plus a **per-provider quota** column for the `CloudQuota` backing) fenced between
 `<!-- amoebius:stack_surface:start -->` /
 `<!-- amoebius:stack_surface:end -->` markers; until that generator exists, marking a table generated is

@@ -1,18 +1,44 @@
 # Browser Offline Runtime
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
-**Generated sections**: none
-
 > **Purpose**: Define the bounded DSL, paired plans, encrypted browser facilities, authentication states,
 > authoritative replay protocol, and release obligations for offline-capable amoebius applications.
+> **Read this if**: an application has to keep working without a network, or queued work has to be replayed safely.
+
+This document owns bounded offline continuity: what a specification may declare offline, the encrypted local
+store, and the rule that queued intent carries no execution authority and is re-decided by the server on
+replay. It does not own the online runtime it pairs with, owned by
+[low_code_ui_runtime_doctrine.md](./low_code_ui_runtime_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. Scope and adjacent owners](#2-scope-and-adjacent-owners)
+- [3. The authored continuity surface](#3-the-authored-continuity-surface)
+- [4. Queueable ports are a stricter port class](#4-queueable-ports-are-a-stricter-port-class)
+- [5. One bound program, paired online and offline plans](#5-one-bound-program-paired-online-and-offline-plans)
+- [6. Closed browser facilities and encrypted storage](#6-closed-browser-facilities-and-encrypted-storage)
+- [7. Offline identity and partitioning](#7-offline-identity-and-partitioning)
+- [8. One active tab owns connection and replay](#8-one-active-tab-owns-connection-and-replay)
+- [9. Authoritative replay and typed outcomes](#9-authoritative-replay-and-typed-outcomes)
+- [10. Offline blobs](#10-offline-blobs)
+- [11. Release, schema, and compatibility horizon](#11-release-schema-and-compatibility-horizon)
+- [12. Deployment policy, resources, and honesty](#12-deployment-policy-resources-and-honesty)
+- [Related Documents](#related-documents)
+
+---
 
 Phase order, implementation status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). This doctrine states the offline target
 contract; it does not claim that browser persistence or replay is implemented.
-
----
 
 ## 1. Why this doctrine exists
 
@@ -313,8 +339,7 @@ the application DSL. This is sibling evidence, not an amoebius implementation cl
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Low-Code UI Runtime](./low_code_ui_runtime_doctrine.md)
 - [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md)
 - [Release Lifecycle](./release_lifecycle_doctrine.md)

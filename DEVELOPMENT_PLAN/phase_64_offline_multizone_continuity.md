@@ -1,13 +1,36 @@
 # Phase 64: Offline multi-zone continuity
 
+> **Purpose**: Establish the complete offline-capable UI claim across disconnection, a provider-zone fault,
+> Redis/UI-server failover, current reauthentication, blob upload, and effectively-once authoritative replay
+> under each effect owner's declared idempotency contract.
+> **Read this if**: phase 64 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 64 delivers the offline multi-zone continuity; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu → provider` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Establish the complete offline-capable UI claim across disconnection, a provider-zone fault,
-> Redis/UI-server failover, current reauthentication, blob upload, and effectively-once authoritative replay
-> under each effect owner's declared idempotency contract.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — offline multi-zone fault envelope](#resource-provision--offline-multi-zone-fault-envelope)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 64.1: Run the offline multi-zone campaign 📋](#sprint-641-run-the-offline-multi-zone-campaign-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
+
+---
 
 ## Phase Status
 
@@ -66,10 +89,15 @@ unbounded replay/fanout/upload demand refuses the campaign.
 ## Sprint 64.1: Run the offline multi-zone campaign 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Offline/Ha/MultiZone.hs`, `test/live/Phase64OfflineMultiZoneSpec.hs` (planned; not built)
+**Implementation**: `src/Amoebius/Ui/Offline/Ha/MultiZone.hs`,
+`test/live/Phase64OfflineMultiZoneSpec.hs` (planned; not built)
 **Blocked by**: Phases 47, 58, and 63
-**Independent Validation**: `cabal test offline-multizone-continuity` from an off-cluster probe against provider-confirmed zone isolation and independent browser/identity/data observers
-**Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Independent Validation**: `cabal test offline-multizone-continuity` from an off-cluster probe against
+provider-confirmed zone isolation and independent browser/identity/data observers
+**Docs to update**:
+`documents/engineering/browser_offline_runtime_doctrine.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`,
+`documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 

@@ -6,7 +6,7 @@
 
 - testing : designed. See documents/engineering/testing_doctrine.md — a test *is* an amoebius deployment
   (spec + chaos schedule + typed expectation surface + mandatory teardown), the three phase-gate registers plus
-  the Register-2.5 simulation activity, and the per-run proven/tested/assumed ledger. Generation is Phase 42.
+  the Register-2.5 simulation activity, and the per-run proven/tested/assumed ledger. Generation is Phase 54.
 
 - backups : designed. See documents/engineering/backup_recovery_doctrine.md — the closed BackupPolicy
   deployment rule (remote / append-only-WORM / air-gapped manual-or-automatic media), the write-but-never-delete
@@ -20,4 +20,56 @@
   DESIGNED. See documents/engineering/preflight_validation_doctrine.md — the pure-functional `Check` algebra
   behind the `dhall update` admission gate: the AWS `DryRun` + STS join and the SSH reach + hardware-match
   probes, the worst-case dynamic envelope that validates a future-needed credential now, and the recursive
-  `SubtreeValidated` proof tree. Adopted by Phase 26 (admission gate) and Phases 34/37 (provider probes).
+  `SubtreeValidated` proof tree. Adopted by Phase 33 (the singleton's `dhall update` admission gate).
+
+New questions:
+
+-prometheus/grafana: is it impossible to represent unmonitored deployments ? do we have a well definted DSL shape for monitoring ?
+  DESIGNED. Was: no — monitoring bound only `Workflow`/`RouteEntry`/`ExtensionSpec`, so a plain workload, a
+  platform capability, a Job, a host worker or a fabric role deployed unmonitored. See
+  documents/engineering/monitoring_doctrine.md — now FOUR obligations: §2.4 adds the mandatory
+  `BoundExecutionUnit.monitor : UnitMonitor` (`MonitorProvenance` has no `Exempt` arm), parallel to
+  platform_services §10's "no pod is exempt" `ResourceEnvelope`, so "monitored deployment" and "deployment"
+  have the same inhabitants. Three defects repaired: `WorkflowMonitor` now carries `access : AccessScope`
+  (the no-`Public` guarantee was claimed type-foreclosed while only the TensorBoard arm had the field), the
+  `AccessScope` arm count and the stale `UserScoped` naming are reconciled across three docs, and the
+  previously-undefined leaf types (`MetricName`, `ErrorBudget`, `BacklogBound`, `PrometheusRule`,
+  `GrafanaPanel`, `MonitoredTopology`, `BudgetRemaining`, `BreachReason`) are declared or delegated. The alert
+  receiver now exists inside the `Observability` capability, baked and Keycloak-fronted, with delivery beyond
+  the cluster edge stated as out of band (a URL arm would be the escape the DSL forecloses everywhere else).
+  illegal_state_catalog.md §3.87; Phases 4/5/11/31/35 wired.
+
+-what is the purpose of ToyModel and why is it golden locked
+  DESIGNED. See documents/engineering/formal_model_doctrine.md §4.1 — the reference-model obligation now has a
+  doctrinal home (it previously lived only in the phase file). ToyModel is the throwaway bounded two-process
+  mutual-exclusion model authored entirely inside the fragment, whose only job is to prove the KERNEL
+  (`interpret` and `emitTLA` are faithful denotations of one value) before the Phase-3 GatewayMigration rides
+  on it. Byte-locked for three stated reasons: anti-circularity (the golden is committed in Phase 0 before
+  `EmitTLA.hs` exists), sole coverage of the liveness path (the differential test is safety-scoped and blind
+  to `SF_vars`→`WF_vars` or `[]`↔`<>`), and non-vacuity via a structural assertion that walks the value.
+  Phase 2 now pins the canonical TLA+ rendering convention the byte golden requires, and
+  development_plan_standards §M.1 gains the general golden-amendment clause.
+
+-what are the various types in Model ?
+  DESIGNED. See documents/engineering/formal_model_doctrine.md §2–§3 — `Model` (9 fields), `Action` (4),
+  `Fairness = WeakFair | StrongFair`, `Temporal = Always | Eventually | LeadsTo` (those five are the "all five
+  liveness/fairness constructors" Phase 2 keeps citing → `WF_vars`/`SF_vars`/`[]`/`<>`/`~>`), plus `State`,
+  `Event`, `Tla`, `Cfg`, `Name`, and the `ConstVal` value domain. `Expr` — which types 6 of 9 `Model` fields
+  and every `Temporal` argument — was declared NOWHERE and is now declared with its full constructor set,
+  including the `Card` and `Add`/`Sub` formers the Phase-3 `ownerCount ~> ownerCount = 1` goal needs and the
+  earlier prose list lacked. `interpret` is now `Model -> Event -> State -> Maybe State` (disabled event =
+  `Nothing`, not a fabricated stutter step), with `enabledEvents` named for the explorer.
+
+-is there a general story for migrations
+  DESIGNED. See documents/engineering/migration_doctrine.md — the law was re-derived in six-plus docs and
+  owned by none. It now states five clauses once (create-new → verified-migrate → retire-old; no representable
+  destruction; observed edge never a duration; failure retires nothing; rollback is a pointer CAS) plus a
+  "one discipline, many instances" table over eleven senses, modelled on readiness_ordering §7. Two exceptions
+  are stated rather than elided: `Failover` can lose committed writes, and sibling-project convergence is a
+  homonym. Holes closed: a stand-down edge and the `PlannedMigrationTerminates` liveness goal for a stalled
+  `Planned` handover (§3.88 — `UniqueGatewayOwner` is "at most one", so a zero-owner stall violated nothing);
+  the `StorageMutation` name collision; mid-copy chunk-granularity re-entry; DSL schema evolution
+  (widening/narrowing/reinterpretation, generated_artifacts §5.1); the missing inforcespec↔gateway
+  cross-links; and §3.85/§3.86, the two catalog entries inforcespec_migration's headline claims previously
+  lacked. Tenant promotion to a child cluster is recorded OPEN — it was asserted to be a `RolloutPhase`, which
+  is the in-cluster apply, and no owner covers moving durable bytes across a cluster boundary. 

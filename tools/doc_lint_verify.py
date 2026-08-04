@@ -47,9 +47,15 @@ def fixture_side():
     print(f"fixture side — {len(names)} seeded negatives\n")
     for name in names:
         want, co_implied = expected(name)
-        code, violations = doc_lint.run(os.path.join(CORPUS, name))
+        # An advisory check does not fail the gate, so its fixture is proven by the
+        # check's own run. The seeded defect must still be the ONLY one it trips.
+        only = {want} if want in doc_lint.ADVISORY else None
+        code, violations = doc_lint.run(os.path.join(CORPUS, name), only=only)
         hit = sorted({v.check for v in violations})
         allowed = {want} | co_implied
+        if only:
+            _, all_v = doc_lint.run(os.path.join(CORPUS, name))
+            hit = sorted({v.check for v in all_v})
         if code == 0:
             print(f"  FAIL  {name:38s} lint stayed clean; expected {want}")
             ok = False
@@ -62,7 +68,8 @@ def fixture_side():
             ok = False
         else:
             also = f"  (co-implies {', '.join(sorted(co_implied))})" if co_implied else ""
-            print(f"  ok    {name:38s} {want}{also}")
+            adv = "  (advisory)" if want in doc_lint.ADVISORY else ""
+            print(f"  ok    {name:38s} {want}{adv}{also}")
     return ok
 
 

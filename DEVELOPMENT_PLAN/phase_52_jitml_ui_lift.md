@@ -1,13 +1,34 @@
 # Phase 52: jitML UI lift
 
+> **Purpose**: Lift jitML training, checkpoint, and ready-model contracts into the generic UI runtime and test
+> only an owned, committed, Ready model can be invoked from the authenticated application, with the terminal
+> training receipt recoverable across UI-server, Redis, and WebSocket loss.
+> **Read this if**: phase 52 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 52 does for jitML's numerics-facing surface what phase 50 did for infernix, and is the second and last such lift; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [lift_and_compose_doctrine.md](../documents/engineering/lift_and_compose_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cuda` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Lift jitML training, checkpoint, and ready-model contracts into the generic UI runtime and test
-> only an owned, committed, Ready model can be invoked from the authenticated application, with the terminal
-> training receipt recoverable across UI-server, Redis, and WebSocket loss.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — bounded jitML realtime envelope](#resource-provision--bounded-jitml-realtime-envelope)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 52.1: Bind the jitML training-to-ready-model UI adapter 📋](#sprint-521-bind-the-jitml-training-to-ready-model-ui-adapter-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -134,16 +155,15 @@ unbounded Redis/output-buffer, or one-short post-fault lookup shape refuses befo
 ## Sprint 52.1: Bind the jitML training-to-ready-model UI adapter 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/JitML/UiAdapter.hs`,
-`dhall/ui/jitml.dhall`, and `test/live/Phase52JitMLUiLift.hs`
-(target paths; not yet built)
-**Blocked by**: Phase 31 gate; Phase 40 gate; Phase 51 gate.
-**Independent Validation**: the live harness checks the ready/failed/in-flight/non-owner/foreign matrix against
-Keycloak, Envoy, Pulsar, MinIO, checkpoint, GPU, Redis-route, durable-receipt, and browser evidence; all five
-committed mutants must turn red.
+**Implementation**: `src/Amoebius/JitML/UiAdapter.hs`, `dhall/ui/jitml.dhall`, and
+`test/live/Phase52JitMLUiLift.hs` (target paths; not yet built)
+**Blocked by**: Phase 31 gate; Phase 40
+gate; Phase 51 gate.
+**Independent Validation**: the live harness checks the
+ready/failed/in-flight/non-owner/foreign matrix against Keycloak, Envoy, Pulsar, MinIO, checkpoint, GPU,
+Redis-route, durable-receipt, and browser evidence; all five committed mutants must turn red.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/lift_and_compose_doctrine.md`,
-`documents/engineering/tenancy_doctrine.md`, and
+`documents/engineering/lift_and_compose_doctrine.md`, `documents/engineering/tenancy_doctrine.md`, and
 `documents/engineering/ui_realtime_coordination_doctrine.md`.
 
 ### Objective

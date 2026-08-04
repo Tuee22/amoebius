@@ -1,14 +1,37 @@
 # Phase 33: Live DSL deploy via the replicas=1 singleton
 
+> **Purpose**: Turn the pre-cluster-proven DSL into a live deploy — hand the mandatory reconciler Lease from
+> the observed bootstrap host to the Deployment-`replicas=1` control-plane singleton, then have that singleton
+> decode one `.dhall` and reconcile the platform plus a trivial app onto a real cluster, with single-writer
+> exclusion delegated to k8s/etcd and no amoebius election.
+> **Read this if**: phase 33 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 33 delivers the live DSL deploy via the replicas=1 singleton; its design is owned by [preflight_validation_doctrine.md](../documents/engineering/preflight_validation_doctrine.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Turn the pre-cluster-proven DSL into a live deploy — hand the mandatory reconciler Lease from
-> the observed bootstrap host to the Deployment-`replicas=1` control-plane singleton, then have that singleton
-> decode one `.dhall` and reconcile the platform plus a trivial app onto a real cluster, with single-writer
-> exclusion delegated to k8s/etcd and no amoebius election.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Resource provision — the singleton's sealed whole-deployment envelope](#resource-provision--the-singletons-sealed-whole-deployment-envelope)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 33.1: The control-plane singleton — a Deployment replicas=1, single-instance from k8s/etcd 📋](#sprint-331-the-control-plane-singleton--a-deployment-replicas1-single-instance-from-k8setcd-)
+- [Sprint 33.2: Live reconcile of the platform + a trivial app from one `.dhall` 📋](#sprint-332-live-reconcile-of-the-platform--a-trivial-app-from-one-dhall-)
+- [Sprint 33.3: Phase gate harness — live deploy + the pre-cluster negative corpus as a live regression guard 📋](#sprint-333-phase-gate-harness--live-deploy--the-pre-cluster-negative-corpus-as-a-live-regression-guard-)
+- [Sprint 33.4: The admin REST surface — `vault init/unseal`, `dhall update`, secret KV-CRUD 📋](#sprint-334-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -45,8 +68,7 @@ Single-writer authority for that singleton is **delegated to k8s/etcd**: the Dep
 to desired `replicas=1` and reschedules on node loss, but update/replacement may transiently expose distinct old,
 terminating, and replacement Pod UIDs. Strict at-most-one-writer is therefore a Kubernetes `Lease` (the
 etcd-backed client-go leader-election
-object) — **never a bespoke amoebius election, no ranked-failover rule, no warm-standby candidate population,
-no signed-commit-log protocol**. The singleton is **stateless at the pod level** — it holds no PVC; its
+object) — **never a bespoke amoebius election, no ranked-failover rule, no warm-standby candidate population, no signed-commit-log protocol**. The singleton is **stateless at the pod level** — it holds no PVC; its
 durable state is exclusively the Vault-enveloped MinIO bucket — so a lost pod loses nothing. As a regression
 belt, the pre-cluster negative corpus of Phase 6 is re-run against this live deploy path and each fixture still
 fails to type-check or decode — but that type/decode result was **already proven in the pre-cluster band**;
@@ -67,8 +89,7 @@ substrate is exercised by this phase's gate.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** on a single-node linux-cpu `kind` cluster, one `.dhall` decodes and the **Deployment-`replicas=1`
-control-plane singleton** — single-writer authority delegated to k8s/etcd, with **no amoebius election** — reconciles
+**Gate:** on a single-node linux-cpu `kind` cluster, one `.dhall` decodes and the **Deployment-`replicas=1` control-plane singleton** — single-writer authority delegated to k8s/etcd, with **no amoebius election** — reconciles
 the standard platform-service stack plus a trivial app to convergence and tears down leak-free, while the
 pre-cluster (Phase-6) negative corpus, re-run against the same live deploy path, still fails at Gate 1 or
 Gate 2 — a **Register-3** live-infrastructure check. Before the singleton's first mutation, the gate observes
@@ -79,6 +100,21 @@ operator drives `vault init/unseal` → `dhall update` → `kv put/get/list/dele
 operator password never persisted, every seal-critical verb refused from a non-node-local reach before any Vault
 contact, and every named `SecretRef` whose capability probe fails rejected before any reconcile with its own
 distinct reason tag.
+
+```mermaid
+flowchart LR
+  %% register: orientation
+  s0["Sprint 33.1: The control-plane singleton — a Deployment replicas=1…"]
+  s1["Sprint 33.2: Live reconcile of the platform + a trivial app from one .dhall"]
+  s2["Sprint 33.3: Phase gate harness — live deploy + the pre-cluster negative…"]
+  s3["Sprint 33.4: The admin REST surface — vault init/unseal, dhall update…"]
+  gate["the phase 33 gate"]
+  s0 -->|"produces what the next consumes"| s1
+  s1 -->|"produces what the next consumes"| s2
+  s2 -->|"produces what the next consumes"| s3
+  s3 -->|"the last seam the gate closes over"| gate
+```
+*Orientation. The seams phase 33 builds, in order; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns the apparatus. Not run.*
 
 **Gate-integrity clauses ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate is hardened as follows and passes only when every clause below holds:
 
@@ -107,8 +143,7 @@ distinct reason tag.
   expected per-pass enact sets (`test/fixtures/phase33/expected-enact-pass1.json`,
   `…/expected-enact-pass2.json`), the perturbation target list (`…/perturb-targets.txt`), and the negative
   corpus's expected Gate-1/Gate-2 rejection-tag table (`…/negative-expected-tags.tsv`, hand-authored,
-  independent of the singleton's own decoder output — §M.3) are all **committed in Phase 0 before
-  `Singleton.hs`/`Reconcile.hs`/`Deploy.hs` exist**; none is regenerated from implementation output. The
+  independent of the singleton's own decoder output — §M.3) are all **committed in Phase 0 before `Singleton.hs`/`Reconcile.hs`/`Deploy.hs` exist**; none is regenerated from implementation output. The
   admin-surface oracles of [Sprint 33.4](#sprint-334-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-)
   — `test/golden/admin/reach-matrix.tsv`, `test/golden/admin/admission-tags.tsv`, and the paired
   `test/fixtures/admin/secrets-capability/` corpus — are pinned on the same terms, before `AdminApi.hs` exists.
@@ -125,7 +160,7 @@ distinct reason tag.
 ## Resource provision — the singleton's sealed whole-deployment envelope
 
 This phase applies — as consumed background, not a newly adopted doctrine — the canonical resource matrix and sealed whole-deployment provision boundary from
-[`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+[`resource_capacity_types.md §3.1`](../documents/engineering/resource_capacity_types.md#31-the-systematic-provision-matrix)
 and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting);
 the singleton receives no bootstrap exception from those folds.
 
@@ -216,8 +251,7 @@ refuse before the first apiserver or object-store mutation.
 - [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)
   — *the control-plane singleton*: every cluster has exactly one brain holding total authority over the cluster
   and its secrets. Per [§3.1](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
-  ("exactly one pod" is a k8s/etcd property, not an amoebius election), the singleton is a **Deployment
-  `replicas=1`**, **stateless** at the pod level (no PVC; durable state exclusively the Vault-enveloped MinIO
+  ("exactly one pod" is a k8s/etcd property, not an amoebius election), the singleton is a **Deployment `replicas=1`**, **stateless** at the pod level (no PVC; durable state exclusively the Vault-enveloped MinIO
   bucket), and single-writer authority is **delegated to k8s/etcd** through the mandatory `Lease`, never a
   bespoke election. This phase also performs the one-way authority handoff from the observed Phase-26
   bootstrap-host holder through fresh release and observed holder absence on that same Lease object to the authenticated singleton Pod holder; Kubernetes
@@ -238,8 +272,7 @@ refuse before the first apiserver or object-store mutation.
   a tested amoebius result.
 - [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
   — *the illegal-state-unrepresentable contract*: Gate 1, Gate 2, bind/expand, the Phase-11 provision seal,
-  and Phase-13 `renderAll` were discharged in-process in the pre-cluster band. This phase runs the **runtime
-  residue** — the live path must follow decoded IR → bind/expand → `planInfrastructure` → explicit
+  and Phase-13 `renderAll` were discharged in-process in the pre-cluster band. This phase runs the **runtime residue** — the live path must follow decoded IR → bind/expand → `planInfrastructure` → explicit
   already-materialized observation (or validated/CAS-enacted batch and receipt) → `ProvisionContext` →
   `provision` → opaque `ProvisionedSpec` → `renderAll`; an incompatible target returns `Left` before effects.
   The live gate proves the apiserver
@@ -250,29 +283,29 @@ refuse before the first apiserver or object-store mutation.
 ## Sprint 33.1: The control-plane singleton — a Deployment replicas=1, single-instance from k8s/etcd 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/ControlPlane/Singleton.hs` (the in-cluster singleton role + the shared
-daemon spine); `src/Amoebius/ControlPlane/Reconcile.hs` (the `discover → diff → enact → re-observe` loop
-wrapping the Phase-26 typed reconciler and its observed-Pod/runtime-storage normalization);
-`src/Amoebius/ControlPlane/AuthorityHandoff.hs` (bootstrap-holder drain/release/readback and singleton acquire);
-`src/Amoebius/Capacity/RuntimeStorage.hs` (shared component-role/layout and scope-indexed node-accounting fold)
-— target paths, not yet built.
-**Blocked by**: Phase 26 gate (the typed renderer + SSA reconciler and observed bootstrap-host Lease holder —
-the singleton is itself a rendered, applied object); Phase 29 gate (root Vault — the singleton is the in-cluster principal that operates Vault);
-Phase 24 gate (the `kind` cluster + the host-daemon→singleton handoff the midwife begins).
-**Independent Validation**: on the single-node linux-cpu cluster the singleton manifest is a **Deployment with
-`replicas=1`** carrying **no PVC**; the Pod comes up, runs the daemon spine, and serves `/healthz` / `/readyz`
-/ `/metrics`; deleting the Pod causes Kubernetes to converge a replacement with no data
-loss; the manifest contains **no amoebius election controller, no ranked-failover config, and no standby
-Pod**. **"At most one writer" is observed concretely (§M.5):** an apiserver watch records every Pod UID,
-owner chain, protected source annotation, phase, and Lease transition across the full delete→reschedule window;
-at every resource version at most one authenticated UID holds the Lease, while every simultaneously present or
-reserved UID remains in the capacity ledger. Initial bring-up must additionally show bootstrap holder →
-quiesced/released → fresh same-Lease holder absence → authenticated singleton Pod UID holder, with no host mutation after release
-and no singleton mutation before acquire. **"No data loss" names the durable state
-probed:** before the delete the singleton's `InForceSpec` object is written to the Vault-Transit-enveloped
-MinIO bucket; after the replacement reports `/readyz` ready it reads that object back and the decrypted bytes
-are byte-identical to the pre-delete write (a stateless pod losing its durable MinIO state would fail this).
-**Docs to update**: `documents/engineering/daemon_topology_doctrine.md`,
+**Implementation**: `src/Amoebius/ControlPlane/Singleton.hs` (the in-cluster singleton
+role + the shared daemon spine); `src/Amoebius/ControlPlane/Reconcile.hs` (the `discover → diff → enact →
+re-observe` loop wrapping the Phase-26 typed reconciler and its observed-Pod/runtime-storage normalization);
+`src/Amoebius/ControlPlane/AuthorityHandoff.hs` (bootstrap-holder drain/release/readback and singleton
+acquire); `src/Amoebius/Capacity/RuntimeStorage.hs` (shared component-role/layout and scope-indexed
+node-accounting fold) — target paths, not yet built.
+**Blocked by**: Phase 26 gate (the typed renderer + SSA
+reconciler and observed bootstrap-host Lease holder — the singleton is itself a rendered, applied object);
+Phase 29 gate (root Vault — the singleton is the in-cluster principal that operates Vault); Phase 24 gate
+(the `kind` cluster + the host-daemon→singleton handoff the midwife begins).
+**Independent Validation**: on
+the single-node linux-cpu cluster the singleton manifest is a **Deployment with `replicas=1`** carrying **no PVC**; the Pod comes up, runs the daemon spine, and serves `/healthz` / `/readyz` / `/metrics`; deleting the
+Pod causes Kubernetes to converge a replacement with no data loss; the manifest contains **no amoebius election controller, no ranked-failover config, and no standby Pod**. **"At most one writer" is observed concretely (§M.5):** an apiserver watch records every Pod UID, owner chain, protected source annotation,
+phase, and Lease transition across the full delete→reschedule window; at every resource version at most one
+authenticated UID holds the Lease, while every simultaneously present or reserved UID remains in the
+capacity ledger. Initial bring-up must additionally show bootstrap holder → quiesced/released → fresh
+same-Lease holder absence → authenticated singleton Pod UID holder, with no host mutation after release and
+no singleton mutation before acquire. **"No data loss" names the durable state probed:** before the delete
+the singleton's `InForceSpec` object is written to the Vault-Transit-enveloped MinIO bucket; after the
+replacement reports `/readyz` ready it reads that object back and the decrypted bytes are byte-identical to
+the pre-delete write (a stateless pod losing its durable MinIO state would fail this).
+**Docs to update**:
+`documents/engineering/daemon_topology_doctrine.md`,
 `documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
@@ -305,8 +338,7 @@ bootstrap-host-to-singleton Lease handoff, and no amoebius election.
 - Single-writer authority **delegated to k8s/etcd**: the Deployment controller converges desired `replicas=1`
   while old/terminating/replacement UIDs may overlap; a Kubernetes `Lease` (the
   etcd-backed client-go leader-election object) is the sole mechanism where strict at-most-one-writer must
-  survive deletion/eviction replacement or partition — **no bespoke election, no signed commit log, no
-  standby population**.
+  survive deletion/eviction replacement or partition — **no bespoke election, no signed commit log, no standby population**.
 - A closed initial `AuthorityHandoff`: while holding the exact Lease the Phase-26 host applies the singleton
   Deployment; the waiting Pod can complete prerequisites but receives no mutation capability and keeps
   `/readyz` false. The host stops action issuance, drains in-flight work, executes the typed
@@ -329,8 +361,7 @@ bootstrap-host-to-singleton Lease handoff, and no amoebius election.
    authenticated Pod UID holds the Lease at each resource version while all present/reserved UIDs remain
    capacity-debited, with the MinIO-held `InForceSpec` read back byte-identical afterward.
 2. The reconcile loop runs one idempotent pass to convergence from a decoded spec and a re-run is a no-op,
-   where **"no-op" is defined observably (§M.6) as: the second pass's apiserver audit log records zero mutating
-   writes (`create`/`update`/`patch`/`delete`) under the singleton field manager** — unchanged end-state
+   where **"no-op" is defined observably (§M.6) as: the second pass's apiserver audit log records zero mutating writes (`create`/`update`/`patch`/`delete`) under the singleton field manager** — unchanged end-state
    readiness alone does not satisfy this. To prove the compute path actually ran on the second pass (not a
    skipped/memoized short-circuit), the second pass executes with any reconcile result cache bypassed and its
    `discover` step is observed to have re-read live cluster state before concluding the empty diff. The
@@ -363,28 +394,26 @@ The whole sprint (📋 Planned).
 ## Sprint 33.2: Live reconcile of the platform + a trivial app from one `.dhall` 📋
 
 **Status**: Planned
-**Implementation**: `dhall/examples/platform_plus_trivial_app.dhall` (the positive deploy fixture);
-`src/Amoebius/ControlPlane/Deploy.hs` (the singleton's platform + trivial-app reconcile entry) — target paths,
-not yet built.
-**Blocked by**: Sprint 33.1 (the running singleton + reconcile loop); Phase 30 and Phase 31 gates (the service
-set the `.dhall` deploys); Phase 32 gate (the Keycloak-owned edge through which the app is validated); Phase 5
-(the Gate-2 decoder producing the in-memory IR the loop consumes).
-**Independent Validation**: one `.dhall` decodes through `Dhall.inputFile auto` to its IR and the singleton
-reconciles the standard platform stack plus a trivial single-service app to ready on the linux-cpu cluster.
-**Because Phases 24–32 leave the platform and edge pre-converged, the harness first perturbs the Phase-30/31
-service set (§M.6, forecloses the
-pre-converged-ride cheat):** before the first pass it deletes the named components in
-`test/fixtures/phase33/perturb-targets.txt` (at minimum one platform `Deployment` and its `Service` — e.g. the
-Prometheus `Deployment`+`Service`), then asserts **per-pass enact records read from the apiserver audit log
-(§M.5), not the singleton's self-report:** the **first** pass's created/patched set is **non-empty** and
-matches `expected-enact-pass1.json` (it restores the deleted components to Ready), and the **second**
-invocation's enact set is **empty** and matches `expected-enact-pass2.json` — a `no-op` meaning **zero mutating
-writes under the singleton field manager in the audit log**, not merely unchanged end-state readiness. A
-teardown then leaves **no leaked resources**: the postflight sweep is scoped explicitly to **this run's
-provisioned objects, identified by the run-unique label `amoebius.dev/phase33-run=<run-id>` the singleton
-stamps on every object it creates** (Phase-54 flag-at-creation machinery is not assumed; this label set is
-authored here), and the sweep is empty over that label set; separately, every platform component perturbed by
-the harness is asserted back at Ready so the shared Phase-30/31 stack is left as found.
+**Implementation**: `dhall/examples/platform_plus_trivial_app.dhall` (the positive
+deploy fixture); `src/Amoebius/ControlPlane/Deploy.hs` (the singleton's platform + trivial-app reconcile
+entry) — target paths, not yet built.
+**Blocked by**: Sprint 33.1 (the running singleton + reconcile loop);
+Phase 30 and Phase 31 gates (the service set the `.dhall` deploys); Phase 32 gate (the Keycloak-owned edge
+through which the app is validated); Phase 5 (the Gate-2 decoder producing the in-memory IR the loop
+consumes).
+**Independent Validation**: one `.dhall` decodes through `Dhall.inputFile auto` to its IR and the
+singleton reconciles the standard platform stack plus a trivial single-service app to ready on the linux-cpu
+cluster. **Because Phases 24–32 leave the platform and edge pre-converged, the harness first perturbs the Phase-30/31 service set (§M.6, forecloses the pre-converged-ride cheat):** before the first pass it deletes
+the named components in `test/fixtures/phase33/perturb-targets.txt` (at minimum one platform `Deployment`
+and its `Service` — e.g. the Prometheus `Deployment`+`Service`), then asserts **per-pass enact records read from the apiserver audit log (§M.5), not the singleton's self-report:** the **first** pass's created/patched
+set is **non-empty** and matches `expected-enact-pass1.json` (it restores the deleted components to Ready),
+and the **second** invocation's enact set is **empty** and matches `expected-enact-pass2.json` — a `no-op`
+meaning **zero mutating writes under the singleton field manager in the audit log**, not merely unchanged
+end-state readiness. A teardown then leaves **no leaked resources**: the postflight sweep is scoped
+explicitly to **this run's provisioned objects, identified by the run-unique label `amoebius.dev/phase33-run=<run-id>` the singleton stamps on every object it creates** (Phase-54
+flag-at-creation machinery is not assumed; this label set is authored here), and the sweep is empty over
+that label set; separately, every platform component perturbed by the harness is asserted back at Ready so
+the shared Phase-30/31 stack is left as found.
 **Docs to update**: `documents/engineering/dsl_doctrine.md`,
 `documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -440,31 +469,30 @@ The whole sprint (📋 Planned).
 ## Sprint 33.3: Phase gate harness — live deploy + the pre-cluster negative corpus as a live regression guard 📋
 
 **Status**: Planned
-**Implementation**: `test/integration/Phase33Gate.hs` (linux-cpu spin-up / reconcile / teardown + the negative
-regression assertions); `test/integration/Phase33RuntimeStorage.hs` (planned-slot→observed-Pod-UID readback,
-SplitRuntime backing boundaries, node scope/domain/ownership equality, reservation/observed no-double-debit,
-and alias controls); the reused Phase-6
-negative corpus under `dhall/examples/illegal_*.dhall` (re-run, not
-re-authored) — target paths, not yet built.
-**Blocked by**: Sprint 33.1, Sprint 33.2; Phase 6 (the pre-cluster illegal-state negative corpus +
-validation-locus ledger, already proven in Registers 1–2); Phase 32 gate (the Keycloak-owned edge the deployed
-app must route through).
-**Independent Validation**: the harness deploys the platform + trivial app from one `.dhall` on linux-cpu
-(under the perturbation + attribution regime of the Gate-integrity clauses and Sprint 33.2) and tears down
-leak-free, then re-runs each Phase-6 negative fixture against the live deploy path and asserts each still
-**fails at Gate 1 or Gate 2**, and each positive fixture still decodes; the run emits a **Register-3**
-proven/tested/assumed ledger naming the live substrate. **"The live deploy path" is pinned to the identical
-entry point the positive fixture used (§M.3, forecloses the host-side re-run cheat):** each negative `.dhall`
-is submitted through the exact same singleton spec-ingestion/`Deploy.hs` entry the positive gate fixture flowed
-through (not a separate host-side CorpusSpec decoder), and each yields a **structured Gate-1 (`dhall type`
-error) or Gate-2 (`DecodeError` tag) rejection whose emitted tag equals the Phase-0-committed expected tag for
-that fixture in `test/fixtures/phase33/negative-expected-tags.tsv` (§M.8)** — a bare "it failed" does not
-satisfy this. **"No fixture reaches the apiserver" is proven, not assumed (§M.5):** across the entire negative
-corpus run the apiserver audit log shows **zero** platform/app-object writes, and a full-cluster
-`resourceVersion` snapshot taken before and after the corpus run is equal — cluster state is byte-for-byte
-unchanged.
-**Docs to update**: `DEVELOPMENT_PLAN/substrates.md`, `documents/engineering/testing_doctrine.md`,
-`DEVELOPMENT_PLAN/README.md` (flip the Phase-33 status when the gate passes).
+**Implementation**: `test/integration/Phase33Gate.hs` (linux-cpu spin-up / reconcile /
+teardown + the negative regression assertions); `test/integration/Phase33RuntimeStorage.hs`
+(planned-slot→observed-Pod-UID readback, SplitRuntime backing boundaries, node scope/domain/ownership
+equality, reservation/observed no-double-debit, and alias controls); the reused Phase-6 negative corpus
+under `dhall/examples/illegal_*.dhall` (re-run, not re-authored) — target paths, not yet built.
+**Blocked by**: Sprint 33.1, Sprint 33.2; Phase 6 (the pre-cluster illegal-state negative corpus + validation-locus
+ledger, already proven in Registers 1–2); Phase 32 gate (the Keycloak-owned edge the deployed app must route
+through).
+**Independent Validation**: the harness deploys the platform + trivial app from one `.dhall` on
+linux-cpu (under the perturbation + attribution regime of the Gate-integrity clauses and Sprint 33.2) and
+tears down leak-free, then re-runs each Phase-6 negative fixture against the live deploy path and asserts
+each still **fails at Gate 1 or Gate 2**, and each positive fixture still decodes; the run emits a
+**Register-3** proven/tested/assumed ledger naming the live substrate. **"The live deploy path" is pinned to the identical entry point the positive fixture used (§M.3, forecloses the host-side re-run cheat):** each
+negative `.dhall` is submitted through the exact same singleton spec-ingestion/`Deploy.hs` entry the
+positive gate fixture flowed through (not a separate host-side CorpusSpec decoder), and each yields a
+**structured Gate-1 (`dhall type` error) or Gate-2 (`DecodeError` tag) rejection whose emitted tag equals
+the Phase-0-committed expected tag for that fixture in `test/fixtures/phase33/negative-expected-tags.tsv`
+(§M.8)** — a bare "it failed" does not satisfy this. **"No fixture reaches the apiserver" is proven, not
+assumed (§M.5):** across the entire negative corpus run the apiserver audit log shows **zero**
+platform/app-object writes, and a full-cluster `resourceVersion` snapshot taken before and after the corpus
+run is equal — cluster state is byte-for-byte unchanged.
+**Docs to update**:
+`DEVELOPMENT_PLAN/substrates.md`, `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md`
+(flip the Phase-33 status when the gate passes).
 
 ### Objective
 Adopt [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
@@ -480,8 +508,7 @@ the pre-cluster band; here the guard confirms the live deploy path never admits 
 - The negative regression guard: the Phase-6 corpus (a bad PVC↔PV pairing, a Keycloak-bypassing open ingress, a
   product named in application logic, and the capacity/topology/bounded-storage set) **re-run** against the
   live deploy path (the same singleton `Deploy.hs` entry the positive fixture used), each asserted to fail at
-  Gate 1 or Gate 2 **with its specific foreclosure tag matching the Phase-0-committed hand-authored oracle
-  `test/fixtures/phase33/negative-expected-tags.tsv`** (each row: fixture → expected `dhall type` error or
+  Gate 1 or Gate 2 **with its specific foreclosure tag matching the Phase-0-committed hand-authored oracle `test/fixtures/phase33/negative-expected-tags.tsv`** (each row: fixture → expected `dhall type` error or
   `DecodeError` tag, authored independently of the singleton's decoder — §M.3/§M.8), and each paired with a
   positive that differs only in the foreclosed dimension — **never re-establishing** the type discipline, only
   guarding that the deploy path inherits it.
@@ -521,30 +548,33 @@ The whole sprint (📋 Planned).
 ## Sprint 33.4: The admin REST surface — `vault init/unseal`, `dhall update`, secret KV-CRUD 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/ControlPlane/AdminApi.hs` (the four endpoint families, their reach classes,
-and the `dhall update` admission gate), `pb/pb/admin.py` (the **admin-REST client** mode of the two-mode `pb`
-CLI, deferred to "the singleton" by [phase_24](phase_24_midwife_bootstrap_kind.md) Sprint 24.3 and owned here) —
-target paths, not yet built. This sprint promotes Sprint 33.1's admin-REST **control-surface stub** to the real
-surface; it does not re-implement the Sprint-29.1 Argon2id→AEAD unlock envelope, the Phase-29 Vault client, or
-the Sprint-33.2 reconcile loop — it is the operator-facing channel into all three.
-**Blocked by**: Sprint 33.1 (the singleton that hosts the surface, and the stub this replaces); Sprint 33.2 (the
-reconcile loop `dhall update` drives); Phase 29 gate (the root Vault, its unlock-material envelope, and the
-built-in Vault client the KV verbs and the admission gate call). **Not circular:** Phase 29 unseals under the
-Phase-26 bootstrap-host authority, which is the only authority that exists before this surface; this sprint adds
-the operator-facing endpoint that fronts that same mechanism once the singleton holds the Lease
+**Implementation**: `src/Amoebius/ControlPlane/AdminApi.hs` (the four endpoint families,
+their reach classes, and the `dhall update` admission gate), `pb/pb/admin.py` (the **admin-REST client**
+mode of the two-mode `pb` CLI, deferred to "the singleton" by
+[phase_24](phase_24_midwife_bootstrap_kind.md) Sprint 24.3 and owned here) — target paths, not yet built. This sprint promotes Sprint 33.1's admin-REST
+**control-surface stub** to the real surface; it does not re-implement the Sprint-29.1 Argon2id→AEAD unlock
+envelope, the Phase-29 Vault client, or the Sprint-33.2 reconcile loop — it is the operator-facing channel
+into all three.
+**Blocked by**: Sprint 33.1 (the singleton that hosts the surface, and the stub this
+replaces); Sprint 33.2 (the reconcile loop `dhall update` drives); Phase 29 gate (the root Vault, its
+unlock-material envelope, and the built-in Vault client the KV verbs and the admission gate call). **Not circular:** Phase 29 unseals under the Phase-26 bootstrap-host authority, which is the only authority that
+exists before this surface; this sprint adds the operator-facing endpoint that fronts that same mechanism
+once the singleton holds the Lease
 ([`bootstrap_sequence_doctrine.md` §4](../documents/engineering/bootstrap_sequence_doctrine.md#4-the-host-daemon--singleton-handoff), step 8 of [§3](../documents/engineering/bootstrap_sequence_doctrine.md#3-the-ordered-bootstrap-sequence) exposes the surface *at* the handoff point).
-**Independent Validation**: an operator drives the full post-handoff sequence **only** through the amoebius
-NodePort admin surface — `vault init/unseal`, then `dhall update`, then `kv put/get/list/delete` — and the
-cluster reconciles toward the delivered `InForceSpec`. The operator password crosses CLI → NodePort → singleton
-and is **never persisted**: an OS-boundary observer (§M.5 — a write/`strace` observer over the singleton process
-and its container filesystem plus the apiserver audit log, never a log the endpoint emits about itself) shows it
-in no file, no environment variable, no k8s object, and no log line. Each seal-critical call attempted from a
+**Independent Validation**: an operator drives the full
+post-handoff sequence **only** through the amoebius NodePort admin surface — `vault init/unseal`, then
+`dhall update`, then `kv put/get/list/delete` — and the cluster reconciles toward the delivered
+`InForceSpec`. The operator password crosses CLI → NodePort → singleton and is **never persisted**: an
+OS-boundary observer (§M.5 — a write/`strace` observer over the singleton process and its container
+filesystem plus the apiserver audit log, never a log the endpoint emits about itself) shows it in no file,
+no environment variable, no k8s object, and no log line. Each seal-critical call attempted from a
 non-node-local reach is **refused before any Vault contact** with its own reach-violation tag. Each `dhall
 update` whose named `SecretRef` fails its capability probe is rejected **before any reconcile** with its own
 distinct reason tag, and the apiserver audit log records zero writes for that attempt.
-**Docs to update**: `documents/engineering/bootstrap_sequence_doctrine.md`,
-`documents/engineering/substrate_doctrine.md`, `documents/engineering/vault_pki_doctrine.md`,
-`documents/engineering/tenancy_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+**Docs to update**:
+`documents/engineering/bootstrap_sequence_doctrine.md`, `documents/engineering/substrate_doctrine.md`,
+`documents/engineering/vault_pki_doctrine.md`, `documents/engineering/tenancy_doctrine.md`,
+`DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`bootstrap_sequence_doctrine.md` §5 — the admin control plane: the CLI ↔ the singleton REST API](../documents/engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)

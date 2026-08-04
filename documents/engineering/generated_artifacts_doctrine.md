@@ -1,11 +1,21 @@
 # Generated Artifacts: emitted from a source of truth, never committed
 
+> **Purpose**: Single source of truth for the rule that every artifact amoebius can *render from a typed source* — Kubernetes manifests, TLA+ files, Dhall schemas, checked UI plans/content manifests, PureScript catalog codecs, and the generic client bundle — is a **build artifact emitted at build/check time and never committed to the repository**; only authored Dhall and runtime/generator source are committed.
+> **Read this if**: it has to be settled whether an artifact is committed or produced.
+
+This document owns the committed-versus-generated boundary: which artifacts are rendered from source and
+never checked in, and which are authored and versioned precisely because they must not be derivable from the
+thing they check. It owns no generator; each is owned by the doctrine that defines its output.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
-> **Purpose**: Single source of truth for the rule that every artifact amoebius can *render from a typed source* — Kubernetes manifests, TLA+ files, Dhall schemas, checked UI plans/content manifests, PureScript catalog codecs, and the generic client bundle — is a **build artifact emitted at build/check time and never committed to the repository**; only authored Dhall and runtime/generator source are committed.
+</details>
 
 ---
 
@@ -65,7 +75,7 @@ the recipe becomes a projection of typed data and the committed artifact is the 
 
 ## 3. The rule
 
-- **No production generated artifact lives in the repository.** No `spec/tla/*.tla`, rendered manifest YAML, reflected
+- **No production generated artifact lives in the repository.** No `gen/tla/*.tla`, rendered manifest YAML, reflected
   `*.dhall` schema, checked `ClientPlan`/`UiServerPlan`, offline codec/migration/compatibility or service-worker
   manifest, per-app content manifest, generated `*.purs` catalog codec, or compiled generic client bundle is
   committed. The repository holds Haskell and generic PureScript
@@ -79,9 +89,28 @@ the recipe becomes a projection of typed data and the committed artifact is the 
   renderer and committed under `test/` as an oracle
   ([conformance_harness_doctrine.md](./conformance_harness_doctrine.md)). Copying the renderer's own output into
   the golden is prohibited: that copy is a generated artifact and supplies no independent expectation.
+- **One emitted path, one suffix convention, one scan.** So that "generated" and "authored oracle" can never
+  be confused by a reader or a check, three conventions are normative and are stated **here**, not
+  re-derived per phase:
+  1. **Emitted artifacts are written only under the git-ignored `gen/` tree**, in a per-kind subdirectory
+     (`gen/tla/`, `gen/manifests/`, `gen/dhall/`, `gen/ui/`). No emitted artifact is written anywhere else,
+     and nothing under `gen/` is ever tracked.
+  2. **A committed oracle carries a `.golden` suffix appended to its natural extension**
+     (`ToyModel.tla.golden`, `<deployment-id>.json.golden`) and lives under `test/`. The suffix is what makes
+     an authored fixture textually distinguishable from the artifact it pins.
+  3. **The never-committed check is one command**: `git ls-files -- 'gen/*'` plus a per-kind extension sweep
+     over tracked paths whose extension is *literally* the generated one — for TLA+,
+     `git ls-files -- '*.tla' '*.cfg'` — each returning empty. A `.golden`-suffixed fixture does not match
+     either, by construction; an actually-emitted `.tla`/`.cfg` under version control fails.
+- **A golden is amended, never rewritten from a failing run.** When a renderer's output legitimately changes —
+  a formatting fix, a new constructor, a fragment extension, a toolchain bump that alters accepted syntax —
+  the golden is updated under the oracle-amendment discipline of
+  [development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
+  which requires the amendment be authored from the *intended* output and reviewed as a change to the
+  expectation. Regenerating a golden from the failing run's actual output silently converts an oracle into a
+  snapshot and is prohibited at any phase.
 - **Run-evidence ledgers are committed records.** The honesty ledger a gate emits
-  ([testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact),
-  [development_plan_standards.md §K](../../DEVELOPMENT_PLAN/development_plan_standards.md#k-honesty-proven--tested--assumed))
+  ([testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact), [development_plan_standards.md §K](../../DEVELOPMENT_PLAN/development_plan_standards.md#k-honesty-proven--tested--assumed))
   **is committed**, deliberately. It is the second non-production committed class, alongside independently
   authored test oracles. It is *not* a rendering
   of a committed source that can be regenerated on demand — it is the durable record of *what a gate run
@@ -128,6 +157,45 @@ The rule is about *rendered* artifacts, not all non-Haskell files. The committed
 The line: a human-authored typed input or runtime/generator implementation is committed source; an artifact
 projected or compiled deterministically from that source is generated and is not committed.
 
+### 5.1 When the reflected schema changes under an authored `.dhall`
+
+**The problem.** The two classes above are coupled in one direction that the rule above does not cover. An
+operator's `InForceSpec` and an app's `UiSource` are *authored* and committed; the Dhall schema they are
+authored **against** is *generated* from the Haskell ADTs. So a change to those ADTs — a field added, a union
+arm added, a field renamed or removed — silently changes the meaning of every already-committed `.dhall` value
+in the fleet. The failure is not a stale generated artifact (there is none to go stale); it is a committed
+authored value that no longer type-checks, or worse, still type-checks and now means something else. It
+surfaces at the next `dhall update`, on a spec the operator did not touch.
+
+**Why the obvious alternative fails.** Versioning the schema and keeping N of them re-admits exactly what
+[§1](#1-why-this-doctrine-exists) removes: several concurrent descriptions of one type surface, kept in step by
+hope. Refusing ever to change the ADTs is not available either — the whole plan is a sequence of phases that
+widen them.
+
+**The chosen rule.** Schema evolution is classified by what it does to already-authored values, and only two
+of the three classes are admissible without an authored migration:
+
+- **Widening** — adding an *optional* field with a default, or adding a union arm no existing value inhabits.
+  Every committed `.dhall` still type-checks and still denotes what it denoted. Admissible.
+- **Narrowing** — removing a field or arm, or making an optional field required. Existing values may stop
+  type-checking. Admissible **only** as a `dhall update` that is rejected at Gate 1 with the operator holding
+  the authored value: the operator edits the source, because amoebius does not own it. There is no automatic
+  rewrite of an authored file, and there is deliberately no facility to produce one — a tool that silently
+  edited an operator's committed spec would make the authored/generated line meaningless.
+- **Reinterpretation** — keeping a field's name and type while changing its meaning. **Not admissible.** It is
+  the one change that cannot be caught by any gate, because the old value still type-checks and now denotes
+  something else. A meaning change is expressed as a *rename* (a narrowing plus a widening), so that Gate 1
+  refuses the old value rather than accepting it under new semantics.
+
+**What it forecloses.** amoebius gives up in-place schema upgrades of operator-authored specs: a narrowing is
+an operator edit, and there is no migration tool to write. The honest residue is that the widening/narrowing
+classification is a property of the ADT change, checked by the Dhall typechecker on the corpus rather than
+proven — nothing forbids an author from making a reinterpretation change, and only review catches it.
+
+This is the DSL's own instance of the general migration law
+([migration_doctrine.md §3](./migration_doctrine.md#3-one-discipline-many-instances)); it is recorded there as
+an instance whose verification gate is the Gate-1 typecheck over the committed fixture corpus.
+
 ---
 
 ## 6. Planning ownership
@@ -141,8 +209,7 @@ result.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Formal Model Doctrine](./formal_model_doctrine.md) — the `.tla`/`.cfg` case
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — the k8s-object and `--dry-run` cases

@@ -1,15 +1,38 @@
 # Phase 11: Whole-deployment provision seal + expansion
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
-**Generated sections**: none
-
 > **Purpose**: Take the fully expanded `BoundDeployment` produced by [Phase 10](phase_10_capability_bind.md),
 > run it through the conditional infrastructure planner/materialization boundary and then the Phase-7/8/9
 > capacity folds, and either prove the declared target materialized — sealing one opaque whole-deployment
 > `ProvisionedSpec` carrying a single identity-keyed `ProvisionedRenderSourceSet` with per-field ownership and
 > four-stage activation — or return exactly one structured `ProvisionError` at the `provision-seal` locus.
+> **Read this if**: phase 11 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 11 delivers the whole-deployment provision seal + expansion; its design is owned by [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [resource_capacity_sources.md](../documents/engineering/resource_capacity_sources.md), [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), and the plan for reaching it is owned here.
+Register 1: an in-process battery, no cluster.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 11.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) 📋](#sprint-111-the-conditional-infrastructure-planner--materialization-boundary-planinfrastructure-)
+- [Sprint 11.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion 📋](#sprint-112-the-whole-deployment-provision-fold--executionruntime-storageobjectobservabilitymigrationscheduler-expansion-)
+- [Sprint 11.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation 📋](#sprint-113-the-provisionedspec-seal--identity-keyed-render-source-set--four-stage-activation-)
+- [Sprint 11.4: The provision-seal property/corpus + the Register-1 gate 📋](#sprint-114-the-provision-seal-propertycorpus--the-register-1-gate-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -64,16 +87,18 @@ stages. On any insufficiency — post-bind expansion overcommit, monitoring-work
 a CUDA-requiring workload on a non-CUDA topology — it returns the exact structured `ProvisionError` at the
 `provision-seal` locus and never constructs `ProvisionedSpec`.
 
-What is **not** here: the capability union, the `CapabilityBinding`, the total `bind`, the object-node-multiset
-shape oracle, and the Gate-1/Gate-2 negatives ([Phase 10](phase_10_capability_bind.md)); the *representational*
-`InferenceEngine`/`EngineRuntime` union and the identity-complete accelerator source/workload/residency/
-coexistence provision corpus ([Phase 12](phase_12_inference_accelerator_provision.md)); the *soundness* of the
-`fits`/`carve`/`place` folds and the composed full-resource-vector place-witness gate this phase merely invokes
-([Phase 7](phase_07_capacity_core_folds.md), [Phase 8](phase_08_storage_geometry_folds.md),
-[Phase 9](phase_09_execution_accelerator_folds.md)); the pure `renderAll :: ProvisionedSpec -> [K8sObject]` that
-consumes the sealed set ([Phase 13](phase_13_render_manifest_goldens.md)); the live `amoebius-capacity`
-scheduler runtime ([Phase 27](phase_27_capacity_scheduler.md)); and the live realization of any provider or the
-actual jit-resolve of an engine ([Phase 48](phase_48_determinism_jitcache.md), the live band).
+What is **not** here:
+- the capability union, the `CapabilityBinding`, the total `bind`, the object-node-multiset shape oracle,
+  and the Gate-1/Gate-2 negatives ([Phase 10](phase_10_capability_bind.md))
+- the *representational* `InferenceEngine`/`EngineRuntime` union and the identity-complete accelerator
+  source/workload/residency/ coexistence provision corpus
+  ([Phase 12](phase_12_inference_accelerator_provision.md))
+- the *soundness* of the `fits`/`carve`/`place` folds and the composed full-resource-vector place-witness
+  gate this phase merely invokes ([Phase 7](phase_07_capacity_core_folds.md), [Phase 8](phase_08_storage_geometry_folds.md), [Phase 9](phase_09_execution_accelerator_folds.md))
+- the pure `renderAll :: ProvisionedSpec -> [K8sObject]` that consumes the sealed set ([Phase 13](phase_13_render_manifest_goldens.md))
+- the live `amoebius-capacity` scheduler runtime ([Phase 27](phase_27_capacity_scheduler.md))
+- and the live realization of any provider or the actual jit-resolve of an engine
+  ([Phase 48](phase_48_determinism_jitcache.md), the live band).
 
 **Substrate:** none — no host, no cluster, no provider; the gate is an in-process `cabal test` over
 `planInfrastructure` + `provision` + `provisionRenderSources`, analogous to the Phase-9 fold battery it invokes.
@@ -110,41 +135,61 @@ apparatus (`illegal_accelerator_count_shortage`, `illegal_accelerator_source_wor
 mutants) stays in [Phase 12](phase_12_inference_accelerator_provision.md). This phase inherits only the
 seal-locus slice below.
 
+```mermaid
+flowchart LR
+  %% register: orientation
+  s0["Sprint 11.1: The conditional infrastructure planner + materialization…"]
+  s1["Sprint 11.2: The whole-deployment provision fold…"]
+  s2["Sprint 11.3: The ProvisionedSpec seal + identity-keyed render-source set…"]
+  s3["Sprint 11.4: The provision-seal property/corpus + the Register-1 gate"]
+  gate["the phase 11 gate"]
+  s0 -->|"produces what the next consumes"| s1
+  s1 -->|"produces what the next consumes"| s2
+  s2 -->|"produces what the next consumes"| s3
+  s3 -->|"the last seam the gate closes over"| gate
+```
+*Orientation. The seams phase 11 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+
 **Oracle-pinning (§M.1).** Every fixture, expected `ProvisionError` tag, and reference table this gate checks
 against is authored and **committed in Phase 0**, before `planInfrastructure`/`provision` exist — no oracle is
 regenerated from the implementation's own output, and the opaque `ProvisionedSpec` has *no* golden (a golden
 value would defeat its opacity; its correctness is checked only through the independent reference predicates
 below):
 
-- **Inherited positive corpus** (authored in Phase 0, provisioned here): the nine per-arm positive fixtures
-  `dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` for all nine capability arms — each already
-  `bind`-checked against its `golden_servicespec_<arm>_<shape>` in Phase 10 — are provisioned against their
-  declared target topologies. Two Phase-0-committed `ProvisionTargetSupply` fixtures drive the planner boundary:
-  a **pre-existing** fixture that must yield `NoInfrastructureRequired`, and a **creation** fixture that must
-  return one `InfrastructureRequired` plan, validate/CAS-enact its `ProvisionedProviderActionBatch` into a
-  `ValidatedInfrastructureActionBatch`, and feed a receipt-bound `ObservedInfrastructureMaterialization` into
-  `ProvisionContext`.
-- **Seal-locus negative corpus** — each asserting **its specific `ProvisionError` reason (§M.8)** and each
-  paired with a positive differing only in the foreclosed dimension:
-  `dhall/examples/illegal_post_bind_expansion_overcommit.dhall` (an app skeleton that fits alone but whose case
-  table makes the selected provider's kind-indexed desired replica, surge instance, retained old revision, live
-  terminating instance, sidecars, standard-platform graph, model-derived kubelet/CRI runtime metadata, or one
-  physical partition's unique child-carve sum exceed its exact boundary by one — each case returns its exact
-  structured `Left`, proving the seal runs the fold *after* identity-keyed epoch expansion and
-  component→role→layout-backing derivation, not over the raw app);
-  `illegal_monitoring_work_over_budget.dhall` (the expanded `Observability` descriptor exceeds one mandatory
-  finite `MonitoringWorkBudget` workflow/rule/series/evaluation-work bound by one → `Left MonitoringBudgetExceeded`,
-  its paired positive differing only in that bound);
-  `illegal_accelerator_vram_shortage.dhall` (a residency epoch that fits raw device `memory.total` but exceeds
-  net `allocatableVram` → `ProvisionError VramOvercommit`);
-  `illegal_cuda_on_cpu_target.dhall` (a CUDA-requiring workload on a non-CUDA topology → `ProvisionError
-  MissingCapability Cuda`);
-  `illegal_controller_child_unbounded.dhall` (`Left UnknownCommitment`: a CR arm with no finite
-  child pod/PVC/rollout envelope);
-  `illegal_elastic_per_node_expansion_overcommit.dhall` (a workload that fits raw candidate allocatable but not
-  after multiplying/subtracting required per-node execution units); and
-  `illegal_prior_provision_ref_{missing,stale,wrong_generation,wrong_arm}.dhall` (the corresponding structured
-  `ProvisionError` raised **before** any transition execution, allocation, or copy).
+### Inherited positive corpus
+
+(authored in Phase 0, provisioned here): the nine per-arm positive fixtures
+`dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` for all nine capability arms — each already
+`bind`-checked against its `golden_servicespec_<arm>_<shape>` in Phase 10 — are provisioned against their
+declared target topologies. Two Phase-0-committed `ProvisionTargetSupply` fixtures drive the planner boundary:
+a **pre-existing** fixture that must yield `NoInfrastructureRequired`, and a **creation** fixture that must
+return one `InfrastructureRequired` plan, validate/CAS-enact its `ProvisionedProviderActionBatch` into a
+`ValidatedInfrastructureActionBatch`, and feed a receipt-bound `ObservedInfrastructureMaterialization` into
+`ProvisionContext`.
+
+### Seal-locus negative corpus
+
+Each fixture asserts **its specific `ProvisionError` reason (§M.8)**, and each is paired with a positive
+differing only in the foreclosed dimension:
+- `dhall/examples/illegal_post_bind_expansion_overcommit.dhall` (an app skeleton that fits alone but whose
+  case table makes the selected provider's kind-indexed desired replica, surge instance, retained old
+  revision, live terminating instance, sidecars, standard-platform graph, model-derived kubelet/CRI runtime
+  metadata, or one physical partition's unique child-carve sum exceed its exact boundary by one — each case
+  returns its exact structured `Left`, proving the seal runs the fold *after* identity-keyed epoch expansion
+  and component→role→layout-backing derivation, not over the raw app)
+- `illegal_monitoring_work_over_budget.dhall` (the expanded `Observability` descriptor exceeds one mandatory
+  finite `MonitoringWorkBudget` workflow/rule/series/evaluation-work bound by one → `Left
+  MonitoringBudgetExceeded`, its paired positive differing only in that bound)
+- `illegal_accelerator_vram_shortage.dhall` (a residency epoch that fits raw device `memory.total` but
+  exceeds net `allocatableVram` → `ProvisionError VramOvercommit`)
+- `illegal_cuda_on_cpu_target.dhall` (a CUDA-requiring workload on a non-CUDA topology → `ProvisionError
+  MissingCapability Cuda`)
+- `illegal_controller_child_unbounded.dhall` (`Left UnknownCommitment`: a CR arm with no finite child
+  pod/PVC/rollout envelope)
+- `illegal_elastic_per_node_expansion_overcommit.dhall` (a workload that fits raw candidate allocatable but
+  not after multiplying/subtracting required per-node execution units)
+- and `illegal_prior_provision_ref_{missing,stale,wrong_generation,wrong_arm}.dhall` (the corresponding
+  structured `ProvisionError` raised **before** any transition execution, allocation, or copy).
 
 **Committed mutation quota (§M.2).** This phase inherits **ten** of the source's committed seeded mutants —
 the ones that break the seal or its expansion — committed and re-run (not run once); the gate MUST turn each
@@ -173,8 +218,7 @@ red when substituted:
   or leak qualified Pod/image ownership, or double-debit an alias group (guard weakening; caught by the
   runtime-storage domain/role/ownership predicate).
 
-**Independent reference predicates (§M.3).** Every equivalence check defines its reference side **independently
-of `provision`'s own fold**, never by reusing it:
+**Independent reference predicates (§M.3).** Every equivalence check defines its reference side **independently of `provision`'s own fold**, never by reusing it:
 
 1. an **independently enumerated** kind-indexed `(sourceUnit, revision, ordinal, resource) →
    MaterializedExecutionInstance` instance/epoch map (a distinct enumeration over the expanded runnable-source
@@ -215,7 +259,7 @@ each one-resource-or-one-byte-short minimally-differing pair rejects, exercising
   skeleton is insufficient; the seal folds the *fully expanded* vector — kind-indexed desired/old/surge/
   terminating epochs, sidecars, controller children, the standard platform graph, and
   component→role→layout-backed runtime metadata — and returns `Left` on any one-axis overcommit.
-- [`resource_capacity_doctrine.md §9.2`](../documents/engineering/resource_capacity_doctrine.md#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget)
+- [`resource_capacity_sources.md §9.2`](../documents/engineering/resource_capacity_sources.md#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget)
   and [`§10`](../documents/engineering/resource_capacity_doctrine.md#10-planning-ownership)
   — **monitoring cost folds through the standard machinery**, and **planning ownership.** The seal runs the
   named, version-pinned conservative cost models that derive the Prometheus/proxy compute envelope and the
@@ -258,22 +302,23 @@ each one-resource-or-one-byte-short minimally-differing pair rejects, exercising
 `ProvisionTargetSupply`/`InfrastructurePlanningResult` types, the internal demand derivation from
 `BoundDeployment`, and the receipt-bound `ProvisionContext` constructor) — target path, not yet built. This
 Phase-11 source inventory deliberately does not import the Phase-13 `K8sObject`/Aeson renderer.
-**Blocked by**: Phase 10 gate (the total `bind` that produces the wholly-unprovisioned `BoundDeployment`);
-Phase 5 gate (the IR + decoder the refs project from).
-**Independent Validation**: a unit + property suite runs `planInfrastructure` over the pre-existing and creation
-`ProvisionTargetSupply` fixtures and asserts: the pre-existing fixture yields `NoInfrastructureRequired`; the
-creation fixture returns exactly one `InfrastructureRequired` plan owning one batch-scoped Pulumi
-graph/checkpoint/dependency/concurrency/quota partition and a fresh plan token, whose child-create payloads
-carry bound intent and budget but never a circular child `ProvisionedSpec`; validation joins that batch to a
-`ValidatedInfrastructureActionBatch` with fresh plan/action tokens, and only its CAS enaction plus receipt-bound
-provider/host readback (`ObservedInfrastructureMaterialization`) constructs `ProvisionContext`; replay, missing
-readback, or promised (not-yet-observed) identities reject. The derived demand is checked equal to an
-independent enumeration over the expanded `BoundDeployment` (never a caller-authored demand vector).
-`StandaloneRoot` supplies the complete declared node/host/account/backing/API-etcd inventory and `ForestMember`
-supplies the exact opaque `ClusterBudget`.
-**Docs to update**: `documents/engineering/resource_capacity_doctrine.md` (§10 planning-ownership backlink),
-`documents/engineering/manifest_generation_doctrine.md` (§9 the planning boundary),
-`DEVELOPMENT_PLAN/system_components.md`.
+**Blocked by**: Phase 10 gate (the total `bind` that produces the wholly-unprovisioned `BoundDeployment`); Phase 5
+gate (the IR + decoder the refs project from).
+**Independent Validation**: a unit + property suite runs
+`planInfrastructure` over the pre-existing and creation `ProvisionTargetSupply` fixtures and asserts: the
+pre-existing fixture yields `NoInfrastructureRequired`; the creation fixture returns exactly one
+`InfrastructureRequired` plan owning one batch-scoped Pulumi graph/checkpoint/dependency/concurrency/quota
+partition and a fresh plan token, whose child-create payloads carry bound intent and budget but never a
+circular child `ProvisionedSpec`; validation joins that batch to a `ValidatedInfrastructureActionBatch` with
+fresh plan/action tokens, and only its CAS enaction plus receipt-bound provider/host readback
+(`ObservedInfrastructureMaterialization`) constructs `ProvisionContext`; replay, missing readback, or
+promised (not-yet-observed) identities reject. The derived demand is checked equal to an independent
+enumeration over the expanded `BoundDeployment` (never a caller-authored demand vector). `StandaloneRoot`
+supplies the complete declared node/host/account/backing/API-etcd inventory and `ForestMember` supplies the
+exact opaque `ClusterBudget`.
+**Docs to update**: `documents/engineering/resource_capacity_doctrine.md` (§10
+planning-ownership backlink), `documents/engineering/manifest_generation_doctrine.md` (§9 the planning
+boundary), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`resource_capacity_doctrine.md §10 — Planning ownership`](../documents/engineering/resource_capacity_doctrine.md#10-planning-ownership):
@@ -307,47 +352,49 @@ The whole sprint (📋 Planned).
 ## Sprint 11.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Capacity/Provision.hs` (add `provision`, kind-indexed execution-epoch
-expansion, and the private `ProvisionedSpec` construction);
+**Implementation**: `src/Amoebius/Capacity/Provision.hs` (add `provision`, kind-indexed
+execution-epoch expansion, and the private `ProvisionedSpec` construction);
 `src/Amoebius/Capacity/RuntimeStorage.hs` (planned-slot and observed-Pod-UID metadata shapes,
 component→role→layout-backing derivation, and scope-indexed node runtime/image-storage aggregates) — target
 paths, not yet built.
-**Blocked by**: Sprint 11.1; Phase 9 gate (the execution-epoch / scheduler-reservation / kubelet-CRI
-runtime-metadata / accelerator-residency folds and the composed full-resource-vector place-witness gate this
-fold invokes); Phase 8 gate (the logical→physical storage-geometry fold); Phase 7 gate (the base
-`fits`/`carve`/`place` capacity fold).
-**Independent Validation**: a unit + property suite provisions each of the nine per-arm positives (both shapes)
-to an opaque `ProvisionedSpec` and asserts (i) an independently enumerated kind-indexed
-`(sourceUnit, revision, ordinal, resource) → MaterializedExecutionInstance` instance/epoch map exact-equals the
-provision result for the steady map (including a Job-completed empty control) and every empty-capable rollout
-step, rejecting each one-unit-short desired-replica / surge / old-revision variant; (ii) a separate pure
-normalized-observation property exact-fits the live desired ∪ referenced-old ∪ terminating ∪
-scheduler-reservation union — where `PendingUnscheduled` is API-only, `Reserved` and unbound/unknown-outcome
-`BindingInFlight` spend the planned placed vector in the scheduler ledger, a confirmed `Bound` Pod whose ledger
-is still in flight enters the observed-UID `BindingRecovery` arm, and `Bound`/`Terminating` axes instantiate
-observed-UID rows — rejecting its one-unit-short terminating pair, copied-new-as-old input, wrong generation,
-invented first-deploy old row, and two-candidate stale-residual race; (iii) the runtime-storage fold derives
-every component's `KubeletNodefs | CriRuntimeRoot` role, resolves it through `Unified | SplitRuntime |
-SplitImage`, groups aliases by physical carve once, and builds one `ProvisionedNodeRuntimeStorageAccounting`
-per node and planned-epoch fingerprint with disjoint-and-exhaustive qualified Pod/image ownership — dropping the
-largest simultaneous row, removing/changing the target model, dropping/swapping a role, mismatching a
+**Blocked by**: Sprint 11.1; Phase 9 gate (the execution-epoch / scheduler-reservation
+/ kubelet-CRI runtime-metadata / accelerator-residency folds and the composed full-resource-vector
+place-witness gate this fold invokes); Phase 8 gate (the logical→physical storage-geometry fold); Phase 7
+gate (the base `fits`/`carve`/`place` capacity fold).
+**Independent Validation**: a unit + property suite
+provisions each of the nine per-arm positives (both shapes) to an opaque `ProvisionedSpec` and asserts (i)
+an independently enumerated kind-indexed `(sourceUnit, revision, ordinal, resource) →
+MaterializedExecutionInstance` instance/epoch map exact-equals the provision result for the steady map
+(including a Job-completed empty control) and every empty-capable rollout step, rejecting each
+one-unit-short desired-replica / surge / old-revision variant; (ii) a separate pure normalized-observation
+property exact-fits the live desired ∪ referenced-old ∪ terminating ∪ scheduler-reservation union — where
+`PendingUnscheduled` is API-only, `Reserved` and unbound/unknown-outcome `BindingInFlight` spend the planned
+placed vector in the scheduler ledger, a confirmed `Bound` Pod whose ledger is still in flight enters the
+observed-UID `BindingRecovery` arm, and `Bound`/`Terminating` axes instantiate observed-UID rows — rejecting
+its one-unit-short terminating pair, copied-new-as-old input, wrong generation, invented first-deploy old
+row, and two-candidate stale-residual race; (iii) the runtime-storage fold derives every component's
+`KubeletNodefs | CriRuntimeRoot` role, resolves it through `Unified | SplitRuntime | SplitImage`, groups
+aliases by physical carve once, and builds one `ProvisionedNodeRuntimeStorageAccounting` per node and
+planned-epoch fingerprint with disjoint-and-exhaustive qualified Pod/image ownership — dropping the largest
+simultaneous row, removing/changing the target model, dropping/swapping a role, mismatching a
 planned/observed domain, overlapping/leaking ownership, double-debiting an alias, or reducing either
 SplitRuntime nodefs or imagefs/containerfs by one byte rejects, and an elastic target retains
-`PerInstanceKubeletFilesystemLayout` with only elastic `(instance, disk, carve)` refs materialized one-for-one
-by an `ObservedNodeTargetBinding`; (iv) the expanded `Observability` descriptor's derived Prometheus/proxy
-envelope equals the versioned cost-model derivation and `illegal_monitoring_work_over_budget` returns
-`Left MonitoringBudgetExceeded`; and (v) `provision` resolves each `Prior*ProvisionRef` against
-`ProvisionContext`, exact-matching deployment/generation/resource arm and rejecting missing/stale/
-wrong-generation/wrong-arm refs before any allocation or copy. This validation goes **red** on each of the ten
-inherited seeded mutants (Sprint 11.4).
-**Docs to update**: `documents/engineering/resource_capacity_doctrine.md` (§3/§4/§9.2 backlink),
+`PerInstanceKubeletFilesystemLayout` with only elastic `(instance, disk, carve)` refs materialized
+one-for-one by an `ObservedNodeTargetBinding`; (iv) the expanded `Observability` descriptor's derived
+Prometheus/proxy envelope equals the versioned cost-model derivation and
+`illegal_monitoring_work_over_budget` returns `Left MonitoringBudgetExceeded`; and (v) `provision` resolves
+each `Prior*ProvisionRef` against `ProvisionContext`, exact-matching deployment/generation/resource arm and
+rejecting missing/stale/ wrong-generation/wrong-arm refs before any allocation or copy. This validation goes
+**red** on each of the ten inherited seeded mutants (Sprint 11.4).
+**Docs to update**:
+`documents/engineering/resource_capacity_doctrine.md` (§3/§4/§9.2 backlink),
 `documents/engineering/service_capability_doctrine.md` (§4 the provisioning tail),
 `documents/illegal_state/illegal_state_catalog.md` (the post-bind provision-seal locus),
 `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`resource_capacity_doctrine.md §4 — the total fold`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
-and [`§9.2 — monitoring cost folds through the standard machinery`](../documents/engineering/resource_capacity_doctrine.md#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget):
+and [`§9.2 — monitoring cost folds through the standard machinery`](../documents/engineering/resource_capacity_sources.md#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget):
 provision the fully expanded `BoundDeployment` against its topology by driving the Phase-7/8/9 folds over the
 complete resource vector, so the only deployable representation is the opaque whole-deployment `ProvisionedSpec`
 and an impossible target has no deployable value.
@@ -441,24 +488,24 @@ The whole sprint (📋 Planned).
 ## Sprint 11.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Capacity/RenderSource.hs` (`K8sObjectIdentity`, its compatibility alias
-`KubernetesObjectId`, the closed private `ProvisionedRenderSource identity`, the closed
+**Implementation**: `src/Amoebius/Capacity/RenderSource.hs` (`K8sObjectIdentity`, its
+compatibility alias `KubernetesObjectId`, the closed private `ProvisionedRenderSource identity`, the closed
 `RenderActivation = Immediate | BootstrapSchedulerStage | AfterBootstrapAddonCutover |
-AfterManagedCapacityReady`, and
-`provisionRenderSources :: ProvisionedDeploymentParts -> Either ProvisionError ProvisionedRenderSourceSet`) —
-target path, not yet built. Deliberately does not import the Phase-13 `K8sObject`/Aeson renderer.
+AfterManagedCapacityReady`, and `provisionRenderSources :: ProvisionedDeploymentParts -> Either
+ProvisionError ProvisionedRenderSourceSet`) — target path, not yet built. Deliberately does not import the
+Phase-13 `K8sObject`/Aeson renderer.
 **Blocked by**: Sprint 11.2.
-**Independent Validation**: a property suite asserts that the complete `ProvisionedDeploymentParts` domain
-contributes exactly one equal-keyed `ProvisionedRenderSource` per Kubernetes object identity to the sole
-`ProvisionedSpec.renderSources`; each map key equals its embedded source identity; shared
-Namespace/quota/scheduler/admission/RBAC/`Lease`/CRD sources have exactly one global owner; and the source's
-provisioned-part witness fixes its owner, fields, reconcile mode, and activation stage. A duplicate, omitted,
-key/embedded-identity-mismatched, or owner-mismatched candidate rejects **before** `ProvisionedSpec` is
-constructed. An independent four-stage activation classifier (from a Phase-0-committed reference table)
-classifies every source and rejects a missing/extra stage, a managed-node taint/admission source placed in an
-early stage, or a source whose activation disagrees with its provisioned owner — so a managed-node
-taint/admission object cannot be swept into a first generic apply. No public function accepts one service
-projection for rendering.
+**Independent Validation**: a property
+suite asserts that the complete `ProvisionedDeploymentParts` domain contributes exactly one equal-keyed
+`ProvisionedRenderSource` per Kubernetes object identity to the sole `ProvisionedSpec.renderSources`; each
+map key equals its embedded source identity; shared Namespace/quota/scheduler/admission/RBAC/`Lease`/CRD
+sources have exactly one global owner; and the source's provisioned-part witness fixes its owner, fields,
+reconcile mode, and activation stage. A duplicate, omitted, key/embedded-identity-mismatched, or
+owner-mismatched candidate rejects **before** `ProvisionedSpec` is constructed. An independent four-stage
+activation classifier (from a Phase-0-committed reference table) classifies every source and rejects a
+missing/extra stage, a managed-node taint/admission source placed in an early stage, or a source whose
+activation disagrees with its provisioned owner — so a managed-node taint/admission object cannot be swept
+into a first generic apply. No public function accepts one service projection for rendering.
 **Docs to update**: `documents/engineering/manifest_generation_doctrine.md` (§2 who seals the whole-deployment
 render-source set), `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -498,34 +545,37 @@ The whole sprint (📋 Planned).
 ## Sprint 11.4: The provision-seal property/corpus + the Register-1 gate 📋
 
 **Status**: Planned
-**Implementation**: `test/capability/ProvisionProps.hs` (the provision-seal property battery),
-`test/capability/RuntimeStorageBindingProps.hs` (planned-slot/observed-UID domains, role/layout resolution,
-node-aggregate ownership/grouping, reservation/observed no-double-debit, and exact-fit/one-byte-short cases),
-`test/capability/ProvisionSealGate.hs` (the gate + validation-locus ledger with coverage-assertion machinery),
-the Phase-0-committed `ProvisionTargetSupply` boundary fixtures and reference tables, and the seal-locus
-negatives `dhall/examples/{illegal_post_bind_expansion_overcommit,illegal_monitoring_work_over_budget,
+**Implementation**: `test/capability/ProvisionProps.hs` (the provision-seal property
+battery), `test/capability/RuntimeStorageBindingProps.hs` (planned-slot/observed-UID domains, role/layout
+resolution, node-aggregate ownership/grouping, reservation/observed no-double-debit, and
+exact-fit/one-byte-short cases), `test/capability/ProvisionSealGate.hs` (the gate + validation-locus ledger
+with coverage-assertion machinery), the Phase-0-committed `ProvisionTargetSupply` boundary fixtures and
+reference tables, and the seal-locus negatives
+`dhall/examples/{illegal_post_bind_expansion_overcommit,illegal_monitoring_work_over_budget,
 illegal_accelerator_vram_shortage,illegal_cuda_on_cpu_target,illegal_controller_child_unbounded,
 illegal_elastic_per_node_expansion_overcommit,
-illegal_prior_provision_ref_{missing,stale,wrong_generation,wrong_arm}}.dhall`, plus the ten inherited seeded
-mutants under `test/capability/mutants/{mutant_fixed_prometheus_requests,
+illegal_prior_provision_ref_{missing,stale,wrong_generation,wrong_arm}}.dhall`, plus the ten inherited
+seeded mutants under `test/capability/mutants/{mutant_fixed_prometheus_requests,
 mutant_provisioned_value_in_bound_deployment,mutant_unchecked_prior_ref,mutant_drop_execution_replica,
 mutant_drop_execution_surge,mutant_drop_execution_old_revision,mutant_wrong_execution_revision_join,
 mutant_double_debit_controller_child,mutant_drop_largest_kubelet_metadata,
 mutant_missing_kubelet_metadata_model}` — target paths, not yet built. The nine per-arm positive fixtures
 `dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` and their `golden_servicespec_<arm>_<shape>`
-goldens are **inherited from [Phase 10](phase_10_capability_bind.md)** and provisioned, not re-authored, here.
-**Blocked by**: Sprint 11.1, Sprint 11.2, Sprint 11.3; Phase 9 gate (the folds this seal invokes); Phase 10
-gate (the positive corpus and its goldens).
-**Independent Validation**: `cabal test provision-seal-spec` is green — each of the nine per-arm positives
-provisions (both shapes) to an opaque whole-deployment `ProvisionedSpec` on its positive topology, with the
-independent instance/epoch enumeration, runtime-storage ownership predicate, and four-stage activation
-classifier all satisfied; the two `ProvisionTargetSupply` fixtures exercise `NoInfrastructureRequired` and the
-`InfrastructureRequired`→CAS→`ProvisionContext` path; each seal-locus negative returns its **specifically-tagged**
-`ProvisionError` at the `provision-seal` locus, each paired with a minimally-differing positive; exact-fit
-execution-epoch / runtime-storage-backing / accelerator-VRAM boundaries accept while each one-resource-or-one-byte-short
-pair rejects; the run emits a Register-1 proven/tested/assumed ledger whose coverage-assertion machinery is red
-if any named fixture, negative reason, or mutant is absent; and the suite is red under each of the ten
-committed seeded mutants.
+goldens are **inherited from [Phase 10](phase_10_capability_bind.md)** and provisioned, not re-authored,
+here.
+**Blocked by**: Sprint 11.1, Sprint 11.2, Sprint 11.3; Phase 9 gate (the folds this seal invokes);
+Phase 10 gate (the positive corpus and its goldens).
+**Independent Validation**: `cabal test
+provision-seal-spec` is green — each of the nine per-arm positives provisions (both shapes) to an opaque
+whole-deployment `ProvisionedSpec` on its positive topology, with the independent instance/epoch
+enumeration, runtime-storage ownership predicate, and four-stage activation classifier all satisfied; the
+two `ProvisionTargetSupply` fixtures exercise `NoInfrastructureRequired` and the
+`InfrastructureRequired`→CAS→`ProvisionContext` path; each seal-locus negative returns its
+**specifically-tagged** `ProvisionError` at the `provision-seal` locus, each paired with a
+minimally-differing positive; exact-fit execution-epoch / runtime-storage-backing / accelerator-VRAM
+boundaries accept while each one-resource-or-one-byte-short pair rejects; the run emits a Register-1
+proven/tested/assumed ledger whose coverage-assertion machinery is red if any named fixture, negative
+reason, or mutant is absent; and the suite is red under each of the ten committed seeded mutants.
 **Docs to update**: `documents/engineering/resource_capacity_doctrine.md`,
 `documents/engineering/service_capability_doctrine.md` (§4.1 the seal-locus family/CUDA rejection),
 `documents/illegal_state/illegal_state_catalog.md` (§2 the load-bearing limit at the provision-seal locus),
@@ -613,12 +663,11 @@ The whole sprint (📋 Planned).
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
-  design-proof acceptance token: *binding-composition proven*, never *runtime proven*)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *binding-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the explicit-provision / opaque-`ProvisionedSpec`
   invariant
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — [§3](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)/[§4](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting) the envelope and
-  the total fold, [§9.2](../documents/engineering/resource_capacity_doctrine.md#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget) monitoring cost folds, [§10](../documents/engineering/resource_capacity_doctrine.md#10-planning-ownership) planning ownership
+  the total fold, [§9.2](../documents/engineering/resource_capacity_sources.md#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget) monitoring cost folds, [§10](../documents/engineering/resource_capacity_doctrine.md#10-planning-ownership) planning ownership
 - [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — [§4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) the binding's
   provisioning tail, [§4.1](../documents/illegal_state/illegal_state_techniques.md#41-pvcpv-binding-by-construction) the seal-locus family/CUDA rejection
 - [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) `renderAll` is
@@ -637,9 +686,7 @@ The whole sprint (📋 Planned).
   union and the identity-complete accelerator source/workload/residency/coexistence provision that layers on
   this seal
 - [phase_13](phase_13_render_manifest_goldens.md) — the pure deployment-global
-  `renderAll :: ProvisionedSpec -> [K8sObject]` that consumes the identity-keyed render-source set this phase
-  seals
-- [phase_27](phase_27_capacity_scheduler.md) — the live `amoebius-capacity` scheduler that reuses this seal's
+  `renderAll :: ProvisionedSpec -> [K8sObject]` that consumes the identity-keyed render-source set this phase seals - [phase_27](phase_27_capacity_scheduler.md) — the live `amoebius-capacity` scheduler that reuses this seal's
   pure identity/revision epoch algebra
 - [phase_48](phase_48_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
   materializes the named `EngineRuntime` identity this seal only decodes

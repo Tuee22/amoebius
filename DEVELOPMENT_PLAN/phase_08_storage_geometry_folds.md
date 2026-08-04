@@ -1,10 +1,5 @@
 # Phase 8: Logical→physical storage geometry folds
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
-**Generated sections**: none
-
 > **Purpose**: Build the pure logical→physical storage-geometry fold — the closed `StorageBudget`/`Growable`
 > arithmetic, the BookKeeper/MinIO/registry/ZooKeeper/Patroni/Vault/etcd geometry with complete
 > recovery/healing/orphan scenarios, filesystem presentation + allocation rounding, uniform StatefulSet claims,
@@ -12,6 +7,34 @@
 > as total, in-process Haskell, and prove under QuickCheck that every producer's physical demand fits its
 > single-owner backing and each storage-geometry negative decode-rejects directly on its isolated axis, on
 > hand-authored logical-demand/backing fixtures, before any host or backing exists.
+> **Read this if**: phase 8 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 8 delivers the logical→physical storage geometry folds; its design is owned by [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
+Register 1: an in-process battery, no cluster.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 8.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold 📋](#sprint-81-the-storagebudgetgrowable-arithmetic--logicalphysical-geometry-fold-)
+- [Sprint 8.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` 📋](#sprint-82-the-policy-only-storage-scaling-fold--provisionedstoragescalingenvelope--planstoragescaling-)
+- [Sprint 8.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim 📋](#sprint-83-quickcheck-properties--storage-accepts--in-envelope-pulsar-two-ceiling-uniform-claim-)
+- [Sprint 8.4: The storage-geometry fold-negative corpus + the gate 📋](#sprint-84-the-storage-geometry-fold-negative-corpus--the-gate-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -23,15 +46,13 @@ is design intent, never a tested amoebius result. This phase opens after the [Ph
 `ProvisionError`/`FilesystemPresentation`/`BackingAllocationPolicy`/`StorageBacking` base types) and runs on
 **no substrate** (`none`) in **Register 1** — it stands up no host, no cluster, and no backing, only an
 in-process storage-geometry fold + QuickCheck battery. Where a shape below is exercised in a sibling system
-(prodbox's platform-backbone BookKeeper/MinIO/ZooKeeper recovery accounting), that is **sibling evidence, not
-an amoebius result**.
+(prodbox's platform-backbone BookKeeper/MinIO/ZooKeeper recovery accounting), that is **sibling evidence, not an amoebius result**.
 
 ## Phase Summary
 
 This phase makes amoebius's *"no unbounded storage, anywhere; every producer's physical demand fits a
 single-owner backing"* invariant executable as pure provisioning arithmetic, and proves its
-implementation/properties under QuickCheck in-process. It owns the **logical→physical storage-geometry fold
-only** — the slice of the capacity model that turns a producer's declared *logical* demand into a *physical*
+implementation/properties under QuickCheck in-process. It owns the **logical→physical storage-geometry fold only** — the slice of the capacity model that turns a producer's declared *logical* demand into a *physical*
 byte requirement against a named backing, and the closed storage-budget arithmetic over it:
 
 - The **closed `StorageBudget` / `Growable` unions' arithmetic**: the single-owner ceiling-per-arm
@@ -48,13 +69,7 @@ byte requirement against a named backing, and the closed storage-budget arithmet
   filesystem overhead and rounds up to the backing's `BackingAllocationPolicy { minimumBytes, quantumBytes }`
   before its private `ProvisionedVolumeDemand.provisionedBytes` resolves exactly once.
 - **Uniform StatefulSet claims**: `uniformStatefulSetClaims` groups each durable demand to a private member map
-  plus one uniform size and `perBackingDebit[backing] = max ordinal provisioned demand × members on that
-  backing`, so no aggregate can move spare bytes between backings.
-- **Schema / registry-backend migration storage**: `provisionSchemaMigration`, `provisionStorageMigration`, and
-  `provisionRegistryBackendMigration` fit old+new+workspace/temp/WAL high-water plus the transition's executor
-  demand before any create/copy/DDL, retaining every old/new partial commitment on failed verification.
-- The **six-arm object-store producer peak** (`app`/`content`/`registry`/`Pulsar-offload`/`Pulumi-checkpoint`/
-  `control-plane-state`): `mergeObjectStoreLogicalPeaks` enforces source↔producer inventory equality, rejects
+  plus one uniform size and `perBackingDebit[backing] = max ordinal provisioned demand × members on that backing`, so no aggregate can move spare bytes between backings. - **Schema / registry-backend migration storage**: `provisionSchemaMigration`, `provisionStorageMigration`, and `provisionRegistryBackendMigration` fit old+new+workspace/temp/WAL high-water plus the transition's executor demand before any create/copy/DDL, retaining every old/new partial commitment on failed verification. - The **six-arm object-store producer peak** (`app`/`content`/`registry`/`Pulsar-offload`/`Pulumi-checkpoint`/ `control-plane-state`): `mergeObjectStoreLogicalPeaks` enforces source↔producer inventory equality, rejects
   identity/size or admission conflicts, preserves every writer, and derives each per-writer admission witness
   and the merged `ObjectStoreAdmissionGatewayDemand`.
 - The **two-ceiling Pulsar fold**: the physically expanded hot-tier ceiling (built on the `bookKeeperPhysicalDemand`
@@ -100,11 +115,8 @@ fold + QuickCheck battery, analogous to the Phase 5 decode battery and the Phase
 
 **Gate:** the logical→physical storage-geometry fold holds under QuickCheck — every generated in-envelope
 producer yields a physical demand that fits its single-owner backing and the fold is **provably total**
-(interpreted concretely in [Gate integrity](#gate-integrity): compile-time exhaustiveness under
-`-Werror=incomplete-patterns` on every `Amoebius.Capacity.{Storage,StorageGeometry,ServiceStorage,Growable,StorageScaling}`
-module **and** a sampled QuickCheck no-crash run — both, not either) — and the pure folds return their
-structured `ProvisionError`/`Left` on each storage-geometry negative fixture when applied **directly to the
-hand-authored logical-demand/backing fixture that isolates its over-backing axis** (no `bind`/`provision` call;
+(interpreted concretely in [Gate integrity](#gate-integrity): compile-time exhaustiveness under `-Werror=incomplete-patterns` on every `Amoebius.Capacity.{Storage,StorageGeometry,ServiceStorage,Growable,StorageScaling}` module **and** a sampled QuickCheck no-crash run — both, not either) — and the pure folds return their
+structured `ProvisionError`/`Left` on each storage-geometry negative fixture when applied **directly to the hand-authored logical-demand/backing fixture that isolates its over-backing axis** (no `bind`/`provision` call;
 the [Phase 11](phase_11_provision_seal.md) gate re-exercises these same folds through its post-bind provision
 seal) in the **representative set named in [Gate integrity](#gate-integrity)**
 (`illegal_store_over_backing` incl. its MinIO parity/healing/orphan/rounding/uniform-claim/registry-upload/
@@ -112,10 +124,7 @@ Vault-Raft/ZooKeeper/Patroni/schema/six-arm variants, `illegal_hot_tier_over_boo
 `illegal_topic_time_only_offload`, `illegal_cache_over_local_pool`, and
 `illegal_incluster_cache_bound_mismatch`), while the storage-geometry variant rows of the two positive
 fixtures named in [Gate integrity](#gate-integrity) fit feasibly. Every fixture, golden, and expected
-`Left`-tag it checks against is **authored and committed in Phase 0 before the `Amoebius.Capacity.*` storage
-implementation exists** (§M.1); the gate turns red under the **committed per-geometry seeded-mutant battery
-named in [Gate integrity](#gate-integrity)** (§M.2) and green only when an **implementation-independent
-storage-envelope reference predicate** (§M.3, defined in Sprint 8.3) accepts a returned physical demand *iff* it
+`Left`-tag it checks against is **authored and committed in Phase 0 before the `Amoebius.Capacity.*` storage implementation exists** (§M.1); the gate turns red under the **committed per-geometry seeded-mutant battery named in [Gate integrity](#gate-integrity)** (§M.2) and green only when an **implementation-independent storage-envelope reference predicate** (§M.3, defined in Sprint 8.3) accepts a returned physical demand *iff* it
 is in-envelope — a **Register-1** in-process check that runs on no substrate.
 
 <a id="n-gate-integrity-refinements"></a>
@@ -128,96 +137,121 @@ capacity/topology negatives are gated by [Phase 7](phase_07_capacity_core_folds.
 accelerator/VM-partition negatives by [Phase 9](phase_09_execution_accelerator_folds.md). This phase does **not**
 duplicate that corpus — it partitions it along the storage seam.
 
-- **Representative set (§M.7).** The gate's storage-geometry fold-negative corpus is *exactly* the five named
-  fixtures inherited from the source corpus:
-  `illegal_store_over_backing`, `illegal_hot_tier_over_bookie`, `illegal_topic_time_only_offload`,
-  `illegal_cache_over_local_pool`, and `illegal_incluster_cache_bound_mismatch`; the
-  positive set is the storage-geometry variant rows of
-  `legal_multisubstrate_cluster` (a store-fits-backing row, BookKeeper/MinIO physical-fits, uniform-claim
-  exact-fit, presentation/quantum-rounding exact-fit, and ZooKeeper/Patroni/Vault recovery-fits plus a
-  control-plane-storage-steady-fits row) and `legal_managed_eks` (a fixed-`InstanceStore` root-fits row and a
-  derived-root-EBS-within-`nodeRootStorage`-quota row). All are committed in Phase 0 (§M.1) as part of the
-  forty-one-fixture corpus; the compute/topology base-fold negatives (`illegal_engine_substrate_mismatch`,
-  `illegal_rke2_reused_host`, `illegal_overcommit_*`, the elastic-branch negatives,
-  `illegal_untolerated_taint`, `illegal_memory_backed_underreserved`,
-  `illegal_tmpfs_init_persistence_underreserved`, …) are owned by
-  [Phase 7](phase_07_capacity_core_folds.md) and the execution/accelerator/VM-partition and
-  provider-root/control-plane-storage fixtures
-  (`illegal_hard_ceiling_overcommit`, `illegal_node_local_storage_over_backing`,
-  `illegal_disk_backing_alias_double_spend`, `illegal_filesystem_layout_*`, `illegal_image_*`, the
-  accelerator/CUDA/Metal negatives, `illegal_provider_instance_store_root_underprovisioned`,
-  `illegal_provider_node_root_ebs_over_quota`, `illegal_control_plane_storage_transition_overrun`, and
-  `legal_tmpfs_two_concurrent_writers_single_debit`) by
-  [Phase 9](phase_09_execution_accelerator_folds.md).
-  `illegal_store_over_backing` is a stable fixture identifier with a **committed case table** for MinIO
-  parity/healing, finite-horizon failed-write/upload orphan exposure, filesystem overhead, backing
-  minimum/quantum rounding, uniform claims (a differing-backing ordinal short despite aggregate spare bytes
-  elsewhere), registry upload/failed-partial or filesystem→MinIO old+new copy workspace, one ZooKeeper member's
-  transaction-log/snapshot recovery, one Patroni data/WAL/failover ordinal, schema old+new/temp/WAL overlap, and
-  Vault Raft compaction/recovery plus audit rotation; the same fixture's producer cases omit each of the six
-  closed object-store arms (`app`/`content`/`registry`/`Pulsar-offload`/`Pulumi-checkpoint`/`control-plane-state`)
-  in turn. `illegal_hot_tier_over_bookie` has logical-fit/physical-overflow cases for BookKeeper
-  write-quorum/recovery placement. These are variants inside the named fixtures, not unnamed additions to the
-  exact corpus, and do not change the five-negative/two-positive representative count.
-- **Committed per-geometry seeded-mutant battery (§M.2).** One committed mutant per geometry obligation, each
-  individually required to turn the suite red, drawn from the operator set:
-  - **Storage `Σ` / backing comparison** — weaken the backing comparison (accept a physical demand one byte over
-    its single-owner backing).
-  - **BookKeeper** — drop write-quorum placement or the recovery/re-replication scenario derivation from its
-    finite fault bound.
-  - **MinIO** — drop stripe padding, data+parity shards, metadata, the healing workspace, or the complete
-    per-set plus cross-set failure-scenario product.
-  - **Fault-scenario product** — collapse the complete derived fault-policy scenario product to a favourable
-    subset.
-  - **Concurrent/orphan exposure** — drop the finite-horizon failed-write/upload orphan retention.
-  - **Filesystem overhead** — skip the `Block`/version-pinned filesystem-presentation overhead.
-  - **Backing minimum/quantum** — skip the `BackingAllocationPolicy` minimum/quantum rounding.
-  - **Uniform claim rounding** — replace `max ordinal × members` with an aggregate that moves spare bytes
-    between backings.
-  - **Pulsar hot-tier ceiling** — drop the physically expanded hot-tier ceiling (accept a topic whose logical
-    hot bytes fit but whose write-quorum/recovery placement exceeds one bookie).
-  - **Pulsar durable-total ceiling** — drop the durable-total offload ceiling (accept a time-only-offload topic
-    with no size-triggered durable bound).
-  - **Native cache-pool accounting** — reuse the same cache bytes twice / exceed the named host cache backing.
-  - **In-cluster cache nesting** — drop the exact catalog asset join/digest dedup/first-miss temporary peak,
-    drop `ProvisionedCacheDemand.derivedPeak ≤ CacheBudget ≤ emptyDir.sizeLimit`, or charge the same bytes twice.
-  - **Provider-root storage** — under-size a fixed `InstanceStore` root; omit the root policy/presentation/
-    allocation; fail to derive and round the private `EphemeralRootEbs` request; or debit it from durable quota
-    rather than the separate `nodeRootStorage` byte/volume-count ceiling. (The provider-root negatives
-    `illegal_provider_instance_store_root_underprovisioned` and `illegal_provider_node_root_ebs_over_quota` are
-    owned by [Phase 9](phase_09_execution_accelerator_folds.md); this mutant guards the shared geometry fold, not
-    a Phase-8 gate fixture.)
-  - **Control-plane etcd physical transition** — omit WAL preallocation/overshoot, the snapshot-save temporary,
-    the serialized defrag old+new overlap, or the `(maxBackups + 1) × maxBytesPerFile` audit rotation term.
-    (The control-plane-storage negative `illegal_control_plane_storage_transition_overrun` is owned by
-    [Phase 9](phase_09_execution_accelerator_folds.md); this mutant guards the shared geometry fold, not a
-    Phase-8 gate fixture.)
-  - **Object-store producer** — omit a source-producer arm (any of the six, including the control-plane-state
-    sixth arm); accept a physical-object identity/size conflict; accept a same-byte/different-object-count
-    geometry; or drop a per-writer admission witness.
-  - **Registry** — drop the OCI object dedup, the bounded concurrent upload workspace, or the failed-partial
-    extents retained for the GC horizon.
-  - **ZooKeeper** — drop a member's transaction-log/snapshot/failure-recovery overlap.
-  - **Patroni** — drop the data/WAL/checkpoint/failover peak or the SQL-mutation admission proxy derivation.
-  - **Vault** — drop the persisted-version/lease expansion, the Raft/WAL/snapshot model, the old+new compaction
-    overlap, the recovery headroom, or the audit rotation term.
-  - **Migration** — drop the old+new+workspace/temp/WAL high-water or the executor demand of any of
-    `provisionStorageMigration` / `provisionSchemaMigration` / `provisionRegistryBackendMigration`.
-  - **`planStorageScaling`** — return `AllocateWithinRetainedCarve` / `CreateProviderCapacity` /
-    `ShrinkByVerifiedMigration` without witnessing the retained carve / residual quota / old+new migration
-    high-water, or ignore the `ObservedStorageScalingSnapshot` fingerprint.
+```mermaid
+flowchart LR
+  %% register: orientation
+  s0["Sprint 8.1: The StorageBudget/Growable arithmetic + logical→physical…"]
+  s1["Sprint 8.2: The policy-only storage-scaling fold —…"]
+  s2["Sprint 8.3: QuickCheck properties — storage accepts ⟺ in-envelope…"]
+  s3["Sprint 8.4: The storage-geometry fold-negative corpus + the gate"]
+  gate["the phase 8 gate"]
+  s0 -->|"produces what the next consumes"| s1
+  s1 -->|"produces what the next consumes"| s2
+  s2 -->|"produces what the next consumes"| s3
+  s3 -->|"the last seam the gate closes over"| gate
+```
+*Orientation. The seams phase 8 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
 
-  Field-deletion operators are explicit members of this battery: delete one OCI stored object, snapshot chain,
-  registry upload bound, root-backing policy/quota, or Vault Raft/audit operand and require a **structured
-  rejection** rather than treating absence as zero or falling back to an aggregate.
-- **Totality gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** Every storage fold module must compile with
-  `-Werror=incomplete-patterns` and `-Werror=incomplete-uni-patterns`, without `error`, partial `head`, or
-  `fromJust`; the QuickCheck no-crash sample is an additional check and cannot satisfy totality on its own.
-- **Independent reference predicate (§M.3).** Defined in Sprint 8.3 Deliverables; it never calls
-  `bookKeeperPhysicalDemand`, `minioPhysicalDemand`, `provisionObjectStoreProducer`, `registryStoragePeak`,
-  `vaultStoragePeak`, `uniformStatefulSetClaims`, or the Pulsar/cache/provider-root folds, deriving the complete
-  fault-policy scenario product, presentation overhead, allocation rounding, and per-backing residual **directly**
-  from the generated fixture's declared logical demands and backing rules, and asserting **accept ⟺ in-envelope**.
+### Representative set (§M.7)
+
+The gate's storage-geometry fold-negative corpus is *exactly* the five named
+fixtures inherited from the source corpus:
+`illegal_store_over_backing`, `illegal_hot_tier_over_bookie`, `illegal_topic_time_only_offload`,
+`illegal_cache_over_local_pool`, and `illegal_incluster_cache_bound_mismatch`; the
+positive set is the storage-geometry variant rows of
+`legal_multisubstrate_cluster` (a store-fits-backing row, BookKeeper/MinIO physical-fits, uniform-claim
+exact-fit, presentation/quantum-rounding exact-fit, and ZooKeeper/Patroni/Vault recovery-fits plus a
+control-plane-storage-steady-fits row) and `legal_managed_eks` (a fixed-`InstanceStore` root-fits row and a
+derived-root-EBS-within-`nodeRootStorage`-quota row). All are committed in Phase 0 (§M.1) as part of the
+forty-one-fixture corpus; the compute/topology base-fold negatives (`illegal_engine_substrate_mismatch`,
+`illegal_rke2_reused_host`, `illegal_overcommit_*`, the elastic-branch negatives,
+`illegal_untolerated_taint`, `illegal_memory_backed_underreserved`,
+`illegal_tmpfs_init_persistence_underreserved`, …) are owned by
+[Phase 7](phase_07_capacity_core_folds.md) and the execution/accelerator/VM-partition and
+provider-root/control-plane-storage fixtures
+(`illegal_hard_ceiling_overcommit`, `illegal_node_local_storage_over_backing`,
+`illegal_disk_backing_alias_double_spend`, `illegal_filesystem_layout_*`, `illegal_image_*`, the
+accelerator/CUDA/Metal negatives, `illegal_provider_instance_store_root_underprovisioned`,
+`illegal_provider_node_root_ebs_over_quota`, `illegal_control_plane_storage_transition_overrun`, and
+`legal_tmpfs_two_concurrent_writers_single_debit`) by
+[Phase 9](phase_09_execution_accelerator_folds.md).
+`illegal_store_over_backing` is a stable fixture identifier with a **committed case table** for MinIO
+parity/healing, finite-horizon failed-write/upload orphan exposure, filesystem overhead, backing
+minimum/quantum rounding, uniform claims (a differing-backing ordinal short despite aggregate spare bytes
+elsewhere), registry upload/failed-partial or filesystem→MinIO old+new copy workspace, one ZooKeeper member's
+transaction-log/snapshot recovery, one Patroni data/WAL/failover ordinal, schema old+new/temp/WAL overlap, and
+Vault Raft compaction/recovery plus audit rotation; the same fixture's producer cases omit each of the six
+closed object-store arms (`app`/`content`/`registry`/`Pulsar-offload`/`Pulumi-checkpoint`/`control-plane-state`)
+in turn. `illegal_hot_tier_over_bookie` has logical-fit/physical-overflow cases for BookKeeper
+write-quorum/recovery placement. These are variants inside the named fixtures, not unnamed additions to the
+exact corpus, and do not change the five-negative/two-positive representative count.
+
+### Committed per-geometry seeded-mutant battery (§M.2)
+
+One committed mutant per geometry obligation, each
+individually required to turn the suite red, drawn from the operator set:
+- **Storage `Σ` / backing comparison** — weaken the backing comparison (accept a physical demand one byte over
+  its single-owner backing).
+- **BookKeeper** — drop write-quorum placement or the recovery/re-replication scenario derivation from its
+  finite fault bound.
+- **MinIO** — drop stripe padding, data+parity shards, metadata, the healing workspace, or the complete
+  per-set plus cross-set failure-scenario product.
+- **Fault-scenario product** — collapse the complete derived fault-policy scenario product to a favourable
+  subset.
+- **Concurrent/orphan exposure** — drop the finite-horizon failed-write/upload orphan retention.
+- **Filesystem overhead** — skip the `Block`/version-pinned filesystem-presentation overhead.
+- **Backing minimum/quantum** — skip the `BackingAllocationPolicy` minimum/quantum rounding.
+- **Uniform claim rounding** — replace `max ordinal × members` with an aggregate that moves spare bytes
+  between backings.
+- **Pulsar hot-tier ceiling** — drop the physically expanded hot-tier ceiling (accept a topic whose logical
+  hot bytes fit but whose write-quorum/recovery placement exceeds one bookie).
+- **Pulsar durable-total ceiling** — drop the durable-total offload ceiling (accept a time-only-offload topic
+  with no size-triggered durable bound).
+- **Native cache-pool accounting** — reuse the same cache bytes twice / exceed the named host cache backing.
+- **In-cluster cache nesting** — drop the exact catalog asset join/digest dedup/first-miss temporary peak,
+  drop `ProvisionedCacheDemand.derivedPeak ≤ CacheBudget ≤ emptyDir.sizeLimit`, or charge the same bytes twice.
+- **Provider-root storage** — under-size a fixed `InstanceStore` root; omit the root policy/presentation/
+  allocation; fail to derive and round the private `EphemeralRootEbs` request; or debit it from durable quota
+  rather than the separate `nodeRootStorage` byte/volume-count ceiling. (The provider-root negatives
+  `illegal_provider_instance_store_root_underprovisioned` and `illegal_provider_node_root_ebs_over_quota` are
+  owned by [Phase 9](phase_09_execution_accelerator_folds.md); this mutant guards the shared geometry fold, not
+  a Phase-8 gate fixture.)
+- **Control-plane etcd physical transition** — omit WAL preallocation/overshoot, the snapshot-save temporary,
+  the serialized defrag old+new overlap, or the `(maxBackups + 1) × maxBytesPerFile` audit rotation term.
+  (The control-plane-storage negative `illegal_control_plane_storage_transition_overrun` is owned by
+  [Phase 9](phase_09_execution_accelerator_folds.md); this mutant guards the shared geometry fold, not a
+  Phase-8 gate fixture.)
+- **Object-store producer** — omit a source-producer arm (any of the six, including the control-plane-state
+  sixth arm); accept a physical-object identity/size conflict; accept a same-byte/different-object-count
+  geometry; or drop a per-writer admission witness.
+- **Registry** — drop the OCI object dedup, the bounded concurrent upload workspace, or the failed-partial
+  extents retained for the GC horizon.
+- **ZooKeeper** — drop a member's transaction-log/snapshot/failure-recovery overlap.
+- **Patroni** — drop the data/WAL/checkpoint/failover peak or the SQL-mutation admission proxy derivation.
+- **Vault** — drop the persisted-version/lease expansion, the Raft/WAL/snapshot model, the old+new compaction
+  overlap, the recovery headroom, or the audit rotation term.
+- **Migration** — drop the old+new+workspace/temp/WAL high-water or the executor demand of any of
+  `provisionStorageMigration` / `provisionSchemaMigration` / `provisionRegistryBackendMigration`.
+- **`planStorageScaling`** — return `AllocateWithinRetainedCarve` / `CreateProviderCapacity` /
+  `ShrinkByVerifiedMigration` without witnessing the retained carve / residual quota / old+new migration
+  high-water, or ignore the `ObservedStorageScalingSnapshot` fingerprint.
+
+Field-deletion operators are explicit members of this battery: delete one OCI stored object, snapshot chain,
+registry upload bound, root-backing policy/quota, or Vault Raft/audit operand and require a **structured rejection** rather than treating absence as zero or falling back to an aggregate.
+
+### Totality gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub))
+
+Every storage fold module must compile with `-Werror=incomplete-patterns` and
+`-Werror=incomplete-uni-patterns`, without `error`, partial `head`, or `fromJust`; the QuickCheck no-crash
+sample is an additional check and cannot satisfy totality on its own.
+
+### Independent reference predicate (§M.3)
+
+Defined in Sprint 8.3 Deliverables; it never calls `bookKeeperPhysicalDemand`, `minioPhysicalDemand`,
+`provisionObjectStoreProducer`, `registryStoragePeak`, `vaultStoragePeak`, `uniformStatefulSetClaims`, or
+the Pulsar/cache/provider-root folds, deriving the complete fault-policy scenario product, presentation
+overhead, allocation rounding, and per-backing residual **directly** from the generated fixture's declared
+logical demands and backing rules, and asserting **accept ⟺ in-envelope**.
 
 ## Doctrine adopted
 
@@ -247,8 +281,7 @@ duplicate that corpus — it partitions it along the storage seam.
   ([`§6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
   every storage **sum** is checked at `provision-seal` and never type-foreclosed, honoring the load-bearing
   limit of [`§2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it).
-- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) (**Register 1** — pure/golden,
-  in-process, no cluster) and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the register this gate reaches and
+- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) (**Register 1** — pure/golden, in-process, no cluster) and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the register this gate reaches and
   the ledger it emits, with model↔runtime correspondence and runtime fidelity marked UNVERIFIED (owned by the
   live band — [Phase 26](phase_26_object_reconciler.md)/[Phase 28](phase_28_retained_storage.md)/
   [Phase 30](phase_30_platform_backbone.md)/[Phase 47](phase_47_provider_dynamic_nodes.md)).
@@ -258,46 +291,44 @@ duplicate that corpus — it partitions it along the storage seam.
 ## Sprint 8.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold 📋
 
 **Status**: Planned
-**Implementation**:
-`src/Amoebius/Capacity/Storage.hs` (identity-named disjoint local pools, the closed `StorageBudget` fold, the
-native host-worker cache-pool accounting, and the two-ceiling Pulsar fold);
-`src/Amoebius/Capacity/StorageGeometry.hs` (`bookKeeperPhysicalDemand`, `contentStoreLogicalPeak`,
-`minioPhysicalDemand`, volume presentation/allocation rounding, `uniformStatefulSetClaims`,
-`provisionObjectStoreProducer`/`mergeObjectStoreLogicalPeaks`, `provisionStorageMigration`,
-`provisionSchemaMigration`, `provisionRegistryBackendMigration`, and the root-volume storage geometry
-`provisionNodeRootVolume`);
-`src/Amoebius/Capacity/ServiceStorage.hs` (exact cache nesting `provisionCacheDemand`, `registryStoragePeak`,
-`provisionZooKeeperMetadataStore`, `provisionPatroniSql`, `vaultStoragePeak`, and the etcd/control-plane
-physical storage-transition peak `provisionControlPlaneStorage`);
-`src/Amoebius/Capacity/Growable.hs` (`Growable`/`ScalingPolicy`);
-extends `src/Amoebius/Capacity/Types.hs` with the storage-geometry demand/provisioned type family
-(`StorageBudget`, `Growable`, durable-geometry `DeclaredVolumeDemand` fields, `StatefulSetClaimSlot`,
-`VolumePresentation`, `ProvisionedVolumeDemand`, `CachePopulationDemand`/`ProvisionedCacheDemand`,
-`RegistryStorageDemand`, `VaultStorageDemand`, `ZooKeeperMetadataStoreDemand`/
-`ProvisionedZooKeeperMetadataStoreDemand`, `PatroniSqlDemand`/`ProvisionedPatroniSql`, `ObjectStoreDemand`,
-six-arm `ObjectStoreProducerDemand`/`ProvisionedObjectStoreLogicalPeak`, `ObjectStoreAdmissionGatewayDemand`,
-`StorageMigrationDemand`/`ProvisionedStorageMigration`, `SchemaMigrationDemand`/`ProvisionedSchemaMigration`,
+**Implementation**: `src/Amoebius/Capacity/Storage.hs` (identity-named disjoint local
+pools, the closed `StorageBudget` fold, the native host-worker cache-pool accounting, and the two-ceiling
+Pulsar fold); `src/Amoebius/Capacity/StorageGeometry.hs` (`bookKeeperPhysicalDemand`,
+`contentStoreLogicalPeak`, `minioPhysicalDemand`, volume presentation/allocation rounding,
+`uniformStatefulSetClaims`, `provisionObjectStoreProducer`/`mergeObjectStoreLogicalPeaks`,
+`provisionStorageMigration`, `provisionSchemaMigration`, `provisionRegistryBackendMigration`, and the
+root-volume storage geometry `provisionNodeRootVolume`); `src/Amoebius/Capacity/ServiceStorage.hs` (exact
+cache nesting `provisionCacheDemand`, `registryStoragePeak`, `provisionZooKeeperMetadataStore`,
+`provisionPatroniSql`, `vaultStoragePeak`, and the etcd/control-plane physical storage-transition peak
+`provisionControlPlaneStorage`); `src/Amoebius/Capacity/Growable.hs` (`Growable`/`ScalingPolicy`); extends
+`src/Amoebius/Capacity/Types.hs` with the storage-geometry demand/provisioned type family (`StorageBudget`,
+`Growable`, durable-geometry `DeclaredVolumeDemand` fields, `StatefulSetClaimSlot`, `VolumePresentation`,
+`ProvisionedVolumeDemand`, `CachePopulationDemand`/`ProvisionedCacheDemand`, `RegistryStorageDemand`,
+`VaultStorageDemand`, `ZooKeeperMetadataStoreDemand`/ `ProvisionedZooKeeperMetadataStoreDemand`,
+`PatroniSqlDemand`/`ProvisionedPatroniSql`, `ObjectStoreDemand`, six-arm
+`ObjectStoreProducerDemand`/`ProvisionedObjectStoreLogicalPeak`, `ObjectStoreAdmissionGatewayDemand`,
+`StorageMigrationDemand`/`ProvisionedStorageMigration`,
+`SchemaMigrationDemand`/`ProvisionedSchemaMigration`,
 `RegistryBackendMigrationDemand`/`ProvisionedRegistryBackendMigration`, `ControlPlaneStorageDemand`, and the
 provider-root storage types `ProvisionedNodeRootVolumeRequest`/`InstanceStore`/`EphemeralRootEbs`/
 `nodeRootStorage`) — target paths, not yet built. The base `Quantity`/`Residual`/`AvailableCapacity`/
-`ProvisionError`/`FilesystemPresentation`/`BackingAllocationPolicy`/`StorageBacking` declarations, and the VM
-parent-disk `PhysicalDiskPartition` arithmetic, live in [Phase 7](phase_07_capacity_core_folds.md)/
-[Phase 9](phase_09_execution_accelerator_folds.md); this sprint consumes them and adds the geometry arithmetic
-only.
-**Blocked by**: [Phase 7 gate](phase_07_capacity_core_folds.md) (the base capacity types + `fits`/`carve`
-subtraction over zero-capable residuals this fold layers on); Phase 5 gate (the GADT-indexed IR + total decoder
-these demands decode into).
-**Independent Validation**: a unit suite runs the geometry folds over hand-authored logical-demand/backing
-inputs: each producer's logical demand expands through its complete replication/erasure/metadata/recovery/
-healing/concurrent/orphan scenario product, receives its `Block`/version-pinned filesystem overhead, rounds up
-to the backing minimum/quantum, resolves its `ProvisionedVolumeDemand.provisionedBytes` exactly once, and fits
-its single-owner backing; an over-backing store, a physically hot-tier-over-bookie topic, a time-only-offload
-topic, a cache over its named pool, an in-cluster cache nesting violation, an under-provisioned instance-store
-root, a root-EBS request outside its `nodeRootStorage` byte/volume-count quota, or a control-plane transition
-overrun returns the fold's tagged `Left` naming the offending backing/axis; and dropping any scenario/overhead/
-rounding term makes the property red.
-**Docs to update**: `documents/engineering/resource_capacity_doctrine.md` (Phase-8 status backlink for §5/§6/§7),
-`documents/engineering/storage_lifecycle_doctrine.md` (§5.2 backing read-side),
+`ProvisionError`/`FilesystemPresentation`/`BackingAllocationPolicy`/`StorageBacking` declarations, and the
+VM parent-disk `PhysicalDiskPartition` arithmetic, live in [Phase 7](phase_07_capacity_core_folds.md)/
+[Phase 9](phase_09_execution_accelerator_folds.md); this sprint consumes them and adds the geometry
+arithmetic only.
+**Blocked by**: [Phase 7 gate](phase_07_capacity_core_folds.md) (the base capacity types + `fits`/`carve` subtraction over zero-capable residuals this fold layers on); Phase 5 gate (the GADT-indexed IR + total decoder these demands decode into).
+**Independent Validation**: a unit suite runs the geometry
+folds over hand-authored logical-demand/backing inputs: each producer's logical demand expands through its
+complete replication/erasure/metadata/recovery/ healing/concurrent/orphan scenario product, receives its
+`Block`/version-pinned filesystem overhead, rounds up to the backing minimum/quantum, resolves its
+`ProvisionedVolumeDemand.provisionedBytes` exactly once, and fits its single-owner backing; an over-backing
+store, a physically hot-tier-over-bookie topic, a time-only-offload topic, a cache over its named pool, an
+in-cluster cache nesting violation, an under-provisioned instance-store root, a root-EBS request outside its
+`nodeRootStorage` byte/volume-count quota, or a control-plane transition overrun returns the fold's tagged
+`Left` naming the offending backing/axis; and dropping any scenario/overhead/ rounding term makes the
+property red.
+**Docs to update**: `documents/engineering/resource_capacity_doctrine.md` (Phase-8 status
+backlink for §5/§6/§7), `documents/engineering/storage_lifecycle_doctrine.md` (§5.2 backing read-side),
 `documents/engineering/pulsar_client_doctrine.md` (§6 two-ceiling read-side),
 `documents/illegal_state/illegal_state_catalog.md` (§3.19–§3.20 layer reconciliation),
 `DEVELOPMENT_PLAN/system_components.md`.
@@ -328,15 +359,7 @@ declared logical numbers only (the substrate backing inventory and PV sizes are 
   workspace, and every per-set plus cross-set failure combination derived from its finite fault bound. Each
   logical demand then receives its `Block` or version-pinned filesystem overhead and rounds up to the backing's
   allocation minimum/quantum before `uniformStatefulSetClaims` groups it to a private member map plus one
-  uniform size and `perBackingDebit[backing] = max ordinal provisioned demand × members on that backing`; no
-  aggregate can move spare bytes between backings.
-- `provisionObjectStoreProducer` covers the closed
-  `app`/`content`/`registry`/`Pulsar-offload`/`Pulumi-checkpoint`/`control-plane-state` six-arm union: it
-  retains exact physical resident ids, structural future/transient extents, per-writer admission witnesses, and
-  complete producer-specific retention/rate/failure operands. Source↔producer inventory equality is mandatory;
-  `mergeObjectStoreLogicalPeaks` rejects identity/size or admission conflicts and preserves every writer before
-  `minioPhysicalDemand` runs, and derives the merged `ObjectStoreAdmissionGatewayDemand` (the gateway's compute
-  pod-`place` witness composes downstream in [Phase 9](phase_09_execution_accelerator_folds.md)).
+  uniform size and `perBackingDebit[backing] = max ordinal provisioned demand × members on that backing`; no aggregate can move spare bytes between backings. - `provisionObjectStoreProducer` covers the closed `app`/`content`/`registry`/`Pulsar-offload`/`Pulumi-checkpoint`/`control-plane-state` six-arm union: it retains exact physical resident ids, structural future/transient extents, per-writer admission witnesses, and complete producer-specific retention/rate/failure operands. Source↔producer inventory equality is mandatory; `mergeObjectStoreLogicalPeaks` rejects identity/size or admission conflicts and preserves every writer before `minioPhysicalDemand` runs, and derives the merged `ObjectStoreAdmissionGatewayDemand` (the gateway's compute pod-`place` witness composes downstream in [Phase 9](phase_09_execution_accelerator_folds.md)).
 - `registryStoragePeak` exact-joins all selected OCI objects, deduplicates by digest, and adds structured
   bounded concurrent upload workspace plus failed-partial extents retained for the declared GC horizon; only its
   interim filesystem projection uses scalar `derivedPeak`. `vaultStoragePeak` exact-expands bounded persisted
@@ -391,18 +414,20 @@ The whole sprint (📋 Planned).
 ## Sprint 8.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Capacity/StorageScaling.hs` (`ProvisionedStorageScalingEnvelope`,
-`ObservedStorageScalingSnapshot`, `planStorageScaling`) — target path, not yet built.
-**Blocked by**: Sprint 8.1 (the `StorageBudget` arithmetic + backing/quota types the envelope retains and the
-plan witnesses).
-**Independent Validation**: a unit suite constructs a private `ProvisionedStorageScalingEnvelope` for each
-`Growable` producer, feeds a complete fingerprinted `ObservedStorageScalingSnapshot`, and asserts
-`planStorageScaling` returns exactly one of `NoChange | AllocateWithinRetainedCarve | CreateProviderCapacity |
-ShrinkByVerifiedMigration` with current allocation, residual/quota, and old+new migration high-water witnessed;
-a plan that emits a transition without its witness, or that ignores the snapshot fingerprint, is rejected. The
-suite asserts this phase has **no mutation capability** — it observes and plans only.
-**Docs to update**: `documents/engineering/resource_capacity_doctrine.md` (§6 `Growable`/`ScalingPolicy` policy
-backlink), `documents/engineering/storage_lifecycle_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+**Implementation**: `src/Amoebius/Capacity/StorageScaling.hs`
+(`ProvisionedStorageScalingEnvelope`, `ObservedStorageScalingSnapshot`, `planStorageScaling`) — target path,
+not yet built.
+**Blocked by**: Sprint 8.1 (the `StorageBudget` arithmetic + backing/quota types the envelope
+retains and the plan witnesses).
+**Independent Validation**: a unit suite constructs a private
+`ProvisionedStorageScalingEnvelope` for each `Growable` producer, feeds a complete fingerprinted
+`ObservedStorageScalingSnapshot`, and asserts `planStorageScaling` returns exactly one of `NoChange |
+AllocateWithinRetainedCarve | CreateProviderCapacity | ShrinkByVerifiedMigration` with current allocation,
+residual/quota, and old+new migration high-water witnessed; a plan that emits a transition without its
+witness, or that ignores the snapshot fingerprint, is rejected. The suite asserts this phase has **no mutation capability** — it observes and plans only.
+**Docs to update**:
+`documents/engineering/resource_capacity_doctrine.md` (§6 `Growable`/`ScalingPolicy` policy backlink),
+`documents/engineering/storage_lifecycle_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`resource_capacity_doctrine.md` §6 — Growable + ScalingPolicy, the quota-bounded dynamic provisioning arm](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm):
@@ -438,18 +463,19 @@ The whole sprint (📋 Planned).
 ## Sprint 8.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim 📋
 
 **Status**: Planned
-**Implementation**: `test/dsl/StorageGeometryProps.hs` (QuickCheck generators for logical-demand/backing
-inputs + the property battery: BookKeeper/MinIO scenario derivation, presentation/allocation rounding,
-uniform-claim grouping, the six-arm object-store merge, the two Pulsar ceilings, cache nesting, provider-root
-storage, control-plane physical transition, migration transitions, and the storage `Σ ≤ backing` equivalence),
-reusing the Phase-6 property harness — target path, not yet built.
+**Implementation**: `test/dsl/StorageGeometryProps.hs` (QuickCheck generators for
+logical-demand/backing inputs + the property battery: BookKeeper/MinIO scenario derivation,
+presentation/allocation rounding, uniform-claim grouping, the six-arm object-store merge, the two Pulsar
+ceilings, cache nesting, provider-root storage, control-plane physical transition, migration transitions,
+and the storage `Σ ≤ backing` equivalence), reusing the Phase-6 property harness — target path, not yet
+built.
 **Blocked by**: Sprint 8.1, Sprint 8.2.
-**Independent Validation**: `cabal test dsl-spec` runs the property battery green — the geometry-fold
-`accepts ⟺ in-envelope` equivalence, presentation/rounding, uniform-claim, Pulsar two-ceiling, cache-nesting,
-provider-root, and control-plane-transition properties hold over generated inputs, each meeting its committed
-`cover`/`checkCoverage` minimum (≥30% rejecting / out-of-backing, ≥30% accepting / in-backing per fold; §M.4);
-and the **committed per-geometry seeded-mutant battery of [Gate integrity](#gate-integrity) turns the suite red
-individually** (§M.2), not merely one hand-picked strawman.
+**Independent Validation**: `cabal test dsl-spec` runs the
+property battery green — the geometry-fold `accepts ⟺ in-envelope` equivalence, presentation/rounding,
+uniform-claim, Pulsar two-ceiling, cache-nesting, provider-root, and control-plane-transition properties
+hold over generated inputs, each meeting its committed `cover`/`checkCoverage` minimum (≥30% rejecting /
+out-of-backing, ≥30% accepting / in-backing per fold; §M.4); and the **committed per-geometry seeded-mutant battery of [Gate integrity](#gate-integrity) turns the suite red individually** (§M.2), not merely one
+hand-picked strawman.
 **Docs to update**: `documents/engineering/resource_capacity_doctrine.md`,
 `documents/engineering/storage_lifecycle_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`,
 `documents/engineering/testing_doctrine.md` (the Register-1 property register),
@@ -488,8 +514,7 @@ compute `place`.
   (out-of-backing) and ≥30% accepting (in-backing) generated inputs per fold, the suite failing when the
   coverage minimum is unmet** (§M.4) — so a generator that emits near-constant in-backing inputs cannot
   vacuously pass the reject direction.
-- The reference predicate carries **one seeded mutant per geometry obligation** ([Gate integrity](#gate-integrity)
-  §M.2), each individually required to turn the suite red: the storage-`Σ` backing comparison; BookKeeper
+- The reference predicate carries **one seeded mutant per geometry obligation** ([Gate integrity](#gate-integrity) §M.2), each individually required to turn the suite red: the storage-`Σ` backing comparison; BookKeeper
   quorum/recovery and complete scenario derivation; MinIO stripe/parity/healing and complete cross-set
   scenarios; concurrent/orphan horizon; filesystem overhead; backing minimum/quantum; uniform claim rounding;
   each Pulsar ceiling; native cache-pool accounting; in-cluster cache nesting/single-charge; provider-root
@@ -521,33 +546,34 @@ The whole sprint (📋 Planned).
 ## Sprint 8.4: The storage-geometry fold-negative corpus + the gate 📋
 
 **Status**: Planned
-**Implementation**: `dhall/examples/{illegal_store_over_backing,illegal_hot_tier_over_bookie,
+**Implementation**:
+`dhall/examples/{illegal_store_over_backing,illegal_hot_tier_over_bookie,
 illegal_topic_time_only_offload,illegal_cache_over_local_pool,
-illegal_incluster_cache_bound_mismatch}.dhall` (the five storage-geometry/cache `provision-seal` fold negatives)
-+ reuse of the storage-geometry variant rows of `legal_multisubstrate_cluster`/`legal_managed_eks`;
-`test/dsl/StorageGeometryGate.hs` (the gate battery + validation-locus ledger) — target paths, not yet built.
-All five negatives, the reused positive rows, and their expected results / `Left`-tags are authored and
-committed in Phase 0 before the implementation exists (§M.1, [Gate integrity](#gate-integrity)) as part of the
-forty-one-fixture corpus.
-**Blocked by**: Sprint 8.1, Sprint 8.2, Sprint 8.3; Phase 4 gate (the positive Gate-1 corpus).
-**Independent Validation**: the gate applies the Phase-8 storage-geometry folds directly to each hand-authored
-logical-demand/backing fixture. Binding and whole-deployment provisioning belong to
-[Phase 10](phase_10_capability_bind.md) and [Phase 11](phase_11_provision_seal.md); this gate intentionally tests
-the lower fold boundary. Each positive row fits
-its backing feasibly and each negative fixture returns the fold's structured `ProvisionError`/`Left` on its
-isolated over-backing axis — **each negative asserting its specific expected tag** (e.g.
-`illegal_store_over_backing` → `Left (StorageOverBacking …)`, `illegal_hot_tier_over_bookie` →
-`Left (StorageOverBacking …)` on the BookKeeper hot-tier backing, `illegal_topic_time_only_offload` →
-`Left (PulsarDurableCeilingUnbounded …)`, `illegal_cache_over_local_pool` → `Left (StorageOverBacking …)` on the
+illegal_incluster_cache_bound_mismatch}.dhall` (the five storage-geometry/cache `provision-seal` fold
+negatives) + reuse of the storage-geometry variant rows of
+`legal_multisubstrate_cluster`/`legal_managed_eks`; `test/dsl/StorageGeometryGate.hs` (the gate battery +
+validation-locus ledger) — target paths, not yet built. All five negatives, the reused positive rows, and
+their expected results / `Left`-tags are authored and committed in Phase 0 before the implementation exists
+(§M.1, [Gate integrity](#gate-integrity)) as part of the forty-one-fixture corpus.
+**Blocked by**: Sprint
+8.1, Sprint 8.2, Sprint 8.3; Phase 4 gate (the positive Gate-1 corpus).
+**Independent Validation**: the gate
+applies the Phase-8 storage-geometry folds directly to each hand-authored logical-demand/backing fixture.
+Binding and whole-deployment provisioning belong to [Phase 10](phase_10_capability_bind.md) and
+[Phase 11](phase_11_provision_seal.md); this gate intentionally tests the lower fold boundary. Each positive
+row fits its backing feasibly and each negative fixture returns the fold's structured
+`ProvisionError`/`Left` on its isolated over-backing axis — **each negative asserting its specific expected tag** (e.g. `illegal_store_over_backing` → `Left (StorageOverBacking …)`, `illegal_hot_tier_over_bookie` →
+`Left (StorageOverBacking …)` on the BookKeeper hot-tier backing, `illegal_topic_time_only_offload` → `Left
+(PulsarDurableCeilingUnbounded …)`, `illegal_cache_over_local_pool` → `Left (StorageOverBacking …)` on the
 named cache backing, and `illegal_incluster_cache_bound_mismatch` → `Left (CacheBudgetNestingViolation …)`),
-**not merely "some
-`Left`", and each paired with a store-fits row differing only in the foreclosed dimension** (§M.8) — each
-assertion annotated with its catalog entry ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)/[§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)/[§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)) and its checked-rejection layer at
-the `provision-seal` locus; the run emits a Register-1 proven/tested/assumed ledger.
-**Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (the storage §3.11/§3.17/§3.19/§3.20/§3.25
-checked-rejection / `provision-seal` entries → layer-2 Register-1),
-`documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-8 status when the gate
-passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-8 `none` gate row).
+**not merely "some `Left`", and each paired with a store-fits row differing only in the foreclosed dimension** (§M.8) — each assertion annotated with its catalog entry
+([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)/[§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)/[§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model))
+and its checked-rejection layer at the `provision-seal` locus. The storage-geometry run emits its own
+Register-1 proven/tested/assumed ledger over the logical-to-physical obligations above.
+**Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (the
+storage §3.11/§3.17/§3.19/§3.20/§3.25 checked-rejection / `provision-seal` entries → layer-2 Register-1),
+`documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-8 status when the
+gate passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-8 `none` gate row).
 
 ### Objective
 Adopt [`illegal_state_catalog.md` §4.6 — capacity-accounting, storage checked](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
@@ -557,34 +583,45 @@ while the positive store-fits rows fit feasibly — and emit the per-entry valid
 honest foreclosure layer of each.
 
 ### Deliverables
-- The fold-negative fixtures — `illegal_store_over_backing` ([§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)), whose case table includes logical committed
-  bytes fitting while erasure/healing, finite-horizon failed-write orphans, filesystem overhead, backing
-  minimum/quantum, uniform-claim rounding, a differing-backing ordinal short despite aggregate spare bytes
-  elsewhere, registry upload/failed partials or filesystem→MinIO old+new copy workspace, one ZooKeeper member's
-  transaction-log/snapshot recovery, one Patroni data/WAL/failover ordinal, schema old+new/temp/WAL overlap, or
-  Vault Raft compaction/recovery/audit rotation exceeds a physical backing, and whose producer cases omit each of
-  the six closed object-store arms in turn; `illegal_hot_tier_over_bookie` ([§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), whose case table includes
-  logical hot bytes fitting while write-quorum/recovery placement exceeds one bookie;
-  `illegal_topic_time_only_offload` ([§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), a topic whose only retention is time-based and therefore has no
-  size-triggered durable ceiling; `illegal_cache_over_local_pool` ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)), exact catalog residents plus
-  bounded first-miss temporaries exceeding the named cache backing; `illegal_incluster_cache_bound_mismatch`
-  ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), a cache peak/budget/`emptyDir` nesting or double-charge violation — each returning its
-  **specific** tagged `Left` at the fold and paired with a store-fits row differing
-  only in the foreclosed dimension, with the type-foreclosed neighbours noted as already foreclosed upstream
-  (Phase 4/6) and the base capacity/topology ([§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)/[§3.22](../documents/illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)) and execution/accelerator ([§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)/[§3.27](../documents/illegal_state/illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)–[§3.30](../documents/illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool))
-  negatives noted as owned by [Phase 7](phase_07_capacity_core_folds.md)/[Phase 9](phase_09_execution_accelerator_folds.md). This fold
-  additionally *implements* the provider-root and control-plane-storage byte-fit — the under-provisioned
-  instance-store root ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), the privately derived, rounded root-EBS request over its distinct
-  `nodeRootStorage` byte/volume-count ceiling ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), and the control-plane etcd
-  max-WAL/preallocated-next/snapshot-save/serialized-defrag transition overrun ([§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)) — but their **committed
-  gate negatives** (`illegal_provider_instance_store_root_underprovisioned` /
-  `illegal_provider_node_root_ebs_over_quota` / `illegal_control_plane_storage_transition_overrun`) are owned by
-  [Phase 9](phase_09_execution_accelerator_folds.md) per the §M.7 partition — fold mechanics here, gate oracle in
-  Phase 9; the cache negatives `illegal_cache_over_local_pool` / `illegal_incluster_cache_bound_mismatch` are
-  this phase's **own** committed gate negatives. This phase's committed gate asserts exactly the five pure
-  storage-geometry/cache negatives (`illegal_store_over_backing`, `illegal_hot_tier_over_bookie`,
-  `illegal_topic_time_only_offload`, `illegal_cache_over_local_pool`,
-  `illegal_incluster_cache_bound_mismatch`).
+- The fold-negative fixtures — `illegal_store_over_backing` ([§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)),
+  whose case table includes logical committed bytes fitting while erasure/healing, finite-horizon
+  failed-write orphans, filesystem overhead, backing minimum/quantum, uniform-claim rounding, a
+  differing-backing ordinal short despite aggregate spare bytes elsewhere, registry upload/failed partials
+  or filesystem→MinIO old+new copy workspace, one ZooKeeper member's transaction-log/snapshot recovery, one
+  Patroni data/WAL/failover ordinal, schema old+new/temp/WAL overlap, or Vault Raft
+  compaction/recovery/audit rotation exceeds a physical backing, and whose producer cases omit each of the
+  six closed object-store arms in turn;
+  - `illegal_hot_tier_over_bookie` ([§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)),
+    whose case table includes logical hot bytes fitting while write-quorum/recovery placement exceeds one
+    bookie;
+  - `illegal_topic_time_only_offload` ([§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)),
+    a topic whose only retention is time-based and therefore has no size-triggered durable ceiling;
+  - `illegal_cache_over_local_pool` ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)),
+    exact catalog residents plus bounded first-miss temporaries exceeding the named cache backing;
+  - `illegal_incluster_cache_bound_mismatch` ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)),
+    a cache peak/budget/`emptyDir` nesting or double-charge violation — each returning its **specific**
+    tagged `Left` at the fold and paired with a store-fits row differing only in the foreclosed dimension,
+    with the type-foreclosed neighbours noted as already foreclosed upstream (Phase 4/6) and the base
+    capacity/topology ([§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)/[§3.22](../documents/illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration))
+    and execution/accelerator ([§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)/[§3.27](../documents/illegal_state/illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)–[§3.30](../documents/illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool))
+    negatives noted as owned by
+    [Phase 7](phase_07_capacity_core_folds.md)/[Phase 9](phase_09_execution_accelerator_folds.md).
+  - This fold additionally *implements* the provider-root and control-plane-storage byte-fit — the
+    under-provisioned instance-store root
+    ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)),
+    the privately derived, rounded root-EBS request over its distinct `nodeRootStorage` byte/volume-count
+    ceiling
+    ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)),
+    and the control-plane etcd max-WAL/preallocated-next/snapshot-save/serialized-defrag transition overrun
+    ([§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar))
+    — but their **committed gate negatives** (`illegal_provider_instance_store_root_underprovisioned` /
+    `illegal_provider_node_root_ebs_over_quota` / `illegal_control_plane_storage_transition_overrun`) are
+    owned by [Phase 9](phase_09_execution_accelerator_folds.md) per the §M.7 partition — fold mechanics
+    here, gate oracle in Phase 9; the cache negatives `illegal_cache_over_local_pool` /
+    `illegal_incluster_cache_bound_mismatch` are this phase's **own** committed gate negatives.
+  - This phase's committed gate asserts exactly the five pure storage-geometry/cache negatives
+    (`illegal_store_over_backing`, `illegal_hot_tier_over_bookie`, `illegal_topic_time_only_offload`,
+    `illegal_cache_over_local_pool`, `illegal_incluster_cache_bound_mismatch`).
 - The positive storage-geometry variant rows of `legal_multisubstrate_cluster` (a store-fits-backing row,
   BookKeeper/MinIO physical-fits, uniform-claim exact-fit, presentation/quantum-rounding exact-fit,
   ZooKeeper/Patroni/Vault recovery-fits, and a control-plane-storage-steady-fits row) and `legal_managed_eks` (a
@@ -634,8 +671,7 @@ The whole sprint (📋 Planned).
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
-  design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the no-unbounded-storage invariant
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — [§5](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)/[§6](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)/[§7](../documents/engineering/resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total): the
   `StorageBudget`/`Growable` arithmetic and the two-ceiling Pulsar fold

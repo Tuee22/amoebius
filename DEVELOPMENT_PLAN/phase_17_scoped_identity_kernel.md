@@ -1,12 +1,32 @@
 # Phase 17: Scoped identity kernel
 
+> **Purpose**: Build the pure scope, audience, provenance, and information-flow kernel that prevents UI data
+> or authority from being retagged across subjects or tenants.
+> **Read this if**: phase 17 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 17 delivers the scoped identity kernel; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), and the plan for reaching it is owned here.
+Register 1: an in-process battery, no cluster.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Build the pure scope, audience, provenance, and information-flow kernel that prevents UI data
-> or authority from being retagged across subjects or tenants.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 17.1: Scope-indexed handles and total flow checking 📋](#sprint-171-scope-indexed-handles-and-total-flow-checking-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -77,11 +97,11 @@ does not prove Keycloak truth, provider row policy, network isolation, or nonint
 ## Sprint 17.1: Scope-indexed handles and total flow checking 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Security/{Scope,Flow}.hs`, `test/ui/ScopeSpec.hs`, and
-`test/ui/compile_fail/` (target authored sources; not yet built)
+**Implementation**: `src/Amoebius/Ui/Security/{Scope,Flow}.hs`, `test/ui/ScopeSpec.hs`,
+and `test/ui/compile_fail/` (target authored sources; not yet built)
 **Blocked by**: Phase 16
-**Independent Validation**: `cabal test ui-scope-spec` reads the Phase-0 matrices and compile-fail expectations,
-runs the exact paired cases and QuickCheck coverage obligations, and proves every named mutant turns red.
+**Independent Validation**: `cabal test ui-scope-spec` reads the Phase-0 matrices and compile-fail expectations, runs the
+exact paired cases and QuickCheck coverage obligations, and proves every named mutant turns red.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/illegal_state/illegal_state_security.md`, `documents/engineering/testing_doctrine.md`
 

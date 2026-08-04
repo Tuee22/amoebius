@@ -1,12 +1,35 @@
 # Phase 62: Offline blobs and partition isolation
 
+> **Purpose**: Add bounded encrypted local blobs and prove that upload, dependency replay, quota handling, and
+> tenant/subject partition switching cannot expose or orphan them.
+> **Read this if**: phase 62 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 62 delivers the offline blobs and partition isolation; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu`` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Add bounded encrypted local blobs and prove that upload, dependency replay, quota handling, and
-> tenant/subject partition switching cannot expose or orphan them.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — bounded local-blob upload](#resource-provision--bounded-local-blob-upload)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 62.1: Gate encrypted blob replay and isolation 📋](#sprint-621-gate-encrypted-blob-replay-and-isolation-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
+
+---
 
 ## Phase Status
 
@@ -59,10 +82,14 @@ storm. Browser quota remains runtime-observed and cannot masquerade as cluster c
 ## Sprint 62.1: Gate encrypted blob replay and isolation 📋
 
 **Status**: Planned
-**Implementation**: `ui/src/Amoebius/Ui/Offline/BlobStore.purs`, `src/Amoebius/Ui/Offline/BlobUpload.hs`, `test/live/Phase62OfflineBlobSpec.hs` (planned; not built)
+**Implementation**: `ui/src/Amoebius/Ui/Offline/BlobStore.purs`,
+`src/Amoebius/Ui/Offline/BlobUpload.hs`, `test/live/Phase62OfflineBlobSpec.hs` (planned; not built)
 **Blocked by**: Phase 61
-**Independent Validation**: `cabal test offline-blobs-isolation-live` with raw browser storage, MinIO audit/content, and tenant-effect observers
-**Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`, `documents/engineering/tenancy_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Independent Validation**: `cabal test offline-blobs-isolation-live` with raw
+browser storage, MinIO audit/content, and tenant-effect observers
+**Docs to update**:
+`documents/engineering/browser_offline_runtime_doctrine.md`, `documents/engineering/tenancy_doctrine.md`,
+`documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 

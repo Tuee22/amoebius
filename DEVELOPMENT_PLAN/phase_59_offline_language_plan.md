@@ -1,12 +1,34 @@
 # Phase 59: Offline language and paired plans
 
+> **Purpose**: Make offline continuity an explicit bounded application contract and compile it into exactly
+> matching public-client and private-server replay plans without exposing browser or Redis mechanisms in the DSL.
+> **Read this if**: phase 59 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 59 delivers the offline language and paired plans; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), and the plan for reaching it is owned here.
+Register 1: an in-process battery, no cluster.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Make offline continuity an explicit bounded application contract and compile it into exactly
-> matching public-client and private-server replay plans without exposing browser or Redis mechanisms in the DSL.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 59.1: Compile the offline contract 📋](#sprint-591-compile-the-offline-contract-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
+
+---
 
 ## Phase Status
 
@@ -56,10 +78,15 @@ compiler under test; no live authority or fresh challenge is applicable at Regis
 ## Sprint 59.1: Compile the offline contract 📋
 
 **Status**: Planned
-**Implementation**: `dhall/amoebius/UiOffline.dhall`, `src/Amoebius/Ui/Offline/{Types,Decode,Plan}.hs`, `test/Ui/OfflinePlanSpec.hs` (planned; not built)
+**Implementation**: `dhall/amoebius/UiOffline.dhall`,
+`src/Amoebius/Ui/Offline/{Types,Decode,Plan}.hs`, `test/Ui/OfflinePlanSpec.hs` (planned; not built)
 **Blocked by**: Phase 22
-**Independent Validation**: `cabal test offline-plan-spec` against authored fixtures, an independent key-set oracle, and seeded mutants
-**Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`, `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/generated_artifacts_doctrine.md`
+**Independent Validation**: `cabal test offline-plan-spec` against authored
+fixtures, an independent key-set oracle, and seeded mutants
+**Docs to update**:
+`documents/engineering/browser_offline_runtime_doctrine.md`,
+`documents/engineering/low_code_ui_runtime_doctrine.md`,
+`documents/engineering/generated_artifacts_doctrine.md`
 
 ### Objective
 

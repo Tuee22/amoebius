@@ -1,12 +1,35 @@
 # Phase 63: Offline release and schema evolution
 
+> **Purpose**: Prevent a rollout from stranding or discarding persisted offline state by requiring migrations
+> or retained decoders and replay handlers for the full declared compatibility horizon.
+> **Read this if**: phase 63 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 63 delivers the offline release and schema evolution; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), [generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu`` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Prevent a rollout from stranding or discarding persisted offline state by requiring migrations
-> or retained decoders and replay handlers for the full declared compatibility horizon.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — compatibility overlap](#resource-provision--compatibility-overlap)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 63.1: Gate offline-compatible rollout and rollback 📋](#sprint-631-gate-offline-compatible-rollout-and-rollback-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
+
+---
 
 ## Phase Status
 
@@ -59,10 +82,16 @@ horizon with no finite server or storage demand is rejected.
 ## Sprint 63.1: Gate offline-compatible rollout and rollback 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Release/OfflineCompatibility.hs`, `ui/src/Amoebius/Ui/Offline/Migration.purs`, `test/live/Phase63OfflineReleaseSpec.hs` (planned; not built)
+**Implementation**: `src/Amoebius/Release/OfflineCompatibility.hs`,
+`ui/src/Amoebius/Ui/Offline/Migration.purs`, `test/live/Phase63OfflineReleaseSpec.hs` (planned; not built)
 **Blocked by**: Phase 62
-**Independent Validation**: `cabal test offline-release-evolution-live` against pinned A/B artifacts, crash points, provider observations, and seeded mutants
-**Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`, `documents/engineering/release_lifecycle_doctrine.md`, `documents/engineering/generated_artifacts_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Independent Validation**: `cabal test offline-release-evolution-live` against
+pinned A/B artifacts, crash points, provider observations, and seeded mutants
+**Docs to update**:
+`documents/engineering/browser_offline_runtime_doctrine.md`,
+`documents/engineering/release_lifecycle_doctrine.md`,
+`documents/engineering/generated_artifacts_doctrine.md`,
+`documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 

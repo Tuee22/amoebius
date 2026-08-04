@@ -1,11 +1,33 @@
 # The Gateway-Migration Model: amoebius's one proof obligation
 
+> **Purpose**: Single source of truth for the *one* protocol amoebius proves itself — the cross-cluster **gateway migration**, covering **both** branches of `GatewayMigration = <Planned | Failover>` — expressed as a reifiable `Model` ([formal_model_doctrine.md](./formal_model_doctrine.md)), **simulated** with io-sim and **proven** with TLC, and reduced to every `InForceSpec` by a decode-time structural-fit fold rather than any per-spec model-check.
+> **Read this if**: the migration's formal claim has to be read, extended, or checked.
+
+This document owns the formal model of the gateway migration: the states, the safety invariants, the
+liveness properties under fairness, and the freshness guard on a takeover. It does not own the migration's
+operational description, owned by [gateway_migration_doctrine.md](./gateway_migration_doctrine.md), nor the
+model-as-data machinery it is expressed in, owned by
+[formal_model_doctrine.md](./formal_model_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: documents/engineering/tla_modelling_assumptions.md
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
-> **Purpose**: Single source of truth for the *one* protocol amoebius proves itself — the cross-cluster **gateway migration**, covering **both** branches of `GatewayMigration = <Planned | Failover>` — expressed as a reifiable `Model` ([formal_model_doctrine.md](./formal_model_doctrine.md)), **simulated** with io-sim and **proven** with TLC, and reduced to every `InForceSpec` by a decode-time structural-fit fold rather than any per-spec model-check.
+</details>
+
+## Contents
+- [1. The one obligation](#1-the-one-obligation)
+- [2. The two branches (the state machine this model checks)](#2-the-two-branches-the-state-machine-this-model-checks)
+- [3. The `Model`](#3-the-model)
+- [4. Simulate and prove](#4-simulate-and-prove)
+- [5. One-and-done, plus a per-`InForceSpec` structural fit](#5-one-and-done-plus-a-per-inforcespec-structural-fit)
+- [6. Modelling bounds and honesty](#6-modelling-bounds-and-honesty)
+- [7. Planning ownership](#7-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -29,8 +51,7 @@ cannot cover it because it spans clusters. This is the *only* boundary this mode
 **main focus of amoebius's simulation and proofs**.
 
 Both branches are in scope. The prior framing (`tla_modelling_assumptions.md`, now superseded) scoped the
-model to the `Failover` branch and treated the `Planned` branch's RPO=0 as merely an argued assumption. **This
-doctrine reverses that:** the `Planned` coordinated handover and the `Failover` emergency takeover are *both*
+model to the `Failover` branch and treated the `Planned` branch's RPO=0 as merely an argued assumption. **This doctrine reverses that:** the `Planned` coordinated handover and the `Failover` emergency takeover are *both*
 modelled, simulated, and proven.
 
 ---
@@ -101,6 +122,16 @@ migration action eventually fires, i.e. no cluster is starved by an adversarial 
 - **`SessionEventuallyRebinds`** — a session on the losing endpoint *eventually* rebinds to the survivor
   (the liveness face of bounded rebind; the real-time *bound* itself is an R8 assumed premise, monitored at
   runtime, never proven by the model).
+- **`PlannedMigrationTerminates`** — a started `Planned` migration *eventually* reaches a terminal state:
+  either the target owns the wild ingress and the source ingress is decommissioned, or the migration stands
+  down and the source still owns it. This is the property that forbids the **stalled handover** — a forest
+  resting quiesced with `ownerCount = 0` forever, which `UniqueGatewayOwner` ("at most one") permits and no
+  safety invariant catches. It is the liveness face of the stand-down edge owned by
+  [gateway_migration_doctrine.md §5.1](./gateway_migration_doctrine.md#51-stand-down-a-planned-migration-that-does-not-complete),
+  and like the other two it holds only under `F`: an adversarial scheduler that starves both the
+  catch-up action and the stand-down action leaves the migration in progress, and no model can rule that out.
+  The stand-down transition is modelled as an ordinary fair action, not as an operator oracle, so the property
+  is checked rather than assumed away.
 
 Because liveness is TLC-only ([formal_model_doctrine.md §3](./formal_model_doctrine.md#3-two-total-renderings)),
 each `modelProperties` goal carries a **fairness-sensitivity check**: it must go red when `F` is removed, proving
@@ -146,9 +177,7 @@ record it repoints and the hub role it moves. The fold accepts *G* only when it 
 - **acyclic** — the directed edge relation has no cycle (no chain of hand-offs loops back onto a cluster);
 - **independent** — **both** graph-independence **and** resource-independence. Two edges are graph-independent
   iff their `dnsRecord`s differ and no reachable interleaving of their transitions requires one vertex to hold
-  the wild-ingress role for two records at once. They are resource-independent iff **no cluster is reused as
-  `active` or `standby` across two DNS records**. The fold requires both, and therefore **rejects
-  cluster-reuse-across-records**, not only cycle and pairing structure.
+  the wild-ingress role for two records at once. They are resource-independent iff **no cluster is reused as `active` or `standby` across two DNS records**. The fold requires both, and therefore **rejects cluster-reuse-across-records**, not only cycle and pairing structure.
 
   Rejecting the shared survivor is the deliberate strict reading. A shared vertex would be admissible only
   under the shared-resource premise of the honest limit below — an *assumed* premise, not a proven one — so
@@ -158,8 +187,7 @@ record it repoints and the hub role it moves. The fold accepts *G* only when it 
   spec, and remains a named deferred obligation gated on the decomposition lemma.
 
 **The parameter envelope, not only the graph shape.** Graph shape alone does not carry the scope-2 proof: that
-proof was discharged over specific `CONSTANTS` — a declared per-branch **data-loss budget**, a bounded **TTL
-regime**, and the replication-**offset**/log domains the state variables range over — and an accepted instance
+proof was discharged over specific `CONSTANTS` — a declared per-branch **data-loss budget**, a bounded **TTL regime**, and the replication-**offset**/log domains the state variables range over — and an accepted instance
 whose parameters fall outside those constants is **not** covered by it even when its graph is
 pairwise/acyclic/independent. The fold therefore checks each instance against a declared **parameter envelope**
 as well as the graph: every edge's `Failover` data-loss budget lies within the proven cap, its `dnsRecord` TTL
@@ -179,12 +207,10 @@ requires before "green at scope N" generalizes.
 interaction from the accepted set, but it does **not** make accepted instances resource-independent in general.
 Two vertex-disjoint 2-cluster instances still interact through infrastructure the graph does not model — one
 route53 hosted zone and its write rate-limit, one Vault, one commit log. The scope-2 cutoff is sound only if
-those remaining shared-resource interactions are genuinely absent or themselves confluent, and **that is an
-assumed premise, not a proven one**. The strict fold therefore narrows the assumption rather than discharging
+those remaining shared-resource interactions are genuinely absent or themselves confluent, and **that is an assumed premise, not a proven one**. The strict fold therefore narrows the assumption rather than discharging
 it: it removes the one shared-resource class the decoder can see, and leaves the classes it cannot.
 
-Two things keep the residue honest, and neither may be reported as more than it is: (a) the **decomposition
-lemma** — that the N-instance product refines the 2-instance model under the decoder's independence predicate —
+Two things keep the residue honest, and neither may be reported as more than it is: (a) the **decomposition lemma** — that the N-instance product refines the 2-instance model under the decoder's independence predicate —
 is a named obligation, discharged either by a machine-checked proof (TLAPS/Lean,
 [formal_model_doctrine.md §4](./formal_model_doctrine.md#4-single-source-correspondence)) or by an over-scope
 TLC run (scope 3–4) that **models the shared resources in**; (b) until either lands, at least one over-scope
@@ -240,8 +266,7 @@ tested amoebius result.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Formal Model Doctrine](./formal_model_doctrine.md) — the `Model`→{interpret, emitTLA} pattern this is an instance of
 - [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration` taxonomy and the state machine this models

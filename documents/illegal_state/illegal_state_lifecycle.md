@@ -1,18 +1,51 @@
 # Illegal States — Readiness, Promotion & Monitoring
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: The themed slice of the illegal-state catalog covering the lifecycle band — the readiness
 > race (condition, never duration), unverified environment promotion, unmonitored workflows/extensions, a
 > chaos fault targeting an undeclared component, and the build/link band (a foreign image, an unnamed
 > container process, an unmodeled build stage, a worker naming an unlinked extension, and extension source
 > reaching outside the sanctioned API) — with the honest limit that a type-check proves the *spec composes*,
 > not that the *running cluster enforces it*.
+> **Read this if**: a bring-up, teardown, or reconcile state has to be shown impossible to express.
+
+Lifecycle entries are about order and transition rather than shape: what may follow what, and what may never
+be observed as having happened. The numbering belongs to
+[illegal_state_catalog.md](./illegal_state_catalog.md), and the reconcile loop these entries constrain to
+[cluster_lifecycle_doctrine.md §9](../engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Scope](#1-scope)
+- [2. The readiness, promotion & monitoring illegal states](#2-the-readiness-promotion--monitoring-illegal-states)
+- [Related Documents](#related-documents)
 
 ---
+
+```mermaid
+flowchart LR
+  %% register: orientation
+  g1["Gate-1-editor<br/>5 entries"]
+  g2["Gate-2-decoder<br/>4 entries"]
+  g3["Gate-3-astcheck<br/>1 entry"]
+  ps["provision-seal<br/>none in this slice"]
+  rg["rendered-output-golden<br/>none in this slice"]
+  le["live-effect<br/>none in this slice"]
+  g1 -->|"anything the typecheck admits"| g2
+  g2 -->|"linked extension source only"| g3
+  g2 -->|"anything the decoder admits"| ps
+  ps -->|"anything the seal admits"| rg
+  rg -->|"anything the golden admits"| le
+```
+*Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. Lifecycle is the only slice reaching the extension-source check, and no entry has the provisioning seal as its primary locus. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
 
 ## 1. Scope
 
@@ -60,18 +93,14 @@ adds one new **Validation-locus** line naming where the illegal state is caught 
 Raw tooling makes the bring-up race the default: a chart assumes its database is up, an initContainer polls a
 port in a `sleep`-loop, a bootstrap script runs `sleep 30 && kubectl apply` and hopes the apiserver answered —
 each substituting a **duration** for a **condition**, so it passes on a fast host and flakes on a slow one, then
-strands a half-applied cluster. amoebius forecloses the *shape* that races on two axes. **(a) The gate is a
-condition, never a duration.** The sanctioned sequencing gate carries a typed `Readiness` (`Reachable | Serving |
+strands a half-applied cluster. amoebius forecloses the *shape* that races on two axes. **(a) The gate is a condition, never a duration.** The sanctioned sequencing gate carries a typed `Readiness` (`Reachable | Serving |
 Condition | Unsealed | Committed`) with **no `AfterDuration` arm**, so "wait N then assume ready" has no
 constructor — the same no-illegal-arm idiom as `Rke2Servers`/`StorageBacking`/`Growable`
-([§3.24](./illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), [§3.18](./illegal_state_storage.md#318-unbounded-storage-anywhere),
-[§3.21](./illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)). **(b) The order is a derived, acyclic
-readiness DAG.** Bring-up edges are *derived* from the declared dependency graph — a dependent's start-handle
+([§3.24](./illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), [§3.18](./illegal_state_storage.md#318-unbounded-storage-anywhere), [§3.21](./illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)). **(b) The order is a derived, acyclic readiness DAG.** Bring-up edges are *derived* from the declared dependency graph — a dependent's start-handle
 exists only once its dependency's `Ready` edge does — never hand-sequenced per installer, the same
 derive-don't-author discipline as NetworkPolicy ([§3.6](./illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other))
 and tolerations ([§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)); a total `mkBringUpOrder` fold rejects a
-cycle or an undeclared dependency at decode. The honest limit (the [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
-limit, applied to readiness): the type **cannot** prove a port is responsive — that the observed condition
+cycle or an undeclared dependency at decode. The honest limit (the [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) limit, applied to readiness): the type **cannot** prove a port is responsive — that the observed condition
 becomes true, in bounded time, is `runtime-checked`, owned by the reconciler and the chaos doctrine. The special
 **initial-bootstrap** case (before the in-cluster SSA/Pulsar machinery exists) is closed by the host tier's local
 observed primitives — the three-valued `discover` (Present/Absent/Unreachable, `Unreachable → refuse`) and the
@@ -79,18 +108,12 @@ observed primitives — the three-valued `discover` (Present/Absent/Unreachable,
 [`readiness_ordering_doctrine.md`](../engineering/readiness_ordering_doctrine.md) (the readiness-edge discipline) reading the
 bring-up edges of [`platform_services_doctrine.md` §11](../engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
 and enacted by the reconciler of [`cluster_lifecycle_doctrine.md` §9](../engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine).
-**Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed
-`Readiness` union — no duration arm) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+**Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `Readiness` union — no duration arm) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (a start-handle exists only once its dependency's readiness edge does) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (the dependency graph is the single owner of order) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)-shape
 total fold (`mkBringUpOrder` acyclic/complete). **Layer:** `type-foreclosed` for the no-duration-arm gate shape
 and the derived-edge handle; `decode-foreclosed` for the acyclic/complete DAG fold; `runtime-checked` residue —
-that the observed condition actually resolves (owned by [`readiness_ordering_doctrine.md` §6](../engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps),
-[`cluster_lifecycle_doctrine.md` §9](../engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine),
-and [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md)). *(Honesty: the `type-foreclosed` claim scopes
-to the sanctioned `Readiness`-typed surface, not the whole `IO` monad — a raw `threadDelay` is caught one layer
-out by the [`daemon_topology_doctrine.md` §6](../engineering/daemon_topology_doctrine.md#6-the-shared-daemon-spine) ban, a
-`runtime-checked` discipline.)*
+that the observed condition actually resolves (owned by [`readiness_ordering_doctrine.md` §6](../engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps), [`cluster_lifecycle_doctrine.md` §9](../engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine), and [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md)). *(Honesty: the `type-foreclosed` claim scopes to the sanctioned `Readiness`-typed surface, not the whole `IO` monad — a raw `threadDelay` is caught one layer out by the [`daemon_topology_doctrine.md` §6](../engineering/daemon_topology_doctrine.md#6-the-shared-daemon-spine) ban, a `runtime-checked` discipline.)*
 
 **Validation-locus:** `Gate-2-decoder` (the closed `Readiness` union with no `AfterDuration` arm is a Haskell
 `data` type on the Phase-14 surface, and bring-up order is *derived*, never Dhall-authored — so no `dhall
@@ -111,8 +134,7 @@ ETag-CAS pointer to a `Release` **requires** that the `Release`'s test-topology 
 strength (Prod requires the chaos layer). The advance constructor demands an **evidence witness**, so
 "promote-unverified → prod" has no inhabitant — the same constructor-gating shape as the `.ready`-gated
 `ArtifactRef` ([§3.25](./illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)), applied to release evidence rather than model bytes. **Owner:**
-[`release_lifecycle_doctrine.md` §4](../engineering/release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable) (the `PromotionGate` precondition + the
-immutable release ledger). **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a promotion handle exists only once its evidence edge does).
+[`release_lifecycle_doctrine.md` §4](../engineering/release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable) (the `PromotionGate` precondition + the immutable release ledger). **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a promotion handle exists only once its evidence edge does).
 **Layer:** type-foreclosed uninhabitable; runtime-checked residue — that the tests actually ran and that prod actually converged
 on the promoted `Release`, owned by [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing
 doctrine.
@@ -135,31 +157,25 @@ workflow compiles, deploys, and then emits no monitoring signal, and a monitorin
 extension has no inhabitant. Every renderable surface carries a mandatory `AccessScope` with **no** `Public`
 arm — the same `ExposeToWild`-only-Keycloak discipline as [§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress) —
 so an unauthenticated monitoring surface is uninhabitable (`AccessScope` is `AdminGlobal`, the single admin
-identity, or `UserScoped`, a Keycloak-backed app-logic filter). Coverage of the derived rules/panels across a
+identity; `SubjectScoped`, a Keycloak-minted `(tenant, owner)` filter; or `TenantRoleScoped`, a derived
+tenant→role projection). Coverage of the derived rules/panels across a
 workflow's topics and non-vacuousness of the SLO bounds are total decoder folds; whole-deployment feasibility
 (freshness ≥ scrape interval, Σ rule cost ≤ the `Observability` workload's `Capacity`) is a post-bind provision
 fold. **Owner:**
-[`monitoring_doctrine.md`](../engineering/monitoring_doctrine.md) (the obligation types, derivation, access model, and
-parent-monitoring posture) + [`pulsar_client_doctrine.md` §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) (the
-`validateTopology` fold that carries it). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (the mandatory
-`monitor` / `liveness` / `extMonitoring` fields + the absent `Off`/`Public` arms — no forever-unmonitored arm) +
-[§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the coverage fold over the
-workflow/topic collection) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
+[`monitoring_doctrine.md`](../engineering/monitoring_doctrine.md) (the obligation types, derivation, access model, and parent-monitoring posture) + [`pulsar_client_doctrine.md` §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) (the `validateTopology` fold that carries it). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (the mandatory `monitor` / `liveness` / `extMonitoring` fields + the absent `Off`/`Public` arms — no forever-unmonitored arm) +
+[§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the coverage fold over the workflow/topic collection) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (the recording-rule feasibility Σ). **Layer:** `type-foreclosed` for the mandatory-field presence, the absent
 `Off`/`Public` arms, and the `NonEmpty` lists; `decode-foreclosed` for coverage, non-vacuousness, feasibility,
-and the `routes[].workflow`-vs-`name` reconciliation; `runtime-checked` residue — that the SLO is actually met,
-the alert fires, the named `/metrics` series exists, and a `UserScoped` filter actually excludes another user's
-data — owned by [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the review tier.
+and the `routes[].workflow`-vs-`name` reconciliation; `runtime-checked` residue — that the SLO is actually met, the alert fires, the named `/metrics` series exists, and a `SubjectScoped` filter actually excludes another subject's data — owned by [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the review tier.
 
 **Validation-locus:** `Gate-1-editor` (the mandatory `monitor` / `liveness` / `extMonitoring` fields, the
 `NonEmpty` `extMonitoring` list, and the absent `Off`/`Public` arms fail `dhall type` at authoring time) +
-`Gate-2-decoder` (the coverage and non-vacuousness folds and the `routes[].workflow`-vs-`name` reconciliation
-return `Left` at decode) + `provision-seal` (the monitoring feasibility Σ fold returns a `ProvisionError`
+`Gate-2-decoder` (the coverage and non-vacuousness folds and the `routes[].workflow`-vs-`name` reconciliation return `Left` at decode) + `provision-seal` (the monitoring feasibility Σ fold returns a `ProvisionError`
 after binding and before any `ProvisionedSpec` exists) + `rendered-output-golden` (that the emitted monitoring surface renders
 behind the Keycloak-owned edge with no `Public` listener — the no-backdoor-ingress analog of
 [§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress), caught by a golden test on the rendered manifest rather than a
 cluster) + `live-effect` (that the SLO is actually met, the alert fires, the named `/metrics` series exists, and
-a `UserScoped` filter actually excludes another user's data). Per the validation-locus axis of
+a `SubjectScoped` filter actually excludes another subject's data). Per the validation-locus axis of
 [`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the foreclosure layer above.
 
 ---
@@ -168,8 +184,7 @@ a `UserScoped` filter actually excludes another user's data). Per the validation
 
 Raw fault-injection tooling lets a scenario name any target: a test can script "partition the VPN" or "kill the
 broker" against a cluster that runs neither, so the scenario is meaningless — or, worse, asserts an invariant no
-declared component upholds. amoebius makes the fault schedule a **typed projection over the enclosing
-`InForceSpec`'s declared components**: `ChaosSchedule = NonEmpty FaultInjection`, and each `FaultInjection`'s
+declared component upholds. amoebius makes the fault schedule a **typed projection over the enclosing `InForceSpec`'s declared components**: `ChaosSchedule = NonEmpty FaultInjection`, and each `FaultInjection`'s
 `FaultTarget` is a reference that resolves **only** against a component the spec actually declares — the same
 derive-don't-author discipline that makes tolerations, `NetworkPolicy`, and the readiness DAG projections of the
 spec rather than hand-authored fields ([`readiness_ordering_doctrine.md`](../engineering/readiness_ordering_doctrine.md)).
@@ -202,13 +217,11 @@ exhaustively (manifest-list digest, per-platform child and config digests, per-l
 *identity* not at all, so any digest inhabited it and an app could name a container amoebius neither built
 nor inspected. Making `identity : ImageIdentity` a required field closes it: the union's three arms are
 named catalog identities — the host-pulled `KindNode` image, the multi-arch `Base` image, and a `Runtime`
-variant keyed by the reviewed trusted-adapter set linked into it — with **no `Foreign`, free-digest, or `Url`
-arm**. An app therefore has no image to name; its checked UI program is immutable release data interpreted by
+variant keyed by the reviewed trusted-adapter set linked into it — with **no `Foreign`, free-digest, or `Url` arm**. An app therefore has no image to name; its checked UI program is immutable release data interpreted by
 that generic runtime. Only a new trusted Haskell adapter can mint another runtime variant. This is
 the same closure `EngineRuntime` already carries against an operator-supplied engine address, applied one
 layer out. **Owner:** [`image_build_doctrine.md` §5](../engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)
-(the closed identity) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the
-`ImageArtifact` field). **Technique:** [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
+(the closed identity) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the `ImageArtifact` field). **Technique:** [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
 (a relation over a closed named catalog) + [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (identity as a required field, not an optional annotation). **Layer:** `type-foreclosed` — a foreign image
 reference has no constructor, with a `rendered-output-golden` residue that the *deployed* image is the one
@@ -228,8 +241,7 @@ binary in a closed `InClusterRole`, or a binary some `BakeStep` installed, named
 relations make the pairing coherent rather than merely present: an `AmoebiusRole` container must run an
 image whose identity is the `Runtime` arm, and a `BakedService`'s binary must be installed by a `BakeStep`
 in that identity's own build content — so a container cannot name an executable no stage put in its image.
-**Owner:** [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the field and
-the relations) + [`daemon_topology_doctrine.md` §2](../engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)
+**Owner:** [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the field and the relations) + [`daemon_topology_doctrine.md` §2](../engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)
 (the closed role union). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (required field) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
 (process↔image and binary↔bake-content relations over the enclosing build). **Layer:** `type-foreclosed` for
@@ -250,8 +262,7 @@ That is precisely the defect amoebius refuses one layer up, where a Go-templated
 after interpolation and no type inspects the result
 ([`manifest_generation_doctrine.md` §1](../engineering/manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)).
 A required `content : NonEmpty BakeStep` closes it, and the union's arms are the doctrine's own preference
-ladder — `AptPackage`, `OfficialTarball`, `SourceBuild` — plus the two intra-build moves, with **no
-`RunShell : Text` arm and no `Url` arm**. The Dockerfile stops being committed source and becomes a
+ladder — `AptPackage`, `OfficialTarball`, `SourceBuild` — plus the two intra-build moves, with **no `RunShell : Text` arm and no `Url` arm**. The Dockerfile stops being committed source and becomes a
 generated projection of that data. **Owner:**
 [`image_build_doctrine.md` §6](../engineering/image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)
 (the typed content) + [`generated_artifacts_doctrine.md`](../engineering/generated_artifacts_doctrine.md)
@@ -297,8 +308,7 @@ unsanctioned import, raw `IO`, an FFI call, an `unsafe*` operation, Template Has
 with a located diagnostic. Its `Accepted` arm carries an opaque, constructor-private
 `CheckedExtensionSource` that only the checker produces and only the linker consumes, so "link unchecked
 source" has no more syntax than "render an unprovisioned spec". **Owner:**
-[`dsl_doctrine.md` §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) (the
-gate) + [`dsl_doctrine.md` §8](../engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits)
+[`dsl_doctrine.md` §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) (the gate) + [`dsl_doctrine.md` §8](../engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits)
 (the constrained surface). **Technique:**
 [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (an opaque checked value as the only linkable state) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
@@ -311,16 +321,45 @@ residue claimed by no gate.
 time over extension source before link, per the validation-locus axis of
 [`illegal_state_techniques.md`](./illegal_state_techniques.md).
 
+### 3.87 An execution unit with no monitoring obligation
+
+[§3.43](#343-an-unmonitored-workflow-or-extension-or-an-unauthenticated-monitoring-surface) binds the
+workflow surface — a `Workflow`, a `RouteEntry`, an `ExtensionSpec`. It leaves everything else a spec
+deploys with no monitoring obligation at all: an ordinary Deployment/StatefulSet/DaemonSet workload, each of
+the eight cluster-invariant platform capabilities, the Envoy/Keycloak edge, a copy/schema/Pulumi/ACME Job, a
+controller child or admission webhook, a host process or host worker, and the topology-derived
+network-fabric roles. Such a deployment decodes, provisions, renders, and runs with nothing observing it —
+and reads as covered, because its *workflows* are fully monitored. amoebius closes this the same way it
+closed the parallel resource obligation, where no pod is exempt from its `ResourceEnvelope`: every
+`BoundExecutionUnit` carries a mandatory `UnitMonitor`, whose `MonitorProvenance` has no `Exempt`/`None` arm,
+so the binder cannot construct a unit without one and an operator cannot hand-author a derived capability's
+monitor. "Monitored deployment" and "deployment" therefore have the same inhabitants.
+**Owner:** [`monitoring_doctrine.md` §2.4](../engineering/monitoring_doctrine.md#24-per-execution-unit-obligation--boundexecutionunitmonitor)
+(the obligation and its provenance union) + [`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)
+(the no-pod-is-exempt precedent it parallels).
+**Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (required field by construction, plus the absent exempt arm) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
+(the derived rule/series cost of the enlarged monitored population folded against the finite
+`MonitoringWorkBudget`).
+**Layer:** `type-foreclosed` for field presence and the absent `Exempt` arm; `decode-foreclosed` for
+non-vacuousness of each unit's bounds and for the execution-set coverage fold; `provision-seal` for
+feasibility, since universal monitoring can exceed the observability workload's capacity where workflow-only
+monitoring did not; `runtime-checked` residue — that each unit's declared series actually exists on the
+endpoint it names.
+**Validation-locus:** `Gate-1-editor` (the mandatory `monitor` field and the absent `Exempt` arm fail
+`dhall type` at authoring) + `Gate-2-decoder` (non-vacuousness and coverage folds return `Left`) +
+`provision-seal` (the enlarged monitoring feasibility Σ returns a `ProvisionError` before any
+`ProvisionedSpec` exists) + `live-effect` residue (the named series exists and is scraped). Per the
+validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the
+foreclosure layer above.
+
 ---
 
-## Cross-references
-
+## Related Documents
 - [The Illegal-State Catalog](./illegal_state_catalog.md) — the catalog index and the load-bearing honesty
   limit this slice inherits ([§1](#1-scope) framing, [§2](#2-the-readiness-promotion--monitoring-illegal-states) the honesty limit, [§6](illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the three foreclosure layers)
 - [Illegal States — Typing Techniques](./illegal_state_techniques.md) — the seven typing techniques, the
   coverage matrix, the foreclosure layers, and the **validation-locus axis** each entry above cites
-- [DSL Doctrine](../engineering/dsl_doctrine.md) — the contract this catalog enumerates (a valid `InForceSpec` cannot
-  represent illegal state)
+- [DSL Doctrine](../engineering/dsl_doctrine.md) — the contract this catalog enumerates (a valid `InForceSpec` cannot represent illegal state)
 - [Readiness Ordering Doctrine](../engineering/readiness_ordering_doctrine.md) — [§3.41](#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)
   the readiness-edge discipline (readiness is a condition/edge, not a wait)
 - [Platform Services Doctrine](../engineering/platform_services_doctrine.md) — the bring-up/dependency ordering

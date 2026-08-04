@@ -1,12 +1,34 @@
 # Phase 60: Encrypted browser offline runtime
 
+> **Purpose**: Implement the generic browser facilities that persist bounded offline state encrypted at rest,
+> partition it by identity and scope, and give one fenced tab ownership of migration, connection, and replay.
+> **Read this if**: phase 60 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 60 delivers the encrypted browser offline runtime; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), and the plan for reaching it is owned here.
+Register 2: a real boundary against fake tools.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Implement the generic browser facilities that persist bounded offline state encrypted at rest,
-> partition it by identity and scope, and give one fenced tab ownership of migration, connection, and replay.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 60.1: Build the encrypted local interpreter 📋](#sprint-601-build-the-encrypted-local-interpreter-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
+
+---
 
 ## Phase Status
 
@@ -54,10 +76,14 @@ neither calls the runtime under test.
 ## Sprint 60.1: Build the encrypted local interpreter 📋
 
 **Status**: Planned
-**Implementation**: `ui/src/Amoebius/Ui/Offline/{Store,Crypto,Partition,Leader,ServiceWorker}.purs`, `test/browser/Phase60OfflineRuntimeSpec.hs` (planned; not built)
+**Implementation**:
+`ui/src/Amoebius/Ui/Offline/{Store,Crypto,Partition,Leader,ServiceWorker}.purs`,
+`test/browser/Phase60OfflineRuntimeSpec.hs` (planned; not built)
 **Blocked by**: Phase 59
-**Independent Validation**: `cabal test offline-browser-runtime-spec` with raw browser-storage inspection and seeded mutants
-**Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`, `documents/engineering/testing_doctrine.md`, `documents/engineering/generated_artifacts_doctrine.md`
+**Independent Validation**: `cabal test offline-browser-runtime-spec` with raw browser-storage inspection and seeded
+mutants
+**Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`,
+`documents/engineering/testing_doctrine.md`, `documents/engineering/generated_artifacts_doctrine.md`
 
 ### Objective
 

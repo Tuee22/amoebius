@@ -1,13 +1,24 @@
 # Illegal States — Cluster Topology
 
+> **Purpose**: The themed slice of the illegal-state catalog covering compute-engine/substrate
+> compatibility, `LinuxHost` witnesses, and rke2 quorum/locality — the cluster-topology states a valid
+> `InForceSpec` cannot represent.
+> **Read this if**: a cluster engine, node, or substrate pairing has to be shown impossible to express.
+
+Topology entries are the clearest instances of foreclosure by construction: an incompatible engine-and-host
+pairing simply has no constructor, so nothing needs to reject it. The numbering belongs to
+[illegal_state_catalog.md](./illegal_state_catalog.md), and the relation that admits only sensible pairings to
+[cluster_topology_doctrine.md §5](../engineering/cluster_topology_doctrine.md#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
-> **Purpose**: The themed slice of the illegal-state catalog covering compute-engine/substrate
-> compatibility, `LinuxHost` witnesses, and rke2 quorum/locality — the cluster-topology states a valid
-> `InForceSpec` cannot represent.
+</details>
 
 ---
 
@@ -44,11 +55,9 @@ Raw tooling permits pointing kind, rke2, or a managed cluster at a substrate tha
 managed provider (EKS) be a bolt-on afterthought rather than a first-class citizen. amoebius makes the
 compute engine a **declared axis** distinct from the *detected* substrate, and a `Node` is built by a
 compatible-pair smart constructor: only an `(engine, substrate-indexed host | hostless provider)` pair the
-relation permits has a constructor, checked **elementwise** so heterogeneous **multi-substrate clusters stay
-legal** while an incompatible pairing has no inhabitant. EKS is a first-class `Managed` arm of the closed
+relation permits has a constructor, checked **elementwise** so heterogeneous **multi-substrate clusters stay legal** while an incompatible pairing has no inhabitant. EKS is a first-class `Managed` arm of the closed
 `ComputeEngine` union (a product/unknown engine is uninhabitable). **Owner:**
-[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) (+ the node inventory in
-[`substrate_doctrine.md`](../engineering/substrate_doctrine.md)). **Technique:** [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (relation over a collection) + [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) (+ the node inventory in [`substrate_doctrine.md`](../engineering/substrate_doctrine.md)). **Technique:** [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (relation over a collection) + [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (closed union, EKS arm present) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the node inventory the compatibility reads). **Layer:** decode-foreclosed for the
 elementwise compatibility fold; type-foreclosed sub-part (EKS is a union arm; a product/unknown engine is
 uninhabitable).
@@ -59,10 +68,7 @@ uninhabitable).
 kind and rke2 need a Linux kernel; on a bare apple or windows host there is none until one is synthesized in
 a VM. amoebius makes a `LinuxHost` a **witness** whose only constructor on a non-Linux substrate is the
 virtualization provider (`limaHost` on apple, `wsl2Host` on windows), so "rke2/kind on a bare Apple host"
-(the VM interposition [`substrate_doctrine.md` §4](../engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
-describes as reconcile behaviour) becomes a *type demand* — the bare-host spec has no inhabitant. (Distinct
-from the Apple-Metal *build* carve-out, which is on-host by design,
-[`apple_metal_headless_builds.md`](../engineering/apple_metal_headless_builds.md).) **Owner:**
+(the VM interposition [`substrate_doctrine.md` §4](../engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux) describes as reconcile behaviour) becomes a *type demand* — the bare-host spec has no inhabitant. (Distinct from the Apple-Metal *build* carve-out, which is on-host by design, [`apple_metal_headless_builds.md`](../engineering/apple_metal_headless_builds.md).) **Owner:**
 [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) (+ substrate [§4](../engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux) for the synthesis).
 **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a distro GADT indexed by a required `LinuxHost` witness). **Layer:** type-foreclosed uninhabitable;
 runtime-checked residue — that the Lima/WSL2 VM actually boots.
@@ -73,8 +79,7 @@ runtime-checked residue — that the Lima/WSL2 VM actually boots.
 kind runs every node as a container on one Docker host, so a multi-node kind cluster spanning machines is a
 category error. amoebius's `Kind` arm carries **exactly one** `LinuxHost` field; multi-node is `replicas` on
 that one host, and a second host has no field to bind. **Owner:**
-[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (required-field: one
-`host`; `replicas` never adds a host). **Layer:** type-foreclosed uninhabitable.
+[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (required-field: one `host`; `replicas` never adds a host). **Layer:** type-foreclosed uninhabitable.
 **Validation-locus:** `Gate-1-editor` (the `Kind` arm's single required `host` field — a second host has no field to bind, so `dhall type` rejects it at authoring time).
 
 ### 3.16 A multi-node rke2 cluster with fewer Linux hosts than nodes (or a host reused)
@@ -91,8 +96,7 @@ duplicate `HostId` **over `servers ∪ agentFloor`** — a server host reused as
 one machine, is caught alongside two servers on one machine. This **generalizes** the original "the node list
 *is* the host list" cardinality to the split fixed/elastic server-agent inventory (the quorum shape itself is
 [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). **Owner:**
-[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (`node == host`
-cardinality) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (distinctness fold over `servers ∪ agentFloor`). **Layer:** decode-foreclosed — assigned to its weaker
+[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (`node == host` cardinality) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (distinctness fold over `servers ∪ agentFloor`). **Layer:** decode-foreclosed — assigned to its weaker
 distinctness floor; the cardinality sub-part is type-foreclosed.
 **Validation-locus:** `Gate-2-decoder` (the total decode fold `mkRke2` returns `Left` on a reused `HostId`
 over `servers ∪ agentFloor`, before any `ProvisionedSpec` exists) + `Gate-1-editor` (the fixed-node cardinality
@@ -113,8 +117,7 @@ deliberate re-provision, **never** a `ScalingPolicy`/autoscale — `ScalingPolic
 `Autoscaled` agent arm and grows that data plane.
 The control-plane taint and its tolerations are **derived** from the server set, never hand-authored (the
 [§3.5](./illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity)/[§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration) derive-don't-author discipline). **Owner:**
-[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `Rke2Servers`
-union — the even/zero arm has no constructor). **Layer:** type-foreclosed uninhabitable; runtime-checked residue — that etcd
+[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `Rke2Servers` union — the even/zero arm has no constructor). **Layer:** type-foreclosed uninhabitable; runtime-checked residue — that etcd
 actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md).
 **Validation-locus:** `Gate-1-editor` (the closed `Rke2Servers` union — the even/zero-server cardinality has no arm, so `dhall type` rejects it before any binary runs) + `live-effect` (that etcd actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md)).
 
@@ -122,8 +125,7 @@ actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](../engi
 
 A managed control plane (EKS) is deliberately **hostless** — no `LinuxHost` field to hang a node off, no
 channel-1 mTLS — so a full **member** node stretched onto a `Managed Eks` control plane is representable **only**
-if the provider natively supports it (**EKS Hybrid Nodes**). Absent that provider-native arm it has **no
-constructor** — **type-foreclosed uninhabitable**, the identical closed-union "no arm = not supported" idiom as a
+if the provider natively supports it (**EKS Hybrid Nodes**). Absent that provider-native arm it has **no constructor** — **type-foreclosed uninhabitable**, the identical closed-union "no arm = not supported" idiom as a
 2/0-server quorum ([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), a `Ha7` arm,
 and `StorageBacking`'s missing unbounded case ([§3.18](./illegal_state_storage.md#318-unbounded-storage-anywhere)). amoebius must **not**
 build a second WireGuard + distro-mTLS control-plane fabric to fake it — that is the "autonomous substrate
@@ -134,8 +136,7 @@ machinery. A stretched **host worker** on EKS needs no such arm — it is contro
 [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§2](../engineering/cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4.1](../engineering/cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation) (the hostless `Managed` arm), on the
 surface-provider-vs-build discipline owned by [`cluster_lifecycle_doctrine.md`](../engineering/cluster_lifecycle_doctrine.md)
 [§1](../engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape) + [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md). **Technique:**
-[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed provider-arm union —
-the hybrid arm is absent, so the state has no inhabitant). **Layer:** type-foreclosed uninhabitable until a provider-native
+[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed provider-arm union — the hybrid arm is absent, so the state has no inhabitant). **Layer:** type-foreclosed uninhabitable until a provider-native
 arm is surfaced; runtime-checked residue — that the provider's hybrid mechanism actually joins the node.
 **Validation-locus:** `Gate-1-editor` (the closed provider-arm union — the hybrid arm is absent, so a full member node on a hostless `Managed Eks` control plane has no constructor and fails `dhall type`) + `live-effect` (that the provider's hybrid mechanism actually joins the node, once a provider-native arm is surfaced).
 
@@ -145,29 +146,23 @@ An etcd quorum split across network-localities loses its low-latency majority an
 link. This round keeps all rke2 servers **`Site`-co-located** by indexing the server set on one `Site`:
 `Rke2Servers (s :: Site) = Single (HostAt s) | Ha3 … | Ha5 …` forces every server onto **one** `Site s`, so a
 split-`Site` quorum has **no inhabitant** — a **type-foreclosed phantom-`Site` unification**, **explicitly not** the
-odd-quorum count union of [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain) (that
-entry forecloses even/zero *cardinalities*; this forecloses a *split locality* at a legal cardinality).
+odd-quorum count union of [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain) (that entry forecloses even/zero *cardinalities*; this forecloses a *split locality* at a legal cardinality).
 Control-plane machinery (the co-located quorum, `mkStretchedAgent`) is full-node-only; host workers carry no
-quorum. **Owner:** [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§4.1](../engineering/cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation) (the `Site`-indexed
-`Rke2Servers`); the `Site` axis owned by [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) [§8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints). **Technique:**
-[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a phantom `Site` index the server arms
-must unify on) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the
-servers/agents collection shape). **Layer:** type-foreclosed uninhabitable; runtime-checked residue — that the co-located members
+quorum. **Owner:** [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§4.1](../engineering/cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation) (the `Site`-indexed `Rke2Servers`); the `Site` axis owned by [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) [§8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints). **Technique:**
+[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a phantom `Site` index the server arms must unify on) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the servers/agents collection shape). **Layer:** type-foreclosed uninhabitable; runtime-checked residue — that the co-located members
 actually keep a low-latency majority.
 **Validation-locus:** `Gate-2-decoder` (the phantom `Site` index that every server arm must unify on — a split-`Site` server set has no inhabitant once decoded into the `Site`-indexed GADT) + `live-effect` (that the co-located members actually keep a low-latency majority).
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the catalog index, the honesty limit
   ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)),
   and the three foreclosure layers ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
   This document is one themed slice of it.
 - [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
   coverage matrix ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the foreclosure layers, and the **validation-locus axis** used on every entry above.
-- [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid `InForceSpec` cannot
-  represent illegal state") these topology entries instantiate.
+- [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid `InForceSpec` cannot represent illegal state") these topology entries instantiate.
 - [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) — the owning doctrine for every entry
   here: the `ComputeEngine`/`Node` compatibility relation, the `Kind`/`Rke2` arms, the `Rke2Servers` quorum
   union, the hostless `Managed` arm, the node fold, and the `Site`-indexed server set.
@@ -179,8 +174,7 @@ actually keep a low-latency majority.
   [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md) — the surface-provider-vs-build discipline behind the
   hostless `Managed` arm ([§3.37](#337-a-full-stretched-node-on-a-managed-eks-control-plane-without-a-provider-native-hybrid-arm)).
 - [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) — the runtime-enforcement owner for the
-  quorum/locality `live-effect` residue ([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain),
-  [§3.39](#339-a-split-site-etcd-quorum)).
+  quorum/locality `live-effect` residue ([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), [§3.39](#339-a-split-site-etcd-quorum)).
 - [`apple_metal_headless_builds.md`](../engineering/apple_metal_headless_builds.md) — the on-host Apple-Metal *build*
   carve-out, distinct from the `LinuxHost` witness demand
   ([§3.14](#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)).

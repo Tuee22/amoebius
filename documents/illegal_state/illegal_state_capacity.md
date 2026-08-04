@@ -1,14 +1,31 @@
 # Illegal States — Capacity & Placement
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
-**Generated sections**: none
-
 > **Purpose**: The themed slice of the illegal-state catalog covering capacity folds, placement /
 > bin-packing, tolerations / affinity, and accelerator ownership / VRAM — the states a valid `InForceSpec`
 > cannot represent, with the honest limit that a type-check proves the *spec composes*, not that the
 > *running cluster enforces it*.
+> **Read this if**: a resource, placement, or quota state has to be shown impossible rather than merely checked.
+
+Resource states form the largest slice of the catalog, and the one where foreclosure is weakest: a sum is
+arithmetic, so most entries here are caught by a total check rather than by having no inhabitant at all. The
+entries and their loci are owned here; the numbering belongs to
+[illegal_state_catalog.md](./illegal_state_catalog.md) and the arithmetic itself to
+[resource_capacity_folds.md](../engineering/resource_capacity_folds.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Scope](#1-scope)
+- [2. The capacity & placement illegal states](#2-the-capacity--placement-illegal-states)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -41,6 +58,23 @@ the spec composes; it does not prove the cluster enforces it ([`illegal_state_te
 
 ## 2. The capacity & placement illegal states
 
+```mermaid
+flowchart LR
+  %% register: orientation
+  g1["Gate-1-editor<br/>3 entries"]
+  g2["Gate-2-decoder<br/>1 entry"]
+  g3["Gate-3-astcheck<br/>none in this slice"]
+  ps["provision-seal<br/>5 entries"]
+  rg["rendered-output-golden<br/>none in this slice"]
+  le["live-effect<br/>none in this slice"]
+  g1 -->|"anything the typecheck admits"| g2
+  g2 -->|"linked extension source only"| g3
+  g2 -->|"anything the decoder admits"| ps
+  ps -->|"anything the seal admits"| rg
+  rg -->|"anything the golden admits"| le
+```
+*Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. Capacity is the slice where foreclosure is weakest: most entries are a sum, so the seal catches what no type can. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
+
 ### 3.5 Undeployable pods (taints, tolerations & affinity)
 
 In raw k8s a nodeSelector / affinity can match **no** node, *or* a taint no workload
@@ -50,8 +84,7 @@ tolerations are checked against the *declared* node inventory of the cluster spe
 at least one inventory node whose capabilities satisfy the requested affinity and whose taints are all covered
 by the derived tolerations. Placement is expressed as a capability the
 workload *requests* and a node *offers*; an unmatchable request/topology pair is constructible input but
-cannot produce `ProvisionedSpec`. A **toleration is never
-hand-authored** — it is *derived* from a declared node taint (the same "derived, never written" discipline as
+cannot produce `ProvisionedSpec`. A **toleration is never hand-authored** — it is *derived* from a declared node taint (the same "derived, never written" discipline as
 NetworkPolicy, [§3.6](./illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)), so "a toleration for a taint no node declares" is unrepresentable and "a taint no
 workload tolerates" leaves the existence fold with no landable node. This strengthens the original
 affinity-only entry to cover taints and tolerations. This entry checks placement *constraints*
@@ -62,11 +95,7 @@ and the two compose in `place`'s `podFits`: **substrate/affinity-capability exis
 **resource-fit existence** ([§3.27](#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)),
 the latter now reading accelerator fit through the wholesale-per-node owner ([§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim)),
 never a per-pod `gpu` axis. **Owner:**
-[`substrate_doctrine.md`](../engineering/substrate_doctrine.md) (substrate/arch capabilities, the closed node-taint set +
-node inventory) and [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (the
-derived-toleration rule, parallel to derived NetworkPolicy). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (capability tags) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a
-derived toleration handle exists only once its taint edge does) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the node inventory is the single
-owner of "what substrates and taints exist"), the existence check itself being a [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) value-level fold. **Layer:**
+[`substrate_doctrine.md`](../engineering/substrate_doctrine.md) (substrate/arch capabilities, the closed node-taint set + node inventory) and [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (the derived-toleration rule, parallel to derived NetworkPolicy). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (capability tags) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a derived toleration handle exists only once its taint edge does) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the node inventory is the single owner of "what substrates and taints exist"), the existence check itself being a [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) value-level fold. **Layer:**
 decode-foreclosed for the existence fold; the derived-toleration shape is type-foreclosed ([§3.22](#322-a-hand-authored-un-derived-toleration)).
 **Validation-locus:** `provision-seal` (the whole-deployment schedulability existence fold returns a
 `ProvisionError` before any `ProvisionedSpec` exists when no node satisfies affinity and tolerates every taint) +
@@ -93,8 +122,7 @@ debit.
 
 The scheduler-reservation proof uses CPU, memory, and pod `ephemeral-storage` **reserved** demand — the
 declared requests plus any declared compute headroom pad, which is `Zero` on every axis for a workload that
-declares none ([§3.72](#372-a-compute-headroom-pad-that-reserves-past-its-own-limit),
-[§3.73](#373-a-padded-reservation-that-overcommits-allocatable)). A separate
+declares none ([§3.72](#372-a-compute-headroom-pad-that-reserves-past-its-own-limit), [§3.73](#373-a-padded-reservation-that-overcommits-allocatable)). A separate
 finite-limit/physical-peak proof sums declared memory and pod-ephemeral **limits**, durable caps, native-cache
 peak budgets, and other bounded consumers, so requests alone cannot overclaim physical sufficiency. Memory is
 a reactive kernel boundary and local ephemeral storage is a kubelet measurement/eviction boundary, not a
@@ -117,8 +145,7 @@ disjoint pools must themselves carve within the physical disk. Accelerator
 availability/count and accelerator memory are checked in the placement-specific entries [§3.27](#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)
 and [§3.30](#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool).
 
-Because capacity is a *value*, not a type index (Dhall has no dependent arithmetic), these are **total pure
-provision checks**, honestly decode-foreclosed — never claimed uninhabitable. The full expansion and fold
+Because capacity is a *value*, not a type index (Dhall has no dependent arithmetic), these are **total pure provision checks**, honestly decode-foreclosed — never claimed uninhabitable. The full expansion and fold
 must finish after capability binding and before rendering; only success constructs the opaque
 `ProvisionedSpec`, so a raw or merely bound deployment cannot bypass capacity admission by calling
 deployment-global `renderAll`. The same boundary rejects an execution policy that has no possible progress:
@@ -154,8 +181,7 @@ derive-don't-author discipline as NetworkPolicy ([§3.6](./illegal_state_securit
 unrepresentable, and the schedulability existence fold ([§3.5](#35-undeployable-pods-taints-tolerations--affinity)) does the rest. **Owner:**
 [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) (the closed `NodeTaintKind` set + node inventory) +
 [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (the derivation rule). **Technique:**
-[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the node inventory is the single owner of what taints exist) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a `Toleration` handle exists only
-once its taint edge does). **Layer:** type-foreclosed uninhabitable.
+[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the node inventory is the single owner of what taints exist) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a `Toleration` handle exists only once its taint edge does). **Layer:** type-foreclosed uninhabitable.
 **Validation-locus:** `Gate-1-editor` (the Dhall workload record carries **no** hand-authorable toleration
 field at all — a toleration is not a spellable input but a projection from a declared node taint in the
 Haskell render layer, so a free-text toleration is unwritable at authoring) + `Gate-2-decoder` (the
@@ -190,12 +216,11 @@ workload fits some compatible candidate, and the worst-case *instance count* (no
 scale) stays within quota. This is sound but **not** a completeness guarantee: it never admits a spec the
 autoscaler cannot grow to satisfy, though it may reject a packable one. The old aggregate-sum
 ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)) does not catch this;
-the placement does. **Owner:** [`resource_capacity_doctrine.md` §4.1](../engineering/resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)
+the placement does. **Owner:** [`resource_capacity_folds.md` §4.1](../engineering/resource_capacity_folds.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)
 (the `place` witness/envelope; pod resources are CPU/memory/ephemeral storage and accelerator demand is a
 separate discrete capability relation reached through the node's wholesale accelerator owner,
 [§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim))
-+ [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) (the fixed-vs-elastic `Topology` shape that
-selects the branch). **Technique:** [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
++ [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) (the fixed-vs-elastic `Topology` shape that selects the branch). **Technique:** [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (the placement upgrade of the capacity fold). **Layer:** decode-foreclosed — a checked construction of a placement witness /
 envelope proof, **sound-not-complete** (may reject a packable spec, never admits an unplaceable one); runtime-checked
 residue — that the scheduler actually reproduces a feasible placement and the autoscaler actually grows, owned
@@ -212,8 +237,7 @@ Raw k8s extended-resource scheduling can distribute a node's integer devices amo
 vendor-specific sharing schemes can expose fractional-looking allocations, so ownership of a node's GPUs can
 become diffuse and contended. This round **reframes** a node's accelerators
 as owned **wholesale** by that node's **single accelerator worker** (`Cuda` or `AppleMetal`) — every other pod
-uses the node's leftover CPU/memory/ephemeral capacity but never its accelerators — and **introduces** a typed **per-node-singleton
-accelerator-owner worker kind** (a DaemonSet-like node-affinity worker) in the daemon taxonomy, the witness type
+uses the node's leftover CPU/memory/ephemeral capacity but never its accelerators — and **introduces** a typed **per-node-singleton accelerator-owner worker kind** (a DaemonSet-like node-affinity worker) in the daemon taxonomy, the witness type
 the earlier N-replica unelected Deployment model lacked. So "two accelerator owners on one node" and "a per-pod
 fractional accelerator claim" have **no authorable constructor**. On Linux CUDA, wholesale ownership is still
 made real through a derived Kubernetes integer extended-resource request/limit on that one owner pod's
@@ -222,9 +246,7 @@ node/profile affinity on its pod; ordinary pods cannot author that claim. VRAM r
 sub-budget because the Kubernetes device allocation is whole-device, not a VRAM scheduler. The one owner
 *multiplexes* train + serve + Tier-3 JIT on the node, which is what lets a continuous job train while it serves
 ([§3.32](./illegal_state_ml_asset.md#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention)).
-**Owner:** [`daemon_topology_doctrine.md`](../engineering/daemon_topology_doctrine.md) (the worker taxonomy + the per-node
-singleton kind), consumed by [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (which this round
-keeps accelerators separate from `PodResourceVec = { cpu, memory, ephemeralStorage }`). **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
+**Owner:** [`daemon_topology_doctrine.md`](../engineering/daemon_topology_doctrine.md) (the worker taxonomy + the per-node singleton kind), consumed by [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (which this round keeps accelerators separate from `PodResourceVec = { cpu, memory, ephemeralStorage }`). **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (a per-node ownership index — one owner per node's accelerators) + [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (the closed accelerator-owner worker-kind union — no fractional-claim arm). **Layer:** split — the
 *fractional-claim* arm is **type-foreclosed** (the closed worker-kind union gives it no inhabitant), while
@@ -252,8 +274,7 @@ VM-carve + host-worker + cache demand exceeding any physical-host axis fails at 
 **decode-foreclosed `Left Overcommit`** — the physical-host counterpart of aggregate pod overcommit
 ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)); a host running a host
 worker with **no** declared physical-host `Capacity` leaves the Demand unfoldable and is likewise a
-decode-foreclosed provision rejection. **Owner:** [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the
-host→host-worker fold arithmetic), consuming the host-worker `Demand` owned by
+decode-foreclosed provision rejection. **Owner:** [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the host→host-worker fold arithmetic), consuming the host-worker `Demand` owned by
 [`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)
 (extended to "every container **and every host-level worker subprocess**") and the physical-host `Capacity` +
 system-reserved netting owned by [`substrate_doctrine.md` §8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints). **Technique:**
@@ -302,12 +323,10 @@ cluster-wide `vram` sum. An undeclared accelerator-memory envelope is rejected r
 an Apple host declaring independent VRAM violates the closed unified-memory capacity shape. A producing
 node's footprint does **not** transfer as the serving-node demand — fit is recomputed for the chosen
 serving/training/JIT placement and replica count.
-**Owner:** [`substrate_doctrine.md` §8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints) (the device-vector versus
-unified-memory capacity shape) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md)
+**Owner:** [`substrate_doctrine.md` §8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints) (the device-vector versus unified-memory capacity shape) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md)
 (device placement and net usable device-memory arithmetic) +
 [`service_capability_doctrine.md`](../engineering/service_capability_doctrine.md) /
-[`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) (the immutable workload
-accelerator-memory envelope). **Technique:**
+[`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) (the immutable workload accelerator-memory envelope). **Technique:**
 [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (accelerator-device placement plus aggregate sub-budget) +
 [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
@@ -391,8 +410,7 @@ re-observed residual capacity, and the pad is never added as a numeric delta to 
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the parent catalog: the full entry index, the
   introductory framing, and the load-bearing honesty limit ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
 - [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)),
@@ -401,17 +419,12 @@ re-observed residual capacity, and the pad is never added as a numeric delta to 
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract that a valid `InForceSpec` cannot
   represent illegal state.
 - [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) — the capacity-accounting folds and the
-  `place` witness / growth-envelope (owner of [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded),
-  [§3.27](#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement),
-  [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host), and the device/unified-memory
-  placement arithmetic for [§3.30](#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool)).
+  `place` witness / growth-envelope (owner of [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded), [§3.27](#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement), [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host), and the device/unified-memory placement arithmetic for [§3.30](#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool)).
 - [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) — substrate/arch capabilities, the closed node-taint set +
   node inventory, per-host `Capacity` (including [§8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints) physical-host pools and accelerator device vectors) cited by [§3.5](#35-undeployable-pods-taints-tolerations--affinity),
   [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded),
   [§3.22](#322-a-hand-authored-un-derived-toleration), [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host), and [§3.30](#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool).
-- [`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) — the derived-toleration rule (parallel to
-  derived NetworkPolicy) and the complete execution-unit resource-envelope rule ([§10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope),
-  extended to host-level worker subprocesses), cited by [§3.5](#35-undeployable-pods-taints-tolerations--affinity),
+- [`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) — the derived-toleration rule (parallel to derived NetworkPolicy) and the complete execution-unit resource-envelope rule ([§10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope), extended to host-level worker subprocesses), cited by [§3.5](#35-undeployable-pods-taints-tolerations--affinity),
   [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded),
   [§3.22](#322-a-hand-authored-un-derived-toleration), and [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host).
 - [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md) — the PV sizes consumed by the aggregate

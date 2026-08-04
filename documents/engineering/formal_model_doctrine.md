@@ -1,11 +1,36 @@
 # The Formal Model: one reifiable value, two renderings
 
+> **Purpose**: Single source of truth for how amoebius expresses a concurrent protocol as **one reifiable Haskell `Model` value** from which both the runtime decision function (`interpret`) and the TLA+ specification (`emitTLA`) are total renderings — minimizing drift while differential checks test their correspondence — and the `.tla`/`.cfg` are **generated, never-committed** artifacts.
+> **Read this if**: a protocol has to be model-checked, or a model-checking result has to be read for its actual reach.
+
+This document owns the model-as-data discipline: one reifiable value, two total renderings, and the boundary
+between what a green model-check establishes and what running code must still earn. It does not own the
+protocol being modelled, owned by
+[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md), nor the simulation layer that
+bridges model and implementation, owned by
+[deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/tla_modelling_assumptions.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
-> **Purpose**: Single source of truth for how amoebius expresses a concurrent protocol as **one reifiable Haskell `Model` value** from which both the runtime decision function (`interpret`) and the TLA+ specification (`emitTLA`) are total renderings — minimizing drift while differential checks test their correspondence — and the `.tla`/`.cfg` are **generated, never-committed** artifacts.
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. The `Model` is data](#2-the-model-is-data)
+- [3. Two total renderings](#3-two-total-renderings)
+- [4. Single-source correspondence](#4-single-source-correspondence)
+- [5. The `.tla`/`.cfg` are generated, never committed](#5-the-tlacfg-are-generated-never-committed)
+- [6. What a green model-check proves, and what it does not](#6-what-a-green-model-check-proves-and-what-it-does-not)
+- [7. Prototype validation](#7-prototype-validation)
+- [8. Trace validation: the earlier code↔model bridge](#8-trace-validation-the-earlier-codemodel-bridge)
+- [9. Planning ownership](#9-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -42,8 +67,11 @@ maintain and nothing to drift — the correspondence is a fact about the renderi
 A `Model` is a bounded transition system expressed in a deliberately small, **first-order, side-effect-free**
 fragment: named state variables, an initial assignment, a set of guarded parameterized actions, named boolean
 invariants, and an optional state constraint that bounds exploration. The expression language carries only what
-the amoebius safety invariants need — booleans, arithmetic comparison, finite sets, quantifiers over finite
-sets, function literals/update/application — and no more.
+the amoebius safety and liveness properties need — booleans, bounded integer arithmetic and comparison, finite
+sets with cardinality, quantifiers over finite sets, function literals/update/application, and a conditional —
+and no more. The constructor set is declared below rather than described, so the differential generator's
+per-constructor coverage floor ([DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md))
+quantifies over an enumerated set and not over prose.
 
 ```haskell
 data Model = Model
@@ -64,10 +92,61 @@ data Action = Action                            -- a guard that, when it holds, 
   , actGuard  :: Expr
   , actEffect :: [(Name, Expr)]
   }
+
+type Name = Text                                -- a TLA+-legal identifier
+
+data ConstVal                                   -- the closed value domain: what a CONSTANT holds,
+  = CBool  Bool                                 -- what a state variable holds, and what an Expr
+  | CInt   Integer                              -- evaluates to
+  | CStr   Text                                 -- a model value / enumerated symbol
+  | CSet   (Set ConstVal)                        -- a finite set
+  | CFun   (Map ConstVal ConstVal)               -- a finite function (TLA+ [d -> r])
+
+data Expr                                       -- closed, first-order, side-effect-free
+  = Lit     ConstVal                            -- a literal in the value domain
+  | Var     Name                                -- read a state variable in the pre-state
+  | Param   Name                                -- read an action parameter's binding
+  | Const   Name                                -- read a CONSTANT
+  | Not     Expr        | And   Expr Expr       -- boolean
+  | Or      Expr Expr   | Implies Expr Expr
+  | Eq      Expr Expr   | Lt    Expr Expr       -- equality and arithmetic comparison
+  | Le      Expr Expr
+  | Add     Expr Expr   | Sub   Expr Expr       -- bounded integer arithmetic
+  | Card    Expr                                -- finite-set cardinality
+  | SetLit  [Expr]      | Union Expr Expr       -- finite sets
+  | Diff    Expr Expr   | Member Expr Expr
+  | Forall  Name Expr Expr                       -- forall x \in S : P  (S finite)
+  | Exists  Name Expr Expr                       -- exists x \in S : P  (S finite)
+  | FunLit  Name Expr Expr                       -- [ x \in S |-> e ]
+  | FunApp  Expr Expr                            -- f[x]
+  | FunUpd  Expr Expr Expr                       -- [ f EXCEPT ![x] = e ]
+  | IfThen  Expr Expr Expr
 ```
 
-The smallness is a requirement, not an economy. **To render a model to TLA+ faithfully, its transition relation
-must be reified — expressed in this closed first-order fragment — not written as an opaque Haskell function.**
+**Reading state, and priming.** `Expr` denotes over the **pre-state**: `Var` reads a state variable's current
+value, `Param` reads the enclosing action's parameter binding, `Const` reads a `CONSTANT`. There is no primed
+term-former, deliberately. Priming is **structural**: the `Name` key of an `actEffect` pair *is* the primed
+variable, its `Expr` value is evaluated in the pre-state, and every `modelVars` entry absent from `actEffect`
+is `UNCHANGED`. A next-state value therefore cannot be read inside an expression, which is what keeps the
+fragment first-order and makes `emitTLA`'s walk a local translation rather than a scope analysis.
+
+`Expr` is **unityped**: nothing at the Haskell type level forbids `And (Lit (CInt 1)) …`. That is a recorded
+decision, not an oversight — a GADT-indexed `Expr t` would buy well-formedness at the cost of a generator
+(`§4`) that must produce well-typed values by construction, which is the harder half of the differential
+test. Ill-sorted expressions are instead rejected by a total well-formedness pass at model-construction time
+(booleans where `modelInvariants` and `actGuard` require them; a finite set where `actParams`, `Forall`,
+`Exists`, and `FunLit` require one; a `modelFairness` key that names a declared `modelActions` entry), and
+that pass is a decode-style check, never claimed as a type fact.
+
+**`Card` and `Add`/`Sub` are load-bearing, not decoration.** amoebius's one obligation states its convergence
+goal as `ownerCount ~> ownerCount = 1`
+([gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md)); `ownerCount` is the
+cardinality of the owner set, so a fragment with comparison but no cardinality former could not express the
+property the model exists to prove. The bounded arithmetic serves the same role for the replication offset and
+the accrued-divergence bound. The fragment is as small as it can be *and still express the one model* — not
+smaller.
+
+The smallness is a requirement, not an economy. **To render a model to TLA+ faithfully, its transition relation must be reified — expressed in this closed first-order fragment — not written as an opaque Haskell function.**
 An arbitrary Haskell function cannot be translated to TLA+; a value in this fragment can be walked structurally.
 Keeping every modelled protocol inside the fragment is the price of "generate the `.tla`, never hand-write it,"
 and it is affordable because the one obligation amoebius models is small (a handful of variables — see
@@ -99,11 +178,30 @@ that reasons about infinite behaviours — is paid honestly in [§3](#3-two-tota
 
 ## 3. Two total renderings
 
+The types the two renderings consume and produce are closed and small:
+
+```haskell
+type State = Map Name ConstVal                  -- one binding per `modelVars` entry, total over it
+data Event = Event                              -- an action under a parameter binding
+  { evAction :: Name                            -- names a `modelActions` entry
+  , evArgs   :: Map Name ConstVal               -- one binding per `actParams` entry
+  }
+newtype Tla = Tla Text                          -- the rendered module
+newtype Cfg = Cfg Text                          -- the rendered TLC configuration
+```
+
 One `Model` value is consumed by two total functions:
 
-- **`interpret :: Model -> (Event -> State -> State)`** — the runtime decision core. Given a state and an event
-  (an action under a parameter binding), it computes the next state. This is the pure function a daemon calls to
+- **`interpret :: Model -> Event -> State -> Maybe State`** — the runtime decision core. Given a state and an
+  event (an action under a parameter binding), it computes the next state. It returns `Nothing` exactly when
+  the event is **not enabled** — the named action's `actGuard` evaluates false under the binding, or the event
+  names no declared action — and `Just` the successor otherwise; a disabled event is not an error and is not
+  an identity step, because a self-loop would fabricate a stuttering transition TLA+'s `Next` does not
+  sanction. Totality is the absence of partiality, not the absence of a `Nothing` case. This is the pure
+  function a daemon calls to
   decide what to do next; it is unit-testable with no cluster (Register 1, [conformance_harness_doctrine.md](./conformance_harness_doctrine.md)).
+  The explorer's companion is **`enabledEvents :: Model -> State -> [Event]`**, the finite enumeration of every action × parameter binding whose guard holds in a state — finite because each `actParams` range is a finite set — which is what makes the breadth-first frontier of [§4](#4-single-source-correspondence)
+  computable at all.
 - **`emitTLA :: Model -> (Tla, Cfg)`** — renders the same value to a TLA+ module and its configuration, which
   TLC then model-checks. The emitter is a structural walk of the fragment: state variables become `VARIABLES`,
   the initial assignment becomes `Init`, each action becomes an operator, their disjunction becomes `Next`, the
@@ -124,10 +222,34 @@ Their checked agreement on the meaning of every constructor is what makes the si
 
 ---
 
+```mermaid
+flowchart LR
+  %% register: algebra
+  m["Model: one reifiable value"]:::intent
+  i[["interpret :: Model -> Event -> State -> Maybe State"]]:::intent
+  e[["emitTLA :: Model -> Tla"]]:::intent
+  dec["the runtime decision, Nothing where an event is disabled"]:::intent
+  tla["generated .tla and .cfg, never committed"]:::intent
+  tlc{{"TLC model check"}}:::gate
+  ok((("safety and liveness established for the model"))):::seal
+  no>"counterexample trace: the model is wrong, not the code"]:::refuse
+  m -->|"binds the model"| i
+  m -->|"binds the same model"| e
+  i --> dec
+  e --> tla
+  tla --> tlc
+  tlc -->|"no counterexample"| ok
+  tlc -->|"counterexample"| no
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+```
+*Design intent, Tier-1. Two total renderings of one value, which is what makes the correspondence between the checked model and the running decision function structural rather than asserted. A green check establishes properties of the model alone; what the code owes beyond that is stated in [§6](#6-what-a-green-model-check-proves-and-what-it-does-not). Vocabulary: [diagram_conventions.md](./diagram_conventions.md).*
+
 ## 4. Single-source correspondence
 
-Because `interpret` and `emitTLA` are two renderings of one `Model`, there is **no per-model
-variable→code correspondence table and no divergence log**. Sharing the source removes one class of manual
+Because `interpret` and `emitTLA` are two renderings of one `Model`, there is **no per-model variable→code correspondence table and no divergence log**. Sharing the source removes one class of manual
 drift, but it does not prove the two rendering functions semantically equivalent. Renderer faithfulness is one
 reusable meta-obligation, checked across the fragment rather than asserted separately in prose for each model.
 
@@ -139,8 +261,7 @@ running **both** checkers on the same `Model`:
 - the in-process explorer (Register 1, a `cabal test`), and
 - TLC on the emitted `.tla` (Register 1 as well; run through the standard `tla2tools` toolchain).
 
-A validated model is one where both agree — green on the correct model — **and both go red under the same
-mutation** (a deliberately broken variant of the model reaches the illegal state and both checkers report it).
+A validated model is one where both agree — green on the correct model — **and both go red under the same mutation** (a deliberately broken variant of the model reaches the illegal state and both checkers report it).
 Agreement plus shared sensitivity to a seeded fault is the operational form of "the two renderings mean the same
 thing." This agreement is a **safety** cross-check: both the explorer and TLC evaluate the safety invariants, so
 their agreement catches an `emitTLA`/`interpret` divergence on the safety semantics. Liveness has no such
@@ -170,18 +291,57 @@ TLC's `CONSTRAINT` semantics (a boundary state that violates the constraint is c
 checked but is **not** expanded), `CHECK_DEADLOCK` is set explicitly on both sides, and the test asserts the two
 produce identical **canonical state-fingerprint *sets*** — not merely equal cardinality, which equal counts
 alone do not establish (equal count + equal verdict is not equal state set) — alongside the same verdict,
-shrinking any divergence to a minimal offending model. This differential faithfulness claim is **scoped to the
-safety sub-fragment**: the generator exercises `emitTLA`'s `Init`/`Next`/`INVARIANT`/`CONSTRAINT` rendering, and
+shrinking any divergence to a minimal offending model. This differential faithfulness claim is **scoped to the safety sub-fragment**: the generator exercises `emitTLA`'s `Init`/`Next`/`INVARIANT`/`CONSTRAINT` rendering, and
 the explorer checks no liveness, so the `modelFairness`/`modelProperties` (`WF`/`SF`/`PROPERTY`) rendering is
 **not** covered by this test and rests on the `emitTLA` golden and the TLC-only liveness runs instead. This is the single most valuable place in the
 kernel for a **proof assistant**: a machine-checked meta-theorem that each `Expr`/`Temporal` constructor's
 `interpret`-denotation equals the TLA+ denotation `emitTLA` targets would upgrade faithfulness from
 *tested* to *proven*. That meta-theorem, and the fold-closure proofs the confluence ledger requires
-([chaos_failover_doctrine.md §19](./chaos_failover_doctrine.md#19-the-cross-boundary-ledger-and-conformance-rows)),
+([chaos_failover_second_axis.md §19](./chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows)),
 are the **only** two places a proof assistant is warranted here — adopt it surgically (evaluate Liquid Haskell,
 which checks the *actual* Haskell and so introduces no second artifact to drift, against Lean) or not at all; a
 broad proof-assistant layer would re-introduce exactly the artifact-drift the `Model`-as-data pattern exists to
 foreclose ([§1](#1-why-this-doctrine-exists)).
+
+### 4.1 The reference model, and why its rendering is byte-locked
+
+**The problem.** The renderers are the load-bearing artifacts, and nothing in the scheme so far exercises them
+against an expectation authored independently of them. A renderer validated only by re-running itself proves
+that it is stable, not that it is right; and the differential test above is **safety-scoped**, so an emitter
+that renders `StrongFair` as `WF_vars`, or swaps `[]` for `<>`, is invisible to every other oracle in the kernel. Both gaps are invisible at author time and surface as a TLC run that model-checks a protocol the daemon does not implement.
+
+**Why the obvious alternative fails.** The tempting fixture is a model generated or snapshotted from the
+renderer's own first output. That is not an oracle: it re-derives the expectation from the artifact under
+test, so it can only ever fail on a *change*, never on an *error*. Equally tempting is a structural
+(AST-level) assertion on the emitted spec instead of a byte comparison — but the defects that matter here are
+exactly the ones a structural comparison normalizes away: operator precedence, the fairness conjunct attached
+to the temporal `Spec` formula, and the `CONSTRAINT`/`CHECK_DEADLOCK` conventions the two checkers must agree
+on.
+
+**The chosen rule.** The kernel carries a **reference model** — one small, complete, hand-authored `Model`
+that exists only to validate the renderers, distinct from every model that describes a real amoebius
+protocol — and its rendering is pinned **byte-for-byte** against a fixture authored *before* the renderer
+exists. Three properties make the fixture an oracle rather than a snapshot:
+
+1. **Independence.** The golden is authored and committed in the documentation phase, before any emitter
+   source exists, under the gate-integrity discipline
+   ([development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
+   A golden regenerated from the renderer's own output is not a test.
+2. **Sole coverage of the liveness path.** Because the differential test is safety-scoped, this golden is the
+   **only** oracle that pins the rendered bytes of the fairness and temporal constructors — `WeakFair` and
+   `StrongFair` as `WF_vars`/`SF_vars` conjuncts, and `Always`/`Eventually`/`LeadsTo` as `[]`/`<>`/`~>`. Committed renderer mutants that swap one for another must turn it red, or the oracle has no teeth. 3. **Non-vacuity by structural assertion.** A reference model that exercised only booleans would let the golden pass while quantifier, function, and fairness translation stayed stubbed. A committed assertion therefore walks the reference model's own `Expr`/`Action`/`Temporal` nodes and fails unless it carries at least one finite quantifier, one function literal/update/application, **both** `Fairness` constructors, and **all three** `Temporal` constructors. The fixture cannot be weakened without that assertion failing first.
+
+**What it forecloses.** The renderer can no longer be reformatted freely: any change to emitted layout is a
+golden change, and a golden may be amended only under the oracle-amendment discipline
+([development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)),
+never rewritten from a failing run's actual output. That rigidity is the point: it is what makes the byte
+comparison an oracle. The concrete reference model — its name, its protocol, its committed fixture paths, and
+the mutants that must break it — is a build artifact of the formal-model phase and is named in
+[DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md);
+this doctrine owns only the obligation and its rationale. The reference model proves the **kernel**; it is not
+an amoebius protocol, and no claim about amoebius follows from it. The one real obligation is the gateway
+migration ([gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md)), which rides the
+kernel this fixture validates.
 
 ---
 
@@ -199,8 +359,7 @@ Haskell `Model`.
 
 ## 6. What a green model-check proves, and what it does not
 
-Per the honesty discipline ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
-[chaos_failover_doctrine.md](./chaos_failover_doctrine.md)):
+Per the honesty discipline ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)):
 
 - **Proven-for-the-model, at the declared bound.** A green TLC run is an exhaustive proof that the declared
   invariants hold on every reachable state of the model *at the bounded scope*. It is a real result, and because
@@ -281,8 +440,7 @@ tested amoebius result.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Gateway Migration Model](./gateway_migration_model_doctrine.md) — the one concrete `Model`: both branches of `GatewayMigration`, model-checked and simulated
 - [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — the Extract→Model→Inject methodology and the proven/tested/assumed ledger this rendering serves

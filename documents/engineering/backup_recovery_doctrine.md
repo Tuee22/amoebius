@@ -1,15 +1,42 @@
 # Backup & Recovery
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Single source of truth for amoebius's backup and recovery surface — the closed
 > `BackupPolicy` deployment rule (remote, append-only/WORM, and air-gapped media), the write-but-never-delete
 > credential boundary that keeps retention and deletion out of band, the verified content-addressed
 > `BackupArtifact`, the bounded-no-overcommit sizing fold, and the restore/seed path that populates a fresh
 > coordinate under a consistency-over-availability posture — never an in-place overwrite of live data.
+> **Read this if**: data has to survive the loss of the system holding it, or a restore has to be reasoned about.
+
+This document owns backup and recovery: the write-only credential that makes deletion unrepresentable for
+amoebius, the bounded medium in a distinct failure domain, and the rule that a restore seeds a fresh
+coordinate rather than overwriting live bytes. It does not own routine storage lifetimes, owned by
+[storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md), nor the freshness condition a recovered
+replica must meet before taking the gateway, owned by
+[gateway_migration_doctrine.md](./gateway_migration_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. The backup surface — a closed `BackupPolicy` deployment rule](#2-the-backup-surface--a-closed-backuppolicy-deployment-rule)
+- [3. The three strategies](#3-the-three-strategies)
+- [4. The write-but-never-delete credential boundary](#4-the-write-but-never-delete-credential-boundary)
+- [5. Sizing and the no-overcommit fold](#5-sizing-and-the-no-overcommit-fold)
+- [6. The verified, content-addressed `BackupArtifact`](#6-the-verified-content-addressed-backupartifact)
+- [7. Recovery: restore seeds a fresh coordinate](#7-recovery-restore-seeds-a-fresh-coordinate)
+- [8. The gateway dovetail: seed-from-backup under consistency over availability](#8-the-gateway-dovetail-seed-from-backup-under-consistency-over-availability)
+- [9. Honesty (proven/tested/assumed)](#9-honesty-proventestedassumed)
+- [10. Boundaries this doc owns vs defers](#10-boundaries-this-doc-owns-vs-defers)
+- [11. Planning ownership](#11-planning-ownership)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -39,8 +66,7 @@ so it protects against node loss but not against the domain-scoped disaster a ba
 
 **The chosen rule.** A backup is a **deployment rule** — a closed `BackupPolicy` authored beside HA replicas
 and the PACELC surface ([`app_vs_deployment_doctrine.md`](./app_vs_deployment_doctrine.md)), never application
-logic — that names a **bounded** medium in a **distinct failure domain**, a **write regime**, and a **bounded
-retention**. amoebius holds a **put-only** credential over that medium: retention and deletion are out of band
+logic — that names a **bounded** medium in a **distinct failure domain**, a **write regime**, and a **bounded retention**. amoebius holds a **put-only** credential over that medium: retention and deletion are out of band
 and amoebius never authenticates as an actor that can delete a backup. A completed backup is a verified,
 content-addressed `BackupArtifact`. Recovery **seeds a fresh coordinate** from such an artifact — it never
 overwrites live durable bytes — and a backup-seeded cluster may take the wild-ingress gateway only after its
@@ -110,6 +136,24 @@ keep-forever arm, so backup history is bounded by the same discipline the Pulsar
 
 ---
 
+```mermaid
+stateDiagram-v2
+  %% register: orientation
+  state "live coordinate, in service" as Live
+  state "backup artifact on a bounded medium" as Artifact
+  state "fresh coordinate, seeded from the artifact" as Fresh
+  state "freshness proven against the declared bound" as Proven
+  Live --> Artifact : written under a put-only credential
+  Artifact --> Fresh : restore creates, never overwrites
+  Fresh --> Proven : freshness observed, not assumed
+  Proven --> Live : may take service
+  note right of Live
+    no transition writes back over a live coordinate
+    amoebius has no representable delete against the artifact
+  end note
+```
+*Orientation. Design intent. A restore seeds a fresh coordinate and the live one is never overwritten, so a bad restore costs nothing that was already there. The put-only credential model is owned by [§4](#4-the-write-but-never-delete-credential-boundary) where it is stated normatively; the freshness bound a recovered replica must meet before taking the gateway is owned by [gateway_migration_doctrine.md](./gateway_migration_doctrine.md).*
+
 ## 3. The three strategies
 
 The medium union and the write regime together express the three named strategies without a strategy scalar:
@@ -146,8 +190,7 @@ model owned by
 [`storage_lifecycle_doctrine.md` §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation).
 
 The write credential is a specialization of the `CloudAccountMutationCapability` owned by
-[`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) whose `allowedActions` is a **closed
-put-only record** — there is no field into which a `DeleteObject`, `ExpireObject`, `PutBucketLifecycle`, or
+[`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) whose `allowedActions` is a **closed put-only record** — there is no field into which a `DeleteObject`, `ExpireObject`, `PutBucketLifecycle`, or
 `DeleteObjectVersion` action could be placed:
 
 ```haskell
@@ -228,16 +271,14 @@ medium's backing:
   bytes ([`storage_lifecycle_doctrine.md` §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union)).
 - **The copy/verify executor is charged.** The `Job` that copies and verifies a generation carries a complete
   `PodResourceEnvelope` and is admitted before render, exactly like the shrink-migration copy/verify Job
-  ([`storage_lifecycle_doctrine.md` §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction),
-  [`inforcespec_migration_doctrine.md` §4](./inforcespec_migration_doctrine.md#4-shrink-is-create-new--verified-migrate--retire-old-backing-reclaim-is-external-and-privileged)).
+  ([`storage_lifecycle_doctrine.md` §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction), [`inforcespec_migration_doctrine.md` §4](./inforcespec_migration_doctrine.md#4-shrink-is-create-new--verified-migrate--retire-old-backing-reclaim-is-external-and-privileged)).
 
 ---
 
 ## 6. The verified, content-addressed `BackupArtifact`
 
 A completed backup is an immutable, content-addressed artifact carrying a provenance witness and the commit
-watermark it captured. It is branded opaque at Gate 2, materialized only at `provision-seal`, and **counts only
-once verified** — the same discipline as the `ReclaimEligible` artifact
+watermark it captured. It is branded opaque at Gate 2, materialized only at `provision-seal`, and **counts only once verified** — the same discipline as the `ReclaimEligible` artifact
 ([`storage_lifecycle_doctrine.md` §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction))
 and the `.ready`-gated `ArtifactRef`
 ([`content_addressing_doctrine.md` §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)):
@@ -279,8 +320,8 @@ these live bytes," and it composes with the no-destruction contract of
 [`inforcespec_migration_doctrine.md` §3](./inforcespec_migration_doctrine.md#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)
 rather than becoming a disguised delete. This is also why restore does not contradict
 [`storage_lifecycle_doctrine.md` §6](./storage_lifecycle_doctrine.md#6-the-lossless-teardown-guarantee-deterministic-rebind):
-routine rebind reattaches bytes that were never deleted; restore populates a coordinate that is empty because
-its backing was lost.
+routine rebind reattaches bytes that were never deleted; restore populates a coordinate that is empty
+because its backing was lost.
 
 ```haskell
 data RestorePhase = Requested | MediumOnline | Seeded | FreshnessProven
@@ -329,8 +370,7 @@ by that surface's fold, in the same total checked-rejection shape as its `rto �
 Like `Planned`/`Failover`, the `Seed` recovery is a **world-triggered event** classified at the recovery edge,
 never an authored `mode` field ([`consistency_pacelc_doctrine.md` §3.4](./consistency_pacelc_doctrine.md#34-the-mode-is-world-triggered-not-authored)).
 
-**The proof obligation (owned by [`gateway_migration_model_doctrine.md`](./gateway_migration_model_doctrine.md),
-built in the formal-model phase).** The gateway migration model already makes cutover reachable only after an
+**The proof obligation (owned by [`gateway_migration_model_doctrine.md`](./gateway_migration_model_doctrine.md), built in the formal-model phase).** The gateway migration model already makes cutover reachable only after an
 observed `verify-caught-up` edge (`PlannedIsLossless`). That precondition is **generalized** to a
 `FreshnessWitness` guard on the promote / gateway-take transition, dischargeable two ways: a warm replica that
 is caught up (today), or a cold seed proven within `freshnessBound` (new). The model doctrine defines the added
@@ -364,8 +404,7 @@ Per [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-t
   prove the medium honors its object-lock, that an out-of-band retention actor behaves, or that the copied
   bytes match the source — those are `live-effect` / runtime-checked residue, the same layer as the
   verified-shrink copy equivalence.
-- **The write-but-never-delete boundary is decode-foreclosed at the credential shape and runtime-enforced at
-  the cloud API.** The `allowedActions` record has no delete field (a spec-layer guarantee); that the cloud
+- **The write-but-never-delete boundary is decode-foreclosed at the credential shape and runtime-enforced at the cloud API.** The `allowedActions` record has no delete field (a spec-layer guarantee); that the cloud
   account actually denies delete is the runtime backstop owned by
   [`pulumi_iac_doctrine.md` §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model).
 - **The key-independence premise is assumed.** That the envelope key is recoverable independently of the
@@ -404,8 +443,7 @@ status ledger; it links back for status.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — the retained-rebind guarantee backups complement, the closed `StorageBacking` union, and the delete-forbidden posture
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — the create-vs-delete credential model the put-only backup credential specializes

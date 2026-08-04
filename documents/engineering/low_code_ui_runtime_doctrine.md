@@ -1,20 +1,54 @@
 # Low-Code UI Runtime
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
-**Generated sections**: none
-
 > **Purpose**: Define the bounded Dhall language, checked Haskell intermediate representation, generic
 > PureScript client runtime, server responsibility, and security boundaries by which amoebius composes
 > authenticated single-page applications with services, data, workflows, and ML artifacts without exposing
 > an escape hatch around authorization or tenant isolation.
+> **Read this if**: an application surface has to be authored, or the browser/server trust boundary has to be settled.
+
+This document owns the bounded application language and its runtime: one checked value projected into a
+public client plan and a private server plan, typed effect ports, and the rule that a browser is never an
+authority source. It does not own realtime transport, owned by
+[ui_realtime_coordination_doctrine.md](./ui_realtime_coordination_doctrine.md), nor offline continuity,
+owned by [browser_offline_runtime_doctrine.md](./browser_offline_runtime_doctrine.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [1. Why this doctrine exists](#1-why-this-doctrine-exists)
+- [2. Scope and single-source ownership](#2-scope-and-single-source-ownership)
+- [3. One checked value, two runtime plans](#3-one-checked-value-two-runtime-plans)
+- [4. The authored Dhall surface](#4-the-authored-dhall-surface)
+- [5. Gate 2 and the checked Haskell IR](#5-gate-2-and-the-checked-haskell-ir)
+- [6. Modules and total composition](#6-modules-and-total-composition)
+- [7. State, events, and deterministic updates](#7-state-events-and-deterministic-updates)
+- [8. Effects are typed ports, not network operations](#8-effects-are-typed-ports-not-network-operations)
+- [9. Routes, identity, authorization, and the edge](#9-routes-identity-authorization-and-the-edge)
+- [10. Single-tenant and multi-tenant applications](#10-single-tenant-and-multi-tenant-applications)
+- [11. Data, forms, and storage](#11-data-forms-and-storage)
+- [12. Workflows and artifact lifting into the UX](#12-workflows-and-artifact-lifting-into-the-ux)
+- [13. Generic PureScript client and amoebius UI server](#13-generic-purescript-client-and-amoebius-ui-server)
+- [14. Runtime role, deployment, and high availability](#14-runtime-role-deployment-and-high-availability)
+- [15. Versioning, rollout, and generated artifacts](#15-versioning-rollout-and-generated-artifacts)
+- [16. Admission stages and illegal-state foreclosure](#16-admission-stages-and-illegal-state-foreclosure)
+- [17. Verification obligations](#17-verification-obligations)
+- [18. Honesty boundary](#18-honesty-boundary)
+- [19. Extension rule and permanently absent escape hatches](#19-extension-rule-and-permanently-absent-escape-hatches)
+- [Related Documents](#related-documents)
+
+---
 
 Phase order, implementation status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). This document owns the intended UI language
 and runtime contract; it does not assert that the contract is implemented.
-
----
 
 ## 1. Why this doctrine exists
 
@@ -75,8 +109,7 @@ not redefine them.
 | Foreclosure terminology and honesty | [Illegal-State Techniques](../illegal_state/illegal_state_techniques.md) | This doctrine identifies type-, decode-, bind-, and runtime-foreclosed UI states without overstating any layer. |
 
 The statement in [The Amoebius DSL](./dsl_doctrine.md) that Dhall carries parameters rather than logic remains
-the general rule. The UI-specific refinement is that a normalized Dhall value may carry a **declarative program
-description**. It carries no executable callback, interpreter, effect implementation, authorization decision,
+the general rule. The UI-specific refinement is that a normalized Dhall value may carry a **declarative program description**. It carries no executable callback, interpreter, effect implementation, authorization decision,
 or provider operation. The trusted runtimes continue to carry all operational semantics.
 
 ---
@@ -117,6 +150,38 @@ role-binding rules, raw policy, or handler implementation details. The server pr
 claim merely because the matching client plan would normally emit it.
 
 ---
+
+```mermaid
+flowchart TD
+  %% register: algebra
+  src["UiSource: a closed Dhall algebra"]:::intent
+  chk{{"Gate 2: total check into the Haskell IR"}}:::gate
+  bad>"Left: names the unbound port or missing authorization"]:::refuse
+  bound["BoundUiProgram: one checked value"]:::intent
+  comp[["deterministic plan compiler"]]:::intent
+  client["ClientPlan: public, served to the browser"]:::intent
+  server["UiServerPlan: private, never served"]:::intent
+  links["external-link and content manifest"]:::intent
+  demand["finite resource demand"]:::intent
+  seal((("one release names all four atomically"))):::seal
+  src --> chk
+  chk -->|"rejects"| bad
+  chk -->|"binds the checked program"| bound
+  bound -->|"binds one value"| comp
+  comp --> client
+  comp --> server
+  comp --> links
+  comp --> demand
+  client --> seal
+  server --> seal
+  links --> seal
+  demand --> seal
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+```
+*Design intent, Tier-1 decode-foreclosed at the gate. Four artifacts from one checked value is what makes a mixed client-and-server pair unrepresentable: they are not separately authored, so they cannot separately drift. The typed effect ports the server plan mediates are owned by [§8](#8-effects-are-typed-ports-not-network-operations). Vocabulary: [diagram_conventions.md](./diagram_conventions.md).*
 
 ## 4. The authored Dhall surface
 
@@ -402,6 +467,20 @@ trusted subject, tenant scope, grants, authorization-policy version, and trace/a
 inside the public input has no authority and is rejected when the contract forbids it.
 
 ---
+
+```mermaid
+flowchart LR
+  %% register: orientation
+  br["the browser, running the generic interpreter"]
+  ed["the authenticated edge"]
+  srv["the UI server, holding UiServerPlan"]
+  cap["a bound capability"]
+  br -->|"one authenticated same-origin request"| ed
+  ed -->|"derives identity and scope, never trusts the browser"| srv
+  srv -->|"reauthorizes, then mediates one typed port"| cap
+  br -.->|"the browser never names a capability"| cap
+```
+*Orientation. Design intent. The trust boundary drawn as reachability: the browser names a port, and the server names the capability. Whether that separation is foreclosed by construction or enforced at runtime is stated by [§9](#9-routes-identity-authorization-and-the-edge), which owns the rule.*
 
 ## 9. Routes, identity, authorization, and the edge
 
@@ -861,8 +940,7 @@ tenancy, and capability escape arm.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Engineering Doctrine Index](./README.md)
 - [Documentation Standards](../documentation_standards.md)

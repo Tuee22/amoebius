@@ -1,16 +1,41 @@
 # Phase 27: amoebius-capacity scheduler + bootstrap cutover
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
-**Generated sections**: none
-
 > **Purpose**: Build the same-binary `amoebius-capacity` scheduler as a dedicated role layered on the
 > Phase-26 reconciler — the state-indexed reservation ledger, the two-stage bootstrap taint/RBAC cutover
 > (`BootstrapCapacitySchedulerReady` → controller cutover → `ManagedCapacityReady`), execution-identity
 > admission, and the CAS `Reserved` → `BindingInFlight` → submit/confirm Kubernetes Binding → `Bound`
 > protocol — proven live by binding a pinned Pending guarded-Pod set with no double-bind and rejecting any
 > guarded workload before `ManagedCapacityReady`.
+> **Read this if**: phase 27 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 27 delivers the amoebius-capacity scheduler + bootstrap cutover; its design is owned by [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [readiness_ordering_doctrine.md](../documents/engineering/readiness_ordering_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Resource provision — the `CapacitySchedulerSystemDemand` envelope](#resource-provision--the-capacityschedulersystemdemand-envelope)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 27.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms 📋](#sprint-271-state-indexed-reservation-ledger--normalization--absent-pod-recovery-arms-)
+- [Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses 📋](#sprint-272-scheduler-bootstrap-authority--two-stage-taintrbac-cutover--readiness-witnesses-)
+- [Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery 📋](#sprint-273-scheduler-loop--reservedbindinginflightbindingbound-cas--placement--recovery-)
+- [Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate 📋](#sprint-274-live-scheduler-binding--bootstrapsteady-cutover-gate-)
+- [Sprint 27.5: Register-2.5 scheduler convergence under simulated faults 📋](#sprint-275-register-25-scheduler-convergence-under-simulated-faults-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -32,8 +57,7 @@ reservation ledger, the aggregate-CAS reservation protocol, the identity admissi
 
 ## Phase Summary
 
-This phase delivers the `amoebius-capacity` scheduler. It is **the same amoebius Haskell binary in a dedicated
-role**, not a scheduler-framework plugin and not a second implementation. `CapacitySchedulerSystemDemand`
+This phase delivers the `amoebius-capacity` scheduler. It is **the same amoebius Haskell binary in a dedicated role**, not a scheduler-framework plugin and not a second implementation. `CapacitySchedulerSystemDemand`
 makes its image, complete Pod envelope, config, RBAC, readiness, identity admission, managed-node taint
 policy, reservation CRD/records, API/etcd bytes, and CAS churn explicit, so the scheduler's own cost
 participates in the same identity-aware fold it enforces on every other Pod.
@@ -121,6 +145,27 @@ scheduler-role fixtures that depend on the Phase-25 registry/preloaded image and
 which are committed at the start of this phase before the implementation that consumes them (§M.1 named
 exception).
 
+```mermaid
+flowchart LR
+  %% register: algebra
+  fx["committed fixtures"]:::intent
+  or["independently authored oracle"]:::intent
+  mu["seeded mutant"]:::intent
+  g{{"the phase 27 gate command"}}:::gate
+  ok((("phase seal: the ledger this gate emits"))):::seal
+  no>"the mutant must turn it red"]:::refuse
+  fx -->|"binds the corpus"| g
+  or -->|"binds the expectation"| g
+  mu -->|"binds the defect"| g
+  g -->|"fixtures green, oracle agrees"| ok
+  g -->|"mutant green means the gate is not one"| no
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+```
+*Design intent. Phase 27's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+
 **Inherited committed fixtures (§M.1/§M.7 concrete corpus).** This phase reuses
 [Phase 26's concrete reconcile corpus](phase_26_object_reconciler.md) rather than selecting new service specs. It
 inherits exactly these members:
@@ -168,11 +213,8 @@ committed/re-run, not run once:
 read by an **external apiserver + reservation-CRD observer** — a distinct `kubectl get -o json` / client-go
 reader that is **not the scheduler and shares no fold/CAS/`Step→argv` code with it**. It reads the reservation
 records, their CAS version, and the Kubernetes `Binding` subresource directly and asserts, independently of the
-code under test: **no `Binding` request precedes a successful `Reserved` CAS**; **every guarded Pod UID has
-exactly one reservation debit** (no Pod+ledger double debit); at every audit resourceVersion **at most one
-holder** and no non-authority write without the exact mandatory-`Lease` holder (held by the Phase-26
-reconciler); on the immediate re-run the reservation records and CAS version are **byte-identical** and **no
-new `Binding` is issued**; and **no second default-scheduler exception exists**. The scheduler's self-reported
+code under test: **no `Binding` request precedes a successful `Reserved` CAS**; **every guarded Pod UID has exactly one reservation debit** (no Pod+ledger double debit); at every audit resourceVersion **at most one holder** and no non-authority write without the exact mandatory-`Lease` holder (held by the Phase-26
+reconciler); on the immediate re-run the reservation records and CAS version are **byte-identical** and **no new `Binding` is issued**; and **no second default-scheduler exception exists**. The scheduler's self-reported
 "reserved once, bound once" is corroborating evidence only, never the passing condition. The reference *action*
 domain is the Phase-0-pinned hand-authored `expected-actions.json` scheduler slice, authored before the
 planner — not regenerated from the scheduler's own output.
@@ -191,8 +233,7 @@ planner — not regenerated from the scheduler's own output.
   identity-aware fold (equal shared image extents deduplicate, compute/slots add).
 - **Namespace/quota** — the `amoebius-capacity-scheduler` namespace and its exact `ResourceQuota pods=1`.
 - **Reservation state** — the reservation CRD, config, and aggregate root; the canonical reservation
-  serializer derives entry bytes, and `maxEntries` derives from the **maximum normalized Pod-UID population
-  including retained terminal records**, never an authored scalar. The three compute-headroom pad scalars are
+  serializer derives entry bytes, and `maxEntries` derives from the **maximum normalized Pod-UID population including retained terminal records**, never an authored scalar. The three compute-headroom pad scalars are
   part of the canonically pinned compute-axis field set, so they enlarge the derived entry bytes and therefore
   the `maxEntries` and `EtcdChurnBudget` provisions; they are not an optional tail a serializer may omit for
   rows whose pad is `Zero`.
@@ -210,8 +251,7 @@ planner — not regenerated from the scheduler's own output.
   bootstrap taint/RBAC cutover, and execution-identity admission. Generic SSA, staged execution, Job terminal,
   authenticated deletion, and the rollback/release ledger are Phase 26's or stay deferred.
 - [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
-  — **desired is the validated identity index of `renderAll(provisionedSpec)`, observed is live inventory, and
-  actions are typed** (the scheduler-ledger slice). The state-indexed
+  — **desired is the validated identity index of `renderAll(provisionedSpec)`, observed is live inventory, and actions are typed** (the scheduler-ledger slice). The state-indexed
   `Reserved | BindingInFlight | Bound | Terminating | TerminalRetained` records, their CAS version, and the
   `LedgerOnlyAbsentRecovery` arms are **observed** to authorize reservation transitions, never treated as
   another desired source; a `PlannedExecutionSlotId` is never a Pod UID.
@@ -240,17 +280,18 @@ planner — not regenerated from the scheduler's own output.
 ## Sprint 27.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Scheduler/Ledger.hs` — the state-indexed reservation ledger join and
-normalization that extends Phase 26's `src/Amoebius/Execution/Normalize.hs` observed snapshot with the
-scheduler dimension; target paths, not yet built.
-**Blocked by**: Phase 26 gate (the object reconciler, `ObservedLiveResourceSnapshot`, and `ValidatedLiveTarget`
-construction).
-**Independent Validation**: a fresh snapshot over the pinned corpus normalizes each reservation state exactly
-once and produces the committed scheduler-ledger slice of
-`test/live/fixtures/reconcile-corpus/expected-actions.json`, authored before this module. Every ledger negative
-(orphan, missing, wrong-state, double debit) fails to construct a `ValidatedLiveTarget` and before any
-apiserver, ledger, or Binding write.
-**Docs to update**: `documents/engineering/manifest_generation_doctrine.md`,
+**Implementation**: `src/Amoebius/Scheduler/Ledger.hs` — the state-indexed reservation
+ledger join and normalization that extends Phase 26's `src/Amoebius/Execution/Normalize.hs` observed
+snapshot with the scheduler dimension; target paths, not yet built.
+**Blocked by**: Phase 26 gate (the
+object reconciler, `ObservedLiveResourceSnapshot`, and `ValidatedLiveTarget` construction).
+**Independent Validation**: a fresh snapshot over the pinned corpus normalizes each reservation state exactly once and
+produces the committed scheduler-ledger slice of
+`test/live/fixtures/reconcile-corpus/expected-actions.json`, authored before this module. Every ledger
+negative (orphan, missing, wrong-state, double debit) fails to construct a `ValidatedLiveTarget` and before
+any apiserver, ledger, or Binding write.
+**Docs to update**:
+`documents/engineering/manifest_generation_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
@@ -317,18 +358,22 @@ The whole sprint (📋 Planned).
 ## Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Scheduler/Readiness.hs`, the scheduler-authority slice of
-`src/Amoebius/Manifest/Authority.hs` (`CapacitySchedulerSystemDemand` admission and the scheduler-system-only
-token; the cold-start `Lease` authority itself is Phase 26), and `src/Amoebius/Admission/ExecutionIdentity.hs`
-(the managed-taint/admission install) — target paths, not yet built. The scheduler role is an entry point of
-the existing amoebius binary/image, not a second implementation or a kube-scheduler plugin.
-**Blocked by**: Sprint 27.1; Phase 25 gate (the preloaded/side-loaded base image + in-cluster registry);
-Phase 26 gate (the reconciler holding the mandatory reconciler `Lease`).
-**Independent Validation**: `BootstrapCapacitySchedulerReady` precedes the finite bootstrap-controller cutover;
-every old default-scheduled UID is absent/released and every replacement is reservation-joined before
-`ManagedCapacityReady`; only the latter precedes any general guarded controller action. An independent taint/
-admission/RBAC/writer-domain readback mints `ManagedCapacityReady`; no readiness witness is a `threadDelay`.
-**Docs to update**: `documents/engineering/manifest_generation_doctrine.md`,
+**Implementation**: `src/Amoebius/Scheduler/Readiness.hs`, the scheduler-authority slice
+of `src/Amoebius/Manifest/Authority.hs` (`CapacitySchedulerSystemDemand` admission and the
+scheduler-system-only token; the cold-start `Lease` authority itself is Phase 26), and
+`src/Amoebius/Admission/ExecutionIdentity.hs` (the managed-taint/admission install) — target paths, not yet
+built. The scheduler role is an entry point of the existing amoebius binary/image, not a second
+implementation or a kube-scheduler plugin.
+**Blocked by**: Sprint 27.1; Phase 25 gate (the
+preloaded/side-loaded base image + in-cluster registry); Phase 26 gate (the reconciler holding the mandatory
+reconciler `Lease`).
+**Independent Validation**: `BootstrapCapacitySchedulerReady` precedes the finite
+bootstrap-controller cutover; every old default-scheduled UID is absent/released and every replacement is
+reservation-joined before `ManagedCapacityReady`; only the latter precedes any general guarded controller
+action. An independent taint/ admission/RBAC/writer-domain readback mints `ManagedCapacityReady`; no
+readiness witness is a `threadDelay`.
+**Docs to update**:
+`documents/engineering/manifest_generation_doctrine.md`,
 `documents/engineering/readiness_ordering_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
@@ -352,8 +397,7 @@ independently mint `ManagedCapacityReady`.
   the Phase-25 side-loaded/preloaded amoebius image, has unique-node affinity, and merges its static owner row
   with the ledger fold (equal shared image extents deduplicate, compute/slots add). These are the only
   `BootstrapSchedulerStage` actions.
-- `BootstrapCapacitySchedulerReady`: exact active generation/config/root readback mints it **while the managed
-  taint, general identity admission, and full Binding authority remain absent**. Its restricted capability can
+- `BootstrapCapacitySchedulerReady`: exact active generation/config/root readback mints it **while the managed taint, general identity admission, and full Binding authority remain absent**. Its restricted capability can
   only patch the exact observed distro/Phase-25 bootstrap-controller set to `schedulerName=amoebius-capacity`.
 - The bootstrap-controller cutover under `AfterBootstrapAddonCutover`: for every controller, re-observe the old
   default-scheduled UID absent and resource-indexed released, then the replacement UID reservation-joined,
@@ -397,14 +441,16 @@ The whole sprint (📋 Planned).
 ## Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Scheduler/{Loop,Placement,Reservation,Binding,Recovery}.hs` and the
-authentication path of `src/Amoebius/Admission/ExecutionIdentity.hs` — target paths, not yet built.
-**Blocked by**: Sprint 27.1, Sprint 27.2, Phase 7 gate (the `place`/`fits`/`carve` resource-algebra fold the
-placement invokes).
+**Implementation**:
+`src/Amoebius/Scheduler/{Loop,Placement,Reservation,Binding,Recovery}.hs` and the authentication path of
+`src/Amoebius/Admission/ExecutionIdentity.hs` — target paths, not yet built.
+**Blocked by**: Sprint 27.1,
+Sprint 27.2, Phase 7 gate (the `place`/`fits`/`carve` resource-algebra fold the placement invokes).
 **Independent Validation**: two concurrent candidates cannot reserve the same residual; crash-after-reserve,
 restart, and Binding failure recover idempotently; the external observer proves no Binding precedes a
 successful reservation CAS and every UID is debited once.
-**Docs to update**: `documents/engineering/manifest_generation_doctrine.md`,
+**Docs to update**:
+`documents/engineering/manifest_generation_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
@@ -464,19 +510,22 @@ The whole sprint (📋 Planned).
 ## Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate 📋
 
 **Status**: Planned
-**Implementation**: `test/live/SchedulerReservationSpec.hs` and `test/live/SchedulerBootstrapCutoverSpec.hs`,
-driving the Sprint 27.1–27.3 `Scheduler/*` and `Admission/ExecutionIdentity` modules against the live Phase-24
-`kind` cluster and the converged Phase-26 reconciler — target paths, not yet built.
+**Implementation**: `test/live/SchedulerReservationSpec.hs` and
+`test/live/SchedulerBootstrapCutoverSpec.hs`, driving the Sprint 27.1–27.3 `Scheduler/*` and
+`Admission/ExecutionIdentity` modules against the live Phase-24 `kind` cluster and the converged Phase-26
+reconciler — target paths, not yet built.
 **Blocked by**: Sprint 27.3.
-**Independent Validation**: the representative corpus observes `BootstrapCapacitySchedulerReady`, complete
-bootstrap-controller cutover, and `ManagedCapacityReady` **before** any guarded Pod; the guarded Deployment
-binds exclusively through the CAS reservation/Binding protocol with no double-bind; a guarded workload before
-`ManagedCapacityReady` is rejected with zero writes; the immediate re-run is a scheduler no-op by the external
-observer; and every committed scheduler mutant turns red.
-**Docs to update**: `documents/engineering/manifest_generation_doctrine.md`,
-`documents/engineering/readiness_ordering_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`,
-`documents/engineering/daemon_topology_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-27 status when
-the gate passes).
+**Independent Validation**: the
+representative corpus observes `BootstrapCapacitySchedulerReady`, complete bootstrap-controller cutover, and
+`ManagedCapacityReady` **before** any guarded Pod; the guarded Deployment binds exclusively through the CAS
+reservation/Binding protocol with no double-bind; a guarded workload before `ManagedCapacityReady` is
+rejected with zero writes; the immediate re-run is a scheduler no-op by the external observer; and every
+committed scheduler mutant turns red.
+**Docs to update**:
+`documents/engineering/manifest_generation_doctrine.md`,
+`documents/engineering/readiness_ordering_doctrine.md`,
+`documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/daemon_topology_doctrine.md`,
+`DEVELOPMENT_PLAN/README.md` (flip the Phase-27 status when the gate passes).
 
 ### Objective
 
@@ -502,8 +551,7 @@ namespace down leak-free.
   rejected at admission; independent observers show zero writes (no reservation record, no Binding, no owned
   object resourceVersion change), and the paired positive is admitted only after the full witness.
 - The idempotent re-run: an immediate re-run of the same spec plans only scheduler no-ops; the external
-  apiserver + reservation-CRD observer asserts byte-identical reservation records and CAS version, **no new
-  Binding request**, the same mandatory-`Lease` holder/resourceVersion, and no second default-scheduler
+  apiserver + reservation-CRD observer asserts byte-identical reservation records and CAS version, **no new Binding request**, the same mandatory-`Lease` holder/resourceVersion, and no second default-scheduler
   exception.
 - The committed red-path suite: the mutants `bind-before-reservation-CAS`, `numeric-add-instead-of-whole-ledger-refold`,
   `same-UID-double-debit`, `bound-deleted-on-restart`, `default-scheduler-managed-node-bypass`,
@@ -539,12 +587,12 @@ The whole sprint (📋 Planned).
 `Admission/ExecutionIdentity` modules on the Phase-14 `io-classes` `Env` / modeled apiserver — target paths,
 not yet built. This is the scheduler slice of the deterministic-simulation battery; Phase 26 owns the
 object-reconciler slice of the same environment.
-**Blocked by**: Sprint 27.4; the Phase-15 deterministic-simulation substrate and the Phase-14 `io-classes`
-seams / modeled apiserver.
+**Blocked by**: Sprint 27.4; the Phase-15
+deterministic-simulation substrate and the Phase-14 `io-classes` seams / modeled apiserver.
 **Independent Validation**: `IOSimPOR` interleaves reservation-ledger CAS races, bootstrap-`Lease` acquire/renew
-ambiguity, crashes/watch gaps across **both** scheduler-readiness stages, crash-after-reserve, Binding failure,
-and restarts. Every schedule either converges to a typed scheduler no-op or fails closed without an overlapping
-writer, an unguarded Pod, overspend, or a double-bind; counterexamples replay by seed.
+ambiguity, crashes/watch gaps across **both** scheduler-readiness stages, crash-after-reserve, Binding
+failure, and restarts. Every schedule either converges to a typed scheduler no-op or fails closed without an
+overlapping writer, an unguarded Pod, overspend, or a double-bind; counterexamples replay by seed.
 **Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-27 status backlink),
 `documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -562,8 +610,7 @@ neither pure-value checks nor the live sample exhausts.
   add-on-cutover/full-authority transition, reservation-CAS, and Binding critical sections rather than only
   between iterations.
 - Safety invariants on every trace: no general guarded action from `BootstrapCapacitySchedulerReady`; no full
-  authority before complete old-UID release/replacement joins; **one reservation debit per Pod UID**; **no
-  Binding before a successful CAS**; no `Bound` record unreserved on restart; no non-authority write without the
+  authority before complete old-UID release/replacement joins; **one reservation debit per Pod UID**; **no Binding before a successful CAS**; no `Bound` record unreserved on restart; no non-authority write without the
   exact mandatory-`Lease` holder; and unchanged snapshot tokens cannot be reused after any observed-state
   transition.
 - Committed mutants for lost-`Lease`/resourceVersion retry (against the reconciler holder the scheduler depends
@@ -612,14 +659,11 @@ The whole sprint (📋 Planned).
 ## Related Documents
 
 - [README.md](README.md) — the live tracker and phase order this document serves
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
-  Register-3 acceptance token: *the scheduler binds under an external CAS-ledger/Lease observer with no
-  double-bind*, externally observed live)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the Register-3 acceptance token: *the scheduler binds under an external CAS-ledger/Lease observer with no double-bind*, externally observed live)
 - [overview.md](overview.md) — target architecture; the same-binary `amoebius-capacity` scheduler that
   authenticates a sealed prior+desired child template, re-folds the resource algebra under one aggregate CAS,
   then alone binds the Pod
-- [phase_26_object_reconciler.md](phase_26_object_reconciler.md) — the object reconciler (observe → diff →
-  scoped-SSA → staged-enact → delete → wait, and the `ValidatedLiveTarget` + mandatory `Lease`) this phase is
+- [phase_26_object_reconciler.md](phase_26_object_reconciler.md) — the object reconciler (observe → diff → scoped-SSA → staged-enact → delete → wait, and the `ValidatedLiveTarget` + mandatory `Lease`) this phase is
   layered on
 - [phase_07_capacity_core_folds.md](phase_07_capacity_core_folds.md) — the `place`/`fits`/`carve` resource
   algebra the scheduler placement re-folds under aggregate CAS

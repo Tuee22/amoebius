@@ -1,12 +1,32 @@
 # Phase 20: UI plan compiler
 
+> **Purpose**: Compile one sealed `BoundUiProgram` deterministically into matching immutable `ClientPlan`,
+> `UiServerPlan`, public-contract, content-manifest, route-dispatch, and finite runtime-demand artifacts.
+> **Read this if**: phase 20 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 20 delivers the UI plan compiler; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md), and the plan for reaching it is owned here.
+Register 1: an in-process battery, no cluster.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Compile one sealed `BoundUiProgram` deterministically into matching immutable `ClientPlan`,
-> `UiServerPlan`, public-contract, content-manifest, route-dispatch, and finite runtime-demand artifacts.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 20.1: Deterministic paired-plan projection 📋](#sprint-201-deterministic-paired-plan-projection-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -91,15 +111,15 @@ interpreter, release publication, transport security, or runtime freshness enfor
 ## Sprint 20.1: Deterministic paired-plan projection 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Compile/{ClientPlan,ServerPlan,Manifest,Demand}.hs` and
-`test/ui/Phase20UiPlanCompilerSpec.hs` (target authored sources; not yet built)
+**Implementation**: `src/Amoebius/Ui/Compile/{ClientPlan,ServerPlan,Manifest,Demand}.hs`
+and `test/ui/Phase20UiPlanCompilerSpec.hs` (target authored sources; not yet built)
 **Blocked by**: Phase 19
 **Independent Validation**: `cabal test ui-plan-compiler-spec` compares fresh compiler output with the
 Phase-0 tables/goldens and requires every named projection/determinism mutant to fail.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
+**Docs to update**:
+`documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/ui_realtime_coordination_doctrine.md`,
-`documents/engineering/generated_artifacts_doctrine.md`,
-`documents/illegal_state/illegal_state_security.md`
+`documents/engineering/generated_artifacts_doctrine.md`, `documents/illegal_state/illegal_state_security.md`
 
 ### Objective
 

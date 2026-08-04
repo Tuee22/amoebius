@@ -1,12 +1,32 @@
 # Phase 18: UI authorization kernel
 
+> **Purpose**: Build the pure action-registry and current-authority transition that keeps client presentation,
+> server dispatch, policy, scope, audit, and plan freshness in exact agreement.
+> **Read this if**: phase 18 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 18 delivers the UI authorization kernel; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), and the plan for reaching it is owned here.
+Register 1: an in-process battery, no cluster.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Build the pure action-registry and current-authority transition that keeps client presentation,
-> server dispatch, policy, scope, audit, and plan freshness in exact agreement.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 18.1: Sealed action registry and authorized-action transition 📋](#sprint-181-sealed-action-registry-and-authorized-action-transition-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -77,12 +97,15 @@ HTTP routing, handler implementation correctness, or provider-side isolation.
 ## Sprint 18.1: Sealed action registry and authorized-action transition 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Security/Authorization.hs`, `test/ui/AuthorizationSpec.hs`, and
-`test/ui/AuthorizationReference.hs` (target authored sources; not yet built)
+**Implementation**: `src/Amoebius/Ui/Security/Authorization.hs`,
+`test/ui/AuthorizationSpec.hs`, and `test/ui/AuthorizationReference.hs` (target authored sources; not yet
+built)
 **Blocked by**: Phase 17
-**Independent Validation**: `cabal test ui-authorization-spec` compares production results with Phase-0 pins
-and the separate reference evaluator, verifies empty denied traces, and requires each named mutant to fail.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
+**Independent Validation**: `cabal test ui-authorization-spec` compares
+production results with Phase-0 pins and the separate reference evaluator, verifies empty denied traces, and
+requires each named mutant to fail.
+**Docs to update**:
+`documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/illegal_state/illegal_state_security.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective

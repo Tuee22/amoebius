@@ -1,16 +1,41 @@
 # Phase 14: chain/Step kernel + `--dry-run` + boundary fake-tool harness
 
+> **Purpose**: Seed the pure chain/Step reconcile kernel and its `--dry-run` plan render — `chain :: cfg ->
+> [Step]` as a pure value whose byte-for-byte preview is produced with no effects and whose descent is > golden-locked (Register 1) — then run the real amoebius binary over that same pure `[Step]` plan against fake > `kubectl`/`docker`/`pulumi` invoked by absolute path, asserting the exact argv stream and applied bytes > (Register 2), the two-register boundary that closes the pre-cluster conformance spine in-process, before any
+> cluster or effectful interpreter exists.
+> **Read this if**: phase 14 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 14 delivers the chain/Step kernel + `--dry-run` + boundary fake-tool harness; its design is owned by [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), [conformance_harness_doctrine.md](../documents/engineering/conformance_harness_doctrine.md), [generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md), and the plan for reaching it is owned here.
+Register 1: an in-process battery, no cluster.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Seed the pure chain/Step reconcile kernel and its `--dry-run` plan render — `chain :: cfg ->
-> [Step]` as a pure value whose byte-for-byte preview is produced with no effects and whose descent is
-> golden-locked (Register 1) — then run the real amoebius binary over that same pure `[Step]` plan against fake
-> `kubectl`/`docker`/`pulumi` invoked by absolute path, asserting the exact argv stream and applied bytes
-> (Register 2), the two-register boundary that closes the pre-cluster conformance spine in-process, before any
-> cluster or effectful interpreter exists.
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 14.1: The `Step` algebra + `chain :: cfg -> \[Step\]` builder 📋](#sprint-141-the-step-algebra--chain--cfg---step-builder-)
+- [Sprint 14.2: The pure descent — `nextFrameAfter` / `foldLift` (golden-locked) 📋](#sprint-142-the-pure-descent--nextframeafter--foldlift-golden-locked-)
+- [Sprint 14.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) 📋](#sprint-143-renderchainplan----dry-run-byte-for-byte-render-no-live-infra-)
+- [Sprint 14.4: The plan-render golden battery (`chain-spec`) — the Part-A gate 📋](#sprint-144-the-plan-render-golden-battery-chain-spec--the-part-a-gate-)
+- [Sprint 14.5: The single typed subprocess seam + `boundary-spec` skeleton 📋](#sprint-145-the-single-typed-subprocess-seam--boundary-spec-skeleton-)
+- [Sprint 14.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders 📋](#sprint-146-the-fake-kubectlhelmdockerpulumi-recorders-)
+- [Sprint 14.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate 📋](#sprint-147-the-boundary-battery--exact-commands--applied-bytes--no-path--the-part-b-gate-)
+- [Sprint 14.8: The sanctioned-API surface — what extension source may reach 📋](#sprint-148-the-sanctioned-api-surface--what-extension-source-may-reach-)
+- [Sprint 14.9: Gate 3 — the extension AST checker and the link seal 📋](#sprint-149-gate-3--the-extension-ast-checker-and-the-link-seal-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -18,8 +43,7 @@
 
 📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
 is design intent, never a tested amoebius result. This phase opens after the Phase 13 gate (the pure
-`renderAll :: ProvisionedSpec -> [K8sObject]` and its rendered-output goldens,
-[phase_13_render_manifest_goldens.md](phase_13_render_manifest_goldens.md)) and runs on **no substrate**
+`renderAll :: ProvisionedSpec -> [K8sObject]` and its rendered-output goldens, [phase_13_render_manifest_goldens.md](phase_13_render_manifest_goldens.md)) and runs on **no substrate**
 (`none`) across **Registers 1 and 2** — it stands up no host, no cluster, and no live effectful interpreter,
 only an in-process plan-render battery (Register 1) plus the real binary driven against a handful of controlled
 fake tool binaries in a controlled directory (Register 2). This phase **merges** the two former pre-cluster
@@ -28,8 +52,7 @@ render (the Register-1 half); **Part B** is the boundary-integration fake-tool h
 pure plan (the Register-2 half). Where a shape below is already exercised in a sibling system — hostbootstrap's
 `Step`/`Chain` algebra, its `renderChainPlan`, its `foldLift`, and its `runChainFromFrame` descent (Part A); and
 prodbox validating its behaviour through a single thin IO seam with subprocess fakes in a dedicated boundary
-suite, `typed-process`, and byte-for-byte dry-run goldens (Part B) — that is **sibling evidence, not an
-amoebius result**.
+suite, `typed-process`, and byte-for-byte dry-run goldens (Part B) — that is **sibling evidence, not an amoebius result**.
 
 ## Phase Summary
 
@@ -39,29 +62,18 @@ against fakes and asserting the exact commands and bytes (Part B) — both witho
 
 **Part A (Register 1) — the pure kernel and its no-effect render.** It delivers the `Step` algebra (a label, the
 frame it runs in, a `StepKind`, and an effectful `stepRun` action that is *declared but never invoked here*), the
-`chain :: cfg -> [Step]` builder whose amoebius instantiation receives a checked plan config containing the whole
-`ProvisionedSpec`, the pure descent (`nextFrameAfter`/`foldLift`) that computes which steps belong to which frame
+`chain :: cfg -> [Step]` builder whose amoebius instantiation receives a checked plan config containing the whole `ProvisionedSpec`, the pure descent (`nextFrameAfter`/`foldLift`) that computes which steps belong to which frame
 without running a single action, and the `renderChainPlan` / `--dry-run` renderer that emits the exact plan a
 live apply would execute. The load-bearing claim is
 [conformance_harness_doctrine §3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)'s
 invariant: **rendering a plan never touches live infrastructure** — the render path is a pure function of
-committed source and completes with no apiserver, no credentials, no broker, no Vault. Because `[Step]` is a pure
-value, the `--dry-run` preview is byte-for-byte what a live apply would submit; both consume the same rendered
-value. `renderAll` contributes the complete desired object set, while Step construction retains each source's
-`RenderActivation`; the dry-run therefore shows later-stage objects and their readiness-gated action stage
-without implying they are eligible for the first generic apply. The effectful `runChainFromFrame` seam is
-*declared* here but its live invocation is out of scope — there is **no election, no standby, and no singleton
-runtime** in this phase.
+committed source and completes with no apiserver, no credentials, no broker, no Vault. Because `[Step]` is a pure value, the `--dry-run` preview is byte-for-byte what a live apply would submit; both consume the same rendered value. `renderAll` contributes the complete desired object set, while Step construction retains each source's `RenderActivation`; the dry-run therefore shows later-stage objects and their readiness-gated action stage without implying they are eligible for the first generic apply. The effectful `runChainFromFrame` seam is *declared* here but its live invocation is out of scope — there is **no election, no standby, and no singleton runtime** in this phase.
 
 **Part B (Register 2) — the boundary that executes the plan against fakes.** It delivers the single, thin IO seam
 through which the amoebius binary invokes every external tool (`src/Amoebius/Exec/Tool.hs`, the one
 `typed-process` seam that runs a resolved tool **by absolute path**, never a `PATH` lookup), the four fake tool
 recorders (`kubectl`, `helm`, `docker`, `pulumi`) that capture argv and applied-manifest bytes and return canned
-success, and the `boundary-spec` test-suite that drives the *real* binary over the Part-A `[Step]` plan against
-those fakes and asserts the exact command stream and applied bytes. Nothing here contacts live infrastructure:
-the plan and the manifest bytes the fakes receive are the same pure rendered value Part A already golden-locked,
-so the applied bytes a fake records are byte-for-byte what a live apply would submit — the identity owned by
-[`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md). The mocking
+success, and the `boundary-spec` test-suite that drives the *real* binary over the Part-A `[Step]` plan against those fakes and asserts the exact command stream and applied bytes. Nothing here contacts live infrastructure: the plan and the manifest bytes the fakes receive are the same pure rendered value Part A already golden-locked, so the applied bytes a fake records are byte-for-byte what a live apply would submit — the identity owned by [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md). The mocking
 posture is strict: mocking happens **only** at the subprocess boundary; the planning and rendering code under
 test stays pure and untouched. The harness also proves the cross-cutting no-`PATH` invariant at the boundary —
 the binary invokes each fake by the exact absolute path it was handed and never resolves a tool against the
@@ -84,40 +96,61 @@ directory (Part B).
 **Part B is Register 2** (boundary integration with fake tools, no cluster), both in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** two in-process registers pass together over the representative corpora pinned in
-[Gate integrity](#gate-integrity), on **no substrate** — **(Part A · Register 1)** `cabal test chain-spec`, run
-inside a network-isolated namespace (`unshare -n`) with `KUBECONFIG`/cloud-credential/`VAULT_ADDR`/`VAULT_TOKEN`
-scrubbed, is green: for each of the two Phase-0-committed cfg fixtures (`multi.cfg.json`, `minimal.cfg.json`) the
-real decode→bind/expand→plan/resolve-infrastructure→provision path followed by `chain :: cfg -> [Step]` renders
-a byte-for-byte `--dry-run` plan matching its committed `plan.golden`, the manifest-bearing Step projections are
-identity-disjoint subsets whose union equals the **Phase-13** whole-deployment `renderAll` golden byte-for-byte,
-the `nextFrameAfter`/`foldLift` descent goldens hold, the `[Step]` step set equals the hand-authored
-`expected_steps.json` table, and the canaried counter reads **zero** `stepRun` executions across the render (with
-a committed canary control case proving it reads nonzero when one is executed); the two committed mutants
-(**m1** cfg service-drop, **m2** descent guard-weaken) turn `chain-spec` red; **(Part B · Register 2)**
-`cabal test boundary-spec` is green: the real amoebius binary runs the representative plan corpus (≥1 step for
-each tool amoebius actually invokes — `kubectl`, `docker`, `pulumi`; the `helm` fake a **zero-invocations
-negative control**) against the fakes invoked **by absolute path** under the hostile decoy-`PATH` arrangement,
-the recorded argv sequence equals the committed hand-authored expected-argv transcript in
-`test/boundary/golden/argv/`, the applied-manifest bytes equal the Phase-13/Part-A goldens byte-for-byte, each of
-the three invoked-tool transcripts (`kubectl`/`docker`/`pulumi`) is non-empty and the `helm` transcript is empty,
-and the three committed mutants (**mB1** argv, **mB2** byte, **mB3** `PATH`-resolution) turn `boundary-spec` red.
-The composite run emits a proven/tested/assumed ledger led by a Tier-2-UNVERIFIED banner, marking the live apply
-([phase_26_object_reconciler.md](phase_26_object_reconciler.md)) and runtime enforcement
+[Gate integrity](#gate-integrity), on **no substrate** — **(Part A · Register 1)** `cabal test chain-spec`,
+run inside a network-isolated namespace (`unshare -n`) with
+`KUBECONFIG`/cloud-credential/`VAULT_ADDR`/`VAULT_TOKEN` scrubbed, is green:
+- for each of the two Phase-0-committed cfg fixtures (`multi.cfg.json`, `minimal.cfg.json`) the real
+  decode→bind/expand→plan/resolve-infrastructure→provision path followed by `chain :: cfg -> [Step]` renders a byte-for-byte `--dry-run` plan matching its committed `plan.golden`, the manifest-bearing Step projections are identity-disjoint subsets whose union equals the **Phase-13** whole-deployment `renderAll` golden byte-for-byte, the `nextFrameAfter`/`foldLift` descent goldens hold, the `[Step]` step set equals the hand-authored `expected_steps.json` table, and the canaried counter reads **zero** `stepRun` executions across the render (with a committed canary control case proving it reads nonzero when one is executed) - the two committed mutants (**m1** cfg service-drop, **m2** descent guard-weaken) turn `chain-spec` red
+- **(Part B · Register 2)** `cabal test boundary-spec` is green: the real amoebius binary runs the
+  representative plan corpus (≥1 step for each tool amoebius actually invokes — `kubectl`, `docker`,
+  `pulumi`; the `helm` fake a **zero-invocations negative control**) against the fakes invoked **by absolute path** under the hostile decoy-`PATH` arrangement, the recorded argv sequence equals the committed
+  hand-authored expected-argv transcript in `test/boundary/golden/argv/`, the applied-manifest bytes equal
+  the Phase-13/Part-A goldens byte-for-byte, each of the three invoked-tool transcripts
+  (`kubectl`/`docker`/`pulumi`) is non-empty and the `helm` transcript is empty, and the three committed
+  mutants (**mB1** argv, **mB2** byte, **mB3** `PATH`-resolution) turn `boundary-spec` red.
+
+The composite run emits a proven/tested/assumed ledger led by a Tier-2-UNVERIFIED banner, marking the live
+apply ([phase_26_object_reconciler.md](phase_26_object_reconciler.md)) and runtime enforcement
 ([phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md)) UNVERIFIED. Every fixture, golden,
-expected-argv transcript, and expected `Left`-tag is authored and committed in Phase 0 before the implementation
-exists — with the executor-argv transcript pinned at the start of Phase 14 before the executor implementation
-(the §M.1 named exception); a golden regenerated from the implementation is not a test.
+expected-argv transcript, and expected `Left`-tag is authored and committed in Phase 0 before the
+implementation exists — with the executor-argv transcript pinned at the start of Phase 14 before the
+executor implementation (the §M.1 named exception); a golden regenerated from the implementation is not a
+test.
 
 ## Gate integrity
 
 This section fixes the one shared interpretation of the gate's representative corpora, oracle pins, and seeded
-mutants, so two engineers implement the same gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-clauses 1–8); it strengthens, never weakens, the Gate and sprint Validations above. Because this phase **merges**
+mutants, so two engineers implement the same gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clauses 1–8); it strengthens, never weakens, the Gate and sprint Validations above. Because this phase **merges**
 two former phases, it keeps **both** sources' committed fixtures, mutants, and oracles, **partitioned** into the
 two parts along the register seam: Part A owns the pure plan-render corpus under `test/kernel/`, Part B owns the
 boundary corpus under `test/boundary/`. All artifacts named here are authored and committed in Phase 0 before
 `Amoebius.Kernel.*` and `Amoebius.Exec.*` exist (the one exception is the executor-argv transcript of Part B,
 pinned at the start of Phase 14 before the executor — the §M.1 named exception).
+
+```mermaid
+flowchart LR
+  %% register: orientation
+  s0["Sprint 14.1: The Step algebra + chain :: cfg -> [Step] builder"]
+  s1["Sprint 14.2: The pure descent — nextFrameAfter / foldLift (golden-locked)"]
+  s2["Sprint 14.3: renderChainPlan / --dry-run byte-for-byte render (no live infra)"]
+  s3["Sprint 14.4: The plan-render golden battery (chain-spec) — the Part-A gate"]
+  s4["Sprint 14.5: The single typed subprocess seam + boundary-spec skeleton"]
+  s5["Sprint 14.6: The fake kubectl/helm/docker/pulumi recorders"]
+  s6["Sprint 14.7: The boundary battery — exact commands + applied bytes…"]
+  s7["Sprint 14.8: The sanctioned-API surface — what extension source may reach"]
+  s8["Sprint 14.9: Gate 3 — the extension AST checker and the link seal"]
+  gate["the phase 14 gate"]
+  s0 -->|"produces what the next consumes"| s1
+  s1 -->|"produces what the next consumes"| s2
+  s2 -->|"produces what the next consumes"| s3
+  s3 -->|"produces what the next consumes"| s4
+  s4 -->|"produces what the next consumes"| s5
+  s5 -->|"produces what the next consumes"| s6
+  s6 -->|"produces what the next consumes"| s7
+  s7 -->|"produces what the next consumes"| s8
+  s8 -->|"the last seam the gate closes over"| gate
+```
+*Orientation. The seams phase 14 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
 
 ### Part A (Register 1) — the pure plan-render corpus (`test/kernel/`)
 
@@ -127,11 +160,9 @@ pinned at the start of Phase 14 before the executor — the §M.1 named exceptio
   ≥ 3 declared services, with one service whose step is **out-of-frame** so its `stepRun` must never be reached)
   and `minimal.cfg.json` (one frame, one service). "Fixture chain" everywhere in this phase means `chain` applied
   to the resulting checked config containing its opaque `ProvisionedSpec` — the builder exercised end-to-end —
-  never a hand-authored opaque witness or `[Step]` literal. A provision failure produces no plan.
-- **Oracle-pinning (§M.1).** The `--dry-run` plan goldens
+  never a hand-authored opaque witness or `[Step]` literal. A provision failure produces no plan. - **Oracle-pinning (§M.1).** The `--dry-run` plan goldens
   (`test/kernel/fixtures/plan/{multi,minimal}.plan.golden`) and the descent goldens
-  (`test/kernel/fixtures/descent/{multi,minimal}.descent.golden`) are hand-authored and **committed in Phase 0
-  before `renderChainPlan` exists**; a golden regenerated from the renderer is not a test.
+  (`test/kernel/fixtures/descent/{multi,minimal}.descent.golden`) are hand-authored and **committed in Phase 0 before `renderChainPlan` exists**; a golden regenerated from the renderer is not a test.
 - **Independent step-set reference (§M.3).** The step-set reference is a hand-authored table
   `test/kernel/fixtures/plan/expected_steps.json` (one entry per declared service/frame per cfg), authored from
   the cfg by hand — **not** from `chain`'s output; the plan is asserted to contain exactly that step set
@@ -149,8 +180,7 @@ pinned at the start of Phase 14 before the executor — the §M.1 named exceptio
   `descent/multi.descent.golden` byte-diverges; the zero-`stepRun` counter is invariant under m2, since no
   `stepRun` runs during render). Each mutant is committed and re-run, not run once.
 - **Zero-`stepRun` via a canaried counter (§M.5, OS-boundary observer).** Every `Step` is constructible **only**
-  through the counting smart constructor (the raw constructor is not exported), and the counter increments **when
-  the `stepRun` IO action is executed** (not when the field thunk is forced; `stepRun` is excluded from the
+  through the counting smart constructor (the raw constructor is not exported), and the counter increments **when the `stepRun` IO action is executed** (not when the field thunk is forced; `stepRun` is excluded from the
   `NFData` instance so `deepseq`-ing the plan cannot execute an action). The battery asserts the counter reads
   **zero** over the whole render, and a committed **canary** control case that deliberately executes one
   `stepRun` asserts the counter reads nonzero — proving the counter can detect an invocation and that the
@@ -162,8 +192,7 @@ pinned at the start of Phase 14 before the executor — the §M.1 named exceptio
 
 ### Part B (Register 2) — the boundary corpus (`test/boundary/`)
 
-- **Representative plan corpus (§M.7, concrete corpus).** A committed `[Step]` fixture containing **at least one
-  step routed to each tool amoebius actually invokes** — `kubectl` apply, `docker` build/push, `pulumi` up — over
+- **Representative plan corpus (§M.7, concrete corpus).** A committed `[Step]` fixture containing **at least one step routed to each tool amoebius actually invokes** — `kubectl` apply, `docker` build/push, `pulumi` up — over
   the Part-A cfg fixtures, so every real boundary surface is driven, not just `kubectl`. The `helm` fake is
   present **only as a negative control asserted to record zero invocations** (amoebius never shells to Helm). An
   invoked tool the binary never routed through leaves an empty transcript and the suite is red, foreclosing a
@@ -207,12 +236,7 @@ pinned at the start of Phase 14 before the executor — the §M.1 named exceptio
 
 - [`dsl_doctrine.md §2 — two languages, one system: Dhall carries params, Haskell carries logic`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)
   (Part A): the **chain/Step algebra** and its load-bearing consequence, *"the plan is the data."* A project's
-  deploy is a pure function `chain :: cfg -> [Step]`; each `Step` is *"the pure renderable shape plus the
-  effectful reconcile action"*; because `[Step]` is a pure value, `--dry-run` renders the exact plan it would
-  execute (`renderChainPlan` / `renderChain`) *without running a single action*; and the recursive-descent claim
-  — the interpreter *"runs a step's action only when the binary is in that step's frame; the descent logic itself
-  is pure and unit-tested, and `runChainFromFrame` is the thin effectful seam"* — declared here but exercised
-  only from Part B (Register 2) onward.
+  deploy is a pure function `chain :: cfg -> [Step]`; each `Step` is *"the pure renderable shape plus the effectful reconcile action"*; because `[Step]` is a pure value, `--dry-run` renders the exact plan it would execute (`renderChainPlan` / `renderChain`) *without running a single action*; and the recursive-descent claim — the interpreter *"runs a step's action only when the binary is in that step's frame; the descent logic itself is pure and unit-tested, and `runChainFromFrame` is the thin effectful seam"* — declared here but exercised only from Part B (Register 2) onward.
 - [`conformance_harness_doctrine.md §3 — rendering never touches live infrastructure`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
   (Parts A and B): the load-bearing invariant — a render is a pure function of committed source, the `--dry-run`
   preview is byte-for-byte what a live apply would submit, and the plan and manifest bytes the fakes receive in
@@ -224,9 +248,7 @@ pinned at the start of Phase 14 before the executor — the §M.1 named exceptio
   cluster, Part B: the real binary run with fake `helm`/`kubectl`/`docker`/`pulumi` that record their argv and
   applied bytes) and
   [`§4 — the spine`](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run)
-  (the **Plan** step — *"`chain` produces the `[Step]` value; `--dry-run` renders it; a golden test pins the
-  plan"* — for Part A, and the **fake apply** step — the binary runs the plan against fake tools and the recorded
-  commands and applied bytes are asserted — for Part B, closing the pre-cluster spine).
+  (the **Plan** step — *"`chain` produces the `[Step]` value; `--dry-run` renders it; a golden test pins the plan"* — for Part A, and the **fake apply** step — the binary runs the plan against fake tools and the recorded commands and applied bytes are asserted — for Part B, closing the pre-cluster spine).
 - [`conformance_harness_doctrine.md §5 — honesty: what the harness does and does not establish`](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish)
   (Part B): a green boundary run is quoted as *"the binary emits the exact commands and applied bytes,"* never as
   *"the cluster is correct."*
@@ -251,29 +273,22 @@ pinned at the start of Phase 14 before the executor — the §M.1 named exceptio
 ## Sprint 14.1: The `Step` algebra + `chain :: cfg -> [Step]` builder 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Kernel/Step.hs` (the `Step` type, `StepKind`, and the `stepRun` action field),
-`src/Amoebius/Kernel/Chain.hs` (the `chain :: cfg -> [Step]` builder) — target paths, not yet built.
-**Blocked by**: Phase 13 gate (the pure `renderAll :: ProvisionedSpec -> [K8sObject]` whose output a step's
-renderable shape embeds, [phase_13_render_manifest_goldens.md](phase_13_render_manifest_goldens.md)); Phase 11
-(the whole-deployment provision seal — the only constructor of the `ProvisionedSpec` carried by the plan config,
-[phase_11_provision_seal.md](phase_11_provision_seal.md)); Phase 5 (raw decode into `ClusterIR` / `FrameConfig`,
-[phase_05_gadt_decoder_gate2.md](phase_05_gadt_decoder_gate2.md)).
-**Independent Validation**: the real decode→bind/expand→plan/resolve-infrastructure→provision path followed by
-`chain` for each committed fixture cfg (`multi.cfg.json`, `minimal.cfg.json`) evaluates to a pure `[Step]` value
-whose shape (label, frame, `StepKind`, embedded rendered objects) is inspectable with no `stepRun` executed.
-"Partiality-free evaluation" is defined concretely as **`deepseq` of the `[Step]` value to normal form
-succeeds** (the `stepRun` IO field is excluded from the `NFData` instance so forcing the plan cannot execute an
-action), with a `-Wall`-clean build. The builder invokes public `renderAll` once for the fixture's whole
-`ProvisionedSpec`; every Step embeds only an identity-selected subset of that value, and the disjoint union is
-byte-identical to the corresponding Phase-13 whole-deployment golden.
-**Docs to update**: `documents/engineering/dsl_doctrine.md` (§2 chain/Step-kernel status backlink).
+**Implementation**: `src/Amoebius/Kernel/Step.hs` (the `Step` type, `StepKind`, and the
+`stepRun` action field), `src/Amoebius/Kernel/Chain.hs` (the `chain :: cfg -> [Step]` builder) — target
+paths, not yet built.
+**Blocked by**: Phase 13 gate (the pure `renderAll :: ProvisionedSpec -> [K8sObject]` whose output a step's renderable shape embeds, [phase_13_render_manifest_goldens.md](phase_13_render_manifest_goldens.md)); Phase 11 (the whole-deployment provision seal — the only constructor of the `ProvisionedSpec` carried by the plan config, [phase_11_provision_seal.md](phase_11_provision_seal.md)); Phase 5 (raw decode into `ClusterIR` / `FrameConfig`, [phase_05_gadt_decoder_gate2.md](phase_05_gadt_decoder_gate2.md)).
+**Independent Validation**: the real decode→bind/expand→plan/resolve-infrastructure→provision path followed by `chain` for
+each committed fixture cfg (`multi.cfg.json`, `minimal.cfg.json`) evaluates to a pure `[Step]` value whose
+shape (label, frame, `StepKind`, embedded rendered objects) is inspectable with no `stepRun` executed.
+"Partiality-free evaluation" is defined concretely as **`deepseq` of the `[Step]` value to normal form succeeds** (the `stepRun` IO field is excluded from the `NFData` instance so forcing the plan cannot execute an action), with a `-Wall`-clean build. The builder invokes public `renderAll` once for the fixture's whole
+`ProvisionedSpec`; every Step embeds only an identity-selected subset of that value, and the disjoint union
+is byte-identical to the corresponding Phase-13 whole-deployment golden.
+**Docs to update**:
+`documents/engineering/dsl_doctrine.md` (§2 chain/Step-kernel status backlink).
 
 ### Objective
 Adopt [`dsl_doctrine.md §2 — Dhall carries params, Haskell carries logic`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic):
-seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `chain :: cfg -> [Step]`, instantiated
-with a checked plan config containing the whole `ProvisionedSpec`, each `Step` being a pure renderable shape
-(label, frame, `StepKind`, the `[K8sObject]` it would apply) plus an effectful `stepRun` action — with the chain
-being the system and the checked config supplying `cfg`.
+seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `chain :: cfg -> [Step]`, instantiated with a checked plan config containing the whole `ProvisionedSpec`, each `Step` being a pure renderable shape (label, frame, `StepKind`, the `[K8sObject]` it would apply) plus an effectful `stepRun` action — with the chain being the system and the checked config supplying `cfg`.
 
 ### Deliverables
 - A `Step` type = label + frame + `StepKind` + `stepRun :: cfg -> IO ()`, and a generic `chain :: cfg -> [Step]`;
@@ -290,15 +305,12 @@ being the system and the checked config supplying `cfg`.
 
 ### Validation
 1. The real provision path followed by `chain` on each fixture cfg (`multi.cfg.json`, `minimal.cfg.json`)
-   produces a pure `[Step]` whose renderable shape is fully inspectable without executing any `stepRun`; the
-   evaluation is partiality-free in the sense above (`deepseq` to normal form succeeds; `stepRun` excluded from
-   `NFData`).
+   produces a pure `[Step]` whose renderable shape is fully inspectable without executing any `stepRun`; the evaluation is partiality-free in the sense above (`deepseq` to normal form succeeds; `stepRun` excluded from `NFData`).
 2. The identity-disjoint union of all manifest-bearing Step projections equals the Phase-13 committed `renderAll`
    golden for the fixture's whole `ProvisionedSpec` byte-for-byte (independent cross-golden oracle, not the
    kernel's own output); every projected object is byte-identical to the same identity in that golden and no
    public per-service renderer is reachable.
-3. The `[Step]` step set equals the hand-authored `expected_steps.json` table for the cfg (one entry per declared
-   service/frame), asserted structurally against the table.
+3. The `[Step]` step set equals the hand-authored `expected_steps.json` table for the cfg (one entry per declared service/frame), asserted structurally against the table.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -306,17 +318,20 @@ The whole sprint (📋 Planned).
 ## Sprint 14.2: The pure descent — `nextFrameAfter` / `foldLift` (golden-locked) 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Kernel/Descent.hs` (`nextFrameAfter`, `foldLift`), plus the *declaration only*
-of the effectful seam `runChainFromFrame` in `src/Amoebius/Kernel/Chain.hs` — target paths, not yet built.
+**Implementation**: `src/Amoebius/Kernel/Descent.hs` (`nextFrameAfter`, `foldLift`),
+plus the *declaration only* of the effectful seam `runChainFromFrame` in `src/Amoebius/Kernel/Chain.hs` —
+target paths, not yet built.
 **Blocked by**: Sprint 14.1.
-**Independent Validation**: `nextFrameAfter` and `foldLift` are pure functions with no `IO` in their type; a
-descent over the fixture chain (`chain` applied to `multi.cfg.json`) reproduces the Phase-0-committed golden
-frame/step assignment (`descent/multi.descent.golden`), and the out-of-frame step is folded into the plan but its
-`stepRun` is provably never reached — "provably never reached" defined as `deepseq` of the fold-derived plan to
-normal form succeeding with the counting-constructor counter still reading zero (the IO action is never
-executed). The committed descent mutant (m2) that weakens `nextFrameAfter` to place the out-of-frame step
-in-frame MUST turn this check red.
-**Docs to update**: `documents/engineering/dsl_doctrine.md` (§2 descent/seam status backlink).
+**Independent Validation**: `nextFrameAfter` and
+`foldLift` are pure functions with no `IO` in their type; a descent over the fixture chain (`chain` applied
+to `multi.cfg.json`) reproduces the Phase-0-committed golden frame/step assignment
+(`descent/multi.descent.golden`), and the out-of-frame step is folded into the plan but its `stepRun` is
+provably never reached — "provably never reached" defined as `deepseq` of the fold-derived plan to normal
+form succeeding with the counting-constructor counter still reading zero (the IO action is never executed).
+The committed descent mutant (m2) that weakens `nextFrameAfter` to place the out-of-frame step in-frame MUST
+turn this check red.
+**Docs to update**: `documents/engineering/dsl_doctrine.md` (§2 descent/seam status
+backlink).
 
 ### Objective
 Adopt [`dsl_doctrine.md §2`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)'s
@@ -327,12 +342,7 @@ the chain into the lift/plan structure) — and only *declares* the effectful se
 Part B (Register 2) and Register 3.
 
 ### Deliverables
-- Pure `nextFrameAfter :: Frame -> [Step] -> Maybe Frame` and `foldLift :: cfg -> [Step] -> Plan`, neither
-  carrying `IO`, computing the frame/step assignment and the fold-derived plan with no action run.
-- The effectful `runChainFromFrame` **declared** as the single IO seam, with an in-file honesty note that its
-  *invocation* is out of scope in Part A — Part B exercises it against fake tools (Sprints 14.5–14.7) and
-  Register 3 against the live Deployment-`replicas=1` singleton
-  ([phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md)); there is no election or standby anywhere in
+- Pure `nextFrameAfter :: Frame -> [Step] -> Maybe Frame` and `foldLift :: cfg -> [Step] -> Plan`, neither carrying `IO`, computing the frame/step assignment and the fold-derived plan with no action run. - The effectful `runChainFromFrame` **declared** as the single IO seam, with an in-file honesty note that its *invocation* is out of scope in Part A — Part B exercises it against fake tools (Sprints 14.5–14.7) and Register 3 against the live Deployment-`replicas=1` singleton ([phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md)); there is no election or standby anywhere in
   the kernel.
 
 ### Validation
@@ -349,20 +359,23 @@ The whole sprint (📋 Planned).
 ## Sprint 14.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Kernel/Plan.hs` (`renderChainPlan` / `renderChain`), `src/Amoebius/Cli.hs` (the
-`--dry-run` **render** path, kept structurally separate from any apply path) — target paths, not yet built.
+**Implementation**: `src/Amoebius/Kernel/Plan.hs` (`renderChainPlan` / `renderChain`),
+`src/Amoebius/Cli.hs` (the `--dry-run` **render** path, kept structurally separate from any apply path) —
+target paths, not yet built.
 **Blocked by**: Sprint 14.1, Sprint 14.2.
-**Independent Validation**: `renderChainPlan` of the fixture chain (`chain` applied after the fixture has
-successfully constructed its `ProvisionedSpec`) is a pure `Text`/bytes value; the `--dry-run` code path has no
-branch that opens a socket, reads a credential, or resolves a cluster. This is enforced by two committed
-mechanisms that are **part of the gate command**, not a one-off manual check: (a) an automated static assertion
-(a `cabal test chain-spec` case) that the transitive module-import closure of `Amoebius.Kernel.Plan` and the
-`--dry-run` CLI code path **excludes** any network/process/credential module (e.g. `Network.*`,
-`System.Process`, socket/HTTP/Vault clients); and (b) the suite runs inside `unshare -n` with
-`KUBECONFIG`/cloud-credential/`VAULT_*` env vars scrubbed, so any actual socket/apiserver/Vault contact fails at
-the OS boundary — the isolated namespace is the external observer.
-**Docs to update**: `documents/engineering/conformance_harness_doctrine.md` (§3 render-never-touches-infra
-backlink), `documents/engineering/generated_artifacts_doctrine.md` (the plan is emitted, never committed).
+**Independent Validation**:
+`renderChainPlan` of the fixture chain (`chain` applied after the fixture has successfully constructed its
+`ProvisionedSpec`) is a pure `Text`/bytes value; the `--dry-run` code path has no branch that opens a
+socket, reads a credential, or resolves a cluster. This is enforced by two committed mechanisms that are
+**part of the gate command**, not a one-off manual check: (a) an automated static assertion (a `cabal test
+chain-spec` case) that the transitive module-import closure of `Amoebius.Kernel.Plan` and the `--dry-run`
+CLI code path **excludes** any network/process/credential module (e.g. `Network.*`, `System.Process`,
+socket/HTTP/Vault clients); and (b) the suite runs inside `unshare -n` with
+`KUBECONFIG`/cloud-credential/`VAULT_*` env vars scrubbed, so any actual socket/apiserver/Vault contact
+fails at the OS boundary — the isolated namespace is the external observer.
+**Docs to update**:
+`documents/engineering/conformance_harness_doctrine.md` (§3 render-never-touches-infra backlink),
+`documents/engineering/generated_artifacts_doctrine.md` (the plan is emitted, never committed).
 
 ### Objective
 Adopt [`conformance_harness_doctrine.md §3 — rendering never touches live infrastructure`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure):
@@ -372,8 +385,7 @@ credentials, no broker, no Vault — so the preview is byte-for-byte what would 
 only on the (here-absent) apply path.
 
 ### Deliverables
-- A pure `renderChainPlan` / `renderChain :: [Step] -> PlanText` that serializes the fold-derived plan
-  deterministically (stable ordering, no ambient clock/host reads).
+- A pure `renderChainPlan` / `renderChain :: [Step] -> PlanText` that serializes the fold-derived plan deterministically (stable ordering, no ambient clock/host reads).
 - A `--dry-run` render command that emits the plan and returns, structurally incapable of reaching the effectful
   seam; the emitted plan is a *generated artifact* — rendered from source, never committed
   ([generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md)).
@@ -390,26 +402,28 @@ The whole sprint (📋 Planned).
 ## Sprint 14.4: The plan-render golden battery (`chain-spec`) — the Part-A gate 📋
 
 **Status**: Planned
-**Implementation**: `test/kernel/PlanSpec.hs`, the Phase-0-committed fixtures under `test/kernel/fixtures/cfg/`
-(`multi.cfg.json`, `minimal.cfg.json`), `test/kernel/fixtures/plan/{multi,minimal}.plan.golden`,
+**Implementation**: `test/kernel/PlanSpec.hs`, the Phase-0-committed fixtures under
+`test/kernel/fixtures/cfg/` (`multi.cfg.json`, `minimal.cfg.json`),
+`test/kernel/fixtures/plan/{multi,minimal}.plan.golden`,
 `test/kernel/fixtures/descent/{multi,minimal}.descent.golden`, the hand-authored step-set table
 `test/kernel/fixtures/plan/expected_steps.json`, and the committed mutants under `test/kernel/mutants/`
-(`m1_cfg_drop_service`, `m2_descent_inframe`) — target paths, not yet built; the goldens and tables are committed
-in Phase 0 before the renderer exists.
+(`m1_cfg_drop_service`, `m2_descent_inframe`) — target paths, not yet built; the goldens and tables are
+committed in Phase 0 before the renderer exists.
 **Blocked by**: Sprint 14.3 (and Sprints 14.1, 14.2).
-**Independent Validation**: `cabal test chain-spec`, run inside `unshare -n` with credential env vars scrubbed,
-is green — the `--dry-run` render of each fixture chain (`chain` applied after real provisioning) matches its
-Phase-0-committed golden byte-for-byte, the Step projections form the exact identity-disjoint union of the
-Phase-13 committed whole-deployment `renderAll` golden, the step set matches `expected_steps.json`, the descent
-goldens hold, the canaried counter reads zero `stepRun` executions across the run (and the canary control case
-proves it reads nonzero when one is executed), and both committed mutants (m1, m2) turn the suite red.
-**Docs to update**: `documents/engineering/conformance_harness_doctrine.md` (§4 the Plan spine step is
-golden-locked here), `documents/engineering/testing_doctrine.md` (the Register-1 plan-render ledger variant).
+**Independent Validation**: `cabal test chain-spec`, run inside `unshare -n` with credential env vars
+scrubbed, is green — the `--dry-run` render of each fixture chain (`chain` applied after real provisioning)
+matches its Phase-0-committed golden byte-for-byte, the Step projections form the exact identity-disjoint
+union of the Phase-13 committed whole-deployment `renderAll` golden, the step set matches
+`expected_steps.json`, the descent goldens hold, the canaried counter reads zero `stepRun` executions across
+the run (and the canary control case proves it reads nonzero when one is executed), and both committed
+mutants (m1, m2) turn the suite red.
+**Docs to update**:
+`documents/engineering/conformance_harness_doctrine.md` (§4 the Plan spine step is golden-locked here),
+`documents/engineering/testing_doctrine.md` (the Register-1 plan-render ledger variant).
 
 ### Objective
 Adopt [`conformance_harness_doctrine.md §4`](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run)'s
-spine **Plan** step (*"`chain` produces the `[Step]` value; `--dry-run` renders it; a golden test pins the
-plan"*) and [`§2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)'s
+spine **Plan** step (*"`chain` produces the `[Step]` value; `--dry-run` renders it; a golden test pins the plan"*) and [`§2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)'s
 **Register 1**: assemble the in-process battery that pins the `--dry-run` plan and the descent byte-for-byte and
 proves no action runs during render, emitting a Register-1 proven/tested/assumed ledger with model↔runtime
 correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Register 3).
@@ -461,23 +475,24 @@ The whole sprint (📋 Planned).
 ## Sprint 14.5: The single typed subprocess seam + `boundary-spec` skeleton 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Exec/Tool.hs` (the one `typed-process` seam that invokes a tool by absolute
-path over the `[Step]`/effect data), a `boundary-spec` test-suite stanza in `amoebius.cabal`, and an empty
-`test/boundary/` tree — target paths, not yet built.
-**Blocked by**: Sprint 14.4 (the Part-A gate — the `chain :: cfg -> [Step]` plan + its `--dry-run` render, the
-plan this harness executes); Phase 5's real `amoebius` cabal package + `dsl-spec` skeleton
-([phase_05_gadt_decoder_gate2.md](phase_05_gadt_decoder_gate2.md)); Phase 1's recorded `typed-process` pin under
-GHC 9.12.4 ([phase_01_toolchain_spike.md](phase_01_toolchain_spike.md)).
-**Independent Validation**: `cabal build` and `cabal test boundary-spec` (zero tests) succeed on the pinned
-toolchain; a source gate confirms `Exec/Tool.hs` is the **sole** subprocess-invocation site. The gate's scope is
-all of `src/`; it is red if any subprocess-spawning primitive appears outside `Exec/Tool.hs` — the enumerated
-token set (the one interpretation, closing the "sole site" vs. literal-token divergence) is: `System.Process`
-(`createProcess`/`readProcess`/`callProcess`/`spawnProcess`/`readCreateProcess`/`callCommand`), `typed-process`
-(`runProcess`/`readProcess`/`startProcess`/`withProcessWait`), `System.Posix.Process`
-(`executeFile`/`forkProcess`/`createSession`), and any raw FFI `c_exec*`/`system` import. The gate is red if the
-enumerated set is empty (no primitive was searched for), guarding against a vacuous scope.
-**Docs to update**: `DEVELOPMENT_PLAN/system_components.md` (register the exec seam + `boundary-spec` suite),
-this document.
+**Implementation**: `src/Amoebius/Exec/Tool.hs` (the one `typed-process` seam that
+invokes a tool by absolute path over the `[Step]`/effect data), a `boundary-spec` test-suite stanza in
+`amoebius.cabal`, and an empty `test/boundary/` tree — target paths, not yet built.
+**Blocked by**: Sprint
+14.4 (the Part-A gate — the `chain :: cfg -> [Step]` plan + its `--dry-run` render, the plan this harness executes); Phase 5's real `amoebius` cabal package + `dsl-spec` skeleton
+([phase_05_gadt_decoder_gate2.md](phase_05_gadt_decoder_gate2.md)); Phase 1's recorded `typed-process` pin
+under GHC 9.12.4 ([phase_01_toolchain_spike.md](phase_01_toolchain_spike.md)).
+**Independent Validation**:
+`cabal build` and `cabal test boundary-spec` (zero tests) succeed on the pinned toolchain; a source gate
+confirms `Exec/Tool.hs` is the **sole** subprocess-invocation site. The gate's scope is all of `src/`; it is
+red if any subprocess-spawning primitive appears outside `Exec/Tool.hs` — the enumerated token set (the one
+interpretation, closing the "sole site" vs. literal-token divergence) is: `System.Process`
+(`createProcess`/`readProcess`/`callProcess`/`spawnProcess`/`readCreateProcess`/`callCommand`),
+`typed-process` (`runProcess`/`readProcess`/`startProcess`/`withProcessWait`), `System.Posix.Process`
+(`executeFile`/`forkProcess`/`createSession`), and any raw FFI `c_exec*`/`system` import. The gate is red if
+the enumerated set is empty (no primitive was searched for), guarding against a vacuous scope.
+**Docs to update**: `DEVELOPMENT_PLAN/system_components.md` (register the exec seam + `boundary-spec` suite), this
+document.
 
 ### Objective
 Adopt [`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
@@ -502,16 +517,17 @@ The whole sprint (📋 Planned).
 ## Sprint 14.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders 📋
 
 **Status**: Planned
-**Implementation**: `test/boundary/fakes/{kubectl,helm,docker,pulumi}` (the four fake executables that append argv
-+ stdin bytes to a transcript and exit with a canned response) and `test/boundary/Fakes.hs` (the transcript ADT +
-the canned-response table) — target paths, not yet built.
+**Implementation**: `test/boundary/fakes/{kubectl,helm,docker,pulumi}` (the four fake
+executables that append argv + stdin bytes to a transcript and exit with a canned response) and
+`test/boundary/Fakes.hs` (the transcript ADT + the canned-response table) — target paths, not yet built.
 **Blocked by**: Sprint 14.5.
-**Independent Validation**: each fake, invoked directly, appends its full argv (in order) and its complete stdin
-bytes to the run transcript and returns its canned exit; a unit check proves the transcript captures argv order
-and applied-manifest bytes **losslessly** (round-trips the recorded bytes with no re-encoding).
-**Docs to update**: `documents/engineering/testing_doctrine.md` (the Register-2 fake-tool recorder shape),
-`documents/engineering/conformance_harness_doctrine.md` (the §2/§4 fake-apply recorder),
-`DEVELOPMENT_PLAN/system_components.md`.
+**Independent Validation**: each fake, invoked directly, appends its full argv
+(in order) and its complete stdin bytes to the run transcript and returns its canned exit; a unit check
+proves the transcript captures argv order and applied-manifest bytes **losslessly** (round-trips the
+recorded bytes with no re-encoding).
+**Docs to update**: `documents/engineering/testing_doctrine.md` (the
+Register-2 fake-tool recorder shape), `documents/engineering/conformance_harness_doctrine.md` (the §2/§4
+fake-apply recorder), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`conformance_harness_doctrine.md §2/§4`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation):
@@ -536,34 +552,28 @@ The whole sprint (📋 Planned).
 ## Sprint 14.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate 📋
 
 **Status**: Planned
-**Implementation**: `test/boundary/BoundarySpec.hs`; the applied-manifest bytes reuse the Phase-13 `renderAll`
-goldens; the **expected-argv transcripts are a separate committed hand-authored oracle**
-(`test/boundary/golden/argv/`), NOT derived from the Part-A plan golden by any executor-reachable function; the
-committed mutants under `test/boundary/mutants/` (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`) — target paths, not
-yet built.
-**Blocked by**: Sprint 14.6, Sprint 14.5; Sprint 14.4 (the `[Step]` plan + `--dry-run` goldens); Phase 13 gate
-(the `renderAll` manifest goldens — the applied bytes asserted here,
-[phase_13_render_manifest_goldens.md](phase_13_render_manifest_goldens.md)).
-**Representative plan corpus (§M.7):** the exercised plan is named explicitly here — a committed `[Step]` fixture
-containing **at least one step routed to each tool amoebius actually invokes** (`kubectl` apply, `docker`
-build/push, `pulumi` up), so every real boundary surface is driven, not just `kubectl`; the `helm` fake is
-present only as a **negative control asserted to record zero invocations** (amoebius never shells to Helm).
-**Independent Validation**: `cabal test boundary-spec` is green — the real binary runs the representative corpus
-against the fakes; the recorded argv sequence equals the **committed hand-authored expected-argv transcript**
-(§M.3: authored at fixture-authoring time from the spec, never by the executor's own `Step→argv` fold or any
-function reachable from it — a source gate rejects any import of executor argv-building code into the oracle); the
-recorded applied-manifest bytes equal the Phase-13/Part-A goldens byte-for-byte; **each of the three invoked tool
-transcripts (`kubectl`/`docker`/`pulumi`) is asserted non-empty** (§M.7 — an invoked tool the binary never routed
-through leaves an empty transcript and the suite is red, foreclosing a `kubectl`-only executor; the `helm`
-negative-control transcript is asserted empty). The no-`PATH` invariant is detected by the **hostile
-decoy-`PATH` arrangement** (§M.5): the run executes with the fakes' directory absent from `PATH` and a decoy
-directory containing same-named executables that write a distinct sabotage-marker placed first on `PATH`; the
-suite is red if any sabotage-marker is observed (proving `PATH` was consulted) or if any fake's transcript
-`argv[0]` differs from the handed absolute path. **Committed seeded mutants (§M.2), re-run every gate run, that
-MUST turn the suite red**: **mB1** — an executor argv mutant (drop a flag / reorder two argv elements / swap a
-subcommand); **mB2** — a byte mutant (one flipped byte in a `renderAll` golden); **mB3** — a `PATH`-resolution
-mutant (the seam resolving by bare tool name). The suite failing on each is a demonstrated negative control, not
-merely assertion logic.
+**Implementation**: `test/boundary/BoundarySpec.hs`; the applied-manifest bytes reuse
+the Phase-13 `renderAll` goldens; the **expected-argv transcripts are a separate committed hand-authored oracle** (`test/boundary/golden/argv/`), NOT derived from the Part-A plan golden by any executor-reachable
+function; the committed mutants under `test/boundary/mutants/` (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`)
+— target paths, not yet built.
+**Blocked by**: Sprint 14.6, Sprint 14.5; Sprint 14.4 (the `[Step]` plan + `--dry-run` goldens); Phase 13 gate (the `renderAll` manifest goldens — the applied bytes asserted here,
+[phase_13_render_manifest_goldens.md](phase_13_render_manifest_goldens.md)). **Representative plan corpus (§M.7):** the exercised plan is named explicitly here — a committed `[Step]` fixture containing **at least one step routed to each tool amoebius actually invokes** (`kubectl` apply, `docker` build/push, `pulumi`
+up), so every real boundary surface is driven, not just `kubectl`; the `helm` fake is present only as a
+**negative control asserted to record zero invocations** (amoebius never shells to Helm).
+**Independent Validation**: `cabal test boundary-spec` is green — the real binary runs the representative corpus against
+the fakes; the recorded argv sequence equals the **committed hand-authored expected-argv transcript** (§M.3:
+authored at fixture-authoring time from the spec, never by the executor's own `Step→argv` fold or any
+function reachable from it — a source gate rejects any import of executor argv-building code into the
+oracle); the recorded applied-manifest bytes equal the Phase-13/Part-A goldens byte-for-byte; **each of the three invoked tool transcripts (`kubectl`/`docker`/`pulumi`) is asserted non-empty** (§M.7 — an invoked tool
+the binary never routed through leaves an empty transcript and the suite is red, foreclosing a
+`kubectl`-only executor; the `helm` negative-control transcript is asserted empty). The no-`PATH` invariant
+is detected by the **hostile decoy-`PATH` arrangement** (§M.5): the run executes with the fakes' directory
+absent from `PATH` and a decoy directory containing same-named executables that write a distinct
+sabotage-marker placed first on `PATH`; the suite is red if any sabotage-marker is observed (proving `PATH`
+was consulted) or if any fake's transcript `argv[0]` differs from the handed absolute path. **Committed seeded mutants (§M.2), re-run every gate run, that MUST turn the suite red**: **mB1** — an executor argv
+mutant (drop a flag / reorder two argv elements / swap a subcommand); **mB2** — a byte mutant (one flipped
+byte in a `renderAll` golden); **mB3** — a `PATH`-resolution mutant (the seam resolving by bare tool name).
+The suite failing on each is a demonstrated negative control, not merely assertion logic.
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` (flip the Phase-14 status when the gate passes),
 `documents/engineering/testing_doctrine.md`, `documents/engineering/conformance_harness_doctrine.md`.
 
@@ -582,9 +592,7 @@ is owned by [phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md) and
 [phase_26_object_reconciler.md](phase_26_object_reconciler.md)).
 
 ### Deliverables
-- The committed **representative plan corpus** — a `[Step]` fixture with at least one step per tool — and the
-  committed **hand-authored expected-argv transcripts** (`test/boundary/golden/argv/`, pinned at the start of
-  Phase 14 before the executor implementation (the §M.1 named exception), authored independently of the executor
+- The committed **representative plan corpus** — a `[Step]` fixture with at least one step per tool — and the committed **hand-authored expected-argv transcripts** (`test/boundary/golden/argv/`, pinned at the start of Phase 14 before the executor implementation (the §M.1 named exception), authored independently of the executor
   per §M.3).
 - The committed **seeded mutants** named in the Gate (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`) with a harness
   that re-runs each and asserts `boundary-spec` red (§M.2).
@@ -614,15 +622,17 @@ The whole sprint (📋 Planned).
 ## Sprint 14.8: The sanctioned-API surface — what extension source may reach 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Dsl/SanctionedApi.hs`, `dhall/amoebius/SanctionedApi.dhall`, and the
-Phase-0-committed oracle `test/fixtures/phase14/sanctioned_api_expected.dhall` (the hand-authored module and
-effect allowlist, authored **independently** of `SanctionedApi.hs` per §M.3) — target paths, not yet built.
-**Blocked by**: Sprint 14.1 (the `Step` algebra whose `stepRun` is the effect this surface bounds).
-**Independent Validation**: the committed allowlist and the implementation's `SanctionedApi` value agree
-exactly, reconciled automatically against the Phase-0 fixture and never against the implementer's own value;
-every entry names a module that exists in the pinned dependency closure; the surface contains **no** arm
-admitting raw `IO`, and a grep for `unsafePerformIO`/`unsafeCoerce`/`foreign import` over the allowlisted
-surface returns nothing.
+**Implementation**: `src/Amoebius/Dsl/SanctionedApi.hs`,
+`dhall/amoebius/SanctionedApi.dhall`, and the Phase-0-committed oracle
+`test/fixtures/phase14/sanctioned_api_expected.dhall` (the hand-authored module and effect allowlist,
+authored **independently** of `SanctionedApi.hs` per §M.3) — target paths, not yet built.
+**Blocked by**:
+Sprint 14.1 (the `Step` algebra whose `stepRun` is the effect this surface bounds).
+**Independent Validation**: the committed allowlist and the implementation's `SanctionedApi` value agree exactly,
+reconciled automatically against the Phase-0 fixture and never against the implementer's own value; every
+entry names a module that exists in the pinned dependency closure; the surface contains **no** arm admitting
+raw `IO`, and a grep for `unsafePerformIO`/`unsafeCoerce`/`foreign import` over the allowlisted surface
+returns nothing.
 **Docs to update**: `documents/engineering/dsl_doctrine.md`
 
 ### Objective
@@ -648,21 +658,20 @@ The whole sprint (📋 Planned).
 ## Sprint 14.9: Gate 3 — the extension AST checker and the link seal 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Dsl/AstCheck.hs` (the checker and the opaque `CheckedExtensionSource`),
-`test/dsl/AstCheckSpec.hs`; the Phase-0-committed corpus `test/fixtures/phase14/astcheck/` — a positive
-extension source set plus **one negative per `AstViolationReason` arm** (`UnsanctionedImport`, `RawIO`,
-`ForeignCall`, `UnsafeOperation`, `TemplateHaskell`, `OrphanInstance`), each paired with a positive differing
-only in that dimension, and each with its expected `modulePath`/`srcSpan`/`reason` recorded in
-`astcheck_negatives.expected` — target paths, not yet built.
+**Implementation**: `src/Amoebius/Dsl/AstCheck.hs` (the checker and the opaque
+`CheckedExtensionSource`), `test/dsl/AstCheckSpec.hs`; the Phase-0-committed corpus
+`test/fixtures/phase14/astcheck/` — a positive extension source set plus **one negative per `AstViolationReason` arm** (`UnsanctionedImport`, `RawIO`, `ForeignCall`, `UnsafeOperation`,
+`TemplateHaskell`, `OrphanInstance`), each paired with a positive differing only in that dimension, and each
+with its expected `modulePath`/`srcSpan`/`reason` recorded in `astcheck_negatives.expected` — target paths,
+not yet built.
 **Blocked by**: Sprint 14.8.
-**Independent Validation**: every positive fixture yields `Accepted`; **every** negative fixture yields
-`Rejected` at the **exact tagged reason and source span recorded for it in the Phase-0 table**, not merely a
-non-zero exit; the linker accepts only a `CheckedExtensionSource` and its constructor is not exported, proven
-by a **compile-fail golden** — a test module attempting to construct one directly must fail to compile, the
-same way the `ProvisionedSpec` seal is proven at Phase 11. The committed seeded mutants
-`mutant/phase14/astcheck-allow-rawio` (delete the `RawIO` rejection) and
-`mutant/phase14/astcheck-export-ctor` (export the `CheckedExtensionSource` constructor) MUST each turn the
-suite red — the first via the `RawIO` negative, the second via the compile-fail golden (§M.2).
+**Independent Validation**: every positive fixture yields
+`Accepted`; **every** negative fixture yields `Rejected` at the **exact tagged reason and source span recorded for it in the Phase-0 table**, not merely a non-zero exit; the linker accepts only a
+`CheckedExtensionSource` and its constructor is not exported, proven by a **compile-fail golden** — a test
+module attempting to construct one directly must fail to compile, the same way the `ProvisionedSpec` seal is
+proven at Phase 11. The committed seeded mutants `mutant/phase14/astcheck-allow-rawio` (delete the `RawIO`
+rejection) and `mutant/phase14/astcheck-export-ctor` (export the `CheckedExtensionSource` constructor) MUST
+each turn the suite red — the first via the `RawIO` negative, the second via the compile-fail golden (§M.2).
 **Docs to update**: `documents/engineering/dsl_doctrine.md`,
 `documents/illegal_state/illegal_state_lifecycle.md`, `DEVELOPMENT_PLAN/system_components.md`
 
@@ -718,12 +727,10 @@ The whole sprint (📋 Planned).
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
-  design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the DSL / pre-cluster conformance vision
 - [substrates.md](substrates.md) — substrate registry and per-phase map
-- [system_components.md](system_components.md) — target component inventory (the kernel modules, the exec seam,
-  and the `chain-spec`/`boundary-spec` suites)
+- [system_components.md](system_components.md) — target component inventory (the kernel modules, the exec seam, and the `chain-spec`/`boundary-spec` suites)
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) the chain/Step algebra and *"the plan is the data"*
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — [§2](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) the registers for
   pre-cluster validation (Registers 1 and 2), [§3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure) rendering never touches live infrastructure, [§4](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run) the
@@ -731,8 +738,7 @@ The whole sprint (📋 Planned).
   fixture→provision→`renderAll`)→plan→dry-run→fake-apply spine, [§5](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish) the honesty limit
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — the rendered plan is
   emitted from source and never committed, and the applied bytes equal the `--dry-run` bytes
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) the registers (Register 1 for Part A,
-  Register 2 for Part B), [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run proven/tested/assumed ledger
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) the registers (Register 1 for Part A, Register 2 for Part B), [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run proven/tested/assumed ledger
 - [phase_11](phase_11_provision_seal.md) — the whole-deployment provision seal that constructs the opaque
   `ProvisionedSpec` the plan config carries
 - [phase_13](phase_13_render_manifest_goldens.md) — the pure `renderAll` output from which a step selects its

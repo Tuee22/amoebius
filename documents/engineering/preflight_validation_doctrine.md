@@ -1,25 +1,41 @@
 # Preflight Validation: the `Check` Algebra and the Forest Proof Tree
 
+> **Purpose**: Single Source of Truth for the pure-functional validation algebra (`Check`) that is the mechanism of the `dhall update` admission gate, its credential/host/quota probe instances including the worst-case dynamic envelope, and the recursive-forest validate-before-effect proof tree that makes a partial acknowledgement across a parent/child/grandchild forest unrepresentable.
+> **Read this if**: an admission check has to be written, or an existing rejection has to be traced to its cause.
+
+This document owns the admission algebra: a free structure with a short-circuiting sequential arm and an
+accumulating parallel one, its probe instances, and the recursive proof tree that makes a partial acceptance
+across a cluster forest unrepresentable. It does not own the capacity folds that run after admission, owned
+by [resource_capacity_folds.md](./resource_capacity_folds.md).
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md, documents/glossary.md
 **Generated sections**: none
 
-> **Purpose**: Single Source of Truth for the pure-functional validation algebra (`Check`) that is the mechanism of the `dhall update` admission gate, its credential/host/quota probe instances including the worst-case dynamic envelope, and the recursive-forest validate-before-effect proof tree that makes a partial acknowledgement across a parent/child/grandchild forest unrepresentable.
+</details>
+
+---
 
 Everything in this document is Phase-0 design intent; amoebius has built no phase. Where a mechanism runs today in the sibling prodbox/hostbootstrap projects it is marked **proven-in-sibling** — evidence, not a tested amoebius result ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). The impossibility theorem of [§2](#2-the-check-algebra) is established functional-programming mathematics; the `Check` GADT, its interpreters, the worst-case envelope, and the forest proof tree are **new-design-intent**.
 
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
----
-
 ## 1. Why this doctrine exists
 
-The Dhall gates foreclose only structurally-illegal specifications. Gate 1 (typecheck) and Gate 2 (the total decoder) reject a spec that names no API-key `SecretRef` for a cloud provision, or no SSH key for a self-managed host ([dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)). They cannot decide whether Vault is reachable, whether a named key exists, whether the live AWS or SSH authority recognises that key and grants the permissions and quotas the spec demands, whether an SSH host actually carries its declared hardware, or whether two clusters in a forest collide in a provider's resource identity. Each of these is a fact about a running world, settled only by observation; a spec that decodes cleanly can still fail at the first cloud or host call.
+The Dhall gates foreclose only structurally-illegal specifications. Gate 1 (typecheck) and Gate 2 (the total decoder) reject a spec that names no API-key `SecretRef` for a cloud provision, or no SSH key for a self-managed host ([dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)). What they cannot decide is anything about a running world. Is the secret store reachable, and does a named key exist in it? Does the live cloud or host authority recognise that key, and grant the permissions and quotas the spec demands? Does a host actually carry its declared hardware? Do two clusters in a forest collide in a provider's resource identity? Each of those is settled only by observation. A spec that decodes cleanly can therefore still fail at the first cloud or host call.
 
 An untyped, per-call validation layer fails the property amoebius requires. Ad-hoc checks scattered through the deploy path report the first failure and stop, cannot express which checks are independent (and therefore parallelisable) versus dependent, and admit a deploy that then fails halfway through `pulumi up` with resources half-created. The admission the deploy needs is a single composable structure whose success is a precondition of any mutation.
 
-amoebius already owns the runtime admission gate this requires: `dhall update` "actively proves each named secret before admitting the upload, and rejects fail-fast otherwise", reaching real hosts and cloud APIs and rejecting an absent secret, an SSH key that cannot connect, a host short of its declared resources, or a cloud credential lacking permission or quota, before any reconcile ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)). This document owns the *mechanism* of that gate — one pure-functional `Check` algebra ([§2](#2-the-check-algebra)), its probe instances ([§3](#3-the-check-instances-the-mechanism-of-the-dhall-update-gate)), and the recursive lift of the same algebra over the forest ([§4](#4-the-recursive-forest)) — and two extensions the gate's prose does not yet spell out: the worst-case dynamic envelope that validates a future-needed credential now, and the ack/nack proof tree.
+amoebius already owns the runtime admission gate this requires. `dhall update` "actively proves each named secret before admitting the upload, and rejects fail-fast otherwise"
+([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)). It reaches real hosts and cloud APIs
+before any reconcile. It rejects an absent secret, a key that cannot connect, a host short of its declared
+resources, or a credential lacking permission or quota.
+
+This document owns the *mechanism* of that gate: one pure-functional `Check` algebra ([§2](#2-the-check-algebra)), its probe instances ([§3](#3-the-check-instances-the-mechanism-of-the-dhall-update-gate)), and the recursive lift of the same algebra over the forest ([§4](#4-the-recursive-forest)). It adds two extensions the gate's own prose does not yet spell out — the worst-case dynamic envelope that validates a future-needed credential now, and the ack/nack proof tree.
 
 What the design forecloses, stated honestly ([§5](#5-the-guarantee-and-its-honest-limits)): a `Check` proof is stamped to observation time and cannot prove the running cluster complies. "A validated deploy cannot fail" is not achievable; the achievable and claimed property is that no enumerated, probe-observable precondition can fail at validation and that every subsequent self-management mutation is re-confirmed by the existing single-use snapshot token and fails closed on drift.
 
@@ -54,7 +70,7 @@ One `Check` value carries both disciplines — the `Bind` fragment in the short-
 
 ### 2.2 Independence is machine-checked
 
-`AllOf` and `Both` hold children of type `Check _`, never `_ -> Check _`. The type has no position in which one child can be written as a function of a sibling's result, so composing checks under an accumulating combinator is a machine-checked assertion of their independence; expressing a dependency forces a `Bind`, which relocates the pair onto the sequential spine. This is the validation-shaped image of the deploy rule that two operations writing the same checkpoint namespace are a data dependency and therefore compose monadically, not applicatively ([pulumi_iac_doctrine.md §7](./pulumi_iac_doctrine.md#7-applicative-parallelism-for-independent-deploys)).
+`AllOf` and `Both` hold children of type `Check _`, never `_ -> Check _`. The type has no position in which one child can be written as a function of a sibling's result. Composing checks under an accumulating combinator is therefore a machine-checked assertion of their independence, and expressing a dependency forces a `Bind`, which relocates the pair onto the sequential spine. This is the validation-shaped image of the deploy rule that two operations writing the same checkpoint namespace are a data dependency and therefore compose monadically, not applicatively ([pulumi_iac_doctrine.md §7](./pulumi_iac_doctrine.md#7-applicative-parallelism-for-independent-deploys)).
 
 ### 2.3 The accumulation discipline
 
@@ -64,7 +80,8 @@ The canonical `Applicative`/`Monad` instances short-circuit (`<*> = ap`). Error 
 
 The laws are stated over a pure interpreter `runPure :: Env -> Check a -> Outcome a`, quantified over generated `Env` and `Check`. The `Bind` fragment satisfies the Functor, Applicative, and Monad laws, including coherence (`<*> = ap`) and short-circuit (a failed `mf` leaves `mx` unobserved). `AllOf`/`Both` are homomorphisms into `Validation`'s accumulating applicative, preserving error multiplicity (`errorCount (Both a b) = errorCount a + errorCount b`). The load-bearing law is non-collapse: `both a b` and `a >>= \x -> b >>= \y -> pure (x, y)` agree on the successful value but differ on failure — the former accumulates both reasons, the latter reports one. `Select` is left-biased: on the left branch's success the right is unobserved; on both-branch failure both reasons are kept.
 
-A committed mutant corpus fixes these properties, following the seeded-mutant idiom of [formal_model_doctrine.md](./formal_model_doctrine.md) and [testing_doctrine.md](./testing_doctrine.md): each mutation must turn a property red. Representative mutants: `AllOf` short-circuits (killed by the accumulation homomorphism and non-collapse); `Both` drops the second error (homomorphism and non-collapse); `Select` drops an unproven branch's errors (the `Select` law); `<*>` accumulates (coherence); `AllOf`'s `mappend` becomes set-union, losing multiplicity; `both` becomes silently monadic (non-collapse); and the success seal is exposed so `renderAll` accepts an unsealed value (the seal-opacity golden of [illegal_state_techniques.md §6](../illegal_state/illegal_state_techniques.md)).
+A committed mutant corpus fixes these properties, following the seeded-mutant idiom of [formal_model_doctrine.md](./formal_model_doctrine.md) and [testing_doctrine.md](./testing_doctrine.md): each mutation must turn a property red. Each representative mutant is listed with the property that kills it.
+`AllOf` short-circuits (accumulation homomorphism, non-collapse); `Both` drops the second error (homomorphism, non-collapse); `Select` drops an unproven branch's errors (the `Select` law); `<*>` accumulates (coherence); `AllOf`'s `mappend` becomes set-union, losing multiplicity; `both` becomes silently monadic (non-collapse); and the success seal is exposed so `renderAll` accepts an unsealed value (the seal-opacity golden of [illegal_state_techniques.md §6](../illegal_state/illegal_state_techniques.md)).
 
 ### 2.5 Interpreters, result type, and the seal
 
@@ -72,6 +89,7 @@ A committed mutant corpus fixes these properties, following the seeded-mutant id
 
 ```mermaid
 flowchart TD
+%% register: algebra
   a1["fits: Right"]:::intent
   a2>"podFits: Left e1"]:::refuse
   a3>"place: Left e2"]:::refuse
@@ -105,10 +123,13 @@ The pure capacity fold proves that worst-case demand fits declared supply. This 
 
 A sealed, uninitialised, or unreachable Vault is the monadic head of the whole validation: `vaultReach` is bound before any `SecretRef` is probed, so a sealed Vault short-circuits fail-closed and no probe leaks whether a named secret exists ([vault_pki_doctrine.md](./vault_pki_doctrine.md)). This is the mechanism of the gate's requirement that a named secret exist in Vault ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)).
 
-Each credential is tested against its real authority through one shape, `reachable ⇒ recognises ⇒ satisfies`, a monadic spine whose `satisfies` stage runs its independent properties under `both`. The AWS interpreter recognises the credential by joining the `sts:GetCallerIdentity` account to the authored `CloudAccountId`, and satisfies it by proving permissions (an EC2 `DryRun` in both directions — create and modify authorised, durable `DeleteVolume` denied) accumulated with quotas (AWS Service Quotas cover the demand). The SSH interpreter recognises the credential by connecting to the intended host with the Vault-resolved key, and satisfies it by running the substrate resource-probe over SSH transport — the same probe run locally, marshalled to the remote host — against the declared per-host capacity; a host declared `linux-cuda` with no accelerator refuses ([substrate_doctrine.md](./substrate_doctrine.md)). Both interpreters are the mechanism of the gate's requirement that an SSH key connect and match observed hardware and that a cloud credential carry the required permissions and quotas ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)).
+Each credential is tested against its real authority through one shape, `reachable ⇒ recognises ⇒ satisfies`, a monadic spine whose `satisfies` stage runs its independent properties under `both`. The AWS interpreter recognises the credential by joining the `sts:GetCallerIdentity` account to the authored
+`CloudAccountId`. It satisfies the credential by proving permissions (an EC2 `DryRun` in both directions — create and modify authorised, durable `DeleteVolume` denied) accumulated with quotas (AWS Service Quotas cover the demand). The SSH interpreter recognises the credential by connecting to the intended host with the resolved key.
+It satisfies the credential by running the substrate resource-probe over SSH transport — the same probe run locally, marshalled to the remote host — against the declared per-host capacity; a host declared `linux-cuda` with no accelerator refuses ([substrate_doctrine.md](./substrate_doctrine.md)). Both interpreters are the mechanism of the gate's requirement that an SSH key connect and match observed hardware and that a cloud credential carry the required permissions and quotas ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   start["admitProviderCredential acct ref"]:::intent
   vr[/"Lift vaultReach"/]:::effect
   se[/"Lift secretExists"/]:::effect
@@ -134,7 +155,12 @@ flowchart TD
 ```
 *Design intent. The `Bind` spine short-circuits on a sealed Vault; `perms` and `quota` share no edge and accumulate. The seal is the existing `ValidatedInfrastructurePlan`, not a new value.*
 
-Ongoing self-management logic is bound by validating the worst-case future envelope at upload. A pure fold derives, from the `InForceSpec`, the union over every reachable branch — including a branch gated behind a runtime threshold — of the credentials it may resolve, the accounts and hosts it may target, and the quota ceiling it may reach. The projection and observation types are reused from the existing scaling model: the ceiling is the `ScalingPolicy` quota and its worst-case projection, observed against the residual of `ObservedProviderAccount` ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)). The only new element is pulling the check that the declared ceiling fits observed headroom forward from the runtime locus to the upload locus. A cloud-burst branch that fires only above a traffic threshold therefore contributes its account credential to the set validated at upload, so a credential the branch will later need is proven present now; a scaling ceiling that could exceed observed quota refuses at upload rather than at runtime.
+Ongoing self-management logic is bound by validating the worst-case future envelope at upload. A pure fold derives, from the `InForceSpec`, the union over every reachable branch — including a branch
+gated behind a runtime threshold. That union names the credentials the branch may resolve, the accounts and
+hosts it may target, and the quota ceiling it may reach. The projection and observation types are reused from the existing scaling model. The ceiling is the
+`ScalingPolicy` quota and its worst-case projection, observed against the residual of
+`ObservedProviderAccount` ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)). The only new element is pulling the check that the declared ceiling fits observed headroom forward from the runtime locus to the upload locus. A cloud-burst branch that fires only above a traffic threshold therefore contributes its account credential
+to the set validated at upload. A credential the branch will later need is proven present now; a scaling ceiling that could exceed observed quota refuses at upload rather than at runtime.
 
 Re-validation after upload is driven by observed drift, never by an elapsed duration: the reconciler re-runs the same `Check` when its `discover → diff → enact → re-observe` loop observes a relevant change ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)), and each mutation is re-confirmed by the pre-mutation snapshot token, in keeping with the prohibition on timers ([readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md)).
 
@@ -146,18 +172,23 @@ The new `ValidationError` arms are `VaultAuthorityUnreachable`, `HostUnreachable
 
 ### 4.1 Cross-cluster resource-identity disjointness
 
-A credential is a shareable name; an owned resource identity is single-owner. A parent and child may hold the same AWS key, but must not deploy into the same VPC or onto the same SSH host. A per-cluster VPC identity is name-disjoint by derivation — a total function of the forest-unique `ClusterId`, so two clusters cannot name the same identity, a decode-level property resting on the same `ClusterId`-distinctness fold that rejects a reused host ([illegal_state_techniques.md](../illegal_state/illegal_state_techniques.md)) — and is actually disjoint by fresh spawn, because each spawn is a distinct Pulumi deploy under a disjoint budget ([pulumi_iac_doctrine.md §8](./pulumi_iac_doctrine.md#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated)); the latter is a runtime effect, not a type foreclosure. A statically-named SSH-host collision across sibling subtrees is rejected by a root-scope distinctness fold. Because a child receives only its downward subtree projection ([cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)), that fold runs at the root only and is not part of per-child re-validation; downward-only projection makes this consistent. A host identity discovered at reconcile time rides the existing three-valued `discover`/`Unreachable → refuse` gate and the `dhall update` capability probe.
+A credential is a shareable name; an owned resource identity is single-owner. A parent and child may hold the same AWS key, but must not deploy into the same VPC or onto the same SSH host. A per-cluster VPC identity is name-disjoint by derivation: it is a total function of the forest-unique `ClusterId`, so two clusters cannot name the same identity. That is a decode-level property, resting on the same `ClusterId`-distinctness fold that rejects a reused host ([illegal_state_techniques.md](../illegal_state/illegal_state_techniques.md)). It is additionally disjoint by fresh spawn, because each spawn is a distinct Pulumi deploy under a disjoint budget ([pulumi_iac_doctrine.md §8](./pulumi_iac_doctrine.md#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated)); the latter is a runtime effect, not a type foreclosure. A statically-named SSH-host collision across sibling subtrees is rejected by a root-scope distinctness fold. Because a child receives only its downward subtree projection ([cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)), that fold runs at the root only and is not part of per-child re-validation; downward-only projection makes this consistent. A host identity discovered at reconcile time rides the existing three-valued `discover`/`Unreachable → refuse` gate and the `dhall update` capability probe.
 
 ### 4.2 Secret-injection exactness
 
-The set of secrets a child needs is the `SecretRef` closure of its projected spec unioned with its worst-case dynamic envelope. Injection is defined as that closure — one fold, not two independently authored sets — so no verb injects an arbitrary secret and a secret outside the closure has no injection site; over-injection is unrepresentable by construction, the same binding-by-construction technique that ties a PVC to its PV ([illegal_state_techniques.md](../illegal_state/illegal_state_techniques.md)). Under-injection is closed by a fold that yields an opaque `SeededProof`, a precondition of the child spec handoff: a child does not receive its `InForceSpec` until every needed secret, including a future-needed one, is seeded ([vault_pki_doctrine.md §7](./vault_pki_doctrine.md#7-parent-injects-secrets-into-the-childs-vault)). `SeededProof` persists in the `ValidationLedger`.
+The set of secrets a child needs is the `SecretRef` closure of its projected spec unioned with its worst-case dynamic envelope. Injection is defined as that closure — one fold, not two independently authored sets. No verb therefore injects an arbitrary secret, and a secret outside the closure has no injection site at all. Over-injection is unrepresentable by construction, the same binding-by-construction technique that ties a PVC to its PV ([illegal_state_techniques.md](../illegal_state/illegal_state_techniques.md)). Under-injection is closed by a fold that yields an opaque `SeededProof`, a precondition of the child spec handoff: a child does not receive its `InForceSpec` until every needed secret, including a future-needed one, is seeded ([vault_pki_doctrine.md §7](./vault_pki_doctrine.md#7-parent-injects-secrets-into-the-childs-vault)). `SeededProof` persists in the `ValidationLedger`.
 
 ### 4.3 The two-phase validate-before-effect proof tree
 
-The forest validation is one recursive value: `SubtreeValidated(n) = localProof(n) ⊗ Π over children SubtreeValidated(c)`, opaque and constructor-private. `localProof(n)` is the monadic chain Gate 1, Gate 2, bind, `planInfrastructure`, `provision`, the `dhall update` capability admission, and the parent's reach to the node; independent sibling subtrees fold under `independently`. Because a parent's proof embeds every descendant's proof as a factor, and a `Left` factor absorbs the product, a state in which a grandchild acknowledges and the child then rejects — with the parent already enacted — is unrepresentable: any rejection makes the whole product `Left`, and no parent proof, hence no parent effect, is constructed. The ordering in which descendants validate before an ancestor may enact is a property of the product, not a scheduled protocol; there is no coordinator and no acknowledgement sequence to order incorrectly. This is the forest-scale generalisation of `Unreachable → refuse` ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
+The forest validation is one recursive value: `SubtreeValidated(n) = localProof(n) ⊗ Π over children SubtreeValidated(c)`, opaque and constructor-private. `localProof(n)` is the monadic chain Gate 1, Gate 2, bind, `planInfrastructure`, `provision`, the
+`dhall update` capability admission, and the parent's reach to the node. Independent sibling subtrees fold
+under `independently`. A parent's proof embeds every descendant's proof as a factor, and a `Left` factor absorbs the product.
+A state in which a grandchild acknowledges, the child then rejects, and the parent has already enacted is
+therefore unrepresentable: any rejection makes the whole product `Left`, and no parent proof, hence no parent effect, is constructed. The ordering in which descendants validate before an ancestor may enact is a property of the product, not a scheduled protocol; there is no coordinator and no acknowledgement sequence to order incorrectly. This is the forest-scale generalisation of `Unreachable → refuse` ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
 
 ```mermaid
 flowchart TD
+%% register: algebra
   glp[["localProof G"]]:::intent
   svg((("SubtreeValidated G"))):::seal
   clp[["localProof C"]]:::intent
@@ -190,6 +221,7 @@ Two predicates govern an unchanged node, and conflating them reopens the partial
 
 ```mermaid
 flowchart TD
+%% register: algebra
   gok["localProof G: Right, grandchild acknowledges"]:::intent
   svg((("SubtreeValidated G: Right"))):::seal
   cnack>"localProof C: Left, child rejects"]:::refuse
@@ -209,13 +241,20 @@ flowchart TD
 
 ### 4.5 The Phase-2 seal stack and transport
 
-The effect of a subtree consumes a stack of three seals in order: the pure `ProvisionedSpec` that `renderAll` accepts, settled per node in Phase 1; the recursive `SubtreeValidated`, settled for the whole subtree in Phase 1; and a fresh `ValidatedInfrastructureActionBatch`/single-use snapshot token re-read immediately before each mutation in Phase 2 ([pulumi_iac_doctrine.md §8](./pulumi_iac_doctrine.md#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated)). The first two are settled before any effect, which is what validate-before-effect means; the third handles world-drift per mutation, and a stale token restarts observation with zero mutation. The acknowledgement rides the `ParentReachChannel` projected from each child's compute engine, so a child its parent cannot reach has no inhabitant ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)); reachability is a factor of `localProof`, so an unreachable child collapses every ancestor's product.
+The effect of a subtree consumes a stack of three seals, in order.
+First the pure `ProvisionedSpec` that `renderAll` accepts, settled per node in Phase 1; then the recursive
+`SubtreeValidated`, settled for the whole subtree in Phase 1; then a fresh `ValidatedInfrastructureActionBatch` and single-use snapshot token, re-read immediately before
+each mutation in Phase 2
+([pulumi_iac_doctrine.md §8](./pulumi_iac_doctrine.md#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated)). The first two are settled before any effect, which is what validate-before-effect means; the third handles world-drift per mutation, and a stale token restarts observation with zero mutation. The acknowledgement rides the `ParentReachChannel` projected from each child's compute engine, so a child its parent cannot reach has no inhabitant ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)); reachability is a factor of `localProof`, so an unreachable child collapses every ancestor's product.
 
 ---
 
 ## 5. The guarantee and its honest limits
 
-When the deploy's `Check` returns success — the `ValidatedInfrastructurePlan` seal — then at each probe's observation instant Vault was unsealed and every named secret resolved, every credential was accepted by its live target, permissions and quotas covered the spec's worst-case demand including its dynamic envelope, every target's hardware fit, no two tiers collided in a resource identity, and every needed secret was seeded. For every subsequent self-management mutation, the single-use snapshot token is re-read immediately before the mutation and a drifted snapshot yields zero mutation.
+A successful deploy `Check` — the `ValidatedInfrastructurePlan` seal — establishes the following, each at
+its own probe's observation instant. The secret store was unsealed and every named secret resolved. Every
+credential was accepted by its live target. Permissions and quotas covered the spec's worst-case demand,
+including its dynamic envelope. Every target's hardware fit, no two tiers collided in a resource identity, and every needed secret was seeded. For every subsequent self-management mutation, the single-use snapshot token is re-read immediately before the mutation and a drifted snapshot yields zero mutation.
 
 The limits are stated per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline). "A validated deploy cannot fail under ongoing logic" is not achievable and is not claimed; the worst-case envelope is necessary but not sufficient, and what bounds ongoing logic is the pre-mutation token making every future mutation refuse on drift, not succeed. A `Check` proof is stamped to observation time, so the token collapses the check-to-effect window to per-mutation but does not erase it. The guarantee covers enumerated, probe-observable preconditions, not a denotational completeness claim ([illegal_state_techniques.md §6](../illegal_state/illegal_state_techniques.md)); and it is Tier-2 runtime-checked — that the new state is actually effected is observed by the reconciler, never asserted as a type proof ([readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md)).
 
@@ -238,7 +277,7 @@ The limits are stated per [documentation_standards.md §6](../documentation_stan
 
 ---
 
-## Cross-references
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [DSL Doctrine](./dsl_doctrine.md) — the two gates, the opaque seal, `ValidationLedger`
 - [Bootstrap Sequence Doctrine](./bootstrap_sequence_doctrine.md) — the `dhall update` gate this is the mechanism of

@@ -1,11 +1,21 @@
 # Lift and Compose, Don't Reimplement
 
+> **Purpose**: Single source of truth for the principle that amoebius **lifts the proven primitives** of the sibling projects (`prodbox`, `hostbootstrap`, `infernix`, `jitML`) and **re-homes them onto amoebius seams**, rather than reimplementing them — so amoebius's own work is the *composition and the typed surface*, not the numerics, the inference orchestration, or the deployment mechanics that already exist and run.
+> **Read this if**: an existing sibling implementation could serve a need, and the question is whether to lift or rewrite.
+
+This document owns the reuse discipline: which shape lifts from which sibling project onto which seam, what
+is re-shaped in the process, and the honest statement that a sibling result is evidence rather than an
+amoebius result. It owns none of the lifted code, and the seams it names are owned by their own doctrines.
+
+<details>
+<summary>Link-graph metadata</summary>
+
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
-> **Purpose**: Single source of truth for the principle that amoebius **lifts the proven primitives** of the sibling projects (`prodbox`, `hostbootstrap`, `infernix`, `jitML`) and **re-homes them onto amoebius seams**, rather than reimplementing them — so amoebius's own work is the *composition and the typed surface*, not the numerics, the inference orchestration, or the deployment mechanics that already exist and run.
+</details>
 
 ---
 
@@ -18,10 +28,8 @@ orchestration, engine-pool routing, and durable-context event-sourcing; `hostboo
 smart-constructor illegal-state types, and schema-reflected-from-Haskell. All four run today and are test-backed.
 
 Rewriting any of that from scratch would discard tested code and reintroduce its bugs, for no gain — the numerics
-and the orchestration are not where amoebius is novel. amoebius is novel in **how these shapes are lifted and
-composed under one typed DSL**: the illegal-state-unrepresentable surface, the total composability, the single
-opinionated platform, the one formal obligation. So the rule is: **lift the proven shape, re-home it onto the
-amoebius seam, and reserve new implementation for the composition layer and the seams themselves.** What this
+and the orchestration are not where amoebius is novel. amoebius is novel in **how these shapes are lifted and composed under one typed DSL**: the illegal-state-unrepresentable surface, the total composability, the single
+opinionated platform, the one formal obligation. So the rule is: **lift the proven shape, re-home it onto the amoebius seam, and reserve new implementation for the composition layer and the seams themselves.** What this
 forecloses is amoebius reimplementing MinIO, Pulsar, autodiff, or inference orchestration — work that is done
 and whose re-doing would be pure risk.
 
@@ -67,8 +75,7 @@ Register-1/2 validatable:
   and a shared **jit-build resolver** materializes it on first miss into a `CacheBudget`-bounded,
   content-addressed cache — no arbitrary URL, no author-a-download syntax
   ([content_addressing_doctrine.md](./content_addressing_doctrine.md)).
-- **Handwritten demo clients and sibling JWT/direct endpoints → `UiSource`, typed ports, and the authenticated
-  UI server.** The sibling screens supply interaction requirements, while their browser networking and identity
+- **Handwritten demo clients and sibling JWT/direct endpoints → `UiSource`, typed ports, and the authenticated UI server.** The sibling screens supply interaction requirements, while their browser networking and identity
   seams are replaced. One checked `BoundUiProgram` derives the generic client and server dispatch; every effect
   crosses the Keycloak/Envoy edge and a trusted Haskell handler
   ([low_code_ui_runtime_doctrine.md §13](./low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server)).
@@ -130,8 +137,7 @@ is design intent, never a tested amoebius result.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) the checked client/server projection and [§12](./low_code_ui_runtime_doctrine.md#12-workflows-and-artifact-lifting-into-the-ux) workflow/artifact UX lifting
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — `UiSource` and typed workflow use are application logic; replica and placement choices are deployment rules

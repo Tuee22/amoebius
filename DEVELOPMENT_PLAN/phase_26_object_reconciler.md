@@ -1,10 +1,5 @@
 # Phase 26: Typed renderer + object reconciler
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
-**Generated sections**: none
-
 > **Purpose**: Take an opaque whole-deployment `ProvisionedSpec`, re-observe and cross-check the target's
 > complete resource/capability inventory before mutation, construct the Phase-13 deployment-global
 > `renderAll` object list and separately validate/index it, then enact snapshot-bound typed actions on a live
@@ -13,6 +8,35 @@
 > authenticated deletion — observing each action's live postcondition until the generation converges and
 > proving an immediate re-run is a no-op; the `amoebius-capacity` scheduler that later binds guarded Pods by
 > CAS reservation is layered on in Phase 27.
+> **Read this if**: phase 26 is next in the queue, or a later phase depends on what its gate establishes.
+
+Phase 26 delivers the typed renderer + object reconciler; its design is owned by [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [readiness_ordering_doctrine.md](../documents/engineering/readiness_ordering_doctrine.md), and the plan for reaching it is owned here.
+Register 3, live, on the `linux-cpu` substrate.
+No gate has run.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Generated sections**: none
+
+</details>
+
+## Contents
+- [Phase Status](#phase-status)
+- [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
+- [Doctrine adopted](#doctrine-adopted)
+- [Sprints](#sprints)
+- [Sprint 26.1: Deployment-global desired state + authenticated live inventory + typed action plan 📋](#sprint-261-deployment-global-desired-state--authenticated-live-inventory--typed-action-plan-)
+- [Sprint 26.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch 📋](#sprint-262-bootstrap-lease-authority--generic-typed-action-dispatcher--scoped-ssa--storage-scaling-dispatch-)
+- [Sprint 26.3: Staged execution transitions, Job terminal protocol, and authenticated deletion 📋](#sprint-263-staged-execution-transitions-job-terminal-protocol-and-authenticated-deletion-)
+- [Sprint 26.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) 📋](#sprint-264-wait-for-ready--the-idempotent-convergence-gate-re-run-no-op-)
+- [Sprint 26.5: Register-2.5 reconciler + staged-execution convergence under simulated faults 📋](#sprint-265-register-25-reconciler--staged-execution-convergence-under-simulated-faults-)
+- [Documentation Requirements](#documentation-requirements)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -29,20 +53,15 @@ golden-locked them in Register 1; this phase wires that exact value through the
 `observe → diff → scoped-SSA → staged-enact → delete → wait-for-ready` reconciler onto the single-node `kind`
 cluster from Phase 24. The reconciler is exercised here **from the host binary against a scratch namespace**,
 against the pinned Phase-13 corpus — the in-cluster **control-plane singleton** that eventually owns it
-(a Deployment `replicas=1` whose single-instance guarantee is delegated to k8s/etcd with **no bespoke
-election**) arrives in Phase 33. The `amoebius-capacity` scheduler — its CAS `Reserved`→`BindingInFlight`→
-`Bound` reservation ledger, two-stage bootstrap cutover, and execution-identity admission — is **Phase 27,
-layered on this reconciler**; in this phase the corpus Pods are bound by the **default Kubernetes scheduler**,
+(a Deployment `replicas=1` whose single-instance guarantee is delegated to k8s/etcd with **no bespoke election**) arrives in Phase 33. The `amoebius-capacity` scheduler — its CAS `Reserved`→`BindingInFlight`→
+`Bound` reservation ledger, two-stage bootstrap cutover, and execution-identity admission — is **Phase 27, layered on this reconciler**; in this phase the corpus Pods are bound by the **default Kubernetes scheduler**,
 and the typed-action engine, scoped SSA, staged enactors, authenticated deletion, and unified observed-readiness
 path are amoebius's new code proven live here.
 
 ## Phase Summary
 
 This phase delivers amoebius's live typed-action **object reconciler**. Pure Phase 13 supplies
-`renderAll :: ProvisionedSpec -> [K8sObject]`: one deployment-global rendered list with exact structural
-source ownership across service controllers, admission, quota, RBAC/config, route, storage, and control-plane
-projections. `validateAndIndexRenderedObjects` is the separate pure step that checks each emitted object's
-identity against its source key and constructs the `Map KubernetesObjectId (K8sObject, RenderActivation)` used
+`renderAll :: ProvisionedSpec -> [K8sObject]`: one deployment-global rendered list with exact structural source ownership across service controllers, admission, quota, RBAC/config, route, storage, and control-plane projections. `validateAndIndexRenderedObjects` is the separate pure step that checks each emitted object's identity against its source key and constructs the `Map KubernetesObjectId (K8sObject, RenderActivation)` used
 by diff; it rejects duplicates, source/object-stage mismatch, or domain mismatch rather than changing
 `renderAll`'s canonical signature. Omitted global projections and per-service last-writer-wins concatenation
 are impossible. The exact list is the dry-run result, and only its validated index is the desired-object
@@ -52,8 +71,7 @@ That full list is not permission to apply every object at cold start. The corres
 sources carry a closed activation index
 `Immediate | BootstrapSchedulerStage | AfterBootstrapAddonCutover | AfterManagedCapacityReady`;
 `validateAndIndexRenderedObjects` preserves that index beside each object, and generic SSA never scans the full
-rendered list and applies a later-stage object early. **List membership alone is never generic-SSA
-authorization.** In this phase the enacted corpus spans the `Immediate` bootstrap actions (the derived
+rendered list and applies a later-stage object early. **List membership alone is never generic-SSA authorization.** In this phase the enacted corpus spans the `Immediate` bootstrap actions (the derived
 control-plane Namespace and the mandatory reconciler `Lease`) and the general, default-scheduled workload
 actions; the *stage-unlock gating* that consumes `BootstrapSchedulerStage`, `AfterBootstrapAddonCutover`, and
 `AfterManagedCapacityReady` is produced by the two-stage scheduler bootstrap and therefore belongs to
@@ -156,8 +174,7 @@ Phase 53 respectively).
 
 **Gate:** in **Register 3**, the Phase-13 pure deployment-global `renderAll` list for the pinned
 [representative reconcile corpus](#gate-integrity) is rendered in full and separately validated/indexed with its
-source activation stages, then enacted in a scratch namespace on the live single-node `kind` cluster **only
-through stage-eligible typed actions** — list membership alone is never generic-SSA authorization. The cold-start
+source activation stages, then enacted in a scratch namespace on the live single-node `kind` cluster **only through stage-eligible typed actions** — list membership alone is never generic-SSA authorization. The cold-start
 authority can create only the derived control-plane Namespace and the deployment-global mandatory reconciler
 `Lease`, acquire it under the bootstrap-host identity through the typed `Absent → BootstrapHeld` action, and read
 that holder/object-UID/resourceVersion back; its rounding-aware renewal count and exact one-update/one-revision-
@@ -189,26 +206,47 @@ The apparatus below is this phase's **slice** of the source reconcile corpus, pa
 object-reconciler seam; the `amoebius-capacity` scheduler's bootstrap/cutover/reservation fixtures and its
 `bind-before-reservation-CAS` mutant are partitioned to Phase 27 and are **not** duplicated here.
 
+```mermaid
+flowchart LR
+  %% register: orientation
+  s0["Sprint 26.1: Deployment-global desired state + authenticated live…"]
+  s1["Sprint 26.2: Bootstrap Lease authority + generic typed-action dispatcher…"]
+  s2["Sprint 26.3: Staged execution transitions, Job terminal protocol, and…"]
+  s3["Sprint 26.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op)"]
+  s4["Sprint 26.5: Register-2.5 reconciler + staged-execution convergence…"]
+  gate["the phase 26 gate"]
+  s0 -->|"produces what the next consumes"| s1
+  s1 -->|"produces what the next consumes"| s2
+  s2 -->|"produces what the next consumes"| s3
+  s3 -->|"produces what the next consumes"| s4
+  s4 -->|"the last seam the gate closes over"| gate
+```
+*Orientation. The seams phase 26 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+
 **The representative reconcile corpus (Phase-0-pinned, §M.7 concrete corpus).** The gate's applied service set
-is the committed fixture `test/live/fixtures/reconcile-corpus/` — a subset of the Phase-13 byte-for-byte golden
-corpus (`test/golden/render/` service specs, referenced by their golden IDs, never a freshly hand-picked spec) —
-and it MUST span, with each kind exercising a *live readiness transition that is not instantaneous*: (i) at least
-one Deployment whose container image is pulled from the Phase-25 in-cluster `distribution` registry and whose
-readiness probe carries a **non-zero `initialDelaySeconds`** (so rollout-complete cannot be true at apply time and
-the registry dependency is actually exercised by a running pod); (ii) one StatefulSet or DaemonSet `OnDelete`
-transition with at least two ordered slots; (iii) one Job with provisioned success and backoff-exhausted
-completion variants whose terminal Pod is observed retained and charged (no live completion persistence yet);
-(iv) at least one object that reaches a `Ready`/`Available` status after apply; and (v) at least one
-**CustomResource of amoebius's own in-phase capacity/reservation CRD** — an amoebius-defined, amoebius-controlled
-CRD whose small controller is rendered by `renderAll` and reconciled in this phase, scheduled by the default
-Kubernetes scheduler — whose `status` transitions from absent/unhealthy to healthy after apply and whose child
-Deployment/PVC conforms to a provisioned child-resource/rollout envelope. **The fix that pins item (v) to
-amoebius's own CRD rather than an external workload operator (e.g. the Percona operator built in Phase 31) is
-deliberate:** it keeps the corpus and its over-bound-child mutant self-contained within this phase and earlier
-phases, removing a latent forward dependency on Phase 31. The corpus, its golden-ID manifest, and the committed
-hand-authored expected-action table are authored and committed in **Phase 0 before `Reconcile.hs` exists**
-(§M.1 oracle-pinning). Corpus Pods are bound by the **default scheduler** in this phase; the guarded-Pod-behind-
-`amoebius-capacity` requirement is added to the corpus by Phase 27.
+is the committed fixture `test/live/fixtures/reconcile-corpus/` — a subset of the Phase-13 byte-for-byte
+golden corpus (`test/golden/render/` service specs, referenced by their golden IDs, never a freshly
+hand-picked spec) — and it MUST span, with each kind exercising a *live readiness transition that is not
+instantaneous*:
+- (i) at least one Deployment whose container image is pulled from the Phase-25 in-cluster `distribution`
+  registry and whose readiness probe carries a **non-zero `initialDelaySeconds`** (so rollout-complete
+  cannot be true at apply time and the registry dependency is actually exercised by a running pod)
+- (ii) one StatefulSet or DaemonSet `OnDelete` transition with at least two ordered slots
+- (iii) one Job with provisioned success and backoff-exhausted completion variants whose terminal Pod is
+  observed retained and charged (no live completion persistence yet)
+- (iv) at least one object that reaches a `Ready`/`Available` status after apply
+- and (v) at least one **CustomResource of amoebius's own in-phase capacity/reservation CRD** — an
+  amoebius-defined, amoebius-controlled CRD whose small controller is rendered by `renderAll` and reconciled
+  in this phase, scheduled by the default Kubernetes scheduler — whose `status` transitions from
+  absent/unhealthy to healthy after apply and whose child Deployment/PVC conforms to a provisioned
+  child-resource/rollout envelope.
+
+**The fix that pins item (v) to amoebius's own CRD rather than an external workload operator (e.g. the Percona operator built in Phase 31) is deliberate:** it keeps the corpus and its over-bound-child mutant
+self-contained within this phase and earlier phases, removing a latent forward dependency on Phase 31. The
+corpus, its golden-ID manifest, and the committed hand-authored expected-action table are authored and
+committed in **Phase 0 before `Reconcile.hs` exists** (§M.1 oracle-pinning). Corpus Pods are bound by the
+**default scheduler** in this phase; the guarded-Pod-behind- `amoebius-capacity` requirement is added to the
+corpus by Phase 27.
 
 **Committed seeded mutants the gate MUST turn red (§M.2).** The gate re-runs against a committed mutant set and
 requires each to go red: (a) **`waitForReady = pure ()`** (dropped-effect operator) — must fail against the
@@ -225,8 +263,7 @@ whose probe never passes) MUST turn the convergence suite red on the *honest* en
 declared), foreclosing an immediate-return `Wait.hs`.
 
 **The external apiserver reader (§M.5/§M.6 measurement locus).** All "no-op / byte-stable / converged" verdicts
-are read by a distinct apiserver client (a `kubectl get -o json` / client-go reader) that is **not the reconciler
-and shares no diff/fold code with it**. Immediately before and after the re-run it snapshots every owned object
+are read by a distinct apiserver client (a `kubectl get -o json` / client-go reader) that is **not the reconciler and shares no diff/fold code with it**. Immediately before and after the re-run it snapshots every owned object
 directly from the apiserver and asserts, per object, that `resourceVersion`, `managedFields`, and the full
 label/annotation set are **byte-identical**, and that the `amoebius/owner`-labeled object set is unchanged. The
 reconciler's self-reported "0 mutations, 0 prunes" is corroborating evidence only, never the passing condition.
@@ -250,19 +287,11 @@ every mutation surface.
   named by [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is Phase 27; durable Job completion/cleanup first runs live in Phase 37; rollback and the release
   ledger stay deferred.
 - [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
-  — **desired is the validated identity index of `renderAll(provisionedSpec)`, observed is live inventory, and
-  actions are typed.** `renderAll` retains the canonical `[K8sObject]` result; a separate pure
-  `validateAndIndexRenderedObjects` checks source/object identity and duplicate freedom before diff. Desired
-  state is recomputed; actual Pod UIDs/process IDs, owner chains, host reservations, completions, and physical
-  allocations are observed to authorize transitions, never treated as another desired source. (The state-indexed
-  *k8s scheduler* reservation ledger this model also names is added in Phase 27.)
+  — **desired is the validated identity index of `renderAll(provisionedSpec)`, observed is live inventory, and actions are typed.** `renderAll` retains the canonical `[K8sObject]` result; a separate pure `validateAndIndexRenderedObjects` checks source/object identity and duplicate freedom before diff. Desired state is recomputed; actual Pod UIDs/process IDs, owner chains, host reservations, completions, and physical allocations are observed to authorize transitions, never treated as another desired source. (The state-indexed *k8s scheduler* reservation ledger this model also names is added in Phase 27.)
 - [`manifest_generation_doctrine.md §2`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)
   — **the typed manifest model** (the pure renderer half): this phase *consumes* the Phase-13 pure, total private
   per-source `renderSourcePrivate` projections through the exact deployment-global `renderAll` owner union. The
-  `[K8sObject]` list is byte-for-byte the value `--dry-run` previews; its separately validated identity index is
-  the desired map. An unchecked `ServiceSpec`, duplicate `KubernetesObjectId`, or emitted/source identity mismatch
-  cannot reach diff.
-- [`resource_capacity_doctrine.md §8`](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)
+  `[K8sObject]` list is byte-for-byte the value `--dry-run` previews; its separately validated identity index is the desired map. An unchecked `ServiceSpec`, duplicate `KubernetesObjectId`, or emitted/source identity mismatch cannot reach diff. - [`resource_capacity_doctrine.md §8`](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)
   — **declared at decode, cross-checked at runtime.** Immediately before mutation, this phase re-observes
   CPU/memory/local-ephemeral capacity, pod/CNI/CSI slots, mapped files/etcd logical quota, disjoint
   durable/object-store/migration/native-host-cache pools, admission/executor pods, planned execution slots,
@@ -283,9 +312,7 @@ every mutation surface.
   `renderAll`/plan/`--dry-run` path stayed cluster-free through Phase 14, and **apply is the first live step** —
   so live prerequisites (a reachable cluster, credentials) belong here, never on the render path.
 - [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
-  — the applied `[K8sObject]` set is emitted from the Haskell source of truth and **never committed**; what
-  reaches the cluster is generated at apply time, not a checked-in manifest.
-- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
+  — the applied `[K8sObject]` set is emitted from the Haskell source of truth and **never committed**; what reaches the cluster is generated at apply time, not a checked-in manifest. - [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
   — **Register 3** (live infrastructure): the register this phase's gate reaches; and
   [`§4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact),
   the per-run proven/tested/assumed ledger the live convergence emits (no skips, fail fast; the scratch namespace
@@ -300,29 +327,26 @@ every mutation surface.
 ## Sprint 26.1: Deployment-global desired state + authenticated live inventory + typed action plan 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Manifest/{Preflight,Reconcile,Diff,Actions,Authority}.hs`,
-`src/Amoebius/Execution/{Observe,Normalize,RuntimeStorage}.hs`, and
-`src/Amoebius/Storage/ScalingAction.hs` (fresh storage observation, validation, and state-indexed action token) —
-target paths, not yet built. (The `src/Amoebius/Scheduler/Ledger.hs` reservation-ledger normalization is
-partitioned to Phase 27.)
+**Implementation**:
+`src/Amoebius/Manifest/{Preflight,Reconcile,Diff,Actions,Authority}.hs`,
+`src/Amoebius/Execution/{Observe,Normalize,RuntimeStorage}.hs`, and `src/Amoebius/Storage/ScalingAction.hs`
+(fresh storage observation, validation, and state-indexed action token) — target paths, not yet built. (The
+`src/Amoebius/Scheduler/Ledger.hs` reservation-ledger normalization is partitioned to Phase 27.)
 **Blocked by**: Phase 13 (`renderAll` and the keyed owner union), Phase 24 (live cluster and observed inventory),
 Phase 25 (in-cluster registry).
 **Independent Validation**: a fresh snapshot produces exactly the committed
-`test/live/fixtures/reconcile-corpus/expected-actions.json`, authored before the planner. It includes the full
-object-action and `ValidatedExecutionTransitionAction` domains, not merely add/update/prune names. All one-field
-negatives fail before any apiserver, host, provider, or object-store write.
-**Docs to update**: `documents/engineering/manifest_generation_doctrine.md`,
+`test/live/fixtures/reconcile-corpus/expected-actions.json`, authored before the planner. It includes the
+full object-action and `ValidatedExecutionTransitionAction` domains, not merely add/update/prune names. All
+one-field negatives fail before any apiserver, host, provider, or object-store write.
+**Docs to update**:
+`documents/engineering/manifest_generation_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 
 Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
 — the reconcile state model. Make desired state the separately validated identity index of the exact Phase-13
-`renderAll provisionedSpec :: [K8sObject]` owner union; make observed state a coherent snapshot of Kubernetes
-objects, actual Pod/process identities, host reservations, completions, and physical allocations; and mint only
-the typed actions justified by the whole transition. No planned slot is accepted as a live identity, no object
-label alone is a mutation capability, and no preflight module imports a writer. The state-indexed `amoebius-capacity`
-scheduler reservation ledger is layered on this observation in Phase 27.
+`renderAll provisionedSpec :: [K8sObject]` owner union; make observed state a coherent snapshot of Kubernetes objects, actual Pod/process identities, host reservations, completions, and physical allocations; and mint only the typed actions justified by the whole transition. No planned slot is accepted as a live identity, no object label alone is a mutation capability, and no preflight module imports a writer. The state-indexed `amoebius-capacity` scheduler reservation ledger is layered on this observation in Phase 27.
 
 ### Deliverables
 
@@ -375,21 +399,7 @@ scheduler reservation ledger is layered on this observation in Phase 27.
 
 ### Validation
 
-1. The deployment-global `[K8sObject]` list equals its Phase-13 golden; the separately validated desired map and
-   action plan equal independently authored fixtures. Seeded duplicate object identity, source/emitted-identity
-   mismatch, source/object activation-stage mismatch, generic-SSA-over-full-list, missing global projection,
-   cached observation, and action-domain omission mutants turn red. A Register-1 planner fixture with modeled
-   observed completion still renders the pure Job baseline but plans `CompletedJobNoOp`, proving enactment is not a
-   blind render-list apply; the live fixture instead plans terminal retention because no gateway/readback exists
-   yet.
-2. Execution negatives cover missing or spoofed annotations, wrong Deployment ReplicaSet hop, wrong direct
-   controller kind/resourceVersion, map-key/embedded-identity mismatch, planned-slot-as-Pod-UID, and
-   terminator/replacement UID collapse. Host negatives cover omission of Reserved/`LaunchInFlight`/retained-artifact
-   `HostReservationId`, use of a fake process id for a ledger-only row, and double debit after process join. Positive
-   recovery fixtures cover an absent-process host row in each host-supervisor ledger state and prove each remains
-   charged until its state-specific release evidence. Exact-fit controls debit each identity once. (The k8s scheduler
-   reservation-record negatives — unclassified-orphan record, missing reservation, wrong ledger state/node/template,
-   Bound-Pod-plus-ledger double debit — are Phase 27.)
+1. The deployment-global `[K8sObject]` list equals its Phase-13 golden; the separately validated desired map and action plan equal independently authored fixtures. Seeded duplicate object identity, source/emitted-identity mismatch, source/object activation-stage mismatch, generic-SSA-over-full-list, missing global projection, cached observation, and action-domain omission mutants turn red. A Register-1 planner fixture with modeled observed completion still renders the pure Job baseline but plans `CompletedJobNoOp`, proving enactment is not a blind render-list apply; the live fixture instead plans terminal retention because no gateway/readback exists yet. 2. Execution negatives cover missing or spoofed annotations, wrong Deployment ReplicaSet hop, wrong direct controller kind/resourceVersion, map-key/embedded-identity mismatch, planned-slot-as-Pod-UID, and terminator/replacement UID collapse. Host negatives cover omission of Reserved/`LaunchInFlight`/retained-artifact `HostReservationId`, use of a fake process id for a ledger-only row, and double debit after process join. Positive recovery fixtures cover an absent-process host row in each host-supervisor ledger state and prove each remains charged until its state-specific release evidence. Exact-fit controls debit each identity once. (The k8s scheduler reservation-record negatives — unclassified-orphan record, missing reservation, wrong ledger state/node/template, Bound-Pod-plus-ledger double debit — are Phase 27.)
 3. Runtime-storage negatives cover component drop/role swap, model ownership overlap/hole, Unified alias
    double-debit/drop, SplitRuntime one-byte-short kubelet-nodefs and CRI imagefs/containerfs backings, SplitImage
    routing mismatch, Pending with a node row, and Bound with both a planned and an observed row. Exact fits succeed.
@@ -411,15 +421,16 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `src/Amoebius/Manifest/{Apply,Enact,Authority}.hs` and
 `src/Amoebius/Storage/ScalingDispatch.hs` — target paths, not yet built. The `amoebius-capacity` scheduler
-(`src/Amoebius/Scheduler/*.hs`) and execution-identity admission (`src/Amoebius/Admission/ExecutionIdentity.hs`)
-are layered on this dispatcher in Phase 27.
-**Blocked by**: Sprint 26.1.
+(`src/Amoebius/Scheduler/*.hs`) and execution-identity admission
+(`src/Amoebius/Admission/ExecutionIdentity.hs`) are layered on this dispatcher in Phase 27.
+**Blocked by**:
+Sprint 26.1.
 **Independent Validation**: the host holds the mandatory reconciler `Lease` (via the typed
-`Absent → BootstrapHeld` action) before any non-authority mutation; ordinary object actions retain correct SSA
-field ownership; storage-scaling actions dispatch only their transition-indexed capability and never reuse a
-token after a lost response. No non-SSA effect flows through the SSA module.
-**Docs to update**: `documents/engineering/manifest_generation_doctrine.md`,
-`DEVELOPMENT_PLAN/system_components.md`.
+`Absent → BootstrapHeld` action) before any non-authority mutation; ordinary object actions retain correct
+SSA field ownership; storage-scaling actions dispatch only their transition-indexed capability and never
+reuse a token after a lost response. No non-SSA effect flows through the SSA module.
+**Docs to update**:
+`documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 
@@ -481,13 +492,15 @@ The whole sprint (📋 Planned).
 ## Sprint 26.3: Staged execution transitions, Job terminal protocol, and authenticated deletion 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Execution/{SerialOnDelete,HostTransition,AcceleratorRelease,JobTerminal}.hs`
-and `src/Amoebius/Manifest/Delete.hs` — target paths, not yet built.
+**Implementation**:
+`src/Amoebius/Execution/{SerialOnDelete,HostTransition,AcceleratorRelease,JobTerminal}.hs` and
+`src/Amoebius/Manifest/Delete.hs` — target paths, not yet built.
 **Blocked by**: Sprint 26.2.
-**Independent Validation**: no stage can use evidence from the prior snapshot, no second serial Pod is deleted
-before the expected replacement is Bound+Ready, no CUDA/Metal/host replacement starts before its resource-indexed
-release, the abstract Job protocol cannot clean a terminal Pod before durable completion, and the live pre-gateway
-gate retains that Pod rather than pretending persistence; no label alone can authorize object deletion.
+**Independent Validation**: no stage can use evidence from the prior snapshot, no second serial Pod is deleted before the
+expected replacement is Bound+Ready, no CUDA/Metal/host replacement starts before its resource-indexed
+release, the abstract Job protocol cannot clean a terminal Pod before durable completion, and the live
+pre-gateway gate retains that Pod rather than pretending persistence; no label alone can authorize object
+deletion.
 **Docs to update**: `documents/engineering/manifest_generation_doctrine.md`,
 `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -550,17 +563,20 @@ The whole sprint (📋 Planned).
 ## Sprint 26.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Manifest/Wait.hs`, `test/live/ReconcileConvergeSpec.hs`,
-`test/live/SerialOnDeleteSpec.hs`, and `test/live/JobTerminalRetentionSpec.hs` — target paths, not yet built.
-(The `test/live/SchedulerReservationSpec.hs` live scheduler suite is Phase 27.)
-**Blocked by**: Sprint 26.3, Sprint 26.2.
-**Independent Validation**: the representative corpus reconciles a non-instantaneous Deployment, a serial
-replacement Bound+Ready between deletions, CR health plus child conformance on amoebius's own in-phase
-capacity/reservation CRD, and terminal Job retention without a gateway. The immediate rerun has byte-stable objects
-and no host/object-store/delete effect. A never-ready fixture and dropped-wait mutant turn red.
+**Implementation**: `src/Amoebius/Manifest/Wait.hs`,
+`test/live/ReconcileConvergeSpec.hs`, `test/live/SerialOnDeleteSpec.hs`, and
+`test/live/JobTerminalRetentionSpec.hs` — target paths, not yet built. (The
+`test/live/SchedulerReservationSpec.hs` live scheduler suite is Phase 27.)
+**Blocked by**: Sprint 26.3,
+Sprint 26.2.
+**Independent Validation**: the representative corpus reconciles a non-instantaneous
+Deployment, a serial replacement Bound+Ready between deletions, CR health plus child conformance on
+amoebius's own in-phase capacity/reservation CRD, and terminal Job retention without a gateway. The
+immediate rerun has byte-stable objects and no host/object-store/delete effect. A never-ready fixture and
+dropped-wait mutant turn red.
 **Docs to update**: `documents/engineering/manifest_generation_doctrine.md`,
-`documents/engineering/readiness_ordering_doctrine.md` (the §6 runtime-enactor claim gains its first amoebius
-validation), `DEVELOPMENT_PLAN/README.md` (flip the Phase-26 status when the gate passes).
+`documents/engineering/readiness_ordering_doctrine.md` (the §6 runtime-enactor claim gains its first
+amoebius validation), `DEVELOPMENT_PLAN/README.md` (flip the Phase-26 status when the gate passes).
 
 ### Objective
 
@@ -619,24 +635,26 @@ The whole sprint (📋 Planned).
 ## Sprint 26.5: Register-2.5 reconciler + staged-execution convergence under simulated faults 📋
 
 **Status**: Planned
-**Implementation**: `test/sim/{ReconcileSim,ExecutionTransitionSim}.hs`, driving the real Manifest/Execution
-modules above on the Phase-14 `io-classes` `Env` — target paths, not yet built. (The `test/sim/SchedulerSim.hs`
-schedule battery is Phase 27.)
-**Blocked by**: Sprint 26.4 (the built typed-action engine); Phase 14 (the `io-classes` seams + the modeled
-apiserver); Phase 15 (the deterministic-simulation substrate).
-**Independent Validation**: `IOSimPOR` interleaves object resourceVersion conflicts, bootstrap-`Lease`
-acquire/renew ambiguity, serial stage changes, host/device-release ordering, completion-write failure, and external
-mutation inside critical sections. Every schedule either converges to typed no-op or fails closed without
-overlapping writers, premature deletion, a host start before release, or a token reused after an observed-state
-transition; counterexamples replay by seed.
-**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-26 status backlink),
-`documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+**Implementation**: `test/sim/{ReconcileSim,ExecutionTransitionSim}.hs`, driving the
+real Manifest/Execution modules above on the Phase-14 `io-classes` `Env` — target paths, not yet built. (The
+`test/sim/SchedulerSim.hs` schedule battery is Phase 27.)
+**Blocked by**: Sprint 26.4 (the built
+typed-action engine); Phase 14 (the `io-classes` seams + the modeled apiserver); Phase 15 (the
+deterministic-simulation substrate).
+**Independent Validation**: `IOSimPOR` interleaves object
+resourceVersion conflicts, bootstrap-`Lease` acquire/renew ambiguity, serial stage changes,
+host/device-release ordering, completion-write failure, and external mutation inside critical sections.
+Every schedule either converges to typed no-op or fails closed without overlapping writers, premature
+deletion, a host start before release, or a token reused after an observed-state transition; counterexamples
+replay by seed.
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-26
+status backlink), `documents/engineering/manifest_generation_doctrine.md`,
+`DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 
 Adopt [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits):
-validate the *built* reconciler and staged-action schedules under injected faults **in-process and
-deterministically replayable**, at Register 2.5 — one rung below the Register-3 live gate in the register ladder,
+validate the *built* reconciler and staged-action schedules under injected faults **in-process and deterministically replayable**, at Register 2.5 — one rung below the Register-3 live gate in the register ladder,
 not chronologically ahead of it — closing the code-schedule gap the pure-value tests and the live gate each leave
 open. The scheduler's CAS-race schedules are Phase 27's `SchedulerSim`.
 
@@ -679,12 +697,7 @@ The whole sprint (📋 Planned).
 - `documents/engineering/daemon_topology_doctrine.md` — record that Phase 26 drives the reconciler from the host
   binary; the §3 singleton that *owns* it (Deployment `replicas=1`, delegated single-instance, no election) is stood
   up in Phase 33.
-- `documents/engineering/generated_artifacts_doctrine.md` — note that the applied `[K8sObject]` set is generated at
-  apply time and never committed.
-- `documents/engineering/resource_capacity_doctrine.md` — record the read-only pre-mutation live inventory
-  cross-check and its zero-write failure path.
-- `documents/engineering/deterministic_simulation_doctrine.md` — add the Phase-26 Register-2.5 status backlink for
-  the Sprint-26.5 reconciler/execution fault battery.
+- `documents/engineering/generated_artifacts_doctrine.md` — note that the applied `[K8sObject]` set is generated at apply time and never committed. - `documents/engineering/resource_capacity_doctrine.md` — record the read-only pre-mutation live inventory cross-check and its zero-write failure path. - `documents/engineering/deterministic_simulation_doctrine.md` — add the Phase-26 Register-2.5 status backlink for the Sprint-26.5 reconciler/execution fault battery.
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-26 status when the gate passes; link this document.
@@ -698,8 +711,7 @@ The whole sprint (📋 Planned).
 ## Related Documents
 
 - [README.md](README.md) — the live tracker and phase order this document serves
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
-  Register-3 acceptance token: *converges and re-run is a no-op*, externally observed live)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the Register-3 acceptance token: *converges and re-run is a no-op*, externally observed live)
 - [overview.md](overview.md) — target architecture and the no-Helm / no-release-store reconciler posture
 - [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) the apply/reconcile
   engine adopted here; [§6](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) the reconcile state model; [§2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) the pure renderer consumed from Phase 13

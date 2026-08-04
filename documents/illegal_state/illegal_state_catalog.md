@@ -1,16 +1,28 @@
 # The Illegal-State Catalog — Index
 
-**Status**: Authoritative source
-**Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
-**Generated sections**: none
-
 > **Purpose**: The index to the catalog of illegal and unsafe cluster states amoebius makes
 > unrepresentable — the themed map of *which* states are foreclosed (deep treatment in the eight themed
 > sub-catalogs), a pointer to the seven typing techniques + coverage matrix + foreclosure layers
 > ([`illegal_state_techniques.md`](./illegal_state_techniques.md)), and the honest limits: a type-check
 > proves the *spec composes*, not that the *running cluster enforces it*, and the catalog is *enumerated,
 > not proven exhaustive*.
+> **Read this if**: a specific illegal state has to be located, or a new one has to be added to the enumeration.
+
+This document is the index of the illegal-state enumeration: it holds the numbering and the themed map, while
+the entries themselves live in the slices it links. It does not own the techniques that foreclose them, owned
+by [illegal_state_techniques.md](./illegal_state_techniques.md). An entry is cited by this file's name and
+resolved to the slice that holds its heading, which is the one sanctioned case of a citation naming a
+different file than its target.
+
+<details>
+<summary>Link-graph metadata</summary>
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Generated sections**: none
+
+</details>
 
 ---
 
@@ -24,15 +36,13 @@ defect surfaces at runtime as a pod stuck in `Pending`, a 502, or a backdoor.
 amoebius lifts that whole class of failure from *runtime surprise* to *does not type-check*. The DSL is
 Dhall — a **total** configuration language (no general recursion, no arbitrary I/O, every expression fully
 evaluates), so a spec the type-checker accepts is a finite value amoebius has already inspected end to end.
-The contract, stated by [`dsl_doctrine.md`](../engineering/dsl_doctrine.md): **a valid `InForceSpec`
-cannot represent illegal state**. This document is the companion to that
+The contract, stated by [`dsl_doctrine.md`](../engineering/dsl_doctrine.md): **a valid `InForceSpec` cannot represent illegal state**. This document is the companion to that
 contract — the *enumerated* list of what "illegal state" means, and the *typing techniques* that make each
 entry uninhabitable.
 
 **SSoT split (which doctrine to cite for what).**
 
-- [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) owns the **DSL surface and the contract** ("a valid spec cannot
-  represent illegal state") as a property of the language.
+- [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) owns the **DSL surface and the contract** ("a valid spec cannot represent illegal state") as a property of the language.
 - **This document** is the **index** for the catalog: it owns the framing ([§1](#1-illegal-states-fail-to-type-check)), the
   load-bearing honesty limit ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)), and the **themed map** ([§3](#3-the-catalog--states-a-valid-spec-cannot-represent)) of *which* states are illegal. The
   *deep treatment* of each entry lives in one of the eight themed sub-catalogs; the *how* — the seven
@@ -56,13 +66,10 @@ back for status.
 
 ## 2. The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it
 
-**The types prove that the
-*specification* composes into something internally coherent. They do not prove that the *running
-deployment* enforces it.** Conflating the two proves the wrong theorem.
+**The types prove that the *specification* composes into something internally coherent. They do not prove that the *running deployment* enforces it.** Conflating the two proves the wrong theorem.
 
 Applied to the three correctness layers from the chaos/failover doctrine
-([`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md), generalized from prodbox's
-`chaos_hardening_doctrine.md`):
+([`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md), generalized from prodbox's `chaos_hardening_doctrine.md`):
 
 - **What a green type-check *is*.** A Dhall type-check (and the GADT-indexed Haskell decode behind it,
   [`illegal_state_techniques.md`](./illegal_state_techniques.md))
@@ -79,8 +86,7 @@ Applied to the three correctness layers from the chaos/failover doctrine
 So the catalog's promise is exact: *a PVC that cannot bind a PV is unrepresentable in the spec* — meaning
 no such spec can be written and type-check. It is **not** the claim that *the running cluster's PVC
 is bound*; that is a reconcile-time fact whose verification is owned by
-[`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine. amoebius **defers the
-runtime-enforcement proof there on purpose**, and never reports it here. In the register model this is
+[`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine. amoebius **defers the runtime-enforcement proof there on purpose**, and never reports it here. In the register model this is
 exactly the split: the spec-composition proof is a **Register 1/2** (pre-cluster, in-process) property, front-loaded
 to the pre-cluster gates, while the cluster-enforcement claim is **Register 3** (live-infrastructure integrity, deferred to the
 real-resource phases). This is the same split that
@@ -92,6 +98,7 @@ Diagram vocabulary: [diagram_conventions.md](../engineering/diagram_conventions.
 
 ```mermaid
 flowchart TD
+%% register: algebra
   spec[InForceSpec Dhall value]:::intent -->|Dhall type-check: spec composes, PROVEN at spec layer| decode[[Decode to GADT-indexed Haskell types]]:::intent
   decode -->|smart constructors and indices reject illegal values, PROVEN at code layer| ir[Coherent in-memory cluster IR]:::intent
   ir -->|bind provider/shape and fully expand| bound[BoundDeployment]:::intent
@@ -108,6 +115,7 @@ flowchart TD
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+*Design intent, Tier-1. The foreclosure spine from an authored spec to rendered manifests, each edge naming the layer its gate reaches. Everything from the live-reconcile preflight rightward is runtime-checked and is not established here. Vocabulary: [diagram_conventions.md](../engineering/diagram_conventions.md).*
 
 This is the reference instance of the diagram scheme — node shape encodes the functional-programming role and colour encodes the honesty band; it depicts design intent, not a built or tested amoebius result.
 
@@ -168,6 +176,8 @@ the SSoT for the axis. Most entries name a primary locus plus a live-effect resi
 - [§3.66](./illegal_state_storage.md#366-retention-lowered-below-the-currently-retained-generations-on-an-append-only-medium) — Retention lowered below the currently-retained generations on an append-only medium
 - [§3.67](./illegal_state_storage.md#367-a-restore-into-a-target-smaller-than-or-presentation-incompatible-with-the-backup-extent) — A restore into a target smaller than or presentation-incompatible with the backup extent
 - [§3.68](./illegal_state_storage.md#368-two-conflicting-backup-policies-on-one-coordinate) — Two conflicting backup policies on one coordinate
+- [§3.85](./illegal_state_storage.md#385-a-spec-verb-that-destroys-durable-bytes) — A spec verb that destroys durable bytes
+- [§3.86](./illegal_state_storage.md#386-a-new-generation-that-orphans-a-retained-coordinate) — A new generation that orphans a retained coordinate
 
 ### Cluster topology — [`illegal_state_topology.md`](./illegal_state_topology.md)
 
@@ -239,6 +249,7 @@ the SSoT for the axis. Most entries name a primary locus plus a live-effect resi
 - [§3.69](./illegal_state_multicluster.md#369-a-cold-seeded-secondary-taking-the-gateway-without-proven-freshness) — A cold-seeded secondary taking the gateway without proven freshness
 - [§3.70](./illegal_state_multicluster.md#370-a-coldseedfrombackup-whose-freshness-bound-is-below-the-backup-cadence) — A `ColdSeedFromBackup` whose freshness bound is below the backup cadence
 - [§3.71](./illegal_state_multicluster.md#371-a-freshness-watermark-asserted-rather-than-derived-from-captured-content) — A freshness watermark asserted rather than derived from captured content
+- [§3.88](./illegal_state_multicluster.md#388-a-planned-gateway-migration-resting-with-no-owner) — A `Planned` gateway migration resting with no owner
 
 ### Readiness, promotion & monitoring — [`illegal_state_lifecycle.md`](./illegal_state_lifecycle.md)
 
@@ -251,6 +262,7 @@ the SSoT for the axis. Most entries name a primary locus plus a live-effect resi
 - [§3.76](./illegal_state_lifecycle.md#376-a-build-stage-whose-content-is-unmodeled) — A build stage whose content is unmodeled
 - [§3.77](./illegal_state_lifecycle.md#377-a-worker-naming-an-extension-its-own-binary-does-not-link) — A worker naming an extension its own binary does not link
 - [§3.78](./illegal_state_lifecycle.md#378-extension-source-that-reaches-outside-the-sanctioned-api) — Extension source that reaches outside the sanctioned API
+- [§3.87](./illegal_state_lifecycle.md#387-an-execution-unit-with-no-monitoring-obligation) — An execution unit with no monitoring obligation
 
 ---
 
@@ -267,8 +279,7 @@ the catalog links back there for status and never restates it.
 
 ---
 
-## Cross-references
-
+## Related Documents
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract this catalog enumerates.
 - [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques, the coverage
   matrix, the three foreclosure layers, and the validation-locus axis.

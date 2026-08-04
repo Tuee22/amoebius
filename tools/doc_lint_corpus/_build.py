@@ -103,9 +103,11 @@ MUTATIONS = [
         ("documents/engineering/example_doctrine.md",
          "Status and sequencing live in [the plan](../../DEVELOPMENT_PLAN/README.md).",
          "Status and sequencing live in the plan."),
+        ("documents/engineering/example_doctrine.md",
+         "- [the plan](../../DEVELOPMENT_PLAN/README.md)\n", ""),
         ("DEVELOPMENT_PLAN/README.md",
-         "**Referenced by**: documents/engineering/example_doctrine.md",
-         "**Referenced by**: N/A")]),
+         "**Referenced by**: documents/engineering/example_doctrine.md, documents/engineering/long_doctrine.md",
+         "**Referenced by**: documents/engineering/long_doctrine.md")]),
 
     # -- (i) a section ref inside a cross-file link, resolving locally -------
     ("i_nested_link_local_anchor", "i", {"b1"}, [
@@ -138,6 +140,55 @@ MUTATIONS = [
         ("DEVELOPMENT_PLAN/phase_01_example.md",
          "[example_doctrine.md §2](../documents/engineering/example_doctrine.md#2-the-bound-shape)",
          "[other_doctrine.md §2](../documents/engineering/example_doctrine.md#2-the-bound-shape)")]),
+    # -- (o) document shape and the orientation block -------------------------
+    ("o1_contents_block_missing", "o1", set(), [
+        ("documents/engineering/long_doctrine.md", "## Contents\n", "## Overview\n")]),
+    ("o2_contents_out_of_sync", "o2", set(), [
+        ("documents/engineering/long_doctrine.md",
+         "- [3. The declared ceiling](#3-the-declared-ceiling)",
+         "- [3. The declared ceilings](#3-the-declared-ceiling)")]),
+    ("o3_metadata_before_purpose", "o3", set(), [
+        ("documents/engineering/example_doctrine.md",
+         "# Example Doctrine\n\n> **Purpose**:",
+         "# Example Doctrine\n\n**Status**: Authoritative source\n\n> **Purpose**:")]),
+    ("o4_read_this_if_missing", "o4", set(), [
+        ("documents/engineering/example_doctrine.md",
+         "> **Read this if**: a bound shape has to be rendered.\n", "")]),
+    ("o5_noncanonical_link_section", "o5", set(), [
+        ("documents/engineering/example_doctrine.md",
+         "## Related Documents", "## Cross-references")]),
+
+    # -- (q) the diagram quota and per-register conformance -------------------
+    ("q1_diagram_quota_unmet", "q1", {"q3"}, [
+        ("documents/engineering/long_doctrine.md",
+         "```mermaid\nflowchart LR\n  %% register: algebra\n", "```text\nno diagram here\n"),
+        ("documents/engineering/long_doctrine.md",
+         "```mermaid\nflowchart LR\n  %% register: orientation\n", "```text\nno diagram here\n")]),
+    ("q3_orientation_diagram_missing", "q3", set(), [
+        ("documents/engineering/long_doctrine.md",
+         "```mermaid\nflowchart LR\n  %% register: orientation\n", "```text\nno diagram here\n")]),
+    ("q4_register_directive_missing", "q4", set(), [
+        ("documents/engineering/long_doctrine.md", "  %% register: algebra\n", "")]),
+    ("q5_caption_missing", "q5", set(), [
+        ("documents/engineering/long_doctrine.md",
+         "*Design intent, Tier-1. The specimen gate, drawn in the algebra register.*\n", "")]),
+    # -- (p) the section, document and sentence caps --------------------------
+    ("p1_section_over_cap", "p1", set(), [
+        ("documents/engineering/long_doctrine.md",
+         "Rule 390 of the specimen constrains stage 3 exactly.",
+         "Rule 390 of the specimen constrains stage 3 exactly.\nRule 901 of the specimen constrains stage 3 exactly.\nRule 902 of the specimen constrains stage 3 exactly.\nRule 903 of the specimen constrains stage 3 exactly.\nRule 904 of the specimen constrains stage 3 exactly.\nRule 905 of the specimen constrains stage 3 exactly.\nRule 906 of the specimen constrains stage 3 exactly.\nRule 907 of the specimen constrains stage 3 exactly.\nRule 908 of the specimen constrains stage 3 exactly.\nRule 909 of the specimen constrains stage 3 exactly.\nRule 910 of the specimen constrains stage 3 exactly.\nRule 911 of the specimen constrains stage 3 exactly.")]),
+    ("p3_sentence_over_cap", "p3", set(), [
+        ("documents/engineering/long_doctrine.md",
+         "Rule 200 of the specimen constrains stage 2 exactly.",
+         "A single sentence may not run past the stated word cap, because a reader has to hold every clause of it\nopen at once, and once the clause count passes a handful the sentence stops being parseable in one pass\nand becomes something the reader must scan twice to find the subject it started from, which is exactly\nthe defect the cap exists to prevent; this specimen is deliberately hard-wrapped across several physical\nlines, because the rule measures a sentence over the paragraph it sits in rather than over the line it\nhappens to occupy, and a checker that reads single lines sees only about eighteen words at a time and so\ncan never observe a sentence longer than one wrapped line, which is precisely the blindness that let\nthis rule go unenforced across the whole corpus until a paragraph-level reading was written for it.")]),
+        ("p4_document_over_cap", "p4", set(), [
+        ("documents/engineering/long_doctrine.md",
+         "Rule 625 of the specimen constrains stage 5 exactly.",
+         "Rule 625 of the specimen constrains stage 5 exactly.\n\n### An added subsection\n\nRule 950 of the specimen constrains stage 5 exactly.\nRule 951 of the specimen constrains stage 5 exactly.\nRule 952 of the specimen constrains stage 5 exactly.\nRule 953 of the specimen constrains stage 5 exactly.\nRule 954 of the specimen constrains stage 5 exactly.\nRule 955 of the specimen constrains stage 5 exactly.\nRule 956 of the specimen constrains stage 5 exactly.\nRule 957 of the specimen constrains stage 5 exactly.\nRule 958 of the specimen constrains stage 5 exactly.\nRule 959 of the specimen constrains stage 5 exactly.\nRule 960 of the specimen constrains stage 5 exactly.\nRule 961 of the specimen constrains stage 5 exactly.\nRule 962 of the specimen constrains stage 5 exactly.\nRule 963 of the specimen constrains stage 5 exactly.\nRule 964 of the specimen constrains stage 5 exactly.\nRule 965 of the specimen constrains stage 5 exactly.\nRule 966 of the specimen constrains stage 5 exactly.\nRule 967 of the specimen constrains stage 5 exactly.\nRule 968 of the specimen constrains stage 5 exactly.\nRule 969 of the specimen constrains stage 5 exactly.\nRule 970 of the specimen constrains stage 5 exactly.\nRule 971 of the specimen constrains stage 5 exactly.\nRule 972 of the specimen constrains stage 5 exactly.\nRule 973 of the specimen constrains stage 5 exactly.\nRule 974 of the specimen constrains stage 5 exactly.\nRule 975 of the specimen constrains stage 5 exactly.\nRule 976 of the specimen constrains stage 5 exactly.\nRule 977 of the specimen constrains stage 5 exactly.\nRule 978 of the specimen constrains stage 5 exactly.\nRule 979 of the specimen constrains stage 5 exactly.\nRule 980 of the specimen constrains stage 5 exactly.\nRule 981 of the specimen constrains stage 5 exactly.\nRule 982 of the specimen constrains stage 5 exactly.\nRule 983 of the specimen constrains stage 5 exactly.\nRule 984 of the specimen constrains stage 5 exactly.\nRule 985 of the specimen constrains stage 5 exactly.\nRule 986 of the specimen constrains stage 5 exactly.\nRule 987 of the specimen constrains stage 5 exactly.\nRule 988 of the specimen constrains stage 5 exactly.\nRule 989 of the specimen constrains stage 5 exactly.\nRule 990 of the specimen constrains stage 5 exactly.\nRule 991 of the specimen constrains stage 5 exactly.\nRule 992 of the specimen constrains stage 5 exactly.\nRule 993 of the specimen constrains stage 5 exactly.\nRule 994 of the specimen constrains stage 5 exactly.\nRule 995 of the specimen constrains stage 5 exactly.\nRule 996 of the specimen constrains stage 5 exactly.\nRule 997 of the specimen constrains stage 5 exactly.\nRule 998 of the specimen constrains stage 5 exactly.\nRule 999 of the specimen constrains stage 5 exactly.")]),
+        ("p2_list_item_over_cap", "p2", set(), [
+        ("documents/engineering/long_doctrine.md",
+         "- The third item is the one a fixture grows past the cap.",
+         "- The third item is the one a fixture grows past the cap.\n  Continuation line 1 of the seeded item.\n  Continuation line 2 of the seeded item.\n  Continuation line 3 of the seeded item.\n  Continuation line 4 of the seeded item.\n  Continuation line 5 of the seeded item.\n  Continuation line 6 of the seeded item.\n  Continuation line 7 of the seeded item.\n  Continuation line 8 of the seeded item.\n  Continuation line 9 of the seeded item.\n  Continuation line 10 of the seeded item.\n  Continuation line 11 of the seeded item.\n  Continuation line 12 of the seeded item.\n  Continuation line 13 of the seeded item.\n  Continuation line 14 of the seeded item.\n  Continuation line 15 of the seeded item.\n  Continuation line 16 of the seeded item.\n  Continuation line 17 of the seeded item.\n  Continuation line 18 of the seeded item.\n  Continuation line 19 of the seeded item.\n  Continuation line 20 of the seeded item.\n  Continuation line 21 of the seeded item.\n  Continuation line 22 of the seeded item.\n  Continuation line 23 of the seeded item.\n  Continuation line 24 of the seeded item.\n  Continuation line 25 of the seeded item.")]),
 ]
 
 EXPECTED = {name: (check, co) for name, check, co, _ in MUTATIONS}
