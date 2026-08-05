@@ -1,7 +1,9 @@
 # Example Documentation Standards
 
-> **Purpose**: House rules for the fixture tree.
-> **Read this if**: a fixture document has to conform.
+>
+**Purpose**: House rules for the fixture tree.
+>
+**Read this if**: a fixture document has to conform.
 
 This fixture standard owns naming and tone.
 Plan structure belongs to [the rulebook](../DEVELOPMENT_PLAN/development_plan_standards.md).

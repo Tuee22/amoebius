@@ -28,7 +28,7 @@ The reconciler observes the live shape and enacts only the typed actions its sta
 
 **Substrate:** none
 **Register:** 1
-**Gate:** the committed golden corpus decodes against an independent oracle and one committed seeded mutant turns it red (Gate; 7.2 V1).
+**Gate:** `cabal test example-spec` is green — the committed golden corpus decodes against an independent oracle and one committed seeded mutant turns it red (Gate; 7.2 V1).
 
 ## Doctrine adopted
 

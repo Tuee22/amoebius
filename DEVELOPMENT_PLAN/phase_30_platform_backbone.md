@@ -575,7 +575,7 @@ and close the phase with the backbone HA gate on a fresh cluster.
   Postgres/observability (Phase 31), and singleton-owned reconcile layers UNVERIFIED; the independent
   resource-projection checker compares every applied execution unit/volume exactly to its
   `ProvisionedServiceSpec`.
-- The gate oracles reused here, **authored and committed in Phase 0 before any implementation** (§M.1): the
+- The gate oracles reused here, **authored and committed in this phase's oracle-pinning sprint before any implementation** (§M.1): the
   baked-base-image digest oracle `test/fixtures/phase30/expected-base-digest.txt`, the registry storage-stanza
   oracle `test/fixtures/phase30/registry-storage-driver.golden`, and the drill-topic hot-tier cap
   `test/fixtures/phase30/hot-tier-cap.golden`, plus the independently computed

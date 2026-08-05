@@ -1,7 +1,9 @@
 # Example Techniques
 
-> **Purpose**: Fixture coverage matrix.
-> **Read this if**: a foreclosure technique has to be chosen.
+>
+**Purpose**: Fixture coverage matrix.
+>
+**Read this if**: a foreclosure technique has to be chosen.
 
 This fixture document owns the technique list.
 The entries belong to [the catalog](./illegal_state_catalog.md).

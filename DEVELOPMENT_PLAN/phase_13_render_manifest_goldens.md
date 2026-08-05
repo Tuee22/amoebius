@@ -98,7 +98,7 @@ analogous to the Phase-5 decode battery and the Phase-4 `dhall type` corpus.
 **Gate:** `cabal test render-golden` is green against Phase-0-pinned oracles — the pure, total
 `renderAll :: ProvisionedSpec -> [K8sObject]` emits, **for the concrete corpus** (the full Phase-11 provisioned output set: every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, enumerated explicitly in Sprint 13.3's Deliverables and jointly covering every renderable `K8sObject` sum variant at least once), an object set the
 **byte-for-byte** goldens pin exactly, and the three rendered-output-golden illegal-state properties hold
-**non-vacuously** on the emitted objects. The goldens are authored and **committed in Phase 0** under
+**non-vacuously** on the emitted objects. The goldens are authored and **committed in this phase's oracle-pinning sprint** under
 `test/manifest/golden/<deployment-id>.json` *before* `renderAll` exists, under a single pinned **canonical Aeson encoding** (object keys lexicographically sorted, two-space indent, trailing LF, exactly one golden
 file per deployment keyed by `ProvisionedSpec` id — so "drifts by a single byte" is unambiguous), and are
 **never regenerated from the renderer's own output** (a golden regenerated from `renderAll` is not a test).
@@ -408,7 +408,7 @@ every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, jo
 renderable `K8sObject` sum variant at least once — target paths, not yet built.
 **Blocked by**: Sprint 13.2;
 Phase 11 gate (the whole-deployment `ProvisionedSpec` corpus the goldens render from).
-**Independent Validation**: `cabal test render-golden` is green — the emitted `[K8sObject]` matches its Phase-0-committed byte-for-byte golden under the canonical encoding and every rendered-output-golden illegal-state property holds non-vacuously; the suite goes **red** if the renderer's output drifts by a single byte or if any emitted object violates a by-construction invariant. The NetworkPolicy property checks allow-edge **set equality** against the independent `DepGraphOracle` re-derivation (authored in Phase 0, never `renderAll`'s own fold), so an extra allow edge for an undeclared dependency is caught. The twelve committed seeded
+**Independent Validation**: `cabal test render-golden` is green — the emitted `[K8sObject]` matches its Phase-0-committed byte-for-byte golden under the canonical encoding and every rendered-output-golden illegal-state property holds non-vacuously; the suite goes **red** if the renderer's output drifts by a single byte or if any emitted object violates a by-construction invariant. The NetworkPolicy property checks allow-edge **set equality** against the independent `DepGraphOracle` re-derivation (authored in this phase's oracle-pinning sprint, never `renderAll`'s own fold), so an extra allow edge for an undeclared dependency is caught. The twelve committed seeded
 mutants (below) are re-run each build and each must go red via the *property* assertion it targets, with
 that mutant's golden regenerated to match its (illegal) output so the byte diff alone cannot be what fails.
 **Docs to update**: `documents/engineering/conformance_harness_doctrine.md` (record the

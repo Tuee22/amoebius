@@ -109,7 +109,7 @@ positives (`legal_multisubstrate_cluster`, `legal_managed_eks`) place feasibly; 
 **implementation-independent witness validator** (§M.3, defined in Sprint 7.3) accepts every returned
 placement; and the **committed per-fold seeded-mutant battery** named in [Gate integrity](#gate-integrity)
 (§M.2) turns the suite red individually. Every fixture, golden, and expected `Left`-tag it checks against is
-**authored and committed in Phase 0 before the implementation exists** (§M.1).
+**authored and committed in this phase's oracle-pinning sprint before the implementation exists** (§M.1).
 
 ## Gate integrity
 
@@ -174,7 +174,7 @@ remaining twenty-three source negatives (`illegal_store_over_backing`, `illegal_
 `illegal_accelerator_vram_reserve_boundary`, `illegal_apple_metal_profile_mismatch`,
 `illegal_shared_accelerator_double_owner`) and the positive
 `legal_tmpfs_two_concurrent_writers_single_debit` are routed to phases 8 and 9 and are **not** in this gate's
-representative set. All forty-one fixtures are committed in Phase 0 (§M.1); each is exercised by exactly one
+representative set. All forty-one fixtures are committed in this phase's oracle-pinning sprint (§M.1); each is exercised by exactly one
 sub-phase.
 
 ### Committed per-fold seeded-mutant battery (§M.2)
@@ -214,7 +214,7 @@ no-inhabitant claims are machine-gated by committed `ghc -fno-code` expect-fail 
 snippets wired into `dsl-spec` that must fail to compile with the **specific committed expected type error**
 (e.g. "No instance / no constructor for `bareAppleHost`", the even-quorum refinement rejection), re-checked
 on every run, never an informal typed-hole probe. The three goldens and their expected error text are
-authored and committed in Phase 0 before `Amoebius.Dsl.Topology` exists (§M.1).
+authored and committed in this phase's oracle-pinning sprint before `Amoebius.Dsl.Topology` exists (§M.1).
 
 ## Doctrine adopted
 
@@ -275,7 +275,7 @@ multi-substrate, managed EKS) and returns a structured `Left` naming the full se
 mismatched pair and a duplicate `HostId` for a reused host; the no-inhabitant claim for `bareAppleHost` /
 `bareWindowsHost` / an even-server quorum is machine-gated by a **Phase-6-style `ghc -fno-code` expect-fail compile golden** ([Gate integrity](#gate-integrity), §M.8) — a committed source snippet that attempts each
 construction, wired into `dsl-spec`, that must fail to compile with the **specific committed expected type error**, re-checked on every run — not an informal typed-hole probe. The three expect-fail goldens and their
-expected error text are authored and committed in Phase 0 before `Amoebius.Dsl.Topology` exists (§M.1).
+expected error text are authored and committed in this phase's oracle-pinning sprint before `Amoebius.Dsl.Topology` exists (§M.1).
 **Docs to update**: `documents/engineering/cluster_topology_doctrine.md` (Phase-7 status backlink),
 `documents/engineering/substrate_doctrine.md` (§8 node inventory read-side),
 `documents/illegal_state/illegal_state_catalog.md` (§3.13–§3.16 per-entry layer reconciliation),
@@ -467,7 +467,7 @@ packable one) for the single sound-not-complete check, compute `place`, and neve
 - Equivalence (both-directions) properties for the elementwise-compatibility relation: it accepts a
   heterogeneous multi-substrate fixed/elastic `NodeSupply` **iff** every fixed/floor node and candidate class is
   compatible, and returns the exact incompatible entry set otherwise. The reference side of this
-  `accepts ⟺ in-envelope` property is a **committed hand-authored compatibility predicate authored in Phase 0, distinct from the fold under test** (§M.1, §M.3), never the fold's own comparison. Each equivalence and
+  `accepts ⟺ in-envelope` property is a **committed hand-authored compatibility predicate authored in this phase's oracle-pinning sprint, distinct from the fold under test** (§M.1, §M.3), never the fold's own comparison. Each equivalence and
   soundness property carries QuickCheck `cover` / `checkCoverage` obligations forcing **≥30% rejecting
   (out-of-envelope) and ≥30% accepting (in-envelope) generated inputs per fold, the suite failing when the
   coverage minimum is unmet** (§M.4) — so a generator that emits near-constant in-envelope inputs cannot
@@ -508,7 +508,7 @@ including the four elastic-branch negatives plus the taint / memory-backed / tmp
 folds) + the three `ghc -fno-code` expect-fail compile goldens (`bareAppleHost`, `bareWindowsHost`,
 even-server quorum) + reuse of `legal_multisubstrate_cluster` / `legal_managed_eks`;
 `test/dsl/CapacityTopologyGate.hs` (the base gate battery + validation-locus ledger) — target paths, not yet
-built. These fixtures and their expected results / `Left`-tags are authored and committed in Phase 0 before
+built. These fixtures and their expected results / `Left`-tags are authored and committed in this phase's oracle-pinning sprint before
 the implementation exists (§M.1, [Gate integrity](#gate-integrity)); the remaining
 storage/execution/accelerator fixtures of the committed forty-one-fixture corpus are exercised by phases 8
 and 9, not here.

@@ -219,7 +219,7 @@ fault-mutant) — target paths, not yet built.
 **Blocked by**: Sprint 15.2, Sprint 15.1; Phase 14 gate (the
 boundary harness); Phase 14 gate (the `[Step]` plan the reconcile loop consumes). **Schedule-fixture corpus ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7):** the replayed
 schedules are named explicitly here — a committed corpus of injected partition/redelivery/reorder/crash
-schedules over the toy reconcile loop, each a `test/sim/schedules/` fixture pinned in Phase 0, so every
+schedules over the toy reconcile loop, each a `test/sim/schedules/` fixture pinned in this phase's oracle-pinning sprint, so every
 fault axis the modeled substrates expose is driven, not just a single partition.
 **Independent Validation**:
 `cabal test sim-spec` is green — the real daemon/reconciler code, lifted onto `Env m`, replays the committed

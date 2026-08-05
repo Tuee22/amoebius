@@ -193,7 +193,7 @@ not passed unless, in addition to the above:
 ## Gate integrity
 
 Per [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
-the oracles below are authored and **committed in Phase 0** — before the Phase 25 implementation exists — and
+the oracles below are authored and **committed in this phase's oracle-pinning sprint** — before the Phase 25 implementation exists — and
 their reference sides are defined independently of the code under test. This section is the phase doc's explicit
 "representative set" (§M.7).
 

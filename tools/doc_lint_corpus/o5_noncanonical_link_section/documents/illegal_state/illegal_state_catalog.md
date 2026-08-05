@@ -1,7 +1,9 @@
 # Example Illegal-State Catalog
 
-> **Purpose**: Index of the fixture catalog entries.
-> **Read this if**: a fixture catalog entry needs locating.
+>
+**Purpose**: Index of the fixture catalog entries.
+>
+**Read this if**: a fixture catalog entry needs locating.
 
 This fixture index owns the entry numbering.
 The entries live in [the storage slice](./illegal_state_storage.md).

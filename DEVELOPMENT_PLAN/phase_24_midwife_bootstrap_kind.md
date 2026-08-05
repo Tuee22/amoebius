@@ -152,7 +152,7 @@ filesystem high-water reads. As a redundant process trap, the run also executes 
 loudly and log if invoked by bare name; any trap firing fails the gate. A self-emitted `runTool` compliance
 trace is **not** an admissible observer for any of these assertions.
 
-**Oracle-pinning (§M.1).** The gate's oracles are authored and **committed in Phase 0**, before any
+**Oracle-pinning (§M.1).** The gate's oracles are authored and **committed in this phase's oracle-pinning sprint**, before any
 implementation exists: the `classify` decision table (Sprint 24.1), the per-substrate `[InstallStep]` golden
 plans and the `mkAbsExe`-reject expected-error set (Sprint 24.2), and the named divergent-start fixtures with
 their expected converged observation (Sprint 24.4). A golden regenerated from the implementation is not

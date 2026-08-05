@@ -143,7 +143,7 @@ flowchart LR
   expected per-pass enact sets (`test/fixtures/phase33/expected-enact-pass1.json`,
   `…/expected-enact-pass2.json`), the perturbation target list (`…/perturb-targets.txt`), and the negative
   corpus's expected Gate-1/Gate-2 rejection-tag table (`…/negative-expected-tags.tsv`, hand-authored,
-  independent of the singleton's own decoder output — §M.3) are all **committed in Phase 0 before `Singleton.hs`/`Reconcile.hs`/`Deploy.hs` exist**; none is regenerated from implementation output. The
+  independent of the singleton's own decoder output — §M.3) are all **committed in this phase's oracle-pinning sprint before `Singleton.hs`/`Reconcile.hs`/`Deploy.hs` exist**; none is regenerated from implementation output. The
   admin-surface oracles of [Sprint 33.4](#sprint-334-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-)
   — `test/golden/admin/reach-matrix.tsv`, `test/golden/admin/admission-tags.tsv`, and the paired
   `test/fixtures/admin/secrets-capability/` corpus — are pinned on the same terms, before `AdminApi.hs` exists.

@@ -280,7 +280,7 @@ after convergence.
   new entry — content-addressed, self-naming.
 - **Phase-0-pinned oracles (committed before the folder exists):** a golden `test/golden/release_hash.txt` —
   the expected `releaseHash` for one fixed `Release` fixture `test/golden/release_fixture.json`, computed by an
-  **independent sha256 tool** (not the amoebius folder) and committed in Phase 0; and a **specific-reason negative** `release_fixture_perturbed.json` (the same `Release` with a single image digest changed) whose
+  **independent sha256 tool** (not the amoebius folder) and committed in this phase's oracle-pinning sprint; and a **specific-reason negative** `release_fixture_perturbed.json` (the same `Release` with a single image digest changed) whose
   expected outcome is a `releaseHash` **differing from the golden at the derived key** — paired with the
   positive that differs only in that digest. Committed seeded mutant (operator: dropped-input / effect swap):
   `mutant/hash-omits-substrate` — a folder that omits `substrate-fp` from the hash preimage, collapsing two
@@ -513,7 +513,7 @@ values end-to-end.
   finalize, where the `finalize` phase enacts retire-old)** over the standing platform stack plus one Postgres — and its `ReleaseLifecycleSpec`: write the
   ledger, refuse the under-verified promotion, advance the satisfied one, roll out in order, and always tear
   down, emitting a per-run ledger artifact.
-- **Pre-runtime evidence pinned in Phase 0:** the committed
+- **Pre-runtime evidence pinned in this phase's oracle-pinning sprint:** the committed
   ordered-apply reference `test/golden/rollout_order.txt` (the expected phase-apply sequence, authored
   independently and matched against the API-server audit observer, not the reconciler's self-report); the
   committed post-migration verify oracle `test/golden/migrated_rows.txt` (the expected verified row set of the

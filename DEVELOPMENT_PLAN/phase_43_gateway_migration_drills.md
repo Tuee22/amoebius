@@ -119,7 +119,7 @@ test or after the run cannot satisfy it:
   of journaled-vs-present IDs on the new owner. The ledger embeds the raw journal counts (acked,
   un-replicated-at-cut, recovered), never a bare "loss = 0".
 - **Committed numeric budget fixture.** `test/dhall/phase_43_gateway_migration.dhall` fixes `lagBound = 5 s`,
-  `RTO = 60 s`; authored and committed in Phase 0; its hash is pinned in the gate record and re-checked at gate
+  `RTO = 60 s`; authored and committed in this phase's oracle-pinning sprint; its hash is pinned in the gate record and re-checked at gate
   time so a budget edited after measuring the drill fails the hash check.
 - **Mutation controls.** At least one committed member of this [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) set must fail: (a) `verify-caught-up`-stub — the
   `Planned` `verify-caught-up` edge is weakened to `const True` (dropped-guard); the journal oracle must catch
@@ -472,7 +472,7 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
   Phase-0-committed numeric budget (`lagBound = 5 s`, `RTO = 60 s`, hash-pinned), reconcile divergent
   histories, and always tear down leak-free (verified by the OS-boundary route53/`pulumi stack ls` observer) —
   emitting the machine-derived per-run ledger artifact. The gate topology `.dhall`, `test/inject/journal/` (the
-  out-of-forest write-ID journal schema), and the committed ledger validator are **committed in Phase 0 before the runtime exists**; the runtime-dependent `test/inject/mutants/` seeded mutants (the `verify-caught-up`-stub
+  out-of-forest write-ID journal schema), and the committed ledger validator are **committed in this phase's oracle-pinning sprint before the runtime exists**; the runtime-dependent `test/inject/mutants/` seeded mutants (the `verify-caught-up`-stub
   and `promote-before-fence` mutants that must go red) mutate the Sprint-43.1 implementation, so they are
   **committed at the start of Phase 43, before that implementation is trusted** (the §M.1
   start-of-owning-phase form for oracles that depend on later code).

@@ -43,7 +43,7 @@ No gate has run.
 📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
 is design intent, never a tested amoebius result. This phase opens after the [Phase 7 gate](phase_07_capacity_core_folds.md)
 (the base `fits`/`carve`/`place` fold, the `Topology` relation, and the shared `Quantity`/`Residual`/
-`ProvisionError`/`FilesystemPresentation`/`BackingAllocationPolicy`/`StorageBacking` base types) and runs on
+`AvailableCapacity`/`ProvisionError` base types) and runs on
 **no substrate** (`none`) in **Register 1** — it stands up no host, no cluster, and no backing, only an
 in-process storage-geometry fold + QuickCheck battery. Where a shape below is exercised in a sibling system
 (prodbox's platform-backbone BookKeeper/MinIO/ZooKeeper recovery accounting), that is **sibling evidence, not an amoebius result**.
@@ -124,7 +124,7 @@ Vault-Raft/ZooKeeper/Patroni/schema/six-arm variants, `illegal_hot_tier_over_boo
 `illegal_topic_time_only_offload`, `illegal_cache_over_local_pool`, and
 `illegal_incluster_cache_bound_mismatch`), while the storage-geometry variant rows of the two positive
 fixtures named in [Gate integrity](#gate-integrity) fit feasibly. Every fixture, golden, and expected
-`Left`-tag it checks against is **authored and committed in Phase 0 before the `Amoebius.Capacity.*` storage implementation exists** (§M.1); the gate turns red under the **committed per-geometry seeded-mutant battery named in [Gate integrity](#gate-integrity)** (§M.2) and green only when an **implementation-independent storage-envelope reference predicate** (§M.3, defined in Sprint 8.3) accepts a returned physical demand *iff* it
+`Left`-tag it checks against is **authored and committed in this phase's oracle-pinning sprint before the `Amoebius.Capacity.*` storage implementation exists** (§M.1); the gate turns red under the **committed per-geometry seeded-mutant battery named in [Gate integrity](#gate-integrity)** (§M.2) and green only when an **implementation-independent storage-envelope reference predicate** (§M.3, defined in Sprint 8.3) accepts a returned physical demand *iff* it
 is in-envelope — a **Register-1** in-process check that runs on no substrate.
 
 <a id="n-gate-integrity-refinements"></a>
@@ -162,7 +162,7 @@ positive set is the storage-geometry variant rows of
 `legal_multisubstrate_cluster` (a store-fits-backing row, BookKeeper/MinIO physical-fits, uniform-claim
 exact-fit, presentation/quantum-rounding exact-fit, and ZooKeeper/Patroni/Vault recovery-fits plus a
 control-plane-storage-steady-fits row) and `legal_managed_eks` (a fixed-`InstanceStore` root-fits row and a
-derived-root-EBS-within-`nodeRootStorage`-quota row). All are committed in Phase 0 (§M.1) as part of the
+derived-root-EBS-within-`nodeRootStorage`-quota row). All are committed in this phase's oracle-pinning sprint (§M.1) as part of the
 forty-one-fixture corpus; the compute/topology base-fold negatives (`illegal_engine_substrate_mismatch`,
 `illegal_rke2_reused_host`, `illegal_overcommit_*`, the elastic-branch negatives,
 `illegal_untolerated_taint`, `illegal_memory_backed_underreserved`,
@@ -309,13 +309,12 @@ cache nesting `provisionCacheDemand`, `registryStoragePeak`, `provisionZooKeeper
 `ObjectStoreProducerDemand`/`ProvisionedObjectStoreLogicalPeak`, `ObjectStoreAdmissionGatewayDemand`,
 `StorageMigrationDemand`/`ProvisionedStorageMigration`,
 `SchemaMigrationDemand`/`ProvisionedSchemaMigration`,
-`RegistryBackendMigrationDemand`/`ProvisionedRegistryBackendMigration`, `ControlPlaneStorageDemand`, and the
+`RegistryBackendMigrationDemand`/`ProvisionedRegistryBackendMigration`, `ControlPlaneStorageDemand`, the
 provider-root storage types `ProvisionedNodeRootVolumeRequest`/`InstanceStore`/`EphemeralRootEbs`/
-`nodeRootStorage`) — target paths, not yet built. The base `Quantity`/`Residual`/`AvailableCapacity`/
-`ProvisionError`/`FilesystemPresentation`/`BackingAllocationPolicy`/`StorageBacking` declarations, and the
-VM parent-disk `PhysicalDiskPartition` arithmetic, live in [Phase 7](phase_07_capacity_core_folds.md)/
-[Phase 9](phase_09_execution_accelerator_folds.md); this sprint consumes them and adds the geometry
-arithmetic only.
+`nodeRootStorage`, and the storage-presentation declarations
+`FilesystemPresentation`/`BackingAllocationPolicy`/`StorageBacking`) — target paths, not yet built.
+[Phase 7](phase_07_capacity_core_folds.md)'s base subset defers every storage member of `Types.hs` to this
+phase; this sprint consumes that base and owns the storage declarations plus the geometry arithmetic.
 **Blocked by**: [Phase 7 gate](phase_07_capacity_core_folds.md) (the base capacity types + `fits`/`carve` subtraction over zero-capable residuals this fold layers on); Phase 5 gate (the GADT-indexed IR + total decoder these demands decode into).
 **Independent Validation**: a unit suite runs the geometry
 folds over hand-authored logical-demand/backing inputs: each producer's logical demand expands through its
@@ -491,7 +490,7 @@ compute `place`.
 
 ### Deliverables
 - The **implementation-independent storage-envelope reference predicate** (§M.3): a committed, hand-authored
-  envelope predicate authored in Phase 0, distinct from the fold under test, that **never calls**
+  envelope predicate authored in this phase's oracle-pinning sprint, distinct from the fold under test, that **never calls**
   `bookKeeperPhysicalDemand`, `minioPhysicalDemand`, `provisionObjectStoreProducer`, `mergeObjectStoreLogicalPeaks`,
   `registryStoragePeak`, `vaultStoragePeak`, `provisionZooKeeperMetadataStore`, `provisionPatroniSql`,
   `uniformStatefulSetClaims`, the Pulsar/cache/provider-root/control-plane folds, or the migration folds. It
@@ -553,7 +552,7 @@ illegal_incluster_cache_bound_mismatch}.dhall` (the five storage-geometry/cache 
 negatives) + reuse of the storage-geometry variant rows of
 `legal_multisubstrate_cluster`/`legal_managed_eks`; `test/dsl/StorageGeometryGate.hs` (the gate battery +
 validation-locus ledger) — target paths, not yet built. All five negatives, the reused positive rows, and
-their expected results / `Left`-tags are authored and committed in Phase 0 before the implementation exists
+their expected results / `Left`-tags are authored and committed in this phase's oracle-pinning sprint before the implementation exists
 (§M.1, [Gate integrity](#gate-integrity)) as part of the forty-one-fixture corpus.
 **Blocked by**: Sprint
 8.1, Sprint 8.2, Sprint 8.3; Phase 4 gate (the positive Gate-1 corpus).

@@ -110,7 +110,7 @@ flowchart LR
 *Design intent. Phase 29's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
 **Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The
-gate's oracles are **authored and committed in Phase 0, before any `src/Amoebius/Vault/*.hs` exists**
+gate's oracles are **pinned in this phase's oracle-pinning sprint, ahead of any `src/Amoebius/Vault/*.hs`**
 (§M.1):
 - (a) a canary KV fixture `test/golden/vault/canary.json` — `SecretRef.Vault { mount="secret",
   path="amoebius/canary", field="token" }` with a fixed 32-byte value

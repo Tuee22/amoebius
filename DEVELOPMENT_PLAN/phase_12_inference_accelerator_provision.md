@@ -153,7 +153,7 @@ goldens `test/capability/goldens/golden_servicespec_inference_singlenode.golden`
 `golden_servicespec_inference_distributed.golden`), and `dhall/examples/legal_inference_cuda.dhall` (the
 CUDA accelerator positive that binds and provisions by selecting the matching CUDA target offering with its
 residency/coexistence epochs inside net allocatable VRAM). All three fixtures, both goldens, and every
-expected error/locus tag below are **authored and committed in Phase 0 before the `Amoebius.Capability.Engine` implementation exists** (§M.1); a golden regenerated from `bind`'s own output
+expected error/locus tag below are **authored and committed in this phase's oracle-pinning sprint before the `Amoebius.Capability.Engine` implementation exists** (§M.1); a golden regenerated from `bind`'s own output
 is not a test. An `Immediate` provision path applies — the `InferenceEngine` owner needs no bootstrap-staged
 render activation.
 

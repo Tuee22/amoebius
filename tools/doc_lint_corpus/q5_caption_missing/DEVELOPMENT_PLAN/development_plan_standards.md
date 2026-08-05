@@ -1,7 +1,9 @@
 # Example Plan Standards
 
-> **Purpose**: Fixture rulebook.
-> **Read this if**: a fixture plan document is being reviewed.
+>
+**Purpose**: Fixture rulebook.
+>
+**Read this if**: a fixture plan document is being reviewed.
 
 This fixture rulebook owns plan structure only.
 Header mechanics belong to [the standards](../documents/documentation_standards.md).

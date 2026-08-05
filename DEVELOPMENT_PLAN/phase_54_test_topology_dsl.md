@@ -922,7 +922,7 @@ injects is delegated to Pulsar (Phase 37), never a bespoke amoebius election.
   (proven / tested / assumed / UNVERIFIED), as a first-class output beside pass/fail, whose applicable-move set
   is **derived** from the topology's `ChaosSchedule`/`FaultTarget` projections and the chaos_failover_doctrine
   [§11.1](../documents/engineering/chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget) `FaultKind`→invariant map — never a set the emitter declares for itself. The externally hand-authored
-  expected ledger `test/golden/phase_54_ledger.json` (committed in Phase 0, authored independently of
+  expected ledger `test/golden/phase_54_ledger.json` (committed in this phase's oracle-pinning sprint, authored independently of
   `Ledger.hs`) is the oracle the emitted ledger is matched against field-for-field.
 - A fail-fast prerequisite check: a missing substrate input, credential, or tool fails the run with a message
   naming what is missing — never a pass-with-skip.

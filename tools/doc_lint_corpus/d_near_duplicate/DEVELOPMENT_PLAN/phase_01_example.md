@@ -28,7 +28,7 @@ A bound shape carries the identity, the revision and the ceiling that the provis
 
 **Substrate:** none
 **Register:** 1
-**Gate:** the committed golden corpus decodes against an independent oracle and one committed seeded mutant turns it red (Gate; 1.2 V1).
+**Gate:** `cabal test example-spec` is green — the committed golden corpus decodes against an independent oracle and one committed seeded mutant turns it red (Gate; 1.2 V1).
 
 ## Doctrine adopted
 

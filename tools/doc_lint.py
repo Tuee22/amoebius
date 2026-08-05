@@ -45,6 +45,7 @@ CHECKS = {
     "d": "near-duplicate normative content between two governed documents",
     "e": "status consistency: tracker marker equals the phase doc's Phase Status",
     "f": "gate integrity: gate names fixtures, a mutant, and an independent oracle",
+    "f2": "gate integrity: gate names a backticked re-runnable acceptance command",
     "g1": "catalog integrity: every entry carries a Validation-locus field",
     "g2": "catalog integrity: entry numbering contiguous, no gaps or duplicates",
     "g3": "catalog integrity: every index bullet anchor resolves",
@@ -85,7 +86,13 @@ DOC_CAP = 700             # a whole document, section 10.2
 SENTENCE_CAP = 90         # words in one prose sentence, section 13.1
 
 # Reported, but not gate-failing, while the corpus cannot meet the stated rule.
-ADVISORY = {"p3"}
+# f2 states section K's rule that a ✅ flip records "the exact re-runnable gate
+# command" and section O.3's "one acceptance command". Measured backlog at the time
+# this check landed: 15 of 65 phase gates name no backticked command inside their
+# gate span — phases 00, 02, 03, 08, 29, 32, 35, 37, 39, 42, 43, 44, 46, 47, 48.
+# f2 becomes blocking once those fifteen name theirs; it is advisory only so the
+# check can ship before that content decision is made, not to excuse it.
+ADVISORY = {"p3", "f2"}
 
 LEGAL_STATUS = {"Authoritative source", "Reference only", "Deprecated"}
 HDR_FIELDS = ["Status", "Supersedes", "Referenced by", "Generated sections"]
@@ -659,6 +666,16 @@ def check_e_status(docs_by_rel, v):
             )
 
 
+# A re-runnable acceptance command: a backticked span whose first word is a runner.
+# Anchoring on the leader keeps prose like `Env m` or a module path from counting,
+# which a bare "contains backticks" test would wave through.
+GATE_COMMAND_RE = re.compile(
+    r"`\s*(?:PYTHONDONTWRITEBYTECODE=\S+\s+)?"
+    r"(cabal|python3?|pytest|make|kubectl|ghc|dhall|npm|spago|bash|sh|helm|terraform|docker|go|cargo)\b"
+    r"[^`\n]*`"
+)
+
+
 def check_f_gate_integrity(docs, docs_by_rel, v):
     tracker = docs_by_rel.get("DEVELOPMENT_PLAN/README.md")
 
@@ -685,6 +702,8 @@ def check_f_gate_integrity(docs, docs_by_rel, v):
             v.append(Violation("f", doc.rel, gate_line, "gate names no independent oracle"))
         if not any(t in low for t in ("golden", "fixture", "corpus", "committed")):
             v.append(Violation("f", doc.rel, gate_line, "gate names no committed fixtures or goldens"))
+        if not GATE_COMMAND_RE.search(scope):
+            v.append(Violation("f2", doc.rel, gate_line, "gate names no backticked re-runnable command"))
 
     if tracker is None:
         return
@@ -1258,6 +1277,12 @@ def collect(root):
 
 
 def run(root, only=None):
+    # Absolutise before collecting. check_c resolves an inbound link with
+    # os.path.normpath, which strips a leading "./" — so a relative --root left
+    # docs_by_path keyed on "./x.md" while every lookup asked for "x.md", the
+    # inbound graph came back empty, and every declared Referenced by reported
+    # stale. `--root .` and `--root /abs/path` must agree.
+    root = os.path.abspath(root)
     docs = collect(root)
     if not docs:
         print(f"doc_lint: no governed documents found under {root}", file=sys.stderr)

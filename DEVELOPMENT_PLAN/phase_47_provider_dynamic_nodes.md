@@ -178,7 +178,7 @@ flowchart LR
 *Orientation. The seams phase 47 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
 
 **Oracle-pinning (§M.1).** Every fixture, expected error/outcome tag, and reference table this gate checks
-against is authored and **committed in Phase 0**, before `Amoebius.Cluster.NodeProvisioner` /
+against is hand-authored and **pinned in this phase's oracle-pinning sprint**, ahead of `Amoebius.Cluster.NodeProvisioner` /
 `Amoebius.Pulumi.NodeGroup` / `Amoebius.Pulumi.Teardown` exist — no oracle is regenerated from the
 implementation's own output, and it is authored independently of the code under test (§M.3):
 

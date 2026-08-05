@@ -160,6 +160,13 @@ independent of the decoder's own output ([§M](development_plan_standards.md#m-g
 
 ## Doctrine adopted
 
+- [`dsl_doctrine.md §4 — total composability`](../documents/engineering/dsl_doctrine.md#4-total-composability):
+  adopt the **import policy** the doctrine assigns to the Phase-4/5 gate. `env:` and remote (`http(s):`)
+  imports are forbidden in any authored or uploaded spec; every spec is resolved-and-frozen to a
+  fully-local, `sha256:…`-hashed expression **before** decode. This phase owns the enforcement — Sprint 5.3's
+  resolve-and-freeze stage and its `ForbiddenImport` negatives — and it is what makes the effect-free/total
+  premise of [§2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)
+  true of the expression actually decoded, rather than of arbitrary unresolved Dhall.
 - [`dsl_doctrine.md §5 — the illegal-state-unrepresentable contract`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
   adopt **Gate 2 — the Haskell typed decoder**. A well-typed Dhall value becomes a Haskell value through the
   native `dhall` library in-process (`Dhall.inputFile auto`); decoding is total and fail-fast (a structured
@@ -247,7 +254,7 @@ decode-through round-trip to the cited positive is confirmed at the Sprint 5.4 g
 exists. Because the legal twin is a required-to-compile, actually-decoded constructor, an impoverished
 vocabulary that spells cross-tenant references freely fails its legal twin (or fails to decode the cited
 positive), so the pair cannot be satisfied by a strawman `mkCrossTenantRef` that was simply never defined.
-The compile-fail message locus (expected type-error text) is committed in Phase 0 alongside the fixtures.
+The compile-fail message locus (expected type-error text) is committed in this phase's oracle-pinning sprint alongside the fixtures.
 The exhaustive compile-fail corpus is assembled in Phase 6.
 **Docs to update**:
 `documents/illegal_state/illegal_state_catalog.md` (per-entry layer reconciliation — which entries this IR
@@ -589,9 +596,12 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Dsl/Decode.hs` (`decodeCluster :: FilePath -> IO
-(Either DecodeError ClusterIR)` = `Dhall.inputFile auto` wrapped in an exception-catch that maps thrown
-`DhallErrors`/IO exceptions to `Left DecodeError`; non-partial + fail-closed) and
-`src/Amoebius/Dsl/Error.hs` (the tagged `DecodeError` type) — target paths, not yet built.
+(Either DecodeError ClusterIR)` = a **resolve-and-freeze** stage that rejects every `env:` and remote
+(`http(s):`) import and freezes the remaining local imports to `sha256:…` semantic-integrity hashes,
+*then* `Dhall.inputFile auto` over that resolved, frozen expression — the whole wrapped in an
+exception-catch that maps thrown `DhallErrors`/IO exceptions to `Left DecodeError`; non-partial +
+fail-closed) and `src/Amoebius/Dsl/Error.hs` (the tagged `DecodeError` type, carrying the
+`ForbiddenImport` arm the resolve stage returns) — target paths, not yet built.
 **Blocked by**:
 Sprint 5.2.
 **Independent Validation**: the decode path returns `Either DecodeError ClusterIR` and never
@@ -737,7 +747,7 @@ provisioning boundary.
     child/rollout source operands, exact cache population, registry upload, object-store
     resident/retention/admission/producer identity, Vault Raft/audit, or host enforcement fields;
   - the traversal/type inventory must reject each mutant independently.
-- The **concretely named representative Gate-2 negative set** ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 7), committed in Phase 0: **exactly one `illegal_decode_*.dhall` fixture per named `DecodeError` class** — `illegal_decode_schema.dhall`
+- The **concretely named representative Gate-2 negative set** ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 7), committed in this phase's oracle-pinning sprint: **exactly one `illegal_decode_*.dhall` fixture per named `DecodeError` class** — `illegal_decode_schema.dhall`
   (`SchemaMismatch`), `illegal_decode_domain.dhall` (`OutOfDomainArm`), `illegal_decode_unspellable.dhall`
   (`UnspellableCombination`, a raw
   `RawDeploymentRolloutPolicy.RollingUpdate { maxSurge = 0, maxUnavailable = 0 }`) — each header citing

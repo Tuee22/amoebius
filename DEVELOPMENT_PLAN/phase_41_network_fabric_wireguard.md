@@ -144,7 +144,7 @@ flowchart LR
   topology/resource expansion `test/fixtures/phase41/expected-fabric-demand.json`, the reachability matrix
   `test/fixtures/phase41/reachability-expected.json`, and the negative corpus's expected
   foreclosure-tag table `test/fixtures/phase41/negative-expected-tags.tsv` (hand-authored, independent of the
-  renderer's own output — §M.3) are all **committed in Phase 0 before** `Fabric.hs`/`WgRender.hs`/`WgReconcile.hs`
+  renderer's own output — §M.3) are all **committed in this phase's oracle-pinning sprint before** `Fabric.hs`/`WgRender.hs`/`WgReconcile.hs`
   exist; none is regenerated from implementation output.
 - **External-observer reachability, not a self-report (§M.5).** The hub-attach claim is read from an observer at
   the OS boundary: (a) the spoke netns issues a real transport probe (an ICMP echo *and* a TCP connect) to the

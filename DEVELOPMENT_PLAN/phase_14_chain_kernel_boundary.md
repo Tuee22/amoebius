@@ -112,7 +112,7 @@ run inside a network-isolated namespace (`unshare -n`) with
 The composite run emits a proven/tested/assumed ledger led by a Tier-2-UNVERIFIED banner, marking the live
 apply ([phase_26_object_reconciler.md](phase_26_object_reconciler.md)) and runtime enforcement
 ([phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md)) UNVERIFIED. Every fixture, golden,
-expected-argv transcript, and expected `Left`-tag is authored and committed in Phase 0 before the
+expected-argv transcript, and expected `Left`-tag is authored and committed in this phase's oracle-pinning sprint before the
 implementation exists — with the executor-argv transcript pinned at the start of Phase 14 before the
 executor implementation (the §M.1 named exception); a golden regenerated from the implementation is not a
 test.
@@ -123,7 +123,7 @@ This section fixes the one shared interpretation of the gate's representative co
 mutants, so two engineers implement the same gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clauses 1–8); it strengthens, never weakens, the Gate and sprint Validations above. Because this phase **merges**
 two former phases, it keeps **both** sources' committed fixtures, mutants, and oracles, **partitioned** into the
 two parts along the register seam: Part A owns the pure plan-render corpus under `test/kernel/`, Part B owns the
-boundary corpus under `test/boundary/`. All artifacts named here are authored and committed in Phase 0 before
+boundary corpus under `test/boundary/`. All artifacts named here are authored and committed in this phase's oracle-pinning sprint before
 `Amoebius.Kernel.*` and `Amoebius.Exec.*` exist (the one exception is the executor-argv transcript of Part B,
 pinned at the start of Phase 14 before the executor — the §M.1 named exception).
 
@@ -162,7 +162,7 @@ flowchart LR
   to the resulting checked config containing its opaque `ProvisionedSpec` — the builder exercised end-to-end —
   never a hand-authored opaque witness or `[Step]` literal. A provision failure produces no plan. - **Oracle-pinning (§M.1).** The `--dry-run` plan goldens
   (`test/kernel/fixtures/plan/{multi,minimal}.plan.golden`) and the descent goldens
-  (`test/kernel/fixtures/descent/{multi,minimal}.descent.golden`) are hand-authored and **committed in Phase 0 before `renderChainPlan` exists**; a golden regenerated from the renderer is not a test.
+  (`test/kernel/fixtures/descent/{multi,minimal}.descent.golden`) are hand-authored and **committed in this phase's oracle-pinning sprint before `renderChainPlan` exists**; a golden regenerated from the renderer is not a test.
 - **Independent step-set reference (§M.3).** The step-set reference is a hand-authored table
   `test/kernel/fixtures/plan/expected_steps.json` (one entry per declared service/frame per cfg), authored from
   the cfg by hand — **not** from `chain`'s output; the plan is asserted to contain exactly that step set
@@ -408,7 +408,7 @@ The whole sprint (📋 Planned).
 `test/kernel/fixtures/descent/{multi,minimal}.descent.golden`, the hand-authored step-set table
 `test/kernel/fixtures/plan/expected_steps.json`, and the committed mutants under `test/kernel/mutants/`
 (`m1_cfg_drop_service`, `m2_descent_inframe`) — target paths, not yet built; the goldens and tables are
-committed in Phase 0 before the renderer exists.
+committed in this phase's oracle-pinning sprint before the renderer exists.
 **Blocked by**: Sprint 14.3 (and Sprints 14.1, 14.2).
 **Independent Validation**: `cabal test chain-spec`, run inside `unshare -n` with credential env vars
 scrubbed, is green — the `--dry-run` render of each fixture chain (`chain` applied after real provisioning)

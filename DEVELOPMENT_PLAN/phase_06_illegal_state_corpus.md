@@ -339,7 +339,7 @@ Phase-4 honesty caveat routed here, since Dhall has no opaque types.
   from no live service handle ([§3.3](../documents/illegal_state/illegal_state_security.md#33-misconfigured-gateway)) — each an expect-fail module that must not compile.
 - A pinned `ghc -fno-code` expect-fail harness reporting one aggregate green/red over the golden set, plus a
   positive control module that compiles. Each golden ships a committed `test/dsl/compilefail/<name>.expected`
-  golden (expected GHC error class = type-error, plus locus) authored in Phase 0, and a one-token legal twin.
+  golden (expected GHC error class = type-error, plus locus) authored in this phase's oracle-pinning sprint, and a one-token legal twin.
 - The committed guard-weakening GADT-index mutant (c) — used to prove the harness actually rejects.
 
 ### Validation
@@ -404,9 +404,13 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `test/dsl/ValidationLocusLedger.hs` (the ledger emitter + the
-coverage assertion, run as part of `dsl-spec`) — target paths, not yet built. The emitted ledger artifact is
-a **generated** Register-1 output and is **never committed**
-([`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)).
+coverage assertion, run as part of `dsl-spec`) — target paths, not yet built. The emitted validation-locus
+artifact is a **coverage projection** of the catalog and the modules under test, so by the source-based rule
+of [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
+it is a **generated** Register-1 output and is **never committed**. It is *not* the run-evidence ledger
+[§K](development_plan_standards.md#k-honesty-proven--tested--assumed) requires every gate to emit and
+commit: that is a separate artifact recording what this gate established and by what means, and its schema,
+linter, and path are centrally owned rather than re-derived here.
 **Blocked by**: Sprint 6.1, Sprint 6.2, Sprint 6.3.
 **Independent Validation**: the emitter maps every catalog entry
 to exactly one truth-maker locus (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` /

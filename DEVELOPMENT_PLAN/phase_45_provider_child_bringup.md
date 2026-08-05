@@ -157,7 +157,7 @@ identity map and tag-sweep oracle, and the `mut-47.1-*` / `mut-47.2-skip-sweep` 
 [Phase 47](phase_47_provider_dynamic_nodes.md). This phase inherits only the convergence/handoff slice below.
 
 **Oracle-pinning (§M.1).** Every fixture, expected foreclosure/error tag, and reference table this gate checks
-against is authored and **committed in Phase 0**, before `Amoebius.Cluster.ProviderBringUp` and the provider-child
+against is authored and **committed in this phase's oracle-pinning sprint**, before `Amoebius.Cluster.ProviderBringUp` and the provider-child
 singleton wiring exist — no oracle is regenerated from the implementation's own output:
 
 - **Representative set (§M.7)** — the committed topology `test/dhall/phase_45_provider_provision.dhall`, restricted

@@ -108,7 +108,7 @@ three. The "test-realm user" is the Phase-0-committed `phase32-tester` realm/use
 
 - **Oracle-pinning (§M.1):** the route inventory (`route-inventory.golden`), the test realm/user
   (`realm.json`), the expected derived-NetworkPolicy set (`netpol-expected.json`, see 28.3), and the marker
-  payloads (`marker-row.sql`, `marker-object.bin`) are authored and committed in Phase 0 before
+  payloads (`marker-row.sql`, `marker-object.bin`) are authored and committed in this phase's oracle-pinning sprint before
   `Amoebius.Platform.Edge`/`Keycloak`/`NetworkPolicy` exist; none is regenerated from the implementation.
 - **Committed seeded mutants (§M.2):** at least three committed mutants must go red — (a) an edge variant that
   removes the Keycloak OIDC/JWT filter (guard delete) so an unauthenticated probe reaches a surface; (b) a
@@ -337,7 +337,7 @@ one carve-out really is a *different type* of endpoint, not a wild one.
   key/CSR workspace, certificate/key revision retention, and the resulting Vault Raft/audit high-water; this
   demand is provisioned before the ACME client or Vault mutation can run.
 - The committed scanner-validation seed (`test/fixtures/phase32/backdoor-seed.yaml`, a raw-`kubectl`
-  NodePort/`Ingress` bypass authored in Phase 0) and the argv/env-recording ACME shim used to observe EAB
+  NodePort/`Ingress` bypass authored in this phase's oracle-pinning sprint) and the argv/env-recording ACME shim used to observe EAB
   provenance from the OS boundary.
 
 ### Validation

@@ -635,7 +635,7 @@ against); Phase 7 gate (the `fits`/`carve` capacity fold this bound reuses); Pha
 content-addressed store shape).
 **Independent Validation**: a property + boundary suite shows the cache
 admits no key from a free string, proven by a **committed compile-fail negative fixture**
-`test/negative/phase_48_freestring_key.hs` (registered in the Phase-6 negative corpus, authored in Phase 0)
+`test/negative/phase_48_freestring_key.hs` (registered in the Phase-6 negative corpus, authored in this phase's oracle-pinning sprint)
 whose expected failure is asserted **by locus** — it must fail to typecheck at the attempt to construct a
 cache key from a `String`/`Text`/`Url` with the specific "no instance / no exported constructor" compile
 error — paired with a positive that differs only in keying from `sha256(real bytes)` and compiles. A

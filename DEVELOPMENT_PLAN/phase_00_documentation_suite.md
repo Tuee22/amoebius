@@ -13,7 +13,7 @@ No gate has run.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md
 **Generated sections**: none
 
 </details>
@@ -89,8 +89,9 @@ governed docs, outside quoted/exempt blocks — absent, with semantic SSoT *owne
 rather than a lint verdict; each README Phase-Overview status marker equal to its phase doc's `## Phase Status`
 marker; every phase **Gate** naming its committed fixtures, at least one committed mutant, and an
 independent oracle per [`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
-plus an applicable fresh challenge, outside observer, authority-paired scope negative, zero-forbidden-effect
-observation, and bypass probe for every effect/security gate;
+and naming a backticked re-runnable acceptance command, with the effect/security-gate apparatus — an
+applicable fresh challenge, outside observer, authority-paired scope negative, zero-forbidden-effect
+observation, and bypass probe — documented as a hand review rather than a lint verdict;
 and **illegal-state catalog integrity** — every entry carrying a `**Validation-locus:**`, entry numbering
 contiguous with no gaps or duplicates, every index bullet's anchor resolving, and every entry carrying a
 technique-matrix row)
@@ -412,10 +413,14 @@ through Sprint 0.5.
 one mutates and `_build.py` the authored mutation list), and
 `test/golden/phase_{16..23,36,38,40,50,52,55..58}_*` plus the correspondingly named
 `test/mutants/phase_{16..23,36,38,40,50,52,55..58}_*` (independently authored UI gate oracles and seeded
-mutants pinned before their implementations), `test/formal/golden/ToyModel.{tla,cfg}.golden` plus
-`test/formal/mutants/emitTLA-mut-0{1..4}` and the `ToyModel` hand-derived reachable-distinct-state table and
-expected `INVARIANT`/`PROPERTY` name set (the Phase-2 formal-model oracles, pinned here before
-`Interpret.hs`/`EmitTLA.hs` exist — [`phase_02`](phase_02_formal_model_kernel.md)), and
+mutants pinned before their implementations), `test/formal/mutants/emitTLA-mut-0{1..4}` and the `ToyModel`
+hand-derived reachable-distinct-state table and expected `INVARIANT`/`PROPERTY` name set (the
+convention-independent Phase-2 formal-model oracles, pinned here before
+`Interpret.hs`/`EmitTLA.hs` exist — [`phase_02`](phase_02_formal_model_kernel.md); the byte-exact
+`test/formal/golden/ToyModel.{tla,cfg}.golden` is **not** pinned here — under
+[`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
+a byte-exact golden is pinned no earlier than the sprint fixing its rendering convention, which is
+Phase 2's), and
 `tools/ledger_lint.py` (target standalone scripts; not yet built — they must not depend on the amoebius
 binary, which first appears in the pre-cluster implementation band, Phase 2+. Both are **Python**, matching
 the pre-binary `pb` midwife ([README.md](README.md#toolchain)) and the recorded decision against bash logic

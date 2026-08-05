@@ -1,7 +1,9 @@
 # Example Doctrine
 
-> **Purpose**: One sentence describing the example doctrine.
-> **Read this if**: a bound shape has to be rendered.
+>
+**Purpose**: One sentence describing the example doctrine.
+>
+**Read this if**: a bound shape has to be rendered.
 
 This fixture doctrine owns the bound shape.
 House rules belong to [the standards](../documentation_standards.md).
@@ -21,8 +23,7 @@ House rules are in [the standards](../documentation_standards.md).
 
 ## 1. The rule
 
-amoebius binds the shape before it renders.
-The bound form is described by [§2](#2-the-bound-shape).
+amoebius binds the shape before it renders. The bound form is described by [§2](#2-the-bound-shape).
 
 ## 2. The bound shape
 

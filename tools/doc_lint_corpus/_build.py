@@ -43,7 +43,7 @@ MUTATIONS = [
          "**Generated sections**: none", "**Generated sections**: capability_table")]),
     ("a5_purpose_missing", "a5", set(), [
         ("documents/engineering/example_doctrine.md",
-         "> **Purpose**: One sentence describing the example doctrine.\n", "")]),
+         "**Purpose**: One sentence describing the example doctrine.\n>\n", "")]),
 
     # -- (b) links and section references ------------------------------------
     ("b1_dangling_anchor", "b1", set(), [
@@ -74,6 +74,10 @@ MUTATIONS = [
     ("f_gate_without_mutant", "f", set(), [
         ("DEVELOPMENT_PLAN/phase_01_example.md",
          " and one committed seeded mutant turns it red", "")]),
+    ("f2_gate_without_command", "f2", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "`cabal test example-spec` is green — the committed golden corpus",
+         "the committed golden corpus")]),
 
     # -- (g) catalog integrity, one negative per sub-check -------------------
     ("g1_entry_without_locus", "g1", set(), [
@@ -149,11 +153,11 @@ MUTATIONS = [
          "- [3. The declared ceilings](#3-the-declared-ceiling)")]),
     ("o3_metadata_before_purpose", "o3", set(), [
         ("documents/engineering/example_doctrine.md",
-         "# Example Doctrine\n\n> **Purpose**:",
-         "# Example Doctrine\n\n**Status**: Authoritative source\n\n> **Purpose**:")]),
+         "# Example Doctrine\n\n>\n**Purpose**:",
+         "# Example Doctrine\n\n**Status**: Authoritative source\n\n>\n**Purpose**:")]),
     ("o4_read_this_if_missing", "o4", set(), [
         ("documents/engineering/example_doctrine.md",
-         "> **Read this if**: a bound shape has to be rendered.\n", "")]),
+         ">\n**Read this if**: a bound shape has to be rendered.\n", "")]),
     ("o5_noncanonical_link_section", "o5", set(), [
         ("documents/engineering/example_doctrine.md",
          "## Related Documents", "## Cross-references")]),

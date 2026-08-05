@@ -738,7 +738,7 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
 - The gate `.dhall` (`test/dhall/phase_53_apple_metal_peer.dhall`) is a **generated artifact emitted from Haskell at gate-run time and never committed** — its byte-authority is the authored Haskell emitter in
   `src/Amoebius/HostWorker/Peer.hs` / `HostComms/Illegal.hs`, per development_plan_standards [§B](development_plan_standards.md#b-canonical-file-layout-snake_case) (Implementation names authored source, never a generated artifact). The committed byte-authority for the type-check negatives is
   instead the green host-comms spec and the four one-field-mutant illegal fixtures under
-  `test/dhall/phase_53_illegal/` (authored, committed in Phase 0). The gate `.dhall`, once emitted, drives:
+  `test/dhall/phase_53_illegal/` (authored, committed in this phase's oracle-pinning sprint). The gate `.dhall`, once emitted, drives:
   derive and verify the complete physical-host → Lima-VM/node + host-worker + cache provision witness —
   including the private presentation/allocation-rounded `ProvisionedVmDiskCarve` and its once-charged sparse
   high-water; bring up the apple cluster on Lima; expose the content-mutation gateway and Pulsar on the

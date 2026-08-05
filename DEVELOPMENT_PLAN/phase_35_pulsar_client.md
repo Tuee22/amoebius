@@ -332,7 +332,7 @@ seek-based replay — over the persistent session from Sprint 35.1, with **every
 4. A typed command/event round-trips through the CBOR codec byte-for-byte against the Phase-0-committed CBOR
    vector. Non-CBOR foreclosure is proven **by specific reason** (§M.8), not by any compile failure: the
    compile-fail harness carries one negative fixture **per foreclosed route** — raw `ByteString`, JSON,
-   base64 — each committed in Phase 0 with its expected diagnostic (respectively `No instance for (Serialise
+   base64 — each committed in this phase's oracle-pinning sprint with its expected diagnostic (respectively `No instance for (Serialise
    ByteString)` / `produceRaw not in scope` / `No instance for (Serialise …)` as authored), each paired with a
    positive fixture that differs only in wrapping the body through `encodeCbor` and does type-check; the harness
    asserts the diagnostic *matches the committed tag*, so a fixture that fails for an unrelated reason (typo,

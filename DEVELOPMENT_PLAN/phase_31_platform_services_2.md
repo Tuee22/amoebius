@@ -506,7 +506,7 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
   service in its HA-capable shape. It also verifies generated-manifest and baked-binary provenance, exact
   execution-unit/volume projection from `ProvisionedServiceSpec`, and a Register-3 ledger that labels only the
   observed runtime layer *tested*.
-- The gate oracles, **authored and committed in Phase 0 before any implementation** (§M.1): a Register-1
+- The gate oracles, **authored and committed in this phase's oracle-pinning sprint before any implementation** (§M.1): a Register-1
   property `prop_bringUpOrderDerivedFromEdges` asserting the derived bring-up order is a pure function of the
   *declared* dependency edges (adding or removing a declared edge changes the order; an introduced cycle is
   rejected) under a §M.4 cover/classify floor forcing a stated minimum fraction of cases through the

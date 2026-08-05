@@ -169,7 +169,7 @@ bounded Pulumi plugin/workspace volumes, and the executor concurrency bound. The
 node, its `ScalingPolicy`, the fallback class, the per-PV durable EBS volume, and the static `ebs.csi.aws.com`
 PV are declared in the same fixture but are exercised by the sibling sub-phases, not here.
 
-**Oracle pins (§M.1/§M.3).** Authored and **committed in Phase 0 before the implementation exists**,
+**Oracle pins (§M.1/§M.3).** Authored and **committed in this phase's oracle-pinning sprint before the implementation exists**,
 independently of the code under test:
 
 - `test/goldens/checkpoint_envelope.json` — the ciphertext-shape oracle for a stored checkpoint

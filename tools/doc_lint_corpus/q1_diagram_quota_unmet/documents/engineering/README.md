@@ -1,7 +1,9 @@
 # Example Engineering Doctrine
 
-> **Purpose**: Index of the fixture doctrine set.
-> **Read this if**: a fixture doctrine document needs locating.
+>
+**Purpose**: Index of the fixture doctrine set.
+>
+**Read this if**: a fixture doctrine document needs locating.
 
 This fixture index routes to the doctrine set.
 It owns nothing normative of its own.

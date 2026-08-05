@@ -99,6 +99,15 @@ to Phase 6's exhaustive registry-driven corpus. Neither [§3.23](../documents/il
 gate's green. This eight-entry set is the single canonical Gate-1-class membership and supersedes any
 shorter parenthetical elsewhere in this doc.
 
+**Import-policy negatives (not counted toward the eight).** Two further committed fixtures,
+`dhall/examples/illegal_import_env.dhall` and `dhall/examples/illegal_import_remote.dhall`, pin the
+`env:`/remote-import ban of [`dsl_doctrine.md §4`](../documents/engineering/dsl_doctrine.md#4-total-composability)
+at this gate: each must fail resolution with a `ForbiddenImport` reason, and each carries the §M.8 paired
+positive — the same spec with the import replaced by a frozen local one — which must type-check. They are
+policy negatives rather than illegal-state catalog entries, so they are recorded here and excluded from the
+representative set's green; the enforcing resolve-and-freeze stage is owned by
+[Phase 5](phase_05_gadt_decoder_gate2.md).
+
 ### Paired positive per negative (§M.8 / §M.3)
 
 Each `illegal_*.dhall` is a MINIMAL one-construct mutation of a named committed green positive (its
@@ -108,14 +117,14 @@ type-checks. `tools/dhall_gate1_negatives.sh` asserts BOTH directions per fixtur
 
 ### Specific-reason error goldens (§M.8 / §M.1)
 
-For each negative, a golden `dhall type` error transcript is authored and COMMITTED IN PHASE 0
+For each negative, a golden `dhall type` error transcript is authored and COMMITTED IN THIS PHASE'S ORACLE-PINNING SPRINT
 (`tests/oracle/gate1/<entry>.err`), pinning the failure to name the targeted union/arm/field/record; the
 harness is red if the observed `dhall type` stderr does not match its committed golden (a negative that
 fails for an unrelated typo/import/field error mismatches and goes red).
 
 ### Arm-inventory oracle, independent of the schema (§M.3)
 
-A committed hand-authored catalog table (`tests/oracle/gate1/arm_inventory.csv`, authored in Phase 0 from
+A committed hand-authored catalog table (`tests/oracle/gate1/arm_inventory.csv`, authored in this phase's oracle-pinning sprint from
 `illegal_state_catalog`
 [§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)/[§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)/[§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress),
 NOT derived from the schema modules) pins each union's exact arm set; the harness normalizes each shipped
@@ -309,7 +318,7 @@ replacement is also a failure.
 ### Oracle-pinning (§M.1)
 
 All goldens, the arm/resource-inventory tables, and the seeded mutant above are
-committed in Phase 0 before any schema module exists; none is regenerated from the shipped schema's own
+committed in this phase's oracle-pinning sprint before any schema module exists; none is regenerated from the shipped schema's own
 output.
 
 This gate is Register 1 (pure/golden, in-process, no cluster). It still emits the [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)

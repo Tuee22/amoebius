@@ -150,7 +150,7 @@ integration is a later Phase-11 responsibility;
 (iii) is **provably total** — compile-time exhaustiveness under `-Werror=incomplete-patterns` on every
 `Amoebius.Capacity.*` execution/accelerator/provider-root module **and** a sampled QuickCheck no-crash run,
 both, not either; and (iv) turns red under the **committed per-fold seeded-mutant battery named in [Gate integrity](#gate-integrity)** (§M.2). Every fixture, golden, and expected `Left`-tag it checks against is
-**authored and committed in Phase 0 before the implementation exists** (§M.1). This is a **Register-1**
+**pinned in this phase's oracle-pinning sprint, ahead of the folds they check** (§M.1). This is a **Register-1**
 in-process check that runs on no substrate.
 
 ## Gate integrity
@@ -482,13 +482,13 @@ component ownership; alias-aware backing grouping); extends `src/Amoebius/Capaci
 planned-slot/observed-Pod-UID `KubeletRuntimeMetadataDemand`, `ProvisionedKubeletRuntimeMetadataDemand`,
 `PodRuntimeRole`, `ImageStorageRole`, `NodeImageStorageModelVersion`, `KubeletRuntimeMetadataModelVersion`,
 `ProvisionedNodeImageStorageDemand`, scope-indexed `ProvisionedNodeRuntimeStorageAccounting`,
-`NodeLocalStorageCapacity`/filesystem layouts/image artifacts,
-`FilesystemPresentation`/`VolumePresentation`/`BackingAllocationPolicy`, closed substrate-indexed
-`HostRuntimeEnforcement`, `PhysicalDiskPartition`, `NamedDiskCarve`, and `ProvisionedVmDiskCarve`) — target
+`NodeLocalStorageCapacity`/filesystem layouts/image artifacts, `PhysicalDiskPartition`,
+`NamedDiskCarve`, and `ProvisionedVmDiskCarve`) — target
 paths, not yet built.
 **Blocked by**: Sprint 9.1 (the execution-instance expansion that keys planned slots
 and observed Pod UIDs); Phase 5 gate (the IR + decoder); Phase 7 gate (`NodeCapacity.localStorage` logical
-pod-ephemeral allocatable the physical operands nest inside).
+pod-ephemeral allocatable the physical operands nest inside); [Phase 8 gate](phase_08_storage_geometry_folds.md)
+(the storage-presentation declarations this sprint's layouts and carves are indexed by).
 **Independent Validation**: for every planned
 Pod slot in each epoch, the reference fold independently rebuilds `KubeletRuntimeMetadataShape` from the
 structural sandbox, Pod-directory, runtime, CNI, volume, and mount counts under
@@ -604,14 +604,14 @@ transition and churn quota fit before physical WAL/snapshot/defrag expansion);
 `src/Amoebius/Capacity/PulumiExecution.hs` (deploy/plugin join and concurrent executor/workspace peak);
 extends `src/Amoebius/Capacity/Types.hs` (pod/host accelerator demands and offerings, per-device
 raw/reserved/allocatable VRAM, residency/coexistence-epoch types, the provider-root
-`ProvisionedPerInstanceDiskTemplate`/`InstanceStore`/`EphemeralRootEbs`/ `ProvisionedNodeRootVolumeRequest`
-and `nodeRootStorage` quota types, `BuildExecutionEnvelope`, role-indexed `EngineSystemReserve`,
-`ControlPlaneStorageDemand`/`WorkerEngineStorageDemand`, `EtcdLogicalDemand`/`ProvisionedEtcdLogicalDemand`,
+`ProvisionedPerInstanceDiskTemplate` quota type, `BuildExecutionEnvelope`, role-indexed
+`EngineSystemReserve`, `WorkerEngineStorageDemand`, `EtcdLogicalDemand`/`ProvisionedEtcdLogicalDemand`,
 `MonitoringWorkBudget`, `PulumiExecutionDemand`/`ProvisionedPulumiExecutionDemand`) and the
 accelerator/provider-root branches of `src/Amoebius/Capacity/Fold.hs` — target paths, not yet built.
 **Blocked by**: Sprint 9.1 (the execution expansion that fixes the CUDA DaemonSet arm and the
 engine/executor units these envelopes feed); Phase 7 gate (the base `NodeCapacity`/`CandidateNodeClass`
-templates the provider-root arithmetic instantiates).
+templates the provider-root arithmetic instantiates); [Phase 8 gate](phase_08_storage_geometry_folds.md)
+(the provider-root and control-plane storage declarations this sprint's quota arithmetic instantiates).
 **Independent Validation**: a unit + property suite
 validates accelerator family, whole device count, exact source/workload and policy-class domains, all
 derived coexistence epochs, residency placement, per-device aggregation, shard-id uniqueness/count/byte-sum,
@@ -801,7 +801,7 @@ may reject a packable one) for the composed compute `place`, and never claim com
    [Gate integrity](#gate-integrity) — including the kind-indexed execution,
    scheduler-CAS, runtime-metadata, node-local, physical-partition, accelerator-residency, and
    provider-template mutants, not one hand-picked strawman — makes a property red when re-run individually. The
-   validator carries the reference side of every `accepts ⟺ in-envelope` property as a **committed hand-authored predicate authored in Phase 0, distinct from the fold under test** (§M.1, §M.3), never the
+   validator carries the reference side of every `accepts ⟺ in-envelope` property as a **committed hand-authored predicate authored in this phase's oracle-pinning sprint, distinct from the fold under test** (§M.1, §M.3), never the
    fold's own comparison.
 
 ### Remaining Work
@@ -823,8 +823,8 @@ illegal_shared_accelerator_double_owner}.dhall` (the execution/accelerator/provi
 whole-deployment positives) and the Phase-7-owned `legal_tmpfs_two_concurrent_writers_single_debit`;
 `test/dsl/CapacityTopologyGate.hs` (the composed gate battery + validation-locus ledger) — target paths, not
 yet built. These eighteen fixtures and their expected `Left`-tags — together with the Phase-7 and Phase-8
-slices, forty in all — are authored and committed in Phase 0 before the implementation exists (§M.1,
-[Gate integrity](#gate-integrity)).
+slices, forty in all — are hand-authored and pinned in this phase's oracle-pinning sprint, ahead of the
+modules under test (§M.1, [Gate integrity](#gate-integrity)).
 **Blocked by**: Sprint 9.1, Sprint 9.2, Sprint 9.3, Sprint 9.4; Phase 4
 gate (the positive Gate-1 corpus); Phase 7 gate (the base fold + topology slice the composed witness
 invokes); Phase 8 gate (the storage-geometry slice the composed vector consumes).

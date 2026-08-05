@@ -166,7 +166,7 @@ seeded mutants named in [Gate integrity](#gate-integrity):
 ## Gate integrity
 
 This section pins the concrete corpus, the Phase-0-committed oracles, and the seeded mutants the Gate and each
-sprint Validation above reference. Everything named here is authored and committed in Phase 0, before any
+sprint Validation above reference. Everything named here is authored and committed in this phase's oracle-pinning sprint, before any
 implementation exists.
 
 ```mermaid
@@ -361,7 +361,7 @@ only because amoebius placed them and nothing in the normal cluster lifecycle ca
    PVC with no matching PV stays `Pending` **with the specific event reason `WaitForFirstConsumer`** (no
    provisioner attempted) — asserting the reason string, not merely the `Pending` phase; the paired positive is
    an identical PVC that binds once its PV exists. (b) The negative fixture `two_storageclasses` (a second class
-   plus a default-class annotation, committed in Phase 0) makes assertion 1 fail with the **specific reason `count != 1` / `default-class annotation present`**, distinguishing it from an unrelated golden mismatch.
+   plus a default-class annotation, committed in this phase's oracle-pinning sprint) makes assertion 1 fail with the **specific reason `count != 1` / `default-class annotation present`**, distinguishing it from an unrelated golden mismatch.
 
 ### Remaining Work
 The whole sprint (📋 Planned).

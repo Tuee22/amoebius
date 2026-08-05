@@ -109,7 +109,9 @@ as the conjunction of two committed sub-checks:
 byte-for-byte `.tla`/`.cfg` golden (a committed test fixture under `test/formal/golden/`, distinct from the
 never-committed emitted `gen/tla/` output), the hand-derived expected reachable-distinct-state fingerprint
 set the explorer/TLC run is compared to, and the per-invariant expected-outcome catalogue (which invariant
-each seeded mutant must violate) — are **authored and committed in Phase 0 before `interpret`/`emitTLA` exist**, exactly as [`phase_02`](phase_02_formal_model_kernel.md#phase-summary) §M.1 pins the `ToyModel`
+each seeded mutant must violate) — are **authored and committed in this phase's oracle-pinning sprint,
+before the migration model they check exists**, on the same terms
+[`phase_02`](phase_02_formal_model_kernel.md#phase-summary) §M.1 pins the `ToyModel`
 oracles; a golden regenerated from `emitTLA`'s own output is not a test. Register 1, in-process, substrate
 `none`.
 

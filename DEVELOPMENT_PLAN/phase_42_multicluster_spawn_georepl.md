@@ -148,15 +148,15 @@ the following named, committed artifacts so no self-authored harness or post-hoc
   fixtures that each attempt to construct a `ChildInForceSpec` carrying a sibling or ancestor-only branch and
   **must fail to typecheck**, each asserting its **specific expected compile-fail locus/message** (the type
   error naming the absent constructor/field), paired with a positive fixture that differs only in projecting the
-  child's own subtree and **must** compile — authored and committed in Phase 0 before `ChildInForceSpec.hs`
+  child's own subtree and **must** compile — authored and committed in this phase's oracle-pinning sprint before `ChildInForceSpec.hs`
   exists. A grandchild path proves the projection composes to arbitrary depth.
 - **Confluence-classification oracle (independent of the SUT).** `test/inject/confluence/expected_classes.dhall`
   — a committed, hand-authored table classifying every crossing mutable invariant of the gate workflow as
-  *confluent* or *non-confluent*, authored in Phase 0. The classifier's output is checked against this table,
+  *confluent* or *non-confluent*, authored in this phase's oracle-pinning sprint. The classifier's output is checked against this table,
   never against its own re-derivation; an invariant absent from the table (unclassified) **must default to non-confluent** and be refused active-active wiring.
 - **Idempotent-write golden.** A committed content-addressed golden: replaying a duplicate or reordered
   cross-cluster batch yields the **identical fold result and identical blob keys** (exactly-once for
-  replicated-or-recovered effects), authored in Phase 0.
+  replicated-or-recovered effects), authored in this phase's oracle-pinning sprint.
 - **Committed seeded mutants (≥ 1 must go red).** From the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) operator set: (a) `classifier-default-confluent` —
   the unclassified default flipped from non-confluent to confluent (union-arm addition / guard weakening); the
   committed unclassified fixture is then wrongly admitted for active-active wiring and the classification oracle
@@ -586,7 +586,7 @@ managed-resource registry entry so teardown is a reconcile, not a state machine.
    code-review/parametricity argument): `test/compile-fail/ChildInForceSpec/` ([Gate integrity](#gate-integrity)) holds ≥ 2 negative fixtures
    that each attempt to construct a `ChildInForceSpec` carrying a sibling or ancestor-only branch and **must fail to typecheck**, each asserting its **specific expected compile-fail locus/message** (the type error
    naming the absent constructor/field), paired with a positive fixture that differs only in projecting the
-   child's own subtree and **must** compile — authored and committed in Phase 0 before `ChildInForceSpec.hs`
+   child's own subtree and **must** compile — authored and committed in this phase's oracle-pinning sprint before `ChildInForceSpec.hs`
    exists; the committed `project-identity` mutant ([Gate integrity](#gate-integrity)) makes a sibling branch appear in a child's delivered
    spec and the runtime subtree-inspection assertion goes red; mode (b) bricks with the parent sealed and
    unseals with it available; cross-child Transit decrypt fails; a graceful child teardown leaves zero surviving

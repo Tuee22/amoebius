@@ -151,14 +151,14 @@ flowchart LR
 *Orientation. The seams phase 11 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
 
 **Oracle-pinning (§M.1).** Every fixture, expected `ProvisionError` tag, and reference table this gate checks
-against is authored and **committed in Phase 0**, before `planInfrastructure`/`provision` exist — no oracle is
+against is authored and **committed in this phase's oracle-pinning sprint**, before `planInfrastructure`/`provision` exist — no oracle is
 regenerated from the implementation's own output, and the opaque `ProvisionedSpec` has *no* golden (a golden
 value would defeat its opacity; its correctness is checked only through the independent reference predicates
 below):
 
 ### Inherited positive corpus
 
-(authored in Phase 0, provisioned here): the nine per-arm positive fixtures
+(authored in this phase's oracle-pinning sprint, provisioned here): the nine per-arm positive fixtures
 `dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` for all nine capability arms — each already
 `bind`-checked against its `golden_servicespec_<arm>_<shape>` in Phase 10 — are provisioned against their
 declared target topologies. Two Phase-0-committed `ProvisionTargetSupply` fixtures drive the planner boundary:

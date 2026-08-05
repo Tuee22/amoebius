@@ -328,7 +328,7 @@ store is a single one-object atomic pointer flip.
 - **Phase-0-pinned oracles (committed before the encoder exists):** a golden fixture
   `amoebius-store/test/golden/manifest_canonical.cbor` plus its expected key
   `manifest_canonical.sha256` — the canonical-CBOR byte string and sha256 for one fixed logical manifest,
-  computed by an **independent CBOR canonicalizer** (not the amoebius encoder) and committed in Phase 0; and a
+  computed by an **independent CBOR canonicalizer** (not the amoebius encoder) and committed in this phase's oracle-pinning sprint; and a
   **specific-reason negative** `manifest_noncanonical.cbor` (the *same* logical manifest serialized in a
   non-sorted component order) whose expected failure is a **byte mismatch at the first component-ordering offset** and a key differing from the golden — paired with the positive that differs only in component
   ordering. Committed seeded mutant (operator: dropped-normalization / effect swap):

@@ -114,7 +114,9 @@ bytes of every one (`WF_vars`/`SF_vars` conjuncts, `[]`/`<>`/`~>` operators), an
 (`Always` rendered as `<>`), committed under `test/formal/mutants/` — which the golden **must turn red**, close
 the gap that a renderer swapping `StrongFair`→`WeakFair` or `[]`↔`<>` would otherwise slip through. The oracles this gate checks against — the hand-derived `ToyModel` reachable-distinct-state count and safety verdict, the `emitTLA ToyModel` byte-for-byte golden **under the canonical TLA+ rendering convention fixed in Sprint 2.3**, the **expected `INVARIANT`/`PROPERTY` name set** the emitted `.cfg` must equal exactly (the oracle the spec-weakening mutants above are caught by), and the mutation-operator/renderer-mutant catalog with their
 expected red outcomes — are
-**authored and committed in Phase 0 before `interpret`/`emitTLA` exist** (§M.1); a golden regenerated from the
+**authored and committed before `interpret`/`emitTLA` exist** (§M.1) — the convention-independent oracles in
+Phase 0, and the byte-for-byte golden in Sprint 2.3 itself, authored from the canonical rendering convention
+that sprint fixes as its first deliverable and before its renderer is written; a golden regenerated from the
 renderer's own output does not satisfy the gate. The emitted `.tla`/`.cfg` are rendered fresh from the
 committed `Model` source and are **never committed** to the repository. The run emits a **committed, schema-checked Register-1 ledger** ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)): its rows — safety proven-for-the-model at the declared bound *with the recorded
 distinct-state count*; liveness proven under the named fairness *with the recorded fairness-sensitivity

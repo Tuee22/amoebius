@@ -1,7 +1,9 @@
 # Phase 1: Example
 
-> **Purpose**: Fixture phase document.
-> **Read this if**: the example phase is next in the queue.
+>
+**Purpose**: Fixture phase document.
+>
+**Read this if**: the example phase is next in the queue.
 
 This fixture phase owns one gate and one sprint.
 Its design belongs to [example_doctrine.md](../documents/engineering/example_doctrine.md).
@@ -26,7 +28,7 @@ The reconciler observes the live shape and enacts only the typed actions its sta
 
 **Substrate:** none
 **Register:** 1
-**Gate:** the committed golden corpus decodes against an independent oracle and one committed seeded mutant turns it red (Gate; 1.2 V1).
+**Gate:** `cabal test example-spec` is green — the committed golden corpus decodes against an independent oracle and one committed seeded mutant turns it red (Gate; 1.2 V1).
 
 ## Doctrine adopted
 

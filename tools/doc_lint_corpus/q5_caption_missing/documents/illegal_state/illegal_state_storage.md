@@ -1,7 +1,9 @@
 # Example Storage Slice
 
-> **Purpose**: Fixture catalog entries for storage.
-> **Read this if**: a storage entry has to be read.
+>
+**Purpose**: Fixture catalog entries for storage.
+>
+**Read this if**: a storage entry has to be read.
 
 This fixture slice owns two storage entries.
 Numbering belongs to [the catalog](./illegal_state_catalog.md).

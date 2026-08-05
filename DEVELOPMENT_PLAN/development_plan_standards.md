@@ -382,16 +382,25 @@ happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gat
 **Validation** that feeds it — obeys the clauses below; a gate that omits an applicable clause is incomplete.
 
 1. **Oracle-pinning.** The fixtures, goldens, and expected error/locus tags a gate checks against are
-   authored and **committed in Phase 0** — extending the per-entry validation-locus ledger of the
-   illegal-state corpus to every gate — *before* the implementation exists.
+   **committed before the implementation they check exists**, and the party that writes that
+   implementation is not their sole author — extending the per-entry validation-locus ledger of the
+   illegal-state corpus to every gate.
    - A golden or expected value regenerated from the implementation's own output is not a test: it passes
      for any output, a stub's included.
-   - **Named exception — oracles depending on a later-phase enrichment.** Where an oracle cannot be authored
-     in Phase 0 because it depends on a catalog enrichment or registry a later phase produces (e.g. the
-     `Delivery-owner:`/`Case-family:` tags and `locus_registry.tsv` that
-     [phase_06](phase_06_illegal_state_corpus.md) adds), it is committed **at the start of that owning phase, before the implementation that consumes it** — never regenerated from that implementation.
-   - The before-the-implementation invariant holds; only the *phase* in which the oracle is pinned moves,
-     and the owning phase names the exception explicitly.
+   - **Where an oracle is pinned.** A cross-phase oracle set whose subject is settled before any
+     implementing phase opens — the UI gate goldens and their seeded mutants, and the formal-model oracles
+     [phase_00](phase_00_documentation_suite.md) enumerates — is authored and **committed in Phase 0**.
+     Every other oracle is committed **in its owning phase's first sprint — that phase's
+     *oracle-pinning sprint* — before the implementation sprint that consumes it**, never regenerated
+     from that implementation. This is the ordinary case,
+     not an exception: it covers every oracle depending on a catalog enrichment or registry a later phase
+     produces (e.g. the `Delivery-owner:`/`Case-family:` tags and `locus_registry.tsv` that
+     [phase_06](phase_06_illegal_state_corpus.md) adds). A phase states which of the two applies to its
+     own oracles; Phase 0 owes only the sets it enumerates.
+   - The before-the-implementation and separate-authorship invariants are the load-bearing ones. The
+     *phase* in which an oracle is pinned is a scheduling question, not a correctness one — pinning it
+     earlier than the phase that can author it buys nothing and, where the oracle depends on a later
+     deliverable, is not possible at all.
    - **Amendment.** A pinned oracle is not frozen — a renderer's output, an error tag, or an expected value
      may legitimately change when the design does.
    - It is **amended**, never rewritten from a failing run: the new expectation is authored from the
@@ -404,6 +413,8 @@ happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gat
      golden is authored under (encoding, ordering, indentation, and a content-stable generated-by stamp
      carrying no timestamp or run-varying field) — without one, a hand-authored byte-exact fixture is not
      writable and clause 1 cannot be satisfied ([generated_artifacts_doctrine.md §3](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)).
+     A byte-exact golden is therefore pinned no earlier than the sprint that fixes its convention: where
+     that convention is a later phase's deliverable, the golden is pinned in that phase — not in Phase 0.
 2. **Committed mutation quota.** Every gate names **at least one committed seeded mutant** — a deliberately
    broken implementation or spec — that the gate must turn red. Mutants are drawn from a defined operator set
    (guard negation/weakening, effect swap, dropped effect/`UNCHANGED`, quantifier flip, fairness drop,

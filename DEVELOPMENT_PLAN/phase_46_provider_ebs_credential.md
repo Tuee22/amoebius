@@ -174,7 +174,7 @@ tag-sweep apparatus (`mut-47.1-ignore-signal`, `mut-47.1-apply-over-quota`, `mut
 [Phase 47](phase_47_provider_dynamic_nodes.md). This phase inherits only the durable-EBS slice below.
 
 **Oracle-pinning (§M.1).** Every fixture, golden, and expected tag this gate checks against is authored and
-**committed in Phase 0**, before `Amoebius.Pulumi.{Ebs,Credential}` / `Amoebius.Storage.{EbsCsi,ProviderScaling}`
+**committed in this phase's oracle-pinning sprint**, before `Amoebius.Pulumi.{Ebs,Credential}` / `Amoebius.Storage.{EbsCsi,ProviderScaling}`
 exist — no oracle is regenerated from the implementation's own output:
 
 - **Representative topology slice** — the durable-EBS portion of the committed gate topology

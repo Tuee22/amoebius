@@ -1,7 +1,9 @@
 # Example Development Plan
 
-> **Purpose**: Fixture tracker.
-> **Read this if**: the fixture phase order has to be established.
+>
+**Purpose**: Fixture tracker.
+>
+**Read this if**: the fixture phase order has to be established.
 
 This fixture tracker owns phase order for the example tree.
 Rules belong to [the rulebook](development_plan_standards.md).
