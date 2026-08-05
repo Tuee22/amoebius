@@ -1,4 +1,4 @@
-# Phase 14: chain/Step kernel + `--dry-run` + boundary fake-tool harness
+# Phase 14: chain/Step kernel + `--dry-run` + boundary fake-tool harness + Gate-3 AST checker
 
 > **Purpose**: Seed the pure chain/Step reconcile kernel and its `--dry-run` plan render — `chain :: cfg ->
 > [Step]` as a pure value whose byte-for-byte preview is produced with no effects and whose descent is > golden-locked (Register 1) — then run the real amoebius binary over that same pure `[Step]` plan against fake > `kubectl`/`docker`/`pulumi` invoked by absolute path, asserting the exact argv stream and applied bytes > (Register 2), the two-register boundary that closes the pre-cluster conformance spine in-process, before any
@@ -99,7 +99,7 @@ directory (Part B).
 [Gate integrity](#gate-integrity), on **no substrate** — **(Part A · Register 1)** `cabal test chain-spec`,
 run inside a network-isolated namespace (`unshare -n`) with
 `KUBECONFIG`/cloud-credential/`VAULT_ADDR`/`VAULT_TOKEN` scrubbed, is green:
-- for each of the two Phase-0-committed cfg fixtures (`multi.cfg.json`, `minimal.cfg.json`) the real
+- for each of the two oracle-pinned cfg fixtures (`multi.cfg.json`, `minimal.cfg.json`) the real
   decode→bind/expand→plan/resolve-infrastructure→provision path followed by `chain :: cfg -> [Step]` renders a byte-for-byte `--dry-run` plan matching its committed `plan.golden`, the manifest-bearing Step projections are identity-disjoint subsets whose union equals the **Phase-13** whole-deployment `renderAll` golden byte-for-byte, the `nextFrameAfter`/`foldLift` descent goldens hold, the `[Step]` step set equals the hand-authored `expected_steps.json` table, and the canaried counter reads **zero** `stepRun` executions across the render (with a committed canary control case proving it reads nonzero when one is executed) - the two committed mutants (**m1** cfg service-drop, **m2** descent guard-weaken) turn `chain-spec` red
 - **(Part B · Register 2)** `cabal test boundary-spec` is green: the real amoebius binary runs the
   representative plan corpus (≥1 step for each tool amoebius actually invokes — `kubectl`, `docker`,
@@ -154,7 +154,7 @@ flowchart LR
 
 ### Part A (Register 1) — the pure plan-render corpus (`test/kernel/`)
 
-- **Representative set (§M.7, concrete corpus).** Exactly two Phase-0-committed raw cfg fixtures at
+- **Representative set (§M.7, concrete corpus).** Exactly two oracle-pinned raw cfg fixtures at
   `test/kernel/fixtures/cfg/`, each passed through the real
   decode→bind/expand→plan/resolve-infrastructure→provision path before `chain`: `multi.cfg.json` (≥ 2 frames,
   ≥ 3 declared services, with one service whose step is **out-of-frame** so its `stepRun` must never be reached)
@@ -170,7 +170,7 @@ flowchart LR
 - **Cross-golden render identity (§M.3, independent oracle).** `chain` produces a pure `[Step]` value whose
   manifest-bearing steps are identity-selected subsets of the one **Phase-13** `renderAll` golden for the
   fixture's whole `ProvisionedSpec`; their disjoint identity union equals that complete object set byte-for-byte,
-  and no Step invokes a per-service renderer. Both cfg fixtures are the same Phase-0-committed fixtures Phase 13
+  and no Step invokes a per-service renderer. Both cfg fixtures are the same oracle-pinned fixtures Phase 13
   golden-locked, so a corresponding whole-deployment `renderAll` golden exists for each fixture's
   `ProvisionedSpec`. The reference side is Phase 13's independently committed output, not the kernel's own.
 - **Committed mutants (§M.2), re-run every gate run.** `cabal test chain-spec` turns **red** on each of two
@@ -324,7 +324,7 @@ target paths, not yet built.
 **Blocked by**: Sprint 14.1.
 **Independent Validation**: `nextFrameAfter` and
 `foldLift` are pure functions with no `IO` in their type; a descent over the fixture chain (`chain` applied
-to `multi.cfg.json`) reproduces the Phase-0-committed golden frame/step assignment
+to `multi.cfg.json`) reproduces the oracle-pinned golden frame/step assignment
 (`descent/multi.descent.golden`), and the out-of-frame step is folded into the plan but its `stepRun` is
 provably never reached — "provably never reached" defined as `deepseq` of the fold-derived plan to normal
 form succeeding with the counting-constructor counter still reading zero (the IO action is never executed).
@@ -402,7 +402,7 @@ The whole sprint (📋 Planned).
 ## Sprint 14.4: The plan-render golden battery (`chain-spec`) — the Part-A gate 📋
 
 **Status**: Planned
-**Implementation**: `test/kernel/PlanSpec.hs`, the Phase-0-committed fixtures under
+**Implementation**: `test/kernel/PlanSpec.hs`, the oracle-pinned fixtures under
 `test/kernel/fixtures/cfg/` (`multi.cfg.json`, `minimal.cfg.json`),
 `test/kernel/fixtures/plan/{multi,minimal}.plan.golden`,
 `test/kernel/fixtures/descent/{multi,minimal}.descent.golden`, the hand-authored step-set table
@@ -412,7 +412,7 @@ committed in this phase's oracle-pinning sprint before the renderer exists.
 **Blocked by**: Sprint 14.3 (and Sprints 14.1, 14.2).
 **Independent Validation**: `cabal test chain-spec`, run inside `unshare -n` with credential env vars
 scrubbed, is green — the `--dry-run` render of each fixture chain (`chain` applied after real provisioning)
-matches its Phase-0-committed golden byte-for-byte, the Step projections form the exact identity-disjoint
+matches its oracle-pinned golden byte-for-byte, the Step projections form the exact identity-disjoint
 union of the Phase-13 committed whole-deployment `renderAll` golden, the step set matches
 `expected_steps.json`, the descent goldens hold, the canaried counter reads zero `stepRun` executions across
 the run (and the canary control case proves it reads nonzero when one is executed), and both committed
@@ -429,7 +429,7 @@ proves no action runs during render, emitting a Register-1 proven/tested/assumed
 correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Register 3).
 
 ### Deliverables
-- The Phase-0-committed corpus: `test/kernel/fixtures/cfg/{multi,minimal}.cfg.json` (the representative set —
+- The oracle-pinned corpus: `test/kernel/fixtures/cfg/{multi,minimal}.cfg.json` (the representative set —
   `multi` has ≥ 2 frames, ≥ 3 services, one out-of-frame step; `minimal` has one frame/one service), the plan
   goldens, the descent goldens, and the hand-authored `expected_steps.json` step-set table — all authored and
   committed **before** the renderer exists (a golden regenerated from the implementation is not a test).
@@ -623,7 +623,7 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Dsl/SanctionedApi.hs`,
-`dhall/amoebius/SanctionedApi.dhall`, and the Phase-0-committed oracle
+`dhall/amoebius/SanctionedApi.dhall`, and the oracle-pinned oracle
 `test/fixtures/phase14/sanctioned_api_expected.dhall` (the hand-authored module and effect allowlist,
 authored **independently** of `SanctionedApi.hs` per §M.3) — target paths, not yet built.
 **Blocked by**:
@@ -645,7 +645,7 @@ so that widening it is a reviewed amendment rather than something an extension a
 - A `SanctionedApi` value: the `NonEmptySet ModuleName` an extension may import and the
   `NonEmptySet SanctionedEffect` through which it may perform effects. There is no unrestricted-`IO`
   constructor; every effect an extension can reach is a named arm.
-- The Phase-0-committed independent allowlist oracle and its reconciliation check.
+- The oracle-pinned independent allowlist oracle and its reconciliation check.
 
 ### Validation
 1. The implementation surface equals the committed oracle; a module absent from the oracle but present in the
@@ -659,7 +659,7 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Dsl/AstCheck.hs` (the checker and the opaque
-`CheckedExtensionSource`), `test/dsl/AstCheckSpec.hs`; the Phase-0-committed corpus
+`CheckedExtensionSource`), `test/dsl/AstCheckSpec.hs`; the oracle-pinned corpus
 `test/fixtures/phase14/astcheck/` — a positive extension source set plus **one negative per `AstViolationReason` arm** (`UnsanctionedImport`, `RawIO`, `ForeignCall`, `UnsafeOperation`,
 `TemplateHaskell`, `OrphanInstance`), each paired with a positive differing only in that dimension, and each
 with its expected `modulePath`/`srcSpan`/`reason` recorded in `astcheck_negatives.expected` — target paths,
@@ -688,7 +688,7 @@ Deliver Gate 3: admit extension source against the Sprint-14.8 surface, and make
 - A `--why` diagnostic rendering a rejection as located facts rather than a bare refusal.
 
 ### Validation
-1. Positives accept; each negative rejects at its Phase-0-pinned reason **and** span.
+1. Positives accept; each negative rejects at its oracle-pinned reason **and** span.
 2. The compile-fail golden proves the seal: constructing `CheckedExtensionSource` outside the checker does not
    compile.
 3. Both seeded mutants turn the suite red.

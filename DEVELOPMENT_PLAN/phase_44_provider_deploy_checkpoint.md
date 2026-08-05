@@ -122,7 +122,7 @@ the deploy; `→ provider` (EKS) is the deploy target class, not a hardware subs
 managed node group) and writes real Vault-enveloped checkpoint objects into MinIO; no register-1/2 in-process
 check discharges it.
 
-**Gate:** an `InForceSpec` that, from a **linux-cpu** parent, issues a `pulumi up` under the
+**Gate:** `cabal test provider-deploy-checkpoint-live` is green: an `InForceSpec` that, from a **linux-cpu** parent, issues a `pulumi up` under the
 Deployment-`replicas=1` singleton (no bespoke election) that stands up a provider-managed **EKS control plane + one base managed node group** from the fixture's named CPU-only base `ProviderNodeClass` (`accelerator = None`),
 whose observed joined node's allocatable CPU, memory, logical pod-ephemeral capacity, closed
 nodefs/imagefs/containerfs identities/capacities, resident OCI content/snapshot inventory, storage-model
@@ -262,6 +262,7 @@ via Pulumi with the encrypted-MinIO backend + per-child Vault-envelope, the SSH-
 generalizes); Phase 33 gate (the Deployment-`replicas=1` singleton live-deploy path that runs the engine);
 Phase 30 gate (MinIO reachable as a standard HA platform service); Phase 29 gate (root Vault + the Transit
 envelope) — all external earlier-phase prerequisites.
+**Requires**: `cloud-account` — the credentialed provider account this deploy checkpoint targets.
 **Independent Validation**: from a linux-cpu parent, a
 `pulumi up` issued by the in-cluster singleton reaches a ready EKS control plane + base node group built
 from the fixture's named base-node-class capacity/capability shape; the parent first places the complete

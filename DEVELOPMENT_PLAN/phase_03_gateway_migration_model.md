@@ -68,7 +68,7 @@ explorer), analogous to the Phase-0 documentation lint and the Phase-2 kernel ro
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `emitTLA` renders the concrete `GatewayMigration` `Model` to a generated, never-committed
+**Gate:** `cabal test gateway-migration-model-spec` is green: `emitTLA` renders the concrete `GatewayMigration` `Model` to a generated, never-committed
 `.tla`/`.cfg` on which TLC reaches every named **safety** invariant — `UniqueGatewayOwner`,
 `SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover`, `NoTakeWithoutProvenFreshness`
 — with no counterexample **and** proves the **liveness** `PROPERTY`s `MergeConverges` /
@@ -371,7 +371,7 @@ axis (pairwise / independent / acyclic) **and** the co-equal **parameter-envelop
 - each edge's `Failover` data-loss budget ≤ the proven cap, its `dnsRecord` TTL within the modelled TTL
   regime, every `ColdSeedFromBackup` edge's `freshnessBound` within the modelled freshness regime the
   `NoTakeWithoutProvenFreshness` guard was proven over, and its clusters' offset/log domains within the
-  model's `CONSTANTS` — the four regime bounds being the Sprint-3.1 model `CONSTANTS`, **Phase-0-pinned in the §M.1 oracle and hard-coded in the reference predicate** (never read back from `StructuralFit.hs`) —
+  model's `CONSTANTS` — the four regime bounds being the Sprint-3.1 model `CONSTANTS`, **oracle-pinned in the §M.1 oracle and hard-coded in the reference predicate** (never read back from `StructuralFit.hs`) —
   where the whole *in-envelope* side (graph **and** parameter) is decided by an **independently-authored
   naive reference predicate living in `test/formal/CutoffSpec.hs` that shares no code with
   `src/Amoebius/Multicluster/StructuralFit.hs`** (§M.3) — not the fold or its helpers — so the equivalence
@@ -425,7 +425,7 @@ total fold, never a per-`InForceSpec` TLC.
   graph-shape conjuncts per [`gateway_migration_model_doctrine.md §5`](../documents/engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)
   (data-loss budget ≤ proven cap; `dnsRecord` TTL in the modelled TTL regime; every `ColdSeedFromBackup`
   edge's `freshnessBound` in the modelled freshness regime; offset/log domains within the model's
-  `CONSTANTS` — the four regime bounds being the Sprint-3.1 model `CONSTANTS`, Phase-0-pinned in the §M.1
+  `CONSTANTS` — the four regime bounds being the Sprint-3.1 model `CONSTANTS`, oracle-pinned in the §M.1
   oracle) — decided against an **independently-authored naive reference predicate** (§M.3) sharing no code
   with `StructuralFit.hs`, with committed `cover`/`checkCoverage` thresholds forcing each graph violation
   class (multi-active, cyclic, shared-DNS, **cluster-reuse-across-records**), each
@@ -434,7 +434,7 @@ total fold, never a per-`InForceSpec` TLC.
     acyclicity clause, **and** delete the budget-≤-cap / TTL-in-regime / `freshnessBound`-in-regime /
     offset-domain-within-`CONSTANTS` clause → each of the eight turns the equivalence red, every parameter
     mutant paired with the graph-identical positive it now wrongly accepts);
-  - A **committed Phase-0-pinned corpus** of in-envelope (accepted) and out-of-envelope fixtures, each
+  - A **committed oracle-pinned corpus** of in-envelope (accepted) and out-of-envelope fixtures, each
     rejected fixture asserting **which** clause it violates — multi-active, cyclic, shared-DNS,
     cluster-reuse-across-records, **and one graph-valid reject per parameter dimension (over-budget, TTL-out-of-regime, freshnessBound-out-of-regime, offset-domain-over-`CONSTANTS`)** — each paired with an
     accepted positive differing only in that one dimension, the four parameter fixtures **graph-identical**

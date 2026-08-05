@@ -223,6 +223,12 @@ machine-visible by emitting a ledger.
   correctness layer outside the gate's register is a mandatory **UNVERIFIED** row; and a design-proof
   (substrate `none`) ledger's acceptance token reads *proven-for-the-model*, never *runtime proven*. A ledger
   is evidence because it is committed and externally checked, not because the code under test emitted it.
+- **One committed path, centrally owned.** A gate's ledger is committed at
+  `test/golden/phase_<NN>_ledger.json` — one file per phase, zero-padded, beside the goldens that gate
+  checks. The convention is stated **here** and never re-derived per phase; `ledger_lint` resolves a phase's
+  ledger by that path alone. Without a pinned path the committed-ledger rule is unimplementable: a gate can
+  claim evidence in a file nothing else knows how to find, which is the failure the carve-out exists to
+  prevent.
 - **Skipping an applicable move marks that layer UNVERIFIED — never green.** This is the governing honesty
   rule, stated by the plan and inherited from the chaos doctrine: if a test move *applies* to a layer and
   the run does not perform it, the ledger records that layer as **UNVERIFIED**, not as silently passing. A

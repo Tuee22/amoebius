@@ -141,7 +141,7 @@ volume, writes and reads a marker across a real `pulumi destroy` and re-attach, 
 acceptance token reads *tested on the EKS provider target from a `linux-cpu` parent*, with durable-EBS retention
 recorded *correct-by-class* and the elevated-harness durable-EBS *reclamation* marked **deferred to [Phase 54](phase_54_test_topology_dsl.md), not asserted here**.
 
-**Gate:** an `InForceSpec` that, from a **linux-cpu** parent, spins up a provider cluster (via the
+**Gate:** `cabal test provider-ebs-credential-live` is green: an `InForceSpec` that, from a **linux-cpu** parent, spins up a provider cluster (via the
 [Phase 44](phase_44_provider_deploy_checkpoint.md) deploy), creates **one per-PV durable EBS volume in separate `protect`/`Retain` state**, renders a **static `ebs.csi.aws.com` PV** whose `volumeHandle` is that exact
 Pulumi-created EBS ID with matching Availability-Zone affinity, observes the **baked EBS CSI controller/node become Ready without any external provisioner** and with `kubernetes.io/no-provisioner` as the
 sole StorageClass, writes a **run-unique marker** through the bound `<ns>/sts0/pv_0` claim, records the EBS
@@ -191,7 +191,7 @@ exist — no oracle is regenerated from the implementation's own output:
   on durable retained volumes, per-run cluster create/delete allow; CSI runtime identity:
   `Describe*`/`AttachVolume`/`DetachVolume` allow, `CreateVolume`/`DeleteVolume` deny), authored **independently**
   of the generated `Amoebius.Pulumi.Credential` policy JSON (§M.1/§M.3).
-- **The baked-binary oracle** — `test/fixtures/phase46/ebs_csi_bake_expected.dhall`, the Phase-0-pinned
+- **The baked-binary oracle** — `test/fixtures/phase46/ebs_csi_bake_expected.dhall`, the oracle-pinned
   provider-driver binary/version inventory (controller, node, and required sidecars) the `BakeInventory`
   extension is checked against, authored independently of the base-image build.
 
@@ -317,6 +317,7 @@ program, own state, `protect`/`Retain`, `ProvisionedVolumeDemand` → `ProviderV
 Vault-Transit-enveloped MinIO backend **first delivered by [Phase 44](phase_44_provider_deploy_checkpoint.md) and reused here, not rebuilt** (target path; not yet built)
 **Blocked by**: [Phase 44](phase_44_provider_deploy_checkpoint.md) gate (the provider deploy + encrypted-MinIO checkpoint machinery this reuses for the durable-class state);
 [Phase 28](phase_28_retained_storage.md) gate (`no-provisioner` retained PVs + lossless rebind — the storage substrate the EBS backs) — external earlier-phase prerequisites.
+**Requires**: `cloud-account` — the account whose EBS quota this gate's volumes are drawn from.
 **Independent Validation**: one per-PV EBS
 volume is created in **separate** durable state; its `ProvisionedVolumeDemand` derives an integral-GiB
 `ProviderVolumeRequest` retaining usable/raw geometry, and the same rounded `provisionedBytes` is rendered
@@ -459,7 +460,7 @@ The whole sprint (📋 Planned).
 **Implementation**: `src/Amoebius/Storage/EbsCsi.hs` (typed static-only EBS CSI
 controller/node + PV renderer; no external provisioner), `docker/base/Dockerfile`,
 `src/Amoebius/Image/BakeInventory.hs`, `test/fixtures/phase46/ebs_csi_bake_expected.dhall` (the
-Phase-0-pinned provider-driver binary/version oracle) (target paths; not yet built)
+oracle-pinned provider-driver binary/version oracle) (target paths; not yet built)
 **Blocked by**:
 [Phase 25](phase_25_base_image_registry.md) gate (the multi-arch baked-binary supply chain this sprint extends with provider-only CSI binaries); [Phase 26](phase_26_object_reconciler.md) gate (the typed SSA object reconciler that installs the CSI components from typed manifests); Sprint 46.1 (the durable EBS `volumeHandle` the static PV binds over) — earlier-or-same-phase prerequisites.
 **Independent Validation**:

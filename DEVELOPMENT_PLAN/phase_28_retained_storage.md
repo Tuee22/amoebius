@@ -115,7 +115,7 @@ neither a logical-byte sum nor an unequal usable/raw sum is admissible. A live o
 mounted usable bytes, fs type, and the enforced `ENOSPC` boundary without consumption from a sibling volume or
 the enclosing shared host filesystem.
 
-The gate is passed only when all of the following hold, checked against the Phase-0-pinned oracle corpus and
+The gate is passed only when all of the following hold, checked against the oracle-pinned oracle corpus and
 seeded mutants named in [Gate integrity](#gate-integrity):
 
 - **Real teardown, not soft delete.** After `cluster delete`, an OS-boundary observer on the host (not the
@@ -165,7 +165,7 @@ seeded mutants named in [Gate integrity](#gate-integrity):
 
 ## Gate integrity
 
-This section pins the concrete corpus, the Phase-0-committed oracles, and the seeded mutants the Gate and each
+This section pins the concrete corpus, the oracle-pinned oracles, and the seeded mutants the Gate and each
 sprint Validation above reference. Everything named here is authored and committed in this phase's oracle-pinning sprint, before any
 implementation exists.
 
@@ -189,7 +189,7 @@ one PVC `miniodata` on one retained PV, marker = one object `rebind/nonce` in bu
 witness image is a Phase-25 baked binary served only from the in-cluster `distribution` registry (an
 OS-boundary containerd/registry-log observer confirms zero public-registry pull during the cycle).
 
-**Phase-0-committed oracles (independent of the implementation).**
+**oracle-pinned oracles (independent of the implementation).**
 - `test/live/fixtures/storageclass_expected.yaml` — the exact single-StorageClass golden (Sprint 28.1),
   hand-authored, not regenerated from the renderer.
 - `test/live/fixtures/claimref_table.csv` — the independent reference table mapping
@@ -352,7 +352,7 @@ only because amoebius placed them and nothing in the normal cluster lifecycle ca
   annotation, so a claim can never silently fall through to a dynamic provisioner.
 
 ### Validation
-1. Assert post-bring-up the live `kubectl get storageclass -o yaml` is byte-equal to the Phase-0-pinned golden
+1. Assert post-bring-up the live `kubectl get storageclass -o yaml` is byte-equal to the oracle-pinned golden
    `test/live/fixtures/storageclass_expected.yaml` (an independently hand-authored oracle, not regenerated from
    the renderer): exactly one class, `provisioner: kubernetes.io/no-provisioner`, `reclaimPolicy: Retain`,
    `volumeBindingMode: WaitForFirstConsumer`, and no `storageclass.kubernetes.io/is-default-class` annotation on
@@ -383,7 +383,7 @@ from each template's uniform post-presentation/post-allocation size and its memb
 `perBackingDebit[backing] = max(provisionedBytes) × membersOnBacking`, not a logical, usable, unequal
 pre-rounding, or ownership-erasing aggregate map; the skipped-rounding and collapsed-backing mutants turn
 that fixture red. For an accepted volume, a one-ordinal StatefulSet `volumeClaimTemplate` claim binds to the
-PV whose metadata and `claimRef` match the Phase-0-pinned independent oracle table
+PV whose metadata and `claimRef` match the oracle-pinned independent oracle table
 `test/live/fixtures/claimref_table.csv` (hand-authored from `(namespace, statefulset, ordinal)`, never
 derived from the renderer's own naming helper). Because the logical identity
 `<namespace>/<statefulset>/pv_<integer>` is not a legal `metadata.name` (`/` and `_` are forbidden), the
@@ -456,7 +456,7 @@ PVC creation path to exactly one shape.
   `∀ backing. Σ UniformClaimPlan.perBackingDebit[backing] <= observed[backing]`, where every named durable backing is disjoint from cache and node ephemeral storage and existing/proposed volumes are keyed by stable identity so an unchanged re-run is counted once. Spare bytes on one backing cannot cover another. A failed fold has no continuation that can create an image, mount, PV, or PVC. - Host-retained resize enactment consumes only a private `ProvisionedStorageMigration`: the binder starts from the still-live old private volume, replacement `DeclaredVolumeDemand`, and structural chunk/concurrency/ workspace policy; provisioning derives the new rounded volume, exact copy/verify Job `PodResourceEnvelope`, and per-backing old+new+workspace high-water. The Phase-26 snapshot-bound reconciler creates the replacement and renders/adopts that Job only when the complete transition still fits CPU, memory, ephemeral storage, pod/CSI slots, and backing bytes. Independent byte verification gates cutover and `ReclaimEligible`; failure keeps the old claim active and both volumes/partial workspace charged. Normal operation never deletes either backing. - The Phase-28 enactors for `AllocateWithinRetainedCarve` and `ShrinkByVerifiedMigration`. They accept only Phase 26's fresh, snapshot-bound `ValidatedStorageScalingAction`, immediately recheck the exact retained allocation map/backing/fingerprint, consume its plan-id-indexed token once, and return a post-attempt observed scaling snapshot. Allocation cannot exceed the witnessed residual carve; shrink delegates to the private migration above and never credits the old extent before verified cutover and observed cleanup. `CreateProviderCapacity` is absent from this host capability surface. - The invariant that a PVC is only ever born from a StatefulSet `volumeClaimTemplate` — no bare PVCs or Deployment-owned claims — exercised with a minimal one-ordinal witness StatefulSet. The only Job mount constructor consumes a private `ProvisionedStorageMigration` and is checked to name exactly its old and replacement claims while creating none.
 
 ### Validation
-1. Against the Phase-0-pinned durable-backing inventory, derive the complete post-reconcile PV inventory
+1. Against the oracle-pinned durable-backing inventory, derive the complete post-reconcile PV inventory
    (existing plus proposed, deduplicated by stable identity) and assert that every named backing
    independently satisfies `Σ(perBackingDebit) <= observedBacking`; an unchanged re-run produces the same
    map, not twice the debit.
@@ -575,7 +575,7 @@ durable backing and no normal-operation path can.
 - A live `RebindSpec` that asserts the round-trip and, honestly, that this phase never deletes durable bytes:
   the eventual reclaim of the test-flagged witness volumes is the elevated harness's sole prerogative, kept
   out of the normal path.
-- The Phase-0-committed gate-integrity artifacts of [Gate integrity](#gate-integrity): the two-witness
+- The oracle-pinned gate-integrity artifacts of [Gate integrity](#gate-integrity): the two-witness
   representative set, the `claimref_table.csv` / `storageclass_expected.yaml` oracles, the
   `no_retained_delete.sh` static check, the `test/live/fixtures/migration/` negatives-plus-positive
   verified-migration corpus, and the seeded mutants **M-soft-delete**, **M-seed-marker**,

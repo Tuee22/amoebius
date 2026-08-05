@@ -46,6 +46,9 @@ CHECKS = {
     "e": "status consistency: tracker marker equals the phase doc's Phase Status",
     "f": "gate integrity: gate names fixtures, a mutant, and an independent oracle",
     "f2": "gate integrity: gate names a backticked re-runnable acceptance command",
+    "f3": "gate integrity: a gate never requires a later phase as a pass condition",
+    "s1": "substrate discipline: one catalog member, at most one specialized",
+    "s2": "requires: every Requires token is in the closed section-F vocabulary",
     "g1": "catalog integrity: every entry carries a Validation-locus field",
     "g2": "catalog integrity: entry numbering contiguous, no gaps or duplicates",
     "g3": "catalog integrity: every index bullet anchor resolves",
@@ -70,6 +73,8 @@ CHECKS = {
     "p2": "document shape: a list item's own body stays under the item cap",
     "p3": "sentence budget: a prose sentence stays under the word cap",
     "p4": "document shape: a document stays under the document cap",
+    "p5": "gate budget: the **Gate:** paragraph stays under the gate cap",
+    "p6": "field budget: a sprint field stays under the field cap",
 }
 
 # Section-10 / section-13 caps and the diagram quota of the conventions doc.
@@ -84,15 +89,34 @@ DOC_CAP = 700             # a whole document, section 10.2
 # over paragraphs rather than lines, the corpus carries 1,588 sentences over 45 and
 # 141 over 90. The number here tightens only once the corpus clears the new one.
 SENTENCE_CAP = 90         # words in one prose sentence, section 13.1
+GATE_CAP = 45             # words in the **Gate:** paragraph, section P.3
+FIELD_CAP = 60            # words in one sprint field, section P.2
 
 # Reported, but not gate-failing, while the corpus cannot meet the stated rule.
-# f2 states section K's rule that a ✅ flip records "the exact re-runnable gate
-# command" and section O.3's "one acceptance command". Measured backlog at the time
-# this check landed: 15 of 65 phase gates name no backticked command inside their
-# gate span — phases 00, 02, 03, 08, 29, 32, 35, 37, 39, 42, 43, 44, 46, 47, 48.
-# f2 becomes blocking once those fifteen name theirs; it is advisory only so the
-# check can ship before that content decision is made, not to excuse it.
-ADVISORY = {"p3", "f2"}
+#
+# p5/p6 make sections P.3 and P.2 measurable for the first time — until now both were
+# stated rules the lint could not see. Measured backlog when they landed: 55 of 65
+# gates over the 45-word cap (worst phase_02 at 930) and 149 fields over the 60-word
+# cap (worst 412).
+#
+# Clearing them is *authored* work, not a mechanical pass, and two attempts showed
+# why. Truncating a gate at a word budget breaks parentheticals mid-phrase and, where
+# the acceptance command is not the paragraph's first backticked span, promotes a
+# bare tool name into the command slot. Substituting one uniform summary across 55
+# gates instead trips check `d`: 55 near-identical lines are near-duplicate normative
+# content by definition.
+#
+# The shape to converge on is already in the suite — the 10 conforming gates
+# (phases 16-20, 36, 55, 57, 58, 60, 62, 63) all read:
+#
+#   `<command>` passes the <phase's own corpus, oracle, coverage floors, mutants>
+#   named in [Gate integrity](#gate-integrity). <Next phase> does not open unless the
+#   ledger records Register <R> green and <the layers outside it> UNVERIFIED.
+#
+# ~40 words, two sentences, with the apparatus delegated by anchor and the specifics
+# drawn from that phase's own Gate integrity bullets — which is what makes each line
+# distinct enough to satisfy `d`. Doing that for 55 phases means reading each gate.
+ADVISORY = {"p3", "p5", "p6"}
 
 LEGAL_STATUS = {"Authoritative source", "Reference only", "Deprecated"}
 HDR_FIELDS = ["Status", "Supersedes", "Referenced by", "Generated sections"]
@@ -915,6 +939,134 @@ def check_l_honesty(doc, v):
 DECL_RE = re.compile(r"^\s*(?:data|newtype|type)\s+([A-Z]\w*)")
 
 
+# Section L: the linux-cpu baseline is implied by every gate; a gate may additionally
+# name at most one specialized member. `windows` is a catalog member no phase gates.
+SPECIALIZED = {"apple", "linux-cuda", "windows"}
+CATALOG = SPECIALIZED | {"linux-cpu", "none"}
+# Section F: the closed environment-precondition vocabulary.
+REQUIRES_VOCAB = {"accelerator-device-plugin", "cloud-account", "host-toolchain"}
+SUBSTRATE_RE = re.compile(r"^\*\*Substrate:\*\*\s*(.+?)(?=\n\*\*|\n##|\n\n)", re.M | re.S)
+REQUIRES_RE = re.compile(r"^\*\*Requires\*\*:\s*`([^`]+)`", re.M)
+# A gate routinely *mentions* later phases — to disclaim them, to say who owns an
+# apparatus, to record what supersedes its evidence. Those are healthy and the suite
+# is full of them. What section E forbids is a gate that **requires** a later phase.
+# So the check keys on requiring constructions, not on a whitelist of deferral
+# phrasings: a whitelist has to grow every time someone writes a new way of saying
+# "not mine", and each addition makes the check blunter.
+FORWARD_REQUIRE_RE = re.compile(
+    r"require(?:s|d)?\s+(?:the\s+|a\s+)?[Pp]hase|"
+    r"depend(?:s|ent)?\s+on\s+(?:the\s+)?[Pp]hase|"
+    r"after\s+the\s+[Pp]hase[- ]\d+|"
+    r"[Pp]hase[- ]\d+[^.;]{0,80}?\bmust\s+(?:be\s+)?(?:Ready|green|pass|passed|exist|available|first)|"
+    r"\bmust\b[^.;]{0,80}?[Pp]hase[- ]\d+[^.;]{0,40}?\b(?:first|before|Ready)|"
+    r"using\s+the\s+[Pp]hase[- ]\d+|"
+    r"is\s+a\s+pass\s+condition",
+)
+# Section L's two named forms name a rule rather than a fixed catalog member.
+SUBSTRATE_DEFERRED_RE = re.compile(r"per generated test|→\s*provider|parent-drives-provider", re.I)
+
+
+def _phase_no(rel):
+    m = re.match(r"DEVELOPMENT_PLAN/phase_(\d+)", rel)
+    return int(m.group(1)) if m else None
+
+
+def check_s_substrate(docs, docs_by_rel, v):
+    """Section L: baseline + at most one specialized, and the map agrees."""
+    smap = {}
+    reg = docs_by_rel.get("DEVELOPMENT_PLAN/substrates.md")
+    if reg is not None:
+        for i, line in enumerate(reg.lines, 1):
+            m = re.match(r"^\|\s*(\d+)\s*\|[^|]*\|\s*`?([a-z-]+)`?\s*[^|]*\|", line)
+            if m:
+                smap[int(m.group(1))] = m.group(2)
+
+    for doc in docs:
+        ph = _phase_no(doc.rel)
+        if ph is None:
+            continue
+        m = SUBSTRATE_RE.search(doc.text)
+        if not m:
+            v.append(Violation("s1", doc.rel, 1, "no **Substrate:** line"))
+            continue
+        line_no = doc.text.count("\n", 0, m.start()) + 1
+        # Only the declaration itself counts — the prose after the em dash routinely
+        # says which substrates are NOT exercised, and that is not a declaration.
+        head = re.split(r"[—(]", m.group(1), 1)[0]
+        named = {t for t in CATALOG if re.search(rf"\b{re.escape(t)}\b", head)}
+        if not named and SUBSTRATE_DEFERRED_RE.search(m.group(1)):
+            continue          # section L: deferred-to-generation / parent-drives-provider
+        if not named:
+            v.append(Violation("s1", doc.rel, line_no, "substrate names no catalog member"))
+            continue
+        spec = named & SPECIALIZED
+        if len(spec) > 1:
+            v.append(Violation("s1", doc.rel, line_no,
+                               f"gate requires two specialized substrates: {', '.join(sorted(spec))}"))
+        if ph in smap:
+            declared = sorted(spec)[0] if spec else ("none" if "none" in named else "linux-cpu")
+            if smap[ph] != declared:
+                v.append(Violation("s1", doc.rel, line_no,
+                                   f"substrate {declared} but substrates.md row {ph} says {smap[ph]}"))
+
+    for doc in docs:
+        for m in REQUIRES_RE.finditer(doc.text):
+            if m.group(1) not in REQUIRES_VOCAB:
+                v.append(Violation("s2", doc.rel, doc.text.count("\n", 0, m.start()) + 1,
+                                   f"Requires names {m.group(1)}, not in the section-F vocabulary"))
+
+
+def check_f3_forward_gate(docs, v):
+    """A gate may mention a later phase only to disclaim it, never as a pass condition."""
+    for doc in docs:
+        ph = _phase_no(doc.rel)
+        if ph is None:
+            continue
+        gm = re.search(r"^\*\*Gate:\*\*\s*(.+?)(?=\n\n|\n##)", doc.text, re.M | re.S)
+        if not gm:
+            continue
+        line_no = doc.text.count("\n", 0, gm.start()) + 1
+        tail = doc.text[gm.start():]
+        stop = re.search(r"^##\s+(Doctrine adopted|Sprints)\s*$", tail, re.M)
+        scope = re.sub(r"\s+", " ", tail[: stop.start()] if stop else tail)
+        for sent in re.split(r"(?<=[.;])\s+", scope):
+            later = {int(x) for x in re.findall(r"[Pp]hase[ -](\d{1,2})\b", sent)} - set(range(ph + 1))
+            if later and FORWARD_REQUIRE_RE.search(sent):
+                v.append(Violation("f3", doc.rel, line_no,
+                                   f"gate requires later phase(s) {sorted(later)} as a pass condition"))
+                break
+
+
+def _budget_words(s):
+    """Words in a span, ignoring markup that carries no prose weight."""
+    return len(re.sub(r"[`*\[\]()]", " ", s).split())
+
+
+# Section P.2/P.3. Both rules have the same remedy — delegate the body somewhere it
+# can be read on its own: a gate's apparatus into `## Gate integrity`, a long
+# validation into a numbered `### Validation` list.
+FIELD_RE = re.compile(r"^\*\*([A-Z][A-Za-z ]+)\*\*:(.*?)(?=\n\*\*|\n#{2,3}|\Z)", re.M | re.S)
+
+
+def check_p_budgets(doc, v):
+    if _phase_no(doc.rel) is None:
+        return
+    gm = re.search(r"^\*\*Gate:\*\*\s*(.+?)(?=\n\n|\n##)", doc.text, re.M | re.S)
+    if gm:
+        n = _budget_words(gm.group(1))
+        if n > GATE_CAP:
+            v.append(Violation("p5", doc.rel, doc.text.count("\n", 0, gm.start()) + 1,
+                               f"**Gate:** paragraph is {n} words, cap {GATE_CAP} — delegate the "
+                               f"apparatus to ## Gate integrity"))
+    for m in FIELD_RE.finditer(doc.text):
+        if m.group(1) == "Gate":
+            continue                      # counted by p5
+        n = _budget_words(m.group(2))
+        if n > FIELD_CAP:
+            v.append(Violation("p6", doc.rel, doc.text.count("\n", 0, m.start()) + 1,
+                               f"**{m.group(1)}** field is {n} words, cap {FIELD_CAP}"))
+
+
 def check_m_type_uniqueness(docs, v):
     owners = defaultdict(set)
     where = {}
@@ -1303,6 +1455,7 @@ def run(root, only=None):
         check_o_shape(doc, v)
         check_q_diagrams(doc, v)
         check_p_density(doc, v)
+        check_p_budgets(doc, v)
 
     check_c_referenced_by(docs, docs_by_path, v)
     check_d_near_duplicate(docs, v)
@@ -1311,6 +1464,8 @@ def run(root, only=None):
     check_g_catalog(docs, docs_by_rel, v)
     check_h_backlink(docs, v)
     check_m_type_uniqueness(docs, v)
+    check_s_substrate(docs, docs_by_rel, v)
+    check_f3_forward_gate(docs, v)
 
     if only:
         v = [x for x in v if x.check in only or x.check.rstrip("12345") in only]

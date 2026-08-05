@@ -161,7 +161,7 @@ below):
 (authored in this phase's oracle-pinning sprint, provisioned here): the nine per-arm positive fixtures
 `dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` for all nine capability arms — each already
 `bind`-checked against its `golden_servicespec_<arm>_<shape>` in Phase 10 — are provisioned against their
-declared target topologies. Two Phase-0-committed `ProvisionTargetSupply` fixtures drive the planner boundary:
+declared target topologies. Two oracle-pinned `ProvisionTargetSupply` fixtures drive the planner boundary:
 a **pre-existing** fixture that must yield `NoInfrastructureRequired`, and a **creation** fixture that must
 return one `InfrastructureRequired` plan, validate/CAS-enact its `ProvisionedProviderActionBatch` into a
 `ValidatedInfrastructureActionBatch`, and feed a receipt-bound `ObservedInfrastructureMaterialization` into
@@ -237,7 +237,7 @@ red when substituted:
    concrete `DiskCarveId`), each materialized one-for-one by an `ObservedNodeTargetBinding`;
 3. an independent **four-stage activation classifier** enumerates every source in `ProvisionedDeploymentParts`,
    classifies it into `Immediate | BootstrapSchedulerStage | AfterBootstrapAddonCutover |
-   AfterManagedCapacityReady` from a Phase-0-committed reference table, and rejects a missing/extra stage, a
+   AfterManagedCapacityReady` from an oracle-pinned reference table, and rejects a missing/extra stage, a
    managed-node taint/admission source placed in an early stage, a duplicate/omitted source-domain candidate, a
    map key unequal to its embedded identity, or a source whose activation disagrees with its provisioned owner —
    proving the seal produces exactly one equal-keyed `ProvisionedRenderSource` per `K8sObjectIdentity` with one
@@ -502,7 +502,7 @@ map key equals its embedded source identity; shared Namespace/quota/scheduler/ad
 sources have exactly one global owner; and the source's provisioned-part witness fixes its owner, fields,
 reconcile mode, and activation stage. A duplicate, omitted, key/embedded-identity-mismatched, or
 owner-mismatched candidate rejects **before** `ProvisionedSpec` is constructed. An independent four-stage
-activation classifier (from a Phase-0-committed reference table) classifies every source and rejects a
+activation classifier (from an oracle-pinned reference table) classifies every source and rejects a
 missing/extra stage, a managed-node taint/admission source placed in an early stage, or a source whose
 activation disagrees with its provisioned owner — so a managed-node taint/admission object cannot be swept
 into a first generic apply. No public function accepts one service projection for rendering.
@@ -549,7 +549,7 @@ The whole sprint (📋 Planned).
 battery), `test/capability/RuntimeStorageBindingProps.hs` (planned-slot/observed-UID domains, role/layout
 resolution, node-aggregate ownership/grouping, reservation/observed no-double-debit, and
 exact-fit/one-byte-short cases), `test/capability/ProvisionSealGate.hs` (the gate + validation-locus ledger
-with coverage-assertion machinery), the Phase-0-committed `ProvisionTargetSupply` boundary fixtures and
+with coverage-assertion machinery), the oracle-pinned `ProvisionTargetSupply` boundary fixtures and
 reference tables, and the seal-locus negatives
 `dhall/examples/{illegal_post_bind_expansion_overcommit,illegal_monitoring_work_over_budget,
 illegal_accelerator_vram_shortage,illegal_cuda_on_cpu_target,illegal_controller_child_unbounded,
@@ -669,7 +669,7 @@ The whole sprint (📋 Planned).
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — [§3](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)/[§4](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting) the envelope and
   the total fold, [§9.2](../documents/engineering/resource_capacity_sources.md#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget) monitoring cost folds, [§10](../documents/engineering/resource_capacity_doctrine.md#10-planning-ownership) planning ownership
 - [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — [§4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) the binding's
-  provisioning tail, [§4.1](../documents/illegal_state/illegal_state_techniques.md#41-pvcpv-binding-by-construction) the seal-locus family/CUDA rejection
+  provisioning tail, [§4.7](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) the seal-locus family/CUDA rejection
 - [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) `renderAll` is
   the sole public pure function; this seal produces its unique input
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) the load-bearing limit at

@@ -91,7 +91,7 @@ protocol and worker failover are substrate-agnostic in design but validated only
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** an `InForceSpec` test topology on the linux-cpu kind cluster **stores and fetches a content-addressed artifact by its manifest SHA** — a worker writes the artifact into the three-tier MinIO store and the
+**Gate:** `cabal test content-store-workflow-live` is green: an `InForceSpec` test topology on the linux-cpu kind cluster **stores and fetches a content-addressed artifact by its manifest SHA** — a worker writes the artifact into the three-tier MinIO store and the
 orchestrator reads it back by the manifest SHA carried in the workflow event — then **kills the active worker inside the critical window** (after the active worker's store write and *before* its `event` ack — the same
 window Sprint 37.4 injects in simulation) and **observes the lexically next-in-name-order standby take over the Pulsar Failover subscription** (single-writer delegated to Pulsar, never a bespoke amoebius election), reading
 the identity of the promoted consumer from the Pulsar admin `subscription/{sub}/consumers` API (not a
@@ -111,7 +111,7 @@ topology spins up, runs, and **tears down leak-free** — the postflight sweep i
 enumerated in Sprint 37.3 and fails hard on any non-empty remainder outside its explicitly named
 retained-by-design set — and **re-runs idempotently under a distinct `experiment-hash` namespace** (a cache-bypassing independent recompute, not a content-addressed
 store-hit), emitting a per-run proven/tested/assumed ledger artifact. The gate is checked against the
-Phase-0-committed fixtures named in Sprints 37.1/37.3 and MUST turn red on the committed seeded mutants named
+oracle-pinned fixtures named in Sprints 37.1/37.3 and MUST turn red on the committed seeded mutants named
 there (e.g. the insertion-order-leaking CBOR encoder and the ack-before-store-write worker); the representative
 service set is exactly the `round_trip_failover.dhall` topology's **one orchestrator + three workers** (one
 active, two name-ordered standbys) over the standing single-node Pulsar + MinIO.
@@ -270,10 +270,10 @@ them.
 Phase 26 gate (the modeled typed Job-terminal protocol), Phase 30 gate (MinIO reachable as a standard HA
 platform service) and Phase 28 gate (the `no-provisioner` retained PV the MinIO bytes land on); Phase 34
 gate (the `<app>/<bucket>` ObjectStore the store keys under) — all external earlier-phase prerequisites.
-**Live oracle and register**: run this suite at **Register 3** against the **single-node kind cluster's live MinIO** (the standing Phase-30 HA service on the Phase-28 retained PV), never an in-process or local S3 fake
+**Independent Validation**: run this suite at **Register 3** against the **single-node kind cluster's live MinIO** (the standing Phase-30 HA service on the Phase-28 retained PV), never an in-process or local S3 fake
 — the register is stated so its evidential weight is unambiguous. A gateway-admitted blob PUT under
 `If-None-Match: *` returns success on first write and treats the second write's `412` as success; a
-canonical-CBOR manifest encodes byte-identically from **two writers that first construct the manifest with distinct component insertion orders/permutations**, and both reproduce the **Phase-0-committed golden bytes and sha256 key** (cross-checked against an independent CBOR canonicalizer); a `pointers/latest` `If-Match`
+canonical-CBOR manifest encodes byte-identically from **two writers that first construct the manifest with distinct component insertion orders/permutations**, and both reproduce the **oracle-pinned golden bytes and sha256 key** (cross-checked against an independent CBOR canonicalizer); a `pointers/latest` `If-Match`
 CAS commits the winner and returns `412` to the loser, who re-reads and reapplies the typed advance
 predicate; a reader always observes a 32-byte SHA naming an immutable manifest, never torn state. A capacity
 drill fills the declared maximum write set, forces the pointer CAS to lose after blob/manifest PUT success,
@@ -325,7 +325,7 @@ store is a single one-object atomic pointer flip.
 - Store keys taken under a caller-supplied `experiment-hash` namespace string within the app's ObjectStore
   bucket; this sprint does **not** build `deriveExperimentHash`, the `ContentAddress` typeclass, or SplitMix
   seed derivation (Phase 48 kernel work).
-- **Phase-0-pinned oracles (committed before the encoder exists):** a golden fixture
+- **oracle-pinned oracles (committed before the encoder exists):** a golden fixture
   `amoebius-store/test/golden/manifest_canonical.cbor` plus its expected key
   `manifest_canonical.sha256` — the canonical-CBOR byte string and sha256 for one fixed logical manifest,
   computed by an **independent CBOR canonicalizer** (not the amoebius encoder) and committed in this phase's oracle-pinning sprint; and a
@@ -342,7 +342,7 @@ store is a single one-object atomic pointer flip.
 ### Validation
 1. Write the same blob twice and assert first-write success, second-write `412` treated as a no-op success.
 2. Encode the same logical manifest from **two writers that each first construct it with a distinct component insertion order / permutation** (so byte-identity is not tautological single-encoder reuse), and assert both
-   emit CBOR **byte-identical to the Phase-0-committed golden `manifest_canonical.cbor`** and a key equal to the
+   emit CBOR **byte-identical to the oracle-pinned golden `manifest_canonical.cbor`** and a key equal to the
    committed `manifest_canonical.sha256` — the golden being authored by an independent CBOR canonicalizer, never
    regenerated from the amoebius encoder. Assert the specific-reason negative `manifest_noncanonical.cbor` fails
    with a **byte mismatch at the first component-ordering offset** (not merely "differs"), and that the
@@ -493,7 +493,7 @@ bespoke amoebius election — and assemble the phase gate.
   (iii) **MinIO objects under the run's `experiment-hash` prefix** outside a **named retained-by-design set**
   (the durable test-flagged bytes reclaimed by Phase 54). The sweep emits its **full inventory list and the named retained set** into the per-run ledger; **any non-empty remainder outside the retained set is a hard gate failure**. (Durable-byte reclaim staying with Phase 54 is the *only* exemption, and only for the
   explicitly named retained set — not a blanket class exemption.)
-- **Phase-0-pinned oracles and committed mutants (authored before the runtime exists):** the committed no-fault
+- **oracle-pinned oracles and committed mutants (authored before the runtime exists):** the committed no-fault
   reference `pointers/latest` HEAD bytes `test/golden/head_nofault.bin`; the expected promoted-consumer name
   table `test/golden/failover_rank.txt` (independent of the runtime's own ranking); and committed seeded
   mutants the gate MUST turn **red** — `mutant/ack-before-store-write` (operator: effect reorder — worker acks

@@ -22,8 +22,8 @@ No gate has run.
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
 - [Gate integrity](#gate-integrity)
-- [Doctrine adopted](#doctrine-adopted)
 - [Resource provision — multi-zone UI fault envelope](#resource-provision--multi-zone-ui-fault-envelope)
+- [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 58.1: Run the multi-zone UI failure campaign 📋](#sprint-581-run-the-multi-zone-ui-failure-campaign-)
 - [Documentation Requirements](#documentation-requirements)
@@ -122,14 +122,6 @@ The gate also turns red for `test/mutants/phase_58_redis_one_node.dhall`,
 `test/mutants/phase_58_redis_persistent_receipt.patch`, and
 `test/mutants/phase_58_skip_cursor_repair.patch`.
 
-## Doctrine adopted
-
-- Adopt [`low_code_ui_runtime_doctrine.md` §14 — runtime role, deployment, and HA](../documents/engineering/low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability): stateless replicas and resumable subscriptions, with no leader election.
-- Adopt [`daemon_topology_doctrine.md` §4 — unelected workers](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected): scale UI workers without granting control-plane authority.
-- Adopt [`platform_services_doctrine.md` §2 — one topology across replica counts](../documents/engineering/platform_services_doctrine.md#2-ha-always--including-replicas1): distinguish an HA-capable shape from an observed HA outcome.
-- Adopt [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): bind the claim to an off-cluster challenge and provider-observed fault.
-- Adopt [`ui_realtime_coordination_doctrine.md §§5–8`](../documents/engineering/ui_realtime_coordination_doctrine.md#5-redis-is-ephemeral-platform-internal-coordination): survive one-zone Redis/Sentinel and UI-server loss through bounded reconnect plus durable cursor/receipt repair.
-
 ## Resource provision — multi-zone UI fault envelope
 
 Before mutation, the provision seal accounts for all UI-server/projector replicas, topology and disruption
@@ -139,6 +131,14 @@ Redis/Sentinel members, connection/key/client/output-buffer demand, failover and
 repair reads, and the external operation matrix. An
 unschedulable third zone, one-short post-fault dependency, one-short disruption budget, or unbounded replay
 buffer refuses before the first provider or Kubernetes mutation.
+
+## Doctrine adopted
+
+- Adopt [`low_code_ui_runtime_doctrine.md` §14 — runtime role, deployment, and HA](../documents/engineering/low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability): stateless replicas and resumable subscriptions, with no leader election.
+- Adopt [`daemon_topology_doctrine.md` §4 — unelected workers](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected): scale UI workers without granting control-plane authority.
+- Adopt [`platform_services_doctrine.md` §2 — one topology across replica counts](../documents/engineering/platform_services_doctrine.md#2-ha-always--including-replicas1): distinguish an HA-capable shape from an observed HA outcome.
+- Adopt [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): bind the claim to an off-cluster challenge and provider-observed fault.
+- Adopt [`ui_realtime_coordination_doctrine.md §§5–8`](../documents/engineering/ui_realtime_coordination_doctrine.md#5-redis-is-ephemeral-platform-internal-coordination): survive one-zone Redis/Sentinel and UI-server loss through bounded reconnect plus durable cursor/receipt repair.
 
 ## Sprints
 

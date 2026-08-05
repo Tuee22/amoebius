@@ -176,7 +176,7 @@ reimplementing training, or turning a checkpoint identifier into browser authori
 
 - A linked Haskell jitML UI adapter with typed training, progress, readiness, model-invocation, and error ports,
   preserving the original command/workflow identity into the durable terminal receipt.
-- One Dhall UI module released as Phase-40 content under the unchanged generic runtime image.
+- One Dhall UI module released as Phase-40 content under the unchanged amoebius runtime image.
 - Phase-0 public-contract, interaction, readiness/owner/scope, and hostile-output fixtures.
 - Committed readiness, tenant-scope, same-tenant-owner, local-only-route, and Redis-as-receipt mutants.
 - A Register-3 ledger with challenge, authority provenance, external observer digests, and teardown evidence.

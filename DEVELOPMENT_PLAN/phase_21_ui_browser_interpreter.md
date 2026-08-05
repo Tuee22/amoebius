@@ -1,4 +1,4 @@
-# Phase 21: UI browser interpreter
+# Phase 21: Generic browser interpreter
 
 > **Purpose**: Build the one generic PureScript browser interpreter for immutable `ClientPlan` values and
 > validate its bounded view, event, route, navigation, accessibility, and same-origin effect behavior against
@@ -14,7 +14,7 @@ No gate has run.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>

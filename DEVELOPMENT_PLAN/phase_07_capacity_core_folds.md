@@ -334,7 +334,7 @@ and its role-indexed CPU/memory reserve, the closed substrate-indexed `HostRunti
 `Amoebius/Capacity/*.hs` modules are added by phases 8 and 9); `src/Amoebius/Capacity/Fold.hs`
 (`fits`/`podFits`/`carve`/`place`, the request-reservation + finite-limit proofs, the host → VM → workload
 nesting, and the
-[§4.1](../documents/illegal_state/illegal_state_techniques.md#41-pvcpv-binding-by-construction)
+[§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 static/elastic branch) — target paths, not yet built.
 **Blocked by**: Sprint 7.1 (the `Topology` `place`
 folds over); Phase 5 gate (the IR + decoder).

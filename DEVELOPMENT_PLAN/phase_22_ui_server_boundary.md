@@ -1,4 +1,4 @@
-# Phase 22: UI server boundary
+# Phase 22: UI-server boundary
 
 > **Purpose**: Add the UI-server responsibility to the amoebius executable and test with boundary fakes that
 > every request is freshly authenticated, scoped, authorized, freshness-checked, and dispatched before effect.

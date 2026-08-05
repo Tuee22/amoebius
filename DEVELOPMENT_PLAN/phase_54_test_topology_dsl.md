@@ -15,7 +15,7 @@ No gate has run.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -139,7 +139,7 @@ identity-complete accelerator-owner epoch demand, and distinct provider compute/
 obligations fit the single named substrate; an impossible generated
 proposal is rejected with zero effects rather than launched and left pending.
 
-The gate is checked against these committed, Phase-0-pinned criteria (see
+The gate is checked against these committed, oracle-pinned criteria (see
 [Gate integrity](#gate-integrity)):
 
 1. **Leak-freedom by implementation-independent inventory diff, not tag query.** Leak-freedom is asserted by a
@@ -147,7 +147,7 @@ The gate is checked against these committed, Phase-0-pinned criteria (see
    enumeration of the substrate scope (the `kind` API inventory via `kubectl get all,pv,pvc`; one
    allocation-level record for every retained backing under host `${RETAINED_ROOT}`, read from outside all node
    containers and keyed by relative backing identity/kind plus observed allocation extent where available,
-   rather than mutable payload contents; plus the AWS account/region through a Phase-0-pinned exhaustive set
+   rather than mutable payload contents; plus the AWS account/region through an oracle-pinned exhaustive set
    of service-native read-only `List*`/`Describe*` calls for every cloud resource type the representative set
    can allocate, with AWS Resource Explorer `tag:none` as an additional untagged-resource cross-check) must
    equal the postflight enumeration of that same scope — not merely an empty query for the harness's own
@@ -255,7 +255,7 @@ flowchart LR
 ```
 *Orientation. The seams phase 54 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
 
-**Committed, Phase-0-pinned oracles and mutants (authored before any implementation exists).**
+**Committed, oracle-pinned oracles and mutants (authored before any implementation exists).**
 - `test/golden/phase_54_ledger.json` — the externally hand-authored expected ledger of Gate criterion 4;
   authored independently of `src/Amoebius/Test/Ledger.hs`, it fixes the derived applicable-move set and the
   UNVERIFIED entry for the topology's declared-but-unfaulted invariant.
@@ -627,6 +627,8 @@ The whole sprint (📋 Planned).
 scope/domain/ownership/grouping, SplitRuntime boundary and alias mutants) (target paths; not yet built)
 **Blocked by**: Sprint 54.1 (the `TestTopology` type it emits values of); Phase 24 gate (substrate detection
 — the pure host classification and the full-path substrate probe)
+**Requires**: `cloud-account` — credentials whose authority this sprint *probes*; it asserts what they may
+do, and requires no pre-existing provider resource.
 **Independent Validation**: (Register 2 —
 pure, over Phase-14 fake tools; its live probe layer recorded UNVERIFIED in the ledger, with the real-probe
 discharge deferred to the Register-3 Gate): against a fixed fake host classification + a fixed fake
@@ -832,7 +834,7 @@ untagged and backing-only leaks are visible.
   backing bytes; PVC/PV API objects may still disappear through ordinary cluster lifecycle.
 - A postflight sweep that, after teardown, asserts leak-freedom by the implementation-independent inventory
   diff of Gate criterion 1 — a substrate-scope enumeration (`kubectl get all,pv,pvc`; the external
-  `${RETAINED_ROOT}` allocation inventory; the Phase-0-pinned service-native AWS `List*`/`Describe*` inventory
+  `${RETAINED_ROOT}` allocation inventory; the oracle-pinned service-native AWS `List*`/`Describe*` inventory
   plus Resource Explorer `tag:none`) taken pre- and post-run and compared, not merely a query for the harness's
   own test-owned tag — surfacing any resource present post-run but absent pre-run as a leak (with the leak list
   in the record) while correctly *not* flagging a retained, by-design resource present in both enumerations.

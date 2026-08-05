@@ -155,7 +155,7 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 `Phase Summary` is declarative present tense ("this phase stands up …"), not a promise log. The **Gate** is a
 single, checkable acceptance condition — ideally an `InForceSpec` topology that spins resources up, runs a
 workflow, and tears them down. A phase may state an optional **Phase scope** or legacy **Session scope** note;
-the enforceable sizing rules are owned by [§O](#o-single-session-phase-scope) and apply whether or not that
+the enforceable sizing rules are owned by [§O](#o-sprint-sized-seams-and-bounded-phase-gates) and apply whether or not that
 summary note is present.
 
 **Two optional sections have fixed slots and fixed names**, both in the gate-detail block between
@@ -215,7 +215,8 @@ Each `## Sprint N.Y: <Name> <marker>` carries this header then these sections:
 
 **Status**: Planned
 **Implementation**: <planned module path(s)> (required, becomes concrete when Done)
-**Blocked by**: <earlier sprint id | external prereq | none>
+**Blocked by**: <earlier sprint id | earlier phase gate | none>
+**Requires**: <environment precondition(s) no phase builds | omit if none>
 **Independent Validation**: <how this sprint is checked on its own>
 **Docs to update**: <the governed documents/engineering/*.md this sprint must keep in sync>
 
@@ -234,6 +235,29 @@ Adopt <doctrine section cited by name, §H>; <what this sprint delivers>.
 
 `Implementation` for a Planned sprint names the **target** module path (the intended layout from
 [`system_components.md`](system_components.md)), honestly marked as not-yet-built.
+
+**`Blocked by` and `Requires` are different obligations, and conflating them is what makes a plan look
+unbuildable when it is not.**
+
+- **`Blocked by`** names **phases and sprints only**, and never one later than itself. It is the
+  numerical-order contract: a phase's gate may consume only what a phase ≤ its own number delivers.
+- **`Requires`** names an **environment precondition** — a fact about the host, account, or developer
+  machine that *no phase builds and none ever will*, because it is not amoebius's to build. It is declared
+  so it is checked at gate start rather than assumed, exactly as the substrate is
+  ([`substrates.md` §2](substrates.md#2-substrate-inventory) owns the substrate half of the same idea).
+
+| `Requires` precondition | What it is | Declared by |
+|---|---|---|
+| `accelerator-device-plugin` | A Kubernetes device plugin advertising `nvidia.com/gpu` for the host's device vector — part of what *makes* a host `linux-cuda`, so it belongs to the host, not to a phase | Phase 51 |
+| `cloud-account` | A credentialed provider account carrying the quota and permissions the `Managed Eks` registry entry names | Phases 44–47, 54 |
+| `host-toolchain` | The `ghc`/`cabal`/`dhall`/`spago`/`purs`/Chromium binaries present on the developer host. Their *resolved absolute paths* are a Phase-1 deliverable; their presence is not | Phase 1 |
+
+No phase requires a live public DNS zone: [`phase_32`](phase_32_keycloak_ingress.md) accepts a local ACME
+chain in place of public issuance, and Phase 3's `dnsRecord` TTLs are model parameters, not live records.
+
+Together they make numerical-order developability decidable: **every artifact a gate names is either
+delivered by a phase ≤ its own number, or declared under `Requires`.** An artifact that is neither is an
+orphan prerequisite and a defect — not a reason to invent a new owner phase.
 
 **The four `###` sub-headings repeat once per sprint, so their anchors collide — and that is expected.**
 `Objective`, `Deliverables`, `Validation`, and `Remaining Work` appear in every sprint block, so GitHub mints
@@ -359,11 +383,18 @@ The ledger names the register it reached and marks every correctness layer outsi
 
 ## L. One-substrate discipline
 
-Each phase's acceptance gate requires **at most one** substrate (`none` for the pre-cluster band; else
-`apple` | `linux-cuda` | `linux-cpu` | `windows`), named in the phase's `Phase Summary` and tracked in
-[`substrates.md`](substrates.md). This
-prevents cross-substrate flip-flopping mid-development. A phase whose work touches several substrates is
-split until each gate is single-substrate.
+Every acceptance gate runs on the **always-available `linux-cpu` baseline** and may additionally require
+**at most one specialized substrate** — `apple` or `linux-cuda`. A gate naming a specialized member *implies*
+the baseline and need not restate it: a `linux-cuda` host **is** a Linux host, and an `apple` host supplies
+the baseline through its Lima VM ([`substrates.md` §3](substrates.md#3-virtualized-substrates-lima--wsl2)).
+**No gate may require two specialized substrates.** The pre-cluster band names `none` — no host at all.
+
+The gate's substrate is named in the phase's `Phase Summary` and tracked in
+[`substrates.md`](substrates.md). This prevents cross-substrate flip-flopping mid-development: a phase whose
+work would need both an Apple host and a CUDA host is split until each gate needs at most one.
+
+`windows` remains a catalog member ([`substrates.md` §2](substrates.md#2-substrate-inventory)) but **no phase
+in 0–64 gates it**; it is a declared future member, not a validated one.
 
 **Two named forms satisfy the one-substrate rule without naming a fixed catalog member on the parent gate**, and
 both keep the discipline checkable rather than bending it:
@@ -516,8 +547,6 @@ Pre-implementation, this section is dormant: with every phase 📋 Planned bar t
 complete has a documented reverse move rather than an ad-hoc one.
 
 ---
-
-<a id="o-single-session-phase-scope"></a>
 
 ## O. Sprint-sized seams and bounded phase gates
 

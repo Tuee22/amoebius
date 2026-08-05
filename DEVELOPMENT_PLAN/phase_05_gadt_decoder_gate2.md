@@ -15,7 +15,7 @@ No gate has run.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -232,7 +232,10 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Dsl/Types.hs` (the GADT-indexed `ClusterIR`,
-normalized resource/capacity declaration fields, and component ADTs),
+normalized resource/capacity declaration fields, and component ADTs, including the Gate-2 side of the three
+surfaces [Phase 4](phase_04_dhall_gate1_schema.md) adds to the schema — `ExtensionSpec` with its
+non-optional `extMonitoring : NonEmpty MonitoringSurface`, the PACELC surface, and the closed
+`BackupPolicy` — so an extension without monitoring cannot be decoded any more than it can be authored),
 `src/Amoebius/Dsl/SmartConstructors.hs`, `src/Amoebius/Dsl/Ref.hs` (the phantom tenant `Ref tenant a` and
 ownership indices) — target paths, not yet built.
 **Blocked by**: Sprint 5.1.
@@ -722,7 +725,7 @@ provisioning boundary.
     source/workload key equality, coexistence-domain equality, structural residency
     byte/shard/interconnect declarations, concrete/template supply raw/reserved/net-VRAM/link declarations,
     and the substrate-indexed host enforcement arm plus finite Apple supervisor operands.
-- A Phase-0-committed `tests/oracle/gate2/resource_field_inventory.tsv` that names the complete normalized
+- An oracle-pinned `tests/oracle/gate2/resource_field_inventory.tsv` that names the complete normalized
   field/union inventory independently of `decodeCluster`, plus committed decoder mutants that drop
   `ephemeralStorage`, erase a physical-carve or `allocatableRawBytes` field, erase a `NamedDiskCarve` parent
   index/extent arm/geometry field, erase `kubeletMetadataModel` or one runtime-metadata source identity,

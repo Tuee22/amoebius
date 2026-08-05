@@ -225,7 +225,7 @@ the three-read `detect`)
 phase).
 **Independent Validation**: a unit table of `classify` over the enumerated cross-product asserts
 each expected substrate and each expected hard failure with zero host I/O, checked against a
-**Phase-0-committed hand-authored decision table** (§M.1, §M.3) that is written independently of `classify`
+**oracle-pinned hand-authored decision table** (§M.1, §M.3) that is written independently of `classify`
 — never regenerated from it. The representative set is defined explicitly (§M.7): OS ∈ {`"linux"`,
 `"darwin"`, one unknown-OS sentinel e.g. `"freebsd"`}, arch ∈ {`"x86_64"`/`amd64`, `"aarch64"`/`arm64`, one
 unknown-arch sentinel e.g. `"ppc64le"`}, GPU ∈ {present, absent} — the full 3×3×2 = 18-cell product, so that
@@ -248,13 +248,13 @@ a knob.
   NVIDIA GPU promotes Linux to `linux-cuda`.
 - An `Either`-returning `detect :: IO (Either String Substrate)` wrapping `classify` over the three reads
   (non-`amd64`/`arm64` a hard `Left`), classifying the gate host as `linux-cpu` (no GPU).
-- A **Phase-0-committed independent decision table** (the 18-cell OS × arch × GPU oracle, authored before
+- An **oracle-pinned independent decision table** (the 18-cell OS × arch × GPU oracle, authored before
   `classify` exists and never regenerated from it) and the committed `classify` mutant M1 (GPU-guard negated)
   that Validation 2 turns red.
 
 ### Validation
 1. Unit-test `classify` across the enumerated 18-cell cross-product (OS × arch × GPU, including the unknown-OS
-   and unknown-arch sentinels) with no host access, asserting each cell against the Phase-0-committed
+   and unknown-arch sentinels) with no host access, asserting each cell against the oracle-pinned
    independent decision table — including the Intel-Mac and Linux+GPU hard-failure cells, and the two sentinel
    `Left` cells. **Specific-reason negatives (§M.8):** each `Left` cell asserts its *expected reason string/tag*
    (e.g. `apple-arm64-only` for `darwin`+`amd64`, `unknown-arch` for the arch sentinel), paired with the
@@ -272,7 +272,7 @@ The whole sprint (📋 Planned).
 **Implementation**: `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs`
 (target: the `HostTool` enum + `AbsExe` newtype + `HostConfig` tool map + the `installAndVerify` driver)
 **Blocked by**: Sprint 24.1.
-**Independent Validation**: pure `[InstallStep]` plan tests per substrate asserted against **Phase-0-committed golden plans** (authored independently of the reconciler, not regenerated from it — §M.1, §M.3), plus a property that `mkAbsExe` rejects every non-absolute path with
+**Independent Validation**: pure `[InstallStep]` plan tests per substrate asserted against **oracle-pinned golden plans** (authored independently of the reconciler, not regenerated from it — §M.1, §M.3), plus a property that `mkAbsExe` rejects every non-absolute path with
 `cover`/`classify` obligations (§M.4) forcing the reject branch; on the host, ensuring
 `kind`/`kubectl`/`cabal`/`ghcup` **from a machine-verified clean state** (a preflight probe, recorded in the
 phase ledger, shows ghc/cabal/ghcup/kind/kubectl all absent before the first run) then re-running is a
@@ -305,12 +305,12 @@ than merely discouraged.
   the same `BootstrapExecutionEnvelope` against CPU/memory and named `ToolInstall` disk residual, mints a
   single-use fingerprint token, and rechecks it immediately before the install. An overdraw/unknown backing or
   changed fingerprint performs zero package-manager mutations.
-- **Phase-0-committed oracles/mutants:** the per-substrate `[InstallStep]` golden plans, the `mkAbsExe`-reject expected-error set, and the committed mutant M2 (`Ensure` resolves one tool by bare name) that Validation 4
+- **oracle-pinned oracles/mutants:** the per-substrate `[InstallStep]` golden plans, the `mkAbsExe`-reject expected-error set, and the committed mutant M2 (`Ensure` resolves one tool by bare name) that Validation 4
   turns red under the `execve` observer.
 
 ### Validation
 1. Unit-test each reconciler's `[InstallStep]` plan as a pure value per substrate (no package-manager call),
-   asserting equality against the **Phase-0-committed golden plans** — the reference side is the committed
+   asserting equality against the **oracle-pinned golden plans** — the reference side is the committed
    hand-authored table, never the reconciler's own output (§M.3).
 2. Property-test that `mkAbsExe` rejects non-absolute paths, with a `cover`/`classify` obligation requiring at
    least 20% of generated inputs to hit the non-absolute (reject) branch and at least 20% the absolute branch
@@ -535,7 +535,7 @@ and discharging the live-inventory cross-check of
   as foreign/static commitments, minting `BootstrapCapacitySchedulerReady` then `ManagedCapacityReady`, and
   leaving the scheduler bootstrap Pod as the sole `default-scheduler` exception — is Phase 27's scope and is
   specified there.
-- **Phase-0-committed divergent-start fixtures** (§M.1) with their expected converged observation, and the
+- **oracle-pinned divergent-start fixtures** (§M.1) with their expected converged observation, and the
   committed mutant M3 (reconciler replaced by a `kind get clusters | grep <name>` one-shot guard) that the
   divergence-repair validation turns red.
 - A **teardown + leak-free postflight sweep** (`kind delete cluster`, then assert no residual kind cluster,
@@ -617,7 +617,7 @@ and discharging the live-inventory cross-check of
    kubeconfig file bytes)` is byte-identical before and after the re-run, and the re-run's `execve` audit log
    contains zero `kind create` and zero mutating package-manager calls** — leaving the single node `Ready`, and
    printing the per-managed-resource empty-diff discover result.
-5. **Divergence-repair ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — forecloses the one-shot-guard stub).** From each Phase-0-committed
+5. **Divergence-repair ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — forecloses the one-shot-guard stub).** From each oracle-pinned
    partially-converged start state — at minimum (a) the kind cluster exists but its node container is stopped /
    `NotReady`, and (b) the kubeconfig context is missing — run the identical command; assert it converges to
    exactly one `Ready` node **without recreating the cluster** (no `kind create` for an existing cluster in the

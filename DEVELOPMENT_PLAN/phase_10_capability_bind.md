@@ -98,7 +98,7 @@ corpus battery, analogous to the Phase-5 decode battery.
 under **both** a `SingleNode` and a `Distributed { nodes = n }` (n ≥ 2) shape) every positive need decodes and
 `bind`s to a well-typed `BoundServiceSpec` and assembles into a `BoundDeployment` in-process, with the two bound
 values **structurally different by the object-node-multiset oracle** (deep structural diff that **fails when the difference is a single scalar-field edit — e.g. `replicas: 1 → 3` — or a copied shape tag**) and each equal to
-its Phase-0-committed reviewer-authored golden `golden_servicespec_<arm>_<shape>`, while the **app-surface bytes are byte-identical** across the two shapes (beta-normalized app-surface slices extracted from two *distinct*
+its oracle-pinned reviewer-authored golden `golden_servicespec_<arm>_<shape>`, while the **app-surface bytes are byte-identical** across the two shapes (beta-normalized app-surface slices extracted from two *distinct*
 composed spec files); `illegal_product_in_app` / `illegal_engine_by_url` / `illegal_shape_in_app` each **fail Gate 1** at their asserted `dhall type` error locus (each paired with a minimally-differing positive);
 `illegal_unbuilt_provider` / `illegal_unbound_capability` / `illegal_cyclic_extension` /
 `illegal_shadowing_extension` each return a structured `Left` **tagged with its specific `DecodeError`**
@@ -143,7 +143,7 @@ flowchart LR
 - The **nine-arm positive corpus** `dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` for all nine arms
   (including the specifically-named `legal_objectstore_{singlenode,distributed}` and `legal_inference_cuda`), each
   a full `CapabilityNeed` fixture — the corpus is **not** scope-shrunk to the three named fixtures.
-- The **Phase-0-committed hand-authored arm list** enumerating exactly the nine capability arms, **independent of the union's own definition** — the exhaustiveness check keys against it, not against `bind`'s case analysis.
+- The **oracle-pinned hand-authored arm list** enumerating exactly the nine capability arms, **independent of the union's own definition** — the exhaustiveness check keys against it, not against `bind`'s case analysis.
 - The **expected error/locus tags** for every negative: the asserted `dhall type` error locus (Gate 1) or the
   specific `DecodeError` tag (Gate 2) for each of `illegal_product_in_app`, `illegal_engine_by_url`,
   `illegal_shape_in_app`, `illegal_unbuilt_provider`, `illegal_unbound_capability`, `illegal_cyclic_extension`,
@@ -175,7 +175,7 @@ independently of the code under test:
 - The **app-surface byte equality** is the equality of the **beta-normalized Dhall expressions** of the
   app-surface slices extracted from **two distinct composed spec files** (never a shared import compared to
   itself); the oracle is the Dhall normalizer, not `bind`.
-- The **exhaustiveness check** enumerates coverage against the Phase-0-committed hand-authored arm list, not the
+- The **exhaustiveness check** enumerates coverage against the oracle-pinned hand-authored arm list, not the
   union's own definition.
 
 **Generator coverage (§M.4).** The QuickCheck totality property carries `label`/`classify` + `checkCoverage`
@@ -275,7 +275,7 @@ time) and the `illegal_engine_by_url` fixture (naming an engine by URL) **at the
 engine identity, so the negative cannot pass for an unrelated reason (typo, missing field); a unit check
 confirms the union has exactly **nine** arms (the eight ordinary capabilities plus the `InferenceEngine`
 head) and **no product arm** and **no "other service" escape arm**, enumerated against the
-**Phase-0-committed hand-authored arm list** independent of the union's own definition.
+**oracle-pinned hand-authored arm list** independent of the union's own definition.
 **Docs to update**:
 `documents/engineering/service_capability_doctrine.md` (Phase-10 status backlink for §1/§2 and the §4.1
 no-URL union shape), `documents/engineering/app_vs_deployment_doctrine.md` (the app-surface
@@ -305,7 +305,7 @@ contains.
 ### Validation
 1. `dhall type` accepts each positive `CapabilityNeed` and rejects both a product-named app and a URL-named
    engine at authoring time (Gate 1), each at its asserted error locus; the union has exactly nine arms, no
-   product arm, and no escape arm, checked against the Phase-0-committed hand-authored arm list.
+   product arm, and no escape arm, checked against the oracle-pinned hand-authored arm list.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -332,7 +332,7 @@ share one app-surface import, so the equality is never a file-compared-to-itself
 deep structural diff (per
 [`service_capability_doctrine.md §5`](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values))
 that **fails when the difference is expressible as a single scalar-field edit (e.g. `replicas: 1 → 3`) or a copied shape tag** — plain `/=` does not satisfy it — and each bound value is checked equal to its
-**Phase-0-committed reviewer-authored golden** `golden_servicespec_<arm>_<shape>` (authored before `bind`
+**oracle-pinned reviewer-authored golden** `golden_servicespec_<arm>_<shape>` (authored before `bind`
 exists, never regenerated from `bind`'s output); (c) the `illegal_shape_in_app` negative — a shape or
 provider authored on the **app** surface — **fails `dhall type`** at its asserted type-error locus (the
 app-surface record has no `shape`/`provider` field), paired with its positive differing only in that the
@@ -401,7 +401,7 @@ stopping at the wholly unprovisioned `BoundDeployment`.
   realization is the live band.
 
 ### Validation
-1. The same `CapabilityNeed`, bound under two shapes, produces two `BoundServiceSpec`s that are **structurally different by the object-node-multiset oracle** (deep structural diff per [§5](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values), red on a scalar-only or copied-shape-tag difference; each equal to its Phase-0-committed golden), while the **app-surface bytes**
+1. The same `CapabilityNeed`, bound under two shapes, produces two `BoundServiceSpec`s that are **structurally different by the object-node-multiset oracle** (deep structural diff per [§5](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values), red on a scalar-only or copied-shape-tag difference; each equal to its oracle-pinned golden), while the **app-surface bytes**
    (beta-normalized app-surface slices from two distinct composed spec files) are identical; a binding to an
    unbuilt provider arm returns a structured `Left` tagged (Gate 2); a shape/provider authored on the app
    surface fails `dhall type` at its asserted locus; `bind` never throws. A structural inventory proves
@@ -421,7 +421,7 @@ The whole sprint (📋 Planned).
 **Implementation**: `test/capability/BindProps.hs` (the property battery),
 `test/capability/ShapeOracle.hs` (the independent object-node-multiset structural diff — authored separately
 from `bind` so the oracle is not `bind`'s own fold), `test/capability/BindGate.hs` (the gate +
-validation-locus ledger with coverage-assertion machinery), the **Phase-0-committed** per-arm positive
+validation-locus ledger with coverage-assertion machinery), the **oracle-pinned** per-arm positive
 fixtures `dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` for all nine arms, the
 reviewer-authored goldens `test/capability/goldens/golden_servicespec_<arm>_<shape>.golden` (authored before
 `bind` exists), the seeded mutants under
@@ -461,7 +461,7 @@ honest foreclosure layer of each.
   bound under **both** a `SingleNode` and a `Distributed { nodes = n }` (n ≥ 2) shape — so the corpus is not
   scope-shrunk to the three named `legal_objectstore_{singlenode,distributed}` / `legal_inference_cuda` fixtures.
   A committed **exhaustiveness unit check** asserts the fixture→capability-arm map covers the full nine-arm union
-  (red if any arm has no positive fixture), enumerated against the **Phase-0-committed hand-authored arm list**
+  (red if any arm has no positive fixture), enumerated against the **oracle-pinned hand-authored arm list**
   (Sprint 10.1), independent of `bind`'s own case analysis.
 - The property battery: the same `CapabilityNeed` bound under two shapes yields two `BoundServiceSpec`s
   **structurally different by the object-node-multiset oracle** (red on scalar-only / copied-shape-tag) with
@@ -502,7 +502,7 @@ honest foreclosure layer of each.
 1. `cabal test capability-bind-spec` is green — each of the **nine per-arm** positives binds byte-invariant
    (beta-normalized app-surface slices from distinct composed files) under both shapes and structurally
    different by the object-node-multiset oracle (red on scalar-only / copied-shape-tag) against its
-   Phase-0-committed golden; the exhaustiveness check covers all nine arms and the totality property meets
+   oracle-pinned golden; the exhaustiveness check covers all nine arms and the totality property meets
    `checkCoverage` (each constructor ≥ 8%); each Gate-1 negative (`illegal_product_in_app`,
    `illegal_engine_by_url`, `illegal_shape_in_app`) fails `dhall type` at its asserted locus, and each Gate-2
    negative (`illegal_unbuilt_provider`, `illegal_unbound_capability`, `illegal_cyclic_extension`,

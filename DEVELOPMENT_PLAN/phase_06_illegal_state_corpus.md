@@ -71,9 +71,9 @@ the representational SPA-composition corpus (Phase 16), and every `live-effect` 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** every negative fixture is rejected at its tagged locus — each Gate-1-class negative fails
-`dhall type` at authoring time with the error pinned to a **Phase-0-committed** `dhall type` error-locus golden
+`dhall type` at authoring time with the error pinned to an **oracle-pinned** `dhall type` error-locus golden
 naming the foreclosing union/field (§M.8 specific-reason), each Gate-2-class negative passes `dhall type` and
-decodes to a structured `Left DecodeError` whose tag equals a **Phase-0-committed** expected-`DecodeError`-tag
+decodes to a structured `Left DecodeError` whose tag equals an **oracle-pinned** expected-`DecodeError`-tag
 golden, and each GADT-index negative fails to compile under the pinned `ghc -fno-code` expect-fail golden with a
 GHC **type** error (not a scope/parse error) pinned to a committed expected-error-locus golden — the suite is
 red if any illegal fixture is admitted at or past its locus; QuickCheck is green under `checkCoverage`
@@ -87,7 +87,7 @@ check that runs on no substrate. The committed gate-integrity apparatus ([§M](d
 ## Gate integrity
 
 This gate satisfies the eight [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clauses through the following committed apparatus.
-The existing fixture/error oracles are Phase-0-pinned; the owner/family catalog enrichment identified below
+The existing fixture/error oracles are oracle-pinned; the owner/family catalog enrichment identified below
 must be hand-authored and committed at the start of Phase 6, before the corpus/ledger implementation that
 consumes it (§M.1 oracle-pinning):
 

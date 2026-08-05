@@ -78,7 +78,7 @@ linux-cuda, or windows substrate is touched.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** on a single-node linux-cpu cluster, the root single-node password-encrypted Vault **inits exactly once and unseals fail-closed** (an empty correctly provisioned PV inits and password-seals its unlock material without
+**Gate:** `cabal test vault-pki-live` is green: on a single-node linux-cpu cluster, the root single-node password-encrypted Vault **inits exactly once and unseals fail-closed** (an empty correctly provisioned PV inits and password-seals its unlock material without
 printing raw keys, a delete+recreate only unseals the same Vault, and a secret-dependent workload against a
 sealed Vault fails closed); the bounded source populations plus versioned Raft/audit models derive exact
 retained and rotated-audit backing demands, with a one-byte-under provision rejected before effects and live

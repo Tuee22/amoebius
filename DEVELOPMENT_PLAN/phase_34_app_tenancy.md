@@ -65,7 +65,7 @@ Windows, provider-cloud, multicluster, or availability claim is made.
 
 **Gate:** `cabal test tenant-provider-provisioning-live` creates two challenge-qualified tenant projections,
 applies their sealed provider transactions, and passes only when separately authenticated provider APIs expose
-the exact Phase-0-pinned object/policy relation for all six provider arms. A missing arm, a tenant-key collapse,
+the exact oracle-pinned object/policy relation for all six provider arms. A missing arm, a tenant-key collapse,
 a caller-authored grant, incomplete teardown, or either committed mutant makes the command fail. Application
 round trips are deliberately absent and remain `UNVERIFIED` until Phase 36.
 

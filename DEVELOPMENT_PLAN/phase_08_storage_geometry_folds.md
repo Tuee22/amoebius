@@ -113,7 +113,7 @@ fold + QuickCheck battery, analogous to the Phase 5 decode battery and the Phase
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** the logical→physical storage-geometry fold holds under QuickCheck — every generated in-envelope
+**Gate:** `cabal test dsl-spec` is green: the logical→physical storage-geometry fold holds under QuickCheck — every generated in-envelope
 producer yields a physical demand that fits its single-owner backing and the fold is **provably total**
 (interpreted concretely in [Gate integrity](#gate-integrity): compile-time exhaustiveness under `-Werror=incomplete-patterns` on every `Amoebius.Capacity.{Storage,StorageGeometry,ServiceStorage,Growable,StorageScaling}` module **and** a sampled QuickCheck no-crash run — both, not either) — and the pure folds return their
 structured `ProvisionError`/`Left` on each storage-geometry negative fixture when applied **directly to the hand-authored logical-demand/backing fixture that isolates its over-backing axis** (no `bind`/`provision` call;

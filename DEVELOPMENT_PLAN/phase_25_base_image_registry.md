@@ -1,4 +1,4 @@
-# Phase 25: Multi-arch base image + jit-build resolver + distribution registry
+# Phase 25: Typed bake catalog + multi-arch base image + jit-build resolver + distribution registry
 
 > **Purpose**: Build the multi-arch amoebius base image — every third-party service binary plus the shared
 > jit-build resolver and its toolchain, but no ML engine payloads — and publish it atomically into the
@@ -14,7 +14,7 @@ No gate has run.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -147,7 +147,7 @@ not passed unless, in addition to the above:
   once. A domain expansion, digest mismatch, stale snapshot, or second handoff performs zero imports and zero
   apiserver writes.
 - **Inventory reconciled, not self-authored (§M.1/§M.3/§M.7):** the "every third-party service binary" set is
-  the Phase-0-committed **canonical standard-platform-services inventory** — the `DEVELOPMENT_PLAN/README.md`
+  the oracle-pinned **canonical standard-platform-services inventory** — the `DEVELOPMENT_PLAN/README.md`
   standard-platform-services list as ratified in
   [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md), copied verbatim
   into the committed fixture `test/fixtures/phase25/bake_inventory_expected.dhall` — and the bake-inventory
@@ -156,7 +156,7 @@ not passed unless, in addition to the above:
 - **Per-arch execution, not presence (§M.5):** each baked service binary and each **linux-runnable** toolchain
   binary (`nvcc`/`g++`/pinned compilers + any linux cross-tooling) is executed **on each arch** — natively for
   the host arch and under `binfmt`/QEMU for the non-native arch — by **absolute path** with `<bin> --version`
-  matching the Phase-0-pinned version in `bake_inventory_expected.dhall` (every binary named here carries such a
+  matching the oracle-pinned version in `bake_inventory_expected.dhall` (every binary named here carries such a
   pinned entry and ≥1 committed seeded mutant, §M.2), and each arch's layer passes an ELF `e_machine` check
   proving its binaries are genuinely that arch's (not amd64 bytes copied into the arm64 layer). The Apple-Metal
   bridge is **excluded** from this linux per-arch/ELF check — it is a headless on-host Mach-O dylib produced
@@ -178,7 +178,7 @@ not passed unless, in addition to the above:
   (never an exception thrown inside amoebius's own publisher), and "un-advertised" is asserted via the
   registry HTTP API — `GET /v2/<repo>/tags/list` **omits** the tag and the manifest-list `GET` returns
   **404** — not by inspecting amoebius's own published-set record.
-- **Registry bytes admitted from provenance, not a scalar allowance:** the Phase-0-pinned stored-artifact
+- **Registry bytes admitted from provenance, not a scalar allowance:** the oracle-pinned stored-artifact
   metadata independently enumerates every compressed layer, config, child manifest, and manifest-list object
   by digest and exact stored bytes. Snapshot admission derives the digest-deduplicated
   `resident ∪ new` extent, the largest bounded set of simultaneous upload workspaces, and all partial
@@ -218,7 +218,7 @@ flowchart LR
 ```
 *Design intent. Phase 25's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
-**Pinned oracles (Phase-0-committed):**
+**Pinned oracles (oracle-pinned):**
 - `test/fixtures/phase25/bake_inventory_expected.dhall` — the canonical standard-platform-services inventory
   (a verbatim copy of the `DEVELOPMENT_PLAN/README.md` standard-platform-services list as ratified in
   [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md)) with the per-arch
@@ -253,7 +253,7 @@ flowchart LR
 - `mutant/phase25/wrong-arch-layer` — amd64 bytes placed in the arm64 layer; red at Sprint 25.1 (`e_machine`
   check).
 - `mutant/phase25/gxx-version-skew` — the baked `g++` shimmed (path: `/usr/bin/g++`; operator:
-  `--version`-string patch-decrement) to report a version one patch below its Phase-0-pinned
+  `--version`-string patch-decrement) to report a version one patch below its oracle-pinned
   `bake_inventory_expected.dhall` entry; red at Sprint 25.1's per-arch `<bin> --version` match, paired with the
   positive that the pinned `g++ --version` matches on both arches (§M.2). This gives the linux-runnable
   toolchain set (`nvcc`/`g++`/pinned compilers) its version-match teeth; the Apple-Metal bridge is not a linux
@@ -276,7 +276,11 @@ flowchart LR
   amoebius runtime image (GHC 9.12.4) is the one image amoebius *builds* — **this phase bakes and publishes the amoebius binary alone**; infernix and jitML are linked into the runtime image only when their lifts land (the
   image is rebuilt and republished at [Phase 49](phase_49_infernix_lift.md) /
   [Phase 51](phase_51_jitml_lift_cuda.md), never here), so Phase 25 carries no forward dependency on the
-  extension lifts.
+  extension lifts. The amoebius binary's own UI-server surface travels with it: the compiled generic
+  PureScript client bundle from [Phase 21](phase_21_ui_browser_interpreter.md) is a **baked asset of this
+  image**, not a second image — the UI server is a worker responsibility of the same executable, and a UI
+  release is release *data* ([Phase 40](phase_40_ui_program_release.md)), never an image build. That is
+  inside "the amoebius binary alone": it is product surface, not an ML engine payload.
 - [`image_build_doctrine.md` §2 — the single distribution rule: bake the binaries, build the amoebius image, pull only in-cluster](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster):
   the in-cluster `distribution` registry (replacing Harbor) is the sole pull source, and no workload ever pulls
   from a public registry.
@@ -336,7 +340,7 @@ artifact emitted from the catalog and stamped generated-by, per
 the amoebius runtime layer.
 **Independent Validation**: `docker buildx imagetools inspect <tag>` lists both
 `linux/amd64` and `linux/arm64` under one manifest list; a bake-inventory lint asserts the image contains
-**every** service binary named in the Phase-0-committed canonical inventory
+**every** service binary named in the oracle-pinned canonical inventory
 `test/fixtures/phase25/bake_inventory_expected.dhall` (a verbatim copy of the `DEVELOPMENT_PLAN/README.md`
 standard-platform-services list as ratified in `platform_services_doctrine.md`, reconciled **automatically**
 against that committed table — never against the implementer's own `BakeInventory` value, §M.3) and the
@@ -411,7 +415,7 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
 - An architecture-native Redis probe on both image platforms: absolute-path `redis-server --version` and
   `redis-cli --version` match the independent catalog pin, and the committed `mutant/phase25/omit-redis`
   plus `mutant/phase25/redis-version-skew` each turn the gate red.
-- The Phase-0-committed oracle `test/fixtures/phase25/bake_inventory_expected.dhall` (the canonical
+- The oracle-pinned oracle `test/fixtures/phase25/bake_inventory_expected.dhall` (the canonical
   standard-platform-services set + pinned per-arch versions) and the committed
   mutants `mutant/phase25/stub-arm64-binary`, `mutant/phase25/wrong-arch-layer`,
   `mutant/phase25/gxx-version-skew` (the pinned-`g++`-version-skew that bites the per-arch `<bin> --version`

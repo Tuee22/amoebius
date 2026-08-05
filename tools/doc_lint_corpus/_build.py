@@ -78,6 +78,35 @@ MUTATIONS = [
         ("DEVELOPMENT_PLAN/phase_01_example.md",
          "`cabal test example-spec` is green — the committed golden corpus",
          "the committed golden corpus")]),
+    # -- section L / section F: substrate and environment-precondition discipline --
+    ("f3_forward_gate_unmarked", "f3", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "(Gate; 1.2 V1).",
+         "(Gate; 1.2 V1). The Phase 9 reconciler must be Ready before this gate runs.")]),
+    ("s1_two_specialized_substrates", "s1", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "**Substrate:** none", "**Substrate:** apple and linux-cuda")]),
+    ("s2_requires_unknown_token", "s2", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "**Register:** 1", "**Register:** 1\n**Requires**: `a-precondition-nobody-declared`")]),
+
+    # -- (p5/p6) the section P.3 gate cap and the section P.2 field cap ------
+    ("p5_gate_over_cap", "p5", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "(Gate; 1.2 V1).",
+         "(Gate; 1.2 V1). The apparatus is restated inline here rather than delegated by "
+         "anchor: the paired positives, the negative catalog entries and their expected "
+         "tags, the coverage floors, the independent reference table, and each committed "
+         "mutant with the assertion it must redden.")]),
+    ("p6_field_over_cap", "p6", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "**Register:** 1",
+         "**Register:** 1\n**Blocked by**: nothing, and the whole justification is restated "
+         "in the field rather than moved into a numbered Validation list: no cluster is "
+         "stood up, no host is touched, no credential is read, no external service is "
+         "contacted, no registry is pulled from, and every artifact the run consumes is "
+         "committed beforehand and then re-read from the working tree on each and every "
+         "run, so that the whole justification sits in one field instead of a list.")]),
 
     # -- (g) catalog integrity, one negative per sub-check -------------------
     ("g1_entry_without_locus", "g1", set(), [

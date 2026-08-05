@@ -68,7 +68,7 @@ runs on the emitted spec through the version-stable JVM `tla2tools` toolchain. T
 **Substrate:** none
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** The reifiable `Model` explorer (`interpret` plus the in-process bounded-reachability checker) and
+**Gate:** `cabal test formal-model-spec` is green: the reifiable `Model` explorer (`interpret` plus the in-process bounded-reachability checker) and
 the `emitTLA` renderer round-trip a single small transition-system model — the in-process explorer and TLC
 (run through the standard `tla2tools` toolchain over the freshly emitted `.tla`/`.cfg`) reach the *identical*
 safety verdict on the correct model. The **normative safety-equality convention** is fixed and shared by both

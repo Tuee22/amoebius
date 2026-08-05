@@ -147,9 +147,9 @@ provision-derived peak `≤ CacheBudget` rejection requires live infrastructure 
 the second-pod reuse run against real pods on the live cluster, and the run emits a proven/tested/assumed ledger
 naming that register.
 
-**Gate:** on the single-node linux-cpu `kind` cluster (Phase 24 midwife, Phase 25 base image + baked
+**Gate:** `cabal test determinism-jitcache-live` is green: on the single-node linux-cpu `kind` cluster (Phase 24 midwife, Phase 25 base image + baked
 resolver/toolchain + in-cluster `distribution` registry, Phase 37 content store + workflow runtime), a
-**two-part** acceptance condition holds against the **Phase-0-committed oracle set** ([Gate integrity](#gate-integrity)),
+**two-part** acceptance condition holds against the **oracle-pinned oracle set** ([Gate integrity](#gate-integrity)),
 with every *how-it-behaved* claim read from an OS-boundary observer (§M.5) and every byte comparison performed
 **out-of-band by the harness** on blobs it fetched itself, never inferred from a `412`/`If-None-Match` response
 (§M.6): **(a) determinism** — the seeded workload runs twice under one unchanged `experimentHash` as an
@@ -173,7 +173,7 @@ parts are named in [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
-The gate's committed apparatus is the **union** of both seams' Phase-0-committed corpora, authored and committed
+The gate's committed apparatus is the **union** of both seams' oracle-pinned corpora, authored and committed
 in Phase 0 **before any `src/Amoebius/Kernel/*` or `src/Amoebius/Jit/*` module exists**, partitioned along the
 two-part gate. No golden output *bytes* are pre-committed for the determinism part (they are substrate-specific),
 so its byte-equality legs compare **two fresh runs against each other**, never against a regenerated golden;
@@ -435,7 +435,7 @@ lift Phase 37's concrete blob/manifest key renderers into a kernel-level `Conten
 - Newtyped `BlobSha` / `ManifestSha` carriers with no public constructor from a free `Text`.
 - Adapters binding the typeclass to Phase 37's `blobs/<sha256>` and `manifests/<sha256>` writers — the
   `If-None-Match: *`, `412 = success` protocol stays owned by the store.
-- The Phase-0-committed compile-fail fixture `test/compile-fail/phase_48_forge_blobsha.hs` (with its expected
+- The oracle-pinned compile-fail fixture `test/compile-fail/phase_48_forge_blobsha.hs` (with its expected
   locus), the hand-authored logical-equivalence oracle for the canonical-encoding property, and the mutant
   `test/mutants/ContentAddress_field_order_leak.hs` — authored before `ContentAddress.hs` exists (§M.1–M.3).
 
@@ -462,7 +462,7 @@ The whole sprint (📋 Planned).
 gathered by full-path probes); Phase 4 gate (the resolved-`.dhall` normal form)
 **Independent Validation**:
 unit tests prove `experimentHash` is a pure function of `(resolved-dhall, substrate-fingerprint)` and
-re-derives identically across re-evaluation. The substrate fingerprint conforms to the **Phase-0-committed schema** `test/golden/phase_48_substrate_fingerprint.schema.json` (§M.3), which pins a minimum witness set —
+re-derives identically across re-evaluation. The substrate fingerprint conforms to the **oracle-pinned schema** `test/golden/phase_48_substrate_fingerprint.schema.json` (§M.3), which pins a minimum witness set —
 substrate lane (`linux-cpu`) plus named toolchain witnesses: GHC version, RTS/runtime version, ISA, and
 libc/ABI — **each with its absolute probe path**; a fingerprint missing a required witness FAILS. That the
 probes ran by absolute path with no `PATH`/env read is asserted from an **OS-boundary observer** (§M.5): an
@@ -487,14 +487,14 @@ no-env/no-`PATH` contract.
   never from environment or `PATH`.
 - The store namespace key `<experimentHash>/…` wired so two genuinely different runs — including a flipped metric
   direction (part of the resolved `.dhall`) or a different substrate fingerprint — cannot collide.
-- The Phase-0-committed fingerprint schema `test/golden/phase_48_substrate_fingerprint.schema.json` (minimum
+- The oracle-pinned fingerprint schema `test/golden/phase_48_substrate_fingerprint.schema.json` (minimum
   witness set + each witness's absolute probe path) and the committed fake probe `test/fake/phase_48_fake_ghc`
   used by the sensitivity check — both authored before `ExperimentHash.hs` exists (§M.1, §M.3).
 
 ### Validation
 1. `experimentHash` changes when either the resolved `.dhall` (the committed `..._flipped_metric.dhall` sibling,
    differing only in metric direction) or the substrate fingerprint changes; it is stable across re-evaluation of
-   the same inputs. Asserted against the Phase-0-committed fixtures, not values regenerated from the SUT.
+   the same inputs. Asserted against the oracle-pinned fixtures, not values regenerated from the SUT.
 2. The fingerprint carries every witness required by `test/golden/phase_48_substrate_fingerprint.schema.json`
    (substrate lane + GHC/RTS/ISA/libc witnesses, each with its absolute probe path); a hardcoded constant such
    as `"linux-cpu"` FAILS the schema check. The linux-cpu fingerprint is gathered only by absolute-path probes —
@@ -593,7 +593,7 @@ cross-substrate equality.
 - A ledger artifact recording: identity/seed totality as **proven-in-types**, same-substrate reproduction as
   **tested on linux-cpu**, and cross-substrate bit-equality as **explicitly not asserted** (UNVERIFIED), matching
   the doctrine's proven/tested/assumed table.
-- The Phase-0-committed representative oracle set (authored before any kernel module exists, §M.1): the positive
+- The oracle-pinned representative oracle set (authored before any kernel module exists, §M.1): the positive
   `test/dhall/phase_48_determinism_repro.dhall` and its one-dimension-differing negative siblings
   `..._flipped_metric.dhall`, `..._alt_seed.dhall`, `..._alt_input.dhall` (§M.7, §M.8); the committed mutant
   `test/mutants/Determinism_const_output.hs` (§M.2); and the harness's OS-boundary observer (argv/exec shim or
@@ -688,7 +688,7 @@ over-budget derived peak before the resolver ever materializes an asset.
 ### Validation
 1. There is no exported path to a cache key from a free string; the only path to a resident entry is content
    addressing — asserted by the committed compile-fail negative `test/negative/phase_48_freestring_key.hs`
-   (Phase-6 corpus, Phase-0-authored) failing *at the key-construction locus* with the "no exported constructor"
+   (Phase-6 corpus, independently authored) failing *at the key-construction locus* with the "no exported constructor"
    error, paired with the sha256-keyed positive that compiles.
 2. Prove deployments can select catalog identities but cannot supply or override resident/temporary byte
    operands. For each node/host placement, independently recompute the digest union and the largest finite
@@ -723,13 +723,13 @@ resolver stores into); Phase 25 gate (the base image baking the resolver + its b
 pinned compilers for the linux-cpu build path); Phase 12 gate (the `InferenceEngine` binder + the closed,
 substrate-selected `EngineRuntime` union the resolver keys on).
 **Independent Validation**: a boundary suite
-drives the resolver against a Phase-0-committed backend fixture whose served/compiled bytes **sha256-match the `test/oracle/phase_48_oracle.dhall` pin** — not an arbitrary "fake" blob: a backend returning unpinned
+drives the resolver against an oracle-pinned backend fixture whose served/compiled bytes **sha256-match the `test/oracle/phase_48_oracle.dhall` pin** — not an arbitrary "fake" blob: a backend returning unpinned
 bytes must fail the suite, foreclosing a resolver that stores fixed marker bytes. A cold cache triggers
 exactly one `resolve` (download-or-build) then stores, and the stored `ContentAddress` **equals the committed pin**. A warm cache returns a handle with **no** resolve, proven by an argv-recording shim /
 `strace` observer at the OS boundary (§M.5) capturing **zero** toolchain-or-backend subprocess on the warm
 path — never inferred from a resolver-emitted counter. The resolver has no code path that accepts a free
 URL, proven by the committed compile-fail negative `test/negative/phase_48_url_arm.hs` (Phase-6 corpus,
-Phase-0-authored) failing *at the constructor locus* with "no `Url`/free-string constructor", paired with a
+independently authored) failing *at the constructor locus* with "no `Url`/free-string constructor", paired with a
 closed-catalog-identity positive that compiles. Every subprocess is absolute-path-resolved, asserted by the
 shim capturing the full absolute `argv[0]` (never a bare `PATH`-relative name). The committed seeded mutant
 `resolve _ = <fixed 16-byte marker>` ([Gate integrity](#gate-integrity) part (b) mutant (a)) turns the
@@ -881,9 +881,9 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
 ### Deliverables
 - The gate `.dhall` naming exactly the one representative identity `EngineRuntime.LlamaCppCpu@<pinned-ver>`
   ([Gate integrity](#gate-integrity) concrete corpus), driving one cache-owner pod, two client pods on the same
-  node, and the Phase-0-committed resident-plus-temp over-budget, digest-size-conflict, deletion-credit,
+  node, and the oracle-pinned resident-plus-temp over-budget, digest-size-conflict, deletion-credit,
   bounded-parallel-overflow, and ephemeral-under-reserved fixtures.
-- The Phase-0-committed oracle `test/oracle/phase_48_oracle.dhall` (expected `ContentAddress`, catalog-owned
+- The oracle-pinned oracle `test/oracle/phase_48_oracle.dhall` (expected `ContentAddress`, catalog-owned
   final-resident/temporary byte `Quantity`, `--version`) and the committed seeded mutants under
   `test/mutants/phase_48_cache/` (`resolve _ = <marker>`, `prune = pure ()`, one-byte-short store), authored before
   `src/Amoebius/Jit/*` exists.
@@ -966,7 +966,7 @@ The whole sprint (📋 Planned).
   `src/Amoebius/Kernel/ExperimentHash.hs`, `src/Amoebius/Kernel/Rng.hs`, `src/Amoebius/Kernel/Determinism.hs`,
   `src/Amoebius/Jit/Cache.hs`, `src/Amoebius/Jit/CacheBudget.hs`, `src/Amoebius/Jit/Resolver.hs`,
   `src/Amoebius/Jit/CacheOwner.hs`, the `DeterminismReproSpec` and `EngineCacheGate` live suites, and the
-  Phase-0-committed oracle/negative/mutant artifacts (`test/dhall/phase_48_determinism_repro.dhall` and siblings,
+  oracle-pinned oracle/negative/mutant artifacts (`test/dhall/phase_48_determinism_repro.dhall` and siblings,
   `test/oracle/phase_48_oracle.dhall`, `test/negative/phase_48_freestring_key.hs`,
   `test/negative/phase_48_url_arm.hs`, `test/mutants/phase_48_determinism/`, `test/mutants/phase_48_cache/`) as Phase-48
   design-first rows.

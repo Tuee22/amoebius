@@ -167,6 +167,11 @@ it has no host to detect and no `LinuxHost` witness. It is the `Managed Eks` arm
 | Gate phase(s) | Phases 44–47 (the four provider split phases; the `linux-cpu` parent drives the deploy; the provider target is not a hardware substrate) — owned by [§4](#4-per-phase-substrate-map) |
 | Status | 📋 Planned |
 
+> **Environment preconditions.** A substrate is a fact about the *host*; the same kind of fact can hold about
+> an account, a cluster addon, or a developer machine. Those are declared in a sprint's `**Requires**` field,
+> whose closed vocabulary is owned by
+> [§F](development_plan_standards.md#f-the-sprint-block-format) — stated there, not re-derived here.
+
 ---
 
 ## 3. Virtualized substrates: Lima / WSL2
@@ -217,7 +222,13 @@ Lima VM on Apple presents as `linux-cpu` to everything above it.
 
 ## 4. Per-phase substrate map
 
-The single substrate each phase's acceptance gate keys to. Each row matches the substrate named in that
+The substrate each phase's acceptance gate keys to, under the
+[§L](development_plan_standards.md#l-one-substrate-discipline) rule: every gate runs on the always-available
+`linux-cpu` baseline and may additionally require **at most one specialized substrate** (`apple` or
+`linux-cuda`). A row naming a specialized member implies the baseline; a row naming `linux-cpu` requires no
+specialized hardware; `none` means no host at all. **No row may name two specialized substrates** — only
+phases 51 and 52 (`linux-cuda`) and 53 (`apple`) name one, and `windows` is named by none.
+Each row matches the substrate named in that
 phase's `Phase Summary`; the README Phase overview carries the same values
 ([README.md Phase overview](README.md#phase-overview)). Phases **1–23** are the initial pre-cluster band
 (substrate `none`, Registers 1–2); phases **24–58** are the initial live band (Register 3). The offline work
@@ -241,7 +252,8 @@ row's full objective, gate, and sprint breakdown lives in its phase document
 | 11 | Whole-deployment provision seal + expansion | `none` | Register 1: `planInfrastructure` derives the exact demand from the expanded `BoundDeployment` and the provision seal validates/CAS-enacts it; pure, no host or cluster. |
 | 12 | InferenceEngine capability + accelerator provision | `none` | Register 1: the `InferenceEngine` capability binds and provisions to an opaque `ProvisionedSpec` by selecting the matching CUDA target offering; pure planning, no host or cluster. |
 | 13 | Pure `renderAll` + rendered-output goldens | `none` | Register 1: sole public whole-deployment `renderAll` + byte-for-byte manifest goldens; rendering never touches live infra, and no service-valued render boundary exists. |
-| 14 | chain/Step kernel + `--dry-run` + boundary fake-tool harness | `none` | Registers 1/2: the pure `[Step]` plan + `--dry-run` golden, then the boundary harness runs that plan against fake `kubectl`/`docker`/`pulumi` by absolute path; recorded argv + applied bytes match the committed goldens; no cluster. | | 15 | Deterministic-simulation substrate | `none` | Register 2 (serves the Register-2.5 deterministic-simulation activity): the real daemon/reconciler code under `IOSim`/`IOSimPOR` against a modeled fault-injectable environment; same-seed → byte-identical trace; no cluster. |
+| 14 | chain/Step kernel + `--dry-run` + boundary fake-tool harness | `none` | Registers 1/2: the pure `[Step]` plan + `--dry-run` golden, then the boundary harness runs that plan against fake `kubectl`/`docker`/`pulumi` by absolute path; recorded argv + applied bytes match the committed goldens; no cluster. |
+| 15 | Deterministic-simulation substrate | `none` | Register 2 (serves the Register-2.5 deterministic-simulation activity): the real daemon/reconciler code under `IOSim`/`IOSimPOR` against a modeled fault-injectable environment; same-seed → byte-identical trace; no cluster. |
 | 16 | Bounded UI-program schema | `none` | Register 1: closed Dhall UI algebra, named external-link requirements, and normalization; no raw URL, browser, server, host, or cluster. |
 | 17 | Scoped identity kernel | `none` | Register 1: pure tenant/subject/membership/owner joins against an independent table. |
 | 18 | UI authorization kernel | `none` | Register 1: pure `CanRead`/`CanInvoke` decisions against an independent access matrix. |

@@ -280,6 +280,7 @@ the two-stage bootstrap cutover, and execution-identity admission this sprint ap
 Phase 26 gate (the observe→diff→scoped-SSA→staged-enact reconciler the cutover patches run under); Phase 25
 gate (the multi-arch baked-binary base image the scheduler image is a digest of) — all external
 earlier-phase prerequisites.
+**Requires**: `cloud-account` — the credentialed account a provider child is brought up inside.
 **Independent Validation**: against a Phase-44-deployed child, the parent
 bootstrap holder creates `amoebius-capacity-scheduler` (`pods=1`) referencing the preloaded CRI digest,
 observes the default-scheduled scheduler's exact active generation/config/root as

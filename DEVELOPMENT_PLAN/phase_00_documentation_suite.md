@@ -36,7 +36,7 @@ No gate has run.
 
 ## Phase Status
 
-🔄 Active. The whole DSL is authored across `documents/` and `DEVELOPMENT_PLAN/`, and all five sprints are
+🔄 Active. The whole DSL is authored across `documents/` and `DEVELOPMENT_PLAN/`, and all six sprints are
 active in lint/remediation or remaining gate-artifact work; none is Done until its named artifacts are complete
 and the two-sided Phase-0 gate passes. Every prescriptive statement in the authored doctrine is design intent, never a tested amoebius result. The
 substrate is `none`: the phase authors prose, stands up no cluster, and runs no workflow.
@@ -81,7 +81,7 @@ runtime surface, or an acceptance command other than the two-sided documentation
 
 **Register:** — (no register: the documentation-lint gate validates text and the link graph, not amoebius behaviour, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** the documentation lint passes **two-sided** — it runs clean over every document in `documents/` and
+**Gate:** `python3 tools/doc_lint_verify.py` passes **two-sided** — it runs clean over every document in `documents/` and
 `DEVELOPMENT_PLAN/` (valid header metadata per the documentation standard; every anchored relative link resolves
 under the [§4](../documents/documentation_standards.md#4-cross-referencing) slug rule; every `Referenced by` header reconciled from the true link graph in both directions;
 **near-duplicate normative content** — measured by sentence-shingle overlap above a stated threshold between two

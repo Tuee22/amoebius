@@ -1,4 +1,4 @@
-# Phase 31: Platform services-2 (Redis/Sentinel + Percona/Patroni + observability + readiness-DAG)
+# Phase 31: Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG)
 
 > **Purpose**: Stand up Redis/Sentinel, Percona/Patroni with pgAdmin, and Prometheus/Grafana, then bring the
 > whole standard stack up in the derived readiness-DAG order asserted from an external-observer trace.
@@ -193,7 +193,7 @@ discharges is owned by
   and every service in this linux-cpu corpus carries cache `None` and accelerator `None` with no device
   extended-resource claim. An independent calculation combines app containers, both forms of init container,
   and pod/runtime overhead, then exact-matches the placement witness; a presence-only subset check is insufficient.
-- **Prometheus retained-state identity and boundary (§M.3 independent projection, §M.5 OS-boundary observer).** A Phase-0-pinned monitoring oracle independently folds the bounded scrape-sample rate and
+- **Prometheus retained-state identity and boundary (§M.3 independent projection, §M.5 OS-boundary observer).** An oracle-pinned monitoring oracle independently folds the bounded scrape-sample rate and
   retention into resident blocks, WAL/head, old+new compaction overlap, and derives query/temp headroom from
   the structural query operands. The applied
   StatefulSet claim/backing and PVC/PV capacity plus effective evaluation interval,

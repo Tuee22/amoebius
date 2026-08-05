@@ -175,7 +175,7 @@ and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation]
   the independently derived coexistence-epoch oracle). A green gate against any committed mutant fails the
   phase.
 - **Representative set (§M.7).** The gate's representative set is exactly: one apple substrate (Apple-Silicon
-  host + Lima Ubuntu-24.04 VM), the exact Phase-0-pinned physical-host/VM/node/worker/cache resource fold (the
+  host + Lima Ubuntu-24.04 VM), the exact oracle-pinned physical-host/VM/node/worker/cache resource fold (the
   VM carve is 4 vCPU, 8 GiB memory, and a private rounded raw-disk result of 40 GiB derived from the pinned
   guest-usable/presentation/allocation operands; all other numeric demands/supplies live in the pinned resource
   oracle), the two host-only NodePort Services {ContentMutationGateway, Pulsar} (raw MinIO absent), the two
@@ -207,7 +207,7 @@ the implementation):
 - `test/golden/phase_53/metal_job_ref.py` — the off-implementation CPU (NumPy) reference for the dispatched
   kernel, used two ways: ahead of time it produces the pinned `job_A`/`job_B` expected bytes, and
   **at gate-run time** it derives the challenge job `job_C`'s expected output. Only this reference
-  **script** is Phase-0-committed; `job_C`'s input is nonce/seed-derived at gate-run time and its expected output
+  **script** is oracle-pinned; `job_C`'s input is nonce/seed-derived at gate-run time and its expected output
   is computed by this reference at gate-run time, so **no committed golden for `job_C` exists in the repo** for a
   worker to echo. The oracle stays independent of the code under test (§M.1/§M.3) — it is regenerated from this
   off-implementation reference, never from the bridge.
@@ -556,7 +556,7 @@ resolver + `CacheBudget`-bounded content-addressed cache the MSL source-metadata
 (absolute path, no env/`PATH`), `dlopen`'d, and verified by its probe symbol; generated MSL compiles at
 runtime via `MTLDevice.makeLibrary(source:options:)` and dispatches on the host GPU, and the dispatch
 surfaces a real `MTLDevice` artifact — the compiled `MTLLibrary` handle and its pipeline reflection — not
-merely a returned buffer; the dispatched kernel's output is byte-equal to the Phase-0-pinned
+merely a returned buffer; the dispatched kernel's output is byte-equal to the oracle-pinned
 off-implementation CPU reference (`test/golden/phase_53/job_A.expected`) for `job_A`'s input and
 byte-**different** and equal to `job_B.expected` for `job_B`'s input, so an input-independent or constant
 worker output is red, and byte-matches the **run-time-derived** expected value (off-implementation NumPy
@@ -607,7 +607,7 @@ this sprint realizes it in amoebius for the first time.
    fitting build, an OS/config observer proves the compiler stays within CPU/RSS and named backing ceilings;
    deliberate overrun is throttled/terminated/`ENOSPC`, never spilled elsewhere.
 2. Compile generated MSL at runtime through the bridge and dispatch a kernel for both `job_A` and `job_B`;
-   assert the returned buffer is byte-equal to the Phase-0-pinned CPU reference expected output for each job
+   assert the returned buffer is byte-equal to the oracle-pinned CPU reference expected output for each job
    (`test/golden/phase_53/job_A.expected`, `job_B.expected`), that the two outputs **differ** (so a constant
    output fails), and that a real `MTLLibrary`/pipeline-reflection handle was obtained. Additionally dispatch the
    challenge job `job_C` whose input is generated **this run** (nonce/seed-derived, never committed) and assert the
@@ -765,7 +765,7 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
 2. The gate `.dhall` runs the full Apple-Metal peer workflow: the worker consumes the job over native Pulsar
    (no WebSocket frames, no TLS handshake, only `127.0.0.1:<nodeport>`), and the output landed through the
    provisioned mutation gateway in MinIO,
-   retrieved by its content address, is byte-equal to the Phase-0-pinned off-implementation expected output for
+   retrieved by its content address, is byte-equal to the oracle-pinned off-implementation expected output for
    the dispatched job (`test/golden/phase_53/job_A.expected`) — with `job_B` yielding the distinct pinned
    `job_B.expected`, so a constant or input-independent artifact fails. The gate additionally dispatches the
    challenge job `job_C`, whose input is generated at gate-run time (nonce/seed-derived, never committed) and whose

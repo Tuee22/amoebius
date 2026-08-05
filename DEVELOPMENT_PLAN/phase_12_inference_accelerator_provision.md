@@ -106,7 +106,7 @@ allocatable VRAM; the committed `illegal_cuda_on_cpu_target` fixture returns its
 `EngineRuntime` union; and every engine/accelerator negative — family-unavailable-on-lane, count shortage, VRAM
 overcommit, source/workload-key inequality, policy-domain mismatch, residency-placement malformation, and
 coexistence overcommit — returns its **specific** structured `Left`, each paired with a positive differing only
-in the foreclosed dimension. The full apparatus (the concrete corpus, the Phase-0-pinned goldens, the five
+in the foreclosed dimension. The full apparatus (the concrete corpus, the oracle-pinned goldens, the five
 committed accelerator-provision seeded mutants that must go red, and the independent reference predicate) is
 named in [Gate integrity](#gate-integrity), to which this line delegates per
 [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub). A **Register-1** in-process check that runs on no
@@ -145,7 +145,7 @@ flowchart LR
 
 ### Representative positive set (§M.7, §M.1)
 
-The gate's positive corpus is *exactly* the three Phase-0-committed fixtures
+The gate's positive corpus is *exactly* the three oracle-pinned fixtures
 `dhall/examples/legal_inference_singlenode.dhall`, `dhall/examples/legal_inference_distributed.dhall` (the
 `InferenceEngine` arm bound under `SingleNode` and `Distributed { nodes = n }`, n ≥ 2, satisfying the
 [Phase-10](phase_10_capability_bind.md) object-node-multiset shape oracle against the reviewer-authored
@@ -160,7 +160,7 @@ render activation.
 ### Representative negative set (§M.7, §M.8)
 
 The gate's engine/accelerator negative corpus is *exactly* the
-nine Phase-0-committed fixtures, each asserting **its specific failure reason** and **paired with a positive differing only in the foreclosed dimension**:
+nine oracle-pinned fixtures, each asserting **its specific failure reason** and **paired with a positive differing only in the foreclosed dimension**:
 - `illegal_engine_by_url` — an engine named by URL — **fails Gate 1** (`dhall type`) at an
   *unknown-constructor / no-such-alternative* type error on the `EngineRuntime` union (the union has no
   `Url`/`Download` arm), paired with `legal_inference_cuda` differing only in that the engine is a named
@@ -388,7 +388,7 @@ The whole sprint (📋 Planned).
 property + coexistence- epoch battery — offering→lane quotient totality, family×lane relation,
 source/workload-key and policy-domain equality, shard validation, and exact-fit/one-device/one-byte-short
 cases); the shared `test/capability/BindGate.hs` gate harness (this seam's entries in its validation-locus
-ledger + coverage- assertion machinery); the **Phase-0-committed** fixtures
+ledger + coverage- assertion machinery); the **oracle-pinned** fixtures
 `dhall/examples/{legal_inference_singlenode,legal_inference_distributed,legal_inference_cuda,
 illegal_engine_by_url,illegal_engine_family_unavailable_on_lane,illegal_cuda_on_cpu_target,
 illegal_accelerator_count_shortage,illegal_accelerator_vram_shortage,
@@ -409,7 +409,7 @@ the InferenceEngine/accelerator slice — `legal_inference_cuda` binds and provi
 `ProvisionedSpec` by selecting the matching CUDA offering; the `legal_inference_{singlenode,distributed}`
 pair binds byte-invariant (beta-normalized app-surface slices from distinct composed files) under both
 shapes and structurally different by the [Phase-10](phase_10_capability_bind.md) object-node-multiset oracle
-(red on scalar-only / copied-shape-tag) against its Phase-0-committed golden; `illegal_engine_by_url` fails
+(red on scalar-only / copied-shape-tag) against its oracle-pinned golden; `illegal_engine_by_url` fails
 `dhall type` at its asserted locus; each of the nine engine/accelerator provision negatives returns its
 specifically-tagged `Left` at the `provision-seal` locus, each paired with a minimally-differing positive;
 the QuickCheck coverage obligations meet `checkCoverage` on every reject branch; exact-fit

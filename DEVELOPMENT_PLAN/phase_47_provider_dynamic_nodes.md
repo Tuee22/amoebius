@@ -129,7 +129,7 @@ The emitted ledger marks provider bring-up + signal-driven node join and per-run
 EKS target from a linux-cpu parent, durable-EBS retention *correct-by-class*, and the elevated-harness durable
 reclamation *explicitly deferred to [Phase 54](phase_54_test_topology_dsl.md)*.
 
-**Gate:** an `InForceSpec` (`test/dhall/phase_47_provider_provision.dhall`) that, from a **linux-cpu** parent,
+**Gate:** `cabal test provider-dynamic-nodes-live` is green: an `InForceSpec` (`test/dhall/phase_47_provider_provision.dhall`) that, from a **linux-cpu** parent,
 spins up a provider-managed EKS cluster, brings up its stateless hostless in-cluster control plane, **dynamically provisions an extra node by evaluating a declared `ScalingPolicy` signal** (not by an operator hand-editing the
 target) from a named CPU-only `ProviderNodeClass`, and observes it join — already `ManagedCapacity`-tainted,
 past full supply/layout/device readback and scheduler-generation CAS — with allocatable capacity at least the
@@ -316,6 +316,7 @@ EC2/managed nodes) (target paths from [system_components.md](system_components.m
 [Phase 8](phase_08_storage_geometry_folds.md) gate (the logical→physical node-root/durable storage geometry); [Phase 9](phase_09_execution_accelerator_folds.md) gate (the accelerator residency / net-allocatable-VRAM fold); [Phase 11](phase_11_provision_seal.md) gate (the post-bind observe-then-plan cloud batch and opaque `ProvisionedSpec` seal); [Phase 26](phase_26_object_reconciler.md) gate (the `discover → diff → enact → re-observe` reconciler this drives); [Phase 27](phase_27_capacity_scheduler.md)
 gate (the `amoebius-capacity` scheduler-generation CAS / reservation / exclusive Binding at node join) — all
 earlier-or-sibling-phase prerequisites.
+**Requires**: `cloud-account` — the account whose node quota this gate scales against.
 **Independent Validation**: a `.dhall`-declared node rule (load /
 workflow-completion) drives the live node set toward its desired shape by choosing only a declared
 `ProviderNodeClass` whose complete capacity/capability shape can host the pending `ResourceEnvelope`;

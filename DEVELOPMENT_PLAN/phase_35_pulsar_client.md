@@ -74,7 +74,7 @@ are exercised by later phases).
 **Register:** 3 (live infrastructure) — the gate runs against a real broker on a real cluster, not an
 in-process fake.
 
-**Gate:** on a `linux-cpu` kind cluster with Pulsar up as a standard HA service (Phase 30), an `InForceSpec`
+**Gate:** `cabal test pulsar-client-live` is green: on a `linux-cpu` kind cluster with Pulsar up as a standard HA service (Phase 30), an `InForceSpec`
 test topology **round-trips a workflow command → event over the native Pulsar binary protocol with broker-side deduplication enabled**, a **CBOR command/event payload round-trips byte-for-byte** through the
 typed codec, and a **fixture attempting a non-CBOR payload fails to type-check** — the topology spinning up,
 running, and tearing down leak-free and idempotently on re-run, emitting a Register-3 proven/tested/assumed
@@ -103,7 +103,7 @@ flowchart LR
 ```
 *Design intent. Phase 35's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
-The gate passes only when every clause below holds; each is checked against a **Phase-0-committed oracle**
+The gate passes only when every clause below holds; each is checked against an **oracle-pinned oracle**
 authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from the client.
 
 - **Committed oracle corpus (representative set, §M.7, §M.1).** The gate's representative set is named
@@ -293,7 +293,7 @@ four-subscription-shape assertions are wire-real:
   `ACK_RESPONSE`)
 - each of the four subscription types exhibits its distinct delivery shape
 - a `SEEK` to an earlier `message_id` replays the log
-- a typed value round-trips through the CBOR codec byte-for-byte against the Phase-0-committed CBOR vector,
+- a typed value round-trips through the CBOR codec byte-for-byte against the oracle-pinned CBOR vector,
   a fixture attempting a non-CBOR payload has no constructor (fails to type-check with its committed
   expected diagnostic), and a corrupt CBOR body yields a structured `Left DecodeError` on consume.
 
@@ -329,7 +329,7 @@ seek-based replay — over the persistent session from Sprint 35.1, with **every
 2. For each subscription type, attach the matching consumer set and assert its delivery shape (single reader;
    primary-then-standby ordering; round-robin spread; per-key affinity).
 3. Consume a prefix, `SEEK` back, and assert the earlier messages are redelivered.
-4. A typed command/event round-trips through the CBOR codec byte-for-byte against the Phase-0-committed CBOR
+4. A typed command/event round-trips through the CBOR codec byte-for-byte against the oracle-pinned CBOR
    vector. Non-CBOR foreclosure is proven **by specific reason** (§M.8), not by any compile failure: the
    compile-fail harness carries one negative fixture **per foreclosed route** — raw `ByteString`, JSON,
    base64 — each committed in this phase's oracle-pinning sprint with its expected diagnostic (respectively `No instance for (Serialise
@@ -354,7 +354,7 @@ yet built.
 **Blocked by**: none (pure derivation; no broker or session required).
 **Independent Validation**: property tests that `topicFor` derives
 `persistent://<tenant>/<namespace>/<workflow>.<phase>.<substrate>` from a typed `RouteEntry`, checked
-against a **Phase-0-committed hand-authored expected-topic table** (a distinct spec of the naming scheme,
+against an **oracle-pinned hand-authored expected-topic table** (a distinct spec of the naming scheme,
 not `topicFor`'s own output re-fed as its own oracle, §M.3); `validateTopology` returns the **full**
 violation list on graphs seeded with duplicates, empty lanes, and one-sided links; an `emit-only` workflow
 (the `gc` exemplar) is accepted despite having reports with no producing input.
@@ -385,7 +385,7 @@ a runtime mystery — the illegal-state-unrepresentable principle applied to the
 
 ### Validation
 1. Property test: for each generated `RouteEntry`, `topicFor descriptor` equals the entry computed by the
-   **Phase-0-committed independent expected-topic table** (§M.3) — not merely equal to `topicFor` mapped over
+   **oracle-pinned independent expected-topic table** (§M.3) — not merely equal to `topicFor` mapped over
    the descriptor, which is a tautology. "No code path accepts a literal topic string" is made concrete as a
    **type-level foreclosure that reaches the wire layer**: `Connection`'s `LOOKUP_TOPIC` and the produce/consume
    entry points accept only a `Topic` newtype whose sole constructor is private and produced only by `topicFor`;
@@ -451,7 +451,7 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
   BookKeeper/ZooKeeper demand, and complete `PulsarOffloadObjectDemand`/`StorageBudgetId`, followed by
   snapshot-bound preflight of observed/reserved/terminating identities and node runtime/image-storage rows; no
   broker socket or namespace mutation occurs on `Left ProvisionError` or live-preflight refusal.
-- The Phase-0-committed gate oracles (§M.1), authored before the client exists: the CBOR command/event byte
+- The oracle-pinned gate oracles (§M.1), authored before the client exists: the CBOR command/event byte
   vectors, the hand-authored expected derived-topic table, the standing-namespace pre-run policy snapshot, and
   the committed seeded-mutant set (topicFor-literal, one-sided-link-clause-deleted, produceRaw-re-added) each
   asserted to turn the gate red (§M.2).
@@ -459,7 +459,7 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
 ### Validation
 1. Run the gate topology end-to-end on the `linux-cpu` kind cluster and assert: a workflow command round-trips
    to an event over the native protocol with broker-side dedup enabled; the CBOR payloads round-trip
-   byte-for-byte against the Phase-0-committed CBOR command/event vectors; the produced and consumed topic
+   byte-for-byte against the oracle-pinned CBOR command/event vectors; the produced and consumed topic
    names equal the committed derived-topic table (§M.3, algebra on the gate path); a fixture attempting a
    non-CBOR payload fails to type-check with its committed expected diagnostic (§M.8). A companion negative gate
    run seeds the same topology with a one-sided link and asserts `validateTopology` refuses it **before any broker socket is opened**.
@@ -472,7 +472,7 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
    (idempotent). **Leak-free teardown** is proven by an **external enumerate-and-compare sweep** (§M.5): after
    teardown, an observer external to the client queries the standing broker's admin surface and asserts the test
    tenant contains **zero** topics, subscriptions/cursors, and namespaces, and asserts the standing Phase-30
-   namespace's policy set (including the deduplication policy) equals the Phase-0-committed pre-run snapshot —
+   namespace's policy set (including the deduplication policy) equals the oracle-pinned pre-run snapshot —
    subscriptions, stray topics, and a left-enabled dedup policy each fail the assertion. Emit the Register-3
    ledger — the deferred content-store, workflow-runtime, and cross-cluster surfaces (Phase 37 and later)
    recorded UNVERIFIED, never green.

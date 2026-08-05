@@ -93,8 +93,11 @@ epochs, and evidence hashes.
   `accept_body_tenant` trusts the caller's tenant field instead of server context. Both are committed from the
   adopted live-isolation brief and must admit a forbidden nonce, turning the provider-side oracle red.
 
-The gate tears down the test realm, subjects, tenant data, observer grants, and namespaces. The elevated harness
-compares authenticated pre/post inventories; a leaked test credential or resource fails the phase.
+The gate tears down the test realm, subjects, tenant data, observer grants, and namespaces. An **elevated
+observer provisioned in this phase** — credentialed outside the subject under test, not the shared
+`src/Amoebius/Test/{Harness,Sweep}.hs` that [Phase 54](phase_54_test_topology_dsl.md) later consolidates these
+per-phase observers into — compares authenticated pre/post inventories; a leaked test credential or resource
+fails the phase.
 
 ## Resource provision — scoped live probe
 

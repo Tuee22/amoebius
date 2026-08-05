@@ -87,9 +87,9 @@ protocols and the `PromotionGate` are substrate-agnostic in design but validated
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** an `InForceSpec` test topology on the linux-cpu kind cluster exercises the four delivery values
+**Gate:** `cabal test release-lifecycle-live` is green: an `InForceSpec` test topology on the linux-cpu kind cluster exercises the four delivery values
 end-to-end and passes only when all hold. (i) A **live `Release`-ledger write produces a content-addressed `releaseHash`** — recomputed by an independent sha256 over the resolved deployment-dhall ‖ image-digests ‖
-substrate-fp and asserted byte-equal to the Phase-0-committed golden key, the ledger entry immutable in the
+substrate-fp and asserted byte-equal to the oracle-pinned golden key, the ledger entry immutable in the
 Phase-37 store. (ii) An **`Environment` promotion whose `Release` ledger lacks the required evidence strength is refused by the `PromotionGate`** — the committed under-verified fixture `release_unverified` (its evidence
 ledger marks the Runtime/chaos layer UNVERIFIED) yields no `advance` value for `Prod`, and the refusal is
 asserted with the specific reason tag `PromotionRefused:RuntimeEvidenceMissing` (not merely "failed"), paired
@@ -104,7 +104,7 @@ against the standing Phase-34 Postgres (the retire phase never denotes byte dest
 spins up, runs, tears down **leak-free**, and **re-runs idempotently under a distinct per-run store namespace** (a cache-bypassing independent recompute of the `releaseHash`, not a store-hit), emitting a
 committed proven/tested/assumed ledger that names its register (3) and substrate (linux-cpu) and marks the
 runtime layer **tested, never proven** and the cross-cluster/canary layers **UNVERIFIED**. The gate is checked
-against the Phase-0-committed fixtures named in Sprints 39.1–39.4 and **MUST turn red** on the committed seeded
+against the oracle-pinned fixtures named in Sprints 39.1–39.4 and **MUST turn red** on the committed seeded
 mutant `mutant/gate-admits-unverified` — a `PromotionGate` whose guard is weakened so a promotion that SHOULD
 be refused (`release_unverified` → `Prod`) is **admitted** — and on the additional mutants named per sprint.
 The representative set is exactly the `release_lifecycle.dhall` topology's **one trivial app with three
@@ -247,11 +247,12 @@ the section it adopts; individual sprints cite the same sections where they buil
 **Blocked by**: Phase
 37 gate (the three-tier content-addressed store the ledger writes into — blobs ← manifests ← pointers);
 Phase 33 gate (the reconciler whose rendered generations the ledger records) — both external earlier-phase
-prerequisites. **Live oracle and register**: execute at **Register 3** against the Phase-37 single-node kind
+prerequisites.
+**Independent Validation**: execute at **Register 3** against the Phase-37 single-node kind
 cluster's live MinIO store, never an in-process fake — the register is stated so its evidential weight is
 unambiguous. A `Release` write emits a `releaseHash` **recomputed by an independent sha256** over
 `resolved-deployment-dhall ‖ image-digests ‖ substrate-fp` (not the amoebius folder's own output) and equal
-to the Phase-0-committed golden key; two writes of the same logical `Release` deduplicate to one entry and
+to the oracle-pinned golden key; two writes of the same logical `Release` deduplicate to one entry and
 return the same hash; a second write attempting to edit a field of an existing `releaseHash` entry is
 **rejected** by the content-addressed write protocol (immutability is runtime-checked residue).
 **Docs to update**: `documents/engineering/release_lifecycle_doctrine.md` (§2),
@@ -278,7 +279,7 @@ after convergence.
   unrepresentable at the store boundary.
 - Deduplication: writing an already-present logical `Release` returns the existing `releaseHash` and adds no
   new entry — content-addressed, self-naming.
-- **Phase-0-pinned oracles (committed before the folder exists):** a golden `test/golden/release_hash.txt` —
+- **oracle-pinned oracles (committed before the folder exists):** a golden `test/golden/release_hash.txt` —
   the expected `releaseHash` for one fixed `Release` fixture `test/golden/release_fixture.json`, computed by an
   **independent sha256 tool** (not the amoebius folder) and committed in this phase's oracle-pinning sprint; and a **specific-reason negative** `release_fixture_perturbed.json` (the same `Release` with a single image digest changed) whose
   expected outcome is a `releaseHash` **differing from the golden at the derived key** — paired with the
@@ -348,7 +349,7 @@ pointer over the fixed ledger, not a redeploy.
 - Exact Content-demand objects for all three pointer HEADs and their retained histories; concurrent CAS loser,
   failed write, multipart, and prior-body extents remain charged under the release `StorageBudgetId` and sole
   mutation admission until fresh inventory proves reclamation.
-- **Phase-0-pinned oracles:** a committed **compile-fail fixture** `test/reject/fourth_environment.hs` whose
+- **oracle-pinned oracles:** a committed **compile-fail fixture** `test/reject/fourth_environment.hs` whose
   expected outcome is a **specific type error at the `Environment` constructor site** (no constructor for a
   fourth arm), paired with a positive that names an enumerated arm; and a golden pointer-history transcript
   `test/golden/promote_history.txt` (the expected ETag sequence for a fixed `Dev → Staging → Prod` promotion
@@ -425,7 +426,7 @@ unrepresentable state.
   on it — an in-process validation of the DSL can never mean the cluster enforces it.
 - A refusal carries the **specific reason** (`PromotionRefused:RuntimeEvidenceMissing`), not a bare failure,
   and leaves the environment pointer HEAD untouched.
-- **Phase-0-pinned oracles (authored before the gate exists):** the committed environment→required-strength
+- **oracle-pinned oracles (authored before the gate exists):** the committed environment→required-strength
   mapping table `test/golden/evidence_strength.txt` (hand-authored, independent of the gate's fold), which
   records `Dev` = Decision green, `Staging` = Protocol *tested*, `Prod` = Runtime/chaos *tested* — never
   *proven* on any arm; the

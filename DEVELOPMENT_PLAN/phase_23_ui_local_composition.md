@@ -1,4 +1,4 @@
-# Phase 23: UI local composition
+# Phase 23: Local UI composition
 
 > **Purpose**: Compose authored low-code applications through the generic browser and UI-server runtimes and
 > test locally that data, workflow, and ready-artifact interactions preserve authorization and tenant scope.

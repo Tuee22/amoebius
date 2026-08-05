@@ -178,6 +178,8 @@ The fixtures, oracle, observers, and mutants are delegated to [Gate integrity](#
 `test/live/Phase51JitMLCudaArtifactLift.hs` (target paths; not yet built)
 **Blocked by**: Phase 37 gate;
 Phase 48 gate; Phase 49 gate.
+**Requires**: `accelerator-device-plugin` — the device plugin advertising `nvidia.com/gpu` for the host's
+device vector. It is part of what makes the host `linux-cuda`, not a phase deliverable.
 **Independent Validation**: the single live command checks the positive
 CUDA-to-commit chain, both pre-effect capacity negatives, the pointer-conflict and command-id conflict
 negatives, and all four committed mutants against external evidence.

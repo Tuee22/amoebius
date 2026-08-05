@@ -139,7 +139,7 @@ flowchart LR
   named per-consumer Patroni Postgres clusters with pgAdmin**; the "trivial app" is exactly the
   single-service Deployment+Service+HTTPRoute of `dhall/examples/platform_plus_trivial_app.dhall`. No other
   service set satisfies the gate.
-- **Phase-0-pinned oracle (§M.1).** The positive fixture `dhall/examples/platform_plus_trivial_app.dhall`, the
+- **oracle-pinned oracle (§M.1).** The positive fixture `dhall/examples/platform_plus_trivial_app.dhall`, the
   expected per-pass enact sets (`test/fixtures/phase33/expected-enact-pass1.json`,
   `…/expected-enact-pass2.json`), the perturbation target list (`…/perturb-targets.txt`), and the negative
   corpus's expected Gate-1/Gate-2 rejection-tag table (`…/negative-expected-tags.tsv`, hand-authored,
@@ -485,7 +485,7 @@ each still **fails at Gate 1 or Gate 2**, and each positive fixture still decode
 negative `.dhall` is submitted through the exact same singleton spec-ingestion/`Deploy.hs` entry the
 positive gate fixture flowed through (not a separate host-side CorpusSpec decoder), and each yields a
 **structured Gate-1 (`dhall type` error) or Gate-2 (`DecodeError` tag) rejection whose emitted tag equals
-the Phase-0-committed expected tag for that fixture in `test/fixtures/phase33/negative-expected-tags.tsv`
+the oracle-pinned expected tag for that fixture in `test/fixtures/phase33/negative-expected-tags.tsv`
 (§M.8)** — a bare "it failed" does not satisfy this. **"No fixture reaches the apiserver" is proven, not
 assumed (§M.5):** across the entire negative corpus run the apiserver audit log shows **zero**
 platform/app-object writes, and a full-cluster `resourceVersion` snapshot taken before and after the corpus
@@ -508,7 +508,7 @@ the pre-cluster band; here the guard confirms the live deploy path never admits 
 - The negative regression guard: the Phase-6 corpus (a bad PVC↔PV pairing, a Keycloak-bypassing open ingress, a
   product named in application logic, and the capacity/topology/bounded-storage set) **re-run** against the
   live deploy path (the same singleton `Deploy.hs` entry the positive fixture used), each asserted to fail at
-  Gate 1 or Gate 2 **with its specific foreclosure tag matching the Phase-0-committed hand-authored oracle `test/fixtures/phase33/negative-expected-tags.tsv`** (each row: fixture → expected `dhall type` error or
+  Gate 1 or Gate 2 **with its specific foreclosure tag matching the oracle-pinned hand-authored oracle `test/fixtures/phase33/negative-expected-tags.tsv`** (each row: fixture → expected `dhall type` error or
   `DecodeError` tag, authored independently of the singleton's decoder — §M.3/§M.8), and each paired with a
   positive that differs only in the foreclosed dimension — **never re-establishing** the type discipline, only
   guarding that the deploy path inherits it.
@@ -516,7 +516,7 @@ the pre-cluster band; here the guard confirms the live deploy path never admits 
   dropped-effect `Reconcile.hs::enact`, red because the perturbed component is never restored) and an
   attribution mutant (harness principal issues the writes, red because the audit clause detects a non-singleton
   writer) — both committed and re-run each gate, each asserted to turn the gate red.
-- The **Phase-0-pinned oracle bundle** committed before any implementation exists:
+- The **oracle-pinned oracle bundle** committed before any implementation exists:
   `dhall/examples/platform_plus_trivial_app.dhall`, `expected-enact-pass1.json`, `expected-enact-pass2.json`,
   `perturb-targets.txt`, `negative-expected-tags.tsv`, and `harness-rbac.yaml` (under `test/fixtures/phase33/`).
 - A **Register-3** proven/tested/assumed ledger recording the live-enforcement result (the apiserver admitted
@@ -622,7 +622,7 @@ is untouched by its existence.
   Phase 24 Sprint 24.3 records. It is a client of this surface and adds no second control path.
 - **The reach-class enforcement** as typed structure rather than deployment convention, so a seal-critical verb
   has no constructor reachable from a non-node-local source.
-- **Phase-0-pinned oracles (§M.1)**, authored before `AdminApi.hs` exists: `test/golden/admin/reach-matrix.tsv`
+- **oracle-pinned oracles (§M.1)**, authored before `AdminApi.hs` exists: `test/golden/admin/reach-matrix.tsv`
   (hand-authored (endpoint family × reach class) → admit/refuse plus the exact refusal tag, independent of the
   implementation — §M.3); `test/golden/admin/admission-tags.tsv` (one row per foreclosed admission cause with
   its distinct reason tag); and the paired corpus `test/fixtures/admin/secrets-capability/` — four

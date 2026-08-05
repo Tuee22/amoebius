@@ -223,7 +223,7 @@ flowchart LR
 ```
 *Orientation. The seams phase 26 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
 
-**The representative reconcile corpus (Phase-0-pinned, §M.7 concrete corpus).** The gate's applied service set
+**The representative reconcile corpus (oracle-pinned, §M.7 concrete corpus).** The gate's applied service set
 is the committed fixture `test/live/fixtures/reconcile-corpus/` — a subset of the Phase-13 byte-for-byte
 golden corpus (`test/golden/render/` service specs, referenced by their golden IDs, never a freshly
 hand-picked spec) — and it MUST span, with each kind exercising a *live readiness transition that is not

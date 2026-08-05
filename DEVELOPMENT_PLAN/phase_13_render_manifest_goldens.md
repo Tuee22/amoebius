@@ -95,11 +95,11 @@ analogous to the Phase-5 decode battery and the Phase-4 `dhall type` corpus.
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `cabal test render-golden` is green against Phase-0-pinned oracles — the pure, total
+**Gate:** `cabal test render-golden` is green against oracle-pinned oracles — the pure, total
 `renderAll :: ProvisionedSpec -> [K8sObject]` emits, **for the concrete corpus** (the full Phase-11 provisioned output set: every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, enumerated explicitly in Sprint 13.3's Deliverables and jointly covering every renderable `K8sObject` sum variant at least once), an object set the
 **byte-for-byte** goldens pin exactly, and the three rendered-output-golden illegal-state properties hold
 **non-vacuously** on the emitted objects. The goldens are authored and **committed in this phase's oracle-pinning sprint** under
-`test/manifest/golden/<deployment-id>.json` *before* `renderAll` exists, under a single pinned **canonical Aeson encoding** (object keys lexicographically sorted, two-space indent, trailing LF, exactly one golden
+`test/manifest/golden/<deployment-id>.json.golden` *before* `renderAll` exists, under a single pinned **canonical Aeson encoding** (object keys lexicographically sorted, two-space indent, trailing LF, exactly one golden
 file per deployment keyed by `ProvisionedSpec` id — so "drifts by a single byte" is unambiguous), and are
 **never regenerated from the renderer's own output** (a golden regenerated from `renderAll` is not a test).
 The three properties, with their predicates fixed: **(a)** every emitted pod carries a hardened
@@ -400,7 +400,7 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `test/manifest/RenderGoldenSpec.hs`,
-`test/manifest/golden/<deployment-id>.json` (the Phase-0-committed golden fixtures, one per deployment,
+`test/manifest/golden/<deployment-id>.json.golden` (the oracle-pinned golden fixtures, one per deployment,
 under the canonical Aeson encoding), the independent test-side allow-edge oracle
 `test/manifest/DepGraphOracle.hs` (a hand-authored re-derivation of allow edges from the declared dependency
 graph, not a call into `renderAll`), and the **concrete corpus** — the full Phase-10 binder output set:
@@ -408,7 +408,7 @@ every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, jo
 renderable `K8sObject` sum variant at least once — target paths, not yet built.
 **Blocked by**: Sprint 13.2;
 Phase 11 gate (the whole-deployment `ProvisionedSpec` corpus the goldens render from).
-**Independent Validation**: `cabal test render-golden` is green — the emitted `[K8sObject]` matches its Phase-0-committed byte-for-byte golden under the canonical encoding and every rendered-output-golden illegal-state property holds non-vacuously; the suite goes **red** if the renderer's output drifts by a single byte or if any emitted object violates a by-construction invariant. The NetworkPolicy property checks allow-edge **set equality** against the independent `DepGraphOracle` re-derivation (authored in this phase's oracle-pinning sprint, never `renderAll`'s own fold), so an extra allow edge for an undeclared dependency is caught. The twelve committed seeded
+**Independent Validation**: `cabal test render-golden` is green — the emitted `[K8sObject]` matches its oracle-pinned byte-for-byte golden under the canonical encoding and every rendered-output-golden illegal-state property holds non-vacuously; the suite goes **red** if the renderer's output drifts by a single byte or if any emitted object violates a by-construction invariant. The NetworkPolicy property checks allow-edge **set equality** against the independent `DepGraphOracle` re-derivation (authored in this phase's oracle-pinning sprint, never `renderAll`'s own fold), so an extra allow edge for an undeclared dependency is caught. The twelve committed seeded
 mutants (below) are re-run each build and each must go red via the *property* assertion it targets, with
 that mutant's golden regenerated to match its (illegal) output so the byte diff alone cannot be what fails.
 **Docs to update**: `documents/engineering/conformance_harness_doctrine.md` (record the
@@ -430,7 +430,7 @@ states — directly on the emitted objects, all without a cluster.
 
 ### Deliverables
 `test/manifest/RenderGoldenSpec.hs` pinning the emitted object set byte-for-byte against the
-Phase-0-committed `test/manifest/golden/<deployment-id>.json` (canonical Aeson encoding) for **the concrete corpus** (every capability arm × {`SingleNode`, `Distributed`}), plus per-capability **shape-completeness**
+oracle-pinned `test/manifest/golden/<deployment-id>.json.golden` (canonical Aeson encoding) for **the concrete corpus** (every capability arm × {`SingleNode`, `Distributed`}), plus per-capability **shape-completeness**
 assertions: a Kubernetes workload emits exactly its provisioned Deployment, StatefulSet, DaemonSet, or Job
 arm, while a host-only capability emits no Kubernetes workload; every Kubernetes arm has its
 `ServiceAccount`/`Role`/`RoleBinding` triple and derived `NetworkPolicy`; and every
@@ -499,7 +499,7 @@ declared graph (kills property c's set-equality against `DepGraphOracle`).
   live band). The golden fixtures are test artifacts, never committed deployment manifests.
 
 ### Validation
-1. `cabal test render-golden` is green — output matches the Phase-0-committed byte-for-byte goldens (canonical
+1. `cabal test render-golden` is green — output matches the oracle-pinned byte-for-byte goldens (canonical
    encoding) across the concrete corpus, shape-completeness and corpus-wide non-zero counts hold (no vacuous
    universal), and every rendered-output invariant holds — the NetworkPolicy check by allow-edge set equality
    against the independent `DepGraphOracle`. Each of the twelve committed seeded mutants (R1 CPU/memory drift,

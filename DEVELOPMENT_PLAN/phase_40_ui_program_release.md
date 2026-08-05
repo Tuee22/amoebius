@@ -1,7 +1,7 @@
-# Phase 40: Atomic UI program release
+# Phase 40: Atomic immutable UI-program release
 
 > **Purpose**: Atomically release an immutable bound UI program as a content-addressed `ClientPlan` /
-> `UiServerPlan` pair plus public-contract artifacts, without rebuilding the generic PureScript runtime image,
+> `UiServerPlan` pair plus public-contract artifacts, without rebuilding the amoebius runtime image,
 > and reject stale, missing, or mixed plan identities before any action executes.
 > **Read this if**: phase 40 is next in the queue, or a later phase depends on what its gate establishes.
 
@@ -14,7 +14,7 @@ No gate has run.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -33,7 +33,7 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. No UI release artifacts or live gate evidence exist; the generic-runtime and stale-plan claims
+📋 Planned. No UI release artifacts or live gate evidence exist; the unchanged-image and stale-plan claims
 remain design intent until the Register-3 gate passes.
 
 ## Phase Summary
@@ -42,7 +42,9 @@ This phase owns the release projection from one bound UI program into an immutab
 serializable `UiServerPlan` manifest, public-contract objects, and content manifests carried atomically by the
 Phase-39 release ledger. The server-plan object contains dispatch/policy/handler identities and codecs, not
 serialized Haskell functions; its named handlers must exist in the linked runtime. The generic PureScript
-runtime has one immutable OCI image for its ABI/component-catalog identity. Changing an app program changes
+runtime is a **baked asset of the one amoebius runtime image** — the UI server is a worker responsibility of
+the same amoebius executable ([`low_code_ui_runtime_doctrine.md §13`](../documents/engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server)),
+so that image carries its ABI/component-catalog identity. Changing an app program changes
 content artifacts and the release hash, never an app-specific image layer or a handwritten frontend bundle.
 
 Every effect request carries the exact current program, content, contract, policy, and scope identities.
@@ -53,11 +55,11 @@ cannot admit a frame whose program/ABI/routing epoch does not exact-match an act
 
 **Session scope:** In one uninterrupted engineering session, implement the UI-to-release artifact projection
 and stale-digest admission boundary, accepted only by `cabal test ui-program-release-live-gate`. Split if the work requires a new rollout engine, durable
-schema migration, generic-runtime image build, or second acceptance command.
+schema migration, amoebius runtime image build, or second acceptance command.
 **Substrate:** linux-cpu
 **Register:** 3 (live infrastructure)
 **Gate:** `cabal test ui-program-release-live-gate` publishes two atomic paired-plan UI releases over one
-generic runtime image, externally observes each matching pair carrying a fresh challenge through one
+unchanged amoebius runtime image, externally observes each matching pair carrying a fresh challenge through one
 authorized action, and establishes that stale, missing, or mixed client/server identities return
 `ReloadRequired` with zero action effect. The concrete
 fixtures, observers, oracle, and mutants are delegated to [Gate integrity](#gate-integrity).
@@ -83,12 +85,16 @@ fixtures, observers, oracle, and mutants are delegated to [Gate integrity](#gate
   the browser, first omitting a digest and then supplying a hand-authored plan/action tuple. Both attempts must
   fail before handler lookup and leave the external action journal unchanged; a browser-side reload screen is
   never accepted as evidence of rejection.
-- **Observer outside the SUT.** The elevated harness reads Envoy access records, the Phase-39 release-ledger
+- **Observer outside the SUT.** An elevated observer provisioned in this phase — not the shared
+  `src/Amoebius/Test/{Harness,Sweep}.hs` that [Phase 54](phase_54_test_topology_dsl.md) later consolidates —
+  reads Envoy access records, the Phase-39 release-ledger
   pointer history, both MinIO plan-object identities and bytes for each release, the action service's
   append-only journal, and the containerd image digest. UI-server self-report is not evidence; any missing or
   challenge-mismatched source fails the gate.
-- **Single generic image.** The independent containerd/registry observer must see one unchanged generic
-  PureScript runtime image digest across both releases and no app-specific UI image. Per-app plans/contracts
+- **Single generic image.** The independent containerd/registry observer must see one unchanged **amoebius
+  runtime image** digest across both releases and no app-specific UI image — the image
+  [Phase 25](phase_25_base_image_registry.md) bakes and publishes, carrying the compiled PureScript client
+  bundle as a baked asset; a UI release is release *data*, never an image build. Per-app plans/contracts
   are immutable release/content objects.
 - **Committed mutants.** Phase 0 commits
   `test/mutants/phase_40/mut-40-accept-stale-authority-digest.patch` (guard weakening) and
@@ -144,7 +150,7 @@ per-app frontend image, half-published plan, mixed-plan execution, or stale-plan
 - Deterministic paired client/server plan objects, UI release manifests, and exact source-key equality from
   `BoundUiProgram`.
 - Compatibility checking and fail-closed `ReloadRequired` admission before handler lookup.
-- One generic-runtime image identity shared by the two gate releases.
+- One amoebius runtime image identity shared by the two gate releases.
 - Phase-0 manifests, plan-pair/stale-digest matrices, fresh-action oracle, and three named mutants.
 - A Register-3 ledger recording authenticated challenge and external evidence digests.
 

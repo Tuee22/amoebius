@@ -1,7 +1,8 @@
 # Phase 1: Toolchain spike
 
-> **Purpose**: Prove — before any later phase promises an executable decoder, simulator, or resolver — that
-> the pre-cluster Haskell surface builds on the pinned toolchain, or record the exact remediation or blocker.
+> **Purpose**: Pin the pre-cluster toolchains — recording where every tool later phases invoke by absolute
+> path actually resolves to — and prove, before any later phase promises an executable decoder, simulator, or
+> resolver, that the pre-cluster Haskell surface builds on that pin, or record the exact remediation or blocker.
 > **Read this if**: phase 1 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 1 delivers the toolchain spike; its design is owned by [conformance_harness_doctrine.md](../documents/engineering/conformance_harness_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), and the plan for reaching it is owned here.
@@ -78,9 +79,9 @@ subset already in the stock closure) compiles and links under **GHC 9.12.4 / Cab
 package store
 (`cabal build` run after `rm -rf dist-newstyle` and against a `--store-dir` that holds none of the probed
 packages, so a stale store hit cannot mask an unbuildable config), **and** the two committed executable probes
-run green: `cabal run probe:decode` in-process decodes the Phase-0-committed positive fixture
+run green: `cabal run probe:decode` in-process decodes the oracle-pinned positive fixture
 `probe/fixtures/ok.dhall` into its committed expected Haskell value and exits 0, and `cabal run probe:sim` runs the named `IOSimPOR` schedule and **emits the terminal state it reaches on stdout in the committed serialization**, which the external harness `probe/oracle/check-sim-terminal` byte-diffs
-against the Phase-0-committed oracle `probe/fixtures/sim-terminal.expected` — this leg greens **only** on a
+against the oracle-pinned oracle `probe/fixtures/sim-terminal.expected` — this leg greens **only** on a
 byte-exact match, never on the probe's self-reported exit 0 (a `main = exitSuccess` stub emits no terminal state
 and so fails the diff). Evidence, not prose, closes the gate: the green outcome
 counts only with the retained `cabal build`/`cabal run` transcripts that echo `ghc --version` and
@@ -173,9 +174,13 @@ terminal-state positive it breaks — §M.2).
 ## Sprint 1.1: Shared toolchain pin + `cabal.project` skeleton 📋
 
 **Status**: Planned
-**Implementation**: `cabal.project`, `cabal.project.freeze` — target paths, not yet
-built.
+**Implementation**: `cabal.project`, `cabal.project.freeze`, and `toolchain/pins.json` — the **pin
+manifest**: the resolved absolute paths of `ghc`/`cabal`/`dhall` (invoked by absolute path from
+[Phase 5](phase_05_gadt_decoder_gate2.md) on) and of `spago`/`purs` + Chromium (the browser toolchain the UI
+phases from [Phase 21](phase_21_ui_browser_interpreter.md) on drive) — target paths, not yet built.
 **Blocked by**: Phase 0 gate.
+**Requires**: `host-toolchain` — the pinned binaries present on the developer host. This sprint records
+**where they resolve to**; it does not install them.
 **Independent Validation**: `cabal build` of a trivial library succeeds
 on **GHC 9.12.4 / Cabal 3.16.1.0** from a clean store (`rm -rf dist-newstyle` first), with the retained
 transcript echoing `ghc --version` and `cabal --version` in-band and showing the shell-observed exit 0; the
@@ -207,7 +212,7 @@ The whole sprint (📋 Planned).
 (decode a trivial `.dhall` in-process) — target paths, not yet built.
 **Blocked by**: Sprint 1.1.
 **Independent Validation**: a probe depending on `dhall` builds under the pin from a clean store, and `cabal
-run probe:decode` decodes the Phase-0-committed `probe/fixtures/ok.dhall` into its committed expected
+run probe:decode` decodes the oracle-pinned `probe/fixtures/ok.dhall` into its committed expected
 Haskell value and exits 0 (a green `cabal build` alone does **not** satisfy this — an executed, exit-checked
 run is required); paired with it, `probe/fixtures/bad-type.dhall` — a positive/negative pair differing only
 in one mistyped field — makes `cabal run probe:decode` fail with its committed `dhall` type-error tag (§M.8:
@@ -257,7 +262,7 @@ paths, not yet built.
 **Independent Validation**: a probe depending on
 `io-sim`/`io-classes` builds under the pin from a clean store, and `cabal run probe:sim` runs the
 Phase-0-named `IOSimPOR` schedule and **emits the terminal state it reaches on stdout**, which the external
-harness `probe/oracle/check-sim-terminal` byte-diffs against the Phase-0-committed oracle
+harness `probe/oracle/check-sim-terminal` byte-diffs against the oracle-pinned oracle
 `probe/fixtures/sim-terminal.expected` — the leg greens **only** on a byte-exact match, **not** on the
 probe's self-reported exit 0 (a `main = exitSuccess` stub emits no terminal state and fails the diff);
 paired with it, the seeded mutant `probe/mutants/perturb-sim-schedule` (the schedule's step ordering
@@ -278,7 +283,7 @@ by this probe.
 ### Deliverables
 - A recorded resolution for `io-sim` + `io-classes` on the pin with its retained green build + `cabal run
   probe:sim` transcripts, **or** a recorded blocker with verbatim failing output per remediation class.
-- The Phase-0-committed `IOSimPOR` schedule name and its expected terminal state serialized as
+- The oracle-pinned `IOSimPOR` schedule name and its expected terminal state serialized as
   `probe/fixtures/sim-terminal.expected`, the external comparison harness `probe/oracle/check-sim-terminal`, and
   the seeded sim-path mutant `probe/mutants/perturb-sim-schedule`.
 

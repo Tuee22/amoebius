@@ -138,7 +138,7 @@ flowchart LR
   resource, nodefs, kernel-interface, queue, and listener fingerprint. The singleton re-observes that
   fingerprint immediately before the first `ip`/`wg`/traffic-control/listener mutation; mismatch or overdraw
   discards the plan with zero such effects.
-- **Phase-0-pinned oracle (§M.1).** The positive fixture `dhall/examples/wireguard_fabric.dhall`, the committed
+- **oracle-pinned oracle (§M.1).** The positive fixture `dhall/examples/wireguard_fabric.dhall`, the committed
   rendered-config golden `test/fixtures/phase41/expected-peer-config.golden` (key fields carried as `SecretRef`
   names, *not* key material — with the AllowedIPs, per-peer VPN-IP, and hub `Endpoint` pinned), the expected
   topology/resource expansion `test/fixtures/phase41/expected-fabric-demand.json`, the reachability matrix
@@ -416,7 +416,7 @@ probe over the VPN IP, not a self-report.
   VPN-IP, and teardown is leak-free — expressed as a test-topology `.dhall` with a teardown obligation.
 - The negative regression guard: the inline-key-literal (secrets-in-Dhall), overlapping-VPN-IP, and
   out-of-CIDR-`AllowedIPs` fixtures re-run against the same render entry point, each failing at Gate 1/Gate 2
-  with its foreclosure tag equal to the Phase-0-committed hand-authored oracle
+  with its foreclosure tag equal to the oracle-pinned hand-authored oracle
   `test/fixtures/phase41/negative-expected-tags.tsv` (§M.3/§M.8), each paired with a positive differing only in
   the foreclosed dimension.
 - **Committed seeded mutants (§M.2):** `test/fixtures/phase41/mutants/missing-peer-key.patch` (the spoke's
@@ -424,7 +424,7 @@ probe over the VPN IP, not a self-report.
   `test/fixtures/phase41/mutants/hub-no-endpoint.patch` (the hub-role config omits its `Endpoint` — the spoke
   has no hub address, the probe fails red) — both committed and re-run each gate, each asserted to turn the gate
   red.
-- The **Phase-0-pinned oracle bundle** committed before any implementation exists:
+- The **oracle-pinned oracle bundle** committed before any implementation exists:
   `dhall/examples/wireguard_fabric.dhall`, `expected-peer-config.golden`,
   `expected-fabric-demand.json`, `reachability-expected.json`, and `negative-expected-tags.tsv` (under
   `test/fixtures/phase41/`).

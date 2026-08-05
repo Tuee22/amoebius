@@ -132,7 +132,7 @@ submit/confirm Kubernetes Binding → CAS `Bound`, with an external apiserver + 
 bootstrap→steady cutover leaving **no double-bind**; a guarded workload submitted before
 `ManagedCapacityReady` is rejected at admission with **zero writes**; the immediate re-run is a scheduler
 **no-op** (byte-stable reservation records/CAS version, no new Binding, same `Lease` holder) by the independent
-observer; and every committed scheduler mutant turns the suite red. The scheduler slice of the Phase-0-pinned
+observer; and every committed scheduler mutant turns the suite red. The scheduler slice of the oracle-pinned
 fixtures, the committed seeded mutant set, and the independent reference oracle are named in
 [Gate integrity](#gate-integrity) below ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) delegation).
 
@@ -140,7 +140,7 @@ fixtures, the committed seeded mutant set, and the independent reference oracle 
 
 The apparatus is the **scheduler slice** of the source phase's committed reconcile corpus, partitioned along
 this seam; Phase 26 owns the object/convergence slice of the same corpus, and the two do not duplicate each
-other. All identifiers are Phase-0-pinned before `Scheduler/Ledger.hs` exists (§M.1 oracle-pinning), except the
+other. All identifiers are oracle-pinned before `Scheduler/Ledger.hs` exists (§M.1 oracle-pinning), except the
 scheduler-role fixtures that depend on the Phase-25 registry/preloaded image and the Phase-24 live cluster,
 which are committed at the start of this phase before the implementation that consumes them (§M.1 named
 exception).
@@ -216,7 +216,7 @@ records, their CAS version, and the Kubernetes `Binding` subresource directly an
 code under test: **no `Binding` request precedes a successful `Reserved` CAS**; **every guarded Pod UID has exactly one reservation debit** (no Pod+ledger double debit); at every audit resourceVersion **at most one holder** and no non-authority write without the exact mandatory-`Lease` holder (held by the Phase-26
 reconciler); on the immediate re-run the reservation records and CAS version are **byte-identical** and **no new `Binding` is issued**; and **no second default-scheduler exception exists**. The scheduler's self-reported
 "reserved once, bound once" is corroborating evidence only, never the passing condition. The reference *action*
-domain is the Phase-0-pinned hand-authored `expected-actions.json` scheduler slice, authored before the
+domain is the oracle-pinned hand-authored `expected-actions.json` scheduler slice, authored before the
 planner — not regenerated from the scheduler's own output.
 
 ## Resource provision — the `CapacitySchedulerSystemDemand` envelope

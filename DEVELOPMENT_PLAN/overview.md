@@ -196,7 +196,7 @@ runtime fidelity UNVERIFIED until that phase discharges them
 - **Phase 11 — Whole-deployment provision seal + expansion** (`none`) → [phase_11](phase_11_provision_seal.md).
 - **Phase 12 — InferenceEngine capability + accelerator provision** (`none`) → [phase_12](phase_12_inference_accelerator_provision.md).
 - **Phase 13 — Pure `renderAll` + rendered-output goldens** (`none`) → [phase_13](phase_13_render_manifest_goldens.md).
-- **Phase 14 — chain/Step kernel + `--dry-run` + boundary fake-tool harness** (`none`) → [phase_14](phase_14_chain_kernel_boundary.md).
+- **Phase 14 — chain/Step kernel + `--dry-run` + boundary fake-tool harness + Gate-3 AST checker** (`none`) → [phase_14](phase_14_chain_kernel_boundary.md).
 - **Phase 15 — Deterministic-simulation substrate** (`none`) → [phase_15](phase_15_deterministic_sim_substrate.md).
 - **Phase 16 — Bounded UI-program schema** (`none`) → [phase_16](phase_16_ui_program_schema.md).
 - **Phase 17 — Scoped identity kernel** (`none`) → [phase_17](phase_17_scoped_identity_kernel.md).
@@ -209,13 +209,13 @@ runtime fidelity UNVERIFIED until that phase discharges them
 
 *Live band (Register 3), substrate-ordered:*
 - **Phase 24 — Python midwife + substrate detect + single kind cluster** (`linux-cpu`) → [phase_24](phase_24_midwife_bootstrap_kind.md).
-- **Phase 25 — Multi-arch base image + jit-build resolver + distribution registry** (`linux-cpu`) → [phase_25](phase_25_base_image_registry.md).
+- **Phase 25 — Typed bake catalog driving the multi-arch base image, its jit-build resolver, and the distribution registry** (`linux-cpu`) → [phase_25](phase_25_base_image_registry.md).
 - **Phase 26 — Typed renderer + object reconciler** (`linux-cpu`) → [phase_26](phase_26_object_reconciler.md).
 - **Phase 27 — amoebius-capacity scheduler + bootstrap cutover** (`linux-cpu`) → [phase_27](phase_27_capacity_scheduler.md).
 - **Phase 28 — No-provisioner retained storage + lossless rebind** (`linux-cpu`) → [phase_28](phase_28_retained_storage.md).
 - **Phase 29 — Root Vault + PKI + built-in Haskell Vault client** (`linux-cpu`) → [phase_29](phase_29_vault_pki.md).
 - **Phase 30 — Platform backbone (MetalLB + MinIO + Pulsar HA)** (`linux-cpu`) → [phase_30](phase_30_platform_backbone.md).
-- **Phase 31 — Platform services-2 (Redis/Sentinel + Percona/Patroni + observability + readiness-DAG)** (`linux-cpu`) → [phase_31](phase_31_platform_services_2.md).
+- **Phase 31 — Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG)** (`linux-cpu`) → [phase_31](phase_31_platform_services_2.md).
 - **Phase 32 — Keycloak-owned ingress** (`linux-cpu`) → [phase_32](phase_32_keycloak_ingress.md).
 - **Phase 33 — Live DSL deploy via the replicas=1 singleton** (`linux-cpu`) → [phase_33](phase_33_live_dsl_singleton.md).
 - **Phase 34 — Tenant/provider provisioning** (`linux-cpu`) → [phase_34](phase_34_app_tenancy.md).
@@ -245,11 +245,11 @@ runtime fidelity UNVERIFIED until that phase discharges them
 - **Phase 58 — Initial online UI multi-zone high availability** (`linux-cpu → provider`) → [phase_58](phase_58_ui_ha_multizone.md).
 
 *Offline-continuity extension:*
-- **Phase 59 — Offline language and paired-plan projection** (`none`) → [phase_59](phase_59_offline_language_plan.md).
+- **Phase 59 — Offline language and paired plans** (`none`) → [phase_59](phase_59_offline_language_plan.md).
 - **Phase 60 — Encrypted browser offline runtime** (`none`) → [phase_60](phase_60_encrypted_browser_runtime.md).
-- **Phase 61 — Authoritative offline replay and durable receipts** (`linux-cpu`) → [phase_61](phase_61_offline_replay_receipts.md).
-- **Phase 62 — Offline blobs and tenant isolation** (`linux-cpu`) → [phase_62](phase_62_offline_blobs_isolation.md).
-- **Phase 63 — Offline release evolution** (`linux-cpu`) → [phase_63](phase_63_offline_release_evolution.md).
+- **Phase 61 — Offline replay and durable receipts** (`linux-cpu`) → [phase_61](phase_61_offline_replay_receipts.md).
+- **Phase 62 — Offline blobs and partition isolation** (`linux-cpu`) → [phase_62](phase_62_offline_blobs_isolation.md).
+- **Phase 63 — Offline release and schema evolution** (`linux-cpu`) → [phase_63](phase_63_offline_release_evolution.md).
 - **Phase 64 — Offline multi-zone continuity** (`linux-cpu → provider`) → [phase_64](phase_64_offline_multizone_continuity.md).
 - **Phases 65+ — Later phases** (`varies`) → [later_phases.md](later_phases.md).
 

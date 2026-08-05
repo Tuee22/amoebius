@@ -131,6 +131,16 @@ NOT derived from the schema modules) pins each union's exact arm set; the harnes
 schema module and compares its arm inventory byte-exactly against this table, red on any extra (e.g. a
 `Custom : Text` / `Raw : Text` escape arm) or missing arm.
 
+**Canonical CSV rendering convention (§M.1).** `arm_inventory.csv`, `surface_fields.csv`, and
+`resource_fields.csv` are authored and compared under one pinned convention, without which a byte-exact
+fixture is not writable: UTF-8 without BOM; Unix `LF` line endings with a trailing `LF` on the final row;
+one header row naming the columns; rows sorted lexicographically by their full key path under the C locale
+(byte order, not locale collation); arms within a row emitted in the union's declaration order; `,`
+separator with no surrounding whitespace and no quoting unless a field contains `,`, `"`, or a newline
+(then RFC-4180 double-quoting); and **no generated-by stamp, timestamp, path, or run-varying field of any
+kind**. "Normalizes" above means exactly this rendering applied to the shipped module's extracted
+inventory — no other transformation.
+
 ### Resource-shape oracle, independent of the schema (§M.3)
 
 A committed hand-authored `tests/oracle/gate1/resource_fields.csv` pins the recursive field/arm inventory
@@ -362,11 +372,21 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
 
 **Status**: Planned
 **Implementation**:
-`dhall/amoebius/{prelude,Cluster,App,Deployment,Capability,Topology,Capacity,Resources,Storage,Retention,Image}.dhall`
-(typed surfaces + smart constructors) — target paths, not yet built.
-**Blocked by**: Phase 3 gate. External
-prerequisite: the `dhall` CLI only — this sprint needs **no** Haskell skeleton (that arrives with the Gate-2
-decoder in Phase 5).
+`dhall/amoebius/{prelude,Cluster,App,Deployment,Capability,Topology,Capacity,Resources,Storage,Retention,Image,Extension,Consistency,Backup}.dhall`
+(typed surfaces + smart constructors) — target paths, not yet built. The last three close doctrine surfaces
+that no phase previously owned: `Extension.dhall` carries `ExtensionSpec` with its **mandatory, non-optional**
+`extMonitoring : NonEmpty MonitoringSurface` and the closed `MonitoringSurface` union
+([`dsl_doctrine.md §8`](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits)),
+so an extension declaring no monitoring has no inhabitant; `Consistency.dhall` carries the PACELC surface
+([`consistency_pacelc_doctrine.md`](../documents/engineering/consistency_pacelc_doctrine.md)) that
+[Phase 43](phase_43_gateway_migration_drills.md) consumes; `Backup.dhall` carries the closed `BackupPolicy`
+([`backup_recovery_doctrine.md`](../documents/engineering/backup_recovery_doctrine.md)), cross-cutting
+invariant #23 — phases 0–64 own the *declarable* policy; its live enactment (the put-only credential and the
+copy/verify `Job`) is the named candidate phase in [`later_phases.md`](later_phases.md), so the surface is
+owned rather than merely absent.
+**Blocked by**: Phase 3 gate.
+**Requires**: `host-toolchain` — the `dhall` CLI only; this sprint needs **no** Haskell skeleton (that
+arrives with the Gate-2 decoder in Phase 5).
 **Independent Validation**: `dhall type` / `dhall lint` accept every schema module on
 its own — each surface type is well-formed and every smart constructor elaborates to a value of its declared
 type — AND each shipped union's arm inventory and each surface record's required-field set match their
@@ -405,7 +425,7 @@ an authoring-time boundary that fires before any binary runs.
   negatives — a spec naming a foreign image, an authored shell fragment, a container with no `process` — must
   each fail `dhall type` at the committed expected error.
 - The pure resource declarations of
-  [ 0 ](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
+  [`resource_capacity_doctrine.md §3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
   unit-tagged quantity fields; `PodResourceVec = { cpu, memory, ephemeralStorage }`; `Resources = {
   requests, limits }`; the optional declared compute headroom `ComputeHeadroomDemand = { reason, pad }` on
   `PodResourceEnvelope` and its `HostComputeHeadroomDemand` mirror on `HostResources`, whose `reason` is the

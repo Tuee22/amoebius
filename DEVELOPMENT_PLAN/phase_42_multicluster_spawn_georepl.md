@@ -113,7 +113,7 @@ tolerance is exercised at the boundary by the
 **Register:** 3 — live infrastructure: a real parent and two real child clusters and a real geo-replicated
 workflow crossing an asynchronous boundary.
 
-**Gate:** a parent spawns two children (re-running the spawn is a no-op observed at the OS boundary) that
+**Gate:** `cabal test multicluster-spawn-live` is green: a parent spawns two children (re-running the spawn is a no-op observed at the OS boundary) that
 geo-replicate a `command → event* → result` workflow, and the forest tears down leak-free. The parent first
 observes physical-host residual and proves
 `parent engine carve + child-A carve + child-B carve + non-cluster commitments ≤ host` for CPU, memory, VM/node

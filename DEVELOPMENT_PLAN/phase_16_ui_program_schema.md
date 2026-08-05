@@ -1,4 +1,4 @@
-# Phase 16: UI program schema
+# Phase 16: Bounded UI-program schema
 
 > **Purpose**: Add the bounded `UiSource` Dhall algebra and total UI checker that seals structurally valid
 > application programs as `CheckedUiProgram` values without admitting executable browser escape hatches.

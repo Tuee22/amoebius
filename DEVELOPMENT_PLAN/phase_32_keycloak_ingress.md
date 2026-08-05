@@ -14,7 +14,7 @@ No gate has run.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -78,7 +78,7 @@ host, tracked in [substrates.md](substrates.md); no apple, linux-cuda, or window
 delete + recreate; a Register-1/2 in-process check cannot discharge it (though the *render-time*
 impossibility of a self-published ingress was already golden-locked pre-cluster in Phase 13).
 
-**Gate:** on the live `linux-cpu` cluster carrying the standard service stack, every wild route — WAN, LAN,
+**Gate:** `cabal test keycloak-ingress-live` is green: on the live `linux-cpu` cluster carrying the standard service stack, every wild route — WAN, LAN,
 and localhost-browser — reaches a platform or app surface **only** through `LoadBalancer → Envoy/Gateway API →
 Keycloak`; an unauthenticated request to any surface is rejected at that edge; **no workload or chart can publish its own wild ingress** or open a backdoor NodePort (the sole exception being the host-origin,
 localhost-only NodePort, a distinct endpoint type); and the **Phase-28 storage-rebind regression still holds**
@@ -95,13 +95,13 @@ cluster came up (see [Gate integrity](#gate-integrity)).
 
 ### Representative set (concrete corpus, §M.7)
 
-The gate's "every wild route / every surface" quantifies over an **explicitly enumerated, Phase-0-committed route inventory** — `test/fixtures/phase32/route-inventory.golden` — listing every browser surface on the
+The gate's "every wild route / every surface" quantifies over an **explicitly enumerated, oracle-pinned route inventory** — `test/fixtures/phase32/route-inventory.golden` — listing every browser surface on the
 Phase-30/31 standard service stack that the edge fronts: **Grafana, the Keycloak admin console, the Vault UI, the MinIO console, the platform API surface, and a platform-owned authenticated-WebSocket upgrade probe** (the exact set is the golden; if the stack's surface set changes,
 the golden is re-authored and re-committed, never regenerated from the running edge). The three origin classes
 — WAN, LAN, localhost-browser — are each probed from a **distinct Linux network namespace / sidecar container**
 attached to a separate veth with a non-loopback source address for WAN/LAN and the host loopback for
 localhost-browser; a single host-side `curl` of the MetalLB address is **not** an acceptable stand-in for all
-three. The "test-realm user" is the Phase-0-committed `phase32-tester` realm/user fixture
+three. The "test-realm user" is the oracle-pinned `phase32-tester` realm/user fixture
 (`test/fixtures/phase32/realm.json`), authored before the edge exists.
 
 ## Gate integrity
@@ -264,7 +264,7 @@ observed as readiness conditions, not durations.
   for its children, and no scalar "database bytes" stands in for the storage structure.
 - The readiness edges wired into the derived DAG: MetalLB address before the Gateway listener; Keycloak ready
   before the edge admits wild traffic — never a `threadDelay`.
-- The Phase-0-committed oracle fixtures this sprint checks against: `test/fixtures/phase32/route-inventory.golden`
+- The oracle-pinned oracle fixtures this sprint checks against: `test/fixtures/phase32/route-inventory.golden`
   (the explicit surface set) and `test/fixtures/phase32/realm.json` (the `phase32-tester` realm/user), both
   authored before `Amoebius.Platform.Edge`/`Keycloak` exist; plus committed mutant (a) — an OIDC-filter-removed
   edge variant the gate must show going red.
@@ -371,7 +371,7 @@ The whole sprint (📋 Planned).
 re-renders/re-applies, and asserts both the applied policy set **and** live reachability flip on; then
 removes the edge and asserts denial returns — so the policy must be a total function of the graph, not the
 fixed Phase-30/31 service names. (2) **Independent set-equality:** the applied policies are compared for set
-equality against the Phase-0-committed `netpol-expected.json` and against a **separate graph-walker** over
+equality against the oracle-pinned `netpol-expected.json` and against a **separate graph-walker** over
 the declared dependency edges (a code path distinct from `renderAll`), never the reconciler's own fold.
 After apply, a pod declaring consumer of `B` reaches `B`, a pod that does not is denied, and a probe to an
 undeclared edge times out.
@@ -391,7 +391,7 @@ and every other is denied.
 - The live posture: a service that does not declare consuming `B` cannot reach `B`, and a declared edge is not
   severed — the two shapes [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)
   makes unrepresentable at authoring time, now confirmed on the running cluster.
-- The Phase-0-committed expected-policy oracle `test/fixtures/phase32/netpol-expected.json`, an independent
+- The oracle-pinned expected-policy oracle `test/fixtures/phase32/netpol-expected.json`, an independent
   graph-walker (a code path distinct from `renderAll`) that recomputes the expected allow-set from the declared
   dependency edges, and committed mutant (b) — a `derive` variant that drops one allow-edge and adds one
   undeclared allow-edge, which the set-equality check must show going red.
@@ -404,7 +404,7 @@ and every other is denied.
    reachability flips on; remove the edge and assert the allow is withdrawn and reachability flips off. This
    fails against committed mutant (b) (drop one allow, add one undeclared allow), which the gate must show going
    red.
-4. Assert set equality between the applied policies and the Phase-0-committed `netpol-expected.json` **and** the
+4. Assert set equality between the applied policies and the oracle-pinned `netpol-expected.json` **and** the
    output of an **independent graph-walker** (distinct from `renderAll`) over the declared dependency edges — not
    by re-running the implementation's own `derive`.
 

@@ -318,6 +318,11 @@ durable/cache (Phase 8), accelerator net-allocatable VRAM, execution/admission e
 
 ## Doctrine adopted
 
+- [`resource_capacity_construction.md — checked construction`](../documents/engineering/resource_capacity_construction.md#checked-construction)
+  — the identity and derivation obligations checked construction adds beyond a record's fields. This phase's
+  execution/accelerator/provider-root smart constructors discharge them: every demand it declares is derived
+  through its stated operands rather than authored, and its identity keys (planned slot, observed Pod UID,
+  per-device residency epoch) are checked at construction, not asserted downstream.
 - [`resource_capacity_doctrine.md §4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
   — the total fold `fits`/`carve`/`place` and the nesting: this phase composes the four total functions and the
   host → VM → workload nesting over the full resource vector, with `place` branching per
@@ -957,7 +962,7 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the capacity/execution/accelerator invariants
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — the `fits`/`carve`/`place`
-  fold, the [§4.1](../documents/illegal_state/illegal_state_techniques.md#41-pvcpv-binding-by-construction) static/elastic branch, and the [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) sound-not-complete honesty limit
+  fold, the [§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) static/elastic branch, and the [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) sound-not-complete honesty limit
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the execution/accelerator/
   provider-root entries and the [§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting technique, with [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)/[§6](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the load-bearing limit and honest
   layer split

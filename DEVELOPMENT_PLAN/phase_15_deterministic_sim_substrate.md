@@ -69,8 +69,10 @@ fixtures.
 substrate the live-band phases later use for their Register-2.5 activity; the phase gate itself keys to Register 2,
 never 2.5 ([`development_plan_standards.md §K`](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `cabal test sim-spec` is green — the real daemon/reconciler code, lifted onto the `Env m` interface,
-replays the **committed schedule-fixture corpus** (Sprint 15.3, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7: a Phase-0-pinned set of injected partition/redelivery/reorder/crash schedules) under `IOSim`/`IOSimPOR` with each named per-fake fault contract
+**Gate:** `cabal test sim-spec` is green — the **committed reference reconcile program** this phase authors
+against the `Env m` interface (Sprint 15.1), *not* a later phase's production reconciler — Phases 26–45 replay
+their own real code on this substrate as their Register-2.5 activity ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)), which is not this
+gate's pass condition — replays the **committed schedule-fixture corpus** (Sprint 15.3, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7: an oracle-pinned set of injected partition/redelivery/reorder/crash schedules) under `IOSim`/`IOSimPOR` with each named per-fake fault contract
 asserted ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7: fake MinIO returns **412** on an `If-None-Match` conflict; fake apiserver yields a **resourceVersion conflict** and a **watch-gap**; fake route53 serves the **stale record during propagation delay** and offers **no CAS**; fake Vault **rejects ops while sealed**; a **partitioned Pulsar** link delivers nothing until healed, then **redelivers with dedup**; the reorder/duplicate/crash knobs each produce their stated observable). **Determinism is asserted by same-seed → byte-identical trace replay** (cache-bypass is N/A — an `IOSim` replay recomputes the whole program every run, it is not served from a store), **paired with a
 schedule-sensitivity control ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-6): a distinct-seed / distinct-fault-schedule run MUST produce a *different*
 trace** — a same-trace result under a perturbed schedule is red (it proves the faults are ignored, so the replay assertion is a tautology about the library). The gate names **at least one committed seeded fault-mutant ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-2),
@@ -86,7 +88,7 @@ check that runs on no substrate.
 
 **Independent oracle (§M.3).** The determinism assertion (same-seed → byte-identical trace) is guarded against
 tautology by the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-6 schedule-sensitivity control, but the *invariant verdicts* are checked against a
-**Phase-0-committed, hand-authored expected-outcome table** — one row per committed schedule-fixture giving the
+**oracle-pinned, hand-authored expected-outcome table** — one row per committed schedule-fixture giving the
 invariant verdict (`upheld` / `violated`, and for a violation the expected failing invariant) that the
 reconciler must produce under that schedule — authored **independently of the `Env m` reconciler code** and
 sharing none of it, so the equivalence `replayed-verdict ⟺ expected-verdict` cannot be a re-derivation of the
@@ -214,7 +216,7 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `test/sim/SimSpec.hs` (the `IOSim`/`IOSimPOR` replay battery),
 `test/sim/schedules/` (the committed schedule-fixture corpus — injected partition/redelivery/reorder/crash
-schedules, Phase-0-pinned), and `test/sim/mutants/dropped_partition_handling/` (the committed seeded
+schedules, oracle-pinned), and `test/sim/mutants/dropped_partition_handling/` (the committed seeded
 fault-mutant) — target paths, not yet built.
 **Blocked by**: Sprint 15.2, Sprint 15.1; Phase 14 gate (the
 boundary harness); Phase 14 gate (the `[Step]` plan the reconcile loop consumes). **Schedule-fixture corpus ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7):** the replayed
@@ -250,7 +252,7 @@ fidelity *assumed* — the honest premise this substrate buys
 ([`deterministic_simulation_doctrine.md §5`](../documents/engineering/deterministic_simulation_doctrine.md#5-what-dst-establishes-and-the-one-premise-it-buys)).
 
 ### Deliverables
-- The committed **schedule-fixture corpus** (`test/sim/schedules/`, Phase-0-pinned per [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-1) — injected
+- The committed **schedule-fixture corpus** (`test/sim/schedules/`, oracle-pinned per [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-1) — injected
   partition/redelivery/reorder/crash schedules over the toy reconcile loop.
 - The committed **seeded fault-mutant** (`test/sim/mutants/dropped_partition_handling/`) with a harness that
   re-runs it and asserts `sim-spec` red ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-2).

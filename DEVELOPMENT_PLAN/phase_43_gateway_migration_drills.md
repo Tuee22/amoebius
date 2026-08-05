@@ -15,7 +15,7 @@ No gate has run.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -85,7 +85,7 @@ exercised by killing a sibling on the same host — not a property a single root
 **Register:** 3 — live infrastructure: a real geo-replicated forest, a real DNS repoint, a real WireGuard
 hub-role move, and adversarial fault injection against the running forest.
 
-**Gate:** a `Planned` handover completes with **RPO=0** — demonstrated not by a bare "loss = 0" but by the
+**Gate:** `cabal test gateway-migration-drills-live` is green: a `Planned` handover completes with **RPO=0** — demonstrated not by a bare "loss = 0" but by the
 external write-journal oracle of [Gate integrity](#gate-integrity) below (a Register-3 run yields *tested*, never *proven*, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)): the drill runs under a **non-idle** workload (the client journals every source-acked write ID to a store *outside* the forest, and the harness asserts **≥ 8 acked-but-un-replicated write IDs exist at the quiesce instant**, i.e. observed replication lag > 0, before authority moves), and
 post-cutover every journaled ID is present on the new owner; killing the lead cluster mid-workflow (again with
 ≥ 8 acked-but-un-replicated IDs in flight) drives a `Failover` that promotes the surviving sibling only through
@@ -317,7 +317,7 @@ it.
    self-defined "committed = already replicated"), and a session that never loses its endpoint; a `Failover`
    after killing the lead (again with ≥ 8 acked-but-un-replicated IDs in flight) resumes through one authority
    with **measured loss ≤ the committed `lagBound` and authority transfer within the committed `RTO`**, where
-   those budgets are the Phase-0-committed numeric values in `test/dhall/phase_43_gateway_migration.dhall`
+   those budgets are the oracle-pinned numeric values in `test/dhall/phase_43_gateway_migration.dhall`
    (`lagBound = 5 s`, `RTO = 60 s`) whose hash is pinned before the drill runs — the drill **reports declared-vs-measured for both dimensions**, so a generous or post-hoc-tuned budget is visible; driving lag
    past the committed bound makes the freshness gate refuse to promote and the lag monitor alarm before a breach;
    and the committed `promote-before-fence` mutant ([Gate integrity](#gate-integrity)) — the `PromotionGate` guard negated — must go red.
@@ -446,7 +446,7 @@ arrivals) run against the live forest and assert all five named invariants (`Uni
 `SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover`,
 `NoTakeWithoutProvenFreshness`); and `phase_43_gateway_migration.dhall` spins the forest up, runs both
 branches, asserts RPO=0 for `Planned` **via the out-of-forest write-journal set-equality oracle ([Gate integrity](#gate-integrity)) under a workload carrying ≥ 8 acked-but-un-replicated IDs at the cut**
-and measured loss ≤ the **Phase-0-committed, hash-pinned numeric budget** for `Failover`, tears down
+and measured loss ≤ the **oracle-pinned, hash-pinned numeric budget** for `Failover`, tears down
 leak-free **as read by the OS-boundary route53/`pulumi stack ls` observer (retained `no-provisioner` PVs exempt)**, turns the committed seeded mutants red, and emits a machine-derived proven/tested/assumed ledger
 validated against the raw journal.
 **Docs to update**:
@@ -469,7 +469,7 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
   never a paper variable→module table).
 - `test/dhall/phase_43_gateway_migration.dhall`: spin two children up, geo-replicate, run a `Planned` handover
   asserting RPO=0 via the write-journal oracle, kill the lead to force `Failover` asserting rebind within the
-  Phase-0-committed numeric budget (`lagBound = 5 s`, `RTO = 60 s`, hash-pinned), reconcile divergent
+  oracle-pinned numeric budget (`lagBound = 5 s`, `RTO = 60 s`, hash-pinned), reconcile divergent
   histories, and always tear down leak-free (verified by the OS-boundary route53/`pulumi stack ls` observer) —
   emitting the machine-derived per-run ledger artifact. The gate topology `.dhall`, `test/inject/journal/` (the
   out-of-forest write-ID journal schema), and the committed ledger validator are **committed in this phase's oracle-pinning sprint before the runtime exists**; the runtime-dependent `test/inject/mutants/` seeded mutants (the `verify-caught-up`-stub
@@ -487,7 +487,7 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
    trace-validation is the Sprint-43.3 obligation and is not re-run in Register 3. The Inject drills run against
    the live forest and pass, each asserting all five named safety invariants (`NoWriteAfterStaleFailover` is the
    safety half; the recovery-time half is the separate *tested* RTO datapoint). `phase_43_gateway_migration.dhall`
-   reports **RPO=0 for `Planned` proven by the write-journal set-equality oracle ([Gate integrity](#gate-integrity)) under a workload with ≥ 8 acked-but-un-replicated IDs at the cut** — not a bare "loss = 0" — and **measured loss ≤ the Phase-0-committed `lagBound` and transfer ≤ the committed `RTO`** (hash pinned before the drill; declared-vs-measured reported
+   reports **RPO=0 for `Planned` proven by the write-journal set-equality oracle ([Gate integrity](#gate-integrity)) under a workload with ≥ 8 acked-but-un-replicated IDs at the cut** — not a bare "loss = 0" — and **measured loss ≤ the oracle-pinned `lagBound` and transfer ≤ the committed `RTO`** (hash pinned before the drill; declared-vs-measured reported
    for both). Teardown is **leak-free by the OS-boundary observer of [Gate integrity](#gate-integrity)**: the route53 API and `pulumi stack ls`,
    read outside the forest, report zero surviving migration DNS records and zero surviving child stacks, with the
    retained `no-provisioner` PVs of Sprint 43.2 explicitly exempt. The committed seeded mutants ([Gate integrity](#gate-integrity): `verify-caught-up`-stub and `promote-before-fence`) each go red. The ledger is **machine-derived from the run record** and passes its committed validator — every ledger figure (RPO/RTO, observed max lag, raw journal
