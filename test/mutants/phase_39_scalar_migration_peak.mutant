@@ -1,0 +1,2 @@
+operator=structural-demand-collapse
+expected=a caller scalar replaces the old+new+WAL+workspace+executor structural peak

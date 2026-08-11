@@ -1,0 +1,8 @@
+{
+  "affinity": {"amoebius.dev/accelerator-profile": "nvidia-sm52"},
+  "container": "accelerator-owner",
+  "limits": {"nvidia.com/gpu": 1},
+  "requests": {"nvidia.com/gpu": 1},
+  "substrate": "linux-cuda",
+  "wholeDeviceOffering": true
+}

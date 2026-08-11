@@ -1,0 +1,3 @@
+synchronous_mode: on
+synchronous_mode_strict: on
+maximum_lag_on_failover: 1048576

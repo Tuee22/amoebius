@@ -1,0 +1,2 @@
+operator=receipt-key-collapse
+expected=distinct commands collapse or conflict reuse is accepted

@@ -1,0 +1,9 @@
+{
+  "case": "migration_verify_mismatch",
+  "expectedDigest": "sha256:nonce",
+  "observedDigest": "sha256:corrupt",
+  "expectedReason": "byte-verification-mismatch",
+  "oldBindingLive": true,
+  "reclaimEligible": false,
+  "charged": ["old", "new", "partial-workspace"]
+}

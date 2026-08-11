@@ -1,0 +1,8 @@
+port	request	response	scope	effect
+read	ReadQuery	ReadResult	owner	ReadData
+mutate	Mutation	MutationReceipt	owner	MutateData
+start	WorkflowStart	WorkflowReceipt	owner	StartWorkflow
+observe	WorkflowCursor	WorkflowEvent	owner	ObserveWorkflow
+subscribe	Subscription	StreamEvent	owner	Subscribe
+upload	BoundedBlob	ReadyBlob	owner	UploadBounded
+artifact	ReadyArtifactHandle	ArtifactResult	owner	UseReadyArtifact

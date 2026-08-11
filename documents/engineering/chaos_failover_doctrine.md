@@ -21,6 +21,8 @@ discharge is owned by [gateway_migration_doctrine.md](./gateway_migration_doctri
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. The defect this doctrine targets](#1-the-defect-this-doctrine-targets)
 - [2. When this applies — the gate](#2-when-this-applies--the-gate)
@@ -49,8 +51,10 @@ discharge is owned by [gateway_migration_doctrine.md](./gateway_migration_doctri
 
 ---
 
-> **Honesty up front.** amoebius has not built Phases 2–14. Every prescriptive statement below is
-> **design intent**, and every result attributed to the sibling prodbox project is **evidence from another > system**, never a tested amoebius result. The proven/tested/assumed rule
+> **Honesty up front.** Prescriptive statements below are target design. Current implementation and
+> revalidation progress live in the [tracker](../../DEVELOPMENT_PLAN/README.md#current-implementation-audit),
+> and every result attributed to sibling prodbox is evidence from another system, never an amoebius result.
+> The proven/tested/assumed rule
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline))
 > is this document's own moral core ([§12](#12-the-moral-core--proven-tested-assumed)).
 
@@ -248,7 +252,13 @@ lossless-delegation premise therefore holds only where `synchronous_mode: on`, a
 stance (with the named behavior when no synchronous standby exists), and `maximum_lag_on_failover` are set as a
 **required typed platform-service invariant** — owned by
 [platform_services_doctrine.md §8](./platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) —
-not left to Patroni's default. amoebius **delegates** the
+not left to Patroni's default. Phase 31 supplied the first amoebius live evidence for that premise: the
+committed oracle matched `synchronous_mode: on`, `synchronous_mode_strict: on`, and
+`maximum_lag_on_failover: 1048576` on a Ready three-member Patroni cluster, while the async-default mutant
+failed for its specific reason. This is evidence that the delegation precondition was rendered and operated,
+not a proof of Patroni consensus or a multi-zone failover theorem. The gate ran on the universal `linux-cpu`
+baseline; when pristine Linux isolation is required the route is Incus on Linux/Linux-CUDA, Lima on Apple,
+or WSL2 on Windows. amoebius **delegates** the
 synchronous-HA correctness obligation to these systems rather than re-deriving it. Pulsar supplies any
 topic-lifecycle coordinator's sole-consumer behavior through its subscription and deduplicated-delivery
 contracts; amoebius introduces no coordinator election
@@ -516,6 +526,11 @@ broad *unvalidated-until-live* surface with a narrow *modeled-environment-fideli
 small Register-3 conformance suite — are owned by
 [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md). The standing tax (polymorphism in `m`) is paid deliberately in exchange for it.
 
+The first concrete rung is built in
+[Phase 15](../../DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md): `Env m`, injected real clients, an
+`IOSim` interpreter, six modeled substrates, and deterministic/POR replay of a reference reconciler. The phase
+keeps real-substrate fidelity assumed and live behavior unverified.
+
 ---
 
 ## 11. Move III — Inject: break the running thing on purpose
@@ -660,7 +675,7 @@ reported as proven. Keep this ledger explicitly:
 | GADT-indexed state machine | Illegal in-process transitions are compile errors | **Proven** (machine-checked, exhaustive) | Anything across processes |
 | **Extract** — pure decision + property test | The branch is a total function of typed inputs; unknowns and distinguished states are explicit; safety-critical freshness is fenced | **Proven** for purity / totality / fence wiring; **tested** (sampled) for the property unless the input space is finite and exhausted | That the protocol composing these decisions is sound; that an unfenced observation is current |
 | **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) **safety** invariant and, under a named fairness, the **liveness** property, under modeled crash/reorder, within scope | **Proven for the model** at TLC-green — safety on every reachable state, liveness (TLC-only) **under the assumed fairness `F`** (fairness-sensitivity checked); one shared `Model` removes the manual mapping, while differential checks test the spec↔decision-core `interpret` correspondence, **not** the effectful daemon; the three instruments over one `Model` = **one** protocol proof (TLC) + renderer cross-checks, not three; **assumed** for runtime fidelity — bridged early by **trace validation** (Register 2.5 sim, Register 3 live) and confirmed by Register-3 chaos (Phase 43) — and for actor counts beyond scope | That the built runtime's real physics refine the model; behaviour above scope; real-time / clock-skew / fairness premises (R8, F) |
-| **Simulate** — deterministic simulation (Register 2.5) | The pure decision upholds the invariant under in-process schedules against peer stubs (Tier-1, Phase 3); **and** the *built daemon/reconciler code*, run under `IOSim`/`IOSimPOR` against a **modeled faulty environment** (fake Pulsar/MinIO/apiserver/route53/Vault/clock), upholds the invariants under injected partition/reorder/redelivery/crash — deterministically replayable, no cluster | **Tested** — sampled schedules + injected environment faults; the modeled-environment's fidelity to the real substrate is **assumed** (discharged by a narrow Register-3 conformance suite) | Schedules/faults not explored; that the real Pulsar/k8s behave as the sim models them (Register 3); real-time physics |
+| **Simulate** — design schedules (Register 1) then deterministic daemon simulation (Register 2.5) | The pure decision upholds the invariant under bounded-exhaustive IOSimPOR schedules (Tier-1, Phase 3); **and later** the *built daemon/reconciler code*, run under `IOSim`/`IOSimPOR` against a **modeled faulty environment** (fake Pulsar/MinIO/apiserver/route53/Vault/clock), upholds the invariants under injected partition/reorder/redelivery/crash — deterministically replayable, no cluster | **Tested** — bounded schedules for the Phase-3 decision model; modeled-environment daemon schedules remain UNVERIFIED until their owning phase, and fidelity to the real substrate remains **assumed** until Register 3 | Schedules/faults beyond the recorded bounds; that the real Pulsar/k8s behave as the sim models them (Register 3); real-time physics |
 | **Inject** — live fault injection | The deployed forest survived the injected faults | **Tested** (the faults chosen), never proven | Faults/interleavings not injected; that the invariant is *sound* |
 | Synchrony / real-time assumption (R8) | The timing premise (clock skew, lease, heartbeat) is named, bounded, monitored | **Assumed** — monitored at runtime, never proven by any move | Behaviour when the bound is exceeded; that it holds in the field |
 | Intra-cluster external-effect fencing window (a `Lease` is mutual exclusion, not output fencing) | The at-most-one-writer of *external* side effects (route53 / Vault) during a pause/partition is bounded by the lease TTL and absorbed by idempotent / last-writer-safe writes + reconciler re-convergence; single-instance itself is delegated to k8s/etcd (no election) | **Assumed** — monitored, never proven (R8-adjacent, [daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)) | That a stale external write never lands during the window; safety of a *non*-idempotent external effect |
@@ -668,14 +683,15 @@ reported as proven. Keep this ledger explicitly:
 (Three further rows — the cross-boundary consistency premise, the failover budget, and the
 invariant-confluence classification — belong to the Second Axis and are recorded in [§19](#19-the-cross-boundary-ledger-and-conformance-rows).)
 
-**Applied to amoebius today, the ledger is blunt — and that is by design.** Nothing in Phases 2–14 is
-built. So **every** layer above is, for amoebius, **UNVERIFIED** pending implementation; the only
-*proven* facts available are sibling prodbox results, which are **evidence, not amoebius proof.** The
+**Applied to amoebius today, the ledger is layered — and that is by design.** Phases 2 and 3 are built:
+the formal kernel and bounded `GatewayMigration` protocol are proven-for-the-model/tested at Register 1.
+The effectful daemon, modeled environment, and live forest remain **UNVERIFIED**; sibling prodbox results are
+still evidence, not amoebius proof. The
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) phase-discipline rule makes this binding: *every
 validation emits a proven/tested/assumed ledger artifact, and skipping an applicable test move marks that
-correctness layer UNVERIFIED, never green.* When the gateway-migration design-model is TLC-checked
-(the pre-cluster formal phase, Register 1), the multi-cluster runtime is built, and its model↔code correspondence is
-closed (Phase 43, the deferred Tier-2), its ledger will read like prodbox's; until then, claiming the
+correctness layer UNVERIFIED, never green.* The gateway-migration design model is now TLC-checked at Register 1;
+when the multi-cluster runtime is built and its live model↔code correspondence is closed (Phase 43, deferred
+Tier-2), its runtime ledger can turn green. Until then, claiming the
 singleton is "hardened" because prodbox proved a sibling invariant is exactly what this section forbids.
 
 The rule, stated once and meant absolutely: **never report a tested, assumed, or merely argued result as proven.** Type-checking, decision purity, and finite-and-exhausted decision properties can be *proven* at
@@ -683,6 +699,17 @@ the code layer; everything else is *evidence*. The ledger is the deliverable: no
 but a precise record of what is known and by what means. An honestly
 *conditional* invariant a system enforces is worth more than an *absolute* one it silently violates under
 partition.
+
+### Phase-37 layered result
+
+Phase 37 records a Register-2.5 cross-check (256 deterministic schedules plus bounded `IOSimPOR`) and a
+Register-3 live injection on `linux-cpu`. The live fault kills `worker-a` after immutable store commit and
+before acknowledgement; broker-ranked `worker-b` takes over, the broker output counter proves redispatch, the
+external subscription observes one command, and Kubernetes/MinIO/Pulsar remainders are empty. Double-apply and
+orphan-consumer mutants fail in simulation, while all ten phase mutants fail in the assembled gate. These are
+tested intra-cluster results. Cross-cluster failover and Pulsar consensus internals remain UNVERIFIED. Every
+hardware substrate can run the CPU lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
+on Windows.
 
 ---
 
@@ -857,6 +884,21 @@ A crossing owes evidence, and the rows it owes are enumerated rather than left t
 rows are carried by
 [chaos_failover_second_axis.md](./chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows).
 
+**Phase-42 tested boundary.** `Amoebius.Multicluster.ConfluenceClass` classifies the pinned crossing set and
+defaults every unknown invariant to non-confluent; `Amoebius.Multicluster.GeoReplication` supplies the
+duplicate/reorder-stable work fold. The Register-3 gate used two real projected child clusters and external
+Vault, MinIO, native Pulsar, and Patroni observers. Three classifier/projection/resource-accounting mutants
+turn red. This establishes the classifier and the child boundary as tested, not the Phase-43 planned/failover
+migration correspondence and not physically independent brokers per child. Regardless of detected hardware,
+the `linux-cpu` execution fallback is always available. A clean Linux guest comes from Incus on Linux or
+Linux-CUDA, Lima on Apple, and WSL2 on Windows.
+
+**Phase-43 migration datapoint.** `Amoebius.Multicluster.GatewayMigration` delegates its decisions to the
+Phase-3 `interpret` model. Planned and Failover traces cover all sixteen migration actions; an outside-forest
+journal observes eight unreplicated acknowledgements at each cut, zero Planned loss, fenced promotion, and
+post-heal convergence. Recovery time is tested, while the data-loss bound remains assumed-and-monitored.
+Authoritative local DNS and a raw-kernel hub move are tested; Route53 and real WAN behavior are UNVERIFIED.
+
 ---
 
 ## Appendix A — retired (control-plane single-instance is delegated to k8s/etcd)
@@ -898,9 +940,9 @@ deployment-rules and not app logic, the obligation does not spread across the fo
 the cross-cluster gateway-migration boundary (intra-cluster single-instance being delegated to k8s/etcd), and
 nowhere else.
 
-The deliverable is the **ledger**, not the moves. For amoebius today the ledger is
-almost entirely UNVERIFIED, with prodbox standing in only as *sibling evidence*. That is a fact to record,
-not a failure to conceal. A system is "provably chaos-hardened" only to the degree it can state
+The deliverable is the **ledger**, not the moves. For amoebius today the design protocol has a green
+model-scoped ledger, while runtime fidelity and live chaos remain UNVERIFIED; prodbox remains only *sibling
+evidence*. That is a fact to record, not a failure to conceal. A system is "provably chaos-hardened" only to the degree it can state
 what it *proved*, what it merely *tested*, and what it only *assumed*, and the governing discipline is that
 the first word never stands in for the other two.
 

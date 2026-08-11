@@ -1,0 +1,10 @@
+{
+  "scheduleName": "crash-retry",
+  "scheduleSeed": 2,
+  "schedulePartition": false,
+  "scheduleRedelivery": false,
+  "scheduleReorder": false,
+  "scheduleDuplicate": false,
+  "scheduleCrash": true,
+  "scheduleDnsDelay": 0
+}

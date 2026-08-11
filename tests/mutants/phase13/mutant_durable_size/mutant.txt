@@ -1,0 +1,1 @@
+Drop the sealed render-source annotation standing for the durable projection; source-annotation must turn red.

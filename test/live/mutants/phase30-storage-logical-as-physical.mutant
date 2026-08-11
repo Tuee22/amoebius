@@ -1,0 +1,2 @@
+mutation=copy logical MinIO bytes directly into the physical witness
+expected_red=MinIO physical geometry amplifies logical bytes

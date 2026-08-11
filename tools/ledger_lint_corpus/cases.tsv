@@ -1,0 +1,8 @@
+# case	expected check
+positive	PASS
+missing_key	schema
+unknown_surface	surface
+tracker_mismatch	tracker
+runtime_overclaim	layers
+invalid_status	status
+bad_hash	hash

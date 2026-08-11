@@ -1,0 +1,125 @@
+cabal-version: 3.12
+name: amoebius-pulumi
+version: 0.1.0.0
+build-type: Simple
+license: Apache-2.0
+
+flag phase44-static-key-mutant
+  description: Build the committed Phase-44 pod-local checkpoint-key mutant
+  default: False
+  manual: True
+
+flag phase44-leak-path-mutant
+  description: Build the committed Phase-44 child-PATH leak mutant
+  default: False
+  manual: True
+
+flag phase44-drop-parallel-executor-mutant
+  description: Build the committed Phase-44 dropped parallel executor mutant
+  default: False
+  manual: True
+
+flag phase46-allow-delete-mutant
+  description: Remove the operational durable-EBS delete denial
+  default: False
+  manual: True
+
+flag phase46-dynamic-provisioner-mutant
+  description: Add the forbidden external EBS provisioner
+  default: False
+  manual: True
+
+flag phase46-credit-old-mutant
+  description: Credit the old EBS before privileged deletion observation
+  default: False
+  manual: True
+
+flag phase46-drop-copy-executor-mutant
+  description: Omit the migration copy executor from peak admission
+  default: False
+  manual: True
+
+flag phase46-bypass-validated-batch-mutant
+  description: Bypass fresh single-use cloud batch validation
+  default: False
+  manual: True
+
+flag phase47-skip-sweep-mutant
+  description: Skip the independent run-owned sweep
+  default: False
+  manual: True
+
+flag phase47-untagged-orphan-mutant
+  description: Reduce run-owned enumeration to the run tag
+  default: False
+  manual: True
+
+library
+  exposed-modules:
+      Amoebius.Pulumi.Engine
+      Amoebius.Pulumi.Backend.EncryptedMinio
+      Amoebius.Pulumi.Provider.Eks
+      Amoebius.Pulumi.Ebs
+      Amoebius.Pulumi.Credential
+      Amoebius.Storage.EbsCsi
+      Amoebius.Storage.ProviderScaling
+      Amoebius.Pulumi.NodeGroup
+      Amoebius.Pulumi.Teardown
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.21 && <4.22,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+  if flag(phase44-static-key-mutant)
+    cpp-options: -DPHASE44_STATIC_KEY_MUTANT
+  if flag(phase44-leak-path-mutant)
+    cpp-options: -DPHASE44_LEAK_PATH_MUTANT
+  if flag(phase44-drop-parallel-executor-mutant)
+    cpp-options: -DPHASE44_DROP_PARALLEL_EXECUTOR_MUTANT
+  if flag(phase46-allow-delete-mutant)
+    cpp-options: -DPHASE46_ALLOW_DELETE_MUTANT
+  if flag(phase46-dynamic-provisioner-mutant)
+    cpp-options: -DPHASE46_DYNAMIC_PROVISIONER_MUTANT
+  if flag(phase46-credit-old-mutant)
+    cpp-options: -DPHASE46_CREDIT_OLD_MUTANT
+  if flag(phase46-drop-copy-executor-mutant)
+    cpp-options: -DPHASE46_DROP_COPY_EXECUTOR_MUTANT
+  if flag(phase46-bypass-validated-batch-mutant)
+    cpp-options: -DPHASE46_BYPASS_VALIDATED_BATCH_MUTANT
+  if flag(phase47-skip-sweep-mutant)
+    cpp-options: -DPHASE47_SKIP_SWEEP_MUTANT
+  if flag(phase47-untagged-orphan-mutant)
+    cpp-options: -DPHASE47_UNTAGGED_ORPHAN_MUTANT
+
+test-suite provider-deploy-checkpoint-contract
+  type: exitcode-stdio-1.0
+  main-is: Phase44ContractSpec.hs
+  hs-source-dirs: test
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius-pulumi
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite provider-ebs-credential-contract
+  type: exitcode-stdio-1.0
+  main-is: Phase46ContractSpec.hs
+  hs-source-dirs: test
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius-pulumi
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite provider-teardown-contract
+  type: exitcode-stdio-1.0
+  main-is: Phase47TeardownSpec.hs
+  hs-source-dirs: test
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius-pulumi,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns

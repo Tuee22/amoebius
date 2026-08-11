@@ -24,6 +24,8 @@ replica must meet before taking the gateway, owned by
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. The backup surface — a closed `BackupPolicy` deployment rule](#2-the-backup-surface--a-closed-backuppolicy-deployment-rule)
@@ -413,8 +415,11 @@ Per [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-t
   `NoTakeWithoutProvenFreshness` is proven at the model scope; the RTO of an actual cold-seed recovery is
   validated by drill; that the observed watermark faithfully reflects real replication/backup lag is a
   monitored, assumed premise ([`consistency_pacelc_doctrine.md` §4](./consistency_pacelc_doctrine.md#4-honesty-proven--tested--assumed)).
-- **Everything here is design intent.** No statement is a tested amoebius result. Phase order, status, and
-  gates live only in [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
+- **The model-scoped freshness claim is now evidence; the recovery runtime is not.** Phase 3 proved
+  `NoTakeWithoutProvenFreshness` for the bounded gateway model and caught its dedicated witness-removal mutant.
+  The backup representation, deploy/seed mechanics, observed-watermark fidelity, and live RTO remain design
+  intent or assumed/runtime-checked residue. Phase order and gates live only in
+  [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -433,8 +438,9 @@ Per [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-t
 
 ## 11. Planning ownership
 
-This document is normative backup-and-recovery doctrine only. It states the target shape; every statement is
-design intent, not a built or tested amoebius capability. Delivery sequencing, completion status, and
+This document is normative backup-and-recovery doctrine only. It states the target shape; except for the
+explicit Phase-3 model-scoped freshness result above, its statements are design intent, not a built or tested
+amoebius capability. Delivery sequencing, completion status, and
 validation gates — the pure representation folded into the Phase 4–12 gates, the `FreshnessWitness` proof
 extension in the formal-model phase, and the live backup/restore/cold-seed gates riding on the Vault, MinIO,
 provider-credential, multicluster, and test-topology phases — live only in

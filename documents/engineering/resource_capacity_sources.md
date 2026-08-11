@@ -19,6 +19,8 @@ claimed as evidence is owned by
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [8. Where the numbers come from: declared in pure input, provisioned before render, cross-checked at runtime](#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)
 - [9. What this doctrine deliberately does not own](#9-what-this-doctrine-deliberately-does-not-own)
@@ -1339,7 +1341,7 @@ To keep SSoT boundaries crisp:
 | Per-volume presentation, usable/raw hard-cap semantics, backing allocation policy, and the `StorageBacking` union shape | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 | Per-container CPU/memory/ephemeral-storage declaration, bounded pod-local scratch/cache, and per-host-worker resource envelope | [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope) |
 | Host image-build stage graph, build scratch/cache semantics, and host-vs-pod builder choice | [image_build_doctrine.md §6](./image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1) |
-| Kind bootstrap and enforcement of named engine-process/control-plane storage quotas | [../../DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md](../../DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md) |
+| Kind bootstrap and enforcement of named engine-process/control-plane storage quotas | [../../DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md](../../DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md) |
 | Cloud quota provisioning; dynamic node provisioning enaction; per-PV EBS | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | The Pulsar topic-lifecycle policy (retention, size-triggered offload, backlog quota) | [pulsar_client_doctrine.md §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
 | The content-addressed MinIO store as a storage backing | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |

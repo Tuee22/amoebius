@@ -1,0 +1,5 @@
+state	cluster_exists	node_state	node_envelope	kubelet_envelope	addon_envelopes	kubeconfig_exists	node_ready	expected_actions	kind_create
+absent	false	absent	false	false	false	false	false	create-cluster,ensure-node-envelope,ensure-kubelet-envelope,wait-ready,ensure-addon-envelopes	1
+stopped-node	true	exited	true	false	false	true	false	start-node,ensure-kubelet-envelope,wait-ready,ensure-addon-envelopes	0
+missing-kubeconfig	true	running	true	true	false	false	false	export-kubeconfig,wait-ready,ensure-addon-envelopes	0
+converged	true	running	true	true	true	true	true		0

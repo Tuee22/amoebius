@@ -1,0 +1,4 @@
+operator=normalization-delete
+target=Amoebius.Store.Manifest
+change=encode-components-in-insertion-order
+expected=canonical-manifest-first-mismatch-offset-24

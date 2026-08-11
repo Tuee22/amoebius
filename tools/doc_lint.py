@@ -28,6 +28,7 @@ import os
 import re
 import sys
 from collections import defaultdict
+from pathlib import Path
 
 # --------------------------------------------------------------------------
 # Check registry
@@ -53,6 +54,7 @@ CHECKS = {
     "g2": "catalog integrity: entry numbering contiguous, no gaps or duplicates",
     "g3": "catalog integrity: every index bullet anchor resolves",
     "g4": "catalog integrity: every entry has a technique-matrix row",
+    "g5": "catalog integrity: ownership/family tags reconcile with locus_registry.tsv",
     "h": "plan back-link: every engineering doctrine doc links to the tracker",
     "i": "a section ref inside a cross-file link must resolve into that file",
     "j": "sprint and gate-module references must name their owning phase",
@@ -694,8 +696,7 @@ def check_e_status(docs_by_rel, v):
 # Anchoring on the leader keeps prose like `Env m` or a module path from counting,
 # which a bare "contains backticks" test would wave through.
 GATE_COMMAND_RE = re.compile(
-    r"`\s*(?:PYTHONDONTWRITEBYTECODE=\S+\s+)?"
-    r"(cabal|python3?|pytest|make|kubectl|ghc|dhall|npm|spago|bash|sh|helm|terraform|docker|go|cargo)\b"
+    r"`\s*(cabal|python3?|pytest|make|kubectl|ghc|dhall|npm|spago|bash|sh|helm|terraform|docker|go|cargo)\b"
     r"[^`\n]*`"
 )
 
@@ -816,6 +817,20 @@ def check_g_catalog(docs, docs_by_rel, v):
                 loc = numbers[key]
                 path, _, line = loc.rpartition(":")
                 v.append(Violation("g4", path, int(line), f"entry §{key} has no technique-matrix row"))
+
+
+def check_g5_registry(root, v):
+    """Phase-6 enrichment, conditional so the Phase-0 miniature corpus stays self-contained."""
+    registry = os.path.join(root, "dhall", "examples", "locus_registry.tsv")
+    if not os.path.exists(registry):
+        return
+    tools_dir = os.path.join(root, "tools")
+    if tools_dir not in sys.path:
+        sys.path.insert(0, tools_dir)
+    from locus_registry_lint import registry_violations
+
+    for path, line, message in registry_violations(Path(root)):
+        v.append(Violation("g5", path, line, message))
 
 
 def check_h_backlink(docs, v):
@@ -1462,6 +1477,7 @@ def run(root, only=None):
     check_e_status(docs_by_rel, v)
     check_f_gate_integrity(docs, docs_by_rel, v)
     check_g_catalog(docs, docs_by_rel, v)
+    check_g5_registry(root, v)
     check_h_backlink(docs, v)
     check_m_type_uniqueness(docs, v)
     check_s_substrate(docs, docs_by_rel, v)

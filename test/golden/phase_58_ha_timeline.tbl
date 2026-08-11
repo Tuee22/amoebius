@@ -1,0 +1,6 @@
+ordinal event available_zones accepted_operations repaired_from_durable
+1 ready 3 full no
+2 isolate-zone-b 2 full yes
+3 redis-pubsub-loss 2 full yes
+4 reconnect 2 full yes
+5 restore-zone-b 3 full yes

@@ -1,0 +1,53 @@
+cabal-version: 3.12
+name: probe
+version: 0.1.0.0
+build-type: Simple
+license: Apache-2.0
+
+executable probe
+  main-is: ProbeDeps.hs
+  hs-source-dirs: app
+  build-depends:
+      aeson,
+      base >=4.21 && <4.22,
+      cryptohash-sha256,
+      dhall,
+      directory,
+      filepath,
+      http-client,
+      http-client-tls,
+      io-classes,
+      io-sim,
+      megaparsec,
+      prettyprinter,
+      proto,
+      proto-lens,
+      purescript-bridge,
+      supernova,
+      tar,
+      template-haskell,
+      typed-process,
+      zlib
+  default-language: GHC2024
+  ghc-options: -Wall -Werror=missing-methods
+
+executable decode
+  main-is: Decode.hs
+  hs-source-dirs: app
+  build-depends:
+      base >=4.21 && <4.22,
+      dhall,
+      text
+  default-language: GHC2024
+  ghc-options: -Wall -Werror=missing-methods
+
+executable sim
+  main-is: Sim.hs
+  hs-source-dirs: app
+  build-depends:
+      base >=4.21 && <4.22,
+      io-classes,
+      io-classes:strict-stm,
+      io-sim
+  default-language: GHC2024
+  ghc-options: -Wall -Werror=missing-methods

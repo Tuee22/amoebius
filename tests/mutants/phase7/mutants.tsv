@@ -1,0 +1,20 @@
+mutant	operator	expected_red_locus
+fits-drop-memory	axis-deletion	fits equivalence
+carve-skip-subtraction	guard-deletion	carve exact-fit second debit
+fixed-place-admit-overcommit	guard-weakening	independent fixed witness validator
+elastic-place-unconditional-right	guard-weakening	independent elastic witness validator
+compatibility-admit-all	guard-weakening	compatibility oracle
+rke2-allow-duplicate-host	guard-weakening	distinct-host fixture
+pod-drop-ephemeral	axis-deletion	pod ephemeral fixture
+cpu-policy-ignore	guard-deletion	CPU limit fixture
+elastic-ignore-class-max	guard-deletion	class maximum fixture
+elastic-drop-per-node	axis-deletion	per-node overhead fixture
+taint-ignore	guard-deletion	eligibility fixture
+memory-backed-drop	axis-deletion	memory-backed fixture
+tmpfs-persistence-drop	transition-deletion	init persistence fixture
+headroom-pad-drop	axis-deletion	padded reservation fixture
+validator-drop-cpu	oracle-axis-deletion	independent witness validator
+validator-drop-memory	oracle-axis-deletion	independent witness validator
+validator-drop-ephemeral	oracle-axis-deletion	independent witness validator
+validator-drop-slots	oracle-axis-deletion	independent witness validator
+validator-drop-csi-dedup	oracle-axis-deletion	independent witness validator

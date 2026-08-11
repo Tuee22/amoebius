@@ -1,0 +1,9 @@
+operand maximum
+post_fault_zones 2
+reconnect_seconds 30
+cursor_repair_seconds 10
+replay_concurrency 1
+outbox_count 8
+blob_bytes 1048576
+upload_concurrency 1
+result_bytes 65536

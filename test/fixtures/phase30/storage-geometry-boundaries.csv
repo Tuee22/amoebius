@@ -1,0 +1,7 @@
+surface,logical_bytes,required_physical_bytes,available_bytes,result
+minio-exact-fit,24576,2686976,2686976,accept
+minio-one-byte-over,24576,2686976,2686975,reject
+bookkeeper-exact-fit,65536,196623,196623,accept
+bookkeeper-one-byte-over,65536,196623,196622,reject
+zookeeper-recovery,12288,36864,36864,accept
+uniform-four-drives,24576,2686976,2686976,accept

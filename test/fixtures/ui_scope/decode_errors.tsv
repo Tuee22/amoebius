@@ -1,0 +1,4 @@
+case	error
+raw-resource-id	UntrustedResourceId
+scope-retag	ScopeRetagForbidden
+general-declassify	DeclassificationForbidden

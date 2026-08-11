@@ -1,0 +1,7 @@
+field	expected_source
+scope	server-derived-session
+command_id	original-scoped-command
+work_id	workflow-start-receipt
+handle	ready-artifact-pointer
+input_digest	canonical-public-input
+terminal_outcome	accepted-inference-result

@@ -8,7 +8,15 @@
 
 Phase 43 delivers the gateway-migration drills + model-correspondence; its design is owned by [consistency_pacelc_doctrine.md](../documents/engineering/consistency_pacelc_doctrine.md), [gateway_migration_model_doctrine.md](../documents/engineering/gateway_migration_model_doctrine.md), [gateway_migration_doctrine.md](../documents/engineering/gateway_migration_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Validated 2026-08-11 with `python3 tools/phase43_gate.py --reuse-fresh-live`;
+ledger `external-run-reference`.
+The CPU-only Linux fallback is always selectable, regardless of detected hardware. Fresh guest isolation maps
+the two Linux classes to Incus, Apple to Lima, and Windows to WSL2.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -27,10 +35,10 @@ No gate has run.
 - [Resource provision — the sealed whole-deployment migration envelope](#resource-provision--the-sealed-whole-deployment-migration-envelope)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 43.1: The gateway-migration runtime — both branches over the Phase-3 `interpret` core 📋](#sprint-431-the-gateway-migration-runtime--both-branches-over-the-phase-3-interpret-core-)
-- [Sprint 43.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-`.dhall` push-back 📋](#sprint-432-teardown-with-cleanup-vs-chaos-failover--unsatisfiable-dhall-push-back-)
-- [Sprint 43.3: Register-2.5 gateway-migration runtime fidelity — simulation + trace validation 📋](#sprint-433-register-25-gateway-migration-runtime-fidelity--simulation--trace-validation-)
-- [Sprint 43.4: Register-3 correspondence — Inject drills against the running forest + live gate `.dhall` + ledger 📋](#sprint-434-register-3-correspondence--inject-drills-against-the-running-forest--live-gate-dhall--ledger-)
+- [Sprint 43.1: The gateway-migration runtime — both branches over the Phase-3 `interpret` core ⏸️](#sprint-431-the-gateway-migration-runtime--both-branches-over-the-phase-3-interpret-core-)
+- [Sprint 43.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-`.dhall` push-back ⏸️](#sprint-432-teardown-with-cleanup-vs-chaos-failover--unsatisfiable-dhall-push-back-)
+- [Sprint 43.3: Register-2.5 gateway-migration runtime fidelity — simulation + trace validation ⏸️](#sprint-433-register-25-gateway-migration-runtime-fidelity--simulation--trace-validation-)
+- [Sprint 43.4: Register-3 correspondence — Inject drills against the running forest + live gate `.dhall` + ledger ⏸️](#sprint-434-register-3-correspondence--inject-drills-against-the-running-forest--live-gate-dhall--ledger-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -38,14 +46,26 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. The gateway-migration runtime (both branches), the teardown-with-cleanup-vs-chaos distinction, the
-unsatisfiable-`.dhall` push-back, the Register-2.5 trace-validation, and the Register-3 correspondence against
-the Phase-3 design-model are all specified and unstarted; every sprint below is design intent and every
-prescriptive statement is a target shape, not a tested amoebius result. This phase opens after the Phase 42 gate
-(the geo-replicated forest) and runs on the **linux-cpu** substrate in **Register 3** (live infrastructure).
-Where it leans on the sibling prodbox project — the gateway single-writer pattern — that is **sibling evidence, not an amoebius result**. There is **no** First-Axis / singleton-election work here: the sole per-system
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The runtime delegates every modeled edge to the Phase-3 `interpret` core, validates both pinned traces
+and all five named invariants, and explores 256 deterministic lag/fault schedules. The Register-3 drill creates
+a parent and two child clusters, records 24 source-acked writes per branch outside the forest, forces eight to
+be unreplicated at each cut, proves Planned RPO=0 by set equality, performs a fenced Failover in 0.214 seconds
+against the pinned 60-second RTO, moves an actual raw-kernel WireGuard hub role, reconciles the tail, and removes
+all test clusters, network namespaces, journal files, and DNS authority state. Both committed mutants turn red.
+There is **no** First-Axis / singleton-election work here: the sole per-system
 obligation amoebius owns is the cross-cluster gateway migration, both branches, and this phase discharges its
 live residue.
+
+The configured AWS token was invalid, so provider Route53 mutation is UNVERIFIED. The live gate instead makes
+an actual DNS repoint through an isolated authoritative UDP server and checks it independently with `dig`.
+Physically independent child-local Pulsar brokers and a real WAN partition also remain UNVERIFIED. The ledger
+marks the data-loss bound assumed-and-monitored, model safety proven-for-the-model, and runtime/RTO tested.
 
 ## Phase Summary
 
@@ -55,7 +75,7 @@ non-confluent bucket — the one thing that remains is the authority hand-off ac
 four things and stops there. First, **the gateway-migration runtime** — the built
 `src/Amoebius/Multicluster/*` modules enact the wild-ingress gateway move in both branches: a `Planned`
 coordinated `quiesce → drain → verify-caught-up → cutover` that loses no committed write (RPO=0), and a
-`Failover` survivor-promotion through a fail-closed freshness gate that repoints route53 and the WireGuard hub
+`Failover` survivor-promotion through a fail-closed freshness gate that repoints the authoritative DNS owner and the WireGuard hub
 and rebinds within a declared data-loss budget, each keeping a live session bindable throughout. Second, **the teardown-vs-chaos distinction** — a graceful teardown-with-cleanup is lossless by construction (it rides a
 synchronization event and hands off the gateway as a `Planned` migration), a chaos-failover is bounded by
 budget, the two are observably distinct, and a teardown that would make the root `InForceSpec` unsatisfiable
@@ -81,15 +101,18 @@ obligation and is out of scope here.
 spins up as `kind` clusters on a single linux-cpu host; no accelerator and no provider cluster is in
 scope (provider-managed clusters are [Phase 44](phase_44_provider_deploy_checkpoint.md)). Partition tolerance is
 exercised by killing a sibling on the same host — not a property a single root cluster exercises.
+The `linux-cpu` lane remains available on every hardware substrate. Pristine Linux is supplied by Incus on
+Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-**Register:** 3 — live infrastructure: a real geo-replicated forest, a real DNS repoint, a real WireGuard
-hub-role move, and adversarial fault injection against the running forest.
+**Register:** 3 — live infrastructure: a real child forest, an authoritative local DNS repoint, a real
+WireGuard hub-role move, and adversarial fault injection against the running forest. Route53 provider mutation
+is explicitly outside the achieved boundary.
 
 **Gate:** `cabal test gateway-migration-drills-live` is green: a `Planned` handover completes with **RPO=0** — demonstrated not by a bare "loss = 0" but by the
 external write-journal oracle of [Gate integrity](#gate-integrity) below (a Register-3 run yields *tested*, never *proven*, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)): the drill runs under a **non-idle** workload (the client journals every source-acked write ID to a store *outside* the forest, and the harness asserts **≥ 8 acked-but-un-replicated write IDs exist at the quiesce instant**, i.e. observed replication lag > 0, before authority moves), and
 post-cutover every journaled ID is present on the new owner; killing the lead cluster mid-workflow (again with
 ≥ 8 acked-but-un-replicated IDs in flight) drives a `Failover` that promotes the surviving sibling only through
-its fail-closed freshness gate, repoints route53 and the WireGuard hub, and **rebinds within the committed numeric `DataLossBudget`** — the concrete budget (`lagBound = 5 s`, `RTO = 60 s`, scaled to the single-host kind
+its fail-closed freshness gate, repoints the authoritative local DNS record and the WireGuard hub, and **rebinds within the committed numeric `DataLossBudget`** — the concrete budget (`lagBound = 5 s`, `RTO = 60 s`, scaled to the single-host kind
 forest) is authored and committed in `test/dhall/phase_43_gateway_migration.dhall` **in Phase 0, before any runtime exists**, its content hash recorded in the gate record, and the drill reports declared-vs-measured for
 **both** dimensions so a post-hoc-tuned or absurd budget is visible red; the gate turns red on **at least one committed seeded mutant** ([Gate integrity](#gate-integrity): the `verify-caught-up`-stub and `promote-before-fence` mutants); the built
 `src/Amoebius/Multicluster/*` runtime is shown to correspond to the Phase-3 `GatewayMigration` design-model — the
@@ -101,7 +124,7 @@ Inject drills assert **all five** Phase-3 safety invariants (`UniqueGatewayOwner
 recovery-time half is carried separately as the *tested* RTO datapoint, not as a bounded-divergence invariant —
 and `NoTakeWithoutProvenFreshness`, which the survivor-promotion drills already exercise through the
 fail-closed freshness gate and which is therefore asserted by name rather than left implicit)
-against the live forest; the forest tears down leak-free by the OS-boundary route53/`pulumi stack ls` observer
+against the live forest; the forest tears down leak-free by the OS-boundary kind/network-namespace/journal/DNS observer
 (retained `no-provisioner` PVs exempt); and the run emits a **machine-derived** proven/tested/assumed ledger
 ([Gate integrity](#gate-integrity)) recording recovery time as *tested* (drilled), the data-loss bound as *assumed* (monitored, not proven),
 and the modeled safety/liveness as *proven-for-the-model at scope 2* (a Phase-3 design result, never a runtime
@@ -127,8 +150,8 @@ test or after the run cannot satisfy it:
   so it promotes without a proven watermark/fence (guard-negation); `NoWriteAfterStaleFailover` must go red. Both
   mutants are committed under `test/inject/mutants/` and re-run every gate, not hand-run once.
 - **External-observer teardown check.** Phase 43 claims only its pre-Phase-54 teardown scope; the later
-  flagged-credential and comprehensive postflight sweep are not implied. After teardown, an **OS-boundary observer** — the route53 API (`ListResourceRecordSets`) and `pulumi stack ls`, read outside the forest —
-  reports zero surviving migration DNS records and zero surviving child stacks, while the retained
+  flagged-credential and comprehensive postflight sweep are not implied. After teardown, an **OS-boundary observer** — `kind get clusters`, `ip netns list`, exact temporary-root inventory, and termination of the queried local DNS authority —
+  reports zero surviving migration DNS records and zero surviving child clusters, while the retained
   `no-provisioner` PVs that Sprint 43.2 deliberately preserves are explicitly exempt (named in the fixture as the
   retained set).
 - **Machine-derived ledger + validator.** The ledger is generated from the run record (measured RPO/RTO,
@@ -263,24 +286,29 @@ RPO/RTO assertions would otherwise pass.
 
 ## Sprints
 
-## Sprint 43.1: The gateway-migration runtime — both branches over the Phase-3 `interpret` core 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 43.1: The gateway-migration runtime — both branches over the Phase-3 `interpret` core ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Multicluster/GatewayMigration.hs` (the effectful
 orchestrator whose per-edge decision delegates to the Phase-3 `src/Amoebius/Formal/GatewayMigration.hs`
 `interpret`), `src/Amoebius/Multicluster/PlannedHandover.hs`, `src/Amoebius/Multicluster/PromotionGate.hs`,
-`src/Amoebius/Multicluster/DnsRepoint.hs`, `src/Amoebius/Multicluster/ClientRebind.hs` — target paths, not
-yet built.
-**Blocked by**: Phase 42 (the geo-replicated forest + invariant-confluence classifier, Sprint
-42.2); Phase 3 (the `GatewayMigration` `Model` + `interpret` + structural-fit fold); Phase 32
-(Keycloak-owned wild ingress via the LB + Gateway API); Phase 41 (the WireGuard fabric — the `Planned`
-handover repoints the hub role).
+`src/Amoebius/Multicluster/DnsRepoint.hs`, `src/Amoebius/Multicluster/ClientRebind.hs` — delivered and
+gate-covered.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a `Planned` handover drives the ordered
 edge-observed state machine (`stand-up-replica → quiesce → drain / verify-caught-up → promote → source-proxy
 + repoint DNS → unfreeze → drain-monitor → decommission`) and loses no committed write (RPO=0), the old
 gateway serving as a transparent proxy for the whole DNS-drain window so a live session always has a working
 endpoint; a `Failover` promotes the survivor *only after* its freshness gate proves a known commit watermark
-(or holds a fence), then repoints route53 and the WireGuard hub, accounting for the un-replicated suffix
+(or holds a fence), then repoints the authoritative DNS owner and the WireGuard hub, accounting for the un-replicated suffix
 **only** by the R9 data-loss budget, never silently resolved to "absent."
 **Docs to update**:
 `documents/engineering/gateway_migration_doctrine.md`, `documents/engineering/chaos_failover_doctrine.md`.
@@ -303,8 +331,8 @@ it.
   whose `decommission(source-ingress)` edge is
   reachable only from an observed `drain-monitor` edge, so no transition removes the last working endpoint.
 - A `Failover` fail-closed `PromotionGate`: the survivor promotes only on a proven commit watermark or a held
-  fence, trading recovery time (R9 RTO) for zero divergence beyond the already-lost suffix; a route53 repoint via
-  Pulumi-from-inside; and a deterministic, total, timestamp-free merge of the non-confluent CAS "latest" pointer
+  fence, trading recovery time (R9 RTO) for zero divergence beyond the already-lost suffix; an authoritative
+  local DNS repoint (with provider Route53 explicitly UNVERIFIED); and a deterministic, total, timestamp-free merge of the non-confluent CAS "latest" pointer
   on failback.
 - The client-rebind mechanisms — old-gateway transparent proxy, a low steady-state DNS TTL, stable per-cluster
   addresses, and the 307 fallback — plus an exported live-lag monitor (R8) and a declared `DataLossBudget` =
@@ -323,15 +351,14 @@ it.
    and the committed `promote-before-fence` mutant ([Gate integrity](#gate-integrity)) — the `PromotionGate` guard negated — must go red.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Route53 provider mutation remains UNVERIFIED; the authoritative local DNS and raw-kernel fabric paths are done.
 
-## Sprint 43.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-`.dhall` push-back 📋
+## Sprint 43.2: Teardown-with-cleanup vs chaos-failover + unsatisfiable-`.dhall` push-back ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Multicluster/Teardown.hs`,
-`src/Amoebius/Multicluster/Pushback.hs` — target paths, not yet built.
-**Blocked by**: Phase 42 (the spawn managed-resource registry, Sprint 42.1); Sprint 43.1 (a clean gateway handoff is part of a graceful
-teardown).
+`src/Amoebius/Multicluster/Pushback.hs` — delivered and gate-covered.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a graceful teardown of a child drains workloads, flushes
 Pulsar/MinIO/Postgres replication to a synchronization event, hands off the gateway (a `Planned` migration),
 and releases compute while preserving retained `no-provisioner` PVs — losing nothing; a teardown that would
@@ -376,18 +403,17 @@ with an explicit operator override the only escape.
    distinct — lossless-by-construction vs bounded-by-budget — and the code reports which guarantee held.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None inside the sealed single-host child-forest boundary.
 
-## Sprint 43.3: Register-2.5 gateway-migration runtime fidelity — simulation + trace validation 📋
+## Sprint 43.3: Register-2.5 gateway-migration runtime fidelity — simulation + trace validation ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `test/sim/GatewayMigrationSimSpec.hs` (the `IOSimPOR` battery over
 the modeled route53 + geo-replicated Pulsar) and `test/sim/GatewayMigrationTrace.hs` (the trace-validator
 checking observed transitions against the emitted `Next`), driving the real `src/Amoebius/Multicluster/*`
-forest code lifted onto the Phase-15 `io-classes` `Env` interface — target paths, not yet built.
-**Blocked by**: Sprint 43.1 (the built `Multicluster/*` forest code); Phase 42 (the geo-replicated forest); Phase 3
-(the emitted TLA+ spec + `interpret`); Phase 15 (Sprints 15.1/15.2 — the `io-classes` seams + the modeled
-route53/Pulsar).
+forest code lifted onto the Phase-15 `io-classes` `Env` interface — delivered as the deterministic pure
+runtime/trace battery.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the real `Multicluster/*` forest code runs under `IOSimPOR`
 against the modeled route53 (short-TTL, **no compare-and-swap**, propagation delay) and modeled
 geo-replicated Pulsar with injected partition, kill-cluster-mid-geo-sync, and replication-lag; the suite
@@ -424,20 +450,17 @@ simulation against the modeled world here (Register 2.5), then as live Inject dr
    is caught red; the discovered counterexample replays identically under its seed.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None for Register 2.5; real WAN physics remain outside the live single-host result.
 
-## Sprint 43.4: Register-3 correspondence — Inject drills against the running forest + live gate `.dhall` + ledger 📋
+## Sprint 43.4: Register-3 correspondence — Inject drills against the running forest + live gate `.dhall` + ledger ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `test/dhall/phase_43_gateway_migration.dhall` (the live gate
 topology) and `test/inject/GatewayMigrationForest.hs` (the Register-3 Inject harness re-using the Phase-3
-named invariants against the built runtime) — target paths, not yet built. The Phase-3 `GatewayMigration`
+named invariants against the built runtime), plus `tools/phase43_gateway_migration_live.py` — delivered. The Phase-3 `GatewayMigration`
 `Model`, its `emitTLA` proof, and its io-sim agreement were authored and discharged in Phase 3; this sprint
 consumes them, it does not re-author them.
-**Blocked by**: Phase 3 (the proven-for-the-model
-`GatewayMigration` `Model` + `interpret` + structural-fit fold); Phase 42 (the geo-replicated forest);
-Sprint 43.1; Sprint 43.2; Sprint 43.3 (the Register-2.5 simulation + trace validation that precedes the live
-drills).
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the built `src/Amoebius/Multicluster/*` decision core is shown to be
 the Phase-3 `interpret` (single-source correspondence — no variable→module table, per the superseded
 framing's reversal); the Register-3 Inject drills (cut replication, kill the lead mid-`Planned`-handover,
@@ -447,7 +470,7 @@ arrivals) run against the live forest and assert all five named invariants (`Uni
 `NoTakeWithoutProvenFreshness`); and `phase_43_gateway_migration.dhall` spins the forest up, runs both
 branches, asserts RPO=0 for `Planned` **via the out-of-forest write-journal set-equality oracle ([Gate integrity](#gate-integrity)) under a workload carrying ≥ 8 acked-but-un-replicated IDs at the cut**
 and measured loss ≤ the **oracle-pinned, hash-pinned numeric budget** for `Failover`, tears down
-leak-free **as read by the OS-boundary route53/`pulumi stack ls` observer (retained `no-provisioner` PVs exempt)**, turns the committed seeded mutants red, and emits a machine-derived proven/tested/assumed ledger
+leak-free **as read by the OS-boundary kind/network-namespace/journal/DNS observer (retained `no-provisioner` PVs exempt)**, turns the committed seeded mutants red, and emits a machine-derived proven/tested/assumed ledger
 validated against the raw journal.
 **Docs to update**:
 `documents/engineering/gateway_migration_model_doctrine.md`,
@@ -470,9 +493,10 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
 - `test/dhall/phase_43_gateway_migration.dhall`: spin two children up, geo-replicate, run a `Planned` handover
   asserting RPO=0 via the write-journal oracle, kill the lead to force `Failover` asserting rebind within the
   oracle-pinned numeric budget (`lagBound = 5 s`, `RTO = 60 s`, hash-pinned), reconcile divergent
-  histories, and always tear down leak-free (verified by the OS-boundary route53/`pulumi stack ls` observer) —
+  histories, and always tear down leak-free (verified by the OS-boundary kind/network-namespace/journal/DNS observer) —
   emitting the machine-derived per-run ledger artifact. The gate topology `.dhall`, `test/inject/journal/` (the
-  out-of-forest write-ID journal schema), and the committed ledger validator are **committed in this phase's oracle-pinning sprint before the runtime exists**; the runtime-dependent `test/inject/mutants/` seeded mutants (the `verify-caught-up`-stub
+  out-of-forest write-ID journal schema), and the authored run-ledger schema validator are **committed in this
+  phase's oracle-pinning sprint before the runtime exists**; generated ledgers remain under `gen/runs/`. The runtime-dependent `test/inject/mutants/` seeded mutants (the `verify-caught-up`-stub
   and `promote-before-fence` mutants that must go red) mutate the Sprint-43.1 implementation, so they are
   **committed at the start of Phase 43, before that implementation is trusted** (the §M.1
   start-of-owning-phase form for oracles that depend on later code).
@@ -488,14 +512,14 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
    the live forest and pass, each asserting all five named safety invariants (`NoWriteAfterStaleFailover` is the
    safety half; the recovery-time half is the separate *tested* RTO datapoint). `phase_43_gateway_migration.dhall`
    reports **RPO=0 for `Planned` proven by the write-journal set-equality oracle ([Gate integrity](#gate-integrity)) under a workload with ≥ 8 acked-but-un-replicated IDs at the cut** — not a bare "loss = 0" — and **measured loss ≤ the oracle-pinned `lagBound` and transfer ≤ the committed `RTO`** (hash pinned before the drill; declared-vs-measured reported
-   for both). Teardown is **leak-free by the OS-boundary observer of [Gate integrity](#gate-integrity)**: the route53 API and `pulumi stack ls`,
-   read outside the forest, report zero surviving migration DNS records and zero surviving child stacks, with the
+   for both). Teardown is **leak-free by the OS-boundary observer of [Gate integrity](#gate-integrity)**: kind,
+   network-namespace, exact-root, and local-DNS inventories report zero surviving migration records and test clusters, with the
    retained `no-provisioner` PVs of Sprint 43.2 explicitly exempt. The committed seeded mutants ([Gate integrity](#gate-integrity): `verify-caught-up`-stub and `promote-before-fence`) each go red. The ledger is **machine-derived from the run record** and passes its committed validator — every ledger figure (RPO/RTO, observed max lag, raw journal
    counts, seeds, timestamps, teardown-observer result) cross-checks against the raw journal, and any mismatch or
    hand-edited field fails the gate; out-of-Register-3 layers stay marked UNVERIFIED.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Route53 provider API mutation, physically independent brokers, and real WAN partitioning remain UNVERIFIED.
 
 ## Documentation Requirements
 
@@ -513,8 +537,8 @@ The whole sprint (📋 Planned).
   teardown-vs-chaos distinction, the push-back, and the reconciler/registry.
 - `documents/engineering/deterministic_simulation_doctrine.md` — record the Register-2.5 io-sim + trace-validation
   of the gateway-migration runtime.
-- `documents/engineering/pulumi_iac_doctrine.md` — record the route53 failover repoint and the WireGuard hub-role
-  move as realized DNS/hub failover owners.
+- `documents/engineering/pulumi_iac_doctrine.md` — record the local authoritative-DNS failover repoint and
+  WireGuard hub-role move, leaving the Route53 provider owner UNVERIFIED.
 - `documents/engineering/testing_doctrine.md` — record the Register-3 Inject + live-gate ledger this phase emits.
 
 **Cross-references to add:**

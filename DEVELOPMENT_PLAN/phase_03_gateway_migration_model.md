@@ -8,14 +8,19 @@
 
 Phase 3 delivers the gateway-migration model (both branches); its design is owned by [gateway_migration_model_doctrine.md](../documents/engineering/gateway_migration_model_doctrine.md), [backup_recovery_doctrine.md](../documents/engineering/backup_recovery_doctrine.md), [formal_model_doctrine.md](../documents/engineering/formal_model_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+The gate passed on 2026-08-09; live daemon/forest correspondence remains UNVERIFIED.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/gateway_migration_model_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -25,10 +30,10 @@ No gate has run.
 - [Phase Summary](#phase-summary)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 3.1: Author the `GatewayMigration` `Model` — both branches 📋](#sprint-31-author-the-gatewaymigration-model--both-branches-)
-- [Sprint 3.2: `emitTLA` render + TLC exhaustive proof (both branches) 📋](#sprint-32-emittla-render--tlc-exhaustive-proof-both-branches-)
-- [Sprint 3.3: io-sim agreement + seeded-mutation catch 📋](#sprint-33-io-sim-agreement--seeded-mutation-catch-)
-- [Sprint 3.4: Scope-2 pairwise cutoff + decode-time structural-fit fold 📋](#sprint-34-scope-2-pairwise-cutoff--decode-time-structural-fit-fold-)
+- [Sprint 3.1: Author the `GatewayMigration` `Model` — both branches ⏸️](#sprint-31-author-the-gatewaymigration-model--both-branches-)
+- [Sprint 3.2: `emitTLA` render + TLC exhaustive proof (both branches) ⏸️](#sprint-32-emittla-render--tlc-exhaustive-proof-both-branches-)
+- [Sprint 3.3: io-sim agreement + seeded-mutation catch ⏸️](#sprint-33-io-sim-agreement--seeded-mutation-catch-)
+- [Sprint 3.4: Scope-2 pairwise cutoff + decode-time structural-fit fold ⏸️](#sprint-34-scope-2-pairwise-cutoff--decode-time-structural-fit-fold-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -36,12 +41,21 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
-is design intent, never a tested amoebius result. This phase opens after the Phase 2 gate (the
-`Model`/`interpret`/`emitTLA` kernel) passes and runs on **no substrate** (`none`) — it stands up no host and
-no cluster. The `Model`→{`interpret`, `emitTLA`} mechanism was confirmed end to end in a throwaway sibling
-spike ([`formal_model_doctrine.md §7`](../documents/engineering/formal_model_doctrine.md#7-prototype-validation)); that is sibling
-evidence the mechanism works, not a built amoebius result.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The Register-1 gate passed on 2026-08-09 with
+`python3 tools/phase3_gate.py`, emitting ledger
+`dynamically-resolved`. The explorer and pinned TLC
+agree on all 53 reachable states and all five safety invariants; TLC proves all three liveness properties under
+weak fairness, and each property goes red when fairness is removed. IOSimPOR explored 13 schedules within the
+committed bound of 20, all per-invariant and mechanical mutants were caught, the independently authored
+StructuralFit reference/corpus passed, all eight clause-delete mutants went red, and the scope-3 shared-resource
+stress caught its seeded mutant. This is proven-for-the-model/tested design evidence on substrate `none`; live
+daemon/forest correspondence remains **UNVERIFIED**, and the decomposition lemma remains **OPEN**.
 
 ## Phase Summary
 
@@ -174,13 +188,21 @@ flowchart LR
 
 ## Sprints
 
-## Sprint 3.1: Author the `GatewayMigration` `Model` — both branches 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 3.1: Author the `GatewayMigration` `Model` — both branches ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Formal/GatewayMigration.hs` (the concrete `Model`
 value + its five named invariants), atop the Phase-2
-`src/Amoebius/Formal/{Model,Interpret,EmitTLA,Explore}.hs` kernel — target paths, not yet built.
-**Blocked by**: Phase 2 gate (the `Model`/`interpret`/`emitTLA` kernel and the in-process explorer).
+`src/Amoebius/Formal/{Model,Interpret,EmitTLA,Explore}.hs` kernel — built and exercised by the phase gate.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the value typechecks against the Phase-2 `Model` EDSL and the reachability explorer enumerates
 a non-empty, constraint-bounded state space that visits **both** a `Planned` and a `Failover` transition;
 the explorer confirms the environment actions (`client-write`, `replication-tick`, `active-crash`,
@@ -240,15 +262,16 @@ seeded from backup within its `freshnessBound` also discharges
    exercised on some reachable state (no inert data variable).
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. Both branches, all 20 actions, all five invariants, and all three liveness properties are reachable and
+structurally well formed; the correct explorer state space contains 53 states with no safety violation.
 
-## Sprint 3.2: `emitTLA` render + TLC exhaustive proof (both branches) 📋
+## Sprint 3.2: `emitTLA` render + TLC exhaustive proof (both branches) ⏸️
 
-**Status**: Planned
-**Implementation**: `test/formal/GatewayMigrationTLC.hs` (the TLC harness) rendering to
-`gen/tla/GatewayMigration.{tla,cfg}` (emitted, git-ignored, never committed) and running `tla2tools` —
-target paths, not yet built.
-**Blocked by**: Sprint 3.1.
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `test/formal/gateway/GatewayMigrationSpec.hs` (the TLC harness) rendering to
+`gen/tla/gateway-migration-model-spec/` (emitted, git-ignored, never committed) and running pinned `tla2tools`
+against the byte-locked fixtures in `test/formal/gateway/golden/` — built.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: TLC reaches every named
 safety invariant with no counterexample at scope 2 for **both** branches, **and** proves each liveness
 `PROPERTY` (`MergeConverges`, `SessionEventuallyRebinds`, `PlannedMigrationTerminates`) under the declared
@@ -294,15 +317,15 @@ exhaustively model-check it at the bounded scope, proving both branches reach ev
    scope 2 — with the vacuity and fairness-sensitivity checks passing and no committed emitted spec.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. TLC and the explorer agree on the exact 53-state fingerprint set; safety and liveness are green, every
+action/antecedent vacuity obligation is reachable, and all three fairness-removal checks are red.
 
-## Sprint 3.3: io-sim agreement + seeded-mutation catch 📋
+## Sprint 3.3: io-sim agreement + seeded-mutation catch ⏸️
 
-**Status**: Planned
-**Implementation**: `test/formal/GatewayMigrationIOSim.hs` (the `IOSimPOR` harness over
-the lifted `interpret`) and a seeded-mutation variant of the `Model` used by both the TLC and io-sim suites
-— target paths, not yet built.
-**Blocked by**: Sprint 3.1, Sprint 3.2.
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `test/formal/gateway/GatewayMigrationSpec.hs` (the `IOSimPOR` harness over
+the lifted `interpret`) and its committed model-mutant catalogue under `test/formal/gateway/oracle/` — built.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**:
 `IOSimPOR` and the in-process reachability explorer, both reading the *same* `Model`'s `interpret`, assert
 the same safety predicates the TLC invariants name and find no violation on the correct model — `IOSimPOR`
@@ -357,15 +380,17 @@ sensitivity to one seeded fault — the operational form of single-source corres
    safety-only instruments); a safety invariant with no committed falsifying mutant fails the gate.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. IOSimPOR explored 13 partial-order-reduced schedules within the committed schedule bound of 20; the five
+per-invariant mutants violate exactly their named invariant, all five mechanical safety operators are red in
+the explorer and TLC, and invariant deletion is caught by the obligation/golden oracle.
 
-## Sprint 3.4: Scope-2 pairwise cutoff + decode-time structural-fit fold 📋
+## Sprint 3.4: Scope-2 pairwise cutoff + decode-time structural-fit fold ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Multicluster/StructuralFit.hs` (the total decode-time fold over an
-`InForceSpec` migration graph) and `test/formal/CutoffSpec.hs` (the envelope corpus + the over-scope stress
-run) — target paths, not yet built.
-**Blocked by**: Sprint 3.2.
+`InForceSpec` migration graph) and `test/formal/gateway/GatewayMigrationSpec.hs` (the independent envelope
+predicate/corpus + over-scope stress run) — built.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a QuickCheck generator over random migration graphs shows the fold **accepts ⟺ pairwise ∧ independent ∧ acyclic ∧ in-parameter-envelope** — *in-envelope* spanning **both** the graph-shape
 axis (pairwise / independent / acyclic) **and** the co-equal **parameter-envelope** axis ([`gateway_migration_model_doctrine.md §5`](../documents/engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)):
 - each edge's `Failover` data-loss budget ≤ the proven cap, its `dnsRecord` TTL within the modelled TTL
@@ -470,7 +495,10 @@ total fold, never a per-`InForceSpec` TLC.
    cutoff is labelled argued/tested; TLC is never invoked on the per-spec decode path.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None for the phase gate. The 1,600-case coverage run and totality property pass; all eight clause-delete
+mutants are red under diagnostic equivalence, and the correct scope-3 shared-resource model is green while its
+dual-owner mutant is red. The decomposition lemma intentionally remains an open later obligation, so the
+cutoff is argued/tested rather than claimed proven.
 
 ## Documentation Requirements
 

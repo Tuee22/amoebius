@@ -1,0 +1,17 @@
+{
+  "childClusters": ["amoebius-p42-a", "amoebius-p42-b"],
+  "externalObservers": [
+    "kind get clusters",
+    "pulumi stack ls --json",
+    "kubectl job resource readback",
+    "Vault Transit decrypt",
+    "native Pulsar protocol roundtrip",
+    "MinIO object HEAD",
+    "Postgres work-id row readback"
+  ],
+  "parentCluster": "amoebius-p42-parent",
+  "retainedBackingStores": ["phase24-root-platform"],
+  "secondPassChildMutations": 0,
+  "survivingChildClustersAfterTeardown": 0,
+  "survivingChildStacksAfterTeardown": 0
+}

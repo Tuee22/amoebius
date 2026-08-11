@@ -1,0 +1,1 @@
+Replace a content-digested image with a mutable tag; image-digest must turn red.

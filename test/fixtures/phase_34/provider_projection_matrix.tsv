@@ -1,0 +1,10 @@
+logical_relation	provider	object_type	parent_template	tenant_qualified	permission_class	absence_rule
+realm-read-role	Keycloak	RealmRole	amoebius/{tenant}	yes	read	no unqualified role
+subject-membership	Keycloak	GroupRoleMapping	amoebius/{tenant}	yes	member+owner	no cross-tenant member
+secret-prefix	Vault	AclPolicy	secret/data/amoebius/phase34/{app}/{tenant}/*	yes	read+list	no sibling prefix
+message-namespace	Pulsar	NamespacePolicy	{tenant}/{app}	yes	produce+consume	no public/default grant
+object-bucket	Minio	BucketPolicy	{app}-{tenant}	yes	read+write	no wildcard bucket
+kubernetes-namespace	KubernetesApi	Namespace	{app}-{tenant}	yes	manage	no shared namespace
+east-west-policy	KubernetesApi	NetworkPolicy	{app}-{tenant}/default-deny	yes	same-tenant	no cross-tenant selector
+sql-role	Postgres	Role	{app}_{tenant}	yes	connect	no shared login role
+sql-schema	Postgres	Schema	{app}_{tenant}	yes	usage+create	no public grant

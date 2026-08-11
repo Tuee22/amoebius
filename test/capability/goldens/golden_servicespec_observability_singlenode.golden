@@ -1,0 +1,10 @@
+capability=Observability
+resource=telemetry
+provider=Canonical
+product=Prometheus
+shape=SingleNode
+object|observability/telemetry/config|ConfigMap|provider-config|-
+object|observability/telemetry/member-0|StatefulSet|member|observability/telemetry/controller-0
+object|observability/telemetry/service|Service|stable-endpoint|-
+execution|observability/telemetry/member-0|StatefulSet
+intent=ObservabilityIntent "telemetry"

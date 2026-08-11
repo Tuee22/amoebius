@@ -1,0 +1,6 @@
+case	client_content	server_content	client_authority	server_authority	result	effect_count
+current-A	A	A	A	A	Accepted	1
+stale-authority	A	A	old	A	ReloadRequired	0
+stale-content	old	A	A	A	ReloadRequired	0
+missing-digest	-	A	A	A	ReloadRequired	0
+hand-authored-tuple	fake	A	fake	A	ReloadRequired	0

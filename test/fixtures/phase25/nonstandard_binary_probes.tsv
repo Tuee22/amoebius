@@ -1,0 +1,4 @@
+catalog_name	expected_exit	expected_output
+metallb-controller	0	Usage of 
+metallb-speaker	0	Usage of 
+percona-postgresql-operator	2	unable to load in-cluster configuration

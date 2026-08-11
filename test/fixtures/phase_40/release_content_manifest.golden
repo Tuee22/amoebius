@@ -1,0 +1,7 @@
+release-A client-plan sha256:CLIENT-A
+release-A server-plan sha256:SERVER-A
+release-A authority sha256:AUTH-A
+release-B client-plan sha256:CLIENT-B
+release-B server-plan sha256:SERVER-B
+release-B authority sha256:AUTH-B
+runtime-image sha256:RUNTIME-UNCHANGED

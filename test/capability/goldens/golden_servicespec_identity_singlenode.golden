@@ -1,0 +1,10 @@
+capability=Identity
+resource=accounts
+provider=Canonical
+product=Keycloak
+shape=SingleNode
+object|identity/accounts/config|ConfigMap|provider-config|-
+object|identity/accounts/member-0|StatefulSet|member|identity/accounts/controller-0
+object|identity/accounts/service|Service|stable-endpoint|-
+execution|identity/accounts/member-0|StatefulSet
+intent=GenericCapabilityIntent Identity "accounts"

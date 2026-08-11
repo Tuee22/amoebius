@@ -1,0 +1,1 @@
+Default a missing coexistence-policy class instead of rejecting unequal class domains.

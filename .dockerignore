@@ -4,3 +4,118 @@
 
 # Editor settings are kept at the user/global level, not in the repo.
 /.vscode/
+
+# Version-control metadata, generated output, and legacy generated migration
+# surfaces are never Docker build inputs.
+.git
+.git/**
+gen
+gen/**
+DEVELOPMENT_PLAN/evidence
+DEVELOPMENT_PLAN/evidence/**
+DEVELOPMENT_PLAN/ledgers
+DEVELOPMENT_PLAN/ledgers/**
+test/enumeration
+test/enumeration/**
+test/golden/phase_*_ledger.json
+test/golden/phase_54_expected_run_ledger.json
+
+# Dependency resolution is refreshed dynamically.
+**/*.lock
+**/*.freeze
+**/package-lock.json
+**/npm-shrinkwrap.json
+**/pnpm-lock.yaml
+**/go.sum
+
+# Haskell, JavaScript, and PureScript build products.
+dist-newstyle
+dist-newstyle/**
+.cabal-sandbox
+.cabal-sandbox/**
+.ghc.environment.*
+cabal.project.local
+**/*.o
+**/*.hi
+**/*.dyn_o
+**/*.dyn_hi
+**/*.hie
+.phase1-store
+.phase1-store/**
+**/*.tla
+**/*.cfg
+node_modules
+node_modules/**
+ui-runtime/.spago
+ui-runtime/.spago/**
+ui-runtime/output
+ui-runtime/output/**
+ui-runtime/dist
+ui-runtime/dist/**
+
+# Source-adjacent Python interpreter caches are local accelerators, never image
+# build inputs.
+**/__pycache__
+**/__pycache__/**
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Language caches and coverage output.
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+.coverage.*
+htmlcov
+coverage
+
+# Tool acquisition and phase/build output.
+toolchain/bin
+toolchain/bin/**
+toolchain/runtime
+toolchain/runtime/**
+toolchain/downloads
+toolchain/downloads/**
+toolchain/cache
+toolchain/cache/**
+.phase*-build
+phase*-build
+build
+build/**
+_build
+_build/**
+out
+out/**
+output
+output/**
+dist
+dist/**
+.cache
+.cache/**
+tmp
+tmp/**
+temp
+temp/**
+
+# Test and runtime output.
+playwright-report
+test-results
+screenshots
+browser-profile
+browser-profile/**
+**/*.log
+**/*.pid
+**/*.sock
+
+# Local credentials and runtime state.
+.env
+.env.*
+.secrets
+.secrets/**
+.credentials
+.credentials/**
+kubeconfig
+
+# The downloaded toolchain is host-local. Authored resolver policy beneath
+# toolchain/ remains available to builds.

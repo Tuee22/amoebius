@@ -1,0 +1,4 @@
+step	subject	from	to	epoch	old_state	old_handles
+1	alice	t-a	t-b	2	cleared	invalid
+2	alice	t-b	revoked	3	cleared	invalid
+3	mallory	none	t-b	-	unchanged	invalid

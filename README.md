@@ -10,8 +10,9 @@
 This page states what amoebius is and routes into the corpus; it owns no doctrine and no schedule. The design
 is owned by the doctrine set under [`documents/`](./documents/README.md), phase order and status by
 [`DEVELOPMENT_PLAN/README.md`](./DEVELOPMENT_PLAN/README.md), and the sequence in which to read either by
-[`documents/reading_order.md`](./documents/reading_order.md). **Nothing described below is built** — the
-repository currently holds the specification and its lint, and no source tree.
+[`documents/reading_order.md`](./documents/reading_order.md). The phase tracker is the authority for what is
+built and validated; this page describes the target architecture and does not promote planned surfaces to
+tested results.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -27,10 +28,26 @@ repository currently holds the specification and its lint, and no source tree.
 
 amoebius has one Haskell **runtime binary** with closed responsibilities for its bootstrap/host command mode,
 **sudo-capable host daemon**, **in-cluster control-plane singleton**, **capacity scheduler**, and **unelected
-workers**. A separate thin Python `pb` program is the pre-binary midwife and post-handoff admin-REST client; it
+workers**. A separate thin Python `pb` program is the pre-binary bootstrap coordinator and post-handoff admin-REST client; it
 is an operator frontend, not another runtime role or control plane. The worker set
 includes the generic UI server and owner-scoped UI projector as well as linked workflow and ML roles; an
 application does not introduce another executable or privileged server.
+
+Every detected hardware substrate can always run the baseline **`linux-cpu`** lane. Linux runs it natively,
+Apple supplies it through Lima, and Windows supplies it through WSL2; a Linux-CUDA host can select the same
+CPU-only lane without exposing its accelerator. When a gate needs a **pristine Linux host**, the provider is
+fixed by the physical substrate: **Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows**. The
+complete mapping and its tested/assumed status live in the
+[substrate plan](./DEVELOPMENT_PLAN/substrates.md) and
+[substrate doctrine](./documents/engineering/substrate_doctrine.md).
+
+Only authored inputs and reviewed external source belong in version control. Every reproducible projection,
+dependency resolution, lock/freeze file, generated source, test enumeration, ledger, receipt, log, or report
+is emitted under `gen/` or retained in the external evidence store. The complete repository tree and required
+ignore coverage are owned by the
+[repository-layout doctrine](./documents/engineering/repository_layout_doctrine.md).
+Python interpreter bytecode is the one source-adjacent cache exception: Python uses its normal cache behavior,
+while `.gitignore` and `.dockerignore` exclude every `__pycache__` directory and bytecode suffix.
 
 The binary manages Kubernetes cluster lifecycle and interprets checked `.dhall` values into opinionated
 deployments and bounded low-code applications. A low-code app is finite `UiSource` data compiled into matching
@@ -73,8 +90,11 @@ and reattaches retained backing
   — a test *is* an amoebius deployment: a spec composed with a chaos schedule, a typed expectation surface,
   and a mandatory teardown. Validation runs in three phase-gate registers (1 pure/golden · 2
   boundary-with-fakes · 3 live), plus the Register-2.5 deterministic-simulation activity, which is never
-  itself a phase gate; every gate emits a committed proven/tested/assumed ledger that
-  states which layer it reached and marks the rest UNVERIFIED.
+  itself a phase gate; every gate emits an untracked proven/tested/assumed ledger, externally attested against
+  the committed tree, that states which layer it reached and marks the rest UNVERIFIED.
+- **How the repository is laid out:**
+  [`documents/engineering/repository_layout_doctrine.md`](./documents/engineering/repository_layout_doctrine.md)
+  — the complete authored/generated tree, dependency-resolution policy, and ignore contracts.
 - **How low-code applications work:**
   [`documents/engineering/low_code_ui_runtime_doctrine.md`](./documents/engineering/low_code_ui_runtime_doctrine.md)
   — bounded Dhall UI programs, one checked value projected into client/server plans, typed effects,
@@ -86,10 +106,11 @@ and reattaches retained backing
 
 ## Toolchain
 
-GHC 9.12.4, Cabal 3.16.1.0 (one shared pin across all packages). Python `pb` is the pre-binary launcher and
-post-handoff operator client.
+Python `pb` is the pre-binary bootstrap coordinator and post-handoff operator client. Compilers, package tools,
+libraries, and browser dependencies resolve dynamically from authored compatibility requirements. Resolved
+versions, paths, dependency graphs, and integrity observations are generated per run and never committed.
 
 ## Working agreement
 
 LLMs/assistants must not run `git add`, `git commit`, or `git push`; staging and committing are reserved
-for the human (see [`CLAUDE.md`](./CLAUDE.md)).
+for the human (see [`AGENTS.md`](./AGENTS.md); [`CLAUDE.md`](./CLAUDE.md) mirrors the same restriction).

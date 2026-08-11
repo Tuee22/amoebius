@@ -23,6 +23,8 @@ owned by [resource_capacity_storage.md](./resource_capacity_storage.md).
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. A content-derived name that cannot be forged](#1-a-content-derived-name-that-cannot-be-forged)
 - [2. The three-tier store: blobs ← manifests ← pointers](#2-the-three-tier-store-blobs--manifests--pointers)
@@ -262,7 +264,7 @@ differ), and **a pointer is the only mutable object, advanced only by ETag-CAS, 
 |-------|------------------|-----------|--------|
 | `experimentHash` | `sha256(resolved-dhall ‖ substrate-fingerprint)` | an ML run / artifact ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) | existing (sibling `jitML`/`infernix`) |
 | `kernelKey` | `sha256(kernel-source ‖ substrate-fingerprint)` | a Tier-3 JIT kernel ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) | Phase-N design intent (Q8) |
-| `releaseHash` | `sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fingerprint)`; the resolved deployment includes every pinned UI-program/contract/ABI digest | a deployment generation | Phase-N design intent (Q13) |
+| `releaseHash` | `sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fingerprint)`; the resolved deployment includes every pinned UI-program/contract/ABI digest | a deployment generation | validated in Phase 39 |
 | OCI image digest | registry-owned (not amoebius-computed) | a container image | existing ([`image_build_doctrine.md` §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)) |
 
 **Pointer kinds** — mutable, ETag-CAS only, namespaced by kind:
@@ -275,8 +277,8 @@ differ), and **a pointer is the only mutable object, advanced only by ETag-CAS, 
 
 Ownership and honesty for the registry:
 
-- `experimentHash` ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) and the `trial` pointer ([§2](#2-the-three-tier-store-blobs--manifests--pointers)) are the **existing** pair — the only members with a working
-  sibling implementation. Everything else here is amoebius **design intent**, not a built result.
+- `experimentHash` ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) and the `trial` pointer ([§2](#2-the-three-tier-store-blobs--manifests--pointers)) supplied the original sibling pair. Phase 39 added
+  validated amoebius `releaseHash` and `environment`-pointer instances; other future members remain design intent.
 - `kernelKey` folds *kernel source* and the substrate fingerprint the same way `experimentHash` folds the
   resolved `.dhall`; the finer JIT cache-key composition is owned by the sibling
   `jitML/documents/engineering/determinism_contract.md`. `kernelKey` is consumed by Tier 3 in [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).
@@ -341,7 +343,7 @@ experimentHash = sha256(resolved-dhall ‖ substrate-fingerprint)
   The DSL surface that produces this normal form is owned by [`dsl_doctrine.md`](./dsl_doctrine.md); this doc only
   consumes it.
 - **`substrate-fingerprint`** is the identity of *where the math runs* — `apple-silicon` / `linux-cpu` /
-  `linux-cuda` plus the toolchain witnesses that fix float semantics (the GHC 9.12.4 baseline, the
+  `linux-cuda` plus the per-run resolved toolchain witnesses that affect float semantics (compiler,
   kernel-compiler/runtime versions, ISA, ABI). It is gathered by full-path subprocess probes, never from
   environment variables or `PATH`, per the no-env/no-PATH contract owned by
   [`substrate_doctrine.md`](./substrate_doctrine.md). The *composition* of this fingerprint (and the related, finer-grained JIT cache key) is owned by `jitML/documents/engineering/determinism_contract.md`; this doc
@@ -470,12 +472,20 @@ content-addressing/determinism *use* of it, the catalog owns the typing discipli
 
 ### 4.5 The ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss
 
+[Phase 10](../../DEVELOPMENT_PLAN/phase_10_capability_bind.md) validates the representational first step:
+`InferenceEngine` carries one of the closed named `AppleMetal | Cuda | LinuxCpu` lanes, with no URL or download
+constructor, and the URL negative fails Gate 1. The family/lane availability relation, bounded-cache
+materialization, and live first-miss resolution remain owned by their later phases.
+
 The three legs above pin the *training/inference math*; this subsection pins the **asset axis** that feeds it —
 the three kinds of heavy thing a model-serving pod needs (a runtime engine, model weights, a compiled kernel).
 An earlier design gave each a *different* lifecycle (engine baked into the image, model eagerly staged, kernel
 lazily JIT'd). This round **collapses all three onto one shape**: a **bounded, content-addressed, ephemeral cache**, populated on first miss by `resolve = {download | build}`, shared across `infernix` and `jitML` through
 the **`jit-build` capability-extension** ([`service_capability_doctrine.md`](./service_capability_doctrine.md)).
 The DRY win is one resolver and one bounded pool for all three asset kinds instead of three bespoke paths.
+The resolver's enumerated Haskell dependency surface and the native Pulsar fork/codegen dependency were
+build-tested together by the [Phase 1 toolchain gate](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md); no
+resolver or runtime behavior is claimed by that Register-1 result.
 
 The single design rule survives, restated for the collapse: **no asset is ever fetched by authoring a URL.**
 Each asset is **named** by a typed content-addressed identity drawn from a **closed catalog** — there is no
@@ -593,6 +603,8 @@ The three asset kinds, **one cache shape** (`resolve = {download | build}` on fi
   download — the identity is drawn from a closed catalog. The base image and the resolver's build inputs are
   owned by [`image_build_doctrine.md`](./image_build_doctrine.md); this **replaces** `infernix`'s per-engine
   Poetry-venv + curl-tar-at-image-build with the one shared resolve-on-miss path.
+  Phase 25.1 has live-proved only the base image's resolver/toolchain presence and byte identity on both Linux
+  architectures; first-miss materialization into `CacheBudget` remains a Phase 48 gate.
 - **Tier 2 — `ModelArtifact` = eager STAGE-THEN-SERVE, and *staging by name IS a provenance-carrying import*.**
   The parent-minted nested `infernix.dhall` names the model *set*; the in-cluster singleton stages each
   model into the shared bounded cache, and the `.ready` sentinel is written **last** so the `model` pointer ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)) commits only a complete
@@ -724,6 +736,17 @@ any content hash.
 lattice-join law (commutative/associative/idempotent), per the ledger above. Whether two clusters *produce the same bytes to merge* in the first place is a separate
 question, and its ceiling is [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic).
 
+### Phase-37 realization
+
+Phase 37 built and validated the three tiers in `amoebius-store`: immutable components and canonical-CBOR
+manifests use `If-None-Match: *`; 32-byte HEAD pointers use ETag `If-Match` CAS with loser reread. A live
+MinIO drill proved an orphan created before a losing pointer update remains charged through the positive GC
+horizon and earns credit only after a fresh empty inventory. Two independent workflow namespaces converged
+on the pinned manifest SHA during native Pulsar Failover redelivery. Cross-cluster replication and the
+`deriveExperimentHash`/SplitMix kernel remain UNVERIFIED until Phases 42/48. The live gate ran on the
+universally available `linux-cpu` lane; a pristine Linux host uses Incus on Linux/Linux-CUDA, Lima on Apple,
+or WSL2 on Windows.
+
 ---
 
 ## 6. The honest ceiling: types make the bookkeeping total, not the physics deterministic
@@ -818,6 +841,42 @@ status ledger; it states the target shape and links back for status. Per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement here is a proven amoebius result:
 the model generalizes mechanisms built and tested in the sibling `jitML` and `infernix` libraries into amoebius
 design intent.
+
+The Phase-42 Register-3 instance realizes the cross-boundary fold in
+`Amoebius.Multicluster.GeoReplication`. An independently pinned golden shows duplicate/reordered records
+produce the same fold and blob keys; live MinIO accepts the content-addressed object and observes an
+idempotent same-key duplicate, while native Pulsar and Patroni observers recover the same fresh work identity.
+The live data plane was the retained HA Phase-24 platform shared by two real child-cluster projections; a
+physically independent Pulsar broker set per child remains UNVERIFIED. Every hardware substrate can always run
+this `linux-cpu` lane. For a pristine Linux host use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on
+Windows.
+
+The Phase-48 Register-3 instance makes Tier-1 engine materialization content-addressed in
+`Amoebius.Jit.Resolver` and keeps digest constructors and cache keys private. Pure contracts cover canonical
+field ordering, complete compiler/ISA/libc/RTS fingerprints, SplitMix-derived streams, digest/size conflict
+refusal, first-miss convergence, pin-aware pruning, and capacity admission. A retained-Kubernetes drill then
+used four fresh compute Jobs, out-of-band MinIO comparison, a replaceable cache owner with two unmounted
+clients, and an in-cluster `distribution` registry to observe MISS→materialize→HIT and cleanup. The resolved
+payload is a pinned executable engine fixture, not a full production llama.cpp or model-inference result;
+cross-substrate bit equality, cross-node reuse, the Tier-2 model cache, and Tier-3 CUDA kernel cache remain
+UNVERIFIED. Every hardware substrate can always run the `linux-cpu` lane. When the gate needs a pristine Linux
+host, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+The Phase-49 scoped instance stages a pinned 87-byte CPU micro-model as blob → canonical-CBOR manifest → ready
+pointer, refuses a precommit reference, and writes two fresh-Job outputs that are byte-equal to an independent
+golden. A named Phase-48 engine observes MISS→single materialization→HIT. This is a content-addressed adapter
+and deterministic micro-decoder result, not production TinyLlama inference; worker-direct artifact fetch,
+full-engine linkage, general noninterference, and cross-substrate bit equality remain UNVERIFIED. Every
+hardware substrate can always run `linux-cpu`; a pristine Linux host uses Incus on Linux/Linux-CUDA, Lima on
+Apple, or WSL2 on Windows.
+
+The scoped Phase-51 adapter directly uses Phase-37 content digests and canonical component manifests, and only
+a successful pointer witness exposes its opaque committed artifact. Live retained-MinIO evidence stores the
+fresh batch, a fully oracle-checked 40 MB CUDA checkpoint, a canonical JSON evidence manifest, then a create-
+only conditional pointer; a conflicting write returns 412 without changing the pointer. The sibling CBOR
+checkpoint format, mutable `latest` ETag-CAS, orphan horizon, JIT-cache materialization, and full training
+provenance remain UNVERIFIED. All hardware substrates keep the CPU execution alternative; clean Linux is
+provided by Incus for Linux/Linux-CUDA, Lima for Apple, or WSL2 for Windows.
 
 ---
 

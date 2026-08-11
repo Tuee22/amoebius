@@ -5,8 +5,13 @@
 > **Read this if**: phase 57 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 57 delivers the UI rollout, projection catch-up, and reconnect; its design is owned by [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [pulsar_client_doctrine.md](../documents/engineering/pulsar_client_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Register 3, scoped live, on the `linux-cpu` substrate.
+The scoped gate passed on 2026-08-11; cluster, browser, and provider observations remain `UNVERIFIED`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -24,7 +29,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 57.1: Execute and verify the coherent UI release transition 📋](#sprint-571-execute-and-verify-the-coherent-ui-release-transition-)
+- [Sprint 57.1: Execute and verify the coherent UI release transition ⏸️](#sprint-571-execute-and-verify-the-coherent-ui-release-transition-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,7 +37,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. The release transition and its live evidence are unimplemented design intent.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 Scoped gate passed. The transition kernel, cursor isolation, registration drain, host-local durable
+observers, and all four mutation loci pass. Real Keycloak, Gateway API/Envoy, Pulsar, browser, Kubernetes,
+CNI, and provider observations remain `UNVERIFIED`.
 
 ## Phase Summary
 
@@ -48,7 +61,9 @@ old decoders until their compatibility window closes.
 command, `cabal test phase57-ui-rollout-reconnect`; split if the work introduces another rollout algorithm,
 substrate, or infrastructure-failure injection.
 
-**Substrate:** `linux-cpu` ([§L](development_plan_standards.md#l-one-substrate-discipline)).
+**Substrate:** `linux-cpu` ([§L](development_plan_standards.md#l-one-substrate-discipline)). Every hardware
+substrate can always run `linux-cpu`. When the gate needs a pristine Linux host, use Incus on Linux or
+Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -114,14 +129,24 @@ fail the backend/Redis/cursor timeline.
 
 ## Sprints
 
-## Sprint 57.1: Execute and verify the coherent UI release transition 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 57.1: Execute and verify the coherent UI release transition ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/ReleaseTransition.hs`,
-`src/Amoebius/Ui/Realtime/Drain.hs`, `test/live/Phase57UiRolloutSpec.hs` (planned; not built)
-**Blocked by**: Phases 40, 55, and 56
-**Independent Validation**: `cabal test phase57-ui-rollout-reconnect` against
-real Keycloak authority, pinned timeline/access/cursor tables, and broker/browser/API/CNI observations
+`src/Amoebius/Ui/Projection/Cursor.hs`, `src/Amoebius/Ui/Realtime/Drain.hs`,
+`test/live/Phase57UiRolloutSpec.hs`, `tools/phase57_ui_rollout_live.py`, and `tools/phase57_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `python3 tools/phase57_gate.py`; scoped transition,
+cursor, registration, fresh-journal, durable reconnect, and mutant observations are tested. Real Keycloak,
+Gateway/Pulsar/browser/API/CNI observations remain `UNVERIFIED`.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/release_lifecycle_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`,
 `documents/engineering/ui_realtime_coordination_doctrine.md`
@@ -141,13 +166,15 @@ Deliver one coherent, reversible UI release transition with scope-preserving rec
 
 ### Validation
 
-1. Run `cabal test phase57-ui-rollout-reconnect` on `linux-cpu`; the canonical transition must match all
-   independent timeline, authority, scope, and bypass predicates and all three mutants must fail at their
-   pinned locus.
+1. Run `python3 tools/phase57_gate.py` on `linux-cpu`; the scoped canonical
+   transition must match the pinned custody and local timeline/cursor/scope predicates, all four mutants must
+   fail at their pinned loci, and unsupported provider observations must remain `UNVERIFIED`.
 
 ### Remaining Work
 
-The whole sprint is planned; no live rollout evidence exists.
+Run the same transition through real Keycloak sessions, Gateway API/Envoy access logs, a native Pulsar
+watermark observer, a browser-network proxy, Kubernetes audit, and CNI/provider zero-effect observations.
+Those surfaces are deliberately `UNVERIFIED`; the scoped local gate does not substitute for them.
 
 ## Documentation Requirements
 

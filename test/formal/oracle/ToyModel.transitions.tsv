@@ -1,0 +1,9 @@
+from	event	to	enabled	invariant
+idle,idle	request-p0	want,idle	true	MutualExclusion
+idle,idle	request-p1	idle,want	true	MutualExclusion
+want,idle	enter-p0	critical,idle	true	MutualExclusion
+idle,want	enter-p1	idle,critical	true	MutualExclusion
+critical,idle	exit-p0	idle,idle	true	MutualExclusion
+idle,critical	exit-p1	idle,idle	true	MutualExclusion
+want,want	enter-p0	critical,want	true	MutualExclusion
+want,want	enter-p1	want,critical	true	MutualExclusion

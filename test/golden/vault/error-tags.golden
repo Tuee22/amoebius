@@ -1,0 +1,6 @@
+unavailable|vault-read-failed tag=unavailable detail=redacted
+uninitialized|vault-read-failed tag=uninitialized detail=redacted
+sealed|vault-read-failed tag=sealed detail=redacted
+policy-missing|vault-read-failed tag=policy-missing detail=redacted
+secret-missing|vault-read-failed tag=secret-missing detail=redacted
+decrypt-denied|vault-read-failed tag=decrypt-denied detail=redacted

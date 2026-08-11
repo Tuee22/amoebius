@@ -1,0 +1,8 @@
+port	handler	capability	scope	idempotency	audit
+read	data-read	SqlRead	owner	none	read
+mutate	data-write	SqlWrite	owner	required	mutation
+start	workflow-start	Workflow	owner	required	workflow
+observe	workflow-observe	Workflow	owner	none	workflow
+subscribe	stream-subscribe	PulsarSubscription	owner	none	stream
+upload	blob-upload	ContentStore	owner	required	blob
+artifact	artifact-use	InferenceEngine	owner	required	artifact

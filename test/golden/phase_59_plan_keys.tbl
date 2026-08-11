@@ -1,0 +1,7 @@
+operation public_client_key private_replay_key classification
+infernix-start infernix-start infernix-start queued
+jitml-training-start jitml-training-start jitml-training-start queued
+workflow-progress - - cached-projection
+ml-signal - - online-only
+workflow-cancel - - online-only
+model-invocation - - online-only

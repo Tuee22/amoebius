@@ -1,0 +1,2 @@
+operator=effect-swap
+expected=idempotent replay creates a second handler effect

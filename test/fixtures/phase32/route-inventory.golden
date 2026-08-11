@@ -1,0 +1,6 @@
+Grafana|/grafana/
+KeycloakAdmin|/keycloak/
+VaultUi|/vault/
+MinioConsole|/minio/
+PlatformApi|/platform/
+AuthenticatedWebSocket|/ws

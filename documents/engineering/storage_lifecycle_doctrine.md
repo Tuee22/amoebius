@@ -22,6 +22,8 @@ decoupled from, owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doc
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Cluster and storage have independent lifetimes](#1-cluster-and-storage-have-independent-lifetimes)
 - [2. One storage class, and it provisions nothing](#2-one-storage-class-and-it-provisions-nothing)
@@ -36,6 +38,11 @@ decoupled from, owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doc
 - [Related Documents](#related-documents)
 
 ---
+
+**Node-local read-side status.** The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md)
+validates model-pinned OCI content/snapshot joins, planned-slot versus observed-UID runtime metadata, closed
+layout routing, alias-aware backing groups, and physical raw-versus-VM-usable parent accounting. Live deletion,
+GC, allocation, and backing observation remain unverified; ledger `external-run-reference`.
 
 ## 1. Cluster and storage have independent lifetimes
 
@@ -65,9 +72,12 @@ model and the rebind contract, and references the rest.
 
 This model **generalizes** the single-node, host-path-only retained-storage scheme proven in the sibling
 prodbox project (`prodbox/documents/engineering/storage_lifecycle_doctrine.md`) and lifts it to amoebius's
-multi-node, multi-substrate world. Read every prescriptive statement below as amoebius *design intent* —
-evidence inherited from prodbox is evidence from a sibling system, not proof in amoebius, which has not yet
-built the storage layer. Status and gates live only in
+multi-node, multi-substrate world. Evidence inherited from prodbox remains evidence from a sibling system,
+not proof in amoebius. The Phase-28 amoebius retained-host slice is now independently live-tested: the exact
+scope and ledger are owned by
+[Phase 28](../../DEVELOPMENT_PLAN/phase_28_retained_storage.md). Phase 30 additionally live-tested the
+linux-cpu distributed-service arm for MinIO's four retained drives and Pulsar's three ZooKeeper plus three
+BookKeeper claims; provider-backed arms remain design intent. Status and gates live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -199,7 +209,7 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Design intent. The PV name and claimRef are pure functions of (namespace, statefulset, ordinal), so the same ordinal computes the same bind on every rebuild; the physical host path and EBS volume are runtime-checked backing residue, not proven here.*
+*Normative model. Phase 28 live-tested the host-retained arm: PV name and claimRef were pure identity functions, and independently observed fixed-size host images supplied the backing; provider-backed EBS remains a later-phase runtime proof obligation.*
 
 ---
 
@@ -226,10 +236,11 @@ all become guesswork. amoebius makes the declared size a **hard ceiling**, not a
   cannot spill past it onto shared host disk, and the mounted filesystem must expose at least the derived usable
   capacity. Provider volumes enforce the raw ceiling with the EBS volume size. A host-backed
   volume must name an amoebius-managed quota- or image-backed extent that enforces the same byte ceiling;
-  a raw shared-filesystem subdirectory is not an admissible `StorageBacking`. The Phase-28 live gate must
-  prove a write past the cap fails and neighboring volumes/backing remain intact. Until that enforcement
-  exists, the storage phase is simply unimplemented — amoebius does not downgrade the provision to an
-  “advisory but deployable” state.
+  a raw shared-filesystem subdirectory is not an admissible `StorageBacking`. Phase 28 live-tested this
+  enforcement with one fixed-raw-size ext4 image per retained PV: raw length equalled the private provisioned
+  capacity, mounted usable capacity covered demand, and a fill plus one-byte write failed with `ENOSPC`
+  without growing that image or consuming its sibling volume or shared host pools. The project does not
+  downgrade a substrate lacking equivalent enforcement to an “advisory but deployable” state.
 - **Aggregate backing admission precedes render/apply.** Each retained claim names the exact backing/pool it
   debits, and the post-bind resource fold checks `Σ(provisionedBytes) ≤ observed/declarable backing` before a
   `ProvisionedSpec` exists. The same physical bytes cannot also be presented as node ephemeral or cache
@@ -263,6 +274,14 @@ Either way, the rule is the same: **node lifecycle and storage lifecycle are dec
 node-level precondition for the cluster-level guarantee in [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind).
 
 ### 5.2 The storage backing is bounded — the closed `StorageBacking` union
+
+**Pure read-side status.** The [Phase 8 gate](../../DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md)
+implements the closed Haskell `StorageBudget`/`StorageBacking` read side and independently tests physical
+geometry, filesystem presentation, allocation rounding, uniform per-backing claims, migrations, backup,
+restore, disjoint pools, and bounded snapshot-driven scaling (ledger
+`dynamically-resolved`). It consumes authored
+in-process backing capacities only. Live capacity observation, allocation, rebind, healing, migration, and
+declared≤observed reconciliation remain **UNVERIFIED** until their owning live phases.
 
 [§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim) caps each *volume*; this subsection caps the *backing* a set of volumes draws from, so "unbounded storage"
 ([illegal_state_catalog.md §3.18](../illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)) has no syntax. There is no such thing as
@@ -473,7 +492,7 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Design intent. Deterministic rebind reconstructs the bind from a uid-less pre-bound PV and a recomputed PVC — two halves that meet by identity; the running clusters and the surviving backing bytes are runtime-checked, not proven here.*
+*Normative model with delivered host-retained instances. Phase 28 observed the real cluster/node/API absent while host images retained run-unique bytes, recreated fresh cluster/PV/claim identities, and read the same Postgres row and MinIO object without a post-recreate write. Phase 30 then bound distributed MinIO/ZooKeeper/BookKeeper StatefulSet claims to identity-named fixed ext4 backings; provider instances remain later-phase proof obligations.*
 
 **Deterministic rebind is guaranteed only when all of these hold** (adapted and generalized from the
 prodbox rebinding rules):
@@ -656,6 +675,11 @@ ReclaimEligible =
 > and external break-glass boundary) is design intent; treat it as a specification to be validated, never as a proven
 > result. Delivery is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
+Phase 39 is the validated database-schema instance of this discipline: two live PostgreSQL rounds performed
+`create-new → verified-migrate → retire-old`, matched an independent row oracle, and retained every old row
+after retirement. The broader volume-shrink and privileged reclaim machinery described above remains design
+intent; the Phase-39 retire step neither represented nor performed durable-byte deletion.
+
 ---
 
 ## 9. What this doctrine deliberately does not own
@@ -676,15 +700,61 @@ To keep the SSoT boundaries crisp:
 
 ---
 
+### Validated Vault retained-state face
+
+Phase 29 exercised the Phase-28 retained-storage contract with the real root Vault: a 128 MiB fixed ext4 Raft
+image and a separate 64 MiB fixed ext4 rotated-audit image survived deletion of the kind node and every PV/PVC
+API object, rebound in a fresh cluster, and recovered the same Vault cluster id, canary, and PKI root by unseal
+only. The live Raft and audit high-water measurements remained below observed usable capacity. The proof ran on
+the universally available `linux-cpu` lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or
+WSL2 on Windows.
+
 ## 10. Planning ownership
 
+Phase 37 consumes the retained Phase-28/30 MinIO backing without changing its lifetime rules. Its live gate
+writes immutable content and terminal-Job completion objects, proves failed-pointer-CAS orphan retention and
+fresh post-horizon deletion, then reports an empty test-owned MinIO remainder; normal platform teardown never
+deletes retained backing. This was validated on `linux-cpu`, a lane every hardware substrate can always run.
+When a pristine Linux host is needed, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 43 exercises the same lifetime distinction during gateway movement. Graceful teardown is admitted only
+after synchronization and keeps the retained Phase-24 platform; chaos failover is labeled budgeted instead of
+lossless. The survivor-capacity check refuses durable, cache, ephemeral, compute, device, and unreachable
+shortfalls before resource release, and the live postflight removes only Phase-43 objects and temporary roots.
+
+Phase 46 adds the provider-storage model without claiming a provider effect. The pure contract keeps required
+usable bytes distinct from allocation-rounded bytes, seals a provider ID behind checked create receipt data,
+keeps old and replacement bytes/count/attachments/copy execution charged together, and renders only a Retain
+static-PV shape over a known handle. A retained-kind analogue preserved one marker across two PV API identities
+on one backing and separately observed opaque durable/ephemeral checkpoint keys in MinIO. The backing was
+hostPath, not EBS; real cluster-destroy EBS retention, CSI attach, same-handle reattach, cloud delete denial,
+and Phase-54 reclamation remain UNVERIFIED.
+
 This document is normative storage-lifecycle doctrine only. Delivery sequencing, completion status,
-validation gates, and remaining work — including the host-side hard-cap enforcement mechanism ([§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)) and the
-verified-shrink migration ([§8](#8-shrinking-storage-without-representing-data-destruction)) — are owned by
+validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). This doc never maintains a competing
-status ledger; it states the target shape and links back for status. Per
-[documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement here is a proven amoebius
-result: the model generalizes behaviour proven in prodbox into amoebius design intent.
+status ledger; it states the target shape and links back for status. Phase 28 delivered and live-tested the
+host-side hard-cap, uniform-claim/backing admission, retained scaling/migration state machine, and
+delete/recreate rebind slice with ledger
+`dynamically-resolved`.
+Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
+that evidence must not be generalized to untested provider or control-plane subjects.
+
+Phase 30 further exercised the no-provisioner distributed-service face: four MinIO drive claims, three
+ZooKeeper metadata claims, and three BookKeeper ledger claims bound to deterministic identity-named PVs backed
+by fixed ext4 images. Live capacity and exact projection checks passed, while the registry stored no PV of its
+own after its verified S3-driver rehome. This is a linux-cpu Register-3 tested result, not proof of consensus
+or provider storage. Every hardware substrate can always run `linux-cpu`; for a pristine Linux host use Incus
+on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 32 re-exercised the delete/recreate mechanism after the authenticated edge landed. The destructive
+portion ran in the isolated `amoebius-phase32-rebind` kind cluster so the retained Phase 24–32 platform stack
+remained available. The committed Keycloak-relational row payload and exact MinIO object survived old node/API
+absence and a run-two control plane with different CA, kube-system namespace UID, and node-container ID; no
+post-recreate writes preceded readback, and the scratch cluster was then removed while backing images remained.
+This is a regression projection of the Phase-28 storage guarantee, not a claim that the retained production-
+shaped edge cluster itself was destroyed. Every hardware substrate can always run its `linux-cpu` lane; use
+Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows for a pristine Linux host.
 
 ---
 

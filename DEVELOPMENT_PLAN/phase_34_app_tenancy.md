@@ -6,7 +6,13 @@
 
 Phase 34 delivers the tenant/provider provisioning; its design is owned by [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md), [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Validated 2026-08-10 with `python3 tools/phase34_gate.py --reuse-fresh-live`;
+ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -25,7 +31,7 @@ No gate has run.
 - [Resource provision — one sealed provider transaction](#resource-provision--one-sealed-provider-transaction)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 34.1: Derive, apply, and externally read back tenant provider policy 📋](#sprint-341-derive-apply-and-externally-read-back-tenant-provider-policy-)
+- [Sprint 34.1: Derive, apply, and externally read back tenant provider policy ⏸️](#sprint-341-derive-apply-and-externally-read-back-tenant-provider-policy-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,9 +39,20 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. The typed identity and authorization kernels are Phase 17 and Phase 18 results; the live DSL
-singleton is a Phase 33 result. This phase adds only provider provisioning. It makes no application-data-path,
-per-user enforcement, browser, UI-runtime, or HA claim.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ **Done.** The checked two-tenant graph is derived into a sealed, closed six-provider transaction and
+live-applied to Keycloak, Vault, Pulsar, MinIO, Kubernetes API, and Postgres. Distinct provider-native or
+scoped ServiceAccount observers recovered the fresh challenge, both illegal twins produced zero effects, both
+mutants turned red, and authenticated target inventories returned to preflight. Application-data-path,
+per-user enforcement, browser, UI-runtime, and HA claims remain explicitly UNVERIFIED.
+
+Every hardware substrate can always run the `linux-cpu` lane. When a validation needs a pristine Linux host,
+use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows; specialized lanes are additive.
 
 ## Phase Summary
 
@@ -145,15 +162,23 @@ cleanup inventories, substrate, and Register. It records no credential material.
 
 ## Sprints
 
-## Sprint 34.1: Derive, apply, and externally read back tenant provider policy 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 34.1: Derive, apply, and externally read back tenant provider policy ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+zero-effect rejects, complete target inventory, and two mutation checks are validated at Register 3.
 **Implementation**: `src/Amoebius/Tenancy/ProviderProjection.hs`,
 `src/Amoebius/Tenancy/ProviderTransaction.hs`,
 `src/Amoebius/Tenancy/Provider/{Keycloak,Vault,Pulsar,Minio,KubernetesApi,Postgres}.hs`, and
-`test/live/TenantProviderProvisioningSpec.hs` (target authored sources; not yet built)
-**Blocked by**: Phase
-18; Phase 33
+`test/live/TenantProviderProvisioningSpec.hs`, and `tools/phase34_tenant_provider_live.py` — delivered
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: one command instantiates the pinned relation with fresh tenant
 challenges, observes all six control planes using read-only identities, establishes that both illegal twins
 have zero provider effects, kills both committed mutants, and verifies teardown inventory.
@@ -187,7 +212,7 @@ provisioning alone establishes application request isolation.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. Phase 36 retains the application request-isolation residue.
 
 ## Documentation Requirements
 

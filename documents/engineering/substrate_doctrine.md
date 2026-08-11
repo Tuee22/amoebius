@@ -1,9 +1,9 @@
 # Substrates
 
 > **Purpose**: Define the host substrates amoebius runs on (apple / linux-cpu / linux-cuda / windows),
-> the virtualized substrates that synthesize a Linux host (Lima / WSL2), the host worker nodes that
+> the virtualized substrates that synthesize a Linux host (Incus / Lima / WSL2), the host worker nodes that
 > reach substrate-specific hardware as host subprocesses, the no-environment-variable / no-`PATH` lazy
-> tool-ensure contract, and the substrate-specific midwife CLI that builds and hands off to the binary —
+> tool-ensure contract, and the substrate-specific bootstrap coordinator CLI that builds and hands off to the binary —
 > while the Apple-Metal host worker's headless, on-host, **no-VM** build/run shape (fixed Metal bridge +
 > runtime MSL compilation) is owned by [apple_metal_headless_builds.md](./apple_metal_headless_builds.md).
 > **Read this if**: amoebius has to run on a particular host, or a host-specific capability has to be reached.
@@ -19,10 +19,12 @@ does not own the cluster engine that runs on it, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/engineering/repository_layout_doctrine.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. The substrate is a fact about the host, not a knob](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)
@@ -30,7 +32,7 @@ does not own the cluster engine that runs on it, owned by
 - [3. The no-environment / no-`PATH` lazy tool-ensure contract](#3-the-no-environment--no-path-lazy-tool-ensure-contract)
 - [4. Virtualized substrates: synthesizing a Linux host where the host is not Linux](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
 - [5. Host worker nodes: substrate-specific hardware that cannot be containerized](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)
-- [6. The midwife contract: a Python CLI ensures a toolchain, builds the binary, hands off](#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)
+- [6. The bootstrap coordinator contract: a Python CLI ensures a toolchain, builds the binary, hands off](#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)
 - [7. The LoadBalancer backend follows the materialized compute engine and provider](#7-the-loadbalancer-backend-follows-the-materialized-compute-engine-and-provider)
 - [8. The node inventory: the single owner of hosts, capacity, and taints](#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)
 - [9. Planning ownership](#9-planning-ownership)
@@ -38,15 +40,18 @@ does not own the cluster engine that runs on it, owned by
 
 ---
 
+**Pure inventory read-side status.** The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md)
+validates closed kubelet filesystem layouts, OCI/runtime metadata routing, provider-root template identities,
+accelerator family/profile ownership, and raw/reserved/allocatable VRAM arithmetic in Register 1. Detection,
+materialization, attachment, and observed readback remain unverified; ledger `external-run-reference`.
+
 ## 1. The substrate is a fact about the host, not a knob
 
 The first thing amoebius does on a new machine is **find out what the machine is** — it does not ask, and
-it cannot be told. A substrate is detected, not configured: the host's OS, CPU architecture, and GPU
-presence are read at runtime and classified into one of a closed set of substrates. Everything downstream
-— which package manager bootstraps the toolchain, which VM provider can synthesize a Linux host, which LB
-the cluster gets, whether a host worker node is even possible — is a *consequence* of that classification,
-never an independent input. This is what keeps a `.dhall` honest: it cannot claim a CUDA workload on a
-machine with no GPU, because the substrate that would carry it is not a thing the operator gets to assert.
+it cannot be told. A hardware substrate is detected, not configured: the host's OS, CPU architecture, and GPU
+presence are read at runtime and classified into one of a closed set of substrates. That fact determines the
+package-manager root, the VM provider, and which optional hardware lanes can be offered. A deployment may then
+select only from those observed offerings; it cannot claim CUDA on a machine with no CUDA device.
 
 The canonical amoebius substrate catalog — the "at most one substrate per validation" set the plan keys
 its phase gates to (see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)) — is four
@@ -58,6 +63,23 @@ members:
 | **linux-cpu** | Linux | `amd64` or `arm64` | none | The default validation substrate; kind/rke2 control plane |
 | **linux-cuda** | Linux | `amd64` or `arm64` | NVIDIA present | In-cluster CUDA workloads via the NVIDIA container runtime |
 | **windows** | Windows | `amd64` | CUDA present ⇒ on-host worker node | Linux substrates via WSL2; Windows-CUDA host worker nodes |
+
+**`linux-cpu` is the mandatory baseline offered by every hardware substrate.** The four detected names are
+not four mutually exclusive workload ceilings. They describe the physical host and its additional
+capabilities. Every one has a route to a CPU-only Linux execution lane:
+
+| Detected hardware substrate | `linux-cpu` route | Optional additional lane |
+|-----------------------------|-------------------|--------------------------|
+| `linux-cpu` | native Linux, or a fresh Incus guest when isolation/pristineness is required | none |
+| `linux-cuda` | native CPU-only Linux, or a fresh Incus guest; NVIDIA devices are not passed through | in-cluster CUDA |
+| `apple` | a Lima Linux guest | on-host Apple Metal |
+| `windows` | a WSL2 Linux distro | on-host CUDA when observed |
+
+Thus detecting `linux-cuda`, `apple`, or `windows` **never removes `linux-cpu`**. Specialized hardware is an
+additive offering, not a promotion that forbids the baseline. In phase and ledger prose, “runs on
+`linux-cpu`” names this selected CPU-only Linux lane; it does not assert that the physical machine lacks a GPU
+or natively runs Linux. Where the distinction matters, evidence records both the detected hardware substrate
+and the selected execution lane.
 
 Two axes are orthogonal and both matter: the **OS** chooses the package manager and the VM-provider
 strategy ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)); the **architecture** (`amd64` / `arm64`) is what makes mixed-arch clusters and multi-arch
@@ -133,8 +155,10 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 - **Apple is always `arm64`.** macOS on a non-`arm64` architecture is rejected outright — there is no
   Intel-Mac substrate. Apple Silicon's unified memory is why the Apple substrate is treated distinctly
   ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)), and that is an `arm64` fact.
-- **GPU presence promotes the substrate.** A Linux host with an NVIDIA GPU classifies as `linux-cuda`
-  (seed: `linux-gpu`), not `linux-cpu`; the CUDA container runtime is then a reconciler precondition ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)).
+- **GPU presence enriches the detected substrate.** A Linux host with an NVIDIA GPU classifies physically as
+  `linux-cuda` (seed: `linux-gpu`), not `linux-cpu`; this makes the CUDA lane available and makes the NVIDIA
+  container runtime a precondition only when that lane is selected. The host still always offers the
+  `linux-cpu` lane, where the GPU is neither passed through nor advertised.
 
 > **A non-NVIDIA accelerator classifies as `linux-cpu` — a named detection gap.** The probe is NVIDIA-only
 > (`hasNvidiaGpu`), so a Linux host carrying a non-NVIDIA accelerator (AMD/ROCm, a TPU-class part) classifies
@@ -148,10 +172,12 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 > coordinated multi-doc work: a new closed substrate + detector and, downstream, a new `EngineRuntime` arm and
 > landing-relation entry.
 
-> **Honesty.** This is the `hostbootstrap` seed, ported from a prior Python detector. It is *evidence from
-> a sibling library*, not a tested amoebius result — amoebius has not built Phase 24. Read every mechanism
-> in this doc as design intent seeded from a working sibling, never as a proven amoebius behaviour. Status
-> and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+> **Honesty.** The detector, universal-CPU/provider mapping, `AbsExe` tool boundary, and Python bootstrap coordinator are now
+> implemented. A pristine Incus VM on the physical `linux-cuda` parent exercised clean install, build, handoff,
+> idempotence, divergence repair, and teardown; evidence is retained under
+> `DEVELOPMENT_PLAN/evidence/phase_24`. This is not a complete Phase-24 pass because the full live enforcement
+> inventory remains unfinished. Status and gates live only in
+> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -236,20 +262,34 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 > that is type-enforced now; package-manager-canonical *discovery* is the part still to land. Do not read
 > the current discovery seam as the finished contract.
 
+**Phase-35 code generation.** `amoebius-pulsar/Setup.hs` resolves the repository-pinned `protoc` and
+`proto-lens-protoc` files by absolute path, verifies both exist, and gives `proto-lens-setup` a closed scoped
+search domain with that pinned directory first and only Cabal's fixed compiler directories afterward. It never
+inherits or consults the ambient host `PATH`, so an unrelated executable cannot shadow code generation. The
+generated modules stay build artifacts.
+
 ---
 
 ## 4. Virtualized substrates: synthesizing a Linux host where the host is not Linux
 
 amoebius is Kubernetes-centric and does not support Windows containers; the unit of compute it actually
-wants is a **Linux host**. On a substrate that is not natively Linux, amoebius synthesizes one in a VM and
-then treats it as an ordinary Linux substrate — the same typed service projections, the same services, the same DSL.
-The VM is plumbing; the substrate the cluster sees is Linux.
+wants is a **Linux host**. Every hardware substrate can supply that `linux-cpu` lane. A native Linux host may
+supply it directly, while Apple and Windows synthesize it in a VM. When a gate requires a **pristine Linux
+host**, native Linux is also interposed: the gate runs in a newly created guest rather than pretending a
+populated parent is clean. The VM is plumbing; the substrate the cluster sees is CPU-only Linux.
 
 | Host substrate | VM provider | What it synthesizes | Seed module |
 |----------------|-------------|---------------------|-------------|
-| **apple** | **Lima** (`limactl`) | An Ubuntu-24.04 Linux VM | `HostBootstrap.Ensure.Lima`, `HostBootstrap.Lima` |
-| **windows** | **WSL2** | An Ubuntu-24.04 Linux distro | `HostBootstrap.Ensure.Wsl2`, `HostBootstrap.Wsl2` |
-| **linux** | Incus / Colima | A nested Linux VM where one is wanted | `HostBootstrap.Incus` (provider exists in the seed) |
+| **apple** | **Lima** (`limactl`) | An Ubuntu-24.04 `linux-cpu` VM | `HostBootstrap.Ensure.Lima`, `HostBootstrap.Lima` |
+| **windows** | **WSL2** | An Ubuntu-24.04 `linux-cpu` distro | `HostBootstrap.Ensure.Wsl2`, `HostBootstrap.Wsl2` |
+| **linux-cpu** / **linux-cuda** | **Incus** | An Ubuntu-24.04 `linux-cpu` VM; CUDA devices are absent unless a different specialized gate explicitly requests passthrough | `HostBootstrap.Incus` |
+
+This provider mapping is mandatory for pristine-host gates: **Incus on either Linux hardware substrate,
+Lima on Apple, WSL2 on Windows**. “Pristine” means the guest is newly materialized from the pinned image and
+the gate records its clean preflight before installing tools. A container is useful isolated evidence, but it
+does not substitute for the required VM when the gate says pristine host. Parent CPU, memory, disk, VM-image,
+and runtime commitments are still observed and admitted before guest creation; the VM does not create free
+capacity.
 
 There is deliberately **no macOS build VM** row. The Apple-Metal host worker's Swift/Metal parts are **not**
 built in a VM (no Tart) — they build headless, directly on the macOS host; that shape and its rationale are
@@ -298,8 +338,11 @@ a host worker*.
 > **Honesty.** Lima, WSL2, and Incus are implemented VM providers in the `hostbootstrap` seed. The headless,
 > on-host Apple build/run shape is **proven in the sibling jitML project** (its implemented fixed-Metal-bridge
 > path) and the sibling `infernix` library **removed** its own legacy Tart path in favour of it — that is
-> *sibling evidence, not an amoebius result*; amoebius has not built its Apple phase, and there is no amoebius
-> Tart code, now or planned. Phase/status: [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+> sibling evidence for physical Metal. Phase 53 now implements the Lima/brew plan, private disk/capacity fold,
+> and headless bridge/build/lifecycle contracts, but its Linux `x86_64` scoped gate leaves live Apple/Lima/brew
+> and Metal **UNVERIFIED**. There is no amoebius Tart code, now or planned. Every hardware substrate always
+> retains `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+> Phase/status: [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -377,59 +420,71 @@ flowchart TD
 
 ---
 
-## 6. The midwife contract: a Python CLI ensures a toolchain, builds the binary, hands off
+## 6. The bootstrap coordinator contract: a Python CLI ensures a toolchain, builds the binary, hands off
 
-The **midwife** is the one pre-binary tool amoebius owns — a **Python CLI, not a shell script** — and it
+The **bootstrap coordinator** is the one pre-binary tool amoebius owns — a **Python CLI, not a shell script** — and it
 does as little as possible: get a built amoebius Haskell binary onto the host and then get out of the way,
 because the no-`PATH` / no-env, lazy-tool-ensure discipline ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract))
 cannot start until there is a Haskell binary to enforce it. It is Python for two reasons: it must run on a
 **bare host before any Haskell toolchain exists**, and it is **unified with the operator CLI** — one Python
-CLI (`pb`) with two modes, **midwife** (bare host → build → `exec` the Haskell binary, this section) and
+CLI (`pb`) with two modes, **bootstrap coordinator** (bare host → build → `exec` the Haskell binary, this section) and
 **admin-REST client** (the operator CLI that drives the singleton after handoff,
 [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
 amoebius owns **no shell script**; the earlier `bootstrap.sh` is retired
 ([../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md)).
 
+Phase 24 delivered the bootstrap coordinator mode; Phase 33 Sprint 33.4 now delivers the second mode in
+`pb/pb/admin.py` and `pb/pb/cli.py`, live-validating node-local Vault init/unseal plus Dhall update and KV CRUD
+against the singleton. This does not change the universal baseline: every hardware substrate can always run
+`linux-cpu`, and a pristine Linux host uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+The Phase-44 provider-parent instance follows the same rule. The actual Pulumi 3.228.0 binary was resolved by
+absolute path and observed through `strace` with zero child-environment entries, while the pure engine boundary
+also requires an absolute AWS-plugin path and rejects `PATH`, `PULUMI_*`, and `AWS_*`. The provider `up` and
+AWS-plugin `execve` remain UNVERIFIED because the configured AWS identity is invalid. This does not alter the
+universal route: every hardware substrate can always run the linux-cpu parent, with pristine Linux supplied by
+Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
 The contract, on the canonical Apple lane (`pb bootstrap` mode):
 
 1. **Ensure the package manager.** On Apple that is **Homebrew**. Homebrew is the toolchain *root* — it
    cannot be installed *through* a resolved host tool because there is no prior package manager to install
-   it (the midwife's Homebrew-ensure is, by design, a verified no-op when `brew` is present and a fail-fast
-   with the install instruction otherwise). So the midwife ensures `brew` **pre-binary**.
+   it (the bootstrap coordinator's Homebrew-ensure is, by design, a verified no-op when `brew` is present and a fail-fast
+   with the install instruction otherwise). So the bootstrap coordinator ensures `brew` **pre-binary**.
 2. **Ensure `ghcup` via the package manager** (`brew install ghcup`).
-3. **Install the pinned toolchain: GHC 9.12.4 and Cabal 3.16.1.0** via `ghcup`, and ensure they are
-   available on the host. This is the permanent project toolchain pin; see
-   [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+3. **Resolve and install the current compatible GHC and Cabal** via `ghcup`. Authored requirements select a
+   compatible release channel/range; resolved versions and executable paths are written only to the run-local
+   toolchain record described by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 4. **Build the project Haskell binary** (`cabal build`).
-5. **Hand off to the binary.** The midwife's final act is to `exec` the freshly built binary's `bootstrap`
+5. **Hand off to the binary.** The bootstrap coordinator's final act is to `exec` the freshly built binary's `bootstrap`
    subcommand with its mandatory distro flag — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]` (`replicas` defaults to `1` on `kind`). From here the binary takes over: it installs further build tools
    and dependencies through the package manager **as needed and by full path** ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)) — including, on Apple,
    source-building the fixed Metal bridge headless on the host with `/usr/bin/clang` ([§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host) / [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), never in a VM — and drives cluster
    bring-up.
 
-The midwife is **substrate-specific** because step 1 differs: brew on apple, the system package manager
-(e.g. `apt`) on linux, `winget` on windows. Steps 2–5 are identical across substrates — the same `ghcup`
-toolchain pin, the same build, the same `bootstrap` hand-off — so the per-substrate surface area is exactly
-the package-manager-root bootstrap and nothing else. The midwife is a **thin driver**: it installs no
+The bootstrap coordinator is **substrate-specific** because step 1 differs: brew on apple, the system package manager
+(e.g. `apt`) on linux, `winget` on windows. Steps 2–5 are identical across substrates — the same authored
+compatibility policy, the same per-run resolver, the same build, and the same `bootstrap` hand-off — so the per-substrate surface area is exactly
+the package-manager-root bootstrap and nothing else. The bootstrap coordinator is a **thin driver**: it installs no
 packages beyond the toolchain root, holds no cluster logic, and never runs after the `exec`.
 
 ```mermaid
 flowchart TD
 %% register: orientation
-  pb[pb midwife CLI, Python] -->|ensure package-manager root| pm[brew / apt / winget]
+  pb[pb bootstrap coordinator CLI, Python] -->|ensure package-manager root| pm[brew / apt / winget]
   pm -->|install| ghcup[ghcup]
-  ghcup -->|install GHC 9.12.4 and Cabal 3.16.1.0| tc[Pinned toolchain on host]
+  ghcup -->|resolve and install compatible GHC and Cabal| tc[Run-local resolved toolchain on host]
   tc -->|cabal build| bin[amoebius Haskell binary on the host]
   bin -->|amoebius bootstrap --distro=kind or rke2| handoff[Binary owns the rest: lazy tool-ensure, VM providers, cluster bring-up]
 ```
-*Orientation. Design intent; the midwife contract is owned by [§6](#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off). Everything right of the handoff belongs to the binary, and the Python program does not return.*
+*Orientation. Design intent; the bootstrap coordinator contract is owned by [§6](#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off). Everything right of the handoff belongs to the binary, and the Python program does not return.*
 
 What the in-binary `bootstrap` command then *does* — substrate detection, VM-provider ensure, single-node
 cluster bring-up, the `--distro` / `--replicas` orchestration — is owned by
 [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md), not here. This section owns only the
 **pre-binary** contract and the hand-off point.
 
-> **Provider clusters have no midwife and no host binary.** A fully managed cluster (e.g. EKS) is
+> **Provider clusters have no bootstrap coordinator and no host binary.** A fully managed cluster (e.g. EKS) is
 > provisioned over an API from within an existing amoebius cluster; there is no
 > host access, so there is no host worker node and no on-host bootstrap. That path is owned by
 > [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). The highest-level parent is therefore generally a
@@ -466,6 +521,13 @@ that the rest of amoebius reads. It is the **single owner** (an ownership index,
 [illegal_state_catalog.md §4.4](../illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)) of three things no other doc may re-declare:
 *which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
 consumers read it, and each is a foreclosure that depends on there being exactly one such list.
+
+**Phase 7 read-side status.** The [Phase 7 gate](../../DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md)
+validates the capacity/topology fold against authored in-process `NodeCapacity`, host, candidate-class, taint,
+and quota values (ledger `external-run-reference`).
+It performs no live inventory read. The required `declared allocatable ≤ observed allocatable` cross-check,
+filesystem/runtime metadata observation, VM boot, and node join therefore remain **UNVERIFIED** until their
+owning live phases.
 
 ### Per-host/node `Capacity` (allocatable)
 
@@ -565,7 +627,8 @@ engine with a node only when the relation permits it, and it reads *this* invent
 exist" — so the compatibility fold (I2) and the `LinuxHost`-witness gating (I1) are checked against one
 authoritative list. On apple and windows the only `LinuxHost` constructor is the virtualization provider
 ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)), which is why an
-rke2/kind cluster on those hosts must interpose a Lima/WSL2 Linux VM.
+rke2/kind cluster on those hosts must interpose a Lima/WSL2 Linux VM. Linux hardware may construct the witness
+natively, but a pristine-host gate constructs it through Incus.
 
 This document owns the inventory *record*, the closed `NodeTaintKind` set, and the per-host `Capacity`
 *declaration* — including the **physical-host total and disjoint disk-pool partition** behind a host worker
@@ -671,9 +734,16 @@ this doc owns only the declared `Site` **fact**, not the classification.
 This document is normative substrate doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): substrate detection
 and the `bootstrap` contract land in **Phase 24** (`linux-cpu`); host compute daemons, the Lima/WSL2
-providers, and the headless Apple-Metal fixed-bridge build land in **Phase 53** (`apple`); the in-cluster CUDA path is exercised in
+providers, and the headless Apple-Metal fixed-bridge contracts land in **Phase 53** (`apple`; physical Apple
+surfaces remain UNVERIFIED after its scoped Linux-host gate); the in-cluster CUDA path is exercised in
 **Phase 51** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
 and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
+
+Phase 48 validates deterministic recomputation and Tier-1 executable-engine cache reuse on the retained
+`linux-cpu` platform. It does not establish cross-substrate bit equality, cross-node reuse, production
+llama.cpp inference, or CUDA/Metal cache behavior; those surfaces remain UNVERIFIED. This scoped result does
+not narrow platform availability: every hardware substrate can always run `linux-cpu`. When a pristine Linux
+host is required, Linux and Linux-CUDA use Incus, Apple uses Lima, and Windows uses WSL2.
 
 ---
 
@@ -690,3 +760,4 @@ and links back for status, per [documentation_standards.md §6](../documentation
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
+- [Repository Layout and Artifact Provenance](./repository_layout_doctrine.md) — generated host observations and pristine-host acceptance

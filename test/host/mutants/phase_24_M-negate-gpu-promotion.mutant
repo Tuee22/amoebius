@@ -1,0 +1,3 @@
+operator=replace Linux GPU promotion with the CPU arm
+locus=Amoebius.Host.Substrate.classify
+expected=linux+present flips from linux-cuda to linux-cpu

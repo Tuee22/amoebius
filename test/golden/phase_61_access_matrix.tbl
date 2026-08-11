@@ -1,0 +1,4 @@
+requester tenant owner command expected effect_delta
+owner tenant-a alice scalar-1 Accepted 1
+same-tenant-nonowner tenant-a bob scalar-1 Denied 0
+foreign-tenant tenant-b mallory scalar-1 Denied 0

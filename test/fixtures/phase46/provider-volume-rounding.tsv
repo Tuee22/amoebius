@@ -1,0 +1,5 @@
+case	required_usable_bytes	minimum_bytes	quantum_bytes	expected_size_gib	expected_provisioned_bytes
+one-byte	1	1073741824	1073741824	1	1073741824
+exact-five-gib	5368709120	1073741824	1073741824	5	5368709120
+five-gib-plus-one	5368709121	1073741824	1073741824	6	6442450944
+below-two-gib-minimum	7	2147483648	1073741824	2	2147483648

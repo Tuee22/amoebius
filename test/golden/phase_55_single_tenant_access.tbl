@@ -1,0 +1,6 @@
+case authority action expected effect_count
+own own read allow 1
+own own mutate allow 1
+foreign foreign read Unavailable 0
+revoked revoked mutate Unavailable 0
+direct-handler own bypass BypassDenied 0

@@ -19,6 +19,8 @@ model-as-data machinery it is expressed in, owned by
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. The one obligation](#1-the-one-obligation)
 - [2. The two branches (the state machine this model checks)](#2-the-two-branches-the-state-machine-this-model-checks)
@@ -145,7 +147,9 @@ Both instruments read the **same** `Model`:
 
 - **Simulate (io-sim).** The lifted pure decision core is driven by `io-classes`/`IOSimPOR`'s deterministic,
   partial-order-reduced scheduler against adversarial interleavings, asserting the same safety predicates the
-  invariants name. This is the design-schedule check for both branches.
+  invariants name. This is the design-schedule check for both branches. The Phase-3 gate exercised 13
+  partial-order-reduced schedules within the committed schedule bound of 20 and caught every seeded safety
+  mutant; this is tested-for-design, not the later Register-2.5 daemon simulation.
 - **Prove (TLC).** `emitTLA` renders the `Model` to a spec TLC model-checks exhaustively at a bounded scope,
   reaching every safety invariant with no counterexample **and** every liveness `PROPERTY` under the fairness
   `F`. Because the model is the value the runtime interprets, a green run is proven-for-the-model *about the
@@ -155,6 +159,11 @@ Both instruments read the **same** `Model`:
 Both are Register-1, in-process, needing no cluster ([conformance_harness_doctrine.md](./conformance_harness_doctrine.md)).
 A validated model is green in both, and both go red under a seeded mutation (a transition that drops the fence,
 or decommissions before drain-complete).
+
+**Validated instance.** The [Phase-3 gate](../../DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md) passed
+on 2026-08-09: explorer and TLC agree on the exact 53-state set, the five safety invariants and three liveness
+properties are green, every fairness removal is red, and each named safety mutant violates exactly its expected
+invariant. Ledger: `external-run-reference`.
 
 ---
 
@@ -211,10 +220,10 @@ those remaining shared-resource interactions are genuinely absent or themselves 
 it: it removes the one shared-resource class the decoder can see, and leaves the classes it cannot.
 
 Two things keep the residue honest, and neither may be reported as more than it is: (a) the **decomposition lemma** — that the N-instance product refines the 2-instance model under the decoder's independence predicate —
-is a named obligation, discharged either by a machine-checked proof (TLAPS/Lean,
-[formal_model_doctrine.md §4](./formal_model_doctrine.md#4-single-source-correspondence)) or by an over-scope
-TLC run (scope 3–4) that **models the shared resources in**; (b) until either lands, at least one over-scope
-stress run (3 clusters, chained) is checked ([§6](#6-modelling-bounds-and-honesty)) and the cutoff is recorded
+is a named obligation, ultimately discharged by a machine-checked proof (TLAPS/Lean,
+[formal_model_doctrine.md §4](./formal_model_doctrine.md#4-single-source-correspondence)); an over-scope TLC
+run (scope 3–4) that **models the shared resources in** stress-tests but does not prove that lemma. Until the
+proof lands, at least one over-scope stress run (3 clusters, chained) is checked ([§6](#6-modelling-bounds-and-honesty)) and the cutoff is recorded
 **argued/tested**, never *proven*.
 
 ---
@@ -248,21 +257,22 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
   discharged in two stages, not one: **trace validation**
   ([formal_model_doctrine.md §8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge)) —
   the daemon's observed transition log is checked step-by-step against the emitted spec's `Next` relation —
-  runs first in **Register 2.5** against the deterministically-simulated daemon
-  ([deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md)) and then in **Register 3**
-  against the running forest, so the code↔model bridge is a formal, early check rather than only sampled chaos.
-  What remains genuinely live-only is that the abstracted physics (real replication lag, clock skew) actually
-  hold — Register-3, never a paper correspondence.
+  now runs in **Register 2.5** against `Amoebius.Multicluster.GatewayMigration`: both pinned traces are legal
+  `interpret` sequences and all five named invariants hold across 256 deterministic lag/fault schedules.
+  Register 3 then covers every modeled migration action in a real three-cluster forest. This is runtime
+  correspondence at the tested edge, not proof that a local authoritative DNS server is Route53 or that a
+  single-host pause reproduces WAN physics.
 
 ---
 
 ## 7. Planning ownership
 
-This document is normative model doctrine only. The `Model`, the io-sim harness, and the `emitTLA` model-check
-are built and run in the pre-cluster formal-model phase; the live chaos injection against a running forest is a
-Register-3 gate in the multi-cluster phase. Phase order, status, and gates live only in
-[DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Every statement here is design intent, never a
-tested amoebius result.
+This document is normative model doctrine only. The `Model`, io-sim harness, and `emitTLA` model-check were
+validated by Phase 3. Phase 43 adds the trace validator, full modeled-action coverage, and live Planned/Failover
+drills. Its external journal showed zero Planned loss under positive lag and a fenced Failover inside the
+declared RTO. The data-loss bound remains assumed-and-monitored; Route53, real WAN, and physically independent
+child brokers remain UNVERIFIED. Phase order, status, and gates live only in
+[DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 

@@ -1,0 +1,3 @@
+artifact=linux/arm64:/usr/bin/redis-cli
+mutation=copy-linux-amd64-bytes
+expected_oracle=ElfMachineMismatch

@@ -1,0 +1,1 @@
+PHASE31_REDIS_PUBLIC_IMAGE_MUTANT substitutes docker.io Redis; provision must reject it before render.

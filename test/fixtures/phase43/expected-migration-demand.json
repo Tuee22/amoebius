@@ -1,0 +1,12 @@
+{
+  "apiObjects": 24,
+  "checkpointBytes": 24576,
+  "cpuMilli": 3000,
+  "etcdBytes": 65536,
+  "externalJournalBytes": 16384,
+  "hostProcessSlots": 8,
+  "memoryBytes": 3221225472,
+  "networkQueueBytes": 262144,
+  "podEphemeralBytes": 536870912,
+  "pulumiExecutorLiveSet": 1
+}

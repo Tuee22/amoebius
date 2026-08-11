@@ -1,0 +1,40 @@
+{
+  "schema": "amoebius.phase26.expected-actions.v1",
+  "actions": [
+    "ColdCreateNamespace:Namespace/amoebius-phase26-gate",
+    "AcquireMandatoryLease:Lease/amoebius-phase26-gate/amoebius-reconciler",
+    "ApplyDesiredObject:CustomResourceDefinition/capacityreservations.amoebius.io",
+    "ApplyDesiredObject:ResourceQuota/amoebius-phase26-gate/corpus-envelope",
+    "ApplyDesiredObject:Service/amoebius-phase26-gate/serial-headless",
+    "ApplyDesiredPodController:Deployment/amoebius-phase26-gate/capacity-controller",
+    "ApplyDesiredObject:CapacityReservation/amoebius-phase26-gate/corpus-reservation",
+    "ApplyDesiredPodController:Deployment/amoebius-phase26-gate/private-pull",
+    "SerialOnDeleteStart:StatefulSet/amoebius-phase26-gate/serial",
+    "RetainTerminalAwaitingCompletionGateway:Job/amoebius-phase26-gate/terminal",
+    "ApplyDesiredPodController:Deployment/amoebius-phase26-gate/reservation-child",
+    "ApplyDesiredObject:PersistentVolumeClaim/amoebius-phase26-gate/reservation-child"
+  ],
+  "rerunActions": [
+    "NoOp:CustomResourceDefinition/capacityreservations.amoebius.io",
+    "NoOp:ResourceQuota/amoebius-phase26-gate/corpus-envelope",
+    "NoOp:Service/amoebius-phase26-gate/serial-headless",
+    "NoOp:Deployment/amoebius-phase26-gate/capacity-controller",
+    "NoOp:CapacityReservation/amoebius-phase26-gate/corpus-reservation",
+    "NoOp:Deployment/amoebius-phase26-gate/private-pull",
+    "NoOp:StatefulSet/amoebius-phase26-gate/serial",
+    "RetainTerminalAwaitingCompletionGateway:Job/amoebius-phase26-gate/terminal",
+    "NoOp:Deployment/amoebius-phase26-gate/reservation-child",
+    "NoOp:PersistentVolumeClaim/amoebius-phase26-gate/reservation-child"
+  ],
+  "schedulerActions": [
+    "ApplyBootstrapSchedulerSystem:Deployment/amoebius-capacity-scheduler/amoebius-capacity",
+    "ObserveBootstrapCapacitySchedulerReady:Scheduler/amoebius-capacity",
+    "CutoverBootstrapController:Deployment/amoebius-phase27-gate/bootstrap-addon",
+    "InstallManagedCapacityAuthority:Node/amoebius-phase24-control-plane",
+    "ObserveManagedCapacityReady:Scheduler/amoebius-capacity",
+    "Reserve:CapacityReservation/amoebius-phase27-gate/guarded-pod",
+    "MarkBindingInFlight:CapacityReservation/amoebius-phase27-gate/guarded-pod",
+    "SubmitBinding:Binding/amoebius-phase27-gate/guarded-pod",
+    "ConfirmBound:CapacityReservation/amoebius-phase27-gate/guarded-pod"
+  ]
+}

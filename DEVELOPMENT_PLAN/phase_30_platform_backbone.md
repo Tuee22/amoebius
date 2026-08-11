@@ -9,7 +9,12 @@
 
 Phase 30 delivers the platform backbone (MetalLB + MinIO + Pulsar HA); its design is owned by [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [pulsar_client_doctrine.md](../documents/engineering/pulsar_client_doctrine.md), [image_build_doctrine.md](../documents/engineering/image_build_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+The complete gate passed on 2026-08-10.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -27,9 +32,9 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 30.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming 📋](#sprint-301-metallb-loadbalancer--minio-object-substrate--registry-s3-driver-rehoming-)
-- [Sprint 30.2: Pulsar native-protocol backbone + size-triggered S3 offload drill 📋](#sprint-302-pulsar-native-protocol-backbone--size-triggered-s3-offload-drill-)
-- [Sprint 30.3: The backbone HA bring-up gate 📋](#sprint-303-the-backbone-ha-bring-up-gate-)
+- [Sprint 30.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming ⏸️](#sprint-301-metallb-loadbalancer--minio-object-substrate--registry-s3-driver-rehoming-)
+- [Sprint 30.2: Pulsar native-protocol backbone + size-triggered S3 offload drill ⏸️](#sprint-302-pulsar-native-protocol-backbone--size-triggered-s3-offload-drill-)
+- [Sprint 30.3: The backbone HA bring-up gate ⏸️](#sprint-303-the-backbone-ha-bring-up-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,14 +42,21 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. This phase opens after the Phase 29 root-Vault/PKI
-gate passes and runs on the **linux-cpu** substrate across **Register 3** (live infrastructure) — a
-single-node `kind` cluster on a linux-cpu host, on top of the Phase-25 registry + baked base image, the
-Phase-26 typed renderer + SSA reconciler, the Phase-28 no-provisioner retained storage, and the Phase-29
-unsealed root Vault. The HA-topology, reconciled-manifest, and baked-binary shapes are inherited as **sibling evidence from prodbox**, not amoebius results; **Pulsar is new relative to prodbox** and is the least
-evidence-backed service in the set. Status transitions are recorded reverse-chronologically here once work
-begins.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The complete Register-3 gate passed on 2026-08-10 on a fresh single-node `kind` cluster. Live
+evidence records an externally reachable stable MetalLB VIP, a four-drive distributed MinIO byte round-trip,
+registry migration and cutover to the MinIO S3 driver, three ZooKeeper members, three BookKeeper bookies,
+two Pulsar brokers, native-protocol CBOR/dedup exercise, and 19 observed offload objects while the hot tier
+remained below its committed cap. All 53 SSA-owned live objects matched their desired fields byte-for-byte,
+and the 11 execution-unit projections matched a freshly executed
+`Amoebius.Platform.Backbone.renderBackbone` result. Every runtime image ID matched the Phase-25 baked digest,
+zero public pull was observed, all six seeded mutants went red, and the honesty ledger is
+`dynamically-resolved`.
 
 ## Phase Summary
 
@@ -92,7 +104,9 @@ fixed, hand-assembled service set so the backbone exists before the DSL and the 
 it.
 
 **Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no
-apple, linux-cuda, or windows substrate is touched in Phase 30.
+specialized hardware feature is required. Every hardware substrate can always run this `linux-cpu` lane. If
+the gate requires a pristine Linux host, use Incus on Linux or Linux-CUDA hardware, Lima on Apple hardware,
+or WSL2 on Windows hardware.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)); this is not a pure/golden or fake-tool check but a real bring-up
 on a real cluster, emitting a proven/tested/assumed ledger that names Register 3 and marks the runtime layer
@@ -151,6 +165,17 @@ flowchart LR
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
 *Design intent. Phase 30's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+
+```mermaid
+flowchart LR
+  %% register: orientation
+  registry["in-cluster registry"] -->|"stores blobs"| minio["retained MinIO"]
+  clients["typed platform clients"] -->|"objects and checkpoints"| minio
+  clients -->|"CBOR messages"| pulsar["Pulsar brokers"]
+  pulsar -->|"hot ledgers"| bookkeeper["BookKeeper"]
+  bookkeeper -->|"size-triggered offload"| minio
+```
+*Orientation. Phase 30 converges one retained MinIO backing for registry/content/offload while Pulsar keeps its bounded hot path through BookKeeper, as owned by the [platform-services doctrine](../documents/engineering/platform_services_doctrine.md).*
 
 **Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate is closed to a stub by seven pinned cross-checks, all authored and committed
 in **Phase 0** before any `src/Amoebius/Platform/*` implementation exists (§M.1 oracle-pinning), and named as
@@ -311,14 +336,21 @@ Phase 25) is present as a rehoming consumer of MinIO, not re-delivered here.
 
 ## Sprints
 
-## Sprint 30.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 30.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Platform/LoadBalancer.hs`,
-`src/Amoebius/Platform/Minio.hs`, `src/Amoebius/Platform/Registry.hs` (target paths; not yet built)
-**Blocked by**: Phase 26 (the typed `renderAll` + SSA reconciler that applies these objects), Phase 28 (the
-retained PVs MinIO's StatefulSet binds), Phase 25 (the baked MetalLB/MinIO/`distribution` binaries in the
-in-cluster registry and the interim filesystem-driver blob store this rehomes)
+`src/Amoebius/Platform/Minio.hs`, `src/Amoebius/Platform/Registry.hs`,
+`tools/phase30_backbone_live.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**:
 after apply, MetalLB advertises a LoadBalancer address on the linux-cpu node before any edge asks for one;
 MinIO runs as its HA (distributed) topology on identity-named retained PVs, never a bare Pod — "distributed"
@@ -448,14 +480,13 @@ MinIO S3 driver — closing the Phase-25 deferred gap.
    base digest in the in-cluster `distribution` catalog.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 30.2: Pulsar native-protocol backbone + size-triggered S3 offload drill 📋
+## Sprint 30.2: Pulsar native-protocol backbone + size-triggered S3 offload drill ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Platform/Pulsar.hs` (target paths; not yet built)
-**Blocked by**: Sprint 30.1 (MinIO backs Pulsar's size-triggered S3 offload), Phase 28 (retained
-bookie/broker storage), Phase 29 (Pulsar's credentials are Vault `SecretRef`s, resolved fail-closed)
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Platform/Pulsar.hs`, `tools/phase30_backbone_live.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: Pulsar comes up as an HA broker/ZooKeeper/BookKeeper topology over its **native TCP binary protocol** (no WebSockets) on retained storage; a produce/consume round-trips at-least-once with
 broker-side dedup **exercised, not merely configured** — a duplicate/redelivery of the same
 producer-sequence message is injected and the consumer is asserted to receive it exactly once; the drill
@@ -534,14 +565,14 @@ drill that the mandatory size-triggered MinIO offload actually bounds the BookKe
    plan and each mounted fsType/usable capacity matches its witness, not an ordinal-specific raw demand.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 30.3: The backbone HA bring-up gate 📋
+## Sprint 30.3: The backbone HA bring-up gate ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Platform/Backbone.hs` (target paths; not yet built)
-**Blocked by**: Sprint 30.1, Sprint 30.2, Phase 29 (the Vault-initialized-and-unsealed →
-secret-dependent-startup edge Pulsar depends on)
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Platform/Backbone.hs`, `test/platform/Phase30BackboneSpec.hs`,
+`test/platform/Phase30BackboneLive.hs`, `tools/phase30_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the backbone — MetalLB, MinIO
 (with the rehomed registry), and Pulsar — is brought up on a fresh single-node linux-cpu `kind` cluster and
 the whole set is up, HA-shaped, and reachable in-cluster, with MinIO put/get and Pulsar produce/consume
@@ -625,11 +656,11 @@ and close the phase with the backbone HA gate on a fresh cluster.
    reconcile marked UNVERIFIED.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated with the completed gate:**
 - `documents/engineering/platform_services_doctrine.md` — when this phase lands, its §2 HA-always and §4 MinIO
   notes flip from "design intent" to a Register-3-tested amoebius result on linux-cpu, and the §6 Pulsar
   honesty note gains its first live evidence (still *tested*, never *proven*).

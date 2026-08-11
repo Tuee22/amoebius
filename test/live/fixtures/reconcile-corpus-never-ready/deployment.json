@@ -1,0 +1,7 @@
+{
+  "name": "never-ready",
+  "readinessCommand": ["/bin/sh", "-c", "exit 1"],
+  "initialDelaySeconds": 1,
+  "timeoutSeconds": 8,
+  "expected": "ConvergenceTimeout"
+}

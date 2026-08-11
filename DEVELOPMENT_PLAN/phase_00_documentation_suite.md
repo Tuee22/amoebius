@@ -1,12 +1,18 @@
 # Phase 0: Documentation suite (whole DSL)
 
-> **Purpose**: Author the complete amoebius DSL specification and every engineering doctrine before any
-> implementation phase begins, gated by a single documentation lint over the whole text and link graph.
+> **Purpose**: Govern the complete amoebius DSL specification and engineering doctrine, with one Phase-0 gate
+> over documentation, artifact provenance, repository hygiene, and the link graph.
 > **Read this if**: phase 0 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 0 delivers the documentation suite (whole DSL); its design is owned by [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), and the plan for reaching it is owned here.
 No register: the gate is the documentation lint.
-No gate has run.
+The pre-amendment two-sided checker passed on 2026-08-08; that seal is invalidated, and the current progress
+and remaining implementation are stated below.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -21,14 +27,16 @@ No gate has run.
 ## Contents
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 0.1: Documentation standards + plan-suite spine 🔄](#sprint-01-documentation-standards--plan-suite-spine-)
-- [Sprint 0.2: DSL core + cross-cutting method doctrine 🔄](#sprint-02-dsl-core--cross-cutting-method-doctrine-)
-- [Sprint 0.3: Platform, cluster, storage, substrate & image doctrine 🔄](#sprint-03-platform-cluster-storage-substrate--image-doctrine-)
-- [Sprint 0.4: Secrets/IaC + runtime/transport/determinism doctrine 🔄](#sprint-04-secretsiac--runtimetransportdeterminism-doctrine-)
-- [Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate 🔄](#sprint-05-verification-formal-model-doctrine--the-documentation-lint-gate-)
-- [Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts 🔄](#sprint-06-readability-discipline--document-shape-the-two-diagram-registers-and-the-routing-artifacts-)
+- [Sprint 0.1: Documentation standards + plan-suite spine ✅](#sprint-01-documentation-standards--plan-suite-spine-)
+- [Sprint 0.2: DSL core + cross-cutting method doctrine ✅](#sprint-02-dsl-core--cross-cutting-method-doctrine-)
+- [Sprint 0.3: Platform, cluster, storage, substrate & image doctrine ✅](#sprint-03-platform-cluster-storage-substrate--image-doctrine-)
+- [Sprint 0.4: Secrets/IaC + runtime/transport/determinism doctrine ✅](#sprint-04-secretsiac--runtimetransportdeterminism-doctrine-)
+- [Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate ✅](#sprint-05-verification-formal-model-doctrine--the-documentation-lint-gate-)
+- [Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts ✅](#sprint-06-readability-discipline--document-shape-the-two-diagram-registers-and-the-routing-artifacts-)
+- [Sprint 0.7: Artifact provenance, ignore coverage, and external evidence 🔄](#sprint-07-artifact-provenance-ignore-coverage-and-external-evidence-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -36,10 +44,27 @@ No gate has run.
 
 ## Phase Status
 
-🔄 Active. The whole DSL is authored across `documents/` and `DEVELOPMENT_PLAN/`, and all six sprints are
-active in lint/remediation or remaining gate-artifact work; none is Done until its named artifacts are complete
-and the two-sided Phase-0 gate passes. Every prescriptive statement in the authored doctrine is design intent, never a tested amoebius result. The
-substrate is `none`: the phase authors prose, stands up no cluster, and runs no workflow.
+🔄 Active. Reopened 2026-08-11: the generated-artifact redesign invalidates the prior documentation
+seal. Phase 0 must implement and validate provenance classification, generated-path enforcement, dynamic
+resolution, ignore/context coverage, and external-attestation checks before Phase 1 opens.
+
+**Observed progress — 2026-08-11 dirty-worktree audit:** **Known partial.** The authored doctrine migration is
+present. `tools/doc_lint_verify.py`, `tools/ledger_lint.py`, and `tools/phase0_artifact_lint.py` remain partial
+implementations: they consume repository-resident ledgers/enumerations or a manifest-and-pin model and do not
+jointly implement the current Phase-0 gate. The complete documented ignore-pattern slice is implemented in
+both ignore files and enforced by the artifact lint, including ordinary source-adjacent Python caching and
+the prohibition on command-level cache suppression. The same lint now rejects the retired predecessor term
+for the Bootstrap Coordinator in both authored content and pathnames. A passing legacy documentation check is
+otherwise diagnostic only.
+
+**Invalidated historical record:**
+
+Historical result (invalidated): on 2026-08-08, `python3 tools/doc_lint_verify.py` passed on substrate `none`: the governed tree and
+41 seeded documentation negatives passed two-sided; the ledger checker accepted its positive and rejected all
+six malformed cases; and the manifest audit resolved 199 independent oracle/mutant artifacts across 18 future
+gate owners. That run's generated evidence does not belong in this plan. Every prescriptive statement in
+the authored doctrine remains design intent, never a tested amoebius runtime result; this phase stood up no
+cluster and ran no workflow.
 
 ## Phase Summary
 
@@ -68,8 +93,8 @@ and never committed. Validation runs in three phase-gate registers (1 pure/golde
 live infrastructure. The suite's naming and header mechanics adapt conventions proven in the sibling
 **prodbox** project — that is sibling evidence, not an amoebius result.
 
-This phase runs in **no validation register (Register —)**: no code executes and no register-1/2/3 harness is
-exercised; the gate is a pure text-and-link lint. The cross-cutting invariants the whole plan upholds are
+This phase runs in **no amoebius validation register (Register —)**: documentation tooling executes, but no
+register-1/2/3 amoebius harness or product behavior is exercised. The cross-cutting invariants the whole plan upholds are
 first written down here and then adopted, phase by phase, by the pre-cluster and live bands that follow.
 
 **Session scope:** Complete the one documentation/link-graph re-baseline and run
@@ -81,47 +106,48 @@ runtime surface, or an acceptance command other than the two-sided documentation
 
 **Register:** — (no register: the documentation-lint gate validates text and the link graph, not amoebius behaviour, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `python3 tools/doc_lint_verify.py` passes **two-sided** — it runs clean over every document in `documents/` and
-`DEVELOPMENT_PLAN/` (valid header metadata per the documentation standard; every anchored relative link resolves
-under the [§4](../documents/documentation_standards.md#4-cross-referencing) slug rule; every `Referenced by` header reconciled from the true link graph in both directions;
-**near-duplicate normative content** — measured by sentence-shingle overlap above a stated threshold between two
-governed docs, outside quoted/exempt blocks — absent, with semantic SSoT *ownership* documented as a hand review
-rather than a lint verdict; each README Phase-Overview status marker equal to its phase doc's `## Phase Status`
-marker; every phase **Gate** naming its committed fixtures, at least one committed mutant, and an
-independent oracle per [`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
-and naming a backticked re-runnable acceptance command, with the effect/security-gate apparatus — an
-applicable fresh challenge, outside observer, authority-paired scope negative, zero-forbidden-effect
-observation, and bypass probe — documented as a hand review rather than a lint verdict;
-and **illegal-state catalog integrity** — every entry carrying a `**Validation-locus:**`, entry numbering
-contiguous with no gaps or duplicates, every index bullet's anchor resolving, and every entry carrying a
-technique-matrix row)
-**and** it exits non-zero on every fixture in a committed seeded-negative corpus. A lint that only passes on the
-suite is not a gate; the committed corpus is what proves the lint can fail. **The corpus is this gate's independent oracle (§M.3):** the `tools/doc_lint_corpus/` fixtures are hand-authored — one seeded negative per
-check and sub-check, committed in [`Sprint 0.5`](#sprint-05-verification-formal-model-doctrine--the-documentation-lint-gate-)
-*before* `tools/doc_lint.py` exists, so the party writing the lint is not the sole author of
-what "clean" means; a lint that cannot turn its own committed negatives red is not admitted, exactly as it
-requires of every other phase's gate.
+**Gate:** `python3 tools/doc_lint_verify.py` passes the documentation,
+artifact-provenance, ignore/context, authored-root-write, dynamic-resolution, external-attestation, terminology,
+and committed seeded-mutant checks without creating an unignored or tracked generated file.
+
+## Gate integrity
+
+The gate verifies all governed headers, contents blocks, anchors, bidirectional links, status equality, phase
+numbering, gate ownership, illegal-state coverage, and documentation negative cases. It additionally verifies:
+
+- the generator registry covers every output class in repository-layout doctrine;
+- `.gitignore` and `.dockerignore` cover the normative patterns exactly or more strictly;
+- tracked files contain no generated output, lock/freeze file, package checksum database, hard-coded
+  library/package SHA, generated evidence, bytecode, or developer-home path;
+- Python commands use ordinary bytecode caching, and every resulting cache is excluded from Git and Docker;
+- generated Markdown is absent from governed roots;
+- a synthetic generator cannot write beneath an authored root;
+- a synthetic run bundle validates and uploads to the external-attestation test backend;
+- a case-insensitive repository scan finds no retired predecessor terminology for the Bootstrap Coordinator;
+- every seeded negative for these rules turns the gate red at its expected locus.
+
+The independent oracle is the authored positive corpus plus one authored negative per check. Generated scan
+results, enumeration, logs, and ledgers remain under `gen/runs/phase_00/` and are externally attested. They
+are never copied into the plan.
 
 ```mermaid
 flowchart LR
   %% register: algebra
-  fx["committed fixtures"]:::intent
-  or["independently authored oracle"]:::intent
-  mu["seeded mutant"]:::intent
-  g{{"the phase 0 gate command"}}:::gate
-  ok((("phase seal: the ledger this gate emits"))):::seal
-  no>"the mutant must turn it red"]:::refuse
-  fx -->|"binds the corpus"| g
-  or -->|"binds the expectation"| g
-  mu -->|"binds the defect"| g
-  g -->|"fixtures green, oracle agrees"| ok
-  g -->|"mutant green means the gate is not one"| no
+  src["authored documentation and policy corpus"]:::intent
+  neg["authored seeded negatives"]:::intent
+  gate{{"Phase-0 documentation and artifact-policy gate"}}:::gate
+  ext((("verified external attestation"))):::seal
+  red>"each negative must fail at its named locus"]:::refuse
+  src -->|"positive contract"| gate
+  neg -->|"failure contract"| gate
+  gate -->|"clean tree and policy pass"| ext
+  gate -->|"negative remains green"| red
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Design intent. Phase 0's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+*Design intent. The redesigned Phase-0 gate joins authored policy with two-sided failure cases and retains only an external attestation.*
 
 ## Doctrine adopted
 
@@ -161,8 +187,9 @@ name.
   amoebius's single simulation/proof obligation — reduced to every `InForceSpec` by a decode-time structural-fit
   fold, never a per-spec model-check. There is no First-Axis / singleton-election obligation.
 - [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule) —
-  *The rule*: production rendered artifacts are emitted from a Haskell source of truth and never committed;
-  independently authored test oracles and run-evidence ledgers are the two non-production committed classes.
+  *The rule*: every reproducible projection and every run-evidence artifact is generated and never committed;
+  only independently authored source, policy, fixtures, oracles, and reviewed external immutable inputs belong
+  in version control.
 - [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton) —
   *The control-plane singleton*: a Deployment `replicas=1`, stateless (no PVC), single-instance delegated to
   k8s/etcd through the mandatory reconciler Lease ([§3.1](../documents/illegal_state/illegal_state_storage.md#31-bad--illegal-durable-storage), no bespoke election), durable state the
@@ -206,9 +233,9 @@ name.
 > validation at each sprint's own point in the order — the phase gate is a single end-of-phase two-sided run,
 > so "validated in isolation" names the per-doc-group scope of the check, not the moment it can first execute.
 
-## Sprint 0.1: Documentation standards + plan-suite spine 🔄
+## Sprint 0.1: Documentation standards + plan-suite spine ✅
 
-**Status**: Active
+**Status**: Done
 **Implementation**: `documents/documentation_standards.md`,
 `DEVELOPMENT_PLAN/development_plan_standards.md`, `DEVELOPMENT_PLAN/README.md`,
 `DEVELOPMENT_PLAN/overview.md`, `DEVELOPMENT_PLAN/system_components.md`, `DEVELOPMENT_PLAN/substrates.md`,
@@ -248,12 +275,11 @@ amoebius's snake_case rule), and the tracker is rebuilt for 65 contiguous single
 
 ### Remaining Work
 
-Resolve the remaining lint and consistency violations in this sprint's authored files; final validation runs
-through Sprint 0.5.
+None.
 
-## Sprint 0.2: DSL core + cross-cutting method doctrine 🔄
+## Sprint 0.2: DSL core + cross-cutting method doctrine ✅
 
-**Status**: Active
+**Status**: Done
 **Implementation**: `documents/engineering/dsl_doctrine.md`,
 `app_vs_deployment_doctrine.md`, `illegal_state_catalog.md` (the pure index) and its eight themed
 sub-catalogs (`illegal_state_storage.md`, `illegal_state_topology.md`, `illegal_state_capacity.md`,
@@ -305,12 +331,11 @@ doctrines (the three validation registers, the generated-never-committed rule, a
 
 ### Remaining Work
 
-Resolve the remaining lint and consistency violations in this sprint's authored files; final validation runs
-through Sprint 0.5.
+None.
 
-## Sprint 0.3: Platform, cluster, storage, substrate & image doctrine 🔄
+## Sprint 0.3: Platform, cluster, storage, substrate & image doctrine ✅
 
-**Status**: Active
+**Status**: Done
 **Implementation**: `documents/engineering/platform_services_doctrine.md`,
 `storage_lifecycle_doctrine.md`, `cluster_lifecycle_doctrine.md`, `gateway_migration_doctrine.md`,
 `readiness_ordering_doctrine.md`, `single_logical_data_plane_doctrine.md`, `cluster_topology_doctrine.md`,
@@ -350,12 +375,11 @@ detection with the no-env/no-`PATH` lazy tool-ensure contract, and baked-binary 
 
 ### Remaining Work
 
-Resolve the remaining lint and consistency violations in this sprint's authored files; final validation runs
-through Sprint 0.5.
+None.
 
-## Sprint 0.4: Secrets/IaC + runtime/transport/determinism doctrine 🔄
+## Sprint 0.4: Secrets/IaC + runtime/transport/determinism doctrine ✅
 
-**Status**: Active
+**Status**: Done
 **Implementation**: `documents/engineering/vault_pki_doctrine.md`,
 `pulumi_iac_doctrine.md`, `daemon_topology_doctrine.md`, `host_cluster_comms_doctrine.md`,
 `bootstrap_sequence_doctrine.md`, `network_fabric_doctrine.md`, `pulsar_client_doctrine.md`,
@@ -376,7 +400,7 @@ Adopt [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topolo
 [§3.3](../documents/illegal_state/illegal_state_security.md#33-misconfigured-gateway)'s separate same-binary capacity-scheduler role — and
 [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) —
 *The ML-asset lifecycle*: write the secrets/IaC and runtime/transport/determinism layers. The bootstrap doctrine
-records that the pre-binary **midwife is a Python `pb` CLI** (two modes: midwife and admin-REST client), not a
+records that the pre-binary **bootstrap coordinator is a Python `pb` CLI** (two modes: bootstrap coordinator and admin-REST client), not a
 shell script; the daemon-topology and content-addressing docs carry the reversed control-plane and
 jit-resolved-cache intent.
 
@@ -385,7 +409,7 @@ jit-resolved-cache intent.
 - `vault_pki_doctrine.md`, `pulumi_iac_doctrine.md` (in-cluster-only Pulumi, MinIO+Vault-envelope backend).
 - `daemon_topology_doctrine.md` (the three contexts; the `replicas=1` singleton under its mandatory Lease, no
   bespoke election; separate capacity-scheduler and worker roles), `host_cluster_comms_doctrine.md`, `bootstrap_sequence_doctrine.md` (the `pb`
-  midwife + admin-REST client), `network_fabric_doctrine.md`.
+  bootstrap coordinator + admin-REST client), `network_fabric_doctrine.md`.
 - `pulsar_client_doctrine.md` (native protocol, CBOR-only payloads), `content_addressing_doctrine.md`
   (three-tier store, `experimentHash`, the jit-resolved `CacheBudget`-bounded engine cache),
   `monitoring_doctrine.md`, `release_lifecycle_doctrine.md`.
@@ -399,12 +423,11 @@ jit-resolved-cache intent.
 
 ### Remaining Work
 
-Resolve the remaining lint and consistency violations in this sprint's authored files; final validation runs
-through Sprint 0.5.
+None.
 
-## Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate 🔄
+## Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate ✅
 
-**Status**: Active
+**Status**: Done
 **Implementation**: `documents/engineering/chaos_failover_doctrine.md`,
 `testing_doctrine.md`, `test_derivation_analysis.md` (the analysis record behind the derivation boundary),
 `formal_model_doctrine.md`, `gateway_migration_model_doctrine.md`, `tla_modelling_assumptions.md`
@@ -421,9 +444,9 @@ convention-independent Phase-2 formal-model oracles, pinned here before
 [`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
 a byte-exact golden is pinned no earlier than the sprint fixing its rendering convention, which is
 Phase 2's), and
-`tools/ledger_lint.py` (target standalone scripts; not yet built — they must not depend on the amoebius
+`tools/ledger_lint.py` (standalone scripts; they do not depend on the amoebius
 binary, which first appears in the pre-cluster implementation band, Phase 2+. Both are **Python**, matching
-the pre-binary `pb` midwife ([README.md](README.md#toolchain)) and the recorded decision against bash logic
+the pre-binary `pb` bootstrap coordinator ([README.md](README.md#toolchain)) and the recorded decision against bash logic
 ([`dsl_doctrine.md §2`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic));
 a shell script is not admitted)
 **Blocked by**: Sprint 0.1, Sprint 0.2, Sprint 0.3, Sprint 0.4
@@ -540,12 +563,11 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
 
 ### Remaining Work
 
-Make the governed tree lint clean while preserving the passing seeded-negative side; finish the named
-pre-implementation UI oracles/mutants and `tools/ledger_lint.py`, then run the two-sided Phase-0 gate.
+None.
 
-## Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts 🔄
+## Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts ✅
 
-**Status**: Active
+**Status**: Done
 **Implementation**: the document-shape, orientation-block, term-routing, sentence-budget,
 section-name and family-split rules appended to `documents/documentation_standards.md`, plus its rewritten
 [diagram section](../documents/documentation_standards.md#7-diagrams) and its labelled
@@ -602,6 +624,49 @@ any of them is a change to [§10](../documents/documentation_standards.md#10-doc
 [§13](../documents/documentation_standards.md#13-sentence-and-paragraph-budget) plus the matching constant,
 gated as always on the corpus clearing the new number first.
 
+## Sprint 0.7: Artifact provenance, ignore coverage, and external evidence 🔄
+
+**Status**: Active
+**Implementation**: `tools/doc_lint_verify.py`, planned artifact-policy lint and generator registry,
+`.gitignore`, `.dockerignore`, and the external-attestation test adapter
+**Blocked by**: none
+**Independent Validation**: the positive corpus passes; one negative per provenance, ignore, write-boundary,
+dynamic-resolution, terminology, and attestation rule fails at its expected locus.
+**Docs to update**: `README.md`, `documents/engineering/repository_layout_doctrine.md`,
+`documents/engineering/generated_artifacts_doctrine.md`, `documents/engineering/testing_doctrine.md`,
+and the complete `DEVELOPMENT_PLAN/` suite
+
+### Objective
+
+Implement the repository-wide distinction between authored inputs and generated output, including external run
+evidence, dynamic dependency resolution, exact ignore/context coverage, and the renamed bootstrap coordinator.
+
+### Deliverables
+
+- A generator registry and tracked-path provenance classifier.
+- An authored-root write guard used by every later phase gate.
+- `.gitignore` and `.dockerignore` coverage matching repository-layout doctrine.
+- Lints rejecting locks/freezes, generated evidence, package integrity pins, developer-home paths, and obsolete
+  terminology.
+- A synthetic external-attestation positive and negative corpus.
+- Reconciled phase status showing Phase 0 Active and phases 1–64 Blocked.
+
+### Validation
+
+1. Run the redesigned Phase-0 command from a clean tree with ordinary Python bytecode caching enabled.
+2. Confirm every positive policy and documentation check passes.
+3. Confirm every seeded negative fails at its named locus.
+4. Confirm the gate creates output only beneath ignored `gen/runs/phase_00/`.
+5. Confirm the tracked tree and Docker context satisfy the normative scans.
+6. Verify the external test attestation.
+
+### Remaining Work
+
+The complete Git/Docker ignore-pattern, Python command-policy, and Bootstrap-Coordinator terminology slices are
+implemented. The broader provenance registry, tracked/generated-path and effective Docker-context audits,
+authored-root guard, generated-path migration, dynamic-resolution audit, external attestation, other source
+renames, and external-storage work remain.
+
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
@@ -635,5 +700,7 @@ gated as always on the corpus clearing the new number first.
   validation registers this plan's gates are stated in.
 - [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md) — the
   emit-from-source, never-commit rule.
+- [`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md) — the exhaustive
+  authored/generated tree, dynamic-resolution rule, and future ignore/context contract.
 - [`gateway_migration_model_doctrine.md`](../documents/engineering/gateway_migration_model_doctrine.md) —
   amoebius's one simulation/proof obligation.

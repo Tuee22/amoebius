@@ -22,6 +22,8 @@ set.
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. The Invariant: every cluster is the same cluster](#1-the-invariant-every-cluster-is-the-same-cluster)
 - [2. HA always — including `replicas=1`](#2-ha-always--including-replicas1)
@@ -92,7 +94,7 @@ object kinds, dependency edges, and safety policies exercised at one replica are
 
 Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
 
-- **Replica count is a deployment-rules knob, not a renderer fork.** The midwife's `bootstrap` hand-off requires
+- **Replica count is a deployment-rules knob, not a renderer fork.** The bootstrap coordinator's `bootstrap` hand-off requires
   `--distro={kind,rke2}`; `kind` accepts `--replicas=n` (default `1`). The typed deployment projection is shared
   across values of `n`. The application-logic-vs-deployment-rules split that makes replicas a separate orthogonal
   surface is owned by [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
@@ -115,9 +117,11 @@ Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
   client's "mock 3-replica" pattern becomes a deployment-rules `replicas=n` value outside the checked UI
   program.
 
-> **Honesty.** The HA-always model is *specified* here and inherited from prodbox where parts of it are
-> proven; in amoebius it is design intent delivered across Phases 25–32 and the UI availability gate in Phase
-> 58, not a tested amoebius result. Status and gates live
+> **Honesty.** Phase 30 live-tested the topology-parity portion for the linux-cpu backbone: four-drive
+> distributed MinIO, three ZooKeeper members, three BookKeeper bookies, and two Pulsar brokers were rendered
+> from the same HA-shaped Haskell models used for replica-count variants. This is a Register-3 *tested*
+> amoebius result, not proof of consensus or multi-zone availability. Redis/Postgres/observability, Keycloak,
+> cloud LoadBalancers, and the Phase-58 whole-zone outcome remain design intent. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
 
 ---
@@ -134,6 +138,16 @@ either baked into the base container or built by amoebius and served from here. 
   image rather than pulling itself from a public registry (the prodbox Harbor bootstrap problem dissolves).
   Its one runtime dependency is MinIO, which holds the registry's blobs and is itself a preloaded, PV-backed
   service — so the dependency is a plain ordering edge (MinIO before the registry, [§11](#11-bring-up-and-dependency-ordering)), never a pull cycle.
+- **The pre-MinIO bootstrap is finite and already validated.** Phase 25.2 runs the registry backend behind a
+  read-only service proxy and a sole capability-gated mutation proxy from the side-loaded image. Its temporary
+  filesystem blob store is a snapshot-admitted, size-limited `emptyDir`; the exact digest-keyed object,
+  concurrent-upload workspace, and failed-upload/GC peak remain charged. Phase 30 migrates those admitted
+  bytes to MinIO before ordinary whole-deployment ownership, so the bootstrap store is an explicit bounded
+  ordering seam rather than a second storage architecture. Phase 25.3 atomically published the exact audited
+  two-architecture index and proved a zero-mutation rerun; Phase 25.4 paired a successful exact private pull
+  with a public-pull timeout under an enforcing node firewall and observed zero established public-registry
+  connections. Phase 30 subsequently live-tested the HA-shaped backbone and the MinIO-backed driver,
+  including old-digest migration/readback and a post-cutover object observed in MinIO.
 - **It needs no relational database, and no PV of its own.** Unlike Harbor, `distribution` stores its blobs
   in **MinIO via the S3 storage driver** ([§4](#4-minio--the-object-substrate)) — it holds no PersistentVolume and runs no Postgres/Redis of
   its own, so it takes neither a Patroni cluster under the [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) rule nor a retained PV under the storage
@@ -283,11 +297,13 @@ independent version and lifecycle, and clean per-namespace teardown.
   re-proving it, and the delegation holds **only** with these settings. Absent them an intra-cluster failover
   can promote a replica missing acknowledged commits and thereby lose them — so this is stated as a required
   configuration, not an assumed default.
-- **Canonical consumers.** Keycloak is the proven prodbox consumer; other standard services that need a
+- **Canonical consumers.** Phase 31 fixes the current amoebius database-consumer set to exactly `{Grafana}`;
+  its Patroni cluster, pgAdmin surface, and Grafana migrations are live-tested. Keycloak remains a future
+  Phase-32 consumer. Other standard services that later need a
   relational database each get their own Patroni cluster + pgAdmin. (The registry does **not** —
   `distribution` needs no database, [§3](#3-the-registry--the-single-image-source) — which is one fewer Patroni consumer than prodbox's Harbor.) The
-  authoritative list of which standard services take a database is a Phase 31 delivery detail tracked in
-  [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), not frozen here.
+  authoritative list is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); this
+  doctrine records the Phase-31 tested floor without preventing later typed additions.
 - **Storage is not owned here.** Retained PVs, the `<namespace>/<statefulset>/pv_<integer>` naming, sizing,
   and deterministic rebind are owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
 - **Capacity remains per consumer.** Binding constructs one `PatroniSqlDemand` for each consuming capability:
@@ -319,10 +335,11 @@ The canonical demand shapes are owned by
 the tenant-qualification, empty/diff planner, executor coalescing, target-change retention, MinIO physical fold,
 and sealed provider enactors are owned by [tenancy_doctrine.md §5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored).
 
-Phase 34 owns provider administrative apply/readback for all six arms; its Pulsar adapter applies and observes
-tenant/namespace/ACL policy but does not use an application client. Phase 35, after the native `amoebius-pulsar`
+Phase 34 delivers provider administrative apply/readback for all six arms; its separated live observers cover
+Keycloak, Vault, Pulsar, MinIO, Kubernetes API, and Postgres for two equal-shaped tenants. Its Pulsar adapter
+applies and observes tenant/namespace/ACL policy but does not use an application client. Phase 35, after the native `amoebius-pulsar`
 client exists, owns the authenticated produce/consume round-trip gate. Administrative policy convergence in
-Phase 34 must not be reported as proof of the Phase-35 data path.
+Phase 34 is not proof of the Phase-35 data path; its ledger leaves that surface UNVERIFIED.
 
 ---
 
@@ -594,10 +611,80 @@ host tooling that brings these services up is discovered lazily through the subs
 invoked by full path — there is no `PATH`-based discovery anywhere in the bring-up sequence.
 
 > **Honesty.** Where this section generalizes a behaviour proven in prodbox, that proof is *evidence from a
-> sibling system*, not proof in amoebius — which has not yet built the Phase-25 / Phases-29–32 service set. Read every prescriptive
-> statement here as design intent, never as a tested amoebius result.
+> sibling system*, not proof in amoebius. amoebius has now live-tested the Phase-25 registry, Phase-29 Vault,
+> the Phase-30 linux-cpu backbone subset, and the Phase-31 Redis/Patroni/pgAdmin/Prometheus/Grafana subset.
+> The Phase-32 identity/ingress edge, specialized/provider installers, and their complete equivalence checks
+> remain design intent.
 
 ---
+
+### Validated Vault readiness floor
+
+Phase 29 supplied the first live amoebius proof of the Vault readiness edge: a secret consumer stayed blocked
+while Vault was sealed, then authenticated through `auth/kubernetes/login` and read the exact canary only after
+unseal. A real cluster delete/recreate retained Vault state and the PKI root without re-initialization. This was
+validated on `linux-cpu`, which every hardware substrate can always provide; use Incus on Linux/Linux-CUDA,
+Lima on Apple, or WSL2 on Windows when a pristine Linux host is required. The remaining service-DAG edges are
+owned by their later phases.
+
+### Validated Phase-30 backbone
+
+Phase 30 live-tested MetalLB, distributed MinIO, the registry's MinIO S3 rehome, and Pulsar's
+ZooKeeper/BookKeeper/broker topology. External observations covered a stable reachable VIP, MinIO byte
+identity, registry source stability and target objects, native Pulsar CBOR/dedup traffic, size-triggered
+offload, and a hot tier below its committed cap. Fifty-three SSA-owned object projections and eleven freshly
+rendered Haskell execution-unit projections were byte-identical to the live fields they own; every runtime
+image ID resolved to the baked Phase-25 digest and no public pull was observed. This is tested on `linux-cpu`,
+not a proof of third-party consensus or multi-zone HA. Every hardware substrate can always run `linux-cpu`;
+when a pristine Linux host is needed, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+### Validated Phase-31 service set
+
+Phase 31 live-tested the exact database-consumer set `{Grafana}` with a three-member Patroni cluster carrying
+`synchronous_mode: on`, `synchronous_mode_strict: on`, and a bytes-bounded
+`maximum_lag_on_failover`; pgAdmin became Ready and Grafana completed hundreds of migrations through that
+Postgres service. The Percona 2.6 operator observed the `PerconaPGCluster`, while the receipt honestly records
+the exact Patroni StatefulSet as an amoebius-owned manual child projection rather than attributing it to the
+operator. Prometheus ran from a descriptor-derived retained-storage and query budget, direct access was
+denied by NetworkPolicy, its proxy accepted an in-bound query and rejected the one-over series bound, and
+Grafana used Postgres. Redis ran one primary, two replicas, and three mutually authenticated Sentinel voters;
+a Vault-issued TLS/ACL client observed replication, forced promotion, and retained the TTL-bound challenge,
+with no PVC/AOF/RDB/backup. The gate also sealed 256 deterministic partial-failure schedules, eleven fresh
+Haskell projections, fifty SSA projections, eight red mutants, and a 14-service warm apiserver readiness
+trace. These are tested linux-cpu results, not proofs of third-party consensus. Hardware selection never
+removes the `linux-cpu` fallback. When the run needs a clean guest instead of the existing host, launch it
+through Incus for Linux or Linux-CUDA hardware, Lima for Apple hardware, and WSL2 for Windows hardware.
+
+### Validated Phase-32 authenticated edge
+
+Phase 32 live-tested the first complete amoebius wild edge. Exactly one LoadBalancer remained:
+`edge-system/envoy` at the MetalLB VIP. The typed Gateway/HTTPRoute inventory covered Grafana, Keycloak,
+Vault, MinIO, the platform API, and the authenticated WebSocket probe. Host, WAN-Pod, LAN-Pod, and
+localhost-port-forward observers all completed positive OIDC requests; the paired unauthenticated requests
+were refused or stayed inside Keycloak's own login boundary. The real Envoy Gateway v1.4.2 provider,
+Gateway-API, and xDS runners were observed Ready. The receipt explicitly records that its GatewayClass uses
+the amoebius manual-projection controller and that the two-replica baked Envoy Deployment is the typed static
+data-plane projection; it does not attribute that child to Envoy Gateway.
+
+Keycloak uses its own retained three-member Patroni cluster in `keycloak-db`, separate from Grafana's cluster,
+with strict synchronous mode and the bounded failover-lag oracle. The Percona operator observed the Keycloak
+CR while the exact child is recorded as an amoebius manual projection. Default-deny policy passed an external
+scratch-Pod deny→allow→deny graph variation, the committed backdoor Service made the scanner red before its
+removal restored green, and the sole `HostLocalPeer` NodePort succeeded on node loopback but failed from the
+WAN Pod. Valid and invalid WebSocket tuples proved exact Origin, one-use nonce, subprotocol, authentication,
+and direct-Service denial. These are Register-3 linux-cpu results, not proofs of third-party controller or
+database consensus. Every hardware substrate can always run the same linux-cpu lane; pristine Linux uses
+Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+### Scoped Phase-45 provider-child convergence boundary
+
+Phase 45 pins the exact sixteen-object standard service-name set and implements exact-set/no-extra/no-missing
+validation in the provider-child protocol. The retained-kind drill created and read back those sixteen
+Service objects, then proved the second pass performed zero Kubernetes mutations. This is an object-inventory
+and protocol result only: it does not establish EKS, a cloud LoadBalancer, service data-plane reachability,
+HA behavior, or wild ingress exclusively through provider Keycloak/Envoy. Those provider observations remain
+UNVERIFIED until a real child can be materialized. Phase 45's tracker and substrate row carry the universal
+CPU fallback and pristine-host routing contract.
 
 ## 13. Planning ownership
 
@@ -607,6 +694,11 @@ validation gates, and remaining work are owned by
 This doc never maintains a competing status ledger; it states the target shape and links back for status.
 
 ---
+
+Phase 58 tests the three-zone Redis/Sentinel topology and ephemeral-authority rules only as a scoped admission
+kernel plus a loopback process campaign. Real Redis/Sentinel election and provider-zone survival remain
+UNVERIFIED; topology parity is not observed availability. Every hardware substrate can always run
+`linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)

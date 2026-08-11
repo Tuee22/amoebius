@@ -1,0 +1,5 @@
+mutant	operator	expected_locus
+mutant_copy_shape_tag	effect-swap	object-node-multiset-oracle
+mutant_catchall_arm	union-arm-addition	arm-golden-exhaustiveness
+mutant_shared_app_import	dropped-distinctness	distinct-composed-file-check
+mutant_provisioned_value_in_bound_deployment	effect-swap	bound-structural-inventory

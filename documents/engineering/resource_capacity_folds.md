@@ -19,6 +19,8 @@ numbers entering them come from, owned by
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [4. The total fold: `fits`, `carve`, `place`, and the nesting](#4-the-total-fold-fits-carve-place-and-the-nesting)
 - [Related Documents](#related-documents)
@@ -70,7 +72,16 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Design intent. The folds are decode-foreclosed at the provision seal; the physical residue that the kernel and kubelet honour the caps is runtime-checked.*
+*Target fold and honesty boundary. The base subset is implemented and Register-1 validated in Phase 7; the physical residue that the kernel and kubelet honour the caps remains runtime-checked.*
+
+**Base-fold validation status.** The [Phase 7 gate](../../DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md)
+builds `Amoebius.Capacity.Types`, `Amoebius.Capacity.Fold`, and `Amoebius.Dsl.Topology` with exhaustive-pattern
+warnings promoted to errors. Fifteen direct negative/twin pairs, two real Dhall positives, four sampled
+properties with independent witness recomputation, and 19 seeded mutants validate the base CPU, memory,
+logical ephemeral, pod-slot, CSI-attach, finite CPU-policy, eligibility, and fixed/elastic placement axes
+(ledger `external-run-reference`).
+The storage, execution/runtime, accelerator, and provider-root extensions described below remain
+**UNVERIFIED** until Phases 8–9; live enforcement is not established by this result.
 
 ### The four total functions
 
@@ -130,7 +141,7 @@ already provider allocatable values and only those are folded.
 
 #### Host → VM → guest
 
-A Lima/WSL2 VM `carve`s a sub-`Capacity` from its host; everything the VM runs then
+An Incus/Lima/WSL2 VM `carve`s a sub-`Capacity` from its host; everything the VM runs then
 folds against *that* sub-capacity — nested budgets, so "a VM asking for more than its host" (I6) and "a
 guest asking for more than its VM" are the same relation at different depths.
 
@@ -201,7 +212,7 @@ One physical disk may back system
 reserve, a VM disk, retained-PV storage, a native host-worker/build cache, purpose-tagged host-local storage
 (`HostWorkerLocal`, `BuildScratch`, or `ToolInstall`), and (when not inside the VM disk) kubelet filesystem
 pools. These are disjoint top-level carves except for identities deliberately aliased **inside** one
-`KubeletFilesystemLayout`. On Lima/WSL2, guest kubelet `nodefs` and any distinct `imagefs` are sub-budgets of
+`KubeletFilesystemLayout`. On Incus/Lima/WSL2, guest kubelet `nodefs` and any distinct `imagefs` are sub-budgets of
 the VM disk, so the fold proves
 `guest OS/system reserve + Σ unique layout filesystem parent debits ≤ requiredUsableBytes`, applies the VM
 filesystem/sparse-image overhead model and host allocation quantum, and privately derives

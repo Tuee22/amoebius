@@ -91,11 +91,11 @@ Descriptive only. Each concept is owned by the document named; nothing here rest
 | The `ChaosSchedule` / `FaultKind` types and the `FaultKind`→invariant map | [chaos_failover_doctrine.md §11](./chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose) |
 | The simulated-substrate fault model | [deterministic_simulation_doctrine.md §3](./deterministic_simulation_doctrine.md#3-the-simulated-environment-and-its-fault-model) |
 | The no-cluster spine and its honesty boundary | [conformance_harness_doctrine.md §5](./conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish) |
-| Production generated artifacts are never committed; independently authored oracles and run ledgers are committed non-production records | [generated_artifacts_doctrine.md §3](./generated_artifacts_doctrine.md#3-the-rule) |
+| Generated artifacts and run evidence are never committed; only independently authored expectations remain source | [generated_artifacts_doctrine.md §3](./generated_artifacts_doctrine.md#3-the-rule) and [repository_layout_doctrine.md](./repository_layout_doctrine.md) |
 | `PromotionGate` and per-environment evidence strength | [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable) |
 
 Sequencing and status are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
-No phase delivering any of the above has started.
+All prior phase seals are reopened while the generated-output and external-attestation migration is implemented.
 
 ---
 
@@ -108,7 +108,7 @@ flowchart TD
   exp["authored expectations, committed"]:::intent
   join[["join by identity"]]:::intent
   cov{{"every surface bound to an expectation?"}}:::gate
-  led((("per-run proven, tested, assumed ledger"))):::seal
+  led((("generated run ledger, externally attested"))):::seal
   un>"UNVERIFIED row: an unbound surface, never a silent pass"]:::refuse
   src -->|"binds the source"| proj
   proj --> enum
@@ -131,7 +131,7 @@ This analysis's central recommendation. It was **adopted** and is now owned by
 which states the rule, the enumeration/expectation table, and the coverage-obligation diagram. The argument
 is not restated here.
 
-In summary: a test artifact divides into an **enumeration** (which surfaces exist — generated from committed
+In summary: a test artifact divides into an **enumeration** (which surfaces exist — generated from authored
 source, never committed) and an **expectation** (what must hold — authored, committed, independent of the
 code under test). Generating expectations is forbidden rather than merely unnecessary, because an oracle
 rendered from the subject's own source is a tautology
@@ -394,7 +394,7 @@ deliberate and is recorded here so it is not "fixed" away by a later reader.
 | The app/deployment dividing line | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
 | The simulated-substrate fault model and the Register-2.5 fidelity premise | [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md) |
 | Making an illegal test cluster unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [../illegal_state/illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
-| Phase order, status, gates, the toolchain pin | [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) |
+| Phase order, status, gates, and dynamic toolchain policy | [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) |
 
 ---
 
@@ -430,6 +430,7 @@ any other document.
 - [Testing Doctrine](./testing_doctrine.md)
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
 - [Generated Artifacts Doctrine](./generated_artifacts_doctrine.md)
+- [Repository Layout and Artifact Provenance](./repository_layout_doctrine.md) — generated paths, ignore contracts, and external evidence
 - [Application Logic vs Deployment Rules](./app_vs_deployment_doctrine.md)
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md)
 - [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md)

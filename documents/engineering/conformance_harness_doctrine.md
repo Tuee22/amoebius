@@ -22,6 +22,8 @@ vocabulary the rows are phrased in, owned by
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ---
 
 ## 1. Why this doctrine exists
@@ -57,6 +59,10 @@ Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_d
   from a live service handle, a derived NetworkPolicy — golden-tested on the *rendered* output); the `[Step]`
   plan and its `--dry-run`; the capability→provider→shape binder; the capacity/topology folds; the formal
   `Model` explorer + the emitted `.tla` checked by TLC ([formal_model_doctrine.md](./formal_model_doctrine.md));
+  the Phase-2 instance is built and validated over `ToyModel` with pinned TLC, 200 differential models, and no
+  live infrastructure; the Phase-3 instance is built and validated over both branches of `GatewayMigration`
+  with exact explorer/TLC state-set agreement, bounded IOSimPOR safety schedules, mutation sensitivity, and a
+  structural-cutoff property, also with no live infrastructure;
   the bounded `UiSource` algebra, scoped identity/authorization checks, binding, and deterministic
   `ClientPlan`/`UiServerPlan` compilation.
 - **Register 2 — boundary integration with fakes (no cluster).** The real amoebius binary run with fake
@@ -70,6 +76,9 @@ Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_d
   crash, deterministically replayable. This exercises the daemon's real *schedule* under faults, which Registers
   1 and 2 structurally cannot reach; owned by
   [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md) (register definition in [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing)).
+  The substrate serving this activity is built and gated at Register 2 in
+  [Phase 15](../../DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md); later phases replay their own
+  production reconcilers on it.
 - **Register 3 — live infrastructure only.** The residue that cannot be settled by inspecting source or by
   simulation: the apiserver admitting and the scheduler placing pods, the LoadBalancer coming up, etcd forming
   quorum, a VM interposing, a broker offloading, geo-replication lag, DNS propagation, chaos/partition healing —
@@ -141,6 +150,15 @@ substrates behave as modeled), not first exposure.
 
 ## 5. Honesty: what the harness does and does not establish
 
+Phase 13 realizes the `renderAll` step in Register 1: eighteen canonical deployment outputs are byte-locked,
+and the hardened-resource, ingress, and independently rederived NetworkPolicy predicates are non-vacuous.
+Its twelve seeded mutants fail at those properties. This is rendered-output evidence, not evidence that a
+live apiserver, admission stack, kubelet, or CNI enforces the values.
+
+Phase 14 realizes the Plan and fake-apply steps. Register 1 byte-locks two chain/descent plans with zero
+actions executed; Register 2 drives the real executable against absolute-path fake tools and pins argv and
+stdin bytes. This proves the emitted boundary protocol, not real-tool fidelity or cluster convergence.
+
 Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)
 and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md):
 
@@ -162,11 +180,12 @@ and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md):
 
 ## 6. Planning ownership
 
-This document is normative only. The harness is stood up across the pre-cluster phases; each live phase adds its
+This document is normative. Its Phase-2 Register-1 explorer/TLC instance is built; the remaining harness is
+stood up across later pre-cluster phases, and each live phase adds its
 Register-3 gate. Phase order, status, and gates live only in
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); the requirement that every phase's ledger records
 which register it reached is owned by [development_plan_standards.md](../../DEVELOPMENT_PLAN/development_plan_standards.md).
-Every statement here is design intent, never a tested amoebius result.
+Only that Phase-2 instance is a tested amoebius result here; later register instances remain design intent.
 
 ---
 

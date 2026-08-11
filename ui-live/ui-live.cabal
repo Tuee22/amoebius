@@ -1,0 +1,205 @@
+cabal-version: 3.12
+name: ui-live
+version: 0.1.0.0
+build-type: Simple
+license: Apache-2.0
+
+flag phase55-disable-csrf-mutant
+  default: False
+  manual: True
+flag phase55-dispatch-before-auth-mutant
+  default: False
+  manual: True
+flag phase55-local-socket-map-mutant
+  default: False
+  manual: True
+flag phase55-redis-receipt-authority-mutant
+  default: False
+  manual: True
+flag phase55-canned-response-mutant
+  default: False
+  manual: True
+flag phase55-open-provider-edge-mutant
+  default: False
+  manual: True
+flag phase55-drop-networkpolicy-mutant
+  default: False
+  manual: True
+flag phase56-accept-unlisted-choice-mutant
+  default: False
+  manual: True
+flag phase56-drop-tenant-key-mutant
+  default: False
+  manual: True
+flag phase56-drop-user-key-mutant
+  default: False
+  manual: True
+flag phase56-drop-scope-epoch-mutant
+  default: False
+  manual: True
+flag phase57-shift-before-watermark-mutant
+  default: False
+  manual: True
+flag phase57-discard-cursor-mutant
+  default: False
+  manual: True
+flag phase57-drop-tenant-cursor-key-mutant
+  default: False
+  manual: True
+flag phase57-stale-registration-mutant
+  default: False
+  manual: True
+flag phase58-replicas-one-mutant
+  default: False
+  manual: True
+flag phase58-sticky-session-required-mutant
+  default: False
+  manual: True
+flag phase58-drop-pdb-mutant
+  default: False
+  manual: True
+flag phase58-drop-topology-spread-mutant
+  default: False
+  manual: True
+flag phase58-fault-one-node-only-mutant
+  default: False
+  manual: True
+flag phase58-drop-tenant-cursor-key-mutant
+  default: False
+  manual: True
+flag phase58-drop-keycloak-zone-spread-mutant
+  default: False
+  manual: True
+flag phase58-redis-one-node-mutant
+  default: False
+  manual: True
+flag phase58-redis-persistent-receipt-mutant
+  default: False
+  manual: True
+flag phase58-skip-cursor-repair-mutant
+  default: False
+  manual: True
+
+library
+  exposed-modules:
+      Amoebius.Ui.Ha.MultiZone
+      Amoebius.Ui.Live.SingleTenant
+      Amoebius.Ui.Projection.Cursor
+      Amoebius.Ui.ReleaseTransition
+      Amoebius.Ui.Realtime.Drain
+      Amoebius.Ui.Realtime.Receipt
+      Amoebius.Ui.Realtime.RedisCoordination
+      Amoebius.Ui.Realtime.Route
+      Amoebius.Ui.Server.Dispatch
+      Amoebius.Ui.Server.Security
+      Amoebius.Ui.Server.TenantSession
+  hs-source-dirs: ../src
+  build-depends:
+      base >=4.21 && <4.22,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+  if flag(phase55-disable-csrf-mutant)
+    cpp-options: -DPHASE55_DISABLE_CSRF_MUTANT
+  if flag(phase55-dispatch-before-auth-mutant)
+    cpp-options: -DPHASE55_DISPATCH_BEFORE_AUTH_MUTANT
+  if flag(phase55-local-socket-map-mutant)
+    cpp-options: -DPHASE55_LOCAL_SOCKET_MAP_MUTANT
+  if flag(phase55-redis-receipt-authority-mutant)
+    cpp-options: -DPHASE55_REDIS_RECEIPT_AUTHORITY_MUTANT
+  if flag(phase55-canned-response-mutant)
+    cpp-options: -DPHASE55_CANNED_RESPONSE_MUTANT
+  if flag(phase55-open-provider-edge-mutant)
+    cpp-options: -DPHASE55_OPEN_PROVIDER_EDGE_MUTANT
+  if flag(phase55-drop-networkpolicy-mutant)
+    cpp-options: -DPHASE55_DROP_NETWORKPOLICY_MUTANT
+  if flag(phase56-accept-unlisted-choice-mutant)
+    cpp-options: -DPHASE56_ACCEPT_UNLISTED_CHOICE_MUTANT
+  if flag(phase56-drop-tenant-key-mutant)
+    cpp-options: -DPHASE56_DROP_TENANT_KEY_MUTANT
+  if flag(phase56-drop-user-key-mutant)
+    cpp-options: -DPHASE56_DROP_USER_KEY_MUTANT
+  if flag(phase56-drop-scope-epoch-mutant)
+    cpp-options: -DPHASE56_DROP_SCOPE_EPOCH_MUTANT
+  if flag(phase57-shift-before-watermark-mutant)
+    cpp-options: -DPHASE57_SHIFT_BEFORE_WATERMARK_MUTANT
+  if flag(phase57-discard-cursor-mutant)
+    cpp-options: -DPHASE57_DISCARD_CURSOR_MUTANT
+  if flag(phase57-drop-tenant-cursor-key-mutant)
+    cpp-options: -DPHASE57_DROP_TENANT_CURSOR_KEY_MUTANT
+  if flag(phase57-stale-registration-mutant)
+    cpp-options: -DPHASE57_STALE_REGISTRATION_MUTANT
+  if flag(phase58-replicas-one-mutant)
+    cpp-options: -DPHASE58_REPLICAS_ONE_MUTANT
+  if flag(phase58-sticky-session-required-mutant)
+    cpp-options: -DPHASE58_STICKY_SESSION_REQUIRED_MUTANT
+  if flag(phase58-drop-pdb-mutant)
+    cpp-options: -DPHASE58_DROP_PDB_MUTANT
+  if flag(phase58-drop-topology-spread-mutant)
+    cpp-options: -DPHASE58_DROP_TOPOLOGY_SPREAD_MUTANT
+  if flag(phase58-fault-one-node-only-mutant)
+    cpp-options: -DPHASE58_FAULT_ONE_NODE_ONLY_MUTANT
+  if flag(phase58-drop-tenant-cursor-key-mutant)
+    cpp-options: -DPHASE58_DROP_TENANT_CURSOR_KEY_MUTANT
+  if flag(phase58-drop-keycloak-zone-spread-mutant)
+    cpp-options: -DPHASE58_DROP_KEYCLOAK_ZONE_SPREAD_MUTANT
+  if flag(phase58-redis-one-node-mutant)
+    cpp-options: -DPHASE58_REDIS_ONE_NODE_MUTANT
+  if flag(phase58-redis-persistent-receipt-mutant)
+    cpp-options: -DPHASE58_REDIS_PERSISTENT_RECEIPT_MUTANT
+  if flag(phase58-skip-cursor-repair-mutant)
+    cpp-options: -DPHASE58_SKIP_CURSOR_REPAIR_MUTANT
+
+test-suite phase55-ui-single-tenant-live
+  type: exitcode-stdio-1.0
+  main-is: Phase55UiSingleTenantSpec.hs
+  hs-source-dirs: ../test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      text >=2.1 && <2.2,
+      ui-live
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-multi-tenant-live
+  type: exitcode-stdio-1.0
+  main-is: Phase56UiMultiTenantSpec.hs
+  hs-source-dirs: ../test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      text >=2.1 && <2.2,
+      ui-live
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase57-ui-rollout-reconnect
+  type: exitcode-stdio-1.0
+  main-is: Phase57UiRolloutSpec.hs
+  hs-source-dirs: ../test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      text >=2.1 && <2.2,
+      ui-live
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase58-ui-ha-multizone
+  type: exitcode-stdio-1.0
+  main-is: Phase58UiHaSpec.hs
+  hs-source-dirs: ../test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      text >=2.1 && <2.2,
+      ui-live
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns

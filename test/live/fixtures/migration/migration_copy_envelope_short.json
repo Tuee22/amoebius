@@ -1,0 +1,11 @@
+{
+  "case": "migration_copy_envelope_short",
+  "oldBytes": 67108864,
+  "newBytes": 33554432,
+  "workspaceBytes": 16777216,
+  "backingBytes": 117440512,
+  "copyEnvelopeFits": false,
+  "expectedReason": "copy-job-envelope-exceeds-headroom",
+  "replacementWrites": 0,
+  "jobWrites": 0
+}

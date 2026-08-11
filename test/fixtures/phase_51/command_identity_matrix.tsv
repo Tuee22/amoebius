@@ -1,0 +1,5 @@
+case	tenant	command_id	request_digest	expected	trainer_launches
+first	tenant-a	phase0-command-51	sha256:9b482980a10f5d5154eff79b26a851e4e404fb9018541a6a4b5a9a57f3069040	new-committed-artifact	1
+exact-resend	tenant-a	phase0-command-51	sha256:9b482980a10f5d5154eff79b26a851e4e404fb9018541a6a4b5a9a57f3069040	original-committed-artifact	0
+changed-input	tenant-a	phase0-command-51	sha256:1bfeea7dd5dba17349477e479ef03ec32f452c83fb0f51db7ac4d513345ca6be	IdempotencyConflict	0
+foreign-scope	tenant-b	phase0-command-51	sha256:9b482980a10f5d5154eff79b26a851e4e404fb9018541a6a4b5a9a57f3069040	ArtifactUnavailable	0

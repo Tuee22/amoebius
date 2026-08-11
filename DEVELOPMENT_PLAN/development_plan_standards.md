@@ -2,11 +2,13 @@
 
 > **Purpose**: The rulebook for the amoebius `DEVELOPMENT_PLAN/` suite — the canonical file layout, the
 > per-phase and per-sprint document formats, the status vocabulary, the doctrine-citation rule, and the
-> honesty + one-substrate disciplines every plan document obeys.
+> honesty, implementation-reconciliation, and one-substrate disciplines every plan document obeys.
 > **Read this if**: a plan document is being written or reviewed, or a phase gate has to be judged sufficient.
 
 This rulebook governs the plan suite: the per-phase skeleton, the sprint format, the status vocabulary, and
-the gate-integrity clauses a gate must satisfy before it can be trusted. It inherits header and link mechanics
+the gate-integrity clauses a gate must satisfy before it can be trusted. The tracker owns order, status, and
+the dated implementation-progress audit;
+each phase document owns that phase's human-authored validation contract. It inherits header and link mechanics
 from [`../documents/documentation_standards.md`](../documents/documentation_standards.md), which wins on
 those; this document wins on plan structure. It owns no phase status, which belongs to
 [README.md](README.md).
@@ -16,7 +18,7 @@ those; this document wins on plan structure. It owns no phase status, which belo
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -30,7 +32,7 @@ those; this document wins on plan structure. It owns no phase status, which belo
 - [F. The sprint block format](#f-the-sprint-block-format)
 - [G. Documentation Requirements](#g-documentation-requirements)
 - [H. The doctrine-citation rule (cite by name)](#h-the-doctrine-citation-rule-cite-by-name)
-- [I. Generated-section markers](#i-generated-section-markers)
+- [I. Generated documentation remains untracked](#i-generated-documentation-remains-untracked)
 - [J. Cross-reference path rules](#j-cross-reference-path-rules)
 - [K. Honesty (proven / tested / assumed)](#k-honesty-proven--tested--assumed)
 - [L. One-substrate discipline](#l-one-substrate-discipline)
@@ -40,6 +42,8 @@ those; this document wins on plan structure. It owns no phase status, which belo
 - [P. Plan-document shape](#p-plan-document-shape)
 - [Q. The two phase diagrams](#q-the-two-phase-diagrams)
 - [R. Where the cross-cutting invariants live](#r-where-the-cross-cutting-invariants-live)
+- [S. Universal artifact-hygiene gate](#s-universal-artifact-hygiene-gate)
+- [T. Plan-to-implementation reconciliation](#t-plan-to-implementation-reconciliation)
 - [Related Documents](#related-documents)
 
 ---
@@ -76,8 +80,8 @@ Every file in `DEVELOPMENT_PLAN/` opens with the standard block from
 
 - `**Referenced by**` lists the **actual** inbound links (bidirectional rule, [documentation_standards.md §4](../documents/documentation_standards.md#4-cross-referencing)) —
   not a blanket "everything." It is reconciled from the true link graph, never hand-guessed.
-- `**Generated sections**` is `none` unless the file contains tool-generated blocks ([§I](#i-generated-section-markers)); then it names their
-  ids, comma-separated.
+- `**Generated sections**` is always `none`. Generated Markdown lives under ignored `gen/docs/`, never in the
+  governed plan suite ([§I](#i-generated-documentation-remains-untracked)).
 - `**Status**` is `Authoritative source` for every plan doc (the plan is the SSoT for sequencing/status);
   the README is additionally the *live tracker*.
 
@@ -87,22 +91,22 @@ Every file in `DEVELOPMENT_PLAN/` opens with the standard block from
 
 | File | Role |
 |------|------|
-| `README.md` | Live tracker + index: Document Index, Phase Overview table, status vocabulary, Definition of Done. |
+| `README.md` | Live tracker + index: document index, phase order, status vocabulary, and Definition of Done. |
 | `development_plan_standards.md` | This rulebook. |
 | `overview.md` | Target architecture / vision / current-baseline narrative (the "why/what"). |
 | `system_components.md` | Target component inventory: surface → owning doctrine → planned module path. |
-| `substrates.md` | Substrate registry + per-phase substrate map; sole home of generated tables. |
-| `legacy_tracking_for_deletion.md` | The migration-removal ledger (what the convergence retires, and when). |
+| `substrates.md` | Authored substrate registry and per-phase substrate map. Generated views go to `gen/docs/`. |
+| `legacy_tracking_for_deletion.md` | The implementation/plan divergence and migration-removal ledger: observed mismatch, owner, and closure condition. |
 | `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_64_offline_multizone_continuity.md`). |
 | `later_phases.md` | The in-scope, high-numbered phases not yet given their own document. |
 
 This deviates from prodbox's hyphenated names (`phase-3-gateway-dns.md`) on purpose: amoebius's
 documentation standard mandates snake_case. The *structure* mirrors prodbox; the *naming* follows amoebius.
 
-**Generated artifacts are never a committed module path.** A phase's `Implementation` field ([§F](#f-the-sprint-block-format)) names
-authored Haskell/Dhall *source*, never a generated artifact — a rendered k8s manifest, an emitted TLA+
-`.tla`/`.cfg`, a reflected Dhall schema, or a PureScript contract are emitted from a Haskell source of truth
-and not committed ([`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)).
+**Generated artifacts are never a committed module path.** A phase's `Implementation` field
+([§F](#f-the-sprint-block-format)) names authored source, never a generated artifact, lock/freeze file,
+resolver result, evidence file, or run ledger. The complete rule is owned by
+[`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md).
 
 ## C. Status vocabulary
 
@@ -110,14 +114,29 @@ One vocabulary, used in the README Phase Overview, in each phase's **Phase Statu
 
 | Marker | Meaning |
 |--------|---------|
-| ✅ **Done** | Delivered and validated; the gate passed. |
+| ✅ **Done** | Delivered; the redesigned gate passed from a clean committed tree and its external attestation verified. |
 | 🔄 **Active** | In progress now. |
 | 📋 **Planned** | Specified, not started. (The default for every phase and sprint pre-implementation.) |
 | ⏸️ **Blocked** | Waiting on a named earlier-or-same-phase sprint or an external prerequisite. |
-| 🧪 **Live-proof pending** | Code merged; the live/substrate proof has not yet run (the honesty gap, [§K](#k-honesty-proven--tested--assumed)). |
+| 🧪 **Live-proof pending** | Code exists; the required live/substrate proof has not yet run (the honesty gap, [§K](#k-honesty-proven--tested--assumed)). |
 
 Status lives **only** in the plan. A doctrine doc never carries status; it states the target shape and links
 back here ([documentation_standards.md §1](../documents/documentation_standards.md#1-philosophy), [§6](../documents/documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
+
+**Status and implementation progress are different axes.** Status answers whether the current validation
+contract is open, blocked, pending live proof, or closed. Progress records what a dated static inspection can
+actually find. A source path, test, gate script, or historical run is an **observed footprint**; it is not a
+passed current gate. The tracker uses only these progress terms:
+
+| Progress term | Meaning |
+|---|---|
+| **No footprint observed** | The audit found no implementation path attributable to the phase. Absence is not proof that no implementation exists outside the audit boundary. |
+| **Observed footprint** | At least one attributable source, test, gate, or generated migration artifact exists; completeness and correctness are not established. |
+| **Known partial** | The footprint exists and the phase contract or static inspection names a missing seam, target, provider, observer, or validation layer. |
+| **Policy-conformant** | The current phase gate passed in numeric order from a clean committed tree, including [§S](#s-universal-artifact-hygiene-gate), and its external attestation verified. Only this term is compatible with ✅ Done. |
+
+The tracker attaches a date and audit boundary to every progress summary. Doctrine may describe a target or a
+specifically labelled historical observation, but it never converts progress into status.
 
 ## D. The per-phase document skeleton
 
@@ -137,7 +156,7 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 **Phase scope:** <one cohesive capability claim, its sprint seams, one acceptance command, and the explicit split trigger>
 **Substrate:** <none | apple | linux-cpu | linux-cuda | windows> ([§L](#l-one-substrate-discipline))
 **Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live · 1/2 only for Phase 14 · — for Phase 0> ([§K](#k-honesty-proven--tested--assumed))
-**Gate:** <the concrete acceptance test that must pass before the next phase opens>
+**Gate:** <the concrete acceptance test that must pass before the next phase opens; §S applies implicitly>
 
 ## Gate integrity            (optional; see below)
 ## Resource provision — …    (optional, live band; see below)
@@ -154,7 +173,8 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 
 `Phase Summary` is declarative present tense ("this phase stands up …"), not a promise log. The **Gate** is a
 single, checkable acceptance condition — ideally an `InForceSpec` topology that spins resources up, runs a
-workflow, and tears them down. A phase may state an optional **Phase scope** or legacy **Session scope** note;
+workflow, and tears them down. Every gate also inherits the clean-tree and generated-output postcondition of
+[§S](#s-universal-artifact-hygiene-gate), without duplicating it in the 65 phase documents. A phase may state an optional **Phase scope** or legacy **Session scope** note;
 the enforceable sizing rules are owned by [§O](#o-sprint-sized-seams-and-bounded-phase-gates) and apply whether or not that
 summary note is present.
 
@@ -250,7 +270,7 @@ unbuildable when it is not.**
 |---|---|---|
 | `accelerator-device-plugin` | A Kubernetes device plugin advertising `nvidia.com/gpu` for the host's device vector — part of what *makes* a host `linux-cuda`, so it belongs to the host, not to a phase | Phase 51 |
 | `cloud-account` | A credentialed provider account carrying the quota and permissions the `Managed Eks` registry entry names | Phases 44–47, 54 |
-| `host-toolchain` | The `ghc`/`cabal`/`dhall`/`spago`/`purs`/Chromium binaries present on the developer host. Their *resolved absolute paths* are a Phase-1 deliverable; their presence is not | Phase 1 |
+| `host-toolchain` | The `ghc`/`cabal`/`dhall`/`spago`/`purs`/Chromium binaries present on the developer host. Phase 1 authors compatibility requirements; resolved versions and absolute paths are run-local generated observations under `gen/toolchain/` | Phase 1 |
 
 No phase requires a live public DNS zone: [`phase_32`](phase_32_keycloak_ingress.md) accepts a local ACME
 chain in place of public issuance, and Phase 3's `dnsRecord` TTLs are model parameters, not live records.
@@ -298,20 +318,16 @@ The `Docs to update` field then lists exactly those governed docs. A phase doc's
 is the gathered list of every section the phase implements — this is the spine that keeps the plan and the
 doctrine suite in lockstep.
 
-## I. Generated-section markers
+## I. Generated documentation remains untracked
 
-Tool-generated tables are fenced and registered, never hand-edited between the fences:
+Every governed plan document is a human-authored input and declares `**Generated sections**: none`.
+Tool-produced tables, indexes, dashboards, contents blocks, status projections, and run summaries are written
+only below ignored `gen/docs/`. They may be inspected or published from CI, but they are never copied into a
+tracked Markdown file.
 
-```markdown
-<!-- amoebius:<id>:start -->
-... generated content ...
-<!-- amoebius:<id>:end -->
-```
-
-The `<id>` set must equal the comma-separated `**Generated sections**` header field. Generated tables live
-only in `substrates.md` (and any future generated home); every other file declares `none`. Until an
-amoebius `dev docs generate` exists, a file may declare `none` and carry the equivalent table by hand —
-marking it generated is reserved for when the generator does.
+A table that must remain in a phase contract is authored and reviewed as a requirement. A table that can be
+regenerated from code, a phase contract, repository discovery, or an evidence store is generated output and
+belongs in `gen/docs/`. This rule removes generated-marker fences from the version-controlled corpus.
 
 ## J. Cross-reference path rules
 
@@ -325,8 +341,10 @@ marking it generated is reserved for when the generator does.
 
 The plan inherits the chaos/failover moral rule ([documentation_standards.md §6](../documents/documentation_standards.md#6-honesty-the-proventestedassumed-discipline), [`chaos_failover_doctrine.md`](../documents/engineering/chaos_failover_doctrine.md)): **never mark a sprint ✅ Done on the strength of "it compiles."** A sprint whose live/substrate proof has not run is
 🧪 Live-proof-pending, not Done. A phase gate is passed only when its acceptance test actually ran in its
-register on its substrate ([§L](#l-one-substrate-discipline)). Pre-implementation, every phase and sprint is 📋 Planned and every prescriptive
-statement is design intent.
+register on its substrate ([§L](#l-one-substrate-discipline)). Before any implementation footprint is
+observed, a phase or sprint is 📋 Planned and every prescriptive statement is design intent. Once a footprint
+exists, [§C](#c-status-vocabulary)'s separate progress vocabulary prevents that observation from being
+misreported as validation.
 
 **Validation happens in registers, and the ledger names the register(s) it reached.** A phase gate runs
 in **exactly one register** ([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md), [`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)):
@@ -364,29 +382,33 @@ phase discharges them. This front-loading introduces no forward dependency and d
 contiguous-numbering / no-fractional-phase-id rule ([§E](#e-one-canonical-phase-model)): the design phase keeps its own integer id and its
 own single-substrate (`none`) gate.
 
-**A ✅ Done flip records its evidence.** A phase or sprint moves to ✅ Done only when its acceptance gate has
-actually run, and the flip **records — in the tracker row or the phase doc — the exact re-runnable gate command, the run date, the substrate, and the emitted ledger's hash.** Without them a status flip is an
-unbacked edit of a Markdown cell; the recorded command is what lets any reader re-run the gate and reproduce
-the ledger. The documentation lint ([§M](#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)) rejects a ✅ Done
-row that carries no recorded command, date, substrate, and ledger hash.
+**A ✅ Done flip references verified external evidence.** A phase moves to Done only when its gate runs from
+the human-committed tree, satisfies [§S](#s-universal-artifact-hygiene-gate), and its immutable external
+attestation verifies. A sprint moves to Done only when its current independent validation passes and the
+parent phase's run retains that result; an added phase-level requirement reopens only the sprint whose
+deliverable or validation it changes. The tracker records the human status decision and may link the external
+run. It never copies a generated ledger, receipt, hash, command transcript, or machine observation into
+Markdown.
 
 **Status is single-sourced and consistent.** Status lives only in the plan ([documentation_standards.md §1](../documents/documentation_standards.md#1-philosophy)). The
 marker in a phase's README Phase-Overview row and the marker in that phase doc's `## Phase Status` line **must be identical**; the documentation lint checks this equality and fails on drift.
 
-**The proven/tested/assumed ledger is a committed, schema-checked artifact.** Every gate emits a ledger whose
-schema, linter, and commit status are defined in
-[`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) and Phase 0. Unlike other generated
-artifacts the ledger **is committed** — the deliberate carve-out from the generated-never-committed rule
-([`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)) — so a green
-gate's evidence is a durable, externally-checkable record rather than ephemeral output of the code under test.
-The ledger names the register it reached and marks every correctness layer outside that register UNVERIFIED.
+**The proven/tested/assumed ledger is generated, schema-checked, and externally retained.** Every gate emits
+the ledger under `gen/runs/`; no ledger or evidence copy is committed. The external attestation binds it to
+the committed source tree and phase contract. The ledger names the reached register and marks every layer
+outside that register UNVERIFIED. [`testing_doctrine.md` §4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
+owns its schema and retention boundary.
 
 ## L. One-substrate discipline
 
 Every acceptance gate runs on the **always-available `linux-cpu` baseline** and may additionally require
 **at most one specialized substrate** — `apple` or `linux-cuda`. A gate naming a specialized member *implies*
 the baseline and need not restate it: a `linux-cuda` host **is** a Linux host, and an `apple` host supplies
-the baseline through its Lima VM ([`substrates.md` §3](substrates.md#3-virtualized-substrates-lima--wsl2)).
+the baseline through its Lima VM ([`substrates.md` §3](substrates.md#3-virtualized-substrates-incus--lima--wsl2)).
+Windows supplies it through WSL2. When a gate requires a pristine Linux host, the provider is fixed by the
+detected hardware: **Incus on `linux-cpu` or `linux-cuda`, Lima on `apple`, WSL2 on `windows`**. Consequently,
+a gate row labelled `linux-cpu` names the CPU-only execution lane, not an assertion that the physical host is
+Linux or has no accelerator.
 **No gate may require two specialized substrates.** The pre-cluster band names `none` — no host at all.
 
 The gate's substrate is named in the phase's `Phase Summary` and tracked in
@@ -402,9 +424,11 @@ both keep the discipline checkable rather than bending it:
 - **Deferred-to-generation** (Phase 54, `per generated test`). A gate that *emits* a test `.dhall` names the
   **rule** that each generated test is substrate-locked to exactly one substrate, chosen at generation time — the
   single-substrate property holds per generated artifact, not as a fixed member on the emitting gate.
-- **Parent-drives-provider** (Phases 44–47 and 58, `linux-cpu → provider`). The gate runs on one hardware substrate (the
-  `linux-cpu` parent) and *targets* a provider it does not itself run — EKS is a **declared managed engine, not a detected substrate** ([`substrates.md` §2](substrates.md#2-substrate-inventory)). The single substrate the gate
-  keys to is the parent's; the provider is a compute-engine axis, never a fifth substrate.
+- **Parent-drives-provider** (Phases 44–47 and 58, `linux-cpu → provider`). The gate runs from one selected
+  `linux-cpu` parent lane and *targets* a provider it does not itself run — EKS is a **declared managed engine,
+  not a detected substrate** ([`substrates.md` §2](substrates.md#2-substrate-inventory)). The parent lane may be
+  native Linux or the Incus/Lima/WSL2 guest appropriate to its detected hardware; the provider is a
+  compute-engine axis, never a fifth substrate.
 
 ## M. Gate integrity (a gate cannot be passed by a stub)
 
@@ -412,26 +436,17 @@ A phase gate exists to prove the phase's objective was actually delivered. A gat
 happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gate** — and every sprint
 **Validation** that feeds it — obeys the clauses below; a gate that omits an applicable clause is incomplete.
 
-1. **Oracle-pinning.** The fixtures, goldens, and expected error/locus tags a gate checks against are
-   **committed before the implementation they check exists**, and the party that writes that
-   implementation is not their sole author — extending the per-entry validation-locus ledger of the
-   illegal-state corpus to every gate.
+1. **Independent oracle provenance.** A version-controlled fixture, golden, expected error, or locus tag is a
+   human-authored input reviewed independently of the implementation. The implementation author is not its
+   sole author or reviewer.
    - A golden or expected value regenerated from the implementation's own output is not a test: it passes
      for any output, a stub's included.
-   - **Where an oracle is pinned.** A cross-phase oracle set whose subject is settled before any
-     implementing phase opens — the UI gate goldens and their seeded mutants, and the formal-model oracles
-     [phase_00](phase_00_documentation_suite.md) enumerates — is authored and **committed in Phase 0**.
-     Every other oracle is committed **in its owning phase's first sprint — that phase's
-     *oracle-pinning sprint* — before the implementation sprint that consumes it**, never regenerated
-     from that implementation. This is the ordinary case,
-     not an exception: it covers every oracle depending on a catalog enrichment or registry a later phase
-     produces (e.g. the `Delivery-owner:`/`Case-family:` tags and `locus_registry.tsv` that
-     [phase_06](phase_06_illegal_state_corpus.md) adds). A phase states which of the two applies to its
-     own oracles; Phase 0 owes only the sets it enumerates.
-   - The before-the-implementation and separate-authorship invariants are the load-bearing ones. The
-     *phase* in which an oracle is pinned is a scheduling question, not a correctness one — pinning it
-     earlier than the phase that can author it buys nothing and, where the oracle depends on a later
-     deliverable, is not possible at all.
+   - A reference implementation may generate an expected value at run time, but that expected file remains
+     under `gen/runs/` and is never committed. The reference implementation and its authored inputs may be
+     version-controlled when they do not import or reuse the subject's decision logic.
+   - Authorship before the implementation is strong provenance when Git history establishes it. An existing
+     oracle whose chronology or independent review cannot be established is a regression fixture, not an
+     independent oracle, until it receives an independent review or replacement.
    - **Amendment.** A pinned oracle is not frozen — a renderer's output, an error tag, or an expected value
      may legitimately change when the design does.
    - It is **amended**, never rewritten from a failing run: the new expectation is authored from the
@@ -444,8 +459,7 @@ happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gat
      golden is authored under (encoding, ordering, indentation, and a content-stable generated-by stamp
      carrying no timestamp or run-varying field) — without one, a hand-authored byte-exact fixture is not
      writable and clause 1 cannot be satisfied ([generated_artifacts_doctrine.md §3](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)).
-     A byte-exact golden is therefore pinned no earlier than the sprint that fixes its convention: where
-     that convention is a later phase's deliverable, the golden is pinned in that phase — not in Phase 0.
+     A byte-exact golden is therefore authored no earlier than the sprint that fixes its convention.
 2. **Committed mutation quota.** Every gate names **at least one committed seeded mutant** — a deliberately
    broken implementation or spec — that the gate must turn red. Mutants are drawn from a defined operator set
    (guard negation/weakening, effect swap, dropped effect/`UNCHANGED`, quantifier flip, fairness drop,
@@ -491,14 +505,14 @@ happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gat
     an independently reachable bypass.
 
 These clauses are what a phase's **Gate** and each sprint's **Validation** are checked against. The Phase-0
-documentation lint verifies that every gate line names its committed fixtures, its mutant(s), and its
-independent oracle; the honesty ledger ([§K](#k-honesty-proven--tested--assumed)) records the result.
-**The party that writes the implementation must not be the sole author of the oracle it is checked against** — Phase 0 pins the oracle first.
+documentation lint verifies that every gate names its authored fixtures, mutant(s), and independent oracle.
+The generated run ledger records the result and is externally attested. The implementation author must not be
+the sole author or reviewer of the oracle.
 
 Clauses 9–12 are the plan projection of
 [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect).
-Each applicable phase records the challenge, observer, authority source, paired negative, and raw-observation
-digest in its gate apparatus and evidence ledger.
+Each applicable phase declares the challenge, observer, authority source, and paired negative in its gate
+apparatus. Raw observations and digests remain generated run evidence outside Git.
 
 <a id="gate-integrity-delegation"></a>
 **Gate → Gate-integrity delegation.** A `**Gate:**` line may discharge these clauses inline **or** delegate them to the
@@ -514,9 +528,8 @@ whose apparatus lives one hop away.
 ## N. Reopening and amending a phase
 
 [§C](#c-status-vocabulary) names five status markers and [§K](#k-honesty-proven--tested--assumed) defines one
-transition: a phase moves **to** ✅ Done only when its gate ran and the run's command, date, substrate, and
-ledger hash are recorded. This section defines the reverse and lateral moves [§C](#c-status-vocabulary) left implicit, so that
-changing a phase after it is gated is a recorded act, not a silent Markdown edit.
+transition: a phase moves **to** ✅ Done only after the redesigned gate and external attestation verify. This
+section defines reverse and lateral moves so changing a gated phase is recorded rather than silent.
 
 - **A reverse transition is recorded, never silent.** Moving a phase ✅ Done → 🔄 Active or 📋 Planned, or a
   🔄 Active phase back to 📋 Planned, requires a dated entry in that phase's `## Phase Status` log
@@ -524,17 +537,29 @@ changing a phase after it is gated is a recorded act, not a silent Markdown edit
   `## Phase Status` marker move together ([§K](#k-honesty-proven--tested--assumed) single-sourcing); the
   documentation lint's status-consistency check holds across the move.
 
-- **Scope amendment of a gated phase strikes its evidence.** When a phase whose gate has passed gains scope —
-  a new sprint, a new doctrine adoption, a widened gate — the recorded gate command, date, substrate, and
-  ledger hash **no longer cover the phase's gate**. They are **struck from the tracker row and the phase doc**
-  in the same change, and the phase reverts to a non-Done marker (🔄 Active if work resumes now, 📋 Planned
-  otherwise). A retained ledger hash that no longer certifies the current gate is a stale evidence claim —
-  exactly the dishonesty [§K](#k-honesty-proven--tested--assumed) forbids. The Phase-0 lint, which already
-  rejects a ✅ Done row lacking a recorded command/date/substrate/hash, thereby also forecloses a ✅ Done row
-  whose recorded hash predates a later scope edit, because the amendment must have struck it.
+- **Scope amendment of a gated phase invalidates the prior attestation.** A new sprint, doctrine adoption, or
+  widened gate reverts the phase to Active, Planned, Blocked, or Live-proof pending. The current tracker and
+  status block stop presenting the earlier run as completion evidence. Historical prose may state that a
+  prior boundary ran only when it is explicitly labelled invalidated and carries no copied generated record.
 
 - **The amendment log is the `## Phase Status` block.** Every reopen or scope amendment appends a dated entry
   there; the block is the phase's audit trail, and no amendment is made without one.
+
+- **Reopening also refreshes observed progress and legacy divergence.** The same documentation change updates
+  the tracker audit using [§C](#c-status-vocabulary)'s progress terms and records every discovered
+  implementation-to-plan mismatch in
+  [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md). Neither the old plan nor the existing
+  code silently wins; [§T](#t-plan-to-implementation-reconciliation) governs reconciliation.
+
+- **`Invalidated historical record` is a bounded non-normative block.** Inside `## Phase Status`, that exact
+  label opens a historical sub-block and the next `##` heading closes it. Every status, gate result, evidence
+  path, fixed version, integrity value, and completion claim inside the sub-block is migration context whenever
+  it conflicts with current status, the current gate, this standard, or repository-layout doctrine. It does
+  not make later sections historical implicitly: a retained historical statement elsewhere is labelled
+  locally under [§K](#k-honesty-proven--tested--assumed). Reopening does not rewrite history into a false claim
+  about what an earlier run did. A new sprint and gate state the replacement contract, and closure requires a
+  new run under [§S](#s-universal-artifact-hygiene-gate). In particular, old committed-ledger,
+  lock/freeze, fixed-resolution, and developer-path language never governs future work.
 
 - **What reopening never does after implementation evidence exists.** It never renumbers a completed phase
   and never mints a fractional id. Adding cross-cutting discipline to existing phases with **zero renumber** —
@@ -542,9 +567,13 @@ changing a phase after it is gated is a recorded act, not a silent Markdown edit
   that already own its surfaces — remains the default. The only renumbering exception is the fully mapped
   pre-implementation re-baseline of [§E](#e-one-canonical-phase-model), before any affected gate has evidence.
 
-Pre-implementation, this section is dormant: with every phase 📋 Planned bar the 🔄 Active Phase 0 and none
-✅ Done, no gate evidence exists to strike. It is written now, while it costs nothing, so the first phase to
-complete has a documented reverse move rather than an ad-hoc one.
+The generated-artifact redesign dated 2026-08-11 invokes this section across phases 0–64. Phase 0 is Active;
+phases 1–64 and their sprints are Blocked by the reopened numeric sequence. Retained sprint bodies preserve
+functional and validation outcomes plus pre-amendment capability diagnostics, not obsolete artifact or
+dependency-resolution mechanics and not current closure. A retained instruction to commit generated output,
+freeze resolution, retain a resolved version, path, or integrity hash, or consume repository-resident
+evidence, ledgers, or enumerations is historical and superseded; prior results remain
+historical until each phase gate satisfies [§S](#s-universal-artifact-hygiene-gate).
 
 ---
 
@@ -636,12 +665,84 @@ edit, and the copy a reader trusts is whichever one they opened.
 **The rule.** [overview.md §3](overview.md#3-the-hard-constraints-cross-cutting-invariants) is the sole home
 of the cross-cutting invariant set, because it carries the owning-doctrine citation per invariant, which is
 what makes the set maintainable. [README.md](README.md) is the live tracker ([§B](#b-canonical-file-layout-snake_case)):
-phase order, status, gates, Definition of Done, and the document index. It links to the invariant table and
-never restates it.
+phase order, status, Definition of Done, and the document index. Each phase document owns its specific gate.
+The tracker links to both and never restates them.
 
 **What it forecloses.** Reading the tracker alone as a complete statement of what every phase must uphold.
 That is the intended trade: one hop to a table that names its owners beats two lists that agree only by
 accident.
+
+---
+
+## S. Universal artifact-hygiene gate
+
+Every phase gate includes one implicit postcondition in addition to its phase-specific capability check. A
+gate cannot pass unless all of these conditions hold:
+
+1. The run begins from a clean human-committed tree.
+2. Test surfaces are enumerated at run time into `gen/test-surfaces/` and joined to authored expectations.
+3. All deliberate compilation, generation, resolution, and run evidence stays under `gen/`, a declared build
+   root, or a temporary directory; ignored Python interpreter caches are the sole source-adjacent exception.
+4. No command writes beneath an authored root except for Python's ignored interpreter cache.
+5. No `.lock`, `.freeze`, package checksum database, hard-coded library/package SHA, resolved user-home path,
+   generated ledger, evidence file, enumeration, bytecode, or generated source is tracked.
+6. The gate leaves tracked files unchanged and creates no unignored generated path.
+7. The Docker context contains no generated output, evidence, dependency tree, cache, secret, or runtime state.
+8. The generated run bundle is schema-checked and uploaded as an immutable external attestation bound to the
+   committed tree and phase contract.
+
+Python runs with ordinary bytecode caching enabled. `.gitignore` and `.dockerignore` must cover every
+`__pycache__` directory and Python bytecode suffix, and Phase 0 rejects tracked bytecode, context leakage,
+missing patterns, or command-level suppression. A source-adjacent ignored cache is allowed to remain locally;
+it is not a gate output, authored input, or version-controlled artifact.
+
+The complete file classification, output inventory, ignore patterns, and clean-clone acceptance are owned by
+[`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md). A phase document
+states only its capability-specific acceptance condition; it does not duplicate these eight clauses.
+
+This amendment invalidates every prior phase seal because the former gates could consume committed
+enumerations and ledgers, write evidence beneath `DEVELOPMENT_PLAN/`, and rely on tracked resolver output or
+host-specific paths. Existing code may satisfy the capability part, but that result cannot restore Done until
+the redesigned gate passes in numeric order.
+
+---
+
+## T. Plan-to-implementation reconciliation
+
+The plan, implementation, tests, and historical evidence are independent inputs to a reconciliation. None is
+presumed correct merely because it already exists or is authoritative for a different concern. Target intent
+comes from current doctrine and explicit operator decisions; sequencing and acceptance come from this plan;
+implementation presence comes from dated repository inspection; current proof comes only from the redesigned
+gate and verified external attestation.
+
+Every documentation sweep follows this policy:
+
+1. **Establish the audit boundary.** Record the date, tree state, roots inspected, and whether observations are
+   committed, uncommitted, untracked, generated, or external. A dirty worktree is an observation boundary,
+   never a committed baseline.
+2. **Compare by contract, not filename.** For each phase, compare target capability, implementation paths,
+   tests, gate behavior, artifact provenance, substrate/register, and remaining work. A similarly named file
+   does not establish semantic coverage.
+3. **Classify, do not promote.** Update the tracker with one [§C](#c-status-vocabulary) progress term. File
+   presence, compilation, an old ledger, or an invalidated pass cannot yield `Policy-conformant` or ✅ Done.
+4. **Record every divergence.** Missing target code, extra legacy code, generated material in authored roots,
+   obsolete terminology, incompatible gate behavior, hard-coded resolution, test-plan mismatch, and unclear
+   ownership each receive a row in
+   [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md), with an owner and closure condition.
+5. **Resolve ambiguity explicitly.** If doctrine, plan, and code disagree on intended behavior, the phase stays
+   open or blocked while documentation records the conflict and the decision required. An audit never chooses
+   a new product policy implicitly.
+6. **Update all owners together.** A settled decision updates the owning doctrine, tracker, affected phase
+   contracts, component/substrate inventory, and legacy row in one documentation change. Duplicated status or
+   generated audit projections are prohibited.
+7. **Refresh or retire snapshots.** Counts and path inventories are dated diagnostics. A later relevant change
+   refreshes them; closure replaces the divergence row with its verified disposition rather than preserving a
+   stale count as current truth.
+
+`legacy_tracking_for_deletion.md` is therefore broader than a deletion list: until convergence it is the
+mandatory register of existing code, test, tool, and generated-file state that conflicts with the intended
+plan. The tracker provides the concise current view; the legacy register provides the actionable mismatch
+detail.
 
 ---
 
@@ -650,5 +751,9 @@ accident.
 - [overview.md](overview.md) — target architecture and constraints
 - [substrates.md](substrates.md) — the substrate registry and per-phase map
 - [system_components.md](system_components.md) — the target component inventory
+- [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — existing code/test/artifact divergence and its owning closure phase
 - [Documentation Standards](../documents/documentation_standards.md) — the header/link mechanics this inherits
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine the phases adopt
+- [Repository Layout and Artifact Provenance](../documents/engineering/repository_layout_doctrine.md) — generated paths and ignore contracts
+- [Phase 0](phase_00_documentation_suite.md) — implements the documentation and artifact-policy gate
+- [Phase 6](phase_06_illegal_state_corpus.md) — owns the catalog-coverage implementation referenced by the rulebook

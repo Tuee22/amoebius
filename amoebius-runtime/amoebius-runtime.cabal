@@ -1,0 +1,204 @@
+cabal-version: 3.12
+name: amoebius-runtime
+version: 0.1.0.0
+build-type: Simple
+license: Apache-2.0
+
+extra-source-files:
+    dhall/test/round_trip_failover.dhall
+    test/golden/failover_rank.txt
+    test/golden/head_nofault.bin
+    test/golden/forbidden_coordination_packages.txt
+
+flag phase37-ack-before-store-write-mutant
+  description: Acknowledge a command before the artifact store commit
+  default: False
+  manual: True
+
+flag phase37-lease-election-mutant
+  description: Add a Kubernetes Lease effect to a workflow worker
+  default: False
+  manual: True
+
+flag phase37-double-apply-on-redelivery-mutant
+  description: Apply a redelivered WorkId more than once
+  default: False
+  manual: True
+
+flag phase37-orphan-consumer-on-promotion-mutant
+  description: Retain the old active consumer after standby promotion
+  default: False
+  manual: True
+
+flag phase37-sweep-skips-pulsar-mutant
+  description: Omit Pulsar from the postflight sweep domain
+  default: False
+  manual: True
+
+flag phase45-public-pull-mutant
+  description: Replace the pinned in-cluster provider-child image with a public pull
+  default: False
+  manual: True
+
+flag phase47-ignore-signal-mutant
+  description: Ignore the declared scaling signal
+  default: False
+  manual: True
+
+flag phase47-apply-over-quota-mutant
+  description: Permit a cloud mutation after quota refusal
+  default: False
+  manual: True
+
+flag phase47-unreachable-as-gone-mutant
+  description: Collapse an unreachable node into absent
+  default: False
+  manual: True
+
+flag phase47-ignore-live-csinode-mutant
+  description: Ignore the live CSI attachment ceiling
+  default: False
+  manual: True
+
+flag phase47-dedup-distinct-pvcs-mutant
+  description: Deduplicate distinct old and replacement PVCs
+  default: False
+  manual: True
+
+flag phase47-template-id-as-physical-mutant
+  description: Reuse a class template identity across instances
+  default: False
+  manual: True
+
+library
+  exposed-modules:
+      Amoebius.Execution.JobTerminalLive
+      Amoebius.Cluster.ProviderBringUp
+      Amoebius.Daemon.InClusterSingleton
+      Amoebius.Cluster.NodeProvisioner
+      Amoebius.Workflow.Orchestrator
+      Amoebius.Workflow.Resources
+      Amoebius.Workflow.Runtime
+      Amoebius.Workflow.Worker
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      amoebius-pulsar,
+      amoebius-store,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      serialise ==0.2.6.1,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(phase37-ack-before-store-write-mutant)
+    cpp-options: -DPHASE37_ACK_BEFORE_STORE_WRITE_MUTANT
+  if flag(phase37-lease-election-mutant)
+    cpp-options: -DPHASE37_LEASE_ELECTION_MUTANT
+  if flag(phase37-double-apply-on-redelivery-mutant)
+    cpp-options: -DPHASE37_DOUBLE_APPLY_ON_REDELIVERY_MUTANT
+  if flag(phase37-orphan-consumer-on-promotion-mutant)
+    cpp-options: -DPHASE37_ORPHAN_CONSUMER_ON_PROMOTION_MUTANT
+  if flag(phase37-sweep-skips-pulsar-mutant)
+    cpp-options: -DPHASE37_SWEEP_SKIPS_PULSAR_MUTANT
+  if flag(phase45-public-pull-mutant)
+    cpp-options: -DPHASE45_PUBLIC_PULL_MUTANT
+  if flag(phase47-ignore-signal-mutant)
+    cpp-options: -DPHASE47_IGNORE_SIGNAL_MUTANT
+  if flag(phase47-apply-over-quota-mutant)
+    cpp-options: -DPHASE47_APPLY_OVER_QUOTA_MUTANT
+  if flag(phase47-unreachable-as-gone-mutant)
+    cpp-options: -DPHASE47_UNREACHABLE_AS_GONE_MUTANT
+  if flag(phase47-ignore-live-csinode-mutant)
+    cpp-options: -DPHASE47_IGNORE_LIVE_CSINODE_MUTANT
+  if flag(phase47-dedup-distinct-pvcs-mutant)
+    cpp-options: -DPHASE47_DEDUP_DISTINCT_PVCS_MUTANT
+  if flag(phase47-template-id-as-physical-mutant)
+    cpp-options: -DPHASE47_TEMPLATE_ID_AS_PHYSICAL_MUTANT
+
+test-suite content-store-workflow-live
+  type: exitcode-stdio-1.0
+  main-is: FailoverSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      amoebius-pulsar,
+      amoebius-runtime,
+      amoebius-store,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      serialise ==0.2.6.1,
+      text >=2.1 && <2.2,
+      time >=1.12 && <1.15
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite workflow-failover-sim
+  type: exitcode-stdio-1.0
+  main-is: WorkflowFailoverSimSpec.hs
+  other-modules:
+      WorkflowSimScenario
+  hs-source-dirs:
+      test/sim
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      amoebius-runtime,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      io-classes ==1.10.1.0,
+      io-sim ==1.10.1.0,
+      QuickCheck >=2.15 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite provider-child-bringup-contract
+  type: exitcode-stdio-1.0
+  main-is: Phase45ContractSpec.hs
+  hs-source-dirs:
+      test/provider
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      amoebius-runtime,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite provider-child-bringup-live
+  type: exitcode-stdio-1.0
+  main-is: Phase45LiveSpec.hs
+  hs-source-dirs:
+      test/provider
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2,
+      vector >=0.13 && <0.14
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite provider-dynamic-node-contract
+  type: exitcode-stdio-1.0
+  main-is: Phase47ContractSpec.hs
+  hs-source-dirs: test/provider
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius-runtime,
+      amoebius-pulumi,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns

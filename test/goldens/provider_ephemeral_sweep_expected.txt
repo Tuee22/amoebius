@@ -1,0 +1,4 @@
+resource-class	expected-survivors	ownership-enumeration
+ephemeral	0	run-tag-or-vpc-id-or-cluster-ownership-tag
+durable-per-pv-ebs	1	permitted-retained-class
+elevated-reclamation	UNVERIFIED	phase-54

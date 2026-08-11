@@ -1,0 +1,7 @@
+newProducer :: NativeClient -> Topic -> Text -> IO Producer
+produce :: Serialise a => Producer -> a -> IO MessageId
+produceAtSequence :: Serialise a => Producer -> Word64 -> a -> IO MessageId
+produceKeyedAtSequence :: Serialise a => Producer -> Word64 -> Text -> a -> IO MessageId
+newConsumer :: NativeClient -> Topic -> Text -> SubscriptionType -> IO (Consumer a)
+receive :: Serialise a => Consumer a -> IO (Either DecodeError (Received a))
+acknowledge :: Consumer a -> MessageId -> IO ()

@@ -1,0 +1,13 @@
+component,bytes
+kv-resident,131072
+transit-resident,32768
+pki-resident,196608
+auth-and-lease-resident,65536
+resident-total,425984
+wal,106496
+snapshot,425984
+old-new-compaction,851968
+restart-recovery,212992
+required-usable-peak,2023424
+filesystem-overhead,73728
+provisioned-raw,134217728

@@ -1,0 +1,5 @@
+session cursor plan decision
+t-a/alice t-a/alice B allow
+t-a/bob t-a/alice B deny
+t-b/carol t-a/alice B deny
+t-a/alice t-a/alice A-stale ReloadRequired

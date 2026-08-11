@@ -1,0 +1,1 @@
+Erase the rendered memory request; resource-projection must turn red.

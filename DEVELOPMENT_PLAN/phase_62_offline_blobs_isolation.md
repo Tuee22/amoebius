@@ -5,8 +5,14 @@
 > **Read this if**: phase 62 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 62 delivers the offline blobs and partition isolation; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu`` substrate.
-No gate has run.
+Register 3, scoped live, on the `linux-cpu` substrate.
+The scoped gate passed on 2026-08-11; real MinIO/Gateway/Kubernetes/CNI and production PureScript remain
+`UNVERIFIED`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -25,7 +31,7 @@ No gate has run.
 - [Resource provision — bounded local-blob upload](#resource-provision--bounded-local-blob-upload)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 62.1: Gate encrypted blob replay and isolation 📋](#sprint-621-gate-encrypted-blob-replay-and-isolation-)
+- [Sprint 62.1: Gate encrypted blob replay and isolation ⏸️](#sprint-621-gate-encrypted-blob-replay-and-isolation-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,7 +39,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Offline local-blob persistence and upload are unimplemented.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 Scoped gate passed. The blob state machine, real Chrome encryption/restart/raw inspection, opaque handle,
+two-chunk resume, server hash, independent content readback, dependency ordering, isolation, quota, and six
+mutants pass. Real platform-provider observations remain `UNVERIFIED`.
 
 ## Phase Summary
 
@@ -45,7 +59,8 @@ typed refusal or explicit safe eviction, never silent removal of a blob referenc
 **Session scope:** Gate one bounded blob class and one dependent command; background media processing and
 peer-to-peer transfer are out of scope.
 
-**Substrate:** `linux-cpu`.
+**Substrate:** `linux-cpu`. Every hardware substrate can always run this lane. For pristine Linux, use Incus
+on Linux/Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 
 **Register:** 3 — live infrastructure.
 
@@ -79,14 +94,23 @@ storm. Browser quota remains runtime-observed and cannot masquerade as cluster c
 
 ## Sprints
 
-## Sprint 62.1: Gate encrypted blob replay and isolation 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 62.1: Gate encrypted blob replay and isolation ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `ui/src/Amoebius/Ui/Offline/BlobStore.purs`,
-`src/Amoebius/Ui/Offline/BlobUpload.hs`, `test/live/Phase62OfflineBlobSpec.hs` (planned; not built)
-**Blocked by**: Phase 61
-**Independent Validation**: `cabal test offline-blobs-isolation-live` with raw
-browser storage, MinIO audit/content, and tenant-effect observers
+`src/Amoebius/Ui/Offline/BlobUpload.hs`, `test/live/Phase62OfflineBlobSpec.hs`,
+`tools/phase62_blob_live.py`, and `tools/phase62_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `python3 tools/phase62_gate.py` with model tests, two
+Chrome processes, raw storage, resumable local upload, independent content readback, six mutants, docs, ledger
 **Docs to update**:
 `documents/engineering/browser_offline_runtime_doctrine.md`, `documents/engineering/tenancy_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/testing_doctrine.md`
@@ -104,11 +128,13 @@ Move one offline blob to durable content storage without plaintext leakage, cros
 
 ### Validation
 
-1. Run `cabal test offline-blobs-isolation-live`; require the canonical run green and all mutants red.
+1. Run `python3 tools/phase62_gate.py`; require the scoped canonical model and live
+   trace green and all six mutants red.
 
 ### Remaining Work
 
-The whole sprint is planned.
+Repeat the gate with real MinIO audit/content, Keycloak/Gateway authority, Kubernetes/CNI bypass observation,
+and the production PureScript bundle. Those surfaces remain `UNVERIFIED` here.
 
 ## Documentation Requirements
 

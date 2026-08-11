@@ -1,0 +1,9 @@
+case	expected_tag
+unreachable-release	RefuseOnUnreachable
+pod-slot-one-short	NoPodSlotCover
+csi-attach-one-short	NoCsiAttachSlotCover
+cuda-on-cpu-class	MissingCapability Cuda
+aggregate-instance-quota	ProviderInstanceQuotaExceeded
+aggregate-vcpu-quota	ProviderVcpuQuotaExceeded
+root-ebs-byte-quota	ProviderRootEbsBytesExceeded
+root-ebs-count-quota	ProviderRootEbsCountExceeded

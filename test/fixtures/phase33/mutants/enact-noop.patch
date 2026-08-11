@@ -1,0 +1,5 @@
+--- a/src/Amoebius/ControlPlane/Reconcile.hs
++++ b/src/Amoebius/ControlPlane/Reconcile.hs
+@@
+-enactPlan desired observed = filter (`notElem` observed) desired
++enactPlan _ _ = []

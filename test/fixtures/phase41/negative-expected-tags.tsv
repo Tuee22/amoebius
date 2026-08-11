@@ -1,0 +1,4 @@
+fixture	expected_tag
+dhall/examples/illegal_wg_inline_key.dhall	gate1-inline-key-literal
+dhall/examples/illegal_wg_overlapping_ip.dhall	decode-vpn-ip-overlap
+dhall/examples/illegal_wg_allowed_outside_cidr.dhall	decode-allowed-ips-outside-fabric

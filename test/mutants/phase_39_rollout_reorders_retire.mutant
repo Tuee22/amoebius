@@ -1,0 +1,2 @@
+operator=effect-swap
+expected=retire-old precedes the verified-migrate observation

@@ -1,0 +1,1 @@
+{"trace":["online-a","disconnect","queue-projection","queue-scalar","queue-infernix-start","queue-blob-dependent","isolate-zone-b","advance-release-b","reauthenticate-current","reconnect-zone-c","repair-cursor","upload-verify-blob","replay-once","paired-denial","inspect-effects"],"acceptedEffects":3,"duplicateEffects":0}

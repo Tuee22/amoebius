@@ -1,0 +1,37 @@
+{
+  "costModel": "network-fabric-v1",
+  "fabricCidr": "10.77.0.0/16",
+  "interfaceName": "wg0",
+  "maxPacketBytes": 1280,
+  "maxPacketsPerSecond": 2000,
+  "maxQueuedBytes": 65536,
+  "logPolicy": {
+    "maxBackups": 2,
+    "maxBytesPerFile": 65536,
+    "retentionSeconds": 86400
+  },
+  "nodes": [
+    {
+      "cpuCeilingMilli": 100,
+      "cpuReservationMilli": 25,
+      "hostProcessSlots": 1,
+      "listenerPort": 19410,
+      "memoryCeilingBytes": 33554432,
+      "memoryReservationBytes": 8388608,
+      "nodeFsBytes": 1245184,
+      "nodeId": "gateway-root",
+      "peerIds": ["spoke-alpha"]
+    },
+    {
+      "cpuCeilingMilli": 100,
+      "cpuReservationMilli": 25,
+      "hostProcessSlots": 1,
+      "listenerPort": 19410,
+      "memoryCeilingBytes": 33554432,
+      "memoryReservationBytes": 8388608,
+      "nodeFsBytes": 1245184,
+      "nodeId": "spoke-alpha",
+      "peerIds": ["gateway-root"]
+    }
+  ]
+}

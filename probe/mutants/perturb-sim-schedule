@@ -1,0 +1,4 @@
+operator=schedule-perturbation
+invocation=python3 probe/oracle/check-sim-terminal --perturbed
+change=drop the second writer's fairness step
+expected=terminal-state mismatch: expected terminal=3, actual terminal=1

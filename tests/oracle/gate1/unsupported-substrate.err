@@ -1,0 +1,7 @@
+Error: Expression doesn't match annotation
+- AppleMetalVm
+- LinuxKind
+- LinuxRke2
+- ManagedEks
++ MultiNodeKind
++ WindowsBare

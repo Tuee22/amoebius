@@ -1,0 +1,13 @@
+capability=Sql
+resource=database
+provider=Canonical
+product=Patroni
+shape=SingleNode
+object|sql/database/config|ConfigMap|provider-config|-
+object|sql/database/member-0|StatefulSet|member|sql/database/controller-0
+object|sql/database/schema-bootstrap|Job|bootstrap|sql/database/schema-controller
+object|sql/database/service|Service|stable-endpoint|-
+execution|sql/database/member-0|StatefulSet
+execution|sql/database/schema-bootstrap|Job
+intent=PatroniSqlIntent "database"
+intent=SchemaMigrationIntent "database"

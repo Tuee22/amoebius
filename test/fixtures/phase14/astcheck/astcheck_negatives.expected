@@ -1,0 +1,7 @@
+file	reason	line	column
+negative_import.hs	UnsanctionedImport	2	1
+negative_raw_io.hs	RawIO	2	7
+negative_foreign.hs	ForeignCall	2	1
+negative_unsafe.hs	UnsafeOperation	2	9
+negative_template_haskell.hs	TemplateHaskell	2	9
+negative_orphan.hs	OrphanInstance	2	1

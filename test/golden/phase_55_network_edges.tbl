@@ -1,0 +1,6 @@
+source destination expected
+browser envoy allow
+browser ui-server-direct deny
+browser provider deny
+ui-server bound-provider allow
+foreign-pod provider deny

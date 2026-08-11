@@ -1,0 +1,8 @@
+case,committed,additional,concurrent,failed_set,max_failed_sets,observed_orphan,horizon_seconds,age_seconds,deletion_observed,supply,expected_peak,expected
+exact-fit,100,20,30,10,2,0,5,0,false,170,170,allow
+one-byte-short,100,20,30,10,2,0,5,0,false,169,170,deny
+pre-horizon-orphan-exact,100,20,30,10,2,40,5,4,false,210,210,allow
+pre-horizon-orphan-short,100,20,30,10,2,40,5,4,false,209,210,deny
+post-horizon-not-observed,100,20,30,10,2,40,5,6,false,210,210,allow
+post-horizon-deleted,100,20,30,10,2,40,5,6,true,170,170,allow
+failed-window-one-short,0,0,0,17,3,0,5,0,false,50,51,deny

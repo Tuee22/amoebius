@@ -1,0 +1,2 @@
+mutation=replace the MinIO S3 registry backend with filesystem storage
+expected_red=registry uses MinIO S3 driver

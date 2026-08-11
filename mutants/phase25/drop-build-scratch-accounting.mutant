@@ -1,0 +1,3 @@
+surface=deriveBuildTransition
+mutation=intermediateBytes->0
+expected_oracle=BuildScratchExceeded

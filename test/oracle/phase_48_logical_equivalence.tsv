@@ -1,0 +1,5 @@
+case	logical_fields_a	logical_fields_b	distinct_preimage	expected
+permuted-map	a=1,b=2	b=2,a=1	true	equal-address
+record-order	name=x,count=7	count=7,name=x	true	equal-address
+integer-spelling	value=7	value=007	true	equal-address
+identical	name=x	name=x	false	equal-address

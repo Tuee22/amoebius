@@ -1,0 +1,6 @@
+diff --git a/src/Amoebius/HostWorker/Capacity.hs b/src/Amoebius/HostWorker/Capacity.hs
+--- a/src/Amoebius/HostWorker/Capacity.hs
++++ b/src/Amoebius/HostWorker/Capacity.hs
+@@
+-  [demandVmMemoryBytes demand, demandSystemHeadroomBytes demand, demandWorkerRuntimeBytes demand, epochPeak]
++  [demandVmMemoryBytes demand, demandSystemHeadroomBytes demand, demandWorkerRuntimeBytes demand]

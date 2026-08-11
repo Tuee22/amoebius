@@ -275,9 +275,9 @@ source it admits is owned by [`backup_recovery_doctrine.md` §8](./backup_recove
 
 ## 6. Honesty and layer markers
 
-The forest/geo-replication substrate is **Phase 42**; everything in this document's gateway-migration/DNS
-failover runtime and acceptance is **design intent for Phase 43**. Nothing here is built or verified today. Phase order, status, and
-the acceptance gate are owned by
+The forest/geo-replication substrate is **Phase 42**. Phase 43 realizes the migration shell in
+`Amoebius.Multicluster.GatewayMigration`, `PlannedHandover`, `PromotionGate`, `DnsRepoint`, and
+`ClientRebind`. Phase order, status, and the acceptance gate are owned by
 [DEVELOPMENT_PLAN/README.md → Phase 43](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
 status.
 
@@ -286,17 +286,17 @@ status.
   ([gateway_migration_model_doctrine.md §3](./gateway_migration_model_doctrine.md#3-the-model), [§6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)), not merely argued. What stays
   **assumed** is the *runtime physics* the model abstracts — that the caught-up verification and the
   MinIO/Pulsar/Patroni lossless delegation actually hold live — a **runtime-observed** caught-up edge, not a
-  constructive type-level impossibility, confirmed only by the Register-3 chaos injection of Phase 43. Per the
+  constructive type-level impossibility. Phase 43 observed it with an outside-forest journal and positive lag. Per the
   honesty rule ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)),
-  the model property is *proven-for-the-model* and the runtime fidelity is *assumed until Phase 43*.
+  the model property is *proven-for-the-model* and the drilled runtime fidelity is *tested*.
 - **Both** branches are the subject of amoebius's one proof obligation, owned by
   [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) and set in the concentration
   principle of [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): the `Failover` async correctness via
   `NoWriteAfterStaleFailover` (safety) and `MergeConverges` (liveness), and the `Planned` handover via
   `PlannedIsLossless` — one reifiable `Model`, simulated (io-sim) and proven (TLC) at design time, with
-  spec↔decision-core correspondence differentially checked and no deferred prose table. What remains for Phase 43
-  is Register-3 chaos injection against the running forest — confirming the abstracted physics hold — never a
-  paper correspondence.
+  spec↔decision-core correspondence differentially checked and no deferred prose table. The Register-3 drill
+  covers both arms, all modeled actions, raw-kernel hub handoff, and authoritative local DNS. Provider Route53
+  mutation and WAN physics remain UNVERIFIED.
 - The typed `GatewayFailover { active : ClusterId, standby : ClusterId, dnsRecord, hubRole }` forest relation
   is a **parent-owned** relation in the `RootInForceSpec`, projected read-only into each child's
   `ChildInForceSpec` — the same derive-don't-author, relations-owned-by-the-enclosing-scope pattern the

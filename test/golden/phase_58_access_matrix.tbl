@@ -1,0 +1,5 @@
+interval authority tenant operation expected forbidden_effect
+isolated own t-a read allow zero
+isolated own t-a mutate allow zero
+isolated foreign t-b read deny zero
+isolated foreign t-b mutate deny zero

@@ -1,0 +1,6 @@
+case	entry	legal	illegal	expected
+tenant-index	3.8:tenant-index,3.10:owner-index	test/dsl/compilefail/tenant_legal.hs	test/dsl/compilefail/tenant_illegal.hs	test/dsl/compilefail/tenant.expected
+pv-pvc-index	3.2:pv-pvc-index	test/dsl/compilefail/volume_legal.hs	test/dsl/compilefail/volume_illegal.hs	test/dsl/compilefail/volume.expected
+endpoint-kind-index	3.7:endpoint-kind-index	test/dsl/compilefail/endpoint_legal.hs	test/dsl/compilefail/endpoint_illegal.hs	test/dsl/compilefail/endpoint.expected
+live-service-route-index	3.3:live-service-route-index	test/dsl/compilefail/route_legal.hs	test/dsl/compilefail/route_illegal.hs	test/dsl/compilefail/route.expected
+produce-codec	3.23:produce-codec	test/dsl/compilefail/cbor_legal.hs	test/dsl/compilefail/cbor_illegal.hs	test/dsl/compilefail/cbor.expected

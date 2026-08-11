@@ -1,0 +1,10 @@
+class	value
+asset	/index.html
+asset	/ui.js
+asset	/ui.css
+api	/ui/client-plan
+api	/ui/action/*
+forbidden	eval
+forbidden	dynamic-import-http
+forbidden	provider-sdk
+forbidden	localStorage

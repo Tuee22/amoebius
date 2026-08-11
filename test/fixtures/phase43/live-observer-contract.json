@@ -1,0 +1,15 @@
+{
+  "dnsObserver": "authoritative local DNS readback",
+  "forestClusters": ["amoebius-p43-parent", "amoebius-p43-source", "amoebius-p43-target"],
+  "journalStore": "/var/tmp/amoebius-phase43-journal",
+  "modeledActionsCovered": [
+    "StartPlanned", "StandUpReplica", "Quiesce", "VerifyCaughtUp", "PromotePlanned",
+    "RepointPlannedDns", "Unfreeze", "DrainMonitor", "DecommissionSource", "ActiveCrash",
+    "ColdSeed", "PromoteSurvivor", "RepointFailoverDns", "BoundedRebind", "Heal", "MergeConverge"
+  ],
+  "retainedBackingStores": ["phase24-root-platform"],
+  "route53ProviderApi": "UNVERIFIED",
+  "survivingMigrationRecordsAfterTeardown": 0,
+  "survivingTestClustersAfterTeardown": 0,
+  "wireGuardHubMove": "raw-kernel role handoff"
+}

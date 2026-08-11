@@ -1,0 +1,2 @@
+operator=guard-weakening
+expected=foreign-origin request creates handler bytes

@@ -6,14 +6,19 @@
 
 Phase 19 delivers the UI effect binding; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+Gate passed on 2026-08-09 with ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/ledgers/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md
 **Generated sections**: none
 
 </details>
@@ -24,7 +29,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 19.1: Seal the effect-handler-capability relation 📋](#sprint-191-seal-the-effect-handler-capability-relation-)
+- [Sprint 19.1: Seal the effect-handler-capability relation ⏸️](#sprint-191-seal-the-effect-handler-capability-relation-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,8 +37,17 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. This is a pure provision-seal proof over declared registries. It does not establish that a live
-handler or provider enforces its declared authorization, tenancy, idempotency, or storage behavior.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. Seven ports exact-join their handler/capability/contract tuples, two named links resolve through the
+fixed-HTTPS catalog, all pinned and bounded-input failures are exact with empty traces, coverage floors pass,
+and seven mutants turn red. This pure seal does not establish that a live handler or provider enforces its
+declared authorization, tenancy, idempotency, or storage behavior. See the
+[Phase-19 ledger](ledgers/phase_19_ui_effect_binding.md).
 
 ## Phase Summary
 
@@ -105,16 +119,24 @@ prove a handler's implementation, current provider state, live authorization, or
 
 ## Sprints
 
-## Sprint 19.1: Seal the effect-handler-capability relation 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 19.1: Seal the effect-handler-capability relation ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`,
-`test/ui/Phase19UiEffectBindingSpec.hs`, and `test/ui/EffectBindingReference.hs` (target authored sources;
-not yet built)
-**Blocked by**: Phase 18
+`test/ui/Phase19UiEffectBindingSpec.hs`, `test/ui/EffectBindingReference.hs`, and `tools/phase19_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `cabal test ui-effect-binding-spec`
 compares the private binder's serialized result with the Phase-0 finite relation, verifies empty failure
-traces, and requires every named mutant to fail.
+traces, and requires every named mutant to fail. The full hermetic gate is
+`python3 tools/phase19_gate.py`.
 **Docs to update**:
 `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/service_capability_doctrine.md`,
@@ -145,7 +167,8 @@ one compatible trusted implementation and every effect invariant is present in t
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None in Phase 19. Browser, handler, provider-state, authorization-runtime, and live tenant-isolation truth stay
+UNVERIFIED and remain assigned to later gates.
 
 ## Documentation Requirements
 

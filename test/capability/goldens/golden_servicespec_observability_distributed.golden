@@ -1,0 +1,16 @@
+capability=Observability
+resource=telemetry
+provider=Canonical
+product=Prometheus
+shape=Distributed(3)
+object|observability/telemetry/config|ConfigMap|provider-config|-
+object|observability/telemetry/discovery|Service|member-discovery|-
+object|observability/telemetry/member-0|StatefulSet|member|observability/telemetry/controller-0
+object|observability/telemetry/member-1|StatefulSet|member|observability/telemetry/controller-1
+object|observability/telemetry/member-2|StatefulSet|member|observability/telemetry/controller-2
+object|observability/telemetry/quorum-policy|PodDisruptionBudget|quorum-policy|-
+object|observability/telemetry/service|Service|stable-endpoint|-
+execution|observability/telemetry/member-0|StatefulSet
+execution|observability/telemetry/member-1|StatefulSet
+execution|observability/telemetry/member-2|StatefulSet
+intent=ObservabilityIntent "telemetry"

@@ -1,0 +1,4 @@
+record_kind from to path current_authority
+outbox 1 2 total-migration required
+blob-dependency 1 2 retained-decoder-handler required
+cached-projection 1 2 total-migration required

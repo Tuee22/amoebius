@@ -1,0 +1,9 @@
+CONSTANT
+  Proc = {"p0", "p1"}
+SPECIFICATION Spec
+INVARIANT MutualExclusion
+PROPERTY EveryRequestEventuallyExits
+PROPERTY AlwaysMutualExclusion
+PROPERTY SomeProcessEventuallyCritical
+CONSTRAINT StateBound
+CHECK_DEADLOCK FALSE

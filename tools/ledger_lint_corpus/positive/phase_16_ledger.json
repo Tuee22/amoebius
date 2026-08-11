@@ -1,0 +1,17 @@
+{
+  "phase": 16,
+  "gate_command": "cabal test ui-program-schema-spec",
+  "register": "1",
+  "substrate": "none",
+  "date": "2026-08-08",
+  "layers": [
+    {"name": "Decision", "status": "proven-for-the-model"},
+    {"name": "Protocol", "status": "UNVERIFIED"},
+    {"name": "Runtime", "status": "UNVERIFIED"}
+  ],
+  "coverage": [
+    {"surface": "ui.source.closed_union", "status": "proven-for-the-model"},
+    {"surface": "ui.source.total_graph", "status": "proven-for-the-model"}
+  ],
+  "ledger_hash": "sha256:c51bfdcd9c19a08b6c57786524068243193ceb8a050e01a25abbd60e2d27c4ec"
+}

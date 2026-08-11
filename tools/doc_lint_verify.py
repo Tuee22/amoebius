@@ -14,6 +14,7 @@ Exit status: 0 both sides pass, 1 otherwise.
 
 import argparse
 import os
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -101,6 +102,51 @@ def tree_side():
     return False
 
 
+def ledger_side():
+    """Prove the independent ledger checker accepts and rejects its own corpus."""
+    command = [sys.executable, os.path.join(HERE, "ledger_lint.py"), "--verify-corpus"]
+    result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
+    phase_zero = subprocess.run(
+        [
+            sys.executable,
+            os.path.join(HERE, "ledger_lint.py"),
+            os.path.join(ROOT, "test", "golden", "phase_00_ledger.json"),
+            "--enumeration",
+            os.path.join(ROOT, "test", "enumeration", "phase_00_surfaces.txt"),
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    print("\nledger side — schema and seeded negatives\n")
+    if result.stdout:
+        print(result.stdout.rstrip())
+    if phase_zero.returncode == 0:
+        print("  ok   phase_00_ledger.json         schema, tracker, surfaces, hash")
+    if result.returncode == 0 and phase_zero.returncode == 0:
+        return True
+    if result.stderr:
+        print(result.stderr.rstrip())
+    if phase_zero.stderr:
+        print(phase_zero.stderr.rstrip())
+    return False
+
+
+def artifact_side():
+    """Audit the independently authored Phase-0 oracle and mutant manifest."""
+    command = [sys.executable, os.path.join(HERE, "phase0_artifact_lint.py")]
+    result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
+    print("\nartifact side — pre-implementation oracles and mutants\n")
+    if result.stdout:
+        print(result.stdout.rstrip())
+    if result.returncode == 0:
+        return True
+    if result.stderr:
+        print(result.stderr.rstrip())
+    return False
+
+
 def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--fixtures", action="store_true", help="run the fixture side only")
@@ -111,10 +157,14 @@ def main(argv):
         return 0 if fixtures_ok else 1
 
     tree_ok = tree_side()
+    ledger_ok = ledger_side()
+    artifact_ok = artifact_side()
     print()
     print(f"fixture side: {'PASS' if fixtures_ok else 'FAIL'}")
     print(f"corpus  side: {'PASS' if tree_ok else 'FAIL'}")
-    return 0 if (fixtures_ok and tree_ok) else 1
+    print(f"ledger  side: {'PASS' if ledger_ok else 'FAIL'}")
+    print(f"artifact side: {'PASS' if artifact_ok else 'FAIL'}")
+    return 0 if (fixtures_ok and tree_ok and ledger_ok and artifact_ok) else 1
 
 
 if __name__ == "__main__":

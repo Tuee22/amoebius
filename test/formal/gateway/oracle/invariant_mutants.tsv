@@ -1,0 +1,6 @@
+mutant	expected_invariant	other_invariants
+dual-owner-promote	UniqueGatewayOwner	green
+drop-last-endpoint	SessionAlwaysRebindable	green
+verify-while-offsets-lag	PlannedIsLossless	green
+over-budget-divergence	NoWriteAfterStaleFailover	green
+take-without-witness	NoTakeWithoutProvenFreshness	green

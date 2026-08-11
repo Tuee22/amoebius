@@ -1,0 +1,1 @@
+Accept duplicate shard ids, an incorrect shard sum, or more shards than owner devices.

@@ -1,0 +1,4 @@
+case,required_usable_bytes,minimum_bytes,quantum_bytes,expected_provisioned_bytes,parent_residual_bytes,result
+exact,34359738368,42949672960,4294967296,42949672960,42949672960,fit
+one_more,34359738369,0,4294967296,38654705664,34359738368,parent_short
+raw_one_short,34359738368,42949672960,4294967296,42949672960,42949672959,raw_disk_short

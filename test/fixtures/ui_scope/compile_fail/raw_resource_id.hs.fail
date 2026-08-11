@@ -1,0 +1,8 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+module RawResourceId where
+
+import Amoebius.Ui.Security.Scope (ResourceId)
+
+bad :: ResourceId
+bad = ResourceId "caller-controlled"

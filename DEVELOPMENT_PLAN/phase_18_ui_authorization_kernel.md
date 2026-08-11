@@ -6,14 +6,19 @@
 
 Phase 18 delivers the UI authorization kernel; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+Gate passed on 2026-08-09 with ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -24,7 +29,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 18.1: Sealed action registry and authorized-action transition 📋](#sprint-181-sealed-action-registry-and-authorized-action-transition-)
+- [Sprint 18.1: Sealed action registry and authorized-action transition ⏸️](#sprint-181-sealed-action-registry-and-authorized-action-transition-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,8 +37,16 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. This phase proves the closed authorization relation in process; it makes no claim that a live edge,
-identity provider, or UI-server deployment enforces the relation.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The sealed five-action registry, independent authorization matrix, exact parity and stale-epoch errors,
+coverage floors, empty denial traces, and both authority mutants pass. This proves the closed authorization
+relation in process; it makes no claim that a live edge, identity provider, or UI-server deployment enforces
+the relation. See the [Phase-18 ledger](ledgers/phase_18_ui_authorization_kernel.md).
 
 ## Phase Summary
 
@@ -94,16 +107,24 @@ HTTP routing, handler implementation correctness, or provider-side isolation.
 
 ## Sprints
 
-## Sprint 18.1: Sealed action registry and authorized-action transition 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 18.1: Sealed action registry and authorized-action transition ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Security/Authorization.hs`,
-`test/ui/AuthorizationSpec.hs`, and `test/ui/AuthorizationReference.hs` (target authored sources; not yet
-built)
-**Blocked by**: Phase 17
+`test/ui/AuthorizationSpec.hs`, `test/ui/AuthorizationReference.hs`, and `tools/phase18_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `cabal test ui-authorization-spec` compares
 production results with Phase-0 pins and the separate reference evaluator, verifies empty denied traces, and
-requires each named mutant to fail.
+requires each named mutant to fail. The full hermetic gate is
+`python3 tools/phase18_gate.py`.
 **Docs to update**:
 `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/illegal_state/illegal_state_security.md`, `documents/engineering/testing_doctrine.md`
@@ -137,7 +158,8 @@ or stale authority snapshot.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None in Phase 18. Live identity, UI-server, policy-provider, and tenant-isolation enforcement remains owned by
+the later Register-3 phases and is UNVERIFIED here.
 
 ## Documentation Requirements
 

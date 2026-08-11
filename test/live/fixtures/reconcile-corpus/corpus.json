@@ -1,0 +1,41 @@
+{
+  "schema": "amoebius.phase26.reconcile-corpus.v1",
+  "phase13GoldenIds": [
+    "registry_singlenode",
+    "messagebus_singlenode"
+  ],
+  "namespace": "amoebius-phase26-gate",
+  "owner": "phase26-corpus",
+  "generation": "phase26-generation-1",
+  "image": "registry.amoebius.invalid:5000/amoebius/base@sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4",
+  "objects": [
+    {"identity": "Namespace/amoebius-phase26-gate", "activation": "Immediate", "action": "ColdCreateNamespace"},
+    {"identity": "Lease/amoebius-phase26-gate/amoebius-reconciler", "activation": "Immediate", "action": "AcquireMandatoryLease"},
+    {"identity": "CustomResourceDefinition/capacityreservations.amoebius.io", "activation": "Immediate", "action": "ApplyDesiredObject"},
+    {"identity": "ResourceQuota/amoebius-phase26-gate/corpus-envelope", "activation": "Immediate", "action": "ApplyDesiredObject"},
+    {"identity": "Service/amoebius-phase26-gate/serial-headless", "activation": "Immediate", "action": "ApplyDesiredObject"},
+    {"identity": "Deployment/amoebius-phase26-gate/capacity-controller", "activation": "Immediate", "action": "ApplyDesiredPodController"},
+    {"identity": "CapacityReservation/amoebius-phase26-gate/corpus-reservation", "activation": "Immediate", "action": "ApplyDesiredObject"},
+    {"identity": "Deployment/amoebius-phase26-gate/private-pull", "activation": "Immediate", "action": "ApplyDesiredPodController"},
+    {"identity": "StatefulSet/amoebius-phase26-gate/serial", "activation": "Immediate", "action": "SerialOnDeleteStart"},
+    {"identity": "Job/amoebius-phase26-gate/terminal", "activation": "Immediate", "action": "RetainTerminalAwaitingCompletionGateway"},
+    {"identity": "Deployment/amoebius-phase26-gate/reservation-child", "activation": "Immediate", "action": "ApplyDesiredPodController"},
+    {"identity": "PersistentVolumeClaim/amoebius-phase26-gate/reservation-child", "activation": "Immediate", "action": "ApplyDesiredObject"}
+  ],
+  "childEnvelope": {
+    "replicas": 1,
+    "cpuRequest": "10m",
+    "cpuLimit": "100m",
+    "memoryRequest": "16Mi",
+    "memoryLimit": "64Mi",
+    "ephemeralRequest": "16Mi",
+    "ephemeralLimit": "64Mi",
+    "storageRequest": "16Mi"
+  },
+  "expectedTerminal": {
+    "job": "terminal",
+    "outcome": "Succeeded",
+    "completionGateway": "Absent",
+    "action": "RetainTerminalAwaitingCompletionGateway"
+  }
+}

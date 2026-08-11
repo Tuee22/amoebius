@@ -1,0 +1,11 @@
+data_replicas=3
+sentinel_voters=3
+tls=true
+acl=true
+pvc=false
+aof=false
+rdb=false
+maxmemory=67108864
+maxclients=128
+output_buffer=8388608
+challenge_ttl_seconds=120

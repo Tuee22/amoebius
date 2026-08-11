@@ -1,0 +1,5 @@
+case	step	visible_state	effect	cancelled	route
+single-submit	1	editing	-	false	home
+single-submit	2	pending	submit	false	workflow
+single-cancel	1	cancelled	cancel	true	workflow
+named-link	1	home	navigate:docs	false	home

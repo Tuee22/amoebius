@@ -1,0 +1,16 @@
+registry
+minio
+vault
+zookeeper
+bookkeeper
+pulsar
+redis
+sentinel
+prometheus
+grafana
+postgres
+pgadmin
+envoy
+gateway-api
+keycloak
+cloud-load-balancer

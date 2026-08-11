@@ -70,7 +70,7 @@ as the set its first-use rule ranges over.
 - [spoof-resistant gate](./engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect) — a gate observing an unforgeable post-start effect rather than a self-report.
 - [mutant](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — a committed seeded defect; a gate is trusted only once the mutant turns it red.
 - [gate integrity](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the twelve clauses ensuring a gate cannot be passed by a stub.
-- [substrate](./engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob) — the detected host platform family a gate runs on; a fact, never a configurable knob.
+- [substrate](./engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob) — the detected hardware platform family; it always derives a `linux-cpu` execution lane and may add an accelerator lane. A pristine Linux lane uses Incus on Linux, Lima on Apple, or WSL2 on Windows.
 - [status vocabulary](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — the five phase markers, and the rule confining status to the plan.
 - [Single Source of Truth](./documentation_standards.md#1-philosophy) — the rule that exactly one document owns a concept and the rest link to it.
 
@@ -81,7 +81,7 @@ as the set its first-use rule ranges over.
 - [`Topology`](./engineering/cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction) — a cluster as a fold over its nodes, with cardinality fixed by construction.
 - [context and role](./engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) — the orthogonal grid of where the binary runs against what job it does.
 - [control-plane singleton](./engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton) — the single-replica pod holding cluster and secret authority under a lease.
-- [the midwife](./engineering/substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) — the pre-binary Python command that ensures a toolchain, builds the binary, and hands off.
+- [the bootstrap coordinator](./engineering/substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) — the pre-binary Python command that ensures a toolchain, builds the binary, and hands off.
 - [the handoff](./engineering/bootstrap_sequence_doctrine.md#4-the-host-daemon--singleton-handoff) — the instant the host daemon stops being the authority and the singleton starts.
 - [Channel 1 and Channel 2](./engineering/host_cluster_comms_doctrine.md#1-the-host-origin-surface-two-channels-both-localhost-only) — the two host-origin communication paths and their reach restriction.
 - [wild ingress](./engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) — all traffic originating outside the host, entering by one centralized path.

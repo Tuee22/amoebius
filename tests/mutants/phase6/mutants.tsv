@@ -1,0 +1,5 @@
+mutant	operator	expected_red_locus
+capability-product-arm	union-arm-addition	Gate-1 product-named capability admitted
+dropped-resource-normalization	guard-deletion	positive execution resource traversal
+weakened-volume-index	GADT-index-weakening	PVC/PV illegal pair compiles
+broken-decision-functions	smart-constructor-and-fold-weakening	all four QuickCheck properties

@@ -1,0 +1,6 @@
+diff --git a/src/Amoebius/HostWorker/Capacity.hs b/src/Amoebius/HostWorker/Capacity.hs
+--- a/src/Amoebius/HostWorker/Capacity.hs
++++ b/src/Amoebius/HostWorker/Capacity.hs
+@@
+-    _ -> Right (maximum values)
++    _ -> Right (minimum values)

@@ -137,6 +137,14 @@ flowchart TD
 
 *Design intent. Rendered peer configs and Vault-injected keys are Tier-1 in-process; the wg0 interface is the one effectful seam where `wg set` enacts — runtime-checked, not proven here.*
 
+[Phase 41](../../DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md) validates this v1 seam on the
+always-available `linux-cpu` lane. Two fresh Vault-KV keypairs are resolved by `SecretRef` through the
+current-tree Haskell Kubernetes-auth client; exact rendered config brings up a real two-namespace kernel
+fabric. The spoke reaches the gateway-role hub by ICMP and TCP, while underlay `tcpdump` sees WireGuard
+UDP/51820 and not the fresh plaintext canary. `wg show`, cgroup-v2, `tc`, bounded logs/nodefs, zero-mutation
+rediscovery, and cleanup are external observations. The broker geo-replication peer render, gateway hub
+repoint, and stretched `ControlPlanePeer` remain UNVERIFIED.
+
 ---
 
 ## 4. Topology: the hub is the gateway *role*, and the fabric moves with it
@@ -280,12 +288,11 @@ candidate into a first-class phase (the network fabric is now *load-bearing* for
 "redundant, do not adopt" default that candidate assumed when it measured only against north-south
 ingress); the Linkerd half collapses to the written verdict in [§6](#6-the-service-mesh-verdict-no-linkerd-for-v1).
 
-> **Honesty.** Everything here is Phase 0 **design intent**. A WireGuard fabric, its rendered-config
-> reconcile, and the localhost→fabric generalization are **new amoebius design with no sibling proof** —
-> WireGuard, `wg`, and Gateway-API HTTPRoute weights are real, documented mechanisms, but *that amoebius wires
-> them into this specific fabric* is specified here and unproven until the phase lands. Per
-> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every prescriptive statement as the
-> contract amoebius intends to satisfy, never as a tested result.
+> **Honesty.** Phase 41 supplies Register-3 tested evidence for the static two-peer raw-kernel fabric,
+> Vault-by-name key resolution, gateway-role hub reachability, encrypted underlay, bounded resource controls,
+> and exact teardown. Keyless/overlapping/out-of-CIDR foreclosure remains proven-for-the-model in the
+> pre-cluster band. Broker geo-replication, gateway migration/repoint, stretched control-plane peering, and
+> arbitrary WAN failure behavior remain UNVERIFIED until their owning gates run.
 
 ---
 

@@ -1,0 +1,1 @@
+{"same_owner_same_tenant":"resume-after-cursor","foreign_owner":"deny-zero-advance","foreign_tenant":"deny-zero-advance","discarded_cursor":"forbidden","stale_registration":"unroutable-after-drain"}

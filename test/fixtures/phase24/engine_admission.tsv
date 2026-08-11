@@ -1,0 +1,5 @@
+case	cpu_millis	memory_bytes	disk_bytes	available_cpu_millis	available_memory_bytes	available_disk_bytes	expected
+fits	2000	4294967296	21474836480	8000	17179869184	68719476736	right
+cpu-over-by-one	8001	4294967296	21474836480	8000	17179869184	68719476736	left:HostCpuOvercommit
+memory-over-by-one	2000	17179869185	21474836480	8000	17179869184	68719476736	left:HostMemoryOvercommit
+disk-over-by-one	2000	4294967296	68719476737	8000	17179869184	68719476736	left:HostDiskOvercommit

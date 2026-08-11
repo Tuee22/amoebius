@@ -1,0 +1,3 @@
+model	input	expected_public_result
+reference-uppercase	fresh-challenge	FRESH-CHALLENGE
+reference-escape	port:admin	port:admin

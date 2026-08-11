@@ -18,9 +18,16 @@ by [resource_capacity_folds.md](./resource_capacity_folds.md).
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ---
 
-Everything in this document is Phase-0 design intent; amoebius has built no phase. Where a mechanism runs today in the sibling prodbox/hostbootstrap projects it is marked **proven-in-sibling** — evidence, not a tested amoebius result ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). The impossibility theorem of [§2](#2-the-check-algebra) is established functional-programming mathematics; the `Check` GADT, its interpreters, the worst-case envelope, and the forest proof tree are **new-design-intent**.
+This document states target design, not current delivery. The dated implementation footprint is tracked in
+the [development plan](../../DEVELOPMENT_PLAN/README.md#current-implementation-audit). Where a mechanism runs
+in sibling prodbox/hostbootstrap it is marked **proven-in-sibling** — evidence, not an amoebius result
+([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
+The impossibility theorem of [§2](#2-the-check-algebra) is established functional-programming mathematics;
+the `Check` GADT, its interpreters, the worst-case envelope, and the forest proof tree remain target doctrine.
 
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 

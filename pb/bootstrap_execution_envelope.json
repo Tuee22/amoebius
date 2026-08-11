@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "toolchain": {
+    "ghc": "9.12.4",
+    "cabal": "3.16.1.0",
+    "kind": "0.32.0",
+    "kubectl": "1.35.6"
+  },
+  "installer": {
+    "cpu_count": 2,
+    "memory_bytes": 3221225472,
+    "tool_install_backing_bytes": 12884901888,
+    "steps": [
+      {"tool": "ghcup", "installed_bytes": 67108864, "workspace_bytes": 67108864},
+      {"tool": "ghc", "installed_bytes": 3221225472, "workspace_bytes": 2147483648},
+      {"tool": "cabal", "installed_bytes": 134217728, "workspace_bytes": 134217728},
+      {"tool": "kubectl", "installed_bytes": 67108864, "workspace_bytes": 67108864},
+      {"tool": "kind", "installed_bytes": 16777216, "workspace_bytes": 16777216}
+    ]
+  },
+  "build": {
+    "cpu_count": 2,
+    "memory_bytes": 4294967296,
+    "scratch_bytes": 8589934592,
+    "cache_write_bytes": 12884901888,
+    "concurrency": 2
+  },
+  "downloads": {
+    "ghcup-linux-amd64": {
+      "url": "https://github.com/haskell/ghcup-hs/releases/download/v0.1.50.2/x86_64-linux-ghcup-0.1.50.2",
+      "sha256": "ff6288df9758211372d8242fe830d8e6be6a8365d9406f1c9bde144b7e744143"
+    },
+    "kubectl-linux-amd64": {
+      "url": "https://dl.k8s.io/release/v1.35.6/bin/linux/amd64/kubectl",
+      "sha256": "5d11e2ba01ea68ffd053f56e27738e2b4330013ee67f7e46c6da6c585d3c9926"
+    },
+    "kind-linux-amd64": {
+      "url": "https://github.com/kubernetes-sigs/kind/releases/download/v0.32.0/kind-linux-amd64",
+      "sha256": "50030de23cf40a18505f20426f6a8506bedf13c6e509244bd1fa9463721b0f54"
+    }
+  }
+}

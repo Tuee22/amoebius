@@ -1,0 +1,2 @@
+operator=transition-guard-deletion
+expected=visible ready state precedes durable receipt

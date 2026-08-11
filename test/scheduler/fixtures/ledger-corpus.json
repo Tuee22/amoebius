@@ -1,0 +1,40 @@
+{
+  "schema": "amoebius.phase27.ledger-corpus.v1",
+  "rootResourceVersion": "17",
+  "expectedGeneration": "phase27-generation-1",
+  "expectedTemplateDigest": "sha256:phase27-guarded-template",
+  "fullDebit": {
+    "cpuMillis": 110,
+    "memoryBytes": 67108864,
+    "ephemeralBytes": 67108864,
+    "storageBytes": 16777216,
+    "podSlots": 1,
+    "etcdChurnBytes": 4096
+  },
+  "terminalRetainedDebit": {
+    "cpuMillis": 0,
+    "memoryBytes": 0,
+    "ephemeralBytes": 16777216,
+    "storageBytes": 16777216,
+    "podSlots": 1,
+    "etcdChurnBytes": 2048
+  },
+  "absentPodStates": [
+    "Reserved",
+    "BindingInFlight",
+    "Bound",
+    "Terminating",
+    "TerminalRetained"
+  ],
+  "negativeClasses": [
+    "UnclassifiedOrphan",
+    "MissingReservation",
+    "WrongState",
+    "WrongNode",
+    "WrongGeneration",
+    "WrongTemplate",
+    "UnequalAxes",
+    "DuplicateReservation",
+    "ObservedLedgerDoubleDebit"
+  ]
+}

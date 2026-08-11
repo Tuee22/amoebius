@@ -1,0 +1,5 @@
+source	client	server	route	contract	audit	handler
+home.text	view:text	-	home	-	-	-
+form.submit	event:submit	action:mutate	home	MutationV1	mutation	data-write
+workflow.start	event:start	action:start	workflow	WorkflowStartV1	workflow	workflow-start
+docs.link	navigation:docs	-	home	ExternalLinkV1	-	-

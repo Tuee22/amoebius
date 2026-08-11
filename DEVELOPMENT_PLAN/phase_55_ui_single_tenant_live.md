@@ -5,8 +5,13 @@
 > **Read this if**: phase 55 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 55 delivers the single-tenant low-code UI live path; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Register 3, scoped live, on the `linux-cpu` substrate.
+The scoped gate passed on 2026-08-11; the full browser/identity/provider topology remains `UNVERIFIED`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -24,7 +29,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 55.1: Complete single-tenant UI slice 📋](#sprint-551-complete-single-tenant-ui-slice-)
+- [Sprint 55.1: Complete single-tenant UI slice ⏸️](#sprint-551-complete-single-tenant-ui-slice-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,8 +37,19 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. No implementation or live evidence exists; every statement below is design intent until the
-Register-3 gate records its command, date, substrate, and ledger hash.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 **Scoped gate passed 2026-08-11.** Pinned access/Origin/CSRF/network oracles, authorization-before-dispatch,
+fresh-challenge propagation, cross-replica routing, durable receipt authority, a real two-endpoint loopback
+socket/temporary receipt probe, and seven mutants pass. Fresh OIDC/browser, Keycloak/Envoy, Kubernetes UI
+replicas, retained Redis/PostgreSQL/MinIO/Pulsar, infernix, and provider network observers remain
+**UNVERIFIED**. Ledger `external-run-reference`.
+Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on
+Apple, or WSL2 on Windows.
 
 ## Phase Summary
 
@@ -115,13 +131,21 @@ CSRF/dispatch mutants create forbidden handler or audit bytes even if the public
 
 ## Sprints
 
-## Sprint 55.1: Complete single-tenant UI slice 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 55.1: Complete single-tenant UI slice ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Live/SingleTenant.hs`,
 `src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase55UiSingleTenantSpec.hs` (planned; not
 built)
-**Blocked by**: Phases 32, 33, 38, 40, and 50
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `cabal test
 phase55-ui-single-tenant-live` against the pinned tables and provider-owned observations
 **Docs to update**:
@@ -140,7 +164,8 @@ Deliver the one-tenant generic UI runtime path and its externally observed secur
   fanout, cursor-gap repair, and durable provider/Pulsar receipt lookup without sticky sessions.
 - Real OIDC Playwright flow, owner/other-subject matrix, valid-session origin/CSRF negatives, and
   direct-provider denial probes.
-- Fresh-nonce SQL/S3/Pulsar/Envoy plus artifact-request/infernix-dispatch evidence capture and committed ledger.
+- Fresh-nonce SQL/S3/Pulsar/Envoy plus artifact-request/infernix-dispatch evidence capture and a generated,
+  externally attested run ledger under `gen/runs/`.
 - Five committed mutants that demonstrate the oracle cannot be passed by a canned UI, forged denial, or open
   edge.
 
@@ -154,7 +179,7 @@ Deliver the one-tenant generic UI runtime path and its externally observed secur
 
 ### Remaining Work
 
-The whole sprint is planned; no amoebius implementation or Register-3 result exists.
+The portable and local cross-replica slice is implemented; the full provider/browser Register-3 topology remains UNVERIFIED.
 
 ## Documentation Requirements
 

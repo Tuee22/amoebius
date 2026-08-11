@@ -1,0 +1,32 @@
+mutant	variant	expected_red_locus
+backing-accept-over	direct-backing	single-owner backing comparison
+bookkeeper-drop-quorum	bookkeeper-recovery	BookKeeper write-quorum bytes
+bookkeeper-drop-recovery	bookkeeper-recovery	BookKeeper failure scenario
+minio-drop-parity	minio-parity-healing-orphan	MinIO parity bytes
+minio-drop-healing	minio-parity-healing-orphan	MinIO healing workspace
+minio-drop-orphan	minio-parity-healing-orphan	failed-write orphan horizon
+filesystem-drop-overhead	filesystem-overhead-rounding	filesystem presentation
+allocation-drop-quantum	filesystem-overhead-rounding	backing allocation rounding
+uniform-use-aggregate	uniform-claim-per-backing	per-backing uniform claim
+pulsar-drop-hot	bookkeeper-recovery	physical hot-tier ceiling
+pulsar-drop-durable	pulsar-durable-total	durable-total ceiling
+native-cache-double-spend	native-cache-pool	named cache backing
+incluster-cache-drop-nesting	incluster-cache-budget	cache budget nesting
+provider-root-under-size	instance-store-root	instance-store root
+provider-root-debit-durable	root-ebs-quota	nodeRootStorage quota
+control-plane-drop-transition	control-plane-transition	etcd transition high-water
+object-drop-producer-arm	object-producer-inventory	six-arm inventory equality
+object-accept-conflict	object-identity-conflict	physical identity/size conflict
+object-drop-count	object-count-quota	object-count geometry
+registry-drop-partials	registry-upload-partials	registry failed partials
+zookeeper-drop-recovery	zookeeper-recovery	ZooKeeper recovery overlap
+patroni-drop-wal	patroni-wal-failover	Patroni WAL/failover peak
+vault-drop-audit	vault-raft-audit	Vault audit rotation
+migration-drop-old	storage-migration-highwater	migration old+new high-water
+schema-drop-wal	schema-migration-highwater	schema migration WAL
+registry-migration-drop-workspace	registry-backend-migration	registry migration workspace
+scaling-ignore-fingerprint	scaling-fingerprint	observed snapshot fingerprint
+scaling-drop-highwater	scaling-shrink-highwater	shrink migration witness
+backup-drop-retention	backup-medium-fit	retained backup generations
+pool-allow-alias	disjoint-capacity-pool	disjoint capacity ownership
+restore-drop-workspace	restore-target-fit	restore target workspace

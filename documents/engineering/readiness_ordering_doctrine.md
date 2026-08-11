@@ -230,6 +230,10 @@ RBAC. An independent readback of the exact writer domain then mints `ManagedCapa
 handle for general platform/workload controllers. Crashes or watch gaps re-enter observation at the last
 confirmed edge; they never infer either witness from elapsed time.
 
+Phase 27's live gate observed this exact order on Kubernetes: the bootstrap witness preceded the finite
+replacement-UID cutover, the replacement was reservation-joined, Bound, and Ready before managed authority,
+and a general guarded Pod was rejected with zero writes until the independent managed readback passed.
+
 ---
 
 ## 6. The runtime enactor: the reconciler observes, never sleeps
@@ -249,7 +253,13 @@ Every wait here is honest under the chaos discipline: **bound everything** (ever
 carries an explicit finite bound) and **timeout-coerces-unknown** (a timeout is an *unknown*, never a definite
 "ready") — both owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md). This layer is
 `runtime-checked` and never claimed stronger: the type foreclosed the *duration-gated shape*; the reconciler
-supplies the *observation*, and the honesty is in keeping those two claims apart.
+supplies the *observation*, and the honesty is in keeping those two claims apart. Phase 26 first validates
+that amoebius observation loop directly: a non-instantaneous live Deployment, a never-ready timeout, serial
+replacement Bound+Ready edges, CR health followed by independent child conformance, and a forbidden-symbol
+scan over the enactor all passed without a sleep-gated continuation. Phase 27 extended that evidence to both
+scheduler witnesses and the guarded-Pod admission edge; every live wait used an observed Kubernetes state.
+Phase 39 extended it to an ordered `RolloutPlan`: external API observations and increasing resource versions
+showed base `Available` before migration Job `Complete` before final `Available`; a self-report gate mutant was red.
 
 ---
 
@@ -283,6 +293,16 @@ applies to every timeout in the suite: a bound on how long a thing may take is n
 The catalog entry that turns "a duration-gated / hand-ordered bring-up sequence" into a foreclosed illegal
 state is [`illegal_state_catalog.md` §3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race).
 
+### Phase-31 derived service-DAG validation
+
+Phase 31 implemented the 14-service declared dependency graph and checked it byte-for-byte against an
+independently authored edge oracle. Cycle and dropped-edge mutants turned the gate red. The unmodified
+concurrent `BringUp` runner passed 256 deterministic fault schedules and an `IOSimPOR` exploration, while the
+live cluster produced a warm apiserver-status observation with every dependency observed before its
+dependent and no precondition violations. The live trace is intentionally described as warm reconciliation;
+it does not invent historical readiness timestamps after Kubernetes has replaced them. This is tested on the
+universal `linux-cpu` lane, with Incus/Lima/WSL2 available when a pristine Linux host is required.
+
 ---
 
 ## 8. Planning ownership
@@ -296,9 +316,10 @@ the two-stage scheduler cutover, and the bootstrap-holder→singleton-holder Lea
 catalog foreclosure land in **Phase 33** with the orchestration DSL and the control-plane singleton. This doc
 states the target shape and links back for status.
 
-> **Honesty.** Everything here is Phase 0 design intent, specified before implementation. The reconciler's
-> observed-condition loop and the daemon spine are *demonstrated in the prodbox / hostbootstrap siblings* and
-> inherited as evidence, not a tested amoebius result
+> **Honesty.** Phase 26 now provides tested amoebius evidence for the reconciler's observed-condition loop.
+> Phase 31 now adds tested evidence for the standard-service DAG. The broader daemon spine, scheduler cutover,
+> other service-specific DAGs, and migration edges retain their own
+> later-phase validation boundaries; sibling demonstrations are not substituted for those results
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---

@@ -48,12 +48,15 @@ which document to open first.
 - **[`documentation_standards.md`](./documentation_standards.md)** — the house rules every doc follows: the
   header block, SSoT / no-duplication, the proven/tested/assumed honesty discipline, the third-person tone, and
   the `§N` anchor-link conventions.
+- **[`engineering/repository_layout_doctrine.md`](./engineering/repository_layout_doctrine.md)** — the complete
+  authored/generated repository tree and the ignore, dependency-resolution, and evidence-retention rules.
 
-## Where status and phase order live
+## Where status, progress, and phase order live
 
-Phase order, status, and validation gates live **only** in
+Phase order, current status, dated implementation progress, and validation gates live **only** in
 [`../DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md). The documents here state the target design and
-link back there for status; they never restate a phase status.
+link back there for state; historical implementation observations are diagnostic and never restate a current
+phase status.
 
 ## Related Documents
 - [`engineering/README.md`](./engineering/README.md) — the engineering doctrine index.

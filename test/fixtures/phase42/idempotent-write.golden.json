@@ -1,0 +1,12 @@
+{
+  "blobKeys": [
+    "sha256:95021b602073f533b85643e638bfaf6338facccd5c87b0c2e62624e3c503c1f2",
+    "sha256:45efc2e6b0b98bcab7a1031f9d4d643117a2a603a9bee88a9765c032f8dc78b9",
+    "sha256:de257eb671e2c06204b0b02aeebb9de07beaf9dbea4c88c64ba9e0cf69948480",
+    "sha256:336ec986796342ff0405e4fe25a3a10517994cb96856171843501d5466dc33f0"
+  ],
+  "foldDigest": "sha256:3071c8a392c92a4d8d54455c9e1f7ff06bb4dc01e9380d6c5c21b16e3fd74731",
+  "orderedStages": ["command", "event-1", "event-2", "result"],
+  "uniqueRecords": 4,
+  "workId": "work-42-canary"
+}

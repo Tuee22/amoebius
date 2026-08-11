@@ -23,6 +23,8 @@ the specification language of [dsl_doctrine.md](../engineering/dsl_doctrine.md).
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Scope](#1-scope)
 - [4. The typing techniques](#4-the-typing-techniques)
@@ -62,7 +64,7 @@ The catalog is foreclosed by seven reusable techniques operating across **two ty
 - **The Dhall layer** gives totality, sum types (unions), required fields, and a DSL prelude of *smart
   constructors* — functions that only ever produce valid values, so the user composes from a vocabulary
   with no illegal words. (The DSL surface is owned by [`dsl_doctrine.md`](../engineering/dsl_doctrine.md).)
-- **The Haskell layer** (GHC 9.12.4; pin owned by
+- **The Haskell layer** (a compatible compiler dynamically resolved under
   [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md)) decodes that value into
   **GADT-indexed** types carrying phantom tags and ownership indices, so the in-memory IR the interpreter
   walks has the same illegal-states-absent property as the spec it came from.
@@ -477,9 +479,10 @@ offloading to S3, the pod actually scheduling, the Lima/WSL2 VM actually interpo
 growing capacity, and the cloud honoring the quota — are always runtime-checked, owned by
 [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine, never asserted here.
 
-> **Honesty.** amoebius has built no phase yet. Every `type-foreclosed` and `decode-foreclosed` claim above is the *intended*
-> **Tier-1** (design-time / in-process) property of the type discipline — targeted for in-process validation in the **pre-cluster type/decode gates (Phases 4–13)**,
-> not a tested result; the **Tier-2** `runtime-checked` residue is explicitly deferred to its live phase. Where a technique
+> **Honesty.** Every `type-foreclosed` and `decode-foreclosed` claim above is a target Tier-1 property of the
+> type discipline; current progress lives in the
+> [tracker](../../DEVELOPMENT_PLAN/README.md#current-implementation-audit). The Tier-2 `runtime-checked`
+> residue is explicitly deferred to its live phase. Where a technique
 > generalizes a behaviour proven in prodbox (single-owner SSoT, Keycloak-owns-ingress), that proof is
 > evidence from a sibling system, not proof in amoebius.
 

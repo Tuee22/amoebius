@@ -10,14 +10,19 @@
 
 Phase 28 delivers the no-provisioner retained storage + lossless rebind; its design is owned by [storage_lifecycle_doctrine.md](../documents/engineering/storage_lifecycle_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [resource_capacity_storage.md](../documents/engineering/resource_capacity_storage.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+The gate passed 2026-08-10.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/storage_lifecycle_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -28,9 +33,9 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 28.1: The one inert `no-provisioner` StorageClass 📋](#sprint-281-the-one-inert-no-provisioner-storageclass-)
-- [Sprint 28.2: Deterministic retained-PV generation + the explicit bind 📋](#sprint-282-deterministic-retained-pv-generation--the-explicit-bind-)
-- [Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip 📋](#sprint-283-the-lossless-rebind-gate--postgres-row--minio-marker-round-trip-)
+- [Sprint 28.1: The one inert `no-provisioner` StorageClass ⏸️](#sprint-281-the-one-inert-no-provisioner-storageclass-)
+- [Sprint 28.2: Deterministic retained-PV generation + the explicit bind ⏸️](#sprint-282-deterministic-retained-pv-generation--the-explicit-bind-)
+- [Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip ⏸️](#sprint-283-the-lossless-rebind-gate--postgres-row--minio-marker-round-trip-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -38,14 +43,22 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. The phase runs on the **linux-cpu** substrate in
-**Register 3** (live infrastructure) — a single-node `kind` cluster brought up by the Phase 24 midwife, and
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. All three sprints and the whole-phase gate are implemented and validated. The phase runs on the **linux-cpu** substrate in
+**Register 3** (live infrastructure) — a single-node `kind` cluster brought up by the Phase 24 bootstrap coordinator, and
 it opens only after the Phase 26 gate (the typed renderer + live SSA reconciler) closes, because the
 StorageClass, the retained PVs, and their `claimRef` pins are rendered from pure Haskell and applied through
 that reconciler. The single-node host-path retained-storage scheme this phase generalizes is proven in the
 sibling prodbox project (`prodbox/documents/engineering/storage_lifecycle_doctrine.md`); read that as
-**sibling evidence, not an amoebius result** — amoebius has not yet built the storage layer. Status
+**sibling evidence, not an amoebius result** — amoebius now has its own StorageClass, retained-PV, hard-cap,
+explicit-rebind, and real cluster-delete/recreate evidence. The gate ran with
+`python3 tools/phase28_gate.py` on 2026-08-10 and emitted ledger
+`dynamically-resolved`. Status
 transitions are recorded reverse-chronologically here once work begins.
 
 ## Phase Summary
@@ -94,9 +107,9 @@ itself is out of the retained-storage picture by construction: it is a stateless
 holds **no PVC**, its durable state exclusively the Vault-enveloped MinIO bucket, so MinIO here is a retained
 volume holder while the control plane is only a client of that bucket.
 
-**Substrate:** linux-cpu — the whole gate runs on a single-node `kind` cluster on a linux-cpu host, in
-Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched, and no live
-infrastructure is required to *render* the StorageClass or PV objects (that stays pure, Registers 1–2).
+**Substrate:** `linux-cpu` — this universal lane is always available on every hardware substrate. When a
+pristine Linux host is required, use Incus on native Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows.
+The live gate uses the Phase-24 single-node `kind` cluster; pure StorageClass/PV rendering remains Register 1–2.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -180,20 +193,25 @@ flowchart LR
   s1 -->|"produces what the next consumes"| s2
   s2 -->|"the last seam the gate closes over"| gate
 ```
-*Orientation. The seams phase 28 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+*Orientation. The seams Phase 28 built and validated in order; [Gate integrity](#gate-integrity) owns the apparatus.*
 
 **Representative set (concrete corpus).** Exactly two witnesses, no more: (1) a single-ordinal Postgres
 StatefulSet in namespace `retained-witness` with one PVC `pgdata` on one retained PV, marker = a single row in
 table `rebind_witness(nonce text)`; (2) a single-ordinal MinIO StatefulSet in namespace `retained-witness` with
 one PVC `miniodata` on one retained PV, marker = one object `rebind/nonce` in bucket `rebind-witness`. Each
-witness image is a Phase-25 baked binary served only from the in-cluster `distribution` registry (an
-OS-boundary containerd/registry-log observer confirms zero public-registry pull during the cycle).
+witness executes the exact Phase-25 baked binary from the run-audited Phase-25 OCI archive, restored
+locally into each fresh node under the Phase-25 digest with `imagePullPolicy: Never`; an OS-boundary observer
+confirms zero public-registry pull during the cycle. The Phase-25 Postgres image contains the executable but
+not its `/usr/share/postgresql/17` catalog, so the harness dynamically resolves a compatible Debian package,
+records its observed identity/checksum under `gen/toolchain/`, and mounts only its package-data tree read-only;
+it does not replace or modify the baked executable.
 
 **oracle-pinned oracles (independent of the implementation).**
 - `test/live/fixtures/storageclass_expected.yaml` — the exact single-StorageClass golden (Sprint 28.1),
   hand-authored, not regenerated from the renderer.
 - `test/live/fixtures/claimref_table.csv` — the independent reference table mapping
-  `(namespace, statefulset, ordinal)` to the expected `metadata.name`, `amoebius.io/pv-identity` label,
+  `(namespace, statefulset, ordinal)` to the expected `metadata.name`, RFC-1123-valued
+  `amoebius.io/pv-identity` label, exact `amoebius.io/pv-logical-identity` annotation,
   `claimRef` `(namespace, PVC-name)`, logical demand, `requiredUsableBytes`, presentation/model,
   backing-minimum/quantum operands, and exact private-witness `provisionedBytes` rendered as PVC/PV capacity;
   authored by hand, never by the renderer's naming or sizing helper (Sprints 28.2, 28.3).
@@ -327,12 +345,22 @@ section it implements; individual sprints cite the same sections where they adop
 
 ## Sprints
 
-## Sprint 28.1: The one inert `no-provisioner` StorageClass 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Storage/StorageClass.hs` (target path; not yet built)
-**Blocked by**: Phase 26 gate (the typed renderer + live SSA reconciler that renders and applies the
-StorageClass object); Phase 24 gate (an idempotent single-node `kind` cluster to install it into).
+## Sprint 28.1: The one inert `no-provisioner` StorageClass ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+`python3 tools/phase28_sprint28_1_gate.py`; receipt
+`dynamically-resolved`.
+**Implementation**: `src/Amoebius/Storage/StorageClass.hs`, `test/storage/Phase28StorageClassSpec.hs`,
+`test/live/Phase28StorageClassLiveSpec.hs`, and `tools/phase28_sprint28_1_live.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: after bring-up `kubectl get storageclass` shows **exactly one** class —
 `provisioner: kubernetes.io/no-provisioner`, `reclaimPolicy: Retain`, `volumeBindingMode:
 WaitForFirstConsumer` — and no other class and no `storageclass.kubernetes.io/is-default-class` annotation
@@ -364,17 +392,18 @@ only because amoebius placed them and nothing in the normal cluster lifecycle ca
    plus a default-class annotation, committed in this phase's oracle-pinning sprint) makes assertion 1 fail with the **specific reason `count != 1` / `default-class annotation present`**, distinguishing it from an unrelated golden mismatch.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Generate the sprint receipt under `gen/runs/phase_28/` and retain it only through external attestation.
 
-## Sprint 28.2: Deterministic retained-PV generation + the explicit bind 📋
+## Sprint 28.2: Deterministic retained-PV generation + the explicit bind ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+`python3 tools/phase28_sprint28_2_gate.py`; receipt
+`dynamically-resolved`.
 **Implementation**: `src/Amoebius/Storage/RetainedPV.hs`,
 `src/Amoebius/Storage/HostVolume.hs`, `src/Amoebius/Storage/RetainedScaling.hs` (retained-carve and
-verified- migration storage-scaling arms; target paths, not yet built)
-**Blocked by**: Sprint 28.1 (the
-inert class the retained PVs bind under); Phase 26 gate (the reconciler applies the rendered PVs and the
-witness StatefulSet).
+verified-migration storage-scaling arms), `test/storage/Phase28RetainedPVSpec.hs`,
+`test/live/Phase28RetainedPVLiveSpec.hs`, and `tools/phase28_sprint28_2_live.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: before allocation, the desired post-reconcile retained
 inventory (existing images plus proposed additions, deduplicated by stable identity) is summed against the
 Phase-24/26-observed durable backing (excluding cache and node ephemeral pools); the over-backing negative
@@ -392,8 +421,9 @@ scheme is realized as: `metadata.name` is the RFC-1123 **subdomain** encoding
 component, so the encoding is injective and two distinct identities can never collide on one cluster-scoped
 name
 ([`storage_lifecycle_doctrine.md` §4](../documents/engineering/storage_lifecycle_doctrine.md#4-deterministic-pv-naming-and-the-explicit-bind))
-— and the verbatim logical identity is carried in the label `amoebius.io/pv-identity`; the table pins
-**both**, and the assertion checks both against it. The `claimRef` names the exact `(namespace, PVC-name)`,
+— and the legal `metadata.name` is repeated in the `amoebius.io/pv-identity` label while the verbatim logical
+identity is carried in the `amoebius.io/pv-logical-identity` annotation; the table pins **all three**, and the
+assertion checks all three against it. The `claimRef` names the exact `(namespace, PVC-name)`,
 and the PV capacity is **exactly equal** (`==`, not merely `>=`) to the PVC request and private
 `UniformClaimPlan.provisionedBytes` from the table; that raw rounded number may be larger than the logical
 or required usable demand. The PV path is a mounted fixed-raw-size filesystem image. An independent observer
@@ -426,8 +456,9 @@ PVC creation path to exactly one shape.
 ### Deliverables
 - Deterministic PV generation from `(namespace, statefulset, ordinal)`: the logical identity
   `<namespace>/<statefulset>/pv_<integer>` realized as the injective RFC-1123-subdomain `metadata.name`
-  `<namespace>.<statefulset>.pv-<integer>` with the verbatim identity carried in the `amoebius.io/pv-identity`
-  label, explicit `claimRef` to the exact `(namespace, PVC-name)`, and node affinity to the host-path node for
+  `<namespace>.<statefulset>.pv-<integer>`, repeated in the RFC-1123-valued `amoebius.io/pv-identity` label,
+  with the verbatim logical identity carried in the `amoebius.io/pv-logical-identity` annotation, explicit
+  `claimRef` to the exact `(namespace, PVC-name)`, and node affinity to the host-path node for
   host-backed volumes (the trivial single-node case on this substrate).
 - An authorable `DeclaredVolumeDemand` per claim slot with logical bytes, geometry, backing, and explicit
   `attachment = NodeLocal | Csi { driver }`, with
@@ -497,7 +528,8 @@ PVC creation path to exactly one shape.
    `provisionedBytes`, that this supplies the maximum `requiredUsableBytes`, and that the provision witness
    debits the rounded capacity times ordinal count. Then deploy the one-ordinal rebind
    witness StatefulSet; assert its claim binds to the PV whose `metadata.name`,
-   `amoebius.io/pv-identity` label, `claimRef` `(namespace, PVC-name)`, and **exactly-equal** capacity all
+   `amoebius.io/pv-identity` label, `amoebius.io/pv-logical-identity` annotation, `claimRef`
+   `(namespace, PVC-name)`, and **exactly-equal** capacity all
    match the table's provisioned-witness column, and that node affinity pins the host-backed volume to its
    node. From the host block/image observer assert raw image length `== provisionedBytes`; from inside the
    mounted pod assert the filesystem type equals `VolumePresentation.fsType` and usable capacity
@@ -528,17 +560,18 @@ PVC creation path to exactly one shape.
    allocated extent. A provider-capacity action is rejected because this phase supplies no cloud capability.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None; the live observation, external reader, ten red mutants, and receipt are retained under
+`gen/runs/phase_28/` for external attestation, never an authored root.
 
-## Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip 📋
+## Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Storage/Rebind.hs`, `test/live/RebindSpec.hs` (target
-paths; not yet built)
-**Blocked by**: Sprint 28.2 (the retained PVs + deterministic bind the round-trip
-depends on); Phase 25 gate (the baked-binary Postgres and MinIO images served only from the in-cluster
-`distribution` registry — the witnesses pull nothing from a public registry); Phase 24 gate (the midwife
-`cluster delete` + `recreate` the gate drives).
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+`python3 tools/phase28_gate.py`; sprint receipt
+`external-run-reference` and phase ledger
+`dynamically-resolved`.
+**Implementation**: `src/Amoebius/Storage/Rebind.hs`, `test/live/RebindSpec.hs`,
+`test/storage/Phase28RebindSpec.hs`, and `tools/phase28_rebind_live.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the marker (a fresh per-run
 random nonce) written as a Postgres row and as a MinIO object reads back byte-for-byte after a `cluster
 delete` + `recreate`. The nonce is asserted **absent** from both witnesses before the write and present
@@ -604,7 +637,8 @@ durable backing and no normal-operation path can.
    not treated as a vacuously-true pass.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Migrate the two-service live evidence, audit observation, mutant results, receipt, and phase ledger to
+`gen/runs/phase_28/`; externally attest the bundle and rerun after Phase 27 closes.
 
 ## Documentation Requirements
 

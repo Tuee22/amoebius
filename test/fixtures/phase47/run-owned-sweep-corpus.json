@@ -1,0 +1,16 @@
+{
+  "criteria": {
+    "runTag": "phase47",
+    "vpcId": "vpc-phase47",
+    "clusterName": "amoebius-p47"
+  },
+  "resources": [
+    {"id":"eni-tagged","class":"ephemeral","runTag":"phase47","vpcId":null,"clusterName":null},
+    {"id":"log-untagged","class":"ephemeral","runTag":null,"vpcId":null,"clusterName":"amoebius-p47"},
+    {"id":"elb-untagged","class":"ephemeral","runTag":null,"vpcId":"vpc-phase47","clusterName":null},
+    {"id":"vol-durable","class":"durable","runTag":"phase47","vpcId":"vpc-phase47","clusterName":"amoebius-p47"},
+    {"id":"eni-foreign","class":"ephemeral","runTag":"other","vpcId":"vpc-other","clusterName":"other"}
+  ],
+  "expectedEphemeralLeakIds": ["eni-tagged", "log-untagged", "elb-untagged"],
+  "permittedDurableIds": ["vol-durable"]
+}

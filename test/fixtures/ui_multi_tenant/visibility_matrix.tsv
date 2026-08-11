@@ -1,0 +1,5 @@
+tenant	subject	action	visible
+t-a	alice	read-own	true
+t-a	alice	write-own	true
+t-b	alice	read-own	true
+t-b	mallory	read-own	false

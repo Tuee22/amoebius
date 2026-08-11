@@ -51,6 +51,10 @@ Runtime layers and their enforcement is deferred on purpose (see [`illegal_state
 
 ### 3.12 An app that names a product instead of a capability
 
+**Delivery-owner:** `Phase-4`
+
+**Case-family:** `capability-provision`
+
 Application logic that writes `minio` or `vault` welds itself to one realization and loses portability across
 clusters that deploy the capability differently. amoebius's app surface offers a **capability** union —
 `ObjectStore`, `SecretStore`, `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge` — with no
@@ -63,6 +67,10 @@ directly" has no syntax and fails `dhall type` at authoring time, before any bin
 residue: the illegal shape is unrepresentable, not merely rejected downstream.
 
 ### 3.23 A non-CBOR Pulsar payload
+
+**Delivery-owner:** `Phase-6`
+
+**Case-family:** `messaging`
 
 Raw messaging lets a producer put any bytes on a topic — JSON, base64-in-JSON (infernix's retired path),
 protobuf, an untyped blob — so two services silently disagree on the body format and a consumer mis-reads or
@@ -83,7 +91,16 @@ on the *consume* side (the total
 **not** a `live-effect` locus: there is no runtime-checked claim that a received body is valid — the decode
 either succeeds or fails fast.
 
+**Phase-35 evidence:** realized. The exported producer surface accepts only typed `Serialise` values, the
+`CborPayload` constructor is private, and a fixture importing `produceRaw` fails for the pinned missing-export
+reason. A hand-authored API golden and the committed re-added-raw-arm mutant keep that foreclosure live; a
+malformed received body returns `Left`, while two live namespaces round-trip typed CBOR through the native wire.
+
 ### 3.82 A browser effect or provider call escaping the server-mediated capability boundary
+
+**Delivery-owner:** `Phase-19`
+
+**Case-family:** `ui`
 
 Arbitrary JavaScript, raw HTML, a fetch URL, a provider SDK, or a serialized provider handle turns an
 otherwise typed SPA into a second authority surface. It can skip current server authorization, leak a
@@ -124,6 +141,19 @@ each absent raw arm, serialize a provider capability, inject a provider URL or c
 reuse a catalog link as fetch, add direct network access to a trusted component, and place untrusted text in an
 HTML sink; compile/check, artifact scan, CSP, or the network oracle must turn red before the provider accepts an
 effect.
+
+**Phase-19 evidence.** The Register-1 binder matches seven port tuples and two canonical fixed-HTTPS link joins
+against independent string relations. Eight pinned failures, eight link-catalog failures, and three bounded
+input failures occur before a bound program can emit its pure binding trace; all seven guard/escape mutants turn
+red. Browser traffic, handler behavior, provider authentication, and live isolation remain UNVERIFIED. See
+[Phase 19](../../DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md).
+
+**Phase-21 evidence.** The Register-2 generic bundle renders untrusted values through `textContent`, accepts
+only its closed PureScript event arms, and emits same-origin HTTP/WebSocket requests in real Chrome. An
+independent bundle scanner, browser-enforced CSP canary, fresh request nonce, navigation-only link observation,
+and `strace` network observer all pass; raw-sink, direct-provider, stale-plan, sequential-write, focus, CSP, and
+canned-response mutants turn red. Server authorization, provider authentication, and live isolation remain
+UNVERIFIED. See [Phase 21](../../DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md).
 
 ---
 

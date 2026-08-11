@@ -12,14 +12,19 @@
 
 Phase 26 delivers the typed renderer + object reconciler; its design is owned by [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [readiness_ordering_doctrine.md](../documents/engineering/readiness_ordering_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Sprints 26.1–26.5 and the complete phase gate have passed.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -30,11 +35,11 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 26.1: Deployment-global desired state + authenticated live inventory + typed action plan 📋](#sprint-261-deployment-global-desired-state--authenticated-live-inventory--typed-action-plan-)
-- [Sprint 26.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch 📋](#sprint-262-bootstrap-lease-authority--generic-typed-action-dispatcher--scoped-ssa--storage-scaling-dispatch-)
-- [Sprint 26.3: Staged execution transitions, Job terminal protocol, and authenticated deletion 📋](#sprint-263-staged-execution-transitions-job-terminal-protocol-and-authenticated-deletion-)
-- [Sprint 26.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) 📋](#sprint-264-wait-for-ready--the-idempotent-convergence-gate-re-run-no-op-)
-- [Sprint 26.5: Register-2.5 reconciler + staged-execution convergence under simulated faults 📋](#sprint-265-register-25-reconciler--staged-execution-convergence-under-simulated-faults-)
+- [Sprint 26.1: Deployment-global desired state + authenticated live inventory + typed action plan ⏸️](#sprint-261-deployment-global-desired-state--authenticated-live-inventory--typed-action-plan-)
+- [Sprint 26.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch ⏸️](#sprint-262-bootstrap-lease-authority--generic-typed-action-dispatcher--scoped-ssa--storage-scaling-dispatch-)
+- [Sprint 26.3: Staged execution transitions, Job terminal protocol, and authenticated deletion ⏸️](#sprint-263-staged-execution-transitions-job-terminal-protocol-and-authenticated-deletion-)
+- [Sprint 26.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) ⏸️](#sprint-264-wait-for-ready--the-idempotent-convergence-gate-re-run-no-op-)
+- [Sprint 26.5: Register-2.5 reconciler + staged-execution convergence under simulated faults ⏸️](#sprint-265-register-25-reconciler--staged-execution-convergence-under-simulated-faults-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -42,8 +47,13 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. This phase opens after the **Phase 25 gate** (the
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Complete. Sprints 26.1–26.5 and the complete Register-3/2.5 phase gate passed. This phase opened after the **Phase 25 gate** (the
 multi-arch base image + jit-build resolver + in-cluster `distribution` registry) and the **Phase 24 gate**
 (the single-node `kind` cluster + substrate detect), and runs on the **linux-cpu** substrate in
 **Register 3** — the first phase whose gate actually *applies* rendered objects to a live cluster and observes
@@ -57,6 +67,42 @@ against the pinned Phase-13 corpus — the in-cluster **control-plane singleton*
 `Bound` reservation ledger, two-stage bootstrap cutover, and execution-identity admission — is **Phase 27, layered on this reconciler**; in this phase the corpus Pods are bound by the **default Kubernetes scheduler**,
 and the typed-action engine, scoped SSA, staged enactors, authenticated deletion, and unified observed-readiness
 path are amoebius's new code proven live here.
+
+- **2026-08-09 — Sprint 26.1 complete.** The separately validated desired index, authenticated observed
+  execution union, once-per-identity commitment normalization, physical-backing runtime grouping,
+  whole-vector preflight, single-use Lease/storage tokens, and exact 12-action corpus plan passed with the
+  unchanged Phase-13 renderer gate. An import lint found no writer boundary in the read-only preflight modules.
+  Receipt: [`sprint-26.1-receipt.json`](evidence/phase_26/sprint-26.1-receipt.json), fingerprint
+  `dynamically-resolved`.
+- **2026-08-09 — Sprint 26.2 complete.** The typed Lease token/renewal rounding, effect dispatcher, and scoped
+  SSA boundary passed pure tests and a live scratch-namespace run. The run observed namespace-before-Lease
+  cold ordering, exact bootstrap holder/UID/resourceVersion, stale-CAS rejection, `amoebius` field ownership,
+  correction of an owned-field drift, preservation of a foreign-manager annotation, a resourceVersion-stable
+  no-op, and leak-free teardown. Receipt:
+  [`sprint-26.2-receipt.json`](evidence/phase_26/sprint-26.2-receipt.json), fingerprint
+  `dynamically-resolved`.
+- **2026-08-09 — Sprint 26.3 complete.** The pure serial, ordinary/CUDA/Metal release, Job terminal, and
+  authenticated-delete protocols passed. Live OnDelete replacement deleted and re-observed two provisioned
+  slots in order; each replacement had a distinct UID and reached Bound+Ready. The successful Job pod remained
+  retained with no completion object. A wrong UID/resourceVersion delete precondition conflicted while the exact
+  one deleted, and the label-only mutant went red. Receipt:
+  [`sprint-26.3-receipt.json`](evidence/phase_26/sprint-26.3-receipt.json), fingerprint
+  `dynamically-resolved`.
+- **2026-08-09 — Sprint 26.4 complete.** A clean Register-3 run converged 19 externally observed objects,
+  proved an immediate server-side-apply rerun byte-stable and mutation-free, observed non-instantaneous
+  readiness, serialized both `OnDelete` replacements through absence and distinct Bound+Ready UIDs, retained
+  the terminal Job, independently checked the healthy CR child envelope, and admitted only one of two
+  simultaneous children under a one-Pod quota. Never-ready, over-bound-child, generation-after-diff, and
+  label-only-delete controls were red; both namespaces, the CRD, and the static test PV were absent postflight.
+  Receipt: [`sprint-26.4-receipt.json`](evidence/phase_26/sprint-26.4-receipt.json), fingerprint
+  `dynamically-resolved`.
+- **2026-08-09 — Sprint 26.5 complete.** The real Lease-token, scoped-SSA, serial, host/device-release, Job,
+  authenticated-delete, and readiness modules ran through the Phase-15 `IOSim` environment: eight fault
+  classes × 256 deterministic schedules, bounded `IOSimPOR` exploration, byte-identical same-seed replay,
+  and seven committed red mutants. Modeled-apiserver fidelity remains an explicit assumption and is
+  independently bounded by Sprint 26.4's live evidence. Receipt:
+  [`sprint-26.5-receipt.json`](evidence/phase_26/sprint-26.5-receipt.json), fingerprint
+  `dynamically-resolved`.
 
 ## Phase Summary
 
@@ -324,16 +370,25 @@ every mutation surface.
 
 ## Sprints
 
-## Sprint 26.1: Deployment-global desired state + authenticated live inventory + typed action plan 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 26.1: Deployment-global desired state + authenticated live inventory + typed action plan ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+`python3 tools/phase26_sprint26_1_gate.py`; receipt fingerprint
+`dynamically-resolved`.
 **Implementation**:
 `src/Amoebius/Manifest/{Preflight,Reconcile,Diff,Actions,Authority}.hs`,
 `src/Amoebius/Execution/{Observe,Normalize,RuntimeStorage}.hs`, and `src/Amoebius/Storage/ScalingAction.hs`
-(fresh storage observation, validation, and state-indexed action token) — target paths, not yet built. (The
+(fresh storage observation, validation, and state-indexed action token). (The
 `src/Amoebius/Scheduler/Ledger.hs` reservation-ledger normalization is partitioned to Phase 27.)
-**Blocked by**: Phase 13 (`renderAll` and the keyed owner union), Phase 24 (live cluster and observed inventory),
-Phase 25 (in-cluster registry).
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a fresh snapshot produces exactly the committed
 `test/live/fixtures/reconcile-corpus/expected-actions.json`, authored before the planner. It includes the
 full object-action and `ValidatedExecutionTransitionAction` domains, not merely add/update/prune names. All
@@ -414,17 +469,19 @@ Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. The exact receipt and three-check transcript are retained under
+[`evidence/phase_26/`](evidence/phase_26/). Sprint 26.2 consumes the typed action/authority boundary.
 
-## Sprint 26.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch 📋
+## Sprint 26.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+`python3 tools/phase26_sprint26_2_gate.py`; receipt fingerprint
+`dynamically-resolved`.
 **Implementation**: `src/Amoebius/Manifest/{Apply,Enact,Authority}.hs` and
-`src/Amoebius/Storage/ScalingDispatch.hs` — target paths, not yet built. The `amoebius-capacity` scheduler
+`src/Amoebius/Storage/ScalingAction.hs`, plus `tools/phase26_sprint26_2_live.py`. The `amoebius-capacity` scheduler
 (`src/Amoebius/Scheduler/*.hs`) and execution-identity admission
 (`src/Amoebius/Admission/ExecutionIdentity.hs`) are layered on this dispatcher in Phase 27.
-**Blocked by**:
-Sprint 26.1.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the host holds the mandatory reconciler `Lease` (via the typed
 `Absent → BootstrapHeld` action) before any non-authority mutation; ordinary object actions retain correct
 SSA field ownership; storage-scaling actions dispatch only their transition-indexed capability and never
@@ -487,15 +544,17 @@ observed handoff. The scheduler's CAS reservation/Binding path and its two-stage
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. The live receipt records the Lease CAS, scoped managed fields, stable no-op, and clean postflight.
 
-## Sprint 26.3: Staged execution transitions, Job terminal protocol, and authenticated deletion 📋
+## Sprint 26.3: Staged execution transitions, Job terminal protocol, and authenticated deletion ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+`python3 tools/phase26_sprint26_3_gate.py`; receipt fingerprint
+`dynamically-resolved`.
 **Implementation**:
 `src/Amoebius/Execution/{SerialOnDelete,HostTransition,AcceleratorRelease,JobTerminal}.hs` and
-`src/Amoebius/Manifest/Delete.hs` — target paths, not yet built.
-**Blocked by**: Sprint 26.2.
+`src/Amoebius/Manifest/Delete.hs`, plus `tools/phase26_sprint26_3_live.py`.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: no stage can use evidence from the prior snapshot, no second serial Pod is deleted before the
 expected replacement is Bound+Ready, no CUDA/Metal/host replacement starts before its resource-indexed
 release, the abstract Job protocol cannot clean a terminal Pod before durable completion, and the live
@@ -558,17 +617,16 @@ capability.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. Sprint 26.4 composes these actions into the full convergence/no-op corpus.
 
-## Sprint 26.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) 📋
+## Sprint 26.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Manifest/Wait.hs`,
-`test/live/ReconcileConvergeSpec.hs`, `test/live/SerialOnDeleteSpec.hs`, and
-`test/live/JobTerminalRetentionSpec.hs` — target paths, not yet built. (The
+`test/live/ReconcileConvergeSpec.hs`, `test/live/SerialOnDeleteSpec.hs`,
+`test/live/JobTerminalRetentionSpec.hs`, and `tools/phase26_reconcile_live.py` — built and validated. (The
 `test/live/SchedulerReservationSpec.hs` live scheduler suite is Phase 27.)
-**Blocked by**: Sprint 26.3,
-Sprint 26.2.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the representative corpus reconciles a non-instantaneous
 Deployment, a serial replacement Bound+Ready between deletions, CR health plus child conformance on
 amoebius's own in-phase capacity/reservation CRD, and terminal Job retention without a gateway. The
@@ -630,17 +688,15 @@ This is the phase gate.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. Receipt and live/mutation results are under [`evidence/phase_26/`](evidence/phase_26/).
 
-## Sprint 26.5: Register-2.5 reconciler + staged-execution convergence under simulated faults 📋
+## Sprint 26.5: Register-2.5 reconciler + staged-execution convergence under simulated faults ⏸️
 
-**Status**: Planned
-**Implementation**: `test/sim/{ReconcileSim,ExecutionTransitionSim}.hs`, driving the
-real Manifest/Execution modules above on the Phase-14 `io-classes` `Env` — target paths, not yet built. (The
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `test/sim/{ReconcileSim,ExecutionTransitionSim,Phase26SimCommon}.hs`, driving the
+real Manifest/Execution modules above on the Phase-14 `io-classes` `Env` — built and validated. (The
 `test/sim/SchedulerSim.hs` schedule battery is Phase 27.)
-**Blocked by**: Sprint 26.4 (the built
-typed-action engine); Phase 14 (the `io-classes` seams + the modeled apiserver); Phase 15 (the
-deterministic-simulation substrate).
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `IOSimPOR` interleaves object
 resourceVersion conflicts, bootstrap-`Lease` acquire/renew ambiguity, serial stage changes,
 host/device-release ordering, completion-write failure, and external mutation inside critical sections.
@@ -683,7 +739,9 @@ open. The scheduler's CAS-race schedules are Phase 27's `SchedulerSim`.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. The Register-2.5 receipt and seven-mutant ledger are under
+[`evidence/phase_26/`](evidence/phase_26/); modeled-apiserver fidelity remains assumed, as required by the
+register boundary, and the independent Register-3 run supplies the live boundary evidence.
 
 ## Documentation Requirements
 
@@ -734,7 +792,7 @@ The whole sprint (📋 Planned).
   replaces with real tools, and the `io-classes` seams Sprint 26.5 drives
 - [phase_15_deterministic_sim_substrate.md](phase_15_deterministic_sim_substrate.md) — the `IOSimPOR`
   deterministic-simulation substrate Sprint 26.5 runs on
-- [phase_24_midwife_bootstrap_kind.md](phase_24_midwife_bootstrap_kind.md) — the live single-node `kind` cluster this
+- [phase_24_bootstrap_coordinator_kind.md](phase_24_bootstrap_coordinator_kind.md) — the live single-node `kind` cluster this
   phase applies to
 - [phase_25_base_image_registry.md](phase_25_base_image_registry.md) — the in-cluster registry the applied workloads
   resolve images against

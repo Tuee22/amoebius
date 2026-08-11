@@ -1,0 +1,11 @@
+{
+  "apiVersion": "v1",
+  "kind": "PersistentVolume",
+  "reclaimPolicy": "Retain",
+  "storageClass": "amoebius-retained",
+  "driver": "ebs.csi.aws.com",
+  "volumeHandleSource": "materialized-provider-volume-id",
+  "zoneKey": "topology.ebs.csi.aws.com/zone",
+  "dynamicProvisionerContainers": 0,
+  "soleStorageClassProvisioner": "kubernetes.io/no-provisioner"
+}

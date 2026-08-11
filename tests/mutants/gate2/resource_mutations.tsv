@@ -1,0 +1,19 @@
+mutation_family	target	must_turn_red_at
+drop-field	any StructuralNode	structural-fingerprint
+substitute-field-kind	any StructuralNode.nodeKind	structural-fingerprint
+substitute-field-value	any StructuralNode.nodeValue	structural-fingerprint
+drop-ephemeral-storage	ephemeralStorage	positive-tree-inventory
+drop-physical-carve	allocatableRawBytes	positive-tree-inventory
+drop-kubelet-model	kubeletMetadataModel	positive-tree-inventory
+drop-runtime-network	networkAttachments	positive-tree-inventory
+drop-execution-identity	id|revision	indexed-execution-traversal
+zero-deployment-progress	maxSurge|maxUnavailable	UnspellableCombination
+drop-provider-slots	podSlots|cniSlots|attachableVolumes	positive-tree-inventory
+substitute-account	CloudAccountId	managed-exact-value
+drop-provider-quota	maxInstances|maxVcpu|acceleratorCaps|nodeRootStorage|durable	positive-tree-inventory
+drop-monitoring-budget	MonitoringWorkBudget	monitoring-exact-value
+drop-image-object	manifestListDigest|childDigest|configDigest|layers|chainId	positive-tree-inventory
+drop-transition	PriorProvisionRefSource	positive-tree-inventory
+drop-storage-geometry	BookKeeperGeometry|MinioErasureGeometry	positive-tree-inventory
+drop-service-intent	RegistryStorageIntent|PatroniSqlIntent|VaultStorageDemand	positive-tree-inventory
+drop-accelerator-operand	sources|workloads|residency|coexistence	positive-tree-inventory

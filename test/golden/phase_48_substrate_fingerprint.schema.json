@@ -1,0 +1,12 @@
+{
+  "schema": "amoebius.phase48.substrate-fingerprint.schema.v1",
+  "requiredLane": "linux-cpu",
+  "requiredWitnesses": [
+    {"name": "ghc", "absoluteProbe": "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"},
+    {"name": "rts", "absoluteProbe": "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"},
+    {"name": "isa", "absoluteProbe": "/usr/bin/uname"},
+    {"name": "libcAbi", "absoluteProbe": "/usr/bin/ldd"}
+  ],
+  "environmentInputs": [],
+  "pathLookupAllowed": false
+}

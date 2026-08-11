@@ -6,14 +6,19 @@
 
 Phase 17 delivers the scoped identity kernel; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+Gate passed on 2026-08-09 with ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -24,7 +29,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 17.1: Scope-indexed handles and total flow checking 📋](#sprint-171-scope-indexed-handles-and-total-flow-checking-)
+- [Sprint 17.1: Scope-indexed handles and total flow checking ⏸️](#sprint-171-scope-indexed-handles-and-total-flow-checking-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,8 +37,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. This is a design-proof phase: its gate establishes pure construction and checking properties, not
-that a running identity provider or storage service enforces them.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The owner/grant and flow relations, constructor-closure compile failures, generated coverage, and
+owner-equality mutant pass. Identity-provider and provider-runtime enforcement remain UNVERIFIED. See the
+[Phase-17 ledger](ledgers/phase_17_scoped_identity_kernel.md).
 
 ## Phase Summary
 
@@ -50,10 +62,9 @@ register, or a substrate.
 **Dependency:** Phase 16 — the checked low-code UI program and its reified public value universe.
 **Substrate:** none — no host, browser, identity provider, provider service, or cluster is contacted.
 **Register:** 1 — pure/golden.
-**Gate:** `cabal test ui-scope-spec` passes the Phase-0-pinned paired scope corpus, compile-fail fixtures,
-independent access/flow matrices, coverage floors, and every seeded mutant described in
-[Gate integrity](#gate-integrity). Phase 18 does not open unless the emitted ledger records Register 1 green and
-runtime identity/provider enforcement UNVERIFIED.
+**Gate:** `python3 tools/phase17_gate.py` passes the paired scope corpus, independent
+flow relation, three compile failures, six coverage floors, isolated execution, explicit mutant-red run, and
+ledger check.
 
 ## Gate integrity
 
@@ -94,14 +105,22 @@ does not prove Keycloak truth, provider row policy, network isolation, or nonint
 
 ## Sprints
 
-## Sprint 17.1: Scope-indexed handles and total flow checking 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 17.1: Scope-indexed handles and total flow checking ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Security/{Scope,Flow}.hs`, `test/ui/ScopeSpec.hs`,
-and `test/ui/compile_fail/` (target authored sources; not yet built)
-**Blocked by**: Phase 16
-**Independent Validation**: `cabal test ui-scope-spec` reads the Phase-0 matrices and compile-fail expectations, runs the
-exact paired cases and QuickCheck coverage obligations, and proves every named mutant turns red.
+and `test/fixtures/ui_scope/compile_fail/` — built and validated.
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `ui-scope-spec` matches all owner/swap and flow rows, and six generated reject
+classes meet their floors. Three external construction attempts fail to compile; the committed mutant fails.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/illegal_state/illegal_state_security.md`, `documents/engineering/testing_doctrine.md`
 
@@ -133,7 +152,7 @@ flow before a `CheckedUiProgram` can proceed to authorization binding.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+Done. Live identity and provider enforcement remain UNVERIFIED.
 
 ## Documentation Requirements
 

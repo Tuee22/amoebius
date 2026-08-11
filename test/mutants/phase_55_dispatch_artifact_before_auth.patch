@@ -1,0 +1,5 @@
+--- a/src/Amoebius/Ui/Server/Dispatch.hs
++++ b/src/Amoebius/Ui/Server/Dispatch.hs
+@@ order
+- authorize request >>= dispatchArtifact
++ dispatchArtifact request >>= authorize

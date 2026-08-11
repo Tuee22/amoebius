@@ -1,0 +1,2 @@
+operator: render StrongFair with WF_vars instead of SF_vars
+expected: ToyModel byte golden differs at the fairness conjunct

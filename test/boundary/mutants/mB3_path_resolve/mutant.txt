@@ -1,0 +1,1 @@
+Resolve kubectl by bare name; the hostile PATH decoy must write its sabotage marker.

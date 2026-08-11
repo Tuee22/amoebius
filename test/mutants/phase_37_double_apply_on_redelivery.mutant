@@ -1,0 +1,4 @@
+operator=dedup-delete
+target=Amoebius.Workflow.Runtime
+change=apply-redelivered-work-id-again
+expected=double-applied-work-id

@@ -1,0 +1,8 @@
+tool=/usr/bin/kubectl
+tool=/usr/local/bin/amoebius-singleton
+forbidden-tool=helm
+image-source=registry.amoebius.invalid:5000/amoebius/
+bootstrap-image=registry.amoebius.invalid:5000/amoebius/base@sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4
+forbidden-image-source=docker.io/
+forbidden-image-source=quay.io/
+forbidden-image-source=ghcr.io/

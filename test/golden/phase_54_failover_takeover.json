@@ -1,0 +1,1 @@
+{"subscription":"phase54-failover","subscriptionType":"Failover","killedActive":"worker-a","expectedActive":"worker-b","ordering":"name-ascending","observer":"pulsar-broker-stats"}

@@ -1,0 +1,1 @@
+Seed mut-44.1-static-key: replace the Vault Transit encrypt/decrypt continuation with a pod-local static key while retaining the seal-status precheck. The cryptographic-dependence and filesystem observers must reject it.

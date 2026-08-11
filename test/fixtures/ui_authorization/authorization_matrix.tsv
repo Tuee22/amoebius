@@ -1,0 +1,7 @@
+case	action	policy	permission	scope	epoch	visible	decision
+read-own	read-data	present	read	own	current	true	allow
+hidden-invocable	start-workflow	present	invoke	own	current	false	allow
+default-deny	read-data	absent	read	own	current	true	deny
+wrong-scope	read-data	present	read	foreign	current	true	deny
+wrong-permission	mutate-data	present	read	own	current	true	deny
+stale	end-session	present	invoke	own	stale	true	deny

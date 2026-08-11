@@ -1,0 +1,10 @@
+{
+  "scheduleName": "redelivery-dedup",
+  "scheduleSeed": 2,
+  "schedulePartition": false,
+  "scheduleRedelivery": true,
+  "scheduleReorder": false,
+  "scheduleDuplicate": false,
+  "scheduleCrash": false,
+  "scheduleDnsDelay": 0
+}

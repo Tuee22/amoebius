@@ -1,0 +1,4 @@
+id	value	version
+row-1	alpha	2
+row-2	beta	2
+row-3	gamma	2

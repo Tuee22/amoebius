@@ -1,0 +1,6 @@
+diff --git a/src/Amoebius/JitML/UiAdapter.hs b/src/Amoebius/JitML/UiAdapter.hs
+--- a/src/Amoebius/JitML/UiAdapter.hs
++++ b/src/Amoebius/JitML/UiAdapter.hs
+@@
+-  | contextTenant context /= ownerTenantId owner = Left ArtifactUnavailable
++  | False = Left ArtifactUnavailable

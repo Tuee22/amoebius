@@ -1,0 +1,7 @@
+operand maximum
+blob_bytes 1048576
+chunk_bytes 65536
+chunks 16
+concurrency 1
+blob_age_seconds 86400
+pending_dependencies 8

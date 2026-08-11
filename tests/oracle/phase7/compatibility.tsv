@@ -1,0 +1,10 @@
+engine	environment	accepted
+KindEngine	NativeLinux	true
+KindEngine	VirtualizedLinux	true
+KindEngine	ManagedAws	false
+Rke2Engine	NativeLinux	true
+Rke2Engine	VirtualizedLinux	true
+Rke2Engine	ManagedAws	false
+ManagedEksEngine	NativeLinux	false
+ManagedEksEngine	VirtualizedLinux	false
+ManagedEksEngine	ManagedAws	true

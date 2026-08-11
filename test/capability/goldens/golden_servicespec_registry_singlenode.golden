@@ -1,0 +1,10 @@
+capability=Registry
+resource=images
+provider=Canonical
+product=Distribution
+shape=SingleNode
+object|registry/images/config|ConfigMap|provider-config|-
+object|registry/images/member-0|StatefulSet|member|registry/images/controller-0
+object|registry/images/service|Service|stable-endpoint|-
+execution|registry/images/member-0|StatefulSet
+intent=RegistryStorageProducerIntent RegistryProducer (RegistryStorageIntent {registryStorageResource = "images"})

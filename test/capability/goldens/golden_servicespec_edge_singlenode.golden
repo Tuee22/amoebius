@@ -1,0 +1,10 @@
+capability=Edge
+resource=public-edge
+provider=Canonical
+product=Envoy
+shape=SingleNode
+object|edge/public-edge/config|ConfigMap|provider-config|-
+object|edge/public-edge/member-0|Deployment|member|edge/public-edge/controller-0
+object|edge/public-edge/service|Service|stable-endpoint|-
+execution|edge/public-edge/member-0|Deployment
+intent=GenericCapabilityIntent Edge "public-edge"

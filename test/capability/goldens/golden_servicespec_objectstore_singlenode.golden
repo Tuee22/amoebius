@@ -1,0 +1,11 @@
+capability=ObjectStore
+resource=assets
+provider=Canonical
+product=MinIO
+shape=SingleNode
+object|objectstore/assets/config|ConfigMap|provider-config|-
+object|objectstore/assets/member-0|StatefulSet|member|objectstore/assets/controller-0
+object|objectstore/assets/service|Service|stable-endpoint|-
+execution|objectstore/assets/member-0|StatefulSet
+intent=ObjectStoreProducerIntent ApplicationBuckets "assets"
+intent=ObjectStoreGatewayIntent "assets"

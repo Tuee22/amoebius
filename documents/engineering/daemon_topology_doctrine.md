@@ -20,6 +20,8 @@ between the parts, owned by [host_cluster_comms_doctrine.md](./host_cluster_comm
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. One runtime binary, three contexts](#1-one-runtime-binary-three-contexts)
 - [2. Context × role: an orthogonal grid](#2-context--role-an-orthogonal-grid)
@@ -33,12 +35,17 @@ between the parts, owned by [host_cluster_comms_doctrine.md](./host_cluster_comm
 
 ---
 
+**Pure scheduler read-side status.** The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md)
+validates the aggregate snapshot/root-version reservation guard, absent-Pod recovery debit, and the pure
+Reserved→BindingInFlight→Bound state algebra. Phase 27 subsequently delivered the same-binary live scheduler
+role and Kubernetes Binding effects; the earlier Phase-9 ledger is `external-run-reference`.
+
 <a id="1-one-binary-three-contexts"></a>
 
 ## 1. One runtime binary, three contexts
 
 **Every Haskell runtime role uses the same executable.** There is no Haskell CLI package and a separate daemon
-package; one Haskell binary runs in three different ways. The Python `pb` midwife/admin client is the explicit
+package; one Haskell binary runs in three different ways. The Python `pb` bootstrap coordinator/admin client is the explicit
 operator-frontend boundary: it builds and `exec`s the Haskell command mode during bootstrap, then calls the
 singleton REST API after handoff. It is not a fourth runtime role.
 
@@ -52,8 +59,10 @@ The **same-binary policy** is generalized directly from the prodbox sibling
 (`/home/matthewnowak/prodbox/documents/engineering/distributed_gateway_architecture.md` → "Same-binary
 policy"). This is structural, not stylistic:
 
-- **One distribution artifact, one dependency closure**, built once from the substrate midwife against the
-  pinned toolchain (GHC **9.12.4**, Cabal 3.16.1.0 — the [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) pin).
+- **One distribution artifact, one dependency closure**, built once from the substrate bootstrap coordinator
+  against the current dynamically resolved compatible graph. The external attestation records that graph;
+  the repository stores no lock/freeze or permanent compiler/package pin
+  ([DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md)).
 - **One config loader, one logger, one error type, one set of types.** A daemon and a CLI command share
   the `Command` ADT, the structured-error type, and the Dhall decoder — there is nothing to keep in sync
   between two codebases.
@@ -70,10 +79,15 @@ PureScript assets and Haskell UI-server interpreter specified by
 behaviour. infernix and jitML remain linked trusted workflow and component adapters behind typed ports. The
 named behaviours are libraries inside one binary, not separate products.
 
+[Phase 22](../../DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md) supplies the local executable-boundary
+evidence: the existing `amoebius` artifact accepts the `serve-ui` responsibility and refuses readiness on
+missing, duplicate, contract-mismatched, or ABI-mismatched handler registries. This is Register-2 evidence
+against local fakes; an in-cluster worker deployment and replica lifecycle remain UNVERIFIED.
+
 This document owns *which contexts exist and what each is for*. **How** the host daemon communicates — the
 distro-mTLS path to `kube-apiserver`, and the host-only NodePort peering with no mTLS — is owned by
 [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md). The **substrate** mechanics behind the
-sudo host daemon — substrate detection, the midwife, host (non-containerized) worker *nodes*, and the
+sudo host daemon — substrate detection, the bootstrap coordinator, host (non-containerized) worker *nodes*, and the
 no-environment-variables / no-`PATH` lazy-tool-ensure contract — are owned by
 [substrate_doctrine.md](./substrate_doctrine.md).
 
@@ -112,7 +126,7 @@ Three facts fall out of the grid:
 - **The control-plane singleton is always an in-cluster role.** A cluster's brain lives *in* the cluster it
   governs. Before that cluster exists, the **sudo host daemon** does the bootstrap work that brings the
   first singleton into being (this is the prodbox root single-node story), then defers to it — the host
-  daemon is the *midwife*, not the brain.
+  daemon is the *bootstrap coordinator*, not the brain.
 - **Worker daemons run in both daemon contexts.** Most workers are in-cluster pods; a few must be
   host-level subprocesses because their hardware cannot be containerized (Apple-Metal GPU work, and
   native Windows-CUDA inference — CUDA does not run performantly under WSL2). A host-level worker is the **same binary in the worker role under the host-daemon context**, supervised as a subprocess.
@@ -133,7 +147,8 @@ does). Cluster topology contributes two different axes, and rke2 adds one condit
 all five names distinct prevents an engine choice from being mistaken for a detected host fact or a Kubernetes
 node role from being mistaken for an amoebius process role:
 
-- **(i) Substrate — detected.** `apple` / `linux-cpu` / `linux-cuda` / `windows`, derived from host facts
+- **(i) Hardware substrate — detected.** `apple` / `linux-cpu` / `linux-cuda` / `windows`, derived from host facts;
+  each derives the `linux-cpu` execution lane, natively or through Incus/Lima/WSL2, while accelerator lanes are additive
   ([cluster_topology_doctrine.md §1](./cluster_topology_doctrine.md#1-two-axes-the-substrate-is-detected-the-engine-is-declared), [substrate_doctrine.md](./substrate_doctrine.md)).
 - **(ii) Compute engine — declared.** `Kind` / `Rke2` / `Managed Eks`, authored as deployment intent and
   checked against the detected substrate
@@ -168,7 +183,7 @@ server/agent split.
 daemon topology:
 
 - **The sudo host daemon installs the ROOT rke2 server** — the zero-secret single node
-  `{ servers = Rke2Servers.Single host, agents = Fixed [] }`. This makes the [§2](#2-context--role-an-orthogonal-grid) *midwife* concrete: before any
+  `{ servers = Rke2Servers.Single host, agents = Fixed [] }`. This makes the [§2](#2-context--role-an-orthogonal-grid) *bootstrap coordinator* concrete: before any
   cluster exists there is no singleton yet, so the host daemon (acting on behalf of the future singleton)
   brings up the first `rke2-server`, then defers. This is the prodbox single-node `rke2-server` base —
   **sibling evidence, not an amoebius result** (prodbox's `Rke2.hs` proves the single-node install only).
@@ -192,6 +207,12 @@ singleton never promotes a node from agent to server at runtime; it re-provision
 ---
 
 ## 3. The control-plane singleton
+
+> **Current delivery boundary.** Phase 33 delivers and live-validates the in-cluster `replicas=1` singleton,
+> including the fresh-resourceVersion bootstrap-holder release/absence/singleton-acquire handoff, separate
+> Lease-renewal authority, exact first-pass reconcile and zero-write rerun, durable replacement, and admin
+> surface. The Register-3 ledger is
+> `dynamically-resolved`.
 
 **Every cluster has exactly one brain.** Exactly one daemon holds **total authority over the cluster and its secrets**: it runs the reconcile loop that drives the live cluster toward the global `.dhall`, and it is the
 cluster's secret authority. This role **is the prodbox root single-node control-plane behaviour, generalized**
@@ -312,6 +333,12 @@ extents deduplicate by physical allocation identity with workload extents, while
 additive. The root ledger is scheduler-field-owned and is neither server-side-applied nor pruned by the
 singleton's generic object path.
 
+Phase 27's Register-3 gate validated this role boundary with a namespace `pods=1` quota, the sole
+default-scheduler bootstrap Pod, restricted cutover authority, independently read managed taint/admission/
+Binding RBAC, real Binding assignment after reservation CAS, and leak-free removal of every gate-scoped
+cluster resource. Phase 33 subsequently delivered the in-cluster singleton without giving it scheduler
+authority.
+
 ---
 
 ## 4. Worker daemons — N, unelected
@@ -407,8 +434,9 @@ Properties shared by all workers:
   (unlike Apple-Metal's `apple_metal_headless_builds.md`), inheriting the honesty framing below.
 
 > **Honesty.** The Pulsar / ML / inference worker roles are **new relative to prodbox** — prodbox had no
-> Pulsar and no ML workers. Everything in this section is forward design intent for the relevant phase, not
-> an inherited-proven behaviour; status and gates live only in
+> Pulsar and no ML workers. Phase 35 validates the client substrate workers consume: all four Pulsar
+> subscription encodings are exposed and exercised without an amoebius election. The worker deployments,
+> continuous trainer, and ML/inference roles remain forward work for their owning phases; status lives only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
@@ -545,6 +573,15 @@ bounded/tiered/retained topic lifecycle offloading to **MinIO/S3** as the cold t
   latest value`; it decides nothing about who leads, because nothing leads by election. The SLO obligation that
   feeds it is owned by [monitoring_doctrine.md](./monitoring_doctrine.md).
 
+Phase 35 validates that the native client exposes and live-delivers `Exclusive`, `Failover`, `Shared`, and
+`Key_Shared`. Phase 37 now validates the topology choice: three workers attach to one broker-ranked `Failover`
+subscription with priority/name order `worker-a`, `worker-b`, `worker-c`; killing `worker-a` after its store
+commit and before command acknowledgement promotes `worker-b`. The broker owns active/standby selection;
+amoebius acquires no Lease and links no election/lock client. The orchestrator, workers, gateway, and collector
+fit their closed provision before the round starts, and teardown leaves no consumer handle or provider
+resource. The live proof uses the universal `linux-cpu` lane; pristine Linux uses Incus on Linux/Linux-CUDA,
+Lima on Apple, or WSL2 on Windows.
+
 > **Honesty.** Carrying the event log over Pulsar + MinIO is **forward design, new vs prodbox** — prodbox
 > deliberately did *not* use a durable queue for its gateway log. The signed/hash-chained/idempotent discipline
 > is proven *in prodbox over its HTTP gossip transport*; that is evidence from a sibling system, not a tested
@@ -574,15 +611,33 @@ Lifecycle"); this doc records only the contract amoebius daemons share:
   frame-local fields hot-reload via atomic STM swap on a file-watch; boot fields trigger a
   drain-and-restart so the supervisor relaunches against the new file. No `PATH`, no
   environment-variable precedence on supported paths ([substrate_doctrine.md](./substrate_doctrine.md) for the no-env/no-`PATH` contract). **That frame config arrives differently per context ([§1](#1-one-binary-three-contexts)):** a **CLI / host**
-  binary reads the sibling `amoebius.dhall` written by the midwife; a binary **descending a bootstrap-lift frame** (VM/container) has it **streamed on `stdin` and written once before `exec`** — the parent's
+  binary reads the sibling `amoebius.dhall` written by the bootstrap coordinator; a binary **descending a bootstrap-lift frame** (VM/container) has it **streamed on `stdin` and written once before `exec`** — the parent's
   `context-init` mint ([dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)); an **in-cluster pod** receives it as a rendered
   `ConfigMap` mount ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)). In every case a
   frame receives its frame config from its parent and never rewrites its own. The dynamic `InForceSpec` is a
   separate desired-state value updated through the singleton admin API and stored as a Vault-Transit-enveloped
   MinIO object/ref, not by this file-watch path.
 
-> **Honesty.** This spine is **proven in prodbox**; for amoebius it is design intent inherited from a
-> sibling, not a tested amoebius result.
+> **Honesty.** Phase 33 validates the singleton branch of this spine in amoebius: health/readiness/metrics,
+> Lease-gated service, bounded concurrent HTTP connections, serialized admin effects, independent Lease
+> renewal, and replacement recovery. Applying the same spine to later worker roles remains phase-owned design
+> intent. The broader sibling evidence is context, not an amoebius result.
+
+Phase 44 extends the singleton contract in code with a private `SingletonContext`: an empty context produces
+the pinned `NoSingletonContext` refusal, a replica count other than one refuses, and a prepared provider
+invocation requires absolute Pulumi/plugin paths and supplies no child environment. Scoped live readback
+confirmed the Phase-33 Deployment at one desired/ready/available replica and placed the two bounded executor
+Jobs. Because AWS authority was invalid, an actual provider `pulumi up` did not run inside that singleton and
+remains UNVERIFIED; the scoped result must not be read as EKS evidence.
+
+Phase 45 implements the hostless managed-child topology contract in
+`Amoebius.Daemon.InClusterSingleton`: exactly one singleton role, one capacity-scheduler role, and zero host
+daemon roles, host NodePort peers, or host-substrate witnesses. Its positive pair keeps a self-managed
+`linux-cpu` host witness, so the managed arm cannot silently erase all hosts. Pure tests and retained-kind
+Kubernetes object readback validate that shape and the Lease-gated non-Serving→Serving transition. Because the
+configured AWS identity cannot materialize EKS, the retained drill is explicitly an emulation of the object
+shape and actual Managed EKS foreclosure remains UNVERIFIED. The universal CPU/VM routing rule is recorded in
+the development-plan substrate registry.
 
 ---
 
@@ -614,6 +669,13 @@ flowchart TD
 ```
 *Orientation. Design intent; the context-and-role grid is owned by [§2](#2-context--role-an-orthogonal-grid). One binary appears in every box — the distinction is which context selects which role, never which executable runs.*
 
+Phase 51 validates only a host-CUDA execution slice of the accelerator-owner target. A physical GTX 970,
+`libcuda`, and `nvidia-smi` agree on one process executing 200 kernels over ten million parameters, followed by
+device-memory release. The retained kind node advertises no `nvidia.com/gpu`, so no device-plugin allocation,
+DaemonSet-like owner Pod, resource request/limit, node affinity, Pod UID/cgroup join, or Kubernetes audit row
+is claimed. Full sibling training and failover also remain UNVERIFIED. The universal `linux-cpu` route is
+unchanged: Incus supplies a clean Linux/Linux-CUDA guest, Lima serves Apple, and WSL2 serves Windows.
+
 ---
 
 ## 8. Planning ownership
@@ -622,15 +684,20 @@ This document is normative daemon-topology doctrine only. Delivery sequencing, c
 validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and never restated here. For orientation
 only (the plan is authoritative): the contexts and the same-binary spine ride the bootstrap-kernel phase; the
-in-cluster **control-plane singleton** lands with the live DSL deploy (per
+in-cluster **control-plane singleton** was delivered by the Phase-33 live DSL deploy (per
 [cluster_lifecycle_doctrine.md §10](./cluster_lifecycle_doctrine.md#10-planning-ownership)); single-instance is a
-k8s/etcd property with nothing for amoebius to prove; and the **cross-cluster gateway migration** — the one
+k8s/etcd property, while amoebius's Lease client/handoff protocol is live-validated; and the **cross-cluster gateway migration** — the one
 simulation/proof obligation — is owned, modeled, and gated by
 [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) and
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) in the multi-cluster phase. This doc states the target
 shape and links back for status.
 
 ---
+
+Phase 58's scoped UI-worker result admits three hard-spread unelected worker roles and demonstrates non-sticky
+host-process recovery after one role stops. It does not observe real Kubernetes scheduling or a provider-zone
+fault, so multi-zone worker availability remains UNVERIFIED. Every hardware substrate can always run
+`linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)

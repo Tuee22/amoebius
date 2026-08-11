@@ -1,0 +1,4 @@
+mutant=phase41-missing-peer-key
+flag=phase41-missing-peer-key-mutant
+locus=src/Amoebius/Fabric/Keys.hs:resolvePeerKeyPair
+expected=missing SecretRef resolution must fail before any kernel or listener effect

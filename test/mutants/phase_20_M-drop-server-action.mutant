@@ -1,0 +1,3 @@
+operator=dropped-effect
+change=omit start from UiServerPlan
+expected=workflow.start projection row fails

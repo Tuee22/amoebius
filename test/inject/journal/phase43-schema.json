@@ -1,0 +1,8 @@
+{
+  "acknowledgedIdPattern": "^p43-[a-z]+-[0-9]{4}$",
+  "appendOnly": true,
+  "fields": ["branch", "writeId", "sourceAckedAtMonotonicNs"],
+  "minimumAckedUnreplicatedAtCut": 8,
+  "outsideForest": true,
+  "schema": "amoebius.phase43.write-journal.v1"
+}

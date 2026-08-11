@@ -7,7 +7,13 @@
 
 Phase 32 delivers the Keycloak-owned ingress; its design is owned by [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [pulumi_iac_doctrine.md](../documents/engineering/pulumi_iac_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Validated 2026-08-10 with `python3 tools/phase32_gate.py`; ledger
+`dynamically-resolved`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -26,10 +32,10 @@ No gate has run.
 - [Resource provision — the edge / Patroni / ACME envelope](#resource-provision--the-edge--patroni--acme-envelope)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 32.1: The Keycloak-owned edge — LoadBalancer → Envoy/Gateway API → Keycloak 📋](#sprint-321-the-keycloak-owned-edge--loadbalancer--envoygateway-api--keycloak-)
-- [Sprint 32.2: No self-published wild ingress + public-edge TLS 📋](#sprint-322-no-self-published-wild-ingress--public-edge-tls-)
-- [Sprint 32.3: East-west NetworkPolicy posture — derived default-deny 📋](#sprint-323-east-west-networkpolicy-posture--derived-default-deny-)
-- [Sprint 32.4: The single-door + storage-rebind regression gate 📋](#sprint-324-the-single-door--storage-rebind-regression-gate-)
+- [Sprint 32.1: The Keycloak-owned edge — LoadBalancer → Envoy/Gateway API → Keycloak ⏸️](#sprint-321-the-keycloak-owned-edge--loadbalancer--envoygateway-api--keycloak-)
+- [Sprint 32.2: No self-published wild ingress + public-edge TLS ⏸️](#sprint-322-no-self-published-wild-ingress--public-edge-tls-)
+- [Sprint 32.3: East-west NetworkPolicy posture — derived default-deny ⏸️](#sprint-323-east-west-networkpolicy-posture--derived-default-deny-)
+- [Sprint 32.4: The single-door + storage-rebind regression gate ⏸️](#sprint-324-the-single-door--storage-rebind-regression-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,16 +43,35 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is design intent and every prescriptive
-statement is a target shape, never a tested amoebius result. The gate has not run on any substrate. The
-substrate is **linux-cpu**: the edge is wired and gated on the single-node `kind` cluster carrying the
-Phase-30/31 standard service stack. Keycloak owning all wild ingress is **sibling evidence, not an amoebius result** —
-prodbox proved a Keycloak-as-the-only-door edge, and its Patroni-backed Keycloak is the proven relational
-consumer — while the Envoy + Gateway API L7 data plane and the derived-from-the-dependency-graph east-west
-NetworkPolicy posture are amoebius-shaped and unproven here. Per
-[development_plan_standards.md §K](development_plan_standards.md), no sprint is marked Done — or 🧪
-Live-proof-pending — until its proof actually runs live on `linux-cpu`. Status transitions are recorded
-reverse-chronologically here once work begins.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ **Done.** All four sprints are implemented and the Phase-32 gate is sealed. The retained linux-cpu stack
+now has one externally reachable LoadBalancer, a typed Gateway/HTTPRoute projection, two Ready static Envoy
+data-plane replicas, the real Envoy Gateway v1.4.2 controller runners, Keycloak 26.3.2, and a dedicated
+three-member strict-synchronous Patroni cluster for the Keycloak consumer. The Percona CR is observed by the
+real Phase-31 operator; as in Phase 31, the exact Patroni child is honestly recorded as an amoebius-owned
+manual child projection rather than falsely attributed to the operator. The GatewayClass similarly uses the
+amoebius manual-projection controller name: Envoy Gateway's provider/Gateway API/xDS runners are live and
+observed, while the baked static Envoy Deployment is the data plane rendered from the typed route projection.
+
+The gate positively obtains an OIDC token and serves every pinned route from host, WAN, LAN, and localhost
+origins; rejects unauthenticated HTTP and invalid WebSocket tuples; proves the localhost-only NodePort is
+unreachable off-host; turns a committed backdoor seed red and returns clean; exercises default-deny policy
+through deny→allow→deny graph variation; records Vault-derived TLS/EAB provenance; and finds 93 live SSA
+objects owned by field manager `amoebius`, all using the private Phase-25 digest. Six committed mutants turn
+red for their pinned reasons. The destructive storage regression is run in a separate
+`amoebius-phase32-rebind` kind cluster over the committed Keycloak-relational row and MinIO-object payloads:
+both bytes survive a real node/API deletion and new CA, namespace UID, and node-container identity, then the
+scratch cluster is removed. This isolated projection reuses the Phase-28 persistence harness and deliberately
+does not destroy the retained Phase 24–32 platform cluster.
+
+Every hardware substrate can always run the `linux-cpu` lane. If a validation needs a pristine Linux host,
+use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows; accelerator lanes are additive and never
+remove this CPU baseline.
 
 ## Phase Summary
 
@@ -72,13 +97,15 @@ piece — the Envoy + Gateway API data plane replacing a hand-configured proxy �
 part of the set.
 
 **Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the edge is wired and gated on a single-node `kind` cluster on a linux-cpu
-host, tracked in [substrates.md](substrates.md); no apple, linux-cuda, or windows substrate is touched.
+host, tracked in [substrates.md](substrates.md). This gate did not exercise an accelerator lane, but
+`linux-cpu` remains available on every hardware substrate. A pristine Linux host uses Incus on
+Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 **Register:** 3 (live infrastructure) — the gate drives a real edge on a real cluster and re-exercises a live
 delete + recreate; a Register-1/2 in-process check cannot discharge it (though the *render-time*
 impossibility of a self-published ingress was already golden-locked pre-cluster in Phase 13).
 
-**Gate:** `cabal test keycloak-ingress-live` is green: on the live `linux-cpu` cluster carrying the standard service stack, every wild route — WAN, LAN,
+**Gate:** `python3 tools/phase32_gate.py` is green: on the live `linux-cpu` cluster carrying the standard service stack, every wild route — WAN, LAN,
 and localhost-browser — reaches a platform or app surface **only** through `LoadBalancer → Envoy/Gateway API →
 Keycloak`; an unauthenticated request to any surface is rejected at that edge; **no workload or chart can publish its own wild ingress** or open a backdoor NodePort (the sole exception being the host-origin,
 localhost-only NodePort, a distinct endpoint type); and the **Phase-28 storage-rebind regression still holds**
@@ -107,7 +134,7 @@ three. The "test-realm user" is the oracle-pinned `phase32-tester` realm/user fi
 ## Gate integrity
 
 - **Oracle-pinning (§M.1):** the route inventory (`route-inventory.golden`), the test realm/user
-  (`realm.json`), the expected derived-NetworkPolicy set (`netpol-expected.json`, see 28.3), and the marker
+  (`realm.json`), the expected derived-NetworkPolicy set (`netpol-expected.golden`, see 32.3), and the marker
   payloads (`marker-row.sql`, `marker-object.bin`) are authored and committed in this phase's oracle-pinning sprint before
   `Amoebius.Platform.Edge`/`Keycloak`/`NetworkPolicy` exist; none is regenerated from the implementation.
 - **Committed seeded mutants (§M.2):** at least three committed mutants must go red — (a) an edge variant that
@@ -147,7 +174,7 @@ flowchart LR
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Design intent. Phase 32's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+*Validated Phase-32 gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
 ## Resource provision — the edge / Patroni / ACME envelope
 
@@ -224,15 +251,22 @@ before the first effect, while their exact-fit twins render and reconcile.
 
 ## Sprints
 
-## Sprint 32.1: The Keycloak-owned edge — LoadBalancer → Envoy/Gateway API → Keycloak 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 32.1: The Keycloak-owned edge — LoadBalancer → Envoy/Gateway API → Keycloak ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+runners, two-replica Envoy data plane, dedicated strict-sync Keycloak Patroni cluster, OIDC route matrix, and
+WebSocket guard corpus all pass.
 **Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Keycloak.hs`
-(target paths; not yet built)
-**Blocked by**: Phase 30 gate (external prereq — the backbone is HA-up and
-publishes a MetalLB address), Phase 24 gate (external prereq — the Percona/Patroni database layer is HA-up),
-Phase 29 gate (external prereq — Vault serves Keycloak's DB password and the edge TLS material as
-`SecretRef`s)
+(built), `tools/phase32_keycloak_ingress_live.py`, and `test/live/Phase32KeycloakIngressLiveSpec.hs`.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: for every surface in the committed `route-inventory.golden`, a
 real OIDC login as the Phase-0 `phase32-tester` user yields the surface's content (2xx) **only** after
 traversing Keycloak, while an unauthenticated probe to the same route is rejected/redirected to the Keycloak
@@ -293,14 +327,15 @@ observed as readiness conditions, not durations.
    attempts. The independent backend/CNI trace observes the challenge only for the valid tuple.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 32.2: No self-published wild ingress + public-edge TLS 📋
+## Sprint 32.2: No self-published wild ingress + public-edge TLS ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+pair, Vault EAB provenance shim, bounded ACME staging stand-in, and Dhall literal scan pass live.
 **Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Tls.hs`
-(target paths; not yet built)
-**Blocked by**: Sprint 32.1
+(built), `test/fixtures/phase32/backdoor-seed.yaml`, and `tools/phase32_keycloak_ingress_live.py`.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the live scan is
 itself validated against a **committed seeded violation** — an out-of-band NodePort/`Ingress` applied via
 raw `kubectl` (bypassing the DSL) makes the scan go red and the ledger record it, and its removal restores
@@ -359,19 +394,20 @@ one carve-out really is a *different type* of endpoint, not a wild one.
    the exact-fit twin equals the provisioned projection.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 32.3: East-west NetworkPolicy posture — derived default-deny 📋
+## Sprint 32.3: East-west NetworkPolicy posture — derived default-deny ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+matches it, and a distinct scratch Pod observes deny→allow→deny as its declared graph edge is added/removed.
 **Implementation**: `src/Amoebius/Manifest/NetworkPolicy.hs`,
-`src/Amoebius/Platform/Edge.hs` (target paths; not yet built)
-**Blocked by**: Sprint 32.1
+`src/Amoebius/Platform/Edge.hs` (built), `test/fixtures/phase32/netpol-expected.golden`, and the live harness.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: "derived" is oracled two ways that a hardcoded static allow-list cannot satisfy. (1) **Graph variation:** the gate deploys a scratch consumer workload, adds a declared consuming edge to a provider,
 re-renders/re-applies, and asserts both the applied policy set **and** live reachability flip on; then
 removes the edge and asserts denial returns — so the policy must be a total function of the graph, not the
 fixed Phase-30/31 service names. (2) **Independent set-equality:** the applied policies are compared for set
-equality against the oracle-pinned `netpol-expected.json` and against a **separate graph-walker** over
+equality against the oracle-pinned `netpol-expected.golden` and against a **separate graph-walker** over
 the declared dependency edges (a code path distinct from `renderAll`), never the reconciler's own fold.
 After apply, a pod declaring consumer of `B` reaches `B`, a pod that does not is denied, and a probe to an
 undeclared edge times out.
@@ -391,7 +427,7 @@ and every other is denied.
 - The live posture: a service that does not declare consuming `B` cannot reach `B`, and a declared edge is not
   severed — the two shapes [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)
   makes unrepresentable at authoring time, now confirmed on the running cluster.
-- The oracle-pinned expected-policy oracle `test/fixtures/phase32/netpol-expected.json`, an independent
+- The oracle-pinned expected-policy oracle `test/fixtures/phase32/netpol-expected.golden`, an independent
   graph-walker (a code path distinct from `renderAll`) that recomputes the expected allow-set from the declared
   dependency edges, and committed mutant (b) — a `derive` variant that drops one allow-edge and adds one
   undeclared allow-edge, which the set-equality check must show going red.
@@ -404,20 +440,21 @@ and every other is denied.
    reachability flips on; remove the edge and assert the allow is withdrawn and reachability flips off. This
    fails against committed mutant (b) (drop one allow, add one undeclared allow), which the gate must show going
    red.
-4. Assert set equality between the applied policies and the oracle-pinned `netpol-expected.json` **and** the
+4. Assert set equality between the applied policies and the oracle-pinned `netpol-expected.golden` **and** the
    output of an **independent graph-walker** (distinct from `renderAll`) over the declared dependency edges — not
    by re-running the implementation's own `derive`.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 32.4: The single-door + storage-rebind regression gate 📋
+## Sprint 32.4: The single-door + storage-rebind regression gate ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Platform/Edge.hs`, `test/live/IngressRebindGate.hs`
-(target paths; not yet built)
-**Blocked by**: Sprint 32.1, Sprint 32.2, Sprint 32.3, Phase 28 gate (external
-prereq — the no-provisioner retained-storage lossless rebind the regression reuses)
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+the latter proves exact committed relational/object marker bytes across fresh cluster identities without
+destroying the retained platform stack.
+**Implementation**: `src/Amoebius/Platform/Edge.hs`, `tools/phase32_rebind_regression.py`,
+`tools/phase32_gate.py`, and `test/live/Phase32KeycloakIngressLiveSpec.hs` (built).
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the gate harness proves both halves in one run — the single-door invariant end-to-end
 (unauthenticated request rejected at the edge, positive OIDC round-trip served for the committed route
 inventory, no non-Keycloak wild path) and the marker-bytes round-trip surviving a **witnessed** cluster
@@ -473,11 +510,11 @@ deterministic storage rebind.
    successful recreate as evidence of capacity.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated with the tested Phase-32 result:**
 - `documents/engineering/platform_services_doctrine.md` — when this phase lands, the §9 single-wild-ingress
   honesty note and the §11 ordering edges flip from "design intent" to a delivered-status pointer (status stays
   in the plan); the east-west-derived-NetworkPolicy subsection gains its first live amoebius realization.

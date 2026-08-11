@@ -15,10 +15,12 @@ by [platform_services_doctrine.md](./platform_services_doctrine.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
@@ -40,9 +42,9 @@ Two questions in the vision are left unowned by the docs that touch them:
 > the cluster daemon?"* — and — *"how does a new `.dhall` get implemented or unlock keys provided in the root
 > node? does the project binary provide a thin cli tool to interact with the amoebius daemon api?"*
 
-The bring-up *pieces* exist — the midwife CLI ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)),
+The bring-up *pieces* exist — the bootstrap coordinator CLI ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)),
 "init follows readiness" ([`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)),
-the "midwife, not the brain" host daemon ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)),
+the "bootstrap coordinator, not the brain" host daemon ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)),
 Vault init/unseal ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)),
 and the handoff *trigger* ([`readiness_ordering_doctrine.md` §5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers))
 — but the **ordered sequence** was derivable-across-five-docs, never written, and the **admin control plane**
@@ -61,7 +63,7 @@ A cluster's life has **two régimes with a single, one-way handoff between them*
   default mTLS — **channel 1** of [`host_cluster_comms_doctrine.md` §4](./host_cluster_comms_doctrine.md#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls)
   — to install the distro, acquire the mandatory reconciler Lease under its bootstrap-holder identity, apply
   the capacity-scheduler cutover and platform manifests, and bring up the in-cluster singleton. It is the
-  *midwife*, acting on behalf of the future singleton ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)).
+  *bootstrap coordinator*, acting on behalf of the future singleton ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)).
 - **Steady-state régime — the singleton drives.** Once the platform services **and** the
   control-plane singleton are up, the bootstrap holder has been observed released, and the singleton is the
   observed holder of that same mandatory Lease, the host binary **defers**. From that instant — *even before
@@ -77,7 +79,7 @@ interactions occur through the [amoebius] NodePort."* The one-way handoff is [§
 ```mermaid
 flowchart TD
 %% register: orientation
-  pb[pb midwife CLI, Python: toolchain, build, exec binary] --> hb[Host binary / sudo host daemon]
+  pb[pb bootstrap coordinator CLI, Python: toolchain, build, exec binary] --> hb[Host binary / sudo host daemon]
   hb -->|channel 1: distro mTLS, BOOTSTRAP ONLY| api[kube-apiserver reachable]
   api --> lease[Bootstrap host holds mandatory reconciler Lease]
   lease --> sched[BootstrapCapacitySchedulerReady: exact config and root, no managed taint]
@@ -102,8 +104,8 @@ The sequence is a [`readiness_ordering_doctrine.md`](./readiness_ordering_doctri
 ([`cluster_lifecycle_doctrine.md` §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
 The ordered steps, each gated on the prior step's readiness:
 
-1. **The midwife CLI** (`pb bootstrap`) ensures the toolchain, builds the binary, and `exec`s `amoebius
-   bootstrap --distro={kind,rke2}` ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)).
+1. **The bootstrap coordinator CLI** (`pb bootstrap`) ensures the toolchain, builds the binary, and `exec`s `amoebius
+   bootstrap --distro={kind,rke2}` ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)).
 2. **The host daemon brings up the distro** — the zero-secret single-node root (`kind`, or
    `Rke2Servers.Single`) — and waits on `discover = Present` for `kube-apiserver` (a successful mTLS call,
    not a timer; [`readiness_ordering_doctrine.md` §5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers)).
@@ -151,7 +153,7 @@ This is the **root** bootstrap; a *child* cluster is spawned by a parent (the Pu
 [`cluster_lifecycle_doctrine.md` §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)),
 which injects the child's scoped `InForceSpec` + secrets rather than prompting a human. This ordered sequence **retires the open question** [`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
 recorded (bootstrap config / first-manifest delivery): the first operator-supplied manifest is delivered by step 10's `dhall
-update`, and the transient bootstrap config is the binary-sibling `amoebius.dhall` the midwife establishes.
+update`, and the transient bootstrap config is the binary-sibling `amoebius.dhall` the bootstrap coordinator establishes.
 
 ---
 
@@ -181,7 +183,7 @@ The handoff is **one-way, observed-gated, and transfers control-surface authorit
   Channel 1 (host binary ↔ kube-apiserver) is **retired** — a bootstrap-only privilege.
 - **What does *not* transfer: host-worker supervision.** The sudo host daemon keeps supervising host-level
   worker subprocesses (Apple-Metal / Windows-CUDA inference), which remain Pulsar/MinIO peers on **channel 2** ([`host_cluster_comms_doctrine.md` §3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)).
-  "Midwife then defers" is about the *control* surface, not the host daemon's continued supervision role.
+  "Bootstrap Coordinator then defers" is about the *control* surface, not the host daemon's continued supervision role.
 - **Re-running is a no-op.** Because bring-up is a reconcile
   ([`cluster_lifecycle_doctrine.md` §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)),
   a crash before release re-enters as the bootstrap holder and re-observes its exact state; a crash after
@@ -303,17 +305,23 @@ this doc specifies the single-node-root answer the plan adopts and does not sett
 This document is normative bootstrap-sequence + admin-control-plane doctrine only. Delivery sequencing,
 status, and gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never
 restated here. For orientation only (the plan is authoritative): the **chain/Step kernel** the ordered sequence
-is enacted through rides **Phase 14**, and the **midwife + single-node kind bring-up** rides **Phase 24**; the
-**host→singleton handoff** itself rides **Phase 33** (the control-plane singleton). The **whole admin REST surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — rides **Phase 33 Sprint 33.4**,
+is enacted through rides **Phase 14**, and the **bootstrap coordinator + single-node kind bring-up** rides **Phase 24**; the
+**host→singleton handoff** itself is delivered by **Phase 33** (the control-plane singleton). The **whole admin REST surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — is delivered by **Phase 33 Sprint 33.4**,
 because [§3](#3-the-ordered-bootstrap-sequence) step 8 exposes the surface *at* the handoff point: there is no
 singleton to host an endpoint before it. **Phase 29** (root Vault/PKI) delivers the Vault, the
 password-sealed unlock-material envelope, and the built-in client that the `vault init/unseal` endpoint fronts —
 unsealing there is driven under the Phase-26 bootstrap-host authority, the only authority that exists that
 early. This doc states the target shape and links back for status.
 
-> **Honesty.** Everything here is Phase 0 design intent, specified before implementation. The "midwife then
-> defers" host-daemon model and the reconcile-driven bring-up are *proven in the prodbox / hostbootstrap
-> siblings* and inherited as evidence, not a tested amoebius result
+> **Honesty.** Phase 24 now carries the `pb` bootstrap coordinator mode and reconcile-driven single-node kind bring-up in
+> amoebius code, and a pristine Incus VM exercises their absent→installed→build→`exec` path, no-op re-run,
+> divergence repairs, hard storage and transition boundaries, complete runtime inventory, exact process
+> envelopes, six red mutants, and leak-free teardown. The authoritative Phase-24 gate is complete. Every
+> hardware substrate always supplies the `linux-cpu` lane: Linux runs it natively or in Incus, Apple in Lima,
+> and Windows in WSL2 when a pristine Linux host is required. Phase 33 now delivers the typed host→singleton
+> Lease handoff, the four endpoint families, and the `pb` admin-REST client mode; its Register-3 ledger is
+> `dynamically-resolved`. Claims beyond those delivered
+> boundaries remain design intent or inherited sibling evidence
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
@@ -321,11 +329,11 @@ early. This doc states the target shape and links back for status.
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — [§2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap) the bring-up this sequences (its open question retired here), [§9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) the reconciler that enacts each edge
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) midwife-then-defers, [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) the singleton that exposes the admin REST
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) bootstrap-coordinator-then-defers, [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) the singleton that exposes the admin REST
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — [§4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) init-follows-readiness, [§5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal) the operator-password unseal the admin endpoint carries, [§10](./vault_pki_doctrine.md#10-the-chicken-and-egg-floor-what-stays-outside-vault) the pre-Vault trust floor
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — [§3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio) the workload-plane rule this admin plane is distinct from; [§4](./host_cluster_comms_doctrine.md#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls) channel 1 (bootstrap-only)
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers) the handoff trigger (`/readyz` Serving + the `Committed` readiness edge; single-instance is delegated to k8s/etcd, so there is no election commit to await)
-- [Substrate Doctrine](./substrate_doctrine.md) — [§6](./substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) the midwife CLI igniter
+- [Substrate Doctrine](./substrate_doctrine.md) — [§6](./substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) the bootstrap coordinator CLI igniter
 - [Platform Services Doctrine](./platform_services_doctrine.md) — [§11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) the derived platform bring-up DAG
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.42](../illegal_state/illegal_state_security.md#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness) an unauthenticated admin mutation foreclosed
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

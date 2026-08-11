@@ -1,0 +1,6 @@
+diff --git a/src/Amoebius/HostWorker/Capacity.hs b/src/Amoebius/HostWorker/Capacity.hs
+--- a/src/Amoebius/HostWorker/Capacity.hs
++++ b/src/Amoebius/HostWorker/Capacity.hs
+@@
+-      workloadKeys = Map.keysSet (metalWorkloadBytes metal)
++      workloadKeys = Set.delete "jit" (Map.keysSet (metalWorkloadBytes metal))

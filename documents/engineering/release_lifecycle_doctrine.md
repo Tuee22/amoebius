@@ -21,6 +21,8 @@ nor the reconciler that applies a generation, owned by
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. No external CI/CD control plane — delivery is typed composition on primitives amoebius owns](#1-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns)
 - [2. `Release` and the immutable release ledger (`releaseHash`)](#2-release-and-the-immutable-release-ledger-releasehash)
@@ -93,11 +95,12 @@ delegates their storage, reconciliation, evidence, and provider mechanisms as fo
 | The control-plane singleton that runs the promote/rollout half | [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) |
 | The bounded UI language, plan envelope, browser/server ABI, and compatibility witness | [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
 
-> **Honesty.** This whole doctrine is **Phase-0 reference-only design intent**. None of the four values is
-> built in amoebius. Where a sibling exhibits the shape — jitML's phased rollout, jitML's pre/post-grant
-> schema phase, infernix's `.ready`-gated artifact — that is **sibling evidence, not an amoebius result**
-> ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). Read every prescriptive statement below as
-> the contract amoebius intends to satisfy.
+> **Validated instance.** Phase 39 built all four delivery values in `amoebius-release` and validated their
+> intra-cluster wiring at Register 3 on `linux-cpu`: immutable MinIO release entries, closed environment
+> pointers with ETag CAS, evidence-witness refusal/advance, and externally readiness-gated
+> base→schema-migration→finalize apply. The runtime layer is tested, never proven. Gateway-API canary shifting,
+> Pulsar consumer-group cutover, and cross-cluster/geo promotion remain **UNVERIFIED**. The sibling examples
+> below remain provenance for the original pattern, not evidence substituted for the Phase-39 result.
 
 ---
 
@@ -139,6 +142,10 @@ data AppliedGeneration = AppliedGeneration
   retaining the same release identity. The generic client/server image may remain byte-identical while a program changes,
   but that change still mints a distinct `Release`. The authoritative field set and digest coverage are owned
   by [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts).
+- **The paired-plan rule is observed live.** [Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_program_release.md)
+  publishes two distinct content-addressed UI releases and observes the environment pointer history advancing
+  only A-pair then B-pair. No pointer effect names a missing or mixed half, and the unchanged generic runtime
+  image demonstrates that program release data does not require an OCI rebuild.
 - **`releaseHash` is a distinct hash class, never shared.** It is registered in the canonical hash/pointer
   master table alongside `experimentHash`, `kernelKey`, and the OCI image digest
   ([content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)),
@@ -285,9 +292,8 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   [illegal_state_catalog.md §3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) (an unverified environment promotion), owned by this doctrine, technique "a handle exists only once its evidence
   edge does."
 - **Generalizes the already-planned `Multicluster/PromotionGate.hs`.** amoebius already scopes a
-  `PromotionGate` for the multicluster spawn path; this doctrine **generalizes** that single-purpose gate into
-  the uniform per-environment promotion precondition. That is amoebius design intent (Phase-N), not a built
-  gate.
+  `PromotionGate` for the multicluster spawn path; Phase 39 **generalizes** that single-purpose gate into
+  the now-built uniform per-environment promotion precondition. Cross-cluster use remains Phase 42 work.
 
 > **Layer.** Promote-unverified→prod is **type-foreclosed** (uninhabitable — no `advance` term). The *strength
 > mapping* itself (which layer prod requires) is a policy value the gate enforces at construction time.
@@ -296,7 +302,8 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
 
 infernix gates a servable artifact behind a `.ready` sentinel written **last** (`model_bootstrap.py`,
 `model_cache.py`) — the "no handle without its completion edge" pattern the `PromotionGate` mirrors at the
-promotion layer. Sibling evidence for the *idiom*; the `PromotionGate` itself is unbuilt amoebius design intent.
+promotion layer. This remains sibling evidence for the *idiom*; Phase 39 now supplies amoebius's live-wiring
+evidence for the `PromotionGate` itself.
 
 ---
 
@@ -377,10 +384,10 @@ data ProvisionedRolloutWork       -- private constructors only
 > so a `RolloutPhase` applies **rendered objects**, never a `helm install`. The pattern is borrowed; the Helm
 > is dropped.
 
-> **Layer / honesty.** The `RolloutPlan` is **Phase-39 design intent** enacted by the Phase-26 SSA reconciler,
-> which is itself unbuilt. Ordering, readiness-gating, canary weights, and rollback are real, documented
-> Kubernetes / Gateway-API mechanisms; *that amoebius wires them into this plan type* is specified here and
-> unproven until the phase lands.
+> **Layer / honesty.** Phase 39 validated the typed three-phase plan and its live SSA/readiness wiring for
+> base apply, verified PostgreSQL schema migration, and finalize. This is runtime-tested residue, never a
+> proof. Gateway-API canary weights, Pulsar subscription cutover, and cross-cluster rollout were not exercised
+> and remain **UNVERIFIED**.
 
 ### Sibling evidence — the `RolloutPlan` apply
 
@@ -447,7 +454,20 @@ third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/
 - [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the remaining manifest-change-correctness hardening after Phase 39 homes the schema-migration rollout
 - [Documentation Standards](../documentation_standards.md)
 
-> **Honesty.** Everything here is Phase-0 **reference-only design intent**. The `Release` ledger, the
-> `Environment` promotion pointer, the `PromotionGate`, and the `RolloutPlan`/`RolloutPhase` are **unbuilt in > amoebius** and compose primitives that are themselves Phase-26-and-later. The shapes are **generalized from > siblings** — jitML's phased readiness-gated rollout and its pre/post-grant schema phase, infernix's
-> `.ready`-gated artifact, the content store's ETag-CAS `trial` pointer — each of which is **sibling evidence, > not proof in amoebius**. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every
-> prescriptive statement as the contract amoebius intends to satisfy, never as a tested amoebius result.
+> **Honesty.** Phase 39 is the validated amoebius instance for the immutable `Release` ledger, closed
+> `Environment` pointer, `PromotionGate`, and base→schema-migration→finalize `RolloutPlan`. The live wiring was
+> tested on `linux-cpu`, never proven. The sibling systems remain historical evidence for the borrowed shapes;
+> Gateway-API canary shifting, Pulsar consumer cutover, and cross-cluster/geo promotion remain **UNVERIFIED**.
+
+> **Phase 57 scoped evidence.** The immutable A→B→A state machine now gates both forward and rollback gateway
+> decisions on the corresponding projector watermark; its stale-plan, scoped-cursor, registration-drain, and
+> four mutation checks pass with a fresh append-only host-local observer. Real Gateway API/Envoy, Keycloak,
+> Pulsar, browser, Kubernetes, CNI, and provider observations remain **UNVERIFIED**. Every hardware substrate
+> can always run `linux-cpu`; pristine Linux is supplied by Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
+> on Windows.
+
+> **Phase 63 scoped evidence.** Promotion now requires a finite path for every admitted offline record kind.
+> Real Chrome processes stage B, terminate, resume B atomically, preserve intent through reload, and roll back
+> to A; an append-only local observer records A→B→A and incompatible C is refused. Real Gateway, Pulsar,
+> provider, Keycloak, Kubernetes, and CNI observations remain **UNVERIFIED**. Every hardware substrate can
+> always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.

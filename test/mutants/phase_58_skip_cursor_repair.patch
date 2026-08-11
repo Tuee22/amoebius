@@ -1,0 +1,5 @@
+--- a/src/Amoebius/Ui/Realtime/Reconnect.hs
++++ b/src/Amoebius/Ui/Realtime/Reconnect.hs
+@@ gap
+- repairFromDurableCursor scopedCursor
++ acceptLatestFrame

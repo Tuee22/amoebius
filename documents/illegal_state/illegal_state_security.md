@@ -23,6 +23,8 @@ owned by [platform_services_doctrine.md](../engineering/platform_services_doctri
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Scope](#1-scope)
 - [2. The security, ingress & secrets illegal states](#2-the-security-ingress--secrets-illegal-states)
@@ -73,6 +75,10 @@ flowchart LR
 
 ### 3.3 Misconfigured gateway
 
+**Delivery-owner:** `Phase-6`
+
+**Case-family:** `security`
+
 A hand-written Gateway/HTTPRoute can listen on a port nothing serves, terminate TLS with a cert for the
 wrong host, or route to a backend that doesn't exist. In amoebius the gateway is not free-form: routes are
 emitted from the same value that declares the service, so a route to a non-existent backend, or a listener
@@ -89,6 +95,10 @@ and TLS actually terminates).
 
 ### 3.4 DNS that binds to the wrong IP
 
+**Delivery-owner:** `Phase-13`
+
+**Case-family:** `security`
+
 Route53 (or any DNS) records are strings; nothing prevents pointing `app.example.com` at an address the
 cluster never owned. amoebius never lets the operator *type* the target IP: a DNS binding is a **total function of the allocated LoadBalancer address** — a name binds to a *service handle*, and the address is
 computed from the realized LB, not supplied. A record pointing at an unowned address therefore has no
@@ -103,6 +113,10 @@ at reconcile — the enforcement half the type cannot reach).
 
 ### 3.6 Blocking NetworkPolicy (services can't reach each other)
 
+**Delivery-owner:** `Phase-13`
+
+**Case-family:** `security`
+
 NetworkPolicies are deny-by-omission: a forgotten egress rule silently severs a service from
 its database, with no error anywhere. amoebius does not let operators hand-author allow/deny rules at all.
 Connectivity is **derived** from the declared dependency graph — if service A declares it consumes service
@@ -113,11 +127,18 @@ human never writes the policy. **Owner:**
 
 **Layer:** type-foreclosed at the Haskell IR — NetworkPolicies are derived from the declared dependency graph and never hand-authored, so a severing policy has no constructor; runtime-checked residue — that the live CNI actually admits the traffic.
 **Validation-locus:** `rendered-output-golden` (the derived NetworkPolicy is checked in the emitted objects —
-a declared dependency is never a connection the policy blocks) + `Gate-2-decoder` (the consumer handle exists
+a declared dependency is never a connection the policy blocks; Phase 13 validates exact edge-set equality
+against its independent test-side oracle) + `Gate-2-decoder` (the consumer handle exists
 only once the dependency edge does; the ownership fold over the dependency graph) + `live-effect` residue
-(that the CNI actually admits the derived flow).
+(that the CNI actually admits the derived flow). Phase 32 discharged that residue on linux-cpu with an
+independent scratch Pod: absent edge denied, adding `scratch→minio` admitted, and removing it denied again;
+the policy-swap mutant failed the independently pinned set oracle.
 
 ### 3.7 Accidental insecure / backdoor ingress
+
+**Delivery-owner:** `Phase-6`
+
+**Case-family:** `security`
 
 The highest-severity entry: a chart that opens its own NodePort to the wild, or an Ingress that skips Keycloak, so
 an unauthenticated path exists that nobody meant to ship. amoebius enforces **Keycloak owns all wild ingress** structurally: an app cannot publish its own wild ingress, because the
@@ -130,13 +151,22 @@ host-local peer into a wild endpoint, and none that exposes a workload to the wi
 (capability: only the edge holds the "expose-to-wild" capability) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct indices that do not interconvert).
 
 **Layer:** type-foreclosed at the Haskell IR — only the Keycloak edge holds the expose-to-wild capability and endpoint kinds do not interconvert; runtime-checked residue — that the running cluster in fact exposes no unauthenticated path.
-**Validation-locus:** `rendered-output-golden` (the no-backdoor-ingress golden on the emitted objects — no
-wild NodePort or Keycloak-skipping Ingress in the rendered manifest) + `Gate-2-decoder` (only the edge holds
+**Validation-locus:** `Gate-1-editor` (the application schema exposes no authorable wild-ingress or raw
+NodePort arm) + `rendered-output-golden` (the no-backdoor-ingress golden on the emitted objects — no wild
+NodePort or Keycloak-skipping Ingress in the rendered manifest, validated by Phase 13 in Register 1) + `Gate-2-decoder` (only the edge holds
 the expose-to-wild capability, and endpoint kinds are distinct non-interconverting indices — a self-published
 wild endpoint has no constructor) + `live-effect` residue (that the running cluster in fact exposes no
-unauthenticated path).
+unauthenticated path). Phase 32 discharged that residue on linux-cpu: the sole LoadBalancer was the
+Keycloak/Envoy edge, a committed raw NodePort seed turned the scanner red and removal restored green, and the
+only allowed `HostLocalPeer` NodePort succeeded on node loopback while an actual WAN-Pod source was denied.
+Every hardware substrate can always supply this linux-cpu baseline; pristine Linux uses Incus on
+Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ### 3.8 Cross-tenant references and literal secrets
+
+**Delivery-owner:** `Phase-6`
+
+**Case-family:** `security`
 
 Two locked invariants ride together here. **(a) Secrets are names only** — a literal secret value in Dhall
 is unrepresentable; the spec carries a `SecretRef` (a name), and the parent injects the actual material
@@ -154,6 +184,10 @@ re-tags across tenants) + `live-effect` residue (that the parent actually inject
 the child's Vault at runtime).
 
 ### 3.9 A plaintext spec at rest
+
+**Delivery-owner:** `Phase-29`
+
+**Case-family:** `security`
 
 The `InForceSpec` is sensitive even when it holds no secret *values* — it is the cluster's whole topology.
 So the spec has **no plaintext-at-rest representation**: a cluster never holds its own spec as a plaintext
@@ -173,6 +207,10 @@ ConfigMap or etcd — this row's enforcement is explicitly the runtime half).
 
 ### 3.10 A child spec that reaches beyond its own subtree
 
+**Delivery-owner:** `Phase-6`
+
+**Case-family:** `security`
+
 A child cluster's spec is, by construction, a projection of **exactly its own subtree** (its own config
 including its children's). There is no field in a `ChildInForceSpec` in which a sibling or ancestor-only branch can
 appear, so a parent cannot hand a child anything wider than its subtree, and a child cannot name a sibling's
@@ -189,6 +227,10 @@ a child cannot even *decrypt* a sibling's subtree at runtime, the cryptographic 
 shape).
 
 ### 3.11 An unsafe workload (no resource limits, no hardened securityContext)
+
+**Delivery-owner:** `Phase-4`
+
+**Case-family:** `security`
 
 In raw k8s a Deployment may omit resource requests/limits — a noisy-neighbour or OOM-the-node risk — and run
 as root with a writable root filesystem and full Linux capabilities. amoebius **generates** every workload
@@ -217,10 +259,14 @@ whole-deployment `ProvisionedSpec`, returning a `ProvisionError` before that sea
 cannot supply any demand) +
 `rendered-output-golden` (the hardened non-root / no-privilege-escalation / dropped-capabilities /
 read-only-root `securityContext` and the exact checked resource projection are present in the emitted
-manifest) + `live-effect` residue (the running pod actually enforces the hardened context and resource
+manifest, validated by Phase 13 across all nine capability arms and both shapes) + `live-effect` residue (the running pod actually enforces the hardened context and resource
 ceilings).
 
 ### 3.40 A secure-gateway reach collapsing into wild ingress
+
+**Delivery-owner:** `Phase-13`
+
+**Case-family:** `security`
 
 The new `Gateway` networking arm (`SecureGatewayReach c`, the authenticated secure-gateway wire a non-member host
 worker uses to reach the data plane + Vault) must not become a back-door into the wild — "Keycloak owns all wild
@@ -240,6 +286,10 @@ reach) + `live-effect` residue (that the authenticated secure-gateway wire actua
 runtime).
 
 ### 3.42 An admin mutation without a root-token capability + an unsealed-Vault witness
+
+**Delivery-owner:** `Phase-29`
+
+**Case-family:** `security`
 
 Raw k8s hands anyone with a kubeconfig a mutating control surface — a new manifest, a config change — with no
 proof of authority beyond the cert, and no ordering against secret readiness. amoebius routes **all post-bootstrap admin through the singleton's REST API** (the singleton being a Deployment `replicas=1` with no
@@ -269,6 +319,10 @@ not survive the host-daemon→singleton handoff) + `live-effect` residue (that t
 `replicas=1` with no election — actually holds *sole* admin authority, no split-brain).
 
 ### 3.45 A cross-tenant or hand-authored RBAC binding
+
+**Delivery-owner:** `Phase-11`
+
+**Case-family:** `capability-provision`
 
 Raw k8s (and Keycloak, Vault, Pulsar, and MinIO alongside it) lets an operator hand-write a `RoleBinding`,
 a realm-role grant, a Vault policy, a Pulsar ACL, or a bucket policy that grants one tenant reach into
@@ -314,7 +368,18 @@ graph, with no grant crossing a tenant tag) + `live-effect` residue (provider-st
 normalized content digests, one coalesced target/base witness, store-global MinIO components, and the sealed
 transition high-water; the policies refuse a live cross-tenant read).
 
+**Phase-34 evidence.** The Register-3 gate derives 18 qualified actions for two equal-shaped tenants and reads
+the resulting Keycloak, Vault, Pulsar, MinIO, Kubernetes, and Postgres administrative objects through six
+separated observers. The hand-authored-grant and outer/inner-tenant-mismatch twins have zero provider effects;
+`drop_provider_arm` and `collapse_tenant_key` both turn the unchanged gate red, and complete target inventories
+return to preflight. The actual cross-subject/cross-tenant request refusal remains the Phase-36 live-effect
+residue, not a Phase-34 claim. Ledger `external-run-reference`.
+
 ### 3.79 A UI action whose server authorization does not match its declaration
+
+**Delivery-owner:** `Phase-18`
+
+**Case-family:** `ui`
 
 A hidden or disabled control is presentation, never authorization. If the SPA can name a raw endpoint, if an
 action has no policy, or if its client-visible permission differs from the server handler's enforced permission,
@@ -358,7 +423,24 @@ unguarded, change a handler id without changing the policy, and serve the privat
 client asset; each must fail before effects or private disclosure. Black-box direct action and manifest
 requests are the live oracle, not a click-visibility test.
 
+**Phase-18 evidence.** The Register-1 gate matches five normalized registry tuples and byte-equal client/server
+projections against an independent extractor, matches six allow/deny rows and four exact stale-epoch failures,
+requires every denial to leave an empty pure effect trace, and kills both `default_allow` and
+`visibility_is_authorization`. Live gateway, UI-server, identity-provider, and provider-policy enforcement is
+still UNVERIFIED. See [Phase 18](../../DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md).
+
+**Phase-22 evidence.** The Register-2 `serve-ui` process derives tenant, subject, permission, grant, and epoch
+from a signed credential minted by a separate authority process. Own-scope read/mutation reaches a separate
+capability-guarded handler, while foreign, forged-header, revoked, wrong-origin, and stale twins produce zero
+handler bytes; startup, private-plan, idempotency, and WebSocket pairs also pass, and nine mutants turn red.
+Live Keycloak, edge exclusivity, provider policy, cluster deployment, and HA remain UNVERIFIED. See
+[Phase 22](../../DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md).
+
 ### 3.80 A subject resolving or mutating another subject's resource without a grant
+
+**Delivery-owner:** `Phase-17`
+
+**Case-family:** `ui`
 
 Checking only that a resource identifier exists creates an insecure direct-object-reference path: two subjects
 inside one tenant can see one another's rows, or a subject can submit another tenant's identifier. Every request
@@ -397,7 +479,24 @@ drop only the tenant predicate, trust a browser-supplied tenant, key a cache by 
 grant after revocation; every cross-scope result must be indistinguishable from an unavailable resource and no
 mutation may occur.
 
+**Phase-17 evidence.** The Register-1 scope gate matches six owner/grant joins and the exact same-tenant
+`OwnerMismatch` and cross-tenant `TenantMismatch` swaps. Raw `ResourceId` construction and scope retagging fail
+to compile, and the committed owner-equality mutant makes both swaps red. Provider enforcement remains the live
+residue. See [Phase 17](../../DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md).
+
+**Phase-36 evidence.** The Register-3 gate authenticates and introspects three real Keycloak credentials across
+two tenants, then drives a constructor-private Haskell request context through paired own/foreign Postgres RLS,
+derived MinIO-key, and derived Pulsar-namespace operations. Independent provider and CNI observations find no
+foreign state, message, cursor, or network effect; exact teardown passes. `drop_user_predicate` and
+`accept_body_tenant` each turn the matrix red. Browser tenant switching, cross-cluster isolation, and complete
+provider-audit-log correspondence remain `UNVERIFIED`. Ledger
+`dynamically-resolved`.
+
 ### 3.81 A UI value flowing to an incompatible tenant, subject, or audience scope
+
+**Delivery-owner:** `Phase-17`
+
+**Case-family:** `ui`
 
 A page may read a correctly authorized value and still leak it through a broader response, log, topic, model
 prompt, cache, export, or downstream workflow. Every data source and sink therefore carries a
@@ -431,7 +530,16 @@ formatter into a public response, log a labelled secret, key a cache without its
 topic, and feed untrusted model/browser text into an authority sink; each must identify the complete offending
 path before effects.
 
+**Phase-17 evidence.** The Register-1 flow gate matches four independently authored direct/transitive rows,
+meets six generated reject-class floors, and rejects general declassification at compile time. Cycle,
+missing-member, and transitive-leak diagnostics are total in the pure model; live sink behavior remains
+UNVERIFIED. See [Phase 17](../../DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md).
+
 ### 3.83 A UI plan executed after an authority-bearing source changed
+
+**Delivery-owner:** `Phase-20`
+
+**Case-family:** `ui`
 
 A compiled SPA plan becomes unsafe when authorization policy, tenant-role membership, handler schema, workflow
 contract, resource generation, or referenced model provenance changes while an old browser bundle or server
@@ -470,6 +578,12 @@ UI-program digest, reuse an authorization decision across a membership epoch, ac
 current registry, publish only one plan half, swap equal-shaped client/server generations, or trust the
 browser's claimed generation. Every stale or mixed replay must fail closed; a cosmetic-only change outside the
 declared source set remains executable, preventing an oracle that merely rejects all old bundles.
+
+**Phase-20 evidence.** The Register-1 compiler matches four logical projections, four canonical JSON goldens,
+four concrete SHA-256 identities, and six finite-demand cells. An independently assembled authority-source
+list detects both change and omission, opposite insertion orders in fresh processes are byte-identical, and all
+six projection/digest mutants turn red. Request-time freshness and live release pairing remain UNVERIFIED. See
+[Phase 20](../../DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md).
 
 ---
 

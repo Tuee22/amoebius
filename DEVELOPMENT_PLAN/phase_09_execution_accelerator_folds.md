@@ -10,14 +10,19 @@
 
 Phase 9 delivers the execution-epoch + scheduler + accelerator + provider-root folds; its design is owned by [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [resource_capacity_folds.md](../documents/engineering/resource_capacity_folds.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+Gate passed 2026-08-09; ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/ledgers/phase_09_execution_accelerator.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -28,11 +33,11 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 9.1: Execution-epoch expansion + scheduler-reservation algebra 📋](#sprint-91-execution-epoch-expansion--scheduler-reservation-algebra-)
-- [Sprint 9.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting 📋](#sprint-92-kubeletcri-runtime-metadata--node-local-oci-contentsnapshotimage--physical-disk-parent-accounting-)
-- [Sprint 9.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute 📋](#sprint-93-accelerator-residencynet-allocatable-vram--provider-root-disk-template--enginebuildetcdmonitoring-compute-)
-- [Sprint 9.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants 📋](#sprint-94-the-composed-full-resource-vector-place-witness--properties--independent-validator--per-axis-mutants-)
-- [Sprint 9.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate 📋](#sprint-95-the-executionacceleratorprovider-root-fold-negative-corpus--the-composed-gate-)
+- [Sprint 9.1: Execution-epoch expansion + scheduler-reservation algebra ⏸️](#sprint-91-execution-epoch-expansion--scheduler-reservation-algebra-)
+- [Sprint 9.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ⏸️](#sprint-92-kubeletcri-runtime-metadata--node-local-oci-contentsnapshotimage--physical-disk-parent-accounting-)
+- [Sprint 9.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ⏸️](#sprint-93-accelerator-residencynet-allocatable-vram--provider-root-disk-template--enginebuildetcdmonitoring-compute-)
+- [Sprint 9.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ⏸️](#sprint-94-the-composed-full-resource-vector-place-witness--properties--independent-validator--per-axis-mutants-)
+- [Sprint 9.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ⏸️](#sprint-95-the-executionacceleratorprovider-root-fold-negative-corpus--the-composed-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -40,13 +45,19 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
-is design intent, never a tested amoebius result. This phase opens after the Phase 7 gate (the base
-`fits`/`carve`/`place` fold and the `ComputeEngine`/`LinuxHost`/`Topology` relation the composed `place` folds
-over) **and** the Phase 8 gate (the logical→physical storage geometry the composed resource vector consumes),
-and runs on **no substrate** (`none`) in **Register 1** — it stands up no host and no cluster, only the
-in-process execution/accelerator/provider-root folds, the composed full-resource-vector place-witness, and its
-property + gate battery. Where a shape below is exercised in a sibling system (prodbox's
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. `python3 tools/phase9_gate.py` passed on 2026-08-09 on **no substrate**
+(`none`) in **Register 1**, with ledger
+`dynamically-resolved`. The gate stood up no host or
+cluster: it exercised the pure execution, scheduler, runtime/image-storage, accelerator, provider-root, and
+host-only compute folds plus their composed placement witness. Live scheduler Binding, runtime inventory,
+device attachment, provider materialization, and model-to-runtime correspondence remain **UNVERIFIED**.
+Where a shape below is exercised in a sibling system (prodbox's
 `Prodbox/CLI/Rke2.hs` single-node rke2 base and its teardown push-back soundness), that is **sibling evidence, not an amoebius result**.
 
 ## Phase Summary
@@ -178,7 +189,7 @@ flowchart LR
   s3 -->|"produces what the next consumes"| s4
   s4 -->|"the last seam the gate closes over"| gate
 ```
-*Orientation. The seams phase 9 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+*Orientation. The seams Phase 9 built and sealed in order; [Gate integrity](#gate-integrity) owns the validated apparatus.*
 
 ### Representative set (§M.7)
 
@@ -352,27 +363,25 @@ durable/cache (Phase 8), accelerator net-allocatable VRAM, execution/admission e
 
 ## Sprints
 
-## Sprint 9.1: Execution-epoch expansion + scheduler-reservation algebra 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Capacity/Types.hs` (the execution/scheduler types:
-private `BoundExecutionBody`/kind-indexed controller policies,
-`ExecutionTransitionSource`/`PriorExecutionProvision`,
-`MaterializedExecutionInstance`/`ExecutionEpoch`/`ProvisionedExecutionEpochs`, state-indexed observed
-Pod/process identities, `CompleteResourceReservation`/zero-capable release partitions, aggregate
-scheduler/host reservation ledger types, child-indexed `ProvisionedSchedulerGuardConfig`,
-`CapacitySchedulerSystemDemand`/`ProvisionedCapacitySchedulerSystem`, mandatory reconciler-`Lease` demand,
-and `ControllerChildEnvelope`/`ProvisionedControllerChildren`); `src/Amoebius/Capacity/Scheduler.hs` (the
-complete reservation algebra: allocation-domain identity union; Pod-qualified additive components; CSI
-volume identity; exclusive CUDA device rows; image-pull top-n; static/foreign/resident/ledger/candidate
-fold; prior+desired child templates; aggregate-root byte/churn and state transitions);
-`src/Amoebius/Capacity/HostReservation.hs` (the host reserve/launch/recovery/release ledger and retained
-cache/log/local-artifact partitions); extends the execution branch of `src/Amoebius/Capacity/Fold.hs` (the
-epoch provisioner) — target paths, not yet built.
-**Blocked by**: Phase 7 gate (the base
-`fits`/`podFits`/`carve`/`place` fold and the `Topology` `place` folds over); Phase 5 gate (the GADT-indexed
-IR + total decoder the execution types live in); Phase 6 gate (the property/corpus framework +
-validation-locus ledger).
+## Sprint 9.1: Execution-epoch expansion + scheduler-reservation algebra ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Capacity/Execution.hs` owns the closed controller bodies, exact prior
+reference, identity-keyed materialization, empty-capable epochs, and componentwise peak;
+`src/Amoebius/Capacity/Scheduler.hs` owns reservation projection, aggregate snapshot/root-version guard,
+content/CSI/device unions, absent-Pod recovery debits, and Reserved→BindingInFlight→Bound transitions;
+`src/Amoebius/Capacity/HostReservation.hs` owns the zero-capable compute and retained physical-artifact release
+partitions. These declarations live beside their owner folds rather than enlarging the Phase-7 base
+`Types.hs`/`Fold.hs` pair.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a unit + property suite takes the deployment-level
 `FirstDeployment | UpdateFrom` source plus the desired `BoundExecutionSet`; an update resolves the exact
 prior steady inventory from `ProvisionContext` before independently expanding desired units into
@@ -472,11 +481,11 @@ numbers only — the pure expansion fold Phase 11's `provision` seal later invok
    controller-child debit.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 9.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting 📋
+## Sprint 9.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Capacity/NodeLocalStorage.hs` (the logical
 pod-ephemeral fold, derived mapped-file/AtomicWriter, closed layout routing, exact OCI content/snapshot
 joins, and model-versioned image peak); `src/Amoebius/Capacity/RuntimeStorage.hs` (derive metadata
@@ -488,12 +497,9 @@ planned-slot/observed-Pod-UID `KubeletRuntimeMetadataDemand`, `ProvisionedKubele
 `PodRuntimeRole`, `ImageStorageRole`, `NodeImageStorageModelVersion`, `KubeletRuntimeMetadataModelVersion`,
 `ProvisionedNodeImageStorageDemand`, scope-indexed `ProvisionedNodeRuntimeStorageAccounting`,
 `NodeLocalStorageCapacity`/filesystem layouts/image artifacts, `PhysicalDiskPartition`,
-`NamedDiskCarve`, and `ProvisionedVmDiskCarve`) — target
-paths, not yet built.
-**Blocked by**: Sprint 9.1 (the execution-instance expansion that keys planned slots
-and observed Pod UIDs); Phase 5 gate (the IR + decoder); Phase 7 gate (`NodeCapacity.localStorage` logical
-pod-ephemeral allocatable the physical operands nest inside); [Phase 8 gate](phase_08_storage_geometry_folds.md)
-(the storage-presentation declarations this sprint's layouts and carves are indexed by).
+`NamedDiskCarve`, and `ProvisionedVmDiskCarve`). The implemented declarations reside in the two owner modules
+rather than in the Phase-7 base `Types.hs`.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: for every planned
 Pod slot in each epoch, the reference fold independently rebuilds `KubeletRuntimeMetadataShape` from the
 structural sandbox, Pod-directory, runtime, CNI, volume, and mount counts under
@@ -598,25 +604,19 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
    `systemReserve` charged twice.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 9.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute 📋
+## Sprint 9.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Capacity/ProviderRoot.hs` (private VM/root-EBS
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Capacity/Accelerator.hs` (family/profile/device ownership, complete
+coexistence epochs, unsharded/replicated/sharded placement, interconnect, and net VRAM);
+`src/Amoebius/Capacity/ProviderRoot.hs` (private VM/root-EBS
 high-water derivation and node-root quota); `src/Amoebius/Capacity/Etcd.hs` (exact desired/live API-object
 transition and churn quota fit before physical WAL/snapshot/defrag expansion);
 `src/Amoebius/Capacity/PulumiExecution.hs` (deploy/plugin join and concurrent executor/workspace peak);
-extends `src/Amoebius/Capacity/Types.hs` (pod/host accelerator demands and offerings, per-device
-raw/reserved/allocatable VRAM, residency/coexistence-epoch types, the provider-root
-`ProvisionedPerInstanceDiskTemplate` quota type, `BuildExecutionEnvelope`, role-indexed
-`EngineSystemReserve`, `WorkerEngineStorageDemand`, `EtcdLogicalDemand`/`ProvisionedEtcdLogicalDemand`,
-`MonitoringWorkBudget`, `PulumiExecutionDemand`/`ProvisionedPulumiExecutionDemand`) and the
-accelerator/provider-root branches of `src/Amoebius/Capacity/Fold.hs` — target paths, not yet built.
-**Blocked by**: Sprint 9.1 (the execution expansion that fixes the CUDA DaemonSet arm and the
-engine/executor units these envelopes feed); Phase 7 gate (the base `NodeCapacity`/`CandidateNodeClass`
-templates the provider-root arithmetic instantiates); [Phase 8 gate](phase_08_storage_geometry_folds.md)
-(the provider-root and control-plane storage declarations this sprint's quota arithmetic instantiates).
+the modules retain their demand, provisioned, and structured-error types beside their folds.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a unit + property suite
 validates accelerator family, whole device count, exact source/workload and policy-class domains, all
 derived coexistence epochs, residency placement, per-device aggregation, shard-id uniqueness/count/byte-sum,
@@ -707,20 +707,17 @@ derivations as pure, checked `provision-seal` operations that feed the composed 
    deploy/plugin/concurrency executor envelope) is individually required: dropping it turns a property red.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 9.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants 📋
+## Sprint 9.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ⏸️
 
-**Status**: Planned
-**Implementation**: `test/dsl/CapacityTopologyProps.hs` (QuickCheck generators for the
-whole-deployment envelope + workload sets and the composed placement property battery + the
-implementation-independent composed witness validator) and `test/dsl/RuntimeStorageProps.hs` (planned-slot
-and observed-Pod-UID metadata shapes, component-role grouping, layout resolution, qualified Pod/image
-ownership, per-scope node aggregation, reservation/observed no-double-debit, and alias/one-byte-short
-mutants), reusing the Phase-6 property harness — target paths, not yet built.
-**Blocked by**: Sprint 9.1,
-Sprint 9.2, Sprint 9.3; Phase 7 gate (the base `fits`/`carve`/`place` and topology folds the composed
-witness invokes); Phase 8 gate (the logical→physical storage-geometry folds the composed vector consumes).
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Capacity/Composed.hs` retains the Phase-7 placement, Phase-8 storage, and
+Phase-9 execution/runtime/accelerator/provider-root witnesses; `test/dsl/ExecutionAcceleratorProps.hs`
+contains seven sampled properties and the implementation-independent composed witness validator;
+`test/dsl/ExecutionAcceleratorFixtures.hs` carries deterministic controller, scheduler-state, observed-UID,
+host-only compute, replicated-residency/interconnect, and cover-slot identity checks.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `cabal test dsl-spec` runs the property battery green — the composed placement
 soundness, totality, execution-epoch equality, runtime-metadata grouping, accelerator residency, and
 provider-root properties hold over generated inputs, each meeting its committed `cover`/`checkCoverage`
@@ -810,29 +807,18 @@ may reject a packable one) for the composed compute `place`, and never claim com
    fold's own comparison.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 9.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate 📋
+## Sprint 9.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ⏸️
 
-**Status**: Planned
-**Implementation**:
-`dhall/examples/{illegal_hard_ceiling_overcommit,illegal_node_local_storage_over_backing,
-illegal_disk_backing_alias_double_spend,illegal_filesystem_layout_alias,illegal_filesystem_layout_swapped,
-illegal_image_content_join_missing,illegal_image_snapshot_join_missing,illegal_image_storage_model_missing,
-illegal_split_image_unsupported,illegal_provider_instance_store_root_underprovisioned,
-illegal_provider_node_root_ebs_over_quota,illegal_control_plane_storage_transition_overrun,
-illegal_cuda_on_cpu_target,illegal_accelerator_count_shortage,illegal_accelerator_vram_fragmentation,
-illegal_accelerator_vram_reserve_boundary,illegal_apple_metal_profile_mismatch,
-illegal_shared_accelerator_double_owner}.dhall` (the execution/accelerator/provider-root/runtime-metadata
-`provision-seal` fold negatives) + reuse of `legal_multisubstrate_cluster`/`legal_managed_eks` (the composed
-whole-deployment positives) and the Phase-7-owned `legal_tmpfs_two_concurrent_writers_single_debit`;
-`test/dsl/CapacityTopologyGate.hs` (the composed gate battery + validation-locus ledger) — target paths, not
-yet built. These eighteen fixtures and their expected `Left`-tags — together with the Phase-7 and Phase-8
-slices, forty in all — are hand-authored and pinned in this phase's oracle-pinning sprint, ahead of the
-modules under test (§M.1, [Gate integrity](#gate-integrity)).
-**Blocked by**: Sprint 9.1, Sprint 9.2, Sprint 9.3, Sprint 9.4; Phase 4
-gate (the positive Gate-1 corpus); Phase 7 gate (the base fold + topology slice the composed witness
-invokes); Phase 8 gate (the storage-geometry slice the composed vector consumes).
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `tests/oracle/phase9/execution_accelerator_cases.tsv` pins 32 direct fold variants across
+the exact eighteen named families and a distinct legal twin for each; `tests/oracle/phase9/gate1_cases.tsv`
+and `dhall/examples/phase9/*` pin the accelerator-owner editor barrier;
+`test/dsl/ExecutionAccelerator{Fixtures,Props,Gate,Mutants,Spec}.hs` implements the dedicated and integrated
+battery; `tests/mutants/phase9/mutants.tsv` pins 45 individually selected mutants; and
+`tools/phase9_gate.py` seals the suite, ownership ledger, totality scan, evidence, and result ledger.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the gate applies the Phase-9 folds (the execution expansion, scheduler-reservation algebra,
 runtime-metadata/node-local, accelerator-residency, provider-root, and engine/etcd/build/monitoring helper
 folds, composed with the Phase-7 base `fits`/`podFits`/`carve`/`place` and the Phase-8 storage folds)
@@ -920,11 +906,11 @@ axis — and emit the per-entry validation-locus ledger that names the honest fo
    retain an UNVERIFIED row for every effect that only a runtime observation can settle.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated at the gate seal:**
 - `documents/engineering/resource_capacity_doctrine.md` — backlink §4's fold + §4.1 static/elastic branch to the
   implemented `Amoebius.Capacity.*` execution/accelerator/provider-root modules; confirm every
   capacity/accelerator sum stayed a checked pre-effect rejection at the post-bind `provision-seal` and
@@ -946,7 +932,7 @@ The whole sprint (📋 Planned).
 - `documents/engineering/testing_doctrine.md` — record the Register-1 property + composed-fold ledger this gate
   emits (correspondence and runtime fidelity UNVERIFIED).
 
-**Cross-references to add:**
+**Cross-references added:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-9 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-9 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Capacity/{Scheduler,HostReservation,
@@ -982,3 +968,5 @@ The whole sprint (📋 Planned).
   `InferenceEngine` capability + accelerator residency/coexistence provision built atop the accelerator fold
 - [phase_27_capacity_scheduler.md](phase_27_capacity_scheduler.md) — the live same-binary scheduler role that
   enacts Reserved→BindingInFlight→Bound around Kubernetes Binding
+- [Phase 9 execution/accelerator ledger](ledgers/phase_09_execution_accelerator.md) — the human-readable
+  Register-1 proof/test/assumption boundary

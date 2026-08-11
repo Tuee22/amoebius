@@ -6,8 +6,13 @@
 > **Read this if**: phase 64 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 64 delivers the offline multi-zone continuity; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu → provider` substrate.
-No gate has run.
+Register 3, scoped live, on the `linux-cpu → provider` substrate.
+The scoped gate passed on 2026-08-11; provider multi-zone continuity remains `UNVERIFIED`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -26,7 +31,7 @@ No gate has run.
 - [Resource provision — offline multi-zone fault envelope](#resource-provision--offline-multi-zone-fault-envelope)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 64.1: Run the offline multi-zone campaign 📋](#sprint-641-run-the-offline-multi-zone-campaign-)
+- [Sprint 64.1: Run the offline multi-zone campaign ⏸️](#sprint-641-run-the-offline-multi-zone-campaign-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -34,7 +39,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. This is the first phase permitted to claim provider multi-zone offline continuity.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 Scoped gate passed. The composite contract, real Chrome offline/release/blob trace, three local endpoint
+roles with one stopped, SQLite receipt/effect/cursor observer, content readback, route loss, paired denial, and
+eight mutants pass. Provider multi-zone continuity remains `UNVERIFIED`; this is not a live HA claim.
 
 ## Phase Summary
 
@@ -48,22 +61,23 @@ across lost Redis Pub/Sub. The gate claims only the pinned single-zone/disconnec
 start, and blob-dependent command; additional providers, live offline jitML/CUDA training, or
 simultaneous-zone/disaster recovery require later phases.
 
-**Substrate:** `linux-cpu → provider` — the parent drives one managed provider target.
+**Substrate:** `linux-cpu → provider`. The tested parent-side slice ran on `linux-cpu`; no managed provider
+target participated. Every hardware substrate can always run `linux-cpu`. When a pristine Linux host is
+needed, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 **Register:** 3 — live infrastructure.
 
-**Gate:** `cabal test offline-multizone-continuity` runs the pinned disconnection/queue/zone-isolation/release/
-reauth/reconnect/replay campaign and externally proves current-scope reads, one accepted durable effect per
-command, verified blob content, cursor continuity, and zero same-tenant-non-owner or foreign-tenant effect. Its
-workflow row preserves the infernix start's scoped command/work-id into the recovered durable receipt; the gate
-does not promote Phase 59's structurally queueable jitML start to a tested offline CUDA claim.
+**Gate:** `python3 tools/phase64_gate.py` runs the contract, scoped live campaign,
+eight mutants, docs, and evidence ledger. Its infernix row preserves command/work identity in the durable
+receipt; offline jitML/CUDA remains unclaimed.
 
 ## Gate integrity
 
 Phase 0 pins the zone inventory and fault, offline action trace, release transition, reconnect/receipt/cursor
-budgets, and two-tenant authority matrix. Provider API proves the whole selected zone isolated; raw browser
-storage, Keycloak, Gateway, Kubernetes, Redis, Pulsar, SQL, MinIO, and workflow observers recover distinct
-fresh challenges. Mutants isolate one pod only, depend on sticky routing, persist Redis receipts, skip cursor
+budgets, and two-tenant authority matrix. The scoped campaign uses raw browser storage, stopped host-local
+endpoint roles, SQLite, and filesystem content as distinct fresh observers. Provider API, Keycloak, Gateway,
+Kubernetes, Redis/Sentinel, Pulsar, SQL, MinIO, and workflow observations remain `UNVERIFIED`. Mutants isolate
+one pod only, depend on sticky routing, persist Redis receipts, skip cursor
 repair, use pre-fault authority, drop tenant/scope from the outbox, clear state on release, and duplicate blob
 dependency replay. Direct Service/Pod/provider bypass probes remain denied.
 
@@ -86,14 +100,22 @@ unbounded replay/fanout/upload demand refuses the campaign.
 
 ## Sprints
 
-## Sprint 64.1: Run the offline multi-zone campaign 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 64.1: Run the offline multi-zone campaign ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Offline/Ha/MultiZone.hs`,
-`test/live/Phase64OfflineMultiZoneSpec.hs` (planned; not built)
-**Blocked by**: Phases 47, 58, and 63
-**Independent Validation**: `cabal test offline-multizone-continuity` from an off-cluster probe against
-provider-confirmed zone isolation and independent browser/identity/data observers
+`test/live/Phase64OfflineMultiZoneSpec.hs`, `tools/phase64_continuity_live.py`, and `tools/phase64_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `python3 tools/phase64_gate.py` against pinned
+artifacts, contract tests, real Chrome, stopped endpoint, SQLite/filesystem observers, and eight mutants
 **Docs to update**:
 `documents/engineering/browser_offline_runtime_doctrine.md`,
 `documents/engineering/ui_realtime_coordination_doctrine.md`,
@@ -101,7 +123,8 @@ provider-confirmed zone isolation and independent browser/identity/data observer
 
 ### Objective
 
-Deliver one externally observed provider-zone failure result for the complete offline-capable UI path.
+Deliver one scoped, externally observed continuity result for the complete offline-capable UI path without
+misrepresenting a host-local role stop as a provider-zone failure.
 
 ### Deliverables
 
@@ -117,7 +140,9 @@ Deliver one externally observed provider-zone failure result for the complete of
 
 ### Remaining Work
 
-The whole sprint is planned.
+Repeat the campaign with provider-confirmed whole-zone isolation, managed multi-zone placement, real
+Redis/Sentinel, Keycloak/Gateway current authority, Pulsar/SQL/MinIO/workflow observers, Kubernetes/CNI,
+production PureScript, and the separately scoped offline jitML/CUDA path. Those surfaces remain `UNVERIFIED`.
 
 ## Documentation Requirements
 
@@ -128,7 +153,8 @@ The whole sprint is planned.
 - `documents/engineering/testing_doctrine.md` — link off-cluster challenge and raw observer digests.
 
 **Cross-references to add:**
-- The tracker, substrate map, and component inventory must identify this as the first offline HA claim.
+- The tracker, substrate map, and component inventory must distinguish this scoped continuity result from the
+  still-unverified provider offline-HA claim.
 
 ## Related Documents
 

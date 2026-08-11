@@ -1,0 +1,4 @@
+case	status	body
+scoped-denial	404	resource-unavailable
+direct-provider	403	provider-unavailable
+revoked-grant	404	resource-unavailable

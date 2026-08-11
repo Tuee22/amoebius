@@ -1,0 +1,3 @@
+operator=effect-type-swap
+change=accept a response codec from a different port
+expected=port_type_mismatch.dhall is accepted and the gate fails

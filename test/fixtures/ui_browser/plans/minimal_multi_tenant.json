@@ -1,0 +1,1 @@
+{"digest":"plan-multi-v1","mode":"multi-tenant","routes":["choose-tenant","home"],"events":["choose","edit","submit"]}

@@ -1,0 +1,3 @@
+operator=quantifier-weakening
+change=accept the first of duplicate handlers
+expected=duplicate-handler fails

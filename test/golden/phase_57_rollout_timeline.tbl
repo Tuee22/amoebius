@@ -1,0 +1,6 @@
+ordinal release projector_watermark gateway active_plans result
+1 A A A A ready
+2 B A A A,B hold-shift
+3 B B B A,B shift
+4 A B B A,B hold-rollback
+5 A A A A rollback-complete

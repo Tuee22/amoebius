@@ -1,0 +1,3 @@
+operator=scope-guard-deletion
+change=ignore handler scope
+expected=scope-mismatch fails

@@ -1,0 +1,8 @@
+{
+  "schema": "amoebius.phase48.determinism-resource-shape.v1",
+  "runs": 5,
+  "serializedFreshPods": true,
+  "retainedOutputSets": 2,
+  "hostHarness": {"cpuMillis": 100, "memoryBytes": 67108864, "scratchBytes": 1048576},
+  "expectedOneShortTags": ["RunEnvelopeMissing", "HostHarnessMissing", "SuccessorStartedEarly", "WorkflowUnitMissing"]
+}

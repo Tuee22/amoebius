@@ -7,14 +7,22 @@
 
 Phase 40 delivers the atomic UI program release; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md), [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Validated 2026-08-11 with `python3 tools/phase40_gate.py --reuse-fresh-live`;
+ledger `external-run-reference`.
+Every hardware substrate always supplies this `linux-cpu` lane. When the gate needs a pristine Linux host,
+use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -25,7 +33,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 40.1: Release immutable UI plans without rebuilding the runtime 📋](#sprint-401-release-immutable-ui-plans-without-rebuilding-the-runtime-)
+- [Sprint 40.1: Release immutable UI plans without rebuilding the runtime ⏸️](#sprint-401-release-immutable-ui-plans-without-rebuilding-the-runtime-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,8 +41,20 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. No UI release artifacts or live gate evidence exist; the unchanged-image and stale-plan claims
-remain design intent until the Register-3 gate passes.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. Two fresh live releases over the unchanged Phase-25 private runtime image published atomic
+`ClientPlan`/`UiServerPlan` pairs and accepted exactly their two matching actions. Eight stale, missing,
+mixed, and hand-authored admission cases returned `ReloadRequired` before dispatch; the external action journal
+recorded zero rejected effects. MinIO pointer history, Kubernetes/containerd image observations, Envoy/Keycloak
+counters, exact cleanup, the independent fixtures, and all three committed mutants pass the sealed gate.
+
+This gate does not verify arbitrary future UI-release compatibility witnesses or live rolling-overlap and
+reconnect behavior; those claims remain explicitly UNVERIFIED until their owning later phases run.
 
 ## Phase Summary
 
@@ -121,14 +141,21 @@ fixtures, observers, oracle, and mutants are delegated to [Gate integrity](#gate
 
 ## Sprints
 
-## Sprint 40.1: Release immutable UI plans without rebuilding the runtime 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 40.1: Release immutable UI plans without rebuilding the runtime ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**:
 `src/Amoebius/Ui/Release/{Projection,PlanPair,Compatibility,ArtifactManifest}.hs` and
-`test/live/Phase40UiProgramRelease.hs` (target paths; not yet built)
-**Blocked by**: Phase 20 gate; Phase 38
-gate; Phase 39 gate.
+`test/live/Phase40UiProgramRelease.hs` (built and validated)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the live gate compares both plan objects, release-ledger,
 action-journal, and containerd observations with Phase-0 hand-authored manifests; all three committed
 mutants must fail the unchanged command.
@@ -166,11 +193,12 @@ per-app frontend image, half-published plan, mixed-plan execution, or stale-plan
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None for this sprint. Future compatibility-witness coverage and rolling overlap/reconnect remain owned by
+their later phases and are not claimed by this gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated by the validated gate:**
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record the tested stale-plan rejection and
   one-generic-runtime-image boundary.
 - `documents/engineering/generated_artifacts_doctrine.md` — record plans, codecs, dispatch tables, and app

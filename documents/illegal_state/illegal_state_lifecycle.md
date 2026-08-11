@@ -23,6 +23,8 @@ be observed as having happened. The numbering belongs to
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Scope](#1-scope)
 - [2. The readiness, promotion & monitoring illegal states](#2-the-readiness-promotion--monitoring-illegal-states)
@@ -90,6 +92,10 @@ adds one new **Validation-locus** line naming where the illegal state is caught 
 
 ### 3.41 A duration-gated / hand-ordered bring-up sequence (a readiness race)
 
+**Delivery-owner:** `Phase-14`
+
+**Case-family:** `lifecycle`
+
 Raw tooling makes the bring-up race the default: a chart assumes its database is up, an initContainer polls a
 port in a `sleep`-loop, a bootstrap script runs `sleep 30 && kubectl apply` and hopes the apiserver answered —
 each substituting a **duration** for a **condition**, so it passes on a fast host and flakes on a slow one, then
@@ -127,6 +133,10 @@ foreclosure layer above.
 
 ### 3.26 An unverified environment promotion (promote → prod without the required evidence)
 
+**Delivery-owner:** `Phase-39`
+
+**Case-family:** `lifecycle`
+
 Raw delivery permits pointing prod at any build — tested, untested, or actively red. amoebius makes
 `Environment = < Dev | Staging | Prod >` advance through a typed `PromotionGate`: advancing an environment's
 ETag-CAS pointer to a `Release` **requires** that the `Release`'s test-topology ledger
@@ -146,7 +156,16 @@ actually ran and that prod actually converged on the promoted `Release`, owned b
 doctrines). Per the validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md),
 orthogonal to the foreclosure layer above.
 
+**Validated instance:** Phase 39 compiled the closed `Environment`/opaque `EvidenceWitness` boundary and
+exercised it live. Runtime- and Protocol-missing fixtures returned their specific refusal tags and produced no
+pointer mutation; the tested Runtime witness produced the only Prod advance. The live wiring is tested, never
+proven; Phase 54 later automates topology derivation rather than owning this illegal-state boundary.
+
 ### 3.43 An unmonitored workflow or extension (or an unauthenticated monitoring surface)
+
+**Delivery-owner:** `Phase-11`
+
+**Case-family:** `capacity`
 
 Raw k8s treats monitoring as an optional add-on: a Deployment can run with no scrape target, no alert rule, and
 no dashboard, and a metrics or debug endpoint can be published to the wild with no authentication — so a
@@ -182,6 +201,10 @@ a `SubjectScoped` filter actually excludes another subject's data). Per the vali
 
 ### 3.46 A chaos fault targeting a component the spec never declared
 
+**Delivery-owner:** `Phase-14`
+
+**Case-family:** `lifecycle`
+
 Raw fault-injection tooling lets a scenario name any target: a test can script "partition the VPN" or "kill the
 broker" against a cluster that runs neither, so the scenario is meaningless — or, worse, asserts an invariant no
 declared component upholds. amoebius makes the fault schedule a **typed projection over the enclosing `InForceSpec`'s declared components**: `ChaosSchedule = NonEmpty FaultInjection`, and each `FaultInjection`'s
@@ -211,6 +234,10 @@ component as the drill assumes). Per the validation-locus axis of
 
 ### 3.74 A container image amoebius did not generate
 
+**Delivery-owner:** `Phase-25`
+
+**Case-family:** `image`
+
 Every other byte the cluster runs is accounted for — a baked binary, a linked library, a content-addressed
 asset — but an image reference was, until now, a free digest. `ImageArtifact` constrained *bytes*
 exhaustively (manifest-list digest, per-platform child and config digests, per-layer blob digests) and
@@ -231,6 +258,10 @@ named (and a live containerd inspection independently confirms the pulled digest
 fails `dhall type` before any binary runs, exactly as an engine named by URL does.
 
 ### 3.75 A container whose process is unnamed
+
+**Delivery-owner:** `Phase-25`
+
+**Case-family:** `image`
 
 A `ContainerEnvelope` named an image, a lifecycle, and a complete resource envelope — and never said what
 the container *executes*. No `command`, no `args`, no `entrypoint` field existed anywhere in the type layer,
@@ -254,6 +285,10 @@ land at the decoder, per the validation-locus axis of
 
 ### 3.76 A build stage whose content is unmodeled
 
+**Delivery-owner:** `Phase-25`
+
+**Case-family:** `image`
+
 `BuildStageDemand` typed a build stage's *resources* totally — CPU reservation and ceiling, memory
 reservation and ceiling, peak intermediate bytes, peak cache-write bytes, and its `dependsOn` edges — and
 its *content* not at all. What a stage installed lived in a hand-authored `ARG`/`RUN` Dockerfile: text that
@@ -276,6 +311,10 @@ authored shell fragment fails `dhall type` with no binary involved.
 
 ### 3.77 A worker naming an extension its own binary does not link
 
+**Delivery-owner:** `Phase-25`
+
+**Case-family:** `image`
+
 A trusted linked extension creates a pairing that did not previously exist: a worker Pod names the
 `WorkerKind` it runs, that kind names the `ExtensionId` whose library handles its work, and the Pod's image
 links some particular set of extensions. Nothing forced those two to agree, so a Web-service host could be
@@ -297,6 +336,10 @@ actually serves.
 resolved by the total decoder, which returns `Left` when it is not.
 
 ### 3.78 Extension source that reaches outside the sanctioned API
+
+**Delivery-owner:** `Phase-14`
+
+**Case-family:** `lifecycle`
 
 Gates 1 and 2 prove things about a *value*; neither constrains the Haskell linked beside it. An
 `ExtensionSpec`'s `extChain` carries a `stepRun :: cfg -> IO ()`, and `IO ()` is a type, not a bound — so
@@ -322,6 +365,10 @@ time over extension source before link, per the validation-locus axis of
 [`illegal_state_techniques.md`](./illegal_state_techniques.md).
 
 ### 3.87 An execution unit with no monitoring obligation
+
+**Delivery-owner:** `Phase-11`
+
+**Case-family:** `capacity`
 
 [§3.43](#343-an-unmonitored-workflow-or-extension-or-an-unauthenticated-monitoring-surface) binds the
 workflow surface — a `Workflow`, a `RouteEntry`, an `ExtensionSpec`. It leaves everything else a spec

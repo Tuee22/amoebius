@@ -1,0 +1,3 @@
+path digest visibility mutable
+/asset/hash-app.js sha256:app-v1 public false
+/asset/hash-runtime.js sha256:runtime-v1 public false

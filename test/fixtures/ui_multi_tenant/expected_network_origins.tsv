@@ -1,0 +1,6 @@
+origin	purpose	expected
+same-origin	immutable-assets	allow
+same-origin	ui-transport	allow
+provider	any	deny
+platform-service	any	deny
+foreign-origin	any	deny

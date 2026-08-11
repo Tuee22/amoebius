@@ -20,6 +20,8 @@ capacity, capability, and platform doctrines it cites. It presumes only that a s
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Two surfaces, one app written once](#1-two-surfaces-one-app-written-once)
 - [2. The application-logic surface — what an app *is*](#2-the-application-logic-surface--what-an-app-is)
@@ -130,9 +132,16 @@ What is *conspicuously absent* from this surface is the whole vocabulary of [§3
 region, no failover policy, no chaos knob, no substrate selector. The app author cannot write those words
 because the type does not have those fields.
 
+[Phase 10](../../DEVELOPMENT_PLAN/phase_10_capability_bind.md) tests the capability instance of this split:
+the app-facing `CapabilityNeed` has no product, provider, or shape field, while two distinct composed files
+normalize to identical app slices and bind to structurally different provider graphs.
+
 ---
 
 ## 3. The deployment-rules surface — how the same app *runs*
+
+The Phase-10 `CapabilityBinding` realizes the provider/shape portion of this surface as a one-built-arm
+provider choice plus `SingleNode | Distributed n`; neither field is admitted by the app need.
 
 The deployment-rules surface is the mirror image of [§2](#2-the-application-logic-surface--what-an-app-is): **everything on this surface is about robustness, scale, and placement — and none of it changes what the app is.** Turn every one of these dials and a user sees the
 identical app; they just see it survive more, scale wider, or run on different hardware.
@@ -181,6 +190,8 @@ The deployment-rules surface declares:
   type, the promotion pointer, and the immutable release ledger are owned by
   [release_lifecycle_doctrine.md §3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer). This is the type-level reason there is
   no separate "dev version" and "prod version" of an app ([§5](#5-why-the-split-matters--cashing-it-out)).
+  Phase 39 validated this rule by pointing Dev, Staging, and Prod at the same immutable release hash without
+  rebuilding any app bytes, while environment changes remained CAS operations on pointer objects.
 - **Offline policy and realtime topology.** The application decides whether it is `OnlineOnly` or defines
   offline projections, queueable ports, blob classes, and an offline view: those choices change what the app
   does for a user. The deployment decides maximum offline lease, permitted persisted flow labels, local
@@ -416,11 +427,25 @@ the concentration principle intact: distribution behavior is still exercised and
 boundary rather than duplicated inside each application
 ([chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives)).
 
-The schema, binder, plan compiler, browser interpreter, UI-server boundary, and local-composition work is
-scheduled in the planned UI phases listed by the
-[Development Plan](../../DEVELOPMENT_PLAN/README.md); no implementation or runtime evidence is claimed until
-their gates run
-([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
+[Phase 23](../../DEVELOPMENT_PLAN/phase_23_ui_local_composition.md) supplies concrete local evidence for this
+split. Five application-authored interactions and four visible-state expectations exact-join the generated
+workflow surface for single- and multi-tenant sources, while neither source contains a replica, topology,
+rollout, failover, or fault-schedule choice. The same expectations still require later operator-selected live
+topologies before any deployment, replica-loss, or HA claim becomes verified.
+
+Phase 47 supplies the concrete provider-node classification boundary: workflow-completion and load may be
+inputs to a declared deployment `ScalingPolicy`, but application logic cannot request a node, select a provider
+SKU, weaken quota/capability admission, or bypass taint and scheduler authority. The contract and a retained-
+Kubernetes signal analogue pass; real EKS node mutation remains UNVERIFIED. This separation is portable because
+every hardware substrate can always run `linux-cpu`; when the parent must be a pristine Linux host use Incus on
+Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 49 exercises this split at the core boundary: the application-facing contract names a scope-bound
+artifact workflow, while `linux-cpu`, the finite CPU resource envelope, the named engine, cache placement,
+Pulsar/MinIO/Vault wiring, and worker topology remain deployment/runtime choices. The scoped gate uses a pinned
+micro-decoder and one untouched sibling compacted-topic module; a production TinyLlama engine and the full
+sibling inference core remain UNVERIFIED. Every hardware substrate can always select `linux-cpu`. If the gate
+needs a pristine Linux host, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ---
 

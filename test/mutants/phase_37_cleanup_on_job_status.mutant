@@ -1,0 +1,4 @@
+operator=guard-delete
+target=Amoebius.Execution.JobTerminalLive
+change=delete-terminal-pod-from-job-status-alone
+expected=terminal-cleanup-before-independent-readback

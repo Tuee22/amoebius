@@ -5,8 +5,13 @@
 > **Read this if**: phase 56 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 56 delivers the multi-tenant low-code UI isolation; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Register 3, scoped live, on the `linux-cpu` substrate.
+The scoped gate passed on 2026-08-11; real identity/provider isolation remains `UNVERIFIED`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -25,7 +30,7 @@ No gate has run.
 - [Resource provision — two-scope UI fixture](#resource-provision--two-scope-ui-fixture)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 56.1: Live opaque tenant switching and stale-scope refusal 📋](#sprint-561-live-opaque-tenant-switching-and-stale-scope-refusal-)
+- [Sprint 56.1: Live opaque tenant switching and stale-scope refusal ⏸️](#sprint-561-live-opaque-tenant-switching-and-stale-scope-refusal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,8 +38,18 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. The phase is not evidence of UI isolation or browser security until its Register-3 gate has run on
-`linux-cpu` with real identities and external provider observations.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 **Scoped gate passed 2026-08-11.** Opaque choices, current-membership recheck, scope-epoch rotation,
+state/handle invalidation, tenant/subject/epoch keying, fresh two-scope local observations, and four mutants
+pass. Real Keycloak sessions, browser switching, provider zero-delta observers, Kubernetes audit, CNI, and
+Redis realtime remain **UNVERIFIED**. Ledger `external-run-reference`.
+Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on
+Apple, or WSL2 on Windows.
 
 ## Phase Summary
 
@@ -52,6 +67,8 @@ retain or reveal a raw tenant identity supplied by the browser.
 second independently releasable runtime feature.
 **Dependency:** [Phase 36](phase_36_user_tenant_isolation_live.md) and
 [Phase 55](phase_55_ui_single_tenant_live.md) — live provider isolation and the live single-tenant generic UI path.
+Phase 36 is validated and is consumed unchanged; this phase still waits for Phase 55 and owns browser scope
+switching rather than reopening the provider-isolation result.
 **Substrate:** linux-cpu — one live `kind` cluster with the standing platform; no GPU, Apple, provider-cloud,
 multicluster, or HA-failure claim.
 **Register:** 3 — live infrastructure.
@@ -126,13 +143,21 @@ inventory equal to preflight. Phase 58, not this phase, owns whole-zone HA fault
 
 ## Sprints
 
-## Sprint 56.1: Live opaque tenant switching and stale-scope refusal 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 56.1: Live opaque tenant switching and stale-scope refusal ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Server/TenantSession.hs`,
 `ui-runtime/src/Amoebius/Ui/TenantSwitch.purs`, `test/live/Phase56UiMultiTenantSpec.hs` (target authored
 sources; not yet built)
-**Blocked by**: Phase 36; Phase 55
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the one gate command
 drives real Keycloak sessions and compares browser, server, network, and provider observations with the
 independent Phase-0 matrices; every named mutant must turn red.
@@ -171,7 +196,7 @@ server-established authority while invalidating every stale client value that co
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+The authority kernel and scoped local probe are implemented; the full Register-3 provider/browser path remains UNVERIFIED.
 
 ## Documentation Requirements
 

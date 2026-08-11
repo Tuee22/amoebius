@@ -5,8 +5,13 @@
 > **Read this if**: phase 63 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 63 delivers the offline release and schema evolution; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), [generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu`` substrate.
-No gate has run.
+Register 3, scoped live, on the `linux-cpu` substrate.
+The scoped gate passed on 2026-08-11; live platform rollout/provider observations remain `UNVERIFIED`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -25,7 +30,7 @@ No gate has run.
 - [Resource provision — compatibility overlap](#resource-provision--compatibility-overlap)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 63.1: Gate offline-compatible rollout and rollback 📋](#sprint-631-gate-offline-compatible-rollout-and-rollback-)
+- [Sprint 63.1: Gate offline-compatible rollout and rollback ⏸️](#sprint-631-gate-offline-compatible-rollout-and-rollback-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,7 +38,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. No offline compatibility promotion gate or browser-storage migration exists.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 Scoped gate passed. Promotion/horizon/compatibility checks, atomic crash-resumable migration, retained
+current-authority replay, real Chrome A→staged-B crash→B→A, append-only release/effect observers, and six
+mutants pass. Real platform observers remain `UNVERIFIED`.
 
 ## Phase Summary
 
@@ -45,7 +58,8 @@ current-authority replay handler. Browser migration is atomic, crash-resumable, 
 **Session scope:** Gate one A→B schema migration, one retained-old-handler path, rollback B→A, and one rejected
 incompatible release.
 
-**Substrate:** `linux-cpu`.
+**Substrate:** `linux-cpu`. Every hardware substrate can always run this lane. For pristine Linux, use Incus
+on Linux/Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 
 **Register:** 3 — live infrastructure.
 
@@ -79,14 +93,23 @@ horizon with no finite server or storage demand is rejected.
 
 ## Sprints
 
-## Sprint 63.1: Gate offline-compatible rollout and rollback 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 63.1: Gate offline-compatible rollout and rollback ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Release/OfflineCompatibility.hs`,
-`ui/src/Amoebius/Ui/Offline/Migration.purs`, `test/live/Phase63OfflineReleaseSpec.hs` (planned; not built)
-**Blocked by**: Phase 62
-**Independent Validation**: `cabal test offline-release-evolution-live` against
-pinned A/B artifacts, crash points, provider observations, and seeded mutants
+`ui/src/Amoebius/Ui/Offline/Migration.purs`, `test/live/Phase63OfflineReleaseSpec.hs`,
+`tools/phase63_release_live.py`, and `tools/phase63_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `python3 tools/phase63_gate.py` against pinned A/B
+artifacts, contract tests, separate Chrome processes at crash points, local release/effect observers, mutants
 **Docs to update**:
 `documents/engineering/browser_offline_runtime_doctrine.md`,
 `documents/engineering/release_lifecycle_doctrine.md`,
@@ -106,11 +129,13 @@ Roll forward and back without losing or silently invalidating queued offline int
 
 ### Validation
 
-1. Run `cabal test offline-release-evolution-live`; require canonical green and every compatibility mutant red.
+1. Run `python3 tools/phase63_gate.py`; require the scoped canonical trace green
+   and every compatibility mutant red.
 
 ### Remaining Work
 
-The whole sprint is planned.
+Repeat with real Gateway rollout, Pulsar/provider effects, Keycloak current authority, production PureScript,
+Kubernetes, and CNI. Those observations remain `UNVERIFIED` here.
 
 ## Documentation Requirements
 

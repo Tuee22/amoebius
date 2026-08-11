@@ -20,6 +20,8 @@ bridges model and implementation, owned by
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. The `Model` is data](#2-the-model-is-data)
@@ -73,6 +75,11 @@ and no more. The constructor set is declared below rather than described, so the
 per-constructor coverage floor ([DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md))
 quantifies over an enumerated set and not over prose.
 
+**Implementation status.** Phase 2 built this fragment in `src/Amoebius/Formal/Model.hs` and validated both
+readings on 2026-08-09 with the Register-1 gate in
+[phase_02](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md). The gate exercised every constructor below
+across 200 generated models; this is tested renderer correspondence, not Phase-3 code or runtime fidelity.
+
 ```haskell
 data Model = Model
   { modelName       :: Name
@@ -83,7 +90,8 @@ data Model = Model
   , modelInvariants :: [(Name, Expr)]          -- named boolean SAFETY properties
   , modelFairness   :: [(Name, Fairness)]      -- per-action weak/strong fairness (WF/SF)
   , modelProperties :: [(Name, Temporal)]      -- named LIVENESS properties (temporal)
-  , modelConstraint :: Maybe Expr              -- bounds the explored state space
+  , modelConstraint :: Maybe Expr              -- TLC state constraint (excludes failing states)
+  , modelExpansionLimit :: Maybe Expr           -- checked boundary state is not expanded
   }
 
 data Action = Action                            -- a guard that, when it holds, assigns primed
@@ -254,7 +262,7 @@ drift, but it does not prove the two rendering functions semantically equivalent
 reusable meta-obligation, checked across the fragment rather than asserted separately in prose for each model.
 
 Correspondence is made *testable* by a second in-process reading of the same value: a bounded reachability
-explorer over `interpret` (breadth-first over reachable states, pruned by the constraint, checking every
+explorer over `interpret` (breadth-first over reachable states, pruned by the TLC state constraint, checking every
 invariant on every reachable state — the same shape TLC applies to the emitted spec). A model is validated by
 running **both** checkers on the same `Model`:
 
@@ -286,9 +294,11 @@ mistranslated quantifier, a dropped `UNCHANGED`, a mis-ordered primed assignment
 semantics) would silently make TLC check a different protocol than the daemon runs. Round-tripping one `ToyModel`
 plus one seeded mutation is thin coverage for a property this load-bearing. The operational form of "faithful
 denotation" is therefore a **differential property test**: a generator over the `Model` fragment produces random
-small models, and the explorer and TLC are run on each under a **pinned convention** — the explorer mirrors
-TLC's `CONSTRAINT` semantics (a boundary state that violates the constraint is counted and its invariants
-checked but is **not** expanded), `CHECK_DEADLOCK` is set explicitly on both sides, and the test asserts the two
+small models, and the explorer and TLC are run on each under a **pinned convention**. TLC's actual
+`CONSTRAINT` semantics excludes a failing successor from the distinct-state set; the explorer mirrors that
+exactly. The separate `modelExpansionLimit` is compiled into every action's source guard so a state reached at
+that boundary remains distinct and invariant-checked but is **not** expanded in either reading.
+`CHECK_DEADLOCK` is set explicitly on both sides, and the test asserts the two
 produce identical **canonical state-fingerprint *sets*** — not merely equal cardinality, which equal counts
 alone do not establish (equal count + equal verdict is not equal state set) — alongside the same verdict,
 shrinking any divergence to a minimal offending model. This differential faithfulness claim is **scoped to the safety sub-fragment**: the generator exercises `emitTLA`'s `Init`/`Next`/`INVARIANT`/`CONSTRAINT` rendering, and
@@ -404,8 +414,13 @@ confirmed the load-bearing claims end to end: the in-process explorer and TLC re
 generated spec (identical reachable-state count), and a seeded mutation of the model produced the *expected*
 counterexample in both. The spike has been removed; per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) this
-is **evidence that the mechanism works**, not a built amoebius result — the implementation is deferred to its
-phase ([DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
+was historical evidence that the mechanism worked. Phase 2 has now superseded that spike with the built
+amoebius kernel: eight exact `ToyModel` fingerprints, safety and liveness under fairness, fairness sensitivity,
+all committed mutants killed, and 200 differential models green. The result remains scoped to the model and
+does not by itself establish Phase-3 protocol correspondence or runtime fidelity. Phase 3 subsequently used
+that kernel for the concrete `GatewayMigration` value: explorer/TLC agreement on 53 states, five safety and
+three liveness obligations green, bounded IOSimPOR agreement, and all committed mutants caught. Runtime
+fidelity remains UNVERIFIED.
 
 ---
 
@@ -431,12 +446,12 @@ live forest). The concrete obligation for the one model is owned by
 
 ## 9. Planning ownership
 
-This document is normative formal-model doctrine only. It is authored in the documentation phase; the `Model`
-EDSL, the `interpret` explorer, and the `emitTLA` renderer are built and validated in the pre-cluster
-formal-model phase, and the one concrete model (gateway migration) is authored and model-checked there. Phase
-order, status, and gates live only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); this doc
-states the target shape and links back for status. Every prescriptive statement here is design intent, never a
-tested amoebius result.
+This document remains the normative formal-model doctrine. The `Model` EDSL, the `interpret` explorer, and the
+`emitTLA` renderer were built and validated in Phase 2; the one concrete model (`GatewayMigration`, both
+branches) was built and validated in Phase 3. Phase order, status, and gates live only in
+[DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). The kernel and protocol claims above are
+tested/proven-for-the-model at their recorded scopes; effectful-daemon and live-runtime fidelity remain design
+intent and UNVERIFIED.
 
 ---
 

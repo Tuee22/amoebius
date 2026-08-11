@@ -1,0 +1,6 @@
+provider	allowed_class	denied_class
+Postgres	rls-visible-row	rls-zero-row
+Minio	signed-object-observed	no-forbidden-key
+Pulsar	broker-entry-observed	no-forbidden-entry-or-cursor
+Keycloak	active-introspection	caller-field-not-authority
+KubernetesApi	sut-provider-egress	foreign-pod-timeout

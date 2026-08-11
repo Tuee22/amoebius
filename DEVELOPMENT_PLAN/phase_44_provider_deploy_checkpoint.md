@@ -7,8 +7,14 @@
 > **Read this if**: phase 44 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 44 delivers the provider Pulumi deploy-from-inside + enveloped checkpoint; its design is owned by [pulumi_iac_doctrine.md](../documents/engineering/pulumi_iac_doctrine.md), [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu → provider` substrate.
-No gate has run.
+Register 3, scoped live validation, on the `linux-cpu → provider` substrate. The local parent/checkpoint/process
+boundaries passed on 2026-08-11; provider materialization remains UNVERIFIED because the configured AWS
+identity returns `InvalidClientTokenId`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -26,7 +32,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 44.1: Provider-cluster Pulumi deploy from inside a parent 📋](#sprint-441-provider-cluster-pulumi-deploy-from-inside-a-parent-)
+- [Sprint 44.1: Provider-cluster Pulumi deploy from inside a parent ⏸️](#sprint-441-provider-cluster-pulumi-deploy-from-inside-a-parent-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -34,16 +40,35 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this sub-phase is implemented; the sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. The phase runs on the **linux-cpu** substrate in
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 **Implemented with scoped validation; external provider gate incomplete.** The Phase-0 corpus, bounded
+execution/checkpoint folds, constructor-private seals, CPU-only EKS plan/readback validation, singleton-context
+engine boundary, and Vault-Transit/MinIO live checkpoint path are implemented. The scoped gate passed 13
+domains on 2026-08-11 with ledger
+`dynamically-resolved`: two executor Jobs were live
+concurrently, the absolute Pulumi 3.228.0 process crossed an OS `execve` observer with zero environment
+entries, sealed Vault returned HTTP 503 before a checkpoint PUT, six opaque checkpoint objects round-tripped
+only through direct Transit decrypt, all three seeded mutants went red, and exact cleanup passed. The phase's
+required EKS control plane, managed node group, provider-account/CloudTrail readback, actual singleton
+`pulumi up`, AWS-plugin `execve`, pod-filesystem observer, and direct-S3 denial remain **UNVERIFIED**: the
+configured AWS token returns `InvalidClientTokenId`, so no AWS mutation was attempted. This is not the full
+Register-3 acceptance gate described below. The phase runs on the **linux-cpu** substrate in
 **Register 3** (live infrastructure): the parent amoebius cluster is a single-node `kind` cluster on linux-cpu,
-brought up by the [Phase 24](phase_24_midwife_bootstrap_kind.md) midwife, from inside which the Pulumi engine — under the Deployment-`replicas=1`
+brought up by the [Phase 24](phase_24_bootstrap_coordinator_kind.md) bootstrap coordinator, from inside which the Pulumi engine — under the Deployment-`replicas=1`
 singleton — issues the EKS deploy over the cloud API. `→ provider` names the *deploy target class* (a
 cloud-managed EKS cluster reached over the cloud API), not a fifth hardware substrate, so the gate stays
 single-substrate (`linux-cpu`) while exercising a provider target. The encrypted-MinIO Pulumi backend and a
 working EKS deploy are generalized from the sibling **prodbox** project (its `aws-eks` Pulumi stack,
 `Prodbox.Pulumi.EncryptedBackend`, and its Vault-gated apply/destroy) — read as **sibling evidence, not an amoebius result** (honesty rule, [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 Status transitions are recorded reverse-chronologically here once work begins.
+
+Every hardware substrate can always run this `linux-cpu` parent lane. When the gate needs a pristine Linux
+host, use Incus on Linux or Linux-CUDA hardware, Lima on Apple hardware, and WSL2 on Windows hardware.
 
 ## Phase Summary
 
@@ -248,20 +273,24 @@ audit.
 
 ## Sprints
 
-## Sprint 44.1: Provider-cluster Pulumi deploy from inside a parent 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 44.1: Provider-cluster Pulumi deploy from inside a parent ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-pulumi/src/Amoebius/Pulumi/Provider/Eks.hs` (the EKS
 provider program — the phase-new module), built on the `amoebius-pulumi` engine seam
 (`.../Pulumi/Engine.hs`) and the Vault-Transit-enveloped MinIO backend (`.../Backend/EncryptedMinio.hs`)
 **first delivered by Phase 42 and reused here, not rebuilt**; the `observeProviderAccount` boundary and the
 `PulumiExecutionDemand` / `PulumiCheckpointObjectDemand` types land alongside (target paths from
 [system_components.md](system_components.md); not yet built)
-**Blocked by**: Phase 42 gate (amoebic spawning
-via Pulumi with the encrypted-MinIO backend + per-child Vault-envelope, the SSH-keyed spawn this
-generalizes); Phase 33 gate (the Deployment-`replicas=1` singleton live-deploy path that runs the engine);
-Phase 30 gate (MinIO reachable as a standard HA platform service); Phase 29 gate (root Vault + the Transit
-envelope) — all external earlier-phase prerequisites.
+**Blocked by**: reopened numeric predecessor gates.
 **Requires**: `cloud-account` — the credentialed provider account this deploy checkpoint targets.
 **Independent Validation**: from a linux-cpu parent, a
 `pulumi up` issued by the in-cluster singleton reaches a ready EKS control plane + base node group built
@@ -438,7 +467,13 @@ discovered lazily by full path, with no `PULUMI_*`/`AWS_*`/`PATH` side-channel e
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+- Re-run with valid, quota-bearing AWS authority and perform the actual singleton-owned `pulumi up`.
+- Independently read back the EKS control plane, CPU-only managed node, root volume/layout, resident OCI
+  preload, account quota fingerprint, and empty-on-refusal CloudTrail mutation domain.
+- Observe the AWS plugin `execve` and engine-pod filesystem boundary, and enforce/read back denial of a direct
+  mutating S3 request outside the checkpoint gateway.
+- Destroy the provider stack for cost hygiene and seal the full Register-3 gate. Until these items pass, EKS
+  and managed-node readiness are UNVERIFIED rather than inferred from the green scoped gate.
 
 ## Documentation Requirements
 

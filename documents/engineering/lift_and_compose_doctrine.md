@@ -125,6 +125,42 @@ amoebius design is achievable; it is not an amoebius result until the amoebius p
 gate. The forward record of which sibling artifact each phase supersedes is
 [legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md).
 
+The Phase-49 scoped instance compiles the untouched sibling `Infernix.Topic.Metadata` module into the lifted
+package and uses its compacted view behind a new typed artifact facade. amoebius owns the new ready-last store,
+native-CBOR command/event, Vault-name, named-engine-cache, finite-budget, and deterministic micro-decoder seams.
+Fresh retained-platform evidence covers scoped Vault challenge/denial, native Pulsar duplicate collapse, MinIO
+publication/result equality, cache MISS→HIT, two fresh compute Jobs, exact cleanup, and four red mutants. It
+does not establish production TinyLlama inference, linkage of the full sibling inference engine, direct
+command-to-worker causality, worker-direct credentialed MinIO access, general noninterference, or
+cross-substrate bit equality. Every hardware substrate can always run `linux-cpu`; a pristine Linux host uses
+Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 50 composes that scoped handle type with the Phase-38 receipt fold in the separate
+`infernix-ui-lift` leaf package and projects it through `dhall/ui/infernix.dhall`; it does not import the sibling
+SPA. The pure adapter contract establishes server-derived scope, opaque handles, exact idempotency, escaped
+output, and two independently red compiled mutants. Its live slice uses Chrome, fresh Keycloak identities,
+retained providers, and two loopback origins, with the non-admitting origin reading the receipt from MinIO.
+Because the worker implements only the pinned uppercase reference, no claim is made for complete sibling
+inference, native-CBOR UI transport, an edge-served or Kubernetes-replicated UI, production TinyLlama,
+Redis/WebSocket repair, or broad noninterference. All physical substrate choices retain a `linux-cpu` route;
+the clean-guest mapping is Incus for Linux-family hosts, Lima for Apple hardware, and WSL2 for Windows.
+
+The Phase-51 scoped lift compiles the sibling `JitML.Codegen.RuntimeOperationsCuda` source module unchanged
+inside `jitml-lift`, while the new adapter owns CPU refusal, capacity guards, opaque staged/committed artifacts,
+command/work idempotency, and Phase-37 content digests. A GTX 970 executed 200 PTX steps across ten million
+float parameters and retained MinIO preserved pointer-last publication and a 412 conflict. This is not the
+full sibling trainer, a multi-layer model, its checkpoint module, Kubernetes GPU ownership, native CBOR, or
+failover. The baseline `linux-cpu` route remains usable on all hardware; clean Linux comes from Incus on Linux/
+Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 52 links that committed-artifact boundary into `jitml-ui-lift` and interprets
+`dhall/ui/jitml.dhall`; no sibling SPA source is imported. The scoped proof covers the opaque Ready-model
+adapter, five compiled mutants, Chrome, two local UI origins, a temporary durable receipt observer, and a
+physical host-CUDA computation. It does not cover fresh provider authority, retained coordination/storage,
+Kubernetes or Envoy, the full sibling serving graph, or a single UI-driven train/commit/invoke chain. Host
+hardware never removes the `linux-cpu` choice. For pristine Linux use Incus on Linux-family/CUDA machines,
+Lima on Apple machines, and WSL2 on Windows machines.
+
 ---
 
 ## 6. Planning ownership
@@ -132,8 +168,8 @@ gate. The forward record of which sibling artifact each phase supersedes is
 This document is normative only. Which phase lifts which shape is owned by
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and
 [system_components.md](../../DEVELOPMENT_PLAN/system_components.md); the migration-removal ledger is
-[legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). Every statement here
-is design intent, never a tested amoebius result.
+[legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md). Normative shapes are
+design intent; only explicitly named phase instances are tested amoebius results.
 
 ---
 

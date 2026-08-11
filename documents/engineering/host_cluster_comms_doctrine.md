@@ -109,9 +109,11 @@ This takes option (c)'s security goal — *no malicious network traffic can use 
 achieves it by **network restriction** instead of by crypto or by a single bottlenecking socket, while
 keeping option (b)'s bandwidth headroom (a real socket per stream) without paying (b)'s mTLS tax.
 
-> **Honesty.** This is a *resolved design decision* for Phase 53, argued from the threat model and bandwidth
-> economics below — **not** a tested or proven amoebius result. The loopback-NodePort pattern has a sibling
-> precedent in prodbox ([§6](#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)), which is evidence from another system, not proof here. Status and gates live
+> **Honesty.** Phase 53 now tests the exact two-service `NodePort`/loopback type, all four wild-exposure
+> exclusions, and two real loopback-bound Linux listeners whose routable-interface probes fail. The
+> Apple/Lima NodePorts, native Pulsar, gateway/MinIO flow, and second physical LAN-host probe remain
+> **UNVERIFIED**; this is a scoped amoebius result, not an Apple gate pass. The prodbox precedent remains
+> sibling evidence only. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
@@ -296,7 +298,8 @@ the comms-relevant requirement each substrate must satisfy:
 - **This generalizes a pattern proven in the sibling prodbox project**, where in-cluster Harbor is reached
   by host-origin clients at `127.0.0.1:30080` over a NodePort bound to loopback (prodbox CLAUDE.md,
   "Substrate Equivalence"). That is **evidence from another system, not proof in amoebius** — amoebius has
-  not yet built Phase 53. It is precedent for *feasibility*, not a tested amoebius guarantee.
+  a sibling precedent. Phase 53's scoped Linux-host probe tests the same bind restriction locally, but
+  Apple/Lima realization remains UNVERIFIED.
 - **The DSL never lets a substrate "fix" a missing piece by widening exposure.** If a substrate's node
   networking makes the loopback binding awkward, the resolution is to extend that substrate's installer to
   honor the host-only contract — not to publish the port wider. Substrate equivalence is structural
@@ -357,7 +360,9 @@ secrets-by-name, never the method.
 
 This document is normative host↔cluster comms doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) — host
-compute daemons (the Apple-Metal / Windows-CUDA Pulsar+MinIO peers) land in **Phase 53**. This doc never
+compute-daemon contracts land in **Phase 53**; its scoped gate does not claim the physical Apple peer. The
+implemented surfaces are `Amoebius.HostComms.{NodePort,Loopback,Illegal}` and
+`Amoebius.HostWorker.{Peer,Auth}`. This doc never
 maintains a competing status ledger; it states the target shape and links back for status.
 
 ---

@@ -5,8 +5,13 @@
 > **Read this if**: phase 58 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 58 delivers the initial online UI multi-zone high availability; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu → provider` substrate.
-No gate has run.
+Register 3, scoped live, on the `linux-cpu → provider` substrate.
+The scoped gate passed on 2026-08-11; genuine provider multi-zone HA remains `UNVERIFIED`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -25,7 +30,7 @@ No gate has run.
 - [Resource provision — multi-zone UI fault envelope](#resource-provision--multi-zone-ui-fault-envelope)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 58.1: Run the multi-zone UI failure campaign 📋](#sprint-581-run-the-multi-zone-ui-failure-campaign-)
+- [Sprint 58.1: Run the multi-zone UI failure campaign ⏸️](#sprint-581-run-the-multi-zone-ui-failure-campaign-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,7 +38,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Multi-zone availability is an unimplemented target; replica counts alone are not evidence.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 Scoped gate passed. Topology admission, fault-scope, post-fault authority, durable repair, a three-role
+host-process campaign, and all ten mutation loci pass. Provider multi-zone availability is still
+`UNVERIFIED`; replica counts and local roles are not a live HA claim.
 
 ## Phase Summary
 
@@ -54,7 +67,9 @@ online HA gate. Offline outbox/blob continuity is not claimed until Phase 64.
 loss model, or disaster-recovery claim.
 
 **Substrate:** `linux-cpu → provider` — the parent drives one managed provider target
-([§L](development_plan_standards.md#l-one-substrate-discipline)).
+([§L](development_plan_standards.md#l-one-substrate-discipline)). Every hardware substrate can always run
+`linux-cpu`. When pristine Linux is needed, use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on
+Windows.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -142,15 +157,24 @@ buffer refuses before the first provider or Kubernetes mutation.
 
 ## Sprints
 
-## Sprint 58.1: Run the multi-zone UI failure campaign 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 58.1: Run the multi-zone UI failure campaign ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Ha/MultiZone.hs`,
-`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase58UiHaSpec.hs` (planned; not built)
-**Blocked by**: Phases 45, 47, 54, and 57
-**Independent Validation**: `cabal test phase58-ui-ha-multizone`
-from an off-cluster probe against provider- confirmed whole-zone isolation and pinned post-fault
-OIDC/membership/read/mutation/workflow/subscription/scope observations
+`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase58UiHaSpec.hs`,
+`tools/phase58_ui_ha_live.py`, and `tools/phase58_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `python3 tools/phase58_gate.py`; the scoped topology,
+fault, authority, repair, host-process, and mutant predicates are tested. Provider-confirmed zone isolation
+and off-cluster observations remain `UNVERIFIED`.
 **Docs to update**:
 `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/daemon_topology_doctrine.md`, `documents/engineering/platform_services_doctrine.md`,
@@ -173,12 +197,14 @@ Deliver one externally observed provider-zone failure result for the complete UI
 
 ### Validation
 
-1. Run `cabal test phase58-ui-ha-multizone`; require the canonical run green within pinned bounds and every
-   named mutant red at its independent placement, availability, or security predicate.
+1. Run `python3 tools/phase58_gate.py`; require the scoped canonical run green and
+   every named mutant red. The ledger must not promote unavailable provider observations above `UNVERIFIED`.
 
 ### Remaining Work
 
-The whole sprint is planned; no provider HA evidence exists.
+Run the campaign against at least three real provider zones with provider-confirmed whole-zone isolation,
+off-cluster fresh OIDC, Gateway/Keycloak, Redis/Sentinel, Pulsar/SQL/MinIO, Kubernetes, CNI, and provider audit
+observers. Until then, no provider HA claim exists.
 
 ## Documentation Requirements
 

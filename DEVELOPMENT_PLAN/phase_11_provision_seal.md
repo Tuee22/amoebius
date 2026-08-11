@@ -9,14 +9,20 @@
 
 Phase 11 delivers the whole-deployment provision seal + expansion; its design is owned by [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [resource_capacity_sources.md](../documents/engineering/resource_capacity_sources.md), [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+The Register-1 gate passed on 2026-08-09 with ledger
+`dynamically-resolved`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/ledgers/phase_11_provision_seal.md
 **Generated sections**: none
 
 </details>
@@ -27,10 +33,10 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 11.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) 📋](#sprint-111-the-conditional-infrastructure-planner--materialization-boundary-planinfrastructure-)
-- [Sprint 11.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion 📋](#sprint-112-the-whole-deployment-provision-fold--executionruntime-storageobjectobservabilitymigrationscheduler-expansion-)
-- [Sprint 11.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation 📋](#sprint-113-the-provisionedspec-seal--identity-keyed-render-source-set--four-stage-activation-)
-- [Sprint 11.4: The provision-seal property/corpus + the Register-1 gate 📋](#sprint-114-the-provision-seal-propertycorpus--the-register-1-gate-)
+- [Sprint 11.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ⏸️](#sprint-111-the-conditional-infrastructure-planner--materialization-boundary-planinfrastructure-)
+- [Sprint 11.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ⏸️](#sprint-112-the-whole-deployment-provision-fold--executionruntime-storageobjectobservabilitymigrationscheduler-expansion-)
+- [Sprint 11.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ⏸️](#sprint-113-the-provisionedspec-seal--identity-keyed-render-source-set--four-stage-activation-)
+- [Sprint 11.4: The provision-seal property/corpus + the Register-1 gate ⏸️](#sprint-114-the-provision-seal-propertycorpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -38,8 +44,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
-is design intent, never a tested amoebius result. This phase opens after the [Phase 10](phase_10_capability_bind.md)
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The pure planner, provision fold, opaque seal, corpus, properties, and mutant battery passed on
+2026-08-09. The retained evidence is in [`evidence/phase_11/`](evidence/phase_11/) and the exact claim boundary
+is recorded in [`ledgers/phase_11_provision_seal.md`](ledgers/phase_11_provision_seal.md). This phase opened after the [Phase 10](phase_10_capability_bind.md)
 gate (the capability union + representational `bind` + object-node-multiset shape oracle, which produces the
 wholly-unprovisioned `BoundDeployment` this phase consumes) and the [Phase 9](phase_09_execution_accelerator_folds.md)
 gate (the execution-epoch/scheduler-reservation/runtime-metadata/accelerator folds and the composed
@@ -108,18 +121,9 @@ What is **not** here:
 expanded deployment composes and fits its declared target, not that any provider came up. The live realization
 of every provider and the jit-resolve of every engine are marked **UNVERIFIED**, owned by the live band.
 
-**Gate:** `cabal test provision-seal-spec` is green on **no substrate (`none`), Register 1** — for the inherited
-nine-arm positive corpus (each bound under both `SingleNode` and `Distributed { nodes = n }`, n ≥ 2),
-`planInfrastructure` derives the exact demand from the expanded `BoundDeployment` and the pre-existing fixture
-proves `NoInfrastructureRequired` while the creation fixture validates/CAS-enacts its batch and feeds a
-receipt-bound `ObservedInfrastructureMaterialization` into `ProvisionContext`; `provision` then runs the
-Phase-7/8/9 folds and seals an opaque whole-deployment `ProvisionedSpec` with exactly one equal-keyed
-`ProvisionedRenderSourceSet`; and the committed insufficiency fixtures return their exact structured `Left` at
-the `provision-seal` locus — `illegal_post_bind_expansion_overcommit`, `illegal_monitoring_work_over_budget`,
-`illegal_accelerator_vram_shortage`, and `illegal_cuda_on_cpu_target`. The gate turns **red** on ≥1 committed
-seeded mutant. The complete apparatus — inherited fixtures, committed mutants, and the independent reference
-predicates — is named in [`## Gate integrity`](#gate-integrity); the gate line above delegates to it by anchor
-per [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
+**Gate:** `python3 tools/phase11_gate.py` passed on no substrate, Register 1.
+It covers both planner paths, 18 provision positives, ten specific negatives, two boundary properties, and ten
+mutants. The complete apparatus is named in [`## Gate integrity`](#gate-integrity).
 
 ## Gate integrity
 
@@ -148,7 +152,7 @@ flowchart LR
   s2 -->|"produces what the next consumes"| s3
   s3 -->|"the last seam the gate closes over"| gate
 ```
-*Orientation. The seams phase 11 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+*Orientation. The seams Phase 11 built in order; [Gate integrity](#gate-integrity) owns the passing apparatus.*
 
 **Oracle-pinning (§M.1).** Every fixture, expected `ProvisionError` tag, and reference table this gate checks
 against is authored and **committed in this phase's oracle-pinning sprint**, before `planInfrastructure`/`provision` exist — no oracle is
@@ -295,27 +299,24 @@ each one-resource-or-one-byte-short minimally-differing pair rejects, exercising
 
 ## Sprints
 
-## Sprint 11.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Capacity/Provision.hs` (add `planInfrastructure`, the
-`ProvisionTargetSupply`/`InfrastructurePlanningResult` types, the internal demand derivation from
-`BoundDeployment`, and the receipt-bound `ProvisionContext` constructor) — target path, not yet built. This
-Phase-11 source inventory deliberately does not import the Phase-13 `K8sObject`/Aeson renderer.
-**Blocked by**: Phase 10 gate (the total `bind` that produces the wholly-unprovisioned `BoundDeployment`); Phase 5
-gate (the IR + decoder the refs project from).
-**Independent Validation**: a unit + property suite runs
-`planInfrastructure` over the pre-existing and creation `ProvisionTargetSupply` fixtures and asserts: the
-pre-existing fixture yields `NoInfrastructureRequired`; the creation fixture returns exactly one
-`InfrastructureRequired` plan owning one batch-scoped Pulumi graph/checkpoint/dependency/concurrency/quota
-partition and a fresh plan token, whose child-create payloads carry bound intent and budget but never a
-circular child `ProvisionedSpec`; validation joins that batch to a `ValidatedInfrastructureActionBatch` with
-fresh plan/action tokens, and only its CAS enaction plus receipt-bound provider/host readback
-(`ObservedInfrastructureMaterialization`) constructs `ProvisionContext`; replay, missing readback, or
-promised (not-yet-observed) identities reject. The derived demand is checked equal to an independent
-enumeration over the expanded `BoundDeployment` (never a caller-authored demand vector). `StandaloneRoot`
-supplies the complete declared node/host/account/backing/API-etcd inventory and `ForestMember` supplies the
-exact opaque `ClusterBudget`.
+## Sprint 11.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Capacity/Provision.hs` implements the planner, supply/result types, internal
+demand derivation, validation/enaction, observed readback, and receipt-bound context. It imports no renderer.
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: pre-existing standalone and forest supplies return `NoInfrastructureRequired`.
+Creation returns one exact action batch; fresh snapshot validation and exact readback construct the context.
+Replay, stale snapshots, missing identities, and promised identities reject. QuickCheck compares internally
+derived exact capacity with a one-unit-short supply.
 **Docs to update**: `documents/engineering/resource_capacity_doctrine.md` (§10
 planning-ownership backlink), `documents/engineering/manifest_generation_doctrine.md` (§9 the planning
 boundary), `DEVELOPMENT_PLAN/system_components.md`.
@@ -347,45 +348,18 @@ already materialized or returns exactly one non-renderable plan owning the close
    `ProvisionContext`, and replay / missing-readback / promised-identity inputs reject.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+The whole sprint (✅ Done).
 
-## Sprint 11.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion 📋
+## Sprint 11.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Capacity/Provision.hs` (add `provision`, kind-indexed
-execution-epoch expansion, and the private `ProvisionedSpec` construction);
-`src/Amoebius/Capacity/RuntimeStorage.hs` (planned-slot and observed-Pod-UID metadata shapes,
-component→role→layout-backing derivation, and scope-indexed node runtime/image-storage aggregates) — target
-paths, not yet built.
-**Blocked by**: Sprint 11.1; Phase 9 gate (the execution-epoch / scheduler-reservation
-/ kubelet-CRI runtime-metadata / accelerator-residency folds and the composed full-resource-vector
-place-witness gate this fold invokes); Phase 8 gate (the logical→physical storage-geometry fold); Phase 7
-gate (the base `fits`/`carve`/`place` capacity fold).
-**Independent Validation**: a unit + property suite
-provisions each of the nine per-arm positives (both shapes) to an opaque `ProvisionedSpec` and asserts (i)
-an independently enumerated kind-indexed `(sourceUnit, revision, ordinal, resource) →
-MaterializedExecutionInstance` instance/epoch map exact-equals the provision result for the steady map
-(including a Job-completed empty control) and every empty-capable rollout step, rejecting each
-one-unit-short desired-replica / surge / old-revision variant; (ii) a separate pure normalized-observation
-property exact-fits the live desired ∪ referenced-old ∪ terminating ∪ scheduler-reservation union — where
-`PendingUnscheduled` is API-only, `Reserved` and unbound/unknown-outcome `BindingInFlight` spend the planned
-placed vector in the scheduler ledger, a confirmed `Bound` Pod whose ledger is still in flight enters the
-observed-UID `BindingRecovery` arm, and `Bound`/`Terminating` axes instantiate observed-UID rows — rejecting
-its one-unit-short terminating pair, copied-new-as-old input, wrong generation, invented first-deploy old
-row, and two-candidate stale-residual race; (iii) the runtime-storage fold derives every component's
-`KubeletNodefs | CriRuntimeRoot` role, resolves it through `Unified | SplitRuntime | SplitImage`, groups
-aliases by physical carve once, and builds one `ProvisionedNodeRuntimeStorageAccounting` per node and
-planned-epoch fingerprint with disjoint-and-exhaustive qualified Pod/image ownership — dropping the largest
-simultaneous row, removing/changing the target model, dropping/swapping a role, mismatching a
-planned/observed domain, overlapping/leaking ownership, double-debiting an alias, or reducing either
-SplitRuntime nodefs or imagefs/containerfs by one byte rejects, and an elastic target retains
-`PerInstanceKubeletFilesystemLayout` with only elastic `(instance, disk, carve)` refs materialized
-one-for-one by an `ObservedNodeTargetBinding`; (iv) the expanded `Observability` descriptor's derived
-Prometheus/proxy envelope equals the versioned cost-model derivation and
-`illegal_monitoring_work_over_budget` returns `Left MonitoringBudgetExceeded`; and (v) `provision` resolves
-each `Prior*ProvisionRef` against `ProvisionContext`, exact-matching deployment/generation/resource arm and
-rejecting missing/stale/ wrong-generation/wrong-arm refs before any allocation or copy. This validation goes
-**red** on each of the ten inherited seeded mutants (Sprint 11.4).
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Capacity/Provision.hs` implements `provision` and the opaque seal.
+`src/Amoebius/Capacity/RuntimeStorage.hs` supplies scope-indexed metadata and node runtime/image accounting.
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: all nine arms under both shapes retain independently counted desired instances,
+runtime rows, provider objects, and intents. Exact runtime backing accepts and one byte short rejects.
+Monitoring, accelerator, controller-child, elastic, and four prior-reference failures return distinct tags.
+The ten provision mutants each turn red.
 **Docs to update**:
 `documents/engineering/resource_capacity_doctrine.md` (§3/§4/§9.2 backlink),
 `documents/engineering/service_capability_doctrine.md` (§4 the provisioning tail),
@@ -483,29 +457,17 @@ and an impossible target has no deployable value.
    suite goes **red** under each of the ten inherited seeded mutants.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+The whole sprint (✅ Done).
 
-## Sprint 11.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation 📋
+## Sprint 11.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Capacity/RenderSource.hs` (`K8sObjectIdentity`, its
-compatibility alias `KubernetesObjectId`, the closed private `ProvisionedRenderSource identity`, the closed
-`RenderActivation = Immediate | BootstrapSchedulerStage | AfterBootstrapAddonCutover |
-AfterManagedCapacityReady`, and `provisionRenderSources :: ProvisionedDeploymentParts -> Either
-ProvisionError ProvisionedRenderSourceSet`) — target path, not yet built. Deliberately does not import the
-Phase-13 `K8sObject`/Aeson renderer.
-**Blocked by**: Sprint 11.2.
-**Independent Validation**: a property
-suite asserts that the complete `ProvisionedDeploymentParts` domain contributes exactly one equal-keyed
-`ProvisionedRenderSource` per Kubernetes object identity to the sole `ProvisionedSpec.renderSources`; each
-map key equals its embedded source identity; shared Namespace/quota/scheduler/admission/RBAC/`Lease`/CRD
-sources have exactly one global owner; and the source's provisioned-part witness fixes its owner, fields,
-reconcile mode, and activation stage. A duplicate, omitted, key/embedded-identity-mismatched, or
-owner-mismatched candidate rejects **before** `ProvisionedSpec` is constructed. An independent four-stage
-activation classifier (from an oracle-pinned reference table) classifies every source and rejects a
-missing/extra stage, a managed-node taint/admission source placed in an early stage, or a source whose
-activation disagrees with its provisioned owner — so a managed-node taint/admission object cannot be swept
-into a first generic apply. No public function accepts one service projection for rendering.
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Capacity/RenderSource.hs` implements opaque, identity-keyed sources,
+their four activation stages, and the checked source-set constructor without importing a renderer.
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: the source domain equals provider objects plus four globals. Keys equal embedded
+identities, witnesses independently fix owners, and all four activation stages appear. Duplicate, omitted,
+key-mismatched, owner-mismatched, activation-mismatched, and missing-stage candidates reject.
 **Docs to update**: `documents/engineering/manifest_generation_doctrine.md` (§2 who seals the whole-deployment
 render-source set), `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -540,42 +502,18 @@ identity-keyed render-source set with per-field ownership and a four-stage activ
    missing/extra stage, an early-staged managed taint/admission source, or an owner-disagreeing activation.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+The whole sprint (✅ Done).
 
-## Sprint 11.4: The provision-seal property/corpus + the Register-1 gate 📋
+## Sprint 11.4: The provision-seal property/corpus + the Register-1 gate ⏸️
 
-**Status**: Planned
-**Implementation**: `test/capability/ProvisionProps.hs` (the provision-seal property
-battery), `test/capability/RuntimeStorageBindingProps.hs` (planned-slot/observed-UID domains, role/layout
-resolution, node-aggregate ownership/grouping, reservation/observed no-double-debit, and
-exact-fit/one-byte-short cases), `test/capability/ProvisionSealGate.hs` (the gate + validation-locus ledger
-with coverage-assertion machinery), the oracle-pinned `ProvisionTargetSupply` boundary fixtures and
-reference tables, and the seal-locus negatives
-`dhall/examples/{illegal_post_bind_expansion_overcommit,illegal_monitoring_work_over_budget,
-illegal_accelerator_vram_shortage,illegal_cuda_on_cpu_target,illegal_controller_child_unbounded,
-illegal_elastic_per_node_expansion_overcommit,
-illegal_prior_provision_ref_{missing,stale,wrong_generation,wrong_arm}}.dhall`, plus the ten inherited
-seeded mutants under `test/capability/mutants/{mutant_fixed_prometheus_requests,
-mutant_provisioned_value_in_bound_deployment,mutant_unchecked_prior_ref,mutant_drop_execution_replica,
-mutant_drop_execution_surge,mutant_drop_execution_old_revision,mutant_wrong_execution_revision_join,
-mutant_double_debit_controller_child,mutant_drop_largest_kubelet_metadata,
-mutant_missing_kubelet_metadata_model}` — target paths, not yet built. The nine per-arm positive fixtures
-`dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` and their `golden_servicespec_<arm>_<shape>`
-goldens are **inherited from [Phase 10](phase_10_capability_bind.md)** and provisioned, not re-authored,
-here.
-**Blocked by**: Sprint 11.1, Sprint 11.2, Sprint 11.3; Phase 9 gate (the folds this seal invokes);
-Phase 10 gate (the positive corpus and its goldens).
-**Independent Validation**: `cabal test
-provision-seal-spec` is green — each of the nine per-arm positives provisions (both shapes) to an opaque
-whole-deployment `ProvisionedSpec` on its positive topology, with the independent instance/epoch
-enumeration, runtime-storage ownership predicate, and four-stage activation classifier all satisfied; the
-two `ProvisionTargetSupply` fixtures exercise `NoInfrastructureRequired` and the
-`InfrastructureRequired`→CAS→`ProvisionContext` path; each seal-locus negative returns its
-**specifically-tagged** `ProvisionError` at the `provision-seal` locus, each paired with a
-minimally-differing positive; exact-fit execution-epoch / runtime-storage-backing / accelerator-VRAM
-boundaries accept while each one-resource-or-one-byte-short pair rejects; the run emits a Register-1
-proven/tested/assumed ledger whose coverage-assertion machinery is red if any named fixture, negative
-reason, or mutant is absent; and the suite is red under each of the ten committed seeded mutants.
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `test/capability/{ProvisionProps,RuntimeStorageBindingProps,ProvisionSealGate}.hs`,
+`tests/oracle/phase11/`, `tests/mutants/phase11/`, the paired Dhall corpus, and `tools/phase11_gate.py`.
+The 18 per-arm/shape fixtures remain inherited from [Phase 10](phase_10_capability_bind.md).
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `cabal test provision-seal-spec` covers 18 positives, two planner paths, ten exact
+negative tags, four activation stages, and two boundary properties. The phase gate runs all ten mutants
+individually, checks complete locus coverage, emits retained evidence, and validates the hashed ledger.
 **Docs to update**: `documents/engineering/resource_capacity_doctrine.md`,
 `documents/engineering/service_capability_doctrine.md` (§4.1 the seal-locus family/CUDA rejection),
 `documents/illegal_state/illegal_state_catalog.md` (§2 the load-bearing limit at the provision-seal locus),
@@ -627,13 +565,13 @@ UNVERIFIED.
    an opaque `ProvisionedSpec` on its positive topology satisfying the three independent reference predicates;
    the two boundary fixtures exercise both planner arms; each seal-locus negative returns its specifically-tagged
    `Left` before `renderAll`, each paired with a minimally-differing positive; exact-fit boundaries accept and
-   one-resource/one-byte-short pairs reject; the suite is red under each of the ten committed seeded mutants; and
-   the validation-locus ledger's coverage-assertion machinery turns the suite **red** if any named fixture,
+   one-resource/one-byte-short pairs reject; and every committed mutant is red.
+2. The validation-locus ledger's coverage assertion turns the suite **red** if any named fixture,
    negative reason, or mutant is missing — so *"honestly classifies"* is a machine oracle, not a hand-written
    attestation.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+The whole sprint (✅ Done).
 
 ## Documentation Requirements
 

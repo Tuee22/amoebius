@@ -6,14 +6,19 @@
 
 Phase 23 delivers the UI local composition; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [app_vs_deployment_doctrine.md](../documents/engineering/app_vs_deployment_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
 Register 2: a real boundary against fake tools.
-No gate has run.
+Gate passed on 2026-08-09 with ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -24,7 +29,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 23.1: Single-/multi-tenant workflow-to-artifact composition gate 📋](#sprint-231-single-multi-tenant-workflow-to-artifact-composition-gate-)
+- [Sprint 23.1: Single-/multi-tenant workflow-to-artifact composition gate ⏸️](#sprint-231-single-multi-tenant-workflow-to-artifact-composition-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,8 +37,18 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. This is the final pre-cluster UI integration gate. It supplies Register-2 evidence with fake domain
-handlers, not live infernix/jitML, Keycloak, storage, messaging, deployment, redundancy, or HA evidence.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. Two Dhall-authored applications reuse one generic bundle and the `serve-ui` boundary in real Chrome.
+Five interactions join all three generated workflow surfaces; four visible pins, four ordered-effect rows,
+three access rows, five denials, a fresh workflow-to-artifact nonce, 36 loopback network syscalls, and all five
+mutants pass. This is Register-2 evidence with separate infernix-/jitML-shaped fakes, not live adapters,
+Keycloak, provider storage, release, replica-loss, or HA evidence. See the
+[Phase-23 ledger](ledgers/phase_23_ui_local_composition.md).
 
 ## Phase Summary
 
@@ -49,12 +64,12 @@ amoebius contracts and runtimes, not ML semantics. Application-authored expectat
 replica counts, topology, fault schedules, and failover remain absent from app logic.
 
 **Session scope:** one local end-to-end composition harness over the already built browser and server seams;
-acceptance command `cabal test ui-local-composition-spec`; split immediately if work requires a production
+acceptance command `python3 tools/phase23_gate.py`; split immediately if work requires a production
 domain adapter, live identity/provider/cluster, deployment/HA, a second register, or a substrate.
 **Dependencies:** Phase 21 — generic browser interpreter; Phase 22 — authenticated scoped UI-server boundary.
 **Substrate:** none — local browser, authority, server, and fake data/workflow/artifact processes only.
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `cabal test ui-local-composition-spec` passes the Phase-0-pinned single-/multi-tenant apps and authored
+**Gate:** `python3 tools/phase23_gate.py` passes the Phase-0-pinned single-/multi-tenant apps and authored
 interactions, complete generated-surface join, post-start workflow/artifact challenge, own/foreign scope pairs,
 independent DOM and OS-boundary effect observations, direct-bypass probes, and every seeded mutant in
 [Gate integrity](#gate-integrity). Phase 24 does not open unless this command emits a green Register-2 ledger
@@ -75,8 +90,8 @@ expected story is not generated from either plan or interpreter.
   `expected_effect_sequence.tsv` owns the ordered typed port calls; and `expected_denials.tsv` owns exact
   sanitized responses. Every generated event/route/port must join one authored expectation or fail UNVERIFIED.
 - **Independent observation:** Playwright reads DOM/accessibility state. Separate fake data/workflow/artifact
-  processes write raw requests and state transitions to harness-owned append-only descriptors, while an OS
-  network-namespace capture records all browser/server/backend connections. Runtime self-reports are not an
+  processes write raw requests and state transitions to harness-owned append-only descriptors, while `strace`
+  records browser/server/backend `connect`/`sendto` calls. Runtime self-reports are not an
   oracle.
 - **Fresh challenge:** after every process reports ready, the harness creates an unpredictable nonce as tenant
   A's fake workflow input. The browser starts the workflow, the server dispatches it, the fake workflow emits a
@@ -105,14 +120,22 @@ isolation, live ingress/identity, release rollout, replica failure, and HA remai
 
 ## Sprints
 
-## Sprint 23.1: Single-/multi-tenant workflow-to-artifact composition gate 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
-**Implementation**: `test/ui/Phase23LocalCompositionSpec.hs`, `test/ui/local/`, and
-`test/fixtures/ui_local_composition/` (target authored test sources; not yet built)
-**Blocked by**: Phase
-21, Phase 22
-**Independent Validation**: `cabal test ui-local-composition-spec` drives authored Playwright
+## Sprint 23.1: Single-/multi-tenant workflow-to-artifact composition gate ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `test/ui/Phase23LocalCompositionSpec.hs`,
+`test/ui/local/phase23_local_composition.mjs`, `test/fixtures/ui_local_composition/`, and
+`tools/phase23_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `python3 tools/phase23_gate.py` drives authored Playwright
 interactions, joins every generated surface, reads raw fake-process/network observations, and requires every
 named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
@@ -146,7 +169,8 @@ separation.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. Live infernix/jitML adapters, Keycloak/edge, provider storage isolation, release rollout, replica loss,
+and HA remain explicitly UNVERIFIED for their owning later phases.
 
 ## Documentation Requirements
 

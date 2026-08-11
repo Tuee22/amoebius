@@ -11,14 +11,23 @@
 
 Phase 45 delivers the hostless provider child + convergence + Lease handoff; its design is owned by [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), [image_build_doctrine.md](../documents/engineering/image_build_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu → provider` substrate.
-No gate has run.
+The scoped gate is implemented at the available linux-cpu/Kubernetes boundary; actual EKS convergence remains
+UNVERIFIED because Phase 44 could not authenticate to AWS.
+Scoped seal: `python3 tools/phase45_gate.py --reuse-fresh-live` passed 12 checks
+on 2026-08-11; ledger `external-run-reference`,
+receipt `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md
 **Generated sections**: none
 
 </details>
@@ -29,10 +38,10 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 45.1: Two-stage capacity bootstrap for a hostless provider child 📋](#sprint-451-two-stage-capacity-bootstrap-for-a-hostless-provider-child-)
-- [Sprint 45.2: Parent→child Lease handoff + hostless daemon topology 📋](#sprint-452-parentchild-lease-handoff--hostless-daemon-topology-)
-- [Sprint 45.3: Standard-HA platform-service convergence from typed manifests 📋](#sprint-453-standard-ha-platform-service-convergence-from-typed-manifests-)
-- [Sprint 45.4: The provider-child bring-up gate 📋](#sprint-454-the-provider-child-bring-up-gate-)
+- [Sprint 45.1: Two-stage capacity bootstrap for a hostless provider child ⏸️](#sprint-451-two-stage-capacity-bootstrap-for-a-hostless-provider-child-)
+- [Sprint 45.2: Parent→child Lease handoff + hostless daemon topology ⏸️](#sprint-452-parentchild-lease-handoff--hostless-daemon-topology-)
+- [Sprint 45.3: Standard-HA platform-service convergence from typed manifests ⏸️](#sprint-453-standard-ha-platform-service-convergence-from-typed-manifests-)
+- [Sprint 45.4: The provider-child bring-up gate ⏸️](#sprint-454-the-provider-child-bring-up-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -40,11 +49,25 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. This phase opens after the
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 **Scoped validation complete; provider runtime incomplete.** `Amoebius.Cluster.ProviderBringUp` and
+`Amoebius.Daemon.InClusterSingleton`, the Phase-0 corpus, contract/live tests, scoped Kubernetes driver, gate,
+enumeration, and ledger are built. Pure tests cover pinned private images, bootstrap refusals, readiness,
+complete add-on-domain cutover, managed authority, Lease freshness, exact services, hostless topology, and
+second-pass no-op. A live retained-kind drill observed the scheduler and non-Serving singleton Deployments,
+four old-UID release/replacement joins, same-UID/fresh-resourceVersion parent→absence→child Lease handoff,
+sixteen Service objects, zero forbidden mutations, `Never` pull policy, and exact cleanup. This is a
+**Kubernetes API boundary emulating the `Managed Eks` child shape, not an EKS result**. The following target
+description remains design intent wherever it requires EKS, a managed node, cloud LoadBalancer, full service
+reachability/HA, provider Keycloak ingress, or cloud/network/OS observers. This phase opens after the
 [Phase 44](phase_44_provider_deploy_checkpoint.md) gate (the provider-cluster Pulumi deploy-from-inside + Vault-Transit-enveloped MinIO checkpoint + `observeProviderAccount`, which lands a ready `Managed Eks` control plane and its base managed node group with the pinned amoebius base/scheduler OCI content already imported and capacity-debited into the first node's CRI store). It runs on the **linux-cpu → provider** substrate in
 **Register 3** (live infrastructure): the parent amoebius cluster is a single-node `kind` cluster on linux-cpu
-(the Phase 24 midwife), from inside which the Deployment-`replicas=1` singleton (Phase 33) drove the Phase-44
+(the Phase 24 bootstrap coordinator), from inside which the Deployment-`replicas=1` singleton (Phase 33) drove the Phase-44
 deploy; this phase then reconciles the resulting hostless EKS child to full platform convergence. `→ provider`
 names the *deploy target class* — a cloud-managed EKS cluster reached over the cloud API — not a fifth hardware
 substrate; the provider child has **no host** and no Apple/CUDA substrate of its own, so the gate stays
@@ -54,6 +77,9 @@ convergence** — never the Pulumi deploy/checkpoint that produced its input ([P
 never the per-PV durable EBS + create-vs-delete credential model ([Phase 46](phase_46_provider_ebs_credential.md)),
 and never dynamic node provisioning or the leak-free teardown sweep ([Phase 47](phase_47_provider_dynamic_nodes.md)).
 Status transitions are recorded reverse-chronologically here once work begins.
+
+Every hardware substrate can always run the `linux-cpu` parent lane. When a pristine Linux host is required,
+use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ## Phase Summary
 
@@ -266,20 +292,22 @@ own deploy lifecycle, and the leak-free sweep witness is recorded **deferred to 
 
 ## Sprints
 
-## Sprint 45.1: Two-stage capacity bootstrap for a hostless provider child 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 45.1: Two-stage capacity bootstrap for a hostless provider child ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-runtime/src/Amoebius/Cluster/ProviderBringUp.hs` (the
 bootstrap-scheduler creation, add-on cutover, and managed-authority mint for a provider child), reusing the
 Phase-27 `Amoebius.Scheduler.*` role and its two-stage bootstrap-cutover / execution-identity-admission
-machinery (target paths; not yet built)
-**Blocked by**: Phase 44 gate (the ready `Managed Eks` control plane
-+ base managed node group, with the pinned amoebius base/scheduler OCI content preloaded and
-capacity-debited into the first node's CRI store); Phase 27 gate (the `amoebius-capacity` scheduler role,
-the two-stage bootstrap cutover, and execution-identity admission this sprint applies to a provider child);
-Phase 26 gate (the observe→diff→scoped-SSA→staged-enact reconciler the cutover patches run under); Phase 25
-gate (the multi-arch baked-binary base image the scheduler image is a digest of) — all external
-earlier-phase prerequisites.
+machinery (BUILT/SCOPED-VALIDATED)
+**Blocked by**: reopened numeric predecessor gates.
 **Requires**: `cloud-account` — the credentialed account a provider child is brought up inside.
 **Independent Validation**: against a Phase-44-deployed child, the parent
 bootstrap holder creates `amoebius-capacity-scheduler` (`pods=1`) referencing the preloaded CRI digest,
@@ -328,17 +356,17 @@ is admitted before the child's own capacity scheduler alone binds Pods.
    resolves to the preloaded CRI digest and never a public/child-registry pull.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Run the built protocol against a Phase-44-created EKS control plane and managed node, then read back the real
+provider add-on and CRI-preload boundaries. The local and retained-Kubernetes protocol seams are complete.
 
-## Sprint 45.2: Parent→child Lease handoff + hostless daemon topology 📋
+## Sprint 45.2: Parent→child Lease handoff + hostless daemon topology ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-runtime/src/Amoebius/Daemon/InClusterSingleton.hs`
 (provider-child singleton wiring — exactly one singleton role, one capacity-scheduler role, zero host
 worker-daemon roles), `amoebius-runtime/src/Amoebius/Cluster/ProviderBringUp.hs` (the bootstrap-authority
-release + fresh-absence readback + authenticated child acquire) (target paths; not yet built)
-**Blocked by**: Sprint 45.1; Phase 33 gate (the Deployment-`replicas=1` singleton and the mandatory reconciler `Lease`
-whose single-instance is a k8s/etcd property) — external earlier-phase prerequisite.
+release + fresh-absence readback + authenticated child acquire) (BUILT/SCOPED-VALIDATED)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: from `ManagedCapacityReady`, the parent bootstrap holder converges the pre-handoff Vault +
 MinIO/registry substrate, applies the child singleton **while still holding the Lease** (the Pod stays
 non-Serving and cannot mutate), then drains/releases the bootstrap holder, freshly observes holder absence
@@ -391,18 +419,17 @@ one capacity-scheduler role, and zero host daemons — no host binary, no host w
    witness.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Repeat the exact Lease/topology observers on a real Managed EKS child. Retained kind establishes the Kubernetes
+ordering and no-mutation boundary only; actual provider host foreclosure remains UNVERIFIED.
 
-## Sprint 45.3: Standard-HA platform-service convergence from typed manifests 📋
+## Sprint 45.3: Standard-HA platform-service convergence from typed manifests ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-runtime/src/Amoebius/Cluster/ProviderBringUp.hs`
 (post-handoff child admin REST: Vault init/unseal, projected `.dhall` delivery, and the singleton's
 standard-service convergence), converging through the Phase-26 reconciler and consuming the Phase 25/28–32
-platform-service manifests (target paths; not yet built)
-**Blocked by**: Sprint 45.2;
-[phase_33](phase_33_live_dsl_singleton.md) Sprint 33.4 (the admin REST surface — `vault init/unseal`, `dhall update` — this sprint drives the child through); Phase 26 gate (the object reconciler — observe→diff→scoped-SSA→staged-enact — that converges the manifests); Phase 25 gate (the base image + in-cluster `distribution` registry the services are baked into); Phases 28–32 gates (retained storage, root Vault/PKI, the platform backbone MinIO/Pulsar, platform services-2 Redis/Sentinel/Postgres/observability, and Keycloak-owned ingress — the standard service set converged here) — all external earlier-phase
-prerequisites.
+platform-service manifests (BUILT at the protocol boundary; provider enaction UNVERIFIED)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: through the child admin REST after handoff, the run
 initializes/unseals Vault, delivers the child's projected `.dhall`, and the singleton converges the
 **complete** standard HA platform-service stack (registry, MinIO, Vault, Pulsar, Redis/Sentinel,
@@ -447,17 +474,18 @@ is a structural invariant tested on the provider target.
    public-registry image) MUST go **red** on the image-pull observer.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+On real EKS, converge and probe the complete services for reachability, HA shape, sole Keycloak wild ingress,
+cloud LoadBalancer behavior, zero Helm calls, and zero public-registry network pulls.
 
-## Sprint 45.4: The provider-child bring-up gate 📋
+## Sprint 45.4: The provider-child bring-up gate ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `test/dhall/phase_45_provider_provision.dhall` (the committed gate
 topology, exercised here on its provider-child bring-up + standard-service-convergence slice),
-`test/provider/ProviderChildBringUpGate.hs` (the end-to-end Register-3 gate harness + per-run
-proven/tested/assumed ledger, with the independent Lease/audit, image-pull, and no-op OS-boundary observers)
-(target paths; not yet built)
-**Blocked by**: Sprint 45.1, Sprint 45.2, Sprint 45.3.
+`amoebius-runtime/test/provider/{Phase45ContractSpec,Phase45LiveSpec}.hs`,
+`tools/phase45_{provider_child_live,gate}.py`, with its generated ledger under `gen/runs/phase_45/`
+(observed footprint; provider OS/cloud observers UNVERIFIED)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: from a linux-cpu parent against a Phase-44-deployed `Managed Eks` child, the gate
 `InForceSpec` reaches `BootstrapCapacitySchedulerReady`, cuts every add-on to reservations, reaches
 `ManagedCapacityReady`, releases the parent bootstrap Lease holder and observes it absent before the
@@ -514,7 +542,9 @@ leak-free-sweep layer UNVERIFIED here.
    green here.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Re-run without `PARTIAL_EXTERNAL_AUTHORITY` once valid AWS authority permits Phase 44 to materialize the EKS
+child. Eleven enumerated provider/cloud surfaces remain explicitly UNVERIFIED; Phase 47 still owns the final
+leak-free provider tag sweep.
 
 ## Documentation Requirements
 
@@ -573,6 +603,8 @@ The whole sprint (📋 Planned).
 - [phase_44](phase_44_provider_deploy_checkpoint.md) — the provider-cluster Pulumi deploy-from-inside +
   Vault-Transit-enveloped MinIO checkpoint + `observeProviderAccount` that lands the ready `Managed Eks` control
   plane and preloaded base node this phase converges
+- [phase_33](phase_33_live_dsl_singleton.md) — supplies the singleton role and Lease authority protocol used by
+  the provider child
 - [phase_46](phase_46_provider_ebs_credential.md) — the per-PV durable EBS + create-vs-delete credential + static
   EBS CSI arm, layered on Phase 44, not exercised here
 - [phase_47](phase_47_provider_dynamic_nodes.md) — dynamic node provisioning by signal and the leak-free provider

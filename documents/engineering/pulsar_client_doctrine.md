@@ -21,6 +21,8 @@ misinterpreted payload impossible rather than silent. It does not own the topics
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. One client, one wire, no WebSockets](#1-one-client-one-wire-no-websockets)
 - [2. Scope — what this document owns](#2-scope--what-this-document-owns)
@@ -56,14 +58,14 @@ Both transports are deleted. One native client replaces both, with four concrete
 - **No base64 inflation.** The native protocol carries raw payload bytes with a CRC32C checksum ([§3](#3-the-native-binary-protocol)); the
   WebSocket path inflated every payload ~33% into base64 inside a JSON object.
 - **No second runtime.** jitML's Node subprocess and its IPC are gone; the client is plain Haskell on the
-  pinned toolchain.
+  dynamically resolved compatible toolchain.
 - **`sequence_id` is a first-class protocol field**, not a smuggled URL parameter — which makes the dedup
   contract in [§6](#6-the-declarative-topology-algebra) clean rather than a workaround.
 
 > **Honesty (per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).** "Performance via the
-> native protocol" is the **design rationale** — base64 elimination, persistent producers, no process hop —
-> not a benchmarked amoebius result. amoebius has not yet built Phase 35. The WebSocket costs above are read
-> off the infernix/jitML source as *sibling evidence*; the amoebius speedup is expected, not measured.
+> native protocol" remains a design rationale, not a benchmark result. Phase 35 did validate the native wire,
+> persistent producer/consumer sessions, and absence of WebSocket or second-language client transport; it did
+> not measure a speedup over the sibling paths.
 
 The no-WebSockets rule is a **locked invariant**, recorded as a standard-service fact in
 [platform_services_doctrine.md §6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox): lookup, produce, consume, subscribe,
@@ -133,8 +135,9 @@ Implementation rules for `amoebius-pulsar`:
 - **One persistent TCP session per broker**, multiplexing producers and consumers by `producer_id` /
   `consumer_id` / `request_id`, as the protocol intends. This is the structural reason the
   per-publish-connection cost of the old WebSocket path vanishes ([§1](#1-one-client-one-wire-no-websockets)).
-- **Toolchain & discovery.** The fork builds on **GHC 9.12.4** (the repo-wide pin). Any code-generation
-  tool it needs (e.g. `protoc` for `proto-lens`) is discovered **lazily through the substrate's package manager and invoked by full path**. Host-side code generation never searches `PATH`, and client configuration
+- **Toolchain & discovery.** The fork declares compiler/API compatibility requirements and resolves the
+  current compatible graph per run. Any code-generation tool it needs (e.g. `protoc` for `proto-lens`) is
+  discovered **lazily through the substrate's package manager and invoked by full path**. Host-side code generation never searches `PATH`, and client configuration
   does not come from ambient environment variables. That no-env/no-`PATH` contract is owned by
   [substrate_doctrine.md](./substrate_doctrine.md); it is named here only because the supernova fork must
   conform to it.
@@ -189,9 +192,9 @@ is **unrepresentable** ([illegal_state_catalog.md §3.23](../illegal_state/illeg
   content-addressed manifests — so payloads and manifests share one format and one canonical encoder rather
   than introducing a second.
 - **Toolchain.** The codec is built on **`serialise`** (the `Serialise` typeclass) over **`cborg`** (whose
-  `Codec.CBOR.Write` sorted-map writer gives canonical encoding), on the repo-wide GHC 9.12.4 pin; the
-  dependency is carried in the `amoebius-pulsar` cabal package and registered in the dependency-management
-  surface tracked by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Any codegen tool
+  `Codec.CBOR.Write` sorted-map writer gives canonical encoding). The packages are authored compatibility
+  requirements in `amoebius-pulsar` and resolve dynamically under the policy tracked by
+  [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Any codegen tool
   is discovered lazily by full path (no env, no `PATH`), as `protoc` is ([§3](#3-the-native-binary-protocol)).
 
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
@@ -210,13 +213,12 @@ flowchart TD
   classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
 ```
 
-*Design intent. The CBOR encode and frame chain is Tier-1 in-process and the receive-side decode is a total gate; the broker seam and the running consumer are runtime-checked, not proven here.*
+*Validated Phase-35 chain: the CBOR encode/frame path and total decoder are tested in process; the broker seam and running consumer are Register-3 runtime-checked, not proven.*
 
-> **Honesty.** The CBOR-payload rule is Phase-35 design intent, not a tested amoebius result. Canonical CBOR
-> is *proven in the sibling jitML content store* (`encodeManifestCbor`) — that is sibling evidence, not
-> amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). The type-foreclosed claim is the
-> *produce* surface having no non-CBOR constructor; that a *received* body decodes is the same total-check /
-> runtime residue the CRC32C guarantee already carries, not a stronger claim.
+> **Honesty.** Phase 35 validates the typed producer/consumer API, a hand-authored API-surface golden, a raw
+> producer compile refusal, corrupt-body total refusal, and byte-preserving live CBOR round-trips. The
+> produce-side raw-body arm is type/API-foreclosed; received bytes still cross a runtime broker boundary and
+> are accepted only through total `Either` decoding. No broader canonicalization or performance claim follows.
 
 ---
 
@@ -233,15 +235,15 @@ Forking — rather than depending on the published package — is the honest cho
    published surface demonstrates the *Exclusive* subscription and a basic produce/consume/ack loop;
    production concerns (robust reconnection, partitioned topics, dedup wiring, the topology algebra) are
    amoebius's to add.
-2. **Toolchain pinning.** Supernova's dependency bounds predate GHC 9.12.4; the fork carries the bumps and
-   the pin ([§3](#3-the-native-binary-protocol)).
+2. **Compatibility maintenance.** Supernova's published dependency bounds can lag current compatible GHC and
+   library APIs; the fork carries authored bounds/patches, while Phase 1 resolves and records the actual graph
+   per run ([§3](#3-the-native-binary-protocol)).
 3. **Layering.** The topology algebra ([§6](#6-the-declarative-topology-algebra)) and the dedup contract ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) are amoebius doctrine, not generic
    client features; they live in the fork, above supernova's transport core.
 
-> **Honesty.** Treat supernova as a *starting point with sibling provenance*, not a proven foundation.
-> Every capability in [§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek) is "supernova demonstrates it" or "the protocol provides it" — neither is an
-> amoebius test result. Hardening, reconnection semantics, and the dedup proof are Phase 35 work tracked in
-> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+> **Honesty.** Supernova remains provenance, not evidence. Phase 35 independently validates amoebius's
+> generated framing, CONNECT/LOOKUP, produce/consume/subscribe/seek surface, broker dedup, redelivery, and
+> cleanup. Reconnection hardening beyond the exercised close/reopen paths remains unclaimed.
 
 ---
 
@@ -297,6 +299,11 @@ choice so the omissions are auditable, not silent.
   filter convention
   ([low_code_ui_runtime_doctrine.md §14](./low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability)).
   They are a *projection*, never a decision primitive: no ownership or election logic lives in a TableView.
+  [Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md) validates this application live: native
+  consumers observe eight keyed workflow events, seven owner-qualified projection messages, five original-
+  command-qualified receipt messages, and successful broker compaction for both derived topics. Equal-shaped
+  Alice/Bob/Carol rows remain isolated, and dropping the owner from either key or subscription turns the gate
+  red. Ledger `external-run-reference`.
 - **Not exposed: exclusive-producer access mode** (`Exclusive` / `WaitForExclusive` / `ExclusiveWithFencing`).
   Pulsar's purpose-built single-writer-with-fencing primitive is deliberately absent from the client surface —
   it was evaluated and rejected as the control-plane election substrate (bootstrap/DR circularity; it fences
@@ -309,6 +316,14 @@ choice so the omissions are auditable, not silent.
 ---
 
 ## 6. The declarative topology algebra
+
+**Storage-fold status.** The [Phase 8 gate](../../DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md)
+implements and Register-1 validates Pulsar's two independent ceilings: BookKeeper logical hot bytes expand
+through write-quorum/reserve/re-replication geometry before fitting the bookie backing, and durable offload
+requires a finite size ceiling against its selected budget. The physically-hot-over-bookie and time-only
+cases reject, their twins fit, and the sampled equivalence property meets both coverage directions (ledger
+`dynamically-resolved`). Broker retention,
+BookKeeper recovery, tiered offload, and replay fidelity remain **UNVERIFIED** live effects.
 
 **Nobody writes a topic string by hand.** A topic name is a *derived* function of a typed
 descriptor, and a routing graph that fails validation cannot be reconciled. This is the
@@ -564,12 +579,36 @@ A recurring derivation amoebius adopts from infernix: when a message has a causa
 64-bit `sequence_id` (both are monotonic per topic-partition); otherwise fall back to a stable hash of a
 generated request id, paired with a request-scoped producer name so unordered hashes never share a cursor.
 
-> **Honesty.** infernix's source records that its dedup duplicate-collapse was validated against a real
-> broker (its Sprint 7.14 chaos validation) — but **over WebSockets, in infernix**. That is *sibling
-> evidence*, not an amoebius result: amoebius re-implements the same contract over the native protocol and
-> has not yet run it. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
-> [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), read this section as the specified contract,
-> not a proven amoebius behaviour.
+> **Honesty.** Phase 35 now validates the reusable Haskell client at Register 3: two distinct namespaces use
+> native command/event CBOR round-trips, broker-side duplicate collapse, all four subscription types,
+> unacknowledged redelivery, seek replay, and external cleanup readback. The 720-schedule Register-2.5 battery
+> validates the amoebius dedup fold under its modeled reorder/duplicate domain. Broker consensus and
+> cross-cluster correspondence remain UNVERIFIED.
+
+Phase 37 consumes this surface through native ranked `Failover` subscriptions. The protocol subset now carries
+consumer priority, active-consumer change, and redeliver-unacknowledged frames; outbound frames are serialized
+per client. In two live namespaces, Pulsar selected `worker-a`, promoted `worker-b` after an abrupt kill, and
+redispatched the outstanding command while an independent subscription observed its own command exactly once.
+The content-addressed store made the promoted write a convergent no-op. This proves the client/runtime boundary,
+not Pulsar broker/BookKeeper/ZooKeeper consensus. It ran on the universally available `linux-cpu` lane; use
+Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows for pristine Linux.
+
+The tested backbone uses the universally available `linux-cpu` lane. Every hardware substrate can always run
+that lane; use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows when a pristine Linux host is
+required.
+
+Phase 49 adds a scoped infernix adapter and a separate native driver using typed CBOR command/event payloads,
+one stable scope-qualified command/work id, and the linked sibling compacted-topic view. A fresh retained-
+Pulsar run records two producer attempts and one consumer delivery under broker dedup. It does not establish
+the complete Pulsar-command-to-worker causal chain or migration of the full sibling inference engine; those
+remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; use Incus on Linux/Linux-CUDA, Lima on
+Apple, or WSL2 on Windows for a pristine Linux host.
+
+Phase 57's scoped UI rollout result tests cursor keys containing tenant, owner, and stream and preserves the
+same sequence through a host-local durable reconnect probe. It also gates simulated traffic shifts on
+projector watermarks. No real Pulsar broker or independently consumed broker message id participated, so live
+watermark and resume behavior remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; use
+Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows for a pristine Linux host.
 
 ### Consensus is delegated, not re-proven
 
@@ -604,7 +643,7 @@ infernix and jitML remain **ML extension libraries**; they stop shipping their o
 
 This document is normative client doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the native client,
-the topology algebra, and the round-trip gate land in **Phase 35**, and the infernix/jitML migration onto it
+the topology algebra, and the round-trip gate landed in **Phase 35**, and the infernix/jitML migration onto it
 is **Phases 49 (infernix) and 51 (jitML)**. This doc never maintains a competing status ledger.
 
 ---

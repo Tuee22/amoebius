@@ -1,0 +1,1 @@
+PHASE31_REDIS_UNBOUNDED_BUFFER_MUTANT removes the finite output-buffer bound; provision must reject it.

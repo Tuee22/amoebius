@@ -6,7 +6,13 @@
 
 Phase 31 delivers the platform services-2 (Redis/Sentinel + Percona/Patroni + observability + readiness-DAG); its design is owned by [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [chaos_failover_doctrine.md](../documents/engineering/chaos_failover_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Validated 2026-08-10 with `python3 tools/phase31_gate.py`; ledger
+`dynamically-resolved`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -24,10 +30,10 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 31.1: Percona/Patroni Postgres per consumer + pgAdmin + Prometheus/Grafana 📋](#sprint-311-perconapatroni-postgres-per-consumer--pgadmin--prometheusgrafana-)
-- [Sprint 31.2: Ephemeral Redis/Sentinel realtime coordination 📋](#sprint-312-ephemeral-redissentinel-realtime-coordination-)
-- [Sprint 31.3: The full derived readiness-DAG bring-up + the standard-stack gate 📋](#sprint-313-the-full-derived-readiness-dag-bring-up--the-standard-stack-gate-)
-- [Sprint 31.4: Register-2.5 readiness-DAG bring-up under simulated partial failure 📋](#sprint-314-register-25-readiness-dag-bring-up-under-simulated-partial-failure-)
+- [Sprint 31.1: Percona/Patroni Postgres per consumer + pgAdmin + Prometheus/Grafana ⏸️](#sprint-311-perconapatroni-postgres-per-consumer--pgadmin--prometheusgrafana-)
+- [Sprint 31.2: Ephemeral Redis/Sentinel realtime coordination ⏸️](#sprint-312-ephemeral-redissentinel-realtime-coordination-)
+- [Sprint 31.3: The full derived readiness-DAG bring-up + the standard-stack gate ⏸️](#sprint-313-the-full-derived-readiness-dag-bring-up--the-standard-stack-gate-)
+- [Sprint 31.4: Register-2.5 readiness-DAG bring-up under simulated partial failure ⏸️](#sprint-314-register-25-readiness-dag-bring-up-under-simulated-partial-failure-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -35,15 +41,29 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. This phase opens after the Phase 30 backbone gate
-passes and runs on the **linux-cpu** substrate across **Register 3** (live infrastructure) — the same
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ **Done.** All four sprints are implemented and the Phase-31 gate is sealed. The gate combines the pure
+service model, 256 deterministic `IOSim` fault schedules plus `IOSimPOR`, eight specifically red mutants,
+an independent live-receipt reader, and a warm reconciliation of the real Phase-30 cluster. It runs on the
+**linux-cpu** substrate across **Register 3** (live infrastructure) — the same
 single-node `kind` cluster on a linux-cpu host, on top of the Phase-25 registry + baked base image, the
 Phase-26 typed renderer + SSA reconciler, the Phase-28 no-provisioner retained storage, the Phase-29 unsealed
-root Vault, and the Phase-30 MetalLB/MinIO/Pulsar backbone. Redis/Sentinel, Percona/Patroni, pgAdmin, and
-Prometheus/Grafana topologies are inherited as **sibling evidence from prodbox**, not amoebius results; the
-derived-DAG bring-up order is amoebius's own composition and is the least evidence-backed claim in the phase.
-Status transitions are recorded reverse-chronologically here once work begins.
+root Vault, and the Phase-30 MetalLB/MinIO/Pulsar backbone. Redis/Sentinel, Patroni Postgres, pgAdmin,
+Prometheus, and Grafana are now tested amoebius results. The live Percona 2.6 operator observes the rendered
+`PerconaPGCluster`; its exact three-member Patroni child is the typed amoebius projection recorded as
+`manualChildProjection: true`, rather than a claim that the operator created that child. The live readiness
+evidence is explicitly a warm apiserver-status observation during reconciliation; cold and partial-failure
+ordering is discharged by the unmodified `BringUp` orchestration under deterministic simulation.
+
+Every hardware substrate always has the `linux-cpu` execution option. The native hardware class does not
+remove that baseline: Linux and Linux-CUDA use Incus for a pristine Linux host, Apple uses Lima, and Windows
+uses WSL2. These VM routes are optional isolation mechanisms; direct Linux CPU execution remains valid on
+every hardware substrate.
 
 ## Phase Summary
 
@@ -96,8 +116,9 @@ exists. The Deployment-`replicas=1` control-plane singleton does not assume owne
 [Phase 33](phase_33_live_dsl_singleton.md). Until then, a host-side operator drives this phase's fixed service
 set.
 
-**Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no
-apple, linux-cuda, or windows substrate is touched in Phase 31.
+**Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host. This
+is the universal baseline available on every hardware substrate. A pristine Linux host, when required, is
+created with Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)); a real bring-up on a real cluster, emitting the honesty ledger
 that names Register 3 and marks the runtime layer *tested*, not proved.
@@ -137,7 +158,7 @@ flowchart LR
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Design intent. Phase 31's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+*Validated Phase-31 gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
 **Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate is closed to a stub by the pinned cross-checks below, all authored and
 committed in **Phase 0** before any `src/Amoebius/Platform/*` implementation exists (§M.1 oracle-pinning), and
@@ -279,14 +300,21 @@ Prometheus + Grafana, and Redis primary/replicas/Sentinel — no more, no fewer.
 
 ## Sprints
 
-## Sprint 31.1: Percona/Patroni Postgres per consumer + pgAdmin + Prometheus/Grafana 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 31.1: Percona/Patroni Postgres per consumer + pgAdmin + Prometheus/Grafana ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Platform/Postgres.hs`,
-`src/Amoebius/Platform/Observability.hs` (target paths; not yet built)
-**Blocked by**: Phase 30 (the
-MetalLB/MinIO/Pulsar backbone these services sit on), Phase 26 (reconciler), Phase 28 (retained PVs for the
-Patroni clusters and Prometheus), Phase 29 (each Patroni cluster's credentials are Vault secrets)
+`src/Amoebius/Platform/Observability.hs`, `tools/phase31_services_live.py`,
+`test/live/Phase31ServicesLiveSpec.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the in-scope database-consumer set is named concretely as **exactly `{Grafana}`** — Grafana configured with an external Postgres (Patroni-via-Percona) backing datastore for its
 config/dashboard store (Keycloak is Phase 32; the `distribution` registry takes no database,
 [§3](../documents/engineering/platform_services_doctrine.md#3-the-registry--the-single-image-source)); the
@@ -414,17 +442,15 @@ dashboards.
    treating the finite data size as the complete physical peak go red.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None within the Phase-31 acceptance surface. The Keycloak browser edge remains Phase 32 and singleton-owned
+continuous reconciliation remains Phase 33, both explicitly UNVERIFIED in this phase's ledger.
 
-## Sprint 31.2: Ephemeral Redis/Sentinel realtime coordination 📋
+## Sprint 31.2: Ephemeral Redis/Sentinel realtime coordination ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Platform/Redis.hs`,
-`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase31RedisSpec.hs` (target paths; not yet
-built)
-**Blocked by**: Phase 25 (the monocontainer containing `redis-server`/Sentinel mode and `redis-cli`),
-Phase 26 (typed renderer/reconciler), Phase 29 (Vault TLS and ACL credentials), Phase 30 (live backbone
-cluster)
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Platform/Redis.hs`, `tools/phase31_services_live.py`,
+`test/live/Phase31ServicesLiveSpec.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: generated manifests stand up one Redis primary, at least two replicas,
 and three Sentinel voters from the Phase-25 image; an independent TLS/ACL client observes replication and a
 forced Sentinel failover, while Kubernetes volume/config readback proves no PVC/AOF/RDB/backup, all
@@ -461,16 +487,15 @@ storage, durability, or a new DSL capability.
    outcome and turn red.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. Application-side WebSocket routing remains owned by its later UI-runtime phases; this sprint owns and
+has sealed the platform Redis/Sentinel boundary.
 
-## Sprint 31.3: The full derived readiness-DAG bring-up + the standard-stack gate 📋
+## Sprint 31.3: The full derived readiness-DAG bring-up + the standard-stack gate ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Platform/Services.hs`,
-`src/Amoebius/Platform/BringUp.hs` (target paths; not yet built)
-**Blocked by**: Sprint 31.1, Sprint 31.2,
-Phase 30 (the backbone the DAG folds in), Phase 29 (the Vault-initialized-and-unsealed →
-secret-dependent-startup edge)
+`src/Amoebius/Platform/BringUp.hs`, `tools/phase31_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the full standard stack (Phase-30 backbone + the
 Sprint-31.1 and Sprint-31.2 services) is assembled as one acyclic derived readiness DAG whose edges are the
 [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) hard
@@ -545,17 +570,16 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
    ledger, runtime layer *tested* not *proven* (Keycloak edge + singleton-owned reconcile marked UNVERIFIED).
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The sealed live trace is a warm reconciliation trace; the deterministic scheduler gate owns the
+cold/partial-failure ordering claim.
 
-## Sprint 31.4: Register-2.5 readiness-DAG bring-up under simulated partial failure 📋
+## Sprint 31.4: Register-2.5 readiness-DAG bring-up under simulated partial failure ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `test/Amoebius/Platform/BringUpSim.hs` (the `IOSimPOR` harness
-driving the *unmodified* Sprint-31.3 `src/Amoebius/Platform/BringUp.hs` orchestration; target paths, not yet
-built) over the Phase-14.4 modeled substrate `src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`
-**Blocked by**: Sprint 31.3 (the derived readiness-DAG bring-up this sprint drives unchanged), Sprint 31.1,
-Sprint 31.2 (the services it assembles), Phase 14 Sprint 14.4 (the modeled fault-injectable environment —
-fake Pulsar/MinIO/apiserver/route53/Vault/clock — this runs against)
+driving the unmodified Sprint-31.3 `src/Amoebius/Platform/BringUp.hs` orchestration through a typed fault
+observer)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the exact
 Sprint-31.3 bring-up orchestration, written against `io-classes` with no real IO, runs under `IOSimPOR`
 against the Phase-14.4 fakes with injected partial failure / restart / partition on the modeled
@@ -596,33 +620,19 @@ in-process before the Register-3 live gate ever runs.
 3. Replay a captured seed and assert a bit-identical schedule and outcome; emit the Register-2.5 ledger — substrate `none`, Register 2.5 — recording the honest limit that modeled-substrate fidelity is *assumed* and is discharged only by this phase's Register-3 live gate (Sprint 31.3).
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The harness seals 256 deterministic healthy/partial-failure/restart/partition schedules and one
+`IOSimPOR` exploration with byte-identical replay and an independent-chain overlap witness.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
-- `documents/engineering/platform_services_doctrine.md` — when this phase lands, its §8 "which standard
-  services take a database" detail resolves to the delivered consumer set `{Grafana}`, and the §8 mandated
-  synchronous-Patroni configuration flips from "required configuration" design intent to a Register-3-tested,
-  oracle-checked amoebius result on linux-cpu.
-- `documents/engineering/chaos_failover_doctrine.md` — the §6 `PlannedIsLossless` premise gains its first
-  live evidence that the mandated `synchronous_mode`/`synchronous_mode_strict`/`maximum_lag_on_failover`
-  settings are actually rendered and enforced (the delegation is *tested*, never *proven*).
-- `documents/engineering/readiness_ordering_doctrine.md` — the §11-derived-DAG bring-up gains its first live
-  amoebius enactment over the whole standard stack; the §6 reconciler-observes-never-sleeps claim gains its
-  first Register-3 evidence, read from an external-observer trace.
-- `documents/engineering/monitoring_doctrine.md` — the §3 derived rules/dashboards are recorded as stood up
-  (browser access still behind the Phase-32 edge, marked UNVERIFIED here).
-- `documents/engineering/resource_capacity_doctrine.md` — record the full standard-stack live assertion that
-  every Kubernetes resource/volume field is the exact projection of its checked `ProvisionedServiceSpec`.
-- `documents/engineering/ui_realtime_coordination_doctrine.md` — record the first live Redis/Sentinel
-  topology/failover boundary without promoting Redis to durable or application-visible state.
-
-**Cross-references to add:**
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-31 status when the gate passes and link this document.
-- `DEVELOPMENT_PLAN/substrates.md` — record Phase 31's gate substrate (linux-cpu) in the per-phase substrate map.
-- `DEVELOPMENT_PLAN/system_components.md` — reconcile the `src/Amoebius/Platform/*` target module paths named
-  in each sprint against the component inventory once they become concrete.
+**Completed with the gate:**
+- `platform_services_doctrine.md`, `chaos_failover_doctrine.md`, `readiness_ordering_doctrine.md`,
+  `monitoring_doctrine.md`, `resource_capacity_doctrine.md`, `ui_realtime_coordination_doctrine.md`, and
+  `deterministic_simulation_doctrine.md` now record the tested Phase-31 boundary and its honest limits.
+- `DEVELOPMENT_PLAN/README.md`, `substrates.md`, and `system_components.md` point at the concrete
+  implementations and sealed gate.
+- Each update states the universal substrate rule explicitly: every hardware substrate can always run
+  `linux-cpu`; pristine Linux uses Incus for Linux/Linux-CUDA, Lima for Apple, and WSL2 for Windows.
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase ordering this document sits under

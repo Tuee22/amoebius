@@ -1,0 +1,6 @@
+step	replica	event	expected
+1	A	connect	scoped-socket-owned-by-A
+2	B	terminal-receipt	durable-receipt-written
+3	-	redis-flush	no-authority-loss
+4	A	socket-drop	client-disconnected
+5	current	reconnect	exact-receipt-recovered-once

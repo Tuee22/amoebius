@@ -1,0 +1,4 @@
+operator=effect-add
+target=Amoebius.Workflow.Worker
+change=acquire-coordination-k8s-io-lease-before-consume
+expected=forbidden-coordination-surface-observed

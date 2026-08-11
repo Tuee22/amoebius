@@ -1,0 +1,5 @@
+instance	template-path	expected-physical-identity
+cpu-balanced/0	root/ephemeral-ebs	account-fp/amoebius-p47/cpu-balanced/0/root/ephemeral-ebs
+cpu-balanced/0	carve/containerd	account-fp/amoebius-p47/cpu-balanced/0/carve/containerd
+cpu-balanced/1	root/ephemeral-ebs	account-fp/amoebius-p47/cpu-balanced/1/root/ephemeral-ebs
+cpu-balanced/1	carve/containerd	account-fp/amoebius-p47/cpu-balanced/1/carve/containerd

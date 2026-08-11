@@ -1,0 +1,4 @@
+operator=cleanup-delete
+target=Amoebius.Workflow.Runtime
+change=retain-old-consumer-handle-after-promotion
+expected=failover-consumer-leak

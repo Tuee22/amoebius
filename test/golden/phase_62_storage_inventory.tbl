@@ -1,0 +1,5 @@
+surface stored_shape plaintext local_handle
+indexeddb metadata+ciphertext false false
+opfs opaque-ciphertext false false
+client-plan blob-class+bounds false false
+server-plan upload-handler+verification false false

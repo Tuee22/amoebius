@@ -74,6 +74,10 @@ deployment enforces it (the load-bearing limit owned by [`illegal_state_catalog.
 
 ### 3.31 A capacity or workload fold spanning two clusters
 
+**Delivery-owner:** `Phase-7`
+
+**Case-family:** `topology`
+
 Distributing one workload across clusters looks like "just fold capacity over both," but
 `place :: Topology -> [Workload] -> Either PlacementError Placement` takes exactly **one** `Topology`, and a `Topology` is one cluster ([`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§4](../engineering/cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)). A multi-cluster / fleet capacity fold
 therefore has **no constructor** — the same type-foreclosed "no arm" idiom that forecloses the worker pool as a fourth
@@ -98,6 +102,10 @@ the deferred geo-replication enaction, Phase 42).
 
 ### 3.35 A stretched host worker with no declared networking capability
 
+**Delivery-owner:** `Phase-7`
+
+**Case-family:** `topology`
+
 A host worker whose declared network-locality `Site` differs from the control plane's is reached across the WAN,
 and reaching the data plane (MinIO/Pulsar) + Vault over an untrusted network with no declared secure transport
 is the silent-exposure hazard. This round makes a **networking capability mandatory**: the host-worker
@@ -120,6 +128,10 @@ declared `Site` matching reality, `discover = Unreachable → refuse`).
 
 ### 3.36 A declared-remote full agent with no control-plane witness
 
+**Delivery-owner:** `Phase-7`
+
+**Case-family:** `topology`
+
 A full k8s node (a kubelet member) whose `Site` differs from the control plane's must reach the one
 apiserver/etcd across the WAN; raw tooling permits registering such an agent with no secure control-plane path,
 surfacing the split at reconcile. This round's node fold routes a declared-remote (`Site ≠ s_cp`) self-managed-rke2
@@ -139,6 +151,10 @@ gate has no off-networking constructor); `live-effect` (the kubelet session actu
 
 ### 3.38 A host worker granted a control-plane witness or treated as a member
 
+**Delivery-owner:** `Phase-7`
+
+**Case-family:** `topology`
+
 The two stretched kinds must not blur — a host worker is a non-member data-plane/Vault client and must never be
 handed control-plane reach or counted as a kubelet member. This round's total `witness` fold yields, on its
 host-worker arms, **only** `DataPlaneOnly (FabricMember c)`; the `Reach` sum has **no** path taking a
@@ -152,6 +168,10 @@ per-kind `witness` dispatch). **Layer:** type-foreclosed uninhabitable.
 `K1_HostWorker` arm has no `ControlPlaneToo` constructor — the crossing value never survives decode).
 
 ### 3.44 A session that cannot rebind on gateway migration
+
+**Delivery-owner:** `Phase-43`
+
+**Case-family:** `multicluster`
 
 Raw DNS failover treats a gateway move as "repoint the record and hope": TTL and resolver caching leave a
 window in which a live client still resolves the old gateway address, and if the old ingress is hard-stopped a
@@ -175,6 +195,10 @@ residue — that the `drain-complete` edge (old-gateway traffic ≈ 0) is truthf
 
 ### 3.47 A failover data-loss budget authored below the replication-lag bound
 
+**Delivery-owner:** `Phase-42`
+
+**Case-family:** `multicluster`
+
 Raw failover configuration lets an operator promise a recovery-point objective smaller than the asynchronous
 replication lag can actually lose, so the declared budget is a fiction the physics violates at the first
 partition: up to a full lag-window of acknowledged-but-un-replicated writes is gone at the instant of failover.
@@ -196,6 +220,10 @@ upload-time push-back of the declared bound against monitored lag).
 
 ### 3.48 A geo-replication pair whose active and standby are the same cluster
 
+**Delivery-owner:** `Phase-42`
+
+**Case-family:** `multicluster`
+
 A failover pairing that names one cluster as both `active` and `standby` crosses no asynchronous boundary yet
 owes a failover budget — a degenerate "geo pair" raw configuration admits, and whose failover can never execute
 because there is no second cluster to promote. amoebius rejects `active == standby` on the parent-owned
@@ -209,6 +237,10 @@ cross-referencing the parent-owned relation of [`gateway_migration_doctrine.md` 
 **Validation-locus:** `Gate-2-decoder` (the total `active ≠ standby` fold returns `Left`).
 
 ### 3.49 A child spec that authors its own gateway-failover pairing
+
+**Delivery-owner:** `Phase-42`
+
+**Case-family:** `multicluster`
 
 The failover pairing is a forest relation with two endpoints (an `active` and a `standby` cluster); raw
 configuration would let a child author a pairing naming a sibling or ancestor, minting cross-cluster authority a
@@ -228,6 +260,10 @@ parent-scoped relation).
 survives decode).
 
 ### 3.50 A standing spec that authors an emergency `Failover` as desired state
+
+**Delivery-owner:** `Phase-42`
+
+**Case-family:** `multicluster`
 
 Treating a gateway change as a free choice of posture, raw configuration would let an operator declare "prefer
 `Failover` / availability-first" as standing desired state on any gateway change — licensing an availability-first
@@ -250,6 +286,10 @@ observed at the gateway-change moment).
 
 ### 3.51 An operator-authored `Confluent` cross-boundary disposition
 
+**Delivery-owner:** `Phase-42`
+
+**Case-family:** `multicluster`
+
 Raw configuration would let an operator label a genuinely non-confluent cross-cluster invariant — a global
 floor, global uniqueness, or a sum-to-whole — as "confluent", so it is merged active-active and diverges; the
 false claim type-checks, because confluence (closed-under-merge) is undecidable in Dhall. amoebius's authorable
@@ -268,6 +308,10 @@ honest limit — a genuinely-confluent invariant's confluence is proven at desig
 — the model's confluence classification actually holding under merge.
 
 ### 3.52 A gateway-failover graph reusing one cluster across two DNS records
+
+**Delivery-owner:** `Phase-42`
+
+**Case-family:** `multicluster`
 
 A forest with two geo-replicated pairs could name one survivor cluster as the `standby` of two distinct
 `dnsRecord`s — the shared-survivor topology. Its migrations are graph-independent (distinct records, no vertex
@@ -292,6 +336,10 @@ before any `ProvisionedSpec` exists); the over-scope stress run that *models* a 
 
 ### 3.69 A cold-seeded secondary taking the gateway without proven freshness
 
+**Delivery-owner:** `Phase-42`
+
+**Case-family:** `multicluster`
+
 When a primary is down and a `ColdSeedFromBackup` secondary is stood up on demand and seeded from backups, a
 secondary that took the wild-ingress gateway before its seeded data was proven fresh would serve stale or
 divergent data — the availability-over-consistency error the cold-seed posture exists to refuse. The gateway
@@ -311,6 +359,10 @@ model check.
 
 ### 3.70 A `ColdSeedFromBackup` whose freshness bound is below the backup cadence
 
+**Delivery-owner:** `Phase-42`
+
+**Case-family:** `multicluster`
+
 A cold-seed recovery whose declared `freshnessBound` is shorter than the backup `cadence` is statically
 unsatisfiable: a seed can never be fresher than the newest generation, so no seed could ever satisfy the
 bound and the secondary could never be promoted. The decoder rejects `freshnessBound < cadence` at Gate 2,
@@ -322,6 +374,10 @@ signal is consulted. **Owner:** [`backup_recovery_doctrine.md` §8](../engineeri
 **Layer:** `decode-foreclosed`. **Validation-locus:** `Gate-2-decoder`.
 
 ### 3.71 A freshness watermark asserted rather than derived from captured content
+
+**Delivery-owner:** `Phase-42`
+
+**Case-family:** `multicluster`
 
 If the freshness gate read an operator-asserted watermark instead of one derived from the backup's captured
 content, the consistency-over-availability guarantee would be spoofable: a stale backup could claim a freshness
@@ -335,6 +391,10 @@ authorable field) + `live-effect` residue (that the derived watermark reflects r
 `Gate-2-decoder` + `provision-seal`.
 
 ### 3.88 A `Planned` gateway migration resting with no owner
+
+**Delivery-owner:** `Phase-43`
+
+**Case-family:** `multicluster`
 
 The `Planned` handover's safety invariant is `UniqueGatewayOwner` — *at most* one cluster holds the wild
 ingress. "At most one" is satisfied by **zero**, so a migration that quiesces the source and then stalls

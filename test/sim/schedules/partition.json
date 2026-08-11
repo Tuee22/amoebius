@@ -1,0 +1,10 @@
+{
+  "scheduleName": "partition-heal",
+  "scheduleSeed": 2,
+  "schedulePartition": true,
+  "scheduleRedelivery": false,
+  "scheduleReorder": false,
+  "scheduleDuplicate": false,
+  "scheduleCrash": false,
+  "scheduleDnsDelay": 0
+}

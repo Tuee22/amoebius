@@ -1,0 +1,5 @@
+point durable_state resume
+before-stage schema-a restart-stage
+after-stage schema-a+scratch-b commit-b
+before-commit schema-a+scratch-b commit-b
+after-commit schema-b no-op

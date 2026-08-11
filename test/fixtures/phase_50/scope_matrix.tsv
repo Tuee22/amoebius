@@ -1,0 +1,5 @@
+case	session	handle_scope	result	dispatch_count
+own	t-a/alice	t-a/alice	allow	1
+same-tenant-foreign	t-a/bob	t-a/alice	Unavailable	0
+foreign-tenant	t-b/carol	t-a/alice	Unavailable	0
+stale-scope	t-a/alice@old	t-a/alice	ReloadRequired	0

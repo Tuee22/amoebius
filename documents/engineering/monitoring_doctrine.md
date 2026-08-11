@@ -24,6 +24,8 @@ not own the capacity types that cost passes through, owned by
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Monitoring is a property of what is deployed, not a bolt-on](#1-monitoring-is-a-property-of-what-is-deployed-not-a-bolt-on)
 - [2. The four mandatory obligations](#2-the-four-mandatory-obligations)
@@ -37,6 +39,11 @@ not own the capacity types that cost passes through, owned by
 - [Related Documents](#related-documents)
 
 ---
+
+**Pure cost-model status.** The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md)
+executes the finite `MonitoringWorkBudget` evaluation, query/proxy compute, and TSDB temporary-plus-resident
+storage derivation in Register 1. Prometheus behavior and rendered/live correspondence remain unverified; the
+pure fold ledger is `external-run-reference`.
 
 ## 1. Monitoring is a property of what is deployed, not a bolt-on
 
@@ -550,10 +557,22 @@ not a flat "type-foreclosed":
   ([§3](#3-derivation-and-the-operator-read-model)) — an operator-owned integration amoebius does not
   represent, and therefore does not claim at any layer.
 
-> **Honesty.** amoebius has not built Phase 4. Every type-foreclosed and decode-foreclosed claim here is the
-> intended property of the type discipline, not a tested result; the runtime-checked residues are explicitly
-> deferred. Where a mechanism reuses a behaviour proven in a sibling system (Pulsar Failover subscriptions,
-> Keycloak ext-authz), that is evidence, not proof in amoebius.
+> **Honesty.** Type-foreclosed and decode-foreclosed statements here are target properties; current delivery
+> and revalidation progress live in the [tracker](../../DEVELOPMENT_PLAN/README.md#current-implementation-audit).
+> Runtime-checked residues remain explicit. Reused sibling behavior, including Pulsar Failover subscriptions
+> and Keycloak ext-authz, is evidence from another system, not amoebius proof.
+
+---
+
+### Historical Phase-31 bounded observability result (invalidated)
+
+Phase 31 live-tested a descriptor-derived Prometheus provision with finite evaluation, retention, query
+concurrency, series, sample, range, timeout, and retained-storage operands. The sole query proxy returned 200
+for an in-bound request and 429 for the one-over series request; NetworkPolicy denied Grafana's direct query
+to Prometheus. Three platform targets were active, derived rules were loaded, retained TSDB high-water stayed
+inside its usable bound, and Grafana completed its PostgreSQL-backed migrations. This is a tested
+`linux-cpu` result, not a proof that every future SLO is satisfied. Every hardware substrate always retains
+that linux-cpu baseline; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ---
 
@@ -566,8 +585,9 @@ their decoder and non-vacuity refinements in **Phase 5**, and the
 `validateTopology` fold in **Phase 35**; the execution-set monitoring fold rides the whole-deployment seal in
 **Phase 11**; rendered monitoring shapes and baked binaries (including the alert receiver) land in
 **Phases 13 and 25**;
-the derived rules/panels, the receiver, the `AccessScope`-behind-Keycloak obligation, and the optional local
-Thanos companion in **Phase 31**; the `workflow-health` TableView
+the bounded Prometheus/Grafana projection and derived rules/panels landed in **Phase 31**, while the receiver,
+the `AccessScope`-behind-Keycloak obligation, and any optional local Thanos companion remain owned by their
+respective later delivery surfaces; the `workflow-health` TableView
 projection in **Phase 33** and the orchestrator/worker SLO-status event in **Phase 37**; the extension surfaces in **Phase 49**
 (infernix) and **Phase 51** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
 **Phase 42**; and the decode-rejection tests in **Phase 54**. This doc never maintains a competing status

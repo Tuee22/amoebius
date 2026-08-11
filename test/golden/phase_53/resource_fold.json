@@ -1,0 +1,52 @@
+{
+  "physicalHost": {
+    "substrate": "apple",
+    "architecture": "arm64",
+    "cpuCores": 12,
+    "unifiedMemoryBytes": 25769803776,
+    "diskBytes": 274877906944,
+    "metalProfile": "apple-family-8"
+  },
+  "limaVm": {
+    "id": "amoebius-phase53",
+    "cpuCores": 4,
+    "memoryBytes": 8589934592,
+    "guestSystemUsableBytes": 8589934592,
+    "kubeletUniqueUsableCarves": {
+      "ociContent": 12884901888,
+      "snapshots": 8589934592,
+      "workspace": 4294967296
+    },
+    "requiredUsableBytes": 34359738368,
+    "filesystemOverheadBasisPoints": 500,
+    "sparseImageOverheadBytes": 2147483648,
+    "minimumBytes": 42949672960,
+    "quantumBytes": 4294967296,
+    "provisionedBytes": 42949672960,
+    "presentation": "Filesystem:ext4",
+    "allocation": "SparseRaw"
+  },
+  "hostMemoryDebits": {
+    "limaVmBytes": 8589934592,
+    "systemHeadroomBytes": 2147483648,
+    "workerRuntimeBytes": 1073741824,
+    "metalEpochPeakBytes": 8589934592,
+    "totalBytes": 20401094656
+  },
+  "hostDiskDebits": {
+    "vmSparseHighWaterBytes": 42949672960,
+    "durableBackingBytes": 68719476736,
+    "hostCacheBytes": 17179869184,
+    "totalBytes": 128849018880
+  },
+  "metalOwnerDemand": {
+    "profile": "apple-family-8",
+    "sourceKeys": ["inference", "jit", "library"],
+    "workloadKeys": ["inference", "jit", "library"],
+    "residentClassBounds": {"inference": 1, "jit": 1, "library": 1},
+    "runningClassBounds": {"inference": 1, "jit": 1, "library": 1},
+    "coexistenceEpochs": [["library", "inference"], ["library", "jit"]]
+  },
+  "loopbackServices": ["ContentMutationGateway", "Pulsar"],
+  "rawMinioNodePort": false
+}

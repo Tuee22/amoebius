@@ -1,0 +1,8 @@
+mutant	target	expected
+M-first-handler-wins	bind_errors.tsv:duplicate-handler	DuplicateHandler
+M-drop-capability	bind_errors.tsv:missing-capability	MissingCapability
+M-erase-handler-scope	bind_errors.tsv:scope-mismatch	ScopeMismatch
+M-swap-response-codec	bind_errors.tsv:codec-mismatch	ContractMismatch
+M-retry-without-idempotency	bind_errors.tsv:unsafe-retry	IdempotencyRequired
+export_raw_topic	bind_errors.tsv:raw-topic	ProviderCoordinateForbidden
+M-link-id-as-url	bind_errors.tsv:link-as-url	ExternalLinkNotAnEffect

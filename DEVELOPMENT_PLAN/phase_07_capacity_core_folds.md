@@ -9,14 +9,20 @@
 
 Phase 7 delivers the capacity core fold + topology relation; its design is owned by [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [resource_capacity_folds.md](../documents/engineering/resource_capacity_folds.md), [cluster_topology_doctrine.md](../documents/engineering/cluster_topology_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+Gate passed on 2026-08-09 with seal
+`dynamically-resolved`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/ledgers/phase_07_capacity_topology.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -27,10 +33,10 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 7.1: The `Topology` relation — `ComputeEngine` / `LinuxHost` witness / elementwise compatibility fold 📋](#sprint-71-the-topology-relation--computeengine--linuxhost-witness--elementwise-compatibility-fold-)
-- [Sprint 7.2: The base capacity fold — `fits` / `podFits` / `carve` / `place` 📋](#sprint-72-the-base-capacity-fold--fits--podfits--carve--place-)
-- [Sprint 7.3: QuickCheck properties — soundness, totality, elementwise compatibility + the independent witness validator 📋](#sprint-73-quickcheck-properties--soundness-totality-elementwise-compatibility--the-independent-witness-validator-)
-- [Sprint 7.4: The base capacity/topology fold-negative corpus + the gate 📋](#sprint-74-the-base-capacitytopology-fold-negative-corpus--the-gate-)
+- [Sprint 7.1: The `Topology` relation — `ComputeEngine` / `LinuxHost` witness / elementwise compatibility fold ⏸️](#sprint-71-the-topology-relation--computeengine--linuxhost-witness--elementwise-compatibility-fold-)
+- [Sprint 7.2: The base capacity fold — `fits` / `podFits` / `carve` / `place` ⏸️](#sprint-72-the-base-capacity-fold--fits--podfits--carve--place-)
+- [Sprint 7.3: QuickCheck properties — soundness, totality, elementwise compatibility + the independent witness validator ⏸️](#sprint-73-quickcheck-properties--soundness-totality-elementwise-compatibility--the-independent-witness-validator-)
+- [Sprint 7.4: The base capacity/topology fold-negative corpus + the gate ⏸️](#sprint-74-the-base-capacitytopology-fold-negative-corpus--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -38,18 +44,26 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
-is design intent, never a tested amoebius result. This phase opens after the Phase 6 gate (the illegal-state
-corpus, its QuickCheck properties, and the validation-locus ledger) and runs on **no substrate** (`none`) in
-**Register 1** — it stands up no host and no cluster, only an in-process fold + property battery over the base
-capacity vocabulary and the topology relation. It is the first of the three sub-phases that the old
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. `python3 tools/phase7_gate.py` passed on 2026-08-09 in
+**Register 1** on **no substrate** (`none`) with seal
+`dynamically-resolved`.
+The gate exercised an in-process fold + property battery over the base capacity vocabulary and topology
+relation; it stood up no host or cluster. It is the first of the three sub-phases that the old
 capacity/topology phase was split into: this phase owns the **base capacity fold and the topology relation**;
 [phase_08_storage_geometry_folds.md](phase_08_storage_geometry_folds.md) owns the logical→physical storage
 geometry (BookKeeper/MinIO/Vault/ZooKeeper/Patroni/registry/schema/object-store six-arm, the two-ceiling
 Pulsar fold, and `StorageBudget`/`Growable`/scaling), and
 [phase_09_execution_accelerator_folds.md](phase_09_execution_accelerator_folds.md) owns the execution-epoch
 expansion, scheduler-reservation algebra, kubelet/CRI runtime metadata, accelerator residency/VRAM, and the
-provider-root VM/EBS arithmetic (including the composed full-resource-vector place-witness gate). Where a shape
+provider-root VM/EBS arithmetic (including the composed full-resource-vector place-witness gate). Those
+sibling-phase capabilities, along with live scheduling, storage geometry, accelerator residency, capability
+binding, provisioning, and runtime enforcement, remain **UNVERIFIED** here. Where a shape
 below is exercised in a sibling system (prodbox's `Prodbox/CLI/Rke2.hs` single-node rke2 base and the
 teardown push-back soundness it proves), that is **sibling evidence, not an amoebius result**.
 
@@ -103,8 +117,10 @@ admitted); each of the **fifteen base capacity/topology negative fixtures** name
 [Gate integrity](#gate-integrity) (engine↔substrate mismatch, a reused rke2 host, host/VM/cluster overcommit, CPU-limit-policy, pod-ephemeral overcommit, a padded-reservation overcommit that fits on requests alone, an untolerated taint, a memory-backed volume under-reservation, a tmpfs init-persistence under-reservation, and the four elastic failures — largest-candidate, per-node-overhead, per-class-maximum, and outer-quota) returns
 the base fold's specific committed structured
 `ProvisionError`/`Left` on its isolated insufficient axis when invoked **directly on the hand-authored demand/capacity fixture** (no `bind`/`provision` call; the Phase-11 gate re-exercises these same folds through
-its post-bind provision seal); the three `ghc -fno-code` **expect-fail compile goldens** (`bareAppleHost`,
-`bareWindowsHost`, an even-server quorum) fail to compile with their committed expected type error; the two
+its post-bind provision seal); seven `ghc -fno-code` **expect-fail compile goldens** (the original
+`bareAppleHost`, `bareWindowsHost`, and even-server quorum barriers plus four registry-index barriers for
+single-topology placement, control-plane reach, host-worker reach, and same-site quorum membership) fail to
+compile with their committed expected type errors; the two
 positives (`legal_multisubstrate_cluster`, `legal_managed_eks`) place feasibly; the
 **implementation-independent witness validator** (§M.3, defined in Sprint 7.3) accepts every returned
 placement; and the **committed per-fold seeded-mutant battery** named in [Gate integrity](#gate-integrity)
@@ -141,7 +157,7 @@ flowchart LR
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Design intent. Phase 7's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+*Implemented Phase 7 gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
 ### Representative set (§M.7)
 
@@ -154,8 +170,8 @@ fixtures — `illegal_engine_substrate_mismatch`, `illegal_rke2_reused_host`,
 `illegal_elastic_per_node_overhead_unplaceable`, `illegal_elastic_worst_case_instances_over_quota`,
 `illegal_untolerated_taint`, `illegal_memory_backed_underreserved`, and
 `illegal_tmpfs_init_persistence_underreserved` — plus
-the three `ghc -fno-code` expect-fail compile goldens (`bareAppleHost`, `bareWindowsHost`, an even-server
-quorum, §M.8); the positive set is exactly `legal_multisubstrate_cluster` (the [§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class) heterogeneous carve-out,
+seven `ghc -fno-code` expect-fail compile goldens (the three original host/quorum barriers plus four
+registry-index barriers, §M.8); the positive set is exactly `legal_multisubstrate_cluster` (the [§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class) heterogeneous carve-out,
 exercising the compatibility fold and the fixed-topology first-fit-decreasing witness) and `legal_managed_eks`
 (EKS first-class, whose cover requires at least two nodes materialized from one candidate class, exercising
 the elastic growth-envelope branch). For `illegal_overcommit_host` this sub-phase inherits only the base
@@ -176,6 +192,11 @@ remaining twenty-three source negatives (`illegal_store_over_backing`, `illegal_
 `legal_tmpfs_two_concurrent_writers_single_debit` are routed to phases 8 and 9 and are **not** in this gate's
 representative set. All forty-one fixtures are committed in this phase's oracle-pinning sprint (§M.1); each is exercised by exactly one
 sub-phase.
+
+The emitted `gen/dsl/phase7/validation-locus-ledger.tsv` also reconciles all **11** registry subcases whose
+declared `owner_phase` is `Phase-7`; every row has evidence at its registered Gate-1, GADT-index, or
+`provision-seal` locus. Later-owner storage, execution, accelerator, bind, render, and live rows are not
+claimed by this seal.
 
 ### Committed per-fold seeded-mutant battery (§M.2)
 
@@ -209,12 +230,13 @@ Defined in Sprint 7.3 Deliverables; it never calls `podFits` or
 
 ### Expect-fail compile goldens (§M.8)
 
-The `bareAppleHost` / `bareWindowsHost` / even-server-quorum
-no-inhabitant claims are machine-gated by committed `ghc -fno-code` expect-fail compile goldens — source
+The `bareAppleHost` / `bareWindowsHost` / even-server-quorum no-inhabitant claims and the single-topology,
+control-plane-reach, host-worker-reach, and same-site-quorum index claims are machine-gated by seven
+committed `ghc -fno-code` expect-fail compile goldens — source
 snippets wired into `dsl-spec` that must fail to compile with the **specific committed expected type error**
 (e.g. "No instance / no constructor for `bareAppleHost`", the even-quorum refinement rejection), re-checked
-on every run, never an informal typed-hole probe. The three goldens and their expected error text are
-authored and committed in this phase's oracle-pinning sprint before `Amoebius.Dsl.Topology` exists (§M.1).
+on every run, never an informal typed-hole probe. The seven goldens and their expected error text are
+committed in `tests/oracle/phase7/compile_fail.tsv` and exercised by `tools/phase7_compile_fail.py` (§M.1).
 
 ## Doctrine adopted
 
@@ -260,22 +282,31 @@ authored and committed in this phase's oracle-pinning sprint before `Amoebius.Ds
 
 ## Sprints
 
-## Sprint 7.1: The `Topology` relation — `ComputeEngine` / `LinuxHost` witness / elementwise compatibility fold 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 7.1: The `Topology` relation — `ComputeEngine` / `LinuxHost` witness / elementwise compatibility fold ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Dsl/Topology.hs` (`ComputeEngine`, the substrate-indexed `LinuxHost`
   witness, opaque `Topology = { engine, supply : NodeSupply }` with the supply derived from the engine, the
   compatible-pair smart constructor, the total elementwise compatibility fold, and the `mkRke2` distinctness
-  fold over `servers ∪ agentFloor`); extends `src/Amoebius/Dsl/SmartConstructors.hs` — target paths, not yet
-  built.
-**Blocked by**: Phase 5 gate (the GADT-indexed IR + total decoder the topology types live in); Phase 6 gate
+  fold over `servers ∪ agentFloor`); `dhall/amoebius/Topology.dhall` supplies the closed networking and
+  managed-attachment arms. Both are built and covered by `test/dsl/CapacityTopologyGate.hs`.
+**Prerequisites satisfied**: Phase 5 gate (the GADT-indexed IR + total decoder); Phase 6 gate
 (the property/corpus framework + validation-locus ledger).
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a unit + property suite decodes each positive `Topology` (heterogeneous
 multi-substrate, managed EKS) and returns a structured `Left` naming the full set of incompatible nodes for a
 mismatched pair and a duplicate `HostId` for a reused host; the no-inhabitant claim for `bareAppleHost` /
 `bareWindowsHost` / an even-server quorum is machine-gated by a **Phase-6-style `ghc -fno-code` expect-fail compile golden** ([Gate integrity](#gate-integrity), §M.8) — a committed source snippet that attempts each
-construction, wired into `dsl-spec`, that must fail to compile with the **specific committed expected type error**, re-checked on every run — not an informal typed-hole probe. The three expect-fail goldens and their
-expected error text are authored and committed in this phase's oracle-pinning sprint before `Amoebius.Dsl.Topology` exists (§M.1).
+construction, wired into `dsl-spec`, that must fail to compile with the **specific committed expected type error**, re-checked on every run — not an informal typed-hole probe. Seven expect-fail goldens and their
+expected text are pinned by `tests/oracle/phase7/compile_fail.tsv` (§M.1).
 **Docs to update**: `documents/engineering/cluster_topology_doctrine.md` (Phase-7 status backlink),
 `documents/engineering/substrate_doctrine.md` (§8 node inventory read-side),
 `documents/illegal_state/illegal_state_catalog.md` (§3.13–§3.16 per-entry layer reconciliation),
@@ -320,11 +351,11 @@ boundary.
    specific expected type errors are re-checked on every `dsl-spec` run.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 7.2: The base capacity fold — `fits` / `podFits` / `carve` / `place` 📋
+## Sprint 7.2: The base capacity fold — `fits` / `podFits` / `carve` / `place` ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Capacity/Types.hs` (its **base subset**: `Quantity`,
 the zero-capable `Residual`/`AvailableCapacity`, `PodResourceVec = { cpu, memory, ephemeralStorage }`, the
 closed pod/host-worker `ResourceEnvelope`, `Capacity`/`Demand`/`Budget`, `NodeCapacity` with
@@ -335,9 +366,9 @@ and its role-indexed CPU/memory reserve, the closed substrate-indexed `HostRunti
 (`fits`/`podFits`/`carve`/`place`, the request-reservation + finite-limit proofs, the host → VM → workload
 nesting, and the
 [§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
-static/elastic branch) — target paths, not yet built.
-**Blocked by**: Sprint 7.1 (the `Topology` `place`
-folds over); Phase 5 gate (the IR + decoder).
+static/elastic branch), built and exposed by `dsl-core`.
+**Prerequisites satisfied**: Sprint 7.1 (the `Topology` `place` folds over); Phase 5 gate (the IR + decoder).
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a unit + property suite runs
 `fits`/`carve`/`place` over generated envelopes: a feasible workload set yields a placement witness or a
 **sound growth envelope — where "sound" is fixed concretely as: every pod fits at least one declared
@@ -404,17 +435,18 @@ reading declared numbers only (the substrate node inventory and PV sizes are own
    `fits`/`carve` returns `Right Zero`, a second debit from that residual rejects, and the folds never throw.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 7.3: QuickCheck properties — soundness, totality, elementwise compatibility + the independent witness validator 📋
+## Sprint 7.3: QuickCheck properties — soundness, totality, elementwise compatibility + the independent witness validator ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `test/dsl/CapacityTopologyProps.hs` (QuickCheck generators for
 `Topology` / base envelope / workload sets + the base property battery and the implementation-independent
-witness validator), reusing the Phase-6 property harness — target paths, not yet built. (The
+witness validator), `test/dsl/CapacityTopologyMutants.hs`, and `tests/mutants/phase7/mutants.tsv`, reusing
+the Phase-6 property harness. (The
 runtime-metadata and provider-root property modules are the deliverable of phases 8 and 9.)
-**Blocked by**:
-Sprint 7.1, Sprint 7.2.
+**Prerequisites satisfied**: Sprint 7.1, Sprint 7.2.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `cabal test dsl-spec` runs the base property battery
 green — the fold/relation soundness, totality, headroom-non-negativity, carve-subtraction, and
 elementwise-compatibility properties hold over generated inputs, each meeting its committed
@@ -491,29 +523,24 @@ packable one) for the single sound-not-complete check, compute `place`, and neve
    makes a property red when re-run individually** — the properties have teeth on every base fold, not two.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 7.4: The base capacity/topology fold-negative corpus + the gate 📋
+## Sprint 7.4: The base capacity/topology fold-negative corpus + the gate ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**:
-`dhall/examples/{illegal_engine_substrate_mismatch,illegal_rke2_reused_host,
-illegal_overcommit_host,illegal_overcommit_vm,illegal_overcommit_cluster,illegal_cpu_limit_over_policy,
-illegal_pod_ephemeral_overcommit,illegal_padded_reservation_overcommit,
-illegal_elastic_pod_exceeds_largest_candidate,
-illegal_elastic_class_max_exhausted,illegal_elastic_per_node_overhead_unplaceable,
-illegal_elastic_worst_case_instances_over_quota,illegal_untolerated_taint,illegal_memory_backed_underreserved,
-illegal_tmpfs_init_persistence_underreserved}.dhall` (the fifteen base `provision-seal` fold negatives,
-including the four elastic-branch negatives plus the taint / memory-backed / tmpfs / padded-reservation
-folds) + the three `ghc -fno-code` expect-fail compile goldens (`bareAppleHost`, `bareWindowsHost`,
-even-server quorum) + reuse of `legal_multisubstrate_cluster` / `legal_managed_eks`;
-`test/dsl/CapacityTopologyGate.hs` (the base gate battery + validation-locus ledger) — target paths, not yet
-built. These fixtures and their expected results / `Left`-tags are authored and committed in this phase's oracle-pinning sprint before
-the implementation exists (§M.1, [Gate integrity](#gate-integrity)); the remaining
+`test/dsl/CapacityTopologyFixtures.hs` holds fifteen direct, hand-authored post-decode fold negatives and
+fifteen legal twins pinned by `tests/oracle/phase7/fold_cases.tsv`; the three Gate-1 Dhall foreclosure pairs
+are pinned by `tests/oracle/phase7/gate1_cases.tsv`; seven `ghc -fno-code` pairs live under
+`test/dsl/compilefail7/` and are pinned by `tests/oracle/phase7/compile_fail.tsv`; and the actual Phase-5
+`legal_multisubstrate_cluster` / `legal_managed_eks` Dhall positives are decoded and placed.
+`test/dsl/CapacityTopologyGate.hs`, `test/dsl/CapacityTopologySpec.hs`, and `tools/phase7_gate.py` run the
+base gate battery and emit the validation-locus ledger. These fixtures and expected results / `Left` tags are
+independently authored (§M.1, [Gate integrity](#gate-integrity)); the remaining
 storage/execution/accelerator fixtures of the committed forty-one-fixture corpus are exercised by phases 8
 and 9, not here.
-**Blocked by**: Sprint 7.1, Sprint 7.2, Sprint 7.3; Phase 4 gate (the positive Gate-1
-corpus).
+**Prerequisites satisfied**: Sprint 7.1, Sprint 7.2, Sprint 7.3; Phase 4 gate (the positive Gate-1 corpus).
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the gate applies the Phase-7 base folds
 (`fits`/`podFits`/`carve`/`place` and the topology relation) **directly to each hand-authored demand/capacity fixture** — no `bind`, `planInfrastructure`, `ProvisionContext`, or `provision` call (those
 are the deliverables of [phase_10_capability_bind.md](phase_10_capability_bind.md) /
@@ -556,9 +583,9 @@ validation-locus ledger that names the honest foreclosure layer of each.
   instances than the declared quota → `Left Overcommit`), which foreclose a stubbed elastic `place` that
   returns `Right` unconditionally — each asserted to return its **specific** tagged `Left` at the base fold and
   paired with a positive differing only in the foreclosed dimension, with the type-foreclosed neighbours
-  ([§3.14](../documents/illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)/[§3.15](../documents/illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)/[§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)) noted as already foreclosed upstream. The three `ghc -fno-code` expect-fail compile
-  goldens (`bareAppleHost`, `bareWindowsHost`, an even-server quorum) fail to compile with their committed
-  expected type error (§M.8).
+  ([§3.14](../documents/illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)/[§3.15](../documents/illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)/[§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)) noted as already foreclosed upstream. Seven `ghc -fno-code` expect-fail compile
+  goldens cover the original three host/quorum barriers and four additional registry-owned topology indices;
+  all fail with their committed expected type error (§M.8).
 - The positive fixtures `legal_multisubstrate_cluster` (the [§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class) heterogeneous carve-out, exercising the elementwise compatibility fold and the fixed-topology first-fit-decreasing witness) and `legal_managed_eks`
   (EKS first-class, requiring two materialized instances from one candidate class, exercising the elastic
   growth-envelope branch), asserted to decode and `place` feasibly. (Their storage/execution/accelerator/
@@ -573,7 +600,7 @@ validation-locus ledger that names the honest foreclosure layer of each.
 ### Validation
 1. `cabal test dsl-spec` is green — every one of the fifteen base fold negatives
    ([Gate integrity](#gate-integrity) representative set, including the four elastic negatives) returns its
-   **specific committed** tagged `Left`, the three expect-fail compile goldens fail with their committed
+   **specific committed** tagged `Left`, the seven expect-fail compile goldens fail with their committed
    expected type error, both positives place feasibly, the QuickCheck battery holds at its coverage minima, and
    the committed per-fold seeded-mutant battery ([Gate integrity](#gate-integrity)) turns the suite red
    individually; the suite is red if any base capacity/topology negative provisions to `Right` or to the wrong
@@ -581,11 +608,11 @@ validation-locus ledger that names the honest foreclosure layer of each.
    residue UNVERIFIED.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated at the gate seal:**
 - `documents/engineering/resource_capacity_doctrine.md` — backlink §3's types and §4/§4.1's base fold to the
   implemented `Amoebius.Capacity.{Types,Fold}`; confirm every base capacity sum stayed a checked pre-effect
   rejection at the post-bind `provision-seal` and sound-not-complete for the compute bin-pack. (The §5/§6/§7
@@ -600,7 +627,7 @@ The whole sprint (📋 Planned).
 - `documents/engineering/testing_doctrine.md` — record the Register-1 property + fold ledger this gate emits
   (correspondence and runtime fidelity UNVERIFIED).
 
-**Cross-references to add:**
+**Cross-references added:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-7 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-7 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Dsl/Topology.hs`,
@@ -621,3 +648,4 @@ The whole sprint (📋 Planned).
 - [phase_09_execution_accelerator_folds.md](phase_09_execution_accelerator_folds.md) — the execution-epoch expansion, scheduler-reservation algebra, accelerator/VRAM, and provider-root arithmetic that compose the full-resource-vector place witness on this base fold
 - [phase_10_capability_bind.md](phase_10_capability_bind.md) — the capability → provider → shape binder built atop these folds
 - [phase_11_provision_seal.md](phase_11_provision_seal.md) — the whole-deployment provision seal that re-exercises these base folds after bind
+- [Phase 7 capacity/topology ledger](ledgers/phase_07_capacity_topology.md) — the human-readable Register-1 proof/test/assumption boundary

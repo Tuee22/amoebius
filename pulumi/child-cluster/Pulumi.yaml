@@ -1,0 +1,22 @@
+name: amoebius-child-cluster
+runtime: yaml
+description: Phase-42 child-cluster stack identity and encrypted-checkpoint owner
+config:
+  childId:
+    type: string
+  parentCluster:
+    type: string
+outputs:
+  childId: ${childId}
+  parentCluster: ${parentCluster}
+  engine: kind
+  checkpointCustody: vault-enveloped-minio
+resources:
+  childCluster:
+    type: command:local:Command
+    properties:
+      create: >-
+        /phase42/bin/kind create cluster --name ${childId}
+        --image kindest/node:v1.36.1 --config /phase42/config/${childId}.yaml
+        --kubeconfig /state/kubeconfigs/${childId}.yaml --wait 0s
+      delete: /phase42/bin/kind delete cluster --name ${childId}

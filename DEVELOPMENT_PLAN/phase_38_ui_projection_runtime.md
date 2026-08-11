@@ -7,14 +7,19 @@
 
 Phase 38 delivers the owner-scoped UI projection runtime; its design is owned by [pulsar_client_doctrine.md](../documents/engineering/pulsar_client_doctrine.md), [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Validated 2026-08-11; ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -26,7 +31,7 @@ No gate has run.
 - [Resource provision — bounded owner projections](#resource-provision--bounded-owner-projections)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 38.1: Build and independently verify the owner-scoped live projection 📋](#sprint-381-build-and-independently-verify-the-owner-scoped-live-projection-)
+- [Sprint 38.1: Build and independently verify the owner-scoped live projection ⏸️](#sprint-381-build-and-independently-verify-the-owner-scoped-live-projection-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -34,9 +39,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Phase 20 owns client/server plan compilation and Phase 23 owns local interpreter composition. This
-phase adds only the live owner-scoped projection/receipt seam. No release rollout, ML artifact lift, browser UX, or HA
-claim is made here.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. Phase 20 owns client/server plan compilation and Phase 23 owns local interpreter composition. This
+phase validates only the live owner-scoped projection/receipt seam. Release rollout, ML artifact lift, browser
+UX/reconnect, HA, and cross-cluster projection remain `UNVERIFIED`.
 
 ## Phase Summary
 
@@ -77,12 +88,9 @@ redundancy claim.
 
 **Register:** 3 — live infrastructure.
 
-**Gate:** `cabal test ui-projection-runtime-live` runs the Phase-0-pinned own-owner/foreign-owner/foreign-tenant
-matrix with real Keycloak sessions and post-ready event challenges. It passes only when the scoped server
-response, durable receipt lookup, independent Pulsar consumer, broker watermark, and audit transcript agree on
-the exact owner-qualified projection and command identity and all three committed mutants turn the unchanged
-gate red. The fixtures, authorities, observers,
-bypass probes, and mutants are delegated to [Gate integrity](#gate-integrity).
+**Gate:** `cabal test ui-projection-runtime-live` passed the Phase-0 matrix with fresh Keycloak sessions. The
+scoped query, durable receipt, native consumers, broker compaction observer, edge transcript, teardown, and all
+three red mutants agreed on the exact owner-qualified projection and original command identity.
 
 ## Gate integrity
 
@@ -153,14 +161,22 @@ mutant results.
 
 ## Sprints
 
-## Sprint 38.1: Build and independently verify the owner-scoped live projection 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 38.1: Build and independently verify the owner-scoped live projection ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**:
-`src/Amoebius/Ui/Projection/{Worker,OwnerKey,Watermark,StreamCursor,ReceiptFold}.hs` and
-`test/live/Phase38UiProjectionRuntimeSpec.hs` (target authored sources; not yet built)
-**Blocked by**: Phase
-22; Phase 36; Phase 37
+`src/Amoebius/Ui/Projection/{Worker,OwnerKey,Watermark,StreamCursor,ReceiptFold}.hs`,
+`test/live/Phase38UiProjectionRuntimeSpec.hs`, `tools/phase38_projection_live.py`, and
+`tools/phase38_gate.py` (built and validated)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: one command recovers fresh per-owner challenges and
 durable receipts through a scoped server query and separately authenticated Pulsar/broker/edge observers,
 establishes foreign-scope non-disclosure and zero subscription effect, and kills all three key-collapse
@@ -182,7 +198,7 @@ preserving command, issuer-qualified subject, tenant, and owner scope end to end
 - Bounded compacted-topic worker and sealed scoped projection/receipt query adapter over server-held
   capabilities.
 - Phase-0 matrices/oracles, real-identity fixture, post-ready challenge protocol, native/broker/edge observers,
-  bypass corpus, teardown inventory, evidence ledger, and all three committed mutants.
+  bypass corpus, teardown inventory, generated run ledger, and all three committed mutants.
 
 ### Validation
 
@@ -198,17 +214,17 @@ preserving command, issuer-qualified subject, tenant, and owner scope end to end
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None for Sprint 38.1. Browser/reconnect, release, ML-lift, HA, and cross-cluster claims remain with their named
+later phases.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated with the validated layer:**
 
 - `documents/engineering/pulsar_client_doctrine.md`, `low_code_ui_runtime_doctrine.md`, and
-  `ui_realtime_coordination_doctrine.md` — attach tested live owner-key/subscription/receipt/watermark evidence
-  only.
-- `documents/engineering/tenancy_doctrine.md` — record the live owner-qualified projection residue.
-- `documents/engineering/testing_doctrine.md` — register the broker/native/edge multi-observer pattern.
+  `ui_realtime_coordination_doctrine.md` attach the tested live owner-key/subscription/receipt/watermark evidence.
+- `documents/engineering/tenancy_doctrine.md` records the live owner-qualified projection residue.
+- `documents/engineering/testing_doctrine.md` registers the broker/native/edge multi-observer pattern.
 
 **Cross-references to add:**
 

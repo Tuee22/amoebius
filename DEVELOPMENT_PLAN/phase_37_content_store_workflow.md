@@ -7,8 +7,14 @@
 > **Read this if**: phase 37 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 37 delivers the content store + workflow runtime (Pulsar-Failover single-writer); its design is owned by [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), [resource_capacity_storage.md](../documents/engineering/resource_capacity_storage.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Register 3, live, on the `linux-cpu` substrate. Validated 2026-08-11 with
+`python3 tools/phase37_gate.py --reuse-fresh-live`; ledger
+`dynamically-resolved`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -26,10 +32,10 @@ No gate has run.
 - [Resource provision — the four-Pod runtime plus gateway/collector envelope](#resource-provision--the-four-pod-runtime-plus-gatewaycollector-envelope)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 37.1: Three-tier content-addressed MinIO store 📋](#sprint-371-three-tier-content-addressed-minio-store-)
-- [Sprint 37.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA 📋](#sprint-372-orchestratorworker-workflow-runtime--storefetch-by-manifest-sha-)
-- [Sprint 37.3: Pulsar Failover standby takeover + leak-free teardown (gate) 📋](#sprint-373-pulsar-failover-standby-takeover--leak-free-teardown-gate-)
-- [Sprint 37.4: Register-2.5 workflow failover takeover under simulated fault 📋](#sprint-374-register-25-workflow-failover-takeover-under-simulated-fault-)
+- [Sprint 37.1: Three-tier content-addressed MinIO store ⏸️](#sprint-371-three-tier-content-addressed-minio-store-)
+- [Sprint 37.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA ⏸️](#sprint-372-orchestratorworker-workflow-runtime--storefetch-by-manifest-sha-)
+- [Sprint 37.3: Pulsar Failover standby takeover + leak-free teardown (gate) ⏸️](#sprint-373-pulsar-failover-standby-takeover--leak-free-teardown-gate-)
+- [Sprint 37.4: Register-2.5 workflow failover takeover under simulated fault ⏸️](#sprint-374-register-25-workflow-failover-takeover-under-simulated-fault-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,17 +43,23 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. The phase runs on the **linux-cpu** substrate in
-**Register 3** (live infrastructure) — a single-node `kind` cluster brought up by the Phase 24 midwife with
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The phase runs on the **linux-cpu** substrate in **Register 3** (live infrastructure) — a single-node
+`kind` cluster brought up by the Phase 24 bootstrap coordinator with
 Pulsar and MinIO already standing as HA platform services (Phase 30) on retained storage (Phase 28), and it
 opens only after the Phase 35 gate (the native-protocol Pulsar client, CBOR codec, four subscription types,
 and broker-side dedup) closes, because the workflow runtime consumes that client rather than reimplementing a
 transport. The three-tier store shape is proven in the sibling `jitML` checkpoint format
 (`jitML/src/JitML/Checkpoint/Format.hs`) and the Failover-subscription worker path in the sibling `infernix`
-ML-workflow runtime; read both as **sibling evidence, not an amoebius result** — amoebius has built neither
-the store nor the workflow runtime. Status transitions are recorded reverse-chronologically here once work
-begins.
+ML-workflow runtime; those remain sibling context, while the Phase-37 evidence is an amoebius result. The
+gate sealed the canonical store, terminal-Job protocol, two native Failover cycles, full three-class cleanup,
+256 deterministic schedules, and all ten red mutants. Cross-cluster replication, the Phase-48 experiment-hash
+derivation, and Pulsar consensus internals remain explicitly UNVERIFIED.
 
 ## Phase Summary
 
@@ -259,17 +271,22 @@ them.
 
 ## Sprints
 
-## Sprint 37.1: Three-tier content-addressed MinIO store 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 37.1: Three-tier content-addressed MinIO store ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-store/src/Amoebius/Store/ContentAddress.hs`,
 `amoebius-store/src/Amoebius/Store/Manifest.hs`, `amoebius-store/src/Amoebius/Store/Pointer.hs`,
 `amoebius-store/src/Amoebius/Store/ControlPlaneState.hs`, and
-`amoebius-runtime/src/Amoebius/Execution/JobTerminalLive.hs` (target paths; not yet built)
-**Blocked by**:
-Phase 26 gate (the modeled typed Job-terminal protocol), Phase 30 gate (MinIO reachable as a standard HA
-platform service) and Phase 28 gate (the `no-provisioner` retained PV the MinIO bytes land on); Phase 34
-gate (the `<app>/<bucket>` ObjectStore the store keys under) — all external earlier-phase prerequisites.
+`amoebius-runtime/src/Amoebius/Execution/JobTerminalLive.hs` (built and validated)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: run this suite at **Register 3** against the **single-node kind cluster's live MinIO** (the standing Phase-30 HA service on the Phase-28 retained PV), never an in-process or local S3 fake
 — the register is stated so its evidential weight is unambiguous. A gateway-admitted blob PUT under
 `If-None-Match: *` returns success on first write and treats the second write's `412` as success; a
@@ -378,19 +395,17 @@ store is a single one-object atomic pointer flip.
 > amoebius result.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. Delivered and validated by the Phase-37 gate.
 
-## Sprint 37.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA 📋
+## Sprint 37.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-runtime/src/Amoebius/Workflow/Runtime.hs`,
 `amoebius-runtime/src/Amoebius/Workflow/Orchestrator.hs`,
 `amoebius-runtime/src/Amoebius/Workflow/Worker.hs`, and
 `amoebius-runtime/src/Amoebius/Workflow/Resources.hs` (kind-indexed runnable sources and structural
-runtime-metadata sources consumed by the shared capacity provisioner) (target paths; not yet built)
-**Blocked by**: Sprint 37.1 (the content store the worker writes and the orchestrator fetches); Phase 35
-gate (the native Pulsar client — the capability surface, CBOR codec, and broker-side dedup); Phase 33 gate
-(the live DSL deploy via the Deployment-`replicas=1` singleton that schedules the workflow).
+runtime-metadata sources consumed by the shared capacity provisioner) (built and validated)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the orchestrator produces a workflow `command` on the topic derived from the Phase-35 topology
 algebra and consumes the corresponding `event`; the active worker writes a content-addressed artifact to the
 store and emits an `event` carrying its manifest SHA; the orchestrator fetches the artifact by that SHA and
@@ -442,19 +457,15 @@ artifact reference a content address.
    exactly the four provisioned identities and envelopes.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. Delivered and validated by the Phase-37 gate.
 
-## Sprint 37.3: Pulsar Failover standby takeover + leak-free teardown (gate) 📋
+## Sprint 37.3: Pulsar Failover standby takeover + leak-free teardown (gate) ⏸️
 
-**Status**: Planned
-**Implementation**: `amoebius-runtime/dhall/test/round_trip_failover.dhall` (the gate
-topology), `amoebius-runtime/test/live/FailoverSpec.hs`, and
-`amoebius-runtime/test/live/RuntimeStorageSpec.hs` (planned-slot→observed-Pod-UID equality, node
-scope/domain/ownership/grouping, reservation/observed no-double-debit, SplitRuntime one-byte-short and alias
-controls) (target paths; not yet built)
-**Blocked by**: Sprint 37.2 (the orchestrator/worker round-trip the
-injection acts on); Phase 35 gate (the `Exclusive`/`Failover` subscription type and the at-least-once
-redelivery); Phase 28 / Phase 24 gates (the cluster-lifecycle teardown the InForceSpec drives).
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `amoebius-runtime/dhall/test/round_trip_failover.dhall`,
+`amoebius-runtime/test/live/FailoverSpec.hs`, `amoebius-runtime/src/Amoebius/Workflow/Resources.hs`, and
+`tools/phase37_workflow_live.py` (built and validated)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the gate `InForceSpec` stores and fetches a content-addressed artifact by
 manifest SHA, then kills the active worker **inside the critical window (after its store write, before its `event` ack)**, and observes that the **lexically next-in-name-order** standby — identified by reading the
 consumer list from the Pulsar admin `subscription/{sub}/consumers` API and asserting the specific expected
@@ -494,8 +505,9 @@ bespoke amoebius election — and assemble the phase gate.
   (the durable test-flagged bytes reclaimed by Phase 54). The sweep emits its **full inventory list and the named retained set** into the per-run ledger; **any non-empty remainder outside the retained set is a hard gate failure**. (Durable-byte reclaim staying with Phase 54 is the *only* exemption, and only for the
   explicitly named retained set — not a blanket class exemption.)
 - **oracle-pinned oracles and committed mutants (authored before the runtime exists):** the committed no-fault
-  reference `pointers/latest` HEAD bytes `test/golden/head_nofault.bin`; the expected promoted-consumer name
-  table `test/golden/failover_rank.txt` (independent of the runtime's own ranking); and committed seeded
+  reference `pointers/latest` HEAD bytes `amoebius-runtime/test/golden/head_nofault.bin`; the expected
+  promoted-consumer name table `amoebius-runtime/test/golden/failover_rank.txt` (independent of the runtime's
+  own ranking); and committed seeded
   mutants the gate MUST turn **red** — `mutant/ack-before-store-write` (operator: effect reorder — worker acks
   the `event` before the store write completes, so a mid-window kill loses the command) and
   `mutant/sweep-skips-pulsar` (operator: invariant-clause delete — the sweep omits the Pulsar topic/subscription
@@ -547,20 +559,16 @@ bespoke amoebius election — and assemble the phase gate.
 > normal teardown path.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. Delivered and validated by the Phase-37 gate.
 
-## Sprint 37.4: Register-2.5 workflow failover takeover under simulated fault 📋
+## Sprint 37.4: Register-2.5 workflow failover takeover under simulated fault ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-runtime/test/sim/WorkflowFailoverSimSpec.hs` (the
 `IOSimPOR` property harness), `amoebius-runtime/test/sim/WorkflowSimScenario.hs` (the injected
-kill/redelivery/partition schedule) — the *same* `Amoebius.Workflow.Runtime`/`Orchestrator`/`Worker` code
-from Sprints 37.2–37.3 run against the Phase-15 modeled environment (`src/Amoebius/Sim/Env.hs` +
-`src/Amoebius/Sim/Fakes/*`), nothing forked or re-implemented (target paths; not yet built).
-**Blocked by**:
-Sprint 37.2 (the orchestrator/worker runtime the schedule drives) and Sprint 37.3 (the Failover-takeover +
-leak-free-teardown behaviour whose properties are replayed here); Phase 15 Sprint 15.2 (the
-`Amoebius.Sim.Env` substrate and the fake Pulsar/MinIO the runtime binds against through `io-classes`).
+kill/redelivery/partition schedule), and the same `Amoebius.Workflow.Runtime` state transitions exercised by
+the live suite (built and validated).
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the real workflow runtime, bound to `io-classes` and executed under `IOSimPOR`,
 takes the modeled fake Pulsar + fake MinIO with a `kill-worker-mid-workflow` fault injected inside the same
 critical window the live gate uses — after the store write and before the `event` ack (store object exists,
@@ -625,7 +633,7 @@ adversarial schedules instead of a single live wall-clock trace.
 > here are exactly the ones the live gate asserts; the register is lower because the environment is modeled.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. Delivered and validated by the Phase-37 gate.
 
 ## Documentation Requirements
 

@@ -5,14 +5,19 @@
 
 Phase 2 delivers the formal-model EDSL (`Model`/`interpret`/`emitTLA`); its design is owned by [formal_model_doctrine.md](../documents/engineering/formal_model_doctrine.md), [generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md), [conformance_harness_doctrine.md](../documents/engineering/conformance_harness_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+The gate passed on 2026-08-09; Phase-3 code correspondence and runtime fidelity remain UNVERIFIED.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/formal_model_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -22,10 +27,10 @@ No gate has run.
 - [Phase Summary](#phase-summary)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 2.1: The `Model` fragment EDSL (the reifiable value) 📋](#sprint-21-the-model-fragment-edsl-the-reifiable-value-)
-- [Sprint 2.2: `interpret` + the in-process reachability explorer 📋](#sprint-22-interpret--the-in-process-reachability-explorer-)
-- [Sprint 2.3: `emitTLA` renderer + never-committed emission 📋](#sprint-23-emittla-renderer--never-committed-emission-)
-- [Sprint 2.4: Round-trip + single-source correspondence on `ToyModel` 📋](#sprint-24-round-trip--single-source-correspondence-on-toymodel-)
+- [Sprint 2.1: The `Model` fragment EDSL (the reifiable value) ⏸️](#sprint-21-the-model-fragment-edsl-the-reifiable-value-)
+- [Sprint 2.2: `interpret` + the in-process reachability explorer ⏸️](#sprint-22-interpret--the-in-process-reachability-explorer-)
+- [Sprint 2.3: `emitTLA` renderer + never-committed emission ⏸️](#sprint-23-emittla-renderer--never-committed-emission-)
+- [Sprint 2.4: Round-trip + single-source correspondence on `ToyModel` ⏸️](#sprint-24-round-trip--single-source-correspondence-on-toymodel-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,11 +38,21 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive
-statement here is design intent, never a tested amoebius result. This phase opens after the Phase 1
-toolchain spike records a green (or remediated) build of the pinned Haskell surface, and runs on **no substrate** (`none`) — it stands up no host and no cluster and touches no live infrastructure. The
-round-trip mechanism it builds was demonstrated once in a throwaway spike over a small transition system
-([`formal_model_doctrine.md §7`](../documents/engineering/formal_model_doctrine.md#7-prototype-validation) — the prototype-validation note); that is **spike evidence that the mechanism works, not a built amoebius result**, and the implementation is what this phase delivers.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The Register-1 gate passed on 2026-08-09 with
+`python3 tools/phase2_gate.py`, emitting ledger
+`dynamically-resolved`. The explorer and pinned TLC
+agree on all eight distinct `ToyModel` states and its safety verdict; TLC proves its three temporal properties
+under the declared weak/strong fairness, and removing fairness makes liveness red. The deterministic
+QuickCheck differential passed 200 non-degenerate models with 47.5% safety-violating cases, 100% explicit
+expansion-boundary cases, and 100% coverage of every required fragment constructor. This is a
+proven-for-the-model/tested kernel result on substrate `none`, not correspondence to Phase-3 code and not
+runtime fidelity; both remain **UNVERIFIED**.
 
 ## Phase Summary
 
@@ -109,7 +124,7 @@ correct only on the constructors `ToyModel` happens to exercise cannot pass. Bec
 legitimately **safety-scoped**, the three liveness/fairness constructors it cannot see — `StrongFair`
 (`SF_vars`), `Always` (`[]`), and `Eventually` (`<>`) — are pinned instead by the byte-for-byte `emitTLA`
 golden itself, **not** by any in-process liveness checker: the Sprint 2.1 structural assertion forces
-`ToyModel` to carry all five liveness/fairness constructors, so the Phase-0-committed golden fixes the rendered
+`ToyModel` to carry all five liveness/fairness constructors, so the pre-renderer committed golden fixes the rendered
 bytes of every one (`WF_vars`/`SF_vars` conjuncts, `[]`/`<>`/`~>` operators), and **two further committed liveness-path renderer mutants** — `emitTLA-mut-03` (`StrongFair` rendered as `WF_vars`) and `emitTLA-mut-04`
 (`Always` rendered as `<>`), committed under `test/formal/mutants/` — which the golden **must turn red**, close
 the gap that a renderer swapping `StrongFair`→`WeakFair` or `[]`↔`<>` would otherwise slip through. The oracles this gate checks against — the hand-derived `ToyModel` reachable-distinct-state count and safety verdict, the `emitTLA ToyModel` byte-for-byte golden **under the canonical TLA+ rendering convention fixed in Sprint 2.3**, the **expected `INVARIANT`/`PROPERTY` name set** the emitted `.cfg` must equal exactly (the oracle the spec-weakening mutants above are caught by), and the mutation-operator/renderer-mutant catalog with their
@@ -177,12 +192,20 @@ flowchart LR
 
 ## Sprints
 
-## Sprint 2.1: The `Model` fragment EDSL (the reifiable value) 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 2.1: The `Model` fragment EDSL (the reifiable value) ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Formal/Model.hs` (the `Model`/`Action`/`Expr` fragment
-types), a `formal-model` cabal library + `formal-spec` test-suite stanza — target paths, not yet built.
-**Blocked by**: Phase 1 gate (the toolchain spike records the pinned GHC/Cabal build).
+types), the `formal-model` Cabal library, and the `formal-model-spec` test suite — built.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the fragment types compile under the pinned GHC 9.12.4 / Cabal 3.16.1.0; a hand-authored small
 model (`ToyModel`) is expressible entirely inside the fragment with no opaque Haskell function in its
 transition relation.
@@ -224,15 +247,15 @@ emitting faithful TLA+ rather than hand-writing it.
    oracle is safety-only, a renderer that emits `StrongFair` as `WF_vars` or swaps `[]`↔`<>` is invisible to it and is caught **only** by the byte golden over a `ToyModel` that actually carries those constructors. This is a committed structural assertion over the `ToyModel` value (a test that walks its `Expr`/`Action`/`Temporal` nodes and fails if any of these constructor classes — including `StrongFair`, `Always`, and `Eventually` — is absent), pinned in Phase 0.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The closed fragment and structurally complete `ToyModel` are built and exercised by the phase gate.
 
-## Sprint 2.2: `interpret` + the in-process reachability explorer 📋
+## Sprint 2.2: `interpret` + the in-process reachability explorer ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Formal/Interpret.hs` (`interpret`),
 `src/Amoebius/Formal/Explore.hs` (the bounded breadth-first reachability checker),
-`test/formal/ExploreSpec.hs` — target paths, not yet built.
-**Blocked by**: Sprint 2.1.
+`test/formal/RoundTripSpec.hs` — built; the phase suite owns the hand table and explorer checks.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `interpret` computes the next state for a hand-checked (event, state) pair; the explorer
 visits exactly the reachable-state set of `ToyModel` under its constraint and reports every invariant on
 every reachable state — a `cabal test`, no cluster. The `(event, state) → state` transition table and the
@@ -264,23 +287,24 @@ constraint, checking every invariant on every reachable state.
    transcribed from the explorer's first run) — **proven for the model** at the declared bound.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The hand transition table, eight-state explorer oracle, invariant checks, and explicit
+checked-but-not-expanded boundary convention are green.
 
-## Sprint 2.3: `emitTLA` renderer + never-committed emission 📋
+## Sprint 2.3: `emitTLA` renderer + never-committed emission ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Formal/EmitTLA.hs` (`emitTLA`),
-`src/Amoebius/Cli/Formal.hs` (the `amoebius dev model emit`/`check` subcommand),
-`test/formal/EmitGoldenSpec.hs`, and the two committed liveness-path renderer mutants
+`src/Amoebius/Cli/Formal.hs` (the `amoebius dev model emit` subcommand),
+`test/formal/RoundTripSpec.hs`, and the two committed liveness-path renderer mutants
 `emitTLA-mut-03`/`emitTLA-mut-04` under `test/formal/mutants/`; emitted output lands in the git-ignored
-`gen/tla/` tree — target paths, not yet built.
-**Blocked by**: Sprint 2.1.
+`gen/tla/` tree — built.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**:
 `emitTLA ToyModel` renders a `.tla` + `.cfg`; the renderer is byte-for-byte golden-locked against a
-**Phase-0-committed golden authored before `EmitTLA.hs` exists** (§M.1 — a golden regenerated from the
+**pre-implementation golden authored before `EmitTLA.hs` exists** (§M.1 — a golden regenerated from the
 renderer's own output is not a test), under the **canonical TLA+ rendering convention** fixed below —
-without which a byte-exact golden cannot be hand-authored at all; the emitted artifact carries a `--
-GENERATED … do not edit by hand` stamp and is written only to an ignored build path. The never-committed
+without which a byte-exact golden cannot be hand-authored at all; the emitted artifact carries a valid TLA+
+`\* GENERATED … do not edit by hand` stamp and is written only to an ignored build path. The never-committed
 scan and the golden-fixture layout follow the normative conventions owned by
 [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
 (one emitted path, one `.golden` suffix, one scan), instantiated here: the committed golden fixtures live at
@@ -352,16 +376,16 @@ never committed.
    Sprint 2.4 differential oracle stays legitimately safety-scoped.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The emitter and CLI are byte-golden locked; generated `.tla`/`.cfg` files remain ignored and untracked.
 
-## Sprint 2.4: Round-trip + single-source correspondence on `ToyModel` 📋
+## Sprint 2.4: Round-trip + single-source correspondence on `ToyModel` ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `test/formal/RoundTripSpec.hs` (drives the explorer and TLC over the
 same `Model`), a `tla2tools` invocation wrapper, the committed mechanical model-mutation catalog, and the
 two committed seeded renderer mutants `emitTLA-mut-01`/`emitTLA-mut-02` under `test/formal/mutants/` —
-target paths, not yet built.
-**Blocked by**: Sprint 2.2, Sprint 2.3.
+built and run by `tools/phase2_gate.py`.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: on the
 correct `ToyModel` the in-process explorer and TLC (over the freshly emitted spec, via the version-stable
 JVM `tla2tools` toolchain) reach the identical **safety** verdict (same canonical state-fingerprint sets, no
@@ -433,7 +457,7 @@ operational form of "the two renderings mean the same thing."
   only model bugs): `emitTLA-mut-01` (a deliberately dropped `UNCHANGED` conjunct) and `emitTLA-mut-02` (a
   finite quantifier `\A`↔`\E` mistranslation), committed under `test/formal/mutants/`, each of which the
   differential generator must expose as an explorer/TLC divergence — a surviving renderer mutant fails the gate.
-- The **committed, schema-checked Register-1 ledger** ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed); its schema, linter, and commit status owned by `testing_doctrine.md` and Phase 0), whose Phase-2 rows are:
+- The **generated, schema-checked Register-1 ledger** under `gen/runs/` ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed); its schema and external retention are owned by `testing_doctrine.md` and Phase 0), whose Phase-2 rows are:
   (a) safety proven-for-the-model at the declared bound with the recorded reachable-distinct-state count; (b)
   liveness proven under the named fairness with the recorded fairness-sensitivity outcome; (c) the
   differential-test case count and per-constructor coverage percentages; (d) model-correspondence-to-Phase-3-code
@@ -448,11 +472,12 @@ operational form of "the two renderings mean the same thing."
    exposed by the differential generator as explorer/TLC divergences; TLC proves the liveness `PROPERTY` under
    fairness and reports it red with fairness removed; the safety-scoped differential generator finds no
    explorer/TLC disagreement over **>=200 non-degenerate models** with `checkCoverage` satisfied (each fragment
-   constructor >=20%); and the emitted committed Register-1 ledger equals the suite's recorded results (harness
+   constructor >=20%); and the emitted run-local Register-1 ledger equals the suite's recorded results (harness
    assertion) — the round-trip closes and the kernel is validated for the model at scope.
 
 ### Remaining Work
-The whole sprint (📋 Planned). This sprint carries the phase gate.
+None. The pinned TLC round-trip, liveness sensitivity, mechanical mutants, 200-model differential, and
+machine-derived ledger all pass. Phase-3 code correspondence and runtime fidelity remain UNVERIFIED by design.
 
 ## Documentation Requirements
 

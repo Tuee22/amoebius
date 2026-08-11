@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""Run the sim probe and compare stdout with the independent terminal oracle."""
+
+from __future__ import annotations
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--perturbed", action="store_true")
+    parser.add_argument("--builddir", required=True)
+    parser.add_argument("--store-dir", required=True)
+    args = parser.parse_args()
+    command = [
+        "/home/matthewnowak/.ghcup/bin/cabal-3.16.1.0",
+        "-v0",
+        f"--builddir={args.builddir}",
+        f"--store-dir={args.store_dir}",
+        "run",
+        "probe:sim",
+        "--",
+    ]
+    if args.perturbed:
+        command.append("--perturbed")
+    result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
+    if result.returncode != 0:
+        sys.stderr.write(result.stdout + result.stderr)
+        return result.returncode
+    expected = (ROOT / "probe/fixtures/sim-terminal.expected").read_text(encoding="utf-8")
+    if result.stdout != expected:
+        sys.stderr.write("terminal-state mismatch\n")
+        sys.stderr.write(f"expected: {expected!r}\nactual:   {result.stdout!r}\n")
+        return 1
+    sys.stdout.write(result.stdout)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,12 @@
+envoy->grafana
+envoy->keycloak
+envoy->minio
+envoy->platform-api
+envoy->vault
+envoy->websocket
+grafana->grafana-postgres
+grafana->prometheus-query-proxy
+keycloak->keycloak-postgres
+prometheus->minio
+prometheus->pulsar
+sentinel->redis

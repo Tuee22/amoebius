@@ -6,14 +6,19 @@
 
 Phase 20 delivers the UI plan compiler; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+Gate passed on 2026-08-09 with ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -24,7 +29,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 20.1: Deterministic paired-plan projection 📋](#sprint-201-deterministic-paired-plan-projection-)
+- [Sprint 20.1: Deterministic paired-plan projection ⏸️](#sprint-201-deterministic-paired-plan-projection-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,8 +37,16 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. This phase proves deterministic pure projection and serialization. It does not claim that a
-browser or server interprets the artifacts correctly or that a released artifact is live.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. Four logical rows compile inseparably into four canonical artifacts, four concrete SHA-256 identities,
+and six finite-demand cells; reversed source insertion in two cache-disabled fresh processes is byte-identical,
+and six mutants turn red. This proves pure projection and serialization only. It does not claim interpreter
+correctness or a live release. See the [Phase-20 ledger](ledgers/phase_20_ui_plan_compiler.md).
 
 ## Phase Summary
 
@@ -75,8 +88,8 @@ generated and uncommitted.
 - **Pinned oracles:** `test/fixtures/ui_plan_compiler/projection_rows.tsv` owns the logical client/server/route/
   contract/audit/handler-identity tuples; `client_plan.golden.json`, `ui_server_plan.golden.json`,
   `public_contracts.golden.json`, and `content_manifest.golden.json` own canonical encodings; and
-  `digests.tsv` owns expected ABI, authority, contract, external-link-catalog, and content digests;
-  `runtime_demand.tsv` owns finite browser/server demand rows.
+  `expected_digests.tsv` owns concrete authority, client, server, and contract SHA-256 values. Finite
+  browser/server demand is independently counted from the committed projection rows.
 - **Independent predicates:** one test reader compares serialized key sets and public/private field
   classifications directly from `projection_rows.tsv`; another hand-authored digest input list is fed to a
   distinct reference hash adapter. Neither imports compiler projections, ordering, or digest-source folds.
@@ -108,14 +121,23 @@ interpreter, release publication, transport security, or runtime freshness enfor
 
 ## Sprints
 
-## Sprint 20.1: Deterministic paired-plan projection 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 20.1: Deterministic paired-plan projection ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Compile/{ClientPlan,ServerPlan,Manifest,Demand}.hs`
-and `test/ui/Phase20UiPlanCompilerSpec.hs` (target authored sources; not yet built)
-**Blocked by**: Phase 19
+and `test/ui/{Phase20UiPlanCompilerSpec,PlanCompilerReference}.hs`, plus `tools/phase20_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `cabal test ui-plan-compiler-spec` compares fresh compiler output with the
-Phase-0 tables/goldens and requires every named projection/determinism mutant to fail.
+Phase-0 tables/goldens and requires every named projection/determinism mutant to fail. The full hermetic gate
+is `python3 tools/phase20_gate.py`.
 **Docs to update**:
 `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/ui_realtime_coordination_doctrine.md`,
@@ -147,7 +169,8 @@ freshness identity, or per-application client build is representable in the emit
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None in Phase 20. Browser/server interpretation, release publication, edge enforcement, and live freshness
+remain UNVERIFIED and belong to later gates.
 
 ## Documentation Requirements
 

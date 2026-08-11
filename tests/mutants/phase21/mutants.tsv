@@ -1,0 +1,10 @@
+mutant	target	expected
+M-raw-html-sink	expected_dom/single-submit.txt	hostile-text-dom
+M-drop-event-effect	reference_traces.tsv:single-submit-2	submit-effect
+M-swap-route-target	expected_keyboard_focus.tsv:route	route-focus
+M-accept-stale-plan	plans/minimal_single_tenant.json	ReloadRequired
+M-direct-provider-fetch	expected_transport.tsv:provider-fetch	zero-provider-connection
+M-sequential-state-writes	reference_traces.tsv:single-submit	atomic-trace
+M-break-focus-return	expected_keyboard_focus.tsv:modal-3	modal-opener
+M-unsafe-inline-build	production_headers.tsv	csp-canary
+M-hardcoded-response	expected_transport.tsv:single-submit	fresh-nonce

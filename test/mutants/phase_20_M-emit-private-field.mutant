@@ -1,0 +1,3 @@
+operator=projection-guard-deletion
+change=emit a server handle into ClientPlan
+expected=public codec allowlist fails

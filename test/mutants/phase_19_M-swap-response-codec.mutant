@@ -1,0 +1,3 @@
+operator=effect-type-swap
+change=bind a response codec from another handler
+expected=codec-mismatch fails

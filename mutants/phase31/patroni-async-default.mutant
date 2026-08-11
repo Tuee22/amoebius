@@ -1,0 +1,1 @@
+PHASE31_PATRONI_ASYNC_DEFAULT_MUTANT sets synchronous_mode_strict off; provision must reject with synchronous_mode_strict-not-on.

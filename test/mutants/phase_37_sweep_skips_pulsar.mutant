@@ -1,0 +1,4 @@
+operator=invariant-clause-delete
+target=phase37-postflight-sweep
+change=omit-pulsar-resource-class
+expected=sweep-domain-incomplete

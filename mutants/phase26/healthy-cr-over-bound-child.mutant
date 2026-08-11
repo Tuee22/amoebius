@@ -1,0 +1,3 @@
+surface=custom-resource-child-envelope
+mutation=accept-healthy-custom-resource-before-enumerating-over-bound-child
+expected_oracle=ChildEnvelopeExceeded

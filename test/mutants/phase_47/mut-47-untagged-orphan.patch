@@ -1,0 +1,5 @@
+--- a/amoebius-pulumi/src/Amoebius/Pulumi/Teardown.hs
++++ b/amoebius-pulumi/src/Amoebius/Pulumi/Teardown.hs
+@@ seeded mutant: enumerate only the run tag and miss VPC/cluster-owned orphans
+-  owned = tagMatch || vpcMatch || clusterMatch
++  owned = tagMatch

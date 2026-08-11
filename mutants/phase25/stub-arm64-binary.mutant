@@ -1,0 +1,3 @@
+artifact=linux/arm64:/usr/bin/redis-server
+mutation=replace-with-zero-byte-file
+expected_oracle=BinaryExecutionFailed

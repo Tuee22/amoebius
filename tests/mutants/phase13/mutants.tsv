@@ -1,0 +1,13 @@
+mutant	operator	expected_locus
+mutant_resource_projection	field-alteration	resource-projection
+mutant_ephemeral_rootfs	field-alteration	security-context
+mutant_unbounded_scratch	invariant-delete	bounded-volumes
+mutant_memory_volume_lifecycle	field-alteration	resource-projection
+mutant_image_platform	field-alteration	image-digest
+mutant_durable_size	field-alteration	source-annotation
+mutant_accelerator_projection	invariant-delete	accelerator-claim
+mutant_controller_projection	union-arm-alteration	kind-projection
+mutant_monitoring_projection	field-alteration	resource-projection
+mutant_unhardened_pod	guard-weakening	security-context
+mutant_wild_ingress	guard-weakening	service-exposure
+mutant_undeclared_allow_edge	union-arm-addition	network-policy-edge-set

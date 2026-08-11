@@ -1,0 +1,4 @@
+entry	negative	legal	required
+3.13	dhall/examples/illegal_phase7_unknown_engine.dhall	dhall/examples/legal_phase7_known_engine.dhall	ProductEngine
+3.35	dhall/examples/illegal_phase7_remote_worker_without_networking.dhall	dhall/examples/legal_phase7_remote_worker_networked.dhall	networking
+3.37	dhall/examples/illegal_phase7_managed_hybrid_member.dhall	dhall/examples/legal_phase7_managed_host_worker.dhall	HybridNode

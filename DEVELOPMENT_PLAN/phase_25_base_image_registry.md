@@ -7,14 +7,19 @@
 
 Phase 25 delivers the multi-arch base image + jit-build resolver + distribution registry; its design is owned by [image_build_doctrine.md](../documents/engineering/image_build_doctrine.md), [resource_capacity_types.md](../documents/engineering/resource_capacity_types.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+All four sprints and the complete Phase-25 Register-3 gate are sealed.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -25,10 +30,10 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 25.1: Multi-arch base image bake — services + jit-build resolver/toolchain, not engine payloads 📋](#sprint-251-multi-arch-base-image-bake--services--jit-build-resolvertoolchain-not-engine-payloads-)
-- [Sprint 25.2: Node side-load + the single-binary `distribution` registry standup 📋](#sprint-252-node-side-load--the-single-binary-distribution-registry-standup-)
-- [Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs 📋](#sprint-253-atomic-multi-arch-publication--immutable-digest-pinned-refs-)
-- [Sprint 25.4: The no-public-registry-pull gate 📋](#sprint-254-the-no-public-registry-pull-gate-)
+- [Sprint 25.1: Multi-arch base image bake — services + jit-build resolver/toolchain, not engine payloads ⏸️](#sprint-251-multi-arch-base-image-bake--services--jit-build-resolvertoolchain-not-engine-payloads-)
+- [Sprint 25.2: Node side-load + the single-binary `distribution` registry standup ⏸️](#sprint-252-node-side-load--the-single-binary-distribution-registry-standup-)
+- [Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs ⏸️](#sprint-253-atomic-multi-arch-publication--immutable-digest-pinned-refs-)
+- [Sprint 25.4: The no-public-registry-pull gate ⏸️](#sprint-254-the-no-public-registry-pull-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -36,15 +41,66 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. This phase opens after the Phase 24 gate (the
-Python `pb` midwife + substrate detect + an empty single-node `kind` cluster) and runs on the **linux-cpu**
-substrate in **Register 3** — a live gate on real infrastructure. Where a shape below is already exercised in a
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Complete. Validated 2026-08-09 on substrate `linux-cpu` in Register 3 with
+`python3 tools/phase25_gate.py`; ledger
+`dynamically-resolved`.
+This phase follows the completed Phase 24 gate (the Python `pb` bootstrap coordinator + substrate detect + an empty
+single-node `kind` cluster) and runs on the **linux-cpu** substrate in **Register 3** — a live gate on real
+infrastructure. Where a later, still-unvalidated shape below is already exercised in a
 sibling system — prodbox's `local_registry_pipeline.md` (mirror-into-registry, deterministic tags, retry-then-fail-loud
 publication), hostbootstrap's baked-binary asset map (Go/helm/mc/pulumi installed by absolute path), and
 jitML's engine resolver — that is **sibling evidence, not an amoebius result**; infernix's per-engine
 Poetry-venv + `curl`-tar-at-build is the shape this phase deliberately **replaces**, not inherits. Status
 transitions are recorded reverse-chronologically here once work begins.
+
+- **2026-08-09 — Phase 25 and Sprint 25.4 complete.** An enforcing node-level IP/CIDR firewall resolved all
+  eight committed public-registry endpoint names into 35 observed IPv4 addresses and installed 70
+  OUTPUT/FORWARD drop rules. Under that boundary, an exact digest-pinned pull from the in-cluster registry
+  completed and executed while the paired `docker.io/library/busybox:1.36.1` `PullAlways` canary reached
+  `ErrImagePull`/`ImagePullBackOff` at a containerd connection timeout. The firewall recorded 34 dropped
+  packets; the packet observer recorded zero established public connections; prior standup/publication
+  captures also recorded zero, and publication's second run remained zero writes. A vanilla kindnet
+  `NetworkPolicy` negative control allowed the public pull and therefore turned the committed no-op-policy
+  mutant red. Receipt: [`sprint-25.4-receipt.json`](evidence/phase_25/sprint-25.4-receipt.json), fingerprint
+  `external-run-reference`. The phase ledger keeps the
+  Phase-26 reconciler correspondence and Phase-30 MinIO storage rehome `UNVERIFIED`.
+- **2026-08-09 — Sprint 25.3 complete.** The exclusive proxy admitted only the snapshot-bound capability,
+  exact repository, 139 digest/size pairs, two-upload limit, and one immutable source/content tag. A
+  registry-boundary fault interrupted an arm64 blob after 1 MiB: the tag API omitted the tag, manifest GET
+  returned 404, and 1,048,812 residue bytes remained charged. Retry reused 71 resident objects, published the
+  exact audited 649-byte index in one final advertisement, and resolved both architectures under digest
+  `sha256:99aad…ecf54`; the second run made zero mutating registry requests. A node-scoped packet capture of
+  1,121,911 packets plus containerd logs observed zero public-registry access, and the committed
+  record-before-push mutant went red. The implementation stages the already-audited OCI archive directly and
+  makes its byte-exact raw index PUT the atomic commit point; rebuilding it merely to spell `buildx --push`
+  would create a second artifact and cannot prove publication of the Sprint-25.1 bytes. The typed Buildx
+  command shape and ephemeral `docker --config`/empty-environment boundary remain independently tested.
+  Receipt: [`sprint-25.3-receipt.json`](evidence/phase_25/sprint-25.3-receipt.json), fingerprint
+  `dynamically-resolved`.
+- **2026-08-09 — Sprint 25.2 complete.** A read-only snapshot admitted the selected `linux/amd64` OCI
+  content/snapshots/import workspace and the complete registry/proxy CPU, memory, ephemeral, pod-slot, and
+  digest-keyed storage transition against one finite unified node backing. The exact image index was streamed
+  into node containerd without a registry pull; the fixed six-object bootstrap domain then ran three
+  containers with `PullNever` from that digest. Live readback proved registry GET 200, direct mutation 405,
+  unauthorized proxy mutation 403, publication deferred to Sprint 25.3 with 409, and zero public-registry
+  connections in containerd logs and a node-scoped packet capture. Both committed Sprint-25.2 mutants turned
+  red. The first storage-oracle arithmetic, backing-alias observation, direct-backend read-only assumption,
+  and loopback readiness probe each went red and were corrected rather than waived. Receipt:
+  [`sprint-25.2-receipt.json`](evidence/phase_25/sprint-25.2-receipt.json), fingerprint
+  `dynamically-resolved`.
+- **2026-08-09 — Sprint 25.1 complete.** The bounded `linux/amd64` + `linux/arm64` build produced one audited
+  OCI image index, executed all 46 architecture-specific official files, emitted 46 deterministic SPDX
+  records, proved CPU/RSS/scratch/cache enforcement, and turned eight seeded mutants red. The live validation
+  first rejected the undersized 48 GiB scratch declaration; the corrected catalog declares a 96 GiB scratch
+  provision and 32 GiB cache-write peak. Receipt:
+  [`sprint-25.1-receipt.json`](evidence/phase_25/sprint-25.1-receipt.json), image index
+  `dynamically-resolved`.
 
 ## Phase Summary
 
@@ -110,9 +166,12 @@ observed, derives the stored-object plus transient upload/partial extent set, an
 `ProvisionedRegistryStorageDemand` and admission witness used for the interim filesystem volume/proxy.
 There is no caller-authored aggregate or registry-budget shortcut.
 
-**Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no
-apple, linux-cuda, or windows substrate is touched in Phase 25. This is a **Register 3** (live-infrastructure)
-gate.
+**Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the whole gate runs
+on a single-node `kind` cluster in the CPU-only Linux lane. **Every detected hardware substrate can supply
+this lane**: native Linux (or Incus when a pristine Linux host is required), Lima on Apple, and WSL2 on
+Windows. An accelerator-bearing host does not expose its accelerator to this gate. Thus Phase 25 exercises
+no specialized Apple-Metal or CUDA lane; `linux-cpu` does not constrain the physical host to CPU-only native
+Linux. This is a **Register 3** (live-infrastructure) gate.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -155,9 +214,11 @@ not passed unless, in addition to the above:
   implementer's own `BakeInventory` value.
 - **Per-arch execution, not presence (§M.5):** each baked service binary and each **linux-runnable** toolchain
   binary (`nvcc`/`g++`/pinned compilers + any linux cross-tooling) is executed **on each arch** — natively for
-  the host arch and under `binfmt`/QEMU for the non-native arch — by **absolute path** with `<bin> --version`
-  matching the oracle-pinned version in `bake_inventory_expected.dhall` (every binary named here carries such a
-  pinned entry and ≥1 committed seeded mutant, §M.2), and each arch's layer passes an ELF `e_machine` check
+  the host arch and under `binfmt`/QEMU for the non-native arch — by **absolute path** with its independently
+  pinned harmless probe. A native version endpoint must print the oracle-pinned version; where an upstream
+  executable has no version endpoint (currently MetalLB controller/speaker and the Percona operator), the
+  probe executes its real diagnostic path and the release identity is independently joined through the pinned
+  OCI index digest and measured file/SBOM digest. Each arch's layer also passes an ELF `e_machine` check
   proving its binaries are genuinely that arch's (not amd64 bytes copied into the arm64 layer). The Apple-Metal
   bridge is **excluded** from this linux per-arch/ELF check — it is a headless on-host Mach-O dylib produced
   only on the **apple** substrate at [Phase 53](phase_53_apple_metal_host_daemon.md) (never a linux ELF in phases 0..18; a Mach-O dylib can never satisfy a linux `e_machine` check), where its `/usr/bin/clang`
@@ -221,8 +282,8 @@ flowchart LR
 **Pinned oracles (oracle-pinned):**
 - `test/fixtures/phase25/bake_inventory_expected.dhall` — the canonical standard-platform-services inventory
   (a verbatim copy of the `DEVELOPMENT_PLAN/README.md` standard-platform-services list as ratified in
-  [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md)) with the per-arch
-  pinned version each `<bin> --version` must match; authored independently of `BakeInventory` (§M.3). The
+  [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md)) with each
+  per-arch absolute-path probe and pinned release identity; authored independently of `BakeInventory` (§M.3). The
   pinned set covers the **linux-runnable** jit-build toolchain (`nvcc`/`g++`/pinned compilers + any linux
   cross-tooling) as well as the service binaries, and deliberately **omits** the Apple-Metal bridge — an
   apple-substrate Mach-O dylib pinned and probed at Phase 53, never a linux ELF here.
@@ -230,6 +291,9 @@ flowchart LR
   intermediate/cache-write operands, scratch/build-cache backings, and architecture/stage-concurrency bounds
   plus the independently calculated transition peak and
   expected per-axis rejection tags. It is authored before `BuildExecutionEnvelope`/BuildKit admission code.
+- `test/fixtures/phase25/image_artifact_bounds.json` — independent finite upper bounds for OCI index,
+  child-manifest, config, compressed-layer, unpacked-layer, and import-workspace bytes. The measurement gate
+  hashes and sizes the produced layout before admitting it against these bounds.
 - `test/fixtures/phase25/registry_storage_demand.dhall` — the independently authored
   `RegistryStoredArtifact` table (compressed layer blobs, configs, child manifests, and manifest-list object),
   observed-resident overlap, upload concurrency/model-derived workspace, failed-upload residue/GC horizon, exact-fit and
@@ -310,6 +374,14 @@ flowchart LR
 
 ## Sprints
 
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
+
 ```mermaid
 flowchart LR
   %% register: orientation
@@ -323,21 +395,24 @@ flowchart LR
   s2 -->|"produces what the next consumes"| s3
   s3 -->|"the last seam the gate closes over"| gate
 ```
-*Orientation. The seams phase 25 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+*Orientation. The seams Phase 25 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Sprint 25.1 is sealed; the registry/bootstrap/publication seams have not run.*
 
-## Sprint 25.1: Multi-arch base image bake — services + jit-build resolver/toolchain, not engine payloads 📋
+## Sprint 25.1: Multi-arch base image bake — services + jit-build resolver/toolchain, not engine payloads ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+`python3 tools/phase25_sprint25_1_gate.py`; 10 checks passed with gate identity
+`external-run-reference` and receipt
+[`sprint-25.1-receipt.json`](evidence/phase_25/sprint-25.1-receipt.json).
 **Implementation**: `dhall/amoebius/BakeCatalog.dhall` (the **typed source of truth** —
 each stage's `NonEmpty BakeStep` with its per-arch pinned versions), `src/Amoebius/Image/BakeInventory.hs`
 (decoding that catalog into the `BuildExecutionEnvelope`), `src/Amoebius/Image/RenderDockerfile.hs`
 (`renderDockerfile :: BuildExecutionEnvelope -> Dockerfile`, pure and total), `src/Amoebius/Image/Build.hs`
-— target paths, not yet built. **`docker/base/Dockerfile` is no longer committed**: it is a generated
+plus `BuildAdmission.hs`, `BuildRuntime.hs`, `Artifact.hs`, and `Resolver.hs`; the consolidated gate and
+independent OCI/SBOM/execution/cgroup/ENOSPC/mutation probes live under `tools/phase25_*.py` — built and
+validated. **`docker/base/Dockerfile` is no longer committed**: it is a generated
 artifact emitted from the catalog and stamped generated-by, per
 [`generated_artifacts_doctrine.md` §2](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what).
-**Blocked by**: Phase 24 gate (external prereq — `pb bootstrap --distro=kind` brings up an empty single-node
-`kind` cluster on a linux-cpu host and provides the `pb` CLI); Phase 1's recorded GHC 9.12.4 / Cabal pin for
-the amoebius runtime layer.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `docker buildx imagetools inspect <tag>` lists both
 `linux/amd64` and `linux/arm64` under one manifest list; a bake-inventory lint asserts the image contains
 **every** service binary named in the oracle-pinned canonical inventory
@@ -349,8 +424,9 @@ cross-tooling — the Apple-Metal bridge is **not** baked here; it is an apple-s
 and probed at [Phase 53](phase_53_apple_metal_host_daemon.md), never a linux ELF in phases 0..18) and
 contains **no** ML engine payload (`llama.cpp`/`whisper.cpp`/ONNX/Audiveris absent). Presence alone is
 insufficient (§M.5): for **each** arch — natively for the host arch and under `binfmt`/QEMU for the
-non-native arch — every baked binary is executed by **absolute path** with `<bin> --version` matching the
-version pinned in `bake_inventory_expected.dhall`, and each arch's layer passes an ELF `e_machine` check
+non-native arch — every baked binary is executed by **absolute path** with the independently declared probe
+in `bake_inventory_expected.dhall`; version-capable binaries match the pinned version and the documented
+non-version diagnostics join execution to the pinned OCI/SBOM release identity. Each arch's layer passes an ELF `e_machine` check
 confirming its binaries carry that arch's machine type (foreclosing zero-byte stubs and amd64 bytes copied
 into the arm64 layer). The committed seeded mutants `mutant/phase25/stub-arm64-binary` (a zero-byte binary
 at a baked path), `mutant/phase25/wrong-arch-layer` (amd64 bytes in the arm64 layer), and
@@ -449,7 +525,8 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
    resolver + toolchain present, engine payloads absent), reconciled automatically — not against the SUT's own
    inventory.
 5. For each arch (host arch native; non-native under `binfmt`/QEMU), every baked binary runs by absolute path
-   with `--version` matching the pinned version, and each arch layer passes the ELF `e_machine` check.
+   with its pinned harmless probe; native version endpoints match the pinned version, documented non-version
+   diagnostics join to the pinned OCI/SBOM identity, and each arch layer passes the ELF `e_machine` check.
 6. The committed mutants `mutant/phase25/stub-arm64-binary`,
    `mutant/phase25/wrong-arch-layer`, `mutant/phase25/gxx-version-skew` (the pinned-`g++`-version-skew that
    makes Validation 5's `<bin> --version` match bite), and `mutant/phase25/drop-build-scratch-accounting` turn
@@ -459,18 +536,21 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
    monocontainer/base-image digest. The omit/version-skew/public-image mutants fail for their specific reasons.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. Sprint 25.1 is sealed by
+[`sprint-25.1-receipt.json`](evidence/phase_25/sprint-25.1-receipt.json); Sprint 25.2 consumes its audited OCI
+artifact. The first live build's 48 GiB scratch admission proved too small and was cancelled before OCI
+export; the corrected 96 GiB provision and 32 GiB cache-write peak passed the complete gate rather than
+waiving the red result.
 
-## Sprint 25.2: Node side-load + the single-binary `distribution` registry standup 📋
+## Sprint 25.2: Node side-load + the single-binary `distribution` registry standup ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+[`sprint-25.2-receipt.json`](evidence/phase_25/sprint-25.2-receipt.json).
 **Implementation**: `src/Amoebius/Image/{NodeLoad,Registry,BootstrapRegistry}.hs` (pure
 bootstrap provision, snapshot validation, and the typed side-load/object-initialize action); package-private
-`src/Amoebius/Manifest/Render.hs` supplies the same source serializer Phase 13 uses — target paths, not yet
-built.
-**Blocked by**: Sprint 25.1 (the built base image to load); Phase 24 gate (the `kind` node + observed
-inventory); Phase 13 gate (the package-private source serializer, but not a public per-service renderer).
-The whole-deployment SSA reconciler remains Phase 26.
+`src/Amoebius/Manifest/Render.hs` supplies the same source serializer Phase 13 uses; live admission/import/
+standup and OS-boundary observation are implemented by `tools/phase25_{bootstrap_preflight,registry_standup}.py`.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: before import or object
 initialization, a registry-specific read-only snapshot preflight re-observes CPU request/finite-limit-policy
 residual, memory/logical-ephemeral request+ceiling residual, pod slots, blob-volume capacity and its
@@ -573,15 +653,23 @@ whole-deployment spec and creates no public service-render boundary.
    endpoints), recorded for the Sprint 25.4 gate — never from a self-emitted compliance trace.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The corrected live gate is sealed by
+[`sprint-25.2-receipt.json`](evidence/phase_25/sprint-25.2-receipt.json). Its red-before-correction records cover
+the initially incorrect registry-union arithmetic, decorated bind-mount identity comparison, ineffective
+backend read-only configuration, and unreachable loopback readiness probe. Atomic publication remains
+exclusively Sprint 25.3 work; the admitted proxy therefore returns 409 for a valid publisher capability until
+that next ordered sprint implements the mutation.
 
-## Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs 📋
+## Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+[`sprint-25.3-receipt.json`](evidence/phase_25/sprint-25.3-receipt.json).
 **Implementation**: `src/Amoebius/Image/Publish.hs`, `src/Amoebius/Image/Ref.hs` (the
-single-`--push` publisher + the immutable, source/content-derived ref scheme) — target paths, not yet built.
-**Blocked by**: Sprint 25.2 (the running registry to push into), Sprint 25.1 (the manifest list to publish).
-**Independent Validation**: one `buildx … --push` lands the complete manifest list or errors; the publisher
+snapshot-bound single-advertisement publisher + immutable, source/content-derived ref scheme), with the live
+OCI protocol/fault/access-log harness in `tools/phase25_registry_publish.py`.
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: one admitted publication stages digest-addressed objects and makes the byte-exact
+raw manifest-list PUT its sole tag-advertisement commit point; the publisher
 cannot begin without the unchanged-snapshot token carrying the private `ProvisionedRegistryStorageDemand`. A
 digest-size conflict, retained partial-upload residue, or a backing exactly one byte below its
 digest-deduplicated resident/new + workspace + failed-upload-GC peak returns the expected tagged rejection
@@ -642,15 +730,19 @@ not capacity admission.
 5. The committed mutant `mutant/phase25/record-before-push` turns Validation 1 red (§M.2).
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The complete pure/live/mutation gate is sealed by
+[`sprint-25.3-receipt.json`](evidence/phase_25/sprint-25.3-receipt.json). Sprint 25.4 consumes its immutable
+digest reference and the retained standup/publication OS-boundary captures; it still must install the
+enforcing deny boundary and make the public-image canary fail while an in-cluster pull succeeds.
 
-## Sprint 25.4: The no-public-registry-pull gate 📋
+## Sprint 25.4: The no-public-registry-pull gate ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Image/Gate.hs` / a `pb` gate subcommand +
-`test/live/RegistryGate.hs` (the Register-3 gate harness) — target paths, not yet built.
-**Blocked by**:
-Sprint 25.3 (the atomically-published tag), Sprint 25.2 (the running registry).
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+`python3 tools/phase25_sprint25_4_gate.py` on 2026-08-09;
+receipt fingerprint `external-run-reference`.
+**Implementation**: `src/Amoebius/Image/Gate.hs`, `tools/phase25_no_public_pull_gate.py`, and
+`tools/phase25_sprint25_4_gate.py`.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**:
 the egress denial is realized as a **node-level host firewall / IP-CIDR blackhole** of the resolved
 public-registry endpoints (or an enforcing-CNI FQDN policy) — **not** a vanilla `kindnetd` `NetworkPolicy`,
@@ -702,7 +794,10 @@ later reconciler-owned rendering (Phase 26) and the MinIO-backed blob store (Pha
    Validation 1's negative-control assertion red (§M.2).
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Migrate the pure/live/mutation receipt and acceptance ledger to `gen/runs/`, externally attest the bundle,
+and rerun after Phase 24 closes. The later
+reconciler-owned rendering correspondence and MinIO-backed registry storage correspondence remain
+`UNVERIFIED` and are owned by Phases 26 and 30 respectively.
 
 ## Documentation Requirements
 
@@ -744,7 +839,7 @@ The whole sprint (📋 Planned).
   runtime topology whose mandatory executables this phase bakes into the monocontainer
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the per-distro registry plumbing and the lazy-tool-ensure contract the build obeys
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) the registers (Register 3 reached here)
-- [phase_24](phase_24_midwife_bootstrap_kind.md) — the `pb` midwife + empty `kind` cluster this phase publishes into
+- [phase_24](phase_24_bootstrap_coordinator_kind.md) — the `pb` bootstrap coordinator + empty `kind` cluster this phase publishes into
 - [phase_26](phase_26_object_reconciler.md) — the typed reconciler that adopts the equal-digest bootstrap
   objects into the first whole-deployment `ProvisionedSpec` through the one-time ownership handoff
 - [phase_30](phase_30_platform_backbone.md) — the standard service stack whose MinIO backs the registry's S3-driver blob store

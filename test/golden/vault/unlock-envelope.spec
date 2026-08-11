@@ -1,0 +1,12 @@
+magic=AMOEBIUS-VAULT-UNLOCK\0
+formatVersion=1
+kdf=Argon2id-v1.3
+memoryKiB=32768
+iterations=3
+parallelism=1
+saltBytes=16
+aead=ChaCha20-Poly1305-IETF
+nonceBytes=12
+tagBytes=16
+layout=magic|formatVersion:u8|memoryKiB:u32be|iterations:u32be|parallelism:u32be|salt|nonce|ciphertextBytes:u32be|ciphertext|tag
+aad=all fields through nonce

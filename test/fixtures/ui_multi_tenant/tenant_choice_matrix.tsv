@@ -1,0 +1,5 @@
+subject	tenant	membership	issue	select
+alice	t-a	active	allow	allow
+alice	t-b	active	allow	allow
+alice	t-b	revoked	deny	deny
+mallory	t-b	never-member	deny	deny

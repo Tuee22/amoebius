@@ -1,0 +1,11 @@
+{
+  "checkpointBytes": 49152,
+  "cpuMilli": 3200,
+  "executorLiveSet": 2,
+  "hostProcessSlots": 4,
+  "memoryBytes": 2751463424,
+  "pluginCacheBytes": 67108864,
+  "podEphemeralBytes": 1241513984,
+  "vmDiskBytes": 4294967296,
+  "workspaceBytes": 134217728
+}

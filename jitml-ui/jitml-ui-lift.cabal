@@ -1,0 +1,84 @@
+cabal-version: 3.12
+name: jitml-ui-lift
+version: 0.1.0.0
+build-type: Simple
+license: Apache-2.0
+extra-source-files: ../dhall/ui/jitml.dhall
+
+flag phase52-mint-ready-from-checkpoint-path-mutant
+  default: False
+  manual: True
+
+flag phase52-ignore-artifact-scope-mutant
+  default: False
+  manual: True
+
+flag phase52-ignore-artifact-owner-mutant
+  default: False
+  manual: True
+
+flag phase52-local-only-websocket-route-mutant
+  default: False
+  manual: True
+
+flag phase52-redis-as-receipt-mutant
+  default: False
+  manual: True
+
+library
+  exposed-modules:
+      Amoebius.JitML.UiAdapter
+  hs-source-dirs:
+      src
+  build-depends:
+      amoebius:dsl-core,
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      jitml-lift,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+  if flag(phase52-mint-ready-from-checkpoint-path-mutant)
+    cpp-options: -DPHASE52_MINT_READY_FROM_CHECKPOINT_PATH_MUTANT
+  if flag(phase52-ignore-artifact-scope-mutant)
+    cpp-options: -DPHASE52_IGNORE_ARTIFACT_SCOPE_MUTANT
+  if flag(phase52-ignore-artifact-owner-mutant)
+    cpp-options: -DPHASE52_IGNORE_ARTIFACT_OWNER_MUTANT
+  if flag(phase52-local-only-websocket-route-mutant)
+    cpp-options: -DPHASE52_LOCAL_ONLY_WEBSOCKET_ROUTE_MUTANT
+  if flag(phase52-redis-as-receipt-mutant)
+    cpp-options: -DPHASE52_REDIS_AS_RECEIPT_MUTANT
+
+test-suite jitml-ui-lift-contract
+  type: exitcode-stdio-1.0
+  main-is: Phase52JitMLUiContractSpec.hs
+  hs-source-dirs: ../test/ui
+  build-depends:
+      amoebius:dsl-core,
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      cryptohash-sha256 ==0.11.102.1,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      jitml-lift,
+      jitml-ui-lift,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite jitml-ui-lift-live-gate
+  type: exitcode-stdio-1.0
+  main-is: Phase52JitMLUiLift.hs
+  hs-source-dirs: ../test/live
+  build-depends:
+      aeson ==2.2.5.0,
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns

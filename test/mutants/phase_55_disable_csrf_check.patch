@@ -1,0 +1,5 @@
+--- a/src/Amoebius/Ui/Server/Security.hs
++++ b/src/Amoebius/Ui/Server/Security.hs
+@@ csrf
+- requireValidCsrf request
++ pure ()

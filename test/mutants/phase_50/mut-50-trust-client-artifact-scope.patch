@@ -1,0 +1,7 @@
+--- a/src/Amoebius/Infernix/UiAdapter.hs
++++ b/src/Amoebius/Infernix/UiAdapter.hs
+@@ artifact-scope
+-  authorizationTenant = contextTenant context
+-  authorizationSubject = contextSubject context
++  authorizationTenant = claimedTenant claim
++  authorizationSubject = claimedSubject claim

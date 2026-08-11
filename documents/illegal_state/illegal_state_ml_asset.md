@@ -48,6 +48,10 @@ every "unrepresentable" as *design intent for the type discipline*, never as a t
 
 ### 3.25 An ML asset named by arbitrary URL (or an unready / unlanded model)
 
+**Delivery-owner:** `Phase-12`
+
+**Case-family:** `ml-asset`
+
 Three ML-asset illegal states ride together. **(a) An engine named by arbitrary URL.** Sibling ML
 runtimes curl-tar native payloads and install venvs at image *build* and then re-select per engine — amoebius
 makes the compute engine an `EngineRuntime`, a **closed union of substrate-tagged engine identities with no arbitrary-`Url`/`Download` arm**: the engine is *named* by a typed identity from a closed catalog, selected by
@@ -89,6 +93,10 @@ bytes loading on the substrate, and an imported model's pin/tag being truthful).
 
 ### 3.32 A continuous training run with no checkpoint cadence, or a feed with no bounded retention
 
+**Delivery-owner:** `Phase-8`
+
+**Case-family:** `storage`
+
 "Train forever from a live feed" is how a bounded training budget quietly becomes unbounded — no checkpoints
 means nothing serveable and no resume point, and unbounded topic retention means BookKeeper fills. This round
 adds a **`TrainBudget = Bounded { steps | epochs } | Continuous { checkpointCadence }`** union: `Continuous`
@@ -113,6 +121,10 @@ mandatory `checkpointCadence` / bounded-retention `StorageBudget` fields, fail `
 
 ### 3.33 A multi-partition training feed with no defined merge order
 
+**Delivery-owner:** `Phase-35`
+
+**Case-family:** `messaging`
+
 A Pulsar topic with multiple partitions has no total consume order, so "train from this feed" is
 non-deterministic unless the merge is pinned — a prose "must consume in order" degrades to an untyped runtime
 hope. This round makes `TrainData.Feed` carry a **typed single-partition-or-explicit-merge-function witness**, so
@@ -124,6 +136,10 @@ function is a decode-checked total order, the total decoder returns `Left` on a 
 (the residue: the broker actually replaying the pinned prefix within retention).
 
 ### 3.34 An app serving or continuing another app's model without a grant
+
+**Delivery-owner:** `Phase-37`
+
+**Case-family:** `ml-asset`
 
 With model artifacts content-addressed in shared project buckets, any app in a cluster could dedup-and-serve
 another app's model, leaking a private model or its provenance across the app-isolation boundary. This round
@@ -143,6 +159,10 @@ cross-app model reference absent a grant a total decode-time `Left`) + `live-eff
 serve path honoring the per-app namespace).
 
 ### 3.84 A model output used as an authority-bearing command or identity
+
+**Delivery-owner:** `Phase-18`
+
+**Case-family:** `ui`
 
 Readiness and provenance establish which model produced an output; they do not make that output trustworthy or
 authorized. A model can hallucinate an action id, tenant, subject, resource identifier, permission, grant, policy,

@@ -1,0 +1,4 @@
+operator=effect-reorder
+target=Amoebius.Workflow.Worker
+change=ack-command-before-content-store-commit
+expected=critical-window-command-redelivery-absent

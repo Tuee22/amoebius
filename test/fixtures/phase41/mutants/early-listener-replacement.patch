@@ -1,0 +1,4 @@
+mutant=phase41-early-listener-replacement
+flag=phase41-early-listener-replacement-mutant
+locus=src/Amoebius/Fabric/WgReconcile.hs:replacementActions
+expected=the replacement listener cannot start until observed old-process exit

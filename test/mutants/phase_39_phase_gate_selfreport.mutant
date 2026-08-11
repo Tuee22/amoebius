@@ -1,0 +1,2 @@
+operator=effect-swap
+expected=a self-emitted done marker advances a phase before the live readiness observation

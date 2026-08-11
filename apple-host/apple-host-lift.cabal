@@ -1,0 +1,98 @@
+cabal-version: 3.12
+name: apple-host-lift
+version: 0.1.0.0
+build-type: Simple
+license: Apache-2.0
+
+flag phase53-const-output-mutant
+  default: False
+  manual: True
+
+flag phase53-echo-golden-mutant
+  default: False
+  manual: True
+
+flag phase53-lb-nodeport-mutant
+  default: False
+  manual: True
+
+flag phase53-omit-metal-work-item-mutant
+  default: False
+  manual: True
+
+flag phase53-favorable-metal-epoch-mutant
+  default: False
+  manual: True
+
+flag phase53-drop-metal-overlap-debit-mutant
+  default: False
+  manual: True
+
+library
+  exposed-modules:
+      Amoebius.HostComms.Illegal
+      Amoebius.HostComms.Loopback
+      Amoebius.HostComms.NodePort
+      Amoebius.Host.Substrate
+      Amoebius.HostWorker.AppleMetalBuild
+      Amoebius.HostWorker.Auth
+      Amoebius.HostWorker.Capacity
+      Amoebius.HostWorker.Lifecycle
+      Amoebius.HostWorker.MetalBridge
+      Amoebius.HostWorker.Peer
+      Amoebius.HostWorker.ReferenceKernel
+      Amoebius.HostWorker.Supervise
+      Amoebius.Substrate.Apple
+      Amoebius.Substrate.Brew
+      Amoebius.Substrate.Lima
+  hs-source-dirs: ../src
+  build-depends:
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+  if flag(phase53-const-output-mutant)
+    cpp-options: -DPHASE53_CONST_OUTPUT_MUTANT
+  if flag(phase53-echo-golden-mutant)
+    cpp-options: -DPHASE53_ECHO_GOLDEN_MUTANT
+  if flag(phase53-lb-nodeport-mutant)
+    cpp-options: -DPHASE53_LB_NODEPORT_MUTANT
+  if flag(phase53-omit-metal-work-item-mutant)
+    cpp-options: -DPHASE53_OMIT_METAL_WORK_ITEM_MUTANT
+  if flag(phase53-favorable-metal-epoch-mutant)
+    cpp-options: -DPHASE53_FAVORABLE_METAL_EPOCH_MUTANT
+  if flag(phase53-drop-metal-overlap-debit-mutant)
+    cpp-options: -DPHASE53_DROP_METAL_OVERLAP_DEBIT_MUTANT
+
+test-suite apple-metal-host-contract
+  type: exitcode-stdio-1.0
+  main-is: Phase53AppleHostContractSpec.hs
+  hs-source-dirs: ../test/host
+  build-depends:
+      apple-host-lift,
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite apple-metal-host-live-gate
+  type: exitcode-stdio-1.0
+  main-is: AppleMetalPeerSpec.hs
+  hs-source-dirs: ../test/live
+  build-depends:
+      aeson ==2.2.5.0,
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns

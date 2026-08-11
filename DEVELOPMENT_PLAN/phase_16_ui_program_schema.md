@@ -6,14 +6,19 @@
 
 Phase 16 delivers the UI program schema; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+Gate passed on 2026-08-09 with ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/ledgers/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -24,7 +29,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 16.1: Bounded `UiSource` and total structural checker 📋](#sprint-161-bounded-uisource-and-total-structural-checker-)
+- [Sprint 16.1: Bounded `UiSource` and total structural checker ⏸️](#sprint-161-bounded-uisource-and-total-structural-checker-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,8 +37,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. This phase establishes only the representational and pure checking boundary. It does not claim
-that a browser, UI server, identity provider, or storage provider enforces the checked program.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The closed Dhall wire, total structural checker, independent oracles, generated coverage, constructor
+seal, and all six mutants pass. Browser, UI-server, identity-provider, and storage-provider enforcement remain
+UNVERIFIED. See the [Phase-16 ledger](ledgers/phase_16_ui_program_schema.md).
 
 ## Phase Summary
 
@@ -54,10 +66,9 @@ plan emission, a browser/server interpreter, a second register, or a substrate.
 gate itself is pure and does not consume simulated effects.
 **Substrate:** none — no host, browser, network, credential, provider service, or cluster is contacted.
 **Register:** 1 — pure/golden.
-**Gate:** `cabal test ui-program-schema-spec` passes the Phase-0-pinned positive/negative program corpus,
-independently authored structural oracle, round-trip goldens, coverage floors, and every seeded mutant named in
-[Gate integrity](#gate-integrity). Phase 17 does not open unless the ledger records Register 1 green and all
-runtime-enforcement layers UNVERIFIED.
+**Gate:** `python3 tools/phase16_gate.py` passes the Phase-0 corpus, structural and
+wire oracles, coverage floors, constructor compile seal, network observer, six explicit mutant-red runs, and
+ledger check.
 
 ## Gate integrity
 
@@ -104,14 +115,22 @@ noninterference.
 
 ## Sprints
 
-## Sprint 16.1: Bounded `UiSource` and total structural checker 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 16.1: Bounded `UiSource` and total structural checker ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `dhall/amoebius/ui/`, `src/Amoebius/Ui/{Source,Check}.hs`, and
-`test/ui/Phase16UiProgramSchemaSpec.hs` (target authored sources; not yet built)
-**Blocked by**: Phase 15
-**Independent Validation**: `cabal test ui-program-schema-spec` reads only the Phase-0 pins for expected
-decisions, verifies the generated coverage obligations, and requires every named mutant to fail.
+`test/ui/Phase16UiProgramSchemaSpec.hs` — built and validated.
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: the suite reads the Phase-0 decisions and independent graph/wire tables. Three
+positives and ten exact negatives pass, eight generated classes meet their floors, and all six mutants fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/dsl_doctrine.md`,
 `documents/engineering/generated_artifacts_doctrine.md`
 
@@ -141,7 +160,7 @@ later phases.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+Done. All runtime-enforcement layers remain UNVERIFIED.
 
 ## Documentation Requirements
 

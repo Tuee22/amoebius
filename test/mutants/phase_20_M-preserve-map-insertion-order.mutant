@@ -1,0 +1,3 @@
+operator=determinism-violation
+change=encode map insertion order without canonical sorting
+expected=fresh-process canonical bytes differ

@@ -1,0 +1,2 @@
+operator=dropped-input
+expected=substrate-distinct release generations collapse to one releaseHash

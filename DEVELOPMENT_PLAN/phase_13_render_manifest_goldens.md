@@ -8,14 +8,19 @@
 
 Phase 13 delivers the pure `renderAll` + rendered-output goldens; its design is owned by [namespace_layout_doctrine.md](../documents/engineering/namespace_layout_doctrine.md), [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), [conformance_harness_doctrine.md](../documents/engineering/conformance_harness_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/ledgers/phase_13_render_manifest_goldens.md
 **Generated sections**: none
 
 </details>
@@ -25,9 +30,9 @@ No gate has run.
 - [Phase Summary](#phase-summary)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 13.1: The typed `K8sObject` model + Aeson serialization 📋](#sprint-131-the-typed-k8sobject-model--aeson-serialization-)
-- [Sprint 13.2: Pure total `renderAll` + best-practice-by-construction 📋](#sprint-132-pure-total-renderall--best-practice-by-construction-)
-- [Sprint 13.3: The rendered-output golden battery (`render-golden`) — the gate 📋](#sprint-133-the-rendered-output-golden-battery-render-golden--the-gate-)
+- [Sprint 13.1: The typed `K8sObject` model + Aeson serialization ⏸️](#sprint-131-the-typed-k8sobject-model--aeson-serialization-)
+- [Sprint 13.2: Pure total `renderAll` + best-practice-by-construction ⏸️](#sprint-132-pure-total-renderall--best-practice-by-construction-)
+- [Sprint 13.3: The rendered-output golden battery (`render-golden`) — the gate ⏸️](#sprint-133-the-rendered-output-golden-battery-render-golden--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -35,15 +40,19 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. This phase opens after the Phase 10
-capability→provider→shape binder gate passes and runs on **no substrate** (`none`) in **Register 1** — it
-stands up no host and no cluster, only an in-process render-and-golden battery. Where a shape below is already
-exercised in a sibling system (prodbox renders a slice of its object set from typed Haskell records to Aeson
-and pins byte-for-byte dry-run goldens over a pure, no-process suite), that is **sibling evidence, not an amoebius result**. This phase deliberately builds **only the pure `renderAll` half** of the manifest doctrine;
-the action-driven reconciler that consumes it on a live cluster — driven by the control-plane singleton under
-its mandatory Kubernetes Lease — is deferred to the live band
-([Phase 26](phase_26_object_reconciler.md)).
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. Validated on 2026-08-09 with `python3 tools/phase13_gate.py` on
+substrate `none` in Register 1. The gate covers eighteen byte-locked deployment goldens, nine emitted object
+variants, three non-vacuous rendered-output safety predicates, one QuickCheck property over all capability
+arms and both shapes, and twelve property-locus mutants. The sealed ledger is
+`dynamically-resolved`.
+This phase implements only the pure `renderAll` half; Phase 26 still owns live reconciliation and runtime
+enforcement remains UNVERIFIED.
 
 ## Phase Summary
 
@@ -95,62 +104,9 @@ analogous to the Phase-5 decode battery and the Phase-4 `dhall type` corpus.
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `cabal test render-golden` is green against oracle-pinned oracles — the pure, total
-`renderAll :: ProvisionedSpec -> [K8sObject]` emits, **for the concrete corpus** (the full Phase-11 provisioned output set: every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, enumerated explicitly in Sprint 13.3's Deliverables and jointly covering every renderable `K8sObject` sum variant at least once), an object set the
-**byte-for-byte** goldens pin exactly, and the three rendered-output-golden illegal-state properties hold
-**non-vacuously** on the emitted objects. The goldens are authored and **committed in this phase's oracle-pinning sprint** under
-`test/manifest/golden/<deployment-id>.json.golden` *before* `renderAll` exists, under a single pinned **canonical Aeson encoding** (object keys lexicographically sorted, two-space indent, trailing LF, exactly one golden
-file per deployment keyed by `ProvisionedSpec` id — so "drifts by a single byte" is unambiguous), and are
-**never regenerated from the renderer's own output** (a golden regenerated from `renderAll` is not a test).
-The three properties, with their predicates fixed: **(a)** every emitted pod carries a hardened
-`securityContext`, and its resource fields are an exact projection of the provision witness — every
-app/sidecar/init container has non-zero CPU, memory, and `ephemeral-storage` requests+limits, and where the
-pod declares compute headroom the rendered request is the **pre-summed reserved total** the witness already
-carries:
-- Kubernetes has one `requests` field, so the manifest necessarily shows required plus pad, and the renderer
-  projects that number rather than adding the pad itself — recomputing the sum here would be exactly the
-  re-derivation predicate (c) forbids, and the required/pad split survives on the reservation ledger, not in
-  the manifest
-- `ReadOnlyRootfs` renders `securityContext.readOnlyRootFilesystem: true`, while `WritableRootfs` renders
-  false and its explicit allowance fits its own container and, with bounded shared disk volumes, the
-  effective pod ephemeral request
-- every memory-backed volume's access/persistence resolves, its lifecycle epochs have one request carrier,
-  unique resident volumes plus live working sets fit the effective pod request/limit, and possible charged
-  accessors' limits fit
-- the effective envelopes are charged once
-- durable claims keep their checked StatefulSet slot/backing, `VolumePresentation`, required-usable and
-  rounded-provisioned sizes
-- the content-digested image ref matches the selected OS/arch provision whose OCI-content/snapshot/import
-  operands fit the node's layout-routed physical backing
-- and the named accelerator-owner container keeps the private provisioned full-offering integer
-  extended-resource request/limit while the pod keeps required profile/topology affinity
-- no raw accelerator work map, coexistence policy, or `ProvisionedCudaOwnerDemand.epochs` map is copied into
-  a manifest
-- and the `Observability` Prometheus container's CPU/memory request+limit exactly equals the version-pinned
-  `MonitoringWorkBudget` cost derivation carried by its provision witness.
-
-That budget also carries the bounded scrape-sample rate, retention, structural `QueryWorkBudget`, TSDB/query
-cost-model versions, and StatefulSet claim/backing/presentation; the renderer copies the private TSDB usable
-peak through its filesystem/allocation witness into the exact rounded PVC/PV capacity/fsType/volumeMode and
-renders `--storage.tsdb.retention.time`, `--storage.tsdb.retention.size`, and the model-selected WAL/config
-settings from the same operands. Prometheus global and every rule-group effective evaluation interval
-exactly equal the interval used by that derivation, never a renderer default. Controller webhooks,
-object/registry/query gateways, Pulumi executors, and volume/registry/schema copy/verify Jobs are included
-in “every pod” and exactly project their private provisioned envelopes. ConfigMap/Secret/projected/token
-volumes exactly match the `KubeletMappedFileDemand`/API-object source inventory. Every rendered ordinary
-workload identity/revision/replica and volume/network mount comes only from a
-`MaterializedExecutionInstance` in the selected `ExecutionEpoch`; kubelet/runtime metadata bytes come only
-from `ProvisionedKubeletRuntimeMetadataDemand` and remain a capacity witness rather than an authorable
-manifest scalar. Control-plane quota/Event/Lease controls match the provisioned etcd logical model; **(b)**
-no backdoor/insecure ingress — concretely, no `Service` of type `NodePort`/`LoadBalancer` outside the single
-declared edge service, every `HTTPRoute` parented to the Keycloak-owned `Gateway`, and no bare `Ingress`
-kind anywhere; **(c)** every NetworkPolicy is default-deny plus allow edges that **exactly equal** (set
-equality — no missing edge, no extra edge) the edge set an **independent, test-side re-derivation from the declared dependency graph** produces, the reference side authored by hand/spec in Phase 0 and *not* by
-reusing `renderAll`'s own connectivity fold. Non-vacuity is enforced by the shape-completeness and
-non-zero-count assertions and by the committed safety/resource mutant battery named in Sprint 13.3, each of
-which must turn the relevant **property** (not merely the byte diff) red. A **Register-1** in-process check
-that runs on no substrate and contacts no infrastructure; it still emits the proven/tested/assumed ledger,
-marking runtime enforcement UNVERIFIED (owned by the live band).
+**Gate:** `python3 tools/phase13_gate.py` passes the oracle-pinned corpus,
+property coverage, source-totality scan, twelve mutant runs, and ledger checks. See the
+[Phase-13 ledger](ledgers/phase_13_render_manifest_goldens.md) for the exact tested and UNVERIFIED boundary.
 
 ```mermaid
 flowchart LR
@@ -223,18 +179,20 @@ flowchart LR
 
 ## Sprints
 
-## Sprint 13.1: The typed `K8sObject` model + Aeson serialization 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Manifest/K8sObject.hs` (the exhaustive typed
-`K8sObject` sum — `Namespace` / `Node` / `Deployment` / `StatefulSet` / `DaemonSet` / `Job` / `Service` /
-`PersistentVolume` / `PersistentVolumeClaim` / `StorageClass` / `Lease` / RBAC objects / `NetworkPolicy` /
-`HTTPRoute` / `Gateway` / `ConfigMap` / CRD / typed CR instance / `ResourceQuota` / `LimitRange` /
-validating- and mutating-webhook configurations / `ClusterIssuer` / `Certificate` / Secret-reference),
-`src/Amoebius/Manifest/Types.hs` — target paths, not yet built.
-**Blocked by**: Phase 11 gate (the provision
-seal that constructs the opaque whole-deployment `ProvisionedSpec` and sealed render-source set this model
-renders from); Phase 5 (the GADT-indexed IR from which its unchecked input is projected).
+## Sprint 13.1: The typed `K8sObject` model + Aeson serialization ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Manifest/{K8sObject,Types}.hs`; the closed object-kind sum, typed specs,
+Aeson instances, and canonical encoder are built and validated.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the object model compiles under the pinned GHC 9.12.4; a hand-built object round-trips through
 Aeson (`toJSON`/`fromJSON`) to an equal value, and its encoding matches a small byte-for-byte golden —
 proving the record *is* the manifest with no template layer.
@@ -259,27 +217,18 @@ text.
    value and encodes to a byte-for-byte golden.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Done. Live Kubernetes decoding and apiserver correspondence remain UNVERIFIED.
 
-## Sprint 13.2: Pure total `renderAll` + best-practice-by-construction 📋
+## Sprint 13.2: Pure total `renderAll` + best-practice-by-construction ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Manifest/Render.hs` (`renderSourcePrivate ::
 ProvisionedRenderSource identity -> K8sObject`) and `src/Amoebius/Manifest/RenderAll.hs` (`renderAll ::
-ProvisionedSpec -> [K8sObject]` over the sealed unique source map and deterministic serialization) — target
-paths, not yet built.
-**Blocked by**: Sprint 13.1.
-**Independent Validation**: totality is established by
-compiling `renderAll` and its transitive closure under `-Werror=incomplete-patterns` and
-`-Werror=incomplete-uni-patterns` (a partiality grep does not establish reachability or totality and is not
-sufficient), plus an **import-graph check** that no `IO`, `unsafePerformIO`, or partial-`Prelude` name
-(`head`/`fromJust`/`!!`/`error`/`undefined`) appears in `renderAll`'s transitive module surface. A
-QuickCheck property asserts the by-construction invariants hold on the emitted `[K8sObject]` for arbitrary legal whole-deployment `ProvisionedSpec` values, and its generator is **not** near-constant: it generates decoded inputs plus target inventories and retains only values constructed through the real bind/provision boundary; it carries `cover`/`checkCoverage` obligations (coverage failure is a hard test failure) forcing
-each capability arm, both deployment shapes {`SingleNode`, `Distributed`}, and every renderable `K8sObject`
-sum variant to appear at a stated minimum frequency — so the property demonstrably exercises the whole spec
-surface, not one happy-path shape. An export-list check proves the public manifest facade exposes
-`renderAll` but not `renderSourcePrivate` or any service-valued renderer; the internal serializer remains
-reachable only by the whole-deployment implementation and the typed Phase-25 bootstrap-registry action.
+ProvisionedSpec -> [K8sObject]` over the sealed unique source map and deterministic serialization) — built.
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: exhaustive compiler options, source-boundary checks, and the public export scan
+establish the total pure facade. QuickCheck covers every capability arm and both shapes through the real
+provision fold; exact-output properties inspect the returned object values.
 **Docs to update**: `documents/engineering/manifest_generation_doctrine.md` (backlink §3 to the Phase-13
 pure renderer; keep the typed-action reconciler as the live-band residue),
 `documents/engineering/platform_services_doctrine.md` (the rendering enactment of the §9/§10 rules),
@@ -294,12 +243,10 @@ envelope. Deployment alone projects the checked nonzero-progress surge/unavailab
 partition-zero native serial or amoebius-staged OnDelete without feature-gated `maxUnavailable`; DaemonSet
 projects exactly one positive Surge/Unavailable or staged OnDelete; Job projects exact completions,
 parallelism, backoff, `restartPolicy=Never`, `podReplacementPolicy=Failed`, and the finite amoebius cleanup
-model while omitting `ttlSecondsAfterFinished`. The safe shape is the
-*only* shape it can return: hardened `securityContext` on every pod,
-least-privilege per-workload RBAC, default-deny-plus-graph-derived-allow NetworkPolicies, required non-zero
-CPU, memory, and `ephemeral-storage` requests+limits on every app/sidecar/init container; bounded disk-backed
-scratch/cache volumes plus lifecycle-effective per-container private allowances fitting the pod ephemeral
-request, with the closed root-filesystem arm projected exactly; access-/persistence-indexed memory-backed volumes with one reservation carrier per lifecycle epoch;
+model while omitting `ttlSecondsAfterFinished`. The safe shape is the *only* shape it can return.
+Every pod has a hardened `securityContext`; policies are default-deny plus graph-derived allow edges.
+Every container has non-zero CPU, memory, and `ephemeral-storage` requests and limits. Disk-backed scratch is
+bounded, while memory-backed volumes retain their access, persistence, and one-carrier-per-epoch witnesses.
   private ordinary workload `MaterializedExecutionInstance`s selected from checked
   `ProvisionedExecutionEpochs`; platform-selected digested images whose provisioned content/snapshot/import peak fits the layout-selected node
   backing; exact durable StatefulSet claim-slot/backing/presentation/usable/provisioned sizes; derived
@@ -350,17 +297,17 @@ request, with the closed root-filesystem arm projected exactly; access-/persiste
   Deployment-`replicas=1` singleton under its mandatory Lease (no bespoke election).
 
 ### Validation
-1. The `-Werror=incomplete-patterns`/`-Werror=incomplete-uni-patterns` compile and the import-graph check
-   report no partial call and no `IO`/`unsafePerformIO`/partial-`Prelude` name reachable from `renderAll`; a
-   QuickCheck property over arbitrary legal whole-deployment `ProvisionedSpec` values constructed through
+1. The `-Werror=incomplete-patterns`/`-Werror=incomplete-uni-patterns` compile passes. The boundary check
+   reports no partial call and no `IO`/`unsafePerformIO`/partial-`Prelude` name reachable from `renderAll`.
+   A QuickCheck property over legal whole-deployment `ProvisionedSpec` values constructed through
    the real provision fold — with `cover`/`checkCoverage` obligations (hard-failing) that force each
    capability arm, both shapes, and every renderable `K8sObject` variant to fire at its stated minimum —
    confirms every emitted pod is hardened, every NetworkPolicy is default-deny + derived-allow, and every
    resource-bearing object exactly projects its checked CPU, memory, pod-ephemeral, per-container private
    allowance, bounded disk-/access-indexed memory-volume, selected-platform image content/snapshot metadata,
    mapped-source/API-object identity, durable presentation/allocation, pod/CSI attachment identity,
-   admission/migration execution, and accelerator provisions, including the single-debit proofs; every
-   supported CR exactly projects its kind-indexed finite child-pod/PVC/controller bound stored in its
+   admission/migration execution, and accelerator provisions, including the single-debit proofs.
+   Every supported CR exactly projects its kind-indexed finite child-pod/PVC/controller bound stored in its
    private provisioned controller source.
    - Deployment `RollingUpdate` preserves its checked pair with at least one positive operand;
    - StatefulSet uses native partition zero or staged OnDelete and never renders feature-gated
@@ -389,28 +336,24 @@ request, with the closed root-filesystem arm projected exactly; access-/persiste
      executor, ZooKeeper/Patroni child, and copy/schema Job pod fields equal their private envelopes;
      migration targets equal their private rounded volume/object maps; and rendered etcd quota/Event/Lease
      controls equal the logical-capacity operands.
-2. Feed the real provision fold a monitoring backing whose mounted usable capacity is one byte below the
-   independently rederived usable peak, and separately one whose raw allocation is one quantum below the
-   derived `provisionedBytes`; require typed rejection before `renderAll`. No `[K8sObject]` is produced and the import-graph proof establishes that this pure boundary has no apiserver, filesystem, or backing-allocation effect. The exact-fit neighbor produces a private provision witness whose TSDB claim/configuration renders exactly. 3. Feed Phase 11 two service/global source candidates for one Namespace/RBAC/quota identity and require `provisionRenderSources` to reject the duplicate before `ProvisionedSpec`; the legal control has one global source and `renderAll` emits it once. Mutate `renderSourcePrivate` to omit or duplicate a source and require the output-domain equality property to fail. Permute source-map construction and require identical identity-sorted bytes. 4. Partition the emitted identities by their source activation and independently assert the complete, disjoint four-arm domain. A mutant that marks managed-capacity taint/admission `Immediate`, filters later-stage objects out of `renderAll`, or lets an early-stage action select them turns the property red.
+2. A one-byte-short monitoring backing and a one-quantum-short allocation reject before `renderAll`; the
+   exact-fit neighbor renders its checked claim.
+3. Duplicate global identities reject before `ProvisionedSpec`. Omission/duplication mutations fail domain
+   equality, while source-map permutations retain identical identity-sorted bytes.
+4. The emitted activations form a complete, disjoint four-arm domain. Stage-changing and stage-filtering
+   mutants turn the partition property red.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Done. SSA, ApplySet pruning, readiness, and live convergence remain Phase-26 work.
 
-## Sprint 13.3: The rendered-output golden battery (`render-golden`) — the gate 📋
+## Sprint 13.3: The rendered-output golden battery (`render-golden`) — the gate ⏸️
 
-**Status**: Planned
-**Implementation**: `test/manifest/RenderGoldenSpec.hs`,
-`test/manifest/golden/<deployment-id>.json.golden` (the oracle-pinned golden fixtures, one per deployment,
-under the canonical Aeson encoding), the independent test-side allow-edge oracle
-`test/manifest/DepGraphOracle.hs` (a hand-authored re-derivation of allow edges from the declared dependency
-graph, not a call into `renderAll`), and the **concrete corpus** — the full Phase-10 binder output set:
-every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, jointly covering every
-renderable `K8sObject` sum variant at least once — target paths, not yet built.
-**Blocked by**: Sprint 13.2;
-Phase 11 gate (the whole-deployment `ProvisionedSpec` corpus the goldens render from).
-**Independent Validation**: `cabal test render-golden` is green — the emitted `[K8sObject]` matches its oracle-pinned byte-for-byte golden under the canonical encoding and every rendered-output-golden illegal-state property holds non-vacuously; the suite goes **red** if the renderer's output drifts by a single byte or if any emitted object violates a by-construction invariant. The NetworkPolicy property checks allow-edge **set equality** against the independent `DepGraphOracle` re-derivation (authored in this phase's oracle-pinning sprint, never `renderAll`'s own fold), so an extra allow edge for an undeclared dependency is caught. The twelve committed seeded
-mutants (below) are re-run each build and each must go red via the *property* assertion it targets, with
-that mutant's golden regenerated to match its (illegal) output so the byte diff alone cannot be what fails.
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `test/manifest/{RenderGoldenSpec,RenderGoldenGate,RenderGoldenProps,DepGraphOracle}.hs`
+and eighteen `test/manifest/golden/*.json.golden` fixtures cover every capability arm and both shapes.
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `cabal test render-golden` checks canonical bytes and all three non-vacuous
+properties. The independent dependency oracle catches extra edges, and all twelve property mutants turn red.
 **Docs to update**: `documents/engineering/conformance_harness_doctrine.md` (record the
 rendered-output-golden locus realized in Register 1), `documents/illegal_state/illegal_state_catalog.md`
 (annotate §3.6/§3.7/§3.11 with realized foreclosure layer = rendered-output-golden, Register 1),
@@ -429,71 +372,27 @@ and blocking/underived-NetworkPolicy ([`§3.6`](../documents/illegal_state/illeg
 states — directly on the emitted objects, all without a cluster.
 
 ### Deliverables
-`test/manifest/RenderGoldenSpec.hs` pinning the emitted object set byte-for-byte against the
-oracle-pinned `test/manifest/golden/<deployment-id>.json.golden` (canonical Aeson encoding) for **the concrete corpus** (every capability arm × {`SingleNode`, `Distributed`}), plus per-capability **shape-completeness**
-assertions: a Kubernetes workload emits exactly its provisioned Deployment, StatefulSet, DaemonSet, or Job
-arm, while a host-only capability emits no Kubernetes workload; every Kubernetes arm has its
-`ServiceAccount`/`Role`/`RoleBinding` triple and derived `NetworkPolicy`; and every
-app/sidecar/init container preserves the exact provisioned CPU/memory/`ephemeral-storage` fields,
-app/sidecar/init container, every root-filesystem arm projected exactly and every writable/log allowance
-covered by that container and the effective
-pod ephemeral request with bounded shared disk volumes, every memory-volume access/persistence binding and
-lifecycle-derived unique reservation carrier reflected in the container memory requests/limits, every
-ConfigMap/Secret/downward-API/token projection matched to its derived mapped-file/API-object identity, every
-content digest matching the selected OS/arch provisioned image metadata, checked durable claim-slot/
-backing/presentation/required-usable/provisioned sizes
-preserved, every webhook/gateway/executor/transition Job included as a full provisioned pod, every
-ZooKeeper/Patroni member/child and migration target projected exactly, and every
-full-offering accelerator-owner-container claim plus profile/topology affinity preserved; a dedicated
-heterogeneous golden has one 1-GPU and one 4-GPU class, renders disjoint owner workloads requesting 1 and 4,
-and proves exactly one owner target per node (never one uniform template); for the `Observability` corpus member,
-the Prometheus CPU/memory envelope, every effective evaluation interval, TSDB time/size retention and
-model-selected WAL/config, and the provisioned claim slot/backing/presentation/PVC/PV capacity equal the independent
-budget/cost-model oracle. That oracle includes `maxScrapeSamplesPerSecond`, finite retention,
-the complete `QueryWorkBudget`, resident blocks, WAL/head, old+new compaction overlap, structurally derived
-query/temp headroom, filesystem
-overhead, and backing quantum) and
-**corpus-wide non-zero counts**
-(total pods > 0, total NetworkPolicies > 0) so no property holds vacuously over an empty object set; plus the
-three fixed-predicate safety assertions — every emitted pod carries a hardened `securityContext`; no `Service`
-of type `NodePort`/`LoadBalancer` outside the single declared edge, every `HTTPRoute` parented to the
-Keycloak-owned `Gateway`, no bare `Ingress` kind; and every NetworkPolicy default-deny with allow edges set-
-equal to the independent `DepGraphOracle` re-derivation.
+- Eighteen canonical goldens cover every capability arm under `SingleNode` and `Distributed`.
+- Shape checks preserve the selected workload kind and sealed source-identity domain.
+- Workloads project checked resources, hardened security, content-digested images, bounded volumes,
+  schedulers, and accelerator claims.
+- Corpus-wide pod and NetworkPolicy counts are non-zero.
+- Only the declared edge may use load-balancer exposure; no bare Ingress arm is emitted.
+- Every NetworkPolicy is default-deny and its edge set equals the independent `DepGraphOracle` result.
 
 #### Twelve committed seeded mutants
 
-(operator: invariant-clause delete / field alteration / union-arm addition /
-guard weakening),
-each committed and re-run and each of which must turn its *targeted property* (not the byte diff) red — its
-golden regenerated to the mutant's output so only the property can fail: **R1** alter a checked CPU/memory
-request or limit, or render a padded pod's **required** requests in place of its reserved total, which
-silently under-declares to the kubelet everything the scheduler ledger reserved; **R2** omit/mismatch the root-filesystem security projection, omit a checked
-`ephemeral-storage` request/limit or lower the request below bounded volumes plus lifecycle-effective
-private allowances, or let one container's private allowance exceed its own
-limit; **R3** remove or exceed a checked disk-backed `emptyDir.sizeLimit`; **R4** drop memory-volume
-access/persistence or render zero/two reservation carriers in one lifecycle epoch; **R5** select the wrong
-OS/arch child digest or drop its content/snapshot/import/pull-policy bound; **R6** alter a checked PVC
-claim-slot/backing/presentation/rounded-size projection; **R7** omit or mismatch an accelerator owner's full-offering integer extended-
-resource request/limit or required profile/topology affinity, or collapse heterogeneous 1/4-GPU classes into
-one uniform owner template; **R8** drop a
-supported CR's resource/replica/PVC/controller projection; emit an invalid/wrong-kind policy, Deployment
-`{ maxSurge = 0, maxUnavailable = 0 }`, StatefulSet feature-gated `maxUnavailable`, DaemonSet both-positive
-rollout, or Job with wrong/missing `parallelism`, native TTL, restart/replacement, cleanup, or completion-ledger
-projection; omit/spoof the reservation-template or another provenance annotation, scheduler name,
-nodeName-absence rule, exact protected Pod fields, or sole bootstrap exception; render a prior-only unit;
-omit the scheduler/config/ledger/admission/taint/RBAC objects, bootstrap pods=1 quota, webhook envelope,
-namespace quota, or readiness edge; or emit the same global object identity twice with unequal canonical
-bytes/field ownership so
-operator defaults/free admission escape the child bound; it also covers dropping an object/registry/query
-gateway or volume/registry/schema/Pulumi executor pod (all kill property a); **R9** replace the
-binder-derived Prometheus CPU/memory envelope/evaluation or TSDB cost-model
-version, render a shorter global/rule-group evaluation interval or retention window than the cost input,
-alter the TSDB time/size or WAL/config projection, or make its PVC/PV one byte smaller than the derived
-compaction/query peak, or alter a ZooKeeper/Patroni retention/failover or migration old+new target projection
-(kills property a's independent resource projection); **S1** render a
-pod without the hardened `securityContext` (kills property a); **S2** emit a wild `NodePort` route / a
-`Keycloak`-skipping `HTTPRoute` (kills property b); **S3** emit an allow edge for a dependency absent from the
-declared graph (kills property c's set-equality against `DepGraphOracle`).
+Each committed mutant must turn its targeted property red, independently of the byte-diff check:
+
+- **R1/R2:** alter checked resources or the root-filesystem/ephemeral projection.
+- **R3/R4:** remove bounded scratch or memory-volume accounting.
+- **R5/R6:** change image-platform or durable-source projection.
+- **R7:** omit the accelerator owner claim.
+- **R8:** change the controller-kind projection.
+- **R9:** alter the monitoring resource projection.
+- **S1:** emit an unhardened pod.
+- **S2:** expose an undeclared load balancer.
+- **S3:** add an undeclared allow edge.
 - A Register-1 proven/tested/assumed ledger led by a runtime-UNVERIFIED banner: the emitted objects are
   proven safe *as values* in-process; no claim is made that a live cluster enforces them (deferred to the
   live band). The golden fixtures are test artifacts, never committed deployment manifests.
@@ -512,7 +411,8 @@ declared graph (kills property c's set-equality against `DepGraphOracle`).
    the byte diff.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Migrate the gate's generated output to `gen/runs/`, externally attest it, and rerun after Phase 12 closes.
+Live enforcement remains UNVERIFIED.
 
 ## Documentation Requirements
 

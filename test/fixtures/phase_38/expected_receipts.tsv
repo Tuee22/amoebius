@@ -1,0 +1,6 @@
+tenant	owner	command	status	effect_count
+t-a	alice-a	cmd-a1	Accepted	1
+t-a	alice-a	cmd-a4	Accepted	1
+t-a	alice-a	cmd-a4/changed-input	IdempotencyConflict	0
+t-a	bob-a	cmd-b1	Accepted	1
+t-b	carol-b	cmd-c1	Accepted	1

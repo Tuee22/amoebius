@@ -8,15 +8,22 @@
 > **Read this if**: phase 10 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 10 delivers the capability union + representational bind; its design is owned by [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), [capability_extension_doctrine.md](../documents/engineering/capability_extension_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-No gate has run.
+Register 1: an in-process battery, no cluster. The gate passed on 2026-08-09 with ledger
+`dynamically-resolved`.
+The human-readable boundary is recorded in the
+[Phase-10 capability-bind ledger](ledgers/phase_10_capability_bind.md).
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_10_capability_bind.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -27,9 +34,9 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 10.1: The closed capability union + the no-product-arm Gate-1 foreclosure 📋](#sprint-101-the-closed-capability-union--the-no-product-arm-gate-1-foreclosure-)
-- [Sprint 10.2: The `CapabilityBinding` + total representational `bind` 📋](#sprint-102-the-capabilitybinding--total-representational-bind-)
-- [Sprint 10.3: The bind property/corpus + the Register-1 gate 📋](#sprint-103-the-bind-propertycorpus--the-register-1-gate-)
+- [Sprint 10.1: The closed capability union + the no-product-arm Gate-1 foreclosure ⏸️](#sprint-101-the-closed-capability-union--the-no-product-arm-gate-1-foreclosure-)
+- [Sprint 10.2: The `CapabilityBinding` + total representational `bind` ⏸️](#sprint-102-the-capabilitybinding--total-representational-bind-)
+- [Sprint 10.3: The bind property/corpus + the Register-1 gate ⏸️](#sprint-103-the-bind-propertycorpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,11 +44,18 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
-is design intent, never a tested amoebius result. This phase runs on **no substrate** (`none`) in **Register 1**
-— it stands up no host, no cluster, and no provider, only the pure capability union, the app-surface
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. Validated 2026-08-09 on **no substrate** (`none`) in **Register 1** with
+`python3 tools/phase10_gate.py`; ledger
+`dynamically-resolved`. It stood up
+no host, no cluster, and no provider, only the pure capability union, the app-surface
 `CapabilityNeed` records, the `CapabilityBinding`, the total `bind` producing a `BoundServiceSpec`/`BoundDeployment`,
-and the object-node-multiset structural oracle plus its property/corpus battery. It opens after the
+and the object-node-multiset structural oracle plus its property/corpus battery. It opened after the
 [Phase 6](phase_06_illegal_state_corpus.md) gate (the illegal-state corpus + validation-locus ledger machinery this gate reuses) and the [Phase 9](phase_09_execution_accelerator_folds.md) gate (the execution-epoch / runtime-storage / accelerator folds whose kind-indexed vocabulary `bind`'s output must be compatible with, and which the *later* provision seal — [Phase 11](phase_11_provision_seal.md) — invokes; **`bind` itself calls no fold and no provision here**). Where a shape below is exercised in a sibling system (prodbox's `Prodbox/Lib/ChartPlatform.hs` planner/dependency/values orchestration the binding generalizes, and infernix's `Infernix/Runtime/Worker.hs` selecting its engine by `adapterType` and never fetching it), that is **sibling evidence, not an amoebius result** — and both siblings still *name products* and *fetch* engine payloads, the
 exact couplings this phase's abstraction dissolves.
 
@@ -254,19 +268,25 @@ at the wholly unprovisioned `BoundDeployment`.
 
 ## Sprints
 
-## Sprint 10.1: The closed capability union + the no-product-arm Gate-1 foreclosure 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 10.1: The closed capability union + the no-product-arm Gate-1 foreclosure ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `dhall/amoebius/Capability.dhall` (the closed nine-arm capability
 union — the eight ordinary capabilities plus the ninth `InferenceEngine` head, whose closed `EngineRuntime`
 lane union — `AppleMetal` · `Cuda` · `LinuxCpu` — carries **no arbitrary-`Url`/`Download` arm** — on the app
 surface + the app-surface `CapabilityNeed` records: buckets against `ObjectStore`, a database against `Sql`,
 topic lifecycles against `MessageBus`, OIDC rules against `Identity`, published routes against `Edge`,
 etc.); `src/Amoebius/Capability/Types.hs` (the Haskell `CapabilityNeed` and the `BoundServiceSpec` skeleton
-the binder targets) — target paths, not yet built.
-**Blocked by**: Phase 4 gate (the Gate-1 Dhall schema +
-smart-constructor prelude the union lives in); Phase 5 gate (the GADT-indexed IR + total decoder the
-`BoundServiceSpec` is a projection of).
+the binder targets), both built and validated by this phase.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `dhall type` accepts every positive
 `CapabilityNeed` fixture and rejects both the `illegal_product_in_app` fixture (naming `minio` at authoring
 time) and the `illegal_engine_by_url` fixture (naming an engine by URL) **at their asserted `dhall type` error loci** — an *unknown-constructor / no-such-alternative* type error on the capability union and on the
@@ -308,22 +328,21 @@ contains.
    product arm, and no escape arm, checked against the oracle-pinned hand-authored arm list.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The closed union, need records, and Gate-1 corpus are sealed by the Phase-10 gate.
 
-## Sprint 10.2: The `CapabilityBinding` + total representational `bind` 📋
+## Sprint 10.2: The `CapabilityBinding` + total representational `bind` ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `dhall/amoebius/Capability.dhall` (extend: the `CapabilityBinding`
 records — the one-arm-today provider union + the typed `shape`); `src/Amoebius/Capability/Binding.hs` (the
 pure total `bind` selecting and fully expanding the provider's manifest graph for the chosen shape, the
 kind-indexed `BoundExecutionUnit` vocabulary, controller-child lowering into `ControllerChildEnvelope`, the
 canonical identity-keyed `BoundExecutionSet`/`BoundExecutionInventory`, and the `BoundDeployment` assembly
-retaining the single opaque `FirstDeployment | UpdateFrom PriorExecutionProvisionRef` source) — target
-paths, not yet built. This Phase-10 source inventory deliberately does not import the Phase-11
+retaining the single opaque `FirstDeployment | UpdateFrom PriorExecutionProvisionRef` source). This Phase-10
+source inventory deliberately does not import the Phase-11
 `provision`/`ProvisionedSpec` machinery, the Phase-9 execution-epoch fold, or the Phase-13 `K8sObject`/Aeson
 renderer.
-**Blocked by**: Sprint 10.1; Phase 5 gate (the IR + decoder); Phase 9 gate (the kind-indexed
-execution vocabulary `bind`'s `BoundExecutionUnit`s must be fold-compatible with).
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a unit + property suite binds the same app `ObjectStore`/`Sql` need under a `SingleNode` shape
 and a `Distributed { nodes = n }` (n ≥ 2) shape and asserts: (a) the **app-surface bytes are byte-identical**, where *app-surface bytes* is the **beta-normalized Dhall expression of the app-surface slice extracted from each of two *distinct* composed spec files** — the two composed fixtures do **not**
 share one app-surface import, so the equality is never a file-compared-to-itself tautology; (b) the bound
@@ -413,11 +432,11 @@ stopping at the wholly unprovisioned `BoundDeployment`.
    value injected into `BoundDeployment`).
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The total binder, explicit object graphs, exact execution inventory, and unprovisioned deployment boundary are sealed.
 
-## Sprint 10.3: The bind property/corpus + the Register-1 gate 📋
+## Sprint 10.3: The bind property/corpus + the Register-1 gate ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `test/capability/BindProps.hs` (the property battery),
 `test/capability/ShapeOracle.hs` (the independent object-node-multiset structural diff — authored separately
 from `bind` so the oracle is not `bind`'s own fold), `test/capability/BindGate.hs` (the gate +
@@ -425,17 +444,16 @@ validation-locus ledger with coverage-assertion machinery), the **oracle-pinned*
 fixtures `dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` for all nine arms, the
 reviewer-authored goldens `test/capability/goldens/golden_servicespec_<arm>_<shape>.golden` (authored before
 `bind` exists), the seeded mutants under
-`test/capability/mutants/{mutant_copy_shape_tag,mutant_catchall_arm,mutant_shared_app_import,
+`tests/mutants/phase10/{mutant_copy_shape_tag,mutant_catchall_arm,mutant_shared_app_import,
 mutant_provisioned_value_in_bound_deployment}`, and the negatives
 `dhall/examples/{legal_objectstore_singlenode,legal_objectstore_distributed,legal_inference_cuda,
 illegal_product_in_app,illegal_engine_by_url,illegal_shape_in_app,illegal_unbound_capability,
-illegal_unbuilt_provider,illegal_cyclic_extension,illegal_shadowing_extension}.dhall` — target paths, not
-yet built. The `illegal_cyclic_extension` (a provide-and-require self-loop) and
+illegal_unbuilt_provider,illegal_cyclic_extension,illegal_shadowing_extension}.dhall`. The
+`illegal_cyclic_extension` (a provide-and-require self-loop) and
 `illegal_shadowing_extension` (an anti-shadow merge) negatives each pair with a minimal legal `{infernix,
 jitML}` positive and fail Gate 2 at the committed `extRequires`-graph locus
 ([`capability_extension_doctrine.md §3`](../documents/engineering/capability_extension_doctrine.md#3-the-provide-and-require-contract)).
-**Blocked by**: Sprint 10.1, Sprint 10.2; Phase 4 gate (the positive Gate-1 corpus); Phase 6 gate (the
-validation-locus ledger + coverage-assertion machinery this gate reuses).
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `cabal
 test capability-bind-spec` is green — see below.
 **Docs to update**:
@@ -516,7 +534,7 @@ honest foreclosure layer of each.
    out of scope here and validated by Phases 11/12.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The 18 goldens, three Gate-1 negatives, four Gate-2 negatives, coverage property, validation ledger, and four mutants are sealed.
 
 ## Documentation Requirements
 

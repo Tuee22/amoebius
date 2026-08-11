@@ -1,0 +1,4 @@
+operator=dependency-resolution-removal
+change=remove supernova:base and proto:base from allow-newer
+expected=solver rejects base-4.21.2.0 against the upstream <4.14 bounds
+project_file=probe/mutants/drop-allow-newer.project

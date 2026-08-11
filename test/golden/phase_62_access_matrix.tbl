@@ -1,0 +1,4 @@
+principal tenant owner blob_read upload dependent_effect
+owner tenant-a alice allow allow allow
+same-tenant-nonowner tenant-a bob deny deny deny
+foreign-tenant tenant-b mallory deny deny deny

@@ -1,0 +1,2 @@
+mutation=drop all in-flight and failed-write transient bytes immediately
+expected_red=failed-write orphan horizon retained

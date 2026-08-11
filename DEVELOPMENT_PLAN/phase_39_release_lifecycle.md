@@ -8,7 +8,13 @@
 
 Phase 39 delivers the release lifecycle; its design is owned by [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), [inforcespec_migration_doctrine.md](../documents/engineering/inforcespec_migration_doctrine.md), [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Validated 2026-08-11 with `python3 tools/phase39_gate.py --reuse-fresh-live`;
+ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -26,10 +32,10 @@ No gate has run.
 - [Resource provision — release execution, the content/pointer store, and schema migration](#resource-provision--release-execution-the-contentpointer-store-and-schema-migration)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 39.1: The immutable `Release` ledger (`releaseHash`) 📋](#sprint-391-the-immutable-release-ledger-releasehash-)
-- [Sprint 39.2: The `Environment` ETag-CAS promotion pointer 📋](#sprint-392-the-environment-etag-cas-promotion-pointer-)
-- [Sprint 39.3: The `PromotionGate` — promote-unverified→prod type-foreclosed 📋](#sprint-393-the-promotiongate--promote-unverifiedprod-type-foreclosed-)
-- [Sprint 39.4: `RolloutPlan`/`RolloutPhase` readiness-gated apply + DB schema-migration phase (gate) 📋](#sprint-394-rolloutplanrolloutphase-readiness-gated-apply--db-schema-migration-phase-gate-)
+- [Sprint 39.1: The immutable `Release` ledger (`releaseHash`) ⏸️](#sprint-391-the-immutable-release-ledger-releasehash-)
+- [Sprint 39.2: The `Environment` ETag-CAS promotion pointer ⏸️](#sprint-392-the-environment-etag-cas-promotion-pointer-)
+- [Sprint 39.3: The `PromotionGate` — promote-unverified→prod type-foreclosed ⏸️](#sprint-393-the-promotiongate--promote-unverifiedprod-type-foreclosed-)
+- [Sprint 39.4: `RolloutPlan`/`RolloutPhase` readiness-gated apply + DB schema-migration phase (gate) ⏸️](#sprint-394-rolloutplanrolloutphase-readiness-gated-apply--db-schema-migration-phase-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,18 +43,23 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. The phase runs on the **linux-cpu** substrate in
-**Register 3** (live infrastructure) — the single-node `kind` cluster assembled through Phases 24–33, with
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. All four sprints are implemented in `amoebius-release` and validated in **Register 3** on the
+**linux-cpu** lane — the single-node `kind` cluster assembled through Phases 24–33, with
 its standard platform-service stack already reconciled by the Phase-33 control-plane singleton onto the Phase-28 retained
 storage. It opens only after the Phase 33 gate (live DSL deploy via the Deployment-`replicas=1` singleton and
 the SSA reconciler the `RolloutPlan` enacts on) and the Phase 37 gate (the three-tier content-addressed store
 the `releaseHash`-keyed ledger writes into) both close, because delivery here **composes** those primitives
-rather than reimplementing a reconciler or a store. The four delivery shapes are generalized from siblings —
-jitML's phased readiness-gated rollout and its pre/post-grant schema phase, infernix's `.ready`-gated artifact,
-the content store's ETag-CAS `trial` pointer — each **sibling evidence, not an amoebius result**; amoebius has
-built none of the `Release` ledger, the `Environment` promotion pointer, the `PromotionGate`, or the
-`RolloutPlan`. Status transitions are recorded reverse-chronologically here once work begins.
+rather than reimplementing a reconciler or a store. Two distinct rounds validated the immutable ledger,
+ETag-CAS pointers, typed evidence refusal, and ordered schema-migration rollout, with exact cleanup and eight
+seeded mutants red. Gateway-API canary weight shifting, Pulsar consumer-group cutover, and cross-cluster/geo
+promotion remain **UNVERIFIED**. Every hardware substrate can always run this `linux-cpu` lane; when a
+pristine Linux host is needed, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ## Phase Summary
 
@@ -102,7 +113,7 @@ field-manager apply sequence, never the reconciler's self-report), each phase ga
 the plan **includes a DB schema-migration `RolloutPhase`** obeying `create-new → verified-migrate → retire-old`
 against the standing Phase-34 Postgres (the retire phase never denotes byte destruction). The whole topology
 spins up, runs, tears down **leak-free**, and **re-runs idempotently under a distinct per-run store namespace** (a cache-bypassing independent recompute of the `releaseHash`, not a store-hit), emitting a
-committed proven/tested/assumed ledger that names its register (3) and substrate (linux-cpu) and marks the
+generated proven/tested/assumed ledger under `gen/runs/` that names its register (3) and substrate (linux-cpu) and marks the
 runtime layer **tested, never proven** and the cross-cluster/canary layers **UNVERIFIED**. The gate is checked
 against the oracle-pinned fixtures named in Sprints 39.1–39.4 and **MUST turn red** on the committed seeded
 mutant `mutant/gate-admits-unverified` — a `PromotionGate` whose guard is weakened so a promotion that SHOULD
@@ -239,15 +250,20 @@ the section it adopts; individual sprints cite the same sections where they buil
 
 ## Sprints
 
-## Sprint 39.1: The immutable `Release` ledger (`releaseHash`) 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 39.1: The immutable `Release` ledger (`releaseHash`) ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-release/src/Amoebius/Release/Ledger.hs`,
-`amoebius-release/src/Amoebius/Release/ReleaseHash.hs` (target paths; not yet built)
-**Blocked by**: Phase
-37 gate (the three-tier content-addressed store the ledger writes into — blobs ← manifests ← pointers);
-Phase 33 gate (the reconciler whose rendered generations the ledger records) — both external earlier-phase
-prerequisites.
+`amoebius-release/src/Amoebius/Release/ReleaseHash.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: execute at **Register 3** against the Phase-37 single-node kind
 cluster's live MinIO store, never an in-process fake — the register is stated so its evidential weight is
 unambiguous. A `Release` write emits a `releaseHash` **recomputed by an independent sha256** over
@@ -305,16 +321,14 @@ after convergence.
 > deployment *generations* — sibling evidence, not an amoebius result.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 39.2: The `Environment` ETag-CAS promotion pointer 📋
+## Sprint 39.2: The `Environment` ETag-CAS promotion pointer ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-release/src/Amoebius/Release/Environment.hs`,
-`amoebius-release/src/Amoebius/Release/Promote.hs` (target paths; not yet built)
-**Blocked by**: Sprint 39.1
-(the immutable `Release` entries a pointer advances onto); Phase 37 gate (the ETag-CAS `pointers/*` write
-protocol the `environment` pointer kind reuses) — an external earlier-phase prerequisite.
+`amoebius-release/src/Amoebius/Release/Promote.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: this suite runs in **Register 3** against the live Phase-37 store. `Environment` is a closed
 three-arm union (`Dev`/`Staging`/`Prod`) — an un-enumerated fourth environment has no constructor
 (type-foreclosed). Advancing an environment is an `If-Match` compare-and-swap of that environment's pointer
@@ -375,18 +389,14 @@ pointer over the fixed ledger, not a redeploy.
 > mechanism, not an amoebius result for environment promotion.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 39.3: The `PromotionGate` — promote-unverified→prod type-foreclosed 📋
+## Sprint 39.3: The `PromotionGate` — promote-unverified→prod type-foreclosed ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-release/src/Amoebius/Release/PromotionGate.hs`,
-`amoebius-release/src/Amoebius/Release/EvidenceWitness.hs` (target paths; not yet built)
-**Blocked by**:
-Sprint 39.2 (the ETag-CAS pointer advance the gate is a precondition on); Phase 37 gate (the `Release`
-ledger whose entries carry the evidence reference) — external earlier-phase prerequisites. The per-run
-evidence ledger contract from `testing_doctrine` is consumed as an **opaque `EvidenceWitness`**; this sprint
-does not build the ledger, only the environment→required-strength mapping that reads it.
+`amoebius-release/src/Amoebius/Release/EvidenceWitness.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: this suite runs in **Register 3**. The gate's `advance` constructor demands an
 `EvidenceWitness`; the environment→required-strength mapping is monotone (`Dev` on a green Decision layer;
 `Staging` on the Protocol layer **tested** via Register-2.5 deterministic simulation; `Prod` on the
@@ -459,20 +469,16 @@ unrepresentable state.
 > the already-scoped multicluster `PromotionGate`.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 39.4: `RolloutPlan`/`RolloutPhase` readiness-gated apply + DB schema-migration phase (gate) 📋
+## Sprint 39.4: `RolloutPlan`/`RolloutPhase` readiness-gated apply + DB schema-migration phase (gate) ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-release/src/Amoebius/Release/RolloutPlan.hs`,
 `amoebius-release/src/Amoebius/Release/SchemaMigration.hs`,
 `amoebius-release/dhall/test/release_lifecycle.dhall` (the gate topology),
-`amoebius-release/test/live/ReleaseLifecycleSpec.hs` (target paths; not yet built)
-**Blocked by**: Sprints
-39.1–39.3 (the ledger, the ETag-CAS pointer, and the `PromotionGate` the plan is enacted after); Phase 33
-gate (the in-cluster SSA/ApplySet reconciler and the `replicas=1` singleton the plan applies on); Phase 34
-gate (the in-namespace Postgres the schema-migration phase targets); Phase 28 / Phase 24 gates (the
-cluster-lifecycle teardown the InForceSpec drives) — external earlier-phase prerequisites.
+`amoebius-release/test/live/ReleaseLifecycleSpec.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: this suite runs in **Register 3** on the live single-node kind cluster. A `RolloutPlan` is an
 ordered `[RolloutPhase]`; each phase's objects are applied under the `amoebius` field manager and its readiness gate is **observed from the live object** (rollout complete / `Ready` / CR `status` healthy — never a `threadDelay`), and only then does the next phase apply. The **phase-apply order is read from an external observer at the OS/API boundary** (the API-server audit log / the run's ApplySet apply sequence),
 never the reconciler's self-emitted trace. The DB schema-migration `RolloutPhase` obeys `create-new →
@@ -549,7 +555,7 @@ values end-to-end.
    Postgres schemas the migration phase created, emitting the full inventory plus the named retained set into
    the per-run ledger; any non-empty remainder outside the retained set fails the gate — and **re-runs idempotently under a distinct per-run store namespace** (a cache-bypassing independent recompute of the
    `releaseHash`, never a store-hit), the compute path asserted to have executed.
-5. Assert the run emits a committed **proven/tested/assumed ledger** naming its register (3) and substrate
+5. Assert the run emits and externally attests a generated **proven/tested/assumed ledger** naming its register (3) and substrate
    (linux-cpu), marking the **runtime layer tested — never proven** ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed), a live-band Register-3 gate), the
    type-foreclosure of promote-unverified→prod proven-in-types but its live wiring tested, and the
    **cross-cluster/geo promotion and the Gateway-API canary weight-shift layers UNVERIFIED** (deferred to
@@ -570,7 +576,7 @@ values end-to-end.
 > (tier b) are unrelated; only tier (c), the in-cluster SSA reconciler, enacts this plan.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
 ## Documentation Requirements
 

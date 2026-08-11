@@ -1,0 +1,7 @@
+module,type,fields
+App,App,name|capabilities|storage|topic|workloads|image|build|bookKeeperLogical|pulsarMetadata|pulumi|assetMaterializations|storageBudgets|objectStoreProducers|objectStoreGateways|storageMigrations|schemaMigrations|registryMigrations|sql|vault
+Backup,BackupPolicy,name|cadenceSeconds|retentionGenerations|medium|verification
+Cluster,Cluster,name|substrate|servers|agents|ingress|capacity
+Consistency,Consistency,pacelcPosture|recoverySource|dataLossBudget|rebindBoundSeconds
+Deployment,Deployment,cluster|app|transition|monitoring
+Extension,ExtensionSpec,name|extMonitoring

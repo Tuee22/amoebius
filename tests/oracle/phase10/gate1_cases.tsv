@@ -1,0 +1,4 @@
+case	negative	legal	required
+product-in-app	dhall/examples/illegal_product_in_app.dhall	dhall/examples/legal_objectstore_singlenode.dhall	Missing constructor: Minio
+engine-by-url	dhall/examples/illegal_engine_by_url.dhall	dhall/examples/legal_inference_cuda.dhall	Missing constructor: Url
+shape-in-app	dhall/examples/illegal_shape_in_app.dhall	dhall/examples/legal_objectstore_singlenode.dhall	shape

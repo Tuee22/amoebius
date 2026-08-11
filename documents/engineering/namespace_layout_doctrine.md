@@ -25,6 +25,8 @@ half of the partition is derived directly from it.
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. One namespace per platform capability — the derived set](#2-one-namespace-per-platform-capability--the-derived-set)
@@ -94,6 +96,10 @@ derived — not a layout an installer hand-maintains:
 | `amoebius-control-plane` | the orchestrator singleton (not a capability) | the control-plane Deployment `replicas=1` ([§6](#6-the-control-plane-namespace--a-stateless-singleton-no-pvc)) |
 
 Three properties make the set a *derivation*, not a convention:
+
+Phase 13's Register-1 `render-golden` battery is the validated rendering enactment of this partition: every
+sealed render-source identity is emitted once in deterministic order, and the output-domain property rejects
+missing, duplicate, or cross-owned identities. Live namespace admission remains Phase-26/runtime residue.
 
 - **One namespace per capability, never a shared one.** The Identity edge (Keycloak) and the L7 edge
   (Envoy/Gateway) are distinct capabilities and therefore distinct namespaces (`amoebius-keycloak`,

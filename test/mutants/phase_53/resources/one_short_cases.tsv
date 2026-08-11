@@ -1,0 +1,7 @@
+case	axis	delta	expected	effects
+physical-cpu	cpu-cores	-1	HostCpuShort	0
+unified-memory	bytes	-1	HostMemoryShort	0
+vm-raw-disk	bytes	-1	VmDiskShort	0
+host-cache	bytes	-1	HostDiskShort	0
+process-slot	processes	-1	ProcessSlotsShort	0
+loopback-service	services	-1	ServiceInventoryMismatch	0

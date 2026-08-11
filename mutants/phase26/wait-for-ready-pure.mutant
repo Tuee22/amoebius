@@ -1,0 +1,3 @@
+surface=readiness-observation
+mutation=return-success-without-observing-authoritative-ready-condition
+expected_oracle=ConvergenceTimeout

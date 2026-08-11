@@ -24,6 +24,8 @@ owned by [namespace_layout_doctrine.md](./namespace_layout_doctrine.md).
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Why this doctrine exists: types render manifests, Helm does not](#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)
 - [2. The typed manifest model: `renderAll` is the sole public pure function to objects](#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)
@@ -100,6 +102,13 @@ and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-
 ---
 
 ## 2. The typed manifest model: `renderAll` is the sole public pure function to objects
+
+> **Validated boundary (Phase 13, Register 1).** The pure whole-deployment renderer, canonical Aeson
+> encoding, eighteen capability/shape goldens, exact source-domain projection, and output-safety battery pass
+> under `tools/phase13_gate.py` (ledger `external-run-reference`). This establishes rendered values only;
+> the [§5 live reconciler](#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is independently
+> validated by Phase 26; scheduler CAS/Binding is independently validated by Phase 27, and later
+> service-specific enforcement keeps its own phase boundary.
 
 The core is a per-projection renderer closed by one whole-deployment pure function:
 
@@ -385,6 +394,12 @@ specialized from "any resource the forest can create" down to "Kubernetes object
 [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) —
 never by a CLI invocation racing another writer.
 
+Phase 33 delivers that role and this loop on linux-cpu. Its live gate records the exact seven-object
+first-pass SSA set under field manager `amoebius-phase33-singleton`, a second pass that re-runs discovery and
+emits zero mutating audit records, Lease-gated authority across replacement, and leak-free restoration of the
+retained stack. The singleton itself is a generated `Deployment replicas=1`, `Recreate`, with no PVC or
+amoebius election.
+
 Before any mutation, the engine runs `renderAll`, takes one read-only snapshot of live objects and resource
 inventory, constructs the typed diff and peak transition envelope, and validates the whole-deployment
 `ProvisionedSpec` against residual capacity. The desired `ExecutionEpoch` is keyed by
@@ -523,13 +538,25 @@ flowchart TD
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
-*Design intent for Phase 26. The `ProvisionedSpec` seal and `renderAll` desired union are Tier-1; the live inventory and scheduler ledger are runtime-checked observed residue; the preflight gate mints the single-use `ValidatedLiveTarget` seal or refuses with zero writes, and SSA/CAS/staged/completion are the effectful seams — none proven in amoebius here.*
+*Phase-26/27/28 validation boundary. Phase 26 tested the generic reconciler. Phase 27 then tested the scheduler's five-state ledger, two readiness witnesses, whole-root reservation CAS, real Kubernetes Binding ordering, crash-gap recovery, execution-identity admission, and byte-stable live rerun. Phase 28 used that renderer/reconciler seam to apply the sole inert StorageClass and deterministic retained PVs, including fresh uid-less claimRefs after a real cluster recreate. Durable completion/rollback and the release ledger remain deferred.*
 
-> **Honesty.** This engine is **design intent for Phase 26**, not a built amoebius result. SSA field
-> managers, Kubernetes Binding, and resourceVersion compare-and-swap are real Kubernetes mechanisms;
-> *that amoebius wires them into this specific reconciler* is specified here and unproven until the phase
-> lands. The idempotent `discover → diff → enact` shape it specializes is *proven in prodbox* for AWS/cluster
-> teardown — evidence from a sibling, not amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
+> **Honesty.** Phase 26 now supplies amoebius evidence for the object-reconciler slice: Register 3 observed
+> the live Kubernetes mechanisms and Register 2.5 exercised the real actions through 2,048 deterministic
+> schedules. The modeled-apiserver fidelity of Register 2.5 is assumed and bounded by that separate live run.
+> Phase 27's Register-3 scheduler evidence is recorded in
+> [`live-scheduler.json`](../../DEVELOPMENT_PLAN/evidence/phase_27/live-scheduler.json). Its modeled-apiserver
+> fidelity remains assumed and bounded by that separate live run; Sprint 27.5 sealed the deterministic battery.
+> Phase 28's Register-3 retained-storage evidence is recorded in
+> [`rebind-live.json`](../../DEVELOPMENT_PLAN/evidence/phase_28/rebind-live.json): the reconciler applied the
+> one StorageClass and exact PV/claimRef projections on both sides of a true cluster delete/recreate, and the
+> external readers matched the independent oracle tables. This proves only that retained-host slice; later
+> provider and rollout arms remain deferred.
+
+[Phase 41](../../DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md) extends the same pure-render/reconcile boundary to host networking. Its committed two-peer inventory
+renders byte-for-byte to an independent WireGuard config golden containing only `SecretRef` names. Live
+enactment then reads effective state with `wg show`, and an unchanged second discover/diff pass emits zero
+mutations. Keyless peers are unconstructible; duplicate VPN addresses and out-of-fabric `AllowedIPs` return
+their pinned decode reasons before any `ip`, `wg`, `tc`, cgroup, log, or listener effect.
 
 ### 5.1 The `RolloutPlan`: ordered, readiness-gated phases on this same reconciler (tier (c))
 
@@ -596,8 +623,9 @@ flowchart TD
 > **no Helm**. This is
 > sibling evidence, not an amoebius result.
 
-> **Honesty.** The `RolloutPlan` is **Phase-39 design intent** — it rides the tier-(c) typed-action reconciler, itself
-> Phase 26 and unbuilt; the DB-schema-migration `RolloutPhase` is part of that Phase-39 shape, proven
+> **Honesty.** The `RolloutPlan` is **Phase-39 design intent** — it rides the tier-(c) typed-action reconciler,
+> whose generic action engine Phase 26 delivered; the DB-schema-migration `RolloutPhase` itself is part of
+> that unbuilt Phase-39 shape, proven
 > *only* as the Helm-driven pattern in the jitML sibling. Read as the contract amoebius intends, never as a
 > tested amoebius result.
 
@@ -752,11 +780,9 @@ replaying stored YAML.
 - **Still not a Helm release store.** Neither immutable record stores mutable rendered YAML. The environment
   pointer selects a `Release`; object derivation is recomputed; the application record is append-only evidence.
 
-> **Honesty.** The release application record is **Phase-N design intent** — it composes with the content-store phase
-> ([§9](#9-planning-ownership)) and the tier-(c) reconciler (Phase 26), neither built in amoebius. Content-addressed immutable storage
-> is proven mechanism; *that amoebius appends an `AppliedGeneration` after convergence and promotes
-> environments by CAS over an existing `Release`* is specified across this [§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional) and release_lifecycle_doctrine.md and is
-> unbuilt.
+> **Validated instance.** Phase 39 appends an immutable `AppliedGeneration` only after the final live
+> Deployment reports `Available`, distinct from the pre-promotion `Release`, and uses the Phase-26 tier-(c)
+> SSA/readiness engine for the ordered plan. The observed convergence and write are runtime-tested, not proven.
 
 ---
 
@@ -844,9 +870,12 @@ lands in Phase 39 on the tier-(c) reconciler. This doc states the target shape a
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 
-> **Honesty.** Everything in this doctrine is Phase 0 **design intent**: the typed manifest renderer and the
-> server-side-apply reconciler are Phase 26, and the capability abstraction is Phase 10 — neither is built or
-> proven in amoebius. The approach is **generalized from the prodbox sibling**, which already renders a slice
+> **Honesty.** The complete end-state in this doctrine remains design intent, but its foundations are no
+> longer wholly prospective: Phase 10 delivered the capability abstraction, Phase 13 the typed whole-set
+> renderer, Phase 26 the server-side-apply/staged-action reconciler, Phase 27 the scheduler seam, Phase 28
+> the retained StorageClass/PV/rebind application slice, Phases 29–32 the retained platform/edge stack, and
+> Phase 33 the Lease-held singleton's exact live reconcile/no-op loop. Later provider, rollout, and release-ledger subjects
+> remain unbuilt and must not inherit those results. The approach was **generalized from the prodbox sibling**, which already renders a slice
 > of its object set from typed Haskell to Aeson and applies it with `kubectl`, stamps every object with an
 > owner label, and orchestrates a pure deployment planner — but prodbox still ships its workloads as Helm
 > charts and consumes five upstream charts, so the full workload renderer, typed live-action engine, the

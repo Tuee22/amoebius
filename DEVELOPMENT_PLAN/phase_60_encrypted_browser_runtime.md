@@ -6,7 +6,13 @@
 
 Phase 60 delivers the encrypted browser offline runtime; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), and the plan for reaching it is owned here.
 Register 2: a real boundary against fake tools.
-No gate has run.
+The scoped gate passed on 2026-08-11 against real Chrome; the production PureScript bundle remains
+`UNVERIFIED` because no PureScript compiler is installed.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -24,7 +30,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 60.1: Build the encrypted local interpreter 📋](#sprint-601-build-the-encrypted-local-interpreter-)
+- [Sprint 60.1: Build the encrypted local interpreter ⏸️](#sprint-601-build-the-encrypted-local-interpreter-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,7 +38,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. No browser persistence, encryption, service worker, or cross-tab leader exists.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 Scoped gate passed. A fresh real Chrome profile exercises WebCrypto, IndexedDB, process restart, raw
+storage inspection, partitions, Web Locks, BroadcastChannel, Service Worker/cache state, quota results, and
+all six mutants. Production PureScript compilation and server replay remain `UNVERIFIED`.
 
 ## Phase Summary
 
@@ -45,7 +59,9 @@ required coordination primitives takes the safe single-tab/refuse-concurrency pa
 **Session scope:** Implement and browser-test local facilities only; server replay and accepted receipts remain
 out of scope until Phase 61.
 
-**Substrate:** `none` — Playwright drives a hermetic Chromium runtime.
+**Substrate:** `none` — the gate drives a hermetic Chrome runtime through the browser debugging protocol.
+Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on
+Apple, or WSL2 on Windows.
 
 **Register:** 2 — hermetic browser boundary tests with controlled fakes.
 
@@ -73,15 +89,24 @@ neither calls the runtime under test.
 
 ## Sprints
 
-## Sprint 60.1: Build the encrypted local interpreter 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 60.1: Build the encrypted local interpreter ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**:
 `ui/src/Amoebius/Ui/Offline/{Store,Crypto,Partition,Leader,ServiceWorker}.purs`,
-`test/browser/Phase60OfflineRuntimeSpec.hs` (planned; not built)
-**Blocked by**: Phase 59
-**Independent Validation**: `cabal test offline-browser-runtime-spec` with raw browser-storage inspection and seeded
-mutants
+`src/Amoebius/Ui/Offline/Browser/{Store,Crypto,Partition,Leader,ServiceWorker}.hs`,
+`test/browser/Phase60OfflineRuntimeSpec.hs`, `tools/phase60_browser_live.py`, and `tools/phase60_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `python3 tools/phase60_gate.py` with a two-process
+Chrome profile, raw browser-storage/cache inspection, model contracts, and six compile-time mutants
 **Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`,
 `documents/engineering/testing_doctrine.md`, `documents/engineering/generated_artifacts_doctrine.md`
 
@@ -98,11 +123,13 @@ Persist and recover bounded offline state without disclosing protected records o
 
 ### Validation
 
-1. Run `cabal test offline-browser-runtime-spec`; require every canonical trace green and every mutant red.
+1. Run `python3 tools/phase60_gate.py`; require the canonical model and real Chrome
+   traces green and every mutant red.
 
 ### Remaining Work
 
-The whole sprint is planned.
+Compile and link the PureScript modules into the production generic client bundle once the PureScript toolchain
+is available. Server replay remains owned by Phase 61. Neither surface is inferred from the Chrome harness.
 
 ## Documentation Requirements
 

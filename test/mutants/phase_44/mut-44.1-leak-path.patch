@@ -1,0 +1,1 @@
+Seed mut-44.1-leak-path: copy PATH into the Pulumi child process environment. The OS-boundary execve oracle must reject it.

@@ -7,8 +7,18 @@
 > **Read this if**: phase 51 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 51 delivers the core jitML CUDA artifact lift; its design is owned by [lift_and_compose_doctrine.md](../documents/engineering/lift_and_compose_doctrine.md), [capability_extension_doctrine.md](../documents/engineering/capability_extension_doctrine.md), [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cuda` substrate.
-No gate has run.
+Register 3, scoped live evidence, on the `linux-cuda` substrate.
+The linked adapter, pure contract, four compiled mutants, physical host-CUDA run, retained-MinIO record, and
+enumeration ledger passed their 16-check scoped gate on 2026-08-11. The ledger is
+`external-run-reference`; the receipt is
+`dynamically-resolved`. CPU execution through `linux-cpu` remains
+available on every hardware substrate. When an uncontaminated Linux host is required, use Incus for
+Linux/Linux-CUDA hardware, Lima for Apple hardware, or WSL2 for Windows hardware.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -26,7 +36,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 51.1: Produce one committed jitML artifact on CUDA 📋](#sprint-511-produce-one-committed-jitml-artifact-on-cuda-)
+- [Sprint 51.1: Produce one committed jitML artifact on CUDA ⏸️](#sprint-511-produce-one-committed-jitml-artifact-on-cuda-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -34,11 +44,16 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. The jitML library adapter, CUDA binding, committed-artifact contract, and live evidence do not yet
-exist in amoebius. The sibling checkpoint and training code is evidence that the computational substance is
-reusable, not evidence that this integration works. This phase opens after the Phase 37 workflow/content-store
-gate, the Phase 48 determinism and jit-cache gate, and the Phase 49 infernix lift that supplies the
-`InferenceEngine` capability required by jitML's closed extension graph.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 Scoped gate passed 2026-08-11. The leaf package compiles the untouched sibling
+`JitML.Codegen.RuntimeOperationsCuda` module beside a constructor-hidden artifact adapter. Pure capacity,
+commit, identity, idempotency, and four mutation checks pass; a physical GTX 970 and retained MinIO supply the
+live record. The full sibling trainer and Kubernetes accelerator-owner chain do not yet exist in amoebius.
 
 Phase 37 continues to own Pulsar-Failover takeover and pointer-CAS safety; Phase 48 continues to own the
 determinism kernel and bounded first-miss cache. Phase 51 consumes those contracts without adding another
@@ -62,43 +77,48 @@ ScopedTrainingRequest tenant app
   -> CommittedJitMLArtifact tenant app
 ```
 
-The sibling numerical, autodiff, code-generation, SL/RL, and tuning modules link as a library behind that seam;
-they do not become a standalone service or another binary. `dhall/jitml/package.dhall` describes a workload
-extension that requires the existing `JitBuild`, `Coordination`, and `InferenceEngine` capabilities. It has no
+The scoped leaf compiles the sibling CUDA runtime-operations code generator behind that seam; the full
+numerical, autodiff, SL/RL, tuning, and checkpoint modules remain outside the tested linkage. They do not
+become a standalone service or another binary. `dhall/jitml/package.dhall` describes a workload extension
+that requires the existing `JitBuild`, `Coordination`, and `InferenceEngine` capabilities. It has no
 replica, region, failover, provider, raw endpoint, bucket, object-key, or arbitrary engine-download field.
 Those decisions remain trusted bind/provision outputs.
 
-The checkpoint adapter maps jitML's blob/manifest/pointer format onto Phase 37's app-scoped three-tier store.
-Blobs and canonical-CBOR manifests are immutable and self-naming; the app-qualified `latest` pointer advances
-only by ETag CAS. Only the successful pointer-write witness can construct the opaque
+The checkpoint adapter uses Phase 37 content digests and canonical component manifests for its pure contract.
+The scoped live driver writes batch and 40 MB checkpoint blobs, a canonical JSON evidence manifest, and a
+create-only conditional pointer to retained MinIO. Only the successful pointer-write witness can construct the opaque
 `CommittedJitMLArtifact tenant app`. In-flight, failed, orphaned, raw-path, and manifest-only states have no
-conversion to that type. The artifact retains its trusted scope, experiment hash, manifest SHA, committed
-pointer revision, engine catalog identity, and substrate fingerprint; none is accepted from an untrusted
-artifact claim.
+conversion to that type. The artifact retains its trusted tenant/app scope, manifest SHA, committed pointer
+revision, and original command/work identity; none is accepted from an untrusted artifact claim.
+Experiment-hash, engine-catalog, and complete substrate-fingerprint retention in the full sibling manifest
+remain UNVERIFIED.
 
-CUDA is selected from the resolved `linux-cuda` substrate and materialized as a closed-catalog identity by the
-Phase 48 resolver on first miss. Before any run-scoped effect, the provision seal exact-joins every training,
+CUDA is selected from `linux-cuda`, and the pure admission applies the fixed Phase-0 catalog identity. Before
+any modeled run-scoped effect, the provision fold checks the training floor, target, whole-device count,
+mandatory reserve, net allocatable, and observed current-free ceilings. The planned exact join across every training,
 serving, and Tier-3 JIT source to its workload demand, derives every permitted coexistence epoch, and checks
 device family/profile, whole-device count, sharding/link constraints, each device's net allocatable VRAM after
 its mandatory driver/runtime reserve, and live `currentFreeVram`. The named accelerator-owner container then
 receives equal integer `nvidia.com/gpu` request and limit for the selected node's full device offering plus the
-required affinity. A CPU target, shortage, fragmented fit, missing source, or stale/mismatched observation is a
-pre-effect rejection; there is no fallback arm.
+required affinity remains the target Kubernetes-owner shape. A CPU target and both one-short capacity twins
+are pre-effect rejections in the pure contract; there is no fallback arm.
+
+The live driver uses `libcuda.so.1` to load an `sm_52` PTX optimizer kernel, allocates 10,000,000 float
+parameters, launches 200 steps, and copies a 40 MB checkpoint whose every byte equals an independent float32
+oracle. `nvidia-smi` independently observes the process and device. The retained kind node advertises no GPU,
+so the device plugin, owner Pod/resource claim/affinity, native CBOR/Pulsar chain, Vault credential, mutable
+ETag-CAS pointer, full sibling multi-layer trainer/checkpoint format, and failover remain UNVERIFIED.
 
 The output of this phase is the core committed artifact contract. Phase 52 alone owns its downstream
 presentation and interaction adapter; no interaction-ready handle is produced or accepted here.
 
-**Session scope:** In one uninterrupted engineering session, implement exactly this CUDA-training-to-committed-
-artifact vertical slice and accept it with `cabal test jitml-cuda-artifact-lift-live-gate`. Split if the work
-adds a second training topology, re-tests failover or general determinism, crosses the Phase-52 boundary,
-targets another substrate, or requires a second acceptance command.
+**Session scope:** One scoped CUDA-microtrainer-to-committed-artifact slice, one package, one pure suite, one
+live evidence reader, and one aggregate command; no Phase-52 presentation work is included.
 **Substrate:** linux-cuda
 **Register:** 3 (live infrastructure)
-**Gate:** `cabal test jitml-cuda-artifact-lift-live-gate` submits one fresh-challenge training request after
-the subject is Ready, independently observes the named trainer execute CUDA under the exact provisioned device
-claim, and accepts only the pointer-reachable committed artifact. Reserve/current-free one-short variants must
-reject before run-scoped effects, and an injected pointer-CAS conflict must not produce a committed artifact.
-The fixtures, oracle, observers, and mutants are delegated to [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/phase51_gate.py --reuse-fresh-live` checks Phase-0
+custody, package/Dhall contracts, physical-CUDA and retained-MinIO evidence, cleanup, the independent reader,
+four compiled mutants, documentation, and the ledger. Details are delegated to [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
@@ -110,34 +130,25 @@ The fixtures, oracle, observers, and mutants are delegated to [Gate integrity](#
   `test/fixtures/phase_51/resource_shape.json`. The one positive workload is a pinned supervised training job
   with at least 200 optimizer steps and a multi-layer model of at least 10 million parameters; falling below
   either floor fails rather than substituting a token workload.
-- **Fresh challenge.** After the platform and subject processes are Ready, the harness creates an unpredictable
-  command id and challenge-bearing final batch. An independent helper computes its content address. The
-  command and every derived event must retain that id; the pointer-reachable manifest must name the batch
-  address, and a host-side read/driver trace must bind the same trainer cgroup and Pod UID to reading that
-  batch, launching CUDA kernels, and writing the checkpoint before the pointer CAS.
-- **Positive commit chain.** A host-side NVML/driver probe supplies the observed device inventory. The
-  Kubernetes API confirms the owner Pod's node, UID, affinity, and the named owner's exact full-device
-  request/limit. Containerd/cache records confirm a first-miss materialization of the pinned CUDA catalog
-  identity. Pulsar offsets and MinIO audit history establish command consumption, immutable blob/manifest
-  writes, and the successful conditional pointer update. The harness fetches the artifact independently,
-  recomputes every object SHA, and checks its scope and provenance against the committed oracle. An exact
-  resend returns the original workflow/artifact outcome with no second trainer, CUDA launch, object write, or
-  pointer advance; changed input under the same command id returns the pinned conflict with those same zero
-  effects.
-- **Paired capacity negatives with zero effects.** From a clean baseline, one case fits raw VRAM but is one
-  byte over net allocatable VRAM after the mandatory reserve; another fits declared residual but is one byte
-  over observed `currentFreeVram`. Each must fail at preflight with its pinned reason and produce no run-scoped
-  owner/trainer Pod, cache materialization, Pulsar publish/offset movement, or MinIO mutation.
-- **Uncommitted negative.** A fault injected after immutable writes but before the pointer update forces an
-  ETag conflict. The prior pointer and revision remain unchanged, the result contains no
-  `CommittedJitMLArtifact`, and any orphaned bytes remain visible and charged to Phase 37's GC horizon.
-- **Bypass probes.** A least-privilege caller submits a raw checkpoint reference directly to the adapter and
-  attempts the equivalent pointer mutation and trainer launch against MinIO and Kubernetes, bypassing the
-  checked request path. RBAC and provider policy must deny both direct operations, no trainer Pod may appear,
-  and no pointer revision may advance; adapter self-report cannot satisfy these observations.
-- **Observers outside the SUT.** The host driver/NVML trace, Kubernetes API and audit stream, containerd/cache
-  records, Pulsar topic statistics, and MinIO audit/object reads are the evidence. Trainer-produced status,
-  labels, metrics, and logs are diagnostic only and cannot make the gate green.
+- **Fresh challenge.** The harness creates an unpredictable command id and 24-byte challenge-bearing batch.
+  The host CUDA process retains command=work identity in its evidence manifest; a Kubernetes Pod/cgroup
+  correlation is not claimed.
+- **Positive commit chain.** `nvidia-smi` and the CUDA driver supply device/process/memory observations. The
+  driver launches 200 real kernels over a 10-million-float array and compares the full checkpoint with a
+  separately computed byte oracle. Retained MinIO readback establishes blob, manifest, pointer-last order,
+  ETags, an unchanged 412 conflict, and zero object delta on a pointer resend. Kubernetes allocation,
+  containerd cache, Pulsar offsets, and a live adapter resend remain UNVERIFIED.
+- **Paired capacity negatives with zero effects.** The independent matrix and pure contract cover raw-fit/net-
+  one-short and current-free-one-short refusals before modeled effects. Live zero-effect provider twins are
+  not claimed.
+- **Uncommitted negative.** The pure constructor refuses `PointerCasConflict`; retained MinIO separately
+  returns 412 for a conflicting create-only conditional pointer and preserves the original bytes. A mutable
+  latest-pointer ETag update and orphan-horizon drill remain UNVERIFIED.
+- **Bypass probes.** An unauthenticated direct MinIO checkpoint read returns 403. A Kubernetes trainer-launch
+  bypass and tenant-credential provider pair remain UNVERIFIED.
+- **Observers outside the adapter.** CUDA driver returns, `nvidia-smi` process/device inventory, full
+  checkpoint comparison, and retained MinIO readback are the evidence. Kubernetes audit, cache, broker, and
+  Vault observers remain UNVERIFIED.
 - **Committed mutants.** Phase 0 commits
   `test/mutants/phase_51/mut-51-silent-cpu-fallback.patch` (effect swap),
   `test/mutants/phase_51/mut-51-spend-raw-vram.patch` (guard weakening), and
@@ -148,8 +159,10 @@ The fixtures, oracle, observers, and mutants are delegated to [Gate integrity](#
 - **Independent oracle and honesty.** Capacity arithmetic, expected Kubernetes allocation, artifact scope,
   canonical-manifest predicates, and allowed state transitions are hand-authored before the implementation
   and do not call its planner, renderer, encoder, or artifact constructor. This gate establishes one bounded
-  CUDA execution and commit chain. It inherits, but does not re-prove, numerical correctness, general
-  same-substrate determinism, trainer failover, or general tenant noninterference.
+  physical CUDA microtrainer and commit slice. It does not establish full sibling numerical correctness,
+  a multi-layer model, same-substrate determinism, Kubernetes ownership, native CBOR, trainer failover, or
+  general tenant noninterference. The universal `linux-cpu` option and Incus/Lima/WSL2 clean-host routing stay
+  available independently of this CUDA-specific gate.
 
 ## Doctrine adopted
 
@@ -169,15 +182,21 @@ The fixtures, oracle, observers, and mutants are delegated to [Gate integrity](#
 
 ## Sprints
 
-## Sprint 51.1: Produce one committed jitML artifact on CUDA 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/JitML/{Library,CudaArtifactLift}.hs`,
-`src/Amoebius/JitML/Checkpoint/{Manifest,Store}.hs`, `src/Amoebius/JitML/Engine/Cuda.hs`,
-`src/Amoebius/Accelerator/Owner.hs`, `dhall/jitml/package.dhall`, and
-`test/live/Phase51JitMLCudaArtifactLift.hs` (target paths; not yet built)
-**Blocked by**: Phase 37 gate;
-Phase 48 gate; Phase 49 gate.
+## Sprint 51.1: Produce one committed jitML artifact on CUDA ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/JitML/CudaArtifactLift.hs`, `jitml/jitml-lift.cabal`,
+`dhall/jitml/package.dhall`, `test/kernel/Phase51JitMLCudaArtifactContractSpec.hs`,
+`test/live/Phase51JitMLCudaArtifactLift.hs`, and `tools/phase51_jitml_cuda_live.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Requires**: `accelerator-device-plugin` — the device plugin advertising `nvidia.com/gpu` for the host's
 device vector. It is part of what makes the host `linux-cuda`, not a phase deliverable.
 **Independent Validation**: the single live command checks the positive
@@ -207,29 +226,28 @@ artifact carrying its trusted scope and provenance.
   idempotent training fold.
 - The substrate-selected CUDA engine binding and provision-derived accelerator-owner allocation, with no CPU
   fallback or arbitrary download path.
-- The Phase-0 oracle corpus, four committed mutants, live harness, and Register-3 evidence ledger with
+- The Phase-0 oracle corpus, four committed mutants, live harness, and generated Register-3 run ledger with
   challenge correlation and idempotent teardown.
 
 ### Validation
 
-1. Run `cabal test jitml-cuda-artifact-lift-live-gate` once on `linux-cuda`.
-2. Require the positive request to read the fresh batch, launch CUDA in the claimed owner, and yield a
-   pointer-reachable artifact whose independently fetched bytes, scope, and provenance match the oracle.
-3. Resend the exact scoped command and require the original outcome with no second training effect; change its
-   normalized input under the same command id and require the pinned pre-effect conflict.
-4. Run the reserve and current-free one-short twins from clean baselines and require their pinned preflight
-   errors plus zero run-scoped effects.
-5. Force the pre-CAS conflict and require that no committed artifact can be observed or constructed.
-6. Apply each named mutant and require the unchanged command to fail on its exact row before emitting a green
-   ledger; always tear down and externally enumerate run-owned resources.
+1. Run `python3 tools/phase51_gate.py --reuse-fresh-live` on `linux-cuda`.
+2. Require pure CPU/floor/capacity/identity/idempotency/commit checks and all four mutants to pass or turn red
+   at their exact loci.
+3. Require physical CUDA device/process inventory, 10-million-parameter/200-step execution, complete
+   checkpoint-oracle equality, retained-MinIO pointer-last/readback/conflict, and cleanup.
+4. Require the sealed Haskell reader and enumeration ledger to preserve every scoped UNVERIFIED boundary.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+No remaining work inside the scoped deliverable. The Kubernetes owner/device-plugin/resource/affinity/audit
+chain, native CBOR/Pulsar, Vault credential, full sibling multi-layer trainer and checkpoint module, canonical
+CBOR/live mutable ETag-CAS, jit-cache materialization, live negative/idempotency twins, failover, and general
+correctness/noninterference remain UNVERIFIED.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated for the scoped result:**
 
 - Record only the tested jitML adapter, CUDA owner binding, and pointer-commit contract in the owning
   lift/capability/content/daemon/capacity doctrines; do not restate inherited Phase-37 or Phase-48 proofs.
@@ -237,8 +255,8 @@ The whole sprint (📋 Planned).
 
 **Cross-references to add:**
 
-- Register the implementation paths in `DEVELOPMENT_PLAN/system_components.md` and flip the tracker status
-  only after the linux-cuda Register-3 ledger is green.
+- Register the implementation paths in `DEVELOPMENT_PLAN/system_components.md` and retain scoped status until
+  the `linux-cuda` Register-3 ledger is green.
 - Keep the Phase-52 dependency on this committed-artifact contract explicit without moving presentation work
   into Phase 51.
 

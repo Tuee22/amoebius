@@ -1,0 +1,8 @@
+diff --git a/src/Amoebius/HostWorker/ReferenceKernel.hs b/src/Amoebius/HostWorker/ReferenceKernel.hs
+--- a/src/Amoebius/HostWorker/ReferenceKernel.hs
++++ b/src/Amoebius/HostWorker/ReferenceKernel.hs
+@@
+-referenceKernel values = encodeFloat32Le (fmap (\value -> 2 * value + 1) values)
++referenceKernel values
++  | values == [-1, 0.5, 7, 11] = encodeFloat32Le [-1, 2, 15, 23]
++  | otherwise = encodeFloat32Le [3, 5, 7, 9]

@@ -1,0 +1,4 @@
+operator=observer-delete
+target=Amoebius.Execution.JobTerminalLive
+change=cleanup-after-gateway-ack-without-independent-readback
+expected=terminal-cleanup-without-content-proof

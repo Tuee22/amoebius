@@ -5,8 +5,13 @@
 > **Read this if**: phase 61 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 61 delivers the offline replay and durable receipts; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu`` substrate.
-No gate has run.
+Register 3, scoped live, on the `linux-cpu` substrate.
+The scoped gate passed on 2026-08-11; real platform provider/broker/identity observers remain `UNVERIFIED`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -25,7 +30,7 @@ No gate has run.
 - [Resource provision — bounded reconnect and receipt recovery](#resource-provision--bounded-reconnect-and-receipt-recovery)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 61.1: Gate durable replay across replicas 📋](#sprint-611-gate-durable-replay-across-replicas-)
+- [Sprint 61.1: Gate durable replay across replicas ⏸️](#sprint-611-gate-durable-replay-across-replicas-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,7 +38,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. No live offline replay or durable-receipt lookup exists.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 Scoped gate passed. Current-authority replay, scope-qualified idempotency, durable recovery, two local UI
+endpoints, a real dropped response, an independently queried SQLite effect owner, and six mutants pass. Real
+Keycloak/Redis/Pulsar/MinIO/PostgreSQL/infernix/Gateway/Kubernetes/CNI observations remain `UNVERIFIED`.
 
 ## Phase Summary
 
@@ -47,7 +60,8 @@ result but cannot lose, invent, or duplicate an accepted effect.
 payload; offline blob transfer is deferred to Phase 62. Phase 59 structurally admits jitML training starts,
 but this linux-cpu gate does not claim a live offline CUDA training result.
 
-**Substrate:** `linux-cpu`.
+**Substrate:** `linux-cpu`. Every hardware substrate can always run this lane. For pristine Linux, use Incus
+on Linux/Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 
 **Register:** 3 — live infrastructure.
 
@@ -83,14 +97,23 @@ repair, and the declared reconnect storm. No unbounded outbox, output buffer, or
 
 ## Sprints
 
-## Sprint 61.1: Gate durable replay across replicas 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 61.1: Gate durable replay across replicas ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Offline/{Replay,Receipt,Outcome}.hs`,
-`ui/src/Amoebius/Ui/Offline/Replay.purs`, `test/live/Phase61OfflineReplaySpec.hs` (planned; not built)
-**Blocked by**: Phases 58 and 60
-**Independent Validation**: `cabal test offline-replay-receipts-live` with
-provider/broker observers and Redis/socket fault injection
+`ui/src/Amoebius/Ui/Offline/Replay.purs`, `test/live/Phase61OfflineReplaySpec.hs`,
+`tools/phase61_replay_live.py`, and `tools/phase61_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `python3 tools/phase61_gate.py` with the contract,
+two local endpoints, a durable SQLite observer, real response loss, six mutants, documentation, and ledger
 **Docs to update**:
 `documents/engineering/browser_offline_runtime_doctrine.md`,
 `documents/engineering/ui_realtime_coordination_doctrine.md`,
@@ -111,11 +134,13 @@ Prove that every accepted replay has one recoverable durable receipt and current
 
 ### Validation
 
-1. Run `cabal test offline-replay-receipts-live`; require canonical green, all faults repaired, and all mutants red.
+1. Run `python3 tools/phase61_gate.py`; require the scoped canonical trace green,
+   the dropped response repaired from the durable owner, and all six mutants red.
 
 ### Remaining Work
 
-The whole sprint is planned.
+Repeat the campaign with real OIDC, Redis loss, Pulsar/MinIO/PostgreSQL observers, the infernix worker,
+Gateway/Kubernetes/CNI, and direct-service denial. Offline jitML/CUDA is not claimed by this CPU-only phase.
 
 ## Documentation Requirements
 

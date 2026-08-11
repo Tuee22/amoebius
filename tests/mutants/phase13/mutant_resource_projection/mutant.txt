@@ -1,0 +1,1 @@
+Alter a provisioned CPU request in rendered output; resource-projection must turn red.

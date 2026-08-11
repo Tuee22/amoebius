@@ -1,7 +1,8 @@
 # Service Capabilities
 
 > **Purpose**: Single source of truth for the abstraction by which amoebius application logic names abstract
-> **capabilities** — ObjectStore, SecretStore, MessageBus, Sql, Identity, Observability, Registry, Edge —
+> **capabilities** — ObjectStore, SecretStore, MessageBus, Sql, Identity, Observability, Registry, Edge,
+> InferenceEngine —
 > never products, and by which the platform binds each capability to one canonical provider and a per-cluster
 > deployment shape.
 > **Read this if**: an application needs a service, or a provider behind a capability is being chosen or changed.
@@ -21,6 +22,8 @@ never names a product. It does not own how those providers are deployed, owned b
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Why capabilities, not products](#1-why-capabilities-not-products)
@@ -118,6 +121,11 @@ capability and reference a policy, but it cannot construct a permission, provide
 or resource handle. The UI-specific port and request-context contract is owned by
 [low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations).
 
+[Phase 19](../../DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md) supplies Register-1 evidence for that consumer:
+all seven fixture ports bind exactly once to closed semantic capabilities through independently checked
+handler/codec/scope tuples, while an absent capability and a raw provider coordinate fail at distinct loci.
+Actual handler behavior and provider state remain UNVERIFIED.
+
 ---
 
 ## 3. One canonical provider; the type admits alternates
@@ -166,13 +174,19 @@ arm, `Sql` could admit a managed cloud Postgres — without any app spec changin
 the provider. But a union arm is not an adapter. amoebius **does not build a provider adapter it does not yet need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
 would be reporting a designed extension point as a built one.
 
-> **Honesty.** "One canonical provider, type admits alternates" is Phase 10 design intent. The alternate arms
-> are deliberately unbuilt; the canonical bindings above are the only providers amoebius implements. Status
-> lives only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+> **Validated representation.** [Phase 10](../../DEVELOPMENT_PLAN/phase_10_capability_bind.md) implements the
+> one-built-arm `CanonicalProvider` representation and rejects an unbuilt alternate with a distinct Gate-2
+> tag. Alternate arms remain deliberately unbuilt; this validation proves binding composition, not provider
+> realization.
 
 ---
 
 ## 4. Capability → provider → shape: the binding
+
+[Phase 10](../../DEVELOPMENT_PLAN/phase_10_capability_bind.md) realizes this representational seam in
+`Amoebius.Capability.{Types,Binding}`. Its gate binds all nine arms under both shapes, checks 18 exact graph
+goldens, and proves normalized app bytes remain invariant while an independent object-node-multiset oracle
+observes structural graph differences. Provision and runtime provider health remain outside that result.
 
 A capability becomes a running service through a **three-part binding**, and the three parts live on different
 surfaces:
@@ -286,16 +300,21 @@ arm through the target offering projected from the *detected* substrate (the sub
 it has no syntax with which to *author* an arbitrary download or build. This is the [§1](#1-why-capabilities-not-products) object-storage lesson taken to
 its limit: an app can no more write "curl this engine URL at boot" than it can write "deploy `minio`."
 
-**The engine offering is a quotient of one eligible target's detected substrate — a surjection, not an orthogonal cluster-wide axis — and this doctrine owns that mapping.** `EngineRuntime` is a *coarsening* of the four-member substrate catalog
+**The engine offering is a downward-closed set derived from one eligible target's detected substrate, not an
+orthogonal cluster-wide axis, and this doctrine owns that mapping.** `EngineRuntime` is a capability
+projection of the four-member substrate catalog
 ([substrate_doctrine.md §1](./substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob), [cluster_topology_doctrine.md §1](./cluster_topology_doctrine.md#1-two-axes-the-substrate-is-detected-the-engine-is-declared)):
-`apple → AppleMetal`, `linux-cpu → LinuxCpu`, and — the one place two substrates collapse onto one arm —
-`{ linux-cuda, windows } → Cuda`. `Cuda` is therefore **OS-agnostic**: there is no Linux-vs-Windows split inside
+`linux-cpu → { LinuxCpu }`, `linux-cuda → { LinuxCpu, Cuda }`,
+`apple → { LinuxCpu, AppleMetal }`, and `windows → { LinuxCpu }` plus `Cuda` when a compatible device is
+observed. `LinuxCpu` is universal, while `Cuda` is **OS-agnostic**: there is no Linux-vs-Windows split inside
 the union (that distinction has **no constructor** — type-foreclosed), and an eligible node/host's engine is
-*projected from* its detected substrate, never declared free of it. The only freedom the quotient grants is that two substrates share
-one engine arm; it never lets a spec author an engine its substrate cannot provide — that would reopen the
+*projected from* its detected substrate, never declared free of it. The projection never lets a spec author an
+engine its hardware cannot provide — that would reopen the
 "selected by the detected substrate" foreclosure above, which the quotient **preserves** rather than
-loosens. A `Cuda` demand paired with a topology whose nodes and elastic candidates all project to `LinuxCpu`
-returns `Left MissingCapability Cuda`; there is no silent CPU fallback. The lane in the table above is named
+loosens. Accelerator capability is additive: it never removes `LinuxCpu`. A `Cuda` demand paired with a
+topology whose nodes and elastic candidates offer only `LinuxCpu` returns `Left MissingCapability Cuda`;
+there is no silent CPU fallback. Explicitly selecting `LinuxCpu` on CUDA/Apple/Windows hardware is not a
+fallback and is always valid through the native or canonical VM route. The lane in the table above is named
 the **Engine lane** precisely because `Cuda` now spans two
 substrates: keying that row on "substrate" would be a misnomer, since "substrate" names exactly the 4-member
 catalog owned by [substrate_doctrine.md §1](./substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob).
@@ -618,8 +637,16 @@ surface, never asserted here.
 This document is normative capability-model doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
 never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed reconciler that render and apply a chosen shape** land with platform services in **Phase 26**, and the
-**capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster shapes** — lands with the DSL type families in **Phase 10**. This doc states the target shape and links back for
-status.
+**capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster
+shapes** — was delivered by **Phase 10**. This doc states the normative shape; the plan owns the validation
+status and ledger.
+
+Phase 48 validates the CPU arm of the closed engine-runtime binding with a pinned executable resolver fixture:
+its build/download recipes converge on one content digest and version, and two real clients reuse one owner-
+managed cache entry. This is Tier-1 resolver and cache evidence, not production model inference; full llama.cpp,
+cross-substrate equality, the Tier-2 model cache, and Tier-3 CUDA kernels remain UNVERIFIED. `linux-cpu` is an
+always-available option on every hardware substrate. A pristine Linux host is provided by Incus on
+Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ---
 
@@ -639,11 +666,11 @@ status.
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 
-> **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation:
-> manifest generation and the typed reconciler are Phase 26, and the capability abstraction is Phase 10. It is
-> generalized from evidence in the sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering,
-> a chart-platform planner) but **not yet built or proven in amoebius**, and prodbox itself names products and
+> **Honesty.** The pure capability representation and binder are built and tested by Phase 10; manifest
+> generation and the typed reconciler remain Phase 26 work. The design is generalized from evidence in the
+> sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering, a chart-platform planner), and
+> prodbox itself names products and
 > enforces the very substrate-equivalence lint this doctrine reverses. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every prescriptive statement here as the
-> contract amoebius intends to satisfy, never as a tested amoebius result; status lives only in
+> normative contract; status lives only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).

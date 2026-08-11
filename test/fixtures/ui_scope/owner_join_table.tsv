@@ -1,0 +1,7 @@
+tenant	subject	owner_kind	owner_tenant	owner_subject	grant	decision
+t-a	alice-a	SubjectOwner	t-a	alice-a	none	allow
+t-a	alice-a	SubjectOwner	t-a	bob-a	none	deny
+t-a	alice-a	SubjectOwner	t-b	carol-b	none	deny
+t-a	alice-a	TenantOwner	t-a	-	none	allow
+t-a	alice-a	GrantOwner	t-a	bob-a	active	allow
+t-a	alice-a	GrantOwner	t-a	bob-a	revoked	deny

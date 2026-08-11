@@ -1,0 +1,10 @@
+{
+  "algorithm": "SplitMix64",
+  "gamma": "0x9e3779b97f4a7c15",
+  "masterSeed": "0x0123456789abcdef",
+  "streams": [
+    {"index": 0, "seed": "0x157a3807a48faa9d"},
+    {"index": 1, "seed": "0xd573529b34a1d093"},
+    {"index": 37, "seed": "0x3dfafd29d7a4f68a"}
+  ]
+}

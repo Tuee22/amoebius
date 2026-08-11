@@ -1,0 +1,6 @@
+diff --git a/src/Amoebius/JitML/CudaArtifactLift.hs b/src/Amoebius/JitML/CudaArtifactLift.hs
+--- a/src/Amoebius/JitML/CudaArtifactLift.hs
++++ b/src/Amoebius/JitML/CudaArtifactLift.hs
+@@
+-workIdentity request = trainingCommandId request
++workIdentity _ = TrainingCommandId "regenerated-command"

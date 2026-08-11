@@ -6,18 +6,23 @@
 > admission, and the CAS `Reserved` → `BindingInFlight` → submit/confirm Kubernetes Binding → `Bound`
 > protocol — proven live by binding a pinned Pending guarded-Pod set with no double-bind and rejecting any
 > guarded workload before `ManagedCapacityReady`.
-> **Read this if**: phase 27 is next in the queue, or a later phase depends on what its gate establishes.
+> **Read this if**: a later phase depends on the delivered capacity-scheduler gate or its evidence.
 
 Phase 27 delivers the amoebius-capacity scheduler + bootstrap cutover; its design is owned by [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [readiness_ordering_doctrine.md](../documents/engineering/readiness_ordering_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Sprints 27.1–27.5 and the phase-level acceptance gate have passed.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -29,11 +34,11 @@ No gate has run.
 - [Resource provision — the `CapacitySchedulerSystemDemand` envelope](#resource-provision--the-capacityschedulersystemdemand-envelope)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 27.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms 📋](#sprint-271-state-indexed-reservation-ledger--normalization--absent-pod-recovery-arms-)
-- [Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses 📋](#sprint-272-scheduler-bootstrap-authority--two-stage-taintrbac-cutover--readiness-witnesses-)
-- [Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery 📋](#sprint-273-scheduler-loop--reservedbindinginflightbindingbound-cas--placement--recovery-)
-- [Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate 📋](#sprint-274-live-scheduler-binding--bootstrapsteady-cutover-gate-)
-- [Sprint 27.5: Register-2.5 scheduler convergence under simulated faults 📋](#sprint-275-register-25-scheduler-convergence-under-simulated-faults-)
+- [Sprint 27.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms ⏸️](#sprint-271-state-indexed-reservation-ledger--normalization--absent-pod-recovery-arms-)
+- [Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses ⏸️](#sprint-272-scheduler-bootstrap-authority--two-stage-taintrbac-cutover--readiness-witnesses-)
+- [Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery ⏸️](#sprint-273-scheduler-loop--reservedbindinginflightbindingbound-cas--placement--recovery-)
+- [Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate ⏸️](#sprint-274-live-scheduler-binding--bootstrapsteady-cutover-gate-)
+- [Sprint 27.5: Register-2.5 scheduler convergence under simulated faults ⏸️](#sprint-275-register-25-scheduler-convergence-under-simulated-faults-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,8 +46,15 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. This phase opens after the **Phase 26 gate** (the
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. Validated 2026-08-09 with `python3 tools/phase27_gate.py`;
+ledger `external-run-reference`. This phase opened after the
+**Phase 26 gate** (the
 object reconciler's `observe → diff → scoped-SSA → staged-enact → delete → wait` convergence, its
 `ValidatedLiveTarget` construction, the cold-start mandatory-reconciler-`Lease` authority, and the IOSimPOR
 object-fault battery) and runs on the **linux-cpu** substrate in **Register 3**. It is **layered on** that
@@ -54,6 +66,48 @@ turns the corpus's guarded Deployment from a default-scheduled workload into one
 place its control-plane pods — that is **sibling evidence, not an amoebius result**; the state-indexed
 reservation ledger, the aggregate-CAS reservation protocol, the identity admission webhook, and the two-stage
 `BootstrapCapacitySchedulerReady`/`ManagedCapacityReady` cutover are amoebius's new code.
+
+- **2026-08-09 — Sprint 27.1 complete.** The pinned nine-action scheduler oracle and the read-only
+  state-indexed ledger normalizer passed. All five absent-Pod reservation states retained their exact padded
+  debit; Pending remained API-only; confirmed Bound while still `BindingInFlight` joined the observed UID once;
+  and the nine orphan/missing/state/node/generation/template/axes/duplicate/double-debit negative classes
+  refused before any writer boundary. Receipt:
+  [`sprint-27.1-receipt.json`](evidence/phase_27/sprint-27.1-receipt.json), fingerprint
+  `dynamically-resolved`.
+- **2026-08-09 — Sprint 27.2 complete.** Exact reconciler-Lease-holder admission minted a single-use
+  scheduler-system token. Bootstrap readiness required exact generation/config/root with managed authority
+  absent and authorized only the finite cutover; managed readiness required complete old-UID release,
+  replacement reservation/Bound/Ready joins, and independent taint/admission/RBAC/writer-domain readback.
+  Protected execution identity rejected premature workloads and a second default-scheduler exception. Three
+  mutants were red and the readiness source scan found no sleep/clock shortcut. Receipt:
+  [`sprint-27.2-receipt.json`](evidence/phase_27/sprint-27.2-receipt.json), fingerprint
+  `dynamically-resolved`.
+- **2026-08-09 — Sprint 27.3 complete.** The scheduler loop authenticated the protected Pod identity,
+  re-folded the whole aggregate ledger under CAS, required `BindingInFlight` before Binding, and recovered
+  unknown or restarted records without releasing their debit. Same-UID retry was resourceVersion-stable;
+  two residual contenders could not overspend; and all four ordering, fold, idempotence, and restart mutants
+  turned red before the baseline was restored. Receipt:
+  [`sprint-27.3-receipt.json`](evidence/phase_27/sprint-27.3-receipt.json), fingerprint
+  `dynamically-resolved`.
+- **2026-08-09 — Sprint 27.4 complete.** A live Kubernetes admission guard rejected premature and
+  default-scheduler guarded Pods with zero writes. The finite add-on cutover replaced the old UID, the
+  reservation CRD reached `BindingInFlight` before the real Binding API assigned the replacement, independent
+  readers confirmed both guarded UIDs were debited once, and the immediate rerun was byte-stable and
+  Binding-free. A simultaneous one-slot aggregate CAS admitted one of two candidates, all seven scheduler
+  mutants were red, and postflight removed the taint, admission, RBAC, CRD, and namespaces. Receipt:
+  [`sprint-27.4-receipt.json`](evidence/phase_27/sprint-27.4-receipt.json), fingerprint
+  `dynamically-resolved`.
+- **2026-08-09 — Sprint 27.5 complete.** Seven scheduler fault classes each replayed 256 byte-identical
+  schedules through the real readiness, admission, reservation, Binding preparation, recovery, and modeled
+  apiserver seams. Bounded IOSimPOR explored their critical sections; all seven simulation mutants were red;
+  and modeled-apiserver fidelity remains explicitly assumed, bounded by Sprint 27.4's separate live run.
+  Receipt: [`sprint-27.5-receipt.json`](evidence/phase_27/sprint-27.5-receipt.json), fingerprint
+  `dynamically-resolved`.
+- **2026-08-09 — Phase 27 gate complete.** The phase command repeated the live/source-mutation and
+  deterministic-simulation seals, restored all six scheduler baselines together, validated the exhaustive
+  acceptance-surface ledger, and passed documentation lint. Ledger:
+  [`phase_27_ledger.json`](../test/golden/phase_27_ledger.json), fingerprint
+  `dynamically-resolved`.
 
 ## Phase Summary
 
@@ -115,10 +169,21 @@ authority. The scheduler is driven from the **host binary** against the same scr
 Deployment-`replicas=1` in-cluster singleton that eventually *owns* both the reconciler and its scheduling role
 arrives in Phase 33.
 
-**Substrate:** linux-cpu — the whole gate runs on the single-node `kind` cluster on a linux-cpu host from
-Phase 24, layered on the Phase-26 reconciler; no apple, linux-cuda, or windows substrate is touched.
+**Substrate:** `linux-cpu` — this gate selects the universal Linux CPU lane, which is always available on
+every hardware substrate. A pristine Linux host uses Incus on native Linux or Linux-CUDA, Lima on Apple,
+and WSL2 on Windows. This execution uses Phase 24's single-node `kind` cluster and the Phase-26 reconciler.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
+
+```mermaid
+flowchart LR
+  %% register: orientation
+  ledger["27.1 ledger normalization"] --> ready["27.2 bootstrap and managed readiness"]
+  ready --> protocol["27.3 aggregate CAS and Binding"]
+  protocol --> live["27.4 live cutover and guarded Pod"]
+  live --> sim["27.5 deterministic scheduler faults"]
+```
+*Orientation for the ordered scheduler delivery owned by the [Phase 27 plan](phase_27_capacity_scheduler.md).*
 
 **Gate:** in **Register 3** on the live single-node `kind` cluster, layered on the converged Phase-26
 reconciler holding the mandatory reconciler `Lease`: the `amoebius-capacity` scheduler stands up from
@@ -277,16 +342,23 @@ planner — not regenerated from the scheduler's own output.
 
 ## Sprints
 
-## Sprint 27.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 27.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Scheduler/Ledger.hs` — the state-indexed reservation
 ledger join and normalization that extends Phase 26's `src/Amoebius/Execution/Normalize.hs` observed
-snapshot with the scheduler dimension; target paths, not yet built.
-**Blocked by**: Phase 26 gate (the
-object reconciler, `ObservedLiveResourceSnapshot`, and `ValidatedLiveTarget` construction).
+snapshot with the scheduler dimension; built and validated.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a fresh snapshot over the pinned corpus normalizes each reservation state exactly once and
-produces the committed scheduler-ledger slice of
+produces the independently authored expected scheduler-state slice of
 `test/live/fixtures/reconcile-corpus/expected-actions.json`, authored before this module. Every ledger
 negative (orphan, missing, wrong-state, double debit) fails to construct a `ValidatedLiveTarget` and before
 any apiserver, ledger, or Binding write.
@@ -337,7 +409,7 @@ double-debited, no absent Pod makes a debit disappear, and no unclassified recor
 
 ### Validation
 
-1. The normalized ledger for the pinned corpus equals the committed scheduler-ledger slice of
+1. The normalized ledger for the authored corpus equals the independently authored expected scheduler-state slice of
    `expected-actions.json`. Seeded mutants — unclassified-orphan record, missing reservation, wrong
    state/node/template/generation/axes, a `Bound` Pod plus ledger double debit, reservation-only omission, and
    an incorrect terminal released/retained partition — each fail to construct a `ValidatedLiveTarget`.
@@ -353,20 +425,18 @@ double-debited, no absent Pod makes a debit disappear, and no unclassified recor
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. Receipt and phase results are under [`evidence/phase_27/`](evidence/phase_27/).
 
-## Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses 📋
+## Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Scheduler/Readiness.hs`, the scheduler-authority slice
 of `src/Amoebius/Manifest/Authority.hs` (`CapacitySchedulerSystemDemand` admission and the
 scheduler-system-only token; the cold-start `Lease` authority itself is Phase 26), and
 `src/Amoebius/Admission/ExecutionIdentity.hs` (the managed-taint/admission install) — target paths, not yet
 built. The scheduler role is an entry point of the existing amoebius binary/image, not a second
-implementation or a kube-scheduler plugin.
-**Blocked by**: Sprint 27.1; Phase 25 gate (the
-preloaded/side-loaded base image + in-cluster registry); Phase 26 gate (the reconciler holding the mandatory
-reconciler `Lease`).
+implementation or a kube-scheduler plugin; built and validated.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `BootstrapCapacitySchedulerReady` precedes the finite
 bootstrap-controller cutover; every old default-scheduled UID is absent/released and every replacement is
 reservation-joined before `ManagedCapacityReady`; only the latter precedes any general guarded controller
@@ -436,16 +506,16 @@ independently mint `ManagedCapacityReady`.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. Receipt and mutation results are under [`evidence/phase_27/`](evidence/phase_27/).
 
-## Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery 📋
+## Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**:
 `src/Amoebius/Scheduler/{Loop,Placement,Reservation,Binding,Recovery}.hs` and the authentication path of
-`src/Amoebius/Admission/ExecutionIdentity.hs` — target paths, not yet built.
-**Blocked by**: Sprint 27.1,
-Sprint 27.2, Phase 7 gate (the `place`/`fits`/`carve` resource-algebra fold the placement invokes).
+`src/Amoebius/Admission/ExecutionIdentity.hs`, built and validated by
+`test/scheduler/Phase27ReservationSpec.hs` and `tools/phase27_sprint27_3_gate.py`.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: two concurrent candidates cannot reserve the same residual; crash-after-reserve,
 restart, and Binding failure recover idempotently; the external observer proves no Binding precedes a
 successful reservation CAS and every UID is debited once.
@@ -505,16 +575,16 @@ failure — so a Pod is never bound before its reservation CAS and never double-
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. Receipt and mutation results are under [`evidence/phase_27/`](evidence/phase_27/).
 
-## Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate 📋
+## Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `test/live/SchedulerReservationSpec.hs` and
 `test/live/SchedulerBootstrapCutoverSpec.hs`, driving the Sprint 27.1–27.3 `Scheduler/*` and
 `Admission/ExecutionIdentity` modules against the live Phase-24 `kind` cluster and the converged Phase-26
-reconciler — target paths, not yet built.
-**Blocked by**: Sprint 27.3.
+reconciler through `tools/phase27_scheduler_live.py`, sealed by `tools/phase27_sprint27_4_gate.py`.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the
 representative corpus observes `BootstrapCapacitySchedulerReady`, complete bootstrap-controller cutover, and
 `ManagedCapacityReady` **before** any guarded Pod; the guarded Deployment binds exclusively through the CAS
@@ -578,17 +648,17 @@ namespace down leak-free.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. Live evidence, receipt, and repeated mutation results are under
+[`evidence/phase_27/`](evidence/phase_27/).
 
-## Sprint 27.5: Register-2.5 scheduler convergence under simulated faults 📋
+## Sprint 27.5: Register-2.5 scheduler convergence under simulated faults ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `test/sim/SchedulerSim.hs`, driving the real `Scheduler/*` and
-`Admission/ExecutionIdentity` modules on the Phase-14 `io-classes` `Env` / modeled apiserver — target paths,
-not yet built. This is the scheduler slice of the deterministic-simulation battery; Phase 26 owns the
+`Admission/ExecutionIdentity` modules through `test/sim/Phase27SchedulerSimCommon.hs` on the Phase-14
+`io-classes` `Env` / modeled apiserver. This is the scheduler slice of the deterministic-simulation battery; Phase 26 owns the
 object-reconciler slice of the same environment.
-**Blocked by**: Sprint 27.4; the Phase-15
-deterministic-simulation substrate and the Phase-14 `io-classes` seams / modeled apiserver.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `IOSimPOR` interleaves reservation-ledger CAS races, bootstrap-`Lease` acquire/renew
 ambiguity, crashes/watch gaps across **both** scheduler-readiness stages, crash-after-reserve, Binding
 failure, and restarts. Every schedule either converges to a typed scheduler no-op or fails closed without an
@@ -617,7 +687,8 @@ neither pure-value checks nor the live sample exhausts.
   on), collapsed scheduler-readiness stages, premature managed taint/full RBAC, bind-before-CAS, same-UID double
   debit, crash recovery dropping `Bound`, and cached observation. Every mutant must turn red.
 - A Register-2.5 ledger records convergence and fail-closed outcomes only for the explored scheduler traces.
-  Fidelity of the simulated apiserver remains **assumed** until Sprint 27.4's live Register-3 observations.
+  Fidelity of the simulated apiserver remains **assumed** and is bounded by Sprint 27.4's separate live
+  Register-3 observations.
 
 ### Validation
 
@@ -627,11 +698,12 @@ neither pure-value checks nor the live sample exhausts.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. The 1,792-schedule summary, receipt, and mutation results are under
+[`evidence/phase_27/`](evidence/phase_27/).
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Completed engineering-doc updates:**
 - `documents/engineering/manifest_generation_doctrine.md` — §5's amoebius scheduler-role CAS/Binding protocol
   and two-stage bootstrap taint/RBAC cutover flip from design intent to delivered with the Register-3 ledger
   attached; §6's observed state-indexed scheduler ledger (`Reserved | BindingInFlight | Bound | Terminating |
@@ -648,7 +720,7 @@ The whole sprint (📋 Planned).
 - `documents/engineering/deterministic_simulation_doctrine.md` — record the Phase-27 scheduler slice of the
   Register-2.5 io-sim battery (Sprint 27.5), with modeled-apiserver fidelity marked assumed.
 
-**Cross-references to add:**
+**Completed cross-references:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-27 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 27's gate substrate (linux-cpu) in the per-phase substrate
   map.
@@ -669,7 +741,7 @@ The whole sprint (📋 Planned).
   algebra the scheduler placement re-folds under aggregate CAS
 - [phase_13_render_manifest_goldens.md](phase_13_render_manifest_goldens.md) — the `renderAll` golden corpus
   the pinned reconcile corpus is a subset of
-- [phase_24_midwife_bootstrap_kind.md](phase_24_midwife_bootstrap_kind.md) — the live single-node `kind`
+- [phase_24_bootstrap_coordinator_kind.md](phase_24_bootstrap_coordinator_kind.md) — the live single-node `kind`
   cluster this phase's scheduler binds on
 - [phase_25_base_image_registry.md](phase_25_base_image_registry.md) — the in-cluster registry and the
   preloaded/side-loaded amoebius image the bootstrap scheduler Pod uses

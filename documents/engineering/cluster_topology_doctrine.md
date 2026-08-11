@@ -23,6 +23,8 @@ resulting node set, owned by [resource_capacity_folds.md](./resource_capacity_fo
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Two axes: the substrate is detected, the engine is declared](#1-two-axes-the-substrate-is-detected-the-engine-is-declared)
 - [2. `ComputeEngine`: a closed union, EKS a first-class arm](#2-computeengine-a-closed-union-eks-a-first-class-arm)
@@ -54,7 +56,14 @@ substrate doctrine already owns (Lima on apple, WSL2 on windows). This document 
 topology it induces; it owns **no** substrate names, no detection, no VM-provider mechanics, and no capacity
 numbers (those are [substrate_doctrine.md](./substrate_doctrine.md) and [resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 
-Everything below is **design intent for Phase 4** (the type discipline) with runtime realization in Phases 42/43/44. Status and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+The target below begins with Phase 4's type discipline and ends with runtime realization in Phases 42/43/44.
+The [Phase 7 gate](../../DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md) has now built and Register-1
+validated `Amoebius.Dsl.Topology` and the corresponding Dhall networking/managed-attachment arms: three
+Gate-1 pairs, seven compile-time index pairs, the exhausted 3×3 engine/environment compatibility matrix,
+host distinctness, fixed placement, and elastic growth all pass, with their mutants red (ledger
+`dynamically-resolved`).
+No EKS resource was created, no VM booted, and no node joined; those runtime facts remain **UNVERIFIED**.
+Status and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -244,7 +253,7 @@ never an amoebius-built second control-plane fabric (the surface-provider-vs-bui
 [pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision));
 the stretched treatment is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
 
-The untyped CLI surface — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]` ([substrate_doctrine.md §6](./substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off))
+The untyped CLI surface — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]` ([substrate_doctrine.md §6](./substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off))
 — is a *projection* of this typed `ComputeEngine`, not a second source of truth.
 
 ---
@@ -256,8 +265,9 @@ windows there is no Linux kernel until one is *synthesized* in a VM. So a `Linux
 is a **witness** that a Linux kernel exists, and on a non-Linux substrate the **only** constructor for it is
 the virtualization provider.
 
-- **`LinuxHost` is substrate-indexed and its constructor is gated.** On `linux-cpu`/`linux-cuda` a host *is* a
-  `LinuxHost`. On `apple` the only constructor is `limaHost` (a Lima Ubuntu VM); on `windows` the only
+- **`LinuxHost` is substrate-indexed and its constructor is gated.** On `linux-cpu`/`linux-cuda`, native Linux
+  can construct a `LinuxHost`; when a pristine host is required, the constructor is instead `incusHost` over a
+  fresh Ubuntu VM. On `apple` the constructor is `limaHost` (a Lima Ubuntu VM); on `windows` the only
   constructor is `wsl2Host` (a WSL2 Ubuntu distro). There is **no** `bareAppleHost : LinuxHost` and no
   `bareWindowsHost : LinuxHost` ([§4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) constructor-gating, [illegal_state_catalog.md §3.14](../illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)).
 - **So "rke2 on a bare Apple host" (I1) has no inhabitant.** `Rke2`/`Kind` demand a `LinuxHost`; on apple the
@@ -268,6 +278,9 @@ the virtualization provider.
   ([apple_metal_headless_builds.md](./apple_metal_headless_builds.md)) is about the on-host Metal *bridge
   build*; an rke2/kind *cluster* on an apple host still needs a Lima Linux VM. The two are different
   concerns and this doc states the cluster one; the build one is unchanged.
+- **Every constructor yields the `linux-cpu` baseline.** A `linux-cuda` parent does not have to expose its GPU;
+  an Incus guest without device passthrough is a CPU-only `LinuxHost`. Lima and WSL2 provide the same baseline
+  on Apple and Windows. Specialized CUDA/Metal offerings are additive host/node capabilities.
 - **Honesty.** The witness demand is type-foreclosed (no constructor). That the Lima/WSL2 VM *actually boots* and
   presents a working kernel is runtime-checked, owned by
   [substrate_doctrine.md §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)

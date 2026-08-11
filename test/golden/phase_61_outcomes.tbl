@@ -1,0 +1,7 @@
+condition outcome durable_source
+current-new Accepted effect-owner
+current-exact-replay Accepted effect-owner
+effect-before-response Accepted effect-owner
+stale-membership DeniedMembership -
+incompatible-program ReloadRequired -
+conflicting-payload Conflict effect-owner

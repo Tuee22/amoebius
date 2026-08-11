@@ -1,0 +1,5 @@
+tenant	subject	action	membership	decision
+t-a	alice	read-own	active	allow
+t-b	alice	write-own	active	allow
+t-b	alice	write-own	revoked	deny
+t-b	mallory	read-own	never-member	deny

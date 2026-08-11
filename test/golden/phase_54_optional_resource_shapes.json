@@ -1,0 +1,6 @@
+{
+  "none": {"registryBytes": 0, "pulumiBytes": 0, "migrationBytes": 0},
+  "registry": {"registryBytes": 2147483648, "pulumiBytes": 0, "migrationBytes": 0},
+  "pulumi": {"registryBytes": 0, "pulumiBytes": 1073741824, "migrationBytes": 0},
+  "migration": {"registryBytes": 0, "pulumiBytes": 0, "migrationBytes": 3221225472}
+}

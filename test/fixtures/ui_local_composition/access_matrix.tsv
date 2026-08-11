@@ -1,0 +1,4 @@
+case	subject	tenant	resource	decision
+own	alice	t-a	t-a/alice	allow
+same-tenant-foreign	bob	t-a	t-a/alice	deny
+foreign-tenant	carol	t-b	t-a/alice	deny

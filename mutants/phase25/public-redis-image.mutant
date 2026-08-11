@@ -1,0 +1,3 @@
+surface=redis-workload-image
+mutation=image:redis:7.4.5
+expected_oracle=NonMonocontainerImageReference

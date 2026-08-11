@@ -1,0 +1,3 @@
+operator=return converged whenever kind get clusters contains the cluster name
+locus=Amoebius.Cluster.Kind.planActions
+expected=stopped-node and missing-kubeconfig divergent starts stay broken

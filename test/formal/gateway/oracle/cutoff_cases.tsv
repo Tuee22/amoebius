@@ -1,0 +1,12 @@
+case	expected	clause	active	standby	dns	budget	ttl	freshness	max_offset
+valid-single	accept	none	a	b	a.example	1	30	1	2
+valid-independent-pair	accept	none	a:c	b:d	a.example:b.example	1:1	30:30	1:1	2:2
+multi-active	reject	pairwise	a:a	b:c	a.example:b.example	1:1	30:30	1:1	2:2
+cycle	reject	acyclic	a:b	b:a	a.example:b.example	1:1	30:30	1:1	2:2
+shared-dns	reject	graph-independent	a:c	b:d	a.example:a.example	1:1	30:30	1:1	2:2
+cluster-reuse	reject	resource-independent	a:b	b:c	a.example:b.example	1:1	30:30	1:1	2:2
+over-budget	reject	budget	a	b	a.example	2	30	1	2
+ttl-low	reject	ttl	a	b	a.example	1	0	1	2
+ttl-high	reject	ttl	a	b	a.example	1	61	1	2
+freshness-high	reject	freshness	a	b	a.example	1	30	2	2
+offset-high	reject	offset-domain	a	b	a.example	1	30	1	3

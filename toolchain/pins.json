@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "ghc": {
+    "version": "9.12.4",
+    "path": "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
+  },
+  "cabal": {
+    "version": "3.16.1.0",
+    "path": "/home/matthewnowak/.ghcup/bin/cabal-3.16.1.0"
+  },
+  "dhall": {
+    "version": "1.42.2",
+    "path": "/home/matthewnowak/.local/bin/dhall"
+  },
+  "spago": {
+    "version": "1.0.4",
+    "path": "/home/matthewnowak/amoebius/node_modules/spago/bin/bundle.js"
+  },
+  "purs": {
+    "version": "0.15.16",
+    "path": "/home/matthewnowak/amoebius/node_modules/purescript/purs.bin"
+  },
+  "chromium": {
+    "product": "Google Chrome",
+    "version": "150.0.7871.46",
+    "path": "/usr/bin/google-chrome"
+  },
+  "protoc": {
+    "version": "35.0",
+    "path": "/home/matthewnowak/amoebius/toolchain/bin/protoc",
+    "url": "https://github.com/protocolbuffers/protobuf/releases/download/v35.0/protoc-35.0-linux-x86_64.zip",
+    "sha256": "a45cda0989c17dd950db55f6fbe1e5814c50fda08e87aa422980ac1f89dddbbc"
+  },
+  "proto_lens_protoc": {
+    "version": "0.9.0.1",
+    "path": "/home/matthewnowak/amoebius/toolchain/bin/proto-lens-protoc"
+  },
+  "java": {
+    "distribution": "Eclipse Temurin",
+    "version": "21.0.12+8",
+    "floor": "17",
+    "path": "/home/matthewnowak/amoebius/toolchain/runtime/java/bin/java",
+    "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jre_x64_linux_hotspot_21.0.12_8.tar.gz",
+    "sha256": "8a379a67c91a3ae61ffb33d46e0a40c7ba35e70713c4db31cfca30492f792eff"
+  },
+  "tla2tools": {
+    "release": "v1.7.4",
+    "tlc_version": "2.19 of 08 August 2024",
+    "path": "/home/matthewnowak/amoebius/toolchain/runtime/tla/tla2tools.jar",
+    "url": "https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar",
+    "sha1": "bee4a54f3ee3d4afc347c3240ec2d9e93b075104",
+    "sha256": "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88"
+  },
+  "hackage_index_state": "2026-07-31T23:07:19Z"
+}

@@ -1,0 +1,5 @@
+case	step	visible
+single	1	Workflow running
+single	2	Artifact ready
+single	3	Result fresh-challenge
+multi	2	Unavailable

@@ -1,0 +1,2 @@
+source command_id work_id receipt_command_id expected
+offline-outbox command-infernix-1 command-infernix-1 command-infernix-1 equal

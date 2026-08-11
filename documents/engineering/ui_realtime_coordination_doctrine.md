@@ -109,6 +109,20 @@ and refresh tokens are absent.
 
 ## 4. Typed routing and resume envelope
 
+[Phase 20](../../DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md) validates the pure paired-plan and finite-demand
+compiler that owns this envelope's generated location. It does not execute WebSockets, Redis routing, resume,
+or cross-pod dispatch; those protocol/runtime claims remain UNVERIFIED until their later owning phases.
+
+[Phase 21](../../DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md) observes the browser opening the one
+same-origin WebSocket path against a loopback fake server and observes no established non-loopback connection.
+It does not validate session registration, Redis routing, resume, durable receipts, or cross-pod dispatch;
+those protocol/runtime claims remain UNVERIFIED.
+
+[Phase 22](../../DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md) validates local server admission for the same
+path. A signed credential, same origin, fixed subprotocol, single-use session nonce, current program/ABI/scope,
+complete envelope, and available injected coordinator admit one registration; six paired twins refuse. Redis
+routing, resume, durable receipts, cross-pod dispatch, replica drain, and failover remain UNVERIFIED.
+
 Every routed frame carries an envelope equivalent to:
 
 ```haskell
@@ -182,6 +196,23 @@ socket closure, cache loss, reauthentication, bounded reconnect, and cursor repa
 durable effect is not permitted. If Redis loss can change whether an application command was accepted, the
 command path is incorrectly designed.
 
+Phase 31 live-tested this platform boundary: one TLS-only primary, two TLS replication followers, and three
+mutually authenticated Sentinel voters used Vault-issued certificate and ACL material. A least-authority
+`realtime` identity wrote a TTL-bound `amoebius:*` challenge, read it from a replica, forced Sentinel
+promotion, and observed the challenge after failover. Live args and volume inventory showed finite memory,
+client, and output-buffer limits with no PVC/AOF/RDB/backup. This tests the coordination substrate only;
+application-side WebSocket routing, durable cursor repair, and command receipts remain owned by their later
+UI-runtime phases. Every hardware substrate can always select `linux-cpu`; a pristine Linux host uses Incus
+on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 32 then live-tested the browser-edge residue independently of Redis routing. A valid Keycloak bearer,
+exact `https://phase32.amoebius.internal` Origin, fresh single-use nonce, and `amoebius.v1` subprotocol
+received HTTP 101 and the committed challenge. Replayed nonce, wrong Origin, wrong subprotocol,
+unauthenticated, and direct-Service attempts produced no backend challenge. This establishes the one-door
+handshake and bypass denial; replicated UI-server ownership, reconnect, and durable receipt behavior remain
+later-phase obligations. The result uses the universally available `linux-cpu` lane; pristine Linux routing
+is Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
 ---
 
 ## 6. Durable commands, receipts, and replay
@@ -215,6 +246,12 @@ authoritative receipt/projection and return the same typed outcome. An unknown o
 socket write. "Effectively once" is earned only by the named idempotency/fold contract at the effect owner;
 Pulsar delivery and Redis routing do not provide a generic exactly-once side-effect guarantee.
 
+[Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md) validates this receipt primitive live.
+The original scoped command survives native CBOR publication, redelivery, workflow work-id/handle retention,
+and compacted receipt materialization. Only effect-owner accepted/terminal events can advance it; equal command
+and input is idempotent, while changed input conflicts before effect. Owner-keyed cursors repair a non-final
+resume, and stale scope epochs fail closed. Redis and WebSocket delivery are deliberately outside this gate.
+
 ---
 
 ## 7. Replicas, drain, rollout, and gateway migration
@@ -229,6 +266,11 @@ plan/ABI/handler admission and WebSocket authentication complete. During drain i
 connections, emits a reconnect control frame where possible, removes or expires its registrations, and lets
 clients reconnect to any ready replica. Rolling overlap retains every plan/ABI and cursor decoder needed by
 the admitted compatibility window.
+
+[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_program_release.md) validates the admission identity boundary:
+the paired plan pins the WebSocket subprotocol, routing-envelope schema, and cursor codec alongside program,
+content, contract, and authority identities, and stale or mixed tuples fail before effect. It does not exercise
+multiple UI-server replicas, socket drain, rolling overlap, or reconnect; those behaviors remain UNVERIFIED.
 
 During a planned gateway migration, the old edge forwards WebSocket upgrades and frames until the drain edge
 is observed or closes connections with a reconnect reason that causes same-hostname resolution. During forced
@@ -261,6 +303,9 @@ not only UI-server or Redis self-reports.
 The routing and failure semantics above are design intent until their phase gates run. Multiple replicas and
 Sentinel configuration are topology evidence, not availability proof. A live fault test may establish tested
 behavior for its declared envelope; it does not prove behavior for every network partition or Redis defect.
+Phase 25.1 has established only that the pinned `redis-server` and `redis-cli` file bytes are present,
+SBOM-joined, and executable in both official Linux image architectures; it does not establish Redis/Sentinel
+deployment, coordination, failover, or realtime availability.
 
 Sequencing, implementation status, and acceptance commands are owned by the
 [Development Plan](../../DEVELOPMENT_PLAN/README.md). Online WebSocket/Redis work is integrated into the
@@ -272,6 +317,49 @@ Pub/Sub so a non-owning server replica can reach sockets elsewhere. amoebius gen
 session fanout into typed app/subject/scope/program envelopes and fenced instance routes. The sibling's Redis
 replay records and leases are not copied as authoritative receipts; amoebius requires the durable effect-owner
 rule in [§6](#6-durable-commands-receipts-and-replay). Sibling code is evidence, not an amoebius test result.
+
+Phase 50 supplies a deliberately narrower receipt result: the infernix adapter makes the server-derived
+command id the work id, folds the terminal state into the scoped durable receipt, and has a second loopback
+server origin recover that receipt from retained MinIO. Exact replay is effect-free and a compiled mutant that
+drops terminal correlation fails. Real browser and Keycloak sessions plus retained Pulsar/MinIO and a fresh
+reference-worker Job support the record, but no Redis or WebSocket failure was injected and neither mechanism
+participates in acceptance. Cross-pod routing, Kubernetes UI replicas, full edge delivery, native-CBOR UI
+events, and production inference therefore remain UNVERIFIED. There is always a `linux-cpu` execution option
+on each hardware substrate. For pristine Linux, use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on
+Windows.
+
+Phase 52 tests the corresponding jitML fold only at a scoped boundary. Its pure routing model sends a terminal
+receipt from replica identity B to socket identity A, deletes transient route state, and repairs exactly once
+from the durable receipt while the local-route and Redis-as-receipt mutants fail. Chrome repeats the loss and
+repair sequence across two loopback origins using an independent temporary durable-file record. No real Redis,
+WebSocket, Kubernetes replica, retained Pulsar/MinIO, or Envoy route participated, so those runtime claims and
+HA remain UNVERIFIED. `linux-cpu` remains an option on every physical substrate; clean Linux is provided by
+Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 57's scoped result adds program-epoch registration drain and tenant/owner/stream-keyed cursor resume to
+the tested coordination kernel. An append-only local observer confirms watermark-before-shift ordering across
+A→B→A, and all four semantic mutants turn red. Real Redis registrations, Gateway API/Envoy traffic, Pulsar,
+browser reconnect, Kubernetes, CNI, and provider fault observations remain UNVERIFIED. `linux-cpu` is always
+available on every hardware substrate; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
+on Windows.
+
+Phase 58's scoped result tests admission for one-primary/two-replica/three-Sentinel-shaped ephemeral Redis,
+rejects Redis as receipt authority, and preserves one durable receipt and cursor across a host-local role
+failure. No real Redis/Sentinel, complete provider zone, Kubernetes endpoint, or external observer was failed;
+online multi-zone HA remains UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux
+uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 61's scoped replay path physically drops a response after a durable SQLite effect/receipt commit,
+clears transient route state, and recovers the same receipt through another loopback UI endpoint. Exact retry
+does not duplicate the effect, and Redis-only acknowledgement remains inadmissible. Real Redis/Pulsar and
+provider observers remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux
+uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 64's scoped campaign reconnects Chrome through a surviving host-local endpoint after stopping another,
+clears transient route state, and recovers cursor and receipts from SQLite with one effect per command. This
+tests non-sticky/durable-repair behavior but not provider zones or real Redis/Sentinel, which remain
+UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on
+Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ---
 

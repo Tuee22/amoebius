@@ -1,0 +1,4 @@
+case continuity operation max_count max_bytes max_age_seconds conflict ordering dependency validation
+online-only OnlineOnly - 0 0 0 - - - -
+infernix Offline infernix-start 8 65536 86400 reject preserve workflow-root current-authority
+jitml Offline jitml-training-start 4 131072 43200 reject preserve dataset-blob current-authority

@@ -1,0 +1,10 @@
+path	expected
+kind	left:non-absolute-path
+bin/kubectl	left:non-absolute-path
+../kind	left:non-absolute-path
+./kubectl	left:non-absolute-path
+	left:non-absolute-path
+/usr/bin/kubectl	right
+/usr/local/bin/kind	right
+/home/operator/.ghcup/bin/cabal	right
+C:/Program Files/WindowsApps/winget.exe	right

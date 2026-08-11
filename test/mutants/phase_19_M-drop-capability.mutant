@@ -1,0 +1,3 @@
+operator=guard-deletion
+change=bind without a declared capability
+expected=missing-capability fails

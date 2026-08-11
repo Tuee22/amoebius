@@ -1,0 +1,4 @@
+store key_shape allowed_value prohibited_plaintext
+records partition/record ciphertext true
+metadata partition offline-auth-metadata true
+keys - none credential,refresh-token,private-plan

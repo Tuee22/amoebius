@@ -1,0 +1,7 @@
+case expected effect_delta intent_preserved
+a-to-b-migrated Accepted 1 true
+a-record-retained-handler Accepted 1 true
+old-stored-auth-current-deny Denied 0 true
+b-to-a-rollback Accepted 0 true
+incompatible-c PromotionRefused 0 true
+reload-required Reloaded 0 true

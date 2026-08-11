@@ -1,0 +1,15 @@
+{
+  "actions": [
+    "StartPlanned",
+    "StandUpReplica",
+    "Quiesce",
+    "VerifyCaughtUp",
+    "PromotePlanned",
+    "RepointPlannedDns",
+    "Unfreeze",
+    "DrainMonitor",
+    "DecommissionSource"
+  ],
+  "branch": "planned",
+  "terminalPhase": "Done"
+}

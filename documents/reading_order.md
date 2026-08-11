@@ -36,9 +36,9 @@ prior knowledge, but every stop presumes the stops above it.
 
 ## Before starting
 
-> **Nothing described in this corpus is built.** There is no source tree. Every prescriptive sentence in every
-> document is design intent, not a tested result, and the documents say so wherever a claim is made. Reading
-> the corpus as a description of running software will misread all of it.
+> **The repository contains implementation and tests, but every prior phase seal is reopened.** Existing
+> results are historical diagnostics until each redesigned gate passes from a clean committed tree and its
+> external attestation verifies. Prescriptive doctrine remains design intent unless it names that evidence.
 
 - [`glossary.md`](./glossary.md) — open in a second tab and leave it open; every stop below assumes it.
 
@@ -49,7 +49,8 @@ discussion.
 
 - [`DEVELOPMENT_PLAN/overview.md` §1](../DEVELOPMENT_PLAN/overview.md#1-the-everything-orchestrator-shape-one-runtime-binary-three-contexts) — one binary, three contexts, and the shape of the whole system.
 - [`DEVELOPMENT_PLAN/overview.md` §2](../DEVELOPMENT_PLAN/overview.md#2-the-constituent-projects-libraries-and-behaviours-unified-under-the-dsl) — the four sibling projects being unified, and why this is not a rewrite.
-- [`DEVELOPMENT_PLAN/overview.md` §5](../DEVELOPMENT_PLAN/overview.md#5-current-baseline--greenfield) — the greenfield baseline; read this before believing anything else is running.
+- [`DEVELOPMENT_PLAN/overview.md` §5](../DEVELOPMENT_PLAN/overview.md#5-current-baseline--reopened-implementation) — the reopened baseline; read this before treating an implemented surface as validated.
+- [`repository_layout_doctrine.md`](./engineering/repository_layout_doctrine.md) — the complete authored and generated tree, including what can never enter version control.
 
 Stop there. The invariant table in
 [§3](../DEVELOPMENT_PLAN/overview.md#3-the-hard-constraints-cross-cutting-invariants) and the phase index in

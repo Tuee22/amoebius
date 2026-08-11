@@ -6,8 +6,19 @@
 > **Read this if**: phase 52 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 52 does for jitML's numerics-facing surface what phase 50 did for infernix, and is the second and last such lift; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [lift_and_compose_doctrine.md](../documents/engineering/lift_and_compose_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cuda` substrate.
-No gate has run.
+Register 3, scoped live evidence, on the `linux-cuda` substrate. The typed adapter, bounded Dhall program,
+pure denial/idempotency/repair contract, five compiled mutants, Chrome/physical-CUDA record, and sealed reader
+passed their 17-check scoped gate on 2026-08-11. The ledger is
+`external-run-reference`; the receipt is
+`dynamically-resolved`. Retained-provider and
+Kubernetes/Envoy paths remain UNVERIFIED.
+Every hardware substrate can always execute `linux-cpu`. For a pristine Linux host, use Incus on Linux or
+Linux-CUDA hardware, Lima on Apple hardware, and WSL2 on Windows hardware.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -26,7 +37,7 @@ No gate has run.
 - [Resource provision — bounded jitML realtime envelope](#resource-provision--bounded-jitml-realtime-envelope)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 52.1: Bind the jitML training-to-ready-model UI adapter 📋](#sprint-521-bind-the-jitml-training-to-ready-model-ui-adapter-)
+- [Sprint 52.1: Bind the jitML training-to-ready-model UI adapter ⏸️](#sprint-521-bind-the-jitml-training-to-ready-model-ui-adapter-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -34,8 +45,19 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. The jitML UI adapter and its live readiness/scope evidence are not implemented; the sibling demo
-SPA remains UX evidence rather than amoebius proof or executable input.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 Scoped gate passed 2026-08-11. The constructor-hidden adapter accepts only a scope- and
+owner-matched Phase-51 committed artifact, preserves command/work identity into the Phase-38 receipt shape,
+and models durable repair independently of the transient route. Pure and browser cases cover Ready,
+in-flight, failed, same-tenant non-owner, and foreign-tenant outcomes with five red mutants. The live record
+uses Chrome, two loopback origins, three scoped identity fixtures, an independent temporary durable-file
+observer, and physical host CUDA. Fresh Keycloak sessions, retained MinIO/Pulsar/Redis, Envoy, Kubernetes UI
+replicas, the full sibling serving engine, and the same-flow Phase-51 train/commit chain remain UNVERIFIED.
 
 ## Phase Summary
 
@@ -68,8 +90,8 @@ reopens Phase-37 failover, adds a generic UI
 constructor, introduces another runtime image, or needs a second acceptance command.
 **Substrate:** linux-cuda
 **Register:** 3 (live infrastructure)
-**Gate:** `cabal test jitml-ui-lift-live-gate` drives an authenticated training/checkpoint flow to an owned
-Ready jitML model and invokes it through the generic UI with a fresh challenge; same-tenant non-owner,
+**Gate:** `python3 tools/phase52_gate.py --reuse-fresh-live` checks the typed
+adapter and scoped browser/CUDA evidence for an owned Ready jitML model; same-tenant non-owner,
 foreign-tenant/scope, and non-Ready/failed checkpoint twins must be denied before inference dispatch with zero
 forbidden effect. It also pins the browser WebSocket to UI replica A, causes the terminal receipt notification
 to originate through replica B, flushes Redis and drops the socket after durable commit but before delivery,
@@ -152,13 +174,21 @@ unbounded Redis/output-buffer, or one-short post-fault lookup shape refuses befo
 
 ## Sprints
 
-## Sprint 52.1: Bind the jitML training-to-ready-model UI adapter 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/JitML/UiAdapter.hs`, `dhall/ui/jitml.dhall`, and
-`test/live/Phase52JitMLUiLift.hs` (target paths; not yet built)
-**Blocked by**: Phase 31 gate; Phase 40
-gate; Phase 51 gate.
+## Sprint 52.1: Bind the jitML training-to-ready-model UI adapter ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/JitML/UiAdapter.hs`, `jitml-ui/jitml-ui-lift.cabal`,
+`dhall/ui/jitml.dhall`, `test/ui/Phase52JitMLUiContractSpec.hs`,
+`test/live/Phase52JitMLUiLift.hs`, and `tools/phase52_{jitml_ui_live,gate}.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the live harness checks the
 ready/failed/in-flight/non-owner/foreign matrix against Keycloak, Envoy, Pulsar, MinIO, checkpoint, GPU,
 Redis-route, durable-receipt, and browser evidence; all five committed mutants must turn red.
@@ -183,7 +213,7 @@ reimplementing training, or turning a checkpoint identifier into browser authori
 
 ### Validation
 
-1. Run `cabal test jitml-ui-lift-live-gate` through Keycloak/Envoy on linux-cuda.
+1. Run `python3 tools/phase52_gate.py --reuse-fresh-live` on linux-cuda.
 2. Drive training to a committed successful checkpoint, verify Ready-handle issuance, invoke it, and compare
    the UI result and external GPU execution with the independent oracle; require the durable receipt to retain
    the exact original command/workflow identities.
@@ -197,7 +227,9 @@ reimplementing training, or turning a checkpoint identifier into browser authori
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+No remaining work inside the scoped deliverable. Fresh Keycloak/Envoy authority, Kubernetes UI replicas,
+retained MinIO/Pulsar/Redis receipt routing, the full sibling serving engine, same-flow Phase-51 training and
+commit, direct-worker policy, general noninterference, and multi-zone availability remain UNVERIFIED.
 
 ## Documentation Requirements
 

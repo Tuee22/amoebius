@@ -6,7 +6,12 @@
 
 Phase 59 delivers the offline language and paired plans; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+The gate passed on 2026-08-11; runtime behavior remains `UNVERIFIED` by construction.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -24,7 +29,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 59.1: Compile the offline contract 📋](#sprint-591-compile-the-offline-contract-)
+- [Sprint 59.1: Compile the offline contract ⏸️](#sprint-591-compile-the-offline-contract-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,7 +37,14 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. No offline DSL or plan projection is implemented.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The closed offline source types, validation tags, deterministic paired projections, generated-artifact
+commands, independent fixtures, and five compiler mutation loci pass at Register 1.
 
 ## Phase Summary
 
@@ -48,7 +60,8 @@ signals, cancellation, and artifact/model invocation are `OnlineOnly`.
 **Session scope:** Add and test only the language, decoder, binder, and generated-plan projection; browser
 persistence and live replay belong to later phases.
 
-**Substrate:** `none`.
+**Substrate:** `none`. This pure gate needs no hardware. For later runtime use, every hardware substrate can
+always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 **Register:** 1 — pure/type-level validation.
 
@@ -75,14 +88,23 @@ compiler under test; no live authority or fresh challenge is applicable at Regis
 
 ## Sprints
 
-## Sprint 59.1: Compile the offline contract 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 59.1: Compile the offline contract ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `dhall/amoebius/UiOffline.dhall`,
-`src/Amoebius/Ui/Offline/{Types,Decode,Plan}.hs`, `test/Ui/OfflinePlanSpec.hs` (planned; not built)
-**Blocked by**: Phase 22
-**Independent Validation**: `cabal test offline-plan-spec` against authored
-fixtures, an independent key-set oracle, and seeded mutants
+`src/Amoebius/Ui/Offline/{Types,Decode,Plan}.hs`, `test/Ui/OfflinePlanSpec.hs`, and
+`tools/phase59_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `python3 tools/phase59_gate.py` against authored
+fixtures, the independent key-set oracle, five compile-time mutants, documentation, and the coverage ledger
 **Docs to update**:
 `documents/engineering/browser_offline_runtime_doctrine.md`,
 `documents/engineering/low_code_ui_runtime_doctrine.md`,
@@ -102,12 +124,13 @@ Compile one bounded authored offline contract into coherent public and private p
 
 ### Validation
 
-1. Run `cabal test offline-plan-spec`; require the canonical corpus green, each attempt to queue progress,
+1. Run `python3 tools/phase59_gate.py`; require the canonical corpus green, each attempt to queue progress,
    signal, cancellation, or invocation to fail at its pinned tag, and every named mutant to turn red.
 
 ### Remaining Work
 
-The whole sprint is planned.
+Browser persistence, encryption, tab ownership, live authority, and replay are not Register-1 claims. They
+remain `UNVERIFIED` here and belong to Phases 60–64.
 
 ## Documentation Requirements
 

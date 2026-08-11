@@ -51,6 +51,10 @@ the running deployment enforces it. Each `**Layer:**` tag records where the fore
 
 ### 3.13 A compute engine incompatible with its substrates (managed providers first-class)
 
+**Delivery-owner:** `Phase-7`
+
+**Case-family:** `topology`
+
 Raw tooling permits pointing kind, rke2, or a managed cluster at a substrate that cannot run it, and lets a
 managed provider (EKS) be a bolt-on afterthought rather than a first-class citizen. amoebius makes the
 compute engine a **declared axis** distinct from the *detected* substrate, and a `Node` is built by a
@@ -65,6 +69,10 @@ uninhabitable).
 
 ### 3.14 rke2/kind on a host with no Linux node (apple/windows without an interposed Linux VM)
 
+**Delivery-owner:** `Phase-6`
+
+**Case-family:** `topology`
+
 kind and rke2 need a Linux kernel; on a bare apple or windows host there is none until one is synthesized in
 a VM. amoebius makes a `LinuxHost` a **witness** whose only constructor on a non-Linux substrate is the
 virtualization provider (`limaHost` on apple, `wsl2Host` on windows), so "rke2/kind on a bare Apple host"
@@ -72,9 +80,14 @@ virtualization provider (`limaHost` on apple, `wsl2Host` on windows), so "rke2/k
 [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) (+ substrate [§4](../engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux) for the synthesis).
 **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a distro GADT indexed by a required `LinuxHost` witness). **Layer:** type-foreclosed uninhabitable;
 runtime-checked residue — that the Lima/WSL2 VM actually boots.
-**Validation-locus:** `Gate-2-decoder` (the distro GADT indexed by the required `LinuxHost` witness — a bare-host distro has no inhabitant once decoded) + `live-effect` (that the interposed Lima/WSL2 VM actually boots).
+**Validation-locus:** `Gate-1-editor` (the closed substrate union has no bare Apple/Windows rke2 or kind arm) +
+`Gate-2-decoder` (the distro GADT indexed by the required `LinuxHost` witness — a bare-host distro has no inhabitant once decoded) + `live-effect` (that the interposed Lima/WSL2 VM actually boots).
 
 ### 3.15 A multi-node kind cluster not on a single Linux host
+
+**Delivery-owner:** `Phase-4`
+
+**Case-family:** `topology`
 
 kind runs every node as a container on one Docker host, so a multi-node kind cluster spanning machines is a
 category error. amoebius's `Kind` arm carries **exactly one** `LinuxHost` field; multi-node is `replicas` on
@@ -83,6 +96,10 @@ that one host, and a second host has no field to bind. **Owner:**
 **Validation-locus:** `Gate-1-editor` (the `Kind` arm's single required `host` field — a second host has no field to bind, so `dhall type` rejects it at authoring time).
 
 ### 3.16 A multi-node rke2 cluster with fewer Linux hosts than nodes (or a host reused)
+
+**Delivery-owner:** `Phase-6`
+
+**Case-family:** `topology`
 
 A multi-node rke2 cluster needs one distinct Linux host per node; raw tooling permits asking for five nodes with
 three machines, or reusing one machine for two nodes. amoebius's `Rke2` arm carries
@@ -105,6 +122,10 @@ a host).
 
 ### 3.24 An even/zero-server rke2 control plane (no etcd quorum / split-brain)
 
+**Delivery-owner:** `Phase-4`
+
+**Case-family:** `topology`
+
 Raw rke2 HA permits standing up a **two**-server control plane — two etcd voters can never form a majority, so
 the first partition is a split-brain — or a **zero**-server "cluster" of agents with nowhere to join. amoebius
 makes the server set a **closed union** `Rke2Servers = < Single : LinuxHost | Ha3 : {…} | Ha5 : {…} >` whose
@@ -123,6 +144,10 @@ actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](../engi
 
 ### 3.37 A full stretched node on a managed EKS control plane without a provider-native hybrid arm
 
+**Delivery-owner:** `Phase-7`
+
+**Case-family:** `topology`
+
 A managed control plane (EKS) is deliberately **hostless** — no `LinuxHost` field to hang a node off, no
 channel-1 mTLS — so a full **member** node stretched onto a `Managed Eks` control plane is representable **only**
 if the provider natively supports it (**EKS Hybrid Nodes**). Absent that provider-native arm it has **no constructor** — **type-foreclosed uninhabitable**, the identical closed-union "no arm = not supported" idiom as a
@@ -140,7 +165,17 @@ surface-provider-vs-build discipline owned by [`cluster_lifecycle_doctrine.md`](
 arm is surfaced; runtime-checked residue — that the provider's hybrid mechanism actually joins the node.
 **Validation-locus:** `Gate-1-editor` (the closed provider-arm union — the hybrid arm is absent, so a full member node on a hostless `Managed Eks` control plane has no constructor and fails `dhall type`) + `live-effect` (that the provider's hybrid mechanism actually joins the node, once a provider-native arm is surfaced).
 
+The Phase-45 paired pure contract and retained-kind object inventory exercise the closed managed/self-managed
+shape and the `NoHostSubstrateOnManagedEks` refusal without claiming provider runtime proof. Actual Managed EKS
+host-foreclosure readback remains a `live-effect` obligation because AWS authority could not create the child.
+The parent always has a `linux-cpu` option on every hardware substrate; use Incus on Linux/Linux-CUDA, Lima on
+Apple, or WSL2 on Windows when the observation requires a pristine Linux host.
+
 ### 3.39 A split-Site etcd quorum
+
+**Delivery-owner:** `Phase-7`
+
+**Case-family:** `topology`
 
 An etcd quorum split across network-localities loses its low-latency majority and risks partition on the WAN
 link. This round keeps all rke2 servers **`Site`-co-located** by indexing the server set on one `Site`:

@@ -1,0 +1,1 @@
+Drop one model-derived kubelet or CRI metadata component before fitting node-local backing.

@@ -77,6 +77,10 @@ flowchart LR
 
 ### 3.5 Undeployable pods (taints, tolerations & affinity)
 
+**Delivery-owner:** `Phase-7`
+
+**Case-family:** `topology`
+
 In raw k8s a nodeSelector / affinity can match **no** node, *or* a taint no workload
 tolerates, *or* a toleration for a taint no node declares — the pod is admitted and then never schedules.
 amoebius constrains placement so that a workload's substrate/affinity requirement **and** its taint
@@ -104,6 +108,10 @@ constructor, [§3.22](#322-a-hand-authored-un-derived-toleration)) + `live-effec
 witnessed node).
 
 ### 3.17 An over-committed deploy or workload (host / VM / cluster capacity exceeded)
+
+**Delivery-owner:** `Phase-6`
+
+**Case-family:** `capacity`
 
 Raw k8s can admit a workload whose requests, declared limits, or physical peaks exceed the real target, a VM or host
 worker that overdraws its physical host, durable claims larger than their backing, or pod-ephemeral/cache
@@ -163,7 +171,9 @@ and durable backing/claim sizes from
 [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md). **Technique:**
 [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (capacity-accounting total fold). **Layer:** decode-foreclosed.
-**Validation-locus:** `Gate-2-decoder` (the decoder-local zero-progress rolling smart constructor returns
+**Validation-locus:** `Gate-1-editor` (controller-specific closed policy records reject DaemonSet
+both-positive rollout fields, unsupported/nonzero StatefulSet partition arms, and a Job without terminal
+retention) + `Gate-2-decoder` (the decoder-local zero-progress rolling smart constructor returns
 `Left (UnspellableCombination "rollout.rollingProgress")`) + `provision-seal` (the post-bind reservation,
 finite-limit/physical-peak, named-pool, nested-host/build/engine, and monitoring-work folds return
 `Left Overcommit`/`Left StoragePoolOvercommit` before a `ProvisionedSpec` exists) + `live-effect` (residue —
@@ -173,6 +183,10 @@ boundaries: no `Pending`, eviction, OOM, or full disk). The committed
 finite-limit/physical-peak relation; the name does not assert synchronous ephemeral quota enforcement.
 
 ### 3.22 A hand-authored (un-derived) toleration
+
+**Delivery-owner:** `Phase-13`
+
+**Case-family:** `topology`
 
 A free-text toleration is how a pod "tolerates" a taint no node carries (or fails to tolerate the one it
 must). amoebius never lets an operator *write* a toleration: a `Toleration` handle has no exported
@@ -194,6 +208,10 @@ NetworkPolicy, [§3.6](./illegal_state_security.md#36-blocking-networkpolicy-ser
 <a id="327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing"></a>
 
 ### 3.27 A deployment that fits in aggregate but has no resource-capable placement
+
+**Delivery-owner:** `Phase-7`
+
+**Case-family:** `capacity`
 
 Raw k8s admits a workload whose demand fits a cluster *in aggregate* but whose individual pods cannot be packed
 onto individual nodes — for example, a 5-CPU pod on a cluster of 4-CPU nodes, or a pod whose memory or
@@ -233,6 +251,10 @@ the elastic set).
 
 ### 3.28 Two accelerator owners on one node, or a fractional accelerator claim
 
+**Delivery-owner:** `Phase-9`
+
+**Case-family:** `accelerator`
+
 Raw k8s extended-resource scheduling can distribute a node's integer devices among several pods, while
 vendor-specific sharing schemes can expose fractional-looking allocations, so ownership of a node's GPUs can
 become diffuse and contended. This round **reframes** a node's accelerators
@@ -262,6 +284,10 @@ runtime actually grant those devices only to the owner).
 
 ### 3.29 A host worker whose Demand overflows its physical host
 
+**Delivery-owner:** `Phase-7`
+
+**Case-family:** `capacity`
+
 A host-level accelerator worker (an Apple-Metal or Windows-CUDA native subprocess,
 [`substrate_doctrine.md` §5](../engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)) runs beside the Lima/WSL2 VM that backs the in-cluster
 node, both drawing on the same **physical host**; raw tooling accounts neither, so a host binary that
@@ -289,6 +315,10 @@ declares no physical-host `Capacity`) + `live-effect` (residue — that the host
 <a id="330-a-served-model-whose-vram-footprint-exceeds-node-vram"></a>
 
 ### 3.30 An accelerator memory envelope that cannot fit the selected devices or unified-memory pool
+
+**Delivery-owner:** `Phase-9`
+
+**Case-family:** `accelerator`
 
 Accelerator memory is finite and a serving/training/JIT envelope — weights, KV cache, activations, optimizer
 state, batching/context headroom, and workspace — must fit it, but raw execution permits pointing an oversized
@@ -344,6 +374,10 @@ actually fits under real batch/context).
 
 ### 3.72 A compute headroom pad that reserves past its own limit
 
+**Delivery-owner:** `Phase-6`
+
+**Case-family:** `capacity`
+
 Declared compute headroom is the one authorable over-reservation in the capacity model
 ([`resource_capacity_doctrine.md` §3](../engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)):
 a workload may reserve more of a node than it requires, provided the excess carries a closed
@@ -380,6 +414,10 @@ reason is required rather than defaultable, so an authored reservation has nowhe
 (residue — the rendered `requests` carries the padded total and the kubelet reserves exactly it).
 
 ### 3.73 A padded reservation that overcommits allocatable
+
+**Delivery-owner:** `Phase-7`
+
+**Case-family:** `capacity`
 
 Declared compute headroom competes for the same node capacity as the requests it extends; there is no separate
 pool it is drawn from. A fold that admitted a workload set by summing only the required requests, while the

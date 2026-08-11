@@ -1,0 +1,6 @@
+diff --git a/src/Amoebius/Test/Runner.hs b/src/Amoebius/Test/Runner.hs
+--- a/src/Amoebius/Test/Runner.hs
++++ b/src/Amoebius/Test/Runner.hs
+@@
+-  runBody actions `finally` topologyTeardown actions
++  runBody actions

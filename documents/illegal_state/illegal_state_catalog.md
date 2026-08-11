@@ -53,11 +53,29 @@ entry uninhabitable.
 - The *normative rule* behind each catalog entry lives in that entry's owning doctrine
   (storage, gateway/ingress, secrets, …). The catalog names the owner and never restates its content.
 
-Everything below is **design intent**, not a tested amoebius result: the **type discipline** it describes (the
-spec composes; no illegal value is constructible) is **validated in-process** by the pre-cluster gates (Register 1/2 —
-Dhall typecheck + Haskell decoder + property/compile-fail corpus), while its **runtime enforcement** remains a
-**live-cluster** concern (Register 3 — the orchestration DSL + the `replicas=1` control-plane singleton that renders and
-reconciles a live cluster). Status and gates live only in
+Phase 4 validates the Gate-1 subset in-process: its eight canonical no-arm/required-field negatives and
+three image/process negatives fail against the authored closed Dhall schema, with independent shape oracles
+and mutants. Phase 5 validates the focused Gate-2 subset: distinct schema/domain/unspellable refinement
+classes, tenant/state/owner compile indices, full positive-tree retention, and fail-closed import/exception
+handling (ledger `external-run-reference`). Phase 6 validates the exhaustive catalog projection: all 88
+entries and 104 named subcases reconcile, the 33 reached Gate-1/Gate-2 subcases discharge, and the remaining
+71 subcases retain exact later owners (ledger `external-run-reference`). The
+[Phase 7 gate](../../DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md) then supplies exact-locus evidence for
+all 11 Phase-7-owned subcases: three Gate-1 foreclosures, seven compile-time index pairs, and the direct
+base capacity/topology provision-seal fixtures, with 15 negative/twin pairs, two positives, four sampled
+properties, and 19 red mutants (ledger `external-run-reference`). The
+[Phase 8 gate](../../DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md) supplies exact-locus evidence for all
+five Phase-8-owned subcases: two Gate-1 bounded-training barriers and 27 storage-geometry variant/twin rows
+cover logical/physical fit, backup-medium fit, disjoint capacity pools, and restore-target fit; six sampled
+properties pass and 31 mutants are red (ledger `external-run-reference`). The
+[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md) supplies the two owned
+accelerator loci plus 32 exact execution/runtime-storage/accelerator/provider-root negative/twin variants,
+two composed positives, seven sampled properties, and 45 red mutants (ledger
+`dynamically-resolved`). These are checked rejections at the pure `provision-seal` fold boundary.
+Capability binding, whole-deployment post-bind sealing, Gate 3, rendered output, and live-effect entries remain
+unverified at their later loci.
+Runtime enforcement remains a **live-cluster** concern (Register 3 — the orchestration DSL + the
+`replicas=1` control-plane singleton that renders and reconciles a live cluster). Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md); per
 [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) this doc states the target shape and links
 back for status.
@@ -119,10 +137,10 @@ flowchart TD
 
 This is the reference instance of the diagram scheme — node shape encodes the functional-programming role and colour encodes the honesty band; it depicts design intent, not a built or tested amoebius result.
 
-> **Honesty.** "When implemented as specified, the type-check is a proof" is itself a claim about a design
-> not yet built — a **Register 1/2** (pre-cluster / in-process) property targeted for in-process validation,
-> not the live-cluster half. Read every "unrepresentable" below as *design intent for the type discipline*,
-> never as a tested amoebius behaviour.
+> **Honesty.** The exact Gate-1 and focused Gate-2 subsets linked above are now Register-1 results. Every
+> catalog entry outside those enumerated corpora remains design intent until its assigned validation locus;
+> none of these in-process results establishes the live-cluster half. Read "unrepresentable" as tested only
+> where a committed gate/ledger names the entry, never as blanket runtime behaviour.
 
 ---
 
@@ -221,13 +239,13 @@ the SSoT for the axis. Most entries name a primary locus plus a live-effect resi
 
 ### Capability & messaging — [`illegal_state_capability_messaging.md`](./illegal_state_capability_messaging.md)
 
-- [§3.12](./illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability) — An app that names a product instead of a capability
+- [§3.12](./illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability) — An app that names a product instead of a capability. Phase 10 validates the `Minio` constructor is absent at Gate 1; live provider behavior is unverified.
 - [§3.23](./illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload) — A non-CBOR Pulsar payload
 - [§3.82](./illegal_state_capability_messaging.md#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary) — A browser effect or provider call escaping the server-mediated capability boundary
 
 ### ML assets & training — [`illegal_state_ml_asset.md`](./illegal_state_ml_asset.md)
 
-- [§3.25](./illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) — An ML asset named by arbitrary URL (or an unready / unlanded model)
+- [§3.25](./illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) — An ML asset named by arbitrary URL (or an unready / unlanded model). Phase 10 validates the URL arm is absent at Gate 1; readiness, landing, and resolution remain deferred.
 - [§3.32](./illegal_state_ml_asset.md#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention) — A continuous training run with no checkpoint cadence, or a feed with no bounded retention
 - [§3.33](./illegal_state_ml_asset.md#333-a-multi-partition-training-feed-with-no-defined-merge-order) — A multi-partition training feed with no defined merge order
 - [§3.34](./illegal_state_ml_asset.md#334-an-app-serving-or-continuing-another-apps-model-without-a-grant) — An app serving or continuing another app's model without a grant

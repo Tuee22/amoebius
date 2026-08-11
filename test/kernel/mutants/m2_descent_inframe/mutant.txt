@@ -1,0 +1,1 @@
+Place an out-of-frame step in the wrong frame; the descent golden must diverge without executing an action.

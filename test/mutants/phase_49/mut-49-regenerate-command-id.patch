@@ -1,0 +1,5 @@
+--- a/infernix/src/Infernix/Adapter/Pulsar.hs
++++ b/infernix/src/Infernix/Adapter/Pulsar.hs
+@@
+-  eventCommandId = commandId command
++  eventCommandId = CommandId (workId <> "-retry")

@@ -68,8 +68,10 @@ flowchart TD
 > **Honesty.** This shape is **proven in the sibling jitML project**, whose implemented headless Apple path
 > is the authoritative reference (`~/jitML/documents/engineering/apple_silicon_metal_headless_builds.md` —
 > closed 2026-06-12 on Apple Silicon with no Tart/SwiftPM/offline-`metal`/Xcode/keychain step on the core
-> path). That is **sibling evidence, not an amoebius result**: amoebius has not built its Apple phase
-> (Phase 53), so every prescriptive statement below is a **target shape**, not a tested amoebius fact. Status
+> path). Phase 53 now implements and tests amoebius's fixed-MSL numerical contract, bridge/build plan,
+> fast-math-off rule, and no-VM/no-SwiftPM/no-keychain exclusions. Its executing host was Linux `x86_64`, so
+> actual `/usr/bin/clang` framework linking, `MTLDevice`/`MTLLibrary`, and Metal GPU dispatch remain
+> **UNVERIFIED**; the sibling result is still the only physical Apple evidence. Status
 > and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 

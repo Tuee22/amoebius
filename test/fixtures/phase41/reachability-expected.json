@@ -1,0 +1,9 @@
+{
+  "cleartextCanaryOnUnderlay": false,
+  "hubEndpoint": "192.0.2.1:51820",
+  "hubVpnIp": "10.77.0.1",
+  "icmp": "reachable",
+  "spokeVpnIp": "10.77.1.2",
+  "tcp": "reachable",
+  "underlayProtocol": "udp/51820"
+}

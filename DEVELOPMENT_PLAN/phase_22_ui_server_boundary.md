@@ -6,14 +6,19 @@
 
 Phase 22 delivers the UI server boundary; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), and the plan for reaching it is owned here.
 Register 2: a real boundary against fake tools.
-No gate has run.
+Gate passed on 2026-08-09 with ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -24,7 +29,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 22.1: Authenticated scoped UI-server dispatch 📋](#sprint-221-authenticated-scoped-ui-server-dispatch-)
+- [Sprint 22.1: Authenticated scoped UI-server dispatch ⏸️](#sprint-221-authenticated-scoped-ui-server-dispatch-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,8 +37,18 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. This phase reaches Register 2 with an ephemeral test authority and fake handlers. It does not
-claim live Keycloak/Envoy, provider-side isolation, cluster deployment, redundant service, or HA evidence.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The amoebius executable now owns `serve-ui`; a separate signing-authority process mints post-start
+own/foreign/revoked credentials and a separate capability-guarded handler process records raw effects. Seven
+HTTP rows, five access/audit/effect rows, five startup rows, five public assets, five private probes, seven
+WebSocket rows, one stable retry, 29 loopback network syscalls, and all nine mutants pass. Live Keycloak/Envoy,
+provider-side isolation, cluster deployment, replica loss, and HA remain UNVERIFIED. See the
+[Phase-22 ledger](ledgers/phase_22_ui_server_boundary.md).
 
 ## Phase Summary
 
@@ -66,12 +81,12 @@ on every denial. This phase does not implement the browser interpreter, a domain
 manifests, replicas, failover, or a separate server artifact.
 
 **Session scope:** one `serve-ui` HTTPS/WebSocket/session-to-`AuthorizedAction`-to-handler boundary in the existing executable;
-acceptance command `cabal test ui-server-boundary-spec`; split immediately if work requires browser rendering,
+acceptance command `python3 tools/phase22_gate.py`; split immediately if work requires browser rendering,
 a live Keycloak/provider, deployment/HA, a second register, or a substrate.
 **Dependency:** Phase 20 — canonical `UiServerPlan`, public contracts, route dispatch, and authority digests.
 **Substrate:** none — harness-owned local authority/handler processes only; no cluster or external service.
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `cabal test ui-server-boundary-spec` passes the Phase-0-pinned request/access/startup/asset matrices,
+**Gate:** `python3 tools/phase22_gate.py` passes the Phase-0-pinned request/access/startup/asset matrices,
 cryptographically minted least-privilege own/foreign credentials, post-start nonce round trip, stale-epoch,
 private-plan and bypass negatives, independent HTTP plus OS-boundary effect observations, and every seeded mutant in
 [Gate integrity](#gate-integrity). Phase 23 does not open on the server branch unless this command emits a
@@ -93,12 +108,12 @@ harness processes; neither reads a decision trace emitted by the server under te
   server-plan path probes. Every allow pairs with a denial differing only in subject, tenant, permission, grant
   state, origin, or authority epoch. Asset/plan responses must exactly match the Phase-21 browser-enforced
   header policy.
-- **Authority provenance:** an independently started ephemeral OIDC test authority mints signed,
+- **Authority provenance:** an independently started ephemeral signing-authority process mints HMAC-signed,
   least-privilege credentials after the server starts. The server derives tenant/subject/roles from the
   verified token; spoofed `X-Tenant`, `X-Subject`, owner, and role fields never affect the decision.
 - **Fresh challenge and external observation:** after readiness, the harness creates an unpredictable nonce
   and includes it in an authorized typed mutation. A separate handler process records raw request bytes to an
-  append-only harness-owned descriptor, while an OS network-namespace capture records the connection. Both
+  append-only harness-owned descriptor, while `strace` records `connect`/`sendto` system calls. Both
   observers must recover the nonce and matching scoped action; self-reported server audit is insufficient.
 - **Paired denials and bypass probes:** same request with a foreign-subject token, foreign-tenant token,
   revoked grant, stale epoch, invalid origin/CSRF token, direct handler address, or caller tenant header returns
@@ -140,16 +155,24 @@ edge exclusivity, provider policy, storage isolation, and behavior after replica
 
 ## Sprints
 
-## Sprint 22.1: Authenticated scoped UI-server dispatch 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 22.1: Authenticated scoped UI-server dispatch ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**:
 `src/Amoebius/Ui/Server/{Main,Dispatch,RequestContext,SecurityHeaders,WebSocket}.hs`,
-`src/Amoebius/Ui/Realtime/{Class,Envelope}.hs` and `test/ui/Phase22UiServerBoundarySpec.hs` (target authored
-sources; not yet built)
-**Blocked by**: Phase 20
-**Independent Validation**: `cabal test
-ui-server-boundary-spec` starts the authority/server/handler as separate processes, drives paired HTTP
+`src/Amoebius/Ui/Realtime/{Class,Envelope}.hs`, `test/ui/Phase22UiServerBoundarySpec.hs`,
+`test/ui/server/phase22_server_boundary.mjs`, and `tools/phase22_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `python3 tools/phase22_gate.py` starts the
+authority/server/handler as separate processes, drives paired HTTP
 requests, reads independent raw effect/network observations, and requires every named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/daemon_topology_doctrine.md`,
@@ -196,7 +219,8 @@ identity, compatible scope, explicit authorization, current plan identity, and t
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. Live identity, edge exclusivity, provider/storage policy, cluster deployment, replica loss, and HA remain
+explicitly UNVERIFIED for their owning later phases.
 
 ## Documentation Requirements
 

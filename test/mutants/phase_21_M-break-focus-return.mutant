@@ -1,0 +1,2 @@
+operator=accessibility-transition-deletion
+expected=modal focus does not return to its opener

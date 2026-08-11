@@ -1,0 +1,1 @@
+{"schema1":{"outbox":["id","ciphertext","dependencies"],"blob":["id","ciphertext","digest"]},"schema2":{"outbox":["id","sealedPayload","dependencies","version"],"blob":["id","sealedPayload","digest","version"]}}

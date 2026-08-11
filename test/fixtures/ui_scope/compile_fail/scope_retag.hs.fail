@@ -1,0 +1,6 @@
+module ScopeRetag where
+
+import Amoebius.Ui.Security.Scope
+
+bad :: Tenant -> ScopedHandle scope -> ScopedHandle scope
+bad foreignTenant localHandle = retagHandle foreignTenant localHandle

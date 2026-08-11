@@ -1,0 +1,2 @@
+operator=private-surface-exposure
+expected=forbidden server-plan bytes appear in an HTTP transcript

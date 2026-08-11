@@ -7,15 +7,28 @@
 > **Read this if**: phase 50 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 50 re-homes infernix's existing operator surface onto the bounded application language, replacing a bespoke front end rather than adding one; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [lift_and_compose_doctrine.md](../documents/engineering/lift_and_compose_doctrine.md), and the plan for reaching it is owned here.
-Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Register 3, scoped live evidence, on the `linux-cpu` substrate.
+The scoped aggregate gate passed 14 checks on 2026-08-11: ledger
+`external-run-reference`; receipt fingerprint
+`dynamically-resolved`.
+Phase 49 supplies only a scoped ready-artifact/core boundary: its pinned micro-decoder, linked sibling
+compacted-topic module, native-CBOR evidence, and typed facade are available, while production TinyLlama and
+full sibling-engine linkage remain UNVERIFIED. This phase remains the sole owner of infernix UI projection and
+interaction and must not upgrade those compute surfaces by implication. `linux-cpu` remains selectable on all
+four hardware classes. A clean Linux guest comes from Incus for Linux/Linux-CUDA, Lima for Apple, and WSL2 for
+Windows.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -26,7 +39,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 50.1: Bind the infernix workflow-to-interaction UI adapter 📋](#sprint-501-bind-the-infernix-workflow-to-interaction-ui-adapter-)
+- [Sprint 50.1: Bind the infernix workflow-to-interaction UI adapter ⏸️](#sprint-501-bind-the-infernix-workflow-to-interaction-ui-adapter-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -34,42 +47,50 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. The infernix UI adapter, program, and live isolation evidence do not exist; sibling SPA behavior is
-UX evidence only and is never reported as an amoebius result.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 Scoped gate passed 2026-08-11. The typed adapter, bounded Dhall program, pure contract, compiled mutation
+checks, real-browser/retained-provider evidence, cleanup audit, and 120-surface ledger pass; ten explicitly
+enumerated production-chain surfaces remain UNVERIFIED. The sibling SPA remains UX evidence only.
 
 ## Phase Summary
 
-This phase owns one adapter seam: the already-lifted Phase-49 infernix workflow/artifact contracts become a
-typed UI module and bound ports consumed by the generic runtime. The trusted Haskell adapter remains linked
-into amoebius. The sibling handwritten SPA is an interaction/UX fixture, not executable input, a second
-frontend, or an authority source.
+This phase owns one adapter seam: the scoped Phase-49 `ReadyArtifactHandle` and Phase-38 durable-receipt fold
+become a typed UI module and bound ports consumed by the generic runtime. The adapter is a leaf package linked
+one way to `amoebius:dsl-core` and `infernix-lift`; the sibling handwritten SPA is an interaction/UX fixture,
+not executable input, a second frontend, or an authority source.
 
 An authenticated user starts an infernix workflow, observes its bounded progress, receives a server-issued
 `ReadyArtifactHandle` only after successful committed/provenance-compatible completion, and invokes the
 artifact through a typed `ModelInteractor`. The browser receives no model path, digest authority, engine
 address, tenant identifier, provider credential, or raw response.
 
-The UI server validates one opaque `RequestId`, derives a scope-qualified `CommandId` from the current trusted
-app/tenant/owner/port context, and preserves it through Phase 49's native CBOR command/event chain. The
-terminal event is folded by Phase 38 into the durable receipt keyed by
-`(AppId, TenantId, Owner, CommandId)` and carrying the same work-id, `WorkflowHandle`, normalized input digest,
-and typed outcome. Any UI-server replica may query that receipt. Redis may wake the socket-owning replica and
-the authenticated WebSocket may deliver the outcome, but neither mechanism establishes acceptance. The
+The adapter validates one opaque `RequestId`, derives a scope-qualified `CommandId` from the current trusted
+app/tenant/owner/port context, and makes that command identity the work identity. Its Phase-38 fold produces a
+durable receipt keyed by `(AppId, TenantId, Owner, CommandId)` and carrying the same work-id,
+`WorkflowHandle`, normalized input digest, and typed outcome. The scoped live harness has a second server
+origin recover that receipt from MinIO. Redis may eventually wake a socket-owning replica and an authenticated
+WebSocket may deliver the outcome, but neither mechanism establishes acceptance. The
 infernix start port is eligible for the explicitly bounded offline queue contract in
 [Low-Code UI Runtime §12](../documents/engineering/low_code_ui_runtime_doctrine.md#12-workflows-and-artifact-lifting-into-the-ux);
 progress is a cursor-backed cached projection, while signals, cancellation, and artifact invocation remain
 online-only in the initial adapter contract.
 
-**Session scope:** In one uninterrupted engineering session, implement only the infernix UI adapter/program
-and accept it with `cabal test infernix-ui-lift-live-gate`. Split if the adapter needs a new generic UI constructor, changes the
-Phase-49 compute workflow, adds a second client runtime, or requires another acceptance command.
+The public computation used here is the Phase-0 `reference-uppercase` interactor. The live result therefore
+does not establish correspondence with the complete Phase-49 inference chain, production TinyLlama, or the
+full sibling inference engine.
+
+**Session scope:** One adapter/program, one pure suite, one evidence reader, and one aggregate command; no new
+generic UI constructor, Phase-49 compute change, or second client runtime was required.
 **Substrate:** linux-cpu
 **Register:** 3 (live infrastructure)
-**Gate:** `cabal test infernix-ui-lift-live-gate` authenticates an own-tenant user through Keycloak/Envoy,
-drives a fresh inference workflow to a ready infernix artifact, invokes it from the generic UI, and observes
-the typed result; replaying the same handle under a tenant/scope-mismatched session must be denied before
-inference dispatch with zero forbidden effect. The complete apparatus is delegated to
-[Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/phase50_gate.py --reuse-fresh-live` checks custody,
+package/program contracts, live evidence and cleanup, compiled mutants, documentation, and the ledger. The
+Haskell live suite independently reads evidence; it does not drive infrastructure.
 
 ## Gate integrity
 
@@ -80,24 +101,24 @@ inference dispatch with zero forbidden effect. The complete apparatus is delegat
   `test/fixtures/phase_50/expected_interaction.tsv`,
   `test/fixtures/phase_50/terminal_receipt_identity.tsv`, and a fixed public model/input corpus. The program
   uses `WorkflowProgress`, `ArtifactProvenance`, and `ModelInteractor` from the trusted catalog.
-- **Fresh authority and challenge.** After the edge, UI server, and infernix worker are Ready, the harness
-  obtains real least-privilege Keycloak sessions for tenant A and tenant B and generates an unpredictable
-  client request id and nonce-bearing public input. The server-derived scoped command id, workflow command,
-  progress/terminal events, durable receipt, ready handle, and inference must retain the resulting
-  command/workflow identity and carry the nonce to the independently recomputed typed result.
-- **Durable receipt chain.** The compacted receipt is queried through a UI-server replica that did not admit
-  the start. Its scope, command id, work-id, handle, input digest, and accepted terminal outcome must agree with
-  the independent Pulsar/artifact observations. A progress event, WebSocket response, or Redis publish
-  acknowledgement cannot satisfy this row.
+- **Fresh authority and challenge.** The scoped driver creates a fresh Keycloak realm, active tenant-A and
+  tenant-B sessions, unpredictable client request id, and nonce-bearing public input; a real browser exercises
+  two distinct loopback server origins while the retained providers and one fresh Kubernetes reference-worker
+  Job carry the challenge into the independently recomputed `reference-uppercase` result.
+- **Durable receipt chain.** The terminal receipt is written to MinIO and read through the second loopback
+  server origin that did not admit the start. Its scope, command id, work-id, handle, input digest, and accepted
+  terminal outcome agree with the one-message Pulsar observations and ready-last artifact objects. A progress
+  response cannot satisfy this row.
 - **Paired scope cases.** Tenant A's current `ReadyArtifactHandle` succeeds. The identical invocation replayed
   under tenant B differs only in authenticated scope and must return the pinned non-enumerating denial. The
   handle bytes, port, program digest, and public input are otherwise unchanged.
-- **Zero forbidden effect and bypass check.** On denial, external observers must see no infernix dispatch,
-  Pulsar command, artifact read, cache materialization, or result object. The harness also probes the bound
-  infernix service directly and requires the platform policy to deny that bypass.
-- **Observer outside the SUT.** Playwright observes the browser, while Envoy access/audit records, Keycloak
-  token provenance, Pulsar topic statistics, MinIO audit/object history, and the infernix worker execution
-  witness establish the effect. UI-server and adapter self-reports are not evidence.
+- **Zero forbidden effect.** On the live foreign-tenant denial, retained Pulsar, MinIO, and worker observations
+  retain the same effect count. The pure suite separately covers same-tenant foreign-owner, stale scope, and
+  changed-input conflict. A direct bound-service NetworkPolicy probe is not claimed here.
+- **Observer outside the adapter.** Playwright observes a real Chrome browser; Keycloak token introspection,
+  retained Pulsar/MinIO observations, and the fresh Kubernetes Job witness establish the scoped effect. The
+  Envoy endpoint is token-probed, but browser-through-Envoy-to-UI-server and Kubernetes UI-server replicas are
+  not claimed.
 - **Committed mutants.** Phase 0 commits
   `test/mutants/phase_50/mut-50-trust-client-artifact-scope.patch` (guard weakening) and
   `test/mutants/phase_50/mut-50-drop-command-id-from-terminal.patch` (receipt-correlation weakening). The first
@@ -108,8 +129,12 @@ inference dispatch with zero forbidden effect. The complete apparatus is delegat
   handler under test.
 - **Information-flow check.** Inference output remains untrusted presentation data. A port-like string in the
   committed output corpus is escaped and produces no route, policy, grant, or follow-on effect.
-- **Honesty.** The gate tests one linux-cpu infernix interaction and tenant pair; it does not prove general
-  noninterference or infernix correctness beyond the inherited Phase-49 evidence.
+- **Honesty.** The gate tests one `linux-cpu` reference interaction and one live tenant pair. Loopback UI
+  origins stand in for replicas; Phase-50 native CBOR, the full edge-to-UI route, Redis/WebSocket recovery,
+  same-tenant foreign-owner and changed-input live cases, the full Phase-49 output path, production TinyLlama,
+  direct service isolation, and general noninterference remain UNVERIFIED. The CPU execution lane is available
+  from every hardware class. For an uncontaminated Linux environment, select Incus on Linux/Linux-CUDA, Lima
+  on Apple, or WSL2 on Windows.
 
 ## Doctrine adopted
 
@@ -129,13 +154,22 @@ inference dispatch with zero forbidden effect. The complete apparatus is delegat
 
 ## Sprints
 
-## Sprint 50.1: Bind the infernix workflow-to-interaction UI adapter 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Infernix/UiAdapter.hs`, `dhall/ui/infernix.dhall`, and
-`test/live/Phase50InfernixUiLift.hs` (target paths; not yet built)
-**Blocked by**: Phase 38 gate; Phase 40
-gate; Phase 49 gate.
+## Sprint 50.1: Bind the infernix workflow-to-interaction UI adapter ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Infernix/UiAdapter.hs`, `infernix-ui/infernix-ui-lift.cabal`,
+`dhall/ui/infernix.dhall`, `test/ui/Phase50InfernixUiContractSpec.hs`,
+`test/live/Phase50InfernixUiLift.hs`, `tools/phase50_infernix_ui_live.py`, and
+`test/ui/live/phase50_browser.mjs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the live harness checks the own/foreign scope matrix
 against Keycloak, Envoy, Pulsar, MinIO, worker, durable-receipt, and browser observations and requires both
 committed mutants to fail.
@@ -160,23 +194,23 @@ sibling SPA's code, transport, credentials, or authority assumptions.
 
 ### Validation
 
-1. Run `cabal test infernix-ui-lift-live-gate` through the authenticated edge on linux-cpu.
-2. Start the nonce-bound workflow, wait for committed success, verify ready-handle issuance, invoke it, and
-   compare browser output with the independent result oracle; require an uninvolved UI-server replica to query
-   the receipt carrying the exact original command/workflow identities and terminal outcome.
-3. Require exact-command resend to return that receipt without a duplicate workflow; changed input under the
-   same command id must produce the typed idempotency conflict before effects.
-4. Replay the exact handle/input under tenant B and assert the pinned denial plus zero external effect.
-5. Assert the hostile output remains escaped presentation and cannot select any authority-bearing value.
-6. Apply both named mutants and require the unchanged command to fail before the ledger can be green.
+1. Run `python3 tools/phase50_gate.py --reuse-fresh-live` on `linux-cpu`.
+2. Require the pure contract to cover opaque handles, trusted-scope command derivation, durable identity,
+   exact resend, changed-input conflict, foreign-owner/tenant and stale-scope denial, and hostile output.
+3. Require the fresh live record to bind browser, tenant sessions, retained providers, reference worker,
+   ready-last artifact, one-message topics, second-origin receipt recovery, denial, and exact cleanup.
+4. Compile each named mutant independently, require its exact marker to fail, then restore and rerun both
+   Haskell suites before sealing the enumeration ledger.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+No remaining work inside the scoped deliverable. Full browser-through-Envoy routing, Kubernetes UI-server
+replicas, Phase-50 native CBOR, full Phase-49 inference-output correspondence, production TinyLlama,
+Redis/WebSocket recovery, direct-service NetworkPolicy, and the wider live scope matrix remain UNVERIFIED.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated for the sealed scoped result:**
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record only the tested workflow-to-ready-artifact
   UI interaction and exact tenant/scope matrix.
 - `documents/engineering/lift_and_compose_doctrine.md` — keep the sibling SPA a UX fixture and name only the
@@ -186,9 +220,9 @@ The whole sprint (📋 Planned).
 - `documents/engineering/ui_realtime_coordination_doctrine.md` — record only the tested infernix
   terminal-event-to-receipt correlation; cross-pod Redis/socket fault behavior remains Phase 55's claim.
 
-**Cross-references to add:**
-- `DEVELOPMENT_PLAN/README.md` and `DEVELOPMENT_PLAN/overview.md` — link the phase and flip status only after
-  the linux-cpu Register-3 ledger is green.
+**Cross-references completed:**
+- `DEVELOPMENT_PLAN/README.md` and `DEVELOPMENT_PLAN/overview.md` — link the phase and report its scoped
+  `linux-cpu` Register-3 seal.
 - `DEVELOPMENT_PLAN/system_components.md` — register the infernix UI adapter and Dhall module under Phase 50.
 
 ## Related Documents

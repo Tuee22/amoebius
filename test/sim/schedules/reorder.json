@@ -1,0 +1,10 @@
+{
+  "scheduleName": "reorder-delay",
+  "scheduleSeed": 2,
+  "schedulePartition": false,
+  "scheduleRedelivery": false,
+  "scheduleReorder": true,
+  "scheduleDuplicate": true,
+  "scheduleCrash": false,
+  "scheduleDnsDelay": 5
+}

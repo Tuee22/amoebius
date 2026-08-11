@@ -1,0 +1,16 @@
+{
+  "ciphertext": {
+    "encoding": "utf-8",
+    "mustNotContainPlaintext": true,
+    "prefix": "vault:v1:"
+  },
+  "envelopeVersion": 1,
+  "keyNamePattern": "^p44-checkpoint-[a-z0-9-]+$",
+  "requiredFields": [
+    "envelopeVersion",
+    "keyName",
+    "ciphertext",
+    "plaintextSha256"
+  ],
+  "schema": "amoebius.pulumi.checkpoint-envelope.v1"
+}

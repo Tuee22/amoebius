@@ -1,0 +1,4 @@
+environment	required_layer	required_strength
+Dev	Decision	tested
+Staging	Protocol	tested
+Prod	Runtime	tested

@@ -1,0 +1,13 @@
+entry	subcase	negative	legal	golden
+3.16	distinct-hosts	dhall/examples/illegal_decode_reused_rke2_host.dhall	dhall/examples/legal_multisubstrate_cluster.dhall	test/dsl/goldens/distinct-hosts.tag
+3.17	rolling-progress	dhall/examples/illegal_decode_unspellable.dhall	dhall/examples/legal_rollout_surge.dhall	test/dsl/goldens/rolling-progress.tag
+3.17	deployment-host-resource	dhall/examples/illegal_decode_deployment_host_resource.dhall	dhall/examples/legal_controller_deployment.dhall	test/dsl/goldens/deployment-host-resource.tag
+3.17	statefulset-once	dhall/examples/illegal_decode_statefulset_once.dhall	dhall/examples/legal_controller_statefulset.dhall	test/dsl/goldens/statefulset-once.tag
+3.17	statefulset-host-resource	dhall/examples/illegal_decode_statefulset_host_resource.dhall	dhall/examples/legal_controller_statefulset.dhall	test/dsl/goldens/statefulset-host-resource.tag
+3.17	daemonset-host-resource	dhall/examples/illegal_decode_daemonset_host_resource.dhall	dhall/examples/legal_controller_daemonset.dhall	test/dsl/goldens/daemonset-host-resource.tag
+3.17	job-host-resource	dhall/examples/illegal_decode_job_host_resource.dhall	dhall/examples/legal_controller_job.dhall	test/dsl/goldens/job-host-resource.tag
+3.17	hostprocess-pod-resource	dhall/examples/illegal_decode_hostprocess_pod_resource.dhall	dhall/examples/legal_controller_hostprocess.dhall	test/dsl/goldens/hostprocess-pod-resource.tag
+3.17	cuda-rolling	dhall/examples/illegal_decode_cuda_rolling.dhall	dhall/examples/trivial_app.dhall	test/dsl/goldens/cuda-rolling.tag
+3.17	metal-deployment-policy	dhall/examples/illegal_decode_metal_deployment.dhall	dhall/examples/legal_controller_metal_hostprocess.dhall	test/dsl/goldens/metal-deployment-policy.tag
+3.72	headroom-over-limit	dhall/examples/illegal_decode_headroom_over_limit.dhall	dhall/examples/trivial_app.dhall	test/dsl/goldens/headroom-over-limit.tag
+3.72	headroom-all-zero	dhall/examples/illegal_decode_headroom_all_zero.dhall	dhall/examples/trivial_app.dhall	test/dsl/goldens/headroom-all-zero.tag

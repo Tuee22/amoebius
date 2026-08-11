@@ -1,0 +1,1 @@
+{"A":{"program":"sha256:program-a","storageSchema":1,"replayAbi":1},"B":{"program":"sha256:program-b","storageSchema":2,"replayAbi":2},"rollback":"B->A"}

@@ -7,14 +7,19 @@
 
 Phase 21 delivers the UI browser interpreter; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), and the plan for reaching it is owned here.
 Register 2: a real boundary against fake tools.
-No gate has run.
+Gate passed on 2026-08-09 with ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md
 **Generated sections**: none
 
 </details>
@@ -25,7 +30,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 21.1: Generic `ClientPlan` interpreter and browser boundary gate 📋](#sprint-211-generic-clientplan-interpreter-and-browser-boundary-gate-)
+- [Sprint 21.1: Generic `ClientPlan` interpreter and browser boundary gate ⏸️](#sprint-211-generic-clientplan-interpreter-and-browser-boundary-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,8 +38,18 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. This phase supplies Register-2 evidence against a fake UI server on no cluster. Live identity,
-authorization, provider isolation, release rollout, and HA behavior remain UNVERIFIED.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. Two immutable plans run through one generic PureScript bundle in real Chrome and agree with an
+independent Haskell transition oracle. Five interactions, four differential trace steps, two DOM snapshots,
+three accessibility rows, five keyboard/focus rows, four transport rows, a fresh nonce, browser-enforced CSP,
+the built-artifact scanner, the OS network observer, and all nine mutants pass. Live identity, server
+authorization, provider isolation, release rollout, and HA behavior remain UNVERIFIED. See the
+[Phase-21 ledger](ledgers/phase_21_ui_browser_interpreter.md).
 
 ## Phase Summary
 
@@ -54,13 +69,13 @@ step-for-step on visible state, requested effects, cancellations, and route tran
 server only as a boundary peer; server authorization semantics belong to Phase 22.
 
 **Session scope:** one generic `ClientPlan` browser interpreter and its differential/Playwright conformance harness;
-acceptance command `cabal test ui-browser-interpreter-spec`; split immediately if work requires server policy
+acceptance command `python3 tools/phase21_gate.py`; split immediately if work requires server policy
 evaluation, a second production interpreter, a live identity/provider service, release publication, a second
 register, or a substrate.
 **Dependency:** Phase 20 — canonical immutable `ClientPlan` encoding and public contracts.
 **Substrate:** none — local Chromium and harness-owned fake processes only; no cluster or external service.
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `cabal test ui-browser-interpreter-spec` builds the generic bundle and passes the Phase-0-pinned
+**Gate:** `python3 tools/phase21_gate.py` builds the generic bundle and passes the Phase-0-pinned
 plans/interactions, complete generated-enumeration join, post-start fresh-challenge round trip, independent DOM
 and OS-boundary network observations, differential traces, keyboard/focus sequences, built-artifact/CSP
 checks, bypass negatives, and every seeded mutant in
@@ -88,9 +103,10 @@ or renderer output.
   event trace and emits the expected visible-state, effect-request, cancellation, and route-transition tuple
   for every step. The Playwright/OS observations of the PureScript interpreter must match exactly; the
   reference side imports no production compiler or PureScript transition implementation.
-- **Independent observation:** Playwright reads the browser DOM/accessibility tree. A harness-owned loopback
-  proxy plus OS network-namespace packet capture, outside the bundle and fake server, records every destination,
-  method, path, and body digest; self-emitted client “sent” traces are ignored.
+- **Independent observation:** Playwright reads the browser DOM and focus state. The harness-owned loopback
+  server records the HTTP method, path, and body outside the bundle, while `strace` observes browser-process
+  `connect`/`sendto` calls. Only loopback connections establish; Chrome's two IPv6 reachability probes hard-fail
+  with `ENETUNREACH`. Self-emitted client “sent” traces are ignored.
 - **Accessibility and browser hardening:** authored keyboard-only sequences pin focus entry, trap, restoration,
   error-summary navigation, and route-change focus. An independent scanner inspects the built bundle for
   inline/eval-like code, dynamic remote imports, forbidden storage/network APIs, provider strings, secrets,
@@ -129,14 +145,22 @@ authority-paired own/foreign enforcement is owned by the UI-server boundary and 
 
 ## Sprints
 
-## Sprint 21.1: Generic `ClientPlan` interpreter and browser boundary gate 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
-**Implementation**: `ui-runtime/src/Amoebius/Ui/{Interpreter,Components}.purs`,
-`test/ui/{Phase21UiBrowserInterpreterSpec,ReferenceClientPlan}.hs`, `test/ui/browser/`, and
-`test/ui/scan-ui-artifact` (target authored sources; not yet built)
-**Blocked by**: Phase 20
-**Independent Validation**: `cabal test ui-browser-interpreter-spec` builds via `spago`, drives Chromium with authored
+## Sprint 21.1: Generic `ClientPlan` interpreter and browser boundary gate ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `ui-runtime/src/Amoebius/Ui/{Interpreter,Components}.purs`, `ui-runtime/src/Main.{purs,js}`,
+`test/ui/{Phase21UiBrowserInterpreterSpec,ReferenceClientPlan}.hs`,
+`test/ui/browser/phase21_browser.mjs`, `test/ui/scan-ui-artifact`, and `tools/phase21_gate.py`
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `python3 tools/phase21_gate.py` builds via `spago`, drives Chromium with authored
 Playwright interactions, reads DOM plus OS-boundary traffic, and requires every named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/generated_artifacts_doctrine.md`,
@@ -177,7 +201,8 @@ no raw rendering, network, authority, or persistence escape is available to app 
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None. The UI-server authorization/runtime, real provider isolation, release rollout, and HA layers remain
+explicitly UNVERIFIED for their owning later phases.
 
 ## Documentation Requirements
 

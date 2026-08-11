@@ -1,0 +1,6 @@
+case	class	sanitized	scope
+read-own	authorized-read	true	own
+read-foreign	denied	true	foreign-hidden
+mutate-own	authorized-mutation	true	own
+bad-origin	origin-denied	true	own
+stale	stale-authority	true	own

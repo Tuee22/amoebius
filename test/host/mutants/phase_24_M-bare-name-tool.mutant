@@ -1,0 +1,3 @@
+operator=construct AbsExe "kind" without mkAbsExe
+locus=Amoebius.Host.Ensure.mkAbsExeMutantBareName
+expected=external exec observer sees argv[0]=kind and the PATH trap fires

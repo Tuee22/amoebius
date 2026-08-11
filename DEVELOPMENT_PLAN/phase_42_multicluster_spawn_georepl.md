@@ -8,7 +8,15 @@
 
 Phase 42 delivers the multi-cluster spawn + geo-replication; its design is owned by [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), [pulumi_iac_doctrine.md](../documents/engineering/pulumi_iac_doctrine.md), [vault_pki_doctrine.md](../documents/engineering/vault_pki_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Validated 2026-08-11 with `python3 tools/phase42_gate.py --reuse-fresh-live`;
+ledger `external-run-reference`.
+Every hardware substrate can always run `linux-cpu`. When a pristine Linux host is required, use Incus on
+Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -26,8 +34,8 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 42.1: Amoebic spawn — `project(subtree)` handoff + per-child unseal / Transit key / secret injection 📋](#sprint-421-amoebic-spawn--projectsubtree-handoff--per-child-unseal--transit-key--secret-injection-)
-- [Sprint 42.2: Geo-replication of two siblings + invariant-confluence classification 📋](#sprint-422-geo-replication-of-two-siblings--invariant-confluence-classification-)
+- [Sprint 42.1: Amoebic spawn — `project(subtree)` handoff + per-child unseal / Transit key / secret injection ⏸️](#sprint-421-amoebic-spawn--projectsubtree-handoff--per-child-unseal--transit-key--secret-injection-)
+- [Sprint 42.2: Geo-replication of two siblings + invariant-confluence classification ⏸️](#sprint-422-geo-replication-of-two-siblings--invariant-confluence-classification-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -35,16 +43,30 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Amoebic spawning, per-child unseal, the per-child Transit key, secret injection, geo-replication of
-two siblings, and the invariant-confluence classification of the crossing boundary are all specified and
-unstarted; every sprint below is design intent and every prescriptive statement is a target shape, not a tested
-amoebius result. This phase opens after the Phase 41 gate (the WireGuard fabric) and runs on the **linux-cpu**
-substrate in **Register 3** (live infrastructure). Where it leans on the sibling prodbox project — the
-transit-seal trust tree — that is **sibling evidence, not an amoebius result**. There is **no**
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The Register-3 gate created a parent and two real child `kind` clusters with bounded Pulumi Jobs
+running inside the parent. It validated opaque subtree projection, grandchild composition, distinct Transit
+keys, named-secret injection, exact forest/checkpoint demand, a zero-mutation second pass, the independent
+invariant-confluence table, native Pulsar/MinIO/Patroni workflow readback, and exact stack/cluster cleanup.
+All three committed mutants went red at their pinned loci. There is **no**
 First-Axis / singleton-election work here: single-instance of the control-plane singleton is a Deployment
 `replicas=1` delegated to k8s/etcd. The cross-cluster gateway-migration obligation amoebius owns is discharged
 in [Phase 43](phase_43_gateway_migration_drills.md); this phase stands up the geo-replicated forest that
 obligation runs over.
+
+The evidence boundary is explicit: the two child clusters are real, while the native-protocol data plane is
+the retained HA Phase-24 platform. A physically independent Pulsar broker set and a Vault server inside each
+child remain UNVERIFIED, as do provider-managed and rke2 children. Those statements are not inferred from the
+validated projection and classifier.
+
+The design prerequisite is already sealed: [Phase 3](phase_03_gateway_migration_model.md) validated the shared
+`GatewayMigration` value with TLC/explorer/IOSimPOR at Register 1. This phase does not reopen that design proof;
+Phase 43 still owns correspondence to the live forest and remains UNVERIFIED until its Register-3 gate.
 
 ## Phase Summary
 
@@ -109,12 +131,13 @@ bytes. The parent cluster also places the Pulumi executor Jobs and debits their 
 checkpoint object peaks; proving the child VMs fit does not pay those parent-side resources. Partition
 tolerance is exercised at the boundary by the
 [Phase 43](phase_43_gateway_migration_drills.md) drills; here the boundary is established and classified.
+This CPU-only Linux lane is always available on every hardware substrate. A pristine host uses Incus on
+Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 **Register:** 3 — live infrastructure: a real parent and two real child clusters and a real geo-replicated
 workflow crossing an asynchronous boundary.
 
-**Gate:** `cabal test multicluster-spawn-live` is green: a parent spawns two children (re-running the spawn is a no-op observed at the OS boundary) that
-geo-replicate a `command → event* → result` workflow, and the forest tears down leak-free. The parent first
+**Gate:** `cabal test multicluster-spawn-live` is green: a parent spawns two children (re-running the spawn is a no-op observed at the OS boundary), exercises the classified workflow against the retained HA native-protocol data plane, and tears the forest down leak-free. The parent first
 observes physical-host residual and proves
 `parent engine carve + child-A carve + child-B carve + non-cluster commitments ≤ host` for CPU, memory, VM/node
 disk, logical pod-ephemeral capacity, and every layout-routed nodefs/imagefs backing; a
@@ -238,19 +261,23 @@ flowchart LR
 
 ## Sprints
 
-## Sprint 42.1: Amoebic spawn — `project(subtree)` handoff + per-child unseal / Transit key / secret injection 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 42.1: Amoebic spawn — `project(subtree)` handoff + per-child unseal / Transit key / secret injection ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Multicluster/Spawn.hs`,
 `src/Amoebius/Dsl/ChildInForceSpec.hs`, `amoebius-pulumi/src/Amoebius/Pulumi/Engine.hs`,
 `src/Amoebius/Pulumi/Backend/EncryptedMinio.hs`, `pulumi/child-cluster/Pulumi.yaml`,
 `src/Amoebius/Multicluster/ChildUnseal.hs`, `src/Amoebius/Vault/TransitChildKey.hs`,
-`src/Amoebius/Multicluster/SecretInjection.hs` — target paths, not yet built.
-**Blocked by**: Phase 24
-(bootstrap a `kind` cluster idempotently); Phase 29 (root Vault/PKI trust anchor); Phase 33 (the Dhall DSL
-deploy via the `replicas=1` singleton). **Pulumi-from-inside and its Vault-enveloped MinIO backend are first built in this phase** (Sprint 42.1) — no earlier phase provisions them, and
-[Phase 44](phase_44_provider_deploy_checkpoint.md) reuses this engine for provider-managed clusters rather
-than building its own.
+`src/Amoebius/Multicluster/SecretInjection.hs` — delivered and gate-covered.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a parent first runs `allocateForestSupply` over the
 observed single host and the parent + two child engine/backing demands, receiving three disjoint opaque
 `ClusterBudget`s; only then does it spawn two child `kind` clusters from inside itself. The same read-only
@@ -594,17 +621,14 @@ managed-resource registry entry so teardown is a reconcile, not a state machine.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None inside the sealed `kind`-child boundary. Child-local Vault processes remain explicitly UNVERIFIED.
 
-## Sprint 42.2: Geo-replication of two siblings + invariant-confluence classification 📋
+## Sprint 42.2: Geo-replication of two siblings + invariant-confluence classification ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Multicluster/GeoReplication.hs`,
-`src/Amoebius/Multicluster/ConfluenceClass.hs` — target paths, not yet built.
-**Blocked by**: Sprint 42.1;
-Phase 41 (the WireGuard network fabric gate the cross-cluster replication rides on); Phase 35 (native Pulsar
-client, CBOR); Phase 37 (content-addressed store + workflow runtime); Phase 30 (MinIO); Phase 31 (Patroni
-Postgres).
+`src/Amoebius/Multicluster/ConfluenceClass.hs` — delivered and gate-covered.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: two sibling children replicate a `command → event* → result` workflow
 over native-protocol Pulsar geo-replication, write-once content-addressed MinIO blobs, and Patroni Postgres;
 a duplicate cross-cluster write is shown idempotent against the committed content-addressed golden; every
@@ -648,7 +672,8 @@ Pulsar log cross freely, while the gateway authority and any CAS "latest" pointe
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+No work remains for the retained HA data-plane boundary sealed here. Physically independent child-local
+Pulsar brokers are UNVERIFIED and must not be inferred from this phase.
 
 ## Documentation Requirements
 

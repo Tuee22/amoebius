@@ -1,0 +1,25 @@
+{
+  "minimal": [
+    "global/bootstrap-addon-cutover",
+    "global/capacity-scheduler",
+    "global/managed-capacity-admission",
+    "global/namespace",
+    "objectstore/assets/config",
+    "objectstore/assets/member-0",
+    "objectstore/assets/service"
+  ],
+  "multi": [
+    "global/bootstrap-addon-cutover",
+    "global/capacity-scheduler",
+    "global/managed-capacity-admission",
+    "global/namespace",
+    "sql/database/config",
+    "sql/database/discovery",
+    "sql/database/member-0",
+    "sql/database/member-1",
+    "sql/database/member-2",
+    "sql/database/quorum-policy",
+    "sql/database/schema-bootstrap",
+    "sql/database/service"
+  ]
+}

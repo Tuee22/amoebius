@@ -1,0 +1,5 @@
+cause	expected_tag	negative_fixture	positive_fixture
+absent-secret	secret-ref-absent	absent-secret-negative.json	absent-secret-positive.json
+ssh-key-cannot-connect	secret-ssh-unreachable	ssh-connect-negative.json	ssh-connect-positive.json
+host-resource-shortage	secret-host-resource-mismatch	host-resources-negative.json	host-resources-positive.json
+cloud-permission-or-quota	secret-cloud-permission-or-quota-denied	cloud-authority-negative.json	cloud-authority-positive.json

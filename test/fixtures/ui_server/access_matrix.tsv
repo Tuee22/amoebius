@@ -1,0 +1,6 @@
+case	permission	scope	grant	epoch	decision
+read-own	read	own	active	current	allow
+read-foreign	read	foreign	active	current	deny
+mutate-own	write	own	active	current	allow
+bad-origin	write	own	active	current	deny
+stale	write	own	active	stale	deny

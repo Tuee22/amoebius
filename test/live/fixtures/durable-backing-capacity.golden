@@ -1,0 +1,6 @@
+schema=amoebius.phase28.durable-backing.v1
+durable-a.observedBytes=536870912
+durable-a.postReconcileDebitBytes=402653184
+durable-a.stableIdentities=retained-witness/pg-witness/pv_0,retained-witness/minio-witness/pv_0
+excluded.nativeHostCache=true
+excluded.nodeEphemeral=true

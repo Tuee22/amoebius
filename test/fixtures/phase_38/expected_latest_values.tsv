@@ -1,0 +1,4 @@
+tenant	owner	entity	value	visible_to
+t-a	alice-a	entity-1	value-a4	alice-a
+t-a	bob-a	entity-1	value-b1	bob-a
+t-b	carol-b	entity-1	value-c1	carol-b

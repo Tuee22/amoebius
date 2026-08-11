@@ -1,0 +1,5 @@
+operand seconds
+maximum_offline_age 86400
+reconnect_grace 3600
+required_compatibility_horizon 90000
+configured_compatibility_horizon 90000

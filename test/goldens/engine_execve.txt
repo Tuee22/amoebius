@@ -1,0 +1,10 @@
+observer=os-boundary-execve
+argv[0]=/usr/local/bin/pulumi
+argv[1]=up
+argv[2]=--yes
+argv[3]=--non-interactive
+argv[4]=--stack
+argv[5]=amoebius-p44
+environment=EMPTY
+forbidden=PULUMI_*,AWS_*,PULUMI_CONFIG_PASSPHRASE,PATH
+plugin=/var/lib/amoebius/pulumi/plugins/resource-aws-v7.3.0/pulumi-resource-aws

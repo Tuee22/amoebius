@@ -1,0 +1,5 @@
+--- a/src/Amoebius/Ui/Realtime/Drain.hs
++++ b/src/Amoebius/Ui/Realtime/Drain.hs
+@@ drain
+- unregisterProgramEpoch oldEpoch
++ pure ()

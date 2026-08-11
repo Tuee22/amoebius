@@ -6,14 +6,20 @@
 
 Phase 36 delivers the live subject/tenant isolation; its design is owned by [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md), [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Validated 2026-08-10 with `python3 tools/phase36_gate.py
+--reuse-fresh-live`; ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/tenancy_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -25,7 +31,7 @@ No gate has run.
 - [Resource provision — scoped live probe](#resource-provision--scoped-live-probe)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 36.1: Live scoped request and provider-isolation gate 📋](#sprint-361-live-scoped-request-and-provider-isolation-gate-)
+- [Sprint 36.1: Live scoped request and provider-isolation gate ⏸️](#sprint-361-live-scoped-request-and-provider-isolation-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,8 +39,16 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented or tested; its security result exists only after the
-Register-3 gate runs with authority-minted credentials and records its evidence ledger.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The Register-3 gate uses three real Keycloak credentials, a private Haskell request-context adapter,
+live Postgres RLS, derived MinIO keys, native Haskell Pulsar traffic, enforcing NetworkPolicy, independent
+provider observers, cleanup equality, and two red source mutants. Browser tenant switching remains Phase 56;
+cross-cluster isolation and complete provider-audit-log correspondence remain explicitly `UNVERIFIED`.
 
 ## Phase Summary
 
@@ -47,14 +61,16 @@ multi-tenant UI scope switching.
 **Session scope:** one live request-context-to-provider isolation claim and one acceptance command,
 `cabal test user-tenant-isolation-live`; split if a browser interaction, UI-plan rollout, HA failure, second
 substrate, or independently useful provider feature is required.
-**Dependency:** Phases 32, 34, and 35 — respectively Keycloak-owned ingress, derived tenant/provider policy,
-and the native Pulsar client. All three gates must be green.
-**Substrate:** linux-cpu — one live `kind` cluster; no CUDA, Apple, Windows, provider-cloud, or multicluster claim.
+**Dependency:** Phases 32, 34, and 35 — respectively Keycloak-owned ingress, delivered and independently read
+six-provider administrative policy, and the native Pulsar client. Phase 34 supplies readiness only; this phase
+must still establish the real-credential application-effect matrix. All three gates must be green.
+**Substrate:** `linux-cpu` — one live `kind` cluster; no accelerator or multicluster claim. Every hardware
+substrate can always run this baseline. When a pristine Linux host is required, use Incus on Linux or
+Linux-CUDA hardware, Lima on Apple hardware, and WSL2 on Windows hardware.
 **Register:** 3 — live infrastructure.
-**Gate:** `cabal test user-tenant-isolation-live` passes the real-credential, fresh-challenge, paired own/
-foreign-scope matrix and every committed mutant defined in [Gate integrity](#gate-integrity). Each forbidden row
-must have authenticated external pre/post observations establishing zero SQL, MinIO, and Pulsar effect; an HTTP denial
-or hidden control alone cannot pass.
+**Gate:** `cabal test user-tenant-isolation-live` passes the real-credential paired matrix and committed
+mutants. Authenticated external observations establish zero forbidden SQL, MinIO, and Pulsar effects; a public
+denial alone cannot pass. The phase gate repeats the sealed reader, mutants, documentation lint, and ledger lint.
 
 ## Gate integrity
 
@@ -119,13 +135,21 @@ fails the phase.
 
 ## Sprints
 
-## Sprint 36.1: Live scoped request and provider-isolation gate 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 36.1: Live scoped request and provider-isolation gate ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Server/ScopedAuthority.hs`,
-`test/live/UserTenantIsolationSpec.hs` (target authored sources; not yet built)
-**Blocked by**: Phase 32;
-Phase 34; Phase 35
+`test/live/UserTenantIsolationSpec.hs`, `tools/phase36_isolation_live.py`, `tools/phase36_gate.py`,
+`test/fixtures/live_isolation/{user_tenant_access_matrix,public_errors,expected_audit}.tsv` (built and validated)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the one gate command executes every pinned matrix row using
 Keycloak-minted credentials and checks fresh nonces plus read/access attempts through independent
 provider/audit/API/CNI observers; both mutants go red.
@@ -160,18 +184,19 @@ remain tenant- and subject-confined even when a hostile caller swaps identifiers
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+None in this phase. Browser tenant switching is deliberately deferred to Phase 56. Cross-cluster isolation and
+complete provider-audit-log correspondence remain `UNVERIFIED` and are not claimed by this single-cluster gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated by the completed gate:**
 
-- `documents/engineering/low_code_ui_runtime_doctrine.md` and `documents/engineering/tenancy_doctrine.md` —
+- `documents/engineering/low_code_ui_runtime_doctrine.md` and `documents/engineering/tenancy_doctrine.md`
   record the tested live request-context/provider-isolation residue.
-- `documents/illegal_state/illegal_state_security.md` — attach §3.80's real-credential, paired-scope evidence.
-- `documents/engineering/testing_doctrine.md` — register the provider-side zero-effect observer pattern.
+- `documents/illegal_state/illegal_state_security.md` attaches §3.80's paired real-credential evidence.
+- `documents/engineering/testing_doctrine.md` records the provider-side zero-effect observer instance.
 
-**Cross-references to add:**
+**Cross-references completed:**
 
 - `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, and
   `DEVELOPMENT_PLAN/system_components.md` — index the gate, `linux-cpu` substrate, and adapter ownership.

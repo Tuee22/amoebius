@@ -1,0 +1,4 @@
+ordinal	phase	observed_condition
+0	base-apply	deployment/phase39-base:Available
+1	schema-migration	job/phase39-migrate:Complete+sql-copy:verified
+2	finalize	deployment/phase39-final:Available+old-schema:retired

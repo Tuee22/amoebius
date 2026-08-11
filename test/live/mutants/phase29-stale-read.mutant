@@ -1,0 +1,1 @@
+M-stale-read: permit SecretRef resolution when the modeled Vault freshness witness is absent.

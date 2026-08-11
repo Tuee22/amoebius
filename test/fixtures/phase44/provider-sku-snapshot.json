@@ -1,0 +1,18 @@
+{
+  "catalogVersion": "aws-ec2-2026-08-01",
+  "machineTypes": {
+    "m7i.large": {
+      "accelerators": [],
+      "attachableEbsVolumes": 25,
+      "availabilityZones": ["ca-central-1a", "ca-central-1b"],
+      "cniPodSlots": 29,
+      "memoryBytes": 8589934592,
+      "providerVcpuCost": 2,
+      "rawVcpus": 2,
+      "rootEbs": {"minimumGiB": 20, "quantumGiB": 1}
+    }
+  },
+  "provider": "AwsEc2",
+  "region": "ca-central-1",
+  "snapshotDate": "2026-08-01"
+}

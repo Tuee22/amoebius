@@ -314,8 +314,9 @@ The no-destruction guarantee is honest about the layer it reaches, per
 - **Sibling evidence, not an amoebius result.** The schema-migration-as-a-phase shape is proven **live in the sibling jitML** (its pre/post-grant Postgres phase, cited by
   [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)),
   and the `.ready`-gated artifact idiom in infernix; these are **sibling evidence, not amoebius results**. The
-  closed `StorageMutation` union, the decode-time no-orphan fold, and the sharing-as-capability-edge are
-  amoebius design intent, unbuilt.
+  closed `StorageMutation` union, the decode-time no-orphan fold, and the sharing-as-capability-edge remain
+  broader amoebius design intent. Phase 39 now validates the database-schema `RolloutPhase` instance: its
+  verified copy preceded retirement, and retired old bytes remained externally readable.
 
 ---
 

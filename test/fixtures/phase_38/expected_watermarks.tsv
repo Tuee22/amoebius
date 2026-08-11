@@ -1,0 +1,4 @@
+tenant	owner	cursor	resume_result
+t-a	alice-a	3	value-a4
+t-a	bob-a	0	value-b1
+t-b	carol-b	0	value-c1

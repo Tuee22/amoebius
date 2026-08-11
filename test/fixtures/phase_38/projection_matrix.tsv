@@ -1,0 +1,9 @@
+case	tenant	owner	entity	command	sequence	expected
+create-a	t-a	alice-a	entity-1	cmd-a1	create	value-a1
+update-a	t-a	alice-a	entity-1	cmd-a2	update	value-a2
+tombstone-a	t-a	alice-a	entity-1	cmd-a3	tombstone	absent
+recreate-a	t-a	alice-a	entity-1	cmd-a4	recreate	value-a4
+same-shape-bob	t-a	bob-a	entity-1	cmd-b1	create	value-b1
+same-shape-carol	t-b	carol-b	entity-1	cmd-c1	create	value-c1
+redelivery	t-a	alice-a	entity-1	cmd-a4	redeliver	value-a4
+conflict	t-a	alice-a	entity-1	cmd-a4	changed-input	IdempotencyConflict

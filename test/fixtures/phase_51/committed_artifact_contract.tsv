@@ -1,0 +1,6 @@
+state	pointer_cas	constructor_available	expected
+staged	absent	false	ArtifactUncommitted
+manifest-written	absent	false	ArtifactUncommitted
+pointer-conflict	conflict	false	PointerConflict
+pointer-committed	succeeded	true	CommittedJitMLArtifact
+foreign-scope	succeeded	false	ArtifactUnavailable

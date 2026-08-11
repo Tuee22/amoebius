@@ -1,0 +1,1 @@
+Mutant locus: the server accepts the caller's claimed digest without hashing received bytes.

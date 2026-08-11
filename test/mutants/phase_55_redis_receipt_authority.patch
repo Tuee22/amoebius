@@ -1,0 +1,5 @@
+--- a/src/Amoebius/Ui/Realtime/Receipt.hs
++++ b/src/Amoebius/Ui/Realtime/Receipt.hs
+@@ receipt
+- readDurableReceipt commandId
++ acceptRedisAck commandId

@@ -1,0 +1,2 @@
+operator=guard-weakening
+expected=a racing promotion silently clobbers the winning ETag-CAS write

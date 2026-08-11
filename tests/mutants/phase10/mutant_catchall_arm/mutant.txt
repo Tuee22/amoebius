@@ -1,0 +1,1 @@
+Return the ObjectStore BoundServiceSpec from a catch-all branch for capability arms without an explicit binder.

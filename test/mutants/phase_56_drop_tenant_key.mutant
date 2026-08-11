@@ -1,0 +1,2 @@
+operator=trusted-key-weakening
+expected=equal-shaped cross-tenant cache or lookup collides

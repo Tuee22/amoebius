@@ -1,0 +1,5 @@
+--- a/src/Amoebius/Ui/Realtime/Route.hs
++++ b/src/Amoebius/Ui/Realtime/Route.hs
+@@ route
+- routeAcrossReplicas envelope
++ lookupLocalSocket envelope

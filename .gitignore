@@ -4,3 +4,84 @@
 
 # Editor settings are kept at the user/global level, not in the repo.
 /.vscode/
+
+# Canonical generated roots and legacy generated migration surfaces.
+/gen/
+/DEVELOPMENT_PLAN/evidence/
+/DEVELOPMENT_PLAN/ledgers/
+/test/enumeration/
+/test/golden/phase_*_ledger.json
+/test/golden/phase_54_expected_run_ledger.json
+
+# Dependency resolution is refreshed dynamically and never committed.
+*.lock
+*.freeze
+package-lock.json
+npm-shrinkwrap.json
+pnpm-lock.yaml
+go.sum
+
+# Haskell and formal-model build output.
+/dist-newstyle/
+/.cabal-sandbox/
+.ghc.environment.*
+cabal.project.local
+*.o
+*.hi
+*.dyn_o
+*.dyn_hi
+*.hie
+/.phase1-store/
+*.tla
+*.cfg
+
+# JavaScript and PureScript build output.
+/node_modules/
+/ui-runtime/.spago/
+/ui-runtime/output/
+/ui-runtime/dist/
+
+# Python may keep source-adjacent interpreter caches. They are always generated
+# and must never become repository inputs.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage/
+
+# Tool acquisition and phase/build output.
+/toolchain/bin/
+/toolchain/runtime/
+/toolchain/downloads/
+/toolchain/cache/
+/.phase*-build/
+/phase*-build/
+/build/
+/_build/
+/out/
+/output/
+/dist/
+/.cache/
+/tmp/
+/temp/
+
+# Test and runtime output.
+/playwright-report/
+/test-results/
+/screenshots/
+/browser-profile/
+*.log
+*.pid
+*.sock
+
+# Local credentials and runtime state.
+/.env
+/.env.*
+!/.env.example
+/.secrets/
+/.credentials/
+/kubeconfig

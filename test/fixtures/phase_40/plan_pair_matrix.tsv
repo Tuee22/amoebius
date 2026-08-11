@@ -1,0 +1,7 @@
+client	server	authority	result	effect_count
+A	A	A	Accepted	1
+B	B	B	Accepted	1
+A	B	B	ReloadRequired	0
+B	A	A	ReloadRequired	0
+A	missing	A	ReloadRequired	0
+missing	B	B	ReloadRequired	0

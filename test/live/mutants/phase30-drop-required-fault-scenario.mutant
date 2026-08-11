@@ -1,0 +1,2 @@
+mutation=retain only the healthy MinIO scenario
+expected_red=MinIO fault scenarios complete

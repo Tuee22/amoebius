@@ -1,0 +1,14 @@
+MetalLB|
+MinIO|MetalLB
+Vault|
+Registry|MinIO
+ZooKeeper|Vault
+BookKeeper|Vault,ZooKeeper
+Pulsar|MinIO,Vault,ZooKeeper,BookKeeper
+PerconaOperator|
+GrafanaPostgres|Vault,PerconaOperator
+PgAdmin|Vault,GrafanaPostgres
+Redis|Vault
+Sentinel|Vault,Redis
+Prometheus|MinIO,Pulsar
+Grafana|GrafanaPostgres,Prometheus

@@ -1,0 +1,1 @@
+Seed mut-45.1-public-pull: change the scheduler/platform image source from the pinned in-cluster registry digest to docker.io/amoebius/base:latest. The independent image-source and OS-boundary pull predicate must reject it.

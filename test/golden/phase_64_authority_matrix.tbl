@@ -1,0 +1,5 @@
+principal authority projection scalar infernix blob_dependent effect_delta
+owner post-fault-current allow allow allow allow 3
+owner pre-fault deny deny deny deny 0
+same-tenant-nonowner post-fault-current deny deny deny deny 0
+foreign-tenant post-fault-current deny deny deny deny 0

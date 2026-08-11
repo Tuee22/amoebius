@@ -1,0 +1,2 @@
+operator=startup-guard-weakening
+expected=missing-handler startup row reaches readiness

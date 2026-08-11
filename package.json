@@ -1,0 +1,10 @@
+{
+  "name": "amoebius-toolchain",
+  "private": true,
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "playwright-core": "1.62.1",
+    "purescript": "0.15.16",
+    "spago": "1.0.4"
+  }
+}

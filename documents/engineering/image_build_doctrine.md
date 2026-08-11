@@ -24,6 +24,8 @@ nor the runtime asset cache that is the deliberate exception, owned by
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Scope — the build side, not the registry's existence](#1-scope--the-build-side-not-the-registrys-existence)
 - [2. The single distribution rule: bake the binaries, build the amoebius image, pull only in-cluster](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)
@@ -63,7 +65,7 @@ What this doctrine deliberately does **not** own:
 |---------|----------|
 | The in-cluster registry (`distribution`) as a standard service and the sole pull source | [platform_services_doctrine.md](./platform_services_doctrine.md), [service_capability_doctrine.md](./service_capability_doctrine.md) |
 | The registry's MinIO-backed (S3 driver) blob storage — no PV of its own | [platform_services_doctrine.md §3](./platform_services_doctrine.md#3-the-registry--the-single-image-source), [§4](./platform_services_doctrine.md#4-minio--the-object-substrate) |
-| The substrate catalog (apple / linux-cpu / linux-cuda / windows), Lima/WSL2, host worker nodes, and the lazy-tool-ensure contract | [substrate_doctrine.md](./substrate_doctrine.md) |
+| The substrate catalog, universal `linux-cpu` lane, Incus/Lima/WSL2 guests, host worker nodes, and the lazy-tool-ensure contract | [substrate_doctrine.md](./substrate_doctrine.md) |
 | The Apple-Metal host worker's headless, on-host, **no-VM** build/run shape (fixed Metal bridge + runtime MSL compilation) | [apple_metal_headless_builds.md](./apple_metal_headless_builds.md) |
 | Pulumi-managed cloud registries/infra, the MinIO Pulumi backend, DNS (route53) + TLS (zerossl) | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | The content-addressed **workflow-artifact** store (`experimentHash`, pointers→manifests→blobs) — distinct from OCI image digests | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
@@ -125,8 +127,9 @@ Concretely:
   `amd64` and an `arm64` node builds each arch natively; a single-arch host cross-builds the other arch
   (QEMU emulation or a cross-toolchain). The host-vs-pod choice ([§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)) determines which builder backs the
   build; the *output contract* — one fat manifest covering both arches — is identical either way.
-- **The amoebius Haskell binary is GHC 9.12.4** ([../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) toolchain), pinned identically for both arches. There is no per-arch toolchain drift: the same GHC pin
-  compiles the `amd64` and `arm64` layers.
+- **Both architectures use one dynamically resolved toolchain graph.** The current compatible compiler and
+  packages are resolved once per run and used for both `amd64` and `arm64`. The external attestation records
+  both observations and rejects per-architecture dependency drift; no resolution file is committed.
 
 This is the principal generalization over prodbox, which published **native-host-architecture images only**
 (`local_registry_pipeline.md` [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1) step 4, [§3](#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list)). amoebius lifts native-host-architecture-only builds to always building
@@ -179,10 +182,11 @@ time on the missing arch, not at publish time. So amoebius treats a multi-arch i
   inherits prodbox's retry-then-fail-loud publication posture (`local_registry_pipeline.md` [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)); for its
   multi-arch images the unit of success is the complete manifest list.
 
-> **Honesty.** Fail-closed atomic publication is the *specified* contract for Phase 25, not a tested amoebius
-> result. buildx's single-push manifest-list behaviour is a real registry mechanism; that amoebius wires it
-> exactly this way is design intent until validated. See
-> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+> **Validated boundary.** Phase 25 exercised a proxy-induced partial-blob fault, observed the immutable tag
+> absent and its manifest GET at 404, retained the partial residue in storage accounting, then published the
+> exact audited two-architecture index with one final raw-index advertisement. A second run made zero
+> mutating registry requests. This tests the amoebius fail-closed publication mechanism for that Register-3
+> envelope; it does not claim that arbitrary registries provide transactions.
 
 ---
 
@@ -376,7 +380,8 @@ build time, by a strict preference ladder:
 
 ### The runtime image: one recipe, a family of trusted-adapter variants
 
-The amoebius Haskell binary ships as its own runtime image (GHC 9.12.4). Its **in-cluster pod role** is
+The amoebius Haskell binary ships as its own runtime image, built with the run's dynamically resolved
+compatible compiler. Its **in-cluster pod role** is
 selected as control-plane singleton, dedicated `amoebius-capacity` scheduler, or worker — adapting prodbox's
 union-image pattern (`local_registry_pipeline.md`
 [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)). The
@@ -563,14 +568,54 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 
 ## 10. Honesty and planning ownership
 
-> **Honesty.** Every prescriptive statement here is *design intent for Phase 25*
-> (the `distribution` registry + baked service binaries + buildx multi-arch amoebius images,
-> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)), generalized from a pipeline proven
-> in `prodbox` but **not yet built in amoebius**. Per
+> **Validated Phase-25 boundary.** Sprints 25.1–25.2 live-validated the typed bake catalog, generated Dockerfile, bounded
+> host build, one `linux/amd64` + `linux/arm64` OCI index, architecture-native executable probes,
+> deterministic file SBOMs, selected-platform node side-load, resource/storage-complete bootstrap action, and
+> exact six-object `distribution`/mutation-proxy standup from the side-loaded digest. The standup observer saw
+> zero public-registry connections. Sprint 25.3 then live-validated a proxy-induced mid-upload failure with an
+> unadvertised tag and retained residue, the one-request byte-exact manifest-list commit, immutable digest
+> reference, and a zero-mutation rerun. Sprint 25.4 installed an enforcing node firewall, made the public
+> `PullAlways` canary fail at containerd with the expected timeout while the exact private digest pull
+> succeeded, and observed zero established public-registry connections; the unenforced kindnet policy mutant
+> went red. Phase 26 subsequently validated reconciler correspondence, and Phase 30 validated the MinIO S3
+> storage rehome: the source stayed stable through verified old-digest copy/cutover, a post-cutover blob was
+> observed in MinIO, all runtime image IDs matched the baked Phase-25 digest, and the node pull-event window
+> recorded zero public pulls. These are Register-3 *tested* results, never proofs. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): inherited prodbox proof is evidence from a
-> sibling system, not proof in amoebius; read the recommended defaults in [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest) and [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1) as flagged decisions
-> the plan resolves, never as tested results.
+> sibling system, not proof in amoebius. Phase 25 resolved the immutable-reference and host-builder decisions
+> for the validated v1 boundary; broader mechanisms remain governed by their later phase gates.
+
+The validated `linux-cpu` image and registry lane is always available on every hardware substrate. When an
+image or registry gate requires a pristine Linux host, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
+on Windows.
+
+Phase 44's provider plan pins a CPU-only node class and immutable SKU/catalog identity, but no EKS launch
+template was materialized because AWS authentication failed. Consequently, preload of the pinned amoebius
+base/scheduler OCI content into a managed node's CRI store, public-pull absence during provider bootstrap, and
+import-workspace release are still UNVERIFIED. The two scoped executor Jobs did use the already side-loaded
+Phase-25 immutable base digest with `imagePullPolicy: Never`; that is parent-placement evidence only.
+
+Phase 45's provider-child contract rejects public and mutable image references, and its retained-Kubernetes
+drill read back only the pinned private digest with `imagePullPolicy: Never`; the committed public-pull mutant
+turns the independent contract red. No managed-node CRI preload, provider convergence argv trace, containerd
+network observer, or EKS public-pull absence was available, so those layers remain UNVERIFIED. This scoped
+result must not be described as a provider image-supply-chain pass. The `linux-cpu` lane remains available on
+every hardware substrate, with pristine Linux supplied by Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
+on Windows.
+
+Phase 46 pins five AWS-EBS-CSI controller/node/sidecar binary identities, absolute paths, versions, and both
+base architectures. Its static install model has no external-provisioner, Helm, public-image, or dynamic
+StorageClass arm, and the corresponding mutant turns red. The binaries were not added to or executed from a
+rebuilt provider base image in this scoped run, so both architecture probes and actual EBS CSI readiness remain
+UNVERIFIED; the fixture is an inventory contract, not a supply-chain result.
+
+Phase 48 resolves a pinned 41-byte executable engine fixture through absolute build/download recipes, verifies
+its digest, size, and version, stores it under the private content key, and observes a registry-backed warm HIT
+without a public egress event. This is custody and resolver evidence for the Tier-1 mechanism; it is not a
+production llama.cpp payload, model-inference image, cross-architecture binary, or CUDA/Metal supply-chain
+result. Every hardware substrate can always select `linux-cpu`. For a pristine Linux image-build host use
+Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 Delivery sequencing, completion status, and validation gates live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). This doc states the target shape of

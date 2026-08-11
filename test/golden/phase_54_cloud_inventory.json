@@ -1,0 +1,1 @@
+{"region":"us-east-1","serviceNative":["ec2:DescribeVolumes","ec2:DescribeInstances","eks:ListClusters","elasticloadbalancing:DescribeLoadBalancers","route53:ListHostedZones"],"resourceExplorer":{"query":"tag:none","required":true},"canonicalLinuxCpuExpectedDelta":[]}

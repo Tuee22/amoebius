@@ -1,0 +1,3 @@
+# Same logical manifest in reversed component order; exact binary CBOR bytes in lowercase hexadecimal custody.
+# first-mismatch-offset=24
+8274616d6f65626975732e6d616e69666573742e76318282647a657461582084ecd0538bf5559744909cb1693388f35388a668eddc90a5f431b81076fe1e438265616c7068615820d15bcd877ba524f1fffcc5c5f08d58d2df2c2f56c67c243c1ec42195a043f5b6

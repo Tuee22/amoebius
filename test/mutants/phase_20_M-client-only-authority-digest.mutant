@@ -1,0 +1,3 @@
+operator=invariant-clause-delete
+change=omit a private authority source from the digest
+expected=authority digest oracle fails

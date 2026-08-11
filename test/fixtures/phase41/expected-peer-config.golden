@@ -1,0 +1,17 @@
+[gateway-root]
+Interface.Address = 10.77.0.1/32
+Interface.ListenPort = 51820
+Interface.PrivateKeyRef = vault:secret/amoebius/wireguard/gateway-root#private
+Peer.NodeId = spoke-alpha
+Peer.PublicKeyRef = vault:secret/amoebius/wireguard/spoke-alpha#public
+Peer.AllowedIPs = 10.77.1.2/32
+
+[spoke-alpha]
+Interface.Address = 10.77.1.2/32
+Interface.ListenPort = 51820
+Interface.PrivateKeyRef = vault:secret/amoebius/wireguard/spoke-alpha#private
+Peer.NodeId = gateway-root
+Peer.PublicKeyRef = vault:secret/amoebius/wireguard/gateway-root#public
+Peer.AllowedIPs = 10.77.0.1/32
+Peer.Endpoint = 192.0.2.1:51820
+Peer.PersistentKeepalive = 25

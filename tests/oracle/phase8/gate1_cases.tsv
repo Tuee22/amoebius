@@ -1,0 +1,3 @@
+entry	negative	legal	required
+3.32	dhall/examples/phase8/illegal_continuous_training_no_cadence.dhall	dhall/examples/phase8/legal_continuous_training.dhall	checkpointCadence
+3.32	dhall/examples/phase8/illegal_training_feed_no_retention.dhall	dhall/examples/phase8/legal_bounded_training_feed.dhall	retentionBudget

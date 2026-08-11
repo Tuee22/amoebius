@@ -1,0 +1,5 @@
+--- a/src/Amoebius/Multicluster/ConfluenceClass.hs
++++ b/src/Amoebius/Multicluster/ConfluenceClass.hs
+@@
+-classifyInvariant (Unclassified _) = NonConfluent
++classifyInvariant (Unclassified _) = Confluent

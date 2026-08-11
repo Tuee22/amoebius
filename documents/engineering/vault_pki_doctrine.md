@@ -18,6 +18,8 @@ child. It does not own the specification-side spelling of a secret reference bey
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
 - [2. Vault is the fail-closed secrets root](#2-vault-is-the-fail-closed-secrets-root)
@@ -148,7 +150,7 @@ in  SecretRef
 | `TestPlaintext` | **Rejected** | Accepted only by the test harness, only from a flagged test-secrets file. |
 
 The contract is enforced by the same **typed spec gates** that guard every `InForceSpec`
-([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)): Gate 1 (the Dhall typechecker) admits only a well-typed `SecretRef`, and Gate 2 (the in-process Haskell decoder under GHC 9.12.4) runs a validator that **rejects any literal secret value and any `TestPlaintext` arm in production mode**. A plaintext secret in a production config is therefore not "linted later" — it
+([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)): Gate 1 (the Dhall typechecker) admits only a well-typed `SecretRef`, and Gate 2 (the in-process Haskell decoder under the dynamically resolved compatible compiler) runs a validator that **rejects any literal secret value and any `TestPlaintext` arm in production mode**. A plaintext secret in a production config is therefore not "linted later" — it
 fails to decode, and an undecoded config is never reconciled. *If it decodes, it carries no secret.*
 
 The corollary — *flagged* test credentials — is a locked amoebius rule: credentials used for test
@@ -173,6 +175,13 @@ gives every named secret:
   the bytes, and a child names only its own subtree's material.
 - **Rotatable.** Because consumers resolve by name, rotating the value is a Vault write plus a reconcile —
   no `.dhall` edit and no re-roll from the root.
+
+[Phase 41](../../DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md) validates the WireGuard member of this
+family live. The gate writes fresh Curve25519 public/private fields to two temporary KV-v2 objects, names them
+only by mount/path/field `SecretRef`s, and resolves all four fields through the current-tree Haskell
+Kubernetes-auth client. An absent field returns the redacted `secret-missing` reason; raw key bytes enter no
+Dhall, evidence, or retained gate artifact, and the temporary objects, role, policy, and namespace are deleted.
+Parent→child injection remains separate and UNVERIFIED.
 
 `Rke2NodeToken` is the newest member of this family: the single shared secret every rke2 server and agent
 presents to join the cluster's etcd / control-plane fabric. It is a **Vault-KV `SecretRef` class**,
@@ -337,10 +346,10 @@ re-enters the sealed régime, that reach is the **seal-critical, node-local** ar
 reach class — Vault-independent, never over the fabric — so a reboot's unseal never depends on the very Vault
 it is unsealing.
 
-> **Honesty.** The password-encrypted root unseal is *implemented and exercised in prodbox*; in
-> amoebius it is design intent for the root-Vault phase. The specific KDF/AEAD primitives and the
-> unlock-material backend are pinned by the implementing phase, not fixed here. Status lives only in
-> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+> **Honesty.** Phase 29 implements and validates the password-encrypted root-unseal backend in amoebius;
+> Phase 33 implements and live-validates the node-local `vault init/unseal` singleton endpoint and `pb`
+> transport with a zero-persistence observer. Parent/child unseal remains owned by later phases. Status lives
+> only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -618,6 +627,38 @@ the verification surface owned by [chaos_failover_doctrine.md](./chaos_failover_
 [testing_doctrine.md](./testing_doctrine.md), and is *evidence-backed in prodbox* (its `vault_doctrine.md §19` red-team checklist), not yet proven in amoebius.
 
 ---
+
+### Phase-29 validated root boundary
+
+Phase 29 validated the root-only portion of this doctrine on the universal `linux-cpu` lane. A pristine
+single-node cluster initialized a Shamir-sealed Vault exactly once on fixed ext4 retained backings; the unlock
+material used pinned Argon2id v1.3 parameters and ChaCha20-Poly1305-IETF in a mode-0600 host envelope, while
+the human password was never persisted. After the real cluster and API objects were deleted, a fresh cluster
+mounted the same bytes, observed an initialized/sealed Vault, unsealed it without re-init, recovered the same
+Vault cluster id and self-signed PKI root, and read the canary through the built-in Haskell client using a fresh
+Kubernetes-auth login. The live pod had no Vault Agent and no plaintext Secret mount; role deletion denied the
+same read, sealed issuance failed, Raft/audit high-water stayed within the provision, and nine mutants went red.
+Parent/child unseal, parent secret injection, and cross-cluster intermediate CAs remain UNVERIFIED.
+
+Every hardware substrate can always run this `linux-cpu` lane. When a pristine Linux host is needed, the
+canonical VM is Incus on Linux/Linux-CUDA, Lima on Apple, and WSL2 on Windows.
+
+The Phase-42 Register-3 instance realizes the child policy seams in
+`Amoebius.Multicluster.ChildUnseal`, `Amoebius.Vault.TransitChildKey`, and
+`Amoebius.Multicluster.SecretInjection`. The pure gate admits both sanctioned unseal modes, proves that the
+parent-held mode bricks while the parent is sealed, and rejects cross-child subtree decrypt. The live gate
+creates distinct Vault Transit keys, observes cross-key decrypt denial, and resolves parent-injected named KV
+secrets without retaining raw values in evidence. A Vault server physically resident in each child and a
+cross-cluster intermediate-CA hierarchy remain UNVERIFIED. The CPU-only Linux fallback remains selectable on
+every detected hardware class. Fresh guest isolation is provided by Incus for either Linux class, by Lima for
+Apple, and by WSL2 for Windows.
+
+The Phase-49 scoped infernix exercise keeps adapter configuration to Vault secret names, mints one-use
+tenant-scoped challenge credentials, observes tenant B denial against tenant A's model path, and records only
+audit metadata. Secret values never enter evidence. A worker consuming the Vault credential for direct MinIO
+artifact fetch remains UNVERIFIED, as do the full production inference chain and general isolation. Every
+hardware substrate can always run `linux-cpu`; a pristine Linux host uses Incus on Linux/Linux-CUDA, Lima on
+Apple, or WSL2 on Windows.
 
 ## 12. Planning ownership
 

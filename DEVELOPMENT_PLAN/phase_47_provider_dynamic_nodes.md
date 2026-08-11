@@ -8,14 +8,23 @@
 
 Phase 47 delivers the dynamic node provisioning by signal + leak-free provider gate; its design is owned by [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), [resource_capacity_types.md](../documents/engineering/resource_capacity_types.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu → provider` substrate.
-No gate has run.
+The scoped gate is implemented at the pure and retained-Kubernetes boundary. Actual EKS node provisioning,
+AWS audit, and provider leak-freedom remain UNVERIFIED because Phase 44 could not authenticate to AWS.
+Scoped seal: `python3 tools/phase47_gate.py --reuse-fresh-live` passed 22 checks
+on 2026-08-11; ledger `external-run-reference`,
+receipt `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -26,8 +35,8 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 47.1: Dynamic node provisioning by signal 📋](#sprint-471-dynamic-node-provisioning-by-signal-)
-- [Sprint 47.2: Phase gate — spin a provider cluster, provision a node by signal, tear down leak-free 📋](#sprint-472-phase-gate--spin-a-provider-cluster-provision-a-node-by-signal-tear-down-leak-free-)
+- [Sprint 47.1: Dynamic node provisioning by signal ⏸️](#sprint-471-dynamic-node-provisioning-by-signal-)
+- [Sprint 47.2: Phase gate — spin a provider cluster, provision a node by signal, tear down leak-free ⏸️](#sprint-472-phase-gate--spin-a-provider-cluster-provision-a-node-by-signal-tear-down-leak-free-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -35,10 +44,23 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. This phase runs on the **linux-cpu → provider**
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 **Scoped validation complete; AWS runtime incomplete.** The signal-to-target, quota/capability refusal,
+instance identity, receipt-bound materialization, fail-closed teardown, and broadened ownership-enumeration
+contracts are built. Seven independent oracles and eight separately compiled mutants are pinned, and every
+mutant turns red. A retained-Kubernetes drill observed workflow-completion and load signals independently
+create and remove two instance-scoped node shadows, a stable second pass with zero mutation, an Unreachable
+refusal with zero mutation, and an ownership-metadata sweep that catches two untagged run-owned objects missed
+by a tag-only sweep. It cleaned every Phase-47 object. This is a scoped Kubernetes/cloud-metadata analogue,
+**not EKS, EC2/managed-node, CloudTrail, AWS quota, root-EBS, or provider leak-freedom evidence**. Those external
+acceptance surfaces remain design intent. This phase runs on the **linux-cpu → provider**
 substrate in **Register 3** (live infrastructure): the parent amoebius cluster is a single-node `kind` cluster on
-linux-cpu (the [Phase 24](phase_24_midwife_bootstrap_kind.md) midwife), from inside which the
+linux-cpu (the [Phase 24](phase_24_bootstrap_coordinator_kind.md) bootstrap coordinator), from inside which the
 Deployment-`replicas=1` singleton issues the provider node-group mutations over the cloud API. `→ provider`
 names the *deploy target class* — a cloud-managed EKS cluster reached over the cloud API — not a fifth hardware
 substrate; the provider child has no host, so the gate stays single-substrate (`linux-cpu`) while exercising a
@@ -50,6 +72,9 @@ and the composed phase gate. The reconcile-not-state-machine shape and a working
 the sibling **prodbox** project — read as **sibling evidence, not an amoebius result** (honesty rule,
 [`development_plan_standards.md` §K](development_plan_standards.md#k-honesty-proven--tested--assumed)). Status
 transitions are recorded reverse-chronologically here once work begins.
+
+Every hardware substrate can always run the `linux-cpu` parent lane. If a pristine Linux host is needed, use
+Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ## Phase Summary
 
@@ -305,17 +330,21 @@ move (including the broadened sweep) marks that layer **UNVERIFIED**, never gree
 
 ## Sprints
 
-## Sprint 47.1: Dynamic node provisioning by signal 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 47.1: Dynamic node provisioning by signal ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `amoebius-runtime/src/Amoebius/Cluster/NodeProvisioner.hs`
 (declarative node-set reconcile), `amoebius-pulumi/src/Amoebius/Pulumi/NodeGroup.hs` (Pulumi add/drain of
-EC2/managed nodes) (target paths from [system_components.md](system_components.md); not yet built)
-**Blocked by**: [Phase 44](phase_44_provider_deploy_checkpoint.md) gate (the provider-cluster Pulumi deploy/engine/encrypted-MinIO backend and `observeProviderAccount`, which this sprint reuses to add/drain a node group and re-read the account residual); [Phase 33](phase_33_live_dsl_singleton.md) gate (the Deployment-`replicas=1` singleton the enaction runs under); [Phase 7](phase_07_capacity_core_folds.md) gate
-(the `fits`/`carve`/`place` capacity fold re-run against the grown bound);
-[Phase 8](phase_08_storage_geometry_folds.md) gate (the logical→physical node-root/durable storage geometry); [Phase 9](phase_09_execution_accelerator_folds.md) gate (the accelerator residency / net-allocatable-VRAM fold); [Phase 11](phase_11_provision_seal.md) gate (the post-bind observe-then-plan cloud batch and opaque `ProvisionedSpec` seal); [Phase 26](phase_26_object_reconciler.md) gate (the `discover → diff → enact → re-observe` reconciler this drives); [Phase 27](phase_27_capacity_scheduler.md)
-gate (the `amoebius-capacity` scheduler-generation CAS / reservation / exclusive Binding at node join) — all
-earlier-or-sibling-phase prerequisites.
+EC2/managed nodes), and `amoebius-runtime/test/provider/Phase47ContractSpec.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Requires**: `cloud-account` — the account whose node quota this gate scales against.
 **Independent Validation**: a `.dhall`-declared node rule (load /
 workflow-completion) drives the live node set toward its desired shape by choosing only a declared
@@ -336,7 +365,7 @@ provider storage quota, is rejected before any cloud mutation.
 `documents/engineering/cluster_lifecycle_doctrine.md` (§8), `documents/engineering/pulumi_iac_doctrine.md`
 (§4 — the dynamic-node catalog entry), `documents/engineering/app_vs_deployment_doctrine.md` (node
 elasticity as a deployment rule, never app logic), `documents/engineering/resource_capacity_doctrine.md`
-(§6/§3.1 — the live node-scaling enaction), `DEVELOPMENT_PLAN/system_components.md`.
+(§6/§3.1 — the live node-scaling enaction), [system_components.md](system_components.md).
 
 ### Objective
 
@@ -473,26 +502,27 @@ cloud effect.
     `ValidatedCloudProviderAction` is minted; its immediate recheck invalidates it with zero node-group/instance
     mutations.
 
-> **Honesty.** Dynamic provisioning driven by load/workflow signals is *design intent*; no amoebius
-> node-provisioner has been built or measured. The reconcile-not-state-machine shape is *proven in prodbox* for
-> AWS resources — sibling evidence, not an amoebius result. This phase provisions provider-managed worker nodes
+> **Honesty.** Dynamic target derivation and the fail-closed provision contract are built and tested. The live
+> retained-Kubernetes drill observes their object-level analogue only; no amoebius-managed EKS worker node has
+> been created or measured. The reconcile-not-state-machine shape is *proven in prodbox* for AWS resources —
+> sibling evidence, not an amoebius AWS result. This phase provisions provider-managed worker nodes
 > only; self-managed rke2 agents remain an unassigned future live gate. EKS Hybrid Nodes (a full stretched member
 > node on a `Managed Eks` control plane) are a provider-native capability, type-foreclosed absent that arm, and
 > DEFERRED.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+Run the same sealed contract against valid AWS authority and observe real quota, RunInstances/node-group,
+first-Node taint, supply/layout/device, scheduler-generation, physical-identity, and cloud no-op surfaces.
 
-## Sprint 47.2: Phase gate — spin a provider cluster, provision a node by signal, tear down leak-free 📋
+## Sprint 47.2: Phase gate — spin a provider cluster, provision a node by signal, tear down leak-free ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `test/dhall/phase_47_provider_provision.dhall` (the gate topology),
 `amoebius-pulumi/src/Amoebius/Pulumi/Teardown.hs` (per-run `reconcileAbsent` over the ephemeral cluster +
-node subset), and the run-owned OS-boundary sweep harness that enumerates by run-tag + VPC id +
-`eks:cluster-name` / `kubernetes.io/cluster/<name>` (target paths; not yet built)
-**Blocked by**: Sprint
-47.1; [Phase 44](phase_44_provider_deploy_checkpoint.md) gate (provider Pulumi deploy + checkpoint + `observeProviderAccount`); [Phase 45](phase_45_provider_child_bringup.md) gate (bootstrap scheduler readiness, add-on cutover, managed authority, parent→child Lease handoff, stateless in-cluster control plane); [Phase 46](phase_46_provider_ebs_credential.md) gate (per-PV durable EBS, static `ebs.csi.aws.com` CSI PV over a known `volumeHandle`, create-vs-delete credential, marker rebind).
+node subset), `tools/phase47_provider_dynamic_live.py` (scoped retained-Kubernetes analogue), and
+`tools/phase47_gate.py`. The AWS OS-boundary sweep remains an unrun acceptance surface.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**:
 the gate `InForceSpec` starts from a linux-cpu parent, binds/expands the child, then derives the provider
 cluster's initial `ProvisionedInfrastructurePlan` from that exact `BoundDeployment` against the fixture's
@@ -622,18 +652,20 @@ correctly left retained.
    Kubernetes/Pulumi/checkpoint/AWS mutating audit, while the fitting live readback matches the witness rather
    than a renderer-side re-derivation.
 
-> **Honesty.** This gate proves the **per-run / ephemeral** teardown leak-free under a **broadened run-owned**
-> sweep (run-tag + VPC id + `eks:cluster-name` / `kubernetes.io/cluster/<name>`), which catches untagged
-> provider-spawned orphans a tag-only sweep would miss; the full leak-free *test cycle* — reclaiming durable,
+> **Honesty.** The scoped gate proves the broadened ownership-enumeration predicate and observes a real
+> Kubernetes metadata analogue in which run-tag + VPC-id + cluster ownership catches two untagged objects that
+> tag-only enumeration misses. It does **not** prove the per-run provider teardown leak-free; the EKS and AWS
+> sweep layers remain UNVERIFIED. The full leak-free *test cycle* — reclaiming durable,
 > test-flagged EBS under the elevated credential — is [Phase 54](phase_54_test_topology_dsl.md) and is **not** a
 > dependency of this phase. Live AWS spend (EKS, EC2, EBS, NAT/ELB) is the *expected* outcome of asking the
 > harness to provision a provider cluster, exactly as in the prodbox sibling; it is not a separate gate. The EKS
-> reality is proven in prodbox; the amoebius provider-child dynamic-node lifecycle and the run-owned leak-free
-> sweep are validated here for the first time.
+> reality is proven in prodbox; it remains sibling evidence rather than an amoebius AWS result.
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+With valid AWS authority, run the declared EKS topology through both full cycles and independently observe the
+AWS node/audit/sweep surfaces, ephemeral leak freedom, and sole durable-EBS survivor. Durable-EBS reclamation
+remains Phase 54 work.
 
 ## Documentation Requirements
 
@@ -685,6 +717,8 @@ The whole sprint (📋 Planned).
   node group
 - [phase_45_provider_child_bringup.md](phase_45_provider_child_bringup.md) — the stateless hostless in-cluster
   singleton + capacity-scheduler roles + parent→child Lease handoff the gate composes before node provisioning
+- [phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md) — owns the singleton runtime role reused by
+  the provider child
 - [phase_46_provider_ebs_credential.md](phase_46_provider_ebs_credential.md) — per-PV durable EBS decoupled from
   the node lifecycle, the static `ebs.csi.aws.com` CSI PV, and the create-vs-delete credential the gate's marker
   rebind rides on

@@ -10,14 +10,20 @@
 
 Phase 12 delivers the InferenceEngine capability + accelerator provision; its design is owned by [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-No gate has run.
+The Register-1 gate passed on 2026-08-09 with ledger
+`dynamically-resolved`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/ledgers/phase_12_inference_accelerator_provision.md
 **Generated sections**: none
 
 </details>
@@ -28,8 +34,8 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 12.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision 📋](#sprint-121-the-inferenceengine-capability--target-offering-selected-runtime--accelerator-provision-)
-- [Sprint 12.2: The accelerator-provision corpus + the Register-1 gate 📋](#sprint-122-the-accelerator-provision-corpus--the-register-1-gate-)
+- [Sprint 12.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ⏸️](#sprint-121-the-inferenceengine-capability--target-offering-selected-runtime--accelerator-provision-)
+- [Sprint 12.2: The accelerator-provision corpus + the Register-1 gate ⏸️](#sprint-122-the-accelerator-provision-corpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,8 +43,17 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
-is design intent, never a tested amoebius result. This phase opens after the Phase 11 gate (the whole-deployment
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ Done. The target-offering quotient, family relation, identity-complete owner checks, provision corpus,
+properties, and mutant battery passed on 2026-08-09. Evidence is retained under
+[`evidence/phase_12/`](evidence/phase_12/), with the claim boundary in
+[`ledgers/phase_12_inference_accelerator_provision.md`](ledgers/phase_12_inference_accelerator_provision.md).
+This phase opened after the Phase 11 gate (the whole-deployment
 provision seal, from which the accelerator epoch witnesses are constructed) and the Phase 9 gate (the
 identity-complete accelerator-residency/coexistence epoch fold these owner demands feed), and runs on **no substrate** (`none`) in **Register 1** — it stands up no CUDA device, no Metal host, and no cluster, only the
 representational `EngineRuntime` union, the family×lane relation, the owner-demand records, and the
@@ -66,7 +81,7 @@ than a separate VRAM scalar.
 The pairing is the **accelerator-provision seam of the post-bind provision boundary**: after bind expands the
 `InferenceEngine` provider's graph, `provision` selects the **matching eligible target offering** (whose lane is
 projected from that concrete node/host or elastic candidate's detected substrate, never an ambiguous cluster-wide
-substrate), constructs the private `ProvisionedCudaOwnerDemand`/`ProvisionedMetalOwnerDemand` epoch witnesses by
+substrate). It constructs the private `ProvisionedCudaOwnerDemand`/`ProvisionedMetalOwnerDemand` epoch witnesses by
 handing the owner demands to the [Phase 9](phase_09_execution_accelerator_folds.md) accelerator-residency fold,
 and rejects — with a structured `ProvisionError` at the `provision-seal` locus, before any `ProvisionedSpec` is
 constructed — a served model whose family is unavailable on the serving lane, a CUDA requirement paired with a
@@ -97,20 +112,9 @@ Phase-11 provision seal.
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** the `InferenceEngine` capability and its accelerator provision are green under `cabal test` — the
-`legal_inference_cuda` positive (and the `legal_inference_{singlenode,distributed}` shape pair) binds to a
-well-typed `BoundServiceSpec` and **provisions to an opaque whole-deployment `ProvisionedSpec` by selecting the matching CUDA target offering**, its policy-permitted residency/coexistence epochs folding inside per-device net
-allocatable VRAM; the committed `illegal_cuda_on_cpu_target` fixture returns its exact
-`ProvisionError MissingCapability Cuda` at the `provision-seal` locus with **zero provisioned values**; the
-`illegal_engine_by_url` fixture **fails Gate 1** (`dhall type`) at its asserted no-such-alternative locus on the
-`EngineRuntime` union; and every engine/accelerator negative — family-unavailable-on-lane, count shortage, VRAM
-overcommit, source/workload-key inequality, policy-domain mismatch, residency-placement malformation, and
-coexistence overcommit — returns its **specific** structured `Left`, each paired with a positive differing only
-in the foreclosed dimension. The full apparatus (the concrete corpus, the oracle-pinned goldens, the five
-committed accelerator-provision seeded mutants that must go red, and the independent reference predicate) is
-named in [Gate integrity](#gate-integrity), to which this line delegates per
-[§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub). A **Register-1** in-process check that runs on no
-substrate.
+**Gate:** `python3 tools/phase12_gate.py` passed on no substrate, Register 1.
+It covers three positives, all quotient/relation cells, nine negatives, one covered property, and five mutants.
+The complete apparatus is named in [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
@@ -289,35 +293,25 @@ device count equals the owner requirement) and each minimally-differing one-devi
 
 ## Sprints
 
-## Sprint 12.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
-**Implementation**: `dhall/amoebius/Capability.dhall` (fill the reserved
-`InferenceEngine` head from [Phase 10](phase_10_capability_bind.md): the closed `EngineRuntime` lane union,
-the engine-family union, and the identity-complete `CudaOwnerDemand`/`MetalOwnerDemand` source, workload,
-residency, and coexistence shapes); `src/Amoebius/Capability/Engine.hs` (the target-offering→lane quotient
-projection and the **partial** family×lane availability relation plus topology-offering compatibility). The
-private `ProvisionedCudaOwnerDemand`/`ProvisionedMetalOwnerDemand` epoch witnesses are constructed by the
-[Phase 11](phase_11_provision_seal.md) `provision` seal (`src/Amoebius/Capacity/Provision.hs`) invoking the
-[Phase 9](phase_09_execution_accelerator_folds.md) accelerator-residency/coexistence epoch fold; this sprint
-supplies the owner-demand inputs, the offering→lane selection, and the family×lane gate, not the seal or the
-fold — target paths, not yet built.
-**Blocked by**: Phase 10 gate (the reserved nine-arm union with its
-`InferenceEngine` head this sprint fills); Phase 11 gate (the whole-deployment provision seal that
-constructs the accelerator epoch witnesses); Phase 9 gate (the identity-complete
-accelerator-residency/coexistence epoch fold these owner demands feed).
-**Independent Validation**: a unit +
-property suite confirms the `EngineRuntime` union has **no** `Url`/`Download` arm (an engine named by URL
-fails `dhall type`, Gate 1); the target-offering→lane quotient projects `apple → AppleMetal`, `linux-cpu →
-LinuxCpu`, `{ linux-cuda, windows } → Cuda` for a **selected target offering** and has no constructor to
-author a lane free of that offering, nor a Linux-vs-Windows `Cuda` split. It proves `keys(sources) =
-keys(workloads)` and `domains(maxResidentByClass) = domains(maxRunningByClass) = classes(sources)`; derives
-every allowed coexistence epoch; and rejects CUDA-on-CPU, too few devices, malformed
-Unsharded/ReplicatedPerDevice/Sharded placement, or any epoch whose per-device aggregate exceeds net
-allocatable memory. A case that fits raw device `memory.total` but exceeds `allocatableVram`, an omitted
-co-resident work item, and a favorable-epoch-only acceptance each return their exact structured `Left`;
-product labels and raw totals are never supply. The reference side is the committed hand-authored per-device
-aggregation table and family×lane relation (§M.3), never the fold's own accumulator.
+## Sprint 12.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `dhall/amoebius/Capability.dhall` carries the URL-free runtime and family unions.
+`src/Amoebius/Capability/Engine.hs` owns offerings, the lane quotient, family relation, owner demands, policies,
+and the opaque checked accelerator. `src/Amoebius/Capacity/Provision.hs` incorporates it into the seal.
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: four offerings match the pinned quotient and all twelve family/lane cells match
+the relation oracle. Owner keys and policy domains are exact; all allowed epochs and shard rules are checked.
+The hand-authored per-device aggregation table catches overlap omissions. URL, count, lane, VRAM, domain,
+placement, and coexistence failures retain distinct tags.
 **Docs to update**:
 `documents/engineering/service_capability_doctrine.md` (§4.1 backlink),
 `documents/engineering/content_addressing_doctrine.md` (§4.5 Tier-1 engine read-side),
@@ -379,45 +373,17 @@ resolve.
    family×lane relation (§M.3), never the fold's own accumulator.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+The whole sprint (✅ Done).
 
-## Sprint 12.2: The accelerator-provision corpus + the Register-1 gate 📋
+## Sprint 12.2: The accelerator-provision corpus + the Register-1 gate ⏸️
 
-**Status**: Planned
-**Implementation**: `test/capability/EngineAcceleratorProps.hs` (the engine/accelerator
-property + coexistence- epoch battery — offering→lane quotient totality, family×lane relation,
-source/workload-key and policy-domain equality, shard validation, and exact-fit/one-device/one-byte-short
-cases); the shared `test/capability/BindGate.hs` gate harness (this seam's entries in its validation-locus
-ledger + coverage- assertion machinery); the **oracle-pinned** fixtures
-`dhall/examples/{legal_inference_singlenode,legal_inference_distributed,legal_inference_cuda,
-illegal_engine_by_url,illegal_engine_family_unavailable_on_lane,illegal_cuda_on_cpu_target,
-illegal_accelerator_count_shortage,illegal_accelerator_vram_shortage,
-illegal_accelerator_source_workload_mismatch,illegal_accelerator_policy_domain_mismatch,
-illegal_accelerator_residency_placement,illegal_accelerator_coexistence_overcommit}.dhall`, the
-reviewer-authored goldens
-`test/capability/goldens/golden_servicespec_inference_{singlenode,distributed}.golden` (authored before
-`bind` exists), and the five seeded mutants under
-`test/capability/mutants/{mutant_drop_accelerator_work_item,mutant_accept_accelerator_domain_mismatch,
-mutant_select_favorable_accelerator_epoch,mutant_drop_accelerator_overlap_debit,
-mutant_skip_accelerator_shard_validation}` — target paths, not yet built.
-**Blocked by**: Sprint 12.1; Phase
-11 gate (the provision seal these negatives return `Left` from); Phase 9 gate (the
-accelerator-residency/coexistence fold); Phase 4 gate (the `dhall type` positive Gate-1 corpus the
-engine-by-URL negative pairs against).
-**Independent Validation**: `cabal test capability-spec` is green for
-the InferenceEngine/accelerator slice — `legal_inference_cuda` binds and provisions to an opaque
-`ProvisionedSpec` by selecting the matching CUDA offering; the `legal_inference_{singlenode,distributed}`
-pair binds byte-invariant (beta-normalized app-surface slices from distinct composed files) under both
-shapes and structurally different by the [Phase-10](phase_10_capability_bind.md) object-node-multiset oracle
-(red on scalar-only / copied-shape-tag) against its oracle-pinned golden; `illegal_engine_by_url` fails
-`dhall type` at its asserted locus; each of the nine engine/accelerator provision negatives returns its
-specifically-tagged `Left` at the `provision-seal` locus, each paired with a minimally-differing positive;
-the QuickCheck coverage obligations meet `checkCoverage` on every reject branch; exact-fit
-accelerator-epoch/shard/net-VRAM boundaries accept and each one-device or one-byte-short pair rejects; and
-the suite goes **red** under each of the five committed accelerator-provision seeded mutants. The
-validation-locus ledger is present and its Phase-6-style coverage-assertion machinery turns the suite
-**red** if any named fixture, negative reason, or mutant in this seam is absent — 'honestly classifies' is a
-machine oracle, not a hand-written attestation.
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `test/capability/EngineAccelerator{Fixtures,Props,Gate,Mutants,Spec}.hs`, the paired Dhall
+corpus, `tests/oracle/phase12/`, `tests/mutants/phase12/`, and `tools/phase12_gate.py`.
+**Blocked by**: reopened numeric predecessor gates.
+**Independent Validation**: `cabal test capability-spec` covers three positives, the quotient, the relation,
+one Gate-1 and eight provision negatives, and eight QuickCheck branches. The phase gate runs five mutants,
+checks exact locus coverage, retains evidence, and validates the hashed Register-1 ledger.
 **Docs to update**:
 `documents/engineering/service_capability_doctrine.md` (§4.1),
 `documents/illegal_state/illegal_state_catalog.md` (§3.25 → realized layer),
@@ -467,7 +433,7 @@ per-entry validation-locus ledger that names the honest foreclosure layer of eac
    turns the suite **red** if any named fixture, negative reason, or mutant is missing.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+The whole sprint (✅ Done).
 
 ## Documentation Requirements
 

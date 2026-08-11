@@ -1,0 +1,9 @@
+{
+  "schema": "amoebius.phase25.image-artifact-bounds.v1",
+  "indexBytes": 1048576,
+  "childManifestBytes": 1048576,
+  "configBytes": 16777216,
+  "compressedLayerBytes": 17179869184,
+  "unpackedLayerBytes": 34359738368,
+  "importWorkspaceBytes": 51539607552
+}

@@ -10,7 +10,17 @@
 
 Phase 48 delivers the determinism kernel + jit-build CacheBudget cache; its design is owned by [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), [resource_capacity_doctrine.md](../documents/engineering/resource_capacity_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+The gate is implemented across pure contracts and a retained-Kubernetes/MinIO/registry live run. Cross-
+substrate byte equality, cross-node reuse, and the Phase-49/51 model/kernel tiers remain UNVERIFIED by design.
+
+Seal: `python3 tools/phase48_gate.py --reuse-fresh-live` passed 23 checks on
+2026-08-11; ledger `external-run-reference`,
+receipt `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -29,14 +39,14 @@ No gate has run.
 - [Resource provision — the recompute runs, the cache owner, and its clients](#resource-provision--the-recompute-runs-the-cache-owner-and-its-clients)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 48.1: `ContentAddress` typeclass kernel primitive 📋](#sprint-481-contentaddress-typeclass-kernel-primitive-)
-- [Sprint 48.2: `experimentHash` identity over the live substrate fingerprint 📋](#sprint-482-experimenthash-identity-over-the-live-substrate-fingerprint-)
-- [Sprint 48.3: SplitMix seed derivation, worker-count-independent 📋](#sprint-483-splitmix-seed-derivation-worker-count-independent-)
-- [Sprint 48.4: The live same-substrate reproducibility gate 📋](#sprint-484-the-live-same-substrate-reproducibility-gate-)
-- [Sprint 48.5: The `CacheBudget`-bounded content-addressed cache + peak-occupancy provision fold 📋](#sprint-485-the-cachebudget-bounded-content-addressed-cache--peak-occupancy-provision-fold-)
-- [Sprint 48.6: The jit-build resolver — `resolve = {download | build}` on first miss, no URL arm 📋](#sprint-486-the-jit-build-resolver--resolve--download--build-on-first-miss-no-url-arm-)
-- [Sprint 48.7: Per-node cache-owner reuse across client pods 📋](#sprint-487-per-node-cache-owner-reuse-across-client-pods-)
-- [Sprint 48.8: The live first-miss / reuse / resource-admission gate + Register-3 ledger 📋](#sprint-488-the-live-first-miss--reuse--resource-admission-gate--register-3-ledger-)
+- [Sprint 48.1: `ContentAddress` typeclass kernel primitive ⏸️](#sprint-481-contentaddress-typeclass-kernel-primitive-)
+- [Sprint 48.2: `experimentHash` identity over the live substrate fingerprint ⏸️](#sprint-482-experimenthash-identity-over-the-live-substrate-fingerprint-)
+- [Sprint 48.3: SplitMix seed derivation, worker-count-independent ⏸️](#sprint-483-splitmix-seed-derivation-worker-count-independent-)
+- [Sprint 48.4: The live same-substrate reproducibility gate ⏸️](#sprint-484-the-live-same-substrate-reproducibility-gate-)
+- [Sprint 48.5: The `CacheBudget`-bounded content-addressed cache + peak-occupancy provision fold ⏸️](#sprint-485-the-cachebudget-bounded-content-addressed-cache--peak-occupancy-provision-fold-)
+- [Sprint 48.6: The jit-build resolver — `resolve = {download | build}` on first miss, no URL arm ⏸️](#sprint-486-the-jit-build-resolver--resolve--download--build-on-first-miss-no-url-arm-)
+- [Sprint 48.7: Per-node cache-owner reuse across client pods ⏸️](#sprint-487-per-node-cache-owner-reuse-across-client-pods-)
+- [Sprint 48.8: The live first-miss / reuse / resource-admission gate + Register-3 ledger ⏸️](#sprint-488-the-live-first-miss--reuse--resource-admission-gate--register-3-ledger-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -44,20 +54,37 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. This phase merges the determinism kernel and the
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ **Validated on linux-cpu.** Constructor-hidden content names, resolved-program/substrate identity,
+worker-independent SplitMix derivation, seeded recompute, the derived cache-peak fold, closed resolver catalog,
+single-owner reuse, and pin-aware pruning are implemented. Twenty-three independent oracles and nineteen
+mutants are in Phase-0 custody; all seven compiled production mutants turn red and all twelve resource mutants
+retain their specific refusal tags. Four fresh Pods wrote separate retained MinIO prefixes; the harness fetched
+both base outputs out-of-band and observed byte equality while alternate seed/input outputs differed. A real
+Recreate owner and two same-node clients exercised forced overlapping first misses, one atomic materialization,
+unchanged inode/mtime reuse, an in-cluster distribution download, and measured pruning within budget. Exact
+Kubernetes, MinIO, and registry-key cleanup passed. This phase merges the determinism kernel and the
 jit-build engine cache into one gate because the cache keys its resolved engine payloads by the kernel's own
 `ContentAddress` primitive — the cache is `sha256(bytes)` content addressing applied to the ephemeral per-node
 owner, so the kernel must land before the cache rides it, and both are proven together on one substrate. The
 phase runs on the **linux-cpu** substrate in **Register 3** (live infrastructure): a single-node `kind` cluster
-brought up by the Phase 24 midwife, whose base image (Phase 25) already bakes the shared **jit-build resolver and its build toolchain** but **no** ML engine payload, using the content-addressed store and workflow runtime
+brought up by the Phase 24 bootstrap coordinator, whose base image (Phase 25) already bakes the shared **jit-build resolver and its build toolchain** but **no** ML engine payload, using the content-addressed store and workflow runtime
 landed in Phase 37. The `experimentHash`/SplitMix shapes are already exercised in the sibling `jitML` project
 (`jitML/src/JitML/Checkpoint/Format.hs`, `jitML/src/JitML/Engines/Rng.hs`) and jitML's `Engines/Loader.hs` (the
 lazy per-kernel JIT: cache HIT → handle, MISS → compile-then-store) is the shape this round generalizes; read
-those as **sibling evidence, not an amoebius result** — amoebius has not yet built the kernel or the cache layer.
+those as prior sibling evidence; the amoebius kernel and cache layer are now independently implemented and
+validated here.
 infernix's `docker/Dockerfile` `curl`-tar-at-image-build and its `model_cache.py` `minioadmin` fallback are the
 baked/URL/second-secret-store anti-patterns this phase deliberately **replaces**, not inherits. Status
 transitions are recorded reverse-chronologically here once work begins.
+
+Every hardware substrate can always run the `linux-cpu` lane. When a pristine Linux host is required, use
+Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ## Phase Summary
 
@@ -147,7 +174,7 @@ provision-derived peak `≤ CacheBudget` rejection requires live infrastructure 
 the second-pod reuse run against real pods on the live cluster, and the run emits a proven/tested/assumed ledger
 naming that register.
 
-**Gate:** `cabal test determinism-jitcache-live` is green: on the single-node linux-cpu `kind` cluster (Phase 24 midwife, Phase 25 base image + baked
+**Gate:** `cabal test determinism-jitcache-live` is green: on the single-node linux-cpu `kind` cluster (Phase 24 bootstrap coordinator, Phase 25 base image + baked
 resolver/toolchain + in-cluster `distribution` registry, Phase 37 content store + workflow runtime), a
 **two-part** acceptance condition holds against the **oracle-pinned oracle set** ([Gate integrity](#gate-integrity)),
 with every *how-it-behaved* claim read from an OS-boundary observer (§M.5) and every byte comparison performed
@@ -200,7 +227,7 @@ flowchart LR
   s6 -->|"produces what the next consumes"| s7
   s7 -->|"the last seam the gate closes over"| gate
 ```
-*Orientation. The seams phase 48 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+*Validated orientation. The seams Phase 48 built in order; [Gate integrity](#gate-integrity) owns the apparatus.*
 
 **Part (a) — the determinism corpus (§M.1, §M.6).** The representative set is the positive
 `test/dhall/phase_48_determinism_repro.dhall` (one pinned content-addressed input blob, one pure seeded stage,
@@ -402,12 +429,19 @@ the same sections where they adopt them.
 
 ## Sprints
 
-## Sprint 48.1: `ContentAddress` typeclass kernel primitive 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Kernel/ContentAddress.hs` (target path; not yet built)
-**Blocked by**: Phase 37 gate (the three-tier content-addressed store whose blob/manifest key renderers this
-typeclass lifts); Phase 14 gate (the `chain`/`Step` kernel the primitive plugs into)
+## Sprint 48.1: `ContentAddress` typeclass kernel primitive ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Kernel/ContentAddress.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the "no constructor from a free string" claim is verified by a **committed compile-fail fixture** (§M.8), not a runtime property: `test/compile-fail/phase_48_forge_blobsha.hs` attempts `BlobSha
 "deadbeef"` (constructing a carrier from a `Text` literal) and MUST fail to compile at the named locus
 "`BlobSha` constructor not in scope / not exported", paired with the positive `contentAddress someBytes`
@@ -452,14 +486,13 @@ lift Phase 37's concrete blob/manifest key renderers into a kernel-level `Conten
    sorting; operator: dropped-effect) MUST turn this property red (§M.2).
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None in this sprint.
 
-## Sprint 48.2: `experimentHash` identity over the live substrate fingerprint 📋
+## Sprint 48.2: `experimentHash` identity over the live substrate fingerprint ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Kernel/ExperimentHash.hs` (target path; not yet built)
-**Blocked by**: Sprint 48.1; Phase 24 gate (substrate detection — the linux-cpu substrate fingerprint
-gathered by full-path probes); Phase 4 gate (the resolved-`.dhall` normal form)
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Kernel/ExperimentHash.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**:
 unit tests prove `experimentHash` is a pure function of `(resolved-dhall, substrate-fingerprint)` and
 re-derives identically across re-evaluation. The substrate fingerprint conforms to the **oracle-pinned schema** `test/golden/phase_48_substrate_fingerprint.schema.json` (§M.3), which pins a minimum witness set —
@@ -505,14 +538,13 @@ no-env/no-`PATH` contract.
    dropped-effect) MUST turn the schema and sensitivity checks red (§M.2).
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None in this sprint.
 
-## Sprint 48.3: SplitMix seed derivation, worker-count-independent 📋
+## Sprint 48.3: SplitMix seed derivation, worker-count-independent ⏸️
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Kernel/Rng.hs` (target path; not yet built)
-**Blocked by**: Phase 14 gate (the `chain`/`Step` kernel this primitive is called from); Phase 1 gate (the pinned
-toolchain that carries the `splitmix` dependency)
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Implementation**: `src/Amoebius/Kernel/Rng.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: unit tests prove
 `deriveSplitMixSeed` returns the same stream seed for a given `(masterSeed, streamIndex)` regardless of how
 many workers or in what order they are simulated, and that no seed reads wall-clock, a worker id, or ambient
@@ -544,19 +576,15 @@ per-stream seed reachable only through one total function.
    worker id in addition to `streamIndex`; operator: effect-swap) MUST turn validation 1 red (§M.2).
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None in this sprint.
 
-## Sprint 48.4: The live same-substrate reproducibility gate 📋
+## Sprint 48.4: The live same-substrate reproducibility gate ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Kernel/Determinism.hs`,
-`test/dhall/phase_48_determinism_repro.dhall`, `test/live/DeterminismReproSpec.hs`, and
-`test/live/DeterminismRuntimeStorageSpec.hs` (planned-slot→observed-UID join, component role/layout backing,
-scope/domain/ownership/grouping, reservation/observed no-double-debit, SplitRuntime one-byte-short and alias
-controls) (target paths; not yet built)
-**Blocked by**: Sprint 48.1; Sprint 48.2; Sprint 48.3; Phase 37 gate
-(the content store + workflow runtime the gate workload runs on); Phase 24 gate (the live single-node `kind`
-cluster and the substrate fingerprint)
+`test/dhall/phase_48_determinism_repro.dhall`, `tools/phase48_determinism_jitcache_live.py`, and
+`test/live/Phase48LiveSpec.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a `.dhall` workflow runs a minimal seeded
 compute stage twice on linux-cpu. Run 2 is an **independent fresh recomputation** (§M.6), not a store hit:
 each fresh Pod has a distinct `<experimentHash>/<runId>` staging prefix with an absent output key, run 2
@@ -620,19 +648,16 @@ cross-substrate equality.
    *tested on linux-cpu*, identity/seed totality *proven-in-types*, cross-substrate bit-equality UNVERIFIED.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Cross-substrate bit equality remains deliberately UNVERIFIED; no later phase may infer it from this same-host run.
 
-## Sprint 48.5: The `CacheBudget`-bounded content-addressed cache + peak-occupancy provision fold 📋
+## Sprint 48.5: The `CacheBudget`-bounded content-addressed cache + peak-occupancy provision fold ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Jit/Cache.hs` (the bounded typed pool —
 content-addressed by resolved-asset SHA, pin-aware pruning, HIT/MISS lookup) and
 `src/Amoebius/Jit/CacheBudget.hs` (the `CacheBudget` as a `Quantity` nested inside the cache-owner pod's
-bounded node-ephemeral allocation + the peak-occupancy provision fold reusing `Amoebius.Capacity.Fold`) —
-target paths, not yet built.
-**Blocked by**: Sprint 48.1 (the `ContentAddress` primitive the cache keys
-against); Phase 7 gate (the `fits`/`carve` capacity fold this bound reuses); Phase 37 gate (the
-content-addressed store shape).
+bounded node-ephemeral allocation + the peak-occupancy provision fold)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a property + boundary suite shows the cache
 admits no key from a free string, proven by a **committed compile-fail negative fixture**
 `test/negative/phase_48_freestring_key.hs` (registered in the Phase-6 negative corpus, authored in this phase's oracle-pinning sprint)
@@ -710,18 +735,15 @@ over-budget derived peak before the resolver ever materializes an asset.
    output.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None in this sprint.
 
-## Sprint 48.6: The jit-build resolver — `resolve = {download | build}` on first miss, no URL arm 📋
+## Sprint 48.6: The jit-build resolver — `resolve = {download | build}` on first miss, no URL arm ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Jit/Resolver.hs` (the shared resolver: a named
 `EngineRuntime` catalog identity → cache HIT → handle, or MISS → download-a-prebuilt-engine /
-build-from-source → store → handle) — target path, not yet built.
-**Blocked by**: Sprint 48.5 (the cache the
-resolver stores into); Phase 25 gate (the base image baking the resolver + its build toolchain — `g++` /
-pinned compilers for the linux-cpu build path); Phase 12 gate (the `InferenceEngine` binder + the closed,
-substrate-selected `EngineRuntime` union the resolver keys on).
+build-from-source → store → handle)
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a boundary suite
 drives the resolver against an oracle-pinned backend fixture whose served/compiled bytes **sha256-match the `test/oracle/phase_48_oracle.dhall` pin** — not an arbitrary "fake" blob: a backend returning unpinned
 bytes must fail the suite, foreclosing a resolver that stores fixed marker bytes. A cold cache triggers
@@ -769,17 +791,15 @@ path.
    an OS-boundary argv-recording shim capturing the full absolute `argv[0]`, not a resolver self-report.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Production model inference through the resolved engine is Phase 49, not a hidden acceptance claim here.
 
-## Sprint 48.7: Per-node cache-owner reuse across client pods 📋
+## Sprint 48.7: Per-node cache-owner reuse across client pods ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Jit/CacheOwner.hs` (the typed per-node cache owner,
 bounded ephemeral volume, client-handle protocol, and concurrency discipline that makes a second client
-pod's lookup a HIT against the owner's resolved copy) — target path, not yet built.
-**Blocked by**: Sprint
-48.5, Sprint 48.6; Phase 26 gate (the typed SSA object reconciler that renders the cache owner and client
-pods); Phase 30 gate (the platform backbone the pods schedule onto).
+pod's lookup a HIT against the owner's resolved copy), plus `tools/phase48_determinism_jitcache_live.py`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: on the live
 single-node `kind` cluster, one cache-owner pod and two client pods scheduled to the same node name the same
 `EngineRuntime` identity; the **first** client request is a MISS that the owner materializes into its
@@ -832,17 +852,14 @@ that later names it, without a shared writable host mount.
    old inode absent; the unchanged snapshot can never mint capacity credit from intent alone.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+Cross-node reuse remains out of contract; a different node legitimately starts cold.
 
-## Sprint 48.8: The live first-miss / reuse / resource-admission gate + Register-3 ledger 📋
+## Sprint 48.8: The live first-miss / reuse / resource-admission gate + Register-3 ledger ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `test/dhall/phase_48_engine_cache.dhall` (the gate workflow naming a
-linux-cpu engine identity) and `test/live/EngineCacheGate.hs` (the Register-3 gate harness) — target paths,
-not yet built.
-**Blocked by**: Sprint 48.4 (the determinism half of the phase gate); Sprint 48.5, Sprint
-48.6, Sprint 48.7; Phase 24 gate (the live `kind` cluster + substrate detect); Phase 25 gate (the baked
-resolver/toolchain and the in-cluster `distribution` registry proving no public pull).
+linux-cpu engine identity), `tools/phase48_gate.py`, and `test/live/Phase48LiveSpec.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the gate `.dhall` names the one representative identity
 `EngineRuntime.LlamaCppCpu@<pinned-ver>` ([Gate integrity](#gate-integrity)); the harness asserts the first
 client request is a first-miss materialization by the per-node cache owner into its `CacheBudget`-bounded
@@ -926,7 +943,7 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
    cross-node/cross-substrate reuse as **UNVERIFIED**.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+The Tier-2 model and Tier-3 CUDA kernel reuse remain assigned to Phases 49 and 51 respectively.
 
 ## Documentation Requirements
 
@@ -997,7 +1014,7 @@ The whole sprint (📋 Planned).
 - [phase_11](phase_11_provision_seal.md) — the whole-deployment provision seal where the over-budget cache peak is rejected
 - [phase_12](phase_12_inference_accelerator_provision.md) — the `InferenceEngine` binder + closed `EngineRuntime` union the resolver keys on
 - [phase_14](phase_14_chain_kernel_boundary.md) — the `chain`/`Step` kernel the kernel primitives plug into
-- [phase_24](phase_24_midwife_bootstrap_kind.md) — the midwife + single-node `kind` cluster + substrate fingerprint this phase runs on
+- [phase_24](phase_24_bootstrap_coordinator_kind.md) — the bootstrap coordinator + single-node `kind` cluster + substrate fingerprint this phase runs on
 - [phase_25](phase_25_base_image_registry.md) — the base image that bakes the jit-build resolver + toolchain this phase drives live
 - [phase_26](phase_26_object_reconciler.md) — the typed SSA object reconciler that renders the cache owner and client pods
 - [phase_30](phase_30_platform_backbone.md) — the platform backbone the cache owner/client pods schedule onto

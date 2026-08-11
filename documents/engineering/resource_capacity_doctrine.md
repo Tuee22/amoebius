@@ -21,10 +21,12 @@ and provisioning enaction are owned elsewhere and named in
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_schema.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_schema.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
+
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ## Contents
 - [1. Capacity is a budget the fold consumes, and overcommit is a checked rejection](#1-capacity-is-a-budget-the-fold-consumes-and-overcommit-is-a-checked-rejection)
@@ -87,8 +89,27 @@ illegal and the technique that forecloses them is
 [illegal_state_catalog.md §3.17-§3.21 / §4.6](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded); this doc is the normative home of
 the model that catalog names.
 
-Everything below is **design intent for Phase 4** (the source types), Phases 7–13 (the pure
-provision/fold/render boundary), and the later live phases that enact and cross-check it. Status and gates live only in
+The target below spans Phase 4 (the source types), Phases 7–13 (the pure provision/fold/render boundary),
+and later live phases that enact and cross-check it. The [Phase 7 gate](../../DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md)
+has now built and validated the **base** `Amoebius.Capacity.Types` / `Amoebius.Capacity.Fold` slice: CPU,
+memory, logical pod-ephemeral storage, pod and driver-scoped CSI slots, finite CPU-limit policy, headroom,
+taint/anti-affinity eligibility, and fixed/elastic placement. Its 15 direct negatives, 15 legal twins, two
+carried positives, four sampled properties, and 19 mutants passed in Register 1 with ledger
+`dynamically-resolved`.
+The [Phase 8 gate](../../DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md) has now built and validated the
+closed storage budget/growth arithmetic, BookKeeper/MinIO physical expansion, presentation/allocation
+rounding, uniform claims, six-arm object inventory, service/migration/cache/root/control-plane geometry,
+backup/restore/pool checks, both Pulsar ceilings, and snapshot-bound policy-only scaling. Its 27 exact
+variant/twin rows, two positive specs, six sampled equivalence properties, and 31 mutants passed in Register 1
+with ledger `external-run-reference`.
+The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md) now validates execution
+epochs, aggregate scheduler reservations, structural runtime/image accounting, physical partition and
+provider-root arithmetic, accelerator residency against net VRAM, host-only compute derivations, and the
+composed full-vector witness. Its 32 negative/twin variants, seven sampled properties, two composed positives,
+and 45 red mutants passed in Register 1 with ledger
+`dynamically-resolved`.
+Post-bind provisioning, live storage mutation, device attachment, observed inventory, and all physical
+enforcement remain **UNVERIFIED** here. Status and gates live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -111,8 +132,9 @@ the whole-deployment fold is reporting the wrong boundary, and this doc forbids 
 
 Because the guarantee is a *checked rejection*, the check's own correctness is a property to establish, not a
 given. The fold's soundness — and, for the two-directionally-decidable checks (`Σ ≤ backing`, elementwise
-compatibility), its **accepts ⟺ in-envelope equivalence** — is property-tested over generated inputs in Phase 7
-(never a fixed fixture set alone). Where a specific fold's algebraic laws are load-bearing enough to warrant a
+compatibility), its **accepts ⟺ in-envelope equivalence** — is property-tested over generated inputs in the
+[Phase 7](../../DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md) base slice (never a fixed fixture set alone).
+Where a specific fold's algebraic laws are load-bearing enough to warrant a
 machine-checked proof, that is the surgical, deferred proof-assistant track
 ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md)), not a broad proof layer.
 
@@ -225,6 +247,42 @@ are carried by
 
 ---
 
+### Phase-29 Vault capacity validation
+
+Phase 29 validated the bounded Vault source-population fold and its live projection. The declared resident
+population was 425,984 bytes, the derived usable Raft peak was 2,023,424 bytes, and the provisioned fixed raw
+backing was 134,217,728 bytes; rotated audit required at least 4,194,304 usable bytes and received a 67,108,864
+byte raw backing. One-byte-under cases rejected in the pure contract, while forced snapshot/history and audit
+rotation stayed inside the observed ext4 usable capacities. The proof used the universal `linux-cpu` lane;
+pristine Linux routes through Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+### Phase-31 service-capacity validation
+
+Phase 31 added private provisions for the Grafana Patroni members/operator/webhook/gateway/pgAdmin,
+Prometheus/query proxy/Grafana, and Redis/Sentinel. Pure checks rejected one-byte-under Prometheus backing and
+fixed-budget mutation; live readback required complete CPU, memory, and ephemeral-storage request/limit fields
+on all sixteen execution units. Three 256 MiB ext4 Postgres member backings and one 128 MiB Prometheus backing
+were mounted through the retained-storage contract, while Redis remained deliberately ephemeral. This is
+tested on the universal `linux-cpu` lane; pristine Linux routing is Incus for Linux/Linux-CUDA, Lima for
+Apple, and WSL2 for Windows.
+
+### Phase-37 content-store/workflow validation
+
+Phase 37 validated the `ObjectStoreDemand` logical peak with committed, concurrent, full failed-write-window,
+and observed-orphan terms. Exact-fit and every one-short boundary reject before mutation; orphan credit is
+withheld until both the finite horizon and an externally observed deletion. The live store consumes the
+Phase-30 four-drive MinIO raw/usable witness, and the six-source workflow provision covers the orchestrator,
+three Failover workers, content gateway, and completion collector with no accelerator term. The gate uses the
+always-available `linux-cpu` lane; pristine Linux routes through Incus on Linux/Linux-CUDA, Lima on Apple, or
+WSL2 on Windows.
+
+[Phase 41](../../DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md) supplies the live `NetworkFabricSystemDemand` producer/consumer instance. The exact two-node peer
+graph expands finite packet-rate, packet-size, queue-byte, rotated-log, CPU/memory reservation and ceiling,
+nodefs, listener, and host-process operands into one private row per node. Every one-unit-short capacity and a
+changed fingerprint fail before fabric mutation; the fitting token is consumed once. External cgroup-v2,
+`tc`, log/nodefs, process, socket, and kernel-interface readback matches the admitted rows. This tests the
+declared envelope on `linux-cpu`; it does not prove every kernel, queue discipline, or WAN workload.
+
 ## 10. Planning ownership
 
 This document is normative capacity doctrine only. Delivery sequencing, completion status, and validation
@@ -239,8 +297,130 @@ enaction in **Phase 47**, realtime Redis/WebSocket demand in **Phases 31 and 55�
 upload, compatibility, and multi-zone fault demand in **Phases 61–64**. This doc never maintains a competing status ledger; it states the target shape and
 links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
+Phase 53's scoped contract independently rederives 32 GiB of Lima guest-usable carves, applies the pinned
+filesystem and sparse-image overhead plus 40 GiB minimum/4 GiB quantum, and exposes only a private 40 GiB
+`ProvisionedVmDiskCarve`. It charges that witness once beside 64 GiB durable and 16 GiB cache pools, and folds
+the worst Metal coexistence epoch into a 19 GiB unified-memory debit; one-short and six semantic mutants are
+red. Physical Apple supply, Lima raw/allocated image bytes, guest mount/fs-type, and Metal allocation
+readbacks remain UNVERIFIED. Every hardware substrate still offers `linux-cpu`; for a pristine Linux host use
+Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 24 retains a complete pristine-Incus observed inventory and effective etcd/kubelet config readback.
+Live runs boundary-filled finite `Unified` and distinct `SplitRuntime` ext4 identities and observed the next
+allocation fail with `ENOSPC`; `SplitImage` rejected before create. Independent observers also passed the
+etcd/audit/kubelet transition-high-water bounds, node/host/bootstrap coordinator/per-process cgroup envelopes, and complete
+CNI/CSI/OCI/backing-pool inventory. This is the delivered Phase-24 `linux-cpu` boundary; every hardware
+substrate can run that lane, using Incus on Linux, Lima on Apple, or WSL2 on Windows for a pristine Linux host.
+
+Phase 25 then applied the same declared/provisioned/observed discipline to the host build and bootstrap
+registry: live validation
+rejected a 48 GiB scratch declaration before export, corrected it to a 96 GiB provision with a 32 GiB
+concurrent cache-write peak, and independently observed CPU throttling, child OOM kill, and bounded scratch
+and cache `ENOSPC`. Registry admission then deduplicated the exact digest/object inventory against observed
+residents, charged upload workspaces and failed-upload residue, rejected conflicting metadata and one-byte
+under-provision before mutation, and placed the finite registry/proxy execution and storage demand on the
+Phase-24 node. Phase 30 then live-tested the MinIO-backed rehome and backbone resource projection.
+
+Phase 26 closes the generic reconciler cross-check: one coherent authenticated live snapshot is normalized
+before mutation, unknown commitments or an over-bound CR child fail closed, and a snapshot-bound typed target
+is consumed once. The Register-3 corpus independently observed exact child requests/limits/storage, a
+one-Pod quota admitting only one of two simultaneous child submissions with zero over-allocation, and a
+byte-stable immediate rerun. Phase 27 then live-tested the scheduler allocation seam: the reservation CRD
+reached `Reserved` and `BindingInFlight` before the Kubernetes Binding, two simultaneous candidates contended
+on one aggregate root resourceVersion with exactly one winner and zero over-allocation, and both same-UID
+records remained single-debit and byte-stable on immediate rerun.
+
+Phase 28 then closed the retained-host storage-capacity slice. Before materialization, the independent fold
+proved a total raw allocation of `402653184` bytes within the named `536870912`-byte durable backing, with
+the two witness images fixed at 256 MiB and 128 MiB and cache/node-ephemeral identities excluded. The live
+observer matched raw image length, ext4 presentation, and required usable capacity, then reached `ENOSPC` at
+the one-volume hard ceiling without sibling/shared-pool spill. The same gate exercised uniform-claim
+post-rounding debit and verified-migration high-water/cleanup boundaries. The bounded Register-3 ledger is
+`dynamically-resolved`. This `linux-cpu` result is
+available on every hardware substrate; use Incus on native Linux/Linux-CUDA, Lima on Apple, or WSL2 on
+Windows when a pristine Linux host is required.
+
+Phase 30 closed the linux-cpu backbone capacity slice. The pure corpus covered six-arm MinIO producer
+geometry, erasure healing, failed-write orphans, uniform four-drive claim debit, BookKeeper quorum/recovery,
+and exact-fit/one-byte-over boundaries. Live readback then matched complete CPU, memory, and ephemeral-storage
+fields plus retained volumes for every execution unit; 53 SSA object projections and 11 Haskell renderer
+projections were exact. Offload produced 19 MinIO objects while observed hot-tier bytes remained under the
+65,536-byte cap. The Register-3 ledger is
+`dynamically-resolved`. Every hardware substrate can
+always run this `linux-cpu` lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on
+Windows.
+
+Phase 44 adds the scoped provider-planning capacity instance. `PulumiExecutionDemand` accounts both live
+executors at a `BoundedParallel 2` peak, including CPU, memory, pod-ephemeral, plugin-cache, and workspace
+bytes; each one-short case refuses before continuation. `PulumiCheckpointObjectDemand` derives a six-object,
+393,216-byte peak with a named budget, serial overlap, retained revisions, failed-partial exposure, GC horizon,
+and exclusive mutation admission. The CPU-only `ProviderNodeClass` is cross-checked against a pinned SKU, and
+vCPU, node-group, and EBS one-short account fixtures refuse before a provider action. Kubernetes and
+Vault/MinIO live observers validated the executor and checkpoint arms. Actual provider quota observation,
+EKS/node-root supply, and managed-node allocatable/CRI/filesystem enforcement remain UNVERIFIED because AWS
+authority was invalid. This linux-cpu parent lane remains available on every hardware substrate; pristine
+Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 46 completes the pure storage side of `CreateProviderCapacity`: the exact action domain is one volume
+create plus one durable-checkpoint write, gated by the fresh snapshot fingerprint and a single-use batch. The
+migration witness simultaneously admits old+new rounded bytes, two provider volume slots, workspace, copy CPU/
+memory/pod-ephemeral/pod slot, and two distinct CSI attachments; eight one-short cases refuse. The retained
+storage drill validates only an analogue and checkpoint-class accounting. Provider quota observation, actual
+EBS creation/migration, and receipt-bound cloud readback remain UNVERIFIED.
+
+Phase 47 implements the node side of the `ScalingPolicy` arm in `Amoebius.Cluster.NodeProvisioner`.
+Workflow-completion and load signals derive a finite target; the worst-case instance, vCPU, node-root EBS,
+CPU, memory, pod-ephemeral, pod-slot, CNI, CSI-attachment, and capability obligations refuse before provider
+permission when any ceiling is short. Repeated attachment to one PVC is deduplicated while distinct old/new
+PVCs during replacement are not. Pure contracts and a retained-Kubernetes signal analogue pass; live provider
+quota, node supply, root-EBS geometry, and scheduler admission remain UNVERIFIED. The `linux-cpu` lane is always
+available on every hardware substrate; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
+on Windows.
+
+Phase 48 adds the Tier-1 cache-capacity specialization in `Amoebius.Jit.CacheBudget`. Admission deduplicates
+equal digests, rejects conflicting sizes, keeps observed-present bytes charged even when deletion is proposed,
+accounts for the largest finite concurrent temporary overlap, and requires both the owner `emptyDir` and pod
+ephemeral-storage request to cover the provisioned demand. The retained owner/client drill observed a
+121 MiB high-water mark within a 160 MiB cache budget, pruned an unpinned entry, preserved a pinned entry, and
+left no temporary residue. This does not validate cross-node reuse, Tier-2 model capacity, Tier-3 CUDA cache
+capacity, or every substrate's physical limits. The tested `linux-cpu` lane is always available on every
+hardware substrate; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+
+Phase 51 adds a scoped CUDA admission specialization. The pure adapter rejects a CPU target, fewer than 200
+steps, fewer than ten million parameters, non-whole-device count, inconsistent reserve/net geometry, a net-
+allocatable one-short, and a current-free one-short before modeled effects; the raw-VRAM mutant turns red.
+Live inventory admits 64 MiB against a 4 GiB GTX 970 with a 256 MiB reserve, then executes and releases a
+40 MB parameter allocation. Kubernetes device-plugin supply, owner placement, cache high water, and live one-
+short zero-effect twins remain UNVERIFIED. Every hardware platform retains `linux-cpu`; pristine Linux uses
+Incus for Linux/Linux-CUDA, Lima for Apple, or WSL2 for Windows.
+
 ---
 ## Related Documents
+
+Phase 61's scoped bounded replay fixture pins outbox count 8, replay concurrency 1, reconnect 30 seconds,
+receipt lookup 5 seconds, and result bytes 65,536. The local two-endpoint/SQLite trace stays within those
+operands; production Redis, broker, provider, and reconnect-storm high-water observations remain UNVERIFIED.
+Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on
+Apple, or WSL2 on Windows.
+
+Phase 62 pins a 1,048,576-byte blob, 65,536-byte chunks, 16 chunks, concurrency 1, an 86,400-second age, and
+eight pending dependencies. The scoped trace exercises two bounded chunks and explicit depended-on quota
+refusal; browser quota is not cluster supply. Real upload/provider high-water observations remain UNVERIFIED.
+Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on
+Apple, or WSL2 on Windows.
+
+Phase 63 pins an 86,400-second maximum offline age plus 3,600-second reconnect grace and therefore a
+90,000-second compatibility horizon. The scoped Chrome trace observes source plus scratch during staging and
+old/new compatibility overlap; production browser/provider high-water demand remains UNVERIFIED. Every
+hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple,
+or WSL2 on Windows.
+
+Phase 64 pins the complete-zone fault shape, two survivors, replay and reconnect bounds, cursor repair, and
+one blob-dependent effect, while its scoped campaign observes only bounded host-local processes, SQLite, and
+filesystem storage. Provider post-fault high-water and quorum supply remain UNVERIFIED. Every hardware
+substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
+on Windows.
+
 
 - [Resource Capacity Types](./resource_capacity_types.md) — the four types and the checked construction obligations
 - [Resource Capacity Schema](./resource_capacity_schema.md) — the 557 type spellings, in 26 families

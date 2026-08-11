@@ -1,0 +1,3 @@
+operator=swap nodefs and imagefs or remove the hard backing identity
+locus=Amoebius.Capacity.NodeLocalStorage.validateFilesystemLayoutObservation
+expected=SplitRuntime observation turns red

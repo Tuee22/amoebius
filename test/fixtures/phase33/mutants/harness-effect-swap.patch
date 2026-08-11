@@ -1,0 +1,5 @@
+--- a/src/Amoebius/ControlPlane/Singleton.hs
++++ b/src/Amoebius/ControlPlane/Singleton.hs
+@@
+-singletonFieldManager = "amoebius-phase33-singleton"
++singletonFieldManager = "phase33-harness"

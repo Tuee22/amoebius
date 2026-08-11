@@ -8,7 +8,13 @@
 
 Phase 35 delivers the native Pulsar client (CBOR); its design is owned by [pulsar_client_doctrine.md](../documents/engineering/pulsar_client_doctrine.md), [substrate_doctrine.md](../documents/engineering/substrate_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Validated 2026-08-10 with `python3 tools/phase35_gate.py --reuse-fresh-live`;
+ledger `external-run-reference`.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -26,11 +32,11 @@ No gate has run.
 - [Resource provision — the native Pulsar client envelope](#resource-provision--the-native-pulsar-client-envelope)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 35.1: Fork supernova → amoebius-pulsar native binary protocol 📋](#sprint-351-fork-supernova--amoebius-pulsar-native-binary-protocol-)
-- [Sprint 35.2: Capability surface + exclusively-CBOR payload codec 📋](#sprint-352-capability-surface--exclusively-cbor-payload-codec-)
-- [Sprint 35.3: Declarative topology algebra + one-sided-link validation 📋](#sprint-353-declarative-topology-algebra--one-sided-link-validation-)
-- [Sprint 35.4: At-least-once + broker-side dedup + the command→event round-trip gate 📋](#sprint-354-at-least-once--broker-side-dedup--the-commandevent-round-trip-gate-)
-- [Sprint 35.5: Register-2.5 exactly-once effect under simulated redelivery 📋](#sprint-355-register-25-exactly-once-effect-under-simulated-redelivery-)
+- [Sprint 35.1: Fork supernova → amoebius-pulsar native binary protocol ⏸️](#sprint-351-fork-supernova--amoebius-pulsar-native-binary-protocol-)
+- [Sprint 35.2: Capability surface + exclusively-CBOR payload codec ⏸️](#sprint-352-capability-surface--exclusively-cbor-payload-codec-)
+- [Sprint 35.3: Declarative topology algebra + one-sided-link validation ⏸️](#sprint-353-declarative-topology-algebra--one-sided-link-validation-)
+- [Sprint 35.4: At-least-once + broker-side dedup + the command→event round-trip gate ⏸️](#sprint-354-at-least-once--broker-side-dedup--the-commandevent-round-trip-gate-)
+- [Sprint 35.5: Register-2.5 exactly-once effect under simulated redelivery ⏸️](#sprint-355-register-25-exactly-once-effect-under-simulated-redelivery-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -38,12 +44,22 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
-statement is design intent, never a tested amoebius result. This phase opens after the Phase 34 gate (app
-tenancy + `TenantSpec`) and runs on the **linux-cpu** substrate in **Register 3** — live infrastructure: a
-single-node `kind` cluster with Pulsar up as a standard HA service (Phase 30). The mechanisms are generalized
-from two working sibling libraries — infernix's in-process WebSocket Pulsar path and jitML's Node-subprocess
-Pulsar path and topic algebra — and start from a fork of `cr-org/supernova`; that is **sibling evidence, not an amoebius result** (honesty rule, [development_plan_standards.md §K](development_plan_standards.md)).
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+✅ **Done.** `amoebius-pulsar` now speaks Pulsar's native TCP binary protocol with generated protobuf command
+types, mandatory CRC32C payload frames, typed CBOR-only application bodies, derived topics, all four
+subscription types, seek, acknowledgement, and explicit producer sequence identities. Two fresh namespaces
+round-tripped commands and events against the live HA service; external broker-admin readback established
+duplicate collapse, unacked redelivery, replay, and complete teardown. The Register-2.5 battery explored 720
+reorder/duplicate schedules and killed its unstable-key twin. The three committed source mutants and both
+compile-refusal fixtures turn the unchanged gate red for their pinned reasons.
+
+Every hardware substrate can always run the `linux-cpu` lane. When a validation needs a pristine Linux host,
+use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows; specialized lanes are additive.
 
 ## Phase Summary
 
@@ -67,9 +83,10 @@ intra-cluster HA proof — Pulsar's own broker/bookie consensus is **delegated, 
 exposes the four subscription types but runs **no bespoke election**: any single-writer property is delegated
 to the broker's subscription model.
 
-**Substrate:** linux-cpu — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no apple,
-linux-cuda, or windows substrate is touched (the per-substrate topic lanes the algebra partitions traffic onto
-are exercised by later phases).
+**Substrate:** linux-cpu — the gate runs on a single-node `kind` cluster on a linux-cpu host. This choice does
+not narrow portability: every hardware substrate always provides `linux-cpu`, directly or through its pristine
+Linux VM framework (Incus on Linux/Linux-CUDA, Lima on Apple, WSL2 on Windows). The specialized topic lanes
+remain additive and are exercised by later phases.
 
 **Register:** 3 (live infrastructure) — the gate runs against a real broker on a real cluster, not an
 in-process fake.
@@ -101,7 +118,7 @@ flowchart LR
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Design intent. Phase 35's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+*Validated Phase-35 gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
 The gate passes only when every clause below holds; each is checked against an **oracle-pinned oracle**
 authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from the client.
@@ -222,15 +239,23 @@ provision.
 
 ## Sprints
 
-## Sprint 35.1: Fork supernova → amoebius-pulsar native binary protocol 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 35.1: Fork supernova → amoebius-pulsar native binary protocol ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+the live native socket exchange are validated.
 **Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Frame.hs`,
 `amoebius-pulsar/src/Amoebius/Pulsar/Connection.hs`, and `amoebius-pulsar/proto/PulsarApi.proto` — the
-authored source; `Amoebius/Pulsar/Proto/PulsarApi.hs` is `proto-lens`-generated at build from that `.proto`,
-never hand-written (target layout from [system_components.md](system_components.md); not yet built).
-**Blocked by**: Phase 30 — Pulsar reachable as a standard HA service (external earlier-phase prerequisite);
-Phase 25 — the baked Pulsar/service binaries in the in-cluster `distribution` registry.
+authored source; `Proto/PulsarApi.hs` is `proto-lens`-generated at build from that `.proto`, never hand-written
+(delivered and validated).
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: golden-frame encode/decode round-trips of representative `BaseCommand` types byte-for-byte
 against spec-derived fixtures; a CONNECT → CONNECTED → LOOKUP_TOPIC exchange against a single-node broker
 resolves a topic owner through any redirects; a deliberately corrupted CRC32C payload frame yields a
@@ -275,16 +300,17 @@ session per broker — the supernova provenance as **sibling evidence, not an am
    requests/limits/image/local storage normalize to the private provisioned projection.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 35.2: Capability surface + exclusively-CBOR payload codec 📋
+## Sprint 35.2: Capability surface + exclusively-CBOR payload codec ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+golden, and raw-payload compile refusal are validated.
 **Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Producer.hs`,
 `amoebius-pulsar/src/Amoebius/Pulsar/Consumer.hs`, `amoebius-pulsar/src/Amoebius/Pulsar/Subscription.hs`,
 `amoebius-pulsar/src/Amoebius/Pulsar/Seek.hs`, `amoebius-pulsar/src/Amoebius/Pulsar/Cbor.hs` (the typed CBOR
-payload codec on `serialise`/`cborg`) — target paths, not yet built.
-**Blocked by**: Sprint 35.1.
+payload codec on `serialise`/`cborg`) — delivered and validated.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: run against the **live single-node `kind`-cluster broker (Register 3)** — the same
 standing Pulsar service as the gate, not an in-process fake — so the FLOW/MESSAGE/ACK_RESPONSE and
 four-subscription-shape assertions are wire-real:
@@ -344,14 +370,14 @@ seek-based replay — over the persistent session from Sprint 35.1, with **every
    like CRC32C), never a silent misread.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 35.3: Declarative topology algebra + one-sided-link validation 📋
+## Sprint 35.3: Declarative topology algebra + one-sided-link validation ⏸️
 
-**Status**: Planned
-**Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Topology.hs` — target path, not
-yet built.
-**Blocked by**: none (pure derivation; no broker or session required).
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+violations are validated, including the deleted-clause mutant.
+**Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Topology.hs` — delivered and validated.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: property tests that `topicFor` derives
 `persistent://<tenant>/<namespace>/<workflow>.<phase>.<substrate>` from a typed `RouteEntry`, checked
 against an **oracle-pinned hand-authored expected-topic table** (a distinct spec of the naming scheme,
@@ -406,19 +432,17 @@ a runtime mystery — the illegal-state-unrepresentable principle applied to the
    topics through `topicFor`, never from hand-written strings.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None.
 
-## Sprint 35.4: At-least-once + broker-side dedup + the command→event round-trip gate 📋
+## Sprint 35.4: At-least-once + broker-side dedup + the command→event round-trip gate ⏸️
 
-**Status**: Planned
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+duplicate collapse, redelivery, seek replay, independent state readback, and leak-free cleanup.
 **Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Dedup.hs`,
 `amoebius-pulsar/src/Amoebius/Pulsar/Namespace.hs` (the namespace dedup-policy reconcile),
-`amoebius-pulsar/dhall/test/round_trip_dedup.dhall` (the gate topology), and
-`test/integration/Phase35RuntimeStorage.hs` (runner planned-slot→observed-Pod-UID join,
-component-role/layout backings, node scope/domain/ownership equality, reservation/observed no-double-debit,
-alias controls) — target paths, not yet built.
-**Blocked by**: Sprint 35.2, Sprint 35.3; Phase 33 — the live
-DSL deploy via the `replicas=1` singleton (the `InForceSpec` harness that applies the gate topology).
+`amoebius-pulsar/src/Amoebius/Pulsar/Provision.hs`, `amoebius-pulsar/test/PulsarClientLiveSpec.hs`, and
+`tools/phase35_pulsar_live.py` — delivered and validated.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: with namespace deduplication enabled, a producer that retries the same
 `(producer_name, sequence_id)` has the duplicate rejected at ingest; a consumer that crashes before `ACK` is
 redelivered the un-acked message; the `MessageId`→`sequence_id` packing (`ledgerId`/`entryId`) and the
@@ -486,16 +510,16 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
 > delegated, not re-proven.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The content store, workflow runtime, cross-cluster correspondence, and broker consensus internals remain
+explicitly UNVERIFIED under their owning later phases.
 
-## Sprint 35.5: Register-2.5 exactly-once effect under simulated redelivery 📋
+## Sprint 35.5: Register-2.5 exactly-once effect under simulated redelivery ⏸️
 
-**Status**: Planned
-**Implementation**: `test/sim/PulsarDedupSimSpec.hs` (the `IOSimPOR` battery over the
-modeled Pulsar), driving the real `amoebius-pulsar/src/Amoebius/Pulsar/Dedup.hs` consumer-side fold lifted
-onto the Phase-15 `io-classes` `Env` interface — target paths, not yet built.
-**Blocked by**: Sprint 35.4
-(the built at-least-once + dedup client); the Phase 15 gate (the `io-classes` seams + the modeled Pulsar).
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+and the unstable-key twin replays red.
+**Implementation**: `amoebius-pulsar/test/PulsarDedupSimSpec.hs`, driving the production
+`amoebius-pulsar/src/Amoebius/Pulsar/Dedup.hs` fold — delivered and validated.
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the real dedup fold — keyed by a replication-surviving work-id — runs under
 `IOSimPOR` against the modeled Pulsar with injected reorder, duplicate, crash-mid-acknowledge, and
 partition; the suite asserts the **exactly-once effect** invariant (R3): on every explored schedule, no
@@ -524,7 +548,7 @@ gate — the interleaving a single-threaded test cannot reach.
    identically under its seed.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. Modeled-broker fidelity is discharged only to the extent covered by the Register-3 live run.
 
 ## Documentation Requirements
 

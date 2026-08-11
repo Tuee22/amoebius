@@ -1,0 +1,17 @@
+capability=ObjectStore
+resource=assets
+provider=Canonical
+product=MinIO
+shape=Distributed(3)
+object|objectstore/assets/config|ConfigMap|provider-config|-
+object|objectstore/assets/discovery|Service|member-discovery|-
+object|objectstore/assets/member-0|StatefulSet|member|objectstore/assets/controller-0
+object|objectstore/assets/member-1|StatefulSet|member|objectstore/assets/controller-1
+object|objectstore/assets/member-2|StatefulSet|member|objectstore/assets/controller-2
+object|objectstore/assets/quorum-policy|PodDisruptionBudget|quorum-policy|-
+object|objectstore/assets/service|Service|stable-endpoint|-
+execution|objectstore/assets/member-0|StatefulSet
+execution|objectstore/assets/member-1|StatefulSet
+execution|objectstore/assets/member-2|StatefulSet
+intent=ObjectStoreProducerIntent ApplicationBuckets "assets"
+intent=ObjectStoreGatewayIntent "assets"

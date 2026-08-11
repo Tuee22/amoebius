@@ -1,0 +1,4 @@
+operator=accounting-effect-swap
+target=Amoebius.Store.Budget
+change=credit-cas-loser-bytes-before-observed-gc-delete
+expected=pre-horizon-orphan-peak-mismatch

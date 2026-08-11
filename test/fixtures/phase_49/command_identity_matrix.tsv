@@ -1,0 +1,5 @@
+case	tenant	command_id	nonce	input	expected	effects
+first	tenant-a	phase0-command-49	phase0-nonce-49	explain content addressing	new-ready-handle	1
+exact-resend	tenant-a	phase0-command-49	phase0-nonce-49	explain content addressing	original-ready-handle	0
+changed-input	tenant-a	phase0-command-49	phase0-nonce-49	explain storage addressing	IdempotencyConflict	0
+foreign-scope	tenant-b	phase0-command-49	phase0-nonce-49	explain content addressing	ArtifactUnavailable	0

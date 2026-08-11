@@ -1,0 +1,1 @@
+{ secretRef : Text, testSimulation : Bool }

@@ -1,0 +1,1 @@
+M-raw-sha256-seal: replace Argon2id plus authenticated encryption with raw SHA-256 password obfuscation.

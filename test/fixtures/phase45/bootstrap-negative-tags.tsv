@@ -1,0 +1,9 @@
+case	expected_tag
+guarded-before-managed-ready	ManagedCapacityNotReady
+omitted-addon	BootstrapAddonMissing
+old-uid-present	BootstrapOldUidPresent
+replacement-without-reservation	BootstrapReplacementReservationMissing
+second-default-scheduler-exception	DefaultSchedulerExceptionCardinality
+stale-lease-resource-version	HandoffResourceVersionStale
+lease-object-uid-changed	HandoffObjectUidChanged
+child-acquire-before-fresh-absence	HandoffReleasedLeaseRequired

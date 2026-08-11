@@ -1,0 +1,5 @@
+case	authenticated_scope	artifact_scope	pointer_committed	typed_ready_conversion	expected	dispatches	reads	writes
+owned-ready	tenant-a	tenant-a	true	true	ReadyArtifactHandle	1	1	1
+foreign-ready	tenant-b	tenant-a	true	false	ArtifactUnavailable	0	0	0
+owned-staged	tenant-a	tenant-a	false	false	ArtifactNotReady	0	0	0
+forged-wire	tenant-a	tenant-a	false	false	ArtifactNotReady	0	0	0

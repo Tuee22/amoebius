@@ -1,0 +1,2 @@
+operator: render a finite universal quantifier as existential
+expected: explorer/TLC safety verdict or fingerprint set diverges

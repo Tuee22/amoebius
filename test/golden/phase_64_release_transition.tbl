@@ -1,0 +1,6 @@
+ordinal event release authority
+1 disconnect A pre-fault
+2 isolate-zone-b A none
+3 migrate-offline-records B none
+4 reconnect B post-fault-current
+5 replay B post-fault-current

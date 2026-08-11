@@ -21,6 +21,8 @@ client that speaks to the bus, owned by [pulsar_client_doctrine.md](./pulsar_cli
 
 </details>
 
+> **Historical result (invalidated).** Phase-run and implementation-result statements predate the 2026-08-11 reopen unless the owning phase is Done; target doctrine remains normative, and current state is in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+
 ## Contents
 - [1. Why this doctrine exists: two ways to say "run this elsewhere"](#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)
 - [2. The two topologies](#2-the-two-topologies)

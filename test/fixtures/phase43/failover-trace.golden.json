@@ -1,0 +1,13 @@
+{
+  "actions": [
+    "ActiveCrash",
+    "ColdSeed",
+    "PromoteSurvivor",
+    "RepointFailoverDns",
+    "BoundedRebind",
+    "Heal",
+    "MergeConverge"
+  ],
+  "branch": "failover",
+  "terminalPhase": "Done"
+}

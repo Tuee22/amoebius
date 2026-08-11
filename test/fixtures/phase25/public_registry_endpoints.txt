@@ -1,0 +1,8 @@
+registry-1.docker.io
+auth.docker.io
+production.cloudflare.docker.com
+docker.io
+quay.io
+cdn.quay.io
+ghcr.io
+pkg-containers.githubusercontent.com

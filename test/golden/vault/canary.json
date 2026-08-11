@@ -1,0 +1,6 @@
+{
+  "mount": "secret",
+  "path": "amoebius/canary",
+  "field": "token",
+  "value": "phase29-canary-32-byte-value!!!!"
+}

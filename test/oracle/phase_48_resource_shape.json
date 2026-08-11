@@ -1,0 +1,18 @@
+{
+  "schema": "amoebius.phase48.cache-resource-shape.v1",
+  "ownerPods": 1,
+  "clientPods": 2,
+  "simultaneousPodSlots": 3,
+  "cacheBudgetBytes": 160,
+  "emptyDirSizeLimitBytes": 192,
+  "ephemeralRequestBytes": 224,
+  "writableAndLogHeadroomBytes": 32,
+  "expectedVerdicts": {
+    "exactFit": "Right",
+    "overBudget": "CachePeakExceedsBudget",
+    "digestSizeConflict": "ResidentSizeConflict",
+    "earlyDeletionCredit": "DeletionNotObserved",
+    "concurrencyOverflow": "CachePeakExceedsBudget",
+    "ephemeralUnderReserved": "OwnerEphemeralUnderReserved"
+  }
+}

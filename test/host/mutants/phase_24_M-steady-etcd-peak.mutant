@@ -1,0 +1,3 @@
+operator=drop WAL overshoot, preallocation, snapshot temporary bytes, and defrag copy
+locus=Amoebius.Capacity.Etcd.provisionEtcdDemand
+expected=one-byte transition fixture turns red

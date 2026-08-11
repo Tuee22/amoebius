@@ -1,0 +1,6 @@
+case	plan	step	event	input	expected_state	expected_effect
+single-submit	plan-single-v1	1	edit	fresh-challenge	editing	-
+single-submit	plan-single-v1	2	submit	-	pending	POST /ui/action/submit
+single-cancel	plan-single-v1	1	cancel	-	cancelled	POST /ui/action/cancel
+named-link	plan-single-v1	1	open-docs	-	home	NAVIGATE docs
+multi-choose	plan-multi-v1	1	choose	opaque-choice	ready	POST /ui/scope

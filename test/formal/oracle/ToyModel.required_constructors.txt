@@ -1,0 +1,12 @@
+BoolLiteral
+ArithmeticComparison
+FiniteSetMembership
+FiniteQuantifier
+FunctionLiteral
+FunctionUpdate
+FunctionApplication
+WeakFair
+StrongFair
+Always
+Eventually
+LeadsTo

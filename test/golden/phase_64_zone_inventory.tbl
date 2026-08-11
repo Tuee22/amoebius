@@ -1,0 +1,10 @@
+component zone-a zone-b zone-c selected_zone_members
+ui-server 1 1 1 ui-b
+projector 1 1 1 projector-b
+redis 1 1 1 redis-b
+sentinel 1 1 1 sentinel-b
+keycloak 1 1 1 keycloak-b
+gateway 1 1 1 gateway-b
+pulsar 1 1 1 pulsar-b
+sql 1 1 1 sql-b
+minio 1 1 1 minio-b

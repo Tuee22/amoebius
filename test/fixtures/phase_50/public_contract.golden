@@ -1,0 +1,3 @@
+ModelInteractor.request = { requestId : Text, readyArtifact : OpaqueHandle, input : Text }
+ModelInteractor.response = { requestId : Text, result : Text }
+No provider coordinate, model path, cache path, credential, or raw URL is public.

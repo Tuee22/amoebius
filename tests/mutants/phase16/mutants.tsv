@@ -1,0 +1,7 @@
+mutant	target	token
+add_raw_js_arm	raw_browser_escape.dhall	RawBrowserEscape
+add_raw_url_arm	raw_external_link_url.dhall	RawExternalLinkUrl
+M-drop-bound-check	unbounded_collection.dhall	UnboundedCollection
+M-first-id-wins	duplicate_qualified_id.dhall	DuplicateQualifiedId
+M-skip-exhaustiveness	non_exhaustive_event.dhall	NonExhaustiveEvent
+M-swap-port-contract	port_type_mismatch.dhall	PortTypeMismatch

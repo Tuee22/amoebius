@@ -1,0 +1,2058 @@
+cabal-version: 3.12
+name: amoebius
+version: 0.1.0.0
+build-type: Simple
+license: Apache-2.0
+
+flag phase6-mutant
+  description: Build the committed Phase-6 broken-decision mutant
+  default: False
+  manual: True
+
+flag phase6-normalization-mutant
+  description: Build the committed Phase-6 dropped-resource-normalization mutant
+  default: False
+  manual: True
+
+flag phase25-bootstrap-domain-expansion-mutant
+  description: Build the committed Phase-25.2 bootstrap-domain-expansion mutant
+  default: False
+  manual: True
+
+flag phase25-handoff-without-equality-mutant
+  description: Build the committed Phase-25.2 handoff-without-equality mutant
+  default: False
+  manual: True
+
+flag phase25-record-before-push-mutant
+  description: Build the committed Phase-25.3 record-before-push mutant
+  default: False
+  manual: True
+
+flag phase25-noop-egress-policy-mutant
+  description: Build the committed Phase-25.4 unenforced kindnet policy mutant
+  default: False
+  manual: True
+
+flag phase26-wait-for-ready-pure-mutant
+  description: Build the committed Phase-26 dropped readiness observation mutant
+  default: False
+  manual: True
+
+flag phase26-generation-after-diff-mutant
+  description: Build the committed Phase-26 generation stamped after diff mutant
+  default: False
+  manual: True
+
+flag phase26-label-only-delete-mutant
+  description: Build the committed Phase-26 label-only delete authority mutant
+  default: False
+  manual: True
+
+flag phase26-healthy-overbound-child-mutant
+  description: Build the committed Phase-26 healthy CR over-bound child mutant
+  default: False
+  manual: True
+
+flag phase27-collapsed-readiness-mutant
+  description: Build the committed Phase-27 collapsed scheduler-readiness mutant
+  default: False
+  manual: True
+
+flag phase27-stage-drop-mutant
+  description: Build the committed Phase-27 generic-SSA-before-cutover mutant
+  default: False
+  manual: True
+
+flag phase27-default-scheduler-bypass-mutant
+  description: Build the committed Phase-27 managed-node default-scheduler bypass mutant
+  default: False
+  manual: True
+
+flag phase27-bind-before-reservation-cas-mutant
+  description: Build the committed Phase-27 Binding-before-reservation-CAS mutant
+  default: False
+  manual: True
+
+flag phase27-numeric-add-mutant
+  description: Build the committed Phase-27 numeric-add instead of whole-ledger-refold mutant
+  default: False
+  manual: True
+
+flag phase27-same-uid-double-debit-mutant
+  description: Build the committed Phase-27 same-UID double-debit mutant
+  default: False
+  manual: True
+
+flag phase27-bound-deleted-restart-mutant
+  description: Build the committed Phase-27 Bound-record-deleted-on-restart mutant
+  default: False
+  manual: True
+
+flag phase28-skip-durable-aggregate-mutant
+  description: Build the Phase-28 skipped durable aggregate mutant
+  default: False
+  manual: True
+
+flag phase28-sum-unequal-ordinals-mutant
+  description: Build the Phase-28 unequal ordinal sum mutant
+  default: False
+  manual: True
+
+flag phase28-uniform-before-allocation-mutant
+  description: Build the Phase-28 pre-allocation uniformity mutant
+  default: False
+  manual: True
+
+flag phase28-collapse-backing-debits-mutant
+  description: Build the Phase-28 collapsed per-backing debit mutant
+  default: False
+  manual: True
+
+flag phase28-reclaim-delete-mutant
+  description: Build the Phase-28 reclaim Delete mutant
+  default: False
+  manual: True
+
+flag phase28-no-rebind-mutant
+  description: Build the Phase-28 stale claimRef rebind mutant
+  default: False
+  manual: True
+
+flag phase28-raw-host-directory-mutant
+  description: Build the Phase-28 raw host directory mutant
+  default: False
+  manual: True
+
+flag phase28-cutover-before-verify-mutant
+  description: Build the Phase-28 migration cutover-before-verify mutant
+  default: False
+  manual: True
+
+flag phase28-credit-before-cleanup-mutant
+  description: Build the Phase-28 migration credit-before-cleanup mutant
+  default: False
+  manual: True
+
+flag phase28-fake-verify-mutant
+  description: Build the Phase-28 migration fake verification mutant
+  default: False
+  manual: True
+
+flag phase28-soft-delete-mutant
+  description: Build the Phase-28 soft cluster-delete mutant
+  default: False
+  manual: True
+
+flag phase28-seed-marker-mutant
+  description: Build the Phase-28 post-recreate marker seeding mutant
+  default: False
+  manual: True
+
+flag phase29-reinit-existing-mutant
+  description: Build the Phase-29 reinitialize-existing-Vault mutant
+  default: False
+  manual: True
+
+flag phase29-raw-sha256-seal-mutant
+  description: Build the Phase-29 raw-SHA256 unlock envelope mutant
+  default: False
+  manual: True
+
+flag phase29-delete-storage-term-mutant
+  description: Build the Phase-29 omitted Vault storage population mutant
+  default: False
+  manual: True
+
+flag phase29-unbounded-audit-mutant
+  description: Build the Phase-29 unbounded file audit mutant
+  default: False
+  manual: True
+
+flag phase29-sealed-issuance-mutant
+  description: Build the Phase-29 PKI issuance-while-sealed mutant
+  default: False
+  manual: True
+
+flag phase29-unrelated-leaf-mutant
+  description: Build the Phase-29 unrelated leaf signer mutant
+  default: False
+  manual: True
+
+flag phase29-preminted-token-mutant
+  description: Build the Phase-29 pre-minted token client mutant
+  default: False
+  manual: True
+
+flag phase29-error-collapse-mutant
+  description: Build the Phase-29 error-tag collapse and path-leak mutant
+  default: False
+  manual: True
+
+flag phase29-stale-read-mutant
+  description: Build the Phase-29 stale secret read without freshness mutant
+  default: False
+  manual: True
+
+flag phase30-registry-fs-driver-mutant
+  description: Build the Phase-30 registry filesystem-driver mutant
+  default: False
+  manual: True
+
+flag phase30-offload-time-only-mutant
+  description: Build the Phase-30 time-only Pulsar offload mutant
+  default: False
+  manual: True
+
+flag phase30-logical-as-physical-mutant
+  description: Build the Phase-30 logical-as-physical MinIO storage mutant
+  default: False
+  manual: True
+
+flag phase30-drop-fault-scenario-mutant
+  description: Build the Phase-30 dropped MinIO healing-scenario mutant
+  default: False
+  manual: True
+
+flag phase30-sum-ordinals-mutant
+  description: Build the Phase-30 unequal-ordinal sum mutant
+  default: False
+  manual: True
+
+flag phase30-content-immediate-gc-mutant
+  description: Build the Phase-30 immediate failed-write GC mutant
+  default: False
+  manual: True
+
+flag phase31-patroni-async-default-mutant
+  description: Build the Phase-31 non-strict Patroni configuration mutant
+  default: False
+  manual: True
+
+flag phase31-dag-drop-edge-mutant
+  description: Build the Phase-31 Percona-to-Postgres edge deletion mutant
+  default: False
+  manual: True
+
+flag phase31-dag-inject-cycle-mutant
+  description: Build the Phase-31 readiness cycle mutant
+  default: False
+  manual: True
+
+flag phase31-redis-pvc-mutant
+  description: Build the Phase-31 Redis persistence mutant
+  default: False
+  manual: True
+
+flag phase31-redis-unbounded-buffer-mutant
+  description: Build the Phase-31 unbounded Redis output buffer mutant
+  default: False
+  manual: True
+
+flag phase31-redis-public-image-mutant
+  description: Build the Phase-31 public Redis image mutant
+  default: False
+  manual: True
+
+flag phase31-redis-receipt-authority-mutant
+  description: Build the Phase-31 Redis durable receipt authority mutant
+  default: False
+  manual: True
+
+flag phase31-fixed-prometheus-mutant
+  description: Build the Phase-31 fixed Prometheus storage mutant
+  default: False
+  manual: True
+
+flag phase32-drop-oidc-mutant
+  description: Build the Phase-32 missing OIDC guard mutant
+  default: False
+  manual: True
+
+flag phase32-netpol-swap-mutant
+  description: Build the Phase-32 dropped/undeclared NetworkPolicy edge mutant
+  default: False
+  manual: True
+
+flag phase32-delete-noop-mutant
+  description: Build the Phase-32 cluster-delete no-op witness mutant
+  default: False
+  manual: True
+
+flag phase32-drop-origin-mutant
+  description: Build the Phase-32 missing WebSocket Origin check mutant
+  default: False
+  manual: True
+
+flag phase32-nonce-replay-mutant
+  description: Build the Phase-32 reusable WebSocket nonce mutant
+  default: False
+  manual: True
+
+flag phase32-direct-backend-mutant
+  description: Build the Phase-32 directly published WebSocket backend mutant
+  default: False
+  manual: True
+
+flag phase33-enact-noop-mutant
+  description: Build the Phase-33 dropped reconcile enactment mutant
+  default: False
+  manual: True
+
+flag phase33-effect-swap-mutant
+  description: Build the Phase-33 harness-attributed effect swap mutant
+  default: False
+  manual: True
+
+flag phase33-persist-password-mutant
+  description: Build the Phase-33 operator-password persistence mutant
+  default: False
+  manual: True
+
+flag phase33-reach-any-mutant
+  description: Build the Phase-33 seal-critical reach guard weakening mutant
+  default: False
+  manual: True
+
+flag phase33-admit-unproven-secret-mutant
+  description: Build the Phase-33 unproven SecretRef admission mutant
+  default: False
+  manual: True
+
+flag phase34-drop-provider-arm-mutant
+  description: Build the Phase-34 dropped Pulsar provider-arm mutant
+  default: False
+  manual: True
+
+flag phase34-collapse-tenant-key-mutant
+  description: Build the Phase-34 unqualified tenant-key mutant
+  default: False
+  manual: True
+
+flag phase36-drop-user-predicate-mutant
+  description: Build the Phase-36 dropped subject/owner predicate mutant
+  default: False
+  manual: True
+
+flag phase36-accept-body-tenant-mutant
+  description: Build the Phase-36 caller-body tenant authority mutant
+  default: False
+  manual: True
+
+flag phase38-drop-owner-key-mutant
+  description: Build the Phase-38 compaction key without its owner coordinate
+  default: False
+  manual: True
+
+flag phase38-drop-owner-subscription-mutant
+  description: Build the Phase-38 subscription identity without its owner coordinate
+  default: False
+  manual: True
+
+flag phase38-drop-receipt-command-id-mutant
+  description: Build the Phase-38 receipt key without its command coordinate
+  default: False
+  manual: True
+
+flag phase40-accept-stale-authority-digest-mutant
+  description: Accept a stale authority digest before UI action dispatch
+  default: False
+  manual: True
+
+flag phase40-publish-mixed-plan-pair-mutant
+  description: Publish a client/server pair from different UI program revisions
+  default: False
+  manual: True
+
+flag phase40-rebuild-runtime-per-program-mutant
+  description: Derive a program-specific runtime image instead of reusing the generic image
+  default: False
+  manual: True
+
+flag phase41-missing-peer-key-mutant
+  description: Replace an absent WireGuard SecretRef with a default key
+  default: False
+  manual: True
+
+flag phase41-hub-no-endpoint-mutant
+  description: Drop the gateway-role Endpoint from rendered spoke config
+  default: False
+  manual: True
+
+flag phase41-drop-resource-envelope-mutant
+  description: Authorize fabric effects without a validated resource token
+  default: False
+  manual: True
+
+flag phase41-early-listener-replacement-mutant
+  description: Start the replacement fabric listener before observed old-process exit
+  default: False
+  manual: True
+
+flag phase42-classifier-default-confluent-mutant
+  description: Admit an unclassified cross-cluster invariant as confluent
+  default: False
+  manual: True
+
+flag phase42-project-identity-mutant
+  description: Deliver the whole parent forest instead of the selected child subtree
+  default: False
+  manual: True
+
+flag phase42-drop-parallel-executor-mutant
+  description: Charge only one of two simultaneously runnable Pulumi executors
+  default: False
+  manual: True
+
+flag phase43-verify-caught-up-stub-mutant
+  description: Admit a planned handover before target watermark catch-up
+  default: False
+  manual: True
+
+flag phase43-promote-before-fence-mutant
+  description: Promote a failover survivor without freshness or fencing evidence
+  default: False
+  manual: True
+
+flag phase48-content-order-leak-mutant
+  description: Preserve input field order in canonical content encoding
+  default: False
+  manual: True
+
+flag phase48-const-fingerprint-mutant
+  description: Replace the observed substrate fingerprint with a constant
+  default: False
+  manual: True
+
+flag phase48-rng-workerid-mutant
+  description: Mix worker assignment into the stream seed
+  default: False
+  manual: True
+
+flag phase48-const-output-mutant
+  description: Replace the seeded stage with a constant output
+  default: False
+  manual: True
+
+flag phase48-fixed-marker-mutant
+  description: Replace resolved engine bytes with a fixed marker
+  default: False
+  manual: True
+
+flag phase48-prune-noop-mutant
+  description: Drop cache eviction while claiming pruning succeeded
+  default: False
+  manual: True
+
+flag phase48-one-byte-short-mutant
+  description: Truncate the resolved engine payload by one byte
+  default: False
+  manual: True
+
+library
+  exposed-modules:
+      Amoebius.ToolchainPin
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.21 && <4.22
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+library formal-model
+  exposed-modules:
+      Amoebius.Formal.Model
+      Amoebius.Formal.Interpret
+      Amoebius.Formal.Explore
+      Amoebius.Formal.EmitTLA
+      Amoebius.Formal.ToyModel
+      Amoebius.Formal.GatewayMigration
+      Amoebius.Multicluster.StructuralFit
+      Amoebius.Multicluster.GatewayMigration
+      Amoebius.Cli.Formal
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.21 && <4.22,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+library dsl-core
+  visibility: public
+  exposed-modules:
+      Amoebius.Dsl.Cbor
+      Amoebius.Cli
+      Amoebius.Capacity.Accelerator
+      Amoebius.Capacity.Composed
+      Amoebius.Capacity.Etcd
+      Amoebius.Capacity.Execution
+      Amoebius.Capacity.Fold
+      Amoebius.Capacity.Growable
+      Amoebius.Capacity.HostReservation
+      Amoebius.Capacity.NodeLocalStorage
+      Amoebius.Capacity.ProviderRoot
+      Amoebius.Capacity.PulumiExecution
+      Amoebius.Capacity.Provision
+      Amoebius.Capacity.RenderSource
+      Amoebius.Capacity.RuntimeStorage
+      Amoebius.Capacity.Scheduler
+      Amoebius.Capacity.ServiceStorage
+      Amoebius.Capacity.Storage
+      Amoebius.Capacity.StorageGeometry
+      Amoebius.Capacity.StorageScaling
+      Amoebius.Capacity.Types
+      Amoebius.Capability.Binding
+      Amoebius.Capability.Engine
+      Amoebius.Capability.Types
+      Amoebius.Capability.Provisioned
+      Amoebius.Dsl.Decision
+      Amoebius.Dsl.Decode
+      Amoebius.Dsl.AstCheck
+      Amoebius.Dsl.Error
+      Amoebius.Dsl.Foreclosure
+      Amoebius.Dsl.Ref
+      Amoebius.Dsl.SmartConstructors
+      Amoebius.Dsl.SanctionedApi
+      Amoebius.Dsl.Topology
+      Amoebius.Dsl.Types
+      Amoebius.Dsl.ChildInForceSpec
+      Amoebius.Manifest
+      Amoebius.Manifest.K8sObject
+      Amoebius.Manifest.Types
+      Amoebius.Exec.Tool
+      Amoebius.Exec.Boundary
+      Amoebius.Kernel.Chain
+      Amoebius.Kernel.Descent
+      Amoebius.Kernel.Plan
+      Amoebius.Kernel.Step
+      Amoebius.Kernel.ContentAddress
+      Amoebius.Kernel.ExperimentHash
+      Amoebius.Kernel.Rng
+      Amoebius.Kernel.Determinism
+      Amoebius.Jit.Cache
+      Amoebius.Jit.CacheBudget
+      Amoebius.Jit.Resolver
+      Amoebius.Jit.CacheOwner
+      Amoebius.Sim.Env
+      Amoebius.Sim.Fakes.ApiServer
+      Amoebius.Sim.Fakes.Clock
+      Amoebius.Sim.Fakes.MinIO
+      Amoebius.Sim.Fakes.Pulsar
+      Amoebius.Sim.Fakes.Route53
+      Amoebius.Sim.Fakes.Vault
+      Amoebius.Sim.Interp.Real
+      Amoebius.Sim.Interp.Sim
+      Amoebius.Sim.Reconcile
+      Amoebius.Ui.Check
+      Amoebius.Ui.Bind
+      Amoebius.Ui.ExternalLinkCatalog
+      Amoebius.Ui.Source
+      Amoebius.Ui.Security.Flow
+      Amoebius.Ui.Security.Scope
+      Amoebius.Ui.Security.Authorization
+      Amoebius.Ui.Compile.ClientPlan
+      Amoebius.Ui.Compile.ServerPlan
+      Amoebius.Ui.Compile.Manifest
+      Amoebius.Ui.Compile.Demand
+      Amoebius.Ui.Realtime.Class
+      Amoebius.Ui.Realtime.Envelope
+      Amoebius.Ui.Projection.OwnerKey
+      Amoebius.Ui.Projection.StreamCursor
+      Amoebius.Ui.Projection.Watermark
+      Amoebius.Ui.Projection.ReceiptFold
+      Amoebius.Ui.Projection.Worker
+      Amoebius.Ui.Release.ArtifactManifest
+      Amoebius.Ui.Release.Compatibility
+      Amoebius.Ui.Release.PlanPair
+      Amoebius.Ui.Release.Projection
+      Amoebius.Ui.Server.Dispatch
+      Amoebius.Ui.Server.Main
+      Amoebius.Ui.Server.RequestContext
+      Amoebius.Ui.Server.ScopedAuthority
+      Amoebius.Ui.Server.SecurityHeaders
+      Amoebius.Ui.Server.WebSocket
+      Amoebius.Host.Substrate
+      Amoebius.Host.HostTool
+      Amoebius.Host.Ensure
+      Amoebius.Host.Context
+      Amoebius.Cluster.Kind
+      Amoebius.Cluster.Inventory
+      Amoebius.Cluster.Bootstrap
+      Amoebius.Image.Artifact
+      Amoebius.Image.BakeInventory
+      Amoebius.Image.BootstrapRegistry
+      Amoebius.Image.BuildAdmission
+      Amoebius.Image.Build
+      Amoebius.Image.BuildRuntime
+      Amoebius.Image.Gate
+      Amoebius.Image.NodeLoad
+      Amoebius.Image.Publish
+      Amoebius.Image.Ref
+      Amoebius.Image.Registry
+      Amoebius.Image.RenderDockerfile
+      Amoebius.Image.Resolver
+      Amoebius.Manifest.Actions
+      Amoebius.Manifest.Apply
+      Amoebius.Manifest.Authority
+      Amoebius.Manifest.Diff
+      Amoebius.Manifest.Enact
+      Amoebius.Manifest.Preflight
+      Amoebius.Manifest.Reconcile
+      Amoebius.Manifest.Wait
+      Amoebius.Execution.Observe
+      Amoebius.Execution.Normalize
+      Amoebius.Execution.RuntimeStorage
+      Amoebius.Execution.SerialOnDelete
+      Amoebius.Execution.AcceleratorRelease
+      Amoebius.Execution.HostTransition
+      Amoebius.Execution.JobTerminal
+      Amoebius.Storage.ScalingAction
+      Amoebius.Storage.StorageClass
+      Amoebius.Storage.RetainedPV
+      Amoebius.Storage.HostVolume
+      Amoebius.Storage.RetainedScaling
+      Amoebius.Storage.Rebind
+      Amoebius.Vault.Error
+      Amoebius.Vault.SecretRef
+      Amoebius.Vault.Init
+      Amoebius.Vault.Unseal
+      Amoebius.Vault.Seal
+      Amoebius.Vault.Pki
+      Amoebius.Vault.Client
+      Amoebius.Fabric.Keys
+      Amoebius.Fabric.WgRender
+      Amoebius.Fabric.WgReconcile
+      Amoebius.Multicluster.Spawn
+      Amoebius.Multicluster.GeoReplication
+      Amoebius.Multicluster.ConfluenceClass
+      Amoebius.Multicluster.ChildUnseal
+      Amoebius.Multicluster.SecretInjection
+      Amoebius.Multicluster.PlannedHandover
+      Amoebius.Multicluster.PromotionGate
+      Amoebius.Multicluster.DnsRepoint
+      Amoebius.Multicluster.ClientRebind
+      Amoebius.Multicluster.Teardown
+      Amoebius.Multicluster.Pushback
+      Amoebius.Vault.TransitChildKey
+      Amoebius.Pulumi.Backend.EncryptedMinio
+      Amoebius.Platform.Types
+      Amoebius.Platform.LoadBalancer
+      Amoebius.Platform.Minio
+      Amoebius.Platform.Registry
+      Amoebius.Platform.Pulsar
+      Amoebius.Platform.Backbone
+      Amoebius.Platform.Postgres
+      Amoebius.Platform.Redis
+      Amoebius.Platform.Observability
+      Amoebius.Platform.Services
+      Amoebius.Platform.BringUp
+      Amoebius.Platform.Edge
+      Amoebius.Platform.Keycloak
+      Amoebius.Platform.Tls
+      Amoebius.Manifest.NetworkPolicy
+      Amoebius.Manifest.Delete
+      Amoebius.ControlPlane.Singleton
+      Amoebius.ControlPlane.AuthorityHandoff
+      Amoebius.ControlPlane.Reconcile
+      Amoebius.ControlPlane.Deploy
+      Amoebius.ControlPlane.AdminApi
+      Amoebius.Tenancy.ProviderProjection
+      Amoebius.Tenancy.ProviderTransaction
+      Amoebius.Tenancy.Provider.Keycloak
+      Amoebius.Tenancy.Provider.Vault
+      Amoebius.Tenancy.Provider.Pulsar
+      Amoebius.Tenancy.Provider.Minio
+      Amoebius.Tenancy.Provider.KubernetesApi
+      Amoebius.Tenancy.Provider.Postgres
+      Amoebius.Scheduler.Ledger
+      Amoebius.Scheduler.Readiness
+      Amoebius.Admission.ExecutionIdentity
+      Amoebius.Scheduler.Placement
+      Amoebius.Scheduler.Reservation
+      Amoebius.Scheduler.Binding
+      Amoebius.Scheduler.Recovery
+      Amoebius.Scheduler.Loop
+  other-modules:
+      Amoebius.Manifest.Render
+      Amoebius.Manifest.RenderAll
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius-pulumi,
+      aeson ==2.2.5.0,
+      aeson-pretty ==0.8.11,
+      base64-bytestring ==1.2.1.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      crypton ==1.0.6,
+      cryptohash-sha256 ==0.11.102.1,
+      deepseq >=1.5 && <1.6,
+      dhall ==1.42.3,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      io-classes ==1.10.1.0,
+      io-sim ==1.10.1.0,
+      memory ==0.18.0,
+      network ==3.1.4.0,
+      serialise ==0.2.6.1,
+      text >=2.1 && <2.2,
+      time >=1.12 && <1.15,
+      typed-process ==0.2.13.0
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(phase6-mutant)
+    cpp-options: -DPHASE6_MUTANT
+  if flag(phase6-normalization-mutant)
+    cpp-options: -DPHASE6_NORMALIZATION_MUTANT
+  if flag(phase25-bootstrap-domain-expansion-mutant)
+    cpp-options: -DPHASE25_BOOTSTRAP_DOMAIN_EXPANSION_MUTANT
+  if flag(phase25-handoff-without-equality-mutant)
+    cpp-options: -DPHASE25_HANDOFF_WITHOUT_EQUALITY_MUTANT
+  if flag(phase25-record-before-push-mutant)
+    cpp-options: -DPHASE25_RECORD_BEFORE_PUSH_MUTANT
+  if flag(phase25-noop-egress-policy-mutant)
+    cpp-options: -DPHASE25_NOOP_EGRESS_POLICY_MUTANT
+  if flag(phase26-wait-for-ready-pure-mutant)
+    cpp-options: -DPHASE26_WAIT_FOR_READY_PURE_MUTANT
+  if flag(phase26-generation-after-diff-mutant)
+    cpp-options: -DPHASE26_GENERATION_AFTER_DIFF_MUTANT
+  if flag(phase26-label-only-delete-mutant)
+    cpp-options: -DPHASE26_LABEL_ONLY_DELETE_MUTANT
+  if flag(phase26-healthy-overbound-child-mutant)
+    cpp-options: -DPHASE26_HEALTHY_OVERBOUND_CHILD_MUTANT
+  if flag(phase27-collapsed-readiness-mutant)
+    cpp-options: -DPHASE27_COLLAPSED_READINESS_MUTANT
+  if flag(phase27-stage-drop-mutant)
+    cpp-options: -DPHASE27_STAGE_DROP_MUTANT
+  if flag(phase27-default-scheduler-bypass-mutant)
+    cpp-options: -DPHASE27_DEFAULT_SCHEDULER_BYPASS_MUTANT
+  if flag(phase27-bind-before-reservation-cas-mutant)
+    cpp-options: -DPHASE27_BIND_BEFORE_RESERVATION_CAS_MUTANT
+  if flag(phase27-numeric-add-mutant)
+    cpp-options: -DPHASE27_NUMERIC_ADD_MUTANT
+  if flag(phase27-same-uid-double-debit-mutant)
+    cpp-options: -DPHASE27_SAME_UID_DOUBLE_DEBIT_MUTANT
+  if flag(phase27-bound-deleted-restart-mutant)
+    cpp-options: -DPHASE27_BOUND_DELETED_RESTART_MUTANT
+  if flag(phase28-skip-durable-aggregate-mutant)
+    cpp-options: -DPHASE28_SKIP_DURABLE_AGGREGATE_MUTANT
+  if flag(phase28-sum-unequal-ordinals-mutant)
+    cpp-options: -DPHASE28_SUM_UNEQUAL_ORDINALS_MUTANT
+  if flag(phase28-uniform-before-allocation-mutant)
+    cpp-options: -DPHASE28_UNIFORM_BEFORE_ALLOCATION_MUTANT
+  if flag(phase28-collapse-backing-debits-mutant)
+    cpp-options: -DPHASE28_COLLAPSE_BACKING_DEBITS_MUTANT
+  if flag(phase28-reclaim-delete-mutant)
+    cpp-options: -DPHASE28_RECLAIM_DELETE_MUTANT
+  if flag(phase28-no-rebind-mutant)
+    cpp-options: -DPHASE28_NO_REBIND_MUTANT
+  if flag(phase28-raw-host-directory-mutant)
+    cpp-options: -DPHASE28_RAW_HOST_DIRECTORY_MUTANT
+  if flag(phase28-cutover-before-verify-mutant)
+    cpp-options: -DPHASE28_CUTOVER_BEFORE_VERIFY_MUTANT
+  if flag(phase28-credit-before-cleanup-mutant)
+    cpp-options: -DPHASE28_CREDIT_BEFORE_CLEANUP_MUTANT
+  if flag(phase28-fake-verify-mutant)
+    cpp-options: -DPHASE28_FAKE_VERIFY_MUTANT
+  if flag(phase28-soft-delete-mutant)
+    cpp-options: -DPHASE28_SOFT_DELETE_MUTANT
+  if flag(phase28-seed-marker-mutant)
+    cpp-options: -DPHASE28_SEED_MARKER_MUTANT
+  if flag(phase29-reinit-existing-mutant)
+    cpp-options: -DPHASE29_REINIT_EXISTING_MUTANT
+  if flag(phase29-raw-sha256-seal-mutant)
+    cpp-options: -DPHASE29_RAW_SHA256_SEAL_MUTANT
+  if flag(phase29-delete-storage-term-mutant)
+    cpp-options: -DPHASE29_DELETE_STORAGE_TERM_MUTANT
+  if flag(phase29-unbounded-audit-mutant)
+    cpp-options: -DPHASE29_UNBOUNDED_AUDIT_MUTANT
+  if flag(phase29-sealed-issuance-mutant)
+    cpp-options: -DPHASE29_SEALED_ISSUANCE_MUTANT
+  if flag(phase29-unrelated-leaf-mutant)
+    cpp-options: -DPHASE29_UNRELATED_LEAF_MUTANT
+  if flag(phase29-preminted-token-mutant)
+    cpp-options: -DPHASE29_PREMINTED_TOKEN_MUTANT
+  if flag(phase29-error-collapse-mutant)
+    cpp-options: -DPHASE29_ERROR_COLLAPSE_MUTANT
+  if flag(phase29-stale-read-mutant)
+    cpp-options: -DPHASE29_STALE_READ_MUTANT
+  if flag(phase30-registry-fs-driver-mutant)
+    cpp-options: -DPHASE30_REGISTRY_FS_DRIVER_MUTANT
+  if flag(phase30-offload-time-only-mutant)
+    cpp-options: -DPHASE30_OFFLOAD_TIME_ONLY_MUTANT
+  if flag(phase30-logical-as-physical-mutant)
+    cpp-options: -DPHASE30_LOGICAL_AS_PHYSICAL_MUTANT
+  if flag(phase30-drop-fault-scenario-mutant)
+    cpp-options: -DPHASE30_DROP_FAULT_SCENARIO_MUTANT
+  if flag(phase30-sum-ordinals-mutant)
+    cpp-options: -DPHASE30_SUM_ORDINALS_MUTANT
+  if flag(phase30-content-immediate-gc-mutant)
+    cpp-options: -DPHASE30_CONTENT_IMMEDIATE_GC_MUTANT
+  if flag(phase31-patroni-async-default-mutant)
+    cpp-options: -DPHASE31_PATRONI_ASYNC_DEFAULT_MUTANT
+  if flag(phase31-dag-drop-edge-mutant)
+    cpp-options: -DPHASE31_DAG_DROP_EDGE_MUTANT
+  if flag(phase31-dag-inject-cycle-mutant)
+    cpp-options: -DPHASE31_DAG_INJECT_CYCLE_MUTANT
+  if flag(phase31-redis-pvc-mutant)
+    cpp-options: -DPHASE31_REDIS_PVC_MUTANT
+  if flag(phase31-redis-unbounded-buffer-mutant)
+    cpp-options: -DPHASE31_REDIS_UNBOUNDED_BUFFER_MUTANT
+  if flag(phase31-redis-public-image-mutant)
+    cpp-options: -DPHASE31_REDIS_PUBLIC_IMAGE_MUTANT
+  if flag(phase31-redis-receipt-authority-mutant)
+    cpp-options: -DPHASE31_REDIS_RECEIPT_AUTHORITY_MUTANT
+  if flag(phase31-fixed-prometheus-mutant)
+    cpp-options: -DPHASE31_FIXED_PROMETHEUS_MUTANT
+  if flag(phase32-drop-oidc-mutant)
+    cpp-options: -DPHASE32_DROP_OIDC_MUTANT
+  if flag(phase32-netpol-swap-mutant)
+    cpp-options: -DPHASE32_NETPOL_SWAP_MUTANT
+  if flag(phase32-delete-noop-mutant)
+    cpp-options: -DPHASE32_DELETE_NOOP_MUTANT
+  if flag(phase32-drop-origin-mutant)
+    cpp-options: -DPHASE32_DROP_ORIGIN_MUTANT
+  if flag(phase32-nonce-replay-mutant)
+    cpp-options: -DPHASE32_NONCE_REPLAY_MUTANT
+  if flag(phase32-direct-backend-mutant)
+    cpp-options: -DPHASE32_DIRECT_BACKEND_MUTANT
+  if flag(phase33-enact-noop-mutant)
+    cpp-options: -DPHASE33_ENACT_NOOP_MUTANT
+  if flag(phase33-effect-swap-mutant)
+    cpp-options: -DPHASE33_EFFECT_SWAP_MUTANT
+  if flag(phase33-persist-password-mutant)
+    cpp-options: -DPHASE33_PERSIST_PASSWORD_MUTANT
+  if flag(phase33-reach-any-mutant)
+    cpp-options: -DPHASE33_REACH_ANY_MUTANT
+  if flag(phase33-admit-unproven-secret-mutant)
+    cpp-options: -DPHASE33_ADMIT_UNPROVEN_SECRET_MUTANT
+  if flag(phase34-drop-provider-arm-mutant)
+    cpp-options: -DPHASE34_DROP_PROVIDER_ARM_MUTANT
+  if flag(phase34-collapse-tenant-key-mutant)
+    cpp-options: -DPHASE34_COLLAPSE_TENANT_KEY_MUTANT
+  if flag(phase36-drop-user-predicate-mutant)
+    cpp-options: -DPHASE36_DROP_USER_PREDICATE_MUTANT
+  if flag(phase36-accept-body-tenant-mutant)
+    cpp-options: -DPHASE36_ACCEPT_BODY_TENANT_MUTANT
+  if flag(phase38-drop-owner-key-mutant)
+    cpp-options: -DPHASE38_DROP_OWNER_KEY_MUTANT
+  if flag(phase38-drop-owner-subscription-mutant)
+    cpp-options: -DPHASE38_DROP_OWNER_SUBSCRIPTION_MUTANT
+  if flag(phase38-drop-receipt-command-id-mutant)
+    cpp-options: -DPHASE38_DROP_RECEIPT_COMMAND_ID_MUTANT
+  if flag(phase40-accept-stale-authority-digest-mutant)
+    cpp-options: -DPHASE40_ACCEPT_STALE_AUTHORITY_DIGEST_MUTANT
+  if flag(phase40-publish-mixed-plan-pair-mutant)
+    cpp-options: -DPHASE40_PUBLISH_MIXED_PLAN_PAIR_MUTANT
+  if flag(phase40-rebuild-runtime-per-program-mutant)
+    cpp-options: -DPHASE40_REBUILD_RUNTIME_PER_PROGRAM_MUTANT
+  if flag(phase41-missing-peer-key-mutant)
+    cpp-options: -DPHASE41_MISSING_PEER_KEY_MUTANT
+  if flag(phase41-hub-no-endpoint-mutant)
+    cpp-options: -DPHASE41_HUB_NO_ENDPOINT_MUTANT
+  if flag(phase41-drop-resource-envelope-mutant)
+    cpp-options: -DPHASE41_DROP_RESOURCE_ENVELOPE_MUTANT
+  if flag(phase41-early-listener-replacement-mutant)
+    cpp-options: -DPHASE41_EARLY_LISTENER_REPLACEMENT_MUTANT
+  if flag(phase42-classifier-default-confluent-mutant)
+    cpp-options: -DPHASE42_CLASSIFIER_DEFAULT_CONFLUENT_MUTANT
+  if flag(phase42-project-identity-mutant)
+    cpp-options: -DPHASE42_PROJECT_IDENTITY_MUTANT
+  if flag(phase42-drop-parallel-executor-mutant)
+    cpp-options: -DPHASE42_DROP_PARALLEL_EXECUTOR_MUTANT
+  if flag(phase43-verify-caught-up-stub-mutant)
+    cpp-options: -DPHASE43_VERIFY_CAUGHT_UP_STUB_MUTANT
+  if flag(phase43-promote-before-fence-mutant)
+    cpp-options: -DPHASE43_PROMOTE_BEFORE_FENCE_MUTANT
+  if flag(phase48-content-order-leak-mutant)
+    cpp-options: -DPHASE48_CONTENT_ORDER_LEAK_MUTANT
+  if flag(phase48-const-fingerprint-mutant)
+    cpp-options: -DPHASE48_CONST_FINGERPRINT_MUTANT
+  if flag(phase48-rng-workerid-mutant)
+    cpp-options: -DPHASE48_RNG_WORKERID_MUTANT
+  if flag(phase48-const-output-mutant)
+    cpp-options: -DPHASE48_CONST_OUTPUT_MUTANT
+  if flag(phase48-fixed-marker-mutant)
+    cpp-options: -DPHASE48_FIXED_MARKER_MUTANT
+  if flag(phase48-prune-noop-mutant)
+    cpp-options: -DPHASE48_PRUNE_NOOP_MUTANT
+  if flag(phase48-one-byte-short-mutant)
+    cpp-options: -DPHASE48_ONE_BYTE_SHORT_MUTANT
+
+executable amoebius
+  main-is: Main.hs
+  hs-source-dirs:
+      app
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:formal-model,
+      amoebius:dsl-core,
+      base64-bytestring ==1.2.1.0,
+      bytestring >=0.12 && <0.13
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+executable amoebius-singleton
+  main-is: Main.hs
+  hs-source-dirs:
+      app/singleton
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      network ==3.1.4.0,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -threaded
+
+test-suite formal-model-spec
+  type: exitcode-stdio-1.0
+  main-is: RoundTripSpec.hs
+  hs-source-dirs:
+      test/formal
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:formal-model,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      QuickCheck >=2.18 && <2.19
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+test-suite gateway-migration-model-spec
+  type: exitcode-stdio-1.0
+  main-is: GatewayMigrationSpec.hs
+  hs-source-dirs:
+      test/formal/gateway
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:formal-model,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      io-classes ==1.10.1.0,
+      io-sim ==1.10.1.0,
+      process >=1.6 && <1.7,
+      QuickCheck >=2.18 && <2.19
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+test-suite dsl-spec
+  type: exitcode-stdio-1.0
+  main-is: DecodeSpec.hs
+  other-modules:
+      CapacityTopologyFixtures
+      CapacityTopologyGate
+      CapacityTopologyProps
+      BindFixtures
+      BindGate
+      BindMutants
+      BindProps
+      EngineAcceleratorFixtures
+      EngineAcceleratorGate
+      EngineAcceleratorMutants
+      EngineAcceleratorProps
+      ProvisionFixtures
+      ProvisionMutants
+      ProvisionProps
+      ProvisionSealGate
+      DepGraphOracle
+      RenderGoldenGate
+      RenderGoldenProps
+      RuntimeStorageBindingProps
+      ShapeOracle
+      CorpusSpec
+      DecisionPropSpec
+      ExecutionAcceleratorFixtures
+      ExecutionAcceleratorGate
+      ExecutionAcceleratorProps
+      StorageGeometryFixtures
+      StorageGeometryGate
+      StorageGeometryProps
+      ValidationLocusLedger
+  hs-source-dirs:
+      test/dsl
+      test/capability
+      test/manifest
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      deepseq >=1.5 && <1.6,
+      directory >=1.3 && <1.4,
+      dhall ==1.42.3,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+test-suite decision-prop-spec
+  type: exitcode-stdio-1.0
+  main-is: DecisionPropMain.hs
+  other-modules:
+      DecisionPropSpec
+  hs-source-dirs:
+      test/dsl
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+test-suite phase24-host-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase24HostSpec.hs
+  hs-source-dirs:
+      test/host
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+test-suite phase25-image-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase25ImageSpec.hs
+  hs-source-dirs:
+      test/image
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      dhall ==1.42.3,
+      directory >=1.3 && <1.4,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase26-reconcile-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase26ReconcileSpec.hs
+  hs-source-dirs:
+      test/reconcile
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite scheduler-ledger-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase27LedgerSpec.hs
+  hs-source-dirs:
+      test/scheduler
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite scheduler-readiness-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase27ReadinessSpec.hs
+  hs-source-dirs:
+      test/scheduler
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite scheduler-reservation-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase27ReservationSpec.hs
+  hs-source-dirs:
+      test/scheduler
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      io-classes ==1.10.1.0,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite scheduler-reservation
+  type: exitcode-stdio-1.0
+  main-is: SchedulerReservationSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite scheduler-bootstrap-cutover
+  type: exitcode-stdio-1.0
+  main-is: SchedulerBootstrapCutoverSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite reconcile-converge
+  type: exitcode-stdio-1.0
+  main-is: ReconcileConvergeSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite serial-on-delete
+  type: exitcode-stdio-1.0
+  main-is: SerialOnDeleteSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite job-terminal-retention
+  type: exitcode-stdio-1.0
+  main-is: JobTerminalRetentionSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite capacity-topology-spec
+  type: exitcode-stdio-1.0
+  main-is: CapacityTopologySpec.hs
+  other-modules:
+      CapacityTopologyGate
+      CapacityTopologyFixtures
+      CapacityTopologyMutants
+      CapacityTopologyProps
+  hs-source-dirs:
+      test/dsl
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      process >=1.6 && <1.7,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite storage-geometry-spec
+  type: exitcode-stdio-1.0
+  main-is: StorageGeometrySpec.hs
+  other-modules:
+      StorageGeometryFixtures
+      StorageGeometryGate
+      StorageGeometryMutants
+      StorageGeometryProps
+  hs-source-dirs:
+      test/dsl
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      process >=1.6 && <1.7,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite execution-accelerator-spec
+  type: exitcode-stdio-1.0
+  main-is: ExecutionAcceleratorSpec.hs
+  other-modules:
+      CapacityTopologyFixtures
+      ExecutionAcceleratorFixtures
+      ExecutionAcceleratorGate
+      ExecutionAcceleratorMutants
+      ExecutionAcceleratorProps
+  hs-source-dirs:
+      test/dsl
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      process >=1.6 && <1.7,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite capability-bind-spec
+  type: exitcode-stdio-1.0
+  main-is: CapabilityBindSpec.hs
+  other-modules:
+      BindFixtures
+      BindGate
+      BindMutants
+      BindProps
+      ShapeOracle
+  hs-source-dirs:
+      test/capability
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      dhall ==1.42.3,
+      directory >=1.3 && <1.4,
+      process >=1.6 && <1.7,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite provision-seal-spec
+  type: exitcode-stdio-1.0
+  main-is: ProvisionSealSpec.hs
+  other-modules:
+      BindFixtures
+      ProvisionFixtures
+      ProvisionMutants
+      ProvisionProps
+      ProvisionSealGate
+      RuntimeStorageBindingProps
+  hs-source-dirs:
+      test/capability
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      process >=1.6 && <1.7,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite capability-spec
+  type: exitcode-stdio-1.0
+  main-is: EngineAcceleratorSpec.hs
+  other-modules:
+      BindFixtures
+      EngineAcceleratorFixtures
+      EngineAcceleratorGate
+      EngineAcceleratorMutants
+      EngineAcceleratorProps
+      ProvisionFixtures
+  hs-source-dirs:
+      test/capability
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      process >=1.6 && <1.7,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite render-golden
+  type: exitcode-stdio-1.0
+  main-is: RenderGoldenSpec.hs
+  other-modules:
+      BindFixtures
+      DepGraphOracle
+      ProvisionFixtures
+      RenderGoldenGate
+      RenderGoldenProps
+      RenderMutants
+  hs-source-dirs:
+      test/manifest
+      test/capability
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite chain-spec
+  type: exitcode-stdio-1.0
+  main-is: PlanSpec.hs
+  other-modules:
+      BindFixtures
+      ProvisionFixtures
+  hs-source-dirs:
+      test/kernel
+      test/capability
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      deepseq >=1.5 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite boundary-spec
+  type: exitcode-stdio-1.0
+  main-is: BoundarySpec.hs
+  hs-source-dirs:
+      test/boundary
+  build-depends:
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      temporary ==1.3
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+test-suite astcheck-spec
+  type: exitcode-stdio-1.0
+  main-is: AstCheckSpec.hs
+  hs-source-dirs:
+      test/dsl
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite sim-spec
+  type: exitcode-stdio-1.0
+  main-is: SimSpec.hs
+  other-modules:
+      FaultContracts
+      DroppedPartitionMutant
+  hs-source-dirs:
+      test/sim
+      test/sim/mutants/dropped_partition_handling
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      io-classes ==1.10.1.0,
+      io-sim ==1.10.1.0,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite reconcile-sim
+  type: exitcode-stdio-1.0
+  main-is: ReconcileSim.hs
+  other-modules:
+      Phase26SimCommon
+  hs-source-dirs:
+      test/sim
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      io-classes ==1.10.1.0,
+      io-sim ==1.10.1.0,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite execution-transition-sim
+  type: exitcode-stdio-1.0
+  main-is: ExecutionTransitionSim.hs
+  other-modules:
+      Phase26SimCommon
+  hs-source-dirs:
+      test/sim
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      io-classes ==1.10.1.0,
+      io-sim ==1.10.1.0,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite scheduler-sim
+  type: exitcode-stdio-1.0
+  main-is: SchedulerSim.hs
+  other-modules:
+      Phase27SchedulerSimCommon
+  hs-source-dirs:
+      test/sim
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      io-classes ==1.10.1.0,
+      io-sim ==1.10.1.0,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase28-storageclass-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase28StorageClassSpec.hs
+  hs-source-dirs:
+      test/storage
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase28-storageclass-live
+  type: exitcode-stdio-1.0
+  main-is: Phase28StorageClassLiveSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase28-retained-pv-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase28RetainedPVSpec.hs
+  hs-source-dirs:
+      test/storage
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase28-retained-pv-live
+  type: exitcode-stdio-1.0
+  main-is: Phase28RetainedPVLiveSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson >=2.2 && <2.3,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase28-rebind-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase28RebindSpec.hs
+  hs-source-dirs:
+      test/storage
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase28-rebind-live
+  type: exitcode-stdio-1.0
+  main-is: RebindSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson >=2.2 && <2.3,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-program-schema-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase16UiProgramSchemaSpec.hs
+  hs-source-dirs:
+      test/ui
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      dhall ==1.42.3,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-scope-spec
+  type: exitcode-stdio-1.0
+  main-is: ScopeSpec.hs
+  hs-source-dirs:
+      test/ui
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-authorization-spec
+  type: exitcode-stdio-1.0
+  main-is: AuthorizationSpec.hs
+  other-modules:
+      AuthorizationReference
+  hs-source-dirs:
+      test/ui
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-effect-binding-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase19UiEffectBindingSpec.hs
+  other-modules:
+      EffectBindingReference
+  hs-source-dirs:
+      test/ui
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-plan-compiler-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase20UiPlanCompilerSpec.hs
+  other-modules:
+      PlanCompilerReference
+  hs-source-dirs:
+      test/ui
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      bytestring >=0.12 && <0.13,
+      cryptohash-sha256 ==0.11.102.1,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-browser-interpreter-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase21UiBrowserInterpreterSpec.hs
+  other-modules:
+      ReferenceClientPlan
+  hs-source-dirs:
+      test/ui
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-server-boundary-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase22UiServerBoundarySpec.hs
+  hs-source-dirs:
+      test/ui
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-local-composition-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase23LocalCompositionSpec.hs
+  hs-source-dirs:
+      test/ui
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase29-vault-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase29VaultSpec.hs
+  hs-source-dirs:
+      test/vault
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase29-vault-sim
+  type: exitcode-stdio-1.0
+  main-is: UnsealFailClosedSpec.hs
+  hs-source-dirs:
+      test/Amoebius/Sim/Vault
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      bytestring >=0.12 && <0.13,
+      io-classes ==1.10.1.0,
+      io-sim ==1.10.1.0,
+      QuickCheck >=2.18 && <2.19
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite vault-pki-live
+  type: exitcode-stdio-1.0
+  main-is: VaultPkiSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase30-backbone-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase30BackboneSpec.hs
+  hs-source-dirs:
+      test/platform
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      amoebius:dsl-core,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase30-backbone-live
+  type: exitcode-stdio-1.0
+  main-is: Phase30BackboneLiveSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase31-services-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase31ServicesSpec.hs
+  hs-source-dirs:
+      test/platform
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      amoebius:dsl-core,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase31-bringup-sim
+  type: exitcode-stdio-1.0
+  main-is: BringUpSim.hs
+  hs-source-dirs:
+      test/Amoebius/Platform
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      amoebius:dsl-core,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      io-classes ==1.10.1.0,
+      io-sim ==1.10.1.0,
+      QuickCheck >=2.18 && <2.19
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase31-services-live
+  type: exitcode-stdio-1.0
+  main-is: Phase31ServicesLiveSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase32-edge-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase32EdgeSpec.hs
+  hs-source-dirs:
+      test/platform
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase32-keycloak-ingress-live
+  type: exitcode-stdio-1.0
+  main-is: Phase32KeycloakIngressLiveSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase33-gate-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase33Gate.hs
+  hs-source-dirs:
+      test/integration
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      containers >=0.7 && <0.8,
+      filepath >=1.5 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase33-runtime-storage-spec
+  type: exitcode-stdio-1.0
+  main-is: Phase33RuntimeStorage.hs
+  hs-source-dirs:
+      test/integration
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase33-singleton-live
+  type: exitcode-stdio-1.0
+  main-is: Phase33SingletonLiveSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite tenant-provider-provisioning-live
+  type: exitcode-stdio-1.0
+  main-is: TenantProviderProvisioningSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      containers >=0.7 && <0.8,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite user-tenant-isolation-live
+  type: exitcode-stdio-1.0
+  main-is: UserTenantIsolationSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      amoebius-pulsar,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      serialise ==0.2.6.1,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-projection-runtime-live
+  type: exitcode-stdio-1.0
+  main-is: Phase38UiProjectionRuntimeSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      amoebius-pulsar,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      serialise ==0.2.6.1,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-program-release-live-gate
+  type: exitcode-stdio-1.0
+  main-is: Phase40UiProgramRelease.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite phase41-wireguard-live-gate
+  type: exitcode-stdio-1.0
+  main-is: Phase41Gate.hs
+  hs-source-dirs:
+      test/integration
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite multicluster-spawn-live
+  type: exitcode-stdio-1.0
+  main-is: Phase42Gate.hs
+  hs-source-dirs:
+      test/integration
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2,
+      vector >=0.13 && <0.14
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite gateway-migration-sim
+  type: exitcode-stdio-1.0
+  main-is: GatewayMigrationSimSpec.hs
+  other-modules:
+      GatewayMigrationTrace
+  hs-source-dirs:
+      test/sim
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:formal-model,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2,
+      vector >=0.13 && <0.14
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite gateway-migration-drills-live
+  type: exitcode-stdio-1.0
+  main-is: Phase43LiveGate.hs
+  other-modules:
+      GatewayMigrationForest
+  hs-source-dirs:
+      test/integration
+      test/inject
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:formal-model,
+      amoebius:dsl-core,
+      aeson ==2.2.5.0,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2,
+      vector >=0.13 && <0.14
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite provider-deploy-checkpoint-live
+  type: exitcode-stdio-1.0
+  main-is: Phase44ProviderCheckpointSpec.hs
+  hs-source-dirs:
+      test/integration
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2,
+      vector >=0.13 && <0.14
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite provider-ebs-credential-live
+  type: exitcode-stdio-1.0
+  main-is: Phase46ProviderEbsSpec.hs
+  hs-source-dirs:
+      test/integration
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2,
+      vector >=0.13 && <0.14
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite provider-dynamic-nodes-live
+  type: exitcode-stdio-1.0
+  main-is: Phase47ProviderDynamicSpec.hs
+  hs-source-dirs:
+      test/integration
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2,
+      vector >=0.13 && <0.14
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite determinism-jitcache-contract
+  type: exitcode-stdio-1.0
+  main-is: Phase48ContractSpec.hs
+  hs-source-dirs:
+      test/kernel
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite determinism-jitcache-live
+  type: exitcode-stdio-1.0
+  main-is: Phase48LiveSpec.hs
+  hs-source-dirs:
+      test/live
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2,
+      vector >=0.13 && <0.14
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns

@@ -1,0 +1,5 @@
+step	environment	precondition	result	head
+1	Dev	absent	PointerWritten	release_verified@etag-1
+2	Staging	absent	PointerWritten	release_verified@etag-1
+3	Prod	release_previous@etag-0	PointerWritten	release_verified@etag-1
+race-loser	Prod	release_previous@etag-0	PointerConflict	release_verified@etag-1

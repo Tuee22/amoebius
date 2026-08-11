@@ -1,0 +1,5 @@
+step	event	visible	external_effect
+1	start	Workflow started	pulsar-start:request-id
+2	progress	Running	zero-new-starts
+3	ready	Artifact ready	minio-ready-handle
+4	invoke	Result(reference(input))	infernix-execution:request-id

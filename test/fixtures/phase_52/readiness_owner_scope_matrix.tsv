@@ -1,0 +1,6 @@
+case	session	handle_state	handle_owner	handle_tenant	result	gpu_effects
+ready-own	t-a/alice	Ready	alice	t-a	allow	1
+inflight-own	t-a/alice	InFlight	alice	t-a	NotReady	0
+failed-own	t-a/alice	Failed	alice	t-a	NotReady	0
+same-tenant-nonowner	t-a/bob	Ready	alice	t-a	Unavailable	0
+foreign-tenant	t-b/carol	Ready	alice	t-a	Unavailable	0

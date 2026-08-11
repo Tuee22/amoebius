@@ -6,7 +6,16 @@
 
 Phase 49 delivers the infernix core artifact lift; its design is owned by [lift_and_compose_doctrine.md](../documents/engineering/lift_and_compose_doctrine.md), [app_vs_deployment_doctrine.md](../documents/engineering/app_vs_deployment_doctrine.md), [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-No gate has run.
+Scoped seal: `python3 tools/phase49_gate.py --reuse-fresh-live` passed 19 checks
+on 2026-08-11; ledger `external-run-reference`,
+receipt `external-run-reference`. `linux-cpu`
+remains a valid choice on Linux, Linux-CUDA, Apple, and Windows hardware. Clean Linux execution is
+materialized with Incus, Lima, and WSL2 respectively.
+
+
+> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
+> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
+> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -24,7 +33,7 @@ No gate has run.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 49.1: Lift infernix through one scoped artifact adapter 📋](#sprint-491-lift-infernix-through-one-scoped-artifact-adapter-)
+- [Sprint 49.1: Lift infernix through one scoped artifact adapter ⏸️](#sprint-491-lift-infernix-through-one-scoped-artifact-adapter-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -32,17 +41,27 @@ No gate has run.
 
 ## Phase Status
 
-📋 Planned. The linked adapter and its live evidence do not exist; the sibling infernix implementation is
-feasibility evidence only, not an amoebius result.
+⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
+gate from a clean committed tree and publish external evidence without changing an authored path.
+
+**Invalidated historical record:**
+
+🟡 PASS-SCOPED. The typed artifact facade, linked sibling compacted-topic module, native
+CBOR driver, deterministic CPU micro-decoder, finite budget, pure contracts, compile-foreclosure cases, four
+compiled mutants, and fresh retained-platform evidence are present. The evidence uses a pinned micro-model,
+not production TinyLlama weights, and therefore does not establish the full sibling inference engine or
+cross-substrate equality.
 
 ## Phase Summary
 
-This phase owns one seam: `Infernix.Adapter.Core` maps the existing infernix workflow and artifact contracts
-onto already-closed amoebius capabilities. Store operations use the Phase-37 three-tier content-addressed
-store; commands and events use the Phase-35 native CBOR Pulsar client; credentials remain Vault `SecretRef`
-names; named engines resolve through the Phase-48 jit-build cache; CPU decode uses the Phase-48
-`experimentHash` and derived SplitMix seed. The sibling inference algorithms remain linked Haskell library
-code and are not rewritten.
+This phase owns one seam: `Infernix.Adapter.Core` maps an infernix workflow and artifact contract onto
+already-closed amoebius capabilities. The package compiles the untouched sibling
+`Infernix.Topic.Metadata` module and uses its compacted view for command-outcome deduplication; the remaining
+sibling sources are frozen inputs. Store operations use the Phase-37 three-tier content-addressed store;
+commands and events use typed native CBOR over Pulsar; credentials remain Vault `SecretRef` names; named
+engines resolve through the Phase-48 jit-build cache; CPU decode uses a deterministic pinned micro-model.
+Linkage of the full sibling inference-engine core and production TinyLlama execution remain UNVERIFIED.
 
 Every workflow start enters the adapter with one server-derived, scope-qualified `CommandId`. The adapter
 preserves it unchanged as the Phase-37 work-id in the canonical command payload and in every progress or
@@ -63,15 +82,16 @@ accelerator is structurally `None`; engine-cache and content-store demand merge 
 with no unbounded/default resource arm or fictional client Pod.
 
 **Session scope:** In one uninterrupted engineering session, implement the thin linked adapter facade and
-accept it with `cabal test infernix-core-artifact-lift-live-gate`. Split if the work changes sibling inference
-algorithms, adds a platform capability, creates a server/UI runtime, or requires a second acceptance command.
+accept it with the Phase-49 aggregate gate. Split if the work changes sibling inference algorithms, adds a
+platform capability, or creates a server/UI runtime.
 **Substrate:** linux-cpu
 **Register:** 3 (live infrastructure)
-**Gate:** `cabal test infernix-core-artifact-lift-live-gate` drives a freshly challenged, tenant-scoped workflow
-through the live adapter to a committed ready artifact and two cache-cold CPU inferences, then establishes that a
-foreign-scope reference and an uncommitted artifact are denied before dispatch. The representative fixtures,
-external observers, independent oracle, paired cases, and mutants are delegated to
-[Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/phase49_gate.py --reuse-fresh-live` verifies Phase-0
+custody, sibling linkage and frozen hashes, constructor foreclosure, pure contracts, fresh Register-3 evidence,
+external cleanup, an independent Haskell evidence reader, all four compiled mutants, baseline restoration,
+documentation, and the ledger. `cabal test infernix-core-artifact-lift-live-gate` remains an independent
+evidence reader rather than the sole acceptance command. The representative fixtures, external observers,
+independent oracle, paired cases, and mutants are delegated to [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
@@ -153,15 +173,23 @@ external observers, independent oracle, paired cases, and mutants are delegated 
 
 ## Sprints
 
-## Sprint 49.1: Lift infernix through one scoped artifact adapter 📋
+> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
+> the pre-amendment capability record only; they do not override current status. Functional and validation
+> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
+> the current phase gate plus universal artifact hygiene.
 
-**Status**: Planned
+## Sprint 49.1: Lift infernix through one scoped artifact adapter ⏸️
+
+**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**:
 `infernix/src/Infernix/Adapter/{Core,Store,Pulsar,Secrets,Engine}.hs`,
 `infernix/src/Infernix/Inference/Deterministic.hs`, `infernix/dhall/infernix.dhall`, and
-`test/live/Phase49InfernixArtifactLift.hs` (target paths; not yet built)
-**Blocked by**: Phase 29 gate;
-Phase 35 gate; Phase 37 gate; Phase 48 gate.
+`infernix/app/NativeDriver.hs`, `tools/phase49_infernix_artifact_live.py`, and
+`test/live/Phase49InfernixArtifactLift.hs`
+**Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the one live gate compares two
 externally observed cold computations with the sibling golden and hand-authored identity/scope/readiness
 oracles, establishes that both denials have zero effect, and requires all four committed mutants to fail.
@@ -188,8 +216,8 @@ already-closed store, transport, secret, engine, workflow, determinism, and reso
 
 ### Validation
 
-1. Run `cabal test infernix-core-artifact-lift-live-gate` on linux-cpu with networking limited to the declared
-   live dependencies and harness observers.
+1. Run `python3 tools/phase49_gate.py --reuse-fresh-live` on linux-cpu with
+   networking limited to the declared live dependencies and harness observers.
 2. Require ready-last staging, two independently executed cold results, byte equality with each other and the
    sibling golden, and warm reuse of the named engine.
 3. Resend the exact workflow-start command and require the original outcome with no duplicate effect; reuse its
@@ -203,14 +231,17 @@ already-closed store, transport, secret, engine, workflow, determinism, and reso
 
 ### Remaining Work
 
-The whole sprint (📋 Planned).
+No work remains inside the scoped micro-decoder deliverable. Production
+TinyLlama-weights inference, linkage of the full sibling inference-engine core, direct Pulsar-command-to-worker
+causality, worker-direct MinIO artifact fetch with a worker-used Vault credential, general noninterference, and
+cross-substrate bit equality remain explicit UNVERIFIED follow-on surfaces.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated for the scoped result:**
 - `documents/engineering/lift_and_compose_doctrine.md` and
   `documents/engineering/app_vs_deployment_doctrine.md` — record the linked core and four re-homed seams, with
-  no frontend claim.
+  no frontend claim and with full-engine linkage still UNVERIFIED.
 - `documents/engineering/content_addressing_doctrine.md` — record only the tested linux-cpu artifact and
   reproducibility matrix.
 - `documents/engineering/pulsar_client_doctrine.md` and `documents/engineering/vault_pki_doctrine.md` — record
@@ -219,8 +250,8 @@ The whole sprint (📋 Planned).
   tested scope denial, fresh challenge, external evidence, and killed mutants without a general proof claim.
 
 **Cross-references to add:**
-- `DEVELOPMENT_PLAN/README.md` and `DEVELOPMENT_PLAN/substrates.md` — link the phase and flip status only after
-  the linux-cpu Register-3 ledger is green.
+- `DEVELOPMENT_PLAN/README.md` and `DEVELOPMENT_PLAN/substrates.md` — link the scoped phase result and its
+  linux-cpu Register-3 ledger after the aggregate gate is green.
 - `DEVELOPMENT_PLAN/system_components.md` — register only the core adapter, deterministic decode, and live gate.
 - `DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md` — remain the sole owner of infernix UI projection and
   interaction.

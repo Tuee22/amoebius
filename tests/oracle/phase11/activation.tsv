@@ -1,0 +1,5 @@
+witness	activation
+NamespacePart	Immediate
+CapacitySchedulerPart	BootstrapSchedulerStage
+BootstrapAddonCutoverPart	AfterBootstrapAddonCutover
+ManagedCapacityAdmissionPart	AfterManagedCapacityReady

@@ -1,0 +1,5 @@
+--- a/src/Amoebius/Multicluster/PromotionGate.hs
++++ b/src/Amoebius/Multicluster/PromotionGate.hs
+@@
+-  | hasFreshnessWitness evidence || holdsFence evidence = Right PromotionAuthorized
++  | not (hasFreshnessWitness evidence || holdsFence evidence) = Right PromotionAuthorized

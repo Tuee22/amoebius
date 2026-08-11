@@ -1,0 +1,5 @@
+case	total_vram_bytes	reserve_bytes	net_allocatable_bytes	current_free_bytes	required_bytes	expected	effects
+fits	4294967296	268435456	4026531840	3758096384	67108864	ProvisionedCudaTraining	1
+net-one-short	335544319	268435456	67108863	335544319	67108864	CudaNetAllocatableShort	0
+current-free-one-short	4294967296	268435456	4026531840	67108863	67108864	CudaCurrentFreeShort	0
+cpu-target	4294967296	268435456	4026531840	3758096384	67108864	CudaRequired	0
