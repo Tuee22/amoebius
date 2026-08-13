@@ -56,7 +56,7 @@ singleton REST API after handoff. It is not a fourth runtime role.
 | **In-cluster pod** | Deployed as a generated typed manifest (no Helm) inside the cluster | Hosts the **control-plane singleton role** ([§3](#3-the-control-plane-singleton)), the dedicated **capacity-scheduler role** ([§3.3](#33-the-capacity-scheduler-a-separate-role-in-the-same-binary)), or a **worker role** ([§4](#4-worker-daemons--n-unelected)) |
 
 The **same-binary policy** is generalized directly from the prodbox sibling
-(`/home/matthewnowak/prodbox/documents/engineering/distributed_gateway_architecture.md` → "Same-binary
+(`prodbox/documents/engineering/distributed_gateway_architecture.md` → "Same-binary
 policy"). This is structural, not stylistic:
 
 - **One distribution artifact, one dependency closure**, built once from the substrate bootstrap coordinator
@@ -265,14 +265,14 @@ therefore does not build one:
   `replicas=1`" ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1))
   is satisfied by k8s rescheduling the single pod, not by a second pod waiting to be elected.
 
-This is the resolution of the standing question (`notes.txt`) of whether the singleton should run custom
+This is the resolution of the standing pre-plan design-log question of whether the singleton should run custom
 election logic: **it should not — single-instance is a k8s/etcd concern, and amoebius does not duplicate etcd.**
 
 **One honest residue, named: a `Lease` is mutual exclusion, not output fencing.** The Deployment + `Lease`
 guarantee at-most-one *lease-holder*; they do **not**, by themselves, fence a stale *external* side effect. A
 pod that holds the lease, is stop-the-world-GC-paused or partitioned past the lease's expiry, and then resumes
 can still issue a route53 or Vault write while a freshly-elected pod is also writing — the classic fencing-token
-gap (Kleppmann, *How to do distributed locking*), and exactly what `notes.txt` flags when it observes the
+gap (Kleppmann, *How to do distributed locking*), and exactly what that log flags when it observes the
 singleton's authority is *external side effects that validate no broker epoch*. This window is **not** a second
 election obligation — amoebius runs no election — but it is a named **assumed** premise, sibling to the R8
 synchrony premise ([chaos_failover_doctrine.md §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need)):
@@ -559,7 +559,7 @@ to duplicate etcd.
 ### 5.2 The coordination plane is for worker events and audit, not leadership
 
 Worker coordination and durable history still flow through one plane — **Pulsar + MinIO + an append-only, hash-chained, signed event log** — but leadership is *not* derived from it. The commit-log discipline is lifted
-from the prodbox gateway daemon (`/home/matthewnowak/prodbox/src/Prodbox/Gateway/{Types,Daemon}.hs`): events are
+from the prodbox gateway daemon (`prodbox/src/Prodbox/Gateway/{Types,Daemon}.hs`): events are
 hash-chained and signed by their emitter, merged idempotently by event hash (`appendIfNew`). amoebius carries
 the *same event and audit discipline* onto the standard backbone — **Pulsar** for the live event stream (native
 TCP binary protocol, no WebSockets — [pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) with Pulsar's own
@@ -598,7 +598,7 @@ effect-owning provider. It supplies neither worker leadership nor audit history
 
 Every long-running role above — singleton or worker — runs the **same daemon lifecycle**, so there is one
 spine to learn, observe, and test. The deep, prose-level discipline is owned by the prodbox sibling
-(`/home/matthewnowak/prodbox/documents/engineering/distributed_gateway_architecture.md` → "Daemon
+(`prodbox/documents/engineering/distributed_gateway_architecture.md` → "Daemon
 Lifecycle"); this doc records only the contract amoebius daemons share:
 
 - **Lifecycle:** `load → prereq → acquire → ready → serve → drain → exit`, expressed as nested `bracket` /

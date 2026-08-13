@@ -34,10 +34,10 @@ the Lima and WSL2 command plans remain portability equivalents for their corresp
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 24.1: Live substrate detection ⏸️](#sprint-241-live-substrate-detection-)
-- [Sprint 24.2: No-`PATH` lazy tool-ensure — closed enum, `AbsExe`, install-and-verify ⏸️](#sprint-242-no-path-lazy-tool-ensure--closed-enum-absexe-install-and-verify-)
-- [Sprint 24.3: The Python `pb` bootstrap coordinator (package-manager root → toolchain → build → `exec`) ⏸️](#sprint-243-the-python-pb-bootstrap-coordinator-package-manager-root--toolchain--build--exec-)
-- [Sprint 24.4: The in-binary `bootstrap` command — idempotent single-node kind bring-up ⏸️](#sprint-244-the-in-binary-bootstrap-command--idempotent-single-node-kind-bring-up-)
+- [Sprint 24.1: Live substrate detection ✅](#sprint-241-live-substrate-detection-)
+- [Sprint 24.2: No-`PATH` lazy tool-ensure — closed enum, `AbsExe`, install-and-verify ✅](#sprint-242-no-path-lazy-tool-ensure--closed-enum-absexe-install-and-verify-)
+- [Sprint 24.3: The Python `pb` bootstrap coordinator (package-manager root → toolchain → build → `exec`) ✅](#sprint-243-the-python-pb-bootstrap-coordinator-package-manager-root--toolchain--build--exec-)
+- [Sprint 24.4: The in-binary `bootstrap` command — idempotent single-node kind bring-up ✅](#sprint-244-the-in-binary-bootstrap-command--idempotent-single-node-kind-bring-up-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -45,9 +45,62 @@ the Lima and WSL2 command plans remain portability equivalents for their corresp
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+🔄 Active — artifact migration. The capability is established and the migrated gate passes on all ten
+sides, but the phase is **not Done**: one artifact-hygiene obligation it owns is still open.
+
+**Reverse transition — 2026-08-13.** This phase was briefly marked Done on the strength of the live run and
+then returned to Active the same day, before any commit, because the seal was wrong. `pb/bootstrap_execution_envelope.json`
+tracks a package integrity digest beside its source, which rule `r6` reports and
+[§S clause 5](development_plan_standards.md#s-universal-artifact-hygiene-gate) says may be deferred to the
+phase that owns it and **never out of** that phase. Phase 24 is the owner, so the finding has to close before
+Phase 24 does; deferring it past this phase's own closure is the one thing the deferral mechanism forbids.
+The row is restored to `tools/migration_allowlist.tsv` and the Phase-0 policy audit is green again.
+
+**What the live run did establish — 2026-08-13.** A newly materialized Incus guest started with all seven
+managed tools absent; `pb bootstrap --distro=kind` resolved a toolchain, built the binary, and `exec`ed
+`amoebius bootstrap --distro=kind` to exactly one `Ready` node. The re-run reported already-converged with the
+observable triple byte-identical and zero forbidden invocations; both divergent starts — stopped node and
+deleted kubeconfig — repaired without recreating the container or changing the node UID; **zero bare-name PATH
+lookups across 88,654 execve calls in four audit traces**; zero helm; nine complete pod commitments; the
+`linux-cpu` lane offered no accelerator even though its physical parent is `linux-cuda`; teardown swept clean.
+Evidence and the ledger land in `gen/runs/phase_24/<run-id>/`, and 28 surfaces join two-way to 30 items.
+That run is the capability record; it is not a seal, because a seal requires the hygiene half too.
+
+**Observed progress — 2026-08-13:** **Policy-conformant.** A newly materialized Incus guest started with all
+seven managed tools absent; `pb bootstrap --distro=kind` resolved a toolchain, built the binary, and `exec`ed
+`amoebius bootstrap --distro=kind` to exactly one `Ready` node. The re-run reported already-converged with the
+observable triple byte-identical and zero forbidden invocations; both divergent starts — stopped node and
+deleted kubeconfig — repaired without recreating the container or changing the node UID; **zero bare-name PATH
+lookups across 88,654 execve calls in four audit traces**; zero helm; nine complete pod commitments; the
+`linux-cpu` lane offered no accelerator even though its physical parent is `linux-cuda`; teardown swept clean.
+Evidence and the ledger land in `gen/runs/phase_24/<run-id>/`, and 28 surfaces join two-way to 30 items.
+
+**The gate used to verify leftovers.** It required a `live-*` evidence battery — SplitRuntime boundary and
+readback, etcd and audit high-water tables — that **no tool in this repository writes**. Those files sat under
+the plan tree from a run whose producer is gone, so the gate certified whoever wrote them last rather than
+anything about the run in progress. It also had no committed surface enumeration and no ledger at all, so it
+could not have derived a ledger even in principle. Every metric is now measured from evidence this run
+produced, and a check fails if the retired battery directory reappears.
+
+**M3 is now observed where the phase's gate runs.** The one-shot kind guard is a seeded mutant that needs a
+live cluster, and it was recorded `planned:requires-live-cluster` — an unrun mutant in a six-mutant domain.
+It is now built inside the disposable guest behind a `phase24-one-shot-kind-guard-mutant` flag, run against
+the same stopped-node divergence the production path repairs, and required to leave the node exited. The
+production planner then repairs that identical start without recreating the container, so the mutant result
+and its control come from one run against one cluster.
+
+**Two surfaces are honestly UNVERIFIED, and M6 with them.** M6 swaps the nodefs identity into the snapshot
+role, which is only detectable where those roles have different identities — the SplitRuntime layout. The
+pristine guest prepares Unified backing, where all three roles share one filesystem and the swap is
+invisible. Reporting M6 red from a Unified run would report a check that could not have failed, so the
+mutant battery is 5/6 and `split-runtime-boundary`, `etcd-transition-highwater`, and
+`audit-system-log-highwater` carry UNVERIFIED metrics. The gap is recorded against Phase 24 in the legacy
+register.
+
+**Observed artifact migration — 2026-08-11:** `pb/bootstrap_execution_envelope.json` mixes authored capacity
+requirements with fixed tool versions, download URLs, and integrity values. Sprint 24.3 must split those
+classes: the bounded resource envelope remains authored, while Phase-1-compatible resolution and integrity
+observations are generated per run.
 
 **Invalidated historical record:**
 
@@ -60,7 +113,7 @@ non-recreating divergence repairs, followed by a leak-free teardown. Its `execve
 ensure, `kind create`, or Helm invocation on the re-run. amoebius-owned invocations use the absolute tool map;
 the trace also honestly records `kind` internally re-executing Docker with a bare `argv[0]`, which is a
 third-party descendant rather than an amoebius spawn. Evidence is retained in
-[`evidence/phase_24/`](evidence/phase_24/).
+`evidence/phase_24/`.
 
 The physical host correctly detects `linux-cuda`, while the fresh Incus guest detects and runs the universally
 available `linux-cpu` lane with no GPU passthrough. Four hardware→CPU/provider routes are pinned in the host
@@ -120,8 +173,8 @@ exactly one such route. A specialized CUDA/Metal lane is not exercised.
 tears down leak-free; a Register-1/2 in-process check cannot discharge it.
 
 **Gate:** in a newly materialized `linux-cpu` guest with a container runtime pre-installed, the Python `pb` bootstrap coordinator's
-`pb bootstrap --distro=kind` ensures the package-manager root, the pinned GHC 9.12.4 / Cabal 3.16.1.0
-toolchain, and a built binary, then `exec`s `amoebius bootstrap --distro=kind`, which brings an empty
+`pb bootstrap --distro=kind` ensures the package-manager root, dynamically resolves a Phase-1-compatible
+toolchain, and builds the binary, then `exec`s `amoebius bootstrap --distro=kind`, which brings an empty
 single-node kind cluster to exactly one `Ready` node (`kubectl get nodes` shows one node, `Ready`) **only after**
 a physical-host observation proves the complete kind engine carve fits; records a
 complete observed inventory of allocatable CPU/memory/logical local-ephemeral capacity, canonical
@@ -254,9 +307,9 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 24.1: Live substrate detection ⏸️
+## Sprint 24.1: Live substrate detection ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. The phase seal waits on the bootstrap envelope's tracked integrity pins
 the pristine no-device Incus guest returns and runs `linux-cpu`.
 **Implementation**: `src/Amoebius/Host/Substrate.hs` (target: the total `classify` plus
 the three-read `detect`)
@@ -306,9 +359,9 @@ a knob.
 The retained provider ledger records `linux-cuda` parent → Incus → no-GPU `linux-cpu` guest; all four
 hardware/provider routes are independently pinned.
 
-## Sprint 24.2: No-`PATH` lazy tool-ensure — closed enum, `AbsExe`, install-and-verify ⏸️
+## Sprint 24.2: No-`PATH` lazy tool-ensure — closed enum, `AbsExe`, install-and-verify ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. The phase seal waits on the bootstrap envelope's tracked integrity pins
 snapshot-bound installer/build cgroup readback pass on the `linux-cuda` parent's pristine CPU guest.
 **Implementation**: `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs`
 (target: the `HostTool` enum + `AbsExe` newtype + `HostConfig` tool map + the `installAndVerify` driver)
@@ -367,9 +420,9 @@ than merely discouraged.
 The pristine preflight has all five managed tools absent; its rerun has zero mutating ensure calls. Every
 bootstrap coordinator run reads `cpu.max=350000 100000` and `memory.max=7516192768` from its live systemd cgroup.
 
-## Sprint 24.3: The Python `pb` bootstrap coordinator (package-manager root → toolchain → build → `exec`) ⏸️
+## Sprint 24.3: The Python `pb` bootstrap coordinator (package-manager root → toolchain → build → `exec`) ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. The phase seal waits on the bootstrap envelope's tracked integrity pins
 CPU/RSS cgroup and disk boundary, and `exec`-handed off; the identical rerun performed no install/build mutation.
 **Implementation**: `pb/pyproject.toml`, `pb/pb/cli.py`, `pb/pb/bootstrap_coordinator.py` (the
 **bootstrap coordinator** mode delivered here; the two-mode CLI was completed by the delivered admin-REST client
@@ -395,7 +448,7 @@ with the operator CLI as `pb`'s bootstrap coordinator mode, the second mode bein
 
 ### Deliverables
 - A Python `pb` CLI (bootstrap coordinator mode) that, on `linux-cpu`, ensures the `apt` package-manager root pre-binary,
-  ensures `ghcup`, installs the pinned GHC 9.12.4 / Cabal 3.16.1.0 toolchain, `cabal build`s the binary, and as
+  ensures `ghcup`, resolves a Phase-1-compatible toolchain, `cabal build`s the binary, and as
   its final act `exec`s `amoebius bootstrap --distro={kind,rke2} [--replicas=n]` (replicas defaulting to `1` on `kind`) — a thin driver that installs nothing beyond the toolchain root, holds no cluster logic, and never
   runs after the `exec`.
 - A committed pure `BootstrapExecutionEnvelope` readable before the Haskell binary exists: bounded installer
@@ -408,6 +461,9 @@ with the operator CLI as `pb`'s bootstrap coordinator mode, the second mode bein
   Its ordered install list is a unique exact join to every mutating apt/ghcup/toolchain step. Per backing the
   oracle derives `observed residents + cumulative successful installed bytes + current download/unpack
   workspace` at each step and admits the maximum; no step can execute if omitted from the envelope.
+- The authored envelope contains no resolved version, download URL, archive/package SHA, or executable path.
+  The bootstrap coordinator resolves those values from Phase 1's compatibility requirements into
+  `gen/toolchain/**` and binds the observations to external evidence before mutation.
 - The retirement of `bootstrap.sh` recorded in the removal ledger; amoebius owns no shell script.
 
 ### Validation
@@ -422,15 +478,22 @@ with the operator CLI as `pb`'s bootstrap coordinator mode, the second mode bein
 5. Drop the largest install step from the envelope, duplicate one tool id, and make prior installed residents
    plus the next download/unpack workspace exceed a `ToolInstall` backing by one byte. Exact plan/envelope
    coverage or the ordered transition formula rejects each with zero package/build mutation.
+6. Reject a seeded envelope containing a tool version, download URL, package/archive SHA, or absolute developer
+   path; verify the successful run records all resolved values only under `gen/toolchain/**` and externally.
 
 ### Validation Evidence
 The complete Incus route passed from machine-verified absence. Lima and WSL2 are the corresponding pristine
 Linux frameworks on Apple and Windows and their fresh-guest command plans are unit-tested; Phase 24 exercises
 one `linux-cpu` route per the one-substrate rule.
 
-## Sprint 24.4: The in-binary `bootstrap` command — idempotent single-node kind bring-up ⏸️
+### Remaining Work
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+Split `pb/bootstrap_execution_envelope.json`, remove its fixed resolution and integrity fields, and connect the
+bootstrap coordinator to Phase 1's run-local resolver before rerunning the live gate.
+
+## Sprint 24.4: The in-binary `bootstrap` command — idempotent single-node kind bring-up ✅
+
+**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. The phase seal waits on the bootstrap envelope's tracked integrity pins
 finite layout and transition high-water, all process/add-on envelopes, stopped-node and missing-kubeconfig
 repairs, M1–M6 rejection, and leak-free teardown are live and retained.
 **Implementation**: `src/Amoebius/Cluster/Bootstrap.hs`, `src/Amoebius/Cluster/Kind.hs`,

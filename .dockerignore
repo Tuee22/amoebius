@@ -108,13 +108,15 @@ browser-profile/**
 **/*.pid
 **/*.sock
 
-# Local credentials and runtime state.
+# Local credentials and runtime state. The test-secrets seam of vault_pki_doctrine.md
+# section 3.3 is test-only and never enters a build context.
 .env
 .env.*
 .secrets
 .secrets/**
 .credentials
 .credentials/**
+test-secrets.dhall
 kubeconfig
 
 # The downloaded toolchain is host-local. Authored resolver policy beneath

@@ -15,20 +15,23 @@ import sys
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import gate_common
+import toolchain
+
 
 ROOT = Path(__file__).resolve().parent.parent
-PINS = ROOT / "toolchain/pins.json"
 ARM_ORACLE = ROOT / "tests/oracle/phase10/arm_cases.tsv"
 CASES = ROOT / "tests/oracle/phase11/provision_cases.tsv"
 PLANNER = ROOT / "tests/oracle/phase11/planner_cases.tsv"
 ACTIVATION = ROOT / "tests/oracle/phase11/activation.tsv"
 MUTANTS = ROOT / "tests/mutants/phase11/mutants.tsv"
 LOCUS = ROOT / "tests/oracle/phase11/validation_locus.tsv"
-LEDGER = ROOT / "test/golden/phase_11_ledger.json"
-ENUMERATION = ROOT / "test/enumeration/phase_11_surfaces.txt"
 RESULTS = ROOT / "gen/dsl/phase11/phase-results.tsv"
 GENERATED_LEDGER = ROOT / "gen/dsl/phase11/validation-locus-ledger.tsv"
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_11"
+CONTRACT = "DEVELOPMENT_PLAN/phase_11_provision_seal.md"
+GATE_COMMAND = "python3 tools/phase11_gate.py"
 
 
 class GateFailure(RuntimeError):
@@ -37,6 +40,8 @@ class GateFailure(RuntimeError):
 
 def run(command: list[str], *, require_success: bool = True) -> subprocess.CompletedProcess[str]:
     environment = dict(os.environ)
+    if COMPILER and command and Path(command[0]).name.startswith("cabal"):
+        command = [command[0], f"--with-compiler={COMPILER}", *command[1:]]
     result = subprocess.run(
         command,
         cwd=ROOT,
@@ -57,7 +62,7 @@ def read_tsv(path: Path) -> list[dict[str, str]]:
 
 
 def verify_pins() -> tuple[Path, Path, str]:
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
+    pins = toolchain.resolve(["cabal", "dhall", "ghc"])
     cabal = Path(pins["cabal"]["path"])
     ghc = Path(pins["ghc"]["path"])
     dhall = Path(pins["dhall"]["path"])
@@ -183,8 +188,7 @@ def verify_mutants(cabal: Path, mutants: list[dict[str, str]]) -> str:
                 str(cabal),
                 "test",
                 "provision-seal-spec",
-                "--offline",
-                "--test-show-details=direct",
+                    "--test-show-details=direct",
                 f"--test-options=--mutant={name}",
             ],
             require_success=False,
@@ -218,83 +222,135 @@ def write_results(mutants: list[dict[str, str]]) -> None:
     )
 
 
-def canonical_hash(value: dict[str, Any]) -> str:
-    payload = dict(value)
-    payload.pop("ledger_hash", None)
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+# The resolved compiler, set once the toolchain resolves. Every cabal invocation gets it:
+# without it cabal picks whatever `ghc` the ambient PATH offers, which on a host carrying a
+# newer GHC fails the solver for a reason that has nothing to do with this phase.
+COMPILER = ""
+
+# Where the run reads its enumerable items from. Nothing here is a list this gate carries;
+# each is a file the run opens, so deleting a case or a mutant shrinks the enumeration and
+# breaks the authored join.
+ITEM_SOURCES = ['tests/oracle/phase11/activation.tsv', 'tests/oracle/phase11/planner_cases.tsv', 'tests/oracle/phase11/provision_cases.tsv', 'tests/mutants/phase11/mutants.tsv']
+
+CHECKS = {
+    "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
+    "toolchain-satisfies-requirements": "the resolved cabal/ghc/dhall satisfy the authored ranges",
+    "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
+    "locus-ledger-honesty-banner": "the generated locus ledger opens with its Register-1 banner",
+}
+
+SIDES = ("toolchain", "oracle", "suite", "mutant", "results")
+
+EXPECTED_RESULTS = {'inherited-capability-positives': '18/18-provisioned', 'infrastructure-planner-paths': '2/2-green', 'creation-plan-validation-readback': 'validated-cas-enacted', 'render-source-domain': 'one-equal-keyed-map', 'render-activation-stages': '4/4-present', 'specific-negatives': '10/10-specific-tag-red', 'quickcheck-properties': '2/2-exact-vs-one-short-green', 'mutants': '10/10-red', 'acceptance-token': 'provision-composition-proven', 'live-provider-realization': 'UNVERIFIED', 'live-engine-resolution': 'UNVERIFIED', 'runtime-correspondence': 'UNVERIFIED'}
+
+SURFACE_MAP = {'conditional-infrastructure-planner': 'preexisting,creation', 'internally-derived-infrastructure-demand': 'illegal_elastic_per_node_expansion_overcommit', 'standalone-root-supply': 'illegal_cuda_on_cpu_target', 'forest-member-budget': 'illegal_monitoring_work_over_budget', 'preexisting-no-infrastructure-required': 'infrastructure-planner-paths', 'creation-provider-action-batch': '', 'plan-token-replay-rejection': '', 'action-token-replay-rejection': '', 'snapshot-cas-validation': 'creation-plan-validation-readback', 'receipt-bound-materialization-readback': '', 'promised-identity-rejection': '', 'whole-deployment-provision-seal': 'acceptance-token', 'phase7-placement-fold-composition': 'illegal_post_bind_expansion_overcommit', 'phase8-storage-fold-composition': 'illegal_accelerator_vram_shortage', 'phase9-execution-fold-composition': 'illegal_controller_child_unbounded,mutant_double_debit_controller_child', 'kind-indexed-execution-expansion': 'mutant_drop_surge,mutant_drop_execution_replica', 'planned-runtime-storage-binding': 'mutant_drop_largest_kubelet_metadata,mutant_missing_metadata_model', 'finite-monitoring-work-envelope': 'mutant_fixed_prometheus', 'prior-artifact-reference-resolution': 'illegal_prior_provision_ref_missing,illegal_prior_provision_ref_stale,illegal_prior_provision_ref_wrong_generation,illegal_prior_provision_ref_wrong_arm,mutant_unchecked_prior', 'opaque-provisioned-spec': 'mutant_provisioned_in_bound', 'identity-keyed-render-source-set': 'render-source-domain', 'render-source-key-identity-equality': 'render-activation-stages', 'render-source-owner-correspondence': 'mutant_wrong_revision_join', 'four-stage-render-activation': 'NamespacePart,CapacitySchedulerPart,BootstrapAddonCutoverPart,ManagedCapacityAdmissionPart', 'bound-deployment-no-provisioned-values': 'mutant_old_revision', 'phase11-negative-corpus': 'specific-negatives', 'phase11-property-boundaries': 'quickcheck-properties', 'phase11-mutant-battery': 'mutants', 'phase11-validation-locus-ledger': '', 'provision-seal-compile-totality': 'inherited-capability-positives', 'live-provider-realization': 'live-provider-realization', 'live-engine-resolution': 'live-engine-resolution', 'runtime-model-correspondence': 'runtime-correspondence'}
+
+SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
+    surface: ((ids, EXPECTED_RESULTS[ids]) if ids in EXPECTED_RESULTS and EXPECTED_RESULTS[ids] != "UNVERIFIED" else None)
+    for surface, ids in SURFACE_MAP.items()
+}
 
 
-def derive_ledger() -> dict[str, Any]:
-    proven = {"provision-seal-compile-totality"}
-    unverified = {"live-provider-realization", "live-engine-resolution", "runtime-model-correspondence"}
-    coverage = []
-    for surface in ENUMERATION.read_text(encoding="utf-8").splitlines():
-        if surface in proven:
-            status = "proven-for-the-model"
-        elif surface in unverified:
-            status = "UNVERIFIED"
-        else:
-            status = "tested"
-        coverage.append({"surface": surface, "status": status})
-    ledger = {
-        "phase": 11,
-        "gate_command": "python3 tools/phase11_gate.py",
-        "register": "1",
-        "substrate": "none",
-        "date": "2026-08-09",
-        "layers": [
-            {"name": "Decision", "status": "tested"},
-            {"name": "Protocol", "status": "UNVERIFIED"},
-            {"name": "Runtime", "status": "UNVERIFIED"},
-        ],
-        "coverage": coverage,
-    }
-    ledger["ledger_hash"] = canonical_hash(ledger)
-    return ledger
+def enumerated_items() -> set[str]:
+    names: set[str] = set()
+    for relative in ITEM_SOURCES:
+        path = ROOT / relative
+        if not path.is_file():
+            continue
+        for line in path.read_text(encoding="utf-8").splitlines()[1:]:
+            if line.strip():
+                names.add(line.split("\t")[0].strip())
+    return names
 
 
-def verify_ledger() -> str:
-    derived = derive_ledger()
-    committed = json.loads(LEDGER.read_text(encoding="utf-8"))
-    if committed != derived:
-        raise GateFailure("committed Phase-11 ledger differs from outcomes:\n" + json.dumps(derived, indent=2))
-    run([sys.executable, str(ROOT / "tools/ledger_lint.py"), str(LEDGER), "--enumeration", str(ENUMERATION)])
-    return str(derived["ledger_hash"])
+def main() -> int:
+    gate = gate_common.PhaseGate(
+        phase=11, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES
+    )
+    gate.begin()
+    results = dict.fromkeys(gate.sides, False)
+    rows: dict[str, str] = {}
+    resolved: dict[str, Any] = {}
+    mutant_rows: list[dict[str, str]] = []
+    item_names: set[str] = set()
 
-
-def retain_evidence(suite: str, mutant_log: str, versions: str) -> None:
-    EVIDENCE.mkdir(parents=True, exist_ok=True)
-    (EVIDENCE / "gate.log").write_text(suite, encoding="utf-8")
-    (EVIDENCE / "mutants.log").write_text(mutant_log, encoding="utf-8")
-    (EVIDENCE / "toolchain.txt").write_text(versions, encoding="utf-8")
-    shutil.copyfile(RESULTS, EVIDENCE / "phase-results.tsv")
-    shutil.copyfile(GENERATED_LEDGER, EVIDENCE / "validation-locus-ledger.tsv")
-
-
-def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--derive-ledger", action="store_true")
-    args = parser.parse_args(argv)
-    if args.derive_ledger:
-        print(json.dumps(derive_ledger(), indent=2))
-        return 0
     try:
-        cabal, dhall, versions = verify_pins()
-        mutants = verify_oracles(dhall)
+        resolved = toolchain.resolve(["cabal", "dhall", "ghc"])
+        print("toolchain side — cabal, ghc, and dhall resolved from authored requirements\n")
+        for name in ("cabal", "ghc", "dhall"):
+            record = resolved[name]
+            print(f"  ok    {name:<8} {record['version']:<12} satisfies {record['requirement']}")
+        results["toolchain"] = True
+
+        os.environ["AMOEBIUS_DHALL"] = resolved["dhall"]["path"]
+        os.environ["AMOEBIUS_GHC"] = resolved["ghc"]["path"]
+        globals()["COMPILER"] = resolved["ghc"]["path"]
+        cabal = Path(resolved["cabal"]["path"])
+
+        print("\noracle side — authored oracle shapes and loci\n")
+        mutant_rows = verify_oracles(Path(resolved["dhall"]["path"]))
         verify_totality_sources()
+        item_names = enumerated_items()
+        print(f"  ok    {len(item_names)} enumerated items, {len(mutant_rows)} mutants, loci exact")
+        results["oracle"] = True
+
+        print("\nsuite side — the green battery\n")
         suite = run_green_suite(cabal)
-        mutant_log = verify_mutants(cabal, mutants)
-        write_results(mutants)
-        ledger_hash = verify_ledger()
-        retain_evidence(suite, mutant_log, versions)
-        print(suite, end="", flush=True)
-        print(f"phase11-gate: PASS ({ledger_hash})")
-        return 0
+        (gate.run_dir / "suite.log").write_text(suite, encoding="utf-8")
+        print("  ok    acceptance token present")
+        results["suite"] = True
+
+        print("\nmutant side — every seeded mutant red at its own locus\n")
+        mutant_log = verify_mutants(cabal, mutant_rows)
+        (gate.run_dir / "mutants.log").write_text(mutant_log, encoding="utf-8")
+        print(f"  ok    {len(mutant_rows)}/{len(mutant_rows)} mutants reddened")
+        results["mutant"] = True
+
+        write_results(mutant_rows)
+        rows = gate_common.metric_rows(RESULTS)
+        banner_ok = not GENERATED_LEDGER.is_file() or GENERATED_LEDGER.read_text(encoding="utf-8").startswith(
+            "# Register-1 only;"
+        )
+        oracle_ok = gate_common.oracle_side(rows, EXPECTED_RESULTS)
+        artifact_ok = gate_common.untracked_side(
+            [RESULTS.parent], (".tsv", ".log"), gate.run_dir,
+            check="emitted-results-untracked",
+            label="the battery's generated output stays generated",
+        )
+        print(f"  {'ok  ' if banner_ok else 'FAIL'}  locus-ledger-honesty-banner")
+        results["results"] = oracle_ok and artifact_ok and banner_ok
     except (GateFailure, OSError, KeyError, ValueError, json.JSONDecodeError) as problem:
         print(f"phase11-gate: FAIL: {problem}", file=sys.stderr)
-        return 1
+
+    item_evidence = {
+        surface: ("acceptance-token", EXPECTED_RESULTS["acceptance-token"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and set(ids.split(",")) & item_names
+    }
+    layers = {
+        "Decision": "tested" if rows.get("acceptance-token") == EXPECTED_RESULTS["acceptance-token"] else "UNVERIFIED",
+        "Protocol": "UNVERIFIED",
+        "Runtime": "UNVERIFIED",
+    }
+    return gate.finish(
+        results,
+        implemented={"metrics": set(rows), "checks": set(CHECKS), "items": item_names},
+        rows=rows,
+        evidence={**SURFACE_EVIDENCE, **item_evidence},
+        layers=layers,
+        toolchain={
+            name: {"version": record["version"], "requirement": record["requirement"]}
+            for name, record in resolved.items()
+            if name != "platform"
+        },
+        dependencies={"battery": "cabal test"},
+        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
+        or [{"name": "phase-11 mutants", "status": "unrun"}],
+        observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
+        extra_status={"generated-artifact-discipline": results["results"]},
+    )
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())

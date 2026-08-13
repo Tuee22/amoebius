@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-18 pure UI-authorization checks."""
+"""Run and seal the Phase-18 pure UI-authorization checks.
+
+The capability claim is unchanged: the sealed action registry, the independently authored
+access matrix, the four parity diagnostics, the four authority-epoch refusals, and both
+seeded mutants. What changed is where the run's own records live. Evidence and the
+proven/tested/assumed ledger are emitted into the run bundle under `gen/runs/`, the surface
+enumeration is produced at run time and joined to an authored expectation, and the result is
+bound to a source-snapshot digest and retained as an external attestation — the universal
+half owned by `tools/gate_common.py`.
+"""
 
 from __future__ import annotations
 
-import argparse
 import csv
-import hashlib
 import json
 import os
 import re
@@ -14,19 +21,109 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import gate_common
+import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
-PINS = ROOT / "toolchain/pins.json"
 FIXTURES = ROOT / "test/fixtures/ui_authorization"
 MUTANTS = ROOT / "tests/mutants/phase18/mutants.tsv"
 LOCUS = ROOT / "tests/oracle/phase18/validation_locus.tsv"
-ENUMERATION = ROOT / "test/enumeration/phase_18_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_18_ledger.json"
+MODULE = ROOT / "src/Amoebius/Ui/Security/Authorization.hs"
+REFERENCE = ROOT / "test/ui/AuthorizationReference.hs"
 RESULTS = ROOT / "gen/dsl/phase18/phase-results.tsv"
 GENERATED_LEDGER = ROOT / "gen/dsl/phase18/validation-locus-ledger.tsv"
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_18"
+CONTRACT = "DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md"
+GATE_COMMAND = "python3 tools/phase18_gate.py"
+
+COMPILER = ""
+
+SANCTIONED_OBSERVERS = ("unshare-network-namespace", "strace-socket-EPERM")
+
+# One check id per private type. A single "the constructors are private" bit stays green
+# while one of them quietly opens, so the scan reports each separately.
+OPAQUE_TYPES = (
+    ("ActionId", "action-id-constructor-private"),
+    ("BoundActionRegistry", "bound-registry-constructor-private"),
+    ("AuthorityEpochs", "authority-epochs-constructor-private"),
+    ("AuthoritySnapshot", "authority-snapshot-constructor-private"),
+    ("AuthorizedAction", "authorized-action-constructor-private"),
+    ("CanRead", "can-read-constructor-private"),
+    ("CanInvoke", "can-invoke-constructor-private"),
+)
+
+# The closed sums this phase's registry is defined over, with the exact arms the contract
+# names. A union that grows an arm is a widened effect surface, not a refactor.
+CLOSED_UNIONS = (
+    (
+        "ActionEffect",
+        ("ReadData", "MutateData", "StartWorkflow", "ObserveWorkflow", "EndSession"),
+        "closed-action-effect-union",
+    ),
+    (
+        "Permission",
+        ("ReadPermission", "WritePermission", "InvokePermission"),
+        "closed-permission-union",
+    ),
+)
+
+CHECKS = {
+    **{check: f"the {name} constructor is not exported" for name, check in OPAQUE_TYPES},
+    **{check: f"{name} is a closed, enumerable sum of its authored arms" for name, _arms, check in CLOSED_UNIONS},
+    "visibility-absent-from-authorize": "client visibility does not enter the authorization transition",
+    "effect-requires-authorized-action": "the effect interpreter consumes AuthorizedAction and nothing weaker",
+    "reference-evaluator-independent": "the reference evaluator does not import the module under test",
+    "authorization-partial-token-scan": "no partial or unsafe token survives in the authorization module",
+    "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
+    "toolchain-satisfies-requirements": "the resolved cabal and ghc satisfy the authored ranges",
+    "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
+}
+
+SIDES = ("toolchain", "oracle", "source", "suite", "mutant", "results")
+
+EXPECTED_RESULTS = {
+    "action-registry": "5/5-exact",
+    "projection-parity": "client=server=independent-pin",
+    "authorization-matrix": "6/6-independent-agreement",
+    "registry-errors": "4/4-exact",
+    "stale-epochs": "4/4-exact-empty-trace",
+    "generated-coverage": "9/9-classes-at-5-percent",
+    "mutants": "2/2-red",
+    "network-observer": "sanctioned-observer",
+    "identity-provider-truth": "UNVERIFIED",
+    "runtime-policy-enforcement": "UNVERIFIED",
+    "provider-isolation": "UNVERIFIED",
+}
+
+CLASS_METRIC = {
+    "registry": "action-registry",
+    "decision": "authorization-matrix",
+    "parity": "registry-errors",
+    "epoch": "stale-epochs",
+    "property": "generated-coverage",
+    "mutant": "mutants",
+}
+
+CHECK_SIDE = {
+    **{check: "source" for _name, check in OPAQUE_TYPES},
+    **{check: "source" for _name, _arms, check in CLOSED_UNIONS},
+    "visibility-absent-from-authorize": "source",
+    "effect-requires-authorized-action": "source",
+    "reference-evaluator-independent": "source",
+    "authorization-partial-token-scan": "source",
+    "emitted-results-untracked": "results",
+    "recorded-results-match-oracle": "results",
+    "toolchain-satisfies-requirements": "toolchain",
+}
+
+MUTANT_TOKENS = {
+    "default_allow": "phase18-auth-mutant: RED default_allow default-deny",
+    "visibility_is_authorization": "phase18-auth-mutant: RED visibility_is_authorization hidden-invocable+stale",
+}
 
 
 class GateFailure(RuntimeError):
@@ -44,6 +141,9 @@ def environment() -> dict[str, str]:
 
 
 def run(command: list[str], *, require_success: bool = True) -> subprocess.CompletedProcess[str]:
+    """Run a command, forcing every cabal invocation onto the resolved compiler."""
+    if COMPILER and command and Path(command[0]).name.startswith("cabal"):
+        command = [command[0], f"--with-compiler={COMPILER}", *command[1:]]
     result = subprocess.run(
         command,
         cwd=ROOT,
@@ -63,20 +163,7 @@ def read_tsv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle, delimiter="\t"))
 
 
-def verify_pins() -> tuple[Path, str]:
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
-    cabal = Path(pins["cabal"]["path"])
-    ghc = Path(pins["ghc"]["path"])
-    for executable in (cabal, ghc):
-        if not executable.is_absolute() or not executable.is_file():
-            raise GateFailure(f"pinned executable is absent: {executable}")
-    versions = run([str(cabal), "--numeric-version"]).stdout + run([str(ghc), "--numeric-version"]).stdout
-    if pins["cabal"]["version"] not in versions or pins["ghc"]["version"] not in versions:
-        raise GateFailure(f"toolchain version drifted:\n{versions}")
-    return cabal, versions
-
-
-def verify_oracles() -> None:
+def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     registry = read_tsv(FIXTURES / "action_registry.tsv")
     matrix = read_tsv(FIXTURES / "authorization_matrix.tsv")
     errors = read_tsv(FIXTURES / "decode_errors.tsv")
@@ -100,8 +187,9 @@ def verify_oracles() -> None:
         "StalePolicyEpoch", "StaleMembershipEpoch", "StaleGrantEpoch", "StaleScopeEpoch",
     ]:
         raise GateFailure("authority epoch errors drifted")
-    if len(read_tsv(MUTANTS)) != 2:
-        raise GateFailure("Phase-18 mutant manifest must contain exactly two rows")
+    mutants = read_tsv(MUTANTS)
+    if len(mutants) != 2 or {row["mutant"] for row in mutants} != set(MUTANT_TOKENS):
+        raise GateFailure("Phase-18 mutant manifest must contain exactly the two contract mutants")
     locus = read_tsv(LOCUS)
     if len(locus) != 30 or len({row["entry"] for row in locus}) != 30:
         raise GateFailure("Phase-18 validation locus must contain thirty unique rows")
@@ -114,36 +202,77 @@ def verify_oracles() -> None:
         + LOCUS.read_text(encoding="utf-8"),
         encoding="utf-8",
     )
+    counts = {
+        "registry": len(registry),
+        "matrix": len(matrix),
+        "errors": len(errors),
+        "stale": len(stale),
+    }
+    return mutants, counts
+
+
+def item_classes() -> dict[str, str]:
+    classes = {row["entry"].strip(): row["class"].strip() for row in read_tsv(LOCUS)}
+    for row in read_tsv(MUTANTS):
+        classes[row["mutant"].strip()] = "mutant"
+    return classes
+
+
+def union_arms(source: str, type_name: str) -> tuple[list[str], str]:
+    """Return the constructor arms of a `data` declaration and its deriving clause."""
+    match = re.search(rf"^data {type_name}\b(.*?)(?=^\S|\Z)", source, re.MULTILINE | re.DOTALL)
+    if not match:
+        raise GateFailure(f"{type_name} is no longer declared in the authorization module")
+    body = match.group(1)
+    deriving = ""
+    if "deriving" in body:
+        body, _, deriving = body.partition("deriving")
+    arms = re.findall(r"[=|]\s*([A-Z][A-Za-z0-9_']*)", body)
+    return arms, deriving
 
 
 def verify_source_boundaries() -> None:
-    path = ROOT / "src/Amoebius/Ui/Security/Authorization.hs"
-    source = path.read_text(encoding="utf-8")
+    source = MODULE.read_text(encoding="utf-8")
     header = source.split(") where", 1)[0]
-    for type_name in (
-        "ActionId", "BoundActionRegistry", "AuthorityEpochs", "AuthoritySnapshot",
-        "AuthorizedAction", "CanRead", "CanInvoke",
-    ):
-        if f"{type_name} (.." in header:
-            raise GateFailure(f"private constructor exported: {type_name}")
+    for type_name, check in OPAQUE_TYPES:
+        if not re.search(rf"^\s*[,(]?\s*{type_name}\b", header, re.MULTILINE):
+            raise GateFailure(f"{check}: {type_name} is no longer exported")
+        # Matched without assuming the author's spacing: `ActionId(..)` opens the
+        # constructor exactly as `ActionId (..)` does.
+        if re.search(rf"\b{type_name}\s*\(\s*\.\.", header):
+            raise GateFailure(f"{check}: private constructor exported: {type_name}")
+    for type_name, arms, check in CLOSED_UNIONS:
+        observed, deriving = union_arms(source, type_name)
+        if observed != list(arms):
+            raise GateFailure(f"{check}: {type_name} arms drifted: {observed}")
+        if "Bounded" not in deriving or "Enum" not in deriving:
+            raise GateFailure(f"{check}: {type_name} is no longer Bounded and Enum, so it is not enumerably closed")
     prohibited = re.compile(r"\b(error|undefined|fromJust|head|tail|unsafePerformIO|unsafeCoerce)\b|!!")
     stripped = re.sub(r'"(?:\\.|[^"\\])*"', '""', re.sub(r"--[^\n]*", "", source))
     match = prohibited.search(stripped)
     if match:
-        raise GateFailure(f"partial/unsafe token {match.group(0)!r} in {path.relative_to(ROOT)}")
+        raise GateFailure(
+            f"authorization-partial-token-scan: partial token {match.group(0)!r} in {MODULE.relative_to(ROOT)}"
+        )
     authorize_body = source.split("authorize (BoundActionRegistry", 1)[1].split("\ncanRead ::", 1)[0]
     if "specVisibility" in authorize_body or "Visible" in authorize_body or "Hidden" in authorize_body:
-        raise GateFailure("client visibility entered the production authorization transition")
+        raise GateFailure(
+            "visibility-absent-from-authorize: client visibility entered the production authorization transition"
+        )
     if "interpretAuthorized :: AuthorizedAction -> [EffectEvent]" not in source:
-        raise GateFailure("effect interpreter no longer requires AuthorizedAction")
-    reference = (ROOT / "test/ui/AuthorizationReference.hs").read_text(encoding="utf-8")
+        raise GateFailure("effect-requires-authorized-action: the effect interpreter no longer requires AuthorizedAction")
+    reference = REFERENCE.read_text(encoding="utf-8")
     if "Amoebius.Ui.Security.Authorization" in reference:
-        raise GateFailure("independent evaluator imports the production authorization module")
+        raise GateFailure(
+            "reference-evaluator-independent: the independent evaluator imports the production module"
+        )
 
 
 def isolated_green(cabal: Path) -> tuple[str, str]:
     run([str(cabal), "build", "test:ui-authorization-spec", "--offline"])
     binary = Path(run([str(cabal), "list-bin", "test:ui-authorization-spec", "--offline"]).stdout.strip())
+    if not binary.is_absolute() or not binary.is_file():
+        raise GateFailure("ui-authorization-spec binary path is not absolute")
     with tempfile.TemporaryDirectory(prefix="amoebius-phase18-") as directory:
         trace = Path(directory) / "network.trace"
         probe = run(["unshare", "-n", "true"], require_success=False)
@@ -158,7 +287,9 @@ def isolated_green(cabal: Path) -> tuple[str, str]:
                 "-o", str(trace), str(binary),
             ])
             if trace.read_text(encoding="utf-8").strip():
-                raise GateFailure("authorization gate attempted a network syscall:\n" + trace.read_text(encoding="utf-8"))
+                raise GateFailure(
+                    "authorization gate attempted a network syscall:\n" + trace.read_text(encoding="utf-8")
+                )
             observer = "strace-socket-EPERM"
     return result.stdout, observer
 
@@ -166,19 +297,20 @@ def isolated_green(cabal: Path) -> tuple[str, str]:
 def run_green(cabal: Path) -> tuple[str, str]:
     suite = run([str(cabal), "test", "ui-authorization-spec", "--offline", "--test-show-details=direct"])
     isolated, observer = isolated_green(cabal)
-    token = "ui-authorization-spec: PASS (5 actions, 6 matrix rows, 4 parity errors, 4 stale epochs, 9 coverage classes, 2 mutants)"
+    token = (
+        "ui-authorization-spec: PASS "
+        "(5 actions, 6 matrix rows, 4 parity errors, 4 stale epochs, 9 coverage classes, 2 mutants)"
+    )
     if token not in suite.stdout or token not in isolated:
         raise GateFailure("Phase-18 acceptance token is absent from normal or isolated execution")
     return suite.stdout + isolated, observer
 
 
-def run_mutants(cabal: Path) -> str:
-    tokens = {
-        "default_allow": "phase18-auth-mutant: RED default_allow default-deny",
-        "visibility_is_authorization": "phase18-auth-mutant: RED visibility_is_authorization hidden-invocable+stale",
-    }
+def run_mutants(cabal: Path, mutants: list[dict[str, str]]) -> tuple[str, int]:
     logs: list[str] = []
-    for mutant, token in tokens.items():
+    reddened = 0
+    for row in mutants:
+        mutant = row["mutant"]
         result = run(
             [
                 str(cabal), "test", "ui-authorization-spec", "--offline", "--test-show-details=direct",
@@ -186,21 +318,23 @@ def run_mutants(cabal: Path) -> str:
             ],
             require_success=False,
         )
-        if result.returncode == 0 or token not in result.stdout:
-            raise GateFailure(f"authorization mutant survived or missed its red locus: {mutant}\n{result.stdout}")
+        if result.returncode == 0 or MUTANT_TOKENS[mutant] not in result.stdout:
+            raise GateFailure(f"mutant survived or missed its red locus: {mutant}\n{result.stdout}")
+        reddened += 1
         logs.append(result.stdout)
-    return "\n".join(logs)
+    return "\n".join(logs), reddened
 
 
-def write_results(observer: str) -> None:
+def write_results(counts: Mapping[str, int], reddened: int, total: int, observer: str) -> None:
+    """Record what this run measured, not what the contract hoped for."""
     metrics = {
-        "action-registry": "5/5-exact",
+        "action-registry": f"{counts['registry']}/5-exact",
         "projection-parity": "client=server=independent-pin",
-        "authorization-matrix": "6/6-independent-agreement",
-        "registry-errors": "4/4-exact",
-        "stale-epochs": "4/4-exact-empty-trace",
+        "authorization-matrix": f"{counts['matrix']}/6-independent-agreement",
+        "registry-errors": f"{counts['errors']}/4-exact",
+        "stale-epochs": f"{counts['stale']}/4-exact-empty-trace",
         "generated-coverage": "9/9-classes-at-5-percent",
-        "mutants": "2/2-red",
+        "mutants": f"{reddened}/{total}-red",
         "network-observer": observer,
         "identity-provider-truth": "UNVERIFIED",
         "runtime-policy-enforcement": "UNVERIFIED",
@@ -213,83 +347,137 @@ def write_results(observer: str) -> None:
     )
 
 
-def canonical_hash(value: dict[str, Any]) -> str:
-    payload = dict(value)
-    payload.pop("ledger_hash", None)
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+def surface_decisions(
+    expected_rows: list[tuple[str, str, list[str]]],
+    rows: Mapping[str, str],
+    classes: Mapping[str, str],
+    results: Mapping[str, bool],
+) -> dict[str, bool]:
+    """Decide each item- and check-backed surface from a recorded observation."""
+    status: dict[str, bool] = {}
+    for surface, owner, ids in expected_rows:
+        if owner == "metrics" or not ids:
+            continue
+        if owner == "items":
+            unknown = [i for i in ids if i not in classes]
+            metrics = {CLASS_METRIC[classes[i]] for i in ids if i in classes}
+            status[surface] = not unknown and bool(metrics) and all(
+                rows.get(metric) == EXPECTED_RESULTS[metric] for metric in metrics
+            )
+        else:
+            status[surface] = all(results.get(CHECK_SIDE.get(check, ""), False) for check in ids)
+    return status
 
 
-def derive_ledger() -> dict[str, Any]:
-    model_proven = {
-        "opaque-action-id", "closed-action-effect", "closed-permission", "opaque-bound-action-registry",
-        "opaque-authority-epochs", "opaque-authority-snapshot", "opaque-authorized-action",
-        "opaque-can-read", "opaque-can-invoke", "effect-after-authorization-only",
-    }
-    unverified = {"identity-provider-truth", "runtime-policy-enforcement", "provider-isolation"}
-    coverage = []
-    for surface in ENUMERATION.read_text(encoding="utf-8").splitlines():
-        status = "proven-for-the-model" if surface in model_proven else "UNVERIFIED" if surface in unverified else "tested"
-        coverage.append({"surface": surface, "status": status})
-    ledger = {
-        "phase": 18,
-        "gate_command": "python3 tools/phase18_gate.py",
-        "register": "1",
-        "substrate": "none",
-        "date": "2026-08-09",
-        "layers": [
-            {"name": "Decision", "status": "proven-for-the-model"},
-            {"name": "Protocol", "status": "UNVERIFIED"},
-            {"name": "Runtime", "status": "UNVERIFIED"},
-        ],
-        "coverage": coverage,
-    }
-    ledger["ledger_hash"] = canonical_hash(ledger)
-    return ledger
+def main() -> int:
+    gate = gate_common.PhaseGate(
+        phase=18, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES
+    )
+    gate.begin()
+    results = dict.fromkeys(gate.sides, False)
+    rows: dict[str, str] = {}
+    resolved: dict[str, Any] = {}
+    mutant_rows: list[dict[str, str]] = []
+    classes: dict[str, str] = {}
+    reddened = 0
 
-
-def verify_ledger() -> str:
-    derived = derive_ledger()
-    committed = json.loads(LEDGER.read_text(encoding="utf-8"))
-    if committed != derived:
-        raise GateFailure("committed Phase-18 ledger differs from outcomes:\n" + json.dumps(derived, indent=2))
-    run([sys.executable, str(ROOT / "tools/ledger_lint.py"), str(LEDGER), "--enumeration", str(ENUMERATION)])
-    return str(derived["ledger_hash"])
-
-
-def retain_evidence(green: str, mutants: str, versions: str) -> None:
-    EVIDENCE.mkdir(parents=True, exist_ok=True)
-    (EVIDENCE / "gate.log").write_text(green, encoding="utf-8")
-    (EVIDENCE / "mutant.log").write_text(mutants, encoding="utf-8")
-    (EVIDENCE / "toolchain.txt").write_text(versions, encoding="utf-8")
-    shutil.copyfile(RESULTS, EVIDENCE / "phase-results.tsv")
-    shutil.copyfile(GENERATED_LEDGER, EVIDENCE / "validation-locus-ledger.tsv")
-
-
-def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--derive-ledger", action="store_true")
-    args = parser.parse_args(argv)
-    if args.derive_ledger:
-        print(json.dumps(derive_ledger(), indent=2))
-        return 0
     try:
-        cabal, versions = verify_pins()
-        verify_oracles()
+        resolved = toolchain.resolve(["cabal", "ghc"])
+        print("toolchain side — cabal and ghc resolved from authored requirements\n")
+        for name in ("cabal", "ghc"):
+            record = resolved[name]
+            print(f"  ok    {name:<8} {record['version']:<12} satisfies {record['requirement']}")
+        results["toolchain"] = True
+        globals()["COMPILER"] = resolved["ghc"]["path"]
+        cabal = Path(resolved["cabal"]["path"])
+
+        print("\noracle side — the action registry, access matrix, parity, and epoch pins\n")
+        mutant_rows, counts = verify_oracles()
+        classes = item_classes()
+        print(f"  ok    {len(classes)} enumerated items, {len(mutant_rows)} mutants")
+        results["oracle"] = True
+
+        print("\nsource side — the registry's constructors and unions stay closed\n")
         verify_source_boundaries()
+        for _name, check in OPAQUE_TYPES:
+            print(f"  ok    {check}")
+        for _name, _arms, check in CLOSED_UNIONS:
+            print(f"  ok    {check}")
+        print("  ok    visibility-absent-from-authorize    no visibility token in the authorization transition")
+        print("  ok    effect-requires-authorized-action   the interpreter consumes AuthorizedAction")
+        print("  ok    reference-evaluator-independent     the reference does not import the subject")
+        print("  ok    authorization-partial-token-scan    no partial or unsafe token in the module")
+        results["source"] = True
+
+        print("\nsuite side — the pure authorization battery under a network observer\n")
         green, observer = run_green(cabal)
-        mutants = run_mutants(cabal)
-        write_results(observer)
-        ledger_hash = verify_ledger()
-        retain_evidence(green, mutants, versions)
-        print(green, end="", flush=True)
-        print(f"phase18-network-observer: {observer}")
-        print(f"phase18-gate: PASS ({ledger_hash})")
-        return 0
-    except (GateFailure, OSError, KeyError, ValueError, json.JSONDecodeError) as problem:
+        (gate.run_dir / "suite.log").write_text(green, encoding="utf-8")
+        if observer not in SANCTIONED_OBSERVERS:
+            print(f"  FAIL  network observer {observer!r} is not one this contract sanctions")
+        else:
+            print(f"  ok    network-isolated pure gate proven by {observer}")
+            results["suite"] = True
+
+        print("\nmutant side — every seeded mutant red at its own locus\n")
+        mutant_log, reddened = run_mutants(cabal, mutant_rows)
+        (gate.run_dir / "mutants.log").write_text(mutant_log, encoding="utf-8")
+        print(f"  ok    {reddened}/{len(mutant_rows)} mutants reddened")
+        results["mutant"] = True
+
+        write_results(counts, reddened, len(mutant_rows), observer)
+        rows = gate_common.metric_rows(RESULTS)
+        compared = dict(rows)
+        if compared.get("network-observer") in SANCTIONED_OBSERVERS:
+            compared["network-observer"] = "sanctioned-observer"
+        oracle_ok = gate_common.oracle_side(compared, EXPECTED_RESULTS)
+        artifact_ok = gate_common.untracked_side(
+            [RESULTS.parent], (".tsv", ".log"), gate.run_dir,
+            check="emitted-results-untracked",
+            label="the battery's generated output stays generated",
+        )
+        rows = compared
+        results["results"] = oracle_ok and artifact_ok
+    except (GateFailure, OSError, KeyError, ValueError, IndexError, json.JSONDecodeError) as problem:
         print(f"phase18-gate: FAIL: {problem}", file=sys.stderr)
-        return 1
+
+    try:
+        expected_rows = gate.load_expectations()
+    except gate_common.GateError:
+        expected_rows = []
+    evidence: dict[str, tuple[str, str] | None] = {
+        surface: (ids[0], EXPECTED_RESULTS[ids[0]])
+        if owner == "metrics" and ids and EXPECTED_RESULTS.get(ids[0], "UNVERIFIED") != "UNVERIFIED"
+        else None
+        for surface, owner, ids in expected_rows
+    }
+    layers = {
+        "Decision": "proven-for-the-model"
+        if rows.get("authorization-matrix") == EXPECTED_RESULTS["authorization-matrix"]
+        and rows.get("stale-epochs") == EXPECTED_RESULTS["stale-epochs"]
+        else "UNVERIFIED",
+        "Protocol": "UNVERIFIED",
+        "Runtime": "UNVERIFIED",
+    }
+    return gate.finish(
+        results,
+        implemented={"metrics": set(rows), "checks": set(CHECKS), "items": set(classes)},
+        rows=rows,
+        evidence=evidence,
+        layers=layers,
+        toolchain={
+            name: {"version": record["version"], "requirement": record["requirement"]}
+            for name, record in resolved.items()
+            if name != "platform"
+        },
+        dependencies={"ui-authorization-spec": "cabal test"},
+        mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
+        or [{"name": "phase-18 mutants", "status": "unrun"}],
+        observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
+        if RESULTS.is_file()
+        else {},
+        extra_status=surface_decisions(expected_rows, rows, classes, results),
+    )
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())

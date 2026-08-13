@@ -22,7 +22,7 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/ledgers/phase_09_execution_accelerator.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -33,11 +33,11 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 9.1: Execution-epoch expansion + scheduler-reservation algebra ⏸️](#sprint-91-execution-epoch-expansion--scheduler-reservation-algebra-)
-- [Sprint 9.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ⏸️](#sprint-92-kubeletcri-runtime-metadata--node-local-oci-contentsnapshotimage--physical-disk-parent-accounting-)
-- [Sprint 9.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ⏸️](#sprint-93-accelerator-residencynet-allocatable-vram--provider-root-disk-template--enginebuildetcdmonitoring-compute-)
-- [Sprint 9.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ⏸️](#sprint-94-the-composed-full-resource-vector-place-witness--properties--independent-validator--per-axis-mutants-)
-- [Sprint 9.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ⏸️](#sprint-95-the-executionacceleratorprovider-root-fold-negative-corpus--the-composed-gate-)
+- [Sprint 9.1: Execution-epoch expansion + scheduler-reservation algebra ✅](#sprint-91-execution-epoch-expansion--scheduler-reservation-algebra-)
+- [Sprint 9.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ✅](#sprint-92-kubeletcri-runtime-metadata--node-local-oci-contentsnapshotimage--physical-disk-parent-accounting-)
+- [Sprint 9.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ✅](#sprint-93-accelerator-residencynet-allocatable-vram--provider-root-disk-template--enginebuildetcdmonitoring-compute-)
+- [Sprint 9.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ✅](#sprint-94-the-composed-full-resource-vector-place-witness--properties--independent-validator--per-axis-mutants-)
+- [Sprint 9.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ✅](#sprint-95-the-executionacceleratorprovider-root-fold-negative-corpus--the-composed-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -45,9 +45,26 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:5d183b9ec0877167…`
+(1934 non-ignored files) and published verified external attestation
+`sha256:305cadfdf77170e64269d4842fdc9e8a7fea370b991056a7f465db7009c4bd0b`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: 18
+named negative families across 32 variant rows redden at their specific tags beside 32 green twins, two
+positives decode and place the full resource vector, the single Gate-1 accelerator-owner negative fails at its
+exact locus beside a green twin, seven QuickCheck properties hold with coverage on the decision folds, and all
+45 seeded mutants redden at their own loci. Evidence and the ledger move into
+`gen/runs/phase_09/<run-id>/`.
+
+**The surface join partitions 77 run-time items across 37 claim surfaces, and found five surfaces with nothing
+behind them.** The 32 oracle variants and 45 mutants are claimed exactly once each, so an item nobody claims or
+one claimed twice fails the gate. What that exercise exposed is that `accelerator-interconnect`,
+`build-execution-envelope`, `engine-system-reserve`, `monitoring-work-budget`, and
+`pulumi-execution-envelope` have no oracle case, no mutant, and no metric of their own — the pre-amendment
+ledger reported all five `tested` by naming them in a hand-maintained set, which is an assertion, not
+evidence. The ledger now carries them UNVERIFIED alongside the five live surfaces this register cannot reach,
+and the gap is recorded against Phase 9 in
+[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
 
 **Invalidated historical record:**
 
@@ -371,9 +388,9 @@ durable/cache (Phase 8), accelerator net-allocatable VRAM, execution/admission e
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 9.1: Execution-epoch expansion + scheduler-reservation algebra ⏸️
+## Sprint 9.1: Execution-epoch expansion + scheduler-reservation algebra ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/Execution.hs` owns the closed controller bodies, exact prior
 reference, identity-keyed materialization, empty-capable epochs, and componentwise peak;
 `src/Amoebius/Capacity/Scheduler.hs` owns reservation projection, aggregate snapshot/root-version guard,
@@ -483,9 +500,9 @@ numbers only — the pure expansion fold Phase 11's `provision` seal later invok
 ### Remaining Work
 None.
 
-## Sprint 9.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ⏸️
+## Sprint 9.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/NodeLocalStorage.hs` (the logical
 pod-ephemeral fold, derived mapped-file/AtomicWriter, closed layout routing, exact OCI content/snapshot
 joins, and model-versioned image peak); `src/Amoebius/Capacity/RuntimeStorage.hs` (derive metadata
@@ -606,9 +623,9 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
 ### Remaining Work
 None.
 
-## Sprint 9.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ⏸️
+## Sprint 9.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/Accelerator.hs` (family/profile/device ownership, complete
 coexistence epochs, unsharded/replicated/sharded placement, interconnect, and net VRAM);
 `src/Amoebius/Capacity/ProviderRoot.hs` (private VM/root-EBS
@@ -709,9 +726,9 @@ derivations as pure, checked `provision-seal` operations that feed the composed 
 ### Remaining Work
 None.
 
-## Sprint 9.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ⏸️
+## Sprint 9.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/Composed.hs` retains the Phase-7 placement, Phase-8 storage, and
 Phase-9 execution/runtime/accelerator/provider-root witnesses; `test/dsl/ExecutionAcceleratorProps.hs`
 contains seven sampled properties and the implementation-independent composed witness validator;
@@ -809,9 +826,9 @@ may reject a packable one) for the composed compute `place`, and never claim com
 ### Remaining Work
 None.
 
-## Sprint 9.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ⏸️
+## Sprint 9.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `tests/oracle/phase9/execution_accelerator_cases.tsv` pins 32 direct fold variants across
 the exact eighteen named families and a distinct legal twin for each; `tests/oracle/phase9/gate1_cases.tsv`
 and `dhall/examples/phase9/*` pin the accelerator-owner editor barrier;
@@ -968,5 +985,5 @@ None.
   `InferenceEngine` capability + accelerator residency/coexistence provision built atop the accelerator fold
 - [phase_27_capacity_scheduler.md](phase_27_capacity_scheduler.md) — the live same-binary scheduler role that
   enacts Reserved→BindingInFlight→Bound around Kubernetes Binding
-- [Phase 9 execution/accelerator ledger](ledgers/phase_09_execution_accelerator.md) — the human-readable
+- Phase 9 execution/accelerator ledger — the human-readable
   Register-1 proof/test/assumption boundary

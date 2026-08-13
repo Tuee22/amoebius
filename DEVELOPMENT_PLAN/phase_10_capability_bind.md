@@ -11,7 +11,7 @@ Phase 10 delivers the capability union + representational bind; its design is ow
 Register 1: an in-process battery, no cluster. The gate passed on 2026-08-09 with ledger
 `dynamically-resolved`.
 The human-readable boundary is recorded in the
-[Phase-10 capability-bind ledger](ledgers/phase_10_capability_bind.md).
+Phase-10 capability-bind ledger.
 
 
 > **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
@@ -23,7 +23,7 @@ The human-readable boundary is recorded in the
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_10_capability_bind.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -34,9 +34,9 @@ The human-readable boundary is recorded in the
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 10.1: The closed capability union + the no-product-arm Gate-1 foreclosure ⏸️](#sprint-101-the-closed-capability-union--the-no-product-arm-gate-1-foreclosure-)
-- [Sprint 10.2: The `CapabilityBinding` + total representational `bind` ⏸️](#sprint-102-the-capabilitybinding--total-representational-bind-)
-- [Sprint 10.3: The bind property/corpus + the Register-1 gate ⏸️](#sprint-103-the-bind-propertycorpus--the-register-1-gate-)
+- [Sprint 10.1: The closed capability union + the no-product-arm Gate-1 foreclosure ✅](#sprint-101-the-closed-capability-union--the-no-product-arm-gate-1-foreclosure-)
+- [Sprint 10.2: The `CapabilityBinding` + total representational `bind` ✅](#sprint-102-the-capabilitybinding--total-representational-bind-)
+- [Sprint 10.3: The bind property/corpus + the Register-1 gate ✅](#sprint-103-the-bind-propertycorpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -44,9 +44,24 @@ The human-readable boundary is recorded in the
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:a14933f8e034d4ba…`
+(1935 non-ignored files) and published verified external attestation
+`sha256:af29f3726a6b4464436530958b476925360aec3a82a7005ade12fda31a0ad6b6`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: all
+nine capability arms bind in both shapes against 18 exact shape goldens, nine distinct composed app files share
+one normal form while their object-node multisets differ, three Gate-1 and four Gate-2 negatives fail at their
+specific loci and tags, the nine-arm QuickCheck coverage floor holds, and all four seeded mutants redden.
+Evidence and the ledger move into `gen/runs/phase_10/<run-id>/`, and 20 run-time items — the nine arm slugs,
+seven Gate-1/Gate-2 case names, and four mutant names — partition one-to-one across the claim surfaces.
+
+**Two corrections.** `test/capability/BindGate.hs` hard-coded one developer's `dhall` path and now resolves
+per run, failing closed when unset. And, as in Phases 9 and 10's siblings, the join found five contract
+surfaces with no case, mutant, or metric of their own — `controller-child-source-expansion`,
+`unresolved-transition-references`, `registry-storage-bound-intent`, `extension-totality`, and
+`phase10-validation-locus-ledger`. The ledger carries them UNVERIFIED rather than asserting a result the run
+did not produce, and the gap is recorded against Phase 10 in
+[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
 
 **Invalidated historical record:**
 
@@ -276,9 +291,9 @@ at the wholly unprovisioned `BoundDeployment`.
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 10.1: The closed capability union + the no-product-arm Gate-1 foreclosure ⏸️
+## Sprint 10.1: The closed capability union + the no-product-arm Gate-1 foreclosure ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/amoebius/Capability.dhall` (the closed nine-arm capability
 union — the eight ordinary capabilities plus the ninth `InferenceEngine` head, whose closed `EngineRuntime`
 lane union — `AppleMetal` · `Cuda` · `LinuxCpu` — carries **no arbitrary-`Url`/`Download` arm** — on the app
@@ -330,9 +345,9 @@ contains.
 ### Remaining Work
 None. The closed union, need records, and Gate-1 corpus are sealed by the Phase-10 gate.
 
-## Sprint 10.2: The `CapabilityBinding` + total representational `bind` ⏸️
+## Sprint 10.2: The `CapabilityBinding` + total representational `bind` ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/amoebius/Capability.dhall` (extend: the `CapabilityBinding`
 records — the one-arm-today provider union + the typed `shape`); `src/Amoebius/Capability/Binding.hs` (the
 pure total `bind` selecting and fully expanding the provider's manifest graph for the chosen shape, the
@@ -434,9 +449,9 @@ stopping at the wholly unprovisioned `BoundDeployment`.
 ### Remaining Work
 None. The total binder, explicit object graphs, exact execution inventory, and unprovisioned deployment boundary are sealed.
 
-## Sprint 10.3: The bind property/corpus + the Register-1 gate ⏸️
+## Sprint 10.3: The bind property/corpus + the Register-1 gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/capability/BindProps.hs` (the property battery),
 `test/capability/ShapeOracle.hs` (the independent object-node-multiset structural diff — authored separately
 from `bind` so the oracle is not `bind`'s own fold), `test/capability/BindGate.hs` (the gate +

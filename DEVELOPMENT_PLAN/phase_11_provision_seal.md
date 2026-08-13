@@ -22,7 +22,7 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/ledgers/phase_11_provision_seal.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -33,10 +33,10 @@ The Register-1 gate passed on 2026-08-09 with ledger
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 11.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ⏸️](#sprint-111-the-conditional-infrastructure-planner--materialization-boundary-planinfrastructure-)
-- [Sprint 11.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ⏸️](#sprint-112-the-whole-deployment-provision-fold--executionruntime-storageobjectobservabilitymigrationscheduler-expansion-)
-- [Sprint 11.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ⏸️](#sprint-113-the-provisionedspec-seal--identity-keyed-render-source-set--four-stage-activation-)
-- [Sprint 11.4: The provision-seal property/corpus + the Register-1 gate ⏸️](#sprint-114-the-provision-seal-propertycorpus--the-register-1-gate-)
+- [Sprint 11.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ✅](#sprint-111-the-conditional-infrastructure-planner--materialization-boundary-planinfrastructure-)
+- [Sprint 11.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ✅](#sprint-112-the-whole-deployment-provision-fold--executionruntime-storageobjectobservabilitymigrationscheduler-expansion-)
+- [Sprint 11.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ✅](#sprint-113-the-provisionedspec-seal--identity-keyed-render-source-set--four-stage-activation-)
+- [Sprint 11.4: The provision-seal property/corpus + the Register-1 gate ✅](#sprint-114-the-provision-seal-propertycorpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -44,15 +44,29 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:78503b2cb8dc1a0a…`
+(1936 non-ignored files) and published verified external attestation
+`sha256:46f666a4abf03ac312c5f90f695e87670dbe1855f8d068e1152f3e5b991d1cb8`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: 18
+inherited capability positives provision, both infrastructure-planner paths hold, the creation plan validates
+under CAS and enacts against its readback, the render source set is one equal-keyed map across four activation
+stages, ten specific negatives redden at their tags, both property boundaries hold exact-versus-one-short, and
+all ten seeded mutants redden. Evidence and the ledger move into `gen/runs/phase_11/<run-id>/`, and 26
+run-time items — four activation witnesses, two planner cases, ten provision cases, and ten mutant names —
+partition one-to-one across the claim surfaces.
+
+**Six contract surfaces carry no id and are now honestly UNVERIFIED**: `creation-provider-action-batch`,
+`plan-token-replay-rejection`, `action-token-replay-rejection`, `receipt-bound-materialization-readback`,
+`promised-identity-rejection`, and `phase11-validation-locus-ledger`. None has an oracle case, a mutant, or a
+metric of its own; the pre-amendment ledger reported them tested by naming them in a hand-maintained set. The
+gap is recorded against Phase 11 in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
 
 **Invalidated historical record:**
 
 ✅ Done. The pure planner, provision fold, opaque seal, corpus, properties, and mutant battery passed on
-2026-08-09. The retained evidence is in [`evidence/phase_11/`](evidence/phase_11/) and the exact claim boundary
-is recorded in [`ledgers/phase_11_provision_seal.md`](ledgers/phase_11_provision_seal.md). This phase opened after the [Phase 10](phase_10_capability_bind.md)
+2026-08-09. The retained evidence is in `evidence/phase_11/` and the exact claim boundary
+is recorded in `ledgers/phase_11_provision_seal.md`. This phase opened after the [Phase 10](phase_10_capability_bind.md)
 gate (the capability union + representational `bind` + object-node-multiset shape oracle, which produces the
 wholly-unprovisioned `BoundDeployment` this phase consumes) and the [Phase 9](phase_09_execution_accelerator_folds.md)
 gate (the execution-epoch/scheduler-reservation/runtime-metadata/accelerator folds and the composed
@@ -307,9 +321,9 @@ each one-resource-or-one-byte-short minimally-differing pair rejects, exercising
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 11.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ⏸️
+## Sprint 11.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/Provision.hs` implements the planner, supply/result types, internal
 demand derivation, validation/enaction, observed readback, and receipt-bound context. It imports no renderer.
 **Blocked by**: reopened numeric predecessor gates.
@@ -350,9 +364,9 @@ already materialized or returns exactly one non-renderable plan owning the close
 ### Remaining Work
 The whole sprint (✅ Done).
 
-## Sprint 11.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ⏸️
+## Sprint 11.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/Provision.hs` implements `provision` and the opaque seal.
 `src/Amoebius/Capacity/RuntimeStorage.hs` supplies scope-indexed metadata and node runtime/image accounting.
 **Blocked by**: reopened numeric predecessor gates.
@@ -459,9 +473,9 @@ and an impossible target has no deployable value.
 ### Remaining Work
 The whole sprint (✅ Done).
 
-## Sprint 11.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ⏸️
+## Sprint 11.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/RenderSource.hs` implements opaque, identity-keyed sources,
 their four activation stages, and the checked source-set constructor without importing a renderer.
 **Blocked by**: reopened numeric predecessor gates.
@@ -504,9 +518,9 @@ identity-keyed render-source set with per-field ownership and a four-stage activ
 ### Remaining Work
 The whole sprint (✅ Done).
 
-## Sprint 11.4: The provision-seal property/corpus + the Register-1 gate ⏸️
+## Sprint 11.4: The provision-seal property/corpus + the Register-1 gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/capability/{ProvisionProps,RuntimeStorageBindingProps,ProvisionSealGate}.hs`,
 `tests/oracle/phase11/`, `tests/mutants/phase11/`, the paired Dhall corpus, and `tools/phase11_gate.py`.
 The 18 per-arm/shape fixtures remain inherited from [Phase 10](phase_10_capability_bind.md).

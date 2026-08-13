@@ -330,7 +330,7 @@ the bounded generated client, and local unlock reduce that exposure but do not r
 The design is planned in Phases 59–64. Status and evidence remain solely in the
 [Development Plan](../../DEVELOPMENT_PLAN/README.md).
 
-The sibling `/home/matthewnowak/mattandjames` repository supplies implementation evidence for the motivating
+The sibling `mattandjames` repository supplies implementation evidence for the motivating
 browser shape: its `offline_mode.md` and current PureScript/browser boundary use IndexedDB projections and an
 outbox, service-worker shell caching, optional OPFS blobs, partition keys, typed replay outcomes, Web Locks,
 BroadcastChannel, and server-authoritative reconnect. amoebius lifts those mechanisms into a reusable checked

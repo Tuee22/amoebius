@@ -27,10 +27,10 @@ The gate passed on 2026-08-09; Phase-3 code correspondence and runtime fidelity 
 - [Phase Summary](#phase-summary)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 2.1: The `Model` fragment EDSL (the reifiable value) ⏸️](#sprint-21-the-model-fragment-edsl-the-reifiable-value-)
-- [Sprint 2.2: `interpret` + the in-process reachability explorer ⏸️](#sprint-22-interpret--the-in-process-reachability-explorer-)
-- [Sprint 2.3: `emitTLA` renderer + never-committed emission ⏸️](#sprint-23-emittla-renderer--never-committed-emission-)
-- [Sprint 2.4: Round-trip + single-source correspondence on `ToyModel` ⏸️](#sprint-24-round-trip--single-source-correspondence-on-toymodel-)
+- [Sprint 2.1: The `Model` fragment EDSL (the reifiable value) ✅](#sprint-21-the-model-fragment-edsl-the-reifiable-value-)
+- [Sprint 2.2: `interpret` + the in-process reachability explorer ✅](#sprint-22-interpret--the-in-process-reachability-explorer-)
+- [Sprint 2.3: `emitTLA` renderer + never-committed emission ✅](#sprint-23-emittla-renderer--never-committed-emission-)
+- [Sprint 2.4: Round-trip + single-source correspondence on `ToyModel` ✅](#sprint-24-round-trip--single-source-correspondence-on-toymodel-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -38,9 +38,22 @@ The gate passed on 2026-08-09; Phase-3 code correspondence and runtime fidelity 
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:12481410e5094291…`
+(1927 non-ignored files) and published verified external attestation
+`sha256:a6c345e051ff96ff3c66c98a4ea2832f56ada1d50c0d91524a0ce9763b19710e`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** The capability result is unchanged and re-run: the
+explorer and TLC agree on `ToyModel`'s eight distinct reachable states and its safety verdict with identical
+canonical fingerprints, TLC proves liveness under the declared fairness and reddens with fairness removed, and
+all five model-safety, one spec-weakening, two renderer-golden, and two renderer-differential mutants are
+caught. What changed is the apparatus around it. The JVM and `tla2tools` are resolved from
+`toolchain/requirements.json` through `tools/toolchain.py` rather than acquired from URLs and archive checksums
+pinned in a tracked manifest, and the two hard-coded runtime version strings are replaced by requirement
+satisfaction plus a live TLC banner probe. The 31 recorded metrics are checked against the authored expectation
+read off this contract's Gate paragraph, the ledger is derived from those same recorded metrics into
+`gen/runs/phase_02/<run-id>/`, and 14 surfaces join to 39 run-time enumerated items. A new `artifact` side
+asserts what this phase has always claimed but never checked: all 608 emitted `.tla`/`.cfg` files are outside
+the source snapshot, and no specification file sits in authored source.
 
 **Invalidated historical record:**
 
@@ -200,9 +213,9 @@ flowchart LR
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 2.1: The `Model` fragment EDSL (the reifiable value) ⏸️
+## Sprint 2.1: The `Model` fragment EDSL (the reifiable value) ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated 2026-08-12 gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Formal/Model.hs` (the `Model`/`Action`/`Expr` fragment
 types), the `formal-model` Cabal library, and the `formal-model-spec` test suite — built.
 **Blocked by**: reopened numeric predecessor gates.
@@ -249,9 +262,9 @@ emitting faithful TLA+ rather than hand-writing it.
 ### Remaining Work
 None. The closed fragment and structurally complete `ToyModel` are built and exercised by the phase gate.
 
-## Sprint 2.2: `interpret` + the in-process reachability explorer ⏸️
+## Sprint 2.2: `interpret` + the in-process reachability explorer ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated 2026-08-12 gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Formal/Interpret.hs` (`interpret`),
 `src/Amoebius/Formal/Explore.hs` (the bounded breadth-first reachability checker),
 `test/formal/RoundTripSpec.hs` — built; the phase suite owns the hand table and explorer checks.
@@ -290,9 +303,9 @@ constraint, checking every invariant on every reachable state.
 None. The hand transition table, eight-state explorer oracle, invariant checks, and explicit
 checked-but-not-expanded boundary convention are green.
 
-## Sprint 2.3: `emitTLA` renderer + never-committed emission ⏸️
+## Sprint 2.3: `emitTLA` renderer + never-committed emission ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated 2026-08-12 gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Formal/EmitTLA.hs` (`emitTLA`),
 `src/Amoebius/Cli/Formal.hs` (the `amoebius dev model emit` subcommand),
 `test/formal/RoundTripSpec.hs`, and the two committed liveness-path renderer mutants
@@ -378,9 +391,9 @@ never committed.
 ### Remaining Work
 None. The emitter and CLI are byte-golden locked; generated `.tla`/`.cfg` files remain ignored and untracked.
 
-## Sprint 2.4: Round-trip + single-source correspondence on `ToyModel` ⏸️
+## Sprint 2.4: Round-trip + single-source correspondence on `ToyModel` ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated 2026-08-12 gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/formal/RoundTripSpec.hs` (drives the explorer and TLC over the
 same `Model`), a `tla2tools` invocation wrapper, the committed mechanical model-mutation catalog, and the
 two committed seeded renderer mutants `emitTLA-mut-01`/`emitTLA-mut-02` under `test/formal/mutants/` —

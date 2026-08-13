@@ -90,7 +90,7 @@ dhall"*. It gets there by a hard split between two languages:
   witnesses of this binary frame. Neither carries control flow that the binary executes, subprocess strings,
   or environment lookups. Each is read, type-checked, and decoded; neither ever "runs."
 - **Haskell is the logic.** The actual reconcile logic is a pure Haskell value. amoebius adopts
-  hostbootstrap's **chain/Step algebra**: a project's deploy is a pure function `chain :: cfg -> [Step]` (`/home/matthewnowak/hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Step.hs`, `.../Chain.hs`). Each `Step` is *"the pure renderable shape plus the effectful reconcile action"* —
+  hostbootstrap's **chain/Step algebra**: a project's deploy is a pure function `chain :: cfg -> [Step]` (`hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Step.hs`, `.../Chain.hs`). Each `Step` is *"the pure renderable shape plus the effectful reconcile action"* —
   a label, the frame it runs in, a `StepKind`, and a `stepRun :: HostConfig -> IO ()` action
   (`Step.hs`). The chain is the system; the Dhall only supplies the `cfg`.
 
@@ -168,7 +168,7 @@ amoebius has **two Dhall authority surfaces**, and their names are intentionally
   runtime witnesses must hold. It may include bootstrap-local facts, but it is not the cluster/tree desired
   state. This is the amoebius form of hostbootstrap's **binary-context contract**: every binary frame reads
   one local Dhall value carrying the context and witness material it needs
-  (`/home/matthewnowak/hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Context.hs`; this is exactly
+  (`hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Context.hs`; this is exactly
   the shape the sibling prodbox project proved as its Tier-0 `parameters + context + witness` surface in its
   `config_doctrine.md` §0).
 
@@ -226,7 +226,7 @@ entrypoint writes it to that frame's own sibling `amoebius.dhall` and then `exec
 hostbootstrap's
 `ConfigDelivery` (`{ cdWritePath, cdExecPath, cdPayload }`) carried by `liftStdin` through the recursive
 `runChainFromFrame`
-(`/home/matthewnowak/hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Lift.hs`,
+(`hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Lift.hs`,
 `.../Chain.hs`); the container handoff keeps stdin open and overrides the entrypoint to
 `sh -c "cat > <sibling>.dhall && exec <binary>"`. Two invariants fall out, and [§5](#5-the-illegal-state-unrepresentable-contract) leans on both:
 
@@ -795,7 +795,7 @@ expression, and uploaded desired state is the decrypted `InForceSpec` Dhall expr
 Dhall is the **config** surface, not the **data plane**: runtime *message payloads* are never Dhall. They are
 dense binary **CBOR** on the wire, owned by
 [pulsar_client_doctrine.md §3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) — Dhall carries typed
-*params*, a payload carries runtime *bytes*, and the two never mix (the `notes.txt` design note that Dhall
+*params*, a payload carries runtime *bytes*, and the two never mix (the pre-plan design note that Dhall
 does not serve as a message-payload format).
 
 ---

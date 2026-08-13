@@ -19,7 +19,7 @@ The complete Gate-1 gate passed on 2026-08-09; Gate-2 semantics and runtime fide
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_04_gate1.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -30,9 +30,9 @@ The complete Gate-1 gate passed on 2026-08-09; Gate-2 semantics and runtime fide
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 4.1: Dhall prelude + typed surfaces + smart constructors ⏸️](#sprint-41-dhall-prelude--typed-surfaces--smart-constructors-)
-- [Sprint 4.2: Gate-1 positive corpus ⏸️](#sprint-42-gate-1-positive-corpus-)
-- [Sprint 4.3: Gate-1-class negative corpus + partial-foreclosure ledger ⏸️](#sprint-43-gate-1-class-negative-corpus--partial-foreclosure-ledger-)
+- [Sprint 4.1: Dhall prelude + typed surfaces + smart constructors ✅](#sprint-41-dhall-prelude--typed-surfaces--smart-constructors-)
+- [Sprint 4.2: Gate-1 positive corpus ✅](#sprint-42-gate-1-positive-corpus-)
+- [Sprint 4.3: Gate-1-class negative corpus + partial-foreclosure ledger ✅](#sprint-43-gate-1-class-negative-corpus--partial-foreclosure-ledger-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -40,9 +40,30 @@ The complete Gate-1 gate passed on 2026-08-09; Gate-2 semantics and runtime fide
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:81c596c46e9c8772…`
+(1929 non-ignored files) and published verified external attestation
+`sha256:00bfda42ed8e2ddc333713e05262a92f41d9bc76b2dad1219202e12099a9c019`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** The Gate-1 capability result is unchanged and
+re-run: four positive fixtures typecheck, eight catalog, three image/process, and two import-policy negatives
+each fail at their own specific error, the arm, surface-field, and resource-field inventories match their
+authored expectations exactly, and the 525 field-deletion, 176 type-substitution, four special-resource, and
+one custom-arm mutants all turn the battery red. `dhall` now resolves from `toolchain/requirements.json`, the
+run bundle replaces the plan-tree evidence directory, the ledger is derived into that bundle, and 17 surfaces
+join to 20 run-time enumerated items. The battery no longer reads back a generated Markdown ledger from the
+plan tree to confirm its own honesty caveat — that reasoning is authored prose and lives in this contract,
+while the machine-checkable half is the `gate2-residue` metric — and its hard-coded `dhall` fallback path is
+replaced by a hard failure when the resolver has not supplied one.
+
+**Two authored inputs were corrected, both from intent rather than from a failing run.**
+`dhall/amoebius/SanctionedApi.dhall` and `dhall/amoebius/UiOffline.dhall` were not `dhall lint` clean, which
+this phase has always required; both are now normalized, and the change is pure formatting — list collapsing
+and record punning. Separately, the `schema-modules` oracle read 14 while the tree holds 17, because Phase 16
+added `SanctionedApi`, Phase 25 added `BakeCatalog`, and Phase 60 added `UiOffline`. A bare count is a weak
+oracle that drifts silently as later phases grow the schema, so it is amended to 17 **and** paired with a new
+`schema-module-inventory` metric carrying the reviewed module list — a module added without review now breaks
+the inventory instead of sliding past a number
+([§M.1 amendment](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
 
 **Invalidated historical record:**
 
@@ -55,7 +76,7 @@ required fields, and 176 critical nested type bindings; all field-deletion/type-
 special resource/transition mutants, and the extra-`Custom` arm mutant are red. This proves the recorded
 Gate-1 spec-composition shapes only. Gate-2 refinements, binding/index equality, capacity arithmetic, and
 runtime fidelity remain **UNVERIFIED**. The former generated projection is
-[`ledgers/phase_04_gate1.md`](ledgers/phase_04_gate1.md); it is migration input, not current evidence.
+`ledgers/phase_04_gate1.md`; it is migration input, not current evidence.
 
 ## Phase Summary
 
@@ -393,9 +414,9 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 4.1: Dhall prelude + typed surfaces + smart constructors ⏸️
+## Sprint 4.1: Dhall prelude + typed surfaces + smart constructors ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**:
 `dhall/amoebius/{prelude,Cluster,App,Deployment,Capability,Topology,Capacity,Resources,Storage,Retention,Image,Extension,Consistency,Backup}.dhall`
 (typed surfaces + smart constructors) — built and validated. The last three close doctrine surfaces
@@ -661,9 +682,9 @@ cache/registry/Vault storage cannot pass.
 None. The schema modules and independently authored union, required-field, and nested-type inventories agree;
 525 field deletions, 176 required-type substitutions, and the special resource mutants all turn the gate red.
 
-## Sprint 4.2: Gate-1 positive corpus ⏸️
+## Sprint 4.2: Gate-1 positive corpus ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/examples/legal_*.dhall` (worked-example cluster / app /
 deployment specs); `tools/dhall_gate1.sh` (a `dhall type` corpus harness) — built.
 **Blocked by**: reopened numeric predecessor gates.
@@ -714,9 +735,9 @@ the authoring-time demonstration that the schema *admits* every intended world.
 None. All four positives type-check after wiring the non-empty nested capacity, image, cache, registry, Vault,
 engine, transition, accelerator, and monitoring structures required above.
 
-## Sprint 4.3: Gate-1-class negative corpus + partial-foreclosure ledger ⏸️
+## Sprint 4.3: Gate-1-class negative corpus + partial-foreclosure ledger ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/examples/illegal_*.dhall` (the Gate-1 subset);
 `tools/dhall_gate1_negatives.sh` (an expect-fail `dhall type` harness) — built.
 **Blocked by**: reopened numeric predecessor gates.

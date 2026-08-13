@@ -43,7 +43,7 @@ All four sprints and the complete Phase-25 Register-3 gate are sealed.
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
 
 **Invalidated historical record:**
 
@@ -67,7 +67,7 @@ transitions are recorded reverse-chronologically here once work begins.
   packets; the packet observer recorded zero established public connections; prior standup/publication
   captures also recorded zero, and publication's second run remained zero writes. A vanilla kindnet
   `NetworkPolicy` negative control allowed the public pull and therefore turned the committed no-op-policy
-  mutant red. Receipt: [`sprint-25.4-receipt.json`](evidence/phase_25/sprint-25.4-receipt.json), fingerprint
+  mutant red. Receipt: `sprint-25.4-receipt.json`, fingerprint
   `external-run-reference`. The phase ledger keeps the
   Phase-26 reconciler correspondence and Phase-30 MinIO storage rehome `UNVERIFIED`.
 - **2026-08-09 — Sprint 25.3 complete.** The exclusive proxy admitted only the snapshot-bound capability,
@@ -81,7 +81,7 @@ transitions are recorded reverse-chronologically here once work begins.
   makes its byte-exact raw index PUT the atomic commit point; rebuilding it merely to spell `buildx --push`
   would create a second artifact and cannot prove publication of the Sprint-25.1 bytes. The typed Buildx
   command shape and ephemeral `docker --config`/empty-environment boundary remain independently tested.
-  Receipt: [`sprint-25.3-receipt.json`](evidence/phase_25/sprint-25.3-receipt.json), fingerprint
+  Receipt: `sprint-25.3-receipt.json`, fingerprint
   `dynamically-resolved`.
 - **2026-08-09 — Sprint 25.2 complete.** A read-only snapshot admitted the selected `linux/amd64` OCI
   content/snapshots/import workspace and the complete registry/proxy CPU, memory, ephemeral, pod-slot, and
@@ -92,14 +92,14 @@ transitions are recorded reverse-chronologically here once work begins.
   connections in containerd logs and a node-scoped packet capture. Both committed Sprint-25.2 mutants turned
   red. The first storage-oracle arithmetic, backing-alias observation, direct-backend read-only assumption,
   and loopback readiness probe each went red and were corrected rather than waived. Receipt:
-  [`sprint-25.2-receipt.json`](evidence/phase_25/sprint-25.2-receipt.json), fingerprint
+  `sprint-25.2-receipt.json`, fingerprint
   `dynamically-resolved`.
 - **2026-08-09 — Sprint 25.1 complete.** The bounded `linux/amd64` + `linux/arm64` build produced one audited
   OCI image index, executed all 46 architecture-specific official files, emitted 46 deterministic SPDX
   records, proved CPU/RSS/scratch/cache enforcement, and turned eight seeded mutants red. The live validation
   first rejected the undersized 48 GiB scratch declaration; the corrected catalog declares a 96 GiB scratch
   provision and 32 GiB cache-write peak. Receipt:
-  [`sprint-25.1-receipt.json`](evidence/phase_25/sprint-25.1-receipt.json), image index
+  `sprint-25.1-receipt.json`, image index
   `dynamically-resolved`.
 
 ## Phase Summary
@@ -402,7 +402,7 @@ flowchart LR
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 `python3 tools/phase25_sprint25_1_gate.py`; 10 checks passed with gate identity
 `external-run-reference` and receipt
-[`sprint-25.1-receipt.json`](evidence/phase_25/sprint-25.1-receipt.json).
+`sprint-25.1-receipt.json`.
 **Implementation**: `dhall/amoebius/BakeCatalog.dhall` (the **typed source of truth** —
 each stage's `NonEmpty BakeStep` with its per-arch pinned versions), `src/Amoebius/Image/BakeInventory.hs`
 (decoding that catalog into the `BuildExecutionEnvelope`), `src/Amoebius/Image/RenderDockerfile.hs`
@@ -537,7 +537,7 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
 
 ### Remaining Work
 None. Sprint 25.1 is sealed by
-[`sprint-25.1-receipt.json`](evidence/phase_25/sprint-25.1-receipt.json); Sprint 25.2 consumes its audited OCI
+`sprint-25.1-receipt.json`; Sprint 25.2 consumes its audited OCI
 artifact. The first live build's 48 GiB scratch admission proved too small and was cancelled before OCI
 export; the corrected 96 GiB provision and 32 GiB cache-write peak passed the complete gate rather than
 waiving the red result.
@@ -545,7 +545,7 @@ waiving the red result.
 ## Sprint 25.2: Node side-load + the single-binary `distribution` registry standup ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-[`sprint-25.2-receipt.json`](evidence/phase_25/sprint-25.2-receipt.json).
+`sprint-25.2-receipt.json`.
 **Implementation**: `src/Amoebius/Image/{NodeLoad,Registry,BootstrapRegistry}.hs` (pure
 bootstrap provision, snapshot validation, and the typed side-load/object-initialize action); package-private
 `src/Amoebius/Manifest/Render.hs` supplies the same source serializer Phase 13 uses; live admission/import/
@@ -654,7 +654,7 @@ whole-deployment spec and creates no public service-render boundary.
 
 ### Remaining Work
 None. The corrected live gate is sealed by
-[`sprint-25.2-receipt.json`](evidence/phase_25/sprint-25.2-receipt.json). Its red-before-correction records cover
+`sprint-25.2-receipt.json`. Its red-before-correction records cover
 the initially incorrect registry-union arithmetic, decorated bind-mount identity comparison, ineffective
 backend read-only configuration, and unreachable loopback readiness probe. Atomic publication remains
 exclusively Sprint 25.3 work; the admitted proxy therefore returns 409 for a valid publisher capability until
@@ -663,7 +663,7 @@ that next ordered sprint implements the mutation.
 ## Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-[`sprint-25.3-receipt.json`](evidence/phase_25/sprint-25.3-receipt.json).
+`sprint-25.3-receipt.json`.
 **Implementation**: `src/Amoebius/Image/Publish.hs`, `src/Amoebius/Image/Ref.hs` (the
 snapshot-bound single-advertisement publisher + immutable, source/content-derived ref scheme), with the live
 OCI protocol/fault/access-log harness in `tools/phase25_registry_publish.py`.
@@ -731,7 +731,7 @@ not capacity admission.
 
 ### Remaining Work
 None. The complete pure/live/mutation gate is sealed by
-[`sprint-25.3-receipt.json`](evidence/phase_25/sprint-25.3-receipt.json). Sprint 25.4 consumes its immutable
+`sprint-25.3-receipt.json`. Sprint 25.4 consumes its immutable
 digest reference and the retained standup/publication OS-boundary captures; it still must install the
 enforcing deny boundary and make the public-image canary fail while an in-cluster pull succeeds.
 

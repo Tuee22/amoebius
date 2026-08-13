@@ -17,10 +17,13 @@ import tempfile
 from pathlib import Path
 from typing import Sequence
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
 
 ROOT = Path(__file__).resolve().parents[1]
 MUTANTS = ROOT / "test/host/mutants"
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_24"
 CLUSTER = "amoebius-phase24"
 NODE = f"{CLUSTER}-control-plane"
 KUBECONFIG = Path.home() / ".amoebius/phase24/kubeconfig"
@@ -79,7 +82,14 @@ def require_artifacts() -> None:
 def run_pure_oracles() -> None:
     # This suite independently pins M1, M3, M5, and M6 and proves M2 cannot
     # enter the production AbsExe constructor.
-    result = run(("cabal", "test", "phase24-host-spec", "--test-show-details=direct"))
+    # Resolved rather than inherited: a bare `cabal` picks whichever GHC the host PATH
+    # offers, and on a host carrying a newer one the suite fails to resolve `base` and
+    # reports a dependency error where a mutant result belongs.
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    result = run((
+        resolved["cabal"]["path"], f"--with-compiler={resolved['ghc']['path']}",
+        "test", "phase24-host-spec", "--test-show-details=direct",
+    ))
     if "phase24-host-spec: PASS" not in result.stdout:
         raise MutationGateError("pure-mutation-oracle-missing")
 
@@ -124,8 +134,22 @@ def observe_bare_name_and_precreate_mutants() -> tuple[str, str]:
     return "red:bare-argv0-and-PATH-trap", "red:pre-admission-create-observed"
 
 
-def observe_split_runtime_mutant() -> str:
-    rows = (EVIDENCE / "live-split-runtime-readback.tsv").read_text(encoding="utf-8").splitlines()
+def observe_split_runtime_mutant(readback: Path | None = None) -> str:
+    """Decide M6 from a SplitRuntime readback the run itself produced, or report it unreached.
+
+    M6 swaps the nodefs identity into the snapshot role, so it can only be caught where the
+    two roles have *different* identities — that is, under the SplitRuntime layout. The
+    pristine guest run prepares Unified backing, where all three roles share one filesystem
+    and the swap is invisible.
+
+    This used to read a `live-split-runtime-readback.tsv` left behind under the plan tree by
+    a run whose producer is no longer in the repository. A gate that verifies leftovers
+    verifies whoever wrote them last, so the file is no longer an input: absent a readback
+    from this run, M6 is reported unreached rather than green.
+    """
+    if readback is None or not readback.is_file():
+        return "unverified:requires-split-runtime-live-observation"
+    rows = readback.read_text(encoding="utf-8").splitlines()
     fields = [row.split("\t") for row in rows[1:] if row]
     identities = {row[0]: row[3] for row in fields}
     if identities.get("nodefs") == identities.get("imagefs-content"):
@@ -134,8 +158,7 @@ def observe_split_runtime_mutant() -> str:
         raise MutationGateError("M6-reference-containerd-roots-not-shared")
     # Swapping the independently observed nodefs identity into the snapshot
     # role violates the pinned role mapping even though all values are real.
-    mutated_snapshot = identities["nodefs"]
-    if mutated_snapshot == identities["imagefs-content"]:
+    if identities["nodefs"] == identities["imagefs-content"]:
         raise MutationGateError("M6-swapped-root-stayed-green")
     return "red:independent-role-root-readback"
 
@@ -171,6 +194,7 @@ def live_one_shot_mutant() -> str:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live", action="store_true")
+    parser.add_argument("--split-runtime-readback", type=Path, default=None)
     arguments = parser.parse_args(argv)
     try:
         require_artifacts()
@@ -182,7 +206,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "M3": live_one_shot_mutant() if arguments.live else "planned:requires-live-cluster",
             "M4": m4,
             "M5": "red:one-byte-transition-oracle",
-            "M6": observe_split_runtime_mutant(),
+            "M6": observe_split_runtime_mutant(arguments.split_runtime_readback),
         }
         print("mutant\tresult")
         for label in sorted(outcomes):

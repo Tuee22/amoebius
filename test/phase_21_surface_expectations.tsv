@@ -1,0 +1,101 @@
+# Authored expectation for the Phase-21 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. This file replaces the retired committed enumeration,
+# which was a generated projection of the gate rather than an opinion the gate is checked
+# against.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   items     the validation-locus entries and mutant names the run read
+#   metrics   the metric keys in gen/dsl/phase21/phase-results.tsv
+#   checks    the check ids tools/phase21_gate.py implements
+#
+# The 54 items are partitioned so each is claimed exactly once, and each of the nine mutants
+# joins its own surface beside the locus entry naming its red target.
+#
+# Where the retired enumeration listed several names for one observation, they are collapsed
+# here and the collapse is the point. `home-route`, `workflow-route`, and
+# `choose-tenant-route` were three names for the route column of the same four-step
+# differential trace; `external-request-body-observation` was a second name for the body the
+# same-origin action request already carries; `atomic-state-transition` was a second name
+# for what the sequential-state-writes mutant proves. One observation reported under three
+# surfaces reads as three independent results, which is exactly the arithmetic a coverage
+# table exists to prevent.
+#
+# `no-tracked-trace-table` is the surface for what this phase removed. `reference_traces.tsv`
+# held exactly what the independent Haskell semantics returns from the authored
+# interactions, so comparing them proved only that a file agreed with the function that
+# generated it. The suite now derives that side at run time, and the check refuses to let a
+# trace table come back.
+#
+# Every surface carries at least one id. Nothing this contract names is left standing on an
+# assertion.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+generic-purescript-bundle	checks	generic-bundle-no-app-identity
+per-app-plan-not-code	checks	per-app-plan-is-json-data
+plan-digest-verification	checks	plan-digest-verified
+closed-event-transition	checks	closed-event-arms
+escaped-text-rendering	checks	escaped-dom-sink
+forbidden-storage-absence	checks	forbidden-browser-tokens
+server-handle-codec-absence	checks	server-handle-codec-absent
+same-origin-websocket-source	checks	same-origin-websocket-sink
+independent-haskell-reference	checks	reference-independent
+browser-harness-drives-playwright	checks	playwright-harness
+no-tracked-trace-table	checks	derived-trace-table-untracked
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
+single-tenant-plan	items	single_plan
+multi-tenant-plan	items	multi_plan
+edit-event	items	single_submit_edit
+submit-event	items	single_submit_effect
+cancel-event	items	single_cancel
+named-link-event	items	named_link
+choose-event	items	multi_choose
+four-step-differential-trace	items	trace_edit,trace_submit,trace_cancel,trace_link
+single-submit-dom	items	single_dom
+multi-choose-dom	items	multi_dom
+heading-accessibility	items	heading_accessibility
+live-status-accessibility	items	status_accessibility
+button-accessibility	items	button_accessibility
+browser-enforced-csp	items	csp_canary
+trusted-component-dom	items	hostile_text
+stale-plan-reload-required	items	stale_plan
+same-origin-websocket-upgrade	items	websocket
+fresh-post-ready-challenge	items	fresh_challenge
+modal-focus-entry	items	modal_enter
+modal-focus-trap	items	modal_tab
+modal-focus-return	items	modal_escape
+validation-summary-focus	items	validation_enter
+route-heading-focus	items	route_enter
+same-origin-action-request	items	submit_transport
+navigation-only-external-link	items	named_link_transport
+provider-connection-zero	items	provider_transport
+canary-connection-zero	items	canary_transport
+production-security-headers	items	csp_header,coop_header,corp_header,referrer_header,content_type_header
+built-bundle-allowlist-scan	items	bundle_scanner
+raw-html-sink-mutant	items	raw_html_sink,M-raw-html-sink
+drop-event-effect-mutant	items	drop_event_effect,M-drop-event-effect
+swap-route-target-mutant	items	swap_route_target,M-swap-route-target
+accept-stale-plan-mutant	items	accept_stale_plan,M-accept-stale-plan
+direct-provider-fetch-mutant	items	direct_provider_fetch,M-direct-provider-fetch
+sequential-state-writes-mutant	items	sequential_state_writes,M-sequential-state-writes
+break-focus-return-mutant	items	break_focus_return,M-break-focus-return
+unsafe-inline-build-mutant	items	unsafe_inline_build,M-unsafe-inline-build
+hardcoded-response-mutant	items	hardcoded_response,M-hardcoded-response
+plan-decode-battery	metrics	plans
+generated-enumeration-join	metrics	generated-enumeration
+differential-trace-battery	metrics	differential-traces
+dom-snapshot-battery	metrics	dom-snapshots
+accessibility-battery	metrics	accessibility
+keyboard-focus-battery	metrics	keyboard-focus
+transport-battery	metrics	transport
+websocket-upgrade-observed	metrics	websocket
+bundle-and-csp-battery	metrics	artifact-csp
+nine-mutant-battery	metrics	mutants
+loopback-only-os-network-observer	metrics	network-observer
+server-authorization-truth	metrics	server-authorization-truth
+provider-isolation	metrics	provider-isolation
+live-edge-enforcement	metrics	live-edge-enforcement
+release-rollout	metrics	release-rollout
+ha-behavior	metrics	ha-behavior

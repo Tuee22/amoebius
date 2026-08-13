@@ -51,7 +51,7 @@ receipt `external-run-reference`.
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
 
 **Invalidated historical record:**
 
@@ -349,7 +349,7 @@ program, own state, `protect`/`Retain`, `ProvisionedVolumeDemand` → `ProviderV
 `ProviderVolumeSlotId` promised/materialized witness) — built on the `amoebius-pulumi` engine seam and the
 Vault-Transit-enveloped MinIO backend **first delivered by [Phase 44](phase_44_provider_deploy_checkpoint.md) and reused here, not rebuilt** (BUILT/SCOPED-VALIDATED)
 **Blocked by**: reopened numeric predecessor gates.
-**Requires**: `cloud-account` — the account whose EBS quota this gate's volumes are drawn from.
+**Requires**: `cloud-account` — the account whose EBS quota this gate's volumes are drawn from. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-29 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-only-cleartext-and-it-is-flagged)).
 **Independent Validation**: one per-PV EBS
 volume is created in **separate** durable state; its `ProvisionedVolumeDemand` derives an integral-GiB
 `ProviderVolumeRequest` retaining usable/raw geometry, and the same rounded `provisionedBytes` is rendered

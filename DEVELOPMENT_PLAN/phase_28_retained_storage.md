@@ -45,7 +45,7 @@ The gate passed 2026-08-10.
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
 
 **Invalidated historical record:**
 

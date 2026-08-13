@@ -28,7 +28,7 @@ rule in [`generated_artifacts_doctrine.md`](./generated_artifacts_doctrine.md) i
 - [5. Run evidence and phase status](#5-run-evidence-and-phase-status)
 - [6. `.gitignore` contract](#6-gitignore-contract)
 - [7. `.dockerignore` contract](#7-dockerignore-contract)
-- [8. Enforcement and clean-clone acceptance](#8-enforcement-and-clean-clone-acceptance)
+- [8. Enforcement and source-snapshot acceptance](#8-enforcement-and-source-snapshot-acceptance)
 - [9. Migration boundary](#9-migration-boundary)
 - [Related Documents](#related-documents)
 
@@ -72,9 +72,7 @@ amoebius/
 ├── amoebius.cabal                        authored root package declaration
 ├── cabal.project                         authored package set and resolver constraints
 ├── package.json                          authored JavaScript tool requirements
-├── cabal.project.freeze                 present generated migration file; delete and ignore
 ├── package-lock.json                    present generated migration file; delete and ignore
-├── notes.txt                            unclassified migration file; route or delete
 ├── DEVELOPMENT_PLAN/                     authored plan suite
 │   ├── README.md
 │   ├── development_plan_standards.md
@@ -115,11 +113,11 @@ amoebius/
 ├── test/**                               authored tests, fixtures, oracles, and mutants
 ├── tests/**                              authored legacy test layout pending convergence
 ├── mutants/**                            authored seeded mutants
-├── tools/**                              authored gates, generators, lints, and negative lint corpora
+├── tools/**                              authored gates, generators, lints, seeds, and mutation recipes
 ├── vendor/**                             reviewed external source and local compatibility edits
 ├── patches/**                            reviewed authored compatibility patches
 ├── docker/**                             authored image inputs only; rendered recipes go to `gen/docker/`
-├── toolchain/                            authored resolver policy only
+├── toolchain/requirements.json           authored compatibility requirements; no path, version, URL, or digest
 ├── gen/**                                all canonical reproducible local output; never version-controlled
 ├── dist-newstyle/**                      present Cabal output; never version-controlled
 └── node_modules/**                       present package-manager output; never version-controlled
@@ -134,8 +132,12 @@ The following present-day roots are migration surfaces, not additional canonical
 | `test/enumeration/**` | `gen/test-surfaces/**` |
 | `test/golden/phase_*_ledger.json` | `gen/runs/<phase>/<run-id>/ledger.json` |
 | root dependency lock/freeze files | `gen/locks/**` |
-| `toolchain/pins.json` | authored requirements in a non-path manifest; resolved paths in `gen/toolchain/**` |
-| `notes.txt` | classify as authored documentation and convert to governed Markdown, or delete after its content is routed |
+| `toolchain/pins.json` | **migrated.** The authored half is `toolchain/requirements.json` — compatibility ranges, release channels, and asset patterns, no paths; the resolved half is `gen/toolchain/resolved.json`, written per run by `tools/toolchain.py` |
+| `tools/doc_lint_corpus/**/negative_*` and `negative_multi_*` | keep authored positive seeds and mutation recipes; materialize negative copies under `gen/test-corpora/**` |
+| `test/golden/phase_53/job_*.expected` | retain the reference program and authored inputs; produce expected results under the run bundle |
+| Phase-49 frozen-source and expected-hash tables | resolve the reviewed sibling source boundary at run time and record observations under `gen/runs/**` |
+| fixed versions, URLs, paths, or integrity fields in bootstrap/toolchain envelopes | split authored compatibility requirements from run-local resolution under `gen/toolchain/**` |
+| generated digest, checksum, trace, and expected-output fixtures | independently author and review the expectation, or regenerate it under the owning run bundle |
 
 The `test/` and `tests/` roots may coexist during migration. A fixture remains version-controlled only when
 its expectation was authored independently. A generated snapshot, reference-program output, enumeration,
@@ -154,6 +156,7 @@ gen/
 ├── tla/**/*.cfg                          emitted TLC configurations
 ├── manifests/**/*.{yaml,yml,json}        rendered Kubernetes and provider objects
 ├── dhall/**/*.dhall                      reflected or projected Dhall
+├── dsl/**                                decoder/fold/bind battery observations and locus ledgers
 ├── ui/**                                 client/server/offline plans and compiled browser output
 │   ├── client-plans/**
 │   ├── server-plans/**
@@ -166,10 +169,9 @@ gen/
 ├── proto/**/*.hs                         generated protobuf Haskell modules
 ├── proto/**/*.{hi,o,dyn_hi,dyn_o}        protobuf compiler output
 ├── test-surfaces/phase_*.json            runtime test enumeration
+├── test-corpora/**                       materialized negatives derived from authored seeds/recipes
 ├── locks/**                              dependency solver output
-│   ├── cabal.project.freeze
-│   ├── package-lock.json
-│   └── spago.lock
+│   └── phase_*/resolution-*.json
 ├── toolchain/**                          downloaded/resolved tool state
 │   ├── resolved.json
 │   ├── downloads/**
@@ -228,6 +230,11 @@ test enumerations, expected outputs produced by a reference program, generated M
 contents blocks, and copied command output remain untracked. The original `.proto`, authored reference
 implementation, authored expectation, or authored prose remains the source.
 
+A generated negative corpus follows the same rule. Version control retains the smallest independently
+meaningful source: positive seed files, an explicit mutation definition, and the checker. Mutated copies,
+Cartesian expansions, and other mechanically materialized negatives are emitted under `gen/test-corpora/`
+or a temporary directory. Their number, path layout, or usefulness as test input does not make them source.
+
 Generated Markdown is written only under `gen/docs/**`. Governed Markdown under `documents/` and
 `DEVELOPMENT_PLAN/` always declares `**Generated sections**: none`.
 
@@ -276,8 +283,9 @@ phase contract, command, resolved dependency graph, toolchain, substrate, checks
 and raw-observation digests.
 
 The development-plan tracker records the human status decision and an external run reference when needed. It
-does not embed a generated ledger hash or duplicate run output. A dirty-tree run is diagnostic and cannot
-close a phase. A Done decision requires a fresh run from the human-committed tree.
+does not embed a generated ledger hash or duplicate run output. A Done decision requires a run whose recorded
+source-snapshot digest still matches the tree; editing the source afterwards invalidates the binding and needs
+a fresh run. Commit timing is orthogonal and is never a gate condition.
 
 ## 6. `.gitignore` contract
 
@@ -455,11 +463,11 @@ kubeconfig
 An image build that needs a derived artifact regenerates it inside a staged build or receives it as an
 explicit build input from the current run. It never broadens the context to include local caches or evidence.
 
-## 8. Enforcement and clean-clone acceptance
+## 8. Enforcement and source-snapshot acceptance
 
 Every phase gate inherits these postconditions:
 
-1. The run starts from a clean human-committed tree.
+1. The run binds to its source snapshot: every non-ignored file as it stands when the gate starts.
 2. Every deliberate generator writes only to `gen/`, a declared build root, or a temporary directory; normal
    source-adjacent Python interpreter caches are the sole location exception.
 3. Test enumeration is regenerated and joined to independently authored expectations by stable identity.
@@ -468,11 +476,26 @@ Every phase gate inherits these postconditions:
 6. The gate leaves every tracked file unchanged and creates no unignored generated file.
 7. The Docker context audit contains no derived output, evidence, cache, credential, or runtime state.
 8. The external attestation verifies before the phase can be marked Done.
+9. The source snapshot contains every authored input referenced by a build, test, or gate; an ignored
+   worktree file can never complete the repository's source closure.
+10. The tracked-tree audit classifies files semantically, not only by ignore-pattern or path match, and rejects
+    reproducible copies even when they live in an otherwise authored root.
 
 Python commands run with ordinary bytecode caching enabled. The cache may remain beside source on a developer
 worktree because `.gitignore` excludes `__pycache__/` and all Python bytecode suffixes, while `.dockerignore`
 excludes the same paths from every build context. Phase 0 rejects missing patterns, tracked bytecode, Docker
 context leakage, and command-level bytecode suppression; it does not require deleting a valid ignored cache.
+
+Phase 0 audits two different boundaries. The current-tree audit covers tracked, ignored, untracked, and
+effective Docker-context paths, then repeats the documented verifier against the source snapshot alone. The revision-history
+audit separately scans reachable commits for secrets, credentials, generated artifacts, obsolete names, and
+other files that current ignore rules cannot remove retroactively. Unreachable local objects are reported as
+local state and are not treated as part of the shared repository closure.
+
+A secret or credential found in history requires immediate rotation and a coordinated history purge. A
+non-secret generated or obsolete historical blob requires forward removal plus an explicit recorded decision:
+retain the old history, or perform an operator-approved coordinated rewrite. A documentation or cleanup phase
+must never rewrite shared history implicitly.
 
 When a pristine Linux host is required, every hardware substrate supplies the `linux-cpu` lane. Incus is used
 on Linux and Linux-CUDA hosts, Lima on Apple, and WSL2 on Windows. A specialized Apple or Linux-CUDA gate may
@@ -481,15 +504,23 @@ add its one specialized lane without removing the baseline.
 ## 9. Migration boundary
 
 The repository does not yet satisfy this doctrine. The current generated ledgers, evidence, enumeration,
-lock/freeze files, tracked-bytecode deletions, resolved paths, and hard-coded package integrity values are migration inputs, not
-exceptions. Their deletion or relocation is tracked in
+derived test corpora, reference-program outputs, checksum/digest fixtures, resolved paths, and hard-coded
+package integrity values are migration inputs, not exceptions. Ignored authored compatibility patches and
+human reasoning in ignored phase ledgers must be relocated before their old paths are deleted. Their exact
+disposition is tracked in
 [`../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md).
 
-Documentation adoption alone supplies no implementation evidence. The ignore files and exact-pattern lint now
-implement the pattern contract, but Phase 0 remains open until the provenance classifier, tracked-path and
-effective Docker-context audits, authored-root write guard, dynamic-resolution audit, and external attestation
-also pass. Every later phase remains reopened until its gate uses the new output paths, produces external
-evidence, and passes the clean-clone acceptance above.
+Documentation adoption alone supplies no implementation evidence. The 2026-08-11 source-closure audit found the
+Phase-0 verifier depending on ignored inputs; as of 2026-08-12 the provenance classifier, semantic tracked-path
+and effective Docker-context audits, authored-root write guard, history audit, fresh-clone gate,
+dynamic-resolution audit, and external attestation are implemented and pass two-sided from a clone. Phase 0
+is sealed: the gate publishes an attestation bound to the source snapshot it ran against.
+
+The migration surface those checks reveal is not closed by them. Each finding outside the running phase's
+ownership is deferred to the phase named in
+[`../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md),
+reported on every run, and cleared by that phase's gate. Every later phase remains reopened until its gate
+uses the new output paths, produces external evidence, and passes the source-snapshot acceptance above.
 
 ## Related Documents
 

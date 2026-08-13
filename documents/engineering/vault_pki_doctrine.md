@@ -13,7 +13,7 @@ child. It does not own the specification-side spelling of a secret reference bey
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -253,6 +253,49 @@ is itself a per-app name. Correspondingly, the bytes that credential pulls are *
 layers: pin *presence* type-foreclosed, pin *match* decode-foreclosed, "the pin names the intended model" runtime-checked/assumed)
 is owned by content_addressing [§4.5](../illegal_state/illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content); vault_pki owns only that the credential resolving the pull is a name,
 never a value.
+
+### 3.3 The test-secrets seam: the only cleartext, and it is flagged
+
+**The problem.** A live provider gate needs a real cloud credential before Vault can hold one. The gate that
+proves Vault works cannot itself read from Vault, and the gate that mints a least-privilege identity needs an
+elevated credential to mint it with. Left unspecified, that need is met the way it is usually met: a
+`.env` file, an exported `AWS_SECRET_ACCESS_KEY`, or a literal in a test `.dhall`. Each is a cleartext
+credential at rest that no type rejects, that greps like ordinary configuration, and that reaches a commit
+the first time someone runs `git add -A`. The defect surfaces at author time and is invisible until the
+credential is already published.
+
+**Why the obvious alternative fails.** The tempting answer is a lint: scan tracked files for credential-shaped
+strings and fail the build. A scanner cannot distinguish a live key from a fixture that looks like one, so it
+either blocks legitimate test data or learns an exception list that the next real key is added to. More
+fundamentally it runs *after* authoring, on a file that already exists; the property wanted is that a
+production config cannot express a secret value at all.
+
+**The rule.** There is exactly one cleartext-secret file, it is **test-only, flagged, and never tracked**:
+
+- **The type does the rejecting, not a scanner.** Every sensitive field is a `SecretRef`
+  ([§3](#3-the-secretref-contract-a-name-never-a-value)), so a `Text` literal does not typecheck there. Gate 1
+  admits only a well-typed `SecretRef`; Gate 2 rejects the `TestPlaintext` arm in production mode. A
+  production config that decodes carries no secret, and one that carries a secret does not decode.
+- **The production path is prompt-to-Vault, never a file.** Elevated operator material — the cloud-admin
+  credential that mints a least-privilege identity, the unseal password — is supplied at an interactive CLI
+  prompt (`SecretRef.Prompt`), used to write Vault, and discarded. It is never written to disk, never placed
+  in an environment variable, and never staged in a config the reconciler reads.
+- **The test seam is one file, named, ignored, and flagged.** A test run may supply cleartext through a
+  single `test-secrets.dhall` at the repository root. It is covered by `.gitignore`, every value it carries
+  enters the config as `SecretRef.TestPlaintext`, and every credential it stands up is a *flagged* test
+  credential whose teardown the harness owns ([testing_doctrine.md](./testing_doctrine.md)). It is a
+  convenience for standing up a live test, and it is never a production input.
+- **Vault comes first in the numeric order, and that ordering is load-bearing.** A live provider gate
+  ([phase_44](../../DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md) onward) consumes credentials as
+  `SecretRef.Vault` names, so the Vault root ([phase_29](../../DEVELOPMENT_PLAN/phase_29_vault_pki.md)) must
+  already exist for those phases to be runnable at all. The phase order is not merely a convention here: a
+  provider phase run before Vault would have nowhere to resolve a name from, and the only way to make it run
+  would be the cleartext fallback this section forbids.
+
+**What it forecloses.** Convenience. There is no supported way to run a live provider gate from an exported
+environment variable or a checked-in credential, so a fresh clone cannot reach a provider without either an
+operator at a prompt or a Vault that already holds the name. That cost is deliberate: the alternative is a
+credential whose only protection is that nobody has looked.
 
 ---
 

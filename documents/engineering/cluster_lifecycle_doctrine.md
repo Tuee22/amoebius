@@ -422,7 +422,7 @@ set toward it.
 Every lifecycle action in this document — bring-up ([§2](#2-bring-up-and-bootstrap)), spawn ([§3](#3-amoebic-spawning--the-recursive-forest)), dynamic provisioning ([§8](#8-dynamic-node-provisioning)), and
 teardown ([§5](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) — is the **same shape**: *observe the world, compare it to the `.dhall`, enact the diff,
 re-observe.* There is no giant lifecycle state machine. This pattern is **generalized from the prodbox sibling's** reconciler-with-predicates doctrine
-(`/home/matthewnowak/prodbox/documents/engineering/lifecycle_reconciliation_doctrine.md`), lifted from
+(`prodbox/documents/engineering/lifecycle_reconciliation_doctrine.md`), lifted from
 "AWS-resource-leak prevention" to "any cluster / child / node / stack / PV the forest can create."
 
 ```mermaid

@@ -2,6 +2,6 @@ mutant	target	expected
 M-drop-server-action	projection_rows.tsv:workflow.start	server-action-mismatch
 M-swap-action-targets	ui_server_plan.golden.json	handler-projection-mismatch
 M-emit-private-field	client_plan.golden.json	PrivateFieldForbidden
-M-client-only-authority-digest	expected_digests.tsv:authority	digest-mismatch
+M-client-only-authority-digest	derived-digests:authority	digest-mismatch
 M-link-navigation-as-fetch	projection_rows.tsv:docs.link	LinkNavigationAsEffect
 M-preserve-map-insertion-order	client_plan.golden.json	fresh-process-byte-mismatch

@@ -18,7 +18,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +29,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 23.1: Single-/multi-tenant workflow-to-artifact composition gate ⏸️](#sprint-231-single-multi-tenant-workflow-to-artifact-composition-gate-)
+- [Sprint 23.1: Single-/multi-tenant workflow-to-artifact composition gate ✅](#sprint-231-single-multi-tenant-workflow-to-artifact-composition-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,9 +37,30 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:d08a350888547a54…`
+(1946 non-ignored files) and published verified external attestation
+`sha256:363ae0c7c14e334f0455a1ffb67c9ce14eae0f33c736ca555187b076f596bc1a`.
+
+**Observed progress — 2026-08-13:** **Policy-conformant.** Two Dhall-typed applications drive one generic
+browser bundle against the real `serve-ui` boundary and two separately started domain-shaped fake processes:
+five interactions join the generated action set, four visible states and the ordered three-step effect
+sequence match their pins with the fresh nonce reaching both the DOM and the raw effect log, four denials
+return their pinned status and tag with zero private bytes, the direct-to-backend probe is refused at the
+network, and all five mutants redden. Evidence and the ledger move into `gen/runs/phase_23/<run-id>/`, and 58
+surfaces join two-way to 71 run-time enumerated items.
+
+**The composition only became runnable when Phase 22's ABI landed.** `use-artifact` had no row in the closed
+action table, so the third step of the workflow returned the non-enumerating refusal and the artifact result
+never appeared. The table now carries one row per Phase-19 port effect.
+
+**One mutant detector was looking for the wrong success code.** `M-drop-handle-tenant` reports the foreign
+tenant's copied handle being accepted, and the harness tested for status 200 exactly. `use-artifact` is a
+mutation, so the boundary answers 202 — the attack landed and the detector called it a miss. It now tests for
+any 2xx, which is what "accepted" means.
+
+**The suite stopped naming one machine.** It resolved the amoebius binary through an absolute
+`~/.ghcup/bin/cabal-3.16.1.0` and typechecked its Dhall through an absolute `~/.local/bin/dhall`. Both now
+come from the gate's resolution, with PATH as the fallback.
 
 **Invalidated historical record:**
 
@@ -48,7 +69,7 @@ Five interactions join all three generated workflow surfaces; four visible pins,
 three access rows, five denials, a fresh workflow-to-artifact nonce, 36 loopback network syscalls, and all five
 mutants pass. This is Register-2 evidence with separate infernix-/jitML-shaped fakes, not live adapters,
 Keycloak, provider storage, release, replica-loss, or HA evidence. See the
-[Phase-23 ledger](ledgers/phase_23_ui_local_composition.md).
+Phase-23 ledger.
 
 ## Phase Summary
 
@@ -128,9 +149,9 @@ isolation, live ingress/identity, release rollout, replica failure, and HA remai
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 23.1: Single-/multi-tenant workflow-to-artifact composition gate ⏸️
+## Sprint 23.1: Single-/multi-tenant workflow-to-artifact composition gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the composition runs end to end on the Phase-22 boundary; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/ui/Phase23LocalCompositionSpec.hs`,
 `test/ui/local/phase23_local_composition.mjs`, `test/fixtures/ui_local_composition/`, and
 `tools/phase23_gate.py`

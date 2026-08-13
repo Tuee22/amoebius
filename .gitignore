@@ -78,10 +78,12 @@ coverage/
 *.pid
 *.sock
 
-# Local credentials and runtime state.
+# Local credentials and runtime state. The single sanctioned cleartext-secret file is the
+# test-secrets seam of vault_pki_doctrine.md section 3.3: test-only, flagged, never tracked.
 /.env
 /.env.*
 !/.env.example
 /.secrets/
 /.credentials/
+/test-secrets.dhall
 /kubeconfig

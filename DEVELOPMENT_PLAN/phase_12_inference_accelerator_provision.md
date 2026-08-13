@@ -23,7 +23,7 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/ledgers/phase_12_inference_accelerator_provision.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md
 **Generated sections**: none
 
 </details>
@@ -34,8 +34,8 @@ The Register-1 gate passed on 2026-08-09 with ledger
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 12.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ⏸️](#sprint-121-the-inferenceengine-capability--target-offering-selected-runtime--accelerator-provision-)
-- [Sprint 12.2: The accelerator-provision corpus + the Register-1 gate ⏸️](#sprint-122-the-accelerator-provision-corpus--the-register-1-gate-)
+- [Sprint 12.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ✅](#sprint-121-the-inferenceengine-capability--target-offering-selected-runtime--accelerator-provision-)
+- [Sprint 12.2: The accelerator-provision corpus + the Register-1 gate ✅](#sprint-122-the-accelerator-provision-corpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -43,16 +43,28 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:32e80b8d1d0ae545…`
+(1937 non-ignored files) and published verified external attestation
+`sha256:eba86a80c57d10c9629d25cd74199104d3df181cb1adbb2f223492d1d3b3a89f`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run:
+three inference positives provision, the target-offering quotient is exact across four lanes, the family/lane
+relation is exact across twelve pairs, the hand-authored coexistence aggregation matches, the URL Gate-1
+negative reddens at its specific locus, eight provision negatives redden at their tags, the eight-branch
+QuickCheck coverage floor holds, and all five seeded mutants redden. Evidence and the ledger move into
+`gen/runs/phase_12/<run-id>/`, and 23 run-time items — one coexistence epoch, four engine families, four
+target lanes, nine provision cases, and five mutant names — partition one-to-one across the claim surfaces.
+
+**Two contract surfaces carry no id and are now honestly UNVERIFIED**:
+`opaque-provisioned-engine-accelerator` and `phase12-validation-locus-ledger`. The gap is recorded against
+Phase 12 in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
 
 **Invalidated historical record:**
 
 ✅ Done. The target-offering quotient, family relation, identity-complete owner checks, provision corpus,
 properties, and mutant battery passed on 2026-08-09. Evidence is retained under
-[`evidence/phase_12/`](evidence/phase_12/), with the claim boundary in
-[`ledgers/phase_12_inference_accelerator_provision.md`](ledgers/phase_12_inference_accelerator_provision.md).
+`evidence/phase_12/`, with the claim boundary in
+`ledgers/phase_12_inference_accelerator_provision.md`.
 This phase opened after the Phase 11 gate (the whole-deployment
 provision seal, from which the accelerator epoch witnesses are constructed) and the Phase 9 gate (the
 identity-complete accelerator-residency/coexistence epoch fold these owner demands feed), and runs on **no substrate** (`none`) in **Register 1** — it stands up no CUDA device, no Metal host, and no cluster, only the
@@ -301,9 +313,9 @@ device count equals the owner requirement) and each minimally-differing one-devi
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 12.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ⏸️
+## Sprint 12.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/amoebius/Capability.dhall` carries the URL-free runtime and family unions.
 `src/Amoebius/Capability/Engine.hs` owns offerings, the lane quotient, family relation, owner demands, policies,
 and the opaque checked accelerator. `src/Amoebius/Capacity/Provision.hs` incorporates it into the seal.
@@ -375,9 +387,9 @@ resolve.
 ### Remaining Work
 The whole sprint (✅ Done).
 
-## Sprint 12.2: The accelerator-provision corpus + the Register-1 gate ⏸️
+## Sprint 12.2: The accelerator-provision corpus + the Register-1 gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/capability/EngineAccelerator{Fixtures,Props,Gate,Mutants,Spec}.hs`, the paired Dhall
 corpus, `tests/oracle/phase12/`, `tests/mutants/phase12/`, and `tools/phase12_gate.py`.
 **Blocked by**: reopened numeric predecessor gates.

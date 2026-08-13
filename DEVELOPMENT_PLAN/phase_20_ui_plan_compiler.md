@@ -18,7 +18,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +29,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 20.1: Deterministic paired-plan projection ⏸️](#sprint-201-deterministic-paired-plan-projection-)
+- [Sprint 20.1: Deterministic paired-plan projection ✅](#sprint-201-deterministic-paired-plan-projection-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,16 +37,37 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:3587049c696ded8e…`
+(1944 non-ignored files) and published verified external attestation
+`sha256:6e567d5b9a009a424ba1974e7d62957e579bd56f928e9bc1076365584aaaa8be`.
+
+**Observed progress — 2026-08-13:** **Policy-conformant.** The paired-plan result is unchanged and re-run:
+four logical projections match a reference relation that imports no production projection code, four canonical
+artifacts are byte-exact, four digests agree with an independent adapter, six demand cells are finite and
+exact, two fresh cache-disabled processes with reversed insertion order emit identical bytes, and all six
+seeded mutants redden. Evidence and the ledger move into `gen/runs/phase_20/<run-id>/`, and 55 surfaces join
+two-way to 66 run-time enumerated items.
+
+**`expected_digests.tsv` is deleted, which is what this phase owed.** A table of four SHA-256 values over
+bytes the goldens already pin is not an expectation anyone can author or review — it is a reproducible
+observation, and a second copy of a fact can only agree or be wrong. The suite now derives that side at run
+time by hashing the authored goldens with the independent adapter, the run bundle records the derived table,
+and a `derived-digest-table-untracked` check refuses to let any tracked fixture other than the four goldens
+carry a `sha256:` literal again. The Phase-0 gate was re-run green after its manifest row was removed.
+
+**The four plan goldens remain regression fixtures, and this seal does not change that.** They were first
+committed alongside the implementation, so Git establishes no chronology between fixture and subject
+([development_plan_standards.md §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
+clause 1). They hold byte-exactly and the mutants prove the comparison has teeth; what they cannot do is prove
+the intended output was authored before the observed one. Only an independent human reviewer can discharge
+that, and the obligation stays open in the legacy register rather than being absorbed by a green run.
 
 **Invalidated historical record:**
 
 ✅ Done. Four logical rows compile inseparably into four canonical artifacts, four concrete SHA-256 identities,
 and six finite-demand cells; reversed source insertion in two cache-disabled fresh processes is byte-identical,
 and six mutants turn red. This proves pure projection and serialization only. It does not claim interpreter
-correctness or a live release. See the [Phase-20 ledger](ledgers/phase_20_ui_plan_compiler.md).
+correctness or a live release. See the Phase-20 ledger.
 
 ## Phase Summary
 
@@ -71,25 +92,26 @@ HTTP, publishing a Release, a second register, or a substrate.
 **Dependency:** Phase 19 — the sealed `BoundUiProgram` with complete effect bindings.
 **Substrate:** none — no browser, network, credential, artifact store, provider, or cluster is contacted.
 **Register:** 1 — pure/golden.
-**Gate:** `cabal test ui-plan-compiler-spec` passes the Phase-0-pinned paired plan goldens, independent
-projection/key oracle, canonical-encoding and cache-bypassed determinism checks, private-field negatives, and
-all seeded mutants in [Gate integrity](#gate-integrity). Phases 21 and 22 do not open unless the ledger records
-Register 1 green and both interpreter fidelities UNVERIFIED.
+**Gate:** `python3 tools/phase20_gate.py` passes the projection/key oracle, run-time-derived reference
+digests, canonical-encoding and cache-bypassed determinism checks, private-field negatives, isolated
+execution, and all seeded mutants in [Gate integrity](#gate-integrity). Both interpreter fidelities stay
+UNVERIFIED.
 
 ## Gate integrity
 
-Phase 0 commits the app fixtures, logical projection tables, expected digests, and test goldens before
-`Amoebius.Ui.Compile` exists. The committed goldens are independent test oracles; shipped plan output remains
-generated and uncommitted.
+The app fixtures and logical projection tables remain authored source only after Phase 0 records independent
+review. Existing same-commit plan goldens are regression fixtures until reviewed or replaced. Concrete digests
+are recomputed during the gate by the distinct reference adapter and remain generated run evidence; shipped
+plan output is likewise generated and uncommitted.
 
 - **Representative set:** the same minimal single-tenant, multi-tenant, data/form, workflow/subscription, and
   ready-artifact programs exercise every client instruction, public value type, route guard, effect class,
   server dispatch arm, fixed named-link navigation, and manifest entry.
-- **Pinned oracles:** `test/fixtures/ui_plan_compiler/projection_rows.tsv` owns the logical client/server/route/
-  contract/audit/handler-identity tuples; `client_plan.golden.json`, `ui_server_plan.golden.json`,
-  `public_contracts.golden.json`, and `content_manifest.golden.json` own canonical encodings; and
-  `expected_digests.tsv` owns concrete authority, client, server, and contract SHA-256 values. Finite
-  browser/server demand is independently counted from the committed projection rows.
+- **Oracle candidates:** after independent review, `test/fixtures/ui_plan_compiler/projection_rows.tsv` owns
+  the logical client/server/route/contract/audit/handler-identity tuples. The four existing plan goldens must
+  be reviewed or replaced before serving as canonical-encoding oracles. `expected_digests.tsv` is removed;
+  concrete authority, client, server, and contract digests are generated at run time from separately authored
+  digest-source expectations. Finite demand is independently counted from the reviewed projection rows.
 - **Independent predicates:** one test reader compares serialized key sets and public/private field
   classifications directly from `projection_rows.tsv`; another hand-authored digest input list is fed to a
   distinct reference hash adapter. Neither imports compiler projections, ordering, or digest-source folds.
@@ -129,9 +151,9 @@ interpreter, release publication, transport security, or runtime freshness enfor
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 20.1: Deterministic paired-plan projection ⏸️
+## Sprint 20.1: Deterministic paired-plan projection ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Ui/Compile/{ClientPlan,ServerPlan,Manifest,Demand}.hs`
 and `test/ui/{Phase20UiPlanCompilerSpec,PlanCompilerReference}.hs`, plus `tools/phase20_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
@@ -153,12 +175,13 @@ freshness identity, or per-application client build is representable in the emit
 - Total paired compiler, canonical WebSocket routing/cursor codecs, complete digest-source fold, finite demand projection, and
   structured `UiPlanError` values.
 - Exact key-set and public-projection checks performed before any artifact is returned.
-- Phase-0 golden/table readers, fresh-process determinism harness, mutant configurations, and Register-1 ledger.
+- Reviewed golden/table readers, run-time reference-digest generation, a fresh-process determinism harness,
+  mutant configurations, and a generated Register-1 ledger.
 
 ### Validation
 
-1. Run `cabal test ui-plan-compiler-spec`; each emitted byte stream and digest matches its independent pin and
-   all client/server/route/contract/audit key sets are exactly equal where required.
+1. Run `cabal test ui-plan-compiler-spec`; each emitted byte stream matches an independently reviewed
+   expectation, each digest matches a fresh distinct-reference computation, and all required key sets match.
 2. Recompile in a fresh process with randomized source insertion order and cache bypass; output remains
    byte-identical while one authority-bearing input change changes the authority digest.
 3. Run `M-drop-server-action`, `M-swap-action-targets`, `M-emit-private-field`,
@@ -169,8 +192,11 @@ freshness identity, or per-application client build is representable in the emit
 
 ### Remaining Work
 
-None in Phase 20. Browser/server interpretation, release publication, edge enforcement, and live freshness
-remain UNVERIFIED and belong to later gates.
+Done for the compiler. `expected_digests.tsv` is removed, the reference digests are derived at run time and
+recorded in the run bundle, and the gate ran under universal artifact hygiene. One obligation stays open and
+is not this gate's to close: the four plan goldens are same-commit regression fixtures until an independent
+human reviewer validates or replaces them. Browser/server interpretation, release publication, edge
+enforcement, and live freshness remain UNVERIFIED and belong to later gates.
 
 ## Documentation Requirements
 

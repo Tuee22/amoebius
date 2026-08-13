@@ -1,0 +1,44 @@
+# Authored expectation for the Phase-0 test-surface join.
+#
+# `development_plan_standards.md` section S clause 2 and the Definition of Done clause 2
+# require the run to enumerate its test surfaces and join them **completely** to an
+# independently authored expectation. This file is that expectation. It is authored;
+# the enumeration it joins against is discovered at run time from the check registries
+# the three checkers actually implement, and written to `gen/test-surfaces/phase_00.json`.
+#
+# The join is two-way and total. A check that exists but is claimed by no surface fails
+# the gate, and a surface claiming a check no checker implements fails it too — so
+# deleting a check cannot quietly shrink the gate, and naming a check here cannot
+# conjure one.
+#
+# owner is the module whose registry supplies the ids: doc_lint, ledger_lint,
+# artifact_policy, or phase0_artifact_lint.
+#
+# surface<TAB>owner<TAB>check ids (comma-separated)
+documentation.header_metadata	doc_lint	a1,a2,a3,a4,a5
+documentation.anchored_links	doc_lint	b1,b2,i,n
+documentation.bidirectional_references	doc_lint	c
+documentation.normative_uniqueness	doc_lint	d,m
+documentation.status_consistency	doc_lint	e
+documentation.gate_integrity	doc_lint	f,f2,f3
+documentation.illegal_state_catalog	doc_lint	g1,g2,g3,g4,g5
+documentation.plan_backlinks	doc_lint	h
+documentation.terminology_and_honesty	doc_lint	j,k,l
+documentation.commit_independence	doc_lint	t
+documentation.substrate_discipline	doc_lint	s1,s2
+documentation.shape_and_navigation	doc_lint	o1,o2,o3,o4,o5
+documentation.diagram_registers	doc_lint	q1,q3,q4,q5
+documentation.readability_budgets	doc_lint	p1,p2,p3,p4,p5,p6
+documentation.ledger_schema	ledger_lint	json,schema,phase,status,layers,honesty,tracker,path,enumeration,surface,hash
+documentation.preimplementation_artifacts	phase0_artifact_lint	manifest
+repository.generator_registry	artifact_policy	r1
+repository.provenance_classification	artifact_policy	r2
+repository.ignore_coverage	artifact_policy	r3
+repository.docker_context	artifact_policy	r4
+repository.authored_root_write_guard	artifact_policy	r5
+repository.dynamic_resolution	artifact_policy	r6
+repository.source_closure	artifact_policy	r7
+repository.revision_history	artifact_policy	r8
+repository.external_attestation	artifact_policy	r9
+repository.terminology	artifact_policy	r10
+repository.no_leak	artifact_policy	r11

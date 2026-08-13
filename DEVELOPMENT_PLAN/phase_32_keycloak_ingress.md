@@ -45,7 +45,11 @@ Validated 2026-08-10 with `python3 tools/phase32_gate.py`; ledger
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
+
+**Observed artifact migration — 2026-08-11:** the live gate reads
+`test/fixtures/phase32/expected-base-digest.txt`, a copy of the Phase-25 image observation. The file must be
+removed; image provenance is checked against Phase 25's verified attestation and the current registry catalog.
 
 **Invalidated historical record:**
 
@@ -122,21 +126,22 @@ cluster came up (see [Gate integrity](#gate-integrity)).
 
 ### Representative set (concrete corpus, §M.7)
 
-The gate's "every wild route / every surface" quantifies over an **explicitly enumerated, oracle-pinned route inventory** — `test/fixtures/phase32/route-inventory.golden` — listing every browser surface on the
+The gate's "every wild route / every surface" quantifies over an explicitly enumerated route-inventory
+candidate, `test/fixtures/phase32/route-inventory.golden`, after independent review. It lists every browser surface on the
 Phase-30/31 standard service stack that the edge fronts: **Grafana, the Keycloak admin console, the Vault UI, the MinIO console, the platform API surface, and a platform-owned authenticated-WebSocket upgrade probe** (the exact set is the golden; if the stack's surface set changes,
 the golden is re-authored and re-committed, never regenerated from the running edge). The three origin classes
 — WAN, LAN, localhost-browser — are each probed from a **distinct Linux network namespace / sidecar container**
 attached to a separate veth with a non-loopback source address for WAN/LAN and the host loopback for
 localhost-browser; a single host-side `curl` of the MetalLB address is **not** an acceptable stand-in for all
-three. The "test-realm user" is the oracle-pinned `phase32-tester` realm/user fixture
-(`test/fixtures/phase32/realm.json`), authored before the edge exists.
+three. The `phase32-tester` realm/user fixture (`test/fixtures/phase32/realm.json`) is also a regression
+fixture until independently reviewed or replaced.
 
 ## Gate integrity
 
-- **Oracle-pinning (§M.1):** the route inventory (`route-inventory.golden`), the test realm/user
+- **Oracle provenance (§M.1):** the route inventory (`route-inventory.golden`), the test realm/user
   (`realm.json`), the expected derived-NetworkPolicy set (`netpol-expected.golden`, see 32.3), and the marker
-  payloads (`marker-row.sql`, `marker-object.bin`) are authored and committed in this phase's oracle-pinning sprint before
-  `Amoebius.Platform.Edge`/`Keycloak`/`NetworkPolicy` exist; none is regenerated from the implementation.
+  payloads (`marker-row.sql`, `marker-object.bin`) are same-commit regression fixtures until independently
+  reviewed or replaced. None may be regenerated from the implementation or promoted by the former manifest.
 - **Committed seeded mutants (§M.2):** at least three committed mutants must go red — (a) an edge variant that
   removes the Keycloak OIDC/JWT filter (guard delete) so an unauthenticated probe reaches a surface; (b) a
   `derive` variant that drops one allow-edge and adds one undeclared allow-edge (union-arm swap) so the
@@ -154,6 +159,9 @@ three. The "test-realm user" is the oracle-pinned `phase32-tester` realm/user fi
   EAB-provenance assertions read from OS-boundary observers (per-origin netns probe exit codes, an argv/env
   recording shim on the ACME client, a readiness-withholding harness), never a compliance trace the edge emits
   about itself.
+- **Image provenance (§M.5):** every live `imageID` is observed at the CRI boundary and must equal both the
+  verified Phase-25 image identity supplied to this run and the current in-cluster registry catalog. A public
+  or side-loaded alternative fails. No committed expected-digest file participates.
 
 ```mermaid
 flowchart LR
@@ -298,9 +306,8 @@ observed as readiness conditions, not durations.
   for its children, and no scalar "database bytes" stands in for the storage structure.
 - The readiness edges wired into the derived DAG: MetalLB address before the Gateway listener; Keycloak ready
   before the edge admits wild traffic — never a `threadDelay`.
-- The oracle-pinned oracle fixtures this sprint checks against: `test/fixtures/phase32/route-inventory.golden`
-  (the explicit surface set) and `test/fixtures/phase32/realm.json` (the `phase32-tester` realm/user), both
-  authored before `Amoebius.Platform.Edge`/`Keycloak` exist; plus committed mutant (a) — an OIDC-filter-removed
+- The route-inventory and realm fixture candidates, retained only after recorded independent review or
+  replacement, plus committed mutant (a) — an OIDC-filter-removed
   edge variant the gate must show going red.
 
 ### Validation
@@ -327,7 +334,7 @@ observed as readiness conditions, not durations.
    attempts. The independent backend/CNI trace observes the challenge only for the valid tuple.
 
 ### Remaining Work
-None.
+Independently review or replace the same-commit route inventory and realm fixtures before revalidation.
 
 ## Sprint 32.2: No self-published wild ingress + public-edge TLS ⏸️
 
@@ -427,8 +434,8 @@ and every other is denied.
 - The live posture: a service that does not declare consuming `B` cannot reach `B`, and a declared edge is not
   severed — the two shapes [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)
   makes unrepresentable at authoring time, now confirmed on the running cluster.
-- The oracle-pinned expected-policy oracle `test/fixtures/phase32/netpol-expected.golden`, an independent
-  graph-walker (a code path distinct from `renderAll`) that recomputes the expected allow-set from the declared
+- The expected-policy candidate `test/fixtures/phase32/netpol-expected.golden`, retained only after independent
+  review or replacement; an independent graph-walker that recomputes the expected allow-set from the declared
   dependency edges, and committed mutant (b) — a `derive` variant that drops one allow-edge and adds one
   undeclared allow-edge, which the set-equality check must show going red.
 
@@ -440,12 +447,12 @@ and every other is denied.
    reachability flips on; remove the edge and assert the allow is withdrawn and reachability flips off. This
    fails against committed mutant (b) (drop one allow, add one undeclared allow), which the gate must show going
    red.
-4. Assert set equality between the applied policies and the oracle-pinned `netpol-expected.golden` **and** the
+4. After independent review, assert set equality between the applied policies and `netpol-expected.golden` and the
    output of an **independent graph-walker** (distinct from `renderAll`) over the declared dependency edges — not
    by re-running the implementation's own `derive`.
 
 ### Remaining Work
-None.
+Independently review or replace the same-commit expected-policy fixture before revalidation.
 
 ## Sprint 32.4: The single-door + storage-rebind regression gate ⏸️
 
@@ -481,6 +488,8 @@ deterministic storage rebind.
 ### Deliverables
 - The phase-gate harness: assert an unauthenticated request to any platform surface is rejected at the edge and
   there is no non-Keycloak wild path (no exposed backdoor NodePort).
+- Run-local image provenance that consumes the verified Phase-25 identity and current registry catalog; remove
+  `test/fixtures/phase32/expected-base-digest.txt` and never replace it with another copied digest.
 - The storage-rebind regression: write the committed marker row (`marker-row.sql`) into the Keycloak Patroni DB
   and the committed marker object (`marker-object.bin`) into a MinIO bucket; perform the Phase-28 intermediate
   observation while the old apiserver is still running by quiescing the witnesses, stopping each through its
@@ -508,9 +517,12 @@ deterministic storage rebind.
    the old and replacement edge Pods, Keycloak Patroni data/WAL/checkpoint state, and ACME/Vault revisions.
    Removing any one of those operands must fail the committed omission-mutant corpus rather than relying on the
    successful recreate as evidence of capacity.
+5. Compare CRI-observed image identities with the verified Phase-25 run input and current registry catalog;
+   a seeded gate variant that reads an expected-digest file and a side-loaded public image each fail.
 
 ### Remaining Work
-None.
+Remove the committed expected-base-digest file and gate dependency, then rerun with Phase-25 identity supplied
+as run-local verified input.
 
 ## Documentation Requirements
 

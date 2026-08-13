@@ -544,10 +544,10 @@ flowchart TD
 > the live Kubernetes mechanisms and Register 2.5 exercised the real actions through 2,048 deterministic
 > schedules. The modeled-apiserver fidelity of Register 2.5 is assumed and bounded by that separate live run.
 > Phase 27's Register-3 scheduler evidence is recorded in
-> [`live-scheduler.json`](../../DEVELOPMENT_PLAN/evidence/phase_27/live-scheduler.json). Its modeled-apiserver
+> `live-scheduler.json`. Its modeled-apiserver
 > fidelity remains assumed and bounded by that separate live run; Sprint 27.5 sealed the deterministic battery.
 > Phase 28's Register-3 retained-storage evidence is recorded in
-> [`rebind-live.json`](../../DEVELOPMENT_PLAN/evidence/phase_28/rebind-live.json): the reconciler applied the
+> `rebind-live.json`: the reconciler applied the
 > one StorageClass and exact PV/claimRef projections on both sides of a true cluster delete/recreate, and the
 > external readers matched the independent oracle tables. This proves only that retained-host slice; later
 > provider and rollout arms remain deferred.

@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-7 base capacity/topology fold gate."""
+"""The Phase-7 gate — the base capacity fold and the topology relation.
+
+The capability claim and every check behind it are unchanged: the fold, compile-fail,
+Gate-1, compatibility, and mutant oracles all carry their authored shapes, the three
+Gate-1 negatives fail at their exact loci beside green twins, the suite reaches its
+acceptance token with QuickCheck coverage in both directions, and all nineteen seeded
+mutants redden at their own loci.
+
+What changed is the shell: evidence goes to the run bundle instead of the plan tree, the
+ledger is derived into that bundle instead of compared against a committed copy, the
+surfaces are enumerated at run time and joined to an authored expectation, the toolchain is
+resolved from authored requirements, and the run publishes an attestation bound to the
+source snapshot. `test/dsl/CapacityTopologyGate.hs` no longer hard-codes one developer's
+`dhall` path; it resolves per run and fails closed when unset.
+"""
 
 from __future__ import annotations
 
@@ -15,27 +29,38 @@ import sys
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import gate_common
+import toolchain
+
 
 ROOT = Path(__file__).resolve().parent.parent
-PINS = ROOT / "toolchain/pins.json"
 FOLD_ORACLE = ROOT / "tests/oracle/phase7/fold_cases.tsv"
 COMPILE_ORACLE = ROOT / "tests/oracle/phase7/compile_fail.tsv"
 GATE1_ORACLE = ROOT / "tests/oracle/phase7/gate1_cases.tsv"
 COMPATIBILITY_ORACLE = ROOT / "tests/oracle/phase7/compatibility.tsv"
 MUTANTS = ROOT / "tests/mutants/phase7/mutants.tsv"
-LEDGER = ROOT / "test/golden/phase_07_ledger.json"
-ENUMERATION = ROOT / "test/enumeration/phase_07_surfaces.txt"
 RESULTS = ROOT / "gen/dsl/phase7/phase-results.tsv"
 GENERATED_LEDGER = ROOT / "gen/dsl/phase7/validation-locus-ledger.tsv"
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_07"
+CONTRACT = "DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md"
+GATE_COMMAND = "python3 tools/phase7_gate.py"
 
 
 class GateFailure(RuntimeError):
     pass
 
 
+# The resolved compiler, set once the toolchain resolves. Every cabal invocation gets it:
+# without it cabal picks whatever `ghc` the ambient PATH offers, which on a host carrying a
+# newer GHC fails the solver for a reason that has nothing to do with this phase.
+COMPILER = ""
+
+
 def run(command: list[str], *, require_success: bool = True) -> subprocess.CompletedProcess[str]:
     environment = dict(os.environ)
+    if COMPILER and command and Path(command[0]).name.startswith("cabal"):
+        command = [command[0], f"--with-compiler={COMPILER}", *command[1:]]
     result = subprocess.run(
         command,
         cwd=ROOT,
@@ -51,7 +76,7 @@ def run(command: list[str], *, require_success: bool = True) -> subprocess.Compl
 
 
 def verify_pins() -> tuple[Path, str]:
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
+    pins = toolchain.resolve(["cabal", "dhall", "ghc"])
     cabal = Path(pins["cabal"]["path"])
     ghc = Path(pins["ghc"]["path"])
     dhall = Path(pins["dhall"]["path"])
@@ -158,7 +183,6 @@ def run_green_suite(cabal: Path) -> str:
             "capacity-topology-spec",
             "-f-phase6-mutant",
             "-f-phase6-normalization-mutant",
-            "--offline",
             "--test-show-details=direct",
         ]
     )
@@ -179,8 +203,7 @@ def verify_mutants(cabal: Path, mutants: list[dict[str, str]]) -> str:
                 str(cabal),
                 "test",
                 "capacity-topology-spec",
-                "--offline",
-                "--test-show-details=direct",
+                    "--test-show-details=direct",
                 f"--test-options=--mutant={name}",
             ],
             require_success=False,
@@ -216,102 +239,152 @@ def write_results(folds: list[dict[str, str]], mutants: list[dict[str, str]]) ->
     )
 
 
-def canonical_hash(value: dict[str, Any]) -> str:
-    payload = dict(value)
-    payload.pop("ledger_hash", None)
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+CHECKS = {
+    "oracle-shape": "every authored oracle carries its declared row count and unique keys",
+    "compile-oracle-shape": "the compile-fail oracle carries seven unique cases",
+    "compatibility-both-directions": "the compatibility matrix exhausts accept and reject",
+    "independent-placement-validator": "the elastic growth envelope is witnessed by the suite",
+    "positive-decodes-and-places": "each positive topology decodes and places",
+    "elastic-envelope-witness": "the managed-EKS positive places elastically",
+    "independent-validator-separate": "the placement validator is separate from the fold under test",
+    "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
+    "toolchain-satisfies-requirements": "the resolved cabal/ghc/dhall satisfy the authored ranges",
+    "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
+    "locus-ledger-honesty-banner": "the generated locus ledger opens with its Register-1 banner",
+}
+
+SIDES = ("toolchain", "oracle", "suite", "mutant", "results")
+
+EXPECTED_RESULTS = {
+    "fold-negatives": "15/15-specific-tag-red",
+    "legal-twins": "15/15-green",
+    "positive-topologies": "2/2-decode-and-place",
+    "gate1-topology-cases": "3/3-exact-red-with-green-twins",
+    "compile-fail-pairs": "7/7-legal-green-illegal-type-red",
+    "compatibility-matrix": "9/9-equivalent",
+    "quickcheck-properties": "4/4-green-checkCoverage-30-percent-both-directions",
+    "mutants": "19/19-red",
+    "registry-subcases": "11/11-Phase-7-owned-discharged",
+    "base-fold-totality": "compile-exhaustive-and-sampled-no-crash",
+    "acceptance-token": "spec-composition-proven-base-capacity-topology",
+    "storage-geometry": "UNVERIFIED",
+    "execution-accelerator-provider-root-fit": "UNVERIFIED",
+    "runtime": "UNVERIFIED",
+}
+
+SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
+    "base-capacity-types": ("acceptance-token", EXPECTED_RESULTS["acceptance-token"]),
+    "gate1-topology-foreclosures": ("gate1-topology-cases", EXPECTED_RESULTS["gate1-topology-cases"]),
+    "fits-equivalence": ("compatibility-matrix", EXPECTED_RESULTS["compatibility-matrix"]),
+    "carve-zero-capable-subtraction": ("fold-negatives", EXPECTED_RESULTS["fold-negatives"]),
+    "fixed-placement-witness": ("positive-topologies", EXPECTED_RESULTS["positive-topologies"]),
+    "elastic-growth-envelope": ("positive-topologies", EXPECTED_RESULTS["positive-topologies"]),
+    "elementwise-topology-compatibility": ("compatibility-matrix", EXPECTED_RESULTS["compatibility-matrix"]),
+    "rke2-host-distinctness": ("compile-fail-pairs", EXPECTED_RESULTS["compile-fail-pairs"]),
+    "linux-host-quorum-compile-barriers": ("compile-fail-pairs", EXPECTED_RESULTS["compile-fail-pairs"]),
+    "capacity-topology-negative-corpus": ("legal-twins", EXPECTED_RESULTS["legal-twins"]),
+    "legal-multisubstrate-fixed-placement": ("positive-topologies", EXPECTED_RESULTS["positive-topologies"]),
+    "legal-managed-eks-elastic-placement": ("positive-topologies", EXPECTED_RESULTS["positive-topologies"]),
+    "independent-placement-validator": ("positive-topologies", EXPECTED_RESULTS["positive-topologies"]),
+    "quickcheck-capacity-topology-properties": ("quickcheck-properties", EXPECTED_RESULTS["quickcheck-properties"]),
+    "base-fold-compile-totality": ("base-fold-totality", EXPECTED_RESULTS["base-fold-totality"]),
+    "phase7-mutant-battery": ("mutants", EXPECTED_RESULTS["mutants"]),
+    "phase7-validation-locus-ledger": ("registry-subcases", EXPECTED_RESULTS["registry-subcases"]),
+    "capacity-feasibility": ("acceptance-token", EXPECTED_RESULTS["acceptance-token"]),
+    "storage-geometry": None,
+    "execution-accelerator-provider-root-fit": None,
+    "binding-feasibility": None,
+    "render-fidelity": None,
+    "model-runtime-correspondence": None,
+    "runtime-fidelity": None,
+}
+
+PROVEN_SURFACES = {"base-fold-compile-totality"}
 
 
-def derive_ledger() -> dict[str, Any]:
-    tested = {
-        "base-capacity-types",
-        "gate1-topology-foreclosures",
-        "fits-equivalence",
-        "carve-zero-capable-subtraction",
-        "fixed-placement-witness",
-        "elastic-growth-envelope",
-        "elementwise-topology-compatibility",
-        "rke2-host-distinctness",
-        "linux-host-quorum-compile-barriers",
-        "capacity-topology-negative-corpus",
-        "legal-multisubstrate-fixed-placement",
-        "legal-managed-eks-elastic-placement",
-        "independent-placement-validator",
-        "quickcheck-capacity-topology-properties",
-        "phase7-mutant-battery",
-        "phase7-validation-locus-ledger",
-        "capacity-feasibility",
-    }
-    proven = {"base-fold-compile-totality"}
-    coverage = []
-    for surface in ENUMERATION.read_text(encoding="utf-8").splitlines():
-        if surface in proven:
-            status = "proven-for-the-model"
-        elif surface in tested:
-            status = "tested"
-        else:
-            status = "UNVERIFIED"
-        coverage.append({"surface": surface, "status": status})
-    ledger = {
-        "phase": 7,
-        "gate_command": "python3 tools/phase7_gate.py",
-        "register": "1",
-        "substrate": "none",
-        "date": "2026-08-09",
-        "layers": [
-            {"name": "Decision", "status": "tested"},
-            {"name": "Protocol", "status": "UNVERIFIED"},
-            {"name": "Runtime", "status": "UNVERIFIED"},
-        ],
-        "coverage": coverage,
-    }
-    ledger["ledger_hash"] = canonical_hash(ledger)
-    return ledger
+def main() -> int:
+    gate = gate_common.PhaseGate(
+        phase=7, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES
+    )
+    gate.begin()
+    results = dict.fromkeys(gate.sides, False)
+    rows: dict[str, str] = {}
+    resolved: dict[str, Any] = {}
+    mutant_rows: list[dict[str, str]] = []
 
-
-def verify_ledger() -> str:
-    derived = derive_ledger()
-    committed = json.loads(LEDGER.read_text(encoding="utf-8"))
-    if committed != derived:
-        raise GateFailure("committed Phase-7 ledger differs from outcomes:\n" + json.dumps(derived, indent=2))
-    run([sys.executable, str(ROOT / "tools/ledger_lint.py"), str(LEDGER), "--enumeration", str(ENUMERATION)])
-    return str(derived["ledger_hash"])
-
-
-def retain_evidence(suite: str, mutant_log: str, versions: str) -> None:
-    EVIDENCE.mkdir(parents=True, exist_ok=True)
-    (EVIDENCE / "gate.log").write_text(suite, encoding="utf-8")
-    (EVIDENCE / "mutants.log").write_text(mutant_log, encoding="utf-8")
-    (EVIDENCE / "toolchain.txt").write_text(versions, encoding="utf-8")
-    shutil.copyfile(RESULTS, EVIDENCE / "phase-results.tsv")
-    shutil.copyfile(GENERATED_LEDGER, EVIDENCE / "validation-locus-ledger.tsv")
-
-
-def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--derive-ledger", action="store_true")
-    args = parser.parse_args(argv)
-    if args.derive_ledger:
-        print(json.dumps(derive_ledger(), indent=2))
-        return 0
     try:
-        cabal, versions = verify_pins()
-        pins = json.loads(PINS.read_text(encoding="utf-8"))
-        folds, mutants = verify_oracles(Path(pins["dhall"]["path"]))
+        resolved = toolchain.resolve(["cabal", "dhall", "ghc"])
+        print("toolchain side — cabal, ghc, and dhall resolved from authored requirements\n")
+        for name in ("cabal", "ghc", "dhall"):
+            record = resolved[name]
+            print(f"  ok    {name:<8} {record['version']:<12} satisfies {record['requirement']}")
+        results["toolchain"] = True
+
+        os.environ["AMOEBIUS_DHALL"] = resolved["dhall"]["path"]
+        os.environ["AMOEBIUS_GHC"] = resolved["ghc"]["path"]
+        globals()["COMPILER"] = resolved["ghc"]["path"]
+        cabal = Path(resolved["cabal"]["path"])
+
+        print("\noracle side — authored oracle shapes and the Gate-1 loci\n")
+        folds, mutant_rows = verify_oracles(Path(resolved["dhall"]["path"]))
         verify_totality_sources()
+        print(f"  ok    oracle-shape       {len(folds)} fold cases, {len(mutant_rows)} mutants, Gate-1 loci exact")
+        results["oracle"] = True
+
+        print("\nsuite side — dsl-spec and capacity-topology-spec\n")
         suite = run_green_suite(cabal)
-        mutant_log = verify_mutants(cabal, mutants)
-        write_results(folds, mutants)
-        ledger_hash = verify_ledger()
-        retain_evidence(suite, mutant_log, versions)
-        print(suite, end="", flush=True)
-        print(f"phase7-gate: PASS ({ledger_hash})")
-        return 0
+        (gate.run_dir / "suite.log").write_text(suite, encoding="utf-8")
+        print("  ok    acceptance token and QuickCheck coverage present in both directions")
+        results["suite"] = True
+
+        print("\nmutant side — every seeded mutant red at its own locus\n")
+        mutant_log = verify_mutants(cabal, mutant_rows)
+        (gate.run_dir / "mutants.log").write_text(mutant_log, encoding="utf-8")
+        print(f"  ok    {len(mutant_rows)}/{len(mutant_rows)} mutants reddened")
+        results["mutant"] = True
+
+        write_results(folds, mutant_rows)
+        rows = gate_common.metric_rows(RESULTS)
+        banner_ok = GENERATED_LEDGER.is_file() and GENERATED_LEDGER.read_text(encoding="utf-8").startswith(
+            "# Register-1 only;"
+        )
+        oracle_ok = gate_common.oracle_side(rows, EXPECTED_RESULTS)
+        artifact_ok = gate_common.untracked_side(
+            [RESULTS.parent], (".tsv", ".log"), gate.run_dir,
+            check="emitted-results-untracked",
+            label="the battery's generated output stays generated",
+        )
+        if banner_ok:
+            print(f"  ok    locus-ledger-honesty-banner {gate_common.rel(GENERATED_LEDGER)}")
+        else:
+            print("  FAIL  locus-ledger-honesty-banner the generated locus ledger lacks its Register-1 banner")
+        results["results"] = oracle_ok and artifact_ok and banner_ok
     except (GateFailure, OSError, KeyError, ValueError, json.JSONDecodeError) as problem:
         print(f"phase7-gate: FAIL: {problem}", file=sys.stderr)
-        return 1
+
+    layers = {
+        "Decision": "tested" if rows.get("acceptance-token") == EXPECTED_RESULTS["acceptance-token"] else "UNVERIFIED",
+        "Protocol": "UNVERIFIED",
+        "Runtime": "UNVERIFIED",
+    }
+    return gate.finish(
+        results,
+        implemented={"metrics": set(rows), "checks": set(CHECKS)},
+        rows=rows,
+        evidence=SURFACE_EVIDENCE,
+        layers=layers,
+        toolchain={
+            name: {"version": record["version"], "requirement": record["requirement"]}
+            for name, record in resolved.items()
+            if name != "platform"
+        },
+        dependencies={"dsl-spec": "cabal test", "capacity-topology-spec": "cabal test"},
+        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-7 mutants", "status": "unrun"}],
+        observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
+        extra_status={"generated-artifact-discipline": results["results"]},
+    )
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())

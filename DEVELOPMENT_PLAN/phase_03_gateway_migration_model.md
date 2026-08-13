@@ -30,10 +30,10 @@ The gate passed on 2026-08-09; live daemon/forest correspondence remains UNVERIF
 - [Phase Summary](#phase-summary)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 3.1: Author the `GatewayMigration` `Model` — both branches ⏸️](#sprint-31-author-the-gatewaymigration-model--both-branches-)
-- [Sprint 3.2: `emitTLA` render + TLC exhaustive proof (both branches) ⏸️](#sprint-32-emittla-render--tlc-exhaustive-proof-both-branches-)
-- [Sprint 3.3: io-sim agreement + seeded-mutation catch ⏸️](#sprint-33-io-sim-agreement--seeded-mutation-catch-)
-- [Sprint 3.4: Scope-2 pairwise cutoff + decode-time structural-fit fold ⏸️](#sprint-34-scope-2-pairwise-cutoff--decode-time-structural-fit-fold-)
+- [Sprint 3.1: Author the `GatewayMigration` `Model` — both branches ✅](#sprint-31-author-the-gatewaymigration-model--both-branches-)
+- [Sprint 3.2: `emitTLA` render + TLC exhaustive proof (both branches) ✅](#sprint-32-emittla-render--tlc-exhaustive-proof-both-branches-)
+- [Sprint 3.3: io-sim agreement + seeded-mutation catch ✅](#sprint-33-io-sim-agreement--seeded-mutation-catch-)
+- [Sprint 3.4: Scope-2 pairwise cutoff + decode-time structural-fit fold ✅](#sprint-34-scope-2-pairwise-cutoff--decode-time-structural-fit-fold-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,9 +41,23 @@ The gate passed on 2026-08-09; live daemon/forest correspondence remains UNVERIF
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:fa98d6036518a43e…`
+(1928 non-ignored files) and published verified external attestation
+`sha256:f640ce89ff0bd972746f1b155446e7b54266c946cf4b6b8f3f925073fd74f189`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** The capability result is unchanged and re-run: the
+explorer and TLC agree on 53 distinct reachable states with identical canonical fingerprints, five safety
+invariants hold, three liveness properties hold under the declared fairness and redden without it, and the
+per-invariant, mechanical, cutoff-clause, and shared-resource mutant families all turn the gate red. The JVM
+and `tla2tools` now resolve from `toolchain/requirements.json`, the twelve recorded metrics are checked
+against the authored expectation read off this contract, the ledger is derived from those metrics into
+`gen/runs/phase_03/<run-id>/`, and 15 surfaces join to 17 run-time enumerated items.
+
+Two ledger rows that the pre-amendment gate marked `tested` with no recorded metric behind them now name their
+evidence: `vacuity-action-antecedent` is decided by the per-invariant mutants reddening **exactly** — which a
+vacuously-true invariant cannot do — and `structural-fit-cutoff` by the eight cutoff-clause deletions. The
+`decomposition-lemma` row stays UNVERIFIED, because its recorded value is `OPEN` and reporting it otherwise
+would be the dishonest reading.
 
 **Invalidated historical record:**
 
@@ -196,9 +210,9 @@ flowchart LR
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 3.1: Author the `GatewayMigration` `Model` — both branches ⏸️
+## Sprint 3.1: Author the `GatewayMigration` `Model` — both branches ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Formal/GatewayMigration.hs` (the concrete `Model`
 value + its five named invariants), atop the Phase-2
 `src/Amoebius/Formal/{Model,Interpret,EmitTLA,Explore}.hs` kernel — built and exercised by the phase gate.
@@ -265,9 +279,9 @@ seeded from backup within its `freshnessBound` also discharges
 None. Both branches, all 20 actions, all five invariants, and all three liveness properties are reachable and
 structurally well formed; the correct explorer state space contains 53 states with no safety violation.
 
-## Sprint 3.2: `emitTLA` render + TLC exhaustive proof (both branches) ⏸️
+## Sprint 3.2: `emitTLA` render + TLC exhaustive proof (both branches) ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/formal/gateway/GatewayMigrationSpec.hs` (the TLC harness) rendering to
 `gen/tla/gateway-migration-model-spec/` (emitted, git-ignored, never committed) and running pinned `tla2tools`
 against the byte-locked fixtures in `test/formal/gateway/golden/` — built.
@@ -320,9 +334,9 @@ exhaustively model-check it at the bounded scope, proving both branches reach ev
 None. TLC and the explorer agree on the exact 53-state fingerprint set; safety and liveness are green, every
 action/antecedent vacuity obligation is reachable, and all three fairness-removal checks are red.
 
-## Sprint 3.3: io-sim agreement + seeded-mutation catch ⏸️
+## Sprint 3.3: io-sim agreement + seeded-mutation catch ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/formal/gateway/GatewayMigrationSpec.hs` (the `IOSimPOR` harness over
 the lifted `interpret`) and its committed model-mutant catalogue under `test/formal/gateway/oracle/` — built.
 **Blocked by**: reopened numeric predecessor gates.
@@ -384,9 +398,9 @@ None. IOSimPOR explored 13 partial-order-reduced schedules within the committed 
 per-invariant mutants violate exactly their named invariant, all five mechanical safety operators are red in
 the explorer and TLC, and invariant deletion is caught by the obligation/golden oracle.
 
-## Sprint 3.4: Scope-2 pairwise cutoff + decode-time structural-fit fold ⏸️
+## Sprint 3.4: Scope-2 pairwise cutoff + decode-time structural-fit fold ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Multicluster/StructuralFit.hs` (the total decode-time fold over an
 `InForceSpec` migration graph) and `test/formal/gateway/GatewayMigrationSpec.hs` (the independent envelope
 predicate/corpus + over-scope stress run) — built.

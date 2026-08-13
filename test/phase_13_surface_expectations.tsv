@@ -1,0 +1,52 @@
+# Authored expectation for the Phase-13 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   items     the deployment corpus rows and mutant names the run read
+#   metrics   the metric keys in gen/dsl/phase13/phase-results.tsv
+#   checks    the check ids tools/phase13_gate.py implements
+#
+# The 30 items are partitioned so each is claimed exactly once. The eighteen
+# corpus deployments split across the two surfaces that consume them — the capability-shape
+# corpus and the byte-locked goldens — because both read the same rows for different
+# purposes and neither is evidence for the other.
+#
+# **7 contract surfaces carry no id**: `aeson-round-trip`, `sealed-render-source-domain`, `deterministic-identity-order`, `exact-source-identity-projection`, `closed-reconcile-mode`, `default-deny-network-policy`, `phase13-validation-locus-ledger`.
+# None has a corpus row, a mutant, or a metric of its own, so the ledger carries them
+# UNVERIFIED. The gap is recorded against Phase 13 in legacy_tracking_for_deletion.md.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+typed-k8s-object-model	metrics	object-variant-coverage
+canonical-aeson-encoding	metrics	deployment-goldens
+aeson-round-trip	checks	
+pure-total-render-all	metrics	acceptance-token
+sole-public-render-facade	checks	render-facade-sealed
+sealed-render-source-domain	checks	
+deterministic-identity-order	checks	
+exact-source-identity-projection	checks	
+render-activation-domain	items	mutant_monitoring_projection
+closed-reconcile-mode	checks	
+capability-shape-corpus	items	objectstore_singlenode,objectstore_distributed,secretstore_singlenode,secretstore_distributed,messagebus_singlenode,messagebus_distributed,sql_singlenode,sql_distributed,identity_singlenode,identity_distributed
+nine-emitted-object-variants	metrics	capability-shapes
+byte-locked-render-goldens	items	observability_singlenode,observability_distributed,registry_singlenode,registry_distributed,edge_singlenode,edge_distributed,inferenceengine_singlenode,inferenceengine_distributed
+hardened-pod-projection	items	mutant_unhardened_pod
+exact-resource-projection	items	mutant_resource_projection
+content-digested-image-projection	items	mutant_image_platform
+bounded-volume-projection	items	mutant_unbounded_scratch,mutant_memory_volume_lifecycle,mutant_ephemeral_rootfs,mutant_durable_size
+accelerator-claim-projection	items	mutant_accelerator_projection
+controller-kind-projection	items	mutant_controller_projection
+single-declared-edge-exposure	metrics	safety-predicates
+no-bare-ingress	items	mutant_wild_ingress
+default-deny-network-policy	checks	
+independent-allow-edge-equality	items	mutant_undeclared_allow_edge
+phase13-property-coverage	metrics	quickcheck-properties
+phase13-mutant-battery	metrics	mutants
+phase13-validation-locus-ledger	checks	
+phase13-compile-totality	checks	render-totality-options
+live-apiserver-enforcement	metrics	live-apiserver-enforcement
+live-network-policy-enforcement	metrics	live-network-policy-enforcement
+runtime-model-correspondence	metrics	runtime-correspondence
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle,locus-ledger-honesty-banner

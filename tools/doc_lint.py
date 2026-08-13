@@ -48,6 +48,7 @@ CHECKS = {
     "f": "gate integrity: gate names fixtures, a mutant, and an independent oracle",
     "f2": "gate integrity: gate names a backticked re-runnable acceptance command",
     "f3": "gate integrity: a gate never requires a later phase as a pass condition",
+    "t": "commit independence: no document makes committing a gate precondition",
     "s1": "substrate discipline: one catalog member, at most one specialized",
     "s2": "requires: every Requires token is in the closed section-F vocabulary",
     "g1": "catalog integrity: every entry carries a Validation-locus field",
@@ -741,8 +742,13 @@ def check_f_gate_integrity(docs, docs_by_rel, v):
         row = line.lower()
         if not re.search(r"\d{4}-\d{2}-\d{2}", row):
             v.append(Violation("f", tracker.rel, i, "a Done row records no run date"))
-        if "ledger" not in row:
-            v.append(Violation("f", tracker.rel, i, "a Done row records no ledger hash"))
+        # The tracker links the external run; it never copies the generated ledger or
+        # its hash into Markdown (repository_layout_doctrine section 5). So the Done
+        # row must carry the attestation reference, which is what a reader can verify.
+        if not re.search(r"sha256:[0-9a-f]{8}", row):
+            v.append(
+                Violation("f", tracker.rel, i, "a Done row records no attestation reference")
+            )
 
 
 ENTRY_RE = re.compile(r"^#{2,4}\s+(\d+)\.(\d+)\s+(.*)$")
@@ -921,6 +927,51 @@ NEGATED_PROVEN_RE = re.compile(
     r"(not|never|rather than|instead of|cannot be|is not|without)\s+"
     r"(\*{1,2})?prove[sn]?\b", re.I
 )
+
+
+# The gate precondition withdrawn by development_plan_standards section S. A phase
+# result binds to its source snapshot, so commit timing is not a gate input. These are
+# the phrasings that would quietly reintroduce it.
+WITHDRAWN_COMMIT_PHRASES = (
+    "clean committed tree",
+    "clean human-committed",
+    "human-committed tree",
+    "human-committed source",
+    "dirty-tree run",
+    "dirty tree",
+    "dirty worktree",
+    "committed baseline",
+    "clean-tree postcondition",
+    "clean-tree run",
+    # A gate required to run "from a fresh clone" is a committed-tree precondition in
+    # other words: a clone can only ever contain committed content. Source closure is
+    # checked against the source snapshot instead, which does not care about commits.
+    "from a fresh clone",
+    "from a clean clone",
+    "clean-clone acceptance",
+)
+# The one place allowed to name the rule is the passage that records its withdrawal.
+WITHDRAWAL_MARKER = re.compile(r"\bwithdraw", re.I)
+
+
+def check_t_commit_independence(doc, v):
+    """No governed document may make committing a precondition of a gate result."""
+    for i, line in enumerate(doc.stripped_lines, 1):
+        if doc.fence_langs.get(i) is not None or WITHDRAWAL_MARKER.search(line):
+            continue
+        lowered = line.lower()
+        for phrase in WITHDRAWN_COMMIT_PHRASES:
+            if phrase in lowered:
+                v.append(
+                    Violation(
+                        "t",
+                        doc.rel,
+                        i,
+                        f"{phrase!r} reasserts the withdrawn committed-tree gate precondition; "
+                        "a result binds to its source snapshot",
+                    )
+                )
+                break
 
 
 def check_l_honesty(doc, v):
@@ -1428,16 +1479,25 @@ def check_n_label_target(doc, v):
 
 GOVERNED_DIRS = ("documents", "DEVELOPMENT_PLAN")
 
+# Generated Markdown living inside the plan tree is not governed and is not present in
+# a clone. Collecting it would make the governed corpus differ between a developer
+# worktree and a fresh clone, which is the failure this gate exists to catch.
+UNGOVERNED_PREFIXES = ("DEVELOPMENT_PLAN/evidence/", "DEVELOPMENT_PLAN/ledgers/")
+
 
 def collect(root):
     docs = []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "doc_lint_corpus", "node_modules")]
+        dirnames[:] = [
+            d for d in dirnames if d not in (".git", "doc_lint_corpus", "node_modules", "gen")
+        ]
         for fn in sorted(filenames):
             if not fn.endswith(".md"):
                 continue
             full = os.path.join(dirpath, fn)
             rel = os.path.relpath(full, root).replace(os.sep, "/")
+            if rel.startswith(UNGOVERNED_PREFIXES):
+                continue
             if rel.startswith(GOVERNED_DIRS) or rel == "README.md":
                 docs.append(Doc(full, root))
     return docs
@@ -1466,6 +1526,7 @@ def run(root, only=None):
         check_j_sprint_locality(doc, v)
         check_k_product_name(doc, v)
         check_l_honesty(doc, v)
+        check_t_commit_independence(doc, v)
         check_n_label_target(doc, v)
         check_o_shape(doc, v)
         check_q_diagrams(doc, v)

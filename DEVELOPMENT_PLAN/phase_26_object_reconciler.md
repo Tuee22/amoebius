@@ -49,7 +49,7 @@ Sprints 26.1–26.5 and the complete phase gate have passed.
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
 
 **Invalidated historical record:**
 
@@ -72,21 +72,21 @@ path are amoebius's new code proven live here.
   execution union, once-per-identity commitment normalization, physical-backing runtime grouping,
   whole-vector preflight, single-use Lease/storage tokens, and exact 12-action corpus plan passed with the
   unchanged Phase-13 renderer gate. An import lint found no writer boundary in the read-only preflight modules.
-  Receipt: [`sprint-26.1-receipt.json`](evidence/phase_26/sprint-26.1-receipt.json), fingerprint
+  Receipt: `sprint-26.1-receipt.json`, fingerprint
   `dynamically-resolved`.
 - **2026-08-09 — Sprint 26.2 complete.** The typed Lease token/renewal rounding, effect dispatcher, and scoped
   SSA boundary passed pure tests and a live scratch-namespace run. The run observed namespace-before-Lease
   cold ordering, exact bootstrap holder/UID/resourceVersion, stale-CAS rejection, `amoebius` field ownership,
   correction of an owned-field drift, preservation of a foreign-manager annotation, a resourceVersion-stable
   no-op, and leak-free teardown. Receipt:
-  [`sprint-26.2-receipt.json`](evidence/phase_26/sprint-26.2-receipt.json), fingerprint
+  `sprint-26.2-receipt.json`, fingerprint
   `dynamically-resolved`.
 - **2026-08-09 — Sprint 26.3 complete.** The pure serial, ordinary/CUDA/Metal release, Job terminal, and
   authenticated-delete protocols passed. Live OnDelete replacement deleted and re-observed two provisioned
   slots in order; each replacement had a distinct UID and reached Bound+Ready. The successful Job pod remained
   retained with no completion object. A wrong UID/resourceVersion delete precondition conflicted while the exact
   one deleted, and the label-only mutant went red. Receipt:
-  [`sprint-26.3-receipt.json`](evidence/phase_26/sprint-26.3-receipt.json), fingerprint
+  `sprint-26.3-receipt.json`, fingerprint
   `dynamically-resolved`.
 - **2026-08-09 — Sprint 26.4 complete.** A clean Register-3 run converged 19 externally observed objects,
   proved an immediate server-side-apply rerun byte-stable and mutation-free, observed non-instantaneous
@@ -94,14 +94,14 @@ path are amoebius's new code proven live here.
   the terminal Job, independently checked the healthy CR child envelope, and admitted only one of two
   simultaneous children under a one-Pod quota. Never-ready, over-bound-child, generation-after-diff, and
   label-only-delete controls were red; both namespaces, the CRD, and the static test PV were absent postflight.
-  Receipt: [`sprint-26.4-receipt.json`](evidence/phase_26/sprint-26.4-receipt.json), fingerprint
+  Receipt: `sprint-26.4-receipt.json`, fingerprint
   `dynamically-resolved`.
 - **2026-08-09 — Sprint 26.5 complete.** The real Lease-token, scoped-SSA, serial, host/device-release, Job,
   authenticated-delete, and readiness modules ran through the Phase-15 `IOSim` environment: eight fault
   classes × 256 deterministic schedules, bounded `IOSimPOR` exploration, byte-identical same-seed replay,
   and seven committed red mutants. Modeled-apiserver fidelity remains an explicit assumption and is
   independently bounded by Sprint 26.4's live evidence. Receipt:
-  [`sprint-26.5-receipt.json`](evidence/phase_26/sprint-26.5-receipt.json), fingerprint
+  `sprint-26.5-receipt.json`, fingerprint
   `dynamically-resolved`.
 
 ## Phase Summary
@@ -470,7 +470,7 @@ Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_
 ### Remaining Work
 
 None. The exact receipt and three-check transcript are retained under
-[`evidence/phase_26/`](evidence/phase_26/). Sprint 26.2 consumes the typed action/authority boundary.
+`evidence/phase_26/`. Sprint 26.2 consumes the typed action/authority boundary.
 
 ## Sprint 26.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch ⏸️
 
@@ -688,7 +688,7 @@ This is the phase gate.
 
 ### Remaining Work
 
-None. Receipt and live/mutation results are under [`evidence/phase_26/`](evidence/phase_26/).
+None. Receipt and live/mutation results are under `evidence/phase_26/`.
 
 ## Sprint 26.5: Register-2.5 reconciler + staged-execution convergence under simulated faults ⏸️
 
@@ -740,7 +740,7 @@ open. The scheduler's CAS-race schedules are Phase 27's `SchedulerSim`.
 ### Remaining Work
 
 None. The Register-2.5 receipt and seven-mutant ledger are under
-[`evidence/phase_26/`](evidence/phase_26/); modeled-apiserver fidelity remains assumed, as required by the
+`evidence/phase_26/`; modeled-apiserver fidelity remains assumed, as required by the
 register boundary, and the independent Register-3 run supplies the live boundary evidence.
 
 ## Documentation Requirements

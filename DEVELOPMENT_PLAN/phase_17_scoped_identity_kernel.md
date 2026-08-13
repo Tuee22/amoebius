@@ -18,7 +18,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +29,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 17.1: Scope-indexed handles and total flow checking ⏸️](#sprint-171-scope-indexed-handles-and-total-flow-checking-)
+- [Sprint 17.1: Scope-indexed handles and total flow checking ✅](#sprint-171-scope-indexed-handles-and-total-flow-checking-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,15 +37,39 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:f6ee1e7d69f37a07…`
+(1942 non-ignored files) and published verified external attestation
+`sha256:45ba0ed3a546b6dd436f611f2d12e80378bc64c5d349d8f9fdf44f32c727b18a`.
+
+**Observed progress — 2026-08-13:** **Policy-conformant.** The scoped-identity result is unchanged and
+re-run: six owner-join rows and two swap rows match the independent tables at their exact `ScopeError` tags,
+four flow rows agree with a reference relation that shares no helper with the kernel, three compile loci hold,
+six generated classes clear their 5% floor, and the owner-equality mutant reddens on both swap pins. Evidence
+and the ledger move into `gen/runs/phase_17/<run-id>/`, and 40 surfaces join two-way to 47 run-time enumerated
+items.
+
+**Every cabal invocation now carries the resolved compiler.** The pre-migration gate ran `cabal exec ghc`
+bare, so on a host offering a newer GHC than the authored range the compile-fail battery failed to resolve
+`base` and reported a drifted locus — a toolchain mismatch wearing the costume of a capability regression.
+The gate resolves `ghc` and passes it to every cabal call, as Phase 7 established.
+
+**Constructor opacity is nine checks, not one.** Each private type — `Tenant`, `Subject`, `Membership`,
+`RequestContext`, `ScopeWitness`, `ScopedHandle`, `ResourceId`, `FlowLabel`, `CanFlowTo` — has its own check
+id and its own surface, because a single "the constructors are private" bit stays green while one of them
+quietly opens. The scan also no longer assumes the author's spacing: `Tenant(..)` opens a constructor exactly
+as `Tenant (..)` does.
+
+**Three contract surfaces have no recorded observation and are honestly UNVERIFIED.** The kernel declares
+`TenantFlowMismatch`, a cycle diagnostic, and `MissingFlowMember`, but the committed four-row flow matrix
+decides audience widening, integrity elevation, and one transitive leak — and nothing else. `tenant-flow-preservation`,
+`cycle-diagnostic`, and `missing-member-diagnostic` therefore carry no id, and the gap is recorded against
+Phase 17 in the legacy register rather than asserted away.
 
 **Invalidated historical record:**
 
 ✅ Done. The owner/grant and flow relations, constructor-closure compile failures, generated coverage, and
 owner-equality mutant pass. Identity-provider and provider-runtime enforcement remain UNVERIFIED. See the
-[Phase-17 ledger](ledgers/phase_17_scoped_identity_kernel.md).
+Phase-17 ledger.
 
 ## Phase Summary
 
@@ -113,9 +137,9 @@ does not prove Keycloak truth, provider row policy, network isolation, or nonint
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 17.1: Scope-indexed handles and total flow checking ⏸️
+## Sprint 17.1: Scope-indexed handles and total flow checking ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Ui/Security/{Scope,Flow}.hs`, `test/ui/ScopeSpec.hs`,
 and `test/fixtures/ui_scope/compile_fail/` — built and validated.
 **Blocked by**: reopened numeric predecessor gates.
@@ -152,7 +176,9 @@ flow before a `CheckedUiProgram` can proceed to authorization binding.
 
 ### Remaining Work
 
-Done. Live identity and provider enforcement remain UNVERIFIED.
+Done for the pure kernel. Live identity and provider enforcement remain UNVERIFIED, and so do the three flow
+diagnostics no committed row exercises — tenant-flow preservation, the cycle diagnostic, and the missing-member
+diagnostic.
 
 ## Documentation Requirements
 

@@ -20,7 +20,7 @@ The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/ledgers/phase_13_render_manifest_goldens.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -30,9 +30,9 @@ The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED
 - [Phase Summary](#phase-summary)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 13.1: The typed `K8sObject` model + Aeson serialization ⏸️](#sprint-131-the-typed-k8sobject-model--aeson-serialization-)
-- [Sprint 13.2: Pure total `renderAll` + best-practice-by-construction ⏸️](#sprint-132-pure-total-renderall--best-practice-by-construction-)
-- [Sprint 13.3: The rendered-output golden battery (`render-golden`) — the gate ⏸️](#sprint-133-the-rendered-output-golden-battery-render-golden--the-gate-)
+- [Sprint 13.1: The typed `K8sObject` model + Aeson serialization ✅](#sprint-131-the-typed-k8sobject-model--aeson-serialization-)
+- [Sprint 13.2: Pure total `renderAll` + best-practice-by-construction ✅](#sprint-132-pure-total-renderall--best-practice-by-construction-)
+- [Sprint 13.3: The rendered-output golden battery (`render-golden`) — the gate ✅](#sprint-133-the-rendered-output-golden-battery-render-golden--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -40,9 +40,25 @@ The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:34f6b508a276b5b0…`
+(1938 non-ignored files) and published verified external attestation
+`sha256:105d193d15c907176c594bb81305890191d2f818081bf11c081bb499cd046794`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: 18
+deployment goldens are byte-locked, nine capability arms render in two shapes each, the nine emitted object
+variants are exact, three safety predicates are non-vacuous, the QuickCheck arm/shape coverage floor holds, and
+all twelve seeded projection mutants redden at their property loci. Evidence and the ledger move into
+`gen/runs/phase_13/<run-id>/`, and 30 run-time items — eighteen corpus deployments and twelve mutant names —
+partition one-to-one across the claim surfaces.
+
+**Two surfaces gained the evidence they always had, and seven lost evidence they never had.**
+`sole-public-render-facade` and `phase13-compile-totality` are decided by real source checks — the facade
+export scan and the `-Werror=incomplete-patterns` assertion — and now join to those checks by name. The other
+seven — `aeson-round-trip`, `sealed-render-source-domain`, `deterministic-identity-order`,
+`exact-source-identity-projection`, `closed-reconcile-mode`, `default-deny-network-policy`, and
+`phase13-validation-locus-ledger` — have no corpus row, mutant, or metric at all, so the ledger carries them
+UNVERIFIED. The gap is recorded against Phase 13 in
+[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
 
 **Invalidated historical record:**
 
@@ -106,7 +122,7 @@ analogous to the Phase-5 decode battery and the Phase-4 `dhall type` corpus.
 
 **Gate:** `python3 tools/phase13_gate.py` passes the oracle-pinned corpus,
 property coverage, source-totality scan, twelve mutant runs, and ledger checks. See the
-[Phase-13 ledger](ledgers/phase_13_render_manifest_goldens.md) for the exact tested and UNVERIFIED boundary.
+Phase-13 ledger for the exact tested and UNVERIFIED boundary.
 
 ```mermaid
 flowchart LR
@@ -187,9 +203,9 @@ flowchart LR
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 13.1: The typed `K8sObject` model + Aeson serialization ⏸️
+## Sprint 13.1: The typed `K8sObject` model + Aeson serialization ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Manifest/{K8sObject,Types}.hs`; the closed object-kind sum, typed specs,
 Aeson instances, and canonical encoder are built and validated.
 **Blocked by**: reopened numeric predecessor gates.
@@ -219,9 +235,9 @@ text.
 ### Remaining Work
 Done. Live Kubernetes decoding and apiserver correspondence remain UNVERIFIED.
 
-## Sprint 13.2: Pure total `renderAll` + best-practice-by-construction ⏸️
+## Sprint 13.2: Pure total `renderAll` + best-practice-by-construction ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Manifest/Render.hs` (`renderSourcePrivate ::
 ProvisionedRenderSource identity -> K8sObject`) and `src/Amoebius/Manifest/RenderAll.hs` (`renderAll ::
 ProvisionedSpec -> [K8sObject]` over the sealed unique source map and deterministic serialization) — built.
@@ -346,9 +362,9 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
 ### Remaining Work
 Done. SSA, ApplySet pruning, readiness, and live convergence remain Phase-26 work.
 
-## Sprint 13.3: The rendered-output golden battery (`render-golden`) — the gate ⏸️
+## Sprint 13.3: The rendered-output golden battery (`render-golden`) — the gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/manifest/{RenderGoldenSpec,RenderGoldenGate,RenderGoldenProps,DepGraphOracle}.hs`
 and eighteen `test/manifest/golden/*.json.golden` fixtures cover every capability arm and both shapes.
 **Blocked by**: reopened numeric predecessor gates.

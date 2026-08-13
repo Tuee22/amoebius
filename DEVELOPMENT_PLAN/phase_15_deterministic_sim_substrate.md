@@ -20,7 +20,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -30,9 +30,9 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Phase Summary](#phase-summary)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 15.1: The `io-classes` `Env` effect interface + its two interpreters + `sim-spec` skeleton ⏸️](#sprint-151-the-io-classes-env-effect-interface--its-two-interpreters--sim-spec-skeleton-)
-- [Sprint 15.2: The modeled fault-injectable substrates + the per-fake fault-contract corpus ⏸️](#sprint-152-the-modeled-fault-injectable-substrates--the-per-fake-fault-contract-corpus-)
-- [Sprint 15.3: The deterministic-replay battery — same-seed determinism + schedule-sensitivity + fault-mutant — the gate ⏸️](#sprint-153-the-deterministic-replay-battery--same-seed-determinism--schedule-sensitivity--fault-mutant--the-gate-)
+- [Sprint 15.1: The `io-classes` `Env` effect interface + its two interpreters + `sim-spec` skeleton ✅](#sprint-151-the-io-classes-env-effect-interface--its-two-interpreters--sim-spec-skeleton-)
+- [Sprint 15.2: The modeled fault-injectable substrates + the per-fake fault-contract corpus ✅](#sprint-152-the-modeled-fault-injectable-substrates--the-per-fake-fault-contract-corpus-)
+- [Sprint 15.3: The deterministic-replay battery — same-seed determinism + schedule-sensitivity + fault-mutant — the gate ✅](#sprint-153-the-deterministic-replay-battery--same-seed-determinism--schedule-sensitivity--fault-mutant--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -40,9 +40,24 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:2b3c1bd5…`
+(1940 non-ignored files) and published verified external attestation
+`sha256:8a27796e30cb0da4b538fd20e3d758bdf4dff3417669cbf1766c7bc247eaa0b3`.
+
+**Observed progress — 2026-08-13:** **Policy-conformant.** The Register-2 claim is unchanged and re-run: one
+reference reconciler runs under both the real-client and `IOSim` interpreters, six fake contracts each expose
+their knob controls, four oracle-pinned schedules replay, same-seed traces are byte-identical while a distinct
+seed is demonstrably distinct, four bounded `IOSimPOR` replays are green, and the dropped-partition mutant
+reddens at `NoActOnStaleRead`. Evidence and the ledger move into `gen/runs/phase_15/<run-id>/`.
+
+**This is the first phase whose contract vocabulary and battery observations line up completely.** All 25
+surfaces have evidence — 22 validation-locus entries and mutant names partitioned one-to-one, seven recorded
+metrics, and two source-level checks that the gate always performed but never named: the bare-IO-signature scan
+over the simulation scope and the non-vacuous polymorphism-token check. Nothing is carried UNVERIFIED except
+the two rows that must be: `modeled-environment-fidelity` stays **ASSUMED**, because a modeled environment's
+faithfulness to a real substrate is exactly what this register cannot establish, and `live-substrate-runtime`
+stays UNVERIFIED. The Runtime ledger layer is pinned UNVERIFIED for the same reason — Register 2.5 runs the
+real reconciler against a model, never against a substrate.
 
 **Invalidated historical record:**
 
@@ -50,7 +65,7 @@ gate from a clean committed tree and publish external evidence without changing 
 real-client and `IOSim` interpreters, six modeled fault contracts, four deterministic schedules, IOSimPOR
 exploration, schedule sensitivity, and the dropped-partition mutant. Model fidelity to live substrates remains
 ASSUMED and live runtime remains UNVERIFIED. See the
-[Phase-15 ledger](ledgers/phase_15_deterministic_sim_substrate.md).
+Phase-15 ledger.
 
 ## Phase Summary
 
@@ -78,7 +93,7 @@ never 2.5 ([`development_plan_standards.md §K`](development_plan_standards.md#k
 
 **Gate:** `python3 tools/phase15_gate.py` passes the build, six fake-contract,
 four-schedule replay, byte-determinism, sensitivity, IOSimPOR, explicit mutant-red, and ledger checks. The
-[Phase-15 ledger](ledgers/phase_15_deterministic_sim_substrate.md) records the exact tested/model-proven boundary
+Phase-15 ledger records the exact tested/model-proven boundary
 and the assumed fidelity premise.
 
 **Independent oracle (§M.3).** The determinism assertion (same-seed → byte-identical trace) is guarded against
@@ -125,9 +140,9 @@ discriminating power.
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 15.1: The `io-classes` `Env` effect interface + its two interpreters + `sim-spec` skeleton ⏸️
+## Sprint 15.1: The `io-classes` `Env` effect interface + its two interpreters + `sim-spec` skeleton ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Sim/Env.hs` (the typed effect interface —
 publish/consume, put/get-blob, apply-object, write-DNS, vault-op, now/delay — polymorphic over an
 `io-classes` monad `m`), `src/Amoebius/Sim/Interp/{Real,Sim}.hs` (the two interpreters: real clients under
@@ -164,9 +179,9 @@ test (`m = IOSim s`) from one source, generalizing the Phase-14 single IO seam.
 ### Remaining Work
 Done. Live client behavior remains UNVERIFIED.
 
-## Sprint 15.2: The modeled fault-injectable substrates + the per-fake fault-contract corpus ⏸️
+## Sprint 15.2: The modeled fault-injectable substrates + the per-fake fault-contract corpus ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**:
 `src/Amoebius/Sim/Fakes/{Pulsar,MinIO,ApiServer,Route53,Vault,Clock}.hs` (the in-`IOSim` modeled substrates,
 each with a typed fault model) and `test/sim/FaultContracts.hs` (the committed per-fake fault-contract
@@ -200,9 +215,9 @@ compiling-but-inert ADT.
 ### Remaining Work
 Done. Model fidelity to each real substrate remains ASSUMED.
 
-## Sprint 15.3: The deterministic-replay battery — same-seed determinism + schedule-sensitivity + fault-mutant — the gate ⏸️
+## Sprint 15.3: The deterministic-replay battery — same-seed determinism + schedule-sensitivity + fault-mutant — the gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/sim/SimSpec.hs` (the `IOSim`/`IOSimPOR` replay battery),
 `test/sim/schedules/` (the committed schedule-fixture corpus — injected partition/redelivery/reorder/crash
 schedules, oracle-pinned), and `test/sim/mutants/dropped_partition_handling/` (the committed seeded

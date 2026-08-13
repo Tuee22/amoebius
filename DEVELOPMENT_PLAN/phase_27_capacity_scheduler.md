@@ -48,7 +48,7 @@ Sprints 27.1–27.5 and the phase-level acceptance gate have passed.
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
 
 **Invalidated historical record:**
 
@@ -72,7 +72,7 @@ reservation ledger, the aggregate-CAS reservation protocol, the identity admissi
   debit; Pending remained API-only; confirmed Bound while still `BindingInFlight` joined the observed UID once;
   and the nine orphan/missing/state/node/generation/template/axes/duplicate/double-debit negative classes
   refused before any writer boundary. Receipt:
-  [`sprint-27.1-receipt.json`](evidence/phase_27/sprint-27.1-receipt.json), fingerprint
+  `sprint-27.1-receipt.json`, fingerprint
   `dynamically-resolved`.
 - **2026-08-09 — Sprint 27.2 complete.** Exact reconciler-Lease-holder admission minted a single-use
   scheduler-system token. Bootstrap readiness required exact generation/config/root with managed authority
@@ -80,14 +80,14 @@ reservation ledger, the aggregate-CAS reservation protocol, the identity admissi
   replacement reservation/Bound/Ready joins, and independent taint/admission/RBAC/writer-domain readback.
   Protected execution identity rejected premature workloads and a second default-scheduler exception. Three
   mutants were red and the readiness source scan found no sleep/clock shortcut. Receipt:
-  [`sprint-27.2-receipt.json`](evidence/phase_27/sprint-27.2-receipt.json), fingerprint
+  `sprint-27.2-receipt.json`, fingerprint
   `dynamically-resolved`.
 - **2026-08-09 — Sprint 27.3 complete.** The scheduler loop authenticated the protected Pod identity,
   re-folded the whole aggregate ledger under CAS, required `BindingInFlight` before Binding, and recovered
   unknown or restarted records without releasing their debit. Same-UID retry was resourceVersion-stable;
   two residual contenders could not overspend; and all four ordering, fold, idempotence, and restart mutants
   turned red before the baseline was restored. Receipt:
-  [`sprint-27.3-receipt.json`](evidence/phase_27/sprint-27.3-receipt.json), fingerprint
+  `sprint-27.3-receipt.json`, fingerprint
   `dynamically-resolved`.
 - **2026-08-09 — Sprint 27.4 complete.** A live Kubernetes admission guard rejected premature and
   default-scheduler guarded Pods with zero writes. The finite add-on cutover replaced the old UID, the
@@ -95,18 +95,18 @@ reservation ledger, the aggregate-CAS reservation protocol, the identity admissi
   readers confirmed both guarded UIDs were debited once, and the immediate rerun was byte-stable and
   Binding-free. A simultaneous one-slot aggregate CAS admitted one of two candidates, all seven scheduler
   mutants were red, and postflight removed the taint, admission, RBAC, CRD, and namespaces. Receipt:
-  [`sprint-27.4-receipt.json`](evidence/phase_27/sprint-27.4-receipt.json), fingerprint
+  `sprint-27.4-receipt.json`, fingerprint
   `dynamically-resolved`.
 - **2026-08-09 — Sprint 27.5 complete.** Seven scheduler fault classes each replayed 256 byte-identical
   schedules through the real readiness, admission, reservation, Binding preparation, recovery, and modeled
   apiserver seams. Bounded IOSimPOR explored their critical sections; all seven simulation mutants were red;
   and modeled-apiserver fidelity remains explicitly assumed, bounded by Sprint 27.4's separate live run.
-  Receipt: [`sprint-27.5-receipt.json`](evidence/phase_27/sprint-27.5-receipt.json), fingerprint
+  Receipt: `sprint-27.5-receipt.json`, fingerprint
   `dynamically-resolved`.
 - **2026-08-09 — Phase 27 gate complete.** The phase command repeated the live/source-mutation and
   deterministic-simulation seals, restored all six scheduler baselines together, validated the exhaustive
   acceptance-surface ledger, and passed documentation lint. Ledger:
-  [`phase_27_ledger.json`](../test/golden/phase_27_ledger.json), fingerprint
+  `phase_27_ledger.json`, fingerprint
   `dynamically-resolved`.
 
 ## Phase Summary
@@ -425,7 +425,7 @@ double-debited, no absent Pod makes a debit disappear, and no unclassified recor
 
 ### Remaining Work
 
-None. Receipt and phase results are under [`evidence/phase_27/`](evidence/phase_27/).
+None. Receipt and phase results are under `evidence/phase_27/`.
 
 ## Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses ⏸️
 
@@ -506,7 +506,7 @@ independently mint `ManagedCapacityReady`.
 
 ### Remaining Work
 
-None. Receipt and mutation results are under [`evidence/phase_27/`](evidence/phase_27/).
+None. Receipt and mutation results are under `evidence/phase_27/`.
 
 ## Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery ⏸️
 
@@ -575,7 +575,7 @@ failure — so a Pod is never bound before its reservation CAS and never double-
 
 ### Remaining Work
 
-None. Receipt and mutation results are under [`evidence/phase_27/`](evidence/phase_27/).
+None. Receipt and mutation results are under `evidence/phase_27/`.
 
 ## Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate ⏸️
 
@@ -649,7 +649,7 @@ namespace down leak-free.
 ### Remaining Work
 
 None. Live evidence, receipt, and repeated mutation results are under
-[`evidence/phase_27/`](evidence/phase_27/).
+`evidence/phase_27/`.
 
 ## Sprint 27.5: Register-2.5 scheduler convergence under simulated faults ⏸️
 
@@ -699,7 +699,7 @@ neither pure-value checks nor the live sample exhausts.
 ### Remaining Work
 
 None. The 1,792-schedule summary, receipt, and mutation results are under
-[`evidence/phase_27/`](evidence/phase_27/).
+`evidence/phase_27/`.
 
 ## Documentation Requirements
 

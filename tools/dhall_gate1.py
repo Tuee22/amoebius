@@ -13,7 +13,11 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-DHALL = Path(os.environ.get("AMOEBIUS_DHALL", "/home/matthewnowak/.local/bin/dhall"))
+# The resolver supplies the executable. There is deliberately no host-path fallback: a
+# default pointing at one developer's home is resolver output in a tracked file, and a
+# battery that silently runs against whatever `dhall` happens to be on PATH is not the
+# battery the requirement describes.
+DHALL = Path(os.environ["AMOEBIUS_DHALL"]) if os.environ.get("AMOEBIUS_DHALL") else None
 ORACLE = ROOT / "tests" / "oracle" / "gate1"
 RESULTS = ROOT / "gen" / "dhall" / "gate1" / "phase-results.tsv"
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
@@ -354,7 +358,11 @@ def write_results(
     RESULTS.parent.mkdir(parents=True, exist_ok=True)
     RESULTS.write_text(
         "metric\tvalue\n"
+        # The count alone is a weak oracle: it drifts silently whenever a later phase
+        # adds a schema module. The inventory is the reviewable half — a new module has
+        # to be reviewed into the authored expectation before the gate goes green again.
         f"schema-modules\t{len(SCHEMAS)}\n"
+        f"schema-module-inventory\t{','.join(sorted(str(s.relative_to(ROOT)) for s in SCHEMAS))}\n"
         f"positive-fixtures\t{len(POSITIVES)}/4-green\n"
         f"gate1-negatives\t{negative_count}/8-red-specific\n"
         f"image-process-negatives\t{image_negative_count}/3-red-specific\n"
@@ -380,6 +388,11 @@ def main() -> int:
     parser.add_argument("--negative-only", action="store_true")
     args = parser.parse_args()
     try:
+        if DHALL is None:
+            raise GateFailure(
+                "AMOEBIUS_DHALL is unset: run this battery through tools/phase4_gate.py, "
+                "which resolves dhall from toolchain/requirements.json"
+            )
         if not DHALL.is_file():
             raise GateFailure(f"pinned dhall executable is missing: {DHALL}")
         if not args.negative_only:
@@ -404,9 +417,12 @@ def main() -> int:
         if args.negative_only:
             print(f"dhall-gate1-negatives: PASS ({negative_count} catalog negatives)")
             return 0
-        ledger = ROOT / "DEVELOPMENT_PLAN/ledgers/phase_04_gate1.md"
-        if not ledger.is_file() or "spec-composition proven" not in ledger.read_text(encoding="utf-8"):
-            raise GateFailure("partial-foreclosure ledger is absent or malformed")
+        # The partial-foreclosure statement used to live in a generated Markdown ledger in
+        # the plan tree, and this battery read it back to confirm its own honesty caveat.
+        # That reasoning is authored prose and now lives where it belongs: in the Phase-4
+        # contract itself. The machine-checkable half of the same claim is the
+        # `gate2-residue` metric below, which records UNVERIFIED because binding- and
+        # index-shaped foreclosures get their real teeth at Gate 2.
         write_results(
             negative_count,
             image_negative_count,

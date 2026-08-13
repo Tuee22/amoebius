@@ -10,6 +10,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import toolchain
+
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -30,7 +32,7 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mutant", action="store_true")
     args = parser.parse_args(argv)
-    pins = json.loads((ROOT / "toolchain/pins.json").read_text(encoding="utf-8"))
+    pins = toolchain.resolve(["ghc"])
     ghc = pins["ghc"]["path"]
     with (ROOT / "tests/oracle/phase6/compile_fail.tsv").open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle, delimiter="\t"))

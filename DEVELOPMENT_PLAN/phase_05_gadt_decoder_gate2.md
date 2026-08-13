@@ -20,7 +20,7 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_05_gate2.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -30,10 +30,10 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 - [Phase Summary](#phase-summary)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 5.1: The amoebius cabal package + `dsl-spec` test-suite skeleton ⏸️](#sprint-51-the-amoebius-cabal-package--dsl-spec-test-suite-skeleton-)
-- [Sprint 5.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ⏸️](#sprint-52-gadt-indexed-ir--smart-constructors--phantom-tenant-refs--ownership-indices-)
-- [Sprint 5.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ⏸️](#sprint-53-the-fail-closed-decoder-dhallinputfile-auto--exception-catch--structured-decodeerror-)
-- [Sprint 5.4: The Gate-2 decode battery (`dsl-spec`) — the gate ⏸️](#sprint-54-the-gate-2-decode-battery-dsl-spec--the-gate-)
+- [Sprint 5.1: The amoebius cabal package + `dsl-spec` test-suite skeleton ✅](#sprint-51-the-amoebius-cabal-package--dsl-spec-test-suite-skeleton-)
+- [Sprint 5.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ✅](#sprint-52-gadt-indexed-ir--smart-constructors--phantom-tenant-refs--ownership-indices-)
+- [Sprint 5.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ✅](#sprint-53-the-fail-closed-decoder-dhallinputfile-auto--exception-catch--structured-decodeerror-)
+- [Sprint 5.4: The Gate-2 decode battery (`dsl-spec`) — the gate ✅](#sprint-54-the-gate-2-decode-battery-dsl-spec--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,9 +41,32 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:52a29644c13595a7…`
+(1930 non-ignored files) and published verified external attestation
+`sha256:3dfdee987647704b9e62dd70e6c31c4fe96b58df533b216a7b59f73f38ad1a1f`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** The Gate-2 capability result is unchanged and
+re-run: five positive fixtures decode to their authored trees, three tagged negatives fail at distinct
+`DecodeError` tags, four import-policy negatives including the nested pair fail `ForbiddenImport`, three
+compile-fail pairs separate legal from illegal at their authored loci, the 5527-node structural inventory and
+its deletion and substitution mutant families hold, the decoder source carries no partial function, and an
+OS-boundary `execve` observer confirms every `cabal`, `dhall`, and `ghc` invocation used an absolute path.
+23 surfaces join to 26 run-time enumerated items and the ledger is derived into
+`gen/runs/phase_05/<run-id>/`.
+
+**Three corrections, each recorded rather than absorbed.** First, the results table was *written, not
+measured*: sixteen of its twenty rows were string literals emitted after the checks that would have raised, so
+a weakened check would have gone on reporting the same values. Every observable row is now parsed from the
+suite's acceptance token, the `execve` trace, or the mutant's failure locus. Second,
+`test/dsl/DecodeSpec.hs` hard-coded one developer's `ghc` and `dhall` paths; the suite still invokes both by
+absolute path — that is what the argv observer checks — but the path is now a run-local resolution and the
+suite fails closed without it. Third, `Amoebius.Ui.Server.Main` — the `serve-ui` entry point, reached only
+through the executable's subcommand table — was an exposed module of `lib:dsl-core`, so every phase linking the
+shared decision core depended on the Phase-22 UI-server boundary. While that boundary's ABI is unimplemented
+this made the core itself fail to compile and blocked this phase outright. The entry point now belongs to the
+`amoebius` executable, which is the component that calls it; the unimplemented seam stays inside Phase 22
+([legacy register](legacy_tracking_for_deletion.md)). The sibling `Amoebius.Ui.Server.Security` module, needed
+by the core but listed in no component, is now declared.
 
 **Invalidated historical record:**
 
@@ -214,9 +237,9 @@ independent of the decoder's own output ([§M](development_plan_standards.md#m-g
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 5.1: The amoebius cabal package + `dsl-spec` test-suite skeleton ⏸️
+## Sprint 5.1: The amoebius cabal package + `dsl-spec` test-suite skeleton ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `amoebius.cabal`, `cabal.project` (the real package, not the Phase-1
 throwaway probe), the `dsl-core` internal library, the `dsl-spec` test-suite stanza, and the built
 `src/Amoebius/Dsl/` module tree.
@@ -247,9 +270,9 @@ Gate 2 needs, with **no** chain/reconcile/singleton kernel.
 ### Remaining Work
 None for Phase 5. Later DSL expansion belongs to the numerically assigned phases.
 
-## Sprint 5.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ⏸️
+## Sprint 5.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Dsl/Types.hs` (the GADT-indexed `ClusterIR`,
 normalized resource/capacity declaration fields, and component ADTs, including the Gate-2 side of the three
 surfaces [Phase 4](phase_04_dhall_gate1_schema.md) adds to the schema — `ExtensionSpec` with its
@@ -614,9 +637,9 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
 ### Remaining Work
 None for Phase 5; exhaustive catalog expansion is Phase 6.
 
-## Sprint 5.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ⏸️
+## Sprint 5.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Dsl/Decode.hs` (`decodeCluster :: FilePath -> IO
 (Either DecodeError ClusterIR)` = a **resolve-and-freeze** stage that rejects every `env:` and remote
 (`http(s):`) import and freezes the remaining local imports to `sha256:…` semantic-integrity hashes,
@@ -671,9 +694,9 @@ so nothing is ever reconciled against a config that did not fully decode.
 ### Remaining Work
 None for Phase 5.
 
-## Sprint 5.4: The Gate-2 decode battery (`dsl-spec`) — the gate ⏸️
+## Sprint 5.4: The Gate-2 decode battery (`dsl-spec`) — the gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/dsl/DecodeSpec.hs`; positive fixtures reuse Phase 4's
 `dhall/examples/legal_*.dhall`; the representative Gate-2 negative set `dhall/examples/illegal_decode_*.dhall`;
 the semantic-hash/tree/count oracles; structural mutants; and `tools/phase5_gate.py`.
@@ -817,7 +840,7 @@ None. The exhaustive per-catalog-entry corpus begins in Phase 6.
   SmartConstructors,Ref,Decode,Error}.hs`, and the `dsl-spec` test-suite as Phase-5 design-first rows.
 
 ## Related Documents
-- [Phase-5 partial-foreclosure ledger](ledgers/phase_05_gate2.md) — the tested/proven/unverified split sealed by this gate
+- Phase-5 partial-foreclosure ledger — the tested/proven/unverified split sealed by this gate
 - [README.md](README.md) — the live tracker and phase order this document serves
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the DSL vision

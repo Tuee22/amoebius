@@ -71,7 +71,7 @@ autonomous substrate authority acting on its own reconcile loop beside the contr
 larger delegation than the in-cluster operators the manifest doctrine blesses
 ([manifest_generation_doctrine.md §4](./manifest_generation_doctrine.md#4-no-third-party-charts--no-third-party-software-operators-are-generated))); it stores state in **k8s Secrets, at odds with the Vault-centric secrets model** the whole forest trust tree rests on
 ([vault_pki_doctrine.md](./vault_pki_doctrine.md)); and its continuous autonomous reconcile is **harder to formally prove** than Pulumi's batch invocation under the singleton plus amoebius's own typed reconciler. This
-closes the open `notes.txt` question *"do we actually need pulumi? can our state be the dhall just as it was
+closes the open pre-plan design-log question *"do we actually need pulumi? can our state be the dhall just as it was
 with helm?"*: **yes — Pulumi stays for v1, Crossplane is out.**
 
 **The same "surface a provider capability, do not build a second control plane" line governs stretched full nodes.** The Crossplane rejection above generalizes into a discipline this round leans on elsewhere: where a

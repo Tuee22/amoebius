@@ -1,25 +1,31 @@
 #!/usr/bin/env python3
-"""Emit the doc_lint seeded-negative corpus.
+"""Emit the doc_lint seeded-negative corpus beneath the generated root.
 
 `_positive/` is a small conforming documentation tree that `doc_lint.py` passes
-clean. Every other directory here is that tree with **exactly one** hand-specified
-defect seeded into **one** file — the minimal single-defect mutation the gate-integrity
-discipline requires, so a fixture differs from a passing positive only in the flaw it
-seeds, and the lint must name the check that flaw trips rather than recognising the
-fixture itself.
+clean. Each mutation below is that tree with **exactly one** hand-specified defect
+seeded into **one** file — the minimal single-defect mutation the gate-integrity
+discipline requires, so a materialized negative differs from a passing positive only
+in the flaw it seeds, and the lint must name the check that flaw trips rather than
+recognising the fixture itself.
 
-The mutation list below is the authored artifact; this script only copies the tree and
-applies it, so the seeded defects stay auditable in one place.
+The authored inputs are `_positive/` and the mutation list below. The materialized
+negative trees are reproducible projections of those two, so under
+`generated_artifacts_doctrine.md` they are generated output: this script writes them
+to `gen/test-corpora/doc_lint/`, never back beside the source.
 
-    python3 tools/doc_lint_corpus/_build.py         # regenerate every fixture
+    python3 tools/doc_lint_corpus/_build.py         # materialize every negative
+    python3 tools/doc_lint_corpus/_build.py --dest DIR
 """
 
+import argparse
 import os
 import shutil
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 POSITIVE = os.path.join(HERE, "_positive")
+ROOT = os.path.dirname(os.path.dirname(HERE))
+DEST = os.path.join(ROOT, "gen", "test-corpora", "doc_lint")
 
 # (fixture, check the lint must name, co-implied checks, [(file, find, replace), ...])
 #
@@ -205,6 +211,15 @@ MUTATIONS = [
     ("q5_caption_missing", "q5", set(), [
         ("documents/engineering/long_doctrine.md",
          "*Design intent, Tier-1. The specimen gate, drawn in the algebra register.*\n", "")]),
+    # -- (t) commit independence ---------------------------------------------
+    # The seeded text below deliberately spells the withdrawn precondition. It is the
+    # mutation, not a policy statement, and it lives in a mutation recipe rather than a
+    # governed document, which is why check `t` does not flag this file.
+    ("t_committed_tree_precondition", "t", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "**Gate:** `cabal test example-spec` is green",
+         "**Gate:** from a clean committed tree, `cabal test example-spec` is green")]),
+
     # -- (p) the section, document and sentence caps --------------------------
     ("p1_section_over_cap", "p1", set(), [
         ("documents/engineering/long_doctrine.md",
@@ -227,28 +242,51 @@ MUTATIONS = [
 EXPECTED = {name: (check, co) for name, check, co, _ in MUTATIONS}
 
 
-def main():
-    if not os.path.isdir(POSITIVE):
-        print(f"missing {POSITIVE}", file=sys.stderr)
-        return 2
+class SeedError(Exception):
+    """A mutation's find-text no longer occurs in the positive seed."""
 
+
+def materialize(dest=DEST, verbose=False):
+    """Write every seeded negative under `dest` and return {name: path}.
+
+    Raises SeedError when a mutation's anchor text has drifted out of the positive
+    seed — a silently skipped mutation would leave the gate one-sided.
+    """
+    if not os.path.isdir(POSITIVE):
+        raise SeedError(f"missing positive seed {POSITIVE}")
+
+    if os.path.isdir(dest):
+        shutil.rmtree(dest)
+    os.makedirs(dest, exist_ok=True)
+
+    built = {}
     for name, check, _co, edits in MUTATIONS:
-        dest = os.path.join(HERE, name)
-        if os.path.isdir(dest):
-            shutil.rmtree(dest)
-        shutil.copytree(POSITIVE, dest)
+        target_root = os.path.join(dest, name)
+        shutil.copytree(POSITIVE, target_root)
         for rel, find, repl in edits:
-            target = os.path.join(dest, rel)
+            target = os.path.join(target_root, rel)
             with open(target, encoding="utf-8") as fh:
                 text = fh.read()
             if find not in text:
-                print(f"FIXTURE {name}: seed text not found in {rel}", file=sys.stderr)
-                return 2
+                raise SeedError(f"{name}: seed text not found in {rel}")
             with open(target, "w", encoding="utf-8") as fh:
                 fh.write(text.replace(find, repl, 1))
-        print(f"{name:38s} {len(edits)} edit(s) (expects {check})")
+        built[name] = target_root
+        if verbose:
+            print(f"{name:38s} {len(edits)} edit(s) (expects {check})")
+    return built
 
-    print(f"\n{len(MUTATIONS)} fixtures written")
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--dest", default=DEST, help="generated root for the negatives")
+    args = ap.parse_args(argv)
+    try:
+        built = materialize(args.dest, verbose=True)
+    except SeedError as exc:
+        print(f"FIXTURE {exc}", file=sys.stderr)
+        return 2
+    print(f"\n{len(built)} negatives materialized under {args.dest}")
     return 0
 
 

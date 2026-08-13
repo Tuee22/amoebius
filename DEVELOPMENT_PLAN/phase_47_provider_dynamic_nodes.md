@@ -46,7 +46,7 @@ receipt `external-run-reference`.
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
 
 **Invalidated historical record:**
 
@@ -345,7 +345,7 @@ move (including the broadened sweep) marks that layer **UNVERIFIED**, never gree
 (declarative node-set reconcile), `amoebius-pulumi/src/Amoebius/Pulumi/NodeGroup.hs` (Pulumi add/drain of
 EC2/managed nodes), and `amoebius-runtime/test/provider/Phase47ContractSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Requires**: `cloud-account` — the account whose node quota this gate scales against.
+**Requires**: `cloud-account` — the account whose node quota this gate scales against. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-29 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-only-cleartext-and-it-is-flagged)).
 **Independent Validation**: a `.dhall`-declared node rule (load /
 workflow-completion) drives the live node set toward its desired shape by choosing only a declared
 `ProviderNodeClass` whose complete capacity/capability shape can host the pending `ResourceEnvelope`;

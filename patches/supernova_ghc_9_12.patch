@@ -1,0 +1,35 @@
+Reviewed external compatibility patch — amoebius Phase 1.
+
+Upstream project: https://github.com/cr-org/supernova.git
+Upstream channel: default branch (`master`); this patch is authored against the
+  branch head rather than a frozen revision, so the resolver stays dynamic
+  (`repository_layout_doctrine.md` section 4).
+Applies to: `lib/src/Pulsar/Internal/Core.hs` in the `lib` subdirectory package.
+
+Why the patch exists. GHC 9.12 removed the re-export of `Control.Monad.void`
+that `Control.Monad.Reader` used to supply transitively, so the unmodified
+module fails `-Werror` with an out-of-scope `void`. The patch adds the explicit
+import and changes nothing else; it is a compatibility edit, not a behaviour
+change.
+
+Why not carry the fix elsewhere. Waiting on an upstream release would block the
+whole pre-cluster band on a third party, and vendoring the entire `supernova`
+tree to change one import line would replace a four-line reviewed diff with an
+unreviewable source copy. The patch is applied by `cabal.project`'s
+`post-checkout-command` into the run-local build tree; nothing under an authored
+root is modified.
+
+Review: the diff is reviewed on its own terms — the import it adds is the one
+the compiler names — independently of the Phase-1 gate that consumes it.
+
+diff --git a/lib/src/Pulsar/Internal/Core.hs b/lib/src/Pulsar/Internal/Core.hs
+--- a/lib/src/Pulsar/Internal/Core.hs
++++ b/lib/src/Pulsar/Internal/Core.hs
+@@ -11,6 +11,7 @@ import           Control.Monad.Catch            ( MonadThrow
+                                                 , throwM
+                                                 )
+ import           Control.Monad.Managed
++import           Control.Monad                  ( void )
+ import           Control.Monad.Reader
+ import           Data.Foldable                  ( traverse_ )
+ import           Data.IORef                     ( readIORef )

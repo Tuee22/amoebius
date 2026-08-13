@@ -30,7 +30,9 @@ from typing import BinaryIO, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_24"
+# Run-local by default. The phase gate always passes --evidence into its own run bundle;
+# this fallback exists for a standalone harness run and must not name an authored root.
+DEFAULT_EVIDENCE = ROOT / "gen" / "runs" / "phase_24" / "pristine-standalone"
 GUEST_ROOT = Path("/root/amoebius")
 KUBECONFIG = Path("/root/.amoebius/phase24/kubeconfig")
 CLUSTER = "amoebius-phase24"
@@ -561,6 +563,64 @@ def assert_no_create(trace: bytes, label: str) -> None:
         raise GateError(f"phase24-{label}-recreated-cluster")
 
 
+def observe_one_shot_guard_mutant(guest: Guest) -> tuple[str, bytes]:
+    """Run the committed M3 mutant inside the guest and require it to stay broken.
+
+    Divergence repair is only evidence if something could fail it. The production planner
+    repairs a stopped node because it plans from the node's observed state; the mutant
+    treats registration alone as convergence. Building it here, against the same source and
+    the same cluster the production run just repaired, is what separates "the planner works"
+    from "nothing ever diverged".
+
+    It runs last, immediately before teardown, so overwriting the production binary in the
+    shared build directory costs nothing.
+    """
+    build = guest.shell(f"""
+set -eu
+cd {GUEST_ROOT}
+/root/.ghcup/bin/cabal-3.16.1.0 build exe:amoebius -j2 \
+  --with-compiler=/root/.ghcup/bin/ghc-9.12.4 \
+  --flags=+phase24-one-shot-kind-guard-mutant >/root/phase24-m3-build.log 2>&1
+/root/.ghcup/bin/cabal-3.16.1.0 list-bin exe:amoebius \
+  --with-compiler=/root/.ghcup/bin/ghc-9.12.4 \
+  --flags=+phase24-one-shot-kind-guard-mutant
+""")
+    mutant_binary = text(build).strip().splitlines()[-1]
+    if not mutant_binary.startswith("/"):
+        raise GateError("phase24-m3-mutant-binary-not-absolute")
+
+    original_id = guest.execute(("/usr/bin/docker", "inspect", "--format", "{{.Id}}", NODE)).stdout
+    guest.execute(("/usr/bin/docker", "stop", NODE))
+    attempt = guest.execute((
+        "/usr/bin/strace", "-f", "-e", "trace=execve,execveat", "-o", "/root/phase24-m3-execve.log",
+        mutant_binary, "bootstrap", "--distro=kind", "--replicas=1", "--layout=unified",
+    ), check=False)
+    state = text(guest.execute((
+        "/usr/bin/docker", "inspect", "--format", "{{.State.Status}}", NODE,
+    ))).strip()
+    if state == "running":
+        raise GateError("phase24-m3-one-shot-mutant-stayed-green")
+    trace = guest.execute(("/usr/bin/cat", "/root/phase24-m3-execve.log")).stdout
+    assert_no_create(trace, "m3-mutant")
+
+    # The production path, against the same divergent start, must still repair it without
+    # recreating the node. Without this the mutant result would only show that *something*
+    # left the node stopped.
+    repair = pb_trace(guest, "/root/phase24-m3-repair-execve.log")
+    if b"bootstrap-handoff: ready" not in repair.stdout and b"bootstrap-reconcile" not in repair.stdout:
+        raise GateError("phase24-m3-production-repair-did-not-converge")
+    if guest.execute(("/usr/bin/docker", "inspect", "--format", "{{.Id}}", NODE)).stdout != original_id:
+        raise GateError("phase24-m3-production-repair-recreated-container")
+    report = "\n".join((
+        "mutant\tlocus\tobserved",
+        f"M3\tAmoebius.Cluster.Kind.planActions\tred:stopped-node-left-{state}",
+        f"M3-production-repair\tpb.cli bootstrap\tconverged-without-recreate",
+        f"M3-mutant-exit\tstrace-observed\t{attempt.returncode}",
+        "",
+    ))
+    return report, trace
+
+
 def write_evidence(path: Path, payload: bytes | str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if isinstance(payload, str):
@@ -630,6 +690,8 @@ def run_gate(config: GateConfig) -> None:
         )).stdout
         initial_trace = guest.execute(("/usr/bin/cat", "/root/phase24-initial-execve.log")).stdout
 
+        m3_report, m3_trace = observe_one_shot_guard_mutant(guest)
+
         teardown = guest.execute((
             "/root/.local/bin/kind", "delete", "cluster", "--name", CLUSTER,
             "--kubeconfig", str(KUBECONFIG),
@@ -669,6 +731,8 @@ def run_gate(config: GateConfig) -> None:
         write_evidence(evidence / "pristine-clusters-after.txt", after[1])
         write_evidence(evidence / "pristine-kubeconfig-before.txt", hashlib.sha256(before[2]).hexdigest() + "\n")
         write_evidence(evidence / "pristine-kubeconfig-after.txt", hashlib.sha256(after[2]).hexdigest() + "\n")
+        write_evidence(evidence / "pristine-m3-mutant.tsv", m3_report)
+        write_evidence(evidence / "pristine-m3-execve.log", m3_trace)
         write_evidence(evidence / "pristine-teardown.log", teardown.stdout)
         contexts = guest.execute((
             "/root/.local/bin/kubectl", "--kubeconfig", str(KUBECONFIG),

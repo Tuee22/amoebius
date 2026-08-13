@@ -45,7 +45,13 @@ Register 3, live, on the `linux-cpu` substrate. Validated 2026-08-11 with
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
+
+**Observed artifact migration — 2026-08-11:** `manifest_canonical.cbor`,
+`manifest_canonical.sha256`, and `manifest_noncanonical.cbor` are reproducible from one logical manifest and
+the independent canonicalizer/mutation definition. They must be generated during the run. The authored
+logical manifest, canonicalization rules, reference adapter, and expected mismatch locus remain eligible
+source after independent review.
 
 **Invalidated historical record:**
 
@@ -109,7 +115,9 @@ window Sprint 37.4 injects in simulation) and **observes the lexically next-in-n
 the identity of the promoted consumer from the Pulsar admin `subscription/{sub}/consumers` API (not a
 self-emitted worker log), with at-least-once redelivery of the un-acked command. The gate asserts the
 load-bearing safety story *live*: the promoted standby re-fetches the artifact by manifest SHA, the resulting
-`pointers/latest` HEAD is **byte-identical to a committed no-fault reference run**, and an **external Pulsar consumer** (attached at the OS boundary, not the runtime under test) observes the workflow command **exactly once**. A separate failed-commit drill uploads the maximum blob/manifest write set and deliberately loses the
+`pointers/latest` HEAD is **byte-identical to a fresh independent no-fault reference run** retained only in the
+run bundle, and an **external Pulsar consumer** observes the workflow command **exactly once**. A separate
+failed-commit drill uploads the maximum blob/manifest write set and deliberately loses the
 pointer CAS; an external MinIO inventory proves those orphan bytes remain resident and debited before the
 positive finite GC horizon, an over-capacity follow-on write is refused with zero object mutation, and capacity
 is credited only after the GC horizon has elapsed **and** a fresh inventory observes deletion. The independent
@@ -123,7 +131,7 @@ topology spins up, runs, and **tears down leak-free** — the postflight sweep i
 enumerated in Sprint 37.3 and fails hard on any non-empty remainder outside its explicitly named
 retained-by-design set — and **re-runs idempotently under a distinct `experiment-hash` namespace** (a cache-bypassing independent recompute, not a content-addressed
 store-hit), emitting a per-run proven/tested/assumed ledger artifact. The gate is checked against the
-oracle-pinned fixtures named in Sprints 37.1/37.3 and MUST turn red on the committed seeded mutants named
+reviewed expectations and run-time references named in Sprints 37.1/37.3 and MUST turn red on the mutants named
 there (e.g. the insertion-order-leaking CBOR encoder and the ack-before-store-write worker); the representative
 service set is exactly the `round_trip_failover.dhall` topology's **one orchestrator + three workers** (one
 active, two name-ordered standbys) over the standing single-node Pulsar + MinIO.
@@ -290,7 +298,9 @@ them.
 **Independent Validation**: run this suite at **Register 3** against the **single-node kind cluster's live MinIO** (the standing Phase-30 HA service on the Phase-28 retained PV), never an in-process or local S3 fake
 — the register is stated so its evidential weight is unambiguous. A gateway-admitted blob PUT under
 `If-None-Match: *` returns success on first write and treats the second write's `412` as success; a
-canonical-CBOR manifest encodes byte-identically from **two writers that first construct the manifest with distinct component insertion orders/permutations**, and both reproduce the **oracle-pinned golden bytes and sha256 key** (cross-checked against an independent CBOR canonicalizer); a `pointers/latest` `If-Match`
+canonical-CBOR manifest encodes byte-identically from **two writers that first construct the manifest with
+distinct component insertion orders/permutations**, and both match fresh bytes and key from an independent
+CBOR canonicalizer; a `pointers/latest` `If-Match`
 CAS commits the winner and returns `412` to the loser, who re-reads and reapplies the typed advance
 predicate; a reader always observes a 32-byte SHA naming an immutable manifest, never torn state. A capacity
 drill fills the declared maximum write set, forces the pointer CAS to lose after blob/manifest PUT success,
@@ -342,13 +352,11 @@ store is a single one-object atomic pointer flip.
 - Store keys taken under a caller-supplied `experiment-hash` namespace string within the app's ObjectStore
   bucket; this sprint does **not** build `deriveExperimentHash`, the `ContentAddress` typeclass, or SplitMix
   seed derivation (Phase 48 kernel work).
-- **oracle-pinned oracles (committed before the encoder exists):** a golden fixture
-  `amoebius-store/test/golden/manifest_canonical.cbor` plus its expected key
-  `manifest_canonical.sha256` — the canonical-CBOR byte string and sha256 for one fixed logical manifest,
-  computed by an **independent CBOR canonicalizer** (not the amoebius encoder) and committed in this phase's oracle-pinning sprint; and a
-  **specific-reason negative** `manifest_noncanonical.cbor` (the *same* logical manifest serialized in a
-  non-sorted component order) whose expected failure is a **byte mismatch at the first component-ordering offset** and a key differing from the golden — paired with the positive that differs only in component
-  ordering. Committed seeded mutant (operator: dropped-normalization / effect swap):
+- **Independent canonicalization apparatus:** one reviewed logical manifest, the canonical-CBOR convention,
+  and an independent canonicalizer generate the reference bytes and SHA under the run bundle. The tracked
+  `.cbor` and `.sha256` copies are removed. A reviewed mutation definition emits the same logical manifest in
+  non-sorted component order under `gen/test-corpora/`; its expected failure is a byte mismatch at the first
+  component-ordering offset and a different key. Committed seeded mutant:
   `mutant/insertion-order-encoder` — an encoder that emits map/component bytes in insertion order rather than
   sorted order; the gate MUST turn this mutant **red** against the golden vector. The independently authored
   `amoebius-store/test/golden/write_budget_boundaries.csv` pins committed/concurrent/failed/horizon inputs and
@@ -358,10 +366,9 @@ store is a single one-object atomic pointer flip.
 
 ### Validation
 1. Write the same blob twice and assert first-write success, second-write `412` treated as a no-op success.
-2. Encode the same logical manifest from **two writers that each first construct it with a distinct component insertion order / permutation** (so byte-identity is not tautological single-encoder reuse), and assert both
-   emit CBOR **byte-identical to the oracle-pinned golden `manifest_canonical.cbor`** and a key equal to the
-   committed `manifest_canonical.sha256` — the golden being authored by an independent CBOR canonicalizer, never
-   regenerated from the amoebius encoder. Assert the specific-reason negative `manifest_noncanonical.cbor` fails
+2. Encode the same logical manifest from **two writers that each first construct it with a distinct component
+   insertion order/permutation**, then compare both with fresh reference bytes and SHA produced by the
+   independent canonicalizer under `gen/runs/phase_37/`. Assert the generated noncanonical case fails
    with a **byte mismatch at the first component-ordering offset** (not merely "differs"), and that the
    committed `mutant/insertion-order-encoder` turns this validation **red**.
 3. Race two `pointers/latest` updates; assert one commits, the loser gets `412`, re-reads, and the advance
@@ -395,7 +402,9 @@ store is a single one-object atomic pointer flip.
 > amoebius result.
 
 ### Remaining Work
-None. Delivered and validated by the Phase-37 gate.
+Remove the tracked canonical CBOR, SHA, and noncanonical CBOR copies. Retain or create the independently
+reviewed logical input, independently review the write-budget table, generate reference/mutated bytes during
+the run, and rerun the Phase-37 gate.
 
 ## Sprint 37.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA ⏸️
 
@@ -471,7 +480,7 @@ manifest SHA, then kills the active worker **inside the critical window (after i
 consumer list from the Pulsar admin `subscription/{sub}/consumers` API and asserting the specific expected
 consumer name became active, not merely "some standby" — takes over the subscription with the un-acked
 command redelivered and no command lost; the promoted standby's re-fetch drives `pointers/latest` to a HEAD
-**byte-identical to the committed no-fault reference run**, and an **external Pulsar consumer** observes the
+byte-identical to a fresh independent no-fault run, and an **external Pulsar consumer** observes the
 command exactly once. The topology tears down leak-free (the postflight sweep's full inventory empty outside
 the named retained set) and re-runs idempotently **under a distinct `experiment-hash` namespace**
 (independent recompute, cache-bypassed); each run emits a proven/tested/assumed ledger artifact recording
@@ -504,10 +513,10 @@ bespoke amoebius election — and assemble the phase gate.
   (iii) **MinIO objects under the run's `experiment-hash` prefix** outside a **named retained-by-design set**
   (the durable test-flagged bytes reclaimed by Phase 54). The sweep emits its **full inventory list and the named retained set** into the per-run ledger; **any non-empty remainder outside the retained set is a hard gate failure**. (Durable-byte reclaim staying with Phase 54 is the *only* exemption, and only for the
   explicitly named retained set — not a blanket class exemption.)
-- **oracle-pinned oracles and committed mutants (authored before the runtime exists):** the committed no-fault
-  reference `pointers/latest` HEAD bytes `amoebius-runtime/test/golden/head_nofault.bin`; the expected
-  promoted-consumer name table `amoebius-runtime/test/golden/failover_rank.txt` (independent of the runtime's
-  own ranking); and committed seeded
+- **Reference and mutant apparatus:** execute the independent no-fault path during the run and retain its
+  `pointers/latest` HEAD only beneath `gen/runs/phase_37/`; remove
+  `amoebius-runtime/test/golden/head_nofault.bin`. Retain the promoted-consumer name table
+  `amoebius-runtime/test/golden/failover_rank.txt` only after independent review. Committed seeded
   mutants the gate MUST turn **red** — `mutant/ack-before-store-write` (operator: effect reorder — worker acks
   the `event` before the store write completes, so a mid-window kill loses the command) and
   `mutant/sweep-skips-pulsar` (operator: invariant-clause delete — the sweep omits the Pulsar topic/subscription
@@ -525,9 +534,10 @@ bespoke amoebius election — and assemble the phase gate.
    SHA and matches. **Land the kill inside the critical window** — after the active worker's store write and
    before its `event` ack, the window verified from broker/consumer state — and assert live that (a) the
    **lexically next-in-name-order** standby (read from the Pulsar admin `subscription/{sub}/consumers` API and
-   matched against the committed `failover_rank.txt`) is promoted; (b) the un-acked command is redelivered with
+   matched against the independently reviewed `failover_rank.txt`) is promoted; (b) the un-acked command is redelivered with
    **none lost and none double-applied** — an **external Pulsar consumer** (OS-boundary, not the runtime) sees
-   it **exactly once**; and (c) the resulting `pointers/latest` HEAD is **byte-identical to the committed `head_nofault.bin` no-fault reference run**. Assert the committed `mutant/ack-before-store-write` turns this
+   it **exactly once**; and (c) the resulting `pointers/latest` HEAD is byte-identical to the fresh no-fault
+   reference retained in the run bundle. Assert the committed `mutant/ack-before-store-write` turns this
    validation **red** (a mid-window kill loses its command).
 2. **Idempotency and leak-free teardown, disambiguated.** "**Idempotent setup**" means a *second `apply` of the
    topology against the still-standing topology is a byte-stable no-op* (the Phase-26 sense — zero fields
@@ -559,7 +569,8 @@ bespoke amoebius election — and assemble the phase gate.
 > normal teardown path.
 
 ### Remaining Work
-None. Delivered and validated by the Phase-37 gate.
+Remove the tracked no-fault HEAD, generate the comparison run at gate time, independently review or replace
+the failover-rank table, and rerun under universal artifact hygiene.
 
 ## Sprint 37.4: Register-2.5 workflow failover takeover under simulated fault ⏸️
 
@@ -607,7 +618,7 @@ adversarial schedules instead of a single live wall-clock trace.
   no-double-application properties discharged, feeding the same proven/tested/assumed ledger
   ([`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed))
   as the Sprint-37.3 live gate.
-- **Committed seeded mutants the sim MUST turn red (authored before the harness exists):**
+- **Reviewed seeded mutants the sim MUST turn red:**
   `mutant/double-apply-on-redelivery` (operator: dropped dedup — the runtime applies the redelivered command a
   second time, so the pointer HEAD diverges on the fault-firing schedules) and
   `mutant/orphan-consumer-on-promotion` (operator: leaked effect — the old active worker's consumer handle

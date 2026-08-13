@@ -115,6 +115,14 @@ the recipe becomes a projection of typed data and the committed artifact is the 
   gate. They do not grant authority to deploy. Phase 26 consumes the generated object values directly at
   apply time and validates their live convergence without writing rendered manifests into the repository;
   only independently authored fixtures are committed. Receipts are run evidence and remain outside Git.
+- **History must establish or review independence.** When a fixture and the implementation it tests first
+  appear in the same commit, Git establishes no before-implementation provenance. The fixture is a regression
+  fixture until a reviewer independently validates or replaces its expectation. A filename, `golden` label,
+  or same-commit manifest assertion cannot promote it to an independent oracle.
+- **Generated negative copies are not authored mutants.** A positive seed, mutation operator, and mutation
+  selection may be authored source. The materialized negative files produced from them are generated test
+  input and belong under `gen/test-corpora/` or a temporary directory, even when committed copies would make a
+  checker convenient to run.
 - **One emitted path, one suffix convention, one scan.** So that "generated" and "authored oracle" can never
   be confused by a reader or a check, three conventions are normative and are stated **here**, not
   re-derived per phase:

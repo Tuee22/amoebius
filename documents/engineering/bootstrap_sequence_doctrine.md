@@ -50,7 +50,7 @@ and the handoff *trigger* ([`readiness_ordering_doctrine.md` §5](./readiness_or
 — but the **ordered sequence** was derivable-across-five-docs, never written, and the **admin control plane**
 the handoff hands *to* did not exist in doctrine at all. This doc owns both: the sequence ([§3](#3-the-ordered-bootstrap-sequence)),
 the handoff mechanics ([§4](#4-the-host-daemon--singleton-handoff)), and the admin REST surface ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
-It resolves `notes.txt` lines 27/31/33.
+It resolves three questions from the pre-plan design log, since routed into this suite.
 
 ---
 

@@ -19,6 +19,7 @@ import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
+import System.Environment (lookupEnv)
 import System.Exit (ExitCode (ExitSuccess))
 import System.Process (proc, readCreateProcessWithExitCode)
 
@@ -31,8 +32,16 @@ data CorpusSummary = CorpusSummary
   , coveredKeys :: Set CoverageKey
   }
 
-dhall :: FilePath
-dhall = "/home/matthewnowak/.local/bin/dhall"
+-- Resolved per run rather than pinned: a tracked file naming one developer's executable
+-- is resolver output (repository_layout_doctrine.md section 4). The suite fails closed
+-- when the resolver has not supplied one, so it can never fall back to an ambient PATH
+-- lookup that the Phase-5 argv observer would reject.
+resolvedDhall :: IO FilePath
+resolvedDhall = do
+  value <- lookupEnv "AMOEBIUS_DHALL"
+  case value of
+    Just path | not (null path) -> pure path
+    _ -> fail "AMOEBIUS_DHALL is unset: run dsl-spec through tools/phase6_gate.py"
 
 runCorpusSpec :: IO CorpusSummary
 runCorpusSpec = do
@@ -55,6 +64,7 @@ checkGate1 :: [Text] -> IO CoverageKey
 checkGate1 columns = case columns of
   [entry, subcase, negative, legal, golden, required] -> do
     requireDhallTyped legal
+    dhall <- resolvedDhall
     (exitCode, _, stderr) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack negative, "--quiet"]) ""
     assert (exitCode /= ExitSuccess) (Text.unpack negative <> " unexpectedly passed Gate 1")
     let cleaned = stripAnsi (Text.pack stderr)
@@ -91,6 +101,7 @@ checkMalformedCbor = case decodeCbor @Int (LazyByteString.pack [0xff]) of
 
 requireDhallTyped :: Text -> IO ()
 requireDhallTyped fixture = do
+  dhall <- resolvedDhall
   (exitCode, _, stderr) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack fixture, "--quiet"]) ""
   assert (exitCode == ExitSuccess) (Text.unpack fixture <> " did not type-check:\n" <> stderr)
 

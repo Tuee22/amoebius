@@ -18,7 +18,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +29,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 22.1: Authenticated scoped UI-server dispatch ⏸️](#sprint-221-authenticated-scoped-ui-server-dispatch-)
+- [Sprint 22.1: Authenticated scoped UI-server dispatch ✅](#sprint-221-authenticated-scoped-ui-server-dispatch-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,9 +37,40 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:3f78cc6ef4e5814e…`
+(1945 non-ignored files) and published verified external attestation
+`sha256:eec403a9845ec9acf5201e49bf916cd7d3c8e69cdd66c5daef743efb90aac59e`.
+
+**Observed progress — 2026-08-13:** **Policy-conformant.** Seven HTTP rows, five access rows, five sanitized
+audit rows, five effect rows, five pre-readiness startup rows, five public assets, five private probes, seven
+WebSocket rows, one stable idempotent retry, and all nine mutants pass against separately started signing-authority
+and handler processes, with the OS observer seeing loopback traffic only. Evidence and the ledger move into
+`gen/runs/phase_22/<run-id>/`, and 77 surfaces join two-way to 94 run-time enumerated items.
+
+**This is the first run of this gate that could ever have passed.** The boundary ABI the entry point consumes —
+`ActionRequest`, `BoundaryResponse`, `HandlerInvocation`, `HandlerBinding`, `HandlerContract`, `UiServerAbi`,
+`BoundaryMutant`, `admitServerPlan`, `authorizeAndDispatch`, `parseBoundaryMutant`, `publicResponse`, and
+`unavailableResponse` — was declared by an import list and defined nowhere, so `exe:amoebius` did not build.
+`Amoebius.Ui.Server.Dispatch` now implements it: admission resolves each referenced identity to exactly one
+linked binding with a matching contract before readiness, and `authorizeAndDispatch` returns the refusal and the
+handler call as one value, so there is no way to dispatch without holding a decision.
+
+**The seeded mutants are inputs, not compile-time flags.** A boundary whose mutant lives behind CPP needs a
+rebuild per mutant, and a rebuild is a different binary from the one the gate observed. Carrying
+`BoundaryMutant` through the decision means all nine run against exactly the binary under test.
+
+**The executable's packaging defect is fixed with it.** `hs-source-dirs` is a search path, not a module filter:
+listing `src` in the `amoebius` executable made GHC recompile every module `app/Main.hs` imports into that
+component against its own much shorter `build-depends` — which is why the build failed on
+`Amoebius.Vault.SecretRef`, a module the executable never mentions, and would have put two separately compiled
+copies of the shared core in one program. The entry point moved to `app/Amoebius/Ui/Server/Main.hs`, the
+executable searches `app` alone, and a gate check holds both properties.
+
+**One contract surface has no recorded observation and is honestly UNVERIFIED.**
+`unreferenced-handler-unreachable` — extra linked handlers staying legal and unreachable, which is what lets one
+binary serve more than one plan — is implemented, but the startup matrix varies only the count of the
+*referenced* identity. Nothing this run observed exercises an unreferenced one, and the gap is recorded against
+Phase 22 in the legacy register.
 
 **Invalidated historical record:**
 
@@ -48,7 +79,7 @@ own/foreign/revoked credentials and a separate capability-guarded handler proces
 HTTP rows, five access/audit/effect rows, five startup rows, five public assets, five private probes, seven
 WebSocket rows, one stable retry, 29 loopback network syscalls, and all nine mutants pass. Live Keycloak/Envoy,
 provider-side isolation, cluster deployment, replica loss, and HA remain UNVERIFIED. See the
-[Phase-22 ledger](ledgers/phase_22_ui_server_boundary.md).
+Phase-22 ledger.
 
 ## Phase Summary
 
@@ -163,11 +194,11 @@ edge exclusivity, provider policy, storage isolation, and behavior after replica
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 22.1: Authenticated scoped UI-server dispatch ⏸️
+## Sprint 22.1: Authenticated scoped UI-server dispatch ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the boundary ABI is implemented and the migrated gate passes; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**:
-`src/Amoebius/Ui/Server/{Main,Dispatch,RequestContext,SecurityHeaders,WebSocket}.hs`,
+`app/Amoebius/Ui/Server/Main.hs`, `src/Amoebius/Ui/Server/{Dispatch,RequestContext,SecurityHeaders,WebSocket}.hs`,
 `src/Amoebius/Ui/Realtime/{Class,Envelope}.hs`, `test/ui/Phase22UiServerBoundarySpec.hs`,
 `test/ui/server/phase22_server_boundary.mjs`, and `tools/phase22_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
@@ -219,8 +250,10 @@ identity, compatible scope, explicit authorization, current plan identity, and t
 
 ### Remaining Work
 
-None. Live identity, edge exclusivity, provider/storage policy, cluster deployment, replica loss, and HA remain
-explicitly UNVERIFIED for their owning later phases.
+Done for the local boundary. One in-phase gap stays open: no oracle row exercises an unreferenced linked
+handler, so `unreferenced-handler-unreachable` is UNVERIFIED until the startup matrix gains a row that links a
+handler the plan never references. Live identity, edge exclusivity, provider/storage policy, cluster
+deployment, replica loss, and HA remain explicitly UNVERIFIED for their owning later phases.
 
 ## Documentation Requirements
 

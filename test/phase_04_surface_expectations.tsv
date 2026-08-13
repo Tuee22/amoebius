@@ -1,0 +1,34 @@
+# Authored expectation for the Phase-4 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. The surface names are the phase's own vocabulary; the
+# ids are the metric keys the Gate-1 battery is obliged to record, read off this phase's
+# contract rather than off any implementation output.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   metrics   the metric keys in gen/dhall/gate1/phase-results.tsv
+#   checks    the check ids tools/phase4_gate.py implements
+#
+# `gate2-residue` and `runtime-fidelity` name metrics whose recorded value is the literal
+# `UNVERIFIED`. They are listed so the ledger carries them explicitly — this register
+# reaches neither, and a ledger that omitted them would read as though it had.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+dhall-schema-wellformed	metrics	schema-modules,schema-module-inventory
+gate1-positive-corpus	metrics	positive-fixtures
+gate1-catalog-negatives	metrics	gate1-negatives
+image-process-negatives	metrics	image-process-negatives
+import-policy	metrics	import-policy-negatives
+smart-constructor-rejections	metrics	constructor-rejections
+arm-inventory	metrics	arm-inventory
+surface-field-inventory	metrics	surface-field-inventory
+resource-field-inventory	metrics	resource-field-inventory
+resource-field-deletion-mutants	metrics	resource-field-deletion-mutants
+resource-type-substitution-mutants	metrics	resource-type-substitution-mutants
+special-resource-mutants	metrics	special-resource-mutants
+custom-arm-mutant	metrics	custom-arm-mutant
+spec-composition	metrics	acceptance-token
+gate2-residue	metrics	gate2-residue
+runtime-fidelity	metrics	runtime
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle

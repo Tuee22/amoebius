@@ -64,6 +64,8 @@ import ShapeOracle
   , validateBoundExecutionInventory
   )
 import System.Exit (ExitCode (ExitSuccess))
+import System.Environment (lookupEnv)
+import System.IO.Unsafe (unsafePerformIO)
 import System.Process (proc, readCreateProcessWithExitCode)
 
 data ArmOracleRow = ArmOracleRow
@@ -352,7 +354,17 @@ rowsOf path = do
   pure [Text.splitOn "\t" line | line <- drop 1 (Text.lines contents), not (Text.null line), not ("#" `Text.isPrefixOf` line)]
 
 dhall :: FilePath
-dhall = "/home/matthewnowak/.local/bin/dhall"
+dhall = unsafeResolvedDhall
+
+-- Resolved per run rather than pinned: a tracked file naming one developer's executable is
+-- resolver output (repository_layout_doctrine.md section 4). Unset means fail, never guess.
+{-# NOINLINE unsafeResolvedDhall #-}
+unsafeResolvedDhall :: FilePath
+unsafeResolvedDhall = unsafePerformIO $ do
+  value <- lookupEnv "AMOEBIUS_DHALL"
+  case value of
+    Just path | not (null path) -> pure path
+    _ -> fail "AMOEBIUS_DHALL is unset: run this gate through tools/phase10_gate.py"
 
 assert :: Bool -> String -> IO ()
 assert condition message = unless condition (fail message)

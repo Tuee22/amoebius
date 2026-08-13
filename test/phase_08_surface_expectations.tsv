@@ -1,0 +1,63 @@
+# Authored expectation for the Phase-8 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   cases     the variant names in tests/oracle/phase8/storage_cases.tsv, as the run read them
+#   metrics   the metric keys in gen/dsl/phase8/phase-results.tsv
+#   checks    the check ids tools/phase8_gate.py implements
+#
+# Each of this phase's 27 storage claims joins to exactly one storage case. That one-to-one
+# partition is the point: an earlier draft pointed twenty surfaces at the single acceptance
+# token, and the join rejected it — correctly, because one token is not independent
+# evidence for twenty claims.
+#
+# **Three associations are provisional and need the phase owner's review**, because the
+# contract's surface vocabulary and the case oracle were authored separately and never
+# reconciled: `complete-failure-scenarios` -> `object-count-quota`,
+# `backing-allocation-rounding` -> `root-ebs-quota`, and `pulsar-hot-tier-ceiling` ->
+# `incluster-cache-emptydir`. Every other pair matches by name. The gap is recorded in
+# legacy_tracking_for_deletion.md against Phase 8.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+closed-storage-budget	cases	direct-backing
+bounded-growable-policy	cases	scaling-fingerprint
+bookkeeper-physical-geometry	cases	bookkeeper-recovery
+minio-physical-geometry	cases	minio-parity-healing-orphan
+complete-failure-scenarios	cases	object-count-quota
+filesystem-presentation	cases	filesystem-overhead-rounding
+backing-allocation-rounding	cases	root-ebs-quota
+uniform-statefulset-claims	cases	uniform-claim-per-backing
+six-arm-object-store-producers	cases	object-producer-inventory
+object-inventory-and-conflict	cases	object-identity-conflict
+registry-storage-peak	cases	registry-upload-partials
+zookeeper-recovery-peak	cases	zookeeper-recovery
+patroni-wal-failover-peak	cases	patroni-wal-failover
+vault-raft-compaction-audit-peak	cases	vault-raft-audit
+storage-migration-highwater	cases	storage-migration-highwater
+schema-migration-highwater	cases	schema-migration-highwater
+registry-backend-migration-highwater	cases	registry-backend-migration
+pulsar-hot-tier-ceiling	cases	incluster-cache-emptydir
+pulsar-durable-total-ceiling	cases	pulsar-durable-total
+native-cache-pool	cases	native-cache-pool
+incluster-cache-nesting	cases	incluster-cache-budget
+provider-node-root-geometry	cases	instance-store-root
+control-plane-storage-transition	cases	control-plane-transition
+backup-medium-fit	cases	backup-medium-fit
+disjoint-capacity-pools	cases	disjoint-capacity-pool
+restore-target-fit	cases	restore-target-fit
+snapshot-bound-storage-scaling	cases	scaling-shrink-highwater
+bounded-training-gate1	metrics	gate1-training-cases
+independent-storage-envelope-properties	metrics	quickcheck-properties
+storage-fold-compile-totality	metrics	storage-fold-totality
+phase8-mutant-battery	metrics	mutants
+phase8-validation-locus-ledger	metrics	registry-subcases
+storage-geometry	metrics	acceptance-token,named-negatives,variant-rows,legal-twins,positive-specs
+execution-accelerator-provider-root-fit	metrics	execution-accelerator-provider-root-composition
+binding-feasibility	checks	
+render-fidelity	metrics	live-storage-mutation
+model-runtime-correspondence	checks	
+runtime-fidelity	metrics	runtime
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle,locus-ledger-honesty-banner

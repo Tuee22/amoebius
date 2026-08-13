@@ -19,7 +19,7 @@ The composite Register-1/2 gate passed on 2026-08-09. Live tools, apiserver appl
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/ledgers/phase_14_chain_kernel_boundary.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -30,15 +30,15 @@ The composite Register-1/2 gate passed on 2026-08-09. Live tools, apiserver appl
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 14.1: The `Step` algebra + `chain :: cfg -> \[Step\]` builder ⏸️](#sprint-141-the-step-algebra--chain--cfg---step-builder-)
-- [Sprint 14.2: The pure descent — `nextFrameAfter` / `foldLift` (golden-locked) ⏸️](#sprint-142-the-pure-descent--nextframeafter--foldlift-golden-locked-)
-- [Sprint 14.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ⏸️](#sprint-143-renderchainplan----dry-run-byte-for-byte-render-no-live-infra-)
-- [Sprint 14.4: The plan-render golden battery (`chain-spec`) — the Part-A gate ⏸️](#sprint-144-the-plan-render-golden-battery-chain-spec--the-part-a-gate-)
-- [Sprint 14.5: The single typed subprocess seam + `boundary-spec` skeleton ⏸️](#sprint-145-the-single-typed-subprocess-seam--boundary-spec-skeleton-)
-- [Sprint 14.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ⏸️](#sprint-146-the-fake-kubectlhelmdockerpulumi-recorders-)
-- [Sprint 14.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ⏸️](#sprint-147-the-boundary-battery--exact-commands--applied-bytes--no-path--the-part-b-gate-)
-- [Sprint 14.8: The sanctioned-API surface — what extension source may reach ⏸️](#sprint-148-the-sanctioned-api-surface--what-extension-source-may-reach-)
-- [Sprint 14.9: Gate 3 — the extension AST checker and the link seal ⏸️](#sprint-149-gate-3--the-extension-ast-checker-and-the-link-seal-)
+- [Sprint 14.1: The `Step` algebra + `chain :: cfg -> \[Step\]` builder ✅](#sprint-141-the-step-algebra--chain--cfg---step-builder-)
+- [Sprint 14.2: The pure descent — `nextFrameAfter` / `foldLift` (golden-locked) ✅](#sprint-142-the-pure-descent--nextframeafter--foldlift-golden-locked-)
+- [Sprint 14.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ✅](#sprint-143-renderchainplan----dry-run-byte-for-byte-render-no-live-infra-)
+- [Sprint 14.4: The plan-render golden battery (`chain-spec`) — the Part-A gate ✅](#sprint-144-the-plan-render-golden-battery-chain-spec--the-part-a-gate-)
+- [Sprint 14.5: The single typed subprocess seam + `boundary-spec` skeleton ✅](#sprint-145-the-single-typed-subprocess-seam--boundary-spec-skeleton-)
+- [Sprint 14.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ✅](#sprint-146-the-fake-kubectlhelmdockerpulumi-recorders-)
+- [Sprint 14.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ✅](#sprint-147-the-boundary-battery--exact-commands--applied-bytes--no-path--the-part-b-gate-)
+- [Sprint 14.8: The sanctioned-API surface — what extension source may reach ✅](#sprint-148-the-sanctioned-api-surface--what-extension-source-may-reach-)
+- [Sprint 14.9: Gate 3 — the extension AST checker and the link seal ✅](#sprint-149-gate-3--the-extension-ast-checker-and-the-link-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -46,9 +46,29 @@ The composite Register-1/2 gate passed on 2026-08-09. Live tools, apiserver appl
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:d79a808594ad51a9…`
+(1939 non-ignored files) and published verified external attestation
+`sha256:95a34d33ad9a72a75072bfd1e905a7f9c811a6871a0ecbbde0b67b9613064eb5`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** This phase's two-register claim is unchanged and
+re-run. Register 1: two cfg/plan/descent fixtures are byte-locked, the render path performs zero actions with
+its canary observed, and the checked-source compile-fail seal rejects the illegal construction at its authored
+locus. Register 2: three boundary tools are invoked with Helm at zero, four argv-and-byte transcripts are
+exact, Gate-3 accepts two positives and rejects all six violation reasons, and all seven seeded mutants redden.
+The network-isolated render observer is asserted to be one of the two the contract sanctions and recorded
+normalized, so a host reaching the same conclusion by the other route still passes rather than being pinned to
+one implementation.
+
+**Six surfaces gained the source checks that always decided them** — the raw `Step` constructor export scan,
+the dry-run import closure, the subprocess primitive-site inventory, the partial-token scan, the independent
+step-set oracle, and the fake-tool executability check are now named check ids the ledger can cite.
+**Thirteen have no recorded observation at all** and are carried UNVERIFIED.
+
+**The subprocess-site inventory had drifted.** `Image/Build.hs`, `Image/BuildRuntime.hs`, and
+`Image/Publish.hs` reach the process primitive and were not in the declared set. This is a whole-tree
+invariant, so its list must name every legitimate site including later phases'; the three are added with the
+reason recorded beside them and the check stays exact, so any site not named still fails. Both findings are
+recorded in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
 
 **Invalidated historical record:**
 
@@ -59,7 +79,7 @@ the real binary through the one absolute-path subprocess seam and checks four ex
 invoked tools while Helm records zero calls. Gate 3 covers all six violation arms and the opaque checked-source
 link seal. All seven mutants turn red. The ledger is
 `dynamically-resolved`.
-The [Phase-14 ledger](ledgers/phase_14_chain_kernel_boundary.md) records the exact tested and UNVERIFIED
+The Phase-14 ledger records the exact tested and UNVERIFIED
 boundary.
 
 ## Phase Summary
@@ -105,7 +125,7 @@ directory (Part B).
 
 **Gate:** `python3 tools/phase14_gate.py` passes the Part-A, Part-B, Gate-3,
 compile-fail, network-observer, mutant, and ledger checks. The committed
-[Phase-14 ledger](ledgers/phase_14_chain_kernel_boundary.md) records the exact commands, oracle coverage,
+Phase-14 ledger records the exact commands, oracle coverage,
 and live-runtime residue.
 
 ## Gate integrity
@@ -273,9 +293,9 @@ flowchart LR
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 14.1: The `Step` algebra + `chain :: cfg -> [Step]` builder ⏸️
+## Sprint 14.1: The `Step` algebra + `chain :: cfg -> [Step]` builder ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Kernel/Step.hs` (the `Step` type, `StepKind`, and the
 `stepRun` action field), `src/Amoebius/Kernel/Chain.hs` (the `chain :: cfg -> [Step]` builder) — built and
 validated.
@@ -315,9 +335,9 @@ seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `ch
 ### Remaining Work
 Done. Live execution remains UNVERIFIED.
 
-## Sprint 14.2: The pure descent — `nextFrameAfter` / `foldLift` (golden-locked) ⏸️
+## Sprint 14.2: The pure descent — `nextFrameAfter` / `foldLift` (golden-locked) ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Kernel/Descent.hs` (`nextFrameAfter`, `foldLift`),
 plus the effectful seam `runChainFromFrame` in `src/Amoebius/Kernel/Chain.hs` — built and validated.
 **Blocked by**: reopened numeric predecessor gates.
@@ -350,9 +370,9 @@ Part B (Register 2) and Register 3.
 ### Remaining Work
 Done. Live execution remains UNVERIFIED.
 
-## Sprint 14.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ⏸️
+## Sprint 14.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Kernel/Plan.hs` (`renderChainPlan` / `renderChain`),
 `src/Amoebius/Cli.hs` (the `--dry-run` **render** path, kept structurally separate from any apply path) — built
 and validated.
@@ -392,9 +412,9 @@ only on the (here-absent) apply path.
 ### Remaining Work
 Done. Live execution remains UNVERIFIED.
 
-## Sprint 14.4: The plan-render golden battery (`chain-spec`) — the Part-A gate ⏸️
+## Sprint 14.4: The plan-render golden battery (`chain-spec`) — the Part-A gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/kernel/PlanSpec.hs`, the oracle-pinned fixtures under
 `test/kernel/fixtures/cfg/` (`multi.cfg.json`, `minimal.cfg.json`),
 `test/kernel/fixtures/plan/{multi,minimal}.plan.golden`,
@@ -461,9 +481,9 @@ correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Regis
 ### Remaining Work
 Done. Live execution remains UNVERIFIED.
 
-## Sprint 14.5: The single typed subprocess seam + `boundary-spec` skeleton ⏸️
+## Sprint 14.5: The single typed subprocess seam + `boundary-spec` skeleton ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 implementation behind `AbsExe` without widening the seam.
 **Implementation**: `src/Amoebius/Exec/Tool.hs` (the Phase-14 boundary facade that invokes a tool by absolute
 path over the `[Step]`/effect data) and, after Phase 24, `src/Amoebius/Host/Ensure.hs` (the sole raw
@@ -497,9 +517,9 @@ prodbox single-IO-seam shape as *sibling evidence, not an amoebius result*.
 ### Remaining Work
 Done. Live tool fidelity remains UNVERIFIED.
 
-## Sprint 14.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ⏸️
+## Sprint 14.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/boundary/fakes/{kubectl,helm,docker,pulumi}` (the four fake
 executables that append argv + stdin bytes to a transcript and exit with a canned response) and
 `test/boundary/Fakes.hs` (the transcript ADT + the canned-response table) — built and validated.
@@ -532,9 +552,9 @@ prerequisite — that distinction is what keeps Register 2 honestly separate fro
 ### Remaining Work
 Done. Live tool fidelity remains UNVERIFIED.
 
-## Sprint 14.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ⏸️
+## Sprint 14.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/boundary/BoundarySpec.hs`; the applied-manifest bytes reuse
 the Phase-13 `renderAll` goldens; the **expected-argv transcripts are a separate committed hand-authored oracle** (`test/boundary/golden/argv/`), NOT derived from the Part-A plan golden by any executor-reachable
 function; the committed mutants under `test/boundary/mutants/` (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`)
@@ -588,9 +608,9 @@ is owned by [phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md) and
 ### Remaining Work
 Done. Live apiserver application remains UNVERIFIED.
 
-## Sprint 14.8: The sanctioned-API surface — what extension source may reach ⏸️
+## Sprint 14.8: The sanctioned-API surface — what extension source may reach ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Dsl/SanctionedApi.hs`,
 `dhall/amoebius/SanctionedApi.dhall`, and the oracle-pinned oracle
 `test/fixtures/phase14/sanctioned_api_expected.dhall` (the hand-authored module and effect allowlist,
@@ -623,9 +643,9 @@ so that widening it is a reviewed amendment rather than something an extension a
 ### Remaining Work
 Done. Checked-source runtime behavior remains UNVERIFIED.
 
-## Sprint 14.9: Gate 3 — the extension AST checker and the link seal ⏸️
+## Sprint 14.9: Gate 3 — the extension AST checker and the link seal ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Dsl/AstCheck.hs`, `test/dsl/AstCheckSpec.hs`, and
 `test/fixtures/phase14/astcheck/`. The corpus contains positives and one exact-span negative for each of the
 six `AstViolationReason` arms. The checker and its opaque `CheckedExtensionSource` are built and validated.

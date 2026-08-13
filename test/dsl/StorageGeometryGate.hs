@@ -17,6 +17,7 @@ import StorageGeometryFixtures
   , storagePositiveRows
   )
 import StorageGeometryProps (runStorageGeometryProps)
+import System.Environment (lookupEnv)
 import System.Exit (ExitCode (..))
 import System.Process (proc, readCreateProcessWithExitCode)
 
@@ -78,17 +79,27 @@ checkGate1 = do
       assert (length rows == 2) "Phase-8 Gate-1 oracle must contain two rows"
       forM_ rows $ \row -> case Text.splitOn "\t" row of
         [_, negative, legal, required] -> do
+          dhall <- resolvedDhall
           (legalExit, _, legalError) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack legal, "--quiet"]) ""
           assert (legalExit == ExitSuccess) (Text.unpack legal <> " rejected:\n" <> legalError)
           (negativeExit, negativeOut, negativeError) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack negative, "--quiet"]) ""
           let observed = Text.pack (negativeOut <> negativeError)
           assert (negativeExit /= ExitSuccess && required `Text.isInfixOf` observed) (Text.unpack negative <> " missed exact Gate-1 locus")
         _ -> fail ("malformed Phase-8 Gate-1 row: " <> Text.unpack row)
- where
-  dhall = "/home/matthewnowak/.local/bin/dhall"
+
 
 drift :: OracleRow -> String -> String
 drift row field = Text.unpack (oracleVariant row) <> " " <> field <> " drifted"
+
+-- Resolved per run rather than pinned: a tracked file naming one developer's executable
+-- is resolver output (repository_layout_doctrine.md section 4), and a PATH fallback would
+-- defeat the Phase-5 absolute-argv observer. Unset means fail, never guess.
+resolvedDhall :: IO FilePath
+resolvedDhall = do
+  value <- lookupEnv "AMOEBIUS_DHALL"
+  case value of
+    Just path | not (null path) -> pure path
+    _ -> fail "AMOEBIUS_DHALL is unset: run this gate through its tools/phaseN_gate.py"
 
 assert :: Bool -> String -> IO ()
 assert condition message = unless condition (fail message)

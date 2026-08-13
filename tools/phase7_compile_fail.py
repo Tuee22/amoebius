@@ -9,6 +9,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import toolchain
+
 
 ROOT = Path(__file__).resolve().parent.parent
 ORACLE = ROOT / "tests/oracle/phase7/compile_fail.tsv"
@@ -26,7 +28,7 @@ def compile_fixture(ghc: str, fixture: str) -> subprocess.CompletedProcess[str]:
 
 
 def main() -> int:
-    pins = json.loads((ROOT / "toolchain/pins.json").read_text(encoding="utf-8"))
+    pins = toolchain.resolve(["ghc"])
     ghc = pins["ghc"]["path"]
     with ORACLE.open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle, delimiter="\t"))

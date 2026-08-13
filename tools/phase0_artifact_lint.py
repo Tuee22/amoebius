@@ -13,6 +13,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "test" / "phase0_oracle_manifest.tsv"
+# The one enumerable surface this module owns, declared so the run-time enumeration can
+# discover it rather than the expectation file asserting it unilaterally.
+CHECKS = {"manifest": "every pre-implementation oracle and mutant resolves and is owned"}
 PHASES = {2, *range(16, 24), 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, *range(55, 65)}
 PHASE_LOCAL_ROOTS = (
     ROOT / "test" / "manifest" / "golden",
@@ -394,6 +397,26 @@ def main() -> int:
     # their owning phase is completed. Phase-2 byte goldens are the one explicit
     # deferred exception named by the Phase-2.3 plan.
     artifact_namespaces = {"oracle", "mutants", "fixtures", "golden", "dhall"}
+    # An ignored path is generated output, so it is never a Phase-0 authored artifact.
+    # Filtering by ignore status rather than by filename keeps this agreeing with
+    # .gitignore instead of drifting from it, and makes the local worktree and a fresh
+    # clone reach the same verdict.
+    candidates = sorted(
+        str(path.relative_to(ROOT))
+        for path in (ROOT / "test").rglob("*")
+        if path.is_file()
+    )
+    ignored = set()
+    if candidates:
+        lookup = subprocess.run(
+            ["git", "check-ignore", "--stdin"],
+            cwd=ROOT,
+            input="\n".join(candidates),
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        ignored = {line.strip() for line in lookup.stdout.splitlines() if line.strip()}
     actual = {
         str(path.relative_to(ROOT))
         for path in (ROOT / "test").rglob("*")
@@ -407,8 +430,7 @@ def main() -> int:
             and path.name.endswith(".golden")
         )
         and not (ROOT / "test" / "formal" / "gateway") in path.parents
-        and not (path.parent.name == "golden" and re.fullmatch(r"phase_\d{2}_ledger\.json", path.name))
-        and "test/enumeration" not in str(path)
+        and str(path.relative_to(ROOT)) not in ignored
         and not any(root == path.parent or root in path.parents for root in PHASE_LOCAL_ROOTS)
         and belongs_to_pin_owner(path)
     }

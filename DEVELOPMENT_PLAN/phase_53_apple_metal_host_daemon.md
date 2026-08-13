@@ -48,7 +48,12 @@ The scoped gate passed on 2026-08-11; physical Apple/Lima/Metal and provider obs
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
+
+**Observed artifact migration — 2026-08-11:** `job_A.expected` and `job_B.expected` are exact output of
+`metal_job_ref.py` for the tracked inputs. They are generated files and must be removed. The reference program
+and reviewed inputs remain source; all A/B/C expectations are computed in the run bundle. The old golden-replay
+mutant is replaced by a CPU-reference-bypass mutant that numerical equality alone would miss.
 
 **Invalidated historical record:**
 
@@ -159,31 +164,21 @@ on channel 2, with Apple-Metal physics marked *assumed* (sibling evidence, not a
 the [§M gate-integrity standard](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
 and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation](#gate-integrity).
 
-- **Input-dependent output oracle (§M.1/§M.3).** The artifact retrieved from MinIO by content address must be
-  byte-equal to an independently pinned expected output computed **off-implementation** — the committed
-  Phase-0 CPU reference `test/golden/phase_53/metal_job_ref.py` (a plain NumPy recompute of the same kernel
-  math, authored before the bridge exists, never derived from bridge output). Two committed jobs `job_A` and
-  `job_B` (differing only in their input tensor) must land two **different** pinned outputs
-  `blobs/<sha256(out_A)>` and `blobs/<sha256(out_B)>`; a constant, input-independent, or `job_A==job_B` worker
-  output turns the gate red. But committed inputs **and** committed expected outputs both live in-repo, so a
-  worker that compiles MSL yet **discards the GPU result and re-uploads the committed golden bytes keyed by input identity** would still satisfy input-dependence, content-addressing, and the cache-bypass recompute — and the
-  dtruss/execsnoop observer cannot see an in-framework Metal dispatch to catch it. To close that echo-of-golden
-  gap the gate additionally dispatches a **challenge job `job_C` whose input is generated at gate-run time**
-  (nonce/seed-derived, **never committed**) and whose expected output is **computed at run time** by running the
-  off-implementation NumPy reference `test/golden/phase_53/metal_job_ref.py` over that run-time input; the
-  content-addressed artifact must byte-match that run-time-derived value. Because no committed golden for `job_C`
-  exists anywhere in the repo, an echo worker has nothing to replay and must actually dispatch. The dispatch
-  additionally observes a real `MTLDevice` artifact (the compiled `MTLLibrary`/pipeline-reflection handle) and
-  may bind provenance by reading the `MTLBuffer` the GPU kernel wrote, not only the returned buffer.
+- **Input-dependent output oracle (§M.1/§M.3).** The artifact retrieved from MinIO must equal a fresh output
+  from the independent NumPy reference at `test/golden/phase_53/metal_job_ref.py`. The reviewed A/B inputs
+  remain under `test/golden/phase_53/`; their expected bytes and content identities are generated under
+  `gen/runs/phase_53/`. A nonce-derived challenge input C is also generated per run. A, B, and C must produce
+  distinct expected results where specified, and the worker must match each without a committed expected file.
+  Numerical equality is necessary but insufficient: an external Metal observer must recover the real
+  `MTLDevice`, compiled `MTLLibrary`, pipeline reflection, and the `MTLBuffer` written by the dispatch.
 - **Committed seeded mutant (§M.2).** The committed mutant set `test/mutants/phase_53/` includes at minimum
   `const_output.patch` (worker writes a fixed constant regardless of job payload — an effect-swap operator),
-  `echo_golden.patch` (worker returns the per-job **committed golden bytes** keyed by input identity without ever
-  using the dispatch result — the effect-swap operator that survives the committed-`job_A`/`job_B` oracle but is
-  killed by the challenge job), and `lb_nodeport.patch` (the host-comms spec re-typed `LoadBalancer` — a union-arm
+  `cpu_reference_bypass.patch` (worker computes the correct bytes on CPU without a Metal dispatch), and
+  `lb_nodeport.patch` (the host-comms spec re-typed `LoadBalancer` — a union-arm
   addition), plus `omit_metal_work_item.patch`, `favorable_metal_epoch.patch`, and `drop_metal_overlap_debit.patch`;
   the gate is re-run against each and **must go red** (`const_output.patch` fails the input-dependent oracle,
-  `echo_golden.patch` fails `job_C`'s run-time-derived byte-match because it has no committed golden to replay,
-  `lb_nodeport.patch` fails the wild-exposure type-check, and the owner mutants fail exact source equality or
+  `cpu_reference_bypass.patch` fails the external Metal-dispatch observation, `lb_nodeport.patch` fails the
+  wild-exposure type-check, and the owner mutants fail exact source equality or
   the independently derived coexistence-epoch oracle). A green gate against any committed mutant fails the
   phase.
 - **Representative set (§M.7).** The gate's representative set is exactly: one apple substrate (Apple-Silicon
@@ -191,8 +186,8 @@ and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation]
   VM carve is 4 vCPU, 8 GiB memory, and a private rounded raw-disk result of 40 GiB derived from the pinned
   guest-usable/presentation/allocation operands; all other numeric demands/supplies live in the pinned resource
   oracle), the two host-only NodePort Services {ContentMutationGateway, Pulsar} (raw MinIO absent), the two
-  committed dispatch jobs {`job_A`, `job_B`} plus the run-time-generated challenge job `job_C` (nonce/seed-derived
-  input, never committed; expected output computed at gate-run time by the off-implementation NumPy reference),
+  reviewed dispatch inputs {`job_A`, `job_B`} plus the run-time-generated challenge job `job_C` (nonce/seed-
+  derived input; every expected output is computed at run time by the independent NumPy reference),
   and the four wild-exposure negatives enumerated in Sprint 53.5. No other shape is claimed.
 - **VM-disk geometry is materialized and observed (§M.3/§M.4).** Before create, the independent oracle
   rederives `requiredUsableBytes` from guest-system plus unique layout carves, applies the pinned presentation
@@ -212,21 +207,14 @@ and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation]
 
 ## Gate integrity
 
-Under [§M.1 oracle-pinning](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
-the following fixtures, goldens, and expected-error tags are authored and committed **in Phase 0 — before any Phase-53 implementation exists** — and are the byte-authority the gate checks against (none is regenerated from
-the implementation):
+Under [§M.1 oracle provenance](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
+same-commit fixtures remain regression fixtures until independently reviewed or replaced. The reference side
+contains source and expectations, never copied program output:
 
-- `test/golden/phase_53/metal_job_ref.py` — the off-implementation CPU (NumPy) reference for the dispatched
-  kernel, used two ways: ahead of time it produces the pinned `job_A`/`job_B` expected bytes, and
-  **at gate-run time** it derives the challenge job `job_C`'s expected output. Only this reference
-  **script** is oracle-pinned; `job_C`'s input is nonce/seed-derived at gate-run time and its expected output
-  is computed by this reference at gate-run time, so **no committed golden for `job_C` exists in the repo** for a
-  worker to echo. The oracle stays independent of the code under test (§M.1/§M.3) — it is regenerated from this
-  off-implementation reference, never from the bridge.
-- `test/golden/phase_53/job_A.input`, `job_B.input` — the two committed job inputs, differing only in their
+- `test/golden/phase_53/metal_job_ref.py` — the independently reviewed CPU/NumPy reference for the kernel.
+  It generates A/B/C expected bytes and identities only at gate-run time beneath `gen/runs/phase_53/`.
+- `test/golden/phase_53/job_A.input`, `job_B.input` — the two reviewed job inputs, differing only in their
   tensor payload.
-- `test/golden/phase_53/job_A.expected`, `job_B.expected` — the two pinned expected outputs (produced by the
-  CPU reference above, not the bridge), whose sha256 the gate retrieves from MinIO.
 - `test/golden/phase_53/resource_fold.json` — the independently authored physical-host inventory and exact
   Lima-VM, Kubernetes-node, host-worker, Apple-unified-memory, cache, and durable/local-storage demands. For
   the VM it pins guest-system/unique-layout usable carves, `FilesystemPresentation`, backing minimum/quantum, the
@@ -239,10 +227,10 @@ the implementation):
 - `test/dhall/phase_53_illegal/` — the four wild-exposure negatives (see Sprint 53.5), each a one-field
   mutation of the committed green host-comms spec, each carrying its validation-locus tag and its expected
   `dhall type` error string, registered in the Phase-6 illegal-state corpus.
-- `test/mutants/phase_53/const_output.patch`, `echo_golden.patch`, `lb_nodeport.patch`, `omit_metal_work_item.patch`,
+- `test/mutants/phase_53/const_output.patch`, `cpu_reference_bypass.patch`, `lb_nodeport.patch`, `omit_metal_work_item.patch`,
   `favorable_metal_epoch.patch`, `drop_metal_overlap_debit.patch` — the committed seeded mutants the gate must
-  turn red (`echo_golden.patch` replays the committed per-job golden bytes without using the dispatch result, and
-  is caught only by the run-time challenge job `job_C`).
+  turn red. The CPU-reference bypass returns numerically correct bytes but is caught by the independent Metal
+  dispatch observer.
 - `test/mutants/phase_53/resources/` — one-short provider/compiler/worker/harness cases and dropped-envelope/
   premature-replacement mutants, paired with the complete `resource_fold.json` positive.
 
@@ -567,12 +555,11 @@ install + probe + runtime MSL dispatch), `src/Amoebius/HostWorker/AppleMetalBuil
 (absolute path, no env/`PATH`), `dlopen`'d, and verified by its probe symbol; generated MSL compiles at
 runtime via `MTLDevice.makeLibrary(source:options:)` and dispatches on the host GPU, and the dispatch
 surfaces a real `MTLDevice` artifact — the compiled `MTLLibrary` handle and its pipeline reflection — not
-merely a returned buffer; the dispatched kernel's output is byte-equal to the oracle-pinned
-off-implementation CPU reference (`test/golden/phase_53/job_A.expected`) for `job_A`'s input and
-byte-**different** and equal to `job_B.expected` for `job_B`'s input, so an input-independent or constant
-worker output is red, and byte-matches the **run-time-derived** expected value (off-implementation NumPy
-reference `test/golden/phase_53/metal_job_ref.py`, computed at gate-run time) for the **never-committed**
-challenge job `job_C`, so an echo-of-committed-golden worker is red; **no VM is ever started, no SwiftPM/`swift build` runs on a cache miss, and no login-keychain unlock is required**; the source-metadata
+merely a returned buffer. The dispatched kernel's outputs for reviewed inputs A/B and run-generated challenge
+C byte-match values freshly computed by `test/golden/phase_53/metal_job_ref.py` under the run bundle; A and
+B differ, so an input-independent or constant worker is red. The CPU-reference-bypass mutant returns correct
+bytes but lacks the independently observed Metal dispatch and is red. **No VM is ever started, no
+SwiftPM/`swift build` runs on a cache miss, and no login-keychain unlock is required**; the source-metadata
 cache artifact is content-addressed and yields bit-identical output when recomputed on a cache-bypassed
 second run in a distinct content-addressed namespace (an independent recompute, not a store hit).
 **Docs to update**: `documents/engineering/apple_metal_headless_builds.md`,
@@ -617,19 +604,14 @@ this sprint realizes it in amoebius for the first time.
    scratch identity unknown. Each case starts zero clang processes and writes zero object/cache bytes. For a
    fitting build, an OS/config observer proves the compiler stays within CPU/RSS and named backing ceilings;
    deliberate overrun is throttled/terminated/`ENOSPC`, never spilled elsewhere.
-2. Compile generated MSL at runtime through the bridge and dispatch a kernel for both `job_A` and `job_B`;
-   assert the returned buffer is byte-equal to the oracle-pinned CPU reference expected output for each job
-   (`test/golden/phase_53/job_A.expected`, `job_B.expected`), that the two outputs **differ** (so a constant
-   output fails), and that a real `MTLLibrary`/pipeline-reflection handle was obtained. Additionally dispatch the
-   challenge job `job_C` whose input is generated **this run** (nonce/seed-derived, never committed) and assert the
-   returned buffer byte-matches the expected output **computed at run time** by the off-implementation NumPy
-   reference `test/golden/phase_53/metal_job_ref.py` over that input — no committed golden for `job_C` exists, so a
-   worker that replays committed goldens cannot pass. Assert bit-stable output
+2. Compile generated MSL at runtime and dispatch A, B, and nonce-derived C. Generate all three expected outputs
+   with `test/golden/phase_53/metal_job_ref.py` under `gen/runs/phase_53/`; require exact equality, distinct
+   A/B output, and a real `MTLLibrary`/pipeline-reflection/`MTLBuffer` observation. Assert bit-stable output
    under the fast-math-off determinism contract by recomputing `job_A` on a **cache-bypassed** run in a distinct
    content-addressed namespace and asserting the compute path (MSL compile + GPU dispatch) actually executed and
    produced a bit-identical result — a store hit does not satisfy this. The committed mutants
-   `test/mutants/phase_53/const_output.patch` (fixed constant) and `echo_golden.patch` (returns the committed
-   per-job golden without using the dispatch result) must each turn this validation red.
+   `test/mutants/phase_53/const_output.patch` and `cpu_reference_bypass.patch` must each turn this validation
+   red at the numeric or Metal-observer locus respectively.
    The OS-boundary memory/cache observer also confirms the worker stays within its declared runtime +
    Metal-unified-memory ceiling and the host cache stays inside its one carved backing; crossing either ceiling
    is red even if the numerical output is correct.
@@ -637,7 +619,9 @@ this sprint realizes it in amoebius for the first time.
    build/dispatch path spawns has an absolute-path `argv[0]`, every spawn env is the fixed closed allow-set with `PATH` absent, and the trace contains no `tart`, `swift build`, or offline `metal` compiler `execve` on the core path — covering transitively spawned processes a module grep cannot observe.
 
 ### Remaining Work
-Physical bridge compilation, `MTLDevice`/`MTLLibrary` observation, and GPU dispatch remain UNVERIFIED.
+Remove the tracked A/B expected files, retain the reviewed reference script and inputs, replace the replay
+mutant, and generate expectations at run time. Physical bridge compilation,
+`MTLDevice`/`MTLLibrary` observation, and GPU dispatch remain UNVERIFIED.
 
 ## Sprint 53.4: Host compute daemon lifecycle as a managed subprocess ⏸️
 
@@ -771,15 +755,11 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
 2. The gate `.dhall` runs the full Apple-Metal peer workflow: the worker consumes the job over native Pulsar
    (no WebSocket frames, no TLS handshake, only `127.0.0.1:<nodeport>`), and the output landed through the
    provisioned mutation gateway in MinIO,
-   retrieved by its content address, is byte-equal to the oracle-pinned off-implementation expected output for
-   the dispatched job (`test/golden/phase_53/job_A.expected`) — with `job_B` yielding the distinct pinned
-   `job_B.expected`, so a constant or input-independent artifact fails. The gate additionally dispatches the
-   challenge job `job_C`, whose input is generated at gate-run time (nonce/seed-derived, never committed) and whose
-   expected output is computed at run time by the off-implementation NumPy reference
-   `test/golden/phase_53/metal_job_ref.py`; the content-addressed artifact retrieved from MinIO must byte-match
-   that run-time-derived value, so an echo-of-committed-golden worker — which has no committed golden for `job_C`
-   to replay — fails, and the committed mutant `test/mutants/phase_53/echo_golden.patch` must turn this validation
-   red. The gate then tears down leak-free per the three-part residue check.
+   retrieved by content address, equals the fresh reference output generated under the run bundle for reviewed
+   inputs A/B and nonce-derived challenge C. A and B yield distinct outputs, so a constant result fails. The
+   committed `cpu_reference_bypass.patch` returns correct numerical bytes without a Metal dispatch and must
+   fail the external `MTLDevice`/library/pipeline/buffer observation. The gate then tears down leak-free per the
+   three-part residue check.
 3. The live host, Lima VM, Kubernetes node, pods, host worker, private Metal epoch peak, cache, and storage inventory
    matches the Phase-0 resource-fold oracle: all CPU, memory/unified-memory, logical pod-ephemeral,
    layout-routed OCI content/snapshot/workspace, durable, and cache demands fit with nested/disjoint pool
@@ -801,7 +781,8 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
    control live-readbacks equal the private provision projection.
 
 ### Remaining Work
-The pure peer/auth and illegal-state boundaries are tested; the physical Apple Pulsar/gateway/MinIO/Vault workflow remains UNVERIFIED.
+Remove the tracked expected outputs and old replay mutant as part of Sprint 53.3. The pure peer/auth and
+illegal-state boundaries are tested; the physical Apple Pulsar/gateway/MinIO/Vault workflow remains UNVERIFIED.
 
 ## Documentation Requirements
 

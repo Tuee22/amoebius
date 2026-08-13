@@ -44,7 +44,11 @@ The complete gate passed on 2026-08-10.
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
+
+**Observed artifact migration — 2026-08-11:** `test/fixtures/phase30/expected-base-digest.txt` duplicates the
+Phase-25 image observation. It must be removed. Image identity remains a live provenance check against the
+verified Phase-25 attestation and current in-cluster registry catalog, not a committed digest file.
 
 **Invalidated historical record:**
 
@@ -177,9 +181,10 @@ flowchart LR
 ```
 *Orientation. Phase 30 converges one retained MinIO backing for registry/content/offload while Pulsar keeps its bounded hot path through BookKeeper, as owned by the [platform-services doctrine](../documents/engineering/platform_services_doctrine.md).*
 
-**Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate is closed to a stub by seven pinned cross-checks, all authored and committed
-in **Phase 0** before any `src/Amoebius/Platform/*` implementation exists (§M.1 oracle-pinning), and named as
-gate oracles in the Sprint 30.1–30.3 Deliverables.
+**Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).**
+The gate is closed to a stub by seven cross-checks named in the Sprint 30.1–30.3 deliverables. Existing
+same-commit fixtures are regression fixtures until Phase 0 and the owning sprint record independent review or
+replacement; none inherits oracle status from the old manifest claim.
 
 ## Gate integrity
 
@@ -197,8 +202,8 @@ catalog, or any `docker.io`/`quay.io`/other public-registry image reference, fai
 discriminates a genuine baked-binary bring-up from upstream images side-loaded onto the node (which `kind
 load` and a deny-all egress test cannot tell apart — only image identity can). The pull-observation window
 is the containerd/CRI image-pull event log on the kind node read from the OS boundary (not amoebius's own
-logging), covering the whole gate window; a committed fixture-oracle
-`test/fixtures/phase30/expected-base-digest.txt` pins the accepted digest.
+logging), covering the whole gate window. The accepted digest is read from the verified Phase-25 attestation
+and independently confirmed in the current in-cluster catalog; no expected-digest file is committed.
 
 ### Render byte-identity (§M.3 independent provenance)
 
@@ -606,9 +611,8 @@ and close the phase with the backbone HA gate on a fresh cluster.
   Postgres/observability (Phase 31), and singleton-owned reconcile layers UNVERIFIED; the independent
   resource-projection checker compares every applied execution unit/volume exactly to its
   `ProvisionedServiceSpec`.
-- The gate oracles reused here, **authored and committed in this phase's oracle-pinning sprint before any implementation** (§M.1): the
-  baked-base-image digest oracle `test/fixtures/phase30/expected-base-digest.txt`, the registry storage-stanza
-  oracle `test/fixtures/phase30/registry-storage-driver.golden`, and the drill-topic hot-tier cap
+- The reviewed gate oracles reused here: the registry storage-stanza oracle
+  `test/fixtures/phase30/registry-storage-driver.golden` and the drill-topic hot-tier cap
   `test/fixtures/phase30/hot-tier-cap.golden`, plus the independently computed
   `test/fixtures/phase30/storage-geometry-boundaries.csv` covering BookKeeper/MinIO exact-fit, one-byte-over,
   recovery/healing, orphan horizon, and uniform-ordinal rounding. The gate also reuses
@@ -644,8 +648,8 @@ and close the phase with the backbone HA gate on a fresh cluster.
    that output, foreclosing hand-written or `helm template`-derived YAML embedded as string constants. **Image provenance (§M.5):** "no public-registry pull recorded" is read from the containerd/CRI image-pull event log
    on the kind node (the OS-boundary observer, never amoebius's own logging) over the whole gate window,
    **and** every running container's `imageID` digest (`kubectl get pods -A -o jsonpath={..imageID}`) MUST
-   equal the Phase-25 baked base digest committed in `test/fixtures/phase30/expected-base-digest.txt` and
-   present in the in-cluster `distribution` catalog — any other digest or public-registry reference (including
+   equal the digest in the verified Phase-25 attestation and current in-cluster `distribution` catalog — any
+   other digest or public-registry reference (including
    an upstream image pre-side-loaded onto the node with `kind load`) fails. **Resource-provision identity:**
    independently compare every applied app/init/sidecar CPU/memory/ephemeral-storage request+limit, bounded
    `emptyDir`, uniform-template PVC/PV capacity, cache-`None`, and accelerator-`None` projection to the opaque
@@ -656,7 +660,8 @@ and close the phase with the backbone HA gate on a fresh cluster.
    reconcile marked UNVERIFIED.
 
 ### Remaining Work
-None.
+Remove `test/fixtures/phase30/expected-base-digest.txt`, pass the verified Phase-25 digest into the run without
+copying it into Git, and rerun the gate under universal artifact hygiene.
 
 ## Documentation Requirements
 

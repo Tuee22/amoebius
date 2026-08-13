@@ -293,14 +293,19 @@ checkMutantFixtures root = forM_ mutants $ \(name, _locus) -> do
   source <- readFile path
   assert ("operator=" `contains` source && "expected=" `contains` source) (name <> " fixture drifted")
 
+-- The binary under test is named by the gate, which resolved it. The fallback asks
+-- whichever cabal is on PATH; it never names an absolute developer-home path, because a
+-- tracked test that hard-codes one passes only on the machine it was written on.
 resolveBinary :: FilePath -> IO FilePath
 resolveBinary _root = do
   configured <- lookupEnv "AMOEBIUS_BIN"
   case configured of
     Just path -> canonicalizePath path
     Nothing -> do
-      (code, output, errors) <- readCreateProcessWithExitCode
-        (proc "/home/matthewnowak/.ghcup/bin/cabal-3.16.1.0" ["list-bin", "exe:amoebius", "--offline"]) ""
+      compiler <- lookupEnv "AMOEBIUS_GHC"
+      let arguments = ["list-bin", "exe:amoebius", "--offline"]
+            <> maybe [] (\path -> ["--with-compiler=" <> path]) compiler
+      (code, output, errors) <- readCreateProcessWithExitCode (proc "cabal" arguments) ""
       assertEqual "amoebius list-bin exit" ExitSuccess code
       assertEqual "amoebius list-bin stderr" "" errors
       canonicalizePath (trim output)

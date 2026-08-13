@@ -19,7 +19,7 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/ledgers/phase_06_illegal_state.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -30,10 +30,10 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 6.1: Exhaustive negative/positive corpus split by foreclosure locus ⏸️](#sprint-61-exhaustive-negativepositive-corpus-split-by-foreclosure-locus-)
-- [Sprint 6.2: GADT-index compile-fail goldens (type-foreclosed layer) ⏸️](#sprint-62-gadt-index-compile-fail-goldens-type-foreclosed-layer-)
-- [Sprint 6.3: QuickCheck property suite ⏸️](#sprint-63-quickcheck-property-suite-)
-- [Sprint 6.4: The per-entry validation-locus ledger — the gate ⏸️](#sprint-64-the-per-entry-validation-locus-ledger--the-gate-)
+- [Sprint 6.1: Exhaustive negative/positive corpus split by foreclosure locus ✅](#sprint-61-exhaustive-negativepositive-corpus-split-by-foreclosure-locus-)
+- [Sprint 6.2: GADT-index compile-fail goldens (type-foreclosed layer) ✅](#sprint-62-gadt-index-compile-fail-goldens-type-foreclosed-layer-)
+- [Sprint 6.3: QuickCheck property suite ✅](#sprint-63-quickcheck-property-suite-)
+- [Sprint 6.4: The per-entry validation-locus ledger — the gate ✅](#sprint-64-the-per-entry-validation-locus-ledger--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,9 +41,24 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:a1e246296ecadb42…`
+(1931 non-ignored files) and published verified external attestation
+`sha256:2a18c8372d20736e226b93994c8fcd7e133af9e55bc799889551a653269a8b05`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** The corpus result is unchanged and re-run: 88
+catalog entries reconcile to 104 registry subcases, 14 Gate-1 and 13 Gate-2 negatives fail at their own loci
+beside green twins, 12 positives decode, five compile-fail pairs separate legal from illegal, four QuickCheck
+properties hold under `checkCoverage`, the RKE2 server arms are exhausted, and 33 subcases are discharged
+against 71 owner-pinned deferrals. All four registry-reconciliation mutants plus the union-arm, resource
+normalization, GADT-index-weakening, and broken-decision mutants turn the battery red at their own loci. 24
+surfaces join to 27 run-time enumerated items.
+
+**Three corrections.** The results table was written rather than measured; the catalog, registry, corpus, and
+locus-ledger counts, the reddened-property set, and the surviving-mutant count are now all parsed from what the
+run observed. `test/dsl/CorpusSpec.hs` hard-coded one developer's `dhall` path and now resolves it per run,
+failing closed when unset. And `gen/dsl/**` — written by nineteen phases — was never declared in the canonical
+generated-output inventory; the eighteen deferrals covering it were not a migration backlog but a missing
+inventory row, so the class is now declared and all eighteen rows are retired.
 
 **Invalidated historical record:**
 
@@ -225,9 +240,9 @@ alone, before any fixture exists to join against.
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 6.1: Exhaustive negative/positive corpus split by foreclosure locus ⏸️
+## Sprint 6.1: Exhaustive negative/positive corpus split by foreclosure locus ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/examples/{legal_*,illegal_gate1_*,illegal_decode_*}.dhall`
 (extending the Phase-4 positive + Gate-1 corpus and the Phase-5 Gate-2 set to one fixture per
 Register-1-settleable catalog entry); `test/dsl/CorpusSpec.hs`; `tests/oracle/phase6/{gate1_cases,gate2_cases}.tsv`;
@@ -331,9 +346,9 @@ must pass `dhall type` and decode-reject — never billing a Gate-2-only foreclo
 ### Remaining Work
 None for Sprint 6.1.
 
-## Sprint 6.2: GADT-index compile-fail goldens (type-foreclosed layer) ⏸️
+## Sprint 6.2: GADT-index compile-fail goldens (type-foreclosed layer) ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/dsl/compilefail/*.hs` (each a minimal module that spells an
 illegal combination) + `tests/oracle/phase6/compile_fail.tsv` + `tools/{compile_fail.py,compile_fail.sh}`
 (a pinned `ghc -fno-code` expect-fail harness).
@@ -374,9 +389,9 @@ Phase-4 honesty caveat routed here, since Dhall has no opaque types.
 ### Remaining Work
 None for Sprint 6.2.
 
-## Sprint 6.3: QuickCheck property suite ⏸️
+## Sprint 6.3: QuickCheck property suite ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/dsl/DecisionPropSpec.hs` (`prop_smartCtorClosure`,
 `prop_decodeRoundTrip`, `prop_foldTotal`, `prop_compositionPreservesWellFormedness`) and
 `test/dsl/DecisionPropMain.hs`.
@@ -422,9 +437,9 @@ exhausted (the three `Rke2Servers` arms).
 ### Remaining Work
 None for Sprint 6.3.
 
-## Sprint 6.4: The per-entry validation-locus ledger — the gate ⏸️
+## Sprint 6.4: The per-entry validation-locus ledger — the gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/dsl/ValidationLocusLedger.hs` (the coverage-projection emitter + assertion, run as
 part of `dsl-spec`), `tools/phase6_gate.py`, and independently authored expectations under `test/oracles/`.
 The gate discovers surfaces into `gen/test-surfaces/` and emits its run ledger under `gen/runs/`. The emitted validation-locus
@@ -523,7 +538,7 @@ all repository-resident generated inputs, and pass the current externally attest
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves
-- [Phase 6 illegal-state ledger](ledgers/phase_06_illegal_state.md) — the authored proven/tested/unverified account of this gate
+- Phase 6 illegal-state ledger — the authored proven/tested/unverified account of this gate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the DSL vision
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the catalog index and its [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)

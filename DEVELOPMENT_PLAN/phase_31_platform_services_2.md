@@ -43,7 +43,12 @@ Validated 2026-08-10 with `python3 tools/phase31_gate.py`; ledger
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
+
+**Observed artifact migration — 2026-08-11:** `expected-base-digest.txt` duplicates Phase-25 run output, and
+`postgres-share-package.sha256` is a package/archive integrity observation. Both are generated. Phase 31 must
+consume Phase 25's verified image identity and Phase 1's dynamic package resolution without committed checksum
+files.
 
 **Invalidated historical record:**
 
@@ -160,9 +165,10 @@ flowchart LR
 ```
 *Validated Phase-31 gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
-**Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate is closed to a stub by the pinned cross-checks below, all authored and
-committed in **Phase 0** before any `src/Amoebius/Platform/*` implementation exists (§M.1 oracle-pinning), and
-named as gate oracles in the Sprint 31.1–31.4 Deliverables.
+**Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).**
+The gate is closed to a stub by the cross-checks below. Existing same-commit fixtures are regression fixtures
+until Phase 0 and the owning sprint record independent review or replacement; none inherits oracle status from
+the former Phase-0 manifest claim.
 
 ## Gate integrity
 
@@ -194,8 +200,8 @@ discharges is owned by
   invariant with the **specific reason** that `synchronous_mode_strict` is not `on` (paired with the positive
   that differs only in that field), so the negative cannot pass by failing for an unrelated reason.
 - **Image-identity provenance (§M.5 OS-boundary observer).** Every running container's `imageID` digest
-  (`kubectl get pods -A -o jsonpath={..imageID}`) MUST equal the Phase-25 baked base-image digest committed in
-  `test/fixtures/phase31/expected-base-digest.txt` and present in the in-cluster `distribution` registry
+  (`kubectl get pods -A -o jsonpath={..imageID}`) MUST equal the digest in the verified Phase-25 attestation
+  and current in-cluster `distribution` registry
   catalog; any digest not in that catalog, or any `docker.io`/`quay.io`/other public-registry reference (including
   an upstream image pre-side-loaded with `kind load`), fails. The pull-observation window is the
   containerd/CRI image-pull event log on the kind node read from the OS boundary over the whole gate window.
@@ -355,8 +361,9 @@ dashboards.
 - The **mandated Patroni configuration** on every rendered cluster: `synchronous_mode: on`,
   `synchronous_mode_strict: on` (the decided strict stance — no synchronous standby ⇒ the primary refuses new
   writes; the degrade-to-async alternative is rejected), and a bytes-bounded `maximum_lag_on_failover` (a
-  replica lagging past the bound is promotion-ineligible), authored as the committed independent oracle
-  `test/fixtures/phase31/patroni-sync-config.golden`, with the committed seeded mutant
+  replica lagging past the bound is promotion-ineligible). The existing
+  `test/fixtures/phase31/patroni-sync-config.golden` is a regression fixture until independently reviewed or
+  replaced, with the committed seeded mutant
   `mutant/patroni-async-default` named as the mutant this invariant MUST turn red (on the specific reason that
   `synchronous_mode_strict` is not `on`).
 - Prometheus + Grafana scraping platform workloads, with the per-workflow recording/alert rules and
@@ -398,6 +405,9 @@ dashboards.
   presentation/rounded sizes equal to their private checked demands, and cache `None` plus accelerator
   `None`/no device claim on linux-cpu; durable bytes live
   on retained PVs.
+- Run-local resolution of the Postgres shared package through Phase 1's compatibility policy. The selected
+  package identity and observed integrity are generated under `gen/toolchain/**`; no checksum fixture is
+  committed or read by the Haskell/live gate.
 
 ### Validation
 1. Assert the Percona operator is Ready before any `PerconaPGCluster`, then that the named consumer set
@@ -440,10 +450,14 @@ dashboards.
    controller, webhook, SQL admission proxy, one Patroni member CPU/memory/ephemeral/pod/CSI slot, mounted usable byte, or rounded
    backing byte one unit short. Each case rejects before CR/volume creation; mutants omitting the webhook or
    treating the finite data size as the complete physical peak go red.
+5. Reject a seeded tracked package-checksum input, resolve the Postgres shared package dynamically, and verify
+   its selected identity and integrity only through the run-local toolchain record and external attestation.
 
 ### Remaining Work
-None within the Phase-31 acceptance surface. The Keycloak browser edge remains Phase 32 and singleton-owned
-continuous reconciliation remains Phase 33, both explicitly UNVERIFIED in this phase's ledger.
+Remove `postgres-share-package.sha256`, route package acquisition through Phase 1's dynamic resolver, and
+retain its integrity observation only in run evidence. Independently review or replace the same-commit Patroni
+and monitoring expectations. The Keycloak browser edge remains Phase 32 and singleton-owned continuous
+reconciliation remains Phase 33, both explicitly UNVERIFIED.
 
 ## Sprint 31.2: Ephemeral Redis/Sentinel realtime coordination ⏸️
 
@@ -531,14 +545,14 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
   service in its HA-capable shape. It also verifies generated-manifest and baked-binary provenance, exact
   execution-unit/volume projection from `ProvisionedServiceSpec`, and a Register-3 ledger that labels only the
   observed runtime layer *tested*.
-- The gate oracles, **authored and committed in this phase's oracle-pinning sprint before any implementation** (§M.1): a Register-1
-  property `prop_bringUpOrderDerivedFromEdges` asserting the derived bring-up order is a pure function of the
+- The gate-oracle candidates, subject to recorded independent review under §M.1: a Register-1 property
+  `prop_bringUpOrderDerivedFromEdges` asserting the derived bring-up order is a pure function of the
   *declared* dependency edges (adding or removing a declared edge changes the order; an introduced cycle is
   rejected) under a §M.4 cover/classify floor forcing a stated minimum fraction of cases through the
   declared-edge mutation and injected-cycle branches so neither passes vacuously, checked against the committed
   hand-authored edge→order reference table
-  `test/fixtures/phase31/dag-edges.golden` — an oracle **independent of** the `BringUp` fold (§M.3); the
-  committed baked-base-image digest oracle `test/fixtures/phase31/expected-base-digest.txt`; and the committed
+  `test/fixtures/phase31/dag-edges.golden` — an oracle **independent of** the `BringUp` fold (§M.3); and the
+  committed
   seeded mutants **`mutant/dag-drop-edge`** (deletes the `perconaOperator → PerconaPGCluster` declared edge)
   and **`mutant/dag-inject-cycle`** (adds a back-edge making the declared graph cyclic)
   which the gate MUST turn red (§M.2 committed mutation quota) — committed and re-run, not run once.
@@ -562,16 +576,17 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
    provenance. For the Phase-31 additions, a one-versus-many replica render diff may change only count fields;
    Patroni must remain the multi-member projection rather than switch to a standalone variant. Recompute
    `renderAll` and exact-match its bytes to the normalized SSA objects. Separately, observe the kind node's CRI
-   pull log and require every live `imageID` to equal the Phase-25 base digest in
-   `test/fixtures/phase31/expected-base-digest.txt` and the in-cluster catalog; public or side-loaded alternatives
+   pull log and require every live `imageID` to equal the digest in the verified Phase-25 attestation and the
+   current in-cluster catalog; public or side-loaded alternatives
    fail. Finally, exact-match every applied resource field to `ProvisionedServiceSpec`, including app/init/sidecar
    envelopes, bounded `emptyDir`, PVC/PV capacity, the two init-container lifecycle modes, overhead, and the
    cache-`None`/accelerator-`None` arms. Emit the Register-3
    ledger, runtime layer *tested* not *proven* (Keycloak edge + singleton-owned reconcile marked UNVERIFIED).
 
 ### Remaining Work
-None. The sealed live trace is a warm reconciliation trace; the deterministic scheduler gate owns the
-cold/partial-failure ordering claim.
+Remove `expected-base-digest.txt`, consume the verified Phase-25 identity as run input, and rerun the warm
+reconciliation under universal artifact hygiene. The deterministic scheduler gate owns the cold/partial-
+failure ordering claim.
 
 ## Sprint 31.4: Register-2.5 readiness-DAG bring-up under simulated partial failure ⏸️
 

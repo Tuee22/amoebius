@@ -18,7 +18,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/ledgers/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +29,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 16.1: Bounded `UiSource` and total structural checker ⏸️](#sprint-161-bounded-uisource-and-total-structural-checker-)
+- [Sprint 16.1: Bounded `UiSource` and total structural checker ✅](#sprint-161-bounded-uisource-and-total-structural-checker-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,15 +37,33 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:89b25d3a…`
+(1941 non-ignored files) and published verified external attestation
+`sha256:4580dcd430b5608434256528d6500153f7aac31b5bfe27bcf1b484e53ab44c9c`.
+
+**Observed progress — 2026-08-13:** **Policy-conformant.** The bounded UI-program schema result is unchanged
+and re-run: three positive programs decode and ten negatives fail with exact diagnostics, the graph reference
+and normalized wire golden hold byte-identically, the eight generated classes each clear their coverage floor,
+the checked-program compile seal rejects its illegal construction, and all six seeded mutants redden. Evidence
+and the ledger move into `gen/runs/phase_16/<run-id>/`, and 30 run-time items partition one-to-one across the
+schema's foreclosure surfaces.
+
+**Each foreclosure surface takes both halves of its evidence.** The bound check joins its negative fixture
+*and* `M-drop-bound-check`; exhaustiveness joins its negative *and* `M-skip-exhaustiveness`; port unification
+joins its negative *and* `M-swap-port-contract`. A foreclosure is only evidenced by both — the negative that
+must fail, and the mutant proving the check has teeth — and the join now says so.
+
+Three surfaces join to source checks the gate always performed but never named: the forbidden browser-source
+arm scan, the `CheckedUiProgram` constructor-export check, and the UI partial-token scan. Only
+`runtime-noninterference` carries no id, because it is a runtime property this pure register cannot reach. The
+network observer is normalized to the sanctioned pair as in Phase 14, so a host proving isolation by the other
+route still passes.
 
 **Invalidated historical record:**
 
 ✅ Done. The closed Dhall wire, total structural checker, independent oracles, generated coverage, constructor
 seal, and all six mutants pass. Browser, UI-server, identity-provider, and storage-provider enforcement remain
-UNVERIFIED. See the [Phase-16 ledger](ledgers/phase_16_ui_program_schema.md).
+UNVERIFIED. See the Phase-16 ledger.
 
 ## Phase Summary
 
@@ -123,9 +141,9 @@ noninterference.
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 16.1: Bounded `UiSource` and total structural checker ⏸️
+## Sprint 16.1: Bounded `UiSource` and total structural checker ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/amoebius/ui/`, `src/Amoebius/Ui/{Source,Check}.hs`, and
 `test/ui/Phase16UiProgramSchemaSpec.hs` — built and validated.
 **Blocked by**: reopened numeric predecessor gates.

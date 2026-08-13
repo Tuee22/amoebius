@@ -22,7 +22,7 @@ Gate passed on 2026-08-09 with seal
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/ledgers/phase_07_capacity_topology.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -33,10 +33,10 @@ Gate passed on 2026-08-09 with seal
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 7.1: The `Topology` relation — `ComputeEngine` / `LinuxHost` witness / elementwise compatibility fold ⏸️](#sprint-71-the-topology-relation--computeengine--linuxhost-witness--elementwise-compatibility-fold-)
-- [Sprint 7.2: The base capacity fold — `fits` / `podFits` / `carve` / `place` ⏸️](#sprint-72-the-base-capacity-fold--fits--podfits--carve--place-)
-- [Sprint 7.3: QuickCheck properties — soundness, totality, elementwise compatibility + the independent witness validator ⏸️](#sprint-73-quickcheck-properties--soundness-totality-elementwise-compatibility--the-independent-witness-validator-)
-- [Sprint 7.4: The base capacity/topology fold-negative corpus + the gate ⏸️](#sprint-74-the-base-capacitytopology-fold-negative-corpus--the-gate-)
+- [Sprint 7.1: The `Topology` relation — `ComputeEngine` / `LinuxHost` witness / elementwise compatibility fold ✅](#sprint-71-the-topology-relation--computeengine--linuxhost-witness--elementwise-compatibility-fold-)
+- [Sprint 7.2: The base capacity fold — `fits` / `podFits` / `carve` / `place` ✅](#sprint-72-the-base-capacity-fold--fits--podfits--carve--place-)
+- [Sprint 7.3: QuickCheck properties — soundness, totality, elementwise compatibility + the independent witness validator ✅](#sprint-73-quickcheck-properties--soundness-totality-elementwise-compatibility--the-independent-witness-validator-)
+- [Sprint 7.4: The base capacity/topology fold-negative corpus + the gate ✅](#sprint-74-the-base-capacitytopology-fold-negative-corpus--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -44,9 +44,22 @@ Gate passed on 2026-08-09 with seal
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:7e1cd07170ddc0f6…`
+(1932 non-ignored files) and published verified external attestation
+`sha256:61ba75bf3bb6b53846b17ac13903918ec00a1dd14604fbf92c8bb747fc2dd445`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: the
+fold, compile-fail, Gate-1, compatibility, and mutant oracles carry their authored shapes, the three Gate-1
+negatives fail at their exact loci beside green twins, the suite reaches its acceptance token with QuickCheck
+coverage in both directions, and all nineteen seeded mutants redden at their own loci. Evidence and the ledger
+move into `gen/runs/phase_07/<run-id>/`, 25 surfaces join to 25 run-time enumerated items, and the run
+publishes a snapshot-bound attestation.
+
+**Two corrections.** `test/dsl/CapacityTopologyGate.hs` hard-coded one developer's `dhall` path and now
+resolves it per run, failing closed when unset — a PATH fallback would have defeated the Phase-5 absolute-argv
+observer. And no cabal invocation in this gate passed `--with-compiler`, so on a host carrying a newer GHC the
+solver rejected `base` and the gate failed for a reason unrelated to capacity or topology; the resolved
+compiler is now threaded into every cabal call, and `--offline` is dropped so a clean host can resolve at all.
 
 **Invalidated historical record:**
 
@@ -290,9 +303,9 @@ committed in `tests/oracle/phase7/compile_fail.tsv` and exercised by `tools/phas
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 7.1: The `Topology` relation — `ComputeEngine` / `LinuxHost` witness / elementwise compatibility fold ⏸️
+## Sprint 7.1: The `Topology` relation — `ComputeEngine` / `LinuxHost` witness / elementwise compatibility fold ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Dsl/Topology.hs` (`ComputeEngine`, the substrate-indexed `LinuxHost`
   witness, opaque `Topology = { engine, supply : NodeSupply }` with the supply derived from the engine, the
   compatible-pair smart constructor, the total elementwise compatibility fold, and the `mkRke2` distinctness
@@ -353,9 +366,9 @@ boundary.
 ### Remaining Work
 None.
 
-## Sprint 7.2: The base capacity fold — `fits` / `podFits` / `carve` / `place` ⏸️
+## Sprint 7.2: The base capacity fold — `fits` / `podFits` / `carve` / `place` ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/Types.hs` (its **base subset**: `Quantity`,
 the zero-capable `Residual`/`AvailableCapacity`, `PodResourceVec = { cpu, memory, ephemeralStorage }`, the
 closed pod/host-worker `ResourceEnvelope`, `Capacity`/`Demand`/`Budget`, `NodeCapacity` with
@@ -437,9 +450,9 @@ reading declared numbers only (the substrate node inventory and PV sizes are own
 ### Remaining Work
 None.
 
-## Sprint 7.3: QuickCheck properties — soundness, totality, elementwise compatibility + the independent witness validator ⏸️
+## Sprint 7.3: QuickCheck properties — soundness, totality, elementwise compatibility + the independent witness validator ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/dsl/CapacityTopologyProps.hs` (QuickCheck generators for
 `Topology` / base envelope / workload sets + the base property battery and the implementation-independent
 witness validator), `test/dsl/CapacityTopologyMutants.hs`, and `tests/mutants/phase7/mutants.tsv`, reusing
@@ -525,9 +538,9 @@ packable one) for the single sound-not-complete check, compute `place`, and neve
 ### Remaining Work
 None.
 
-## Sprint 7.4: The base capacity/topology fold-negative corpus + the gate ⏸️
+## Sprint 7.4: The base capacity/topology fold-negative corpus + the gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**:
 `test/dsl/CapacityTopologyFixtures.hs` holds fifteen direct, hand-authored post-decode fold negatives and
 fifteen legal twins pinned by `tests/oracle/phase7/fold_cases.tsv`; the three Gate-1 Dhall foreclosure pairs
@@ -648,4 +661,4 @@ None.
 - [phase_09_execution_accelerator_folds.md](phase_09_execution_accelerator_folds.md) — the execution-epoch expansion, scheduler-reservation algebra, accelerator/VRAM, and provider-root arithmetic that compose the full-resource-vector place witness on this base fold
 - [phase_10_capability_bind.md](phase_10_capability_bind.md) — the capability → provider → shape binder built atop these folds
 - [phase_11_provision_seal.md](phase_11_provision_seal.md) — the whole-deployment provision seal that re-exercises these base folds after bind
-- [Phase 7 capacity/topology ledger](ledgers/phase_07_capacity_topology.md) — the human-readable Register-1 proof/test/assumption boundary
+- Phase 7 capacity/topology ledger — the human-readable Register-1 proof/test/assumption boundary

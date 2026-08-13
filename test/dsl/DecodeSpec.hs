@@ -45,11 +45,21 @@ data NegativeCase = NegativeCase
   , negativeTag :: Text
   }
 
-ghc :: FilePath
-ghc = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
-
-dhall :: FilePath
-dhall = "/home/matthewnowak/.local/bin/dhall"
+-- The suite invokes ghc and dhall by absolute path on purpose: the Phase-5 argv observer
+-- asserts that no tool is reached through an ambient PATH lookup. Which absolute path is a
+-- run-local resolution, not a fact about the repository, so the resolver supplies it and
+-- the suite fails closed rather than falling back to one developer's home directory.
+resolvedTool :: String -> IO FilePath
+resolvedTool name = do
+  value <- lookupEnv name
+  case value of
+    Just path | not (null path) -> pure path
+    _ ->
+      fail
+        ( name
+            <> " is unset: run dsl-spec through tools/phase5_gate.py, which resolves the "
+            <> "toolchain from toolchain/requirements.json"
+        )
 
 main :: IO ()
 main = do
@@ -255,6 +265,7 @@ checkNegative schemaOverride NegativeCase {negativeFile, negativeTag} = do
   let selected = case (negativeTag, schemaOverride) of
         ("SchemaMismatch", Just replacement) -> replacement
         _ -> negativeFile
+  dhall <- resolvedTool "AMOEBIUS_DHALL"
   (typeExit, _, typeError) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", selected]) ""
   assert (typeExit == ExitSuccess) (selected <> " is not Gate-1 green:\n" <> typeError)
   result <- decodeCluster selected
@@ -286,6 +297,7 @@ checkCompilePairs oracle = do
   forM_ rows $ \row -> case Text.splitOn "\t" row of
     [_pair, legal, illegal, locus, _positive] -> do
       let arguments fixture = ["-fno-code", "-fforce-recomp", "-isrc", "-XGHC2024", Text.unpack fixture]
+      ghc <- resolvedTool "AMOEBIUS_GHC"
       (legalExit, _, legalError) <- readCreateProcessWithExitCode (proc ghc (arguments legal)) ""
       assert (legalExit == ExitSuccess) (Text.unpack legal <> " failed to compile:\n" <> legalError)
       (illegalExit, _, illegalError) <- readCreateProcessWithExitCode (proc ghc (arguments illegal)) ""

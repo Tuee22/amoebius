@@ -19,7 +19,7 @@ The gate passed 2026-08-10.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -42,7 +42,17 @@ The gate passed 2026-08-10.
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
+
+**Scope amendment — 2026-08-13.** This phase additionally owns the `SecretRef` type itself. Reviewing the
+sibling hostbootstrap secrets policy established that
+[`vault_pki_doctrine.md` §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)
+names four constructors and a production-mode validator, while `src/Amoebius/Vault/SecretRef.hs` implements
+two and no validator, and no `SecretRef` exists under `dhall/amoebius/**`. The type lands here rather than in
+the sealed Gate-1/Gate-2 phases because this is where the Vault root that resolves the names lands: Phases 4
+and 5 sealed against the surfaces they actually name, and adding a type they never carried does not reopen
+them ([§N](development_plan_standards.md#n-reopening-and-amending-a-phase)). The corresponding divergence rows
+are recorded in [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md).
 
 **Invalidated historical record:**
 

@@ -1,0 +1,46 @@
+# Authored expectation for the Phase-7 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. The ids are the metric keys the capacity/topology
+# battery is obliged to record, read off this phase's contract.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   metrics   the metric keys in gen/dsl/phase7/phase-results.tsv
+#   checks    the check ids tools/phase7_gate.py implements
+#
+# Several surfaces share a metric on purpose. `fits-equivalence` and
+# `elementwise-topology-compatibility` are two readings of the same 3x3 compatibility
+# matrix, and `rke2-host-distinctness` and `linux-host-quorum-compile-barriers` are two of
+# the seven compile-fail pairs. Inventing a distinct metric per surface would name the
+# same observation twice and make the join look stronger than the evidence is.
+#
+# The last five surfaces are the ones this register cannot reach; they carry the metrics
+# whose recorded value is the literal `UNVERIFIED`, or no metric at all.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+base-capacity-types	checks	oracle-shape
+gate1-topology-foreclosures	metrics	gate1-topology-cases
+fits-equivalence	metrics	compatibility-matrix
+carve-zero-capable-subtraction	metrics	fold-negatives
+fixed-placement-witness	metrics	positive-topologies
+elastic-growth-envelope	checks	independent-placement-validator
+elementwise-topology-compatibility	checks	compatibility-both-directions
+rke2-host-distinctness	metrics	compile-fail-pairs
+linux-host-quorum-compile-barriers	checks	compile-oracle-shape
+capacity-topology-negative-corpus	metrics	legal-twins
+legal-multisubstrate-fixed-placement	checks	positive-decodes-and-places
+legal-managed-eks-elastic-placement	checks	elastic-envelope-witness
+independent-placement-validator	checks	independent-validator-separate
+quickcheck-capacity-topology-properties	metrics	quickcheck-properties
+base-fold-compile-totality	metrics	base-fold-totality
+phase7-mutant-battery	metrics	mutants
+phase7-validation-locus-ledger	metrics	registry-subcases
+capacity-feasibility	metrics	acceptance-token
+storage-geometry	metrics	storage-geometry
+execution-accelerator-provider-root-fit	metrics	execution-accelerator-provider-root-fit
+binding-feasibility	checks
+render-fidelity	checks
+model-runtime-correspondence	checks
+runtime-fidelity	metrics	runtime
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle,locus-ledger-honesty-banner

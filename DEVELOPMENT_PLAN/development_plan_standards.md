@@ -18,7 +18,7 @@ those; this document wins on plan structure. It owns no phase status, which belo
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -114,7 +114,7 @@ One vocabulary, used in the README Phase Overview, in each phase's **Phase Statu
 
 | Marker | Meaning |
 |--------|---------|
-| ✅ **Done** | Delivered; the redesigned gate passed from a clean committed tree and its external attestation verified. |
+| ✅ **Done** | Delivered; the redesigned gate passed against a recorded source snapshot and its external attestation verified. |
 | 🔄 **Active** | In progress now. |
 | 📋 **Planned** | Specified, not started. (The default for every phase and sprint pre-implementation.) |
 | ⏸️ **Blocked** | Waiting on a named earlier-or-same-phase sprint or an external prerequisite. |
@@ -133,7 +133,7 @@ passed current gate. The tracker uses only these progress terms:
 | **No footprint observed** | The audit found no implementation path attributable to the phase. Absence is not proof that no implementation exists outside the audit boundary. |
 | **Observed footprint** | At least one attributable source, test, gate, or generated migration artifact exists; completeness and correctness are not established. |
 | **Known partial** | The footprint exists and the phase contract or static inspection names a missing seam, target, provider, observer, or validation layer. |
-| **Policy-conformant** | The current phase gate passed in numeric order from a clean committed tree, including [§S](#s-universal-artifact-hygiene-gate), and its external attestation verified. Only this term is compatible with ✅ Done. |
+| **Policy-conformant** | The current phase gate passed in numeric order against a recorded source snapshot, including [§S](#s-universal-artifact-hygiene-gate), and its external attestation verified. Only this term is compatible with ✅ Done. |
 
 The tracker attaches a date and audit boundary to every progress summary. Doctrine may describe a target or a
 specifically labelled historical observation, but it never converts progress into status.
@@ -173,7 +173,7 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 
 `Phase Summary` is declarative present tense ("this phase stands up …"), not a promise log. The **Gate** is a
 single, checkable acceptance condition — ideally an `InForceSpec` topology that spins resources up, runs a
-workflow, and tears them down. Every gate also inherits the clean-tree and generated-output postcondition of
+workflow, and tears them down. Every gate also inherits the source-snapshot and generated-output postcondition of
 [§S](#s-universal-artifact-hygiene-gate), without duplicating it in the 65 phase documents. A phase may state an optional **Phase scope** or legacy **Session scope** note;
 the enforceable sizing rules are owned by [§O](#o-sprint-sized-seams-and-bounded-phase-gates) and apply whether or not that
 summary note is present.
@@ -383,8 +383,10 @@ contiguous-numbering / no-fractional-phase-id rule ([§E](#e-one-canonical-phase
 own single-substrate (`none`) gate.
 
 **A ✅ Done flip references verified external evidence.** A phase moves to Done only when its gate runs from
-the human-committed tree, satisfies [§S](#s-universal-artifact-hygiene-gate), and its immutable external
-attestation verifies. A sprint moves to Done only when its current independent validation passes and the
+a recorded source snapshot, satisfies [§S](#s-universal-artifact-hygiene-gate), and its immutable external
+attestation verifies. The tracker's Done row carries that attestation's reference — the identifier the sealing
+run's bundle was stored under — so the evidence is locatable without copying any generated record into
+Markdown. A sprint moves to Done only when its current independent validation passes and the
 parent phase's run retains that result; an added phase-level requirement reopens only the sprint whose
 deliverable or validation it changes. The tracker records the human status decision and may link the external
 run. It never copies a generated ledger, receipt, hash, command transcript, or machine observation into
@@ -447,6 +449,9 @@ happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gat
    - Authorship before the implementation is strong provenance when Git history establishes it. An existing
      oracle whose chronology or independent review cannot be established is a regression fixture, not an
      independent oracle, until it receives an independent review or replacement.
+   - A fixture and subject first introduced in the same commit have no Git-established chronology between
+     them. The fixture is therefore a regression fixture until an independent reviewer validates or replaces
+     its expectation; a manifest claim cannot supply the missing provenance.
    - **Amendment.** A pinned oracle is not frozen — a renderer's output, an error tag, or an expected value
      may legitimately change when the design does.
    - It is **amended**, never rewritten from a failing run: the new expectation is authored from the
@@ -679,7 +684,8 @@ accident.
 Every phase gate includes one implicit postcondition in addition to its phase-specific capability check. A
 gate cannot pass unless all of these conditions hold:
 
-1. The run begins from a clean human-committed tree.
+1. The result is bound to a recorded **source-snapshot** digest, and commit timing is not a gate input
+   ([the enforcement contract](../documents/engineering/repository_layout_doctrine.md#8-enforcement-and-source-snapshot-acceptance) defines the snapshot).
 2. Test surfaces are enumerated at run time into `gen/test-surfaces/` and joined to authored expectations.
 3. All deliberate compilation, generation, resolution, and run evidence stays under `gen/`, a declared build
    root, or a temporary directory; ignored Python interpreter caches are the sole source-adjacent exception.
@@ -689,16 +695,52 @@ gate cannot pass unless all of these conditions hold:
 6. The gate leaves tracked files unchanged and creates no unignored generated path.
 7. The Docker context contains no generated output, evidence, dependency tree, cache, secret, or runtime state.
 8. The generated run bundle is schema-checked and uploaded as an immutable external attestation bound to the
-   committed tree and phase contract.
+   source-snapshot digest and phase contract.
+9. The source snapshot contains every authored input the build, tests, and gate use, and the same documented
+   command succeeds against the snapshot alone; an ignored worktree file is never an input.
+10. The semantic provenance scan rejects tracked reproducible copies even when their paths are not ignored or
+    their filenames resemble authored fixtures.
+
+<a id="s-commit-timing"></a>
+**Commit timing is not a gate input, and no document may reintroduce it as one.** A result is bound to the
+source it actually ran against, so an uncommitted change is validated on exactly the same terms as a committed
+one, and committing, amending, rebasing, or pushing that same source changes nothing a gate observed. The
+operator commits whenever they choose, on their own cadence, and phase order never waits on it. This replaces
+the pre-2026-08-12 precondition requiring a pristine committed worktree, and the companion rule that any other
+run was merely diagnostic; both are withdrawn, because they made every phase closure wait on an unrelated
+human act while adding nothing a reader needs to trust the result. Documentation check `t` fails any governed
+document that asserts either again.
+
+The snapshot digest is **provenance, not a standing precondition**. It records exactly which source produced a
+result, so a reader can tell one run's evidence from another's. It does not mean an unrelated later edit
+retracts a seal: a closed phase reopens only under [§N](#n-reopening-and-amending-a-phase), when the change
+touches what that phase's gate actually covers.
 
 Python runs with ordinary bytecode caching enabled. `.gitignore` and `.dockerignore` must cover every
 `__pycache__` directory and Python bytecode suffix, and Phase 0 rejects tracked bytecode, context leakage,
 missing patterns, or command-level suppression. A source-adjacent ignored cache is allowed to remain locally;
 it is not a gate output, authored input, or version-controlled artifact.
 
-The complete file classification, output inventory, ignore patterns, and clean-clone acceptance are owned by
+The complete file classification, output inventory, ignore patterns, source-snapshot acceptance, and
+revision-history disposition are owned by
 [`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md). A phase document
-states only its capability-specific acceptance condition; it does not duplicate these eight clauses.
+states only its capability-specific acceptance condition; it does not duplicate these ten clauses.
+
+**Clause 5 is enforced by every gate and remediated by the owning phase.** Read as a whole-tree condition it
+would make Phase 0 wait on phases 1–64, because the tracked resolver output, digest tables, and generated-root
+consumers those phases own are spread across the tree — which inverts the numeric order this plan is built on.
+[`repository_layout_doctrine.md §3.5`](../documents/engineering/repository_layout_doctrine.md#35-tsv-inventory-and-provenance)
+settles it: Phase 0 owns the shared corpora and the machinery, and each later phase owns its domain tables
+before revalidation. A finding outside the running phase's ownership is therefore **deferred, never
+suppressed** — it is reported at every run, attributed to the phase whose gate must clear it, justified by a
+row in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md), and removed from the deferral
+list when that phase closes. A deferral that no longer matches a finding fails the gate, so the list only
+shrinks. Nothing may be deferred out of the phase that owns it.
+
+Phase 0 additionally audits reachable revision history. A discovered secret requires rotation and a
+coordinated purge. A non-secret generated or obsolete historical blob requires forward cleanup plus an
+operator-recorded choice between retaining prior history and an explicitly approved coordinated rewrite.
+Unreachable local objects are reported separately and do not change the shared repository closure.
 
 This amendment invalidates every prior phase seal because the former gates could consume committed
 enumerations and ledgers, write evidence beneath `DEVELOPMENT_PLAN/`, and rely on tracked resolver output or
@@ -717,9 +759,10 @@ gate and verified external attestation.
 
 Every documentation sweep follows this policy:
 
-1. **Establish the audit boundary.** Record the date, tree state, roots inspected, and whether observations are
-   committed, uncommitted, untracked, generated, or external. A dirty worktree is an observation boundary,
-   never a committed baseline.
+1. **Establish the audit boundary.** Record the date, exact revision, worktree state, upstream relation, roots
+   inspected, and whether observations are committed, uncommitted, ignored, untracked, generated, reachable
+   history, unreachable local objects, or external. An audit states the snapshot it observed; it never presents
+   one snapshot's counts as another's.
 2. **Compare by contract, not filename.** For each phase, compare target capability, implementation paths,
    tests, gate behavior, artifact provenance, substrate/register, and remaining work. A similarly named file
    does not establish semantic coverage.
@@ -738,6 +781,12 @@ Every documentation sweep follows this policy:
 7. **Refresh or retire snapshots.** Counts and path inventories are dated diagnostics. A later relevant change
    refreshes them; closure replaces the divergence row with its verified disposition rather than preserving a
    stale count as current truth.
+8. **Verify source closure against the source snapshot.** A build or gate input that exists only because the
+   worktree retains an ignored file is missing source, even when the local command passes. A snapshot failure
+   creates a legacy row owned by the phase that must relocate or replace the input.
+9. **Audit history separately.** Current ignore rules do not remove earlier blobs. Record secrets, generated
+   artifacts, obsolete terminology, and other unwanted history separately from current-tree findings, then
+   apply the disposition policy in [§S](#s-universal-artifact-hygiene-gate).
 
 `legacy_tracking_for_deletion.md` is therefore broader than a deletion list: until convergence it is the
 mandatory register of existing code, test, tool, and generated-file state that conflicts with the intended

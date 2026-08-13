@@ -198,7 +198,7 @@ Three traditions, three layers, three moves:
 
 **And in amoebius, all three are Haskell.** The quiet third move is the native idiom of a typed functional
 language. The constituent **prodbox** behaviour already lives there — pure decision functions over a
-commit log (`canWriteDns`, `nodeDisposition` in `/home/matthewnowak/prodbox/src/Prodbox/Gateway/Types.hs`),
+commit log (`canWriteDns`, `nodeDisposition` in `prodbox/src/Prodbox/Gateway/Types.hs`),
 the Plan / Apply split, the type system as a zero-cost design check. The spine of [§10](#10-simulate--the-pure-program-lifted-io-sim) is
 one ladder: make the **decision** pure (Extract), then the **command** pure (Plan / Apply), then — with
 `io-classes` and `io-sim` — the **whole concurrent program** pure, run as a deterministic model under test
@@ -451,7 +451,7 @@ proven for the model at scope, needing no runtime); model↔decision-core corres
 still requiring renderer-faithfulness tests),
 while the residual **runtime-fidelity** check — that the built forest's real physics hold — is the **Tier-2**
 obligation confirmed by **Register-3 chaos injection** in **Phase 43**. The sibling prodbox spec
-(`/home/matthewnowak/prodbox/documents/engineering/tla/gateway_orders_rule.tla`, six invariants explored to
+(`prodbox/documents/engineering/tla/gateway_orders_rule.tla`, six invariants explored to
 ~4.4M states at scope 3, `prodbox dev tla-check`) is **evidence from a sibling system, not an amoebius proof** — its invariants `UniqueOwner` / `NoTugOfWar` / `SingletonTakeover` are exactly the shape amoebius
 must re-establish for its own model.
 

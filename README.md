@@ -49,6 +49,13 @@ ignore coverage are owned by the
 Python interpreter bytecode is the one source-adjacent cache exception: Python uses its normal cache behavior,
 while `.gitignore` and `.dockerignore` exclude every `__pycache__` directory and bytecode suffix.
 
+**Observed implementation — 2026-08-11 committed-baseline audit.** The clean, pushed tree is not yet
+policy-conformant. It still depends on ignored authored compatibility patches, tracks reproducible test
+material and resolution/integrity observations, and cannot run the complete Phase-0 verifier from a fresh
+clone. The exact current and historical divergences, their owners, and their closure conditions are recorded
+in the [legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md); the
+[development-plan tracker](./DEVELOPMENT_PLAN/README.md#current-implementation-audit) controls migration order.
+
 The binary manages Kubernetes cluster lifecycle and interprets checked `.dhall` values into opinionated
 deployments and bounded low-code applications. A low-code app is finite `UiSource` data compiled into matching
 client and server plans: one generic PureScript interpreter renders it, while the UI-server responsibility
@@ -91,7 +98,7 @@ and reattaches retained backing
   and a mandatory teardown. Validation runs in three phase-gate registers (1 pure/golden · 2
   boundary-with-fakes · 3 live), plus the Register-2.5 deterministic-simulation activity, which is never
   itself a phase gate; every gate emits an untracked proven/tested/assumed ledger, externally attested against
-  the committed tree, that states which layer it reached and marks the rest UNVERIFIED.
+  the source snapshot it ran on, that states which layer it reached and marks the rest UNVERIFIED.
 - **How the repository is laid out:**
   [`documents/engineering/repository_layout_doctrine.md`](./documents/engineering/repository_layout_doctrine.md)
   — the complete authored/generated tree, dependency-resolution policy, and ignore contracts.

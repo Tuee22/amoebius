@@ -7,8 +7,8 @@ independent of the amoebius binary so a ledger cannot certify itself.
 
 Examples:
 
-  python3 tools/ledger_lint.py test/golden/phase_16_ledger.json \
-      --enumeration build/phase_16_surfaces.txt
+  python3 tools/ledger_lint.py gen/runs/phase_16/<run-id>/ledger.json \
+      --enumeration gen/test-surfaces/phase_16.json
   python3 tools/ledger_lint.py --verify-corpus
 """
 
@@ -30,6 +30,22 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 TRACKER = ROOT / "DEVELOPMENT_PLAN" / "README.md"
 CORPUS = HERE / "ledger_lint_corpus"
+
+# The checker's own diagnostic vocabulary, declared so a run can enumerate what this
+# side of the gate actually implements and join it to an authored expectation.
+CHECKS = {
+    "json": "the ledger parses as JSON",
+    "schema": "required keys, row shapes, and field types",
+    "phase": "phase is a non-negative integer",
+    "status": "every row status is in the honesty vocabulary",
+    "layers": "the three correctness layers, with out-of-register ones UNVERIFIED",
+    "honesty": "a substrate-none ledger claims no runtime or unqualified proof",
+    "tracker": "register and substrate equal the tracker row",
+    "path": "a committed ledger uses its phase's filename",
+    "enumeration": "the run enumeration loads",
+    "surface": "coverage joins completely to the enumeration",
+    "hash": "ledger_hash matches the canonical payload",
+}
 
 REQUIRED_KEYS = {
     "phase",
@@ -75,11 +91,24 @@ def parse_tracker(path: Path) -> dict[int, tuple[str, str]]:
 
 
 def load_enumeration(path: Path) -> set[str]:
-    surfaces = {
-        line.strip()
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip() and not line.lstrip().startswith("#")
-    }
+    """Read a run-time surface enumeration.
+
+    `repository_layout_doctrine.md` section 3.1 places the enumeration at
+    `gen/test-surfaces/phase_*.json`; the plain-text form is still read so a corpus
+    case or an older caller keeps working.
+    """
+    raw = path.read_text(encoding="utf-8")
+    if path.suffix == ".json":
+        value = json.loads(raw)
+        if isinstance(value, dict):
+            value = value.get("surfaces", [])
+        surfaces = {str(item) for item in value}
+    else:
+        surfaces = {
+            line.strip()
+            for line in raw.splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        }
     if not surfaces:
         raise ValueError(f"enumeration {path} contains no surfaces")
     return surfaces
@@ -178,8 +207,18 @@ def validate_ledger(
                     Problem("tracker", f"register {register!r} != tracker value {expected_register!r}")
                 )
 
+        # A ledger emitted into the run bundle is named by the bundle, not by the
+        # phase: repository-layout doctrine section 3.1 fixes it at
+        # gen/runs/<phase>/<run-id>/ledger.json. The phase-named form is only the
+        # legacy committed convention, and that convention is what is being retired.
         expected_name = f"phase_{phase:02d}_ledger.json"
-        if ledger_path.name != expected_name and CORPUS not in ledger_path.resolve().parents:
+        resolved = ledger_path.resolve()
+        in_run_bundle = (ROOT / "gen" / "runs") in resolved.parents
+        if (
+            ledger_path.name != expected_name
+            and not in_run_bundle
+            and CORPUS not in resolved.parents
+        ):
             problems.append(Problem("path", f"committed ledger path must end in {expected_name}"))
 
     layer_rows = value.get("layers")

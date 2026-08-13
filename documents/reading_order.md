@@ -37,7 +37,7 @@ prior knowledge, but every stop presumes the stops above it.
 ## Before starting
 
 > **The repository contains implementation and tests, but every prior phase seal is reopened.** Existing
-> results are historical diagnostics until each redesigned gate passes from a clean committed tree and its
+> results are historical diagnostics until each redesigned gate passes against a recorded source snapshot and its
 > external attestation verifies. Prescriptive doctrine remains design intent unless it names that evidence.
 
 - [`glossary.md`](./glossary.md) — open in a second tab and leave it open; every stop below assumes it.

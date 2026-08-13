@@ -149,12 +149,16 @@ checkGeneratedEnumeration root = do
   assertEqual "generated/authored route join" generatedRoutes coveredRoutes
   assert (digest single /= digest multi && mode single /= mode multi) "plan envelope identities collapsed"
 
+-- The expected trace side is computed by the independent Haskell semantics from the
+-- authored interactions, never read from a committed trace table. The retired
+-- `reference_traces.tsv` held exactly what `referenceTraces` returns, so comparing the two
+-- proved only that a file agreed with the function that generated it, while the comparison
+-- that matters — browser against independent semantics — is the second assertion here.
 checkDifferentialTrace :: FilePath -> BrowserObservation -> IO ()
 checkDifferentialTrace root observation = do
   interactions <- loadTable (root </> "test/fixtures/ui_browser/interactions.tsv")
-  expected <- loadTable (root </> "test/fixtures/ui_browser/reference_traces.tsv")
   reference <- either die pure (referenceTraces (filter ((/= "multi-choose") . firstField) interactions))
-  assertEqual "authored/reference trace" (sort expected) (sort reference)
+  assertEqual "reference trace step count" 4 (length reference)
   assertEqual "browser/reference trace" (sort (map (map Text.pack) reference)) (sort (trace observation))
 
 checkDom :: FilePath -> BrowserObservation -> IO ()
@@ -254,11 +258,13 @@ caseNameToFile caseName = case caseName of
 
 -- The multi plan's initial choose-tenant route is covered by its authored DOM case; other routes come from
 -- the reference trace rows. This helper keeps that independent authored route inventory local to the test.
+-- Derived from the authored interactions by the independent semantics, so a route added to
+-- a plan has to appear in an interaction row before the join can cover it. The previous
+-- form ignored its argument and returned two constants, which agreed with any interaction
+-- corpus at all.
 authoredRouteRows :: [[String]] -> [[String]]
-authoredRouteRows _ =
-  [ ["single-submit", "1", "editing", "-", "false", "home"]
-  , ["single-submit", "2", "pending", "submit", "false", "workflow"]
-  ]
+authoredRouteRows interactions =
+  either (const []) id (referenceTraces (filter ((/= "multi-choose") . firstField) interactions))
 
 fieldAt :: Int -> [value] -> [value]
 fieldAt index values = case drop index values of value : _ -> [value]; [] -> []

@@ -23,7 +23,7 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/ledgers/phase_08_storage_geometry.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -34,10 +34,10 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 8.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ⏸️](#sprint-81-the-storagebudgetgrowable-arithmetic--logicalphysical-geometry-fold-)
-- [Sprint 8.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ⏸️](#sprint-82-the-policy-only-storage-scaling-fold--provisionedstoragescalingenvelope--planstoragescaling-)
-- [Sprint 8.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ⏸️](#sprint-83-quickcheck-properties--storage-accepts--in-envelope-pulsar-two-ceiling-uniform-claim-)
-- [Sprint 8.4: The storage-geometry fold-negative corpus + the gate ⏸️](#sprint-84-the-storage-geometry-fold-negative-corpus--the-gate-)
+- [Sprint 8.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ✅](#sprint-81-the-storagebudgetgrowable-arithmetic--logicalphysical-geometry-fold-)
+- [Sprint 8.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ✅](#sprint-82-the-policy-only-storage-scaling-fold--provisionedstoragescalingenvelope--planstoragescaling-)
+- [Sprint 8.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ✅](#sprint-83-quickcheck-properties--storage-accepts--in-envelope-pulsar-two-ceiling-uniform-claim-)
+- [Sprint 8.4: The storage-geometry fold-negative corpus + the gate ✅](#sprint-84-the-storage-geometry-fold-negative-corpus--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -45,9 +45,25 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:690d8f832a33de37…`
+(1933 non-ignored files) and published verified external attestation
+`sha256:2236282920d39585e287806cab364d279156460312aec61e480abdc812d9435c`.
+
+**Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: 27
+storage variants redden at their specific tags beside 27 green twins, five named negatives and two Gate-1
+training cases hold, two positives decode and fit, six QuickCheck properties hold with coverage in both
+directions, and all 31 seeded mutants redden. Evidence and the ledger move into
+`gen/runs/phase_08/<run-id>/`, and the run publishes a snapshot-bound attestation.
+
+**The surface join found a real gap and it is recorded rather than papered over.** A first draft pointed twenty
+of this phase's claim surfaces at the single acceptance-token metric; the join rejected it, correctly, because
+one token is not independent evidence for twenty claims. The contract names 27 storage claims and the case
+oracle carries 27 cases, so the join is now a one-to-one partition — but the two vocabularies were authored
+separately and three pairs do not match by name. Those three associations are marked provisional in
+`test/phase_08_surface_expectations.tsv` and recorded against Phase 8 in
+[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) for the owner to confirm or correct.
+`test/dsl/StorageGeometryGate.hs` also stopped hard-coding a developer `dhall` path, and every cabal
+invocation now carries the resolved compiler.
 
 **Invalidated historical record:**
 
@@ -314,9 +330,9 @@ logical demands and backing rules, and asserting **accept ⟺ in-envelope**.
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 8.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ⏸️
+## Sprint 8.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/Storage.hs` (identity-named disjoint local
 pools, the closed `StorageBudget` fold, the native host-worker cache-pool accounting, and the two-ceiling
 Pulsar fold); `src/Amoebius/Capacity/StorageGeometry.hs` (`bookKeeperPhysicalDemand`,
@@ -440,9 +456,9 @@ declared logical numbers only (the substrate backing inventory and PV sizes are 
 ### Remaining Work
 None.
 
-## Sprint 8.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ⏸️
+## Sprint 8.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/StorageScaling.hs`
 (`ProvisionedStorageScalingEnvelope`, `ObservedStorageScalingSnapshot`, `planStorageScaling`) — built and
 exhaustively pattern-checked.
@@ -490,9 +506,9 @@ observed snapshot — never a live mutation, and never a check that requires a l
 ### Remaining Work
 None.
 
-## Sprint 8.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ⏸️
+## Sprint 8.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/dsl/StorageGeometryProps.hs` (QuickCheck generators for
 logical-demand/backing inputs + the property battery: BookKeeper/MinIO scenario derivation,
 presentation/allocation rounding, uniform-claim grouping, the six-arm object-store merge, the two Pulsar
@@ -574,9 +590,9 @@ compute `place`.
 ### Remaining Work
 None.
 
-## Sprint 8.4: The storage-geometry fold-negative corpus + the gate ⏸️
+## Sprint 8.4: The storage-geometry fold-negative corpus + the gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**:
 `test/dsl/StorageGeometryFixtures.hs` holds the 27 direct post-decode geometry variants and twins pinned by
 `tests/oracle/phase8/storage_cases.tsv`; two real Dhall Gate-1 pairs live under `dhall/examples/phase8/` and
@@ -716,4 +732,4 @@ None.
   full-resource-vector place-witness that integrates this storage geometry
 - [phase_11](phase_11_provision_seal.md) — the whole-deployment provision seal that re-exercises these storage
   folds post-bind
-- [Phase 8 storage-geometry ledger](ledgers/phase_08_storage_geometry.md) — the human-readable Register-1 proof/test/assumption boundary
+- Phase 8 storage-geometry ledger — the human-readable Register-1 proof/test/assumption boundary

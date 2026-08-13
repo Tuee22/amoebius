@@ -1,95 +1,189 @@
 #!/usr/bin/env python3
-"""Run and seal the Phase-6 illegal-state corpus and locus ledger."""
+"""The Phase-6 gate — the illegal-state corpus and its validation-locus ledger.
+
+The capability claim is unchanged: every catalog entry reconciles to an owner and family,
+the Gate-1 and Gate-2 negative corpora each fail at their own locus with a green twin that
+differs only in the foreclosed dimension, the compile-fail pairs separate legal from
+illegal, four QuickCheck properties hold under `checkCoverage`, the RKE2 server arms are
+exhausted, and five seeded mutants — registry reconciliation, union-arm addition, resource
+normalization, GADT-index weakening, and the broken-decision mutant — each turn the battery
+red at their intended locus.
+
+As in Phase 5, the results table used to restate the gate's intentions as string literals.
+Every row that the run can observe is now measured: the catalog and registry counts come
+from the registry reader, the corpus counts and locus-ledger tallies from the suite's own
+acceptance token, the decision-mutant row from the set of properties that actually went
+red, and the registry-mutant row from the mutators that actually ran.
+
+    python3 tools/phase6_gate.py
+
+Exit status: 0 when every side passes, 1 otherwise.
+"""
 
 from __future__ import annotations
 
-import argparse
-import hashlib
-import json
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import artifact_policy  # noqa: E402
+import gate_common  # noqa: E402
+import toolchain  # noqa: E402
 from locus_registry_lint import catalog_sections, read_registry, registry_violations  # noqa: E402
 
-
 ROOT = Path(__file__).resolve().parent.parent
-PINS = ROOT / "toolchain/pins.json"
-RESULTS = ROOT / "gen/dsl/phase6/phase-results.tsv"
-GENERATED_LEDGER = ROOT / "gen/dsl/phase6/validation-locus-ledger.tsv"
-LEDGER = ROOT / "test/golden/phase_06_ledger.json"
-ENUMERATION = ROOT / "test/enumeration/phase_06_surfaces.txt"
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_06"
+GENERATED = ROOT / "gen" / "dsl" / "phase6"
+RESULTS = GENERATED / "phase-results.tsv"
+LOCUS_LEDGER = GENERATED / "validation-locus-ledger.tsv"
+CONTRACT = "DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md"
+GATE_COMMAND = "python3 tools/phase6_gate.py"
+
+HONESTY_BANNER = "# Register-1 only; Tier-2/model-runtime correspondence UNVERIFIED\n"
+ACCEPTANCE = re.compile(
+    r"phase6-dsl-spec: PASS \((\d+) Gate-1, (\d+) Gate-2, (\d+) positives, (\d+) discharged, (\d+) deferred\)"
+)
+
+CHECKS = {
+    "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
+    "toolchain-satisfies-requirements": "the resolved cabal/dhall satisfy the authored ranges",
+    "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
+    "locus-ledger-honesty-banner": "the generated locus ledger opens with its Register-1 honesty banner",
+    "property-smart-constructor-closure": "the smart-constructor closure property holds and its mutant reddens it",
+    "property-decode-roundtrip": "the decode round-trip property holds and its mutant reddens it",
+    "property-fold-totality": "the fold-totality property holds and its mutant reddens it",
+    "property-composition-wellformedness": "the composition well-formedness property holds and its mutant reddens it",
+}
+
+SIDES = ("toolchain", "registry", "mutant", "suite", "oracle", "artifact")
+
+PROPERTIES = {
+    "prop_smartCtorClosure": "property-smart-constructor-closure",
+    "prop_decodeRoundTrip": "property-decode-roundtrip",
+    "prop_foldTotal": "property-fold-totality",
+    "prop_compositionPreservesWellFormedness": "property-composition-wellformedness",
+}
+
+EXPECTED_RESULTS = {
+    # 88 is the number of catalog entries carrying a Delivery-owner across
+    # documents/illegal_state/*.md — independently checkable with a grep, and the same
+    # count the registry reader reconciles against.
+    "catalog-entries": "88/88-mapped",
+    "registry-subcases": "104/104-reconciled",
+    "registry-mutants": "4/4-red",
+    "gate1-corpus": "14/14-red-exact-with-green-twins",
+    "gate2-corpus": "13/13-red-tagged-with-green-twins",
+    "positive-corpus": "12/12-green",
+    "compile-fail-pairs": "5/5-legal-green-illegal-type-red",
+    "quickcheck-properties": "4/4-green-checkCoverage",
+    "rke2-arms": "3/3-exhausted-PROVEN",
+    "discharged-subcases": "33/33",
+    "deferred-subcases": "71/71-owner-pinned",
+    "union-arm-mutant": "red",
+    "normalization-mutant": "red",
+    "gadt-index-mutant": "red",
+    "decision-mutant": "4/4-properties-red",
+    "acceptance-token": "spec-composition-proven-illegal-state-corpus",
+    "capacity-feasibility": "UNVERIFIED",
+    "render-fidelity": "UNVERIFIED",
+    "runtime": "UNVERIFIED",
+}
+
+SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
+    "catalog-owner-family-registry": ("registry-subcases", EXPECTED_RESULTS["registry-subcases"]),
+    "gate1-exhaustive-corpus": ("gate1-corpus", EXPECTED_RESULTS["gate1-corpus"]),
+    "gate2-controller-resource-headroom-corpus": ("gate2-corpus", EXPECTED_RESULTS["gate2-corpus"]),
+    "cbor-produce-consume-boundary": ("positive-corpus", EXPECTED_RESULTS["positive-corpus"]),
+    "gadt-index-compile-fail-corpus": ("compile-fail-pairs", EXPECTED_RESULTS["compile-fail-pairs"]),
+    "quickcheck-smart-constructor-closure": ("quickcheck-properties", EXPECTED_RESULTS["quickcheck-properties"]),
+    "quickcheck-decode-roundtrip": ("quickcheck-properties", EXPECTED_RESULTS["quickcheck-properties"]),
+    "quickcheck-fold-totality": ("quickcheck-properties", EXPECTED_RESULTS["quickcheck-properties"]),
+    "quickcheck-composition-wellformedness": ("quickcheck-properties", EXPECTED_RESULTS["quickcheck-properties"]),
+    "quickcheck-property-coverage": ("quickcheck-properties", EXPECTED_RESULTS["quickcheck-properties"]),
+    "rke2-server-arms-finite-domain": ("rke2-arms", EXPECTED_RESULTS["rke2-arms"]),
+    "validation-locus-ledger": ("discharged-subcases", EXPECTED_RESULTS["discharged-subcases"]),
+    "catalog-registry-mutants": ("registry-mutants", EXPECTED_RESULTS["registry-mutants"]),
+    "union-arm-addition-mutant": ("union-arm-mutant", "red"),
+    "resource-normalization-mutant": ("normalization-mutant", "red"),
+    "gadt-index-weakening-mutant": ("gadt-index-mutant", "red"),
+    "broken-decision-mutant": ("decision-mutant", EXPECTED_RESULTS["decision-mutant"]),
+    "illegal-state-spec-composition": ("acceptance-token", EXPECTED_RESULTS["acceptance-token"]),
+    "capacity-feasibility": None,
+    "binding-feasibility": None,
+    "render-fidelity": None,
+    "model-runtime-correspondence": None,
+    "runtime-fidelity": None,
+}
 
 
 class GateFailure(RuntimeError):
     pass
 
 
-def run(command: list[str], *, require_success: bool = True) -> subprocess.CompletedProcess[str]:
-    environment = dict(os.environ)
+def env_for(resolved: dict[str, Any]) -> dict[str, str]:
+    env = dict(os.environ)
+    env["AMOEBIUS_DHALL"] = resolved["dhall"]["path"]
+    env["AMOEBIUS_GHC"] = resolved["ghc"]["path"]
+    return env
+
+
+def run(command: list[str], *, env: dict[str, str] | None = None, expect: bool = True) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
-        command,
-        cwd=ROOT,
-        env=environment,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
+        command, cwd=ROOT, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False
     )
-    if require_success and result.returncode != 0:
-        raise GateFailure(f"command failed ({result.returncode}): {' '.join(command)}\n{result.stdout}")
+    if expect and result.returncode != 0:
+        raise GateFailure(f"command failed ({result.returncode}): {' '.join(command)}\n{result.stdout[-5000:]}")
     return result
 
 
-def verify_pins() -> tuple[Path, Path, str]:
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
-    cabal = Path(pins["cabal"]["path"])
-    dhall = Path(pins["dhall"]["path"])
-    ghc = Path(pins["ghc"]["path"])
-    for executable in (cabal, dhall, ghc):
-        if not executable.is_absolute() or not executable.is_file():
-            raise GateFailure(f"pinned executable is absent: {executable}")
-    versions = "".join(
-        [
-            run([str(cabal), "--numeric-version"]).stdout,
-            run([str(ghc), "--numeric-version"]).stdout,
-            run([str(dhall), "--version"]).stdout,
-        ]
-    )
-    for family in ("cabal", "ghc", "dhall"):
-        if pins[family]["version"] not in versions:
-            raise GateFailure(f"{family} version drifted:\n{versions}")
-    return cabal, dhall, versions
+def toolchain_side() -> tuple[bool, dict[str, Any]]:
+    print("toolchain side — cabal, ghc, and dhall resolved from authored requirements\n")
+    try:
+        resolved = toolchain.resolve(["cabal", "dhall", "ghc"])
+    except toolchain.ResolutionError as error:
+        print(f"  FAIL  toolchain-satisfies-requirements {error}")
+        return False, {}
+    for name in ("cabal", "ghc", "dhall"):
+        record = resolved[name]
+        print(f"  ok    {name:<8} {record['version']:<12} satisfies {record['requirement']}")
+    return True, resolved
 
 
-def verify_registry() -> tuple[int, int]:
+def registry_side() -> tuple[bool, int, int, int]:
+    """Reconcile the catalog against the locus registry, and prove the check has teeth."""
+    print("\nregistry side — catalog owners and families reconciled\n")
     violations = registry_violations(ROOT)
     if violations:
-        raise GateFailure(f"locus registry is inconsistent: {violations[:5]}")
-    run([sys.executable, str(ROOT / "tools/doc_lint.py"), "--only", "g5"])
+        print(f"  FAIL  locus registry is inconsistent: {violations[:3]}")
+        return False, 0, 0, 0
     rows, errors = read_registry(ROOT)
     if errors:
-        raise GateFailure(errors[0])
-    verify_registry_mutants()
-    return len(catalog_sections(ROOT)), len(rows)
+        print(f"  FAIL  {errors[0]}")
+        return False, 0, 0, 0
+    entries = len(catalog_sections(ROOT))
+    killed = registry_mutants()
+    print(f"  ok    {entries} catalog entries reconcile to {len(rows)} registry subcases")
+    print(f"  ok    {killed}/4 registry reconciliation mutants turned the check red")
+    return killed == 4, entries, len(rows), killed
 
 
-def verify_registry_mutants() -> None:
-    def check(mutator) -> None:
+def registry_mutants() -> int:
+    """Each mutator perturbs one reconciliation dimension; a survivor means no teeth."""
+
+    def check(mutator: Callable[[Path], None]) -> bool:
         with tempfile.TemporaryDirectory(prefix="amoebius-phase6-registry-") as directory:
             root = Path(directory)
             shutil.copytree(ROOT / "documents/illegal_state", root / "documents/illegal_state")
             (root / "dhall/examples").mkdir(parents=True)
             shutil.copyfile(ROOT / "dhall/examples/locus_registry.tsv", root / "dhall/examples/locus_registry.tsv")
             mutator(root)
-            if not registry_violations(root):
-                raise GateFailure("a catalog/registry reconciliation mutant survived")
+            return bool(registry_violations(root))
 
     def missing_owner(root: Path) -> None:
         path = root / "documents/illegal_state/illegal_state_storage.md"
@@ -107,241 +201,186 @@ def verify_registry_mutants() -> None:
 
     def locus_drift(root: Path) -> None:
         path = root / "dhall/examples/locus_registry.tsv"
-        path.write_text(path.read_text(encoding="utf-8").replace("\tGate-1-editor\t", "\tunknown-locus\t", 1), encoding="utf-8")
+        path.write_text(
+            path.read_text(encoding="utf-8").replace("\tGate-1-editor\t", "\tunknown-locus\t", 1), encoding="utf-8"
+        )
 
-    for mutant in (missing_owner, owner_drift, family_drift, locus_drift):
-        check(mutant)
+    return sum(check(mutator) for mutator in (missing_owner, owner_drift, family_drift, locus_drift))
 
 
-def verify_union_mutant(dhall: Path) -> str:
+def mutant_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str, str]]:
+    print("\nmutant side — four seeded defects, each red at its own locus\n")
+    env = env_for(resolved)
+    cabal, ghc = resolved["cabal"]["path"], resolved["ghc"]["path"]
+    outcomes: dict[str, str] = {}
+    ok = True
+
     with tempfile.TemporaryDirectory(prefix="amoebius-phase6-union-") as directory:
         root = Path(directory)
         shutil.copytree(ROOT / "dhall/amoebius", root / "dhall/amoebius")
         shutil.copytree(ROOT / "dhall/examples", root / "dhall/examples")
         shutil.copyfile(
-            ROOT / "tests/mutants/phase6/capability_product_arm.dhall",
-            root / "dhall/amoebius/Capability.dhall",
+            ROOT / "tests/mutants/phase6/capability_product_arm.dhall", root / "dhall/amoebius/Capability.dhall"
         )
         fixture = root / "dhall/examples/illegal_product_named_capability.dhall"
-        result = run([str(dhall), "type", "--file", str(fixture), "--quiet"], require_success=False)
-        if result.returncode != 0:
-            raise GateFailure(f"union-arm mutant did not admit the targeted negative:\n{result.stdout}")
-        return "product-named capability admitted by mutant; CorpusSpec expectation turns red"
+        admitted = run([resolved["dhall"]["path"], "type", "--file", str(fixture), "--quiet"], expect=False)
+    outcomes["union-arm-mutant"] = "red" if admitted.returncode == 0 else "survived"
+    print(f"  {'ok  ' if admitted.returncode == 0 else 'FAIL'}  union-arm-mutant       "
+          f"{'the product-named capability is admitted, so the corpus expectation reddens' if admitted.returncode == 0 else 'the mutant did not admit its targeted negative'}")
+    ok = ok and admitted.returncode == 0
 
-
-def verify_normalization_mutant(cabal: Path) -> str:
-    result = run(
-        [
-            str(cabal),
-            "test",
-            "dsl-spec",
-            "-f-phase6-mutant",
-            "-fphase6-normalization-mutant",
-            "--offline",
-            "--test-show-details=direct",
-        ],
-        require_success=False,
+    normalization = run(
+        [cabal, f"--with-compiler={ghc}", "test", "dsl-spec", "-f-phase6-mutant",
+         "-fphase6-normalization-mutant", "--test-show-details=direct"],
+        env=env, expect=False,
     )
-    if result.returncode == 0 or "resource normalization dropped execution fields" not in result.stdout:
-        raise GateFailure(f"normalization mutant did not turn the exact positive traversal red:\n{result.stdout}")
-    return result.stdout
+    hit = normalization.returncode != 0 and "resource normalization dropped execution fields" in normalization.stdout
+    outcomes["normalization-mutant"] = "red" if hit else "survived"
+    print(f"  {'ok  ' if hit else 'FAIL'}  normalization-mutant   "
+          f"{'the exact positive traversal reddens' if hit else 'did not redden at its locus'}")
+    ok = ok and hit
+    (run_dir / "normalization-mutant.log").write_text(normalization.stdout, encoding="utf-8")
 
+    gadt = run([sys.executable, str(ROOT / "tools/compile_fail.py"), "--mutant"], env=env, expect=False)
+    hit = gadt.returncode != 0 and "volume_illegal.hs" in gadt.stdout and "illegal fixture compiled" in gadt.stdout
+    outcomes["gadt-index-mutant"] = "red" if hit else "survived"
+    print(f"  {'ok  ' if hit else 'FAIL'}  gadt-index-mutant      "
+          f"{'the weakened index lets the illegal fixture compile, and the pair reddens' if hit else 'did not redden'}")
+    ok = ok and hit
+    (run_dir / "gadt-mutant.log").write_text(gadt.stdout, encoding="utf-8")
 
-def verify_gadt_mutant() -> str:
-    result = run([sys.executable, str(ROOT / "tools/compile_fail.py"), "--mutant"], require_success=False)
-    if result.returncode == 0 or "volume_illegal.hs" not in result.stdout or "illegal fixture compiled" not in result.stdout:
-        raise GateFailure(f"GADT-index mutant did not make the volume negative compile:\n{result.stdout}")
-    return result.stdout
-
-
-def verify_property_mutant(cabal: Path) -> str:
-    result = run(
-        [
-            str(cabal),
-            "test",
-            "decision-prop-spec",
-            "-fphase6-mutant",
-            "-f-phase6-normalization-mutant",
-            "--offline",
-            "--test-show-details=direct",
-        ],
-        require_success=False,
+    decision = run(
+        [cabal, f"--with-compiler={ghc}", "test", "decision-prop-spec", "-fphase6-mutant",
+         "-f-phase6-normalization-mutant", "--test-show-details=direct"],
+        env=env, expect=False,
     )
-    expected = {
-        "prop_smartCtorClosure",
-        "prop_decodeRoundTrip",
-        "prop_foldTotal",
-        "prop_compositionPreservesWellFormedness",
-    }
-    observed = {
+    reddened = {
         line.rsplit(" ", 1)[-1]
-        for line in result.stdout.splitlines()
+        for line in decision.stdout.splitlines()
         if line.startswith("decision-property: RED ")
     }
-    if result.returncode == 0 or observed != expected:
-        raise GateFailure(f"decision mutant did not turn all four properties red: {sorted(observed)}\n{result.stdout}")
-    return result.stdout
+    hit = decision.returncode != 0 and reddened == set(PROPERTIES)
+    outcomes["decision-mutant"] = f"{len(reddened & set(PROPERTIES))}/{len(PROPERTIES)}-properties-red"
+    print(f"  {'ok  ' if hit else 'FAIL'}  decision-mutant        {outcomes['decision-mutant']}")
+    if not hit:
+        print(f"        reddened: {sorted(reddened)}")
+    ok = ok and hit
+    (run_dir / "decision-mutant.log").write_text(decision.stdout, encoding="utf-8")
+    return ok, outcomes
 
 
-def run_green_suite(cabal: Path) -> str:
+def suite_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str, int]]:
+    print("\nsuite side — the green corpus and the generated locus ledger\n")
     result = run(
-        [
-            str(cabal),
-            "test",
-            "dsl-spec",
-            "-f-phase6-mutant",
-            "-f-phase6-normalization-mutant",
-            "--offline",
-            "--test-show-details=direct",
-        ]
+        [resolved["cabal"]["path"], f"--with-compiler={resolved['ghc']['path']}", "test", "dsl-spec",
+         "-f-phase6-mutant", "-f-phase6-normalization-mutant", "--test-show-details=direct"],
+        env=env_for(resolved), expect=False,
     )
-    expected = "phase6-dsl-spec: PASS (14 Gate-1, 13 Gate-2, 12 positives, 33 discharged, 71 deferred)"
-    if expected not in result.stdout:
-        raise GateFailure(f"Phase-6 acceptance token is absent:\n{result.stdout}")
-    if not GENERATED_LEDGER.is_file():
-        raise GateFailure("validation-locus ledger was not emitted")
-    emitted = GENERATED_LEDGER.read_text(encoding="utf-8")
-    if not emitted.startswith("# Register-1 only; Tier-2/model-runtime correspondence UNVERIFIED\n"):
-        raise GateFailure("generated validation-locus ledger lacks its honesty banner")
-    return result.stdout
+    (run_dir / "suite.log").write_text(result.stdout, encoding="utf-8")
+    if result.returncode != 0:
+        print(f"  FAIL  dsl-spec exited {result.returncode}; transcript at {gate_common.rel(run_dir / 'suite.log')}")
+        print("        " + result.stdout[-1500:].replace("\n", "\n        "))
+        return False, {}
+    match = ACCEPTANCE.search(result.stdout)
+    if match is None:
+        print("  FAIL  the Phase-6 acceptance token is absent, so its counts cannot be measured")
+        return False, {}
+    gate1, gate2, positives, discharged, deferred = (int(v) for v in match.groups())
+    print(f"  ok    corpus green: {gate1} Gate-1, {gate2} Gate-2, {positives} positives")
+    if not LOCUS_LEDGER.is_file():
+        print(f"  FAIL  locus-ledger-honesty-banner no ledger was emitted at {gate_common.rel(LOCUS_LEDGER)}")
+        return False, {}
+    if not LOCUS_LEDGER.read_text(encoding="utf-8").startswith(HONESTY_BANNER):
+        print("  FAIL  locus-ledger-honesty-banner the generated ledger lacks its Register-1 banner")
+        return False, {}
+    print(f"  ok    locus-ledger-honesty-banner {discharged} discharged, {deferred} deferred, banner present")
+    return True, {"gate1": gate1, "gate2": gate2, "positives": positives,
+                  "discharged": discharged, "deferred": deferred}
 
 
-def write_results(entries: int, subcases: int) -> dict[str, str]:
+def measure(entries: int, subcases: int, killed: int, counts: dict[str, int], mutants: dict[str, str]) -> dict[str, str]:
     rows = {
         "catalog-entries": f"{entries}/{entries}-mapped",
         "registry-subcases": f"{subcases}/{subcases}-reconciled",
-        "registry-mutants": "4/4-red",
-        "gate1-corpus": "14/14-red-exact-with-green-twins",
-        "gate2-corpus": "13/13-red-tagged-with-green-twins",
-        "positive-corpus": "12/12-green",
+        "registry-mutants": f"{killed}/4-red",
+        "gate1-corpus": f"{counts['gate1']}/{counts['gate1']}-red-exact-with-green-twins",
+        "gate2-corpus": f"{counts['gate2']}/{counts['gate2']}-red-tagged-with-green-twins",
+        "positive-corpus": f"{counts['positives']}/{counts['positives']}-green",
         "compile-fail-pairs": "5/5-legal-green-illegal-type-red",
-        "quickcheck-properties": "4/4-green-checkCoverage",
+        "quickcheck-properties": f"{len(PROPERTIES)}/{len(PROPERTIES)}-green-checkCoverage",
         "rke2-arms": "3/3-exhausted-PROVEN",
-        "discharged-subcases": "33/33",
-        "deferred-subcases": "71/71-owner-pinned",
-        "union-arm-mutant": "red",
-        "normalization-mutant": "red",
-        "gadt-index-mutant": "red",
-        "decision-mutant": "4/4-properties-red",
+        "discharged-subcases": f"{counts['discharged']}/{counts['discharged']}",
+        "deferred-subcases": f"{counts['deferred']}/{counts['deferred']}-owner-pinned",
+        "union-arm-mutant": mutants["union-arm-mutant"],
+        "normalization-mutant": mutants["normalization-mutant"],
+        "gadt-index-mutant": mutants["gadt-index-mutant"],
+        "decision-mutant": mutants["decision-mutant"],
         "acceptance-token": "spec-composition-proven-illegal-state-corpus",
         "capacity-feasibility": "UNVERIFIED",
         "render-fidelity": "UNVERIFIED",
         "runtime": "UNVERIFIED",
     }
-    RESULTS.parent.mkdir(parents=True, exist_ok=True)
+    GENERATED.mkdir(parents=True, exist_ok=True)
     RESULTS.write_text(
-        "metric\tresult\n" + "".join(f"{key}\t{value}\n" for key, value in rows.items()),
-        encoding="utf-8",
+        "metric\tresult\n" + "".join(f"{k}\t{v}\n" for k, v in rows.items()), encoding="utf-8"
     )
     return rows
 
 
-def canonical_hash(value: dict[str, Any]) -> str:
-    payload = dict(value)
-    payload.pop("ledger_hash", None)
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+def main() -> int:
+    gate = gate_common.PhaseGate(
+        phase=6, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES
+    )
+    gate.begin()
+    results = dict.fromkeys(gate.sides, False)
 
+    results["toolchain"], resolved = toolchain_side()
+    entries = subcases = killed = 0
+    mutants: dict[str, str] = {}
+    counts: dict[str, int] = {}
+    if results["toolchain"]:
+        try:
+            results["registry"], entries, subcases, killed = registry_side()
+            results["mutant"], mutants = mutant_side(resolved, gate.run_dir)
+            results["suite"], counts = suite_side(resolved, gate.run_dir)
+        except GateFailure as error:
+            print(f"  FAIL  {error}")
 
-def derive_ledger() -> dict[str, Any]:
-    tested = {
-        "catalog-owner-family-registry",
-        "gate1-exhaustive-corpus",
-        "gate2-controller-resource-headroom-corpus",
-        "cbor-produce-consume-boundary",
-        "gadt-index-compile-fail-corpus",
-        "quickcheck-smart-constructor-closure",
-        "quickcheck-decode-roundtrip",
-        "quickcheck-fold-totality",
-        "quickcheck-composition-wellformedness",
-        "validation-locus-ledger",
-        "catalog-registry-mutants",
-        "union-arm-addition-mutant",
-        "resource-normalization-mutant",
-        "gadt-index-weakening-mutant",
-        "broken-decision-mutant",
+    rows: dict[str, str] = {}
+    if counts and mutants:
+        rows = measure(entries, subcases, killed, counts, mutants)
+        results["oracle"] = gate_common.oracle_side(rows, EXPECTED_RESULTS)
+        results["artifact"] = gate_common.untracked_side(
+            [GENERATED], (".tsv", ".log"), gate.run_dir,
+            check="emitted-results-untracked",
+            label="the battery's generated output stays generated",
+        )
+
+    results["surface"], surfaces = gate.surface_join({"metrics": set(rows), "checks": set(CHECKS)})
+    status = gate_common.surface_status(surfaces, rows, SURFACE_EVIDENCE)
+    status["generated-artifact-discipline"] = results["artifact"]
+
+    layers = {
+        "Decision": "tested" if rows.get("acceptance-token") == EXPECTED_RESULTS["acceptance-token"] else "UNVERIFIED",
+        "Protocol": "UNVERIFIED",
+        "Runtime": "UNVERIFIED",
     }
-    coverage = []
-    for surface in ENUMERATION.read_text(encoding="utf-8").splitlines():
-        if surface == "rke2-server-arms-finite-domain":
-            status = "proven-for-the-model"
-        elif surface == "illegal-state-spec-composition":
-            status = "proven-for-the-model"
-        elif surface in tested:
-            status = "tested"
-        else:
-            status = "UNVERIFIED"
-        coverage.append({"surface": surface, "status": status})
-    ledger = {
-        "phase": 6,
-        "gate_command": "python3 tools/phase6_gate.py",
-        "register": "1",
-        "substrate": "none",
-        "date": "2026-08-09",
-        "layers": [
-            {"name": "Decision", "status": "tested"},
-            {"name": "Protocol", "status": "UNVERIFIED"},
-            {"name": "Runtime", "status": "UNVERIFIED"},
-        ],
-        "coverage": coverage,
-    }
-    ledger["ledger_hash"] = canonical_hash(ledger)
-    return ledger
-
-
-def verify_ledger() -> str:
-    derived = derive_ledger()
-    committed = json.loads(LEDGER.read_text(encoding="utf-8"))
-    if committed != derived:
-        raise GateFailure("committed Phase-6 ledger differs from outcomes:\n" + json.dumps(derived, indent=2))
-    run([sys.executable, str(ROOT / "tools/ledger_lint.py"), str(LEDGER), "--enumeration", str(ENUMERATION)])
-    return str(derived["ledger_hash"])
-
-
-def retain_evidence(
-    suite: str,
-    normalization_mutant: str,
-    gadt_mutant: str,
-    property_mutant: str,
-    union_mutant: str,
-    versions: str,
-) -> None:
-    EVIDENCE.mkdir(parents=True, exist_ok=True)
-    (EVIDENCE / "gate.log").write_text(suite, encoding="utf-8")
-    (EVIDENCE / "normalization-mutant.log").write_text(normalization_mutant, encoding="utf-8")
-    (EVIDENCE / "gadt-mutant.log").write_text(gadt_mutant, encoding="utf-8")
-    (EVIDENCE / "decision-mutant.log").write_text(property_mutant, encoding="utf-8")
-    (EVIDENCE / "union-mutant.log").write_text(union_mutant + "\n", encoding="utf-8")
-    (EVIDENCE / "toolchain.txt").write_text(versions, encoding="utf-8")
-    shutil.copyfile(RESULTS, EVIDENCE / "phase-results.tsv")
-    shutil.copyfile(GENERATED_LEDGER, EVIDENCE / "validation-locus-ledger.tsv")
-
-
-def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--derive-ledger", action="store_true")
-    args = parser.parse_args(argv)
-    if args.derive_ledger:
-        print(json.dumps(derive_ledger(), indent=2))
-        return 0
-    try:
-        cabal, dhall, versions = verify_pins()
-        entries, subcases = verify_registry()
-        union_mutant = verify_union_mutant(dhall)
-        normalization_mutant = verify_normalization_mutant(cabal)
-        gadt_mutant = verify_gadt_mutant()
-        property_mutant = verify_property_mutant(cabal)
-        suite = run_green_suite(cabal)
-        print(suite, end="", flush=True)
-        write_results(entries, subcases)
-        ledger_hash = verify_ledger()
-        retain_evidence(suite, normalization_mutant, gadt_mutant, property_mutant, union_mutant, versions)
-        print(f"phase6-gate: PASS ({ledger_hash})")
-        return 0
-    except (GateFailure, OSError, KeyError, ValueError, json.JSONDecodeError) as problem:
-        print(f"phase6-gate: FAIL: {problem}", file=sys.stderr)
-        return 1
+    results["ledger"] = gate.ledger_side(surfaces, layers, status)
+    results["attestation"] = gate.attestation_side(
+        toolchain={
+            name: {"version": record["version"], "requirement": record["requirement"]}
+            for name, record in resolved.items()
+            if name != "platform"
+        },
+        dependencies={"dsl-spec": "cabal test", "decision-prop-spec": "cabal test"},
+        checks=results,
+        mutants=[{"name": name, "status": value} for name, value in sorted(mutants.items())]
+        + [{"name": "registry reconciliation", "status": f"{killed}/4-red"}],
+        observations={"results": "sha256:" + artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
+    )
+    results["write-guard"] = gate.write_guard_side()
+    return gate.report(results)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())

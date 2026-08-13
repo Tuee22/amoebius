@@ -15,6 +15,7 @@ import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
+import System.Environment (lookupEnv)
 import System.Exit (ExitCode (..))
 import System.Process (proc, readCreateProcessWithExitCode)
 
@@ -111,14 +112,24 @@ checkGate1 = do
       assert (length rows == 3) "Phase-7 Gate-1 oracle must contain three rows"
       forM_ rows $ \row -> case Text.splitOn "\t" row of
         [_, negative, legal, required] -> do
+          dhall <- resolvedDhall
           (legalExit, _, legalError) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack legal, "--quiet"]) ""
           assert (legalExit == ExitSuccess) (Text.unpack legal <> " rejected:\n" <> legalError)
           (negativeExit, negativeOut, negativeError) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack negative, "--quiet"]) ""
           let observed = Text.pack (negativeOut <> negativeError)
           assert (negativeExit /= ExitSuccess && required `Text.isInfixOf` observed) (Text.unpack negative <> " missed its exact Gate-1 locus")
         _ -> fail ("malformed Phase-7 Gate-1 row: " <> Text.unpack row)
- where
-  dhall = "/home/matthewnowak/.local/bin/dhall"
+
+
+-- Resolved per run rather than pinned: a tracked file naming one developer's executable
+-- is resolver output (repository_layout_doctrine.md section 4), and a PATH fallback would
+-- defeat the Phase-5 absolute-argv observer. Unset means fail, never guess.
+resolvedDhall :: IO FilePath
+resolvedDhall = do
+  value <- lookupEnv "AMOEBIUS_DHALL"
+  case value of
+    Just path | not (null path) -> pure path
+    _ -> fail "AMOEBIUS_DHALL is unset: run this gate through its tools/phaseN_gate.py"
 
 assert :: Bool -> String -> IO ()
 assert condition message = unless condition (fail message)

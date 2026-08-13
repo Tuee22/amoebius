@@ -311,7 +311,7 @@ Sequencing, implementation status, and acceptance commands are owned by the
 [Development Plan](../../DEVELOPMENT_PLAN/README.md). Online WebSocket/Redis work is integrated into the
 existing pre-Phase-59 UI and platform phases so those phases do not depend on later offline work.
 
-The sibling `/home/matthewnowak/mattandjames` repository is concrete implementation evidence for the basic
+The sibling `mattandjames` repository is concrete implementation evidence for the basic
 shape: `App.WebSocketPresence` keeps TTL connection presence in Redis and `App.WebSocketFanout` uses Redis
 Pub/Sub so a non-owning server replica can reach sockets elsewhere. amoebius generalizes that app-specific
 session fanout into typed app/subject/scope/program envelopes and fenced instance routes. The sibling's Redis

@@ -1,0 +1,22 @@
+# Reachable-revision-history disposition.
+#
+# `repository_layout_doctrine.md` section 8 separates two audits. The current-tree audit
+# can be fixed forward. Reachable history cannot: an ignore rule added today does not
+# remove a blob committed yesterday. So every historical generated or obsolete path
+# family needs an explicit, recorded operator decision, and a documentation or cleanup
+# phase must never rewrite shared history implicitly.
+#
+# A credential in history is not dispositionable. It requires rotation plus a
+# coordinated purge, and the audit fails closed until the blob is gone.
+#
+# decision is `retain-history` or `approved-rewrite`. `retain-history` is the
+# non-destructive default: the blob stays reachable, the current tree no longer carries
+# it, and no shared history is rewritten. Changing a row to `approved-rewrite` is an
+# operator act that authorises a coordinated rewrite; the audit does not perform one.
+#
+# path_glob<TAB>decision<TAB>recorded<TAB>note
+DEVELOPMENT_PLAN/phase_*_bootstrap_kind.md	retain-history	2026-08-12	Retired Bootstrap Coordinator name in four superseded phase-document paths. The glob avoids spelling the retired token, which the terminology scan rejects in a tracked file; the current tree carries no such path.
+tools/__pycache__	retain-history	2026-08-12	Python interpreter cache committed before the bytecode contract landed; both ignore files now exclude it and no tracked bytecode remains.
+tools/__pycache__/*	retain-history	2026-08-12	As above, for the individual cached modules.
+tools/doc_lint_corpus/__pycache__	retain-history	2026-08-12	As above, beneath the lint corpus.
+tools/doc_lint_corpus/__pycache__/*	retain-history	2026-08-12	As above, for the individual cached modules.

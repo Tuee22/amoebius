@@ -149,19 +149,32 @@ checkGoldens root compiled = do
     expected <- stripNewline <$> Lazy.readFile (fixtureRoot </> name)
     assertEqual name expected actual
 
+-- The expected digest side is derived at run time from the authored goldens, never read
+-- from a committed digest table. A table of four SHA-256 values is not something a human
+-- can author or review: it is a reproducible observation of bytes that are already pinned,
+-- so tracking it added a second copy that could only ever agree or be wrong.
 checkDigests :: FilePath -> Fixture -> CompiledUiPlans -> IO ()
 checkDigests root fixture compiled = do
-  rows <- loadTable (root </> "test/fixtures/ui_plan_compiler/expected_digests.tsv")
-  let digests = compiledDigests compiled
+  let fixtureRoot = root </> "test/fixtures/ui_plan_compiler"
+      digests = compiledDigests compiled
+      referenceSources = referenceAuthoritySource
+        (authorizationRows fixture) (compilerPortRows fixture) (compilerBindingRows fixture) (compilerLinkRows fixture)
+  goldenClient <- stripNewline <$> Lazy.readFile (fixtureRoot </> "client_plan.golden.json")
+  goldenServer <- stripNewline <$> Lazy.readFile (fixtureRoot </> "ui_server_plan.golden.json")
+  goldenContracts <- stripNewline <$> Lazy.readFile (fixtureRoot </> "public_contracts.golden.json")
+  let expected =
+        [ ["authority", Text.unpack (referenceDigest (encodeSources referenceSources))]
+        , ["client", Text.unpack (referenceDigest goldenClient)]
+        , ["server", Text.unpack (referenceDigest goldenServer)]
+        , ["contracts", Text.unpack (referenceDigest goldenContracts)]
+        ]
       actual =
         [ ["authority", Text.unpack (authorityDigest digests)]
         , ["client", Text.unpack (clientDigest digests)]
         , ["server", Text.unpack (serverDigest digests)]
         , ["contracts", Text.unpack (contractsDigest digests)]
         ]
-      referenceSources = referenceAuthoritySource
-        (authorizationRows fixture) (compilerPortRows fixture) (compilerBindingRows fixture) (compilerLinkRows fixture)
-  assertEqual "pinned canonical digests" rows actual
+  assertEqual "canonical digests over the authored goldens" expected actual
   assertEqual "independent client digest" (clientDigest digests) (referenceDigest (compiledClientBytes compiled))
   assertEqual "independent server digest" (serverDigest digests) (referenceDigest (compiledServerBytes compiled))
   assertEqual "independent contract digest" (contractsDigest digests) (referenceDigest (compiledContractBytes compiled))

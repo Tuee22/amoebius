@@ -16,19 +16,22 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import gate_common
+import toolchain
+
 
 ROOT = Path(__file__).resolve().parent.parent
-PINS = ROOT / "toolchain/pins.json"
 CASES = ROOT / "test/fixtures/ui_program_schema/cases.tsv"
 GRAPH = ROOT / "test/fixtures/ui_program_schema/graph_reference.tsv"
 WIRE = ROOT / "test/fixtures/ui_program_schema/normalized_wire.golden"
 MUTANTS = ROOT / "tests/mutants/phase16/mutants.tsv"
 LOCUS = ROOT / "tests/oracle/phase16/validation_locus.tsv"
-ENUMERATION = ROOT / "test/enumeration/phase_16_surfaces.txt"
-LEDGER = ROOT / "test/golden/phase_16_ledger.json"
 RESULTS = ROOT / "gen/dsl/phase16/phase-results.tsv"
 GENERATED_LEDGER = ROOT / "gen/dsl/phase16/validation-locus-ledger.tsv"
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_16"
+CONTRACT = "DEVELOPMENT_PLAN/phase_16_ui_program_schema.md"
+GATE_COMMAND = "python3 tools/phase16_gate.py"
 
 
 class GateFailure(RuntimeError):
@@ -46,6 +49,8 @@ def environment() -> dict[str, str]:
 
 
 def run(command: list[str], *, require_success: bool = True) -> subprocess.CompletedProcess[str]:
+    if COMPILER and command and Path(command[0]).name.startswith("cabal"):
+        command = [command[0], f"--with-compiler={COMPILER}", *command[1:]]
     result = subprocess.run(
         command,
         cwd=ROOT,
@@ -66,7 +71,7 @@ def read_tsv(path: Path) -> list[dict[str, str]]:
 
 
 def verify_pins() -> tuple[Path, Path, str]:
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
+    pins = toolchain.resolve(["cabal", "dhall", "ghc"])
     cabal = Path(pins["cabal"]["path"])
     ghc = Path(pins["ghc"]["path"])
     dhall = Path(pins["dhall"]["path"])
@@ -235,87 +240,153 @@ def write_results(observer: str) -> None:
     )
 
 
-def canonical_hash(value: dict[str, Any]) -> str:
-    payload = dict(value)
-    payload.pop("ledger_hash", None)
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+COMPILER = ""
+
+SANCTIONED_OBSERVERS = ("unshare-network-namespace", "strace-socket-EPERM")
+
+CHECKS = {
+    "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
+    "toolchain-satisfies-requirements": "the resolved cabal/ghc/dhall satisfy the authored ranges",
+    "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
+    "forbidden-ui-source-arms": "no raw browser-source or authority arm is present in the schema",
+    "checked-program-constructor-opaque": "the CheckedUiProgram constructor is not exported",
+    "ui-partial-token-scan": "no partial or unsafe token survives in the UI modules",
+}
+
+SIDES = ("toolchain", "oracle", "source", "seal", "suite", "mutant", "results")
+
+EXPECTED_RESULTS = {
+    "program-corpus": "3/3-positive-10/10-exact-negative",
+    "graph-oracle": "3/3-rows",
+    "wire-golden": "3/3-rows-byte-identical",
+    "generated-coverage": "8/8-classes-at-5-percent",
+    "compile-seal": "1/1-illegal-construction-rejected",
+    "mutants": "6/6-red",
+    "network-observer": "sanctioned-observer",
+    "browser-runtime-enforcement": "UNVERIFIED",
+    "authorization-enforcement": "UNVERIFIED",
+    "provider-tenant-isolation": "UNVERIFIED",
+}
+
+SURFACE_MAP = {'closed-tenant-mode-union': 'minimal_single_tenant,minimal_multi_tenant', 'closed-node-kind-union': 'composed_workflow_ui', 'closed-value-type-union': 'ill_typed_generated,checked_ui_illegal', 'no-raw-browser-source-arm': 'forbidden-ui-source-arms', 'named-external-link-requirement': 'raw_external_link_url,duplicate_external_link_requirement,add_raw_url_arm', 'dhall-ui-source-wire': 'raw_browser_escape,add_raw_js_arm', 'deterministic-module-merge': 'duplicate_generated,M-first-id-wins', 'qualified-node-identities': 'duplicate_qualified_id', 'finite-collection-bounds': 'unbounded_collection,over_bound_generated,M-drop-bound-check', 'graph-cycle-rejection': 'recursive_effect,cyclic_generated', 'missing-reference-rejection': 'missing_reference,missing_generated', 'duplicate-identity-rejection': 'graph-oracle', 'duplicate-link-rejection': 'duplicate_link_generated', 'port-type-unification': 'port_type_mismatch,M-swap-port-contract', 'exhaustive-event-branches': 'non_exhaustive_event,non_exhaustive_generated,M-skip-exhaustiveness', 'public-value-projection': 'private_value_projection,private_generated', 'opaque-checked-ui-program': 'compile-seal', 'three-positive-programs': 'program-corpus', 'ten-exact-negative-diagnostics': 'wire-golden', 'normalized-wire-golden': 'normalized_wire', 'independent-graph-reference': 'graph_reference', 'eight-class-generated-coverage': 'generated-coverage', 'six-mutant-battery': 'mutants', 'network-isolated-pure-gate': 'network-observer', 'browser-runtime-enforcement': 'browser-runtime-enforcement', 'authorization-enforcement': 'authorization-enforcement', 'provider-tenant-isolation': 'provider-tenant-isolation', 'runtime-noninterference': '', 'generated-artifact-discipline': 'emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle,checked-program-constructor-opaque,ui-partial-token-scan'}
+
+SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
+    surface: ((ids, EXPECTED_RESULTS[ids]) if ids in EXPECTED_RESULTS and EXPECTED_RESULTS[ids] != "UNVERIFIED" else None)
+    for surface, ids in SURFACE_MAP.items()
+}
 
 
-def derive_ledger() -> dict[str, Any]:
-    model_proven = {
-        "closed-tenant-mode-union", "closed-node-kind-union", "closed-value-type-union",
-        "no-raw-browser-source-arm", "opaque-checked-ui-program", "deterministic-module-merge",
-    }
-    unverified = {
-        "browser-runtime-enforcement", "authorization-enforcement", "provider-tenant-isolation",
-        "runtime-noninterference",
-    }
-    coverage = []
-    for surface in ENUMERATION.read_text(encoding="utf-8").splitlines():
-        status = "proven-for-the-model" if surface in model_proven else "UNVERIFIED" if surface in unverified else "tested"
-        coverage.append({"surface": surface, "status": status})
-    ledger = {
-        "phase": 16,
-        "gate_command": "python3 tools/phase16_gate.py",
-        "register": "1",
-        "substrate": "none",
-        "date": "2026-08-09",
-        "layers": [
-            {"name": "Decision", "status": "proven-for-the-model"},
-            {"name": "Protocol", "status": "UNVERIFIED"},
-            {"name": "Runtime", "status": "UNVERIFIED"},
-        ],
-        "coverage": coverage,
-    }
-    ledger["ledger_hash"] = canonical_hash(ledger)
-    return ledger
+def enumerated_items() -> set[str]:
+    names: set[str] = set()
+    for relative in ("tests/oracle/phase16/validation_locus.tsv", "tests/mutants/phase16/mutants.tsv"):
+        for line in (ROOT / relative).read_text(encoding="utf-8").splitlines()[1:]:
+            if line.strip():
+                names.add(line.split("\t")[0].strip())
+    return names
 
 
-def verify_ledger() -> str:
-    derived = derive_ledger()
-    committed = json.loads(LEDGER.read_text(encoding="utf-8"))
-    if committed != derived:
-        raise GateFailure("committed Phase-16 ledger differs from outcomes:\n" + json.dumps(derived, indent=2))
-    run([sys.executable, str(ROOT / "tools/ledger_lint.py"), str(LEDGER), "--enumeration", str(ENUMERATION)])
-    return str(derived["ledger_hash"])
+def main() -> int:
+    gate = gate_common.PhaseGate(
+        phase=16, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES
+    )
+    gate.begin()
+    results = dict.fromkeys(gate.sides, False)
+    rows: dict[str, str] = {}
+    resolved: dict[str, Any] = {}
+    mutant_rows: list[dict[str, str]] = []
+    item_names: set[str] = set()
+    observer = "unrun"
 
-
-def retain_evidence(green: str, mutants: str, compile_log: str, versions: str) -> None:
-    EVIDENCE.mkdir(parents=True, exist_ok=True)
-    (EVIDENCE / "gate.log").write_text(green, encoding="utf-8")
-    (EVIDENCE / "mutants.log").write_text(mutants, encoding="utf-8")
-    (EVIDENCE / "compile-fail.log").write_text(compile_log, encoding="utf-8")
-    (EVIDENCE / "toolchain.txt").write_text(versions, encoding="utf-8")
-    shutil.copyfile(RESULTS, EVIDENCE / "phase-results.tsv")
-    shutil.copyfile(GENERATED_LEDGER, EVIDENCE / "validation-locus-ledger.tsv")
-
-
-def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--derive-ledger", action="store_true")
-    args = parser.parse_args(argv)
-    if args.derive_ledger:
-        print(json.dumps(derive_ledger(), indent=2))
-        return 0
     try:
-        cabal, dhall, versions = verify_pins()
-        mutants = verify_oracles(dhall)
+        resolved = toolchain.resolve(["cabal", "dhall", "ghc"])
+        print("toolchain side — cabal, ghc, and dhall resolved from authored requirements\n")
+        for name in ("cabal", "ghc", "dhall"):
+            record = resolved[name]
+            print(f"  ok    {name:<8} {record['version']:<12} satisfies {record['requirement']}")
+        results["toolchain"] = True
+        os.environ["AMOEBIUS_DHALL"] = resolved["dhall"]["path"]
+        os.environ["AMOEBIUS_GHC"] = resolved["ghc"]["path"]
+        globals()["COMPILER"] = resolved["ghc"]["path"]
+        cabal = Path(resolved["cabal"]["path"])
+
+        print("\noracle side — the program corpus, graph reference, and mutant manifest\n")
+        mutant_rows = verify_oracles(Path(resolved["dhall"]["path"]))
+        item_names = enumerated_items()
+        print(f"  ok    {len(item_names)} enumerated items, {len(mutant_rows)} mutants")
+        results["oracle"] = True
+
+        print("\nsource side — the schema forecloses raw browser source\n")
         verify_source_boundaries()
+        print("  ok    forbidden-ui-source-arms          no RawJs/RawHtml/RawCss/RawUrl or authority arm")
+        print("  ok    checked-program-constructor-opaque the CheckedUiProgram constructor is not exported")
+        print("  ok    ui-partial-token-scan             no partial or unsafe token in the UI modules")
+        results["source"] = True
+
+        print("\nseal side — the checked-program compile seal\n")
         compile_log = compile_seal(cabal)
+        (gate.run_dir / "compile-seal.log").write_text(compile_log, encoding="utf-8")
+        print("  ok    the illegal construction is rejected")
+        results["seal"] = True
+
+        print("\nsuite side — the pure schema battery under a network observer\n")
         green, observer = run_green(cabal)
-        mutant_log = run_mutants(cabal, mutants)
+        (gate.run_dir / "suite.log").write_text(green, encoding="utf-8")
+        if observer not in SANCTIONED_OBSERVERS:
+            print(f"  FAIL  network observer {observer!r} is not one this contract sanctions")
+        else:
+            print(f"  ok    network-isolated pure gate proven by {observer}")
+            results["suite"] = True
+
+        print("\nmutant side — every seeded mutant red at its own locus\n")
+        mutant_log = run_mutants(cabal, mutant_rows)
+        (gate.run_dir / "mutants.log").write_text(mutant_log, encoding="utf-8")
+        print(f"  ok    {len(mutant_rows)}/{len(mutant_rows)} mutants reddened")
+        results["mutant"] = True
+
         write_results(observer)
-        ledger_hash = verify_ledger()
-        retain_evidence(green, mutant_log, compile_log, versions)
-        print(green, end="", flush=True)
-        print(f"phase16-network-observer: {observer}")
-        print(f"phase16-gate: PASS ({ledger_hash})")
-        return 0
+        rows = gate_common.metric_rows(RESULTS)
+        compared = dict(rows)
+        if compared.get("network-observer") in SANCTIONED_OBSERVERS:
+            compared["network-observer"] = "sanctioned-observer"
+        oracle_ok = gate_common.oracle_side(compared, EXPECTED_RESULTS)
+        artifact_ok = gate_common.untracked_side(
+            [RESULTS.parent], (".tsv", ".log"), gate.run_dir,
+            check="emitted-results-untracked",
+            label="the battery's generated output stays generated",
+        )
+        rows = compared
+        results["results"] = oracle_ok and artifact_ok
     except (GateFailure, OSError, KeyError, ValueError, json.JSONDecodeError) as problem:
         print(f"phase16-gate: FAIL: {problem}", file=sys.stderr)
-        return 1
+
+    decided = {
+        surface: ("program-corpus", EXPECTED_RESULTS["program-corpus"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and (set(ids.split(",")) & item_names or (set(ids.split(",")) & set(CHECKS) and results.get("source")))
+    }
+    layers = {
+        "Decision": "tested" if rows.get("program-corpus") == EXPECTED_RESULTS["program-corpus"] else "UNVERIFIED",
+        "Protocol": "tested" if rows.get("wire-golden") == EXPECTED_RESULTS["wire-golden"] else "UNVERIFIED",
+        "Runtime": "UNVERIFIED",
+    }
+    return gate.finish(
+        results,
+        implemented={"metrics": set(rows), "checks": set(CHECKS), "items": item_names},
+        rows=rows,
+        evidence={**SURFACE_EVIDENCE, **decided},
+        layers=layers,
+        toolchain={
+            name: {"version": record["version"], "requirement": record["requirement"]}
+            for name, record in resolved.items()
+            if name != "platform"
+        },
+        dependencies={"ui-program-spec": "cabal test"},
+        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-16 mutants", "status": "unrun"}],
+        observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
+        extra_status={"generated-artifact-discipline": results["results"]},
+    )
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())

@@ -286,15 +286,16 @@ the phase contract, rejects an unknown enumerated surface, and requires every la
 register to remain `UNVERIFIED`. A substrate-`none` design gate may report `proven-for-the-model`, never
 runtime proof.
 
-The immutable external attestation binds the human-committed source tree, phase contract, gate command,
+The immutable external attestation binds the source-snapshot digest, phase contract, gate command,
 resolved dependencies, toolchain, substrate, runtime bundle, and cleanup outcome. Git contains no ledger,
 receipt, enumeration, log, trace, report, screenshot, resolved path, or copied attestation. The complete
 placement and retention contract is owned by
 [repository_layout_doctrine.md §5](./repository_layout_doctrine.md#5-run-evidence-and-phase-status).
 
-A dirty-tree run is diagnostic only. It cannot close a phase or construct release-promotion evidence. A phase
-status may move to Done only after the external attestation verifies against the human-committed tree and the
-gate leaves the authored tree unchanged.
+A phase status may move to Done only after the external attestation verifies against the run's recorded
+source-snapshot digest and the gate leaves the authored tree unchanged. The digest is what binds a result to
+the source that produced it; whether that source is committed, and when, is the operator's own business and
+never a gate condition.
 
 Skipping an applicable move records `UNVERIFIED`; it never produces a green substitute. The same rule applies
 to an enumerated surface lacking an authored expectation, a missing observer, a skipped mutant, incomplete
@@ -559,6 +560,16 @@ Phase 23 applies the same split to the complete local application story. Generat
 remain the reference side. Real Chrome, separate domain-process append logs, and `strace` recover a post-ready
 workflow nonce through ready-handle use, while five mutations fail at distinct DOM, scope, edge, digest, and
 ordering loci. See [Phase 23](../../DEVELOPMENT_PLAN/phase_23_ui_local_composition.md).
+
+The split also applies to lint and mutation corpora. An authored positive seed, mutation recipe, and expected
+diagnostic may be committed. The recipe's materialized negative copies are generated enumeration/input and
+must be created under `gen/test-corpora/` or a temporary directory. The gate joins each generated case to its
+authored expected diagnostic by stable mutation identity; it does not retain a second source tree of copies.
+
+Git chronology is evidence, not an assumption. A fixture introduced in the same commit as its subject has no
+repository-established before-implementation provenance and is treated as a regression fixture. It becomes an
+independent expectation only through recorded independent review or replacement; until then, the phase cannot
+claim the stronger oracle status from that fixture alone.
 
 Enumeration is a pure projection of a committed typed value, so it is a generated artifact in the ordinary
 sense and inherits the ordinary treatment of

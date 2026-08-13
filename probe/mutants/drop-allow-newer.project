@@ -1,15 +1,40 @@
+-- Seeded mutant: dependency-resolution removal.
+--
+-- This project is a sibling of `cabal.project` that differs in exactly one dimension: the
+-- `allow-newer` stanza is deleted. Everything else — the package list, the source
+-- repository, the compatibility patch, the build settings — is identical, so the red
+-- result is attributable to that single edit and to nothing else
+-- (`development_plan_standards.md` section M clauses 2 and 8).
+--
+-- An earlier revision listed only three packages. That made the solver fail at an unknown
+-- sibling package before it ever reached the intended `proto`/`base` conflict, which is a
+-- mutant that turns the gate red for the wrong reason — indistinguishable, from the gate's
+-- side, from one that works.
+
 packages:
   ./amoebius.cabal
+  ./amoebius-pulsar/amoebius-pulsar.cabal
+  ./amoebius-store/amoebius-store.cabal
+  ./amoebius-runtime/amoebius-runtime.cabal
+  ./amoebius-release/amoebius-release.cabal
+  ./amoebius-pulumi/amoebius-pulumi.cabal
+  ./infernix/infernix-lift.cabal
+  ./infernix-ui/infernix-ui-lift.cabal
+  ./jitml/jitml-lift.cabal
+  ./jitml-ui/jitml-ui-lift.cabal
+  ./apple-host/apple-host-lift.cabal
+  ./test-topology/test-topology.cabal
+  ./ui-live/ui-live.cabal
+  ./offline-runtime/offline-runtime.cabal
   ./probe/probe.cabal
   ./vendor/dual/dual.cabal
 
-with-compiler: /home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc
-index-state: 2026-07-31T23:07:19Z
 optimization: False
 tests: True
 
 source-repository-package
   type: git
   location: https://github.com/cr-org/supernova.git
-  tag: 602409a18f47a38541ba24f5e885199efd383f48
+  tag: master
   subdir: lib proto
+  post-checkout-command: git apply ../../../patches/supernova_ghc_9_12.patch

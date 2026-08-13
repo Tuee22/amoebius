@@ -304,7 +304,12 @@ function readJsonLines(file) {
 function mutantLocus(mutant, result) {
   const multiForeign = result.denials.find(row => row.case === "foreign-tenant");
   const loci = {
-    "M-drop-handle-tenant": () => multiForeign?.status === "200" && "copied-handle-scope",
+    // Any 2xx means the foreign tenant's copied handle was accepted. Naming one success
+    // code made the detector miss the attack it exists to catch: `use-artifact` is a
+    // mutation, so the boundary answers 202, and a predicate looking only for 200 reported
+    // the mutant as surviving-undetected rather than as caught.
+    "M-drop-handle-tenant": () => Number(multiForeign?.status) >= 200
+      && Number(multiForeign?.status) < 300 && "copied-handle-scope",
     "M-direct-workflow-fetch": () => result.directBypass === "provider-bytes" && "browser-backend-edge",
     "M-mix-client-server-plan": () => result.visible.some(row => row.visible === "ReloadRequired") && "plan-pair-digest",
     "M-ready-before-receipt": () => result.visible.some(row => row.step === "1" && row.visible === "Artifact ready") && "ready-order",

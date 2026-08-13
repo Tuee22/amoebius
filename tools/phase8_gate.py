@@ -15,17 +15,20 @@ import sys
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import gate_common
+import toolchain
+
 
 ROOT = Path(__file__).resolve().parent.parent
-PINS = ROOT / "toolchain/pins.json"
 STORAGE_ORACLE = ROOT / "tests/oracle/phase8/storage_cases.tsv"
 GATE1_ORACLE = ROOT / "tests/oracle/phase8/gate1_cases.tsv"
 MUTANTS = ROOT / "tests/mutants/phase8/mutants.tsv"
-LEDGER = ROOT / "test/golden/phase_08_ledger.json"
-ENUMERATION = ROOT / "test/enumeration/phase_08_surfaces.txt"
 RESULTS = ROOT / "gen/dsl/phase8/phase-results.tsv"
 GENERATED_LEDGER = ROOT / "gen/dsl/phase8/validation-locus-ledger.tsv"
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_08"
+CONTRACT = "DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md"
+GATE_COMMAND = "python3 tools/phase8_gate.py"
 
 
 class GateFailure(RuntimeError):
@@ -34,6 +37,8 @@ class GateFailure(RuntimeError):
 
 def run(command: list[str], *, require_success: bool = True) -> subprocess.CompletedProcess[str]:
     environment = dict(os.environ)
+    if COMPILER and command and Path(command[0]).name.startswith("cabal"):
+        command = [command[0], f"--with-compiler={COMPILER}", *command[1:]]
     result = subprocess.run(
         command,
         cwd=ROOT,
@@ -54,7 +59,7 @@ def read_tsv(path: Path) -> list[dict[str, str]]:
 
 
 def verify_pins() -> tuple[Path, Path, str]:
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
+    pins = toolchain.resolve(["cabal", "dhall", "ghc"])
     cabal = Path(pins["cabal"]["path"])
     ghc = Path(pins["ghc"]["path"])
     dhall = Path(pins["dhall"]["path"])
@@ -156,7 +161,6 @@ def run_green_suite(cabal: Path) -> str:
             "storage-geometry-spec",
             "-f-phase6-mutant",
             "-f-phase6-normalization-mutant",
-            "--offline",
             "--test-show-details=direct",
         ]
     )
@@ -177,8 +181,7 @@ def verify_mutants(cabal: Path, mutants: list[dict[str, str]]) -> str:
                 str(cabal),
                 "test",
                 "storage-geometry-spec",
-                "--offline",
-                "--test-show-details=direct",
+                    "--test-show-details=direct",
                 f"--test-options=--mutant={name}",
             ],
             require_success=False,
@@ -213,116 +216,127 @@ def write_results(storage: list[dict[str, str]], mutants: list[dict[str, str]]) 
     )
 
 
-def canonical_hash(value: dict[str, Any]) -> str:
-    payload = dict(value)
-    payload.pop("ledger_hash", None)
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+# The resolved compiler, set once the toolchain resolves. Every cabal invocation gets it:
+# without it cabal picks whatever `ghc` the ambient PATH offers, which on a host carrying a
+# newer GHC fails the solver for a reason that has nothing to do with this phase.
+COMPILER = ""
+
+CHECKS = {
+    "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
+    "toolchain-satisfies-requirements": "the resolved cabal/ghc/dhall satisfy the authored ranges",
+    "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
+    "locus-ledger-honesty-banner": "the generated locus ledger opens with its Register-1 banner",
+}
+
+SIDES = ("toolchain", "oracle", "suite", "mutant", "results")
+
+EXPECTED_RESULTS = {'named-negatives': '5/5-specific-tag-red', 'variant-rows': '27/27-specific-tag-red', 'legal-twins': '27/27-green', 'positive-specs': '2/2-decode-and-storage-rows-fit', 'gate1-training-cases': '2/2-exact-red-with-green-twins', 'quickcheck-properties': '6/6-green-checkCoverage-30-percent-both-directions', 'mutants': '31/31-red', 'registry-subcases': '5/5-Phase-8-owned-discharged', 'storage-fold-totality': 'compile-exhaustive-and-sampled-no-crash', 'acceptance-token': 'spec-composition-proven-storage-geometry', 'live-storage-mutation': 'UNVERIFIED', 'execution-accelerator-provider-root-composition': 'UNVERIFIED', 'runtime': 'UNVERIFIED'}
+
+# Every storage-case surface is decided by the same recorded observation: the run read all
+# 27 variant rows and each one reddened at its specific tag beside a green twin. Pointing
+# them at `variant-rows` records what actually decides them rather than inventing a
+# per-surface metric that measures nothing extra.
+CASE_METRIC = "variant-rows"
+
+SURFACE_MAP = {'closed-storage-budget': 'direct-backing', 'bounded-growable-policy': 'scaling-fingerprint', 'bookkeeper-physical-geometry': 'bookkeeper-recovery', 'minio-physical-geometry': 'minio-parity-healing-orphan', 'complete-failure-scenarios': 'object-count-quota', 'filesystem-presentation': 'filesystem-overhead-rounding', 'backing-allocation-rounding': 'root-ebs-quota', 'uniform-statefulset-claims': 'uniform-claim-per-backing', 'six-arm-object-store-producers': 'object-producer-inventory', 'object-inventory-and-conflict': 'object-identity-conflict', 'registry-storage-peak': 'registry-upload-partials', 'zookeeper-recovery-peak': 'zookeeper-recovery', 'patroni-wal-failover-peak': 'patroni-wal-failover', 'vault-raft-compaction-audit-peak': 'vault-raft-audit', 'storage-migration-highwater': 'storage-migration-highwater', 'schema-migration-highwater': 'schema-migration-highwater', 'registry-backend-migration-highwater': 'registry-backend-migration', 'pulsar-hot-tier-ceiling': 'incluster-cache-emptydir', 'pulsar-durable-total-ceiling': 'pulsar-durable-total', 'native-cache-pool': 'native-cache-pool', 'incluster-cache-nesting': 'incluster-cache-budget', 'provider-node-root-geometry': 'instance-store-root', 'control-plane-storage-transition': 'control-plane-transition', 'backup-medium-fit': 'backup-medium-fit', 'disjoint-capacity-pools': 'disjoint-capacity-pool', 'restore-target-fit': 'restore-target-fit', 'snapshot-bound-storage-scaling': 'scaling-shrink-highwater', 'bounded-training-gate1': 'gate1-training-cases', 'independent-storage-envelope-properties': 'quickcheck-properties', 'storage-fold-compile-totality': 'storage-fold-totality', 'phase8-mutant-battery': 'mutants', 'phase8-validation-locus-ledger': 'registry-subcases', 'storage-geometry': 'acceptance-token,named-negatives,variant-rows,legal-twins,positive-specs', 'execution-accelerator-provider-root-fit': 'execution-accelerator-provider-root-composition', 'binding-feasibility': '', 'render-fidelity': 'live-storage-mutation', 'model-runtime-correspondence': '', 'runtime-fidelity': 'runtime'}
+
+SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
+    surface: ((metric, EXPECTED_RESULTS[metric]) if metric and EXPECTED_RESULTS.get(metric) not in (None, "UNVERIFIED") else None)
+    for surface, metric in SURFACE_MAP.items()
+}
 
 
-def derive_ledger() -> dict[str, Any]:
-    tested = {
-        "closed-storage-budget",
-        "bounded-growable-policy",
-        "bookkeeper-physical-geometry",
-        "minio-physical-geometry",
-        "complete-failure-scenarios",
-        "filesystem-presentation",
-        "backing-allocation-rounding",
-        "uniform-statefulset-claims",
-        "six-arm-object-store-producers",
-        "object-inventory-and-conflict",
-        "registry-storage-peak",
-        "zookeeper-recovery-peak",
-        "patroni-wal-failover-peak",
-        "vault-raft-compaction-audit-peak",
-        "storage-migration-highwater",
-        "schema-migration-highwater",
-        "registry-backend-migration-highwater",
-        "pulsar-hot-tier-ceiling",
-        "pulsar-durable-total-ceiling",
-        "native-cache-pool",
-        "incluster-cache-nesting",
-        "provider-node-root-geometry",
-        "control-plane-storage-transition",
-        "backup-medium-fit",
-        "disjoint-capacity-pools",
-        "restore-target-fit",
-        "bounded-training-gate1",
-        "snapshot-bound-storage-scaling",
-        "independent-storage-envelope-properties",
-        "phase8-mutant-battery",
-        "phase8-validation-locus-ledger",
-        "storage-geometry",
-    }
-    proven = {"storage-fold-compile-totality"}
-    coverage = []
-    for surface in ENUMERATION.read_text(encoding="utf-8").splitlines():
-        if surface in proven:
-            status = "proven-for-the-model"
-        elif surface in tested:
-            status = "tested"
-        else:
-            status = "UNVERIFIED"
-        coverage.append({"surface": surface, "status": status})
-    ledger = {
-        "phase": 8,
-        "gate_command": "python3 tools/phase8_gate.py",
-        "register": "1",
-        "substrate": "none",
-        "date": "2026-08-09",
-        "layers": [
-            {"name": "Decision", "status": "tested"},
-            {"name": "Protocol", "status": "UNVERIFIED"},
-            {"name": "Runtime", "status": "UNVERIFIED"},
-        ],
-        "coverage": coverage,
-    }
-    ledger["ledger_hash"] = canonical_hash(ledger)
-    return ledger
+def main() -> int:
+    gate = gate_common.PhaseGate(
+        phase=8, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES
+    )
+    gate.begin()
+    results = dict.fromkeys(gate.sides, False)
+    rows: dict[str, str] = {}
+    resolved: dict[str, Any] = {}
+    mutant_rows: list[dict[str, str]] = []
+    case_names: set[str] = set()
 
-
-def verify_ledger() -> str:
-    derived = derive_ledger()
-    committed = json.loads(LEDGER.read_text(encoding="utf-8"))
-    if committed != derived:
-        raise GateFailure("committed Phase-8 ledger differs from outcomes:\n" + json.dumps(derived, indent=2))
-    run([sys.executable, str(ROOT / "tools/ledger_lint.py"), str(LEDGER), "--enumeration", str(ENUMERATION)])
-    return str(derived["ledger_hash"])
-
-
-def retain_evidence(suite: str, mutant_log: str, versions: str) -> None:
-    EVIDENCE.mkdir(parents=True, exist_ok=True)
-    (EVIDENCE / "gate.log").write_text(suite, encoding="utf-8")
-    (EVIDENCE / "mutants.log").write_text(mutant_log, encoding="utf-8")
-    (EVIDENCE / "toolchain.txt").write_text(versions, encoding="utf-8")
-    shutil.copyfile(RESULTS, EVIDENCE / "phase-results.tsv")
-    shutil.copyfile(GENERATED_LEDGER, EVIDENCE / "validation-locus-ledger.tsv")
-
-
-def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--derive-ledger", action="store_true")
-    args = parser.parse_args(argv)
-    if args.derive_ledger:
-        print(json.dumps(derive_ledger(), indent=2))
-        return 0
     try:
-        cabal, dhall, versions = verify_pins()
-        storage, mutants = verify_oracles(dhall)
+        resolved = toolchain.resolve(["cabal", "dhall", "ghc"])
+        print("toolchain side — cabal, ghc, and dhall resolved from authored requirements\n")
+        for name in ("cabal", "ghc", "dhall"):
+            record = resolved[name]
+            print(f"  ok    {name:<8} {record['version']:<12} satisfies {record['requirement']}")
+        results["toolchain"] = True
+
+        os.environ["AMOEBIUS_DHALL"] = resolved["dhall"]["path"]
+        os.environ["AMOEBIUS_GHC"] = resolved["ghc"]["path"]
+        globals()["COMPILER"] = resolved["ghc"]["path"]
+        cabal = Path(resolved["cabal"]["path"])
+
+        print("\noracle side — authored oracle shapes and loci\n")
+        primary, mutant_rows = verify_oracles(Path(resolved["dhall"]["path"]))
         verify_totality_sources()
+        case_names = {row["variant"] for row in primary}
+        print(f"  ok    {len(primary)} oracle rows, {len(mutant_rows)} mutants, loci exact")
+        results["oracle"] = True
+
+        print("\nsuite side — the green battery\n")
         suite = run_green_suite(cabal)
-        mutant_log = verify_mutants(cabal, mutants)
-        write_results(storage, mutants)
-        ledger_hash = verify_ledger()
-        retain_evidence(suite, mutant_log, versions)
-        print(suite, end="", flush=True)
-        print(f"phase8-gate: PASS ({ledger_hash})")
-        return 0
+        (gate.run_dir / "suite.log").write_text(suite, encoding="utf-8")
+        print("  ok    acceptance token present")
+        results["suite"] = True
+
+        print("\nmutant side — every seeded mutant red at its own locus\n")
+        mutant_log = verify_mutants(cabal, mutant_rows)
+        (gate.run_dir / "mutants.log").write_text(mutant_log, encoding="utf-8")
+        print(f"  ok    {len(mutant_rows)}/{len(mutant_rows)} mutants reddened")
+        results["mutant"] = True
+
+        write_results(primary, mutant_rows)
+        rows = gate_common.metric_rows(RESULTS)
+        banner_ok = GENERATED_LEDGER.is_file() and GENERATED_LEDGER.read_text(encoding="utf-8").startswith(
+            "# Register-1 only;"
+        )
+        oracle_ok = gate_common.oracle_side(rows, EXPECTED_RESULTS)
+        artifact_ok = gate_common.untracked_side(
+            [RESULTS.parent], (".tsv", ".log"), gate.run_dir,
+            check="emitted-results-untracked",
+            label="the battery's generated output stays generated",
+        )
+        if banner_ok:
+            print(f"  ok    locus-ledger-honesty-banner {gate_common.rel(GENERATED_LEDGER)}")
+        else:
+            print("  FAIL  locus-ledger-honesty-banner the generated locus ledger lacks its Register-1 banner")
+        results["results"] = oracle_ok and artifact_ok and banner_ok
     except (GateFailure, OSError, KeyError, ValueError, json.JSONDecodeError) as problem:
         print(f"phase8-gate: FAIL: {problem}", file=sys.stderr)
-        return 1
+
+    layers = {
+        "Decision": "tested" if rows.get("acceptance-token") == EXPECTED_RESULTS["acceptance-token"] else "UNVERIFIED",
+        "Protocol": "UNVERIFIED",
+        "Runtime": "UNVERIFIED",
+    }
+    case_evidence = {
+        surface: (CASE_METRIC, EXPECTED_RESULTS[CASE_METRIC])
+        for surface, metric in SURFACE_MAP.items()
+        if metric in case_names
+    }
+    return gate.finish(
+        results,
+        implemented={"metrics": set(rows), "checks": set(CHECKS), "cases": case_names},
+        rows=rows,
+        evidence={**SURFACE_EVIDENCE, **case_evidence},
+        layers=layers,
+        toolchain={
+            name: {"version": record["version"], "requirement": record["requirement"]}
+            for name, record in resolved.items()
+            if name != "platform"
+        },
+        dependencies={"battery": "cabal test"},
+        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
+        or [{"name": "phase-8 mutants", "status": "unrun"}],
+        observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
+        extra_status={"generated-artifact-discipline": results["results"]},
+    )
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())

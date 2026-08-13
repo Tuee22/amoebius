@@ -16,17 +16,20 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import gate_common
+import toolchain
+
 
 ROOT = Path(__file__).resolve().parent.parent
-PINS = ROOT / "toolchain/pins.json"
 MUTANTS = ROOT / "tests/mutants/phase14/mutants.tsv"
 LOCUS = ROOT / "tests/oracle/phase14/validation_locus.tsv"
 AST_ORACLE = ROOT / "test/fixtures/phase14/astcheck/astcheck_negatives.expected"
-LEDGER = ROOT / "test/golden/phase_14_ledger.json"
-ENUMERATION = ROOT / "test/enumeration/phase_14_surfaces.txt"
 RESULTS = ROOT / "gen/dsl/phase14/phase-results.tsv"
 GENERATED_LEDGER = ROOT / "gen/dsl/phase14/validation-locus-ledger.tsv"
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_14"
+CONTRACT = "DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md"
+GATE_COMMAND = "python3 tools/phase14_gate.py"
 
 
 class GateFailure(RuntimeError):
@@ -49,6 +52,11 @@ def run(
     require_success: bool = True,
     environment: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
+    # Every cabal invocation carries the resolved compiler. Without it cabal picks whatever
+    # `ghc` the ambient PATH offers, and on a host holding a newer GHC the solver rejects
+    # `base` — a failure with nothing to do with this phase's claim.
+    if COMPILER and command and Path(command[0]).name.startswith("cabal"):
+        command = [command[0], f"--with-compiler={COMPILER}", *command[1:]]
     result = subprocess.run(
         command,
         cwd=ROOT,
@@ -69,7 +77,7 @@ def read_tsv(path: Path) -> list[dict[str, str]]:
 
 
 def verify_pins() -> tuple[Path, Path, str]:
-    pins = json.loads(PINS.read_text(encoding="utf-8"))
+    pins = toolchain.resolve(["cabal", "dhall", "ghc"])
     executables = {name: Path(pins[name]["path"]) for name in ("cabal", "ghc", "dhall")}
     for executable in executables.values():
         if not executable.is_absolute() or not executable.is_file():
@@ -155,18 +163,40 @@ def verify_source_boundaries() -> None:
     for path in (ROOT / "src").rglob("*.hs"):
         if primitive_pattern.search(path.read_text(encoding="utf-8")):
             primitive_hits.append(path)
-    # Phase 24 tightened the original boundary behind the opaque AbsExe tool
-    # ensure. Exec.Tool remains the Phase-14 compatibility facade; only the
-    # Host.Ensure implementation is permitted to reach the process primitive.
-    expected = [ROOT / "src/Amoebius/Host/Ensure.hs"]
-    if primitive_hits != expected:
-        raise GateFailure("subprocess primitive sites drifted: " + ", ".join(str(path.relative_to(ROOT)) for path in primitive_hits))
+    # The declared subprocess sites. This is a whole-tree invariant, so the list has to
+    # name every module in `src/` that legitimately reaches the primitive — not only the
+    # ones Phase 14 itself wrote.
+    #
+    # Phase 24 tightened the original boundary behind the opaque AbsExe tool ensure;
+    # Exec.Tool remains the Phase-14 compatibility facade and only Host.Ensure reaches the
+    # primitive on that path. Amended 2026-08-12 for the three Phase-25 image modules: an
+    # image build, its runtime, and its publish step invoke a builder by construction, and
+    # a whole-tree list that omitted them would report a Phase-25 design decision as a
+    # Phase-14 defect. The check stays exact — any site not named here still fails —
+    # which is the property this phase actually claims
+    # (development_plan_standards.md section M clause 1, amendment).
+    expected = sorted(
+        [
+            ROOT / "src/Amoebius/Host/Ensure.hs",
+            ROOT / "src/Amoebius/Image/Build.hs",
+            ROOT / "src/Amoebius/Image/BuildRuntime.hs",
+            ROOT / "src/Amoebius/Image/Publish.hs",
+        ]
+    )
+    if sorted(primitive_hits) != expected:
+        unexpected = sorted(set(primitive_hits) - set(expected))
+        absent = sorted(set(expected) - set(primitive_hits))
+        raise GateFailure(
+            "subprocess primitive sites drifted: "
+            + f"unexpected={[str(p.relative_to(ROOT)) for p in unexpected]} "
+            + f"absent={[str(p.relative_to(ROOT)) for p in absent]}"
+        )
 
 
 def compile_link_seal(cabal: Path) -> str:
-    legal = run([str(cabal), "exec", "--offline", "ghc", "--", "-fno-code", "-XGHC2024", "-XOverloadedStrings", "-isrc", "test/fixtures/phase14/compilefail/checked_ctor_legal.hs"])
+    legal = run([str(cabal), "exec", "ghc", "--", "-fno-code", "-XGHC2024", "-XOverloadedStrings", "-isrc", "test/fixtures/phase14/compilefail/checked_ctor_legal.hs"])
     illegal = run(
-        [str(cabal), "exec", "--offline", "ghc", "--", "-fno-code", "-XGHC2024", "-XOverloadedStrings", "-isrc", "test/fixtures/phase14/compilefail/checked_ctor_illegal.hs"],
+        [str(cabal), "exec", "ghc", "--", "-fno-code", "-XGHC2024", "-XOverloadedStrings", "-isrc", "test/fixtures/phase14/compilefail/checked_ctor_illegal.hs"],
         require_success=False,
     )
     if illegal.returncode == 0 or "Illegal term-level use of the type constructor ‘CheckedExtensionSource’" not in illegal.stdout:
@@ -260,81 +290,170 @@ def write_results(mutants: list[dict[str, str]], observer: str) -> None:
     RESULTS.write_text("metric\tresult\n" + "".join(f"{key}\t{value}\n" for key, value in metrics.items()), encoding="utf-8")
 
 
-def canonical_hash(value: dict[str, Any]) -> str:
-    payload = dict(value)
-    payload.pop("ledger_hash", None)
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+COMPILER = ""
+
+# The two observers this contract sanctions for proving the render path touched no network.
+# Which one a host supports is a property of the host, not of amoebius, so the gate asserts
+# membership and records the normalized result rather than pinning one of them.
+SANCTIONED_OBSERVERS = ("unshare-network-namespace", "strace-socket-EPERM")
+
+CHECKS = {
+    "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
+    "toolchain-satisfies-requirements": "the resolved cabal/ghc/dhall satisfy the authored ranges",
+    "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
+    "step-constructor-opaque": "the raw Step constructor is not exported",
+    "dry-run-import-closure": "the dry-run surface reaches no process, network, or credential module",
+    "subprocess-primitive-sites": "the subprocess primitive appears only at its declared sites",
+    "partial-token-scan": "no partial or unsafe token survives in the kernel modules",
+    "independent-step-set-oracle-complete": "the independent step-set oracle names both fixtures with labels",
+    "fake-tools-executable": "every fake boundary tool is present and executable",
+}
+
+SIDES = ("toolchain", "oracle", "source", "seal", "suite", "mutant", "results")
+
+EXPECTED_RESULTS = {
+    "chain-fixtures": "2/2-plan-and-descent-byte-locked",
+    "render-actions": "0-with-1/1-canary-observed",
+    "network-observer": "sanctioned-observer",
+    "boundary-tools": "3/3-invoked-helm-0",
+    "boundary-transcripts": "4/4-argv-and-bytes-exact",
+    "astcheck": "2/2-positive-6/6-exact-negative",
+    "compile-link-seal": "1/1-illegal-construction-rejected",
+    "mutants": "7/7-red",
+    "live-tool-fidelity": "UNVERIFIED",
+    "live-apiserver-apply": "UNVERIFIED",
+    "runtime-correspondence": "UNVERIFIED",
+}
+
+SURFACE_MAP = {'opaque-step-constructor': 'step-constructor-opaque', 'counted-step-run': '', 'step-nfdata-excludes-action': '', 'whole-provisioned-plan-config': '', 'pure-chain-builder': '', 'identity-disjoint-step-projections': '', 'render-all-object-union': '', 'four-frame-activation-projection': '', 'pure-next-frame-after': '', 'pure-fold-lift': '', 'canonical-render-chain-plan': '', 'dry-run-effect-import-closure': 'dry-run-import-closure', 'zero-step-run-render': '', 'step-run-canary': 'render-actions', 'two-cfg-plan-goldens': 'minimal_cfg,multi_cfg', 'two-descent-goldens': 'chain-fixtures', 'independent-step-set-oracle': 'independent-step-set-oracle-complete', 'chain-mutant-battery': 'm1_cfg_drop_service,m2_descent_inframe', 'single-subprocess-seam': 'subprocess-primitive-sites', 'absolute-tool-path-seal': 'fake-tools-executable', 'real-binary-fake-boundary': 'boundary_corpus', 'exact-argv-transcripts': 'boundary-transcripts', 'exact-applied-bytes': '', 'hostile-path-canary': '', 'helm-zero-invocation-control': 'boundary-tools', 'boundary-mutant-battery': 'mB1_argv,mB2_byte,mB3_path_resolve', 'closed-sanctioned-api': 'sanctioned_api', 'no-raw-io-effect-arm': 'astcheck', 'six-arm-ast-violation-union': 'negative_import,negative_raw_io,negative_foreign,negative_unsafe,negative_template_haskell,negative_orphan', 'exact-ast-reason-span-corpus': 'positive_basic,positive_manifest', 'opaque-checked-extension-source': 'checked_ctor_illegal', 'checked-source-compile-fail-seal': 'compile-link-seal', 'astcheck-mutant-battery': 'astcheck-allow-rawio,astcheck-export-ctor', 'phase14-validation-locus-ledger': 'mutants', 'phase14-compile-totality': 'partial-token-scan', 'network-isolated-render-observer': 'network-observer', 'live-tool-fidelity': 'live-tool-fidelity', 'live-apiserver-apply': 'live-apiserver-apply', 'runtime-model-correspondence': 'runtime-correspondence', 'generated-artifact-discipline': 'emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle'}
+
+SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
+    surface: ((ids, EXPECTED_RESULTS[ids]) if ids in EXPECTED_RESULTS and EXPECTED_RESULTS[ids] != "UNVERIFIED" else None)
+    for surface, ids in SURFACE_MAP.items()
+}
 
 
-def derive_ledger() -> dict[str, Any]:
-    proven = {"pure-chain-builder", "canonical-render-chain-plan", "single-subprocess-seam", "absolute-tool-path-seal", "no-raw-io-effect-arm", "opaque-checked-extension-source", "phase14-compile-totality"}
-    unverified = {"live-tool-fidelity", "live-apiserver-apply", "runtime-model-correspondence"}
-    coverage = []
-    for surface in ENUMERATION.read_text(encoding="utf-8").splitlines():
-        status = "proven-for-the-model" if surface in proven else "UNVERIFIED" if surface in unverified else "tested"
-        coverage.append({"surface": surface, "status": status})
-    ledger = {
-        "phase": 14,
-        "gate_command": "python3 tools/phase14_gate.py",
-        "register": "1/2",
-        "substrate": "none",
-        "date": "2026-08-09",
-        "layers": [
-            {"name": "Decision", "status": "tested"},
-            {"name": "Protocol", "status": "tested"},
-            {"name": "Runtime", "status": "UNVERIFIED"},
-        ],
-        "coverage": coverage,
-    }
-    ledger["ledger_hash"] = canonical_hash(ledger)
-    return ledger
+def enumerated_items() -> set[str]:
+    names: set[str] = set()
+    for relative in ("tests/oracle/phase14/validation_locus.tsv", "tests/mutants/phase14/mutants.tsv"):
+        for line in (ROOT / relative).read_text(encoding="utf-8").splitlines()[1:]:
+            if line.strip():
+                names.add(line.split("\t")[0].strip())
+    return names
 
 
-def verify_ledger() -> str:
-    derived = derive_ledger()
-    committed = json.loads(LEDGER.read_text(encoding="utf-8"))
-    if committed != derived:
-        raise GateFailure("committed Phase-14 ledger differs from outcomes:\n" + json.dumps(derived, indent=2))
-    run([sys.executable, str(ROOT / "tools/ledger_lint.py"), str(LEDGER), "--enumeration", str(ENUMERATION)])
-    return str(derived["ledger_hash"])
+def main() -> int:
+    gate = gate_common.PhaseGate(
+        phase=14, contract=CONTRACT, command=GATE_COMMAND, register="1/2", substrate="none", sides=SIDES
+    )
+    gate.begin()
+    results = dict.fromkeys(gate.sides, False)
+    rows: dict[str, str] = {}
+    resolved: dict[str, Any] = {}
+    mutant_rows: list[dict[str, str]] = []
+    item_names: set[str] = set()
+    observer = "unrun"
 
-
-def retain_evidence(suites: str, mutants: str, compile_log: str, versions: str) -> None:
-    EVIDENCE.mkdir(parents=True, exist_ok=True)
-    (EVIDENCE / "gate.log").write_text(suites, encoding="utf-8")
-    (EVIDENCE / "mutants.log").write_text(mutants, encoding="utf-8")
-    (EVIDENCE / "compile-fail.log").write_text(compile_log, encoding="utf-8")
-    (EVIDENCE / "toolchain.txt").write_text(versions, encoding="utf-8")
-    shutil.copyfile(RESULTS, EVIDENCE / "phase-results.tsv")
-    shutil.copyfile(GENERATED_LEDGER, EVIDENCE / "validation-locus-ledger.tsv")
-
-
-def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--derive-ledger", action="store_true")
-    args = parser.parse_args(argv)
-    if args.derive_ledger:
-        print(json.dumps(derive_ledger(), indent=2))
-        return 0
     try:
-        cabal, dhall, versions = verify_pins()
-        mutants = verify_oracles(dhall)
+        resolved = toolchain.resolve(["cabal", "dhall", "ghc"])
+        print("toolchain side — cabal, ghc, and dhall resolved from authored requirements\n")
+        for name in ("cabal", "ghc", "dhall"):
+            record = resolved[name]
+            print(f"  ok    {name:<8} {record['version']:<12} satisfies {record['requirement']}")
+        results["toolchain"] = True
+        os.environ["AMOEBIUS_DHALL"] = resolved["dhall"]["path"]
+        os.environ["AMOEBIUS_GHC"] = resolved["ghc"]["path"]
+        globals()["COMPILER"] = resolved["ghc"]["path"]
+        cabal = Path(resolved["cabal"]["path"])
+
+        print("\noracle side — Part-A corpus, Gate-3 reasons, fake tools, and the locus ledger\n")
+        mutant_rows = verify_oracles(Path(resolved["dhall"]["path"]))
+        item_names = enumerated_items()
+        print(f"  ok    {len(item_names)} enumerated items, {len(mutant_rows)} mutants")
+        print("  ok    independent-step-set-oracle-complete both fixtures named with labels")
+        print("  ok    fake-tools-executable    every fake boundary tool present and executable")
+        results["oracle"] = True
+
+        print("\nsource side — the kernel's export and import boundaries\n")
         verify_source_boundaries()
+        print("  ok    step-constructor-opaque      the raw Step constructor is not exported")
+        print("  ok    dry-run-import-closure       no process, network, or credential module on the dry-run surface")
+        print("  ok    subprocess-primitive-sites   the subprocess primitive appears only at its declared sites")
+        print("  ok    partial-token-scan           no partial or unsafe token in the kernel modules")
+        results["source"] = True
+
+        print("\nseal side — the checked-source compile-fail seal\n")
         compile_log = compile_link_seal(cabal)
+        (gate.run_dir / "compile-fail.log").write_text(compile_log, encoding="utf-8")
+        print("  ok    the illegal construction is rejected at its authored locus")
+        results["seal"] = True
+
+        print("\nsuite side — Part A, Part B, and the network-isolated render observer\n")
         suites, observer = run_green_suites(cabal)
-        mutant_log = verify_mutants(cabal, mutants)
-        write_results(mutants, observer)
-        ledger_hash = verify_ledger()
-        retain_evidence(suites, mutant_log, compile_log, versions)
-        print(suites, end="", flush=True)
-        print(f"phase14-network-observer: {observer}")
-        print(f"phase14-gate: PASS ({ledger_hash})")
-        return 0
+        (gate.run_dir / "suites.log").write_text(suites, encoding="utf-8")
+        if observer not in SANCTIONED_OBSERVERS:
+            print(f"  FAIL  network observer {observer!r} is not one this contract sanctions")
+        else:
+            print(f"  ok    network-isolated render proven by {observer}")
+            results["suite"] = True
+
+        print("\nmutant side — every seeded mutant red at its own locus\n")
+        mutant_log = verify_mutants(cabal, mutant_rows)
+        (gate.run_dir / "mutants.log").write_text(mutant_log, encoding="utf-8")
+        print(f"  ok    {len(mutant_rows)}/{len(mutant_rows)} mutants reddened")
+        results["mutant"] = True
+
+        write_results(mutant_rows, observer)
+        rows = gate_common.metric_rows(RESULTS)
+        # The observer is normalized to the membership the contract actually admits, so a
+        # host that reaches the same conclusion by the other sanctioned route still passes.
+        compared = dict(rows)
+        if compared.get("network-observer") in SANCTIONED_OBSERVERS:
+            compared["network-observer"] = "sanctioned-observer"
+        oracle_ok = gate_common.oracle_side(compared, EXPECTED_RESULTS)
+        artifact_ok = gate_common.untracked_side(
+            [RESULTS.parent], (".tsv", ".log"), gate.run_dir,
+            check="emitted-results-untracked",
+            label="the battery's generated output stays generated",
+        )
+        rows = compared
+        results["results"] = oracle_ok and artifact_ok
     except (GateFailure, OSError, KeyError, ValueError, json.JSONDecodeError) as problem:
         print(f"phase14-gate: FAIL: {problem}", file=sys.stderr)
-        return 1
+
+    item_evidence = {
+        surface: ("mutants", EXPECTED_RESULTS["mutants"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and set(ids.split(",")) & item_names
+    }
+    check_evidence = {
+        surface: ("mutants", EXPECTED_RESULTS["mutants"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and set(ids.split(",")) & set(CHECKS) and results.get("source") and results.get("oracle")
+    }
+    layers = {
+        "Decision": "tested" if rows.get("chain-fixtures") == EXPECTED_RESULTS["chain-fixtures"] else "UNVERIFIED",
+        "Protocol": "tested" if rows.get("boundary-transcripts") == EXPECTED_RESULTS["boundary-transcripts"] else "UNVERIFIED",
+        "Runtime": "UNVERIFIED",
+    }
+    return gate.finish(
+        results,
+        implemented={"metrics": set(rows), "checks": set(CHECKS), "items": item_names},
+        rows=rows,
+        evidence={**SURFACE_EVIDENCE, **item_evidence, **check_evidence},
+        layers=layers,
+        toolchain={
+            name: {"version": record["version"], "requirement": record["requirement"]}
+            for name, record in resolved.items()
+            if name != "platform"
+        },
+        dependencies={"chain-spec": "cabal test", "boundary-spec": "cabal test", "astcheck-spec": "cabal test"},
+        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-14 mutants", "status": "unrun"}],
+        observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
+        extra_status={"generated-artifact-discipline": results["results"]},
+    )
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())

@@ -449,6 +449,11 @@ flag phase48-one-byte-short-mutant
   default: False
   manual: True
 
+flag phase24-one-shot-kind-guard-mutant
+  description: Treat a registered kind cluster as converged, ignoring node and kubeconfig divergence
+  default: False
+  manual: True
+
 library
   exposed-modules:
       Amoebius.ToolchainPin
@@ -569,8 +574,8 @@ library dsl-core
       Amoebius.Ui.Release.PlanPair
       Amoebius.Ui.Release.Projection
       Amoebius.Ui.Server.Dispatch
-      Amoebius.Ui.Server.Main
       Amoebius.Ui.Server.RequestContext
+      Amoebius.Ui.Server.Security
       Amoebius.Ui.Server.ScopedAuthority
       Amoebius.Ui.Server.SecurityHeaders
       Amoebius.Ui.Server.WebSocket
@@ -882,19 +887,41 @@ library dsl-core
     cpp-options: -DPHASE48_PRUNE_NOOP_MUTANT
   if flag(phase48-one-byte-short-mutant)
     cpp-options: -DPHASE48_ONE_BYTE_SHORT_MUTANT
+  if flag(phase24-one-shot-kind-guard-mutant)
+    cpp-options: -DPHASE24_ONE_SHOT_KIND_GUARD_MUTANT
 
 executable amoebius
   main-is: Main.hs
+  -- Amoebius.Ui.Server.Main is the serve-ui entry point: it is reached only through
+  -- app/Main.hs's subcommand table and belongs to the executable, not to the shared
+  -- decision core. Keeping it in lib:dsl-core made every phase that links the core depend
+  -- on the Phase-22 UI-server boundary, which is the forward dependency
+  -- development_plan_standards.md section E forbids.
+  --
+  -- It lives under app/ rather than src/ because hs-source-dirs is a search path, not a
+  -- module filter: listing src here made GHC recompile every module app/Main.hs imports
+  -- from source into this component instead of linking lib:dsl-core, against this
+  -- component's much shorter build-depends. That is why exe:amoebius failed on
+  -- Amoebius.Vault.SecretRef -- a module this executable never mentions -- and it would
+  -- have put two separately compiled copies of the shared core in one program.
+  other-modules:
+      Amoebius.Ui.Server.Main
   hs-source-dirs:
       app
   build-depends:
       base >=4.21 && <4.22,
       amoebius:formal-model,
       amoebius:dsl-core,
+      aeson ==2.2.5.0,
       base64-bytestring ==1.2.1.0,
-      bytestring >=0.12 && <0.13
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      crypton ==1.0.6,
+      memory ==0.18.0,
+      network ==3.1.4.0,
+      text >=2.1 && <2.2
   default-language: GHC2024
-  ghc-options: -Wall -Wcompat -Werror=missing-methods
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -threaded
 
 executable amoebius-singleton
   main-is: Main.hs

@@ -19,7 +19,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md
 **Generated sections**: none
 
 </details>
@@ -30,7 +30,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 21.1: Generic `ClientPlan` interpreter and browser boundary gate ⏸️](#sprint-211-generic-clientplan-interpreter-and-browser-boundary-gate-)
+- [Sprint 21.1: Generic `ClientPlan` interpreter and browser boundary gate ✅](#sprint-211-generic-clientplan-interpreter-and-browser-boundary-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -38,9 +38,38 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:05f7d7c56b159a83…`
+(1944 non-ignored files) and published verified external attestation
+`sha256:9494bf7e55160959786c7028baa5d9e0dad2ecb7227e541a03164cd08e6ed3e8`.
+
+**Observed progress — 2026-08-13:** **Policy-conformant.** The browser-boundary result is unchanged and
+re-run: two per-app plans drive one generic bundle in real headless Chrome, five interactions join the
+generated event set exactly, four differential trace steps agree with the independent Haskell semantics, two
+DOM snapshots, three accessibility rows, five keyboard/focus rows, and four transport rows match their pins, a
+fresh post-ready nonce carries through, the built-artifact scanner and browser CSP canary hold, the OS
+observer sees only loopback, and all nine mutants redden. Evidence and the ledger move into
+`gen/runs/phase_21/<run-id>/`, and 66 surfaces join two-way to 84 run-time enumerated items.
+
+**`reference_traces.tsv` is deleted, which is what this phase owed.** The table held exactly what
+`ReferenceClientPlan.referenceTraces` returns from the authored interactions, so the assertion that compared
+them proved only that a file agreed with the function that generated it. The suite now derives that side at
+run time, the comparison that matters — browser against independent semantics — is unchanged, and a
+`derived-trace-table-untracked` check refuses any tracked fixture whose header names the trace columns.
+
+**The route join stopped agreeing with every corpus.** `authoredRouteRows` ignored its argument and returned
+two constant rows, so the generated/authored route join passed for any interaction table at all. It now
+derives the authored side from the same independent semantics, and a route added to a plan has to appear in an
+interaction before the join can cover it.
+
+**The browser driver resolves instead of being typed in.** The gate carried the literal `1.62.1` in two
+places and refused anything else. `playwright` is now an entry in `toolchain/requirements.json` with a
+`>=1.55 <2` range, resolved per run like every other tool.
+
+**Three enumeration names were collapsed into the observations that decide them.** `home-route`,
+`workflow-route`, and `choose-tenant-route` named the route column of one four-step differential trace;
+`external-request-body-observation` named the body the same-origin action request already carries;
+`atomic-state-transition` named what the sequential-state-writes mutant proves. One observation reported under
+three surfaces reads as three independent results.
 
 **Invalidated historical record:**
 
@@ -49,7 +78,7 @@ independent Haskell transition oracle. Five interactions, four differential trac
 three accessibility rows, five keyboard/focus rows, four transport rows, a fresh nonce, browser-enforced CSP,
 the built-artifact scanner, the OS network observer, and all nine mutants pass. Live identity, server
 authorization, provider isolation, release rollout, and HA behavior remain UNVERIFIED. See the
-[Phase-21 ledger](ledgers/phase_21_ui_browser_interpreter.md).
+Phase-21 ledger.
 
 ## Phase Summary
 
@@ -94,7 +123,7 @@ or renderer output.
   every event instruction; cancellation; one fixed named external-link navigation; and one request for each
   public effect class.
 - **Pinned oracles:** `test/fixtures/ui_browser/plans/`, `interactions.tsv`, `expected_dom/`,
-  `expected_accessibility.tsv`, `expected_keyboard_focus.tsv`, `reference_traces.tsv`,
+  `expected_accessibility.tsv`, `expected_keyboard_focus.tsv`,
   `expected_transport.tsv`, `test/fixtures/ui_security/production_headers.tsv`, and
   `artifact_allowlist.tsv` own the inputs and
   outcomes. Every generated event/route/link/port identity must join one authored interaction and expectation;
@@ -153,9 +182,9 @@ authority-paired own/foreign enforcement is owned by the UI-server boundary and 
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 21.1: Generic `ClientPlan` interpreter and browser boundary gate ⏸️
+## Sprint 21.1: Generic `ClientPlan` interpreter and browser boundary gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `ui-runtime/src/Amoebius/Ui/{Interpreter,Components}.purs`, `ui-runtime/src/Main.{purs,js}`,
 `test/ui/{Phase21UiBrowserInterpreterSpec,ReferenceClientPlan}.hs`,
 `test/ui/browser/phase21_browser.mjs`, `test/ui/scan-ui-artifact`, and `tools/phase21_gate.py`

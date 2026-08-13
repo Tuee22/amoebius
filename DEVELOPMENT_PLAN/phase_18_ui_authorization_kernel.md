@@ -18,7 +18,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/ledgers/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +29,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 18.1: Sealed action registry and authorized-action transition ⏸️](#sprint-181-sealed-action-registry-and-authorized-action-transition-)
+- [Sprint 18.1: Sealed action registry and authorized-action transition ✅](#sprint-181-sealed-action-registry-and-authorized-action-transition-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,16 +37,33 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:5397884a3bd5b8ad…`
+(1943 non-ignored files) and published verified external attestation
+`sha256:409c13f0c41aec877a4f3f72c3509fd1c17322523920e1deff0abac0b1cca88a`.
+
+**Observed progress — 2026-08-13:** **Policy-conformant.** The authorization result is unchanged and re-run:
+five registry rows normalize exactly, six matrix rows agree with a reference evaluator that does not import
+the module under test, four parity diagnostics and four authority-epoch refusals hold at their pinned tags
+with empty effect traces, nine generated classes clear their 5% floor, and both seeded mutants redden.
+Evidence and the ledger move into `gen/runs/phase_18/<run-id>/`, and 40 surfaces join two-way to 57 run-time
+enumerated items with every surface carrying at least one id.
+
+**The closed sums are now checked as sums, not implied by their rows.** `ActionEffect` and `Permission` each
+have a check that reads the declaration, compares the arms against the contract's list, and requires the
+`Bounded`/`Enum` deriving that makes the union enumerably closed. Five pinned registry rows say the five arms
+work; they say nothing about a sixth arm being added beside them.
+
+**The two mutants keep their own surfaces.** The pinned row proves the refusal happens and the mutant proves
+the check that refuses has teeth, so `default-allow-mutant` and `visibility-authorization-mutant` join to the
+mutants rather than riding inside `default-deny` and `hidden-action-invocable`. A reader can then see which of
+the two halves went missing.
 
 **Invalidated historical record:**
 
 ✅ Done. The sealed five-action registry, independent authorization matrix, exact parity and stale-epoch errors,
 coverage floors, empty denial traces, and both authority mutants pass. This proves the closed authorization
 relation in process; it makes no claim that a live edge, identity provider, or UI-server deployment enforces
-the relation. See the [Phase-18 ledger](ledgers/phase_18_ui_authorization_kernel.md).
+the relation. See the Phase-18 ledger.
 
 ## Phase Summary
 
@@ -62,10 +79,9 @@ register, or substrate requirement.
 **Dependency:** Phase 17 — scope-indexed request contexts, handles, audiences, and flow witnesses.
 **Substrate:** none — the gate runs hermetically with credential variables scrubbed and network unavailable.
 **Register:** 1 — pure/golden.
-**Gate:** `cabal test ui-authorization-spec` passes the Phase-0-pinned action/access matrices,
-current-authority replay cases, coverage floors, and both seeded mutants in
-[Gate integrity](#gate-integrity). The next phase opens only from that gate ledger; live enforcement remains
-UNVERIFIED until its owning Register-3 phases.
+**Gate:** `python3 tools/phase18_gate.py` passes the Phase-0-pinned action/access matrices, current-authority
+replay cases, coverage floors, isolated execution, and both seeded mutants in
+[Gate integrity](#gate-integrity). Live enforcement remains UNVERIFIED until its owning Register-3 phases.
 
 ## Gate integrity
 
@@ -115,9 +131,9 @@ HTTP routing, handler implementation correctness, or provider-side isolation.
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 18.1: Sealed action registry and authorized-action transition ⏸️
+## Sprint 18.1: Sealed action registry and authorized-action transition ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Ui/Security/Authorization.hs`,
 `test/ui/AuthorizationSpec.hs`, `test/ui/AuthorizationReference.hs`, and `tools/phase18_gate.py`
 **Blocked by**: reopened numeric predecessor gates.

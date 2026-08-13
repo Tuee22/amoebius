@@ -1,11 +1,4 @@
-{ modules =
-  [ "Amoebius.Kernel.Step"
-  , "Amoebius.Manifest.K8sObject"
-  ]
+{ modules = [ "Amoebius.Kernel.Step", "Amoebius.Manifest.K8sObject" ]
 , effects =
-  [ "ApplyManifest"
-  , "BuildImage"
-  , "PushImage"
-  , "UpdateInfrastructure"
-  ]
+  [ "ApplyManifest", "BuildImage", "PushImage", "UpdateInfrastructure" ]
 }

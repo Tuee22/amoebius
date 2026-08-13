@@ -43,7 +43,13 @@ materialized with Incus, Lima, and WSL2 respectively.
 
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+gate against its source snapshot and publish external evidence without changing an authored path.
+
+**Observed artifact migration — 2026-08-11:** `frozen_sources.txt` inventories sibling source,
+`expected_hashes.tsv` reproduces its file hashes, and `sibling_golden.cbor` captures sibling-program output.
+The gate also duplicates the hashes as constants. These are generated observations, not authored expectations.
+The owning sprint must resolve and execute the reviewed sibling boundary per run and retain its identity and
+reference output only in external evidence.
 
 **Invalidated historical record:**
 
@@ -58,7 +64,7 @@ cross-substrate equality.
 This phase owns one seam: `Infernix.Adapter.Core` maps an infernix workflow and artifact contract onto
 already-closed amoebius capabilities. The package compiles the untouched sibling
 `Infernix.Topic.Metadata` module and uses its compacted view for command-outcome deduplication; the remaining
-sibling sources are frozen inputs. Store operations use the Phase-37 three-tier content-addressed store;
+sibling source boundary is reviewed and resolved dynamically. Store operations use the Phase-37 three-tier content-addressed store;
 commands and events use typed native CBOR over Pulsar; credentials remain Vault `SecretRef` names; named
 engines resolve through the Phase-48 jit-build cache; CPU decode uses a deterministic pinned micro-model.
 Linkage of the full sibling inference-engine core and production TinyLlama execution remain UNVERIFIED.
@@ -86,8 +92,8 @@ accept it with the Phase-49 aggregate gate. Split if the work changes sibling in
 platform capability, or creates a server/UI runtime.
 **Substrate:** linux-cpu
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/phase49_gate.py --reuse-fresh-live` verifies Phase-0
-custody, sibling linkage and frozen hashes, constructor foreclosure, pure contracts, fresh Register-3 evidence,
+**Gate:** `python3 tools/phase49_gate.py --reuse-fresh-live` verifies reviewed fixture provenance, dynamic
+sibling linkage and run-local before/after identity, constructor foreclosure, pure contracts, Register-3 evidence,
 external cleanup, an independent Haskell evidence reader, all four compiled mutants, baseline restoration,
 documentation, and the ledger. `cabal test infernix-core-artifact-lift-live-gate` remains an independent
 evidence reader rather than the sole acceptance command. The representative fixtures, external observers,
@@ -95,15 +101,13 @@ independent oracle, paired cases, and mutants are delegated to [Gate integrity](
 
 ## Gate integrity
 
-- **Phase-0 representative set.** Before implementation, Phase 0 commits
+- **Representative-set candidates.** After Phase-0 and owning-phase provenance review, the gate may retain
   `test/dhall/phase_49/infernix_core_artifact_lift.dhall`,
   `test/dhall/phase_49/cpu_budget_one_short.dhall`,
   `test/fixtures/phase_49/request.cbor`,
-  `test/fixtures/phase_49/sibling_golden.cbor`,
-  `test/fixtures/phase_49/expected_hashes.tsv`,
   `test/fixtures/phase_49/command_identity_matrix.tsv`,
-  `test/fixtures/phase_49/artifact_scope_readiness_matrix.tsv`, and
-  `test/fixtures/phase_49/frozen_sources.txt`. The fixed request uses the closed catalog identity
+  `test/fixtures/phase_49/artifact_scope_readiness_matrix.tsv`. Existing same-commit candidates remain
+  regression fixtures until independently reviewed or replaced. The fixed request uses the closed catalog identity
   `catalog/tinyllama-1.1b-cpu@<sha256>` and seed `0x0000000000000001`.
 - **Fresh authenticated challenge.** After Pulsar, MinIO, Vault, the cache owner, and workflow workers are
   Ready, the elevated harness obtains one-use least-privilege service credentials for tenant A and tenant B
@@ -112,8 +116,9 @@ independent oracle, paired cases, and mutants are delegated to [Gate integrity](
   earlier run cannot pass.
 - **Positive artifact flow.** Tenant A stages the pinned model as blob → canonical manifest → ready pointer,
   last, and obtains `ReadyArtifactHandle TenantA`. Two distinct run ids under one unchanged `experimentHash`
-  begin without output keys, execute independently, and produce byte-identical outputs that also match the
-  Phase-0 sibling golden. A second invocation reuses the named engine cache without rematerialization. An
+  begin without output keys, execute independently, and produce byte-identical outputs that also match a
+  fresh independently executed sibling reference under the run bundle. A second invocation reuses the named
+  engine cache without rematerialization. An
   exact resend of the workflow-start command returns the original handle/outcome and causes no second workflow,
   worker execution, pointer advance, or result object; the same command id with a changed input returns the
   pinned idempotency conflict with the same zero-effect rule.
@@ -137,9 +142,10 @@ independent oracle, paired cases, and mutants are delegated to [Gate integrity](
   `test/mutants/phase_49/mut-49-use-wallclock-seed.patch`, plus
   `test/mutants/phase_49/mut-49-regenerate-command-id.patch`. The unchanged gate must turn red on the exact
   scope, readiness, cold-recompute, and command-redelivery rows respectively.
-- **Independent oracle and reversibility.** The sibling golden is recorded from the frozen sibling binary;
-  expected hashes and the scope/readiness matrix are hand-authored independently of the adapter. Switching
-  legacy ↔ amoebius adapters must leave every pre-lift core source in `frozen_sources.txt` byte-unchanged.
+- **Independent oracle and reversibility.** The sibling expected behavior is recomputed by the independently
+  built sibling reference during the run; its output stays under `gen/runs/phase_49/`. The reviewed
+  scope/readiness matrix supplies the behavior expectation. The gate records a run-local sibling-source
+  inventory before and after both adapter paths and requires equality, without a tracked inventory or hash.
 - **Teardown and honesty.** An external pre/post inventory must enumerate and clear test-owned Kubernetes,
   Pulsar, and run-prefixed MinIO ephemera; named content-addressed fixtures are the only retained class. The
   gate tests one linux-cpu corpus and scope pair, not general noninterference or cross-substrate bit equality.
@@ -191,7 +197,7 @@ independent oracle, paired cases, and mutants are delegated to [Gate integrity](
 `test/live/Phase49InfernixArtifactLift.hs`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the one live gate compares two
-externally observed cold computations with the sibling golden and hand-authored identity/scope/readiness
+externally observed cold computations with a fresh sibling reference and reviewed identity/scope/readiness
 oracles, establishes that both denials have zero effect, and requires all four committed mutants to fail.
 **Docs to update**: `documents/engineering/lift_and_compose_doctrine.md`,
 `documents/engineering/app_vs_deployment_doctrine.md`,
@@ -207,31 +213,34 @@ already-closed store, transport, secret, engine, workflow, determinism, and reso
 
 ### Deliverables
 
-- One `Infernix.Adapter.Core` facade and narrow effect adapters, with the frozen sibling core unchanged.
+- One `Infernix.Adapter.Core` facade and narrow effect adapters, with the resolved sibling core unchanged.
 - Private-constructor staged/ready artifact states indexed by authenticated tenant scope and provenance.
 - Native CBOR commands/events preserving one scope-qualified command/work id, Vault secret names, named cached
   engines, deterministic CPU decode, and ready-last content-store publication behind that facade.
 - A finite `CpuInferenceWorkBudget` merged into inherited workflow/cache/store resource owners.
-- Phase-0 fixtures, four named mutants, and a Register-3 evidence ledger with external-source digests.
+- Independently reviewed fixtures, four named mutants, a generated Register-3 ledger, and run-local sibling
+  source identity observations.
 
 ### Validation
 
 1. Run `python3 tools/phase49_gate.py --reuse-fresh-live` on linux-cpu with
    networking limited to the declared live dependencies and harness observers.
 2. Require ready-last staging, two independently executed cold results, byte equality with each other and the
-   sibling golden, and warm reuse of the named engine.
+   run-local sibling reference, and warm reuse of the named engine.
 3. Resend the exact workflow-start command and require the original outcome with no duplicate effect; reuse its
    command id with a changed input and require the pinned pre-effect idempotency conflict.
 4. Replay the ready reference under tenant B and the pre-commit reference under tenant A; require their exact
    denials and zero forbidden Pulsar, MinIO, cache, or worker effect.
-5. Require the URL-engine and one-short resource fixtures to refuse before effects, and verify the frozen core
-   remains byte-unchanged across legacy/amoebius adapter selection.
+5. Require the URL-engine and one-short resource fixtures to refuse before effects. Generate the sibling-source
+   inventory before and after both adapter selections under the run bundle and require it to remain unchanged.
 6. Apply each named mutant and require the unchanged command to fail before a leak-free evidence ledger can be
    emitted.
 
 ### Remaining Work
 
-No work remains inside the scoped micro-decoder deliverable. Production
+Remove `frozen_sources.txt`, `expected_hashes.tsv`, `sibling_golden.cbor`, and the gate's duplicated hash
+constants. Generate before/after source identity and reference output per run, and independently review or
+replace the remaining same-commit fixtures before revalidation. Production
 TinyLlama-weights inference, linkage of the full sibling inference-engine core, direct Pulsar-command-to-worker
 causality, worker-direct MinIO artifact fetch with a worker-used Vault credential, general noninterference, and
 cross-substrate bit equality remain explicit UNVERIFIED follow-on surfaces.

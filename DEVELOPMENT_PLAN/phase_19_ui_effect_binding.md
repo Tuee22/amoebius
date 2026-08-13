@@ -18,7 +18,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/ledgers/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +29,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 19.1: Seal the effect-handler-capability relation ⏸️](#sprint-191-seal-the-effect-handler-capability-relation-)
+- [Sprint 19.1: Seal the effect-handler-capability relation ✅](#sprint-191-seal-the-effect-handler-capability-relation-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,9 +37,31 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate from a clean committed tree and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:2fb7ae466ee82194…`
+(1944 non-ignored files) and published verified external attestation
+`sha256:470c58ccbca52b5e580058c7e086a5b22d5af0bc506ee58d14e397529903587d`.
+
+**Observed progress — 2026-08-13:** **Policy-conformant.** The effect-binding result is unchanged and re-run:
+seven ports exact-join their handler, capability, scope, idempotency, and audit tuples against a relation that
+imports neither production binder, two named links resolve to fixed HTTPS targets, all eight pinned bind
+errors, eight link negatives, and three bounded-input negatives refuse at their own tag with an empty trace,
+thirteen generated classes clear their 5% floor, and all seven seeded mutants redden. Evidence and the ledger
+move into `gen/runs/phase_19/<run-id>/`, and 55 surfaces join two-way to 85 run-time enumerated items.
+
+**The four closed sums are checked as sums.** `PortEffect`, `CapabilityName`, `ScopeRequirement`, and
+`RetryPolicy` each have a check that reads the declaration, compares the arms against the contract's list, and
+requires the `Bounded`/`Enum` deriving that makes the union enumerably closed. Seven pinned port rows say the
+seven arms work; they say nothing about an eighth arm being added beside them.
+
+**The two authored key sets are now cross-checked.** `handlers.tsv` and `capabilities.tsv` are separate files
+that must describe one system. The gate compares their handler keys both ways and rejects a duplicate, so a
+handler that exists in one and not the other fails instead of quietly binding to nothing — a defect no row
+count can see.
+
+**The response codec keeps one surface, not two.** `UiBindError` carries a single `ContractMismatch PortId`
+for the request/response pair, so the only thing separating the response side is the mutant that swaps it.
+That mutant is the surface's evidence; a second surface naming the same mutant would report one observation
+as two independent results.
 
 **Invalidated historical record:**
 
@@ -47,7 +69,7 @@ gate from a clean committed tree and publish external evidence without changing 
 fixed-HTTPS catalog, all pinned and bounded-input failures are exact with empty traces, coverage floors pass,
 and seven mutants turn red. This pure seal does not establish that a live handler or provider enforces its
 declared authorization, tenancy, idempotency, or storage behavior. See the
-[Phase-19 ledger](ledgers/phase_19_ui_effect_binding.md).
+Phase-19 ledger.
 
 ## Phase Summary
 
@@ -68,10 +90,9 @@ interpreter, a live provider, a second register, or a substrate.
 **Dependency:** Phase 18 — the sealed action registry, scoped authority transition, and stale-authority refusal.
 **Substrate:** none — no network, credential, provider process, browser, or cluster is contacted.
 **Register:** 1 — pure/golden.
-**Gate:** `cabal test ui-effect-binding-spec` passes the Phase-0-pinned port/handler/capability corpus,
-independent binding relation, exact-key checks, negative tags, coverage floors, and every seeded mutant in
-[Gate integrity](#gate-integrity). Phase 20 does not open unless the ledger records Register 1 green and
-handler/provider runtime enforcement UNVERIFIED.
+**Gate:** `python3 tools/phase19_gate.py` passes the Phase-0-pinned port/handler/capability corpus,
+independent binding relation, exact-key checks, negative tags, coverage floors, isolated execution, and every
+seeded mutant in [Gate integrity](#gate-integrity). Handler and provider runtime enforcement stays UNVERIFIED.
 
 ## Gate integrity
 
@@ -127,9 +148,9 @@ prove a handler's implementation, current provider state, live authorization, or
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 19.1: Seal the effect-handler-capability relation ⏸️
+## Sprint 19.1: Seal the effect-handler-capability relation ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`,
 `test/ui/Phase19UiEffectBindingSpec.hs`, `test/ui/EffectBindingReference.hs`, and `tools/phase19_gate.py`
 **Blocked by**: reopened numeric predecessor gates.

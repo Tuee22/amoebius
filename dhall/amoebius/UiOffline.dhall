@@ -19,8 +19,4 @@ let OfflineSource =
 
 let Continuity = < OnlineOnly | Offline : OfflineSource >
 
-in  { QueueContract = QueueContract
-    , QueuedPort = QueuedPort
-    , OfflineSource = OfflineSource
-    , Continuity = Continuity
-    }
+in  { QueueContract, QueuedPort, OfflineSource, Continuity }
