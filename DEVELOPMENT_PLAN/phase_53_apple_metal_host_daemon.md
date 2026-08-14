@@ -147,18 +147,9 @@ touched by the gate, and the windows-CUDA host worker is named only as the struc
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/content-store peer over
-host-only NodePorts — one `InForceSpec` in Register 3 brings up the apple-substrate cluster on Lima, exposes
-the sole Phase-37 content-mutation gateway and Pulsar (not raw MinIO) on loopback NodePorts, builds the native worker **headless on-host via the fixed Metal bridge (no VM)**, starts the daemon as a managed subprocess, dispatches a Metal inference job over Pulsar with **no mTLS**, lands its output in the content-addressed MinIO store by content address, and tears the worker and
-cluster down leak-free. Before any of those effects, the gate must construct the physical-host → VM/node +
-host-worker + cache placement/carve witness, including the VM's pinned 4-vCPU/8-GiB carve and the current
-oracle's presentation/allocation-derived **40-GiB raw virtual-disk result**, every pod's
-CPU/memory/ephemeral-storage envelope, the worker's CPU/non-Metal-runtime-memory and identity-complete
-`MetalOwnerDemand`, every structurally derived unified-memory coexistence epoch, and the
-bounded cache/durable-storage pools; the live inventory must meet or exceed every declared supply. The run
-emits a proven/tested/assumed ledger recording that host-only reachability was
-*tested* (reachable from `127.0.0.1`, unreachable from the LAN) and that no mTLS or bespoke RPC was introduced
-on channel 2, with Apple-Metal physics marked *assumed* (sibling evidence, not an amoebius measurement).
+**Gate:** one `InForceSpec` in Register 3 runs an Apple-Silicon host daemon's Metal ML workload as a cluster
+Pulsar/content-store peer over host-only NodePorts, then tears the worker and cluster down leak-free. Its
+apparatus and the provision witness it presupposes are delegated to [Gate integrity](#gate-integrity).
 
 **Gate-integrity clauses ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate passes only when all of the following hold; each is authored under
 the [§M gate-integrity standard](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
@@ -206,6 +197,23 @@ and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation]
   own explicit three-part residue check rather than deferring to it.
 
 ## Gate integrity
+
+**The run the gate command performs.** One `InForceSpec` brings up the apple-substrate cluster on Lima,
+exposes the sole Phase-37 content-mutation gateway and Pulsar (not raw MinIO) on loopback NodePorts, builds
+the native worker **headless on-host via the fixed Metal bridge (no VM)**, starts the daemon as a managed
+subprocess, dispatches a Metal inference job over Pulsar with **no mTLS**, lands its output in the
+content-addressed MinIO store by content address, and tears the worker and cluster down leak-free.
+
+**What must hold before any of those effects.** The gate constructs the physical-host → VM/node + host-worker
++ cache placement/carve witness: the VM's pinned 4-vCPU/8-GiB carve and the current oracle's
+presentation/allocation-derived **40-GiB raw virtual-disk result**, every pod's CPU/memory/ephemeral-storage
+envelope, the worker's CPU/non-Metal-runtime-memory and identity-complete `MetalOwnerDemand`, every
+structurally derived unified-memory coexistence epoch, and the bounded cache/durable-storage pools. The live
+inventory must meet or exceed every declared supply.
+
+**What the run's ledger must record.** Host-only reachability is *tested* — reachable from `127.0.0.1`,
+unreachable from the LAN — and no mTLS or bespoke RPC was introduced on channel 2, with Apple-Metal physics
+marked *assumed*: sibling evidence, not an amoebius measurement.
 
 Under [§M.1 oracle provenance](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
 same-commit fixtures remain regression fixtures until independently reviewed or replaced. The reference side
@@ -551,17 +559,10 @@ The portable and Linux loopback boundary is tested; Lima NodePort realization an
 **Implementation**: `src/Amoebius/HostWorker/MetalBridge.hs` (fixed ObjC/C bridge
 install + probe + runtime MSL dispatch), `src/Amoebius/HostWorker/AppleMetalBuild.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the fixed Objective-C/C Metal bridge dylib is source-built on the host with `/usr/bin/clang`
-(absolute path, no env/`PATH`), `dlopen`'d, and verified by its probe symbol; generated MSL compiles at
-runtime via `MTLDevice.makeLibrary(source:options:)` and dispatches on the host GPU, and the dispatch
-surfaces a real `MTLDevice` artifact — the compiled `MTLLibrary` handle and its pipeline reflection — not
-merely a returned buffer. The dispatched kernel's outputs for reviewed inputs A/B and run-generated challenge
-C byte-match values freshly computed by `test/golden/phase_53/metal_job_ref.py` under the run bundle; A and
-B differ, so an input-independent or constant worker is red. The CPU-reference-bypass mutant returns correct
-bytes but lacks the independently observed Metal dispatch and is red. **No VM is ever started, no
-SwiftPM/`swift build` runs on a cache miss, and no login-keychain unlock is required**; the source-metadata
-cache artifact is content-addressed and yields bit-identical output when recomputed on a cache-bypassed
-second run in a distinct content-addressed namespace (an independent recompute, not a store hit).
+**Independent Validation**: the fixed Objective-C/C Metal bridge is source-built on the host with
+`/usr/bin/clang`, `dlopen`'d, and probed; generated MSL then compiles and dispatches at runtime with an
+observed `MTLDevice`/`MTLLibrary` artifact behind the numbers, and no VM, SwiftPM, or keychain unlock is
+involved. The `### Validation` list below states each check and its mutants.
 **Docs to update**: `documents/engineering/apple_metal_headless_builds.md`,
 `documents/engineering/substrate_doctrine.md`
 
@@ -689,18 +690,10 @@ The lifecycle and finite policy are tested; macOS process/Metal observers and cr
 `src/Amoebius/HostWorker/Auth.hs`, `src/Amoebius/HostComms/Illegal.hs`, `test/live/AppleMetalPeerSpec.hs`
 (the authored harness and scoped evidence reader)
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the
-worker subscribes to its work topic over the native Pulsar TCP binary protocol (no WebSockets), does the
-work, and writes outputs through the Phase-37 mutation gateway into the content-addressed MinIO store — all
-over `127.0.0.1:<nodeport>` with **no mTLS and no bespoke binary↔daemon RPC**; client auth resolves through
-Vault by secret-name, never via a host environment variable or `PATH`; **each of four** wild-exposure
-negatives — (1) host-origin NodePort typed `LoadBalancer`, (2) an Envoy/HTTPRoute route on it, (3) any wild
-listener referencing the port, (4) the daemon publishing its own wild ingress — is a committed `.dhall` that
-is **a one-field mutation of the committed green host-comms spec** (identical except the single wild field,
-so that field is provably the rejection cause), is registered in the Phase-6 illegal-state corpus with its
-validation-locus tag, and **fails `dhall type` with the specific structured error naming the violated exclusion** (asserted against the pinned expected error string, not merely "fails"); the gate `.dhall` runs
-the full Apple-Metal peer workflow end-to-end and tears down leak-free (per the three-part residue check in
-the Gate), emitting a proven/tested/assumed ledger artifact.
+**Independent Validation**: the worker consumes its work topic over the native Pulsar protocol and writes
+through the Phase-37 mutation gateway on `127.0.0.1:<nodeport>` with no mTLS and no bespoke RPC, its Vault
+credentials resolved by name; each of the four one-field wild-exposure negatives fails `dhall type` at its
+pinned error. The `### Validation` list below states each check and its fixtures.
 **Docs to update**:
 `documents/engineering/host_cluster_comms_doctrine.md`, `DEVELOPMENT_PLAN/README.md`,
 `DEVELOPMENT_PLAN/substrates.md`

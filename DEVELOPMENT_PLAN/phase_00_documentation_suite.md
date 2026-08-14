@@ -45,9 +45,41 @@ and remaining implementation are stated below.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-13 after the negative-corpus reopening. All nine sides of
-`python3 tools/doc_lint_verify.py` pass and the run publishes a verified external attestation bound to its
-source-snapshot digest.
+🔄 Active — reopened 2026-08-14 by the final-layout amendment. The prior seal stands as the record of the run
+it describes; what it does not cover is the obligation this phase has just acquired, so the gate is widened
+and rerun rather than treated as already satisfied.
+
+**Why it reopened.** [§U](development_plan_standards.md#u-the-final-repository-layout) makes the target
+repository tree normative and gives it to this phase, alongside the doctrine suite, the two ignore contracts,
+and the artifact-policy machinery this phase already owns. The tree in
+[`repository_layout_doctrine.md` §2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure)
+previously enumerated thirty-one roots and declared itself exhaustive, but nothing compared it to the tree, so
+its rule that a new root needs an amendment first had never decided anything. [§2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure) is now the **target final
+layout** — fourteen roots, each justified by what its contents are — and this phase owns the check that the
+worktree matches it.
+
+**What the reopened gate must add.** Three checks, and one repair to an instrument that would otherwise fail
+to observe them. The checks: every tracked path lies in the target tree; every ignore rule names a path the
+tree contains; no authored path outside `DEVELOPMENT_PLAN/` carries a phase ordinal
+([§U](development_plan_standards.md#u-the-final-repository-layout) clause 3). Each attributes its findings to
+the owning phase through `tools/migration_allowlist.tsv`, on the shrink-only terms
+[§S clause 5](development_plan_standards.md#s-universal-artifact-hygiene-gate) already sets — without that,
+this phase could not close until the last one did, which inverts the numeric order the plan is built on. The
+repair: `AUTHORED_ROOTS` currently skips a listed root that is not a directory instead of reporting it, so a
+rename silently removes that tree from the write guard; it must fail closed, with a seeded negative, before
+any repository-wide rename runs.
+
+**What is already closed, 2026-08-14.** The doctrine half landed with the amendment: [§2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure) states the target
+tree, [§2.1](../documents/engineering/repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package) states the criterion for when a unit warrants its own build package, [§2.2](../documents/engineering/repository_layout_doctrine.md#22-present-day-roots-and-their-required-destination) assigns every present-day
+root a destination and an owner, and [§6](../documents/engineering/repository_layout_doctrine.md#6-gitignore-contract)/[§7](../documents/engineering/repository_layout_doctrine.md#7-dockerignore-contract) are now exhaustive in both directions and reconcile exactly with
+`.gitignore` and `.dockerignore` — closing a hole that had let thirty-one patterns exist in the two files that
+no doctrine declared. Every divergence the amendment exposed is recorded in
+[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#layout-and-naming-divergence-snapshot--2026-08-14)
+with an owner and a closure condition.
+
+**The prior seal — 2026-08-13.** All nine sides of `python3 tools/doc_lint_verify.py` passed and the run
+published a verified external attestation bound to its source-snapshot digest. That result is not retracted;
+it is superseded as *closure* because the gate it describes did not include the target-tree postcondition.
 
 **Reopened and closed on 2026-08-13.** Commit `0526152` first tracked this phase's own machinery —
 `artifact_policy.py`, `artifact_policy_selftest.py`, `attestation.py`, `gate_common.py`,
@@ -135,9 +167,9 @@ runtime surface, or an acceptance command other than the two-sided documentation
 **Register:** — (no register: the documentation-lint gate validates text and the link graph, not amoebius behaviour, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** against its source snapshot, `python3 tools/doc_lint_verify.py` passes the documentation, semantic
-artifact-provenance, ignore/context, authored-root-write, source-closure, dynamic-resolution, reachable-history,
-external-attestation, terminology, and seeded-mutant checks without creating an unignored or tracked generated
-file.
+artifact-provenance, target-tree, ignore/context, authored-root-write, source-closure, dynamic-resolution,
+reachable-history, external-attestation, terminology, and seeded-mutant checks without creating an unignored
+or tracked generated file.
 
 ## Gate integrity
 
@@ -485,36 +517,18 @@ None.
 **Status**: Done — the two-sided run is green against the source snapshot; the negatives materialize under
 `gen/test-corpora/doc_lint/` and no verifier input is an ignored worktree file
 **Implementation**: `documents/engineering/chaos_failover_doctrine.md`,
-`testing_doctrine.md`, `test_derivation_analysis.md` (the analysis record behind the derivation boundary),
-`formal_model_doctrine.md`, `gateway_migration_model_doctrine.md`, `tla_modelling_assumptions.md`
-(deprecated stub), `tools/doc_lint.py`, `tools/doc_lint_verify.py` (the two-sided gate runner),
-`tools/doc_lint_corpus/_positive/` and `_build.py` (the authored conforming seeds and mutation definitions;
-materialized negatives move to `gen/test-corpora/`), and
-`test/golden/phase_{16..23,36,38,40,50,52,55..58}_*` plus the correspondingly named
-`test/mutants/phase_{16..23,36,38,40,50,52,55..58}_*` (UI regression fixtures and seeded mutants requiring
-the provenance review below), `test/formal/mutants/emitTLA-mut-0{1..4}` and the `ToyModel`
-hand-derived reachable-distinct-state table and expected `INVARIANT`/`PROPERTY` name set (the
-convention-independent Phase-2 formal-model oracles, pinned here before
-`Interpret.hs`/`EmitTLA.hs` exist — [`phase_02`](phase_02_formal_model_kernel.md); the byte-exact
-`test/formal/golden/ToyModel.{tla,cfg}.golden` is **not** pinned here — under
-[`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-a byte-exact golden is pinned no earlier than the sprint fixing its rendering convention, which is
-Phase 2's), and
-`tools/ledger_lint.py` (standalone scripts; they do not depend on the amoebius
-binary, which first appears in the pre-cluster implementation band, Phase 2+. Both are **Python**, matching
-the pre-binary `pb` bootstrap coordinator ([README.md](README.md#toolchain)) and the recorded decision against bash logic
-([`dsl_doctrine.md §2`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic));
-a shell script is not admitted)
+`testing_doctrine.md`, `test_derivation_analysis.md`, `formal_model_doctrine.md`,
+`gateway_migration_model_doctrine.md`, `tla_modelling_assumptions.md` (deprecated stub),
+`tools/doc_lint.py`, `tools/doc_lint_verify.py` (the two-sided gate runner),
+`tools/doc_lint_corpus/_positive/` and `_build.py`,
+`test/golden/phase_{16..23,36,38,40,50,52,55..58}_*` with the matching
+`test/mutants/phase_{16..23,36,38,40,50,52,55..58}_*`, `test/formal/mutants/emitTLA-mut-0{1..4}`, the
+`ToyModel` hand-derived reachable-distinct-state table, the expected `INVARIANT`/`PROPERTY` name set, and
+`tools/ledger_lint.py`.
 **Blocked by**: Sprint 0.1, Sprint 0.2, Sprint 0.3, Sprint 0.4
-**Independent Validation**: run the lint **two-sided** over the source snapshot — clean across `documents/`
-and `DEVELOPMENT_PLAN/` tree, **and** non-zero on every materialized case generated from the authored positive
-seeds and mutation definitions (a bad header (a); a
-near-duplicate paragraph (d); a dangling anchor and a bare `§N` prose reference (b); a one-way `Referenced
-by` (c); a drifted status marker (e); a gate line missing its committed mutant/oracle (f); and — for catalog
-integrity (g), one per sub-check — a catalog entry missing its `**Validation-locus:**`, non-contiguous
-catalog numbering, a catalog index bullet with a dangling anchor, and a catalog entry with no
-technique-matrix row; and a doctrine doc missing its `DEVELOPMENT_PLAN/README.md` back-link (h)). The
-malformed-ledger negative lives in `ledger_lint`'s own corpus, not here.
+**Independent Validation**: run the lint **two-sided** over the source snapshot — clean across the governed
+`documents/` and `DEVELOPMENT_PLAN/` trees, **and** non-zero on every case materialized from the authored
+positive seeds and mutation definitions. Validation 2 below names the mutation each check is proven red by.
 **Docs to update**: the five
 verification docs above, `DEVELOPMENT_PLAN/README.md` (record the gate command),
 `documents/engineering/README.md`
@@ -535,14 +549,24 @@ checker that *is* the Phase 0 gate.
 ### Deliverables
 
 - `chaos_failover_doctrine.md` (the Extract→Model→Inject moves, the proven/tested/assumed ledger, the Second
-  Axis of async cross-cluster failover) and `testing_doctrine.md`.
+  Axis of async cross-cluster failover) and `testing_doctrine.md`, together with
+  `test_derivation_analysis.md`, the analysis record behind the derivation boundary.
 - `formal_model_doctrine.md` (one reifiable `Model`, two total renderings, single-source correspondence) and
   `gateway_migration_model_doctrine.md` (the one obligation, both `Planned` and `Failover` branches, reduced by
   a decode-time structural-fit fold).
 - `tla_modelling_assumptions.md`: a `Deprecated` redirect stub pointing at the two docs above.
-- The UI-gate fixture set named by Phases 16–23, 36, 38, 40, 50, 52, and 55–58: each candidate expectation is
+- The UI-gate fixture set named by Phases 16–23, 36, 38, 40, 50, 52, and 55–58 — the
+  `test/golden/phase_*` regression fixtures and the correspondingly named `test/mutants/phase_*` seeded
+  mutants, which are what the provenance review below runs on. Each candidate expectation is
   classified by history and independent review. Same-commit additions remain regression fixtures until
   reviewed or replaced. A generated run-local registry maps retained source to its owner and reject locus.
+- The convention-independent Phase-2 formal-model oracles, pinned here before `Interpret.hs`/`EmitTLA.hs`
+  exist ([`phase_02`](phase_02_formal_model_kernel.md)): `test/formal/mutants/emitTLA-mut-0{1..4}`, the
+  `ToyModel` hand-derived reachable-distinct-state table, and the expected `INVARIANT`/`PROPERTY` name set.
+  The byte-exact `test/formal/golden/ToyModel.{tla,cfg}.golden` is **not** pinned here: under
+  [`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
+  a byte-exact golden is pinned no earlier than the sprint fixing its rendering convention, which is
+  Phase 2's.
 - `tools/doc_lint.py`: a pure text/link checker (no amoebius-binary dependency), run **two-sided** — it must
   pass clean on the suite **and** fail on every case generated from the authored lint seeds and mutation
   definitions. It checks,
@@ -596,6 +620,11 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
   every `coverage` row's `surface` resolving against the run's regenerated enumeration (an unresolvable
   `surface` fails the lint) — with its own committed malformed-ledger negatives, including a `coverage` row
   naming a non-existent surface.
+- Both checkers are standalone scripts that do not depend on the amoebius binary, which first appears in the
+  pre-cluster implementation band from Phase 2 onward, and both are **Python** — matching the pre-binary `pb`
+  bootstrap coordinator ([README.md](README.md#toolchain)) and the recorded decision against bash logic
+  ([`dsl_doctrine.md §2`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
+  A shell script is not admitted.
 
 ### Validation
 
@@ -629,16 +658,11 @@ phases rather than here, recorded in
 ## Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts ✅
 
 **Status**: Done — every hard readability diagnostic is cleared; `p3`, `p5`, and `p6` stay advisory
-**Implementation**: the document-shape, orientation-block, term-routing, sentence-budget,
-section-name and family-split rules appended to `documents/documentation_standards.md`, plus its rewritten
-[diagram section](../documents/documentation_standards.md#7-diagrams) and its labelled
-[motivation shape](../documents/documentation_standards.md#9-motivating-a-design-choice); the plan-document
-shape, gate diagram and invariant-ownership rules appended to
-`DEVELOPMENT_PLAN/development_plan_standards.md`; the retitled
-`documents/engineering/diagram_conventions.md`; the new `documents/glossary.md` and
-`documents/reading_order.md`; the `resource_capacity_*` and `chaos_failover_*` families; and checks
-`o1`–`o5` `q1`–`q5` and `p1`–`p4` in `tools/doc_lint.py`; the authored lint seeds, mutation definitions, and
-expected diagnostics remain source while their negative copies move beneath `gen/test-corpora/`.
+**Implementation**: `documents/documentation_standards.md`,
+`DEVELOPMENT_PLAN/development_plan_standards.md`, the retitled
+`documents/engineering/diagram_conventions.md`, the new `documents/glossary.md` and
+`documents/reading_order.md`, the `resource_capacity_*` and `chaos_failover_*` families, and checks
+`o1`–`o5`, `q1`–`q5`, and `p1`–`p4` in `tools/doc_lint.py`.
 **Blocked by**: Sprint 0.5, after Sprint 0.1 supplied the header and link mechanics these rules extend.
 **Independent Validation**: the two-sided lint. Each of the thirteen checks has an authored mutation and
 expected diagnostic; its generated case turns the gate red naming that check and no other.
@@ -661,7 +685,13 @@ rather than conventional.
 - The family-split rule of [§15](../documents/documentation_standards.md#15-splitting-a-document-into-a-family), instantiated twice.
 - The two diagram registers, replacing the repealed syntactic bans in [§7](../documents/documentation_standards.md#7-diagrams).
 - The labelled four-part motivation shape of [§9](../documents/documentation_standards.md#9-motivating-a-design-choice), which is what makes it reviewable.
-- Checks `o1`–`o5`, `q1`–`q5` and `p1`–`p4`, each with a seeded negative.
+- The plan-suite half of the same discipline, appended to `DEVELOPMENT_PLAN/development_plan_standards.md`:
+  the plan-document shape of [§P](development_plan_standards.md#p-plan-document-shape), the two sanctioned
+  phase diagrams of [§Q](development_plan_standards.md#q-the-two-phase-diagrams), and the invariant-ownership
+  rule of [§R](development_plan_standards.md#r-where-the-cross-cutting-invariants-live).
+- Checks `o1`–`o5`, `q1`–`q5` and `p1`–`p4`, each with a seeded negative. The authored lint seeds, mutation
+  definitions, and expected diagnostics for them remain source; only their materialized negative copies move
+  beneath `gen/test-corpora/`.
 - The **`p3` sentence backlog**, carried openly rather than closed. `p3` is registered in the check table and
   reported by every run, but sits in `doc_lint.py`'s `ADVISORY` set until the corpus meets the rule. The
   2026-08-11 committed-baseline run reports 118 `p3` diagnostics. Clearing them is editorial work requiring

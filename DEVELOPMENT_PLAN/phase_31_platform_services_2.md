@@ -128,21 +128,10 @@ created with Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)); a real bring-up on a real cluster, emitting the honesty ledger
 that names Register 3 and marks the runtime layer *tested*, not proved.
 
-**Gate:** on the Phase-30 backbone cluster the remaining standard services — the Percona operator, the
-per-consumer Patroni Postgres clusters with pgAdmin, Prometheus/Grafana, and Redis/Sentinel — **come up in their HA-capable topologies** (each its HA
-topology even at `replicas=1`; Postgres a Patroni-via-Percona cluster, never a bare Pod) **from generated manifests + baked binaries** (no public-registry pull), each Patroni cluster carrying the **mandated synchronous configuration** (`synchronous_mode: on`, `synchronous_mode_strict: on`, bounded
-`maximum_lag_on_failover`) asserted against a committed oracle, and every execution unit/volume carrying the
-exact complete provision derived by its `ProvisionedServiceSpec` — including Prometheus's exact
-budget-derived compute, evaluation/retention/WAL configuration, and TSDB claim/backing/capacity, with the
-one-byte-under and compaction/recovery high-water witnesses passing; **and the whole standard stack comes up in the [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) derived readiness-DAG order** — the Percona operator before any Postgres
-consumer, Vault initialized-and-unsealed before secret-dependent startup — each edge a condition observed by
-the reconciler's wait-for-ready, the bring-up order asserted a pure function of the declared edges from an
-**external-observer bring-up trace** (not a self-report), with a hardcoded sequential list foreclosed by a
-committed mutant and the async-default Patroni configuration foreclosed by a committed mutant.
-Redis is externally probed through TLS/ACL credentials; its one-primary/two-replica/three-Sentinel topology,
-no-persistence configuration, finite memory/client/output-buffer limits, and failover-ready observation match
-the committed oracle. A public Redis image, PVC/AOF/RDB arm, unbounded key/buffer value, or Redis-as-receipt
-mutant turns the gate red for its specific reason.
+**Gate:** `python3 tools/phase31_gate.py` brings the whole standard stack up on the Phase-30 backbone cluster
+in the [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
+derived readiness-DAG order, every service in its HA-capable topology. The apparatus is
+[Gate integrity](#gate-integrity).
 
 ```mermaid
 flowchart LR
@@ -176,6 +165,20 @@ The apparatus phase 31's gate closes over, in the slot
 [§D](development_plan_standards.md#d-the-per-phase-document-skeleton) reserves for it. Every clause it
 discharges is owned by
 [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
+
+**What the acceptance run must show.** The remaining standard services are the Percona operator, the
+per-consumer Patroni Postgres clusters with pgAdmin, Prometheus/Grafana, and Redis/Sentinel. Each comes up in
+its HA-capable topology — the same shape even at `replicas=1`, Postgres a Patroni-via-Percona cluster and
+never a bare Pod — from generated manifests and baked binaries, with no public-registry pull. Each Patroni
+cluster carries the mandated synchronous configuration asserted against a committed oracle, and every
+execution unit and volume carries the exact complete provision its `ProvisionedServiceSpec` derives.
+Prometheus is included down to its budget-derived compute, evaluation/retention/WAL configuration, and TSDB
+claim, backing, and capacity, with the one-byte-under and compaction/recovery high-water witnesses passing.
+The whole stack then comes up in derived readiness-DAG order — the Percona operator before any Postgres
+consumer, Vault initialized and unsealed before secret-dependent startup — each edge a condition the
+reconciler's wait-for-ready observes rather than a duration it waits out. Redis is externally probed through
+TLS/ACL credentials, and its one-primary, two-replica, three-Sentinel topology, no-persistence configuration,
+finite memory/client/output-buffer limits, and failover-ready observation match the committed oracle.
 
 - **Derived-DAG order (§M.2 committed mutant, §M.3 independent oracle, §M.4 coverage floor, §M.5 external-observer trace).** The
   bring-up order is asserted a pure function of the *declared* dependency edges by a Register-1 property
@@ -239,8 +242,10 @@ discharges is owned by
 - **Redis boundary and failover.** An independent client uses Vault-issued TLS/ACL credentials, writes only a
   TTL-bound challenge key, observes it from a replica, and forces a Sentinel primary failover. Kubernetes
   volume inventory and Redis configuration prove no PVC/AOF/RDB persistence; provider/Pulsar observers prove
-  the exercise creates no durable command receipt. `mutant/redis-pvc`, `mutant/redis-unbounded-buffer`, and
-  `mutant/redis-receipt-authority` turn the gate red.
+  the exercise creates no durable command receipt. `mutant/redis-pvc`, `mutant/redis-public-image`,
+  `mutant/redis-unbounded-buffer`, and `mutant/redis-receipt-authority` each turn the gate red for its own
+  specific reason — a persistence arm, a public image, an unbounded key or buffer value, and Redis standing in
+  as a receipt authority.
 
 **Representative service set (§M.7).** The gate's "remaining standard services" are exactly: the Percona
 operator, the per-consumer Patroni Postgres clusters with pgAdmin for the named consumer set of Sprint 31.1,
@@ -321,22 +326,11 @@ Prometheus + Grafana, and Redis primary/replicas/Sentinel — no more, no fewer.
 `src/Amoebius/Platform/Observability.hs`, `tools/phase31_services_live.py`,
 `test/live/Phase31ServicesLiveSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the in-scope database-consumer set is named concretely as **exactly `{Grafana}`** — Grafana configured with an external Postgres (Patroni-via-Percona) backing datastore for its
-config/dashboard store (Keycloak is Phase 32; the `distribution` registry takes no database,
-[§3](../documents/engineering/platform_services_doctrine.md#3-the-registry--the-single-image-source)); the
-cluster-wide Percona operator reconciles that consumer's `PerconaPGCluster` — an HA Patroni cluster even at
-one replica ("HA" meaning byte-identical modulo replica count to the multi-member Patroni topology), never a
-bare `postgres` Pod, paired with its own pgAdmin; each cluster carries the **mandated synchronous config**
-(`synchronous_mode: on`, `synchronous_mode_strict: on`, bounded `maximum_lag_on_failover`) asserted
-byte-equal to the committed `test/fixtures/phase31/patroni-sync-config.golden` oracle, with the committed
-`mutant/patroni-async-default` failing on the specific reason that `synchronous_mode_strict` is not `on`;
-the operator is up before any Postgres consumer; the consuming Grafana workload is observed to **use** the
-cluster end-to-end — it authenticates with the credential resolved from its Vault `SecretRef` and a SQL row
-it writes is read back from its own Patroni cluster (not merely that an unattached `PerconaPGCluster`
-reconciles); Prometheus scrapes platform workloads, the derived rules/dashboards are generated rather than
-hand-authored, and its exact retained-state projection plus one-byte-under/compaction boundary checks pass;
-every app/init/sidecar container and volume exactly matches its complete `ProvisionedServiceSpec`
-projection.
+**Independent Validation**: the in-scope database-consumer set is exactly `{Grafana}`, on an external
+Patroni-via-Percona datastore for its config/dashboard store. The numbered validation list below discharges
+the operator-before-consumer order, the end-to-end consumer use, the byte-equal Patroni synchronous oracle
+and its mutant, the Prometheus derivation and boundary checks, and the exact `ProvisionedServiceSpec`
+projection on every container and volume.
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/monitoring_doctrine.md`,
 `documents/engineering/chaos_failover_doctrine.md`
@@ -412,9 +406,13 @@ dashboards.
 ### Validation
 1. Assert the Percona operator is Ready before any `PerconaPGCluster`, then that the named consumer set
    `{Grafana}`'s cluster reconciles as an HA Patroni cluster (byte-identical modulo replica count to the
-   multi-member topology, never a bare Pod) paired with pgAdmin, and that the consumer uses it end-to-end:
-   Grafana authenticates with the credential from its Vault `SecretRef` and a SQL row written through Grafana's
-   datastore is read back from its own Patroni cluster.
+   multi-member topology, never a bare `postgres` Pod) paired with its own pgAdmin. The set is exactly
+   `{Grafana}` because Keycloak's own store arrives with the [Phase 32](phase_32_keycloak_ingress.md) edge and
+   the `distribution` registry takes no database at all
+   ([§3](../documents/engineering/platform_services_doctrine.md#3-the-registry--the-single-image-source)).
+   Then assert that the consumer uses its cluster end-to-end — Grafana authenticates with the credential from
+   its Vault `SecretRef` and a SQL row written through Grafana's datastore is read back from its own Patroni
+   cluster — rather than merely that an unattached `PerconaPGCluster` reconciles.
 2. Assert each rendered Patroni config is byte-equal to the committed `patroni-sync-config.golden` oracle
    (`synchronous_mode: on`, `synchronous_mode_strict: on`, bounded `maximum_lag_on_failover`), and that the
    committed `mutant/patroni-async-default` fails the synchronous-mode invariant with the specific reason that
@@ -465,13 +463,10 @@ reconciliation remains Phase 33, both explicitly UNVERIFIED.
 **Implementation**: `src/Amoebius/Platform/Redis.hs`, `tools/phase31_services_live.py`,
 `test/live/Phase31ServicesLiveSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: generated manifests stand up one Redis primary, at least two replicas,
-and three Sentinel voters from the Phase-25 image; an independent TLS/ACL client observes replication and a
-forced Sentinel failover, while Kubernetes volume/config readback proves no PVC/AOF/RDB/backup, all
-key/client/output-buffer/memory/rate bounds exact-match the provision witness, and provider/Pulsar receipt
-observers prove Redis contains no authoritative outcome; `mutant/redis-pvc`,
-`mutant/redis-unbounded-buffer`, `mutant/redis-public-image`, and `mutant/redis-receipt-authority` turn the
-gate red.
+**Independent Validation**: generated manifests stand up one Redis primary, at least two replicas, and three
+Sentinel voters from the Phase-25 image, and an independent TLS/ACL client observes replication and a forced
+Sentinel failover. The numbered validation list below states the volume, configuration, bound, and
+receipt-authority readbacks and the four committed mutants each must turn red.
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`,
 `documents/engineering/ui_realtime_coordination_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`,
@@ -488,14 +483,16 @@ storage, durability, or a new DSL capability.
 - Closed key-class policy with per-class TTL/cleanup, serialized-size/cardinality/rate bounds, Redis
   `maxmemory`, client/output-buffer limits, and a bounded failover/reconnect envelope.
 - No PVC, AOF, RDB snapshot, backup, public Redis image, or application-visible endpoint.
-- Independent failover/config/volume/receipt oracles and the four committed mutants named above.
+- Independent failover/config/volume/receipt oracles and the four committed mutants `mutant/redis-pvc`,
+  `mutant/redis-unbounded-buffer`, `mutant/redis-public-image`, and `mutant/redis-receipt-authority`.
 
 ### Validation
 1. Connect with the least-authority Vault-issued TLS/ACL identity, write one TTL-bound challenge key, observe
    it on a replica, force primary loss, and require Sentinel promotion plus bounded reconnect.
 2. Read live args/config, volume inventory, NetworkPolicy, image digest, memory/client buffers, key TTL, and
-   topology; exact-match the independent oracle and provision witness. Public image/persistence/unbounded
-   mutants fail before readiness.
+   topology; assert no PVC, AOF, RDB, or backup is present and that every key, client, output-buffer, memory,
+   and rate bound exact-matches the independent oracle and the provision witness. Public
+   image/persistence/unbounded mutants fail before readiness.
 3. Run an application command while Redis is flushed and prove its durable receipt/outcome remains solely in
    the effect-owning provider/Pulsar projection; the receipt-authority mutant must duplicate/lose the oracle
    outcome and turn red.
@@ -595,17 +592,10 @@ failure ordering claim.
 driving the unmodified Sprint-31.3 `src/Amoebius/Platform/BringUp.hs` orchestration through a typed fault
 observer)
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the exact
-Sprint-31.3 bring-up orchestration, written against `io-classes` with no real IO, runs under `IOSimPOR`
-against the Phase-14.4 fakes with injected partial failure / restart / partition on the modeled
-dependencies, and across the explored schedules asserts (a) no service starts before its readiness
-precondition, (b) the applicative-concurrent bring-up is deadlock-free and fail-closed on a
-missing/unhealthy dependency, (c) it never reports success until every service is Ready, and (d) a
-**concurrency witness** — on at least one explored schedule the bring-up intervals of two
-declared-dependency-independent services (MinIO and the Percona operator) **overlap**, demonstrating genuine
-applicative concurrency a hand-sequenced total order cannot produce; the committed seeded mutant
-`mutant/dag-drop-edge` (Sprint 31.3) is asserted to turn assertion (a) red under `IOSimPOR`; each run is
-deterministically replayable from its seed on substrate `none` and emits a Register-2.5 ledger.
+**Independent Validation**: the exact Sprint-31.3 bring-up orchestration, unmodified, runs under `IOSimPOR`
+against the Phase-14.4 fakes with injected partial failure, restart, and partition. The numbered validation
+list below states the four schedule-exhaustive assertions, the concurrency witness, the mutant that must turn
+assertion (a) red, and the deterministic replay and Register-2.5 ledger each run emits.
 **Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md`
 
 ### Objective

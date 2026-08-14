@@ -154,24 +154,30 @@ The emitted ledger marks provider bring-up + signal-driven node join and per-run
 EKS target from a linux-cpu parent, durable-EBS retention *correct-by-class*, and the elevated-harness durable
 reclamation *explicitly deferred to [Phase 54](phase_54_test_topology_dsl.md)*.
 
-**Gate:** `cabal test provider-dynamic-nodes-live` is green: an `InForceSpec` (`test/dhall/phase_47_provider_provision.dhall`) that, from a **linux-cpu** parent,
-spins up a provider-managed EKS cluster, brings up its stateless hostless in-cluster control plane, **dynamically provisions an extra node by evaluating a declared `ScalingPolicy` signal** (not by an operator hand-editing the
-target) from a named CPU-only `ProviderNodeClass`, and observes it join — already `ManagedCapacity`-tainted,
-past full supply/layout/device readback and scheduler-generation CAS — with allocatable capacity at least the
-declaration; the complete worst-case elastic envelope must provision inside the node-class maxima and the
-owner-distinct provider quota **before the first cloud mutation**, with the committed over-quota and
-missing-capability negatives rejected with zero mutating AWS calls; the gate then verifies a **zero-mutation**
-no-op reconcile against the still-standing stack and **tears the per-run cluster stack down leak-free** — VPC,
-control plane, node group, and the provisioned node all destroyed with **zero** surviving ephemeral-class
-resources under the broadened run-owned OS-boundary sweep (run-tag **and** VPC-id **and**
-`eks:cluster-name` / `kubernetes.io/cluster/<name>` keyed, catching untagged provider-spawned orphans), with the
-durable per-PV EBS the sole permitted survivor by class. The gate turns **red** on ≥1 committed seeded mutant —
-minimally `mut-47.1-ignore-signal`, `mut-47.1-apply-over-quota`, `mut-47.2-skip-sweep`, **and the new `mut-47-untagged-orphan`** (which leaves an *untagged* provider-spawned orphan a tag-only sweep would miss). The
-complete apparatus — inherited fixtures, committed mutants, and the independent reference predicates — is named
-in [`## Gate integrity`](#gate-integrity); the gate line above delegates to it by anchor per
-[`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
+**Gate:** `cabal test provider-dynamic-nodes-live` is green: `test/dhall/phase_47_provider_provision.dhall`
+spins a provider EKS cluster up from a linux-cpu parent, provisions an extra node by signal, verifies a
+zero-mutation no-op, and tears the per-run stack down leak-free. Its apparatus is
+[Gate integrity](#gate-integrity).
 
 ## Gate integrity
+
+The gate line above states one acceptance condition and delegates its apparatus here by anchor, which
+[`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
+admits as a conforming form. What that one run must show, in order: from a **linux-cpu** parent the
+`InForceSpec` spins up a provider-managed EKS cluster and brings up its stateless hostless in-cluster control
+plane; it then **dynamically provisions an extra node by evaluating a declared `ScalingPolicy` signal**, not
+by an operator hand-editing the target, from a named CPU-only `ProviderNodeClass`, and observes it join
+already `ManagedCapacity`-tainted, past full supply/layout/device readback and scheduler-generation CAS, with
+allocatable capacity at least the declaration. The complete worst-case elastic envelope must provision inside
+the node-class maxima and the owner-distinct provider quota **before the first cloud mutation**, so the
+committed over-quota and missing-capability negatives are rejected with zero mutating AWS calls. The run then
+verifies a **zero-mutation** no-op reconcile against the still-standing stack and **tears the per-run cluster
+stack down leak-free**: VPC, control plane, node group, and the provisioned node all destroyed with **zero**
+surviving ephemeral-class resources under the broadened run-owned OS-boundary sweep defined below, and the
+durable per-PV EBS the sole permitted survivor by class. The gate turns **red** on ≥1 committed seeded mutant,
+minimally `mut-47.1-ignore-signal`, `mut-47.1-apply-over-quota`, `mut-47.2-skip-sweep`, and
+`mut-47-untagged-orphan`, the last of which leaves an *untagged* provider-spawned orphan a tag-only sweep
+would miss.
 
 > **Provider corpus split (by design).** `test/dhall/phase_47_provider_provision.dhall` and the
 > `mut-37.*` mutant family are this sub-phase's own Phase-0 corpus. The four provider sub-phases
@@ -346,21 +352,11 @@ move (including the broadened sweep) marks that layer **UNVERIFIED**, never gree
 EC2/managed nodes), and `amoebius-runtime/test/provider/Phase47ContractSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
 **Requires**: `cloud-account` — the account whose node quota this gate scales against. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-29 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-operators-prompt-automated)).
-**Independent Validation**: a `.dhall`-declared node rule (load /
-workflow-completion) drives the live node set toward its desired shape by choosing only a declared
-`ProviderNodeClass` whose complete capacity/capability shape can host the pending `ResourceEnvelope`;
-raising the declared target provisions an EC2/managed node that joins the cluster; lowering it drains and
-releases the node; re-running converges as a no-op. Join is quarantined: the kubelet registers with the
-`ManagedCapacity` taint from its first observable Node state, complete supply/layout/ device readback
-precedes scheduler target/config-root extension, and only fresh node-scoped taint/admission/ Binding
-authority makes it eligible. An `Unreachable` node observation **refuses** rather than charging ahead. A
-worst-case elastic shape with `baseCount > maxCount`, aggregate base supply outside quota, worst-case growth
-outside the declared maximum-count/provider-quota envelope, or a demand for which no class offers the
-required CPU, memory, logical pod-ephemeral capacity (including the in-cluster cache-owner `emptyDir`'s
-[Phase 7](phase_07_capacity_core_folds.md) local-ephemeral debit), layout-routed nodefs/imagefs physical
-capacity, pod slots, driver-specific CSI attach slots, accelerator family/device count or
-net-allocatable-memory residency capacity, or whose node-root EBS or durable demand exceeds its distinct
-provider storage quota, is rejected before any cloud mutation.
+**Independent Validation**: a `.dhall`-declared load or workflow-completion rule drives the live node set to
+its desired shape, choosing only a `ProviderNodeClass` that fits the pending `ResourceEnvelope`; the node
+joins through a quarantined taint/readback/CAS sequence, an `Unreachable` observation refuses, and any shape
+the envelope cannot carry is rejected before cloud mutation. The `### Validation` list below carries the
+detail.
 **Docs to update**:
 `documents/engineering/cluster_lifecycle_doctrine.md` (§8), `documents/engineering/pulumi_iac_doctrine.md`
 (§4 — the dynamic-node catalog entry), `documents/engineering/app_vs_deployment_doctrine.md` (node
@@ -501,6 +497,14 @@ cloud effect.
     fails before create. Then change account usage or offering availability after a fitting
     `ValidatedCloudProviderAction` is minted; its immediate recheck invalidates it with zero node-group/instance
     mutations.
+12. Reject before any cloud mutation every worst-case elastic shape the envelope cannot carry, so the refusal
+    surface is enumerated rather than sampled: `baseCount > maxCount`, aggregate base supply outside quota,
+    worst-case growth outside the declared maximum-count/provider-quota envelope, and any demand for which no
+    class offers the required CPU, memory, logical pod-ephemeral capacity (including the in-cluster
+    cache-owner `emptyDir`'s [Phase 7](phase_07_capacity_core_folds.md) local-ephemeral debit), layout-routed
+    nodefs/imagefs physical capacity, pod slots, driver-specific CSI attach slots, accelerator family/device
+    count, or net-allocatable-memory residency capacity, or whose node-root EBS or durable demand exceeds its
+    distinct provider storage quota.
 
 > **Honesty.** Dynamic target derivation and the fail-closed provision contract are built and tested. The live
 > retained-Kubernetes drill observes their object-level analogue only; no amoebius-managed EKS worker node has
@@ -523,25 +527,11 @@ first-Node taint, supply/layout/device, scheduler-generation, physical-identity,
 node subset), `tools/phase47_provider_dynamic_live.py` (scoped retained-Kubernetes analogue), and
 `tools/phase47_gate.py`. The AWS OS-boundary sweep remains an unrun acceptance surface.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**:
-the gate `InForceSpec` starts from a linux-cpu parent, binds/expands the child, then derives the provider
-cluster's initial `ProvisionedInfrastructurePlan` from that exact `BoundDeployment` against the fixture's
-complete provider node-class and quota declarations before any cloud mutation — including exact Pulumi
-executor/plugin/workspace/cache, checkpoint-object, pod-slot, CSI-attach, root/durable EBS geometry, and
-provider byte/count ledgers — then validates the plan against a fresh provider snapshot, CAS-consumes the
-plan and per-action tokens, observes the EKS endpoint/nodes/root volumes into a receipt-bound
-`ObservedInfrastructureMaterialization`, constructs `ProvisionContext`, and only then seals the child
-`ProvisionedSpec`. It first proves bootstrap scheduler readiness, add-on cutover, full managed authority,
-and parent-bootstrap→child-singleton Lease handoff ([Phase 45](phase_45_provider_child_bringup.md)); then
-brings up its stateless in-cluster control plane, dynamically provisions an extra node **by signal** (Sprint
-47.1) and observes that node join through the tainted quarantine / config-root / node-authority stages with
-the promised allocatable/capability shape, binds the Pulumi-created EBS through the static CSI PV and writes
-a run-unique marker ([Phase 46](phase_46_provider_ebs_credential.md)), verifies a **zero-mutation** no-op
-reconcile while the stack is still standing, then tears the per-run cluster stack down leak-free (VPC +
-control plane + node group + provisioned node all destroyed, no orphans under the **broadened run-owned sweep**), with any durable per-PV EBS correctly retained; a second full cycle from provider-stack-absent
-state in the retained EBS's declared Availability Zone recreates a static CSI PV over the same
-`volumeHandle`, reattaches the volume, and reads the run-unique marker byte-for-byte before also finishing
-leak-free, and each cycle emits a proven/tested/assumed ledger artifact.
+**Independent Validation**: from a linux-cpu parent the gate `InForceSpec` seals the child `ProvisionedSpec`
+only through the observe-then-plan chain, composes the Phase 44–46 siblings, provisions an extra node by
+signal, verifies a zero-mutation no-op, and tears the per-run stack down leak-free with the durable per-PV EBS
+retained; a second full cycle re-reads its marker. The numbered `### Validation` list below carries the
+detail.
 **Docs to update**:
 `documents/engineering/pulumi_iac_doctrine.md` (§3, §8),
 `documents/engineering/cluster_lifecycle_doctrine.md` (§9), `documents/engineering/testing_doctrine.md` (the
@@ -651,6 +641,15 @@ correctly left retained.
    `mut-47.1-ignore-live-csinode` mutants must go red. Every rejection has an empty
    Kubernetes/Pulumi/checkpoint/AWS mutating audit, while the fitting live readback matches the witness rather
    than a renderer-side re-derivation.
+6. Assert the provisioning chain itself, not merely its outcome. The gate `InForceSpec` binds and expands the
+   child, then derives the provider cluster's initial `ProvisionedInfrastructurePlan` from that exact
+   `BoundDeployment` against the fixture's complete provider node-class and quota declarations before any
+   cloud mutation — including the exact Pulumi executor/plugin/workspace/cache, checkpoint-object, pod-slot,
+   CSI-attach, root/durable EBS geometry, and provider byte/count ledgers. It then validates that plan against
+   a fresh provider snapshot, CAS-consumes the plan and its per-action tokens, observes the EKS
+   endpoint/nodes/root volumes into a receipt-bound `ObservedInfrastructureMaterialization`, constructs
+   `ProvisionContext`, and only then seals the child `ProvisionedSpec`. A run that seals without each step is
+   invalid.
 
 > **Honesty.** The scoped gate proves the broadened ownership-enumeration predicate and observes a real
 > Kubernetes metadata analogue in which run-tag + VPC-id + cluster ownership catches two untagged objects that

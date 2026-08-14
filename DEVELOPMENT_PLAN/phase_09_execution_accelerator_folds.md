@@ -158,28 +158,9 @@ analogous to the Phase 5 decode battery, the Phase 6 property suite, and the sib
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** the **composed full-resource-vector `place` witness** proves every axis on the positive corpus and
-each execution/accelerator/provider-root/runtime-metadata negative returns the fold's structured
-`ProvisionError`/`Left` on its isolated insufficient axis — interpreted concretely in
-[Gate integrity](#gate-integrity). A `cabal test dsl-spec` run (i) places `legal_multisubstrate_cluster` and
-`legal_managed_eks` feasibly across CPU/memory, pod-CNI/CSI slots, logical+physical node storage, OCI
-content/snapshots/workspace, durable/cache demand, accelerator devices + every owner residency epoch, every
-execution/admission envelope, and provider-root VM/root-EBS, with the returned witness accepted by an
-**implementation-independent composed witness validator** (§M.3, defined in Sprint 9.4) that reads the fixture's
-declared allocatables directly and **never calls `podFits` or `place`**; (ii) rejects each of the **eighteen
-execution/accelerator/provider-root/runtime-metadata fold-negative fixtures named in
-[Gate integrity](#gate-integrity)** — the kind-indexed hard-ceiling/rollout overcommit, the node-local
-image content/snapshot/model joins and filesystem-layout alias/swap/SplitImage failures, the disk-backing
-alias double-spend, the provider-root under/over-quota failures, the control-plane etcd-transition overrun, and
-the cuda-on-cpu, accelerator-count/vram-fragmentation/vram-reserve-boundary, apple-metal-profile, and
-shared-accelerator-double-owner failures — with its **specific committed tag** when the fold is applied
-**directly on the hand-authored demand/capacity fixture that isolates its insufficient axis**. Bind/provision
-integration is a later Phase-11 responsibility;
-(iii) is **provably total** — compile-time exhaustiveness under `-Werror=incomplete-patterns` on every
-`Amoebius.Capacity.*` execution/accelerator/provider-root module **and** a sampled QuickCheck no-crash run,
-both, not either; and (iv) turns red under the **committed per-fold seeded-mutant battery named in [Gate integrity](#gate-integrity)** (§M.2). Every fixture, golden, and expected `Left`-tag it checks against is
-**pinned in this phase's oracle-pinning sprint, ahead of the folds they check** (§M.1). This is a **Register-1**
-in-process check that runs on no substrate.
+**Gate:** `cabal test dsl-spec` passes the composed positives, the eighteen fold negatives with their specific
+committed tags, the coverage floors, the totality scan, and the seeded mutants of
+[Gate integrity](#gate-integrity). The ledger must record Register 1 green and the live residue UNVERIFIED.
 
 ## Gate integrity
 
@@ -207,6 +188,23 @@ flowchart LR
   s4 -->|"the last seam the gate closes over"| gate
 ```
 *Orientation. The seams Phase 9 built and sealed in order; [Gate integrity](#gate-integrity) owns the validated apparatus.*
+
+The single acceptance run is `cabal test dsl-spec`, and it has four legs. Its positive leg places
+`legal_multisubstrate_cluster` and `legal_managed_eks` feasibly across CPU/memory, pod-CNI and CSI slots,
+logical and physical node storage, OCI content/snapshots/workspace, durable/cache demand, accelerator devices
+plus every owner residency epoch, every execution/admission envelope, and provider-root VM/root-EBS; the
+returned witness must additionally be accepted by the independent composed witness validator below (§M.3).
+Its negative leg applies the folds directly to the hand-authored demand/capacity fixture that isolates each
+negative's insufficient axis, and requires that fixture's own committed tag rather than merely some `Left`;
+the bind, infrastructure-plan, context, and provision path around those folds belongs to Phase 11 and is no
+part of this condition. The remaining two legs are the totality scan and the seeded-mutant battery, both
+stated below. Every fixture, golden, and expected `Left`-tag the run checks against is pinned in this phase's
+oracle-pinning sprint, ahead of the folds that consume them (§M.1), and the whole run is Register 1 and in
+process: it stands up no host and no cluster.
+
+The coverage floor every property in that run must meet is its committed `cover`/`checkCoverage` minimum of
+30% rejecting and 30% accepting per fold (§M.4). A property that holds only because its generator never
+produced a rejecting case has not been exercised.
 
 ### Representative set (§M.7)
 
@@ -333,9 +331,10 @@ aggregate. The per-axis/per-capability validator mutants of Sprint 9.4 are addit
 
 ### Totality gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub))
 
-Compile every execution, accelerator, and provider-root fold module with both incomplete-pattern warnings
-promoted to errors, and reject `error`, partial `head`, and `fromJust`. The QuickCheck no-crash sample
-supplements that exhaustiveness result; it cannot replace it.
+Compile every `Amoebius.Capacity.*` execution, accelerator, and provider-root fold module under
+`-Werror=incomplete-patterns` and `-Werror=incomplete-uni-patterns`, and reject `error`, partial `head`, and
+`fromJust`. The sampled QuickCheck no-crash run supplements that compile-time exhaustiveness result; the gate
+requires both, and neither substitutes for the other.
 
 ### Independent witness validator (§M.3)
 
@@ -399,24 +398,9 @@ content/CSI/device unions, absent-Pod recovery debits, and Reserved→BindingInF
 partitions. These declarations live beside their owner folds rather than enlarging the Phase-7 base
 `Types.hs`/`Fold.hs` pair.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a unit + property suite takes the deployment-level
-`FirstDeployment | UpdateFrom` source plus the desired `BoundExecutionSet`; an update resolves the exact
-prior steady inventory from `ProvisionContext` before independently expanding desired units into
-identity-keyed steady/rollout epochs and exercising the same epoch provisioner over controller-derived child
-units. It proves every normalized controller policy is kind-valid before epoch construction, covers legal
-Deployment one-sided pairs `{ 1, 0 }` and `{ 0, 1 }`, DaemonSet's exclusive Surge/Unavailable arms, serial
-StatefulSet, finite Job waves/terminal retention, and supervised host replacement, and makes every
-zero-progress/kind-mismatch mutant red. It exact-joins every desired and prior materialized instance to its
-own source unit/revision/ordinal/full resource, preserves added/new/changed/removed semantics, and includes
-reachable empty initial/recreate transition maps. It rejects a copied-new-as-old envelope, an omitted
-removed/replica/surge/old instance, an invented first-deploy old row, an implicit-latest lookup, a second
-controller-child debit, and a free webhook. A terminating-old-at-capacity case proves the derived scheduler
-guard leaves a replacement Pending until observed disappearance; a post-validation terminating-set change
-invalidates the token; two concurrent candidates that each read the same pre-reservation residual, a
-non-aggregate/per-record CAS, a timeout-based reservation release, and a crash/lost-response release from
-`BindingInFlight` each turn a property red. A ledger row whose Pod has disappeared is not dropped as an
-orphan: its Reserved/BindingInFlight/Bound/Terminating/TerminalRetained state selects the exact full or
-retained `LedgerOnlyAbsentRecovery` debit.
+**Independent Validation**: a unit + property suite independently expands the deployment-level transition
+source into identity-keyed steady, rollout, and live epochs and exercises the reservation algebra over them;
+the numbered Validation list below carries the cases, the controls, and the mutants it must redden.
 **Docs to update**:
 `documents/engineering/resource_capacity_doctrine.md` (Phase-9 status backlink),
 `documents/engineering/daemon_topology_doctrine.md` (§3 control-plane singleton reservation read-side),
@@ -496,6 +480,20 @@ numbers only — the pure expansion fold Phase 11's `provision` seal later invok
    turn the suite red, as do a non-aggregate/per-record CAS, timeout-based reservation release,
    crash/lost-response release from `BindingInFlight`, direct-nodeName/post-bind-delta bypass, and a second
    controller-child debit.
+2. Every normalized controller policy is proved kind-valid before epoch construction, so the suite covers
+   DaemonSet's exclusive Surge/Unavailable arms, the native serial `StatefulSetRolloutPolicy`, finite Job
+   waves with terminal retention, and supervised host replacement beside the two legal Deployment one-sided
+   pairs `{ 1, 0 }` and `{ 0, 1 }`; every zero-progress and every wrong-kind policy field turns it red. An
+   update resolves the exact prior steady inventory from `ProvisionContext` before the suite expands the
+   desired units, so added, new, changed, and removed semantics are each observed, every prior and desired
+   materialized instance exact-joins its own source unit, revision, ordinal, and full resource envelope, and
+   the reachable empty initial and recreate transition maps are exercised rather than skipped. The same epoch
+   provisioner runs over controller-derived child units, where a second child debit or a free validating
+   webhook turns the suite red.
+3. The reservation algebra runs over that same expansion. Two concurrent candidates that each read the
+   identical pre-reservation residual turn a property red, as does any orphan-drop of a ledger row whose Pod
+   has disappeared: its Reserved, BindingInFlight, Bound, Terminating, or TerminalRetained state selects the
+   exact full or retained `LedgerOnlyAbsentRecovery` debit instead.
 
 ### Remaining Work
 None.
@@ -503,38 +501,12 @@ None.
 ## Sprint 9.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `src/Amoebius/Capacity/NodeLocalStorage.hs` (the logical
-pod-ephemeral fold, derived mapped-file/AtomicWriter, closed layout routing, exact OCI content/snapshot
-joins, and model-versioned image peak); `src/Amoebius/Capacity/RuntimeStorage.hs` (derive metadata
-components from the structural Pod graph; group them by `KubeletNodefs | CriRuntimeRoot`; total
-role→layout-backing resolution; planned-epoch and observed-snapshot node aggregates; qualified Pod/image
-component ownership; alias-aware backing grouping); extends `src/Amoebius/Capacity/Types.hs`
-(`KubeletMappedFileDemand`, `PodRuntimeMetadataSource`, `KubeletRuntimeMetadataShape`,
-planned-slot/observed-Pod-UID `KubeletRuntimeMetadataDemand`, `ProvisionedKubeletRuntimeMetadataDemand`,
-`PodRuntimeRole`, `ImageStorageRole`, `NodeImageStorageModelVersion`, `KubeletRuntimeMetadataModelVersion`,
-`ProvisionedNodeImageStorageDemand`, scope-indexed `ProvisionedNodeRuntimeStorageAccounting`,
-`NodeLocalStorageCapacity`/filesystem layouts/image artifacts, `PhysicalDiskPartition`,
-`NamedDiskCarve`, and `ProvisionedVmDiskCarve`). The implemented declarations reside in the two owner modules
-rather than in the Phase-7 base `Types.hs`.
+**Implementation**: `src/Amoebius/Capacity/NodeLocalStorage.hs`, `src/Amoebius/Capacity/RuntimeStorage.hs`,
+and the runtime-metadata / node-local / physical-disk extensions to `src/Amoebius/Capacity/Types.hs`.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: for every planned
-Pod slot in each epoch, the reference fold independently rebuilds `KubeletRuntimeMetadataShape` from the
-structural sandbox, Pod-directory, runtime, CNI, volume, and mount counts under
-`NodeCapacity.localStorage.kubeletMetadataModel`; the live variant uses authenticated Pod UIDs and source
-witnesses. It derives component→Pod-runtime-role maps, resolves roles through the selected filesystem
-layout, exact-joins the planned/observed node domain, combines qualified Pod components with the disjoint
-image-model component domain, and groups each physical carve once. `Unified` resolves both roles to nodefs;
-`SplitRuntime` resolves kubelet-owned components to nodefs and CRI-owned components to imagefs/containerfs;
-`SplitImage` resolves both Pod-runtime roles to nodefs/containerfs. It exact-fits SplitRuntime nodefs and
-imagefs/containerfs independently and rejects either one byte short, while Unified and SplitImage alias
-controls charge the shared carve once. For each `PhysicalDiskPartition`, the reference starts from
-`allocatableRawBytes` after unmanaged-host reserve, derives any presented usable physical carve to a raw
-`parentDebitBytes`, and proves exact fit of `systemReserve raw parent debit + Σ unique VM provisionedBytes +
-Σ unique other raw parent debits`; each VM separately exact-fits its nested `VmGuestUsableExtent`
-usable-byte sum. Either parent's one-byte-short pair rejects. `mutant_drop_largest_kubelet_metadata`,
-`mutant_missing_kubelet_metadata_model`, role-drop/swap, backing-swap, scope/domain, ownership-hole/overlap,
-alias-double-debit, `mutant_partition_mixes_vm_usable_bytes`, `mutant_partition_drops_system_reserve`, and
-`mutant_partition_double_debits_child` each turn red.
+**Independent Validation**: a reference fold rebuilds the runtime-metadata shape and the two physical-disk
+parent equations from the fixture's own structural counts, never from the fold under test; the numbered
+Validation list below carries the exact-fit cases, the one-byte-short pairs, and the named mutants.
 **Docs to update**:
 `documents/engineering/resource_capacity_doctrine.md` (Phase-9 status backlink),
 `documents/engineering/storage_lifecycle_doctrine.md` (§5.2 node-local backing read-side),
@@ -606,6 +578,20 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
   backing/carve ids are unique, every node/backing reference resolves exactly once, every logical
   `BackingId`/`CacheBackingId`/`HostStorageBackingId` maps injectively to the correct role carve, and an
   alias/orphan/role mismatch rejects.
+- The declarations these two folds exchange live beside them rather than in the Phase-7 base
+  `src/Amoebius/Capacity/Types.hs`. `src/Amoebius/Capacity/NodeLocalStorage.hs` owns the logical
+  pod-ephemeral fold, the derived mapped-file/AtomicWriter demand, the closed layout routing, the exact OCI
+  content/snapshot joins, and the model-versioned image peak;
+  `src/Amoebius/Capacity/RuntimeStorage.hs` derives metadata components from the structural Pod graph, groups
+  them by `KubeletNodefs | CriRuntimeRoot`, resolves role→layout-backing totally, builds the planned-epoch
+  and observed-snapshot node aggregates, qualifies Pod/image component ownership, and groups aliased
+  backings. `Types.hs` gains only the shared vocabulary: `KubeletMappedFileDemand`,
+  `PodRuntimeMetadataSource`, `KubeletRuntimeMetadataShape`, the planned-slot/observed-Pod-UID
+  `KubeletRuntimeMetadataDemand`, `ProvisionedKubeletRuntimeMetadataDemand`, `PodRuntimeRole`,
+  `ImageStorageRole`, `NodeImageStorageModelVersion`, `KubeletRuntimeMetadataModelVersion`,
+  `ProvisionedNodeImageStorageDemand`, the scope-indexed `ProvisionedNodeRuntimeStorageAccounting`,
+  `NodeLocalStorageCapacity` with its filesystem layouts and image artifacts, `PhysicalDiskPartition`,
+  `NamedDiskCarve`, and `ProvisionedVmDiskCarve`.
 
 ### Validation
 1. Runtime-metadata cases exact-fit every grouped backing, fail with SplitRuntime nodefs one byte short for a
@@ -619,6 +605,19 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
    allocatableRawBytes` while each VM separately exact-fits its nested usable-byte equation; either parent's
    one-byte-short pair rejects, and the no-double-debit property catches an alias, VM high-water, or
    `systemReserve` charged twice.
+2. The reference side is built without the fold under test. For every planned Pod slot in each epoch it
+   rebuilds `KubeletRuntimeMetadataShape` from the structural sandbox, Pod-directory, runtime, CNI, volume,
+   and mount counts under `NodeCapacity.localStorage.kubeletMetadataModel`, and its live variant rebuilds the
+   same shape from authenticated Pod UIDs and source witnesses. It resolves every component's role through
+   the selected layout — `Unified` resolving both roles to nodefs, `SplitRuntime` resolving kubelet-owned
+   components to nodefs and CRI-owned components to imagefs/containerfs, and `SplitImage` resolving both
+   Pod-runtime roles to nodefs/containerfs — and starts each `PhysicalDiskPartition` from
+   `allocatableRawBytes` after the unmanaged-host reserve, deriving every presented usable physical carve to
+   a raw `parentDebitBytes` before it compares. `mutant_drop_largest_kubelet_metadata`,
+   `mutant_missing_kubelet_metadata_model`, `mutant_partition_mixes_vm_usable_bytes`,
+   `mutant_partition_drops_system_reserve`, and `mutant_partition_double_debits_child` each turn it red, as
+   do a role drop or swap, a backing swap, a scope/domain mismatch, an ownership hole or overlap, and an
+   alias double debit.
 
 ### Remaining Work
 None.
@@ -634,23 +633,9 @@ transition and churn quota fit before physical WAL/snapshot/defrag expansion);
 `src/Amoebius/Capacity/PulumiExecution.hs` (deploy/plugin join and concurrent executor/workspace peak);
 the modules retain their demand, provisioned, and structured-error types beside their folds.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a unit + property suite
-validates accelerator family, whole device count, exact source/workload and policy-class domains, all
-derived coexistence epochs, residency placement, per-device aggregation, shard-id uniqueness/count/byte-sum,
-and required interconnect against each device's **net allocatable VRAM** after its mandatory
-`driverRuntimeReserve`, never its raw total; a single unshardable 40-GiB model on 2×24-GiB devices is
-rejected. For every `PhysicalDiskPartition`/provider node it recomputes the post-unmanaged-host
-`allocatableRawBytes` boundary, derives raw VM and ephemeral-root-EBS usable/provisioned high-water through
-presentation and allocation rules, rejects a raw authored aggregate, checks an instance store against its
-fixed bytes, and charges root EBS bytes plus volume count only to `nodeRootStorage`. Generated host-only
-cases independently derive per-stage build concurrency/scratch/cache-write peak, role-indexed named
-engine-process totals, rotated control-plane/worker storage/history fit, monitoring CPU/memory cost, and the
-Pulumi deploy/plugin/concurrent-executor/workspace peak; dropping any term makes the property red. The
-control-plane first exact-joins serialized desired/live old/new/apply Kubernetes objects plus bounded
-revision/Lease/Event churn through `EtcdLogicalDemand` and proves the derived MVCC peak fits
-`backendQuotaBytes`; its separate physical formula then derives backend + WAL
-segment/overshoot/preallocated-next + retained snapshot/snapshot-save temporary + serialized defrag old/new
-peak (Events once) plus `(maxBackups + 1) × maxBytesPerFile` audit/runtime logs.
+**Independent Validation**: a unit + property suite rederives the accelerator, provider-root, and host-only
+compute numbers from the fixture's declared devices, disks, and stage graph rather than from the folds under
+test; the numbered Validation list below carries the cases and the per-term drops it must redden.
 **Docs to update**:
 `documents/engineering/resource_capacity_doctrine.md` (Phase-9 status backlink),
 `documents/engineering/substrate_doctrine.md` (accelerator profile / provider-root read-side),
@@ -722,6 +707,18 @@ derivations as pure, checked `provision-seal` operations that feed the composed 
    preallocation/overshoot/snapshot-save/defrag operand, a control-plane/worker storage/retention term, a
    monitoring evaluation+query/proxy compute or TSDB presentation derivation, or a Pulumi
    deploy/plugin/concurrency executor envelope) is individually required: dropping it turns a property red.
+2. The reference side is derived without the folds under test. It checks accelerator family, whole device
+   count, exact source/workload and policy-class domains, every derived coexistence epoch, residency
+   placement, per-device aggregation, shard-id uniqueness/count/byte-sum, and the required interconnect
+   against each device's net allocatable VRAM after the mandatory `driverRuntimeReserve` rather than its raw
+   total, so a single unshardable 40-GiB model on 2×24-GiB devices is rejected. For every
+   `PhysicalDiskPartition` and provider node it recomputes the post-unmanaged-host `allocatableRawBytes`
+   boundary, rederives the raw VM and ephemeral-root-EBS usable and provisioned high-water through the
+   presentation and allocation rules, checks an instance store against its fixed bytes, and charges root-EBS
+   bytes plus volume count only to `nodeRootStorage`. Generated host-only cases derive the per-stage build
+   concurrency/scratch/cache-write peak, the role-indexed named engine-process totals, the rotated
+   control-plane/worker storage and history fit, the monitoring CPU/memory cost, and the Pulumi
+   deploy/plugin/concurrent-executor/workspace peak the same way.
 
 ### Remaining Work
 None.
@@ -735,11 +732,10 @@ contains seven sampled properties and the implementation-independent composed wi
 `test/dsl/ExecutionAcceleratorFixtures.hs` carries deterministic controller, scheduler-state, observed-UID,
 host-only compute, replicated-residency/interconnect, and cover-slot identity checks.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `cabal test dsl-spec` runs the property battery green — the composed placement
-soundness, totality, execution-epoch equality, runtime-metadata grouping, accelerator residency, and
-provider-root properties hold over generated inputs, each meeting its committed `cover`/`checkCoverage`
-minimum (≥30% rejecting, ≥30% accepting per fold; §M.4); and the committed per-fold seeded-mutant battery of
-[Gate integrity](#gate-integrity) turns the suite red individually (§M.2), not one hand-picked strawman.
+**Independent Validation**: `cabal test dsl-spec` runs the composed-placement soundness, totality,
+execution-epoch equality, runtime-metadata grouping, accelerator-residency, and provider-root properties
+green over generated inputs at their committed coverage floors, and the seeded-mutant battery of
+[Gate integrity](#gate-integrity) reddens the suite one mutant at a time (§M.2).
 **Docs to update**: `documents/engineering/resource_capacity_doctrine.md`,
 `documents/engineering/testing_doctrine.md` (the Register-1 property register),
 `DEVELOPMENT_PLAN/system_components.md`.

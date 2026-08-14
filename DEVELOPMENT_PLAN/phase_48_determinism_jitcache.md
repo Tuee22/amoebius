@@ -174,29 +174,9 @@ provision-derived peak `≤ CacheBudget` rejection requires live infrastructure 
 the second-pod reuse run against real pods on the live cluster, and the run emits a proven/tested/assumed ledger
 naming that register.
 
-**Gate:** `cabal test determinism-jitcache-live` is green: on the single-node linux-cpu `kind` cluster (Phase 24 bootstrap coordinator, Phase 25 base image + baked
-resolver/toolchain + in-cluster `distribution` registry, Phase 37 content store + workflow runtime), a
-**two-part** acceptance condition holds against the **oracle-pinned oracle set** ([Gate integrity](#gate-integrity)),
-with every *how-it-behaved* claim read from an OS-boundary observer (§M.5) and every byte comparison performed
-**out-of-band by the harness** on blobs it fetched itself, never inferred from a `412`/`If-None-Match` response
-(§M.6): **(a) determinism** — the seeded workload runs twice under one unchanged `experimentHash` as an
-**independent fresh recomputation** (each fresh Pod writes a distinct `<experimentHash>/<runId>` staging prefix
-whose output key is provably absent; run 2 cannot read run 1's retained prefix until its pure stage writes,
-§M.6), the two retained output blobs are byte-identical, a changed `masterSeed`/`streamIndex`/pinned input
-yields **different** output bytes, and a changed resolved `.dhall` or substituted substrate fingerprint yields a
-**different** `experimentHash` and namespace; the committed mutant `test/mutants/Determinism_const_output.hs`
-turns the seed/input-sensitivity legs red. **(b) cache owner** — the one named identity
-`EngineRuntime.LlamaCppCpu@<pinned-ver>` resolves on **first miss** into the `CacheBudget`-bounded
-content-addressed cache (bytes sha256-matching the `test/oracle/phase_48_oracle.dhall` pin, the named arm
-attested to have actually run, the handle live at the pinned `--version`, and zero public-registry pull by live
-egress/CNI capture), a **second client pod** on the same node reuses the cache-resident handle with no
-re-materialization (unchanged resident inode/mtime, zero new pull), the owner's derived peak fits
-`derived peak ≤ CacheBudget ≤ emptyDir.sizeLimit` and its ephemeral request covers that volume bound plus
-writable/log headroom, and an over-budget peak, digest-size conflict, deletion credited before observation, or
-bounded-parallel-derived overflow is rejected by the Phase-7 fold at the Phase-11 **`provision-seal`** before any
-resolve; the committed mutants `resolve _ = <fixed 16-byte marker>` and `prune = pure ()` turn part (b) red. The
-run emits a Register-3 proven/tested/assumed ledger; the full committed corpus and its partition into the two
-parts are named in [Gate integrity](#gate-integrity).
+**Gate:** `cabal test determinism-jitcache-live` is green: the two-part determinism and cache-owner acceptance
+condition holds on the live linux-cpu `kind` cluster against every oracle-pinned fixture, independent oracle,
+external observer, and committed mutant in [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
@@ -205,6 +185,26 @@ in Phase 0 **before any `src/Amoebius/Kernel/*` or `src/Amoebius/Jit/*` module e
 two-part gate. No golden output *bytes* are pre-committed for the determinism part (they are substrate-specific),
 so its byte-equality legs compare **two fresh runs against each other**, never against a regenerated golden;
 every other oracle is a hand-authored table independent of the code under test (§M.1, §M.3).
+
+**The two-part acceptance condition.** The run happens on the single-node linux-cpu `kind` cluster — Phase 24
+bootstrap coordinator, Phase 25 base image plus baked resolver/toolchain plus in-cluster `distribution` registry,
+Phase 37 content store plus workflow runtime. Every *how-it-behaved* claim is read from an OS-boundary observer
+(§M.5), and every byte comparison is performed **out-of-band by the harness** on blobs it fetched itself, never
+inferred from a `412`/`If-None-Match` response (§M.6). **(a) Determinism** — the seeded workload runs twice under
+one unchanged `experimentHash` as an **independent fresh recomputation**, each fresh Pod writing a distinct
+`<experimentHash>/<runId>` staging prefix whose output key is provably absent, and run 2 unable to read run 1's
+retained prefix until its pure stage writes. The two retained output blobs are byte-identical; a changed
+`masterSeed`, `streamIndex`, or pinned input yields **different** output bytes; and a changed resolved `.dhall`
+or substituted substrate fingerprint yields a **different** `experimentHash` and namespace. **(b) Cache owner** —
+the one named identity `EngineRuntime.LlamaCppCpu@<pinned-ver>` resolves on **first miss** into the
+`CacheBudget`-bounded content-addressed cache, with bytes sha256-matching the `test/oracle/phase_48_oracle.dhall`
+pin, the named arm attested to have actually run, the handle live at the pinned `--version`, and zero
+public-registry pull by live egress/CNI capture. A **second client pod** on the same node reuses the
+cache-resident handle with no re-materialization (unchanged resident inode/mtime, zero new pull). The owner's
+derived peak fits `derived peak ≤ CacheBudget ≤ emptyDir.sizeLimit` and its ephemeral request covers that volume
+bound plus writable/log headroom. An over-budget peak, digest-size conflict, deletion credited before
+observation, or bounded-parallel-derived overflow is rejected by the Phase-7 fold at the Phase-11
+**`provision-seal`** before any resolve. The run emits a Register-3 proven/tested/assumed ledger.
 
 ```mermaid
 flowchart LR
@@ -442,16 +442,10 @@ the same sections where they adopt them.
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Kernel/ContentAddress.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the "no constructor from a free string" claim is verified by a **committed compile-fail fixture** (§M.8), not a runtime property: `test/compile-fail/phase_48_forge_blobsha.hs` attempts `BlobSha
-"deadbeef"` (constructing a carrier from a `Text` literal) and MUST fail to compile at the named locus
-"`BlobSha` constructor not in scope / not exported", paired with the positive `contentAddress someBytes`
-that compiles; the sprint additionally commits an export-list audit asserting no module re-exports the
-carrier constructors. The canonical-encoding property (pure, in-process, no cluster) is over an
-**independent oracle**: "logically equal" is defined as two payloads the test constructs to be equal by an
-independently hand-authored equivalence (permuted map key order, reordered record fields, equivalent integer
-encodings) — **not** derived from the canonical bytes under test (§M.3) — and the generator carries a
-`cover` obligation (§M.4) forcing at least 30% of cases to exhibit a genuinely distinct byte pre-image;
-those cases must still collapse to the identical key.
+**Independent Validation**: pure and in-process, no cluster. That a content name cannot be forged from a free
+string is a **compile-fail** obligation asserted by locus (§M.8), never a runtime check; the canonical-encoding
+property is judged against a hand-authored equivalence independent of the bytes under test (§M.3). The numbered
+validation list below carries both.
 **Docs to update**:
 `documents/engineering/content_addressing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`, this
 document.
@@ -475,7 +469,8 @@ lift Phase 37's concrete blob/manifest key renderers into a kernel-level `Conten
 
 ### Validation
 1. Type-level, verified by the committed compile-fail fixture `test/compile-fail/phase_48_forge_blobsha.hs`
-   (§M.8): constructing a `BlobSha`/`ManifestSha` from a free `Text` MUST fail to compile with "constructor not
+   (§M.8): its attempt at `BlobSha "deadbeef"` — constructing a `BlobSha`/`ManifestSha` carrier from a free
+   `Text` literal — MUST fail to compile with "`BlobSha` constructor not
    in scope / not exported" at the named locus, while the paired positive `contentAddress bytes` compiles. The
    only path to a `BlobSha`/`ManifestSha` is `contentAddress`; an export-list audit confirms no re-export.
 2. Property: `contentAddress x == contentAddress y` whenever `x` and `y` are logically equal, where **logical equality is defined by a committed hand-authored equivalence independent of the canonical bytes** (§M.3) —
@@ -493,17 +488,10 @@ None in this sprint.
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Kernel/ExperimentHash.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**:
-unit tests prove `experimentHash` is a pure function of `(resolved-dhall, substrate-fingerprint)` and
-re-derives identically across re-evaluation. The substrate fingerprint conforms to the **oracle-pinned schema** `test/golden/phase_48_substrate_fingerprint.schema.json` (§M.3), which pins a minimum witness set —
-substrate lane (`linux-cpu`) plus named toolchain witnesses: GHC version, RTS/runtime version, ISA, and
-libc/ABI — **each with its absolute probe path**; a fingerprint missing a required witness FAILS. That the
-probes ran by absolute path with no `PATH`/env read is asserted from an **OS-boundary observer** (§M.5): an
-argv-recording exec shim (or `strace -f -e execve`) whose log shows every probe invoked by absolute path and
-shows no `getenv`/`PATH` lookup on the fingerprint path — never a self-emitted compliance trace. A
-**sensitivity check** substitutes one named probe's binary with a committed fake
-(`test/fake/phase_48_fake_ghc` emitting a different version): the folded digest MUST change; with all real
-probes unchanged two probes of the same host MUST fold to the identical digest.
+**Independent Validation**: fingerprint conformance is judged against the oracle-pinned schema (§M.3), and that
+every probe ran by absolute path with no `PATH` or environment read is read from an **OS-boundary observer**
+(§M.5), never a self-emitted compliance trace. The numbered validation list below carries the schema, observer,
+and fake-probe sensitivity checks.
 **Docs to update**:
 `documents/engineering/content_addressing_doctrine.md`, `documents/engineering/substrate_doctrine.md`,
 `DEVELOPMENT_PLAN/system_components.md`.
@@ -525,15 +513,19 @@ no-env/no-`PATH` contract.
   used by the sensitivity check — both authored before `ExperimentHash.hs` exists (§M.1, §M.3).
 
 ### Validation
-1. `experimentHash` changes when either the resolved `.dhall` (the committed `..._flipped_metric.dhall` sibling,
-   differing only in metric direction) or the substrate fingerprint changes; it is stable across re-evaluation of
-   the same inputs. Asserted against the oracle-pinned fixtures, not values regenerated from the SUT.
+1. `experimentHash` is a pure function of `(resolved-dhall, substrate-fingerprint)`: it changes when either the
+   resolved `.dhall` (the committed `..._flipped_metric.dhall` sibling, differing only in metric direction) or the
+   substrate fingerprint changes, and re-derives identically across re-evaluation of the same inputs. Asserted
+   against the oracle-pinned fixtures, not values regenerated from the SUT.
 2. The fingerprint carries every witness required by `test/golden/phase_48_substrate_fingerprint.schema.json`
-   (substrate lane + GHC/RTS/ISA/libc witnesses, each with its absolute probe path); a hardcoded constant such
+   (substrate lane `linux-cpu` + the named GHC-version, RTS/runtime-version, ISA, and libc/ABI witnesses, each
+   with its absolute probe path); a fingerprint missing a required witness FAILS, and a hardcoded constant such
    as `"linux-cpu"` FAILS the schema check. The linux-cpu fingerprint is gathered only by absolute-path probes —
-   verified from the argv-shim/`strace` OS-boundary observer (§M.5), not a self-report — with no `PATH`/env read;
-   two probes of the same host fold to the same digest. The **sensitivity check** with one probe replaced by the
-   committed fake binary MUST change the folded digest (§M.3). The committed mutant
+   verified from the argv-recording exec shim or `strace -f -e execve` OS-boundary observer (§M.5), whose log
+   shows every probe invoked by absolute path and no `getenv`/`PATH` lookup on the fingerprint path, never a
+   self-report; two probes of the same host fold to the same digest. The **sensitivity check**, substituting one
+   named probe's binary with the committed fake `test/fake/phase_48_fake_ghc` (which emits a different version),
+   MUST change the folded digest (§M.3). The committed mutant
    `test/mutants/ExperimentHash_const_fingerprint.hs` (fingerprint hardcoded to `"linux-cpu"`; operator:
    dropped-effect) MUST turn the schema and sensitivity checks red (§M.2).
 
@@ -585,18 +577,10 @@ None in this sprint.
 `test/dhall/phase_48_determinism_repro.dhall`, `tools/phase48_determinism_jitcache_live.py`, and
 `test/live/Phase48LiveSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a `.dhall` workflow runs a minimal seeded
-compute stage twice on linux-cpu. Run 2 is an **independent fresh recomputation** (§M.6), not a store hit:
-each fresh Pod has a distinct `<experimentHash>/<runId>` staging prefix with an absent output key, run 2
-cannot read run 1's retained prefix until its stage completes and writes, and the harness asserts that
-boundary from an OS observer (§M.5), an argv/exec shim or `strace` on the compute Pod. The harness retains
-and fetches both exact object sets and blobs itself and does an **out-of-band byte comparison**; a
-`412`/`If-None-Match` result on the second PUT is never read as equality. It then asserts (a) byte-identical
-output under an unchanged `experimentHash`; (b) seed-sensitivity and input-sensitivity per the committed
-`..._alt_seed.dhall` and `..._alt_input.dhall` siblings (different output bytes); (c) a divergent
-`experimentHash` and distinct store namespace for the `..._flipped_metric.dhall` sibling and for a
-substrate-fingerprint substitution; and emits a proven/tested/assumed ledger artifact. The committed mutant
-`test/mutants/Determinism_const_output.hs` MUST turn legs (b) red (§M.2).
+**Independent Validation**: run 2 is an **independent fresh recomputation**, not a store hit (§M.6): the harness
+fetches both retained blobs itself and compares bytes out of band, while an OS-boundary observer (§M.5)
+witnesses the fresh compute. A `412`/`If-None-Match` on the second PUT proves store dedup, never reproduction.
+The numbered validation list below carries all five legs.
 **Docs to update**:
 `documents/engineering/content_addressing_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`, `DEVELOPMENT_PLAN/README.md`,
@@ -624,8 +608,9 @@ cross-substrate equality.
 - The oracle-pinned representative oracle set (authored before any kernel module exists, §M.1): the positive
   `test/dhall/phase_48_determinism_repro.dhall` and its one-dimension-differing negative siblings
   `..._flipped_metric.dhall`, `..._alt_seed.dhall`, `..._alt_input.dhall` (§M.7, §M.8); the committed mutant
-  `test/mutants/Determinism_const_output.hs` (§M.2); and the harness's OS-boundary observer (argv/exec shim or
-  `strace`) that witnesses run 2's fresh compute and the fresh-pod output-key absence (§M.5, §M.6).
+  `test/mutants/Determinism_const_output.hs` (§M.2); and the harness's OS-boundary observer on the compute Pod
+  (an argv/exec shim or `strace`) that witnesses run 2's fresh compute and the fresh-pod output-key absence
+  (§M.5, §M.6).
 
 ### Validation
 1. Two runs with the same `experimentHash` on linux-cpu produce byte-identical output, where both fresh Pods
@@ -658,25 +643,10 @@ content-addressed by resolved-asset SHA, pin-aware pruning, HIT/MISS lookup) and
 `src/Amoebius/Jit/CacheBudget.hs` (the `CacheBudget` as a `Quantity` nested inside the cache-owner pod's
 bounded node-ephemeral allocation + the peak-occupancy provision fold)
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a property + boundary suite shows the cache
-admits no key from a free string, proven by a **committed compile-fail negative fixture**
-`test/negative/phase_48_freestring_key.hs` (registered in the Phase-6 negative corpus, authored in this phase's oracle-pinning sprint)
-whose expected failure is asserted **by locus** — it must fail to typecheck at the attempt to construct a
-cache key from a `String`/`Text`/`Url` with the specific "no instance / no exported constructor" compile
-error — paired with a positive that differs only in keying from `sha256(real bytes)` and compiles. A
-QuickCheck property shows every resident entry is reachable only by hashing real bytes and a lookup is a
-total HIT/MISS, with `cover`/`classify` obligations forcing **≥30% MISS** and **≥30% HIT** cases (§M.4). The
-capacity suite starts from `CachePopulationDemand`: deployment input may select closed-catalog identities
-and a finite first-miss concurrency, but cannot author resident or temporary sizes; binding obtains those
-operands only from each catalog-owned `AssetMaterializationDemand`. For both node and host placements, the
-independent oracle unions the observed resident set and selected new set by content address, rejects
-conflicting resident sizes, adds the largest allowed set of distinct missing-asset temporary peaks, and
-keeps an entry selected for deletion charged until a later observation reports it absent. The resulting
-private `ProvisionedCacheDemand` must fit the typed budget/backing; the pod arm separately includes all
-disk-backed volume bounds plus owner writable/log headroom. Exact-fit passes, while digest-size conflict,
-bounded-parallel-derived overflow, resident-plus-temp one-byte overflow, early deletion credit, and
-under-reserved pod shapes return their specific structured `Left` before any resolve. The independent oracle
-is the committed fixture's hand-authored expected verdict, not the fold's own output. No cluster required.
+**Independent Validation**: a property and boundary suite; no cluster required. The free-string foreclosure is a
+**compile-fail** obligation asserted by locus, the HIT/MISS and capacity properties carry `cover` obligations,
+and every capacity verdict is judged against the committed fixture's hand-authored expected table rather than
+the fold's own output. The numbered validation list below carries each case.
 **Docs to update**: `documents/engineering/content_addressing_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -713,8 +683,10 @@ over-budget derived peak before the resolver ever materializes an asset.
 ### Validation
 1. There is no exported path to a cache key from a free string; the only path to a resident entry is content
    addressing — asserted by the committed compile-fail negative `test/negative/phase_48_freestring_key.hs`
-   (Phase-6 corpus, independently authored) failing *at the key-construction locus* with the "no exported constructor"
-   error, paired with the sha256-keyed positive that compiles.
+   (registered in the Phase-6 negative corpus, authored in this phase's oracle-pinning sprint) failing to
+   typecheck *at the attempt to construct a cache key from a `String`/`Text`/`Url`* with the specific
+   "no instance / no exported constructor" error, paired with a positive that differs only in keying from
+   `sha256(real bytes)` and compiles.
 2. Prove deployments can select catalog identities but cannot supply or override resident/temporary byte
    operands. For each node/host placement, independently recompute the digest union and the largest finite
    first-miss temporary set; exact fit passes, while an unbounded concurrency policy has no constructor. A
@@ -733,6 +705,9 @@ over-budget derived peak before the resolver ever materializes an asset.
    ([Gate integrity](#gate-integrity) part (b) mutant (b)) must turn this clause red (the over-budget residency survives). This is the pure-pool property; its live on-disk counterpart is the Sprint 48.8 postflight residency
    measurement. The fold's expected verdicts are the Phase-0 fixture's hand-authored table, never the fold's own
    output.
+5. A QuickCheck property shows every resident entry is reachable only by hashing real bytes and that a lookup is
+   a total HIT/MISS, with `cover`/`classify` obligations forcing **≥30% MISS** and **≥30% HIT** cases (§M.4), so
+   the property cannot be satisfied by a generator that only ever misses.
 
 ### Remaining Work
 None in this sprint.
@@ -744,18 +719,10 @@ None in this sprint.
 `EngineRuntime` catalog identity → cache HIT → handle, or MISS → download-a-prebuilt-engine /
 build-from-source → store → handle)
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a boundary suite
-drives the resolver against an oracle-pinned backend fixture whose served/compiled bytes **sha256-match the `test/oracle/phase_48_oracle.dhall` pin** — not an arbitrary "fake" blob: a backend returning unpinned
-bytes must fail the suite, foreclosing a resolver that stores fixed marker bytes. A cold cache triggers
-exactly one `resolve` (download-or-build) then stores, and the stored `ContentAddress` **equals the committed pin**. A warm cache returns a handle with **no** resolve, proven by an argv-recording shim /
-`strace` observer at the OS boundary (§M.5) capturing **zero** toolchain-or-backend subprocess on the warm
-path — never inferred from a resolver-emitted counter. The resolver has no code path that accepts a free
-URL, proven by the committed compile-fail negative `test/negative/phase_48_url_arm.hs` (Phase-6 corpus,
-independently authored) failing *at the constructor locus* with "no `Url`/free-string constructor", paired with a
-closed-catalog-identity positive that compiles. Every subprocess is absolute-path-resolved, asserted by the
-shim capturing the full absolute `argv[0]` (never a bare `PATH`-relative name). The committed seeded mutant
-`resolve _ = <fixed 16-byte marker>` ([Gate integrity](#gate-integrity) part (b) mutant (a)) turns the
-stored-`ContentAddress` assertion red.
+**Independent Validation**: a boundary suite. The backend fixture is oracle-pinned, so a resolver
+that stores fixed marker bytes cannot pass; the warm-path no-resolve claim is read from an OS-boundary argv shim
+(§M.5), never a resolver-emitted counter; and the URL foreclosure is a **compile-fail** obligation asserted by
+locus. The numbered validation list below carries each.
 **Docs to update**:
 `documents/engineering/content_addressing_doctrine.md`,
 `documents/engineering/service_capability_doctrine.md`, `documents/engineering/image_build_doctrine.md`,
@@ -781,10 +748,15 @@ path.
   model (Tier 2) and kernel (Tier 3) tiers reuse this resolver but land in Phases 49/51.
 
 ### Validation
-1. A cold cache triggers exactly one `resolve` and stores the result, **and the stored `ContentAddress` equals the `test/oracle/phase_48_oracle.dhall` pin**; a warm cache returns a handle with no resolve, proven by the
-   argv-shim/`strace` observer recording zero backend subprocess on the warm path; there is no path that accepts
+1. The suite drives the resolver against an oracle-pinned backend fixture whose served or compiled bytes
+   **sha256-match the `test/oracle/phase_48_oracle.dhall` pin** — not an arbitrary "fake" blob, so a backend
+   returning unpinned bytes must fail the suite. A cold cache triggers exactly one `resolve`
+   (download-or-build) and stores the result, **and the stored `ContentAddress` equals that committed pin**; a
+   warm cache returns a handle with no resolve, proven by the argv-recording shim / `strace` observer at the OS
+   boundary (§M.5) capturing zero toolchain-or-backend subprocess on the warm path; there is no path that accepts
    a URL or free string, asserted by the committed compile-fail negative `test/negative/phase_48_url_arm.hs`
-   failing at the constructor locus with its named error, paired with the closed-catalog positive that compiles.
+   (Phase-6 corpus, independently authored) failing at the constructor locus with "no `Url`/free-string
+   constructor", paired with the closed-catalog positive that compiles.
    The committed seeded mutant `resolve _ = <fixed-marker>` ([Gate integrity](#gate-integrity) part (b) mutant (a))
    must turn the stored-address assertion red.
 2. Every subprocess the resolver spawns is invoked by absolute path, never resolved against `PATH` — asserted by
@@ -800,23 +772,10 @@ Production model inference through the resolved engine is Phase 49, not a hidden
 bounded ephemeral volume, client-handle protocol, and concurrency discipline that makes a second client
 pod's lookup a HIT against the owner's resolved copy), plus `tools/phase48_determinism_jitcache_live.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: on the live
-single-node `kind` cluster, one cache-owner pod and two client pods scheduled to the same node name the same
-`EngineRuntime` identity; the **first** client request is a MISS that the owner materializes into its
-bounded disk-backed `emptyDir` (stored bytes sha256-matching the `test/oracle/phase_48_oracle.dhall` pin),
-the **second** client lookup is a **HIT** that reuses the resident handle with **no re-materialization** —
-proven by an **OS-boundary observer**, not a resolver counter: the resident entry's inode and mtime are
-unchanged across the second lookup, and the in-cluster `distribution` registry access log plus an egress
-capture record **zero** new pull or build subprocess for the second client. The owner's rendered manifest
-has exact provision-derived CPU/memory/`ephemeral-storage` requests+limits, `emptyDir.sizeLimit`, and no
-writable `hostPath`; the applied ephemeral request is at least the volume bound plus writable/log headroom.
-The concurrent-first-miss race is **operationalized** so the two client requests provably overlap: both
-block on a shared barrier and materialization is deliberately slowed (a payload-size floor or an injected
-delay in the fixture backend) so **both provably observe MISS before either store commits** — then the suite
-asserts exactly one final resident entry, that its bytes hash to the catalog pin, and that **no partial/temp file remains** in the cache directory. The owner consumes the placement's `ProvisionedCacheDemand`: its
-semaphore enforces the finite maximum of distinct first-miss materializations and its digest-keyed
-single-flight table makes same-digest requests share one catalog-derived temporary footprint. A race that
-never overlaps (serialized by accident) does not satisfy this clause.
+**Independent Validation**: live on the single-node `kind` cluster. Reuse is proven by an **OS-boundary
+observer**, never by a resolver counter, and the concurrent-first-miss race is **operationalized** so both
+clients provably observe MISS before either store commits; a race that never overlaps (serialized by accident)
+does not satisfy the clause. The numbered validation list below carries each.
 **Docs to update**:
 `documents/engineering/content_addressing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -839,12 +798,18 @@ that later names it, without a shared writable host mount.
   host is a legitimate first miss).
 
 ### Validation
-1. Client A's first `resolve` is a MISS that the cache owner materializes to bytes hashing to the catalog pin;
-   Client B on the same node HITs the resident handle with no re-materialization, proven by the OS-boundary
-   observer — unchanged resident inode/mtime and zero new registry pull / build subprocess for Client B — never
-   by a resolver-emitted counter. The owner pod's resource/volume projection matches its pure provision.
-2. Two concurrent first-misses, **forced to overlap by a shared barrier and slowed materialization so both observe MISS before either commits**, converge to exactly one stored copy whose bytes hash to the catalog pin;
-   no partial/temp file remains and no torn or duplicate resident entry exists. Repeated same-digest requests use
+1. One cache-owner pod and two client pods scheduled to the same node name the same `EngineRuntime` identity.
+   Client A's first `resolve` is a MISS that the owner materializes into its bounded disk-backed `emptyDir`, to
+   bytes sha256-matching the `test/oracle/phase_48_oracle.dhall` pin; Client B on the same node HITs the resident
+   handle with no re-materialization, proven by the OS-boundary observer — unchanged resident inode/mtime, and
+   the in-cluster `distribution` registry access log plus an egress capture recording zero new pull or build
+   subprocess for Client B — never by a resolver-emitted counter. The owner's rendered manifest carries exact
+   provision-derived CPU/memory/`ephemeral-storage` requests+limits, its `emptyDir.sizeLimit`, and no writable
+   `hostPath`, with the applied ephemeral request at least the volume bound plus writable/log headroom.
+2. Two concurrent first-misses, **forced to overlap by a shared barrier and materialization deliberately slowed
+   (a payload-size floor or an injected delay in the fixture backend) so both observe MISS before either
+   commits**, converge to exactly one stored copy whose bytes hash to the catalog pin;
+   no partial/temp file remains in the cache directory and no torn or duplicate resident entry exists. Repeated same-digest requests use
    one in-flight temporary extent, while an `(n+1)`th distinct missing digest queues and the observed simultaneous
    set never exceeds the provisioned finite concurrency.
 3. Mark an observed unpinned resident for pruning and attempt a replacement whose resident-plus-temp peak would
@@ -860,29 +825,10 @@ Cross-node reuse remains out of contract; a different node legitimately starts c
 **Implementation**: `test/dhall/phase_48_engine_cache.dhall` (the gate workflow naming a
 linux-cpu engine identity), `tools/phase48_gate.py`, and `test/live/Phase48LiveSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the gate `.dhall` names the one representative identity
-`EngineRuntime.LlamaCppCpu@<pinned-ver>` ([Gate integrity](#gate-integrity)); the harness asserts the first
-client request is a first-miss materialization by the per-node cache owner into its `CacheBudget`-bounded
-`emptyDir`, whose stored bytes **sha256-match the `test/oracle/phase_48_oracle.dhall` pin**, the named arm
-**actually executed** (the argv-shim/`strace` observer recorded the absolute-path `g++` compile on the
-`build` arm, or the `distribution` registry access log recorded the in-cluster serve on the `download` arm),
-and the returned handle is **live** (the binary runs and reports the pinned `--version`). "**Zero public-registry pull authored by URL**" is discharged by **live network observation** (a CNI/egress capture
-plus the `distribution` audit log showing no request to any public registry host), **in addition to** the
-Gate-1 type-level foreclosure — the type check alone does not satisfy this clause. The owner manifest's
-CPU/memory/`ephemeral-storage` requests+limits and `emptyDir.sizeLimit` match its pure provision, the
-request covers that bound plus writable/log headroom, and it contains no writable `hostPath`. A second
-client pod on the same node reuses the cache-resident handle with the reuse proven by the OS-boundary
-observer (unchanged resident inode/mtime, zero new pull for the second client). A **postflight on-disk peak/final measurement** confirms pin-aware eviction and resource enforcement: with the cache filled to
-budget, a pinned resident survives and an unpinned resident is evicted, and measured peak/final bytes stay
-within `CacheBudget` (measured on disk, not self-reported). The gate independently reconstructs the observed
-resident digest map and matches it to the private `ProvisionedCacheDemand`; selected-for-deletion entries
-remain charged until absent. A catalog digest-size conflict, a resident-plus-bounded-temp peak one byte over
-budget/backing, a bounded-parallel-derived capacity overflow, or an ephemeral request smaller than the
-bounded volume plus writable/log headroom is rejected by the Phase-7 fold at the Phase-11
-**`provision-seal`** before any resolve, and each materialized artifact's measured final and temporary
-on-disk sizes are asserted `≤` its catalog-owned `AssetMaterializationDemand`. The committed seeded mutants
-`resolve _ = <fixed-marker>` and `prune = pure ()` ([Gate integrity](#gate-integrity)) must turn the gate
-red. The run emits a Register-3 proven/tested/assumed ledger.
+**Independent Validation**: live on the single-node `kind` cluster. Every behavioural claim — arm executed,
+handle live, zero public-registry pull, cross-pod reuse, on-disk peak and eviction — is read from an OS-boundary
+observer or a postflight disk measurement, never a self-report, and each capacity refusal is tagged and
+pre-effect. The numbered validation list below carries each.
 **Docs to update**:
 `documents/engineering/content_addressing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-48
 status when the gate passes), `DEVELOPMENT_PLAN/substrates.md`.
@@ -922,21 +868,27 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
 
 ### Validation
 1. On the live linux-cpu `kind` cluster, the first client resolves `EngineRuntime.LlamaCppCpu@<pinned-ver>`
-   through the cache owner on first miss into the cache, the stored bytes sha256-match the committed
-   `test/oracle/phase_48_oracle.dhall` pin, the named arm actually ran (attested by the OS-boundary
-   argv-shim/`strace` on `build` or the `distribution` audit log on `download`), and the handle is live (reports
-   the pinned `--version`); "zero public-registry pull" is proven by live egress/CNI capture and the registry
-   audit log, not by the type check alone. The owner has exact provision-derived ephemeral resources/volume
-   bounds, its request covers those bounds plus writable/log headroom, and it has no writable `hostPath`. A second
+   through the cache owner on first miss into its `CacheBudget`-bounded `emptyDir`, the stored bytes sha256-match
+   the committed `test/oracle/phase_48_oracle.dhall` pin, the named arm actually ran (attested by the OS-boundary
+   argv-shim/`strace` recording the absolute-path `g++` compile on `build`, or the `distribution` registry audit
+   log recording the in-cluster serve on `download`), and the handle is live (reports the pinned `--version`).
+   "Zero public-registry pull authored by URL" is discharged by live network observation — a CNI/egress capture
+   plus the `distribution` audit log showing no request to any public registry host — **in addition to** the
+   Gate-1 type-level foreclosure; the type check alone does not satisfy this clause. The owner has exact
+   provision-derived CPU/memory/`ephemeral-storage` requests+limits and `emptyDir.sizeLimit` matching its pure
+   provision, its request covers those bounds plus writable/log headroom, and it has no writable `hostPath`. A second
    client on the node reuses the resident handle with no resolve, proven by unchanged resident inode/mtime and
    zero new pull. The committed seeded mutant `resolve _ = <marker>` ([Gate integrity](#gate-integrity) part (b) mutant (a)) must turn this clause red.
-2. A postflight on-disk peak/final measurement confirms pin-aware eviction (pinned resident survives, unpinned
-   evicted, measured bytes remain within `CacheBudget`); the committed mutant `prune = pure ()`
-   ([Gate integrity](#gate-integrity) part (b) mutant (b)) must turn this red. A resident-plus-temp one-byte
-   overflow, digest-size conflict, early deletion credit, bounded-parallel-derived overflow, and
-   ephemeral-under-reserved owner each return their **tagged** `Left` at the Phase-7 fold before any resolve runs,
-   and each materialized artifact's measured final/temp on-disk size is within its catalog-owned
-   `AssetMaterializationDemand`.
+2. With the cache filled to budget, a postflight on-disk peak/final measurement confirms pin-aware eviction and
+   resource enforcement: the pinned resident survives, the unpinned resident is evicted, and measured peak/final
+   bytes remain within `CacheBudget` — measured on disk, not self-reported. The gate independently reconstructs
+   the observed resident digest map and matches it to the private `ProvisionedCacheDemand`, with
+   selected-for-deletion entries still charged until observed absent. The committed mutant `prune = pure ()`
+   ([Gate integrity](#gate-integrity) part (b) mutant (b)) must turn this red. A resident-plus-bounded-temp
+   one-byte overflow, catalog digest-size conflict, early deletion credit, bounded-parallel-derived overflow, and
+   ephemeral-under-reserved owner each return their **tagged** `Left` at the Phase-7 fold at the Phase-11
+   **`provision-seal`** before any resolve runs, and each materialized artifact's measured final/temp on-disk
+   size is within its catalog-owned `AssetMaterializationDemand`.
 3. The Register-3 ledger is emitted and marks first-miss resolution, cross-pod reuse, and pin-aware eviction as
    *tested on linux-cpu*, URL-foreclosure and the required bounded-`CacheBudget` field as *proven-in-types*, the
    numeric cache/ephemeral inequalities as *provision-seal checked*, and the model/kernel tiers (Phases 49/51) and

@@ -90,11 +90,10 @@ domain adapter, live identity/provider/cluster, deployment/HA, a second register
 **Dependencies:** Phase 21 — generic browser interpreter; Phase 22 — authenticated scoped UI-server boundary.
 **Substrate:** none — local browser, authority, server, and fake data/workflow/artifact processes only.
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `python3 tools/phase23_gate.py` passes the Phase-0-pinned single-/multi-tenant apps and authored
-interactions, complete generated-surface join, post-start workflow/artifact challenge, own/foreign scope pairs,
-independent DOM and OS-boundary effect observations, direct-bypass probes, and every seeded mutant in
-[Gate integrity](#gate-integrity). Phase 24 does not open unless this command emits a green Register-2 ledger
-with all live/domain/HA layers UNVERIFIED.
+**Gate:** `python3 tools/phase23_gate.py` passes the Phase-0-pinned apps, authored interactions,
+generated-surface join, fresh challenge, scope pairs, external observations, bypass probes, and seeded mutants
+of [Gate integrity](#gate-integrity). Phase 24 does not open unless it emits a green Register-2 ledger with all
+live/domain/HA layers UNVERIFIED.
 
 ## Gate integrity
 

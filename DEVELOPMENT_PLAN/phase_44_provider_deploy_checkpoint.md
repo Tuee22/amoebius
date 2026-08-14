@@ -147,24 +147,10 @@ the deploy; `→ provider` (EKS) is the deploy target class, not a hardware subs
 managed node group) and writes real Vault-enveloped checkpoint objects into MinIO; no register-1/2 in-process
 check discharges it.
 
-**Gate:** `cabal test provider-deploy-checkpoint-live` is green: an `InForceSpec` that, from a **linux-cpu** parent, issues a `pulumi up` under the
-Deployment-`replicas=1` singleton (no bespoke election) that stands up a provider-managed **EKS control plane + one base managed node group** from the fixture's named CPU-only base `ProviderNodeClass` (`accelerator = None`),
-whose observed joined node's allocatable CPU, memory, logical pod-ephemeral capacity, closed
-nodefs/imagefs/containerfs identities/capacities, resident OCI content/snapshot inventory, storage-model
-version, enforced pull policy, and accelerator absence meet the declared class. Before any checkpoint write or
-cloud effect the parent first places the complete `ProvisionedPulumiExecutionDemand` executor Job plus
-plugin/workspace peaks and provisions the exact `PulumiCheckpointObjectDemand` object peak against its
-`StorageBudgetId` and exclusive `ObjectStoreMutationAdmission`. The exact checkpoint object set lands in MinIO
-as opaque Vault-Transit-enveloped objects **decryptable only via a direct Vault Transit `decrypt` call with the per-child key** (asserted against the committed ciphertext-shape oracle) and **not** from any key material on
-the engine pod's filesystem (OS-boundary filesystem observer records zero plaintext-data-key bytes); a deploy
-attempted with a **sealed Vault refuses before any cloud-side create**; the `pulumi` subprocess is spawned by
-absolute path with **no** `PULUMI_*`/`AWS_*`/`PULUMI_CONFIG_PASSPHRASE`/`PATH` in its environment (OS-boundary
-`execve` observer checked against the committed expected-argv/env table); and the committed seeded mutants
-`mut-44.1-static-key` and `mut-44.1-leak-path` go **red**. The per-run stack is torn down for cost hygiene, but
-the independent leak-free tag-sweep proof is [phase_47_provider_dynamic_nodes.md](phase_47_provider_dynamic_nodes.md)'s
-gate, deferred and never depended on here. The gate delegates its committed-fixture / mutant / oracle apparatus
-to [`## Gate integrity`](#gate-integrity) ([development_plan_standards.md §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
-Each run emits a proven/tested/assumed ledger artifact.
+**Gate:** `cabal test provider-deploy-checkpoint-live` is green: an `InForceSpec` in which the **linux-cpu**
+parent's `replicas=1` singleton stands up a provider-managed **EKS control plane + one base managed node
+group** and holds the whole checkpoint as enveloped MinIO objects. Its apparatus is
+[Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
@@ -182,6 +168,30 @@ create-vs-delete slice (the `ec2:DeleteVolume` expected-denied-call tag, the `pr
 static-CSI `volumeHandle` bind, `mut-46.1-*`) is [phase_46_provider_ebs_credential.md](phase_46_provider_ebs_credential.md)'s;
 and the scheduler-cutover slice (`mut-45.1-public-pull`, the `LinuxHost`-absence foreclosure tag) is
 [phase_45_provider_child_bringup.md](phase_45_provider_child_bringup.md)'s. Partitioned to this seam:
+
+**The acceptance arms.** The single condition the gate line states decomposes into the arms below, and
+delegating them here rather than inlining them is exactly the form
+[development_plan_standards.md §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
+reserves. The `pulumi up` is issued from inside the linux-cpu parent by the Deployment-`replicas=1` singleton,
+whose single-instance is a k8s/etcd property and never a bespoke election, and it raises the control plane and
+base group from the fixture's named CPU-only base `ProviderNodeClass` (`accelerator = None`). The joined
+node's observed allocatable CPU, memory, logical pod-ephemeral capacity, closed
+nodefs/imagefs/containerfs identities and capacities, resident OCI content/snapshot inventory, storage-model
+version, enforced pull policy, and accelerator absence must all meet that declared class. Ordering is itself
+an arm: before any checkpoint write or cloud effect the parent first places the complete
+`ProvisionedPulumiExecutionDemand` executor Job plus its plugin/workspace peaks, then provisions the exact
+`PulumiCheckpointObjectDemand` object peak against its `StorageBudgetId` and exclusive
+`ObjectStoreMutationAdmission`. The exact checkpoint object set lands in MinIO as opaque
+Vault-Transit-enveloped objects decryptable only via a direct Vault Transit `decrypt` call with the per-child
+key — asserted against the committed ciphertext-shape oracle — and not from any key material on the engine
+pod's filesystem, where the OS-boundary filesystem observer records zero plaintext-data-key bytes. A deploy
+attempted with a sealed Vault refuses before any cloud-side create. The `pulumi` subprocess is spawned by
+absolute path with no `PULUMI_*`/`AWS_*`/`PULUMI_CONFIG_PASSPHRASE`/`PATH` in its environment, checked by the
+OS-boundary `execve` observer against the committed expected-argv/env table. The committed seeded mutants
+`mut-44.1-static-key` and `mut-44.1-leak-path` go red. The per-run stack is torn down for cost hygiene, but
+the independent leak-free tag-sweep proof is
+[phase_47_provider_dynamic_nodes.md](phase_47_provider_dynamic_nodes.md)'s gate, deferred and never depended
+on here, and each run emits a proven/tested/assumed ledger artifact.
 
 **Representative set (§M.7).** The deploy slice of the committed topology
 `test/dhall/phase_44_provider_provision.dhall`: one `Managed Eks` control plane and one base managed node group
@@ -292,17 +302,10 @@ provider program — the phase-new module), built on the `amoebius-pulumi` engin
 [system_components.md](system_components.md); not yet built)
 **Blocked by**: reopened numeric predecessor gates.
 **Requires**: `cloud-account` — the credentialed provider account this deploy checkpoint targets. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-29 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-operators-prompt-automated)).
-**Independent Validation**: from a linux-cpu parent, a
-`pulumi up` issued by the in-cluster singleton reaches a ready EKS control plane + base node group built
-from the fixture's named base-node-class capacity/capability shape; the parent first places the complete
-executor Job plus plugin/workspace peaks and provisions the exact checkpoint state-field/revision object
-peak against its `StorageBudgetId` and exclusive mutation admission; the joined node's observed allocatable
-CPU, memory, logical pod-ephemeral capacity, closed nodefs/imagefs/containerfs identities and capacities,
-resident OCI content/snapshot inventory, storage-model version, and enforced image-pull policy meet the
-declared values and its accelerator offering is explicitly `None`; the exact checkpoint object set lands in
-MinIO as opaque Vault-enveloped objects unreadable without an unsealed Vault; a deploy attempted with a
-sealed Vault **refuses before any cloud mutation**; the deploy subprocess is spawned with no
-`PULUMI_*`/`AWS_*`/`PATH` in its environment and the `pulumi`/plugin paths are absolute.
+**Independent Validation**: `cabal test provider-deploy-checkpoint-live` from a linux-cpu parent, run against
+this sprint alone. The singleton-issued deploy, the ordered executor and checkpoint provisioning, the joined
+node's declared shape, the enveloped MinIO object set, the sealed-Vault refusal, and the environment-free
+`execve` are each a numbered check in the Validation list below.
 **Docs to update**:
 `documents/engineering/pulumi_iac_doctrine.md` (§1, §2, §4),
 `documents/engineering/cluster_lifecycle_doctrine.md` (§3), `documents/engineering/substrate_doctrine.md`

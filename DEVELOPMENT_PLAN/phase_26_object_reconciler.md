@@ -218,39 +218,43 @@ Phase 53 respectively).
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** in **Register 3**, the Phase-13 pure deployment-global `renderAll` list for the pinned
-[representative reconcile corpus](#gate-integrity) is rendered in full and separately validated/indexed with its
-source activation stages, then enacted in a scratch namespace on the live single-node `kind` cluster **only through stage-eligible typed actions** — list membership alone is never generic-SSA authorization. The cold-start
-authority can create only the derived control-plane Namespace and the deployment-global mandatory reconciler
-`Lease`, acquire it under the bootstrap-host identity through the typed `Absent → BootstrapHeld` action, and read
-that holder/object-UID/resourceVersion back; its rounding-aware renewal count and exact one-update/one-revision-
-per-attempt etcd debits are already provisioned. Every present-object renew uses the expected observed
-resourceVersion CAS and a fresh single-use token; acknowledgement, conflict, timeout, or lost response consumes
-the token and requires re-observation before authority continues. The Phase-25 registry/proxy objects are
-authenticated read-only as the one declared bootstrap predecessor and cannot be rewritten before `Lease`
-acquisition. A fresh independent whole-deployment inventory then proves the `ProvisionedSpec`'s declared
-CPU/memory/logical-ephemeral-storage, finite CPU-limit budget, pod/CNI/CSI slots, etcd logical quota and mapped
-files, layout-routed physical node storage, durable/object-store/migration/native-host-cache pools, and
-accelerator device/net-and-current-free-VRAM assumptions plus content/snapshot, controller-child/webhook, gateway,
-and executor bounds fit the **residual transition capacity** after every surviving live allocation. The resulting
-`ValidatedLiveTarget` drives scoped SSA, kind-indexed controller actions, the three staged serial/host/accelerator
-actions, Job terminal retention (with durable completion/cleanup capability absent in this live phase), and
-authenticated deletion. Each action's postcondition is **observed** (never a `threadDelay`) until the generation
-converges. A **mismatch writes nothing** — any missing/unbounded/stale arm fails closed with its specific offending
-resource before effects. An **immediate re-run** of the same spec is a **no-op** — only `NoOp`/unchanged
-terminal-retention decisions, zero further mutations, and the same converged live state, measured **byte-stable**
-by independent apiserver, `Lease`, and host observers. The committed seeded mutants (`waitForReady = pure ()`;
-generation-label-stamped-after-diff; delete-from-owner-label-alone; healthy-CR/over-bound-child on amoebius's own
-in-phase capacity/reservation CRD) each go red, and the committed never-ready fixture keeps convergence red on the
-honest engine. See [Gate integrity](#gate-integrity) for the pinned fixtures, mutants, and independent oracle.
-The `amoebius-capacity` scheduler bootstrap, its CAS reservation/Binding ledger, and execution-identity admission
-are **not** part of this gate; they are Phase 27's gate, layered on this reconciler.
+**Gate:** in Register 3 the pinned reconcile corpus renders, enacts on the live single-node `kind` cluster
+through stage-eligible typed actions alone, converges under observed postconditions, and re-runs byte-stable as
+a no-op against every fixture, oracle, and mutant in [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
 The apparatus below is this phase's **slice** of the source reconcile corpus, partitioned along the
 object-reconciler seam; the `amoebius-capacity` scheduler's bootstrap/cutover/reservation fixtures and its
-`bind-before-reservation-CAS` mutant are partitioned to Phase 27 and are **not** duplicated here.
+`bind-before-reservation-CAS` mutant are partitioned to Phase 27 and are **not** duplicated here. The
+`amoebius-capacity` scheduler bootstrap, its CAS reservation/Binding ledger, and execution-identity admission are
+likewise **not** part of this gate; they are Phase 27's gate, layered on this reconciler.
+
+**What the acceptance run must do.** The Phase-13 pure deployment-global `renderAll` list for the pinned
+representative corpus below is rendered in full and separately validated/indexed with its source activation
+stages, then enacted in a scratch namespace **only through stage-eligible typed actions** — list membership alone
+is never generic-SSA authorization. The cold-start authority can create only the derived control-plane Namespace
+and the deployment-global mandatory reconciler `Lease`, acquire it under the bootstrap-host identity through the
+typed `Absent → BootstrapHeld` action, and read that holder/object-UID/resourceVersion back; its rounding-aware
+renewal count and exact one-update/one-revision-per-attempt etcd debits are already provisioned. Every
+present-object renew uses the expected observed resourceVersion CAS and a fresh single-use token; acknowledgement,
+conflict, timeout, or lost response consumes the token and requires re-observation before authority continues. The
+Phase-25 registry/proxy objects are authenticated read-only as the one declared bootstrap predecessor and cannot
+be rewritten before `Lease` acquisition.
+
+A fresh independent whole-deployment inventory then proves the `ProvisionedSpec`'s declared
+CPU/memory/logical-ephemeral-storage, finite CPU-limit budget, pod/CNI/CSI slots, etcd logical quota and mapped
+files, layout-routed physical node storage, durable/object-store/migration/native-host-cache pools, and
+accelerator device/net-and-current-free-VRAM assumptions plus content/snapshot, controller-child/webhook, gateway,
+and executor bounds fit the **residual transition capacity** after every surviving live allocation. The resulting
+`ValidatedLiveTarget` drives scoped SSA, kind-indexed controller actions, the three staged
+serial/host/accelerator actions, Job terminal retention (with durable completion/cleanup capability absent in this
+live phase), and authenticated deletion. Each action's postcondition is **observed** (never a `threadDelay`) until
+the generation converges. A **mismatch writes nothing** — any missing/unbounded/stale arm fails closed with its
+specific offending resource before effects. An **immediate re-run** of the same spec is a **no-op** — only
+`NoOp`/unchanged terminal-retention decisions, zero further mutations, and the same converged live state, measured
+**byte-stable** by independent apiserver, `Lease`, and host observers. Every committed seeded mutant below goes
+red, and the committed never-ready fixture keeps convergence red on the honest engine.
 
 ```mermaid
 flowchart LR

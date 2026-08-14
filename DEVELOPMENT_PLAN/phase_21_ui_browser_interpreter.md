@@ -104,14 +104,16 @@ register, or a substrate.
 **Dependency:** Phase 20 — canonical immutable `ClientPlan` encoding and public contracts.
 **Substrate:** none — local Chromium and harness-owned fake processes only; no cluster or external service.
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `python3 tools/phase21_gate.py` builds the generic bundle and passes the Phase-0-pinned
-plans/interactions, complete generated-enumeration join, post-start fresh-challenge round trip, independent DOM
-and OS-boundary network observations, differential traces, keyboard/focus sequences, built-artifact/CSP
-checks, bypass negatives, and every seeded mutant in
-[Gate integrity](#gate-integrity). Phase 23 does not open on the browser branch unless this one command emits a
-green Register-2 ledger with live layers UNVERIFIED.
+**Gate:** `python3 tools/phase21_gate.py` builds the generic bundle and passes every check and seeded mutant
+in [Gate integrity](#gate-integrity), emitting a Register-2 ledger whose live layers stay UNVERIFIED. Phase 23
+does not open on the browser branch until it does.
 
 ## Gate integrity
+
+That one command exercises every leg below — the Phase-0-pinned plans and interactions, the complete
+generated-enumeration join, the post-start fresh-challenge round trip, the independent DOM and OS-boundary
+network observations, the differential traces, the keyboard/focus sequences, the built-artifact and CSP
+checks, the bypass negatives, and every seeded mutant. A leg that does not run leaves the gate red.
 
 Phase 0 commits all plans, interactions, expected state traces, DOM/accessibility snapshots, keyboard/focus
 sequences, transport rows, security-header policy, artifact allowlist, and mutant expectations before the

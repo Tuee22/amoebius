@@ -109,15 +109,9 @@ Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 delete + recreate; a Register-1/2 in-process check cannot discharge it (though the *render-time*
 impossibility of a self-published ingress was already golden-locked pre-cluster in Phase 13).
 
-**Gate:** `python3 tools/phase32_gate.py` is green: on the live `linux-cpu` cluster carrying the standard service stack, every wild route — WAN, LAN,
-and localhost-browser — reaches a platform or app surface **only** through `LoadBalancer → Envoy/Gateway API →
-Keycloak`; an unauthenticated request to any surface is rejected at that edge; **no workload or chart can publish its own wild ingress** or open a backdoor NodePort (the sole exception being the host-origin,
-localhost-only NodePort, a distinct endpoint type); and the **Phase-28 storage-rebind regression still holds**
-— a marker row in the Keycloak Patroni DB and a marker object in MinIO survive a cluster delete + recreate
-byte-for-byte.
-The committed authenticated-WebSocket probe upgrades and exchanges a fresh challenge only with the valid
-session/Origin/nonce/subprotocol tuple; unauthenticated, wrong-Origin, replayed-nonce, wrong-subprotocol, and
-direct-Service attempts produce no backend frame.
+**Gate:** `python3 tools/phase32_gate.py` is green on the live `linux-cpu` stack: the only wild path to any
+surface is `LoadBalancer → Envoy/Gateway API → Keycloak`, and every fixture, origin probe, oracle, observer,
+and committed mutant in [Gate integrity](#gate-integrity) holds.
 
 The gate is not discharged by a deny-all edge, a self-authored clean scan, a circular "derived" assertion, or
 a skipped teardown. It positively exercises OIDC enforcement, validates its own scanners against committed
@@ -137,6 +131,17 @@ three. The `phase32-tester` realm/user fixture (`test/fixtures/phase32/realm.jso
 fixture until independently reviewed or replaced.
 
 ## Gate integrity
+
+The acceptance condition the gate command discharges is the single door itself. On the live `linux-cpu` cluster
+carrying the standard service stack, every wild route — WAN, LAN, and localhost-browser — must reach a platform
+or app surface **only** through `LoadBalancer → Envoy/Gateway API → Keycloak`, and an unauthenticated request to
+any surface must be rejected at that edge. No workload or chart may publish its own wild ingress or open a
+backdoor NodePort; the sole exception is the host-origin, localhost-only NodePort, which is a distinct endpoint
+type rather than a wild one. The committed authenticated-WebSocket probe must upgrade and exchange a fresh
+challenge only with the valid session/Origin/nonce/subprotocol tuple, while unauthenticated, wrong-Origin,
+replayed-nonce, wrong-subprotocol, and direct-Service attempts produce no backend frame. And the Phase-28
+storage-rebind regression must still hold behind the new edge: a marker row in the Keycloak Patroni database and
+a marker object in MinIO survive a cluster delete + recreate byte-for-byte.
 
 - **Oracle provenance (§M.1):** the route inventory (`route-inventory.golden`), the test realm/user
   (`realm.json`), the expected derived-NetworkPolicy set (`netpol-expected.golden`, see 32.3), and the marker
@@ -275,14 +280,10 @@ WebSocket guard corpus all pass.
 **Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Keycloak.hs`
 (built), `tools/phase32_keycloak_ingress_live.py`, and `test/live/Phase32KeycloakIngressLiveSpec.hs`.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: for every surface in the committed `route-inventory.golden`, a
-real OIDC login as the Phase-0 `phase32-tester` user yields the surface's content (2xx) **only** after
-traversing Keycloak, while an unauthenticated probe to the same route is rejected/redirected to the Keycloak
-login (positive enforcement, not a vacuous deny-all); the only reachable wild path is `LoadBalancer →
-Envoy/Gateway API → Keycloak`, confirmed per origin class from a distinct netns probe; the readiness DAG is
-proven by an **enforced-gating** experiment — the LB address and Keycloak readiness are withheld and the
-dependent step is observed (by an external harness) to block rather than proceed — not by post-hoc reading
-the implementation's own event log.
+**Independent Validation**: positive OIDC enforcement, not a vacuous deny-all — every committed surface is
+served only after traversing Keycloak, the wild path is confirmed per origin class, and the readiness edges are
+proven by withholding them, never by reading the implementation's own event log. The numbered validation list
+below carries each experiment.
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`
 
@@ -343,17 +344,10 @@ pair, Vault EAB provenance shim, bounded ACME staging stand-in, and Dhall litera
 **Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Tls.hs`
 (built), `test/fixtures/phase32/backdoor-seed.yaml`, and `tools/phase32_keycloak_ingress_live.py`.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the live scan is
-itself validated against a **committed seeded violation** — an out-of-band NodePort/`Ingress` applied via
-raw `kubectl` (bypassing the DSL) makes the scan go red and the ledger record it, and its removal restores
-green — so a scan that greps a label the renderer never emits cannot pass vacuously; with the seed removed,
-the scan finds no non-Keycloak wild path (no service exposes a backdoor NodePort reachable from a WAN/LAN
-netns probe); the render layer cannot express a workload-owned wild `Ingress` (`WildIngress` is a
-Keycloak-edge-only construct); the sole carve-out is the host-origin, localhost-only NodePort, proven
-unreachable by a **real probe from a non-host source IP** (a distinct netns with a non-loopback address),
-not by inspecting the Service/listener bind config; public-edge TLS chains through an ACME issuance whose
-EAB material is proven — by an **argv/env-recording shim on the ACME client** — to be read from a Vault
-`SecretRef`, with the rendered Dhall grepped to confirm no EAB literal.
+**Independent Validation**: the scanner is itself validated: a committed raw-`kubectl` bypass seed must turn it
+red and its removal green, so a scan that greps a label the renderer never emits cannot pass vacuously. Off-host
+unreachability and Vault-sourced EAB provenance are observed from the OS boundary; the numbered validation list
+below carries each probe.
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/illegal_state/illegal_state_catalog.md`, `documents/engineering/pulumi_iac_doctrine.md`
 
@@ -386,7 +380,7 @@ one carve-out really is a *different type* of endpoint, not a wild one.
 1. First validate the scanner: apply a committed out-of-band NodePort/`Ingress` seed via raw `kubectl` (not the
    DSL) that opens a WAN/LAN-reachable bypass; assert the scan turns **red** and the ledger records the
    violation; remove the seed and assert **green**. Then, with no seed present, scan the live cluster and assert
-   no exposed backdoor NodePort and no non-Keycloak wild route.
+   no exposed backdoor NodePort reachable from a WAN/LAN netns probe, and no non-Keycloak wild route.
 2. Assert the host-origin, localhost-only NodePort is unreachable off the host by an **actual probe from a distinct network namespace with a non-loopback source IP** (which must fail/time out) paired with a
    host-loopback probe that succeeds — differing only in origin; inspecting the bind config alone is not
    sufficient.
@@ -410,14 +404,10 @@ matches it, and a distinct scratch Pod observes deny→allow→deny as its decla
 **Implementation**: `src/Amoebius/Manifest/NetworkPolicy.hs`,
 `src/Amoebius/Platform/Edge.hs` (built), `test/fixtures/phase32/netpol-expected.golden`, and the live harness.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: "derived" is oracled two ways that a hardcoded static allow-list cannot satisfy. (1) **Graph variation:** the gate deploys a scratch consumer workload, adds a declared consuming edge to a provider,
-re-renders/re-applies, and asserts both the applied policy set **and** live reachability flip on; then
-removes the edge and asserts denial returns — so the policy must be a total function of the graph, not the
-fixed Phase-30/31 service names. (2) **Independent set-equality:** the applied policies are compared for set
-equality against the oracle-pinned `netpol-expected.golden` and against a **separate graph-walker** over
-the declared dependency edges (a code path distinct from `renderAll`), never the reconciler's own fold.
-After apply, a pod declaring consumer of `B` reaches `B`, a pod that does not is denied, and a probe to an
-undeclared edge times out.
+**Independent Validation**: "derived" is oracled two ways that a hardcoded static allow-list cannot satisfy —
+graph variation, which adds and removes a declared edge and watches both the applied policy set and live
+reachability follow, and set equality against an independently authored expectation. The numbered validation
+list below carries both.
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/illegal_state/illegal_state_catalog.md`
 
@@ -444,9 +434,10 @@ and every other is denied.
 2. Assert a probe to an undeclared east-west edge is denied (times out).
 3. Prove "derived" by **graph variation**: deploy a scratch consumer, add a declared edge to a provider,
    re-render/re-apply, and assert the applied policy set gains exactly the corresponding allow and live
-   reachability flips on; remove the edge and assert the allow is withdrawn and reachability flips off. This
-   fails against committed mutant (b) (drop one allow, add one undeclared allow), which the gate must show going
-   red.
+   reachability flips on; remove the edge and assert the allow is withdrawn and reachability flips off. The
+   applied set must therefore be a total function of the declared graph, not of the fixed Phase-30/31 service
+   names. This fails against committed mutant (b) (drop one allow, add one undeclared allow), which the gate must
+   show going red.
 4. After independent review, assert set equality between the applied policies and `netpol-expected.golden` and the
    output of an **independent graph-walker** (distinct from `renderAll`) over the declared dependency edges — not
    by re-running the implementation's own `derive`.
@@ -462,20 +453,10 @@ destroying the retained platform stack.
 **Implementation**: `src/Amoebius/Platform/Edge.hs`, `tools/phase32_rebind_regression.py`,
 `tools/phase32_gate.py`, and `test/live/Phase32KeycloakIngressLiveSpec.hs` (built).
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the gate harness proves both halves in one run — the single-door invariant end-to-end
-(unauthenticated request rejected at the edge, positive OIDC round-trip served for the committed route
-inventory, no non-Keycloak wild path) and the marker-bytes round-trip surviving a **witnessed** cluster
-delete + recreate. Before full cluster deletion, the harness performs Phase 28's intermediate PVC-delete
-observation against the still-running old apiserver: it quiesces the witnesses, drives each through its
-**owning resource's supported stop path** (the operator-owned Patroni witness through its
-`PerconaPGCluster`/operator path, never by mutating the operator's child StatefulSet; the directly owned
-MinIO witness through its StatefulSet), waits until no Pod references the PVCs, then deletes the PVCs; the
-PVCs disappear, the old-cluster PV objects report `Released`, and the backing bytes remain intact. It then
-performs `cluster delete` and confirms from the host boundary that the old cluster, node container, and
-apiserver are absent. After `cluster recreate`, it records a **recreate witness** in the ledger — the
-recreated cluster's identity differs (new cluster CA / kube-system pod UIDs / `kind` node container ID) —
-before the read-back counts. A harness that skips the delete or reads back from the same never-torn-down
-cluster fails this witness.
+**Independent Validation**: the harness proves both halves in one run and cannot fake either: the single-door
+invariant end-to-end, and the committed marker bytes surviving a **witnessed** cluster delete and recreate. A run
+that skips the delete, or reads back from the same never-torn-down cluster, fails the recreate witness. The
+numbered validation list below carries the sequence.
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/storage_lifecycle_doctrine.md`
 
@@ -491,13 +472,15 @@ deterministic storage rebind.
 - Run-local image provenance that consumes the verified Phase-25 identity and current registry catalog; remove
   `test/fixtures/phase32/expected-base-digest.txt` and never replace it with another copied digest.
 - The storage-rebind regression: write the committed marker row (`marker-row.sql`) into the Keycloak Patroni DB
-  and the committed marker object (`marker-object.bin`) into a MinIO bucket; perform the Phase-28 intermediate
-  observation while the old apiserver is still running by quiescing the witnesses, stopping each through its
-  owning resource's supported path (operator-mediated for Patroni; directly owned StatefulSet for MinIO),
-  waiting until no Pod references the PVCs, deleting the PVCs, and observing the old PV objects `Released`;
-  then `cluster delete` and prove the old cluster absent; `cluster recreate`,
+  and the committed marker object (`marker-object.bin`) into a MinIO bucket. Perform the Phase-28 intermediate
+  observation while the old apiserver is still running, quiescing the witnesses and stopping each through its
+  owning resource's supported stop path — the operator-owned Patroni witness through its
+  `PerconaPGCluster`/operator path, never by mutating the operator's child StatefulSet, and the directly owned
+  MinIO witness through its StatefulSet. Wait until no Pod references the PVCs, delete them, and observe the
+  PVCs gone, the old PV objects `Released`, and the backing bytes intact. Then `cluster delete`, proving from
+  the host boundary that the old cluster, its node container, and its apiserver are absent; `cluster recreate`,
   re-render/re-apply fresh PV objects over the retained backing, record the new cluster identity, and read the
-  same bytes back — the Phase-28 guarantee re-run behind the new edge; plus committed mutant (c), a
+  same bytes back — the Phase-28 guarantee re-run behind the new edge. Plus committed mutant (c), a
   delete-no-op harness variant the recreate-witness check must show going red.
 
 ### Validation

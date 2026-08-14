@@ -137,14 +137,9 @@ Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 **Register:** 3 — live infrastructure: a real parent and two real child clusters and a real geo-replicated
 workflow crossing an asynchronous boundary.
 
-**Gate:** `cabal test multicluster-spawn-live` is green: a parent spawns two children (re-running the spawn is a no-op observed at the OS boundary), exercises the classified workflow against the retained HA native-protocol data plane, and tears the forest down leak-free. The parent first
-observes physical-host residual and proves
-`parent engine carve + child-A carve + child-B carve + non-cluster commitments ≤ host` for CPU, memory, VM/node
-disk, logical pod-ephemeral capacity, and every layout-routed nodefs/imagefs backing; a
-one-byte/one-millicore overdraw in a child, executor Job, plugin/workspace volume, or checkpoint budget creates
-neither child. The private provisioned execution/checkpoint witnesses live under the one
-`ProvisionedInfrastructurePlan.batch` before the first Pulumi, SSH, or object-write effect; exact rendered Job
-resources and live MinIO revision objects must read back to that same witness.
+**Gate:** `cabal test multicluster-spawn-live` is green: a parent spawns two children, exercises the classified
+geo-replicated workflow across the boundary, and tears the forest down leak-free — under the pre-effect
+capacity proof, oracles, observers, and mutants of [Gate integrity](#gate-integrity).
 
 Concretely:
 - each child's delivered value is `project(subtree)` — discharged as a **committed compile-fail corpus**
@@ -167,6 +162,13 @@ Concretely:
 
 This phase's gate binds to
 the following named, committed artifacts so no self-authored harness or post-hoc fixture can pass it:
+- **Pre-effect capacity proof.** Before either child exists the parent observes the physical host's residual
+  and proves `parent engine carve + child-A carve + child-B carve + non-cluster commitments ≤ host` for CPU,
+  memory, VM/node disk, logical pod-ephemeral capacity, and every layout-routed nodefs/imagefs backing. A
+  one-byte or one-millicore overdraw in a child, an executor Job, a plugin or workspace volume, or a
+  checkpoint budget creates neither child. The private provisioned execution and checkpoint witnesses live
+  under the one `ProvisionedInfrastructurePlan.batch` before the first Pulumi, SSH, or object-write effect,
+  and the exact rendered Job resources and live MinIO revision objects must read back to that same witness.
 - **Compile-fail corpus (independent of the SUT).** `test/compile-fail/ChildInForceSpec/` holds **≥ 2** negative
   fixtures that each attempt to construct a `ChildInForceSpec` carrying a sibling or ancestor-only branch and
   **must fail to typecheck**, each asserting its **specific expected compile-fail locus/message** (the type
@@ -278,19 +280,10 @@ flowchart LR
 `src/Amoebius/Multicluster/ChildUnseal.hs`, `src/Amoebius/Vault/TransitChildKey.hs`,
 `src/Amoebius/Multicluster/SecretInjection.hs` — delivered and gate-covered.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a parent first runs `allocateForestSupply` over the
-observed single host and the parent + two child engine/backing demands, receiving three disjoint opaque
-`ClusterBudget`s; only then does it spawn two child `kind` clusters from inside itself. The same read-only
-prefix provisions an exact checkpoint object peak for each stack and a bounded-parallel Pulumi execution
-peak for both parent-side executor Jobs, plugins, and workspaces. A committed overdraw differing by one disk
-byte or one executor millicore fails with `SharedSupplyOvercommit`/`PulumiExecutionOvercommit` and the
-runtime/exec observer records zero child creates or checkpoint PUTs. Each admitted child comes up empty and
-reconciles toward its spec; the child's received value is shown — at the type level — to be
-`project(subtree)` with no field carrying a sibling or ancestor-only branch; each child unseals in each of
-the two sanctioned modes; child A's subtree ciphertext fails to decrypt under child B's Transit key even
-with the parent's Vault unsealed; a named `SecretRef` resolves to bytes the parent injected, never from a
-Dhall fragment or an env var; and each child, registered as a managed resource carrying its own `destroy`,
-tears down leak-free via one `reconcileAbsent` loop.
+**Independent Validation**: the read-only supply, checkpoint, and executor prefix is provisioned before any
+child, Pulumi, or object-write effect exists, and every claim is read back from an external runtime observer
+rather than from the spawn itself; the numbered Validation list below carries the fixtures, the error tags,
+and the mutant.
 **Docs to update**:
 `documents/engineering/cluster_lifecycle_doctrine.md`, `documents/engineering/vault_pki_doctrine.md`,
 `documents/engineering/pulumi_iac_doctrine.md`.
@@ -591,13 +584,14 @@ managed-resource registry entry so teardown is a reconcile, not a state machine.
 
 1. The committed shared-host-overdraw fixture exceeds the one host's image/disk budget by one byte; it returns
    `SharedSupplyOvercommit`, exposes no child-create continuation, and the external runtime/cloud audit contains
-   zero child mutations. Its paired fitting parent+two-child carve returns three owner-distinct budgets.
+   zero child mutations and zero checkpoint PUTs. Its paired fitting parent+two-child carve returns three
+   owner-distinct budgets.
    A changed-snapshot fixture consumes host/disk headroom after validation and before Pulumi; the immediate
    token recheck refuses with zero Pulumi calls, child containers, or backing allocations.
 2. Paired one-short fixtures remove only one executor/admission-gateway millicore, one byte of executor/gateway
    memory/pod-ephemeral, plugin-cache, workspace, or checkpoint `StorageBudget`; each returns the
-   dimension-specific provision error
-   before a Job, checkpoint write, SSH call, or child create. In the fitting case, Kubernetes API readback of
+   dimension-specific provision error — `PulumiExecutionOvercommit` on the executor, plugin, and workspace
+   dimensions — before a Job, checkpoint write, SSH call, or child create. In the fitting case, Kubernetes API readback of
    both rendered executor Jobs exactly matches the witnessed image, requests/limits, ephemeral/log/writable
    allowances, volumes, and `BoundedParallel 2` live set; MinIO `LIST`/`HEAD` plus gateway admission records
    match the exact stack/revision object identities and extents. Injecting a failed checkpoint CAS retains the
@@ -618,6 +612,14 @@ managed-resource registry entry so teardown is a reconcile, not a state machine.
    spec and the runtime subtree-inspection assertion goes red; mode (b) bricks with the parent sealed and
    unseals with it available; cross-child Transit decrypt fails; a graceful child teardown leaves zero surviving
    stacks by the OS-boundary observer, retained backing stores exempt.
+5. The read-only prefix completes before any effect. `allocateForestSupply` reads the observed single host
+   together with the parent and both child engine/backing demands, returns three disjoint opaque
+   `ClusterBudget`s, and provisions the exact checkpoint object peak for each stack and the bounded-parallel
+   Pulumi execution peak for both parent-side executor Jobs, their plugins, and their workspaces; only then
+   may the parent spawn a child from inside itself. Each admitted child then comes up empty, reconciles
+   toward its spec, unseals in each of the two sanctioned modes, resolves a named `SecretRef` to bytes the
+   parent injected rather than to a Dhall fragment or an env var, and — registered as a managed resource
+   carrying its own `destroy` — tears down leak-free through one `reconcileAbsent` loop.
 
 ### Remaining Work
 
@@ -629,14 +631,10 @@ None inside the sealed `kind`-child boundary. Child-local Vault processes remain
 **Implementation**: `src/Amoebius/Multicluster/GeoReplication.hs`,
 `src/Amoebius/Multicluster/ConfluenceClass.hs` — delivered and gate-covered.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: two sibling children replicate a `command → event* → result` workflow
-over native-protocol Pulsar geo-replication, write-once content-addressed MinIO blobs, and Patroni Postgres;
-a duplicate cross-cluster write is shown idempotent against the committed content-addressed golden; every
-crossing mutable multi-record invariant is sorted by the
-[§17](../documents/engineering/chaos_failover_second_axis.md#17-the-boundary-and-its-classifier) classifier
-into confluent (crosses freely) or non-confluent (held by bounded authority) against the committed
-independent classification table, an unclassified invariant defaulting to non-confluent; and the forest
-tears down leak-free by the OS-boundary observer.
+**Independent Validation**: two sibling children replicate a `command → event* → result` workflow across the
+boundary; the duplicate-write result is checked against the committed content-addressed golden and every
+crossing invariant against the committed classification table, never against the classifier's own
+re-derivation. The numbered Validation list below carries the cases.
 **Docs to update**:
 `documents/engineering/chaos_failover_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`.
 

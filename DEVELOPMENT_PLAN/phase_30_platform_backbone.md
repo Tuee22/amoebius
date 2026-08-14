@@ -116,38 +116,9 @@ or WSL2 on Windows hardware.
 on a real cluster, emitting a proven/tested/assumed ledger that names Register 3 and marks the runtime layer
 *tested*, never *proven*.
 
-**Gate:** on a single-node linux-cpu `kind` cluster the platform backbone — MetalLB, MinIO, and Pulsar
-(brokers + ZooKeeper metadata + BookKeeper bookies + offload) — **comes up HA** (each is its HA topology even
-at `replicas=1`: MinIO in distributed erasure-set mode, Pulsar multi-broker/multi-ZooKeeper/multi-bookie)
-**from generated manifests + baked binaries**
-(typed objects rendered by the Phase-26 `renderAll`, images resolved only in-cluster with **no public-registry pull**), with MinIO put/get and Pulsar produce/consume round-tripping and every app, init, and sidecar
-container carrying the **exact complete provision derived in its `ProvisionedServiceSpec`** — CPU, memory, and
-ephemeral-storage requests/limits; bounded pod-local volumes; exact durable claim/backing/presentation,
-required-usable bytes, and rounded raw capacities; and explicit
-cache `None` plus accelerator `None` on linux-cpu. BookKeeper's logical hot demand is expanded through
-write-quorum/recovery geometry into a per-bookie physical witness, and MinIO's committed + in-flight +
-failed-write-orphan peak is expanded through erasure/healing geometry into per-drive required usable bytes,
-then filesystem overhead and backing minimum/quantum produce private raw allocations before each StatefulSet
-claim-template group is rounded to its maximum `provisionedBytes` and debited uniformly;
-**the registry→MinIO S3-driver rehoming lands here** — the
-`distribution` registry's blob store moves
-off the interim node-local filesystem driver onto the MinIO S3 driver, closing the Phase-25 deferred gap and
-verified by an external observer that the registry's pushed blobs materialize as objects in the MinIO bucket
-(not on the node filesystem). The MinIO-bound private `ProvisionedRegistryStorageDemand` preserves Phase 25's
-logical `objectSet`, structured `objectStorePeak`, scalar interim `derivedPeak`, mutation admission, and
-upload/orphan witness while changing the backend projection:
-observed-resident/new objects are unioned by digest,
-configs and manifests are counted as well as compressed layers, conflicting sizes reject, concurrent-upload
-workspace/partial uploads remain structured extents until observed GC. The whole MinIO fold enumerates the
-closed six-arm app/content/registry/Pulsar-offload/Pulumi-checkpoint/control-plane-state producer type and
-requires exact equality for the sources present in this deployment, with every `StorageBudgetId`/owner and
-writer admission retained. Its sole object-write gateway has a complete provisioned pod envelope. Pulsar also
-constructs an independent ZooKeeper metadata-store provision—exact znode/session/watch/transaction demand,
-member pods, retained transaction-log/snapshot volumes, and failure recovery overlap—before any broker can
-start. Finally, a **Pulsar size-triggered S3 offload drill** — producing past a topic's
-hot-tier size bound, the offload fires and the hot tier never exceeds its cap, read from an external observer
-on MinIO (offloaded ledger objects appear) and broker/BookKeeper metrics (hot-tier occupancy stays under the
-high-water mark).
+**Gate:** on a single-node linux-cpu `kind` cluster the MetalLB/MinIO/Pulsar backbone, with the registry
+rehomed onto MinIO, comes up HA from generated manifests and baked binaries, round-trips both data planes,
+and holds the hot tier under its offload cap. Its apparatus is [Gate integrity](#gate-integrity).
 
 ```mermaid
 flowchart LR
@@ -356,31 +327,10 @@ Phase 25) is present as a rehoming consumer of MinIO, not re-delivered here.
 `src/Amoebius/Platform/Minio.hs`, `src/Amoebius/Platform/Registry.hs`,
 `tools/phase30_backbone_live.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**:
-after apply, MetalLB advertises a LoadBalancer address on the linux-cpu node before any edge asks for one;
-MinIO runs as its HA (distributed) topology on identity-named retained PVs, never a bare Pod — "distributed"
-meaning the rendered StatefulSet is byte-identical modulo replica count to the `replicas=n` erasure-set
-topology, not a standalone single-drive variant; a put/get round-trips the same bytes; the `distribution`
-registry's blob store is rehomed onto the MinIO S3 driver, asserted against the committed
-`test/fixtures/phase30/registry-storage-driver.golden` oracle and observed externally — every pre-existing
-Phase-25 artifact is copied and digest-verified, remains pullable after cutover, and a post-cutover blob
-materializes in MinIO without changing the old filesystem; the committed `mutant/registry-fs-driver`
-(registry left on the filesystem driver) turns this red; **every app/init/sidecar container, gateway, migration Job, and volume in every object `renderAll` emits for MetalLB, MinIO, and the rehomed registry**
-(scope exactly the amoebius field-manager-owned objects) carries resource fields exactly equal to its
-`ProvisionedServiceSpec`: CPU/memory/ephemeral-storage requests+limits, bounded pod-local volumes, durable
-presentation/required-usable/rounded capacities, cache `None`, and accelerator `None`; the independent
-storage checker derives every fault-policy-required healing case, charges committed + concurrent +
-finite-horizon orphan extents through erasure geometry, applies presentation/allocation rounding before
-uniformity, and rejects usable-byte or raw-quantum boundary failures before apply; a deny-all egress test to
-`docker.io`/`quay.io` breaks no startup **and** the containerd/CRI image-pull event log on the kind node
-(the OS-boundary observer, §M.5) records no public-registry pull during the gate window. Rehome admission
-preserves every Phase-25 artifact/upload operand and the private logical `objectSet`, structured
-`objectStorePeak`, scalar interim `derivedPeak`, mutation admission, and upload/orphan witness, making MinIO
-the replacement `RegistryStorageDemand.backend` rather than inventing a fresh aggregate: the independent
-checker unions observed and new compressed layers/configs/manifests by digest, rejects conflicting sizes,
-derives bounded concurrent workspace and partial-upload object extents through finite GC, feeds that
-structured peak into MinIO geometry, and rejects a one-byte-under target with zero reconcile and zero
-publish requests.
+**Independent Validation**: the numbered Validation list below, which needs nothing from Sprints 30.2–30.3:
+MetalLB advertising an address, a MinIO put/get through the gateway, the registry serving from the S3 driver
+with every Phase-25 digest copied and still pullable, the independent MinIO capacity corpus, and the exact
+resource projection of every rendered execution unit.
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`,
 `documents/engineering/storage_lifecycle_doctrine.md`, `documents/engineering/image_build_doctrine.md`
@@ -450,8 +400,9 @@ MinIO S3 driver — closing the Phase-25 deferred gap.
    envelope. Exercise resident/new digest dedup, conflicting stored
    bytes for one digest, maximum upload concurrency/model-derived workspace, partial-upload residue just before GC, and a
    retained target one byte under the physical result, old+new backing one byte short, transfer executor one
-   unit short, and an injected verify mismatch. Capacity failures yield zero writes; verify failure leaves the
-   source route live and both source/partial-target charged; exact fit verifies then cuts over.
+   unit short, and an injected verify mismatch. Capacity failures yield zero writes — no reconcile request and
+   no publish request is issued; verify failure leaves the source route live and both source/partial-target
+   charged; exact fit verifies then cuts over.
 4. Run the independent MinIO capacity corpus.
    - Cover all six closed arms and require source↔producer equality for the present deployment; reject a
      dropped arm (including control-plane state), writer admission, storage budget, or mismatched owner.
@@ -482,7 +433,9 @@ MinIO S3 driver — closing the Phase-25 deferred gap.
    require equality with the stored placement witness. Then assert
    the containerd/CRI image-pull event log on the kind node (§M.5 OS-boundary observer, not amoebius's own
    logging) records no public-registry pull and every running `imageID` digest resolves to the Phase-25 baked
-   base digest in the in-cluster `distribution` catalog.
+   base digest in the in-cluster `distribution` catalog. A deny-all egress test to `docker.io`/`quay.io` must
+   break no startup, which shows the cluster does not reach outward — the digest check, not the egress test,
+   is what discriminates a baked bring-up from a side-loaded upstream image.
 
 ### Remaining Work
 None.
@@ -492,19 +445,10 @@ None.
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Platform/Pulsar.hs`, `tools/phase30_backbone_live.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: Pulsar comes up as an HA broker/ZooKeeper/BookKeeper topology over its **native TCP binary protocol** (no WebSockets) on retained storage; a produce/consume round-trips at-least-once with
-broker-side dedup **exercised, not merely configured** — a duplicate/redelivery of the same
-producer-sequence message is injected and the consumer is asserted to receive it exactly once; the drill
-topic carries a bounded retention + a **size-triggered** MinIO offload whose high-water mark is the
-committed `test/fixtures/phase30/hot-tier-cap.golden` cap, and sustained ingest past that cap is drilled —
-offloaded ledger objects appear in MinIO (external observer) while BookKeeper/broker hot-tier occupancy
-(external observer on broker metrics) never exceeds the cap, with the committed `mutant/offload-time-only`
-(size trigger removed, time-only) asserted to breach the cap under the same ingest; the independent checker
-expands ZooKeeper's exact znode/session/watch/transaction demand into member log/snapshot/recovery peaks and
-BookKeeper logical hot bytes through write-quorum recovery, rounding every physical ordinal to the uniform
-claim-template debit, with logical-fit/physical-overflow and one-byte-over cases rejected before apply;
-every app/init/sidecar and volume exactly matches its complete provisioned envelope; a secret-dependent
-Pulsar component reaching a sealed Vault fails closed.
+**Independent Validation**: the numbered Validation list below, which needs only the Sprint-30.1 MinIO
+substrate: an HA native-protocol bring-up that fails closed against a sealed Vault, a dedup round-trip
+exercised rather than configured, the size-triggered offload drill, the independent BookKeeper and ZooKeeper
+capacity corpora, and the exact resource projection of every rendered execution unit.
 **Docs to update**:
 `documents/engineering/platform_services_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`
 
@@ -542,6 +486,8 @@ drill that the mandatory size-triggered MinIO offload actually bounds the BookKe
 ### Validation
 1. Apply Pulsar through the reconciler; assert the ZooKeeper metadata ensemble reaches Ready first and the
    broker/bookie set then reaches Ready on retained storage as an HA topology (never a single bare broker).
+   Assert a secret-dependent Pulsar component that reaches a sealed Vault fails closed rather than starting
+   degraded.
 2. Produce then consume a message; assert an at-least-once round-trip. Dedup is **exercised**: inject a
    duplicate (a redelivery of the same producer-sequence id) and assert the consumer observes exactly one
    delivery — not merely that broker-side dedup is enabled on the topic. Assert a CBOR payload round-trips
@@ -578,16 +524,10 @@ None.
 **Implementation**: `src/Amoebius/Platform/Backbone.hs`, `test/platform/Phase30BackboneSpec.hs`,
 `test/platform/Phase30BackboneLive.hs`, `tools/phase30_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the backbone — MetalLB, MinIO
-(with the rehomed registry), and Pulsar — is brought up on a fresh single-node linux-cpu `kind` cluster and
-the whole set is up, HA-shaped, and reachable in-cluster, with MinIO put/get and Pulsar produce/consume
-round-tripping, the registry serving from the MinIO S3 driver, the size-triggered offload holding the hot
-tier under its cap, no image request leaving the cluster for a public registry, and a Register-3
-proven/tested/assumed ledger emitted. The thin MinIO→registry and Vault-unsealed→Pulsar edges are enacted by
-the reconciler's wait-for-ready as observed conditions, never timers; the *full* derived readiness-DAG
-bring-up of the whole standard stack (with the
-[§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) hard edges
-and the `mutant/dag-drop-edge` mutant) is [Phase 31](phase_31_platform_services_2.md).
+**Independent Validation**: the numbered Validation list below, run on a fresh single-node linux-cpu `kind`
+cluster: the whole set up, HA-shaped, and reachable in-cluster; both data planes round-tripping; the registry
+on the S3 driver; the offload holding the hot tier; no image request leaving for a public registry; and a
+Register-3 proven/tested/assumed ledger emitted.
 **Docs to update**:
 `documents/engineering/platform_services_doctrine.md`, `documents/engineering/image_build_doctrine.md`,
 `DEVELOPMENT_PLAN/README.md`
@@ -610,7 +550,10 @@ and close the phase with the backbone HA gate on a fresh cluster.
   proven/tested/assumed Register-3 ledger that marks the runtime layer *tested* and the Keycloak-edge,
   Postgres/observability (Phase 31), and singleton-owned reconcile layers UNVERIFIED; the independent
   resource-projection checker compares every applied execution unit/volume exactly to its
-  `ProvisionedServiceSpec`.
+  `ProvisionedServiceSpec`. Only the two thin MinIO→registry and Vault-unsealed→Pulsar edges are enacted here;
+  the *full* derived readiness-DAG bring-up of the whole standard stack, with the
+  [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) hard edges
+  and the `mutant/dag-drop-edge` mutant, is [Phase 31](phase_31_platform_services_2.md)'s.
 - The reviewed gate oracles reused here: the registry storage-stanza oracle
   `test/fixtures/phase30/registry-storage-driver.golden` and the drill-topic hot-tier cap
   `test/fixtures/phase30/hot-tier-cap.golden`, plus the independently computed

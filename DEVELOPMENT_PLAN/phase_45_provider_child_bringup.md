@@ -148,19 +148,9 @@ substrate ([development_plan_standards.md §L](development_plan_standards.md#l-o
 **Register:** 3 (live infrastructure) — the gate brings a real provider child through bootstrap, handoff, and
 standard-service convergence and re-runs it; no register-1/2 in-process check discharges it.
 
-**Gate:** an `InForceSpec` that, from a **linux-cpu** parent against a Phase-44-deployed `Managed Eks` child,
-reaches `BootstrapCapacitySchedulerReady`, **cuts every default-scheduled bootstrap add-on over to joined custom-scheduler reservations**, installs the full managed taint/admission/exclusive-Binding writer authority and
-reaches `ManagedCapacityReady`, then converges the **complete** standard HA service set (registry, MinIO, Vault,
-Pulsar, Redis/Sentinel, Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud LoadBalancer) from typed manifests —
-reachable, HA, wild ingress only via Keycloak — where the **parent bootstrap Lease holder is released and observed absent before the authenticated child singleton acquires the same Lease** and reports `/readyz`. The
-child runs **no host worker daemon** and advertises **no host substrate** (the `Managed Eks` arm carries no
-`LinuxHost` witness). Re-running the bring-up against the converged child is a **no-op**, defined observably as
-**zero mutating cloud-API/K8s-API calls** on run 2 in an OS-boundary audit trail — not exit 0 and not the
-reconciler's self-reported empty diff. The committed seeded mutant `mut-45.1-public-pull` (a manifest pinned to a
-public-registry image) MUST go **red** on the OS-boundary image-pull observer. The complete apparatus — inherited
-representative set, committed oracles, the committed mutant, and the independent reference predicates — is named
-in [`## Gate integrity`](#gate-integrity); the gate line above delegates to it by anchor per
-[`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
+**Gate:** the `InForceSpec` bring-up run satisfies every reference predicate, committed oracle, enumerated
+negative, and the seeded mutant named in [Gate integrity](#gate-integrity), from a linux-cpu parent against a
+Phase-44-deployed `Managed Eks` child. Exit 0 and a self-reported empty diff cannot satisfy it.
 
 ## Gate integrity
 
@@ -309,16 +299,9 @@ Phase-27 `Amoebius.Scheduler.*` role and its two-stage bootstrap-cutover / execu
 machinery (BUILT/SCOPED-VALIDATED)
 **Blocked by**: reopened numeric predecessor gates.
 **Requires**: `cloud-account` — the credentialed account a provider child is brought up inside. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-29 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-operators-prompt-automated)).
-**Independent Validation**: against a Phase-44-deployed child, the parent
-bootstrap holder creates `amoebius-capacity-scheduler` (`pods=1`) referencing the preloaded CRI digest,
-observes the default-scheduled scheduler's exact active generation/config/root as
-`BootstrapCapacitySchedulerReady`, patches only the finite provider/kube-system bootstrap controller set,
-observes every old add-on UID's absence/release plus its replacement's reservation/Bound/Ready join,
-installs the managed-node taint + execution-identity admission + full exclusive Binding RBAC, and
-independently mints `ManagedCapacityReady` — **in that order**. A guarded test Pod before
-`ManagedCapacityReady`, an omitted add-on, an old UID still present, a replacement without a reservation
-join, or a second default-scheduler exception is rejected. The scheduler Deployment never references the
-not-yet-ready child registry or a public registry.
+**Independent Validation**: the parent bootstrap holder walks a hostless child from a raw default-scheduled
+EKS to `ManagedCapacityReady` in one observed order, and every out-of-order or incomplete bootstrap fixture
+is rejected. The numbered Validation list below states that order and those negatives.
 **Docs to update**:
 `documents/engineering/cluster_lifecycle_doctrine.md` (§2 bring-up and bootstrap on a provider child),
 `documents/engineering/daemon_topology_doctrine.md` (the capacity scheduler as a mandatory in-cluster role),
@@ -349,11 +332,16 @@ is admitted before the child's own capacity scheduler alone binds Pods.
   self-managed cluster; the provider realization is validated here for the first time.
 
 ### Validation
-1. The child proves the scheduler's exact bootstrap generation/config/root, complete provider add-on cutover, and
-   full managed-node taint/admission/Binding writer domain **in that order**. A guarded test Pod before
-   `ManagedCapacityReady`, an omitted add-on, an old UID still present, a replacement without a reservation join,
-   or a second default-scheduler exception must be rejected. Independently read back that the scheduler Deployment
-   resolves to the preloaded CRI digest and never a public/child-registry pull.
+1. Against a Phase-44-deployed child, the parent bootstrap holder creates `amoebius-capacity-scheduler`
+   (`pods=1`) referencing the preloaded CRI digest, proves the default-scheduled scheduler's exact active
+   generation/config/root as `BootstrapCapacitySchedulerReady`, patches only the finite provider/kube-system
+   bootstrap controller set, observes every old add-on UID's absence/release plus its replacement's
+   reservation/Bound/Ready join, installs the managed-node taint, execution-identity admission, and full
+   exclusive Binding RBAC, and independently mints `ManagedCapacityReady` — **in that order**.
+2. A guarded test Pod before `ManagedCapacityReady`, an omitted add-on, an old UID still present, a
+   replacement without a reservation join, or a second default-scheduler exception must be rejected.
+3. Independently read back that the scheduler Deployment resolves to the preloaded CRI digest and never the
+   not-yet-ready child registry or a public registry.
 
 ### Remaining Work
 Run the built protocol against a Phase-44-created EKS control plane and managed node, then read back the real
@@ -367,14 +355,10 @@ provider add-on and CRI-preload boundaries. The local and retained-Kubernetes pr
 worker-daemon roles), `amoebius-runtime/src/Amoebius/Cluster/ProviderBringUp.hs` (the bootstrap-authority
 release + fresh-absence readback + authenticated child acquire) (BUILT/SCOPED-VALIDATED)
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: from `ManagedCapacityReady`, the parent bootstrap holder converges the pre-handoff Vault +
-MinIO/registry substrate, applies the child singleton **while still holding the Lease** (the Pod stays
-non-Serving and cannot mutate), then drains/releases the bootstrap holder, freshly observes holder absence
-on that same still-present Lease object, and only then admits the authenticated child singleton Pod UID to
-acquire the same Lease and report `/readyz`. An independent Lease/audit observer records parent-holder →
-released → fresh-absence → child-holder with **zero parent mutations after release** and **zero child mutations before acquire**; the race fixtures each converge to one holder or refuse. The child runs exactly
-one singleton role, one capacity-scheduler role, and zero host daemons; no host NodePort peer and no host
-substrate is advertised, and the `Managed Eks` substrate-shape check raises `NoHostSubstrateOnManagedEks`.
+**Independent Validation**: single-writer authority moves from the parent bootstrap holder to the
+authenticated child singleton through release and a fresh absence readback on the same Lease, and the child
+comes up with one singleton role, one scheduler role, and no host at all. The numbered Validation list below
+states the observed sequence and the topology assertions.
 **Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md` (§1 the provider-managed column,
 §3 cloud-keyed amoebic spawn), `documents/engineering/daemon_topology_doctrine.md` (§3.1/§5 the singleton +
 capacity scheduler as the only in-cluster daemon roles on a hostless child),
@@ -408,11 +392,16 @@ one capacity-scheduler role, and zero host daemons — no host binary, no host w
   foreclosure tag `NoHostSubstrateOnManagedEks`.
 
 ### Validation
-1. The authority audit — read from an **independent** Lease/audit observer, never the handoff code's self-report —
+1. From `ManagedCapacityReady`, the parent bootstrap holder converges the pre-handoff Vault and MinIO/registry
+   substrate, applies the child singleton **while still holding the Lease** — the Pod stays non-Serving and
+   cannot mutate — then drains/releases the bootstrap holder, freshly observes holder absence on that same
+   still-present Lease object, and only then admits the authenticated child singleton Pod UID to acquire the
+   same Lease and report `/readyz`.
+2. The authority audit — read from an **independent** Lease/audit observer, never the handoff code's self-report —
    shows parent bootstrap holder → drained/released → fresh absence → authenticated child singleton holder, with
    **zero parent mutations after release** and **zero child mutations before acquire**; each race fixture
    converges to one holder or refuses without effects.
-2. The child runs a single in-cluster singleton, one capacity-scheduler role, and zero host daemons; there is no
+3. The child runs a single in-cluster singleton, one capacity-scheduler role, and zero host daemons; there is no
    host NodePort peer and no host substrate advertised — asserted against the committed negative expectation that
    the `Managed Eks` arm carries no `LinuxHost` witness (the committed foreclosure tag
    `NoHostSubstrateOnManagedEks`, §M.8), paired with a positive self-managed arm differing only in carrying a host
@@ -486,15 +475,10 @@ topology, exercised here on its provider-child bring-up + standard-service-conve
 `tools/phase45_{provider_child_live,gate}.py`, with its generated ledger under `gen/runs/phase_45/`
 (observed footprint; provider OS/cloud observers UNVERIFIED)
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: from a linux-cpu parent against a Phase-44-deployed `Managed Eks` child, the gate
-`InForceSpec` reaches `BootstrapCapacitySchedulerReady`, cuts every add-on to reservations, reaches
-`ManagedCapacityReady`, releases the parent bootstrap Lease holder and observes it absent before the
-authenticated child singleton acquires the same Lease and reports `/readyz`, converges the complete standard
-HA service set exact-matching the committed oracle, runs no host daemon and advertises no host substrate,
-and re-runs the bring-up as a no-op (zero mutating cloud/K8s calls in the OS-boundary audit trail).
-`mut-45.1-public-pull` goes red on the image-pull observer. The run emits a proven/tested/assumed ledger;
-the base provider stack is torn down through Phase 44's deploy lifecycle, and the leak-free tag-sweep
-witness is recorded **deferred to Phase 47**.
+**Independent Validation**: one end-to-end run takes a Phase-44-deployed `Managed Eks` child from bootstrap
+through handoff to complete standard-HA convergence, re-runs as an observed no-op, and turns
+`mut-45.1-public-pull` red; the emitted ledger marks the deferred sweep UNVERIFIED. The numbered Validation
+list below states each condition.
 **Docs to update**:
 `documents/engineering/cluster_lifecycle_doctrine.md` (§1/§2/§3),
 `documents/engineering/daemon_topology_doctrine.md` (§3.1/§5),
@@ -523,7 +507,8 @@ leak-free-sweep layer UNVERIFIED here.
   green.
 
 ### Validation
-1. Run the gate end-to-end over `test/dhall/phase_45_provider_provision.dhall` (bring-up/convergence slice): the
+1. Run the gate `InForceSpec` end-to-end over `test/dhall/phase_45_provider_provision.dhall`
+   (bring-up/convergence slice) from a linux-cpu parent: the
    child's scheduler reaches `BootstrapCapacitySchedulerReady`, every bootstrap add-on old UID is released and its
    replacement reservation-joined, full managed authority is read back, and the parent bootstrap Lease holder
    releases and is observed absent before the authenticated child singleton acquires. Only then does the

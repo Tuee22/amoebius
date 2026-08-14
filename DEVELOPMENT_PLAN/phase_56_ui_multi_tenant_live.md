@@ -72,10 +72,10 @@ switching rather than reopening the provider-isolation result.
 **Substrate:** linux-cpu — one live `kind` cluster with the standing platform; no GPU, Apple, provider-cloud,
 multicluster, or HA-failure claim.
 **Register:** 3 — live infrastructure.
-**Gate:** `cabal test ui-multi-tenant-live` drives the generic PureScript client through real Keycloak sessions,
-executes the Phase-0-pinned visibility/authorization matrix with fresh own/foreign tenant challenges, switches
-scope, replays stale requests and handles, probes direct server/provider bypasses, and turns every mutant in
-[Gate integrity](#gate-integrity) red. Forbidden effects require authenticated external zero-delta evidence.
+**Gate:** `cabal test ui-multi-tenant-live` drives the generic PureScript client through a real
+Keycloak-authenticated scope change and satisfies every pinned matrix, fresh challenge, stale replay, bypass
+probe, and mutant in [Gate integrity](#gate-integrity). Forbidden effects require authenticated external
+zero-delta evidence.
 
 ## Gate integrity
 

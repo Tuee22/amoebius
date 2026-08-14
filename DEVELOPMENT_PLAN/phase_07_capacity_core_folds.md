@@ -120,25 +120,9 @@ analogous to the Phase 5 decode battery and the Phase 6 property suite.
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `cabal test dsl-spec` is green on the base slice — the `fits`/`podFits`/`carve`/`place` capacity
-fold and the `ComputeEngine`/`Topology` relation are **provably total** (interpreted concretely in
-[Gate integrity](#gate-integrity): compile-time exhaustiveness under `-Werror=incomplete-patterns` /
-`-Werror=incomplete-uni-patterns` on every `Amoebius.Capacity.{Types,Fold}` / `Amoebius.Dsl.Topology` base
-module **and** a sampled QuickCheck no-crash run — both, not either) and **sound** (every generated positive
-input yields a sound headroom/placement/compatibility result and no over-committed or incompatible spec is
-admitted); each of the **fifteen base capacity/topology negative fixtures** named in
-[Gate integrity](#gate-integrity) (engine↔substrate mismatch, a reused rke2 host, host/VM/cluster overcommit, CPU-limit-policy, pod-ephemeral overcommit, a padded-reservation overcommit that fits on requests alone, an untolerated taint, a memory-backed volume under-reservation, a tmpfs init-persistence under-reservation, and the four elastic failures — largest-candidate, per-node-overhead, per-class-maximum, and outer-quota) returns
-the base fold's specific committed structured
-`ProvisionError`/`Left` on its isolated insufficient axis when invoked **directly on the hand-authored demand/capacity fixture** (no `bind`/`provision` call; the Phase-11 gate re-exercises these same folds through
-its post-bind provision seal); seven `ghc -fno-code` **expect-fail compile goldens** (the original
-`bareAppleHost`, `bareWindowsHost`, and even-server quorum barriers plus four registry-index barriers for
-single-topology placement, control-plane reach, host-worker reach, and same-site quorum membership) fail to
-compile with their committed expected type errors; the two
-positives (`legal_multisubstrate_cluster`, `legal_managed_eks`) place feasibly; the
-**implementation-independent witness validator** (§M.3, defined in Sprint 7.3) accepts every returned
-placement; and the **committed per-fold seeded-mutant battery** named in [Gate integrity](#gate-integrity)
-(§M.2) turns the suite red individually. Every fixture, golden, and expected `Left`-tag it checks against is
-**authored and committed in this phase's oracle-pinning sprint before the implementation exists** (§M.1).
+**Gate:** `cabal test dsl-spec` is green on the base slice: the capacity fold and topology relation are
+provably total and sound, every committed negative refuses at its own locus, and every seeded mutant reddens
+the suite, each term fixed by [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
@@ -150,6 +134,20 @@ storage-geometry fixtures are exercised by [phase_08_storage_geometry_folds.md](
 and the execution/accelerator/provider-root fixtures by
 [phase_09_execution_accelerator_folds.md](phase_09_execution_accelerator_folds.md); the full corpus is not
 re-checked here.
+
+The Gate's one acceptance condition is the conjunction of six checks, and each of its four load-bearing words
+is defined below. The `fits`/`podFits`/`carve`/`place` capacity fold and the `ComputeEngine`/`Topology`
+relation are **provably total** and **sound** — every generated positive input yields a sound
+headroom/placement/compatibility result, and no over-committed or incompatible spec is admitted. Each of the
+**fifteen base capacity/topology negative fixtures** returns the base fold's specific committed structured
+`ProvisionError`/`Left` on its isolated insufficient axis, when invoked **directly on the hand-authored
+demand/capacity fixture**: no `bind` or `provision` call enters this gate, because
+[phase_11_provision_seal.md](phase_11_provision_seal.md) re-exercises these same folds through its post-bind
+provision seal. The seven expect-fail compile goldens fail with their committed expected type errors, the two
+positives place feasibly, the **implementation-independent witness validator** (§M.3) accepts every returned
+placement, and the **committed per-fold seeded-mutant battery** (§M.2) turns the suite red one mutant at a
+time. Every fixture, golden, and expected `Left`-tag the gate checks against is **authored and committed in
+this phase's oracle-pinning sprint before the implementation exists** (§M.1).
 
 ```mermaid
 flowchart LR
@@ -187,7 +185,11 @@ seven `ghc -fno-code` expect-fail compile goldens (the three original host/quoru
 registry-index barriers, §M.8); the positive set is exactly `legal_multisubstrate_cluster` (the [§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class) heterogeneous carve-out,
 exercising the compatibility fold and the fixed-topology first-fit-decreasing witness) and `legal_managed_eks`
 (EKS first-class, whose cover requires at least two nodes materialized from one candidate class, exercising
-the elastic growth-envelope branch). For `illegal_overcommit_host` this sub-phase inherits only the base
+the elastic growth-envelope branch). The fifteen cover, in that order, engine↔substrate mismatch, a reused
+rke2 host, host/VM/cluster overcommit, a CPU-limit-policy breach, pod-ephemeral overcommit, a
+padded-reservation overcommit that fits on requests alone, the four elastic failures (largest-candidate,
+per-class-maximum, per-node-overhead, and outer-quota), an untolerated taint, a memory-backed volume
+under-reservation, and a tmpfs init-persistence under-reservation. For `illegal_overcommit_host` this sub-phase inherits only the base
 CPU/memory/pod-slot/CSI-attach/logical-ephemeral overcommit axis; its `PhysicalDiskPartition` disk-parent
 variant is owned by [phase_09_execution_accelerator_folds.md](phase_09_execution_accelerator_folds.md). The
 remaining twenty-three source negatives (`illegal_store_over_backing`, `illegal_topic_time_only_offload`,
@@ -314,12 +316,10 @@ committed in `tests/oracle/phase7/compile_fail.tsv` and exercised by `tools/phas
 **Prerequisites satisfied**: Phase 5 gate (the GADT-indexed IR + total decoder); Phase 6 gate
 (the property/corpus framework + validation-locus ledger).
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a unit + property suite decodes each positive `Topology` (heterogeneous
-multi-substrate, managed EKS) and returns a structured `Left` naming the full set of incompatible nodes for a
-mismatched pair and a duplicate `HostId` for a reused host; the no-inhabitant claim for `bareAppleHost` /
-`bareWindowsHost` / an even-server quorum is machine-gated by a **Phase-6-style `ghc -fno-code` expect-fail compile golden** ([Gate integrity](#gate-integrity), §M.8) — a committed source snippet that attempts each
-construction, wired into `dsl-spec`, that must fail to compile with the **specific committed expected type error**, re-checked on every run — not an informal typed-hole probe. Seven expect-fail goldens and their
-expected text are pinned by `tests/oracle/phase7/compile_fail.tsv` (§M.1).
+**Independent Validation**: a unit + property suite decodes both positive topologies, returns a structured
+`Left` naming every incompatible node for a mismatched pair and a duplicate `HostId` for a reused host, and
+machine-gates the no-inhabitant claims rather than arguing them. The numbered Validation list below states
+each check.
 **Docs to update**: `documents/engineering/cluster_topology_doctrine.md` (Phase-7 status backlink),
 `documents/engineering/substrate_doctrine.md` (§8 node inventory read-side),
 `documents/illegal_state/illegal_state_catalog.md` (§3.13–§3.16 per-entry layer reconciliation),
@@ -358,10 +358,15 @@ boundary.
   "more nodes than hosts" are already type-foreclosed upstream (Phase 4/5).
 
 ### Validation
-1. Each positive `Topology` decodes; a mismatched pair returns a structured `Left` listing every incompatible
-   node; a reused host returns a duplicate-`HostId` `Left`; the illegal constructors have no inhabitant, proven
-   by the committed `ghc -fno-code` expect-fail compile goldens ([Gate integrity](#gate-integrity), §M.8) whose
-   specific expected type errors are re-checked on every `dsl-spec` run.
+1. Each positive `Topology` — the heterogeneous multi-substrate cluster and the managed EKS one — decodes; a
+   mismatched pair returns a structured `Left` listing every incompatible node; a reused host returns a
+   duplicate-`HostId` `Left`.
+2. The `bareAppleHost` / `bareWindowsHost` / even-server-quorum constructors have no inhabitant, proven the
+   Phase-6 way: seven committed `ghc -fno-code` expect-fail compile goldens ([Gate integrity](#gate-integrity),
+   §M.8), each a source snippet that attempts the construction, wired into `dsl-spec`, that must fail to
+   compile with its **specific committed expected type error**, re-checked on every run — not an informal
+   typed-hole probe. The goldens and their expected text are pinned by
+   `tests/oracle/phase7/compile_fail.tsv` (§M.1).
 
 ### Remaining Work
 None.
@@ -369,31 +374,16 @@ None.
 ## Sprint 7.2: The base capacity fold — `fits` / `podFits` / `carve` / `place` ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `src/Amoebius/Capacity/Types.hs` (its **base subset**: `Quantity`,
-the zero-capable `Residual`/`AvailableCapacity`, `PodResourceVec = { cpu, memory, ephemeralStorage }`, the
-closed pod/host-worker `ResourceEnvelope`, `Capacity`/`Demand`/`Budget`, `NodeCapacity` with
-pod-slot/CSI-attach capacity, its `NoCpuOvercommit | BoundedCpuOvercommit RatioAtLeastOne` CPU-limit policy,
-and its role-indexed CPU/memory reserve, the closed substrate-indexed `HostRuntimeEnforcement`, and the
-`requests ≤ limits` invariant — the storage/execution/accelerator members of `Types.hs` and the sibling
-`Amoebius/Capacity/*.hs` modules are added by phases 8 and 9); `src/Amoebius/Capacity/Fold.hs`
-(`fits`/`podFits`/`carve`/`place`, the request-reservation + finite-limit proofs, the host → VM → workload
-nesting, and the
-[§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
-static/elastic branch), built and exposed by `dsl-core`.
+**Implementation**: `src/Amoebius/Capacity/Types.hs` (its **base subset**) and
+`src/Amoebius/Capacity/Fold.hs`, built and exposed by `dsl-core`. The Deliverables below name what each
+carries; the storage, execution, and accelerator members of `Types.hs`, and the sibling
+`Amoebius/Capacity/*.hs` modules, are added by phases 8 and 9.
 **Prerequisites satisfied**: Sprint 7.1 (the `Topology` `place` folds over); Phase 5 gate (the IR + decoder).
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a unit + property suite runs
-`fits`/`carve`/`place` over generated envelopes: a feasible workload set yields a placement witness or a
-**sound growth envelope — where "sound" is fixed concretely as: every pod fits at least one declared
-candidate including capability and finite CPU/memory/ ephemeral limits, the worst-case instance count forced
-by atomic pods/anti-affinity stays within the outer instance/vCPU quota, and every selected class stays
-within its `maxCount`, verified against the fixture's declared candidate set and quota, not merely that a
-`Right`-valued envelope was returned**; an over-committed one returns `Left Overcommit`/`Left Unschedulable`
-naming the offending axis. Exact-fit `fits`/`carve` returns `Right Zero`, a second debit from that residual
-rejects, and the folds never throw. Both branches spend one pod slot per simultaneously live pod and
-driver-scoped unique-PVC CSI attach slots. (Accelerator device/VRAM fit, execution-epoch peaks,
-durable/object-store geometry, and provider-root arithmetic are appended to the same fold by phases 8 and 9;
-here the fold is the base CPU/memory/slot/logical-ephemeral witness.)
+**Independent Validation**: a unit + property suite runs `fits`/`carve`/`place` over generated envelopes — a
+feasible workload set yields a placement witness or a growth envelope proved sound against the fixture's own
+declared candidates and quota, an over-committed one returns the `Left` naming the offending axis, and the
+folds never throw. The numbered Validation list below fixes "sound" concretely.
 **Docs to update**:
 `documents/engineering/resource_capacity_doctrine.md` (Phase-7 status backlink for §3/§4),
 `documents/illegal_state/illegal_state_catalog.md` (§3.17 layer reconciliation),
@@ -414,8 +404,9 @@ reading declared numbers only (the substrate node inventory and PV sizes are own
   plus log allowance, and explicit `PodLocalStorageDemand` over bounded disk-backed volumes. Every private
   allowance must fit its own container ephemeral request/limit; disk-volume bounds plus the lifecycle-effective
   private allowance fit the pod request/limit; each effective pod envelope is charged once.
-  `Capacity`/`Demand`/`Budget` keep `requests ≤ limits`, and where a pod or host worker declares compute
-  headroom they keep the strengthened `requests + pad ≤ limits` (`reservation + pad ≤ ceiling` on the host arm)
+  `Capacity`/`Demand`/`Budget` keep `requests ≤ limits`, the closed substrate-indexed
+  `HostRuntimeEnforcement` records what the host itself enforces, and where a pod or host worker declares
+  compute headroom they keep the strengthened `requests + pad ≤ limits` (`reservation + pad ≤ ceiling` on the host arm)
   that [Phase 5](phase_05_gadt_decoder_gate2.md) refines. The pad enters the effective demand once, after the
   init-versus-app maximum resolves, beside pod overhead; the reserved total it produces is minted here and has
   no authorable source. Every `NodeCapacity` carries the required
@@ -424,7 +415,8 @@ reading declared numbers only (the substrate node inventory and PV sizes are own
   `DeclaredVolumeDemand` geometry, OCI/image accounting, and kubelet/CRI runtime metadata are refinements owned
   by phases 8 and 9; the base `PodLocalStorageDemand` is the disk-backed `emptyDir` + writable-rootfs/log
   allowance the pod's `ephemeralStorage` request must cover.)
-- `fits`/`podFits`/`carve`/`place` — fixed topology → first-fit-decreasing witness; elastic topology → floor
+- `fits`/`podFits`/`carve`/`place`, the [§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
+  static/elastic branch — fixed topology → first-fit-decreasing witness; elastic topology → floor
   witness + per-class effective capacity after topology-expanded per-node units + a sound candidate-class count
   cover within each `maxCount` + selected cover within the outer instance/vCPU quota. Both branches spend one
   pod slot per simultaneously live pod and driver-scoped unique-PVC attach slots. The returned witness proves
@@ -440,12 +432,22 @@ reading declared numbers only (the substrate node inventory and PV sizes are own
 - An in-file honesty note: every capacity **sum** here is a total checked provision-seal operation,
   sound-not-complete for the compute bin-pack; the base fold is idempotent under re-invocation, so a later
   `Growable` growth re-run ([phase_08_storage_geometry_folds.md](phase_08_storage_geometry_folds.md)) never
-  silently invalidates the base placement.
+  silently invalidates the base placement. Accelerator device/VRAM fit, execution-epoch peaks,
+  durable/object-store geometry, and provider-root arithmetic are appended to this same fold by phases 8 and
+  9; here it is the base CPU/memory/slot/logical-ephemeral witness.
 
 ### Validation
-1. A feasible input yields a witness or a sound envelope (soundness fixed as the [§4.1](../documents/illegal_state/illegal_state_techniques.md#41-pvcpv-binding-by-construction) floor witness, topology-expanded effective candidate capacity, candidate capability/finite-limit fit, per-class `maxCount`, and outer-quota conditions holding, per this sprint's Independent Validation); an over-committed host/VM/
-   cluster or a CPU-limit-over-policy node returns the tagged `Left` naming the offending axis; exact-fit
-   `fits`/`carve` returns `Right Zero`, a second debit from that residual rejects, and the folds never throw.
+1. A feasible input yields a placement witness or a growth envelope, and that envelope is judged sound
+   against the fixture's declared candidate set and quota rather than by the mere return of a `Right`: every
+   pod fits at least one declared candidate on capability and on finite CPU/memory/ephemeral limits, the
+   worst-case instance count forced by atomic pods and anti-affinity stays within the outer instance/vCPU
+   quota, every selected class stays within its `maxCount`, and the
+   [§4.1](../documents/illegal_state/illegal_state_techniques.md#41-pvcpv-binding-by-construction) floor
+   witness holds over topology-expanded effective candidate capacity.
+2. An over-committed host/VM/cluster or a CPU-limit-over-policy node returns `Left Overcommit` / `Left
+   Unschedulable` naming the offending axis; exact-fit `fits`/`carve` returns `Right Zero`, a second debit
+   from that residual rejects, and the folds never throw. Both branches spend one pod slot per simultaneously
+   live pod and driver-scoped unique-PVC CSI attach slots.
 
 ### Remaining Work
 None.
@@ -460,14 +462,10 @@ the Phase-6 property harness. (The
 runtime-metadata and provider-root property modules are the deliverable of phases 8 and 9.)
 **Prerequisites satisfied**: Sprint 7.1, Sprint 7.2.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `cabal test dsl-spec` runs the base property battery
-green — the fold/relation soundness, totality, headroom-non-negativity, carve-subtraction, and
-elementwise-compatibility properties hold over generated inputs, each meeting its committed
-`cover`/`checkCoverage` minimum (≥30% rejecting, ≥30% accepting per fold; §M.4); and the **committed
-per-fold seeded-mutant battery of [Gate integrity](#gate-integrity) — one mutant each for `fits`, `carve`,
-fixed `place`, elastic `place`, elementwise compatibility, and `mkRke2` distinctness, plus the per-axis and
-per-eligibility validator mutants — turns the suite red individually** (§M.2), not merely one hand-picked
-strawman.
+**Independent Validation**: `cabal test dsl-spec` runs the base property battery green, every property meets
+its committed coverage minimum, and the committed per-fold seeded-mutant battery of
+[Gate integrity](#gate-integrity) turns the suite red one mutant at a time rather than on one hand-picked
+strawman. The numbered Validation list below names the properties and the mutants.
 **Docs to update**: `documents/engineering/resource_capacity_doctrine.md`,
 `documents/engineering/cluster_topology_doctrine.md`, `documents/engineering/testing_doctrine.md` (the
 Register-1 property register), `DEVELOPMENT_PLAN/system_components.md`.
@@ -530,10 +528,13 @@ packable one) for the single sound-not-complete check, compute `place`, and neve
   alone does not satisfy this guard.
 
 ### Validation
-1. The property battery is green with every base fold meeting its coverage minimum; and **each committed mutant
-   in the per-fold seeded-mutant battery ([Gate integrity](#gate-integrity)) — `fits`, `carve`, fixed `place`,
-   elastic `place`, elementwise compatibility, `mkRke2` distinctness, and the per-axis validator mutants —
-   makes a property red when re-run individually** — the properties have teeth on every base fold, not two.
+1. The fold/relation soundness, totality, headroom-non-negativity, carve-subtraction, and
+   elementwise-compatibility properties hold over generated inputs, each meeting its committed
+   `cover`/`checkCoverage` minimum of ≥30% rejecting and ≥30% accepting inputs per fold (§M.4).
+2. **Each committed mutant in the per-fold seeded-mutant battery ([Gate integrity](#gate-integrity)) —
+   `fits`, `carve`, fixed `place`, elastic `place`, elementwise compatibility, `mkRke2` distinctness, and the
+   per-axis and per-eligibility validator mutants — makes a property red when re-run individually** — the
+   properties have teeth on every base fold, not two.
 
 ### Remaining Work
 None.
@@ -541,38 +542,16 @@ None.
 ## Sprint 7.4: The base capacity/topology fold-negative corpus + the gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**:
-`test/dsl/CapacityTopologyFixtures.hs` holds fifteen direct, hand-authored post-decode fold negatives and
-fifteen legal twins pinned by `tests/oracle/phase7/fold_cases.tsv`; the three Gate-1 Dhall foreclosure pairs
-are pinned by `tests/oracle/phase7/gate1_cases.tsv`; seven `ghc -fno-code` pairs live under
-`test/dsl/compilefail7/` and are pinned by `tests/oracle/phase7/compile_fail.tsv`; and the actual Phase-5
-`legal_multisubstrate_cluster` / `legal_managed_eks` Dhall positives are decoded and placed.
-`test/dsl/CapacityTopologyGate.hs`, `test/dsl/CapacityTopologySpec.hs`, and `tools/phase7_gate.py` run the
-base gate battery and emit the validation-locus ledger. These fixtures and expected results / `Left` tags are
-independently authored (§M.1, [Gate integrity](#gate-integrity)); the remaining
-storage/execution/accelerator fixtures of the committed forty-one-fixture corpus are exercised by phases 8
-and 9, not here.
+**Implementation**: `test/dsl/CapacityTopologyFixtures.hs`, `test/dsl/compilefail7/`,
+`test/dsl/CapacityTopologyGate.hs`, `test/dsl/CapacityTopologySpec.hs`, and `tools/phase7_gate.py`, pinned by
+`tests/oracle/phase7/fold_cases.tsv`, `tests/oracle/phase7/gate1_cases.tsv`, and
+`tests/oracle/phase7/compile_fail.tsv`.
 **Prerequisites satisfied**: Sprint 7.1, Sprint 7.2, Sprint 7.3; Phase 4 gate (the positive Gate-1 corpus).
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the gate applies the Phase-7 base folds
-(`fits`/`podFits`/`carve`/`place` and the topology relation) **directly to each hand-authored demand/capacity fixture** — no `bind`, `planInfrastructure`, `ProvisionContext`, or `provision` call (those
-are the deliverables of [phase_10_capability_bind.md](phase_10_capability_bind.md) /
-[phase_11_provision_seal.md](phase_11_provision_seal.md), and the Phase-11 gate re-exercises these same
-folds through its post-bind provision seal) — so each positive fixture yields a sound feasible result and
-each negative fixture returns the fold's structured `ProvisionError`/`Left` on its isolated insufficient
-axis — **each negative asserting its specific expected tag** (`illegal_engine_substrate_mismatch` → `Left
-(EngineSubstrateMismatch …)`, `illegal_rke2_reused_host` → `Left (DuplicateHostId …)`,
-`illegal_overcommit_{host,vm,cluster}` → `Left (Overcommit …)` naming the
-CPU/memory/pod-slot/CSI-attach/logical-ephemeral axis, `illegal_cpu_limit_over_policy` → `Left
-(CpuLimitPolicyExceeded …)`, `illegal_pod_ephemeral_overcommit` → `Left (Overcommit …)` on the
-ephemeral-storage axis, `illegal_elastic_pod_exceeds_largest_candidate` → `Left Unschedulable`,
-`illegal_elastic_per_node_overhead_unplaceable` → `Left Unschedulable`,
-`illegal_elastic_class_max_exhausted` → `Left Overcommit`, and
-`illegal_elastic_worst_case_instances_over_quota` → `Left Overcommit`), **not merely "some `Left`", and each paired with a positive differing only in the foreclosed dimension** (§M.8) — each assertion annotated with
-its catalog entry
-([§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded))
-and its checked-rejection layer at the `provision-seal` locus; the run emits a Register-1
-proven/tested/assumed ledger covering the base capacity folds and the topology relation.
+**Independent Validation**: the gate applies the base folds directly to each hand-authored demand/capacity
+fixture, with no `bind` or `provision` call in the path, so every positive yields a sound feasible result and
+every negative returns its specific committed tag, not merely "some `Left`". The numbered Validation list
+below gives the fixture-to-tag mapping.
 **Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (the
 resource/topology §3.13–§3.17 checked-rejection / `provision-seal` entries → layer-2 Register-1),
 `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-7 status when the
@@ -605,6 +584,17 @@ validation-locus ledger that names the honest foreclosure layer of each.
   provider-root case tables — Unified/SplitRuntime routing, root-EBS derivation, epoch metadata — are the
   concern of phases 8 and 9; this gate exercises only their compatibility/base-capacity aspects.
   `legal_tmpfs_two_concurrent_writers_single_debit` is routed to phases 8 and 9.)
+- The committed corpus behind those fixtures: `test/dsl/CapacityTopologyFixtures.hs` holds fifteen direct,
+  hand-authored post-decode fold negatives and fifteen legal twins pinned by
+  `tests/oracle/phase7/fold_cases.tsv`; the three Gate-1 Dhall foreclosure pairs are pinned by
+  `tests/oracle/phase7/gate1_cases.tsv`; seven `ghc -fno-code` pairs live under `test/dsl/compilefail7/` and
+  are pinned by `tests/oracle/phase7/compile_fail.tsv`; and the actual Phase-5 `legal_multisubstrate_cluster`
+  / `legal_managed_eks` Dhall positives are decoded and placed. These fixtures and their expected results and
+  `Left` tags are independently authored (§M.1, [Gate integrity](#gate-integrity)); the remaining
+  storage/execution/accelerator fixtures of the committed forty-one-fixture corpus are exercised by phases 8
+  and 9, not here.
+- The gate battery itself: `test/dsl/CapacityTopologyGate.hs`, `test/dsl/CapacityTopologySpec.hs`, and
+  `tools/phase7_gate.py`, which run the base battery and emit the validation-locus ledger.
 - A Register-1 validation-locus ledger mapping every base entry to its catalog id, checked-rejection layer, and
   `provision-seal` locus, explicitly marking the runtime residue (VM boot, pod schedule, autoscaler growth)
   deferred to the live band — sibling evidence where the capacity arithmetic generalizes prodbox's teardown
@@ -619,6 +609,26 @@ validation-locus ledger that names the honest foreclosure layer of each.
    individually; the suite is red if any base capacity/topology negative provisions to `Right` or to the wrong
    tag; the validation-locus ledger is present and honestly classifies each foreclosure, marking the runtime
    residue UNVERIFIED.
+2. The gate applies `fits`/`podFits`/`carve`/`place` and the topology relation **directly to each
+   hand-authored demand/capacity fixture** — no `bind`, `planInfrastructure`, `ProvisionContext`, or
+   `provision` call, those being the deliverables of
+   [phase_10_capability_bind.md](phase_10_capability_bind.md) and
+   [phase_11_provision_seal.md](phase_11_provision_seal.md), whose gate re-exercises these same folds through
+   its post-bind provision seal — so each positive fixture yields a sound feasible result and each negative
+   fixture returns the fold's structured `ProvisionError`/`Left` on its isolated insufficient axis.
+3. Each negative asserts its **specific expected tag**, paired with a positive differing only in the
+   foreclosed dimension (§M.8): `illegal_engine_substrate_mismatch` → `Left (EngineSubstrateMismatch …)`;
+   `illegal_rke2_reused_host` → `Left (DuplicateHostId …)`; `illegal_overcommit_{host,vm,cluster}` → `Left
+   (Overcommit …)` naming the CPU/memory/pod-slot/CSI-attach/logical-ephemeral axis;
+   `illegal_cpu_limit_over_policy` → `Left (CpuLimitPolicyExceeded …)`; `illegal_pod_ephemeral_overcommit` →
+   `Left (Overcommit …)` on the ephemeral-storage axis; `illegal_elastic_pod_exceeds_largest_candidate` and
+   `illegal_elastic_per_node_overhead_unplaceable` → `Left Unschedulable`; and
+   `illegal_elastic_class_max_exhausted` and `illegal_elastic_worst_case_instances_over_quota` → `Left
+   Overcommit`.
+4. Each assertion is annotated with its catalog entry
+   ([§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded))
+   and its checked-rejection layer at the `provision-seal` locus, and the run emits a Register-1
+   proven/tested/assumed ledger covering the base capacity folds and the topology relation.
 
 ### Remaining Work
 None.

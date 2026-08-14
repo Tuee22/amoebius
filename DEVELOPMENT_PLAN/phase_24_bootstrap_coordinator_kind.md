@@ -194,27 +194,14 @@ exactly one such route. A specialized CUDA/Metal lane is not exercised.
 **Register:** 3 (live infrastructure) — the gate provisions a real kind cluster in a pristine `linux-cpu` guest and
 tears down leak-free; a Register-1/2 in-process check cannot discharge it.
 
-**Gate:** in a newly materialized `linux-cpu` guest with a container runtime pre-installed, the Python `pb` bootstrap coordinator's
-`pb bootstrap --distro=kind` ensures the package-manager root, dynamically resolves a Phase-1-compatible
-toolchain, and builds the binary, then `exec`s `amoebius bootstrap --distro=kind`, which brings an empty
-single-node kind cluster to exactly one `Ready` node (`kubectl get nodes` shows one node, `Ready`) **only after**
-a physical-host observation proves the complete kind engine carve fits; records a
-complete observed inventory of allocatable CPU/memory/logical local-ephemeral capacity, canonical
-`Unified | SplitRuntime` nodefs/imagefs backing and quota identities, resident CRI content/snapshots, disjoint
-durable/native-host-cache backing pools, and accelerator devices/profiles/per-device
-raw/reserved/allocatable plus current-free VRAM; and proves the decoded target's declared
-capacity/capability is no greater than and compatible with that inventory (the selected linux-cpu lane has no
-CUDA offering even when its physical parent does);
-**re-running the identical command reports already-converged and changes nothing** — where "changes nothing"
-means the observable triple `(docker/podman container id/name/image/state, `kind get clusters`, kubeconfig file bytes)` — the container element compared as a normalized id/name/image/state projection, not the volatile uptime/status column — is
-byte-for-byte identical before and after the re-run, and the `execve` audit log for the re-run contains **zero mutating package-manager or `kind create` invocations**; from at least one named partially-converged start
-state the identical run **converges without recreating the cluster** (divergence-repair, Sprint 24.4); **every external tool invocation during the run resolved through an `AbsExe` absolute path** as witnessed by the
-`execve` audit log (every `argv[0]` absolute, drawn from the resolved tool map), no bare-name `PATH` lookup,
-and Helm is never ensured or invoked (no `helm` `execve`, no `helm` trap fired); and the gate ends by tearing
-the cluster down (`kind delete cluster`) and asserting a **leak-free postflight sweep** (no residual kind
-cluster, node container, or kubeconfig context).
+**Gate:** `python3 tools/phase24_gate.py --execute` drives a pristine `linux-cpu` guest to exactly one `Ready`
+kind node through the Python `pb` bootstrap coordinator, and the identical re-run changes nothing. Its
+inventory, absolute-path, divergence-repair, and teardown obligations are delegated to
+[Gate integrity](#gate-integrity).
 
-The committed fixtures, seeded mutants, and independent observers this gate is checked against are named in the [`## Gate integrity`](#gate-integrity) section below ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) Gate → Gate-integrity delegation).
+That delegation is the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
+Gate → Gate-integrity form. One anchor hop away, the section below states each acceptance condition in full
+alongside the committed fixtures, seeded mutants, and independent observers the gate is checked against.
 
 ## Gate integrity
 
@@ -234,6 +221,29 @@ flowchart LR
   s3 -->|"the last seam the gate closes over"| gate
 ```
 *Orientation. The seams Phase 24 built in order; [Gate integrity](#gate-integrity) owns the now-passed apparatus.*
+
+**What one gate run must establish.** The run starts in a newly materialized `linux-cpu` guest with a
+container runtime pre-installed. There the Python `pb` bootstrap coordinator's `pb bootstrap --distro=kind`
+ensures the package-manager root, dynamically resolves a Phase-1-compatible toolchain, and builds the binary,
+then `exec`s `amoebius bootstrap --distro=kind`. That command brings an empty single-node kind cluster to
+exactly one `Ready` node (`kubectl get nodes` shows one node, `Ready`) **only after** a physical-host
+observation proves the complete kind engine carve fits. It then records a complete observed inventory:
+allocatable CPU/memory/logical local-ephemeral capacity, canonical `Unified | SplitRuntime` nodefs/imagefs
+backing and quota identities, resident CRI content/snapshots, disjoint durable/native-host-cache backing
+pools, and accelerator devices/profiles/per-device raw/reserved/allocatable plus current-free VRAM. The
+decoded target's declared capacity/capability must be no greater than and compatible with that inventory —
+the selected linux-cpu lane has no CUDA offering even when its physical parent does.
+
+**"Changes nothing" is a measurement, not a report.** Re-running the identical command reports
+already-converged, and the observable triple `(docker/podman container id/name/image/state, `kind get clusters`, kubeconfig file bytes)` — the container element compared as a normalized id/name/image/state projection, not the volatile uptime/status column — is
+byte-for-byte identical before and after the re-run, while the `execve` audit log for the re-run contains
+**zero mutating package-manager or `kind create` invocations**. From at least one named partially-converged
+start state the identical run **converges without recreating the cluster** (divergence-repair, Sprint 24.4).
+**Every external tool invocation during the run resolved through an `AbsExe` absolute path** as witnessed by
+the `execve` audit log — every `argv[0]` absolute, drawn from the resolved tool map, no bare-name `PATH`
+lookup — and Helm is never ensured or invoked (no `helm` `execve`, no `helm` trap fired). The gate ends by
+tearing the cluster down (`kind delete cluster`) and asserting a **leak-free postflight sweep**: no residual
+kind cluster, node container, or kubeconfig context.
 
 **Gate prerequisite (stated, not ensured):** a container runtime (Docker or Podman) is a **pre-installed host prerequisite** of this gate, *not* a member of the closed `HostTool` enum. `kind` cannot create a cluster
 without one, but amoebius does not provision it; the enum stays exactly `ghcup`, `cabal`, `kubectl`, `kind`,
@@ -388,12 +398,10 @@ snapshot-bound installer/build cgroup readback pass on the `linux-cuda` parent's
 **Implementation**: `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs`
 (target: the `HostTool` enum + `AbsExe` newtype + `HostConfig` tool map + the `installAndVerify` driver)
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: pure `[InstallStep]` plan tests per substrate asserted against **oracle-pinned golden plans** (authored independently of the reconciler, not regenerated from it — §M.1, §M.3), plus a property that `mkAbsExe` rejects every non-absolute path with
-`cover`/`classify` obligations (§M.4) forcing the reject branch; on the host, ensuring
-`kind`/`kubectl`/`cabal`/`ghcup` **from a machine-verified clean state** (a preflight probe, recorded in the
-phase ledger, shows ghc/cabal/ghcup/kind/kubectl all absent before the first run) then re-running is a
-**verified no-op — defined as zero mutating package-manager invocations on the re-run, read from the `execve` audit log** (§M.5, §M.6), never inferred from an exit-0 re-run of idempotent installers; and Helm
-is never ensured or invoked (no `helm` `execve`; the `helm` `PATH` trap never fires).
+**Independent Validation**: pure per-substrate `[InstallStep]` plans checked against oracle-pinned golden
+plans (§M.1, §M.3), an `mkAbsExe` reject property under coverage obligations (§M.4), and a host ensure from
+machine-verified absence whose re-run is a no-op measured in the `execve` audit log (§M.5, §M.6). The numbered
+`### Validation` list below states each check and its mutant.
 **Docs to update**:
 `documents/engineering/substrate_doctrine.md`.
 
@@ -451,12 +459,10 @@ CPU/RSS cgroup and disk boundary, and `exec`-handed off; the identical rerun per
 `pb/pb/admin.py` in [phase_33](phase_33_live_dsl_singleton.md) Sprint 33.4). No shell script: amoebius owns
 none.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: on
-a pristine `linux-cpu` guest **whose cleanliness is machine-verified by a preflight probe recorded in the ledger (no GHC/cabal/ghcup present)**, `pb bootstrap --distro=kind` ensures the package-manager root (`apt`),
-`ghcup`, GHC 9.12.4 / Cabal 3.16.1.0, `cabal build`s the binary, and `exec`s `amoebius bootstrap
---distro=kind`; a second run with the toolchain present is a verified no-op up to the `exec` — **no-op defined as zero mutating `apt`/`ghcup`/`cabal-install` invocations in the second run's `execve` audit log**
-(§M.5, §M.6), never an exit-0 re-run of idempotent installers; the repository tree contains no
-`bootstrap.sh` and no shell script.
+**Independent Validation**: on a pristine `linux-cpu` guest proved clean by a ledger-recorded preflight probe,
+`pb bootstrap --distro=kind` walks the four steps to the `exec`, a second run with the toolchain present is a
+no-op measured in the `execve` audit log (§M.5, §M.6), and the tree holds no shell script. The
+`### Validation` list below states each check and its fixtures.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`,
 `documents/engineering/bootstrap_sequence_doctrine.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`.
 
@@ -490,7 +496,9 @@ with the operator CLI as `pb`'s bootstrap coordinator mode, the second mode bein
 
 ### Validation
 1. In a pristine `linux-cpu` guest **with a ledger-recorded preflight probe confirming ghc/cabal/ghcup absent**,
-   `pb bootstrap --distro=kind` completes steps 1–4 and `exec`s the binary.
+   `pb bootstrap --distro=kind` completes steps 1–4 — ensure the `apt` package-manager root, ensure `ghcup`,
+   resolve a Phase-1-compatible GHC and Cabal (the deleted pin read GHC 9.12.4 / Cabal 3.16.1.0; the pair is
+   now resolved per run), `cabal build` the binary — and `exec`s `amoebius bootstrap --distro=kind`.
 2. Re-run with the toolchain already present is a **verified no-op up to the `exec`, defined as zero mutating `apt`/`ghcup`/`cabal-install` invocations in the re-run's `execve` audit log** (§M.5), not merely exit-0.
 3. Confirm the tree contains no `bootstrap.sh` / no `.sh` igniter.
 4. Independently overdraw installer disk, cabal CPU/RSS, build scratch, and cache-write headroom by one unit;
@@ -530,31 +538,11 @@ repairs, M1–M6 rejection, and leak-free teardown are live and retained.
 the kind bring-up reconciler, the complete observed-inventory reader/cross-check, and the
 parameters/context/witness host context)
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: in a pristine `linux-cpu` guest, `amoebius bootstrap --distro=kind` yields exactly one `Ready`
-node; an immediate re-run reports already-converged and **changes nothing — the observable triple `(docker/
-podman container id/name/image/state, `kind get clusters`, kubeconfig file bytes)` is byte-identical before and after, and the
-re-run's `execve` audit log holds zero `kind create` or mutating package-manager calls**; from at least one **named partially-converged start state** the identical re-run **converges without recreating the cluster** and prints an explicit per-managed-resource discover/diff result showing an empty diff; and **every external
-invocation went through an `AbsExe` absolute path as witnessed by the `execve` audit log** (every `argv[0]` absolute, from the resolved tool map — §M.5), never a self-emitted `runTool` trace; the sprint ends by tearing
-the cluster down and asserting a leak-free postflight sweep. Before the first create, a distinct host reader
-proves the declared `KindEngineDemand` (ordinal node-container runtime, exact `NodeCapacity`, nested in-node
-reserve, separate host process reserve, structural host OCI/snapshot/data-root demand, and disk carves) fits
-current physical-host residual without double debit. Its
-system reserve expands the finite, version-pinned etcd backend/WAL/snapshot-save/defrag transitions,
-Event retention from `etcd.logical.churn.eventRetention`, audit-log, and kubelet/runtime-log budgets; an
-overdraw fixture records zero `kind create`.
-The create reconcile realizes the declared `Unified | SplitRuntime` filesystem layout, pins the containerd
-content and snapshotter roots to the derived physical backing, and enforces each nodefs/imagefs carve with a
-hard quota. It separately realizes and probes the host Docker/Podman data-root/graphroot backing, storage
-driver/model, selected kind-node image objects, active node-container snapshot/writable/log bytes, and pull
-  workspace; these host-runtime bytes are outside the nested node's CRI roots. Before handoff, a distinct
-  inventory reader records allocatable CPU/memory/logical local-ephemeral-storage, allocatable pod slots and
-  remaining CNI/IP capacity, the driver-scoped attachment limits from `CSINode`/driver configuration, the
-  observed layout plus content/snapshot roots and mount/device/quota identities,
-disjoint durable/native-host-cache backing pools, and accelerator
-devices/profiles/per-device raw/reserved/allocatable plus current-free VRAM, and the declared-vs-observed
-cross-check succeeds; fixtures that overstate
-ephemeral storage or declare CUDA on this CPU-only target fail with their specific resource/capability reason
-and cause zero workload/storage API writes or host backing allocations.
+**Independent Validation**: `amoebius bootstrap --distro=kind` must reach one `Ready` node behind a pre-create
+host→engine admission, re-run as a measured no-op, repair a named divergent start without recreating the
+cluster, resolve every invocation through an `AbsExe` path (§M.5), cross-check the declared target against a
+distinct observer's inventory, and tear down leak-free. The `### Validation` list below carries each
+obligation and its fixtures.
 **Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md`,
 `documents/engineering/substrate_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`,
 `documents/engineering/dsl_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
@@ -683,13 +671,20 @@ and discharging the live-inventory cross-check of
 ### Validation
 1. **Gate.** In a fresh `linux-cpu` guest (Incus on Linux, Lima on Apple, WSL2 on Windows; container runtime pre-installed), `amoebius bootstrap --distro=kind`; assert
    `kubectl get nodes` shows exactly one `Ready` node.
-2. **Pre-create host→engine admission.** Run the one-field `kind_engine_memory_exceeds_host` and
+2. **Pre-create host→engine admission.** Before the first create, a host reader distinct from the capacity
+   fold proves the declared `KindEngineDemand` — ordinal node-container runtime, exact `NodeCapacity`, nested
+   in-node reserve, separate host process reserve, structural host OCI/snapshot/data-root demand, and disk
+   carves — fits current physical-host residual without double debit. Its system reserve expands the finite,
+   version-pinned etcd backend/WAL/snapshot-save/defrag transitions, Event retention from
+   `etcd.logical.churn.eventRetention`, audit-log, and kubelet/runtime-log budgets. Run the one-field
+   `kind_engine_memory_exceeds_host` and
    `kind_engine_disk_exceeds_host` fixtures, plus `control_plane_storage_exceeds_system_carve_by_one` and
    `etcd_transition_peak_exceeds_system_carve_by_one`, `control_plane_history_too_short`, and a
    `SplitRuntime` fixture that aliases nodefs/imagefs.
    - Also run a host-runtime-root fixture whose nested `NodeCapacity` fits but host OCI content + active
      snapshot + writable/log + pull workspace is one byte over, and unknown/swapped graphroot/storage-model
-     fixtures; removing one required static process envelope is `UnknownCommitment`.
+     fixtures; removing one required static process envelope is `UnknownCommitment`. Those host-runtime bytes
+     lie outside the nested node's CRI roots and are charged separately from them.
    - Each must fail before mutation with its specific capacity/layout reason, and the external
      `execve`/runtime observer must record zero `kind create` and zero new node containers/backing
      allocations.

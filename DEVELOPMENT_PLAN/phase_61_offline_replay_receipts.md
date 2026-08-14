@@ -67,16 +67,16 @@ on Linux/Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 
 **Gate:** `cabal test offline-replay-receipts-live` queues fresh commands while disconnected, reconnects to a
 different UI-server replica, faults Redis and the socket between effect and response, and externally proves
-the exact typed outcome and zero duplicate/foreign effect for every challenged command. The workflow row uses
-the infernix start port and must preserve one scoped command/work-id through Pulsar, Phase-38 receipt lookup,
-and ready-artifact outcome recovery.
+the exact typed outcome and zero duplicate/foreign effect per challenged command.
+[Gate integrity](#gate-integrity) fixes the apparatus.
 
 ## Gate integrity
 
 Phase 0 pins the command/dependency trace, the infernix start/input/receipt identity row, replay concurrency and
 timeout budgets, typed outcome table, and same-owner/non-owner/foreign-tenant matrix. Distinct real OIDC
 identities issue fresh nonces. Independent SQL, MinIO, Pulsar, workflow, gateway, and Redis observers establish
-durable effect, route loss, and recovery.
+durable effect, route loss, and recovery. The workflow row uses the infernix start port and must preserve one
+scoped command/work-id through Pulsar, Phase-38 receipt lookup, and ready-artifact outcome recovery.
 Mutants acknowledge on Redis publish, omit durable lookup, drop current-membership validation, replay from two
 tabs, discard pending after disconnect, and remove scope from idempotency keys. Direct service/provider probes
 must remain denied.

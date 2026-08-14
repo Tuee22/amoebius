@@ -67,9 +67,7 @@ always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on A
 
 **Gate:** `cabal test offline-plan-spec` accepts the independently authored positive corpus, rejects each
 boundedness/plan-equality/security negative with its pinned tag, emits deterministic paired plans, and turns
-red for every named plan-compiler mutant. The corpus includes queueable infernix/jitML starts with complete
-identity/conflict/order/dependency/count/byte/age contracts and rejects attempts to queue any initial
-online-only ML operation.
+red for every named plan-compiler mutant. Its apparatus is [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
@@ -79,6 +77,11 @@ expected error tags, and an independently authored public/private key-set table.
 omit the server handler for a client codec, make model invocation queueable, persist a forbidden private field,
 and add a browser/Redis product constructor. The oracle parses normalized plan values without invoking the
 compiler under test; no live authority or fresh challenge is applicable at Register 1.
+
+The pinned queue contracts are the complete ones, because an incomplete one is exactly what the language is
+meant to make unrepresentable: each queueable infernix or jitML start carries identity, conflict, order,
+dependency, count, byte, and age terms. Alongside them the corpus carries the refusals — an attempt to queue
+any operation the classification holds online-only is a negative fixture, not an omission.
 
 ## Doctrine adopted
 

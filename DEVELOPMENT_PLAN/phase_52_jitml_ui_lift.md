@@ -90,13 +90,9 @@ reopens Phase-37 failover, adds a generic UI
 constructor, introduces another runtime image, or needs a second acceptance command.
 **Substrate:** linux-cuda
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/phase52_gate.py --reuse-fresh-live` checks the typed
-adapter and scoped browser/CUDA evidence for an owned Ready jitML model; same-tenant non-owner,
-foreign-tenant/scope, and non-Ready/failed checkpoint twins must be denied before inference dispatch with zero
-forbidden effect. It also pins the browser WebSocket to UI replica A, causes the terminal receipt notification
-to originate through replica B, flushes Redis and drops the socket after durable commit but before delivery,
-then requires reconnect and authoritative receipt recovery with no duplicate training effect. The fixtures,
-observers, oracle, and mutants are delegated to
+**Gate:** `python3 tools/phase52_gate.py --reuse-fresh-live` passes on linux-cuda: a browser reaches an owned,
+committed, Ready jitML model and recovers its terminal training receipt across replica, Redis, and socket
+loss. Its denial matrix, fixtures, observers, oracle, and mutants are delegated to
 [Gate integrity](#gate-integrity).
 
 ## Gate integrity

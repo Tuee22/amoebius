@@ -27,6 +27,7 @@ The gate passed 2026-08-10.
 ## Contents
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 29.1: Root single-node password-encrypted Vault — init-once / unseal-on-rebuild ⏸️](#sprint-291-root-single-node-password-encrypted-vault--init-once--unseal-on-rebuild-)
@@ -122,15 +123,23 @@ on Apple, and WSL2 on Windows.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `cabal test vault-pki-live` is green: on a single-node linux-cpu cluster, the root single-node password-encrypted Vault **inits exactly once and unseals fail-closed** (an empty correctly provisioned PV inits and password-seals its unlock material without
-printing raw keys, a delete+recreate only unseals the same Vault, and a secret-dependent workload against a
-sealed Vault fails closed); the bounded source populations plus versioned Raft/audit models derive exact
-retained and rotated-audit backing demands, with a one-byte-under provision rejected before effects and live
-snapshot/compaction/recovery plus audit rotation remaining inside those caps, and every Vault app/init/rotation
-execution unit and volume exactly matching its complete `ProvisionedServiceSpec` projection;
-the Vault `pki/` engine holds a **self-signed root CA that issues** an internal leaf chaining back to it; and the
-**built-in Haskell Vault client (no agent sidecar)** authenticates via Vault Kubernetes auth and **reads a `SecretRef` by name**, returning a typed fail-closed error on any sealed/missing/denied read — a **Register-3**
-live-infrastructure check.
+**Gate:** `cabal test vault-pki-live` is green on a single-node linux-cpu cluster: the root Vault inits once,
+unseals fail-closed, anchors its self-signed PKI, and serves one `SecretRef` to the built-in client, against
+the representative set, oracles, and mutants of [Gate integrity](#gate-integrity).
+
+## Gate integrity
+
+That one command has four legs, and it is green only when all four are. First, the root single-node
+password-encrypted Vault **inits exactly once and unseals fail-closed**: an empty correctly provisioned PV
+inits and password-seals its unlock material without printing raw keys, a delete+recreate only unseals the
+same Vault, and a secret-dependent workload against a sealed Vault fails closed. Second, the bounded source
+populations plus versioned Raft/audit models derive exact retained and rotated-audit backing demands, a
+one-byte-under provision is rejected before effects, live snapshot/compaction/recovery plus audit rotation
+remain inside those caps, and every Vault app/init/rotation execution unit and volume exactly matches its
+complete `ProvisionedServiceSpec` projection. Third, the Vault `pki/` engine holds a **self-signed root CA
+that issues** an internal leaf chaining back to it. Fourth, the **built-in Haskell Vault client (no agent
+sidecar)** authenticates via Vault Kubernetes auth and **reads a `SecretRef` by name**, returning a typed
+fail-closed error on any sealed/missing/denied read — a **Register-3** live-infrastructure check.
 
 ```mermaid
 flowchart LR
@@ -153,9 +162,9 @@ flowchart LR
 ```
 *Design intent. Phase 29's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
-**Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The
-gate's oracles are **pinned in this phase's oracle-pinning sprint, ahead of any `src/Amoebius/Vault/*.hs`**
-(§M.1):
+The gate's oracles are **pinned in this phase's oracle-pinning sprint, ahead of any
+`src/Amoebius/Vault/*.hs`**
+([§M.1](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)):
 - (a) a canary KV fixture `test/golden/vault/canary.json` — `SecretRef.Vault { mount="secret",
   path="amoebius/canary", field="token" }` with a fixed 32-byte value
 - (b) the pinned unlock-material envelope format spec `test/golden/vault/unlock-envelope.spec` (magic bytes,
@@ -229,13 +238,10 @@ consumer pod, never from any log the client emits about itself. Each sprint belo
 `src/Amoebius/Vault/Seal.hs` (the Argon2id-KDF → ChaCha20-Poly1305-IETF password-sealed unlock-material
 envelope), `tools/phase29_vault_live.py`, and the retained-volume evidence — built and validated.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: on an empty PV, `vault init` runs exactly
-once and captures password-sealed unlock material while **never** printing raw unseal/recovery keys or the
-root token; a cluster delete + recreate brings the *same* Vault up by **unseal only** (no re-init, no key
-regeneration); a secret-dependent workload started against a sealed Vault fails its readiness gate closed
-with no plaintext fallback; one byte below the derived Raft or rotated-audit physical peak rejects before
-effects, while a live snapshot/compaction/recovery and audit rotation stay within their provisioned
-backings.
+**Independent Validation**: `vault init` runs exactly once on an empty PV, a cluster rebuild brings the same
+Vault up by unseal only, a secret-dependent workload against a sealed Vault fails its readiness gate closed,
+and the derived Raft and rotated-audit boundaries hold live. The numbered `### Validation` list below carries
+the witnesses, byte-scans, and boundary cases.
 **Docs to update**: `documents/engineering/vault_pki_doctrine.md`,
 `documents/engineering/platform_services_doctrine.md`,
 `documents/engineering/storage_lifecycle_doctrine.md`,
@@ -385,14 +391,10 @@ None.
 binary), `src/Amoebius/Vault/SecretRef.hs` (the `SecretRef` resolver), `src/Amoebius/Vault/Error.hs` (the
 typed fail-closed error), and `test/live/VaultPkiSpec.hs` — built and validated.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: an in-cluster consumer
-authenticates to Vault with its **Kubernetes service-account JWT** (role bound to its namespace + service
-account, least-privilege policy) and resolves a `SecretRef.Vault { mount, path, field }` **by name**,
-receiving exactly the stored bytes; **a Vault audit device (§M.5) records that this read ran under a token minted by `auth/kubernetes/login` bound to the consumer's exact namespace + service account** — not a
-pre-minted or image-baked token; the consumer pod carries **no Vault Agent sidecar container** and mounts
-**no plaintext k8s Secret**; a read of a path outside policy is denied; a sealed / uninitialized /
-policy-missing / secret-missing read returns a **typed fail-closed error** that carries no secret material
-and emits no presence oracle in its logs.
+**Independent Validation**: an in-cluster consumer authenticates to Vault with its Kubernetes service-account
+JWT and resolves a `SecretRef.Vault` by name, with no agent sidecar, no plaintext Secret mount, and a typed
+fail-closed error carrying no secret material on every denied or missing read. The numbered `### Validation`
+list below carries the audit-device provenance witness and the six-tag negatives.
 **Docs to update**: `documents/engineering/vault_pki_doctrine.md`,
 `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-29 status when the
 gate passes), `DEVELOPMENT_PLAN/system_components.md`.
@@ -452,11 +454,10 @@ None.
 `IOSim`/`IOSimPOR` driver that runs the **real** `src/Amoebius/Vault/{Init,Unseal,Seal,Client}.hs` against
 the modeled Vault) — built and validated.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the **real**
-Vault init/unseal client code — written against `io-classes`, unchanged from the live path — runs under
-`IOSim`/`IOSimPOR` against the Phase 15 Sprint 15.2 modeled Vault with injected **sealed / unreachable / lease-expiry / restart** faults, and under adversarial schedules the **fail-closed invariant** holds: the
-daemon **never** proceeds — never issues from `pki/`, never accepts a `.dhall`, never reads a `SecretRef` —
-while Vault is sealed or its freshness is unproven; every failing schedule is **deterministically replayable** from its seed; substrate `none`, **Register 2.5**.
+**Independent Validation**: the real `io-classes` init/unseal client, unchanged from the live path, holds the
+fail-closed invariant under every adversarial `IOSim`/`IOSimPOR` schedule against the Phase-15 modeled Vault,
+and every failing schedule replays from its seed. Substrate `none`, Register 2.5; the numbered
+`### Validation` list below carries the fault families and coverage floors.
 **Docs to update**:
 `documents/engineering/deterministic_simulation_doctrine.md`, `documents/engineering/vault_pki_doctrine.md`,
 `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.

@@ -113,20 +113,9 @@ The live gate uses the Phase-24 single-node `kind` cluster; pure StorageClass/PV
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** durable **storage rebinds after a cluster delete + recreate with no data loss** — a marker row
-written into a Postgres witness StatefulSet and a marker object written into a MinIO witness bucket both
-round-trip byte-for-byte after the cluster is deleted (the cluster and its PVC/PV API objects are gone while
-the retained backing remains) and recreated (the same StatefulSet identities recompute the same claims, which
-bind to freshly rendered PV objects whose pre-bound `claimRef` omits `uid`/`resourceVersion` and points at the
-same backing bytes), demonstrating the lossless-teardown guarantee on the linux-cpu substrate; before either
-witness is created, the aggregate rounded raw allocation of the post-reconcile retained inventory (existing
-plus proposed, without double-counting unchanged identities) is proven within the observed durable backing
-with cache and ephemeral pools excluded. Each ordinal's required usable bytes pass through its presentation
-and backing allocation policy before the resulting `ProvisionedVolumeDemand`s are projected to one uniform
-`volumeClaimTemplate`; the maximum `provisionedBytes` times ordinal count is what the backing fold spends, and
-neither a logical-byte sum nor an unequal usable/raw sum is admissible. A live observer checks raw image size,
-mounted usable bytes, fs type, and the enforced `ENOSPC` boundary without consumption from a sibling volume or
-the enclosing shared host filesystem.
+**Gate:** durable **storage rebinds after a cluster delete + recreate with no data loss** — the Postgres row
+and MinIO object markers round-trip byte-for-byte across a real teardown, against the corpus, oracles,
+ceilings, observers, and seeded mutants of [Gate integrity](#gate-integrity).
 
 The gate is passed only when all of the following hold, checked against the oracle-pinned oracle corpus and
 seeded mutants named in [Gate integrity](#gate-integrity):
@@ -181,6 +170,22 @@ seeded mutants named in [Gate integrity](#gate-integrity):
 This section pins the concrete corpus, the oracle-pinned oracles, and the seeded mutants the Gate and each
 sprint Validation above reference. Everything named here is authored and committed in this phase's oracle-pinning sprint, before any
 implementation exists.
+
+**What the rebind claim means concretely.** A marker row written into a Postgres witness StatefulSet and a
+marker object written into a MinIO witness bucket both round-trip byte-for-byte after the cluster is deleted
+(the cluster and its PVC/PV API objects are gone while the retained backing remains) and recreated (the same
+StatefulSet identities recompute the same claims, which bind to freshly rendered PV objects whose pre-bound
+`claimRef` omits `uid`/`resourceVersion` and points at the same backing bytes), demonstrating the
+lossless-teardown guarantee on the linux-cpu substrate.
+
+**What is proven before either witness is created.** The aggregate rounded raw allocation of the
+post-reconcile retained inventory (existing plus proposed, without double-counting unchanged identities) is
+proven within the observed durable backing with cache and ephemeral pools excluded. Each ordinal's required
+usable bytes pass through its presentation and backing allocation policy before the resulting
+`ProvisionedVolumeDemand`s are projected to one uniform `volumeClaimTemplate`; the maximum `provisionedBytes`
+times ordinal count is what the backing fold spends, and neither a logical-byte sum nor an unequal usable/raw
+sum is admissible. A live observer then checks raw image size, mounted usable bytes, fs type, and the enforced
+`ENOSPC` boundary without consumption from a sibling volume or the enclosing shared host filesystem.
 
 ```mermaid
 flowchart LR
@@ -404,38 +409,10 @@ Generate the sprint receipt under `gen/runs/phase_28/` and retain it only throug
 verified-migration storage-scaling arms), `test/storage/Phase28RetainedPVSpec.hs`,
 `test/live/Phase28RetainedPVLiveSpec.hs`, and `tools/phase28_sprint28_2_live.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: before allocation, the desired post-reconcile retained
-inventory (existing images plus proposed additions, deduplicated by stable identity) is summed against the
-Phase-24/26-observed durable backing (excluding cache and node ephemeral pools); the over-backing negative
-fails before any host allocation or apiserver write. A multi-ordinal skew fixture proves the sum is built
-from each template's uniform post-presentation/post-allocation size and its member-derived
-`perBackingDebit[backing] = max(provisionedBytes) × membersOnBacking`, not a logical, usable, unequal
-pre-rounding, or ownership-erasing aggregate map; the skipped-rounding and collapsed-backing mutants turn
-that fixture red. For an accepted volume, a one-ordinal StatefulSet `volumeClaimTemplate` claim binds to the
-PV whose metadata and `claimRef` match the oracle-pinned independent oracle table
-`test/live/fixtures/claimref_table.csv` (hand-authored from `(namespace, statefulset, ordinal)`, never
-derived from the renderer's own naming helper). Because the logical identity
-`<namespace>/<statefulset>/pv_<integer>` is not a legal `metadata.name` (`/` and `_` are forbidden), the
-scheme is realized as: `metadata.name` is the RFC-1123 **subdomain** encoding
-`<namespace>.<statefulset>.pv-<integer>` — the `.` separator is illegal inside either label-shaped
-component, so the encoding is injective and two distinct identities can never collide on one cluster-scoped
-name
-([`storage_lifecycle_doctrine.md` §4](../documents/engineering/storage_lifecycle_doctrine.md#4-deterministic-pv-naming-and-the-explicit-bind))
-— and the legal `metadata.name` is repeated in the `amoebius.io/pv-identity` label while the verbatim logical
-identity is carried in the `amoebius.io/pv-logical-identity` annotation; the table pins **all three**, and the
-assertion checks all three against it. The `claimRef` names the exact `(namespace, PVC-name)`,
-and the PV capacity is **exactly equal** (`==`, not merely `>=`) to the PVC request and private
-`UniformClaimPlan.provisionedBytes` from the table; that raw rounded number may be larger than the logical
-or required usable demand. The PV path is a mounted fixed-raw-size filesystem image. An independent observer
-checks its raw length, mounted usable capacity, and fs type, then a fill plus one-byte write fails `ENOSPC`
-without growing the image or consuming a sibling volume/cache/ephemeral pool. Deleting the PVC leaves the PV
-`Released`; the suite then **re-creates the identical PVC** (via the same `volumeClaimTemplate` identity)
-and asserts it re-binds to the same identity-named PV — including whatever `claimRef.uid` reconciliation the
-reconciler performs to clear the stale bind — and that the bytes written before the delete read back through
-the re-bound claim. No bare PVC or Deployment-owned claim exists; the separately tested migration Job can
-mount only the two claims sealed into its private transition witness. Retained growth/shrink additionally
-proceeds only through a fresh `ValidatedStorageScalingAction`; stale allocation/backing/fingerprint readback
-or token reuse produces zero host, Job, PV, or PVC writes.
+**Independent Validation**: the pre-allocation durable-backing fold, the uniform `volumeClaimTemplate`
+projection, the deterministic bind against hand-authored `test/live/fixtures/claimref_table.csv`, the
+host-side raw/usable/fs-type/`ENOSPC` observation, the delete-and-re-bind cycle, and the single-use
+storage-scaling dispatcher are each checked live. The numbered Validation below states every predicate.
 **Docs to update**:
 `documents/engineering/storage_lifecycle_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`,
@@ -459,7 +436,11 @@ PVC creation path to exactly one shape.
   `<namespace>.<statefulset>.pv-<integer>`, repeated in the RFC-1123-valued `amoebius.io/pv-identity` label,
   with the verbatim logical identity carried in the `amoebius.io/pv-logical-identity` annotation, explicit
   `claimRef` to the exact `(namespace, PVC-name)`, and node affinity to the host-path node for
-  host-backed volumes (the trivial single-node case on this substrate).
+  host-backed volumes (the trivial single-node case on this substrate). The encoding exists because the
+  logical identity is not itself a legal `metadata.name` — `/` and `_` are forbidden — and it is safe because
+  the `.` separator is illegal inside either label-shaped component, so the encoding is injective and two
+  distinct identities can never collide on one cluster-scoped name
+  ([`storage_lifecycle_doctrine.md` §4](../documents/engineering/storage_lifecycle_doctrine.md#4-deterministic-pv-naming-and-the-explicit-bind)).
 - An authorable `DeclaredVolumeDemand` per claim slot with logical bytes, geometry, backing, and explicit
   `attachment = NodeLocal | Csi { driver }`, with
   `VolumePresentation = Block | Filesystem { fsType, overheadModel }` and each backing's explicit
@@ -487,7 +468,8 @@ PVC creation path to exactly one shape.
   `∀ backing. Σ UniformClaimPlan.perBackingDebit[backing] <= observed[backing]`, where every named durable backing is disjoint from cache and node ephemeral storage and existing/proposed volumes are keyed by stable identity so an unchanged re-run is counted once. Spare bytes on one backing cannot cover another. A failed fold has no continuation that can create an image, mount, PV, or PVC. - Host-retained resize enactment consumes only a private `ProvisionedStorageMigration`: the binder starts from the still-live old private volume, replacement `DeclaredVolumeDemand`, and structural chunk/concurrency/ workspace policy; provisioning derives the new rounded volume, exact copy/verify Job `PodResourceEnvelope`, and per-backing old+new+workspace high-water. The Phase-26 snapshot-bound reconciler creates the replacement and renders/adopts that Job only when the complete transition still fits CPU, memory, ephemeral storage, pod/CSI slots, and backing bytes. Independent byte verification gates cutover and `ReclaimEligible`; failure keeps the old claim active and both volumes/partial workspace charged. Normal operation never deletes either backing. - The Phase-28 enactors for `AllocateWithinRetainedCarve` and `ShrinkByVerifiedMigration`. They accept only Phase 26's fresh, snapshot-bound `ValidatedStorageScalingAction`, immediately recheck the exact retained allocation map/backing/fingerprint, consume its plan-id-indexed token once, and return a post-attempt observed scaling snapshot. Allocation cannot exceed the witnessed residual carve; shrink delegates to the private migration above and never credits the old extent before verified cutover and observed cleanup. `CreateProviderCapacity` is absent from this host capability surface. - The invariant that a PVC is only ever born from a StatefulSet `volumeClaimTemplate` — no bare PVCs or Deployment-owned claims — exercised with a minimal one-ordinal witness StatefulSet. The only Job mount constructor consumes a private `ProvisionedStorageMigration` and is checked to name exactly its old and replacement claims while creating none.
 
 ### Validation
-1. Against the oracle-pinned durable-backing inventory, derive the complete post-reconcile PV inventory
+1. Against the oracle-pinned durable-backing inventory and the Phase-24/26-observed durable backing (cache
+   and node ephemeral pools excluded), derive the complete post-reconcile PV inventory
    (existing plus proposed, deduplicated by stable identity) and assert that every named backing
    independently satisfies `Σ(perBackingDebit) <= observedBacking`; an unchanged re-run produces the same
    map, not twice the debit.
@@ -529,9 +511,10 @@ PVC creation path to exactly one shape.
    debits the rounded capacity times ordinal count. Then deploy the one-ordinal rebind
    witness StatefulSet; assert its claim binds to the PV whose `metadata.name`,
    `amoebius.io/pv-identity` label, `amoebius.io/pv-logical-identity` annotation, `claimRef`
-   `(namespace, PVC-name)`, and **exactly-equal** capacity all
+   `(namespace, PVC-name)`, and capacity **exactly equal** (`==`, not merely `>=`) to the PVC request and the
+   private `UniformClaimPlan.provisionedBytes` all
    match the table's provisioned-witness column, and that node affinity pins the host-backed volume to its
-   node. From the host block/image observer assert raw image length `== provisionedBytes`; from inside the
+   node. That raw rounded number may be larger than the logical or required usable demand. From the host block/image observer assert raw image length `== provisionedBytes`; from inside the
    mounted pod assert the filesystem type equals `VolumePresentation.fsType` and usable capacity
    `>= requiredUsableBytes`. Fill the usable filesystem and issue one more byte; assert `ENOSPC` occurs while
    the raw image length, sibling-volume usage, native-host-cache backing, and node-ephemeral usage do not grow.
@@ -554,8 +537,10 @@ PVC creation path to exactly one shape.
    allocation rounding, uniformity, and backing admission; it does not assert logical-byte equality.
 5. Drive the same retained budget through the storage-scaling dispatcher. A fitting residual produces and
    enacts only `AllocateWithinRetainedCarve`; a shrink produces only `ShrinkByVerifiedMigration` and obeys
-   assertion 1's old+new+workspace/verification checks. Mutating the allocation map, backing extent, or
-   fingerprint after validation invalidates the action before any host/API write; replaying its consumed token
+   assertion 1's old+new+workspace/verification checks. Retained growth and shrink proceed only through a
+   fresh `ValidatedStorageScalingAction`: mutating the allocation map, backing extent, or
+   fingerprint after validation invalidates the action, and a stale readback or a replayed token produces
+   zero host, Job, PV, or PVC writes. Replaying its consumed token
    is impossible; and an injected lost response requires re-observation while retaining every possibly
    allocated extent. A provider-capacity action is rejected because this phase supplies no cloud capability.
 
@@ -572,19 +557,10 @@ None; the live observation, external reader, ten red mutants, and receipt are re
 **Implementation**: `src/Amoebius/Storage/Rebind.hs`, `test/live/RebindSpec.hs`,
 `test/storage/Phase28RebindSpec.hs`, and `tools/phase28_rebind_live.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the marker (a fresh per-run
-random nonce) written as a Postgres row and as a MinIO object reads back byte-for-byte after a `cluster
-delete` + `recreate`. The nonce is asserted **absent** from both witnesses before the write and present
-after recreate, with **no witness write path executed post-recreate** (read from the apiserver audit log and
-a `strace`/argv observer on the witness process, never a self-emitted compliance trace). "Bytes intact
-between delete and recreate" is observed by inspecting the host retained-storage root `${RETAINED_ROOT}`
-**outside** any node container while `kind get clusters` is empty — a real `cluster delete` destroys the
-apiserver, so the PV `Released` *status* is observed only in Sprint 28.2's live PVC-delete step, not here.
-`recreate` is a fresh Phase-24 bootstrap (new apiserver/etcd, changed cluster UID) into which the PV objects
-are re-rendered and re-applied before rebind is asserted; the recreated cluster re-binds the *same backing
-bytes* through fresh PV objects computed by identity (matched against
-`test/live/fixtures/claimref_table.csv`). The only actor that ultimately deletes the test-flagged witness
-volumes is the elevated harness.
+**Independent Validation**: a fresh per-run random nonce, written as a Postgres row and as a MinIO object,
+reads back byte-for-byte after a real `cluster delete` + `recreate` — asserted absent before the write, and
+with no witness write path executed afterwards. Validation 1 below states the observers and the ordering they
+are read in.
 **Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md`,
 `documents/engineering/cluster_lifecycle_doctrine.md`, `DEVELOPMENT_PLAN/README.md`.
 

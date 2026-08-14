@@ -28,6 +28,7 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 ## Contents
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 5.1: The amoebius cabal package + `dsl-spec` test-suite skeleton ✅](#sprint-51-the-amoebius-cabal-package--dsl-spec-test-suite-skeleton-)
@@ -168,16 +169,9 @@ Phase-0 documentation lint and the Phase-4 `dhall type` corpus.
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `cabal test dsl-spec` is green — each positive fixture decodes through the fail-closed `decodeCluster`
-into its `ClusterIR`, each Gate-2-class negative fixture **first passes `dhall type` (Gate-1-green precondition, so its rejection is attributable to the decoder alone, not to Gate 1)** and then returns a
-structured `Left DecodeError` with its expected tag, and the decode path is checked non-partial and fail-closed
-(deep-NF strict evaluation via an `NFData ClusterIR` instance forced by `evaluate . force` on the decode path;
-`-Wall` + a partiality grep proving no `error`/`undefined`/partial match in the pure code; and an
-exception-catch wrapper mapping every thrown `DhallError`/IO exception to a structured `Left`). A structural
-oracle also traverses every positive `ClusterIR` and proves the complete normalized resource/capacity tree was
-retained. This is a **Register-1** in-process check that runs on no substrate. It checks non-partiality of the
-pure code and fail-closure on thrown exceptions; it is not a proof of termination or of exception-freedom of
-the underlying `dhall` library.
+**Gate:** `cabal test dsl-spec` is green over the positive fixtures, tagged Gate-2 negatives, structural
+resource oracle, and committed mutants named in [Gate integrity](#gate-integrity). Phase 6 does not open
+unless the ledger records Register 1 green and every runtime-enforcement layer UNVERIFIED.
 
 ```mermaid
 flowchart LR
@@ -193,6 +187,22 @@ flowchart LR
   s3 -->|"the last seam the gate closes over"| gate
 ```
 *Orientation. The seams phase 5 builds, in order; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns the apparatus. Not run.*
+
+## Gate integrity
+
+Each positive fixture decodes through the fail-closed `decodeCluster` into its `ClusterIR`, and each
+Gate-2-class negative fixture **first passes `dhall type`** — the Gate-1-green precondition that makes its
+rejection attributable to the decoder alone, not to Gate 1 — and only then returns a structured
+`Left DecodeError` with its expected tag. The decode path is checked non-partial and fail-closed three ways:
+deep-NF strict evaluation via an `NFData ClusterIR` instance forced by `evaluate . force` on the decode path;
+`-Wall` plus a partiality grep proving no `error`/`undefined`/partial match in the pure code; and an
+exception-catch wrapper mapping every thrown `DhallError`/IO exception to a structured `Left`. A structural
+oracle also traverses every positive `ClusterIR` and proves the complete normalized resource/capacity tree was
+retained.
+
+This is a **Register-1** in-process check that runs on no substrate. It checks non-partiality of the pure code
+and fail-closure on thrown exceptions; it is not a proof of termination or of exception-freedom of the
+underlying `dhall` library.
 
 **Committed oracle, corpus, and mutants ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clauses 1/2/7/8).** The gate's oracle side is authored and
 committed in **Phase 0 before the decoder exists** — never regenerated from `decodeCluster`'s own output. It
@@ -272,14 +282,9 @@ independent of the decoder's own output ([§M](development_plan_standards.md#m-g
 throwaway probe), the `dsl-core` internal library, the `dsl-spec` test-suite stanza, and the built
 `src/Amoebius/Dsl/` module tree.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `cabal build` of the empty package and `cabal test dsl-spec` (zero
-tests) succeed under GHC 9.12.4 / Cabal 3.16.1.0 using the Phase-1 pin. Disambiguation of "no
-`PATH`-resolved tool" (the one interpretation both engineers now share, since this validation has no
-amoebius binary): the harness resolves `ghc`/`cabal`/`dhall` to the **absolute paths recorded in the Phase-1 pin manifest** and invokes them by absolute path, and an **OS-boundary argv observer** (an argv-recording
-shim on `PATH`, per [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-clause 5) records that every toolchain and `dhall` invocation during this sprint's build/test carried an
-absolute program path — the shim's own log is red if any invocation resolved a bare name via ambient `PATH`.
-This is an external-observer trace, not a self-report by the build script.
+**Independent Validation**: `cabal build` of the empty package and `cabal test dsl-spec` (zero tests) succeed
+under the Phase-1 pin, and no tool reaches them through ambient `PATH`. The numbered `### Validation` list
+below carries the resolution rule and the argv observer that decide the second half.
 **Docs to update**:
 `DEVELOPMENT_PLAN/system_components.md` (register the `amoebius` package + `dsl-spec` suite), this document.
 
@@ -293,7 +298,16 @@ Gate 2 needs, with **no** chain/reconcile/singleton kernel.
   set, exposing the `dsl-core` modules and a `dsl-spec` test-suite stanza.
 
 ### Validation
-1. Pinned `cabal build amoebius:dsl-core` and `cabal test dsl-spec` succeed; the phase gate's `strace` observer records absolute Cabal, GHC, and Dhall executable paths.
+1. Pinned `cabal build amoebius:dsl-core` and `cabal test dsl-spec` succeed under GHC 9.12.4 / Cabal 3.16.1.0;
+   the phase gate's `strace` observer records absolute Cabal, GHC, and Dhall executable paths.
+2. "No `PATH`-resolved tool" is disambiguated to the one interpretation both engineers now share, since this
+   validation has no amoebius binary of its own: the harness resolves `ghc`/`cabal`/`dhall` to the **absolute
+   paths recorded in the Phase-1 pin manifest** and invokes them by absolute path.
+3. An **OS-boundary argv observer** — an argv-recording shim on `PATH`, per
+   [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 5 — records
+   that every toolchain and `dhall` invocation during this sprint's build and test carried an absolute program
+   path. The shim's own log is red if any invocation resolved a bare name via ambient `PATH`. This is an
+   external-observer trace, not a self-report by the build script.
 
 ### Remaining Work
 None for Phase 5. Later DSL expansion belongs to the numerically assigned phases.
@@ -301,34 +315,13 @@ None for Phase 5. Later DSL expansion belongs to the numerically assigned phases
 ## Sprint 5.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `src/Amoebius/Dsl/Types.hs` (the GADT-indexed `ClusterIR`,
-normalized resource/capacity declaration fields, and component ADTs, including the Gate-2 side of the three
-surfaces [Phase 4](phase_04_dhall_gate1_schema.md) adds to the schema — `ExtensionSpec` with its
-non-optional `extMonitoring : NonEmpty MonitoringSurface`, the PACELC surface, and the closed
-`BackupPolicy` — so an extension without monitoring cannot be decoded any more than it can be authored),
-`src/Amoebius/Dsl/SmartConstructors.hs`, `src/Amoebius/Dsl/Ref.hs` (the phantom tenant `Ref tenant a` and
-ownership indices), plus the committed compile-pair corpus. Complete normalized resource/capacity data is retained in the semantic-hash-pinned path-indexed tree and each refined execution retains its exact resource subtree; no provisioned total is synthesized here.
+**Implementation**: `src/Amoebius/Dsl/Types.hs`, `src/Amoebius/Dsl/SmartConstructors.hs`,
+`src/Amoebius/Dsl/Ref.hs`, plus the committed compile-pair corpus.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**:
-the catalog's decode-foreclosed classes
+**Independent Validation**: the catalog's decode-foreclosed classes
 ([§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally))
-have no inhabitant, proven by **committed minimal-pair compile-fail fixtures** (not absence-by-omission).
-For each of
-[§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
-(phantom tenant),
-[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
-(GADT transition index), and
-[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
-(ownership index) the phase commits **two source fixtures differing only in the one index** (tenant tag /
-state index / owner): the **legal twin must compile** *and* must be the exact constructor a **named Phase-4 positive fixture is committed to decode through** (the fixture header cites which `legal_*.dhall`), while
-the **illegal twin must fail `ghc -fno-code` with a type error whose message names that same constructor/index**. Because `decodeCluster` lands in Sprint 5.3, the compile-time minimal pair — legal twin
-compiles, illegal twin fails at its committed locus — is what Sprint 5.2 validates standalone; the actual
-decode-through round-trip to the cited positive is confirmed at the Sprint 5.4 gate once `decodeCluster`
-exists. Because the legal twin is a required-to-compile, actually-decoded constructor, an impoverished
-vocabulary that spells cross-tenant references freely fails its legal twin (or fails to decode the cited
-positive), so the pair cannot be satisfied by a strawman `mkCrossTenantRef` that was simply never defined.
-The compile-fail message locus (expected type-error text) is committed in this phase's oracle-pinning sprint alongside the fixtures.
-The exhaustive compile-fail corpus is assembled in Phase 6.
+have no inhabitant, proven by **committed minimal-pair compile-fail fixtures** rather than by
+absence-by-omission. The numbered `### Validation` list below carries what each pair must do.
 **Docs to update**:
 `documents/illegal_state/illegal_state_catalog.md` (per-entry layer reconciliation — which entries this IR
 type-forecloses), `documents/engineering/dsl_doctrine.md` (Phase-5 status backlink),
@@ -339,10 +332,17 @@ Adopt [`illegal_state_catalog.md §4.2/§4.3/§4.4`](../documents/illegal_state/
 build the Haskell types the Dhall decodes into — GADT-indexed so only legal transitions are typed, phantom
 tenant-tagged so a cross-tenant reference is uninhabitable, and ownership-indexed so a resource has one
 structural owner. These are the ADTs that make an illegal combination un-spellable at the decode boundary.
+Complete normalized resource/capacity data is retained in the semantic-hash-pinned path-indexed tree and each
+refined execution retains its exact resource subtree; no provisioned total is synthesized here.
 
 ### Deliverables
 - `ClusterIR` and its component ADTs as GADT-indexed types + smart constructors exposing only a legal
-  vocabulary; the phantom tenant `Ref tenant a` and ownership indices catalogued at [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally).
+  vocabulary, carried by `src/Amoebius/Dsl/Types.hs` alongside the normalized resource/capacity declaration
+  fields; the phantom tenant `Ref tenant a` and ownership indices of `src/Amoebius/Dsl/Ref.hs`, catalogued at [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally).
+- The Gate-2 side of the three surfaces [Phase 4](phase_04_dhall_gate1_schema.md) adds to the schema:
+  `ExtensionSpec` with its non-optional `extMonitoring : NonEmpty MonitoringSurface`, the PACELC surface, and
+  the closed `BackupPolicy`, so an extension without monitoring cannot be decoded any more than it can be
+  authored.
 - The two **image/process cross-field relations** Dhall cannot express, decoded here because they range over
   the enclosing value rather than one field: an `AmoebiusRole` container must run an image whose identity is
   the `Runtime` arm and, when its role is `Worker`, the kind's `ExtensionId` must be a member of that arm's
@@ -582,15 +582,23 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
 - The committed minimal-pair compile-fail fixtures: for each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), a legal twin (compiles; cited to a named `legal_*.dhall` positive it decodes through) and an illegal twin (fails `ghc -fno-code` with a type error naming the same constructor/index), plus each pair's committed expected type-error locus.
 
 ### Validation
-1. For each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), the committed minimal pair holds at compile time: the legal twin compiles
-   **and** is the constructor a named Phase-4 positive fixture is committed to decode through, and the illegal
+1. For each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant), [§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (GADT transition index), and [§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (ownership index), the phase commits
+   **two source fixtures differing only in the one index** — tenant tag, state index, or owner — and that
+   committed minimal pair holds at compile time: the legal twin compiles
+   **and** is the constructor a named Phase-4 positive fixture is committed to decode through (its header
+   cites which `legal_*.dhall`), and the illegal
    twin fails `ghc -fno-code` with a type error naming that same constructor/index (matching the committed
    locus). The compile-time pair is Sprint 5.2's standalone check; the decode-through round-trip to the cited
    positive is confirmed at the Sprint 5.4 gate once `decodeCluster` exists (Sprint 5.3). The check is red if
    the legal twin fails to compile, if its cited positive later fails to decode through it at the gate
    (foreclosing absence-by-omission), or if the illegal twin's failure locus does not match. The legal
    vocabulary compiles.
-2. Every named positive fixture decodes with a complete normalized resource/capacity tree, and a structural
+2. The pair cannot be satisfied by a strawman `mkCrossTenantRef` that was simply never defined. Because the
+   legal twin is a required-to-compile, actually-decoded constructor, an impoverished vocabulary that spells
+   cross-tenant references freely fails its legal twin, or fails to decode the cited positive. The compile-fail
+   message locus — the expected type-error text — is committed in this phase's oracle-pinning sprint alongside
+   the fixtures, and the exhaustive compile-fail corpus is assembled in Phase 6.
+3. Every named positive fixture decodes with a complete normalized resource/capacity tree, and a structural
    traversal finds no execution unit without id/revision and one kind/cardinality/policy/resource-compatible
    private body;
    - no zero-progress Deployment, invalid/both-positive DaemonSet rolling pair, feature-gated or
@@ -669,20 +677,12 @@ None for Phase 5; exhaustive catalog expansion is Phase 6.
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Dsl/Decode.hs` (`decodeCluster :: FilePath -> IO
-(Either DecodeError ClusterIR)` = a **resolve-and-freeze** stage that rejects every `env:` and remote
-(`http(s):`) import and freezes the remaining local imports to `sha256:…` semantic-integrity hashes,
-*then* `Dhall.inputFile auto` over that resolved, frozen expression — the whole wrapped in an
-exception-catch that maps thrown `DhallErrors`/IO exceptions to `Left DecodeError`; non-partial +
-fail-closed) and `src/Amoebius/Dsl/Error.hs` (the tagged `DecodeError` type, carrying the
-`ForbiddenImport` arm the resolve stage returns). The import-graph preflight rejects direct and nested environment/remote imports; local imports resolve into one semantic-hash-frozen normalized tree before the `inputFile auto` structural table decode.
+(Either DecodeError ClusterIR)`) and `src/Amoebius/Dsl/Error.hs` (the tagged `DecodeError` type).
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the decode path returns `Either DecodeError ClusterIR` and never
-throws into a half-applied effect; a `-Wall` + partiality grep gate confirms no `error`/`undefined`/partial
-head reachable from `decodeCluster`; and "strictness forces the decoded value" is disambiguated to **deep normal form**: an `NFData ClusterIR` instance is derived and the decode path runs `evaluate . force` on the
-`Right` value, so a hidden unevaluated bottom in any field surfaces as a caught exception mapped to `Left`
-rather than passing a shallow `Right _` match. `DecodeError` distinguishes at least the three named failure
-classes as distinct constructors — `SchemaMismatch`, `OutOfDomainArm`, `UnspellableCombination` — so a
-blanket catch-all tag is a type-level regression, not a passing implementation.
+**Independent Validation**: the decode path returns `Either DecodeError ClusterIR` and never throws into a
+half-applied effect, and `DecodeError` carries each named failure class as its own constructor, so a blanket
+catch-all tag is a type-level regression rather than a passing implementation. The numbered `### Validation`
+list below carries the partiality and deep-normal-form checks.
 **Docs to update**:
 `documents/engineering/dsl_doctrine.md` (§5 Gate-2 backlink to the in-process decoder),
 `documents/engineering/testing_doctrine.md` (the Register-1 in-process ledger variant),
@@ -699,6 +699,10 @@ so nothing is ever reconciled against a config that did not fully decode.
   structured `DecodeError` whose class of failure is carried by **distinct constructors** — `SchemaMismatch`,
   `OutOfDomainArm`, `UnspellableCombination` — not a single catch-all arm; and an `NFData ClusterIR` instance
   the decode path forces with `evaluate . force` so the `Right` value is proven deep-NF-total, not merely WHNF.
+- A **resolve-and-freeze** stage ahead of that decode: an import-graph preflight rejects every direct and
+  nested `env:` and remote (`http(s):`) import, returning the `ForbiddenImport` arm of `DecodeError`, and the
+  remaining local imports resolve into one `sha256:…` semantic-integrity-frozen normalized tree. Only then does
+  `Dhall.inputFile auto` run its structural table decode over that resolved, frozen expression.
 - Resource normalization is part of that same total decode: quantities are converted to canonical typed units,
   every required envelope/capacity field is retained, and invalid refined values are returned as a structured
   `Left` naming the field path. Normalization does **not** claim target feasibility; it produces only the
@@ -716,6 +720,9 @@ so nothing is ever reconciled against a config that did not fully decode.
    `Dhall.inputFile auto` throws, which the wrapper catches and tags rather than propagating; the partiality
    gate reports no partial call reachable from the pure decode code; and the `evaluate . force` on the decoded
    value converts any hidden bottom into a caught `Left` (deep-NF check, not a shallow `Right _` match).
+   "Strictness forces the decoded value" is disambiguated here to **deep normal form**: the derived
+   `NFData ClusterIR` instance is what makes an unevaluated bottom in any field surface as a caught exception
+   rather than passing as a `Right`.
 2. The three named failure classes are **distinct constructors** and each is reachable: a decode reproducing a
    thunked/bottom field is caught as `Left` rather than escaping — proving the deep force is on the live path.
 
@@ -729,14 +736,10 @@ None for Phase 5.
 `dhall/examples/legal_*.dhall`; the representative Gate-2 negative set `dhall/examples/illegal_decode_*.dhall`;
 the semantic-hash/tree/count oracles; structural mutants; and `tools/phase5_gate.py`.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `cabal test dsl-spec` is green — each positive fixture decodes to its
-`ClusterIR`; **each `illegal_decode_*.dhall` negative first passes `dhall type` (Gate-1-green precondition) and then** returns a structured `Left` with the expected tag pinned in its committed header; the suite is
-red if any negative fails `dhall type` (so the rejection is Gate-2's, not Gate-1's — foreclosing negatives
-that are merely ill-typed Dhall), red if any Gate-2-illegal fixture decodes, and red if any of the three
-`DecodeError` tag arms has zero fixtures. The "red if any illegal fixture decodes" polarity is proven by an
-**executed committed mutant** (below), not a restated assertion. The expected-tag oracle is the committed
+**Independent Validation**: `cabal test dsl-spec` is green, and the expected-tag oracle is the committed
 Phase-0 fixture-header table, independent of the decoder's own fold
-([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 3).
+([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 3). The
+numbered `### Validation` list below carries the per-fixture obligations and the three red conditions.
 **Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (backlink: the decode-foreclosed entries
 exercised here → layer-2 Register-1), `documents/engineering/testing_doctrine.md`,
 `DEVELOPMENT_PLAN/README.md` (flip the Phase-5 status when the gate passes).
@@ -835,7 +838,9 @@ provisioning boundary.
 
 ### Validation
 1. `cabal test dsl-spec` is green — positives decode; every `illegal_decode_*.dhall` negative first passes
-   `dhall type` (suite red otherwise) and then returns the tagged `Left` matching its committed header; all
+   `dhall type` (suite red otherwise, so the rejection on record is Gate-2's and not Gate-1's, which
+   forecloses negatives that are merely ill-typed Dhall) and then returns the tagged `Left` matching its
+   committed header; the suite is red if any Gate-2-illegal fixture decodes; all
    three `DecodeError` tag arms have >=1 fixture (suite red if any arm is empty); and the deep-NF force and
    fail-closed assertions hold. Each positive's resource/capacity traversal is complete and normalized, and
    the dropped-resource-field decoder mutant turns the suite red.

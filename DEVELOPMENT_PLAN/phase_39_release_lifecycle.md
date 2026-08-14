@@ -29,6 +29,7 @@ ledger `external-run-reference`.
 ## Contents
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
 - [Resource provision — release execution, the content/pointer store, and schema migration](#resource-provision--release-execution-the-contentpointer-store-and-schema-migration)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
@@ -98,30 +99,49 @@ protocols and the `PromotionGate` are substrate-agnostic in design but validated
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `cabal test release-lifecycle-live` is green: an `InForceSpec` test topology on the linux-cpu kind cluster exercises the four delivery values
-end-to-end and passes only when all hold. (i) A **live `Release`-ledger write produces a content-addressed `releaseHash`** — recomputed by an independent sha256 over the resolved deployment-dhall ‖ image-digests ‖
-substrate-fp and asserted byte-equal to the oracle-pinned golden key, the ledger entry immutable in the
-Phase-37 store. (ii) An **`Environment` promotion whose `Release` ledger lacks the required evidence strength is refused by the `PromotionGate`** — the committed under-verified fixture `release_unverified` (its evidence
-ledger marks the Runtime/chaos layer UNVERIFIED) yields no `advance` value for `Prod`, and the refusal is
-asserted with the specific reason tag `PromotionRefused:RuntimeEvidenceMissing` (not merely "failed"), paired
-with a positive `release_verified` differing only in the Runtime evidence edge; the refusal is observed as **no pointer advance in the store's ETag history** (an external-observer read of the pointer HEAD, not a
-self-emitted gate log). (iii) A **satisfied `PromotionGate` advances the ETag-CAS `Environment` pointer** — the
-prod pointer's ETag transitions from the old `releaseHash` to `release_verified`'s, observed from the store's
-pointer history. (iv) A **readiness-gated `RolloutPlan` applies its phases in order** — the phase-apply order is
-read from an **external observer at the OS/API boundary** (the API-server audit log / the run's ApplySet
-field-manager apply sequence, never the reconciler's self-report), each phase gated on live object status, and
-the plan **includes a DB schema-migration `RolloutPhase`** obeying `create-new → verified-migrate → retire-old`
-against the standing Phase-34 Postgres (the retire phase never denotes byte destruction). The whole topology
-spins up, runs, tears down **leak-free**, and **re-runs idempotently under a distinct per-run store namespace** (a cache-bypassing independent recompute of the `releaseHash`, not a store-hit), emitting a
-generated proven/tested/assumed ledger under `gen/runs/` that names its register (3) and substrate (linux-cpu) and marks the
-runtime layer **tested, never proven** and the cross-cluster/canary layers **UNVERIFIED**. The gate is checked
-against the oracle-pinned fixtures named in Sprints 39.1–39.4 and **MUST turn red** on the committed seeded
-mutant `mutant/gate-admits-unverified` — a `PromotionGate` whose guard is weakened so a promotion that SHOULD
-be refused (`release_unverified` → `Prod`) is **admitted** — and on the additional mutants named per sprint.
-The representative set is exactly the `release_lifecycle.dhall` topology's **one trivial app with three
-environment pointers (`Dev`/`Staging`/`Prod`), three committed `Release` entries (`release_verified`,
-`release_unverified`, `release_protocol_unverified`), and one `RolloutPlan` of three ordered phases (base-apply → DB schema-migration →
-finalize, where the `finalize` phase enacts retire-old)** over the standing single-node platform stack plus one Postgres.
+**Gate:** `cabal test release-lifecycle-live` is green: one `InForceSpec` topology on the linux-cpu kind
+cluster exercises the ledger write, the refused promotion, the satisfied advance, and the ordered rollout
+end-to-end. Its representative set, oracles, observers, and mutants are delegated to
+[Gate integrity](#gate-integrity).
+
+## Gate integrity
+
+The gate is one `InForceSpec` test topology on the linux-cpu kind cluster, and it passes only when all four
+delivery values hold at once.
+
+- **A live `Release`-ledger write produces a content-addressed `releaseHash`.** The key is recomputed by an
+  independent sha256 over the resolved deployment-dhall ‖ image-digests ‖ substrate-fp and asserted byte-equal
+  to the oracle-pinned golden key, with the ledger entry immutable in the Phase-37 store.
+- **An `Environment` promotion whose `Release` ledger lacks the required evidence strength is refused by the
+  `PromotionGate`.** The committed under-verified fixture `release_unverified` — its evidence ledger marks the
+  Runtime/chaos layer UNVERIFIED — yields no `advance` value for `Prod`, and the refusal carries the specific
+  reason tag `PromotionRefused:RuntimeEvidenceMissing`, not merely "failed", paired with a positive
+  `release_verified` differing only in the Runtime evidence edge. The refusal is observed as **no pointer
+  advance in the store's ETag history**: an external-observer read of the pointer HEAD, never a self-emitted
+  gate log.
+- **A satisfied `PromotionGate` advances the ETag-CAS `Environment` pointer.** The prod pointer's ETag
+  transitions from the old `releaseHash` to `release_verified`'s, observed from the store's pointer history.
+- **A readiness-gated `RolloutPlan` applies its phases in order.** The phase-apply order is read from an
+  **external observer at the OS/API boundary** — the API-server audit log, or the run's ApplySet field-manager
+  apply sequence, never the reconciler's self-report — each phase is gated on live object status, and the plan
+  **includes a DB schema-migration `RolloutPhase`** obeying `create-new → verified-migrate → retire-old`
+  against the standing Phase-34 Postgres, whose retire phase never denotes byte destruction.
+
+**Hygiene and honesty.** The whole topology spins up, runs, tears down **leak-free**, and **re-runs
+idempotently under a distinct per-run store namespace** — a cache-bypassing independent recompute of the
+`releaseHash`, not a store-hit. It emits a generated proven/tested/assumed ledger under `gen/runs/` naming its
+register (3) and substrate (linux-cpu), marking the runtime layer **tested, never proven** and the
+cross-cluster and canary layers **UNVERIFIED**.
+
+**Oracles, mutants, and the representative set (§M.1, §M.2, §M.7).** The gate is checked against the
+oracle-pinned fixtures named in Sprints 39.1–39.4 and **MUST turn red** on the committed seeded mutant
+`mutant/gate-admits-unverified` — a `PromotionGate` whose guard is weakened so a promotion that SHOULD be
+refused (`release_unverified` → `Prod`) is **admitted** — and on the additional mutants named per sprint. The
+representative set is exactly the `release_lifecycle.dhall` topology's one trivial app with three environment
+pointers (`Dev`/`Staging`/`Prod`), three committed `Release` entries (`release_verified`,
+`release_unverified`, `release_protocol_unverified`), and one `RolloutPlan` of three ordered phases
+(base-apply → DB schema-migration → finalize, where the `finalize` phase enacts retire-old) over the standing
+single-node platform stack plus one Postgres.
 
 ## Resource provision — release execution, the content/pointer store, and schema migration
 
@@ -264,13 +284,10 @@ the section it adopts; individual sprints cite the same sections where they buil
 **Implementation**: `amoebius-release/src/Amoebius/Release/Ledger.hs`,
 `amoebius-release/src/Amoebius/Release/ReleaseHash.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: execute at **Register 3** against the Phase-37 single-node kind
-cluster's live MinIO store, never an in-process fake — the register is stated so its evidential weight is
-unambiguous. A `Release` write emits a `releaseHash` **recomputed by an independent sha256** over
-`resolved-deployment-dhall ‖ image-digests ‖ substrate-fp` (not the amoebius folder's own output) and equal
-to the oracle-pinned golden key; two writes of the same logical `Release` deduplicate to one entry and
-return the same hash; a second write attempting to edit a field of an existing `releaseHash` entry is
-**rejected** by the content-addressed write protocol (immutability is runtime-checked residue).
+**Independent Validation**: at **Register 3** against the Phase-37 kind cluster's live MinIO store, a `Release`
+write emits the oracle-pinned `releaseHash` under an independent sha256, a repeat write of the same logical
+`Release` deduplicates, and an attempted edit of an existing entry is rejected. The `### Validation` list
+below states each check and its fixtures.
 **Docs to update**: `documents/engineering/release_lifecycle_doctrine.md` (§2),
 `documents/engineering/manifest_generation_doctrine.md` (§6.1 — append the application record after
 convergence), `DEVELOPMENT_PLAN/system_components.md`, this document.
@@ -304,7 +321,9 @@ after convergence.
   substrate-distinct generations to one key; the gate MUST turn this mutant **red** against the golden vector.
 
 ### Validation
-1. Write the fixed `release_fixture` and assert the emitted `releaseHash` is **byte-equal to the committed golden `release_hash.txt`** (independently recomputed), and that a second write deduplicates to the same
+1. Execute at **Register 3** against the Phase-37 single-node kind cluster's live MinIO store, never an
+   in-process fake — the register is stated so the result's evidential weight is unambiguous. Write the fixed
+   `release_fixture` and assert the emitted `releaseHash` is **byte-equal to the committed golden `release_hash.txt`** (independently recomputed), and that a second write deduplicates to the same
    entry and hash.
 2. Assert the specific-reason negative `release_fixture_perturbed.json` yields a `releaseHash` **that differs from the golden** (a changed image digest changes identity), and that `mutant/hash-omits-substrate` turns
    this validation **red** (two substrate-distinct fixtures collapse to one key).
@@ -329,14 +348,10 @@ None.
 **Implementation**: `amoebius-release/src/Amoebius/Release/Environment.hs`,
 `amoebius-release/src/Amoebius/Release/Promote.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: this suite runs in **Register 3** against the live Phase-37 store. `Environment` is a closed
-three-arm union (`Dev`/`Staging`/`Prod`) — an un-enumerated fourth environment has no constructor
-(type-foreclosed). Advancing an environment is an `If-Match` compare-and-swap of that environment's pointer
-from the old `releaseHash` to the new one (the exact protocol that advances a `trial`/`model` pointer); the
-CAS is the atomic commit and a concurrent lost-update loser gets `412`, re-reads, and re-applies. The
-pointer history retained by the store answers "what was in prod, when, and which `Release` preceded it" as a
-first-class read, and promotion adds **no** new `Release` — the same immutable entry can be pointed at by
-`Staging` then `Prod`.
+**Independent Validation**: this suite runs in **Register 3** against the live Phase-37 store, where
+`Environment` admits no fourth arm, promotion is an `If-Match` compare-and-swap that writes no new `Release`,
+and a concurrent lost-update loser takes `412` and re-applies. The `### Validation` list below states each
+check and its fixtures.
 **Docs to update**: `documents/engineering/release_lifecycle_doctrine.md` (§3),
 `documents/engineering/content_addressing_doctrine.md` (§2.3 — the `environment` pointer kind),
 `documents/engineering/app_vs_deployment_doctrine.md` (§3 — app bytes byte-identical across environments),
@@ -358,8 +373,9 @@ pointer over the fixed ledger, not a redeploy.
 - App-bytes invariance: the same `Release` (same image digests, same app logic) is what `Staging` then `Prod`
   point at; there is no `if prod then …` in an app spec and no rebuild between environments — everything that
   differs rides the deployment-rules surface.
-- The store's retained pointer history as the audit trail — the prior pointer values are a first-class query,
-  replacing a git-polling controller's changelog.
+- The store's retained pointer history as the audit trail — the prior pointer values are a first-class query
+  answering "what was in prod, when, and which `Release` preceded it", replacing a git-polling controller's
+  changelog.
 - Exact Content-demand objects for all three pointer HEADs and their retained histories; concurrent CAS loser,
   failed write, multipart, and prior-body extents remain charged under the release `StorageBudgetId` and sole
   mutation admission until fresh inventory proves reclamation.
@@ -384,9 +400,9 @@ pointer over the fixed ledger, not a redeploy.
 
 > **Honesty.** Atomicity of promotion is **runtime-checked** — the ETag-CAS protocol forecloses the
 > lost-update/split-promotion race, not a type-level impossibility. The **closedness** of `Environment` (no
-> fourth environment) is **type-foreclosed**. The ETag-CAS flip is proven for `trial` pointers in the sibling
-> store; the `environment` pointer reuses that exact protocol for a new pointee — sibling evidence for the
-> mechanism, not an amoebius result for environment promotion.
+> fourth environment) is **type-foreclosed**. The ETag-CAS flip is proven for the `trial` and `model` pointers
+> in the sibling store; the `environment` pointer reuses that exact protocol for a new pointee — sibling
+> evidence for the mechanism, not an amoebius result for environment promotion.
 
 ### Remaining Work
 None.
@@ -397,16 +413,10 @@ None.
 **Implementation**: `amoebius-release/src/Amoebius/Release/PromotionGate.hs`,
 `amoebius-release/src/Amoebius/Release/EvidenceWitness.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: this suite runs in **Register 3**. The gate's `advance` constructor demands an
-`EvidenceWitness`; the environment→required-strength mapping is monotone (`Dev` on a green Decision layer;
-`Staging` on the Protocol layer **tested** via Register-2.5 deterministic simulation; `Prod` on the
-Runtime/chaos layer **tested** — its highest achievable strength, since live injection samples the faults
-chosen and is never *proven*). A `Release` whose consumed evidence ledger records the Runtime/chaos layer
-**UNVERIFIED** — a Tier-1-only in-process ledger, or a skipped-but-applicable move — yields **no Runtime witness**, so there is **no `advance` value** to hand the Sprint-39.2 CAS: the promotion is **refused** with
-the specific reason tag `PromotionRefused:RuntimeEvidenceMissing`, and the environment pointer HEAD is
-**unchanged in the store** (observed from the pointer history, not a gate self-report). A `Release` carrying
-a *tested* Runtime witness constructs an `advance` value that the CAS commits. The mapping table is a
-committed hand-authored fixture, independent of the gate's own fold.
+**Independent Validation**: this suite runs in **Register 3**, where `advance` demands an `EvidenceWitness`
+read under a monotone environment→required-strength mapping, so a Runtime-UNVERIFIED `Release` yields no
+`advance` value and moves no pointer while its paired positive advances. The `### Validation` list below states
+each check, its reason tags, and its fixtures.
 **Docs to update**:
 `documents/engineering/release_lifecycle_doctrine.md` (§4), `documents/engineering/testing_doctrine.md` (§4
 — the evidence ledger the gate consumes), `documents/illegal_state/illegal_state_lifecycle.md` (§3.26 — the
@@ -428,9 +438,10 @@ unrepresentable state.
 - The environment→required-evidence-strength **mapping** (this doctrine's sole owned policy): `Dev` advances
   on a green Decision layer; `Staging` requires the Protocol layer **tested** (Register-2.5 deterministic
   simulation, no live substrate); `Prod` requires the Runtime/chaos layer **tested** — its highest achievable
-  strength, never *proven* ([`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)),
-  not assumed. The mapping is a committed value the gate enforces at construction time; it does **not** compute
-  the ledger, only reads it.
+  strength, since live injection samples only the faults chosen and is never *proven*
+  ([`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)),
+  not assumed. The mapping is monotone in environment, and is a committed value the gate enforces at
+  construction time; it does **not** compute the ledger, only reads it.
 - The Tier-1-only fence: a purely in-process evidence ledger (Dhall typecheck + decoder + QuickCheck + TLA+/TLC,
   no live substrate) supplies **no Runtime `EvidenceWitness`**, so a `Prod` `PromotionGate` cannot be advanced
   on it — an in-process validation of the DSL can never mean the cluster enforces it.
@@ -479,12 +490,10 @@ None.
 `amoebius-release/dhall/test/release_lifecycle.dhall` (the gate topology),
 `amoebius-release/test/live/ReleaseLifecycleSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: this suite runs in **Register 3** on the live single-node kind cluster. A `RolloutPlan` is an
-ordered `[RolloutPhase]`; each phase's objects are applied under the `amoebius` field manager and its readiness gate is **observed from the live object** (rollout complete / `Ready` / CR `status` healthy — never a `threadDelay`), and only then does the next phase apply. The **phase-apply order is read from an external observer at the OS/API boundary** (the API-server audit log / the run's ApplySet apply sequence),
-never the reconciler's self-emitted trace. The DB schema-migration `RolloutPhase` obeys `create-new →
-verified-migrate → retire-old`: the migrate phase provisions the new schema, migrates and **verifies** the
-copy, and only the later `finalize` phase retires the old — the retire step inheriting the
-durable-data-deletion prohibition so **no `.dhall` value denotes "discard these bytes"**.
+**Independent Validation**: this suite runs in **Register 3** on the live single-node kind cluster, where an
+ordered `[RolloutPhase]` applies each slice under the `amoebius` field manager, gates the next on a condition
+observed from live object state, and carries the DB schema-migration phase. The `### Validation` list below
+states each check, its external observer, and its fixtures.
 **Docs to update**: `documents/engineering/release_lifecycle_doctrine.md` (§5),
 `documents/engineering/manifest_generation_doctrine.md` (§5 — the SSA reconciler the plan enacts on),
 `documents/engineering/readiness_ordering_doctrine.md` (§3 — readiness a condition, never a duration),
@@ -500,7 +509,7 @@ DB schema-migration as a [`storage_lifecycle_doctrine.md §8`](../documents/engi
 values end-to-end.
 
 ### Deliverables
-- `RolloutPlan = [RolloutPhase]` where each `RolloutPhase` carries `{ phaseObjects, phaseGate }`: the desired slice this phase applies and the readiness condition observed from live state that gates the next phase. Enacted by the Phase-33 SSA/ApplySet engine ([`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions));
+- `RolloutPlan = [RolloutPhase]` where each `RolloutPhase` carries `{ phaseObjects, phaseGate }`: the desired slice this phase applies and the readiness condition observed from live state — rollout complete, `Ready`, or CR `status` healthy, never a `threadDelay` — that gates the next phase. Enacted by the Phase-33 SSA/ApplySet engine ([`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions));
   it introduces **no new reconciler**.
 - A **DB schema-migration `RolloutPhase`** against the standing Phase-34 Postgres obeying
   `create-new → verified-migrate → retire-old`: provision the new schema/columns, migrate and **verify** the
@@ -541,7 +550,8 @@ values end-to-end.
    `RolloutPlan` applies its phases in the order of the committed `rollout_order.txt`, **read from the API-server audit observer** (not the reconciler's self-report), each phase gated on observed live status.
 2. Assert the **DB schema-migration `RolloutPhase`** provisions the new schema, migrates and **verifies** the
    copy against the committed `migrated_rows.txt` oracle, and only the later `finalize` phase retires the old — asserting no
-   phase, including retire, denotes durable-byte destruction. Assert `mutant/rollout-reorders-retire` turns
+   phase, including retire, denotes durable-byte destruction and that **no `.dhall` value denotes "discard
+   these bytes"**. Assert `mutant/rollout-reorders-retire` turns
    this validation **red** (retire-before-verified-migrate is a gate failure).
    In the same run, make each schema/index/row, WAL, temporary workspace, executor CPU/memory/ephemeral/image/
    log, claim/attachment, and old/new workload-overlap operand one unit short; assert each refuses before DDL or

@@ -25,6 +25,7 @@ The gate passed on 2026-08-09; Phase-3 code correspondence and runtime fidelity 
 ## Contents
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 2.1: The `Model` fragment EDSL (the reifiable value) ✅](#sprint-21-the-model-fragment-edsl-the-reifiable-value-)
@@ -96,62 +97,93 @@ runs on the emitted spec through the version-stable JVM `tla2tools` toolchain. T
 **Substrate:** none
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `cabal test formal-model-spec` is green: the reifiable `Model` explorer (`interpret` plus the in-process bounded-reachability checker) and
-the `emitTLA` renderer round-trip a single small transition-system model — the in-process explorer and TLC
-(run through the standard `tla2tools` toolchain over the freshly emitted `.tla`/`.cfg`) reach the *identical*
-safety verdict on the correct model. The **normative safety-equality convention** is fixed and shared by both
-sides: equality is over the set of **canonical fingerprints of *distinct reachable* states** (TLC's *distinct
-states*, not its *states generated* counter), with `CHECK_DEADLOCK` set explicitly on both sides and with a
-state satisfying the model's `CONSTRAINT` boundary **checked-but-not-expanded** on both sides (a boundary state
-is counted and invariant-checked, its successors are not enumerated) — so the two implementations cannot count
-under incompatible conventions. Every mutant of a mechanical mutation-operator set over the *model* fragment
+**Gate:** `cabal test formal-model-spec` is green over the committed `ToyModel` round-trip, the Phase-0
+oracles, the mechanical model-mutation set, the four `emitTLA` renderer mutants, and the 200-model
+differential coverage floors of [Gate integrity](#gate-integrity), and its machine-derived Register-1 ledger
+agrees with that run.
+
+## Gate integrity
+
+The apparatus the phase-2 gate closes over, in the slot
+[§D](development_plan_standards.md#d-the-per-phase-document-skeleton) reserves for it; every clause it
+discharges is owned by [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
+
+**What the command proves.** The reifiable `Model` explorer (`interpret` plus the in-process
+bounded-reachability checker) and the `emitTLA` renderer round-trip a single small transition-system model:
+the in-process explorer and TLC — run through the standard `tla2tools` toolchain over the freshly emitted
+`.tla`/`.cfg` — reach the *identical* safety verdict on the correct model. The emitted `.tla`/`.cfg` are
+rendered fresh from the committed `Model` source and are **never committed** to the repository. A green run
+establishes that the two renderings agree, not that any cluster enforces anything.
+
+**The normative safety-equality convention** is fixed and shared by both sides, so the two implementations
+cannot count under incompatible conventions. Equality is over the set of **canonical fingerprints of *distinct
+reachable* states** — TLC's *distinct states*, not its *states generated* counter — with `CHECK_DEADLOCK` set
+explicitly on both sides, and with a state satisfying the model's `CONSTRAINT` boundary
+**checked-but-not-expanded** on both sides: a boundary state is counted and invariant-checked, its successors
+are not enumerated.
+
+**The representative set** is named explicitly: the single committed `ToyModel` — the bounded two-process
+mutual-exclusion model of Sprint 2.1 — plus the QuickCheck fragment generator below. No other model is in
+scope for Phase 2.
+
+**The model-mutation set is mechanical**, not one hand-picked strawman. Every mutant of the operator family
 (guard negation/weakening, effect swap, dropped effect entry/`UNCHANGED`, quantifier flip, fairness drop,
-invariant-clause delete) is caught rather than one hand-picked strawman, partitioned by detection mechanism:
-the **safety mutants** (guard negation/weakening, effect swap, dropped effect entry/`UNCHANGED`, quantifier
-flip) redden **both readings** — the in-process explorer and TLC reach the same safety counterexample; the
-**fairness-drop/liveness mutant** reddens TLC's liveness `PROPERTY` only (the safety-only in-process explorer
-cannot see it); and the **spec-weakening mutants** that drop an obligation rather than introduce a reachable
-violation (invariant-clause delete, and the fairness annotation the fairness-drop removes) are caught by the
-emitted `INVARIANT`/`PROPERTY` set diverging from the Phase-0-pinned expected invariant/property set and byte
-golden, not by a red reachability verdict. TLC proves the model's liveness `PROPERTY` under weak fairness and
-reports it red with fairness removed. The gate's **representative set** is named explicitly: the single committed
-`ToyModel` (the bounded two-process mutual-exclusion model of Sprint 2.1) plus the QuickCheck fragment
-generator described below; no other model is in scope for Phase 2. A QuickCheck generator over the fragment
-finds no explorer/TLC disagreement (identical verdict and identical canonical distinct-state fingerprint sets,
-safety-scoped) across **at least 200 non-degenerate generated models** — each carrying >=1 enabled action and
+invariant-clause delete) is caught, and the set is partitioned by detection mechanism because the three
+mechanisms see different faults. The **safety mutants** — guard negation/weakening, effect swap, dropped
+effect entry/`UNCHANGED`, quantifier flip — redden **both readings**: the in-process explorer and TLC reach
+the same safety counterexample. The **fairness-drop/liveness mutant** reddens TLC's liveness `PROPERTY` only,
+because the safety-only in-process explorer cannot see it. The **spec-weakening mutants**, which drop an
+obligation rather than introduce a reachable violation (invariant-clause delete, and the fairness annotation
+the fairness-drop removes), are caught by the emitted `INVARIANT`/`PROPERTY` set diverging from the
+Phase-0-pinned expected invariant/property set and byte golden, not by a red reachability verdict.
+Independently of the mutants, TLC proves the model's liveness `PROPERTY` under weak fairness and reports it
+red with fairness removed.
+
+**The differential generator may not pass vacuously.** A QuickCheck generator over the fragment finds no
+explorer/TLC disagreement — identical verdict and identical canonical distinct-state fingerprint sets,
+safety-scoped — across **at least 200 non-degenerate generated models**, each carrying >=1 enabled action and
 >=2 reachable states, with `maxDiscardRatio` bounded (<=10) so precondition discards cannot silently gut the
-effective sample and with a floor on `maxSuccess` (>=200 passing cases, not the QuickCheck default of 100) — and
+effective sample and with a floor on `maxSuccess` (>=200 passing cases, not the QuickCheck default of 100).
 QuickCheck `checkCoverage` **asserts every fragment constructor fires**: each of `Expr`'s booleans, arithmetic
 comparison, finite-set membership, finite quantifier, and function literal/update/application, and each of
-`WeakFair`/`StrongFair` and `Always`/`Eventually`/`LeadsTo`, appears in at least 20% of generated models — so a
-generator restricted to the easy boolean two-variable subset fails the coverage obligation instead of passing
-vacuously. A `cover`/`classify` floor additionally requires a minimum fraction of the generated models to be
-**safety-violating** (a reachable counterexample exists) and to reach a `CONSTRAINT` boundary state, so
+`WeakFair`/`StrongFair` and `Always`/`Eventually`/`LeadsTo`, appears in at least 20% of generated models — so
+a generator restricted to the easy boolean two-variable subset fails the coverage obligation instead of
+passing vacuously. A `cover`/`classify` floor additionally requires a minimum fraction of the generated models
+to be **safety-violating** (a reachable counterexample exists) and to reach a `CONSTRAINT` boundary state, so
 explorer↔TLC agreement on the red/boundary branch — not only the both-green branch — is exercised by the
-generated distribution itself, not solely by the `ToyModel` mutation set. The differential suite is itself
-proven to have teeth by **two committed seeded renderer mutants**
-in `emitTLA` — `emitTLA-mut-01` (a dropped `UNCHANGED` conjunct on an action's non-effected variables) and
-`emitTLA-mut-02` (a finite quantifier mistranslated `\A`↔`\E`) — each of which the differential generator
-**must expose** as an explorer/TLC divergence, symmetric to the model-mutation check, so a renderer that is
-correct only on the constructors `ToyModel` happens to exercise cannot pass. Because that differential check is
+generated distribution itself, not solely by the `ToyModel` mutation set.
+
+**The four committed renderer mutants** prove the suite has teeth against `emitTLA` itself, not only against
+model bugs. `emitTLA-mut-01` (a dropped `UNCHANGED` conjunct on an action's non-effected variables) and
+`emitTLA-mut-02` (a finite quantifier mistranslated `\A`↔`\E`) must each be exposed by the differential
+generator as an explorer/TLC divergence, symmetric to the model-mutation check, so a renderer that is correct
+only on the constructors `ToyModel` happens to exercise cannot pass. Because that differential check is
 legitimately **safety-scoped**, the three liveness/fairness constructors it cannot see — `StrongFair`
 (`SF_vars`), `Always` (`[]`), and `Eventually` (`<>`) — are pinned instead by the byte-for-byte `emitTLA`
 golden itself, **not** by any in-process liveness checker: the Sprint 2.1 structural assertion forces
-`ToyModel` to carry all five liveness/fairness constructors, so the pre-renderer committed golden fixes the rendered
-bytes of every one (`WF_vars`/`SF_vars` conjuncts, `[]`/`<>`/`~>` operators), and **two further committed liveness-path renderer mutants** — `emitTLA-mut-03` (`StrongFair` rendered as `WF_vars`) and `emitTLA-mut-04`
-(`Always` rendered as `<>`), committed under `test/formal/mutants/` — which the golden **must turn red**, close
-the gap that a renderer swapping `StrongFair`→`WeakFair` or `[]`↔`<>` would otherwise slip through. The oracles this gate checks against — the hand-derived `ToyModel` reachable-distinct-state count and safety verdict, the `emitTLA ToyModel` byte-for-byte golden **under the canonical TLA+ rendering convention fixed in Sprint 2.3**, the **expected `INVARIANT`/`PROPERTY` name set** the emitted `.cfg` must equal exactly (the oracle the spec-weakening mutants above are caught by), and the mutation-operator/renderer-mutant catalog with their
-expected red outcomes — are
-**authored and committed before `interpret`/`emitTLA` exist** (§M.1) — the convention-independent oracles in
-Phase 0, and the byte-for-byte golden in Sprint 2.3 itself, authored from the canonical rendering convention
-that sprint fixes as its first deliverable and before its renderer is written; a golden regenerated from the
-renderer's own output does not satisfy the gate. The emitted `.tla`/`.cfg` are rendered fresh from the
-committed `Model` source and are **never committed** to the repository. The run emits a **committed, schema-checked Register-1 ledger** ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)): its rows — safety proven-for-the-model at the declared bound *with the recorded
-distinct-state count*; liveness proven under the named fairness *with the recorded fairness-sensitivity
-outcome*; the differential-test case count and per-constructor coverage percentages; and model-correspondence-to-
-Phase-3-code and runtime fidelity marked **UNVERIFIED** — are each **machine-derived from the corresponding recorded test outcome**, and a harness assertion fails the gate if the emitted ledger does not equal the
-suite's recorded results (a hardcoded or print-statement ledger cannot pass). It establishes that the two
-renderings agree, not that any cluster enforces anything.
+`ToyModel` to carry all five liveness/fairness constructors, so the pre-renderer committed golden fixes the
+rendered bytes of every one (`WF_vars`/`SF_vars` conjuncts, `[]`/`<>`/`~>` operators). **Two further committed
+liveness-path renderer mutants** — `emitTLA-mut-03` (`StrongFair` rendered as `WF_vars`) and `emitTLA-mut-04`
+(`Always` rendered as `<>`), committed under `test/formal/mutants/` — which the golden **must turn red**,
+close the gap that a renderer swapping `StrongFair`→`WeakFair` or `[]`↔`<>` would otherwise slip through.
+
+**The oracles** this gate checks against are the hand-derived `ToyModel` reachable-distinct-state count and
+safety verdict, the `emitTLA ToyModel` byte-for-byte golden **under the canonical TLA+ rendering convention
+fixed in Sprint 2.3**, the **expected `INVARIANT`/`PROPERTY` name set** the emitted `.cfg` must equal exactly
+(the oracle the spec-weakening mutants above are caught by), and the mutation-operator/renderer-mutant catalog
+with their expected red outcomes. All of them are **authored and committed before `interpret`/`emitTLA`
+exist** (§M.1) — the convention-independent oracles in Phase 0, and the byte-for-byte golden in Sprint 2.3
+itself, authored from the canonical rendering convention that sprint fixes as its first deliverable and before
+its renderer is written. A golden regenerated from the renderer's own output does not satisfy the gate.
+
+**The ledger** the run emits is a committed, schema-checked Register-1 ledger
+([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)). Its rows — safety
+proven-for-the-model at the declared bound *with the recorded distinct-state count*; liveness proven under the
+named fairness *with the recorded fairness-sensitivity outcome*; the differential-test case count and
+per-constructor coverage percentages; and model-correspondence-to-Phase-3-code and runtime fidelity marked
+**UNVERIFIED** — are each **machine-derived from the corresponding recorded test outcome**, and a harness
+assertion fails the gate if the emitted ledger does not equal the suite's recorded results. A hardcoded or
+print-statement ledger cannot pass.
 
 ```mermaid
 flowchart LR
@@ -238,7 +270,8 @@ emitting faithful TLA+ rather than hand-writing it.
   liveness pieces `data Fairness = WeakFair | StrongFair` and `data Temporal = Always Expr | Eventually Expr |
   LeadsTo Expr Expr`, carried by the `modelFairness`/`modelProperties` fields
   ([`formal_model_doctrine.md §2`](../documents/engineering/formal_model_doctrine.md#2-the-model-is-data)).
-- The reference model (`ToyModel` — the bounded two-process mutual exclusion named in the Gate) authored
+- The reference model (`ToyModel` — the bounded two-process mutual exclusion named in
+  [Gate integrity](#gate-integrity)) authored
   purely inside the
   fragment, carrying at least one named safety invariant, a bounding constraint, and — so the Phase-0 byte
   golden can pin the rendered bytes of **all five** liveness/fairness constructors — both a `WeakFair` and a
@@ -269,15 +302,10 @@ None. The closed fragment and structurally complete `ToyModel` are built and exe
 `src/Amoebius/Formal/Explore.hs` (the bounded breadth-first reachability checker),
 `test/formal/RoundTripSpec.hs` — built; the phase suite owns the hand table and explorer checks.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `interpret` computes the next state for a hand-checked (event, state) pair; the explorer
-visits exactly the reachable-state set of `ToyModel` under its constraint and reports every invariant on
-every reachable state — a `cabal test`, no cluster. The `(event, state) → state` transition table and the
-`ToyModel` reachable-**distinct**-state count and safety verdict this sprint checks against are a
-**committed Phase-0 hand table authored before `Interpret.hs`/`Explore.hs` exist** (§M.1, §M.3) — carrying a
-note recording that its provenance is hand-derivation from the model definition, **not** transcription from
-the explorer's own first output; the harness reads the reference side from this committed table, never from
-the code under test. TLC's independent re-derivation of the same count in Sprint 2.4 corroborates but does
-not replace this Phase-0 pin (so this sprint's reference is not self-referential).
+**Independent Validation**: `interpret` computes the next state for a hand-checked (event, state) pair and the
+explorer visits exactly `ToyModel`'s reachable-state set under its constraint — a `cabal test`, no cluster —
+with the reference side read from a committed Phase-0 hand table, never from the code under test. Validation 2
+below states the provenance rule that table carries.
 **Docs to update**:
 `documents/engineering/formal_model_doctrine.md` (§3/§4 backlink), `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -295,9 +323,18 @@ constraint, checking every invariant on every reachable state.
 
 ### Validation
 1. `interpret` reproduces the transitions of the committed Phase-0 hand table; the explorer's reachable-
-   **distinct**-state count (under the normative CONSTRAINT/`CHECK_DEADLOCK` convention fixed in the Gate) and
+   **distinct**-state count (under the normative CONSTRAINT/`CHECK_DEADLOCK` convention fixed in
+   [Gate integrity](#gate-integrity)) and
    green/red verdict on `ToyModel` equal the **Phase-0-committed hand-derived expectation** (not a value
-   transcribed from the explorer's first run) — **proven for the model** at the declared bound.
+   transcribed from the explorer's first run) — **proven for the model** at the declared bound. The explorer
+   reports every invariant on every reachable state, not only the first violated one.
+2. The `(event, state) → state` transition table and the `ToyModel` reachable-**distinct**-state count and
+   safety verdict this sprint checks against are a **committed Phase-0 hand table authored before
+   `Interpret.hs`/`Explore.hs` exist** (§M.1, §M.3), carrying a note recording that its provenance is
+   hand-derivation from the model definition, **not** transcription from the explorer's own first output; the
+   harness reads the reference side from this committed table, never from the code under test. TLC's
+   independent re-derivation of the same count in Sprint 2.4 corroborates but does not replace this Phase-0
+   pin, so this sprint's reference is not self-referential.
 
 ### Remaining Work
 None. The hand transition table, eight-state explorer oracle, invariant checks, and explicit
@@ -359,7 +396,8 @@ never committed.
   ([`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)).
 - **The Phase-0-committed expected `INVARIANT`/`PROPERTY` name set** for `ToyModel`, which the emitted `.cfg`
   must equal exactly (set equality, not containment). This is the oracle that catches the spec-weakening
-  mutants named in the Gate — an invariant-clause delete or a dropped fairness annotation removes an
+  mutants named in [Gate integrity](#gate-integrity) — an invariant-clause delete or a dropped fairness
+  annotation removes an
   *obligation* rather than introducing a reachable violation, so no red reachability verdict would fire.
 - `emitTLA`, a total renderer, with the structural mapping above — safety (`INVARIANT`), the fairness-annotated
   `Spec`, and liveness (`PROPERTY`).
@@ -399,24 +437,10 @@ same `Model`), a `tla2tools` invocation wrapper, the committed mechanical model-
 two committed seeded renderer mutants `emitTLA-mut-01`/`emitTLA-mut-02` under `test/formal/mutants/` —
 built and run by `tools/phase2_gate.py`.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: on the
-correct `ToyModel` the in-process explorer and TLC (over the freshly emitted spec, via the version-stable
-JVM `tla2tools` toolchain) reach the identical **safety** verdict (same canonical state-fingerprint sets, no
-counterexample); **every** mutant of a mechanical mutation-operator set over the fragment (guard
-negation/weakening, effect swap, dropped effect entry/`UNCHANGED`, quantifier flip, fairness drop,
-invariant-clause delete) is caught — each safety mutant red in both the explorer and TLC, each
-fairness-drop/liveness mutant red in TLC's `PROPERTY`; TLC proves the `ToyModel` liveness `PROPERTY` under
-weak fairness and that same property goes **red** with the fairness annotation removed (the
-fairness-sensitivity check). The differential suite proves its own teeth: the **two committed seeded renderer mutants** in `emitTLA` — `emitTLA-mut-01` (dropped `UNCHANGED` conjunct) and `emitTLA-mut-02`
-(finite quantifier `\A`↔`\E` mistranslation) — must each be exposed by the generator as an explorer/TLC
-divergence (a surviving renderer mutant fails the gate). The QuickCheck generator over the `Model` fragment
-finds no generated model on which the explorer and TLC disagree — identical verdict and identical
-**canonical distinct-state fingerprint sets** (the explorer mirroring TLC's `CONSTRAINT` boundary semantics
-— boundary states checked-but-not-expanded — with `CHECK_DEADLOCK` set explicitly on both) — run over
-**>=200 non-degenerate models** (>=1 enabled action, >=2 reachable states; `maxSuccess>=200`,
-`maxDiscardRatio<=10`) with `checkCoverage` asserting each `Expr`/`Temporal`/`Fairness` constructor listed
-in the Gate appears in >=20% of generated models; this is the **safety-scoped** differential faithfulness
-test (liveness/fairness rendering is not covered by it).
+**Independent Validation**: on the correct `ToyModel` the in-process explorer and TLC reach the identical
+safety verdict; every mechanical model mutant and both renderer mutants are caught; the fairness-sensitivity
+check and the safety-scoped >=200-model differential hold. The numbered Validation below states each
+predicate, and [Gate integrity](#gate-integrity) pins the operator set and the coverage floors.
 **Docs to update**:
 `documents/engineering/formal_model_doctrine.md` (§4/§6 — the correspondence + honesty ledger this gate
 emits), `documents/engineering/conformance_harness_doctrine.md` (§2/§3 — the Register-1 in-process explorer

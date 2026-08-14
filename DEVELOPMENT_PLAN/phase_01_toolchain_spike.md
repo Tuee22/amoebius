@@ -202,16 +202,10 @@ None. Validated by the consolidated Phase-1 gate on 2026-08-08.
 **Implementation**: `probe/probe.cabal` (a `dhall` build-depends), `probe/app/Decode.hs`
 (decode a trivial `.dhall` in-process) — implemented as the retained gate harness.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a probe depending on `dhall` builds under the pin from a clean store, and `cabal
-run probe:decode` decodes the oracle-pinned `probe/fixtures/ok.dhall` into its committed expected
-Haskell value and exits 0 (a green `cabal build` alone does **not** satisfy this — an executed, exit-checked
-run is required); paired with it, `probe/fixtures/bad-type.dhall` — a positive/negative pair differing only
-in one mistyped field — makes `cabal run probe:decode` fail with its committed `dhall` type-error tag (§M.8:
-the failure is asserted by its specific tag, not by "fails"). The exact `allow-newer`/source-patch/fork
-required by `dhall`'s transitive deps (`template-haskell`, `aeson`, `megaparsec`, `prettyprinter`) is
-recorded **together with** the green transcript produced with exactly that set (branch-1 evidentiary rule
-above); or the blocker is recorded with the verbatim failing output and one failing transcript per
-remediation class.
+**Independent Validation**: a `dhall`-dependent probe builds from a clean store and `cabal run probe:decode`
+decodes its oracle-pinned fixture and exits 0, while the one-field-mistyped twin fails with the committed
+type-error tag. The numbered `### Validation` list below carries the transitive-dependency set and the
+evidentiary branch rule.
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` (the `allow-newer` set),
 `documents/engineering/dsl_doctrine.md` (§9 backlink).
 
@@ -231,11 +225,17 @@ buildable on the pin before Phase 5 promises an executable decoder. `dhall` hist
   `probe/fixtures/bad-type.dhall` (+ its expected `dhall` type-error tag).
 
 ### Validation
-1. `cabal run probe:decode` decodes `probe/fixtures/ok.dhall` into its committed expected value and exits 0,
-   and the same binary on `probe/fixtures/bad-type.dhall` fails with the committed `dhall` type-error tag; the
-   exit-checked transcripts are retained. **The "or recorded" branch is evidentiary** per the Gate line — a
-   remediation set counts only with its matching green transcript; a blocker counts only with verbatim failing
-   output per remediation class. Prose alone never passes.
+1. A probe depending on `dhall` builds under the pin from a clean store, and `cabal run probe:decode` decodes
+   `probe/fixtures/ok.dhall` into its committed expected Haskell value and exits 0. A green `cabal build`
+   alone does **not** satisfy this: an executed, exit-checked run is required.
+2. The same binary on `probe/fixtures/bad-type.dhall` — the negative half of a pair differing from
+   `ok.dhall` only in one mistyped field — fails with the committed `dhall` type-error tag (§M.8: the failure
+   is asserted by its specific tag, not by "fails"); the exit-checked transcripts are retained.
+3. The exact `allow-newer`/source-patch/fork required by `dhall`'s transitive deps (`template-haskell`,
+   `aeson`, `megaparsec`, `prettyprinter`) is recorded **together with** the green transcript produced with
+   exactly that set. **The "or recorded" branch is evidentiary** per the Gate line — a remediation set counts
+   only with its matching green transcript; a blocker counts only with verbatim failing output per remediation
+   class. Prose alone never passes.
 
 ### Remaining Work
 None. The positive decode matched byte-for-byte and the negative failed at `DHALL_TYPE_ERROR` in the retained
@@ -250,17 +250,10 @@ committed serialization), the external harness `probe/oracle/check-sim-terminal`
 `probe/fixtures/sim-terminal.expected`, and the seeded mutant `probe/mutants/perturb-sim-schedule` — implemented
 as the retained gate harness.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a probe depending on
-`io-sim`/`io-classes` builds under the pin from a clean store, and `cabal run probe:sim` runs the
-Phase-0-named `IOSimPOR` schedule and **emits the terminal state it reaches on stdout**, which the external
-harness `probe/oracle/check-sim-terminal` byte-diffs against the oracle-pinned oracle
-`probe/fixtures/sim-terminal.expected` — the leg greens **only** on a byte-exact match, **not** on the
-probe's self-reported exit 0 (a `main = exitSuccess` stub emits no terminal state and fails the diff);
-paired with it, the seeded mutant `probe/mutants/perturb-sim-schedule` (the schedule's step ordering
-perturbed / one fairness step dropped) MUST turn `probe:sim` **red at a terminal-state mismatch** against
-the same oracle (§M.2: the mutant is named by path + operator and paired with the terminal-state positive it
-breaks); the exact `allow-newer`/pin is recorded together with the green transcript produced under it
-(branch-1 rule), or the blocker is recorded with verbatim failing output per remediation class.
+**Independent Validation**: a probe depending on `io-sim`/`io-classes` builds from a clean store, and the
+terminal state `cabal run probe:sim` emits matches the external `check-sim-terminal` oracle byte-for-byte
+while the seeded schedule mutant reddens it. The numbered `### Validation` list below carries the stub
+negative, the mutant operator, and the evidentiary branch rule.
 **Docs to update**: `DEVELOPMENT_PLAN/README.md`, `documents/engineering/gateway_migration_model_doctrine.md` (§4
 backlink), `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -279,12 +272,18 @@ by this probe.
   the seeded sim-path mutant `probe/mutants/perturb-sim-schedule`.
 
 ### Validation
-1. `cabal run probe:sim` emits its reached terminal state and the external `check-sim-terminal` harness confirms
-   a byte-exact match against the committed `probe/fixtures/sim-terminal.expected` oracle (never the probe's
-   self-exit); the seeded mutant `probe/mutants/perturb-sim-schedule` is re-run and MUST turn `probe:sim` red at
-   a terminal-state mismatch; transcript retained, **or** the exact remediation/blocker is recorded evidentiarily
-   per the Gate line (matching green transcript, or verbatim failing output per remediation class — prose alone
-   never passes).
+1. A probe depending on `io-sim`/`io-classes` builds under the pin from a clean store, and `cabal run
+   probe:sim` runs the Phase-0-named `IOSimPOR` schedule and **emits the terminal state it reaches on
+   stdout**; the external `check-sim-terminal` harness confirms a byte-exact match against the committed
+   `probe/fixtures/sim-terminal.expected` oracle. The leg greens **only** on that match, never on the probe's
+   self-reported exit 0 — a `main = exitSuccess` stub emits no terminal state and fails the diff.
+2. The seeded mutant `probe/mutants/perturb-sim-schedule` (the schedule's step ordering perturbed, one
+   fairness step dropped) is re-run and MUST turn `probe:sim` red at a terminal-state mismatch against the
+   same oracle (§M.2: the mutant is named by path + operator and paired with the terminal-state positive it
+   breaks).
+3. The transcript is retained, **or** the exact remediation/blocker is recorded evidentiarily per the Gate
+   line (matching green transcript, or verbatim failing output per remediation class — prose alone never
+   passes).
 
 ### Remaining Work
 None. The external terminal-state oracle passed and the schedule perturbation mutant was killed on 2026-08-08.
@@ -292,27 +291,13 @@ None. The external terminal-state oracle passed and the schedule perturbation mu
 ## Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅
 
 **Status**: Done — the capability this sprint recorded is re-established by the redesigned 2026-08-12 gate; its pin, freeze, and repository-resident evidence mechanics are superseded
-**Implementation**: extend `probe/probe.cabal` (the `jit-build` resolver's Haskell deps
-— content-hashing, download-or-build, process control — **plus** the build-only `purescript-bridge` contract
-generator, **plus** the `supernova` fork + `proto-lens` codegen whose recorded resolution Sprint 1.5 lands)
-and a single `probe` executable whose `build-depends` enumerates the **entire** Representative set — `dhall`
-+ `io-sim` + `io-classes` + the eight resolver packages + `purescript-bridge` + `supernova`/`proto-lens`;
-the recorded-resolution ledger in `DEVELOPMENT_PLAN/README.md` — implemented and retained as gate evidence.
+**Implementation**: `probe/probe.cabal` and its single consolidated `probe` executable, plus the
+recorded-resolution ledger in `DEVELOPMENT_PLAN/README.md` — implemented and retained as gate evidence.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: one probe package whose `build-depends` matches the
-"Representative set" list exactly — `dhall`, `io-sim`, `io-classes`, the eight enumerated resolver packages
-`cryptohash-sha256`, `http-client`, `http-client-tls`, `typed-process`, `tar`, `zlib`, `directory`,
-`filepath`, **the build-only `purescript-bridge` contract generator, and the `supernova` fork + `proto-lens` codegen** (all five clauses (i)–(v) of the Representative set; a category description or a set already in
-the stock closure does not satisfy this) — builds and links under GHC 9.12.4 / Cabal 3.16.1.0 from a clean
-store; `cabal run probe:decode` exits 0 on its committed fixture; and `cabal run probe:sim` emits its
-reached terminal state, which the external `check-sim-terminal` harness confirms byte-exact against the
-committed `probe/fixtures/sim-terminal.expected` oracle (never the probe's self-exit). **Both** seeded
-mutants are re-run: `probe/mutants/drop-allow-newer` MUST turn `cabal build` red at a
-version-mismatch/compile-fail locus, and `probe/mutants/perturb-sim-schedule` MUST turn `probe:sim` red at a
-terminal-state mismatch (together proving the gate detects both an unbuildable config and a
-wrong-terminal-state sim, not just rubber-stamps a green one). The consolidated `allow-newer`/patch/fork set
-is recorded with its matching green transcripts (branch-1), or the exact blocker with verbatim
-per-remediation-class failing output (branch-2), in the tracker's Toolchain section.
+**Independent Validation**: one probe package carrying the entire Representative set builds and links from a
+clean store, `probe:decode` and `probe:sim` pass their committed fixture and external oracle, and both seeded
+mutants redden the gate. The numbered `### Validation` list below carries the exact clause, locus, and
+evidentiary-branch obligations.
 **Docs to update**:
 `DEVELOPMENT_PLAN/README.md` (Toolchain — the consolidated pin/`allow-newer` set),
 `documents/engineering/content_addressing_doctrine.md` (§4.5 resolver-deps backlink),
@@ -327,8 +312,11 @@ dependency universe — the phase gate.
 
 ### Deliverables
 - The consolidated throwaway probe executable whose `build-depends` matches the Representative-set list
-  exactly — all five clauses (i)–(v): `dhall` + `io-sim` + `io-classes` + the eight resolver packages +
-  `purescript-bridge` + `supernova`/`proto-lens` (the last folded in from Sprint 1.5).
+  exactly — all five clauses (i)–(v): `dhall` + `io-sim` + `io-classes` + the eight `jit-build` resolver
+  packages (`cryptohash-sha256`, `http-client`, `http-client-tls`, `typed-process`, `tar`, `zlib`,
+  `directory`, `filepath` — content-hashing, download-or-build, and process control) + the build-only
+  `purescript-bridge` contract generator + the `supernova` fork with its `proto-lens` codegen (the last
+  folded in from Sprint 1.5).
 - The recorded-resolution ledger (the `allow-newer`/patch/fork set with its matching green transcripts, or the
   hard blocker with verbatim per-remediation-class failing output) in the tracker's Toolchain section.
 - The retained `cabal.project` + freeze file, all `cabal build`/`cabal run` transcripts, the external
@@ -340,14 +328,20 @@ dependency universe — the phase gate.
   **UNVERIFIED** — retained even though the probe package itself is deleted after resolution.
 
 ### Validation
-1. The consolidated probe's `build-depends` matches the Representative-set list exactly (all five clauses
-   (i)–(v)); `cabal build` is green on the pin from a clean store; `cabal run probe:decode` exits 0 on its
-   committed fixture; `cabal run probe:sim`'s reported terminal state passes the external `check-sim-terminal`
-   diff against the committed oracle; and **both** mutants turn the gate red — `probe/mutants/drop-allow-newer`
-   at a compile-fail locus and `probe/mutants/perturb-sim-schedule` at a terminal-state mismatch — **or** the
-   exact remediation/blocker is recorded evidentiarily per the Gate line. All transcripts are retained and the
-   proven/tested/assumed ledger is emitted — the Phase-1 acceptance condition. Prose in the tracker without
-   matching retained transcripts never passes.
+1. The consolidated probe's `build-depends` matches the Representative-set list exactly — all five clauses
+   (i)–(v); a category description, or a set already in the stock closure, does not satisfy this. It builds
+   and links under GHC 9.12.4 / Cabal 3.16.1.0 from a clean store.
+2. `cabal run probe:decode` exits 0 on its committed fixture, and `cabal run probe:sim`'s reported terminal
+   state passes the external `check-sim-terminal` diff against the committed
+   `probe/fixtures/sim-terminal.expected` oracle, never the probe's self-exit.
+3. **Both** seeded mutants are re-run and turn the gate red — `probe/mutants/drop-allow-newer` at a
+   version-mismatch/compile-fail locus and `probe/mutants/perturb-sim-schedule` at a terminal-state mismatch —
+   together proving the gate detects an unbuildable config and a wrong-terminal-state sim rather than
+   rubber-stamping a green one.
+4. **Or** the consolidated `allow-newer`/patch/fork set is recorded with its matching green transcripts
+   (branch-1), or the exact blocker with verbatim per-remediation-class failing output (branch-2), in the
+   tracker's Toolchain section. All transcripts are retained and the proven/tested/assumed ledger is emitted —
+   the Phase-1 acceptance condition. Prose in the tracker without matching retained transcripts never passes.
 
 ### Remaining Work
 None. The probe remains only as a re-runnable gate harness; it is not a durable amoebius runtime module.
@@ -359,16 +353,10 @@ None. The probe remains only as a re-runnable gate harness; it is not a durable 
 fork + its `proto-lens` codegen, build-only), plus the generated protobuf modules the `proto-lens` codegen
 emits — implemented and retained as gate evidence.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the `supernova`
-fork and its `proto-lens` codegen resolve and compile under the pin from a clean store — the hardest single
-leg, a source **fork** plus a codegen step, not a stock Hackage pull — with the retained green `cabal build`
-transcript echoing `ghc --version`/`cabal --version` in-band and showing the shell-observed exit 0; the
-exact fork ref + `allow-newer`/patch/pin is recorded **together with** that green transcript (branch-1
-evidentiary rule), **or** the blocker is recorded with the verbatim failing `cabal build` output **plus one failing transcript per remediation class** (bare `allow-newer`, source patch, fork/pin), each naming the
-failing package and the compile-fail locus. The consolidated gate's seeded mutant
-`probe/mutants/drop-allow-newer` (a §M.2 dependency-resolution operator) covers this leg too: with the fork
-ref/patch removed, `cabal build` MUST turn red at the `supernova`/`proto-lens` resolution locus — the
-committed mutant this build-only leg is paired against.
+**Independent Validation**: the `supernova` fork and its `proto-lens` codegen resolve and compile under the
+pin from a clean store — the hardest single leg, a source fork plus a codegen step, not a stock Hackage pull
+— and the consolidated `drop-allow-newer` mutant reddens it. The numbered `### Validation` list below carries
+the transcript, locus, and evidentiary-branch obligations.
 **Docs to update**: `DEVELOPMENT_PLAN/README.md`
 (the `supernova` fork ref + codegen `allow-newer`/patch set),
 `documents/engineering/content_addressing_doctrine.md` (the Pulsar-client dependency backlink),
@@ -391,11 +379,16 @@ consolidated gate.
   retained transcript, under `DEVELOPMENT_PLAN/evidence/phase_01/`.
 
 ### Validation
-1. The `supernova` fork + `proto-lens` codegen build green under the pin from a clean store, transcript retained;
-   and the consolidated `probe/mutants/drop-allow-newer`, re-run with the fork ref/patch removed, turns
-   `cabal build` red at the `supernova`/`proto-lens` locus — **or** the exact remediation/blocker is recorded
-   evidentiarily per the Gate line (matching green transcript, or verbatim failing output per remediation class —
-   prose alone never passes).
+1. The `supernova` fork + `proto-lens` codegen resolve and compile green under the pin from a clean store,
+   with the retained `cabal build` transcript echoing `ghc --version`/`cabal --version` in-band and showing
+   the shell-observed exit 0; the exact fork ref + `allow-newer`/patch/pin is recorded **together with** that
+   green transcript (branch-1 evidentiary rule).
+2. The consolidated seeded mutant `probe/mutants/drop-allow-newer` — a §M.2 dependency-resolution operator,
+   and the committed mutant this build-only leg is paired against — is re-run with the fork ref/patch removed
+   and turns `cabal build` red at the `supernova`/`proto-lens` resolution locus.
+3. **Or** the blocker is recorded with the verbatim failing `cabal build` output **plus one failing transcript
+   per remediation class** (bare `allow-newer`, source patch, fork/pin), each naming the failing package and
+   the compile-fail locus. Prose alone never passes.
 
 ### Remaining Work
 None. The exact fork commit, compatibility patch, codegen pins, clean-store transcript, and both generated

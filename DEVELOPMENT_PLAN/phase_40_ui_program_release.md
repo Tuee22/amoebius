@@ -79,10 +79,9 @@ schema migration, amoebius runtime image build, or second acceptance command.
 **Substrate:** linux-cpu
 **Register:** 3 (live infrastructure)
 **Gate:** `cabal test ui-program-release-live-gate` publishes two atomic paired-plan UI releases over one
-unchanged amoebius runtime image, externally observes each matching pair carrying a fresh challenge through one
-authorized action, and establishes that stale, missing, or mixed client/server identities return
-`ReloadRequired` with zero action effect. The concrete
-fixtures, observers, oracle, and mutants are delegated to [Gate integrity](#gate-integrity).
+unchanged amoebius runtime image and admits only an exact-matching plan pair — stale, missing, or mixed
+client/server identities return `ReloadRequired` with zero action effect. Apparatus:
+[Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

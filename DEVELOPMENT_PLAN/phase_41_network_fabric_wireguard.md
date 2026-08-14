@@ -101,20 +101,22 @@ network namespace on that host. No apple, linux-cuda, or windows substrate is ex
 the model in the pre-cluster band; the runtime layer (the tunnel coming up and carrying traffic) and live
 resource-control/readback layer are **tested** on linux-cpu, never *proven*.
 
-**Gate:** on the linux-cpu host, the singleton renders each peer config from **Vault-KV Curve25519 keys named by `SecretRef` only** and reconciles **raw-kernel WireGuard** so every peer draws its VPN IP from the
-gateway-role hub and the hub peer is reachable across the fabric; the exact topology-expanded fabric-system
-demand fits the current node residual and yields a snapshot-bound single-use enactment token before any
-`ip`/`wg`/traffic-control/listener change; a **committed golden** pins the rendered peer
-config; the **hub-role attach is asserted by an external-observer reachability probe over the VPN IP** (an
-OS-level connect + underlay packet capture, never a singleton self-report); **≥2 committed seeded mutants** — a
-missing/rotated peer key, or a hub-role config that omits its `Endpoint` — MUST turn the gate red; and
-**secrets-in-Dhall is foreclosed** (an inline key literal is rejected; peer keys are `SecretRef` names) — a
-**Register-3** live-infrastructure check. The gate-integrity hardening (representative set, oracle pins, and
-seeded mutants) is itemised in [Gate integrity](#gate-integrity).
+**Gate:** on the linux-cpu host the singleton renders each peer config from Vault-KV keys named by
+`SecretRef` only and reconciles raw-kernel WireGuard until an external observer sees the spoke reach the
+gateway-role hub at its VPN IP. [Gate integrity](#gate-integrity) itemises the apparatus.
 
 ## Gate integrity
 
-The gate is hardened as follows ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)) and passes only when every clause below holds:
+The gate is a **Register-3** live-infrastructure check, hardened as follows
+([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)), and passes only
+when every clause below holds. Its single acceptance condition unfolds into five obligations. The exact
+topology-expanded fabric-system demand fits the current node residual and yields a snapshot-bound single-use
+enactment token before any `ip`/`wg`/traffic-control/listener change. A **committed golden** pins the
+rendered peer config. The **hub-role attach is asserted by an external-observer reachability probe over the
+VPN IP**, an OS-level connect plus underlay packet capture rather than a singleton self-report. **≥2
+committed seeded mutants** — a missing/rotated peer key, or a hub-role config that omits its `Endpoint` —
+MUST turn the gate red. And **secrets-in-Dhall is foreclosed**, an inline key literal being rejected because
+peer keys are `SecretRef` names.
 
 ```mermaid
 flowchart LR
@@ -281,12 +283,9 @@ the gate red.
 class: validate and resolve a peer's key by `SecretRef` name through the Phase-29 Vault client); the Dhall
 `WireGuardPeer` fixture carries mount/path/field names only — built and validated.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a peer's Curve25519 keypair is minted into Vault-KV and the renderer resolves it by
-`SecretRef` name through the Phase-29 client; **no key material appears in any `.dhall`** — the schema field
-is a `SecretRef` name, and an attempt to inline a raw key literal is rejected at Gate 1/Gate 2 with the
-committed expected tag in `test/fixtures/phase41/negative-expected-tags.tsv`. The rotated/absent-key case
-(the KV entry a `SecretRef` names does not resolve) is observable: key resolution returns a specific-reason
-error, never a silent empty key.
+**Independent Validation**: a peer's Curve25519 keypair is minted into Vault-KV and resolved by `SecretRef`
+name, **no key material appears in any `.dhall`**, and a `SecretRef` naming an absent or rotated entry fails
+loudly rather than resolving to an empty key. The numbered Validation list below states each check.
 **Docs to update**: `documents/engineering/network_fabric_doctrine.md`,
 `documents/engineering/vault_pki_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -306,9 +305,11 @@ rendered config (Sprint 41.2) stands on.
   expected tag), paired with the positive `SecretRef`-named peer differing only in that dimension.
 
 ### Validation
-1. A minted peer keypair is readable from Vault-KV by `SecretRef` name and no key bytes appear in any committed
-   `.dhall`; the inline-key-literal negative fixture fails at Gate 1/Gate 2 with the exact committed tag, and its
-   matched positive (same peer, key by `SecretRef` name) decodes.
+1. A minted peer keypair is readable from Vault-KV by `SecretRef` name through the Phase-29 client, and no key
+   bytes appear in any committed `.dhall` — the schema field is a `SecretRef` name. The inline-key-literal
+   negative fixture fails at Gate 1/Gate 2 with the exact tag committed in
+   `test/fixtures/phase41/negative-expected-tags.tsv`, and its matched positive (same peer, key by `SecretRef`
+   name) decodes.
 2. A `SecretRef` naming an absent/rotated KV entry yields a specific-reason resolution error (never an empty or
    default key), so the missing-key mutant of the gate (Sprint 41.3) has a defined failure to trip on.
 
@@ -323,15 +324,10 @@ None for this sprint.
 `src/Amoebius/Fabric/WgReconcile.hs` (the singleton's `discover (wg show) → diff → enact (wg set)` reconcile
 of `wg0`) — built and validated.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `render(wireguard_fabric.dhall)` produces per-peer config **byte-identical to the committed golden** `test/fixtures/phase41/expected-peer-config.golden` (key fields carried as `SecretRef` names, with
-per-peer VPN-IP, `AllowedIPs`, and the hub `Endpoint` pinned) — the golden is the Phase-0 oracle, authored
-before `WgRender.hs` exists, so it cannot be a regenerated tautology (§M.1). The reconcile is idempotent: a
-first pass brings `wg0` to the rendered peer set (observed via `wg show` read from the kernel, the OS
-boundary — §M.5), and a second pass is a no-op (zero `wg set` mutations). Overlapping-VPN-IP and
-`AllowedIPs`-outside-CIDR negatives are decode-foreclosed with their committed tags. Before either pass may
-mutate the kernel or a listener, provisioning expands the raw finite `NetworkFabricSystemDemand` over
-exactly the rendered topology and matches `expected-fabric-demand.json`; one-byte CPU/memory/nodefs overdraw
-and a changed-snapshot fixture yield zero `ip`/`wg`/traffic-control/listener effects.
+**Independent Validation**: `render(wireguard_fabric.dhall)` is **byte-identical to the committed golden**,
+the reconcile is idempotent against live kernel state, the overlapping-VPN-IP and out-of-CIDR negatives
+decode-foreclose with their committed tags, and nothing in the kernel or a listener moves before the expanded
+fabric demand is admitted. The numbered Validation list below states each check.
 **Docs to update**:
 `documents/engineering/network_fabric_doctrine.md`, `documents/engineering/manifest_generation_doctrine.md`,
 `documents/engineering/resource_capacity_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
@@ -403,17 +399,10 @@ None for this sprint.
 / reconcile / reachability probe / teardown); the reused negative corpus under
 `dhall/examples/illegal_wg_*.dhall` — built and validated.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the harness stands up the two-peer
-fabric (gateway-role hub + spoke, each in its own Linux network namespace on the linux-cpu host) from
-`dhall/examples/wireguard_fabric.dhall`, the singleton renders + reconciles `wg0` on each, and the **spoke reaches the hub at the hub's VPN-IP** — asserted by an **external-observer** probe (an OS-level ICMP echo +
-TCP connect from the spoke netns to the hub VPN-IP, plus a `tcpdump` underlay capture confirming the traffic
-is WireGuard UDP, never cleartext — §M.5), matching `test/fixtures/phase41/reachability-expected.json`;
-effective peer state is read from `wg show` (the kernel), never a singleton self-report. The gate also
-proves the exact topology-expanded fabric reserve was admitted against a fresh fingerprint before mutation
-and that its cgroup/rate/queue/log controls are effective by OS readback; one-byte and stale-snapshot
-negatives have zero fabric effects. Teardown tears down `wg0` on each node and leaks no interface, peer,
-cgroup, qdisc, or log allocation. The run emits a **Register-3** proven/tested/assumed ledger naming the
-live linux-cpu substrate.
+**Independent Validation**: the harness stands the two-peer fabric up, reconciles `wg0` on each node, and
+proves the spoke reaches the hub at its VPN IP by external observation rather than a singleton self-report;
+the fabric reserve is admitted against a fresh fingerprint before any mutation, and teardown leaks nothing.
+The numbered Validation list below states each check.
 **Docs to update**: `DEVELOPMENT_PLAN/substrates.md`,
 `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-41 status when the
 gate passes).
@@ -459,20 +448,25 @@ probe over the VPN IP, not a self-report.
   pre-cluster band.
 
 ### Validation
-1. From `wireguard_fabric.dhall` the singleton renders config byte-identical to `expected-peer-config.golden` and
+1. The harness stands the two-peer fabric — the gateway-role hub and one spoke, each in its own Linux network
+   namespace on the linux-cpu host — up from `dhall/examples/wireguard_fabric.dhall`. The singleton renders
+   config byte-identical to `expected-peer-config.golden` and
    expands capacity byte-identically to `expected-fabric-demand.json`; the provisioned node/peer rows exactly
    cover the topology; and the current-residual fingerprint yields one `ValidatedFabricEnactment`. It reconciles
    `wg0` on both peers; the spoke's external-observer probe reaches the hub at its VPN-IP matching
-   `reachability-expected.json` (ICMP + TCP connect succeed, underlay `tcpdump` shows WireGuard UDP only, `wg show`
-   confirms the peer set). Read back CPU/memory cgroup controls, packet-rate/queue bounds, rotated-log policy
+   `test/fixtures/phase41/reachability-expected.json` (an OS-level ICMP echo and TCP connect from the spoke
+   netns succeed, an underlay `tcpdump` capture shows WireGuard UDP and never cleartext application bytes, and
+   effective peer state is read from `wg show` — the kernel, never a singleton self-report — §M.5). Read back
+   CPU/memory cgroup controls, packet-rate/queue bounds, rotated-log policy
    and nodefs high-water, listener bind, and peer graph exactly; the `missing-peer-key` and `hub-no-endpoint`
    mutants each turn this red.
 2. Every negative fixture, submitted through the same render entry the positive used, is rejected at Gate 1/Gate 2
    with its emitted tag equal to the committed `negative-expected-tags.tsv` oracle (secrets-in-Dhall foreclosed,
-   overlapping IPs and out-of-CIDR `AllowedIPs` decode-foreclosed); the positives decode; teardown leaves no
-   leaked `wg0` interface or peer; and the ledger honestly classifies each layer (no deferred surface —
-   broker↔broker geo-replication, the gateway-migration repoint — reported as proven, and the runtime tunnel
-   marked *tested*, not *proven*).
+   overlapping IPs and out-of-CIDR `AllowedIPs` decode-foreclosed); the positives decode. Teardown tears `wg0`
+   down on each node and leaks no interface, peer, cgroup, qdisc, or log allocation. The **Register-3**
+   proven/tested/assumed ledger the run emits names the live linux-cpu substrate and honestly classifies each
+   layer (no deferred surface — broker↔broker geo-replication, the gateway-migration repoint — reported as
+   proven, and the runtime tunnel marked *tested*, not *proven*).
 3. Run every one-unit overdraw, omitted-peer, and changed-fingerprint fixture through the same live admission
    boundary. Assert its exact committed reason and use `ip monitor`, `wg show`, cgroup/qdisc/log-policy
    readback, listener process/socket observation, and nodefs byte accounting to prove zero fabric effects.

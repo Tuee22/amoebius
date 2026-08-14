@@ -92,15 +92,16 @@ accept it with the Phase-49 aggregate gate. Split if the work changes sibling in
 platform capability, or creates a server/UI runtime.
 **Substrate:** linux-cpu
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/phase49_gate.py --reuse-fresh-live` verifies reviewed fixture provenance, dynamic
-sibling linkage and run-local before/after identity, constructor foreclosure, pure contracts, Register-3 evidence,
-external cleanup, an independent Haskell evidence reader, all four compiled mutants, baseline restoration,
-documentation, and the ledger. `cabal test infernix-core-artifact-lift-live-gate` remains an independent
-evidence reader rather than the sole acceptance command. The representative fixtures, external observers,
-independent oracle, paired cases, and mutants are delegated to [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/phase49_gate.py --reuse-fresh-live` passes every fixture, observer, oracle, paired
+case, and mutant of [Gate integrity](#gate-integrity). `cabal test infernix-core-artifact-lift-live-gate` is an
+independent evidence reader, never the acceptance command.
 
 ## Gate integrity
 
+- **What the one command decides.** The gate verifies reviewed fixture provenance, dynamic sibling linkage and
+  run-local before/after identity, constructor foreclosure, pure contracts, Register-3 evidence, external
+  cleanup, an independent Haskell evidence reader, all four compiled mutants, baseline restoration,
+  documentation, and the ledger. Every one of those rests on a clause below.
 - **Representative-set candidates.** After Phase-0 and owning-phase provenance review, the gate may retain
   `test/dhall/phase_49/infernix_core_artifact_lift.dhall`,
   `test/dhall/phase_49/cpu_budget_one_short.dhall`,

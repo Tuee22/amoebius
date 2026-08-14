@@ -29,6 +29,7 @@ ledger `external-run-reference`.
 ## Contents
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
 - [Resource provision — the native Pulsar client envelope](#resource-provision--the-native-pulsar-client-envelope)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
@@ -91,13 +92,9 @@ remain additive and are exercised by later phases.
 **Register:** 3 (live infrastructure) — the gate runs against a real broker on a real cluster, not an
 in-process fake.
 
-**Gate:** `cabal test pulsar-client-live` is green: on a `linux-cpu` kind cluster with Pulsar up as a standard HA service (Phase 30), an `InForceSpec`
-test topology **round-trips a workflow command → event over the native Pulsar binary protocol with broker-side deduplication enabled**, a **CBOR command/event payload round-trips byte-for-byte** through the
-typed codec, and a **fixture attempting a non-CBOR payload fails to type-check** — the topology spinning up,
-running, and tearing down leak-free and idempotently on re-run, emitting a Register-3 proven/tested/assumed
-ledger. The topic descriptor also round-trips its required `StorageBudgetId` and complete
-`PulsarOffloadObjectDemand` source operands (segment size, offload concurrency/rate window, deletion lag,
-failure/orphan horizon, and admission model); Phase 30 owns the live MinIO geometry/drill.
+**Gate:** `cabal test pulsar-client-live` is green: the `InForceSpec` test topology satisfies every committed
+oracle, negative, mutant, and external sweep named in [Gate integrity](#gate-integrity), and emits a Register-3
+proven/tested/assumed ledger with every layer outside Register 3 UNVERIFIED.
 
 ```mermaid
 flowchart LR
@@ -119,6 +116,17 @@ flowchart LR
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
 *Validated Phase-35 gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+
+## Gate integrity
+
+The run happens on a `linux-cpu` kind cluster with Pulsar up as a standard HA service (Phase 30). There the
+`InForceSpec` test topology **round-trips a workflow command → event over the native Pulsar binary protocol
+with broker-side deduplication enabled**, a **CBOR command/event payload round-trips byte-for-byte** through
+the typed codec, and a **fixture attempting a non-CBOR payload fails to type-check** — the topology spinning
+up, running, and tearing down leak-free and idempotently on re-run. The topic descriptor also round-trips its
+required `StorageBudgetId` and complete `PulsarOffloadObjectDemand` source operands (segment size, offload
+concurrency/rate window, deletion lag, failure/orphan horizon, and admission model); Phase 30 owns the live
+MinIO geometry/drill.
 
 The gate passes only when every clause below holds; each is checked against an **oracle-pinned oracle**
 authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from the client.
@@ -312,17 +320,8 @@ golden, and raw-payload compile refusal are validated.
 payload codec on `serialise`/`cborg`) — delivered and validated.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: run against the **live single-node `kind`-cluster broker (Register 3)** — the same
-standing Pulsar service as the gate, not an in-process fake — so the FLOW/MESSAGE/ACK_RESPONSE and
-four-subscription-shape assertions are wire-real:
-- a persistent producer sends N messages and collects N `SEND_RECEIPT`s with assigned `message_id`s
-- a consumer grants `FLOW` permits, receives `MESSAGE` frames up to the permits, and `ACK`s (confirmed by
-  `ACK_RESPONSE`)
-- each of the four subscription types exhibits its distinct delivery shape
-- a `SEEK` to an earlier `message_id` replays the log
-- a typed value round-trips through the CBOR codec byte-for-byte against the oracle-pinned CBOR vector,
-  a fixture attempting a non-CBOR payload has no constructor (fails to type-check with its committed
-  expected diagnostic), and a corrupt CBOR body yields a structured `Left DecodeError` on consume.
-
+standing Pulsar service as the gate, not an in-process fake — so every frame-level assertion is wire-real. The
+numbered `### Validation` list below carries the producer, consumer, subscription, seek, and codec obligations.
 **Docs to update**: `documents/engineering/pulsar_client_doctrine.md` (§5, §3.1),
 `documents/illegal_state/illegal_state_catalog.md` (§3.23).
 
@@ -368,6 +367,8 @@ seek-based replay — over the persistent session from Sprint 35.1, with **every
    mutant that re-adds a `produceRaw :: ByteString -> …` export (union-arm addition operator) must turn this
    validation red. A corrupted CBOR body yields a structured `Left DecodeError` on consume (decode-foreclosed,
    like CRC32C), never a silent misread.
+5. A consumer grants `FLOW` permits, receives `MESSAGE` frames up to those permits, and `ACK`s each one,
+   confirmed by the broker's `ACK_RESPONSE`.
 
 ### Remaining Work
 None.
@@ -379,11 +380,10 @@ violations are validated, including the deleted-clause mutant.
 **Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Topology.hs` — delivered and validated.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: property tests that `topicFor` derives
-`persistent://<tenant>/<namespace>/<workflow>.<phase>.<substrate>` from a typed `RouteEntry`, checked
-against an **oracle-pinned hand-authored expected-topic table** (a distinct spec of the naming scheme,
-not `topicFor`'s own output re-fed as its own oracle, §M.3); `validateTopology` returns the **full**
-violation list on graphs seeded with duplicates, empty lanes, and one-sided links; an `emit-only` workflow
-(the `gc` exemplar) is accepted despite having reports with no producing input.
+`persistent://<tenant>/<namespace>/<workflow>.<phase>.<substrate>` from a typed `RouteEntry`, checked against
+an **oracle-pinned hand-authored expected-topic table** — a distinct spec of the naming scheme, not
+`topicFor`'s own output re-fed as its own oracle (§M.3). The numbered `### Validation` list below carries the
+violation-list and exemption obligations.
 **Docs to update**:
 `documents/engineering/pulsar_client_doctrine.md` (§6).
 
@@ -424,8 +424,9 @@ a runtime mystery — the illegal-state-unrepresentable principle applied to the
    graph — to fire in **≥20%** of generated cases each, so the reject path is exercised, not a near-constant
    legal graph. A committed seeded mutant with the one-sided-link clause deleted from `validateTopology`
    (invariant-clause-delete operator) must turn this validation red.
-3. Assert an `emit-only` workflow with unsourced reports validates, while the same graph without the exemption
-   is rejected — a positive/negative pair differing only in the exemption flag (§M.8).
+3. Assert an `emit-only` workflow with unsourced reports validates — the `gc` exemplar, accepted despite
+   having reports with no producing input — while the same graph without the exemption
+   is rejected: a positive/negative pair differing only in the exemption flag (§M.8).
 4. Prove the algebra is on the gate path, not dead code (§M.3): the gate topology `round_trip_dedup.dhall`
    carries a committed `RouteEntry` descriptor, and the Sprint 35.4 gate run asserts the actually-produced and
    actually-consumed topic names equal the committed derived-topic table — the reconcile/gate path derives its
@@ -443,11 +444,10 @@ duplicate collapse, redelivery, seek replay, independent state readback, and lea
 `amoebius-pulsar/src/Amoebius/Pulsar/Provision.hs`, `amoebius-pulsar/test/PulsarClientLiveSpec.hs`, and
 `tools/phase35_pulsar_live.py` — delivered and validated.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: with namespace deduplication enabled, a producer that retries the same
-`(producer_name, sequence_id)` has the duplicate rejected at ingest; a consumer that crashes before `ACK` is
-redelivered the un-acked message; the `MessageId`→`sequence_id` packing (`ledgerId`/`entryId`) and the
-request-scoped-producer-name fallback both keep distinct keys off one dedup cursor; the gate topology
-round-trips a command → event, byte-for-byte CBOR, and tears down leak-free and idempotently.
+**Independent Validation**: with namespace deduplication enabled the broker rejects a retried
+`(producer_name, sequence_id)` at ingest and redelivers the un-acked message after a consumer crash, and
+distinct keys never share one dedup cursor. The numbered `### Validation` list below carries the gate run, the
+dedup drill, and the leak-free sweep.
 **Docs to update**: `documents/engineering/pulsar_client_doctrine.md` (§7), `DEVELOPMENT_PLAN/README.md` (flip the
 Phase-35 status when the gate passes).
 
@@ -520,11 +520,10 @@ and the unstable-key twin replays red.
 **Implementation**: `amoebius-pulsar/test/PulsarDedupSimSpec.hs`, driving the production
 `amoebius-pulsar/src/Amoebius/Pulsar/Dedup.hs` fold — delivered and validated.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the real dedup fold — keyed by a replication-surviving work-id — runs under
-`IOSimPOR` against the modeled Pulsar with injected reorder, duplicate, crash-mid-acknowledge, and
-partition; the suite asserts the **exactly-once effect** invariant (R3): on every explored schedule, no
-effect is lost and none is double-applied. This is the amoebius-owned fold; Pulsar's broker/bookie consensus
-stays delegated and is only *modeled* here. Deterministically replayable, substrate `none`, Register 2.5.
+**Independent Validation**: the real dedup fold, keyed by a replication-surviving work-id, upholds the
+**exactly-once effect** invariant (R3) on every schedule the simulation explores. Deterministically
+replayable, substrate `none`, Register 2.5. The numbered `### Validation` list below carries the injected
+fault set and the broken-fold control.
 **Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-35 status backlink),
 `documents/engineering/pulsar_client_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -537,10 +536,12 @@ gate — the interleaving a single-threaded test cannot reach.
 
 ### Deliverables
 - The `PulsarDedupSimSpec` battery: the real dedup fold under `IOSimPOR` against the modeled Pulsar, asserting
-  no-loss + no-double-apply under injected reorder/duplicate/crash-mid-ack/partition schedules.
+  no-loss + no-double-apply on every explored schedule under injected
+  reorder/duplicate/crash-mid-acknowledge/partition faults.
 - A Register-2.5 proven/tested/assumed ledger — the fold upholds exactly-once under the modeled schedules and
   faults; honest limit: modeled-Pulsar fidelity is **assumed**, discharged by the Sprint 35.4 Register-3 live
-  gate.
+  gate. The dedup fold is the amoebius-owned part; Pulsar's own broker/bookie consensus stays delegated and is
+  only *modeled* here.
 
 ### Validation
 1. `cabal test pulsar-dedup-sim` is green — no schedule loses or double-applies an effect; a deliberately broken

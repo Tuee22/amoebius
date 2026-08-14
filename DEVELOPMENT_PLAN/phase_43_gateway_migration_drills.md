@@ -108,28 +108,9 @@ Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 WireGuard hub-role move, and adversarial fault injection against the running forest. Route53 provider mutation
 is explicitly outside the achieved boundary.
 
-**Gate:** `cabal test gateway-migration-drills-live` is green: a `Planned` handover completes with **RPO=0** — demonstrated not by a bare "loss = 0" but by the
-external write-journal oracle of [Gate integrity](#gate-integrity) below (a Register-3 run yields *tested*, never *proven*, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)): the drill runs under a **non-idle** workload (the client journals every source-acked write ID to a store *outside* the forest, and the harness asserts **≥ 8 acked-but-un-replicated write IDs exist at the quiesce instant**, i.e. observed replication lag > 0, before authority moves), and
-post-cutover every journaled ID is present on the new owner; killing the lead cluster mid-workflow (again with
-≥ 8 acked-but-un-replicated IDs in flight) drives a `Failover` that promotes the surviving sibling only through
-its fail-closed freshness gate, repoints the authoritative local DNS record and the WireGuard hub, and **rebinds within the committed numeric `DataLossBudget`** — the concrete budget (`lagBound = 5 s`, `RTO = 60 s`, scaled to the single-host kind
-forest) is authored and committed in `test/dhall/phase_43_gateway_migration.dhall` **in Phase 0, before any runtime exists**, its content hash recorded in the gate record, and the drill reports declared-vs-measured for
-**both** dimensions so a post-hoc-tuned or absurd budget is visible red; the gate turns red on **at least one committed seeded mutant** ([Gate integrity](#gate-integrity): the `verify-caught-up`-stub and `promote-before-fence` mutants); the built
-`src/Amoebius/Multicluster/*` runtime is shown to correspond to the Phase-3 `GatewayMigration` design-model — the
-built decision core is that model's `interpret` (single-source correspondence, discharged as step-by-step
-trace-validation in Register 2.5 per Sprint 43.3, with the Register-3 drills adding only a
-modeled-action-coverage assertion that every modeled action fired ≥ 1 time across the drill set); the Register-3
-Inject drills assert **all five** Phase-3 safety invariants (`UniqueGatewayOwner`, `SessionAlwaysRebindable`,
-`PlannedIsLossless`, `NoWriteAfterStaleFailover` — the safety half of the superseded `FailoverBounded`; the
-recovery-time half is carried separately as the *tested* RTO datapoint, not as a bounded-divergence invariant —
-and `NoTakeWithoutProvenFreshness`, which the survivor-promotion drills already exercise through the
-fail-closed freshness gate and which is therefore asserted by name rather than left implicit)
-against the live forest; the forest tears down leak-free by the OS-boundary kind/network-namespace/journal/DNS observer
-(retained `no-provisioner` PVs exempt); and the run emits a **machine-derived** proven/tested/assumed ledger
-([Gate integrity](#gate-integrity)) recording recovery time as *tested* (drilled), the data-loss bound as *assumed* (monitored, not proven),
-and the modeled safety/liveness as *proven-for-the-model at scope 2* (a Phase-3 design result, never a runtime
-guarantee); layers outside Register 3 stay marked UNVERIFIED, and — as a Register-3 live-band gate — the runtime
-layer is marked *tested*, never *proven*.
+**Gate:** `cabal test gateway-migration-drills-live` is green: the `Planned` handover and the `Failover`
+takeover each satisfy every oracle, committed budget, named invariant, observer, and mutant of
+[Gate integrity](#gate-integrity). A bare "loss = 0" report cannot satisfy it.
 
 ## Gate integrity
 
@@ -137,13 +118,29 @@ This gate is anchored by the committed artifacts below; substituting evidence pr
 test or after the run cannot satisfy it:
 - **Write-journal oracle (independent of the SUT).** The drill client writes every source-acked write ID to
   `test/inject/journal/` (a store outside the forest, never the SUT's own replication log). "Committed write"
-  means *source-acked*, not *already-replicated*; the harness asserts **≥ 8** such IDs are
+  means *source-acked*, not *already-replicated*; under a **non-idle** workload the harness asserts **≥ 8** such
+  IDs are
   acked-but-not-yet-replicated at the quiesce/kill instant (a positive observed lag), then asserts set-equality
   of journaled-vs-present IDs on the new owner. The ledger embeds the raw journal counts (acked,
   un-replicated-at-cut, recovered), never a bare "loss = 0".
+- **The two branches and what each must show.** The `Planned` handover moves authority before any un-replicated
+  write is lost, and post-cutover every journaled ID is present on the new owner. Killing the lead cluster
+  mid-workflow — again with ≥ 8 acked-but-un-replicated IDs in flight — drives a `Failover` that promotes the
+  surviving sibling only through its fail-closed freshness gate, repoints the authoritative local DNS record and
+  the WireGuard hub, and rebinds within the committed numeric `DataLossBudget`.
 - **Committed numeric budget fixture.** `test/dhall/phase_43_gateway_migration.dhall` fixes `lagBound = 5 s`,
-  `RTO = 60 s`; authored and committed in this phase's oracle-pinning sprint; its hash is pinned in the gate record and re-checked at gate
-  time so a budget edited after measuring the drill fails the hash check.
+  `RTO = 60 s`, scaled to the single-host kind forest; authored and committed in this phase's oracle-pinning sprint; its hash is pinned in the gate record and re-checked at gate
+  time so a budget edited after measuring the drill fails the hash check. The drill reports declared-vs-measured
+  for **both** dimensions, so a post-hoc-tuned or absurd budget is visible red.
+- **The five named invariants, and correspondence.** The Register-3 Inject drills assert all five Phase-3 safety
+  invariants against the live forest: `UniqueGatewayOwner`, `SessionAlwaysRebindable`, `PlannedIsLossless`,
+  `NoWriteAfterStaleFailover` — the safety half of the superseded `FailoverBounded`, whose recovery-time half is
+  carried separately as the *tested* RTO datapoint rather than as a bounded-divergence invariant — and
+  `NoTakeWithoutProvenFreshness`, which the survivor-promotion drills already exercise through the fail-closed
+  freshness gate and which is therefore asserted by name rather than left implicit. That the built
+  `src/Amoebius/Multicluster/*` runtime is the Phase-3 `GatewayMigration` model's `interpret` is discharged as
+  the step-by-step trace-validation of Sprint 43.3 (Register 2.5); Register 3 adds only the
+  modeled-action-coverage assertion that every modeled action fired ≥ 1 time across the drill set.
 - **Mutation controls.** At least one committed member of this [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) set must fail: (a) `verify-caught-up`-stub — the
   `Planned` `verify-caught-up` edge is weakened to `const True` (dropped-guard); the journal oracle must catch
   the lost un-replicated suffix red. (b) `promote-before-fence` — the `Failover` `PromotionGate` guard is negated
@@ -157,7 +154,11 @@ test or after the run cannot satisfy it:
 - **Machine-derived ledger + validator.** The ledger is generated from the run record (measured RPO/RTO,
   observed max lag, the raw journal counts, drill seeds, timestamps, the teardown-observer result), and a
   committed validator cross-checks every ledger figure against the harness's raw journal and the OS-boundary
-  observer, failing the gate on any mismatch or hand-edited field.
+  observer, failing the gate on any mismatch or hand-edited field. It records recovery time as *tested*
+  (drilled), the data-loss bound as *assumed* (monitored, not proven), and the modeled safety/liveness as
+  *proven-for-the-model at scope 2* — a Phase-3 design result, never a runtime guarantee. Layers outside
+  Register 3 stay marked UNVERIFIED, and because this is a live-band gate the runtime layer is marked *tested*,
+  never *proven* ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 ```mermaid
 flowchart LR
@@ -303,13 +304,10 @@ orchestrator whose per-edge decision delegates to the Phase-3 `src/Amoebius/Form
 `src/Amoebius/Multicluster/DnsRepoint.hs`, `src/Amoebius/Multicluster/ClientRebind.hs` — delivered and
 gate-covered.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a `Planned` handover drives the ordered
-edge-observed state machine (`stand-up-replica → quiesce → drain / verify-caught-up → promote → source-proxy
-+ repoint DNS → unfreeze → drain-monitor → decommission`) and loses no committed write (RPO=0), the old
-gateway serving as a transparent proxy for the whole DNS-drain window so a live session always has a working
-endpoint; a `Failover` promotes the survivor *only after* its freshness gate proves a known commit watermark
-(or holds a fence), then repoints the authoritative DNS owner and the WireGuard hub, accounting for the un-replicated suffix
-**only** by the R9 data-loss budget, never silently resolved to "absent."
+**Independent Validation**: a `Planned` handover drives the ordered edge-observed state machine end to end and
+loses no committed write (RPO=0); a `Failover` promotes the survivor only through its freshness gate and
+accounts for the un-replicated suffix by the R9 budget alone. The numbered `### Validation` list below carries
+the edge order and both branches' acceptance conditions.
 **Docs to update**:
 `documents/engineering/gateway_migration_doctrine.md`, `documents/engineering/chaos_failover_doctrine.md`.
 
@@ -349,6 +347,13 @@ it.
    (`lagBound = 5 s`, `RTO = 60 s`) whose hash is pinned before the drill runs — the drill **reports declared-vs-measured for both dimensions**, so a generous or post-hoc-tuned budget is visible; driving lag
    past the committed bound makes the freshness gate refuse to promote and the lag monitor alarm before a breach;
    and the committed `promote-before-fence` mutant ([Gate integrity](#gate-integrity)) — the `PromotionGate` guard negated — must go red.
+2. The `Planned` branch drives the ordered edge sequence `stand-up-replica → quiesce → drain /
+   verify-caught-up → promote → source-proxy + repoint DNS → unfreeze → drain-monitor → decommission`, the old
+   gateway serving as a transparent proxy for the whole DNS-drain window so a live session always has a working
+   endpoint.
+3. The `Failover` branch promotes the survivor *only after* its freshness gate proves a known commit watermark,
+   or holds a fence, and then repoints the authoritative DNS owner and the WireGuard hub. The un-replicated
+   suffix is accounted for **only** by the R9 data-loss budget, never silently resolved to "absent."
 
 ### Remaining Work
 Route53 provider mutation remains UNVERIFIED; the authoritative local DNS and raw-kernel fabric paths are done.
@@ -414,16 +419,10 @@ checking observed transitions against the emitted `Next`), driving the real `src
 forest code lifted onto the Phase-15 `io-classes` `Env` interface — delivered as the deterministic pure
 runtime/trace battery.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the real `Multicluster/*` forest code runs under `IOSimPOR`
-against the modeled route53 (short-TTL, **no compare-and-swap**, propagation delay) and modeled
-geo-replicated Pulsar with injected partition, kill-cluster-mid-geo-sync, and replication-lag; the suite
-asserts all five **safety** invariants (`UniqueGatewayOwner`, `SessionAlwaysRebindable`,
-`PlannedIsLossless`, `NoWriteAfterStaleFailover`, `NoTakeWithoutProvenFreshness`) hold on every explored
-schedule, **and** trace-validates the forest's observed transition log step-by-step against the Phase-3
-emitted spec's `Next` relation
-([`formal_model_doctrine.md §8`](../documents/engineering/formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge))
-— pulling the runtime-fidelity (Tier-2) obligation **forward** from Register-3-only chaos into
-deterministic, replayable simulation. Substrate `none`, Register 2.5.
+**Independent Validation**: the real `Multicluster/*` forest code runs under `IOSimPOR` against a modeled
+route53 and geo-replicated Pulsar, and its observed transition log is trace-validated step-by-step against the
+Phase-3 emitted spec, pulling the runtime-fidelity (Tier-2) obligation **forward** from Register-3-only chaos
+into deterministic, replayable simulation. Substrate `none`, Register 2.5.
 **Docs to update**:
 `documents/engineering/deterministic_simulation_doctrine.md` (Phase-43 status backlink),
 `documents/engineering/gateway_migration_model_doctrine.md` (§6 the Register-2.5 trace-validation bridge).
@@ -436,10 +435,15 @@ simulation against the modeled world here (Register 2.5), then as live Inject dr
 — so the code↔model bridge is a formal, early, replayable check rather than only sampled live chaos.
 
 ### Deliverables
-- The `GatewayMigrationSimSpec` battery: the real forest code under `IOSimPOR` against the modeled
-  route53/Pulsar, asserting all five safety invariants under injected partition/kill-cluster-mid-geo-sync/lag.
+- The `GatewayMigrationSimSpec` battery: the real forest code under `IOSimPOR` against the modeled route53
+  (short-TTL, **no compare-and-swap**, propagation delay) and the modeled geo-replicated Pulsar, asserting all
+  five safety invariants — `UniqueGatewayOwner`, `SessionAlwaysRebindable`, `PlannedIsLossless`,
+  `NoWriteAfterStaleFailover`, `NoTakeWithoutProvenFreshness` — on every explored schedule under injected
+  partition/kill-cluster-mid-geo-sync/lag.
 - The `GatewayMigrationTrace` validator: each observed transition of the simulated forest is a legal `Next`-step
-  of the Phase-3 emitted spec (a mismatch is a code↔model divergence, red).
+  of the Phase-3 emitted spec
+  ([`formal_model_doctrine.md §8`](../documents/engineering/formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge)),
+  and a mismatch is a code↔model divergence, red.
 - A Register-2.5 proven/tested/assumed ledger — the built forest upholds the safety invariants and refines the
   model's `Next` under the modeled schedules and faults; honest limit: modeled route53/Pulsar fidelity and real
   replication-lag / clock-skew physics remain the Register-3 residue (Sprint 43.4).
@@ -461,17 +465,10 @@ named invariants against the built runtime), plus `tools/phase43_gateway_migrati
 `Model`, its `emitTLA` proof, and its io-sim agreement were authored and discharged in Phase 3; this sprint
 consumes them, it does not re-author them.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the built `src/Amoebius/Multicluster/*` decision core is shown to be
-the Phase-3 `interpret` (single-source correspondence — no variable→module table, per the superseded
-framing's reversal); the Register-3 Inject drills (cut replication, kill the lead mid-`Planned`-handover,
-kill the lead with no drain to force `Failover`, drive lag past the bound, fail back with late + duplicate
-arrivals) run against the live forest and assert all five named invariants (`UniqueGatewayOwner`,
-`SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover`,
-`NoTakeWithoutProvenFreshness`); and `phase_43_gateway_migration.dhall` spins the forest up, runs both
-branches, asserts RPO=0 for `Planned` **via the out-of-forest write-journal set-equality oracle ([Gate integrity](#gate-integrity)) under a workload carrying ≥ 8 acked-but-un-replicated IDs at the cut**
-and measured loss ≤ the **oracle-pinned, hash-pinned numeric budget** for `Failover`, tears down
-leak-free **as read by the OS-boundary kind/network-namespace/journal/DNS observer (retained `no-provisioner` PVs exempt)**, turns the committed seeded mutants red, and emits a machine-derived proven/tested/assumed ledger
-validated against the raw journal.
+**Independent Validation**: the built `src/Amoebius/Multicluster/*` decision core is shown to be the Phase-3
+`interpret` — single-source correspondence, no variable→module table — and the live gate topology spins the
+forest up, runs both branches, tears down leak-free, and emits a machine-derived ledger. The numbered
+`### Validation` list below carries the drill set and its oracles.
 **Docs to update**:
 `documents/engineering/gateway_migration_model_doctrine.md`,
 `documents/engineering/chaos_failover_doctrine.md`, `documents/engineering/testing_doctrine.md`.
@@ -486,10 +483,12 @@ ledgered per [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_
 and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross-boundary-ledger-and-conformance-rows).
 
 ### Deliverables
-- The Register-3 Inject drill set run in the inter-cluster dimension against the running forest, asserting the
-  Phase-3 named invariants — the concrete confirmation that the built runtime, which *is* the model's
+- The Register-3 Inject drill set run in the inter-cluster dimension against the running forest — cut
+  replication, kill the lead mid-`Planned`-handover, kill the lead with no drain to force `Failover`, drive lag
+  past the bound, and fail back with late plus duplicate arrivals — each asserting the Phase-3 named invariants.
+  This is the concrete confirmation that the built runtime, which *is* the model's
   `interpret`, upholds under real physics what the model proves in logical time (never a re-authored TLA+ spec,
-  never a paper variable→module table).
+  never a paper variable→module table, which is what the superseded framing had reversed).
 - `test/dhall/phase_43_gateway_migration.dhall`: spin two children up, geo-replicate, run a `Planned` handover
   asserting RPO=0 via the write-journal oracle, kill the lead to force `Failover` asserting rebind within the
   oracle-pinned numeric budget (`lagBound = 5 s`, `RTO = 60 s`, hash-pinned), reconcile divergent

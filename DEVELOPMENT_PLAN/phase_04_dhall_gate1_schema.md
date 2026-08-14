@@ -127,10 +127,9 @@ corpus.
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `dhall type` over the Gate-1 corpus is green — each positive cluster / app / deployment fixture
-type-checks, and each Gate-1-class negative fixture fails `dhall type` at authoring time, in the operator's
-editor or CI, with no amoebius binary ever run. The gate is bound by the concrete criteria below; a bare
-nonzero exit on a negative is not sufficient.
+**Gate:** `dhall type` over the Gate-1 corpus is green — every positive fixture type-checks and every
+Gate-1-class negative fails at its committed error golden, with no amoebius binary run. The apparatus is
+[Gate integrity](#gate-integrity); a bare nonzero exit is not sufficient.
 
 ```mermaid
 flowchart LR
@@ -458,25 +457,14 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**:
 `dhall/amoebius/{prelude,Cluster,App,Deployment,Capability,Topology,Capacity,Resources,Storage,Retention,Image,Extension,Consistency,Backup}.dhall`
-(typed surfaces + smart constructors) — built and validated. The last three close doctrine surfaces
-that no phase previously owned: `Extension.dhall` carries `ExtensionSpec` with its **mandatory, non-optional**
-`extMonitoring : NonEmpty MonitoringSurface` and the closed `MonitoringSurface` union
-([`dsl_doctrine.md §8`](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits)),
-so an extension declaring no monitoring has no inhabitant; `Consistency.dhall` carries the PACELC surface
-([`consistency_pacelc_doctrine.md`](../documents/engineering/consistency_pacelc_doctrine.md)) that
-[Phase 43](phase_43_gateway_migration_drills.md) consumes; `Backup.dhall` carries the closed `BackupPolicy`
-([`backup_recovery_doctrine.md`](../documents/engineering/backup_recovery_doctrine.md)), cross-cutting
-invariant #23 — phases 0–64 own the *declarable* policy; its live enactment (the put-only credential and the
-copy/verify `Job`) is the named candidate phase in [`later_phases.md`](later_phases.md), so the surface is
-owned rather than merely absent.
+— the typed surfaces and their smart constructors.
 **Blocked by**: reopened numeric predecessor gates.
 **Requires**: `host-toolchain` — the `dhall` CLI only; this sprint needs **no** Haskell skeleton (that
 arrives with the Gate-2 decoder in Phase 5).
-**Independent Validation**: `dhall type` / `dhall lint` accept every schema module on
-its own — each surface type is well-formed and every smart constructor elaborates to a value of its declared
-type — AND each shipped union's arm inventory and each surface record's required-field set match their
-committed Phase-0 oracle tables (`arm_inventory.csv`, `surface_fields.csv`, `resource_fields.csv`)
-byte-exactly, so no freeform escape arm, missing foreclosing field, or collapsed resource axis passes.
+**Independent Validation**: every schema module stands on its own under `dhall type` / `dhall lint`, and its
+shipped arm and required-field inventories match the committed oracle tables byte-exactly, so no freeform
+escape arm, missing foreclosing field, or collapsed resource axis passes. The numbered `### Validation` list
+below names the fixtures and the tables.
 **Docs to update**: `documents/engineering/dsl_doctrine.md` (Gate-1 status backlink),
 `DEVELOPMENT_PLAN/system_components.md` (DSL schema inventory).
 
@@ -487,6 +475,20 @@ not logic, and expose them only through smart constructors so that Gate 1 — th
 an authoring-time boundary that fires before any binary runs.
 
 ### Deliverables
+- The last three schema modules close doctrine surfaces that no phase previously owned, so each is delivered
+  here rather than left absent:
+  - `Extension.dhall` carries `ExtensionSpec` with its **mandatory, non-optional**
+    `extMonitoring : NonEmpty MonitoringSurface` and the closed `MonitoringSurface` union
+    ([`dsl_doctrine.md §8`](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits)),
+    so an extension declaring no monitoring has no inhabitant.
+  - `Consistency.dhall` carries the PACELC surface
+    ([`consistency_pacelc_doctrine.md`](../documents/engineering/consistency_pacelc_doctrine.md)) that
+    [Phase 43](phase_43_gateway_migration_drills.md) consumes.
+  - `Backup.dhall` carries the closed `BackupPolicy`
+    ([`backup_recovery_doctrine.md`](../documents/engineering/backup_recovery_doctrine.md)), cross-cutting
+    invariant #23. Phases 0–64 own the *declarable* policy; its live enactment — the put-only credential and
+    the copy/verify `Job` — is the named candidate phase in [`later_phases.md`](later_phases.md), so the
+    surface is owned rather than merely absent.
 - A Dhall prelude and record/union types exposing only *smart constructors* — a vocabulary with no illegal
   words: the **9-arm** no-product `Capability` union (catalog [§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)) — `ObjectStore`, `SecretStore`,
   `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge`, and `InferenceEngine`, the ninth arm
@@ -693,7 +695,10 @@ stored-object/snapshot/workspace metadata, a backing without presentation/minimu
 cache/registry/Vault storage cannot pass.
 
 ### Validation
-1. `dhall type` accepts each schema module. A smart constructor cannot be applied to an out-of-schema argument
+1. `dhall type` and `dhall lint` accept each schema module on its own, every surface type is well-formed, and
+   each shipped union's arm inventory matches the committed `tests/oracle/gate1/arm_inventory.csv`
+   byte-exactly, so no freeform escape arm survives. Every smart constructor elaborates to a value of its
+   declared type, and a smart constructor cannot be applied to an out-of-schema argument
    without a type error — discharged by a named committed fixture set `tests/gate1/ctor_reject/*.dhall`
    (≥1 expect-fail application fixture per smart constructor, enumerated in the harness manifest), each of
    which MUST fail `dhall type`; this is not discharged by appeal to Dhall function typing alone.
@@ -780,13 +785,10 @@ engine, transition, accelerator, and monitoring structures required above.
 **Implementation**: `dhall/examples/illegal_*.dhall` (the Gate-1 subset);
 `tools/dhall_gate1_negatives.sh` (an expect-fail `dhall type` harness) — built.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: every one of the eight canonical
-Gate-1-class negative fixtures **fails** `dhall type` at authoring time for the pinned reason (its stderr
-matches the committed `<entry>.err` golden) while its reverted paired positive type-checks; the committed
-seeded mutant goes red; and the committed partial-foreclosure ledger maps each negative to its catalog entry
-and foreclosure layer (fully vs. residue owned by Phase 5's Gate 2), with the malformed-received-body
-[§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)
-subcase recorded as deferred, not counted green.
+**Independent Validation**: each of the eight canonical Gate-1-class negatives fails `dhall type` for its
+pinned reason while its reverted paired positive type-checks, the committed seeded mutant goes red, and the
+partial-foreclosure ledger accounts for every entry. The numbered `### Validation` list below carries the
+goldens, the mutant, and the deferred-row obligation.
 **Docs to update**:
 `documents/illegal_state/illegal_state_catalog.md` (per-entry Gate-1 foreclosure-layer annotation),
 `DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md` (backlink: the decode-foreclosed residue lands there).
@@ -835,8 +837,12 @@ at Gate 2.
    unless the mutant is caught — i.e. the arm-inventory oracle goes red on the extra `Custom : Text` arm. If
    instead the mutant passes the arm-inventory oracle or lets the product-named negative type-check, the
    mutant has escaped and the seeded-mutant gate is invalid (§M.2).
-4. The run-local partial-foreclosure ledger maps all eight negatives to a catalog entry and foreclosure layer,
-   passes its schema, and is externally attested; the gate is incomplete without it.
+4. The run-local partial-foreclosure ledger maps all eight negatives to a catalog entry and foreclosure layer
+   — fully no-arm/required-field, versus the residue owned by Phase 5's Gate 2 — records the
+   malformed-received-body
+   [§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)
+   subcase as deferred rather than counted green, passes its schema, and is externally attested; the gate is
+   incomplete without it.
 
 ### Remaining Work
 Eight paired catalog negatives and two import-policy negatives must be red for their authored reasons, the

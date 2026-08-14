@@ -263,12 +263,55 @@ Linux. This is a **Register 3** (live-infrastructure) gate.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** on the single-node linux-cpu `kind` cluster, the multi-arch base image — carrying every third-party
-service binary and the jit-build resolver + its toolchain, but **no** ML engine payload — is built as one
-`buildx` OCI manifest list covering `linux/amd64` and `linux/arm64`, side-loaded onto the node, and **published atomically** (all-or-nothing; a partial-arch push leaves the tag un-advertised) into the in-cluster
-single-binary `distribution` registry, with a deny-all egress test to `docker.io`/`quay.io`/`ghcr.io` proving
-**zero public-registry pulls** during registry standup or publication and both arches resolving under the one
-digest-pinned tag.
+**Gate:** `python3 tools/phase25_gate.py` publishes the multi-arch base image atomically into the in-cluster
+`distribution` registry and satisfies every fixture, oracle, OS-boundary observation, and seeded mutant named
+in [Gate integrity](#gate-integrity). A self-emitted compliance trace cannot satisfy it.
+
+## Gate integrity
+
+**Acquisition-arm criteria — added 2026-08-13.** The bake gate additionally proves, per baked binary, that
+its catalog step names the highest applicable rung: an `apt` package where one exists, otherwise an
+`OfficialArtifact` whose checksum was resolved from the publisher's own manifest during this build, otherwise
+a `BuildProduct`. Every retained `CopyOci` step carries a recorded reason, and the count of such steps is a
+pinned metric that the gate compares against an authored expectation — so a silent return to scavenging
+fails rather than passing quietly. A seeded mutant substitutes a `CopyOci` step for an available `apt` rung
+and must turn that metric red. The rendered Dockerfile's `FROM` set is checked against the base image plus
+exactly the recorded last-resort set, and the deny-all egress test already required by the acceptance
+conditions below continues to prove zero public-registry pulls at run time.
+
+Per [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
+the oracles below are authored and **committed in this phase's oracle-pinning sprint** — before the Phase 25 implementation exists — and
+their reference sides are defined independently of the code under test. This section is the phase doc's explicit
+"representative set" (§M.7).
+
+```mermaid
+flowchart LR
+  %% register: algebra
+  fx["committed fixtures"]:::intent
+  or["independently authored oracle"]:::intent
+  mu["seeded mutant"]:::intent
+  g{{"the phase 25 gate command"}}:::gate
+  ok((("phase seal: the ledger this gate emits"))):::seal
+  no>"the mutant must turn it red"]:::refuse
+  fx -->|"binds the corpus"| g
+  or -->|"binds the expectation"| g
+  mu -->|"binds the defect"| g
+  g -->|"fixtures green, oracle agrees"| ok
+  g -->|"mutant green means the gate is not one"| no
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+```
+*Design intent. Phase 25's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
+
+**What the gate command accepts.** On the single-node linux-cpu `kind` cluster, the multi-arch base image —
+carrying every third-party service binary and the jit-build resolver + its toolchain, but **no** ML engine
+payload — is built as one `buildx` OCI manifest list covering `linux/amd64` and `linux/arm64`, side-loaded
+onto the node, and **published atomically** (all-or-nothing; a partial-arch push leaves the tag
+un-advertised) into the in-cluster single-binary `distribution` registry. A deny-all egress test to
+`docker.io`/`quay.io`/`ghcr.io` proves **zero public-registry pulls** during registry standup or publication,
+and both arches resolve under the one digest-pinned tag.
 
 The required service inventory explicitly includes Redis. Both architectures must execute
 `/usr/bin/redis-server --version` and `/usr/bin/redis-cli --version` at the independently pinned version; the
@@ -276,7 +319,7 @@ SBOM/file-digest inventory must contain both paths, and a rendered Redis or Sent
 this published base-image digest, never an upstream Redis image.
 
 The gate's oracles are pinned and committed in **Phase 0**, before any implementation exists (§M.1), and are
-listed in [Gate integrity](#gate-integrity) below; every equivalence check names an
+listed below; every equivalence check names an
 independent reference side (§M.3) and every negative asserts its specific failure reason (§M.8). The gate is
 not passed unless, in addition to the above:
 - **Builder execution admitted, not assumed:** before the first `buildx`/BuildKit process, an independent
@@ -318,7 +361,7 @@ not passed unless, in addition to the above:
   no-op by forcing an enforcing CNI or node-level host firewall into the harness.
 - **OS-boundary observation (§M.5):** "zero public-registry pulls" is read from an **observer at the OS boundary** — the `kind` node's `containerd` logs plus a node-level packet capture (`tcpdump`/eBPF) spanning
   the entire standup-and-publish window — asserting **zero** TCP connections to the resolved endpoints of
-  `docker.io`/`quay.io`/`ghcr.io` (the concrete set in [Gate integrity](#gate-integrity)); never a
+  `docker.io`/`quay.io`/`ghcr.io` (the concrete set is pinned below); never a
   compliance trace the publisher emits about itself. The denial scope covers in-cluster registry standup,
   publication, and pull; the **host-side `buildx` build legitimately reaches upstream** ([§2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§9](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)) and is
   explicitly outside the denied boundary.
@@ -336,46 +379,8 @@ not passed unless, in addition to the above:
 - **Idempotence as zero writes (§M.6):** "re-run is a no-op" is defined as **zero mutating requests**
   (`PUT`/`POST`/`PATCH`) in the registry access log during the second run — not merely exit-0-twice or a
   permitted full rebuild-and-re-push.
-- **Committed seeded mutants (§M.2):** the mutants named in [Gate integrity](#gate-integrity) are committed and
+- **Committed seeded mutants (§M.2):** the mutants named below are committed and
   re-run each gate pass and **must go red**.
-
-## Gate integrity
-
-**Acquisition-arm criteria — added 2026-08-13.** The bake gate additionally proves, per baked binary, that
-its catalog step names the highest applicable rung: an `apt` package where one exists, otherwise an
-`OfficialArtifact` whose checksum was resolved from the publisher's own manifest during this build, otherwise
-a `BuildProduct`. Every retained `CopyOci` step carries a recorded reason, and the count of such steps is a
-pinned metric that the gate compares against an authored expectation — so a silent return to scavenging
-fails rather than passing quietly. A seeded mutant substitutes a `CopyOci` step for an available `apt` rung
-and must turn that metric red. The rendered Dockerfile's `FROM` set is checked against the base image plus
-exactly the recorded last-resort set, and the deny-all egress test already required by the `**Gate:**` line
-above continues to prove zero public-registry pulls at run time.
-
-Per [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
-the oracles below are authored and **committed in this phase's oracle-pinning sprint** — before the Phase 25 implementation exists — and
-their reference sides are defined independently of the code under test. This section is the phase doc's explicit
-"representative set" (§M.7).
-
-```mermaid
-flowchart LR
-  %% register: algebra
-  fx["committed fixtures"]:::intent
-  or["independently authored oracle"]:::intent
-  mu["seeded mutant"]:::intent
-  g{{"the phase 25 gate command"}}:::gate
-  ok((("phase seal: the ledger this gate emits"))):::seal
-  no>"the mutant must turn it red"]:::refuse
-  fx -->|"binds the corpus"| g
-  or -->|"binds the expectation"| g
-  mu -->|"binds the defect"| g
-  g -->|"fixtures green, oracle agrees"| ok
-  g -->|"mutant green means the gate is not one"| no
-  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
-  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
-  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
-  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
-```
-*Design intent. Phase 25's gate apparatus; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns its clauses.*
 
 **Pinned oracles (oracle-pinned):**
 - `test/fixtures/phase25/bake_inventory_expected.dhall` — the canonical standard-platform-services inventory
@@ -501,15 +506,10 @@ flowchart LR
 `python3 tools/phase25_sprint25_1_gate.py`; 10 checks passed with gate identity
 `external-run-reference` and receipt
 `sprint-25.1-receipt.json`.
-**Implementation**: `dhall/amoebius/BakeCatalog.dhall` (the **typed source of truth** —
-each stage's `NonEmpty BakeStep` with its per-arch pinned versions), `src/Amoebius/Image/BakeInventory.hs`
-(decoding that catalog into the `BuildExecutionEnvelope`), `src/Amoebius/Image/RenderDockerfile.hs`
-(`renderDockerfile :: BuildExecutionEnvelope -> Dockerfile`, pure and total), `src/Amoebius/Image/Build.hs`
-plus `BuildAdmission.hs`, `BuildRuntime.hs`, `Artifact.hs`, and `Resolver.hs`; the consolidated gate and
-independent OCI/SBOM/execution/cgroup/ENOSPC/mutation probes live under `tools/phase25_*.py` — built and
-validated. **`docker/base/Dockerfile` is no longer committed**: it is a generated
-artifact emitted from the catalog and stamped generated-by, per
-[`generated_artifacts_doctrine.md` §2](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what).
+**Implementation**: `dhall/amoebius/BakeCatalog.dhall`, `src/Amoebius/Image/BakeInventory.hs`,
+`src/Amoebius/Image/RenderDockerfile.hs`, `src/Amoebius/Image/Build.hs` plus `BuildAdmission.hs`,
+`BuildRuntime.hs`, `Artifact.hs`, and `Resolver.hs`, with the consolidated gate and its independent
+OCI/SBOM/execution/cgroup/ENOSPC/mutation probes under `tools/phase25_*.py` — all built and validated.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `docker buildx imagetools inspect <tag>` lists both
 `linux/amd64` and `linux/arm64` under one manifest list; a bake-inventory lint asserts the image contains
@@ -576,15 +576,19 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
   compressed layer blob, config, child manifest, and index/manifest-list object is keyed by its registry digest,
   kind-tagged, and carries exact stored bytes. It is a distinct registry-storage projection from the same pure
   provenance, not a second caller-authored aggregate and not an estimate reconstructed from unpacked layers.
-- The **typed bake catalog** `dhall/amoebius/BakeCatalog.dhall`: every stage's `content : NonEmpty BakeStep`
+- The **typed bake catalog** `dhall/amoebius/BakeCatalog.dhall` — the **typed source of truth**: every
+  stage's `content : NonEmpty BakeStep`
   with its per-arch pinned versions, decoded by `BakeInventory` into the `BuildExecutionEnvelope`. The union is
   closed with **no `RunShell : Text` arm and no `Url` arm**
   ([`image_build_doctrine.md` §6](../documents/engineering/image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)),
   so an interpolated shell fragment or an operator-supplied download address is unrepresentable rather than
   discouraged — closing [`illegal_state_lifecycle.md` §3.76](../documents/illegal_state/illegal_state_lifecycle.md#376-a-build-stage-whose-content-is-unmodeled).
-- `renderDockerfile`, emitting the previously hand-authored `ARG`/`RUN … install` blocks from that catalog, plus
-  a **byte-for-byte golden** pinning the emitted Dockerfile as a fixture of the *renderer's* behaviour. The
-  Dockerfile is not committed as source; the catalog is.
+- `renderDockerfile :: BuildExecutionEnvelope -> Dockerfile`, pure and total, emitting the previously
+  hand-authored `ARG`/`RUN … install` blocks from that catalog, plus
+  a **byte-for-byte golden** pinning the emitted Dockerfile as a fixture of the *renderer's* behaviour.
+  **`docker/base/Dockerfile` is no longer committed as source**; the catalog is. The emitted file is a
+  generated artifact stamped generated-by, per
+  [`generated_artifacts_doctrine.md` §2](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what).
 - A bake-inventory lint proving the resolver/toolchain are present and every ML engine payload is **absent**.
 - An architecture-native Redis probe on both image platforms: absolute-path `redis-server --version` and
   `redis-cli --version` match the independent catalog pin, and the committed `mutant/phase25/omit-redis`
@@ -649,32 +653,11 @@ bootstrap provision, snapshot validation, and the typed side-load/object-initial
 `src/Amoebius/Manifest/Render.hs` supplies the same source serializer Phase 13 uses; live admission/import/
 standup and OS-boundary observation are implemented by `tools/phase25_{bootstrap_preflight,registry_standup}.py`.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: before import or object
-initialization, a registry-specific read-only snapshot preflight re-observes CPU request/finite-limit-policy
-residual, memory/logical-ephemeral request+ceiling residual, pod slots, blob-volume capacity and its
-resident digest/byte map, the nodefs/imagefs/containerfs layout and capacities, all resident containerd OCI
-content plus committed/active snapshots, the pinned node-image model, and the enforced pull policy.
-`provisionBootstrapRegistry` first constructs the opaque resource-complete `ProvisionedBootstrapRegistry`;
-validation then derives the layout-routed import+registry+mutation-proxy transition and returns a
-snapshot-bound single-use `BootstrapRegistryAction` required by both containerd import and initialization of
-the exact registry/proxy object domain. The registry side binds the canonical `RegistryStorageDemand` to the
-snapshot: it unions observed residents with every desired compressed layer/config/manifest object by digest,
-debits equal digests once, rejects unequal stored-byte metadata for one digest, adds the largest permitted
-simultaneous upload workspaces, and retains the bounded partial-upload residue through the finite GC
-horizon. One-field occupied-CPU, occupied-memory, registry/proxy pod-slot or resource shortage,
-registry-volume/ephemeral-overdraw, digest-size-conflict, content/snapshot-byte-over, layout-alias, and
-pull-policy-mismatch fixtures perform zero imports and zero apiserver writes. A
-domain/identity/source-digest or initialized-field mismatch also mints no action. The admitted
-`distribution` pod and sole mutation proxy then run **from the on-node image** with zero registry pull and
-complete provisioned envelopes: per-container CPU/memory/ephemeral requests+limits and private allowances,
-plus a disk-backed blob volume whose `sizeLimit` covers the derived peak recorded in the opaque
-`ProvisionedRegistryStorageDemand`; shared volume + private allowance fit the pod ephemeral request/limit
-and route to the selected physical filesystem. The host-only endpoint resolves through the per-distro
-wiring; Phase 30 preserves this private demand's `objectSet`, `derivedPeak`, and upload/orphan witness while
-migrating its backend to MinIO. "Zero registry pull" is read from an **OS-boundary observer** (§M.5) — the
-node's containerd logs plus a node-level packet capture spanning the standup window — asserting no
-image-layer fetch and no TCP connection to the resolved endpoints of `docker.io`/`quay.io`/`ghcr.io`
-([Gate integrity](#gate-integrity)), never a self-emitted trace.
+**Independent Validation**: a read-only snapshot preflight admits the whole import, registry, and
+mutation-proxy transition before anything is imported, mints one single-use `BootstrapRegistryAction` for the
+exact provisioned object domain, and leaves every one-field negative with zero imports and zero apiserver
+writes; zero registry pull is read at the OS boundary. The numbered Validation list below states each
+observation and negative.
 **Docs to update**:
 `documents/engineering/image_build_doctrine.md`, `documents/engineering/platform_services_doctrine.md`.
 
@@ -731,24 +714,49 @@ whole-deployment spec and creates no public service-render boundary.
   `BoundExecutionSet`; the registry backend has no mutating route or credential outside that proxy.
 
 ### Validation
-1. Independently occupy CPU, memory, pod slot, pod ephemeral/blob volume, or image store, and mismatch the pull policy;
+1. Before import or object initialization, the registry-specific read-only snapshot preflight re-observes CPU
+   request/finite-limit-policy residual, memory and logical-ephemeral request+ceiling residual, pod slots,
+   blob-volume capacity and its resident digest/byte map, the nodefs/imagefs/containerfs layout and
+   capacities, all resident containerd OCI content plus committed/active snapshots, the pinned node-image
+   model, and the enforced pull policy.
+2. `provisionBootstrapRegistry` first constructs the opaque resource-complete `ProvisionedBootstrapRegistry`;
+   validation then derives the layout-routed import+registry+mutation-proxy transition and returns a
+   snapshot-bound single-use `BootstrapRegistryAction` required by both containerd import and initialization
+   of the exact registry/proxy object domain.
+3. The registry side binds the canonical `RegistryStorageDemand` to that snapshot: it unions observed
+   residents with every desired compressed layer/config/manifest object by digest, debits equal digests once,
+   rejects unequal stored-byte metadata for one digest, adds the largest permitted simultaneous upload
+   workspaces, and retains the bounded partial-upload residue through the finite GC horizon.
+4. Independently occupy CPU, memory, pod slot, pod ephemeral/blob volume, or image store, and mismatch the pull policy;
    each one-field negative must fail the snapshot preflight with zero containerd import and zero apiserver
-   writes. Then admit the fitting selected-platform image, assert the `BootstrapRegistryAction` is single-use
+   writes. The occupied-CPU, occupied-memory, registry/proxy pod-slot or resource shortage,
+   registry-volume/ephemeral-overdraw, digest-size-conflict, content/snapshot-byte-over, layout-alias, and
+   pull-policy-mismatch fixtures all behave that way, and a domain/identity/source-digest or
+   initialized-field mismatch mints no action at all.
+5. Then admit the fitting selected-platform image, assert the `BootstrapRegistryAction` is single-use
    and contains exactly the provisioned registry/proxy identities, assert the `distribution` pod's serialized
    resource/blob-volume envelope and proxy envelope equal their provision witnesses, and assert the registry
    read endpoint plus proxy-private mutation path resolve. A case where the registry fits but the proxy is one
    CPU/memory/ephemeral unit or pod slot short rejects before either Deployment is applied.
-   A fake later whole-deployment adoption with the equal handoff digest succeeds once without object
+6. The admitted `distribution` pod and sole mutation proxy run **from the on-node image** with zero registry
+   pull and complete provisioned envelopes: per-container CPU/memory/ephemeral requests+limits and private
+   allowances, plus a disk-backed blob volume whose `sizeLimit` covers the derived peak recorded in the opaque
+   `ProvisionedRegistryStorageDemand`. The shared volume plus private allowance fit the pod ephemeral
+   request/limit and route to the selected physical filesystem, and the host-only endpoint resolves through
+   the per-distro wiring.
+7. A fake later whole-deployment adoption with the equal handoff digest succeeds once without object
    recreation; a one-field identity/source/owned-field mismatch and a second transfer both reject with zero
-   object writes.
-2. Independently recompute the registry transition from the Phase-0 artifact table and an observed resident
+   object writes. Phase 30 preserves this private demand's `objectSet`, `derivedPeak`, and upload/orphan
+   witness while migrating its backend to MinIO.
+8. Independently recompute the registry transition from the Phase-0 artifact table and an observed resident
    map. Cover a resident/new digest overlap (one debit), conflicting byte sizes for one digest, the maximum
    concurrent upload set, partial-upload residue just before its GC horizon, and a volume exactly one byte
    below the derived peak. Every conflict/overflow rejects before import, apply, or registry mutation; an
    object merely selected for deletion remains charged until a later snapshot observes it absent.
-3. Assert no public-registry pull occurred during registry standup **from the OS-boundary observer** (node
-   `containerd` logs + packet capture; zero TCP connections to the [Gate integrity](#gate-integrity) public
-   endpoints), recorded for the Sprint 25.4 gate — never from a self-emitted compliance trace.
+9. Assert no public-registry pull occurred during registry standup **from the OS-boundary observer** (§M.5 —
+   node `containerd` logs plus a node-level packet capture spanning the standup window; no image-layer fetch
+   and zero TCP connections to the resolved endpoints of the [Gate integrity](#gate-integrity) public
+   registries), recorded for the Sprint 25.4 gate — never from a self-emitted compliance trace.
 
 ### Remaining Work
 None. The corrected live gate is sealed by
@@ -766,23 +774,10 @@ that next ordered sprint implements the mutation.
 snapshot-bound single-advertisement publisher + immutable, source/content-derived ref scheme), with the live
 OCI protocol/fault/access-log harness in `tools/phase25_registry_publish.py`.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: one admitted publication stages digest-addressed objects and makes the byte-exact
-raw manifest-list PUT its sole tag-advertisement commit point; the publisher
-cannot begin without the unchanged-snapshot token carrying the private `ProvisionedRegistryStorageDemand`. A
-digest-size conflict, retained partial-upload residue, or a backing exactly one byte below its
-digest-deduplicated resident/new + workspace + failed-upload-GC peak returns the expected tagged rejection
-with **zero mutating registry requests and no tag publication**. The fitting partial (one-arch) push is
-induced by a **fault-injecting proxy** in front of the registry that fails one arch's blob/manifest upload
-**mid-push** (§M.3 — a registry-boundary fault, never an exception thrown inside amoebius's own publisher),
-and the tag is asserted **un-advertised at the registry HTTP API**: `GET /v2/<repo>/tags/list` omits the tag
-and the manifest-list `GET` returns **404** (§M.8 — the observable is the registry's state, not amoebius's
-own published-set record); the observed partial residue is charged in the next snapshot until GC is
-observed. A re-run against a fully-published tag is a **no-op**, defined as **zero mutating requests**
-(`PUT`/`POST`/`PATCH`) in the registry access log during the second run (§M.6 — not exit-0-twice, not a
-permitted rebuild-and-re-push); refs are immutable digest-pinned (never `:latest` as a deployment
-reference); the build uses an ephemeral `docker --config <dir>` with **no** environment variable and **no**
-`docker login`. The committed mutant `mutant/phase25/record-before-push` (records the tag as published
-before the manifest list lands) MUST turn the un-advertised assertion red (§M.2).
+**Independent Validation**: publication is atomic at the registry boundary — a fault-injected one-arch push
+leaves the tag un-advertised in the registry's own HTTP API, an exact fit publishes once, and the second run
+makes zero mutating requests — and no rejection path touches storage. The numbered Validation list below
+states each condition.
 **Docs to update**:
 `documents/engineering/image_build_doctrine.md`.
 
@@ -813,19 +808,25 @@ not capacity admission.
   assertion.
 
 ### Validation
-1. A single push lands the complete manifest list; a **proxy-induced** one-arch mid-push failure leaves the tag
+1. One admitted publication stages digest-addressed objects and makes the byte-exact raw manifest-list `PUT`
+   its sole tag-advertisement commit point; the publisher cannot begin without the unchanged-snapshot token
+   carrying the private `ProvisionedRegistryStorageDemand`.
+2. A single push lands the complete manifest list; a **proxy-induced** one-arch mid-push failure leaves the tag
    un-advertised **at the registry HTTP API** (`tags/list` omits it; manifest-list `GET` 404s), and the next
    observed inventory reports the partial upload residue still charged before its finite GC horizon.
-2. Give the preflight conflicting stored-byte metadata for one digest, the maximum failed-upload residue, and
-   a backing one byte below the peak independently recorded in `ProvisionedRegistryStorageDemand`. Each
-   returns its specific tagged rejection and the access log records zero `PUT`/`POST`/`PATCH` plus no tag;
+3. Give the preflight conflicting stored-byte metadata for one digest, the maximum failed-upload residue, and
+   a backing one byte below the digest-deduplicated resident/new + workspace + failed-upload-GC peak
+   independently recorded in `ProvisionedRegistryStorageDemand`. Each
+   returns its specific tagged rejection with zero mutating registry requests and no tag publication;
    exact fit publishes.
    A direct backend mutation and a proxy mutation naming an unprovisioned digest/size are denied before
    storage changes; read-only host access remains available.
-3. Re-run against a fully-published tag is a no-op, asserted as **zero `PUT`/`POST`/`PATCH` requests** in the
-   registry access log during the second run; the ref is digest-pinned and never `:latest`.
-4. The build uses the ephemeral config directory with no environment variable and no `docker login`.
-5. The committed mutant `mutant/phase25/record-before-push` turns Validation 1 red (§M.2).
+4. Re-run against a fully-published tag is a no-op, asserted as **zero `PUT`/`POST`/`PATCH` requests** in the
+   registry access log during the second run; the ref is immutable and digest-pinned, never `:latest` as a
+   deployment reference.
+5. The build uses the ephemeral `docker --config <dir>` with no environment variable and no `docker login`.
+6. The committed mutant `mutant/phase25/record-before-push` — it records the tag as published before the
+   manifest list lands — turns Validation 2 red (§M.2).
 
 ### Remaining Work
 None. The complete pure/live/mutation gate is sealed by
@@ -841,24 +842,10 @@ receipt fingerprint `external-run-reference`.
 **Implementation**: `src/Amoebius/Image/Gate.hs`, `tools/phase25_no_public_pull_gate.py`, and
 `tools/phase25_sprint25_4_gate.py`.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**:
-the egress denial is realized as a **node-level host firewall / IP-CIDR blackhole** of the resolved
-public-registry endpoints (or an enforcing-CNI FQDN policy) — **not** a vanilla `kindnetd` `NetworkPolicy`,
-which `kindnetd` does not enforce and which cannot match FQDNs
-([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) ambiguity resolution). Its enforcement is proven by a **negative control** (§M.8): under the *same* policy, a canary
-pod referencing `docker.io/library/busybox` **FAILS `ImagePull`** with the committed expected reason
-(`ErrImagePull`/`ImagePullBackOff` from a connection-timeout to the public endpoint), paired with the
-positive that an in-cluster `distribution` pull of the same shape succeeds. Under that enforced denial the
-registry stands up and the base-image manifest list publishes and resolves with **zero** requests leaving
-for a public registry, asserted from the **OS-boundary observer** (§M.5) — node `containerd` logs + a packet
-capture spanning the entire standup-and-publish window, showing zero TCP connections to the resolved
-endpoints of the [Gate integrity](#gate-integrity) public-registry set; never a self-emitted compliance
-trace. The denial scope covers in-cluster standup/publication/pull; the **host-side `buildx` build is outside it** and legitimately reaches upstream
-([§2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§9](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)).
-Both `linux/amd64` and `linux/arm64` resolve under the one digest-pinned tag; a re-run of the whole build →
-side-load → standup → publish flow is idempotent, defined as **zero mutating (`PUT`/`POST`/`PATCH`) requests** in the registry access log during the second run (§M.6 — not a permitted full
-rebuild-and-re-push). The committed mutant `mutant/phase25/noop-egress-policy` (a vanilla unenforced
-`NetworkPolicy` substituted for the enforcing firewall) MUST turn the negative-control assertion red (§M.2).
+**Independent Validation**: under one enforced node-level egress denial the whole flow stands up, publishes,
+and resolves both arches with zero public-registry requests read at the OS boundary, while the paired
+public-image canary fails `ImagePull` — the negative control that proves the denial is enforced rather than
+declared. The numbered Validation list below states each condition.
 **Docs to update**: `documents/engineering/image_build_doctrine.md`,
 `documents/engineering/testing_doctrine.md`.
 
@@ -882,14 +869,21 @@ later reconciler-owned rendering (Phase 26) and the MinIO-backed blob store (Pha
   evidence, with the interim-storage and reconciler-rehoming residue flagged UNVERIFIED, never green.
 
 ### Validation
-1. The **enforced** egress denial breaks no registry standup, publication, or in-cluster pull, **while** the
-   `docker.io/library/busybox` negative-control canary FAILS `ImagePull` (proving enforcement); zero public
-   pulls are observed at the OS boundary (node `containerd` logs + packet capture) against the committed
-   endpoint set.
-2. Both `linux/amd64` and `linux/arm64` resolve under the one digest-pinned tag; the whole flow re-runs as a
-   no-op, asserted as **zero mutating requests** in the registry access log during the second run.
-3. The committed mutant `mutant/phase25/noop-egress-policy` (unenforced vanilla `NetworkPolicy`) turns
-   Validation 1's negative-control assertion red (§M.2).
+1. The egress denial is realized as a **node-level host firewall / IP-CIDR blackhole** of the resolved
+   public-registry endpoints, or an enforcing-CNI FQDN policy — never a vanilla `kindnetd` `NetworkPolicy`,
+   which `kindnetd` does not enforce and which cannot match FQDNs
+   ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) ambiguity
+   resolution).
+2. That **enforced** denial breaks no registry standup, publication, or in-cluster pull, **while** the
+   `docker.io/library/busybox` negative-control canary FAILS `ImagePull` for its committed expected reason
+   (proving enforcement), paired with the positive that an in-cluster `distribution` pull of the same shape
+   succeeds; zero public pulls are observed at the OS boundary (node `containerd` logs + a packet capture
+   spanning the entire standup-and-publish window) against the committed endpoint set.
+3. Both `linux/amd64` and `linux/arm64` resolve under the one digest-pinned tag; the whole build → side-load
+   → standup → publish flow re-runs as a no-op, asserted as **zero mutating requests** in the registry access
+   log during the second run.
+4. The committed mutant `mutant/phase25/noop-egress-policy` (unenforced vanilla `NetworkPolicy`) turns
+   Validation 2's negative-control assertion red (§M.2).
 
 ### Remaining Work
 Migrate the pure/live/mutation receipt and acceptance ledger to `gen/runs/`, externally attest the bundle,

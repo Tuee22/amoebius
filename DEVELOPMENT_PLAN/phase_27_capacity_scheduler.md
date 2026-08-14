@@ -185,21 +185,10 @@ flowchart LR
 ```
 *Orientation for the ordered scheduler delivery owned by the [Phase 27 plan](phase_27_capacity_scheduler.md).*
 
-**Gate:** in **Register 3** on the live single-node `kind` cluster, layered on the converged Phase-26
-reconciler holding the mandatory reconciler `Lease`: the `amoebius-capacity` scheduler stands up from
-`CapacitySchedulerSystemDemand`, mints `BootstrapCapacitySchedulerReady` (managed taint absent), cuts the
-finite observed bootstrap-controller set over from the default scheduler to `schedulerName=amoebius-capacity`,
-installs the managed taint/admission/full exclusive-Binding RBAC, and **independently** mints
-`ManagedCapacityReady`; it then binds the pinned Pending guarded-Pod set (the corpus's registry-backed,
-non-zero-`initialDelaySeconds` Deployment) **exclusively** through CAS `Reserved` → CAS `BindingInFlight` →
-submit/confirm Kubernetes Binding → CAS `Bound`, with an external apiserver + reservation-CRD observer proving
-**no Binding precedes a successful reservation CAS**, every guarded Pod UID debited **exactly once**, and the
-bootstrap→steady cutover leaving **no double-bind**; a guarded workload submitted before
-`ManagedCapacityReady` is rejected at admission with **zero writes**; the immediate re-run is a scheduler
-**no-op** (byte-stable reservation records/CAS version, no new Binding, same `Lease` holder) by the independent
-observer; and every committed scheduler mutant turns the suite red. The scheduler slice of the oracle-pinned
-fixtures, the committed seeded mutant set, and the independent reference oracle are named in
-[Gate integrity](#gate-integrity) below ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) delegation).
+**Gate:** `cabal test scheduler-reservation scheduler-bootstrap-cutover` is green on the live `kind` corpus:
+the two readiness witnesses and the controller cutover occur in order, then every guarded Pod binds
+exclusively through the reservation CAS, under the fixtures, observer, and mutants of
+[Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
@@ -235,21 +224,23 @@ flowchart LR
 [Phase 26's concrete reconcile corpus](phase_26_object_reconciler.md) rather than selecting new service specs. It
 inherits exactly these members:
 - the **scheduler-role system** — the `CapacitySchedulerSystemDemand` Pod/config/reservation-CRD/RBAC/
-  admission set — which must pass `BootstrapCapacitySchedulerReady`, the bootstrap-controller UID cutover, and
-  `ManagedCapacityReady`, in order, before any guarded Pod;
+  admission set — from which the `amoebius-capacity` scheduler stands up, minting
+  `BootstrapCapacitySchedulerReady` with the managed taint still absent, then passing the bootstrap-controller
+  UID cutover, then independently minting `ManagedCapacityReady`, in that order, before any guarded Pod;
 - the **finite observed distro/Phase-25 bootstrap-controller set** that is patched from the default scheduler
   to `schedulerName=amoebius-capacity` during the cutover;
 - corpus item **(i)** — the guarded Deployment whose container image is pulled from the Phase-25 in-cluster
   `distribution` registry and whose readiness probe carries a **non-zero `initialDelaySeconds`** (so
   rollout-complete cannot be true at Bind time and the registry dependency is exercised by a running pod) — the
-  Pending guarded Pod the scheduler must reserve and bind;
+  Pending guarded Pod the scheduler must reserve and bind exclusively through CAS `Reserved` → CAS
+  `BindingInFlight` → submit/confirm Kubernetes Binding → CAS `Bound`;
 - `test/live/fixtures/reconcile-corpus/expected-actions.json` — the **scheduler-action slice** only: the
   `CapacitySchedulerSystemDemand` static debit, the `BootstrapSchedulerStage` namespace/quota/CRD/config/root/
   cutover-RBAC actions, the `AfterBootstrapAddonCutover` managed-taint/admission/full-Binding install, and the
   `Reserved`/`BindingInFlight`/`Bound` reservation transitions for the guarded Pod;
 - a committed **premature-guarded-workload negative** (§M.8): a Pod naming `amoebius-capacity` / tolerating the
   managed-capacity taint, submitted **before** `ManagedCapacityReady`, asserting its expected admission-reject
-  reason, paired with the positive that is admitted **only after** the full witness. Corpus members (ii) serial
+  reason and **zero writes**, paired with the positive that is admitted **only after** the full witness. Corpus members (ii) serial
   OnDelete, (iii) the Job, (iv) the Ready/Available object, and (v) the CustomResource are Phase 26's slice and
   are not re-exercised here.
 
@@ -279,7 +270,8 @@ read by an **external apiserver + reservation-CRD observer** — a distinct `kub
 reader that is **not the scheduler and shares no fold/CAS/`Step→argv` code with it**. It reads the reservation
 records, their CAS version, and the Kubernetes `Binding` subresource directly and asserts, independently of the
 code under test: **no `Binding` request precedes a successful `Reserved` CAS**; **every guarded Pod UID has exactly one reservation debit** (no Pod+ledger double debit); at every audit resourceVersion **at most one holder** and no non-authority write without the exact mandatory-`Lease` holder (held by the Phase-26
-reconciler); on the immediate re-run the reservation records and CAS version are **byte-identical** and **no new `Binding` is issued**; and **no second default-scheduler exception exists**. The scheduler's self-reported
+reconciler); on the immediate re-run the reservation records and CAS version are **byte-identical** and **no new `Binding` is issued**; and **no second default-scheduler exception exists**. The same observer also
+asserts that the bootstrap→steady cutover leaves **no double-bind**. The scheduler's self-reported
 "reserved once, bound once" is corroborating evidence only, never the passing condition. The reference *action*
 domain is the oracle-pinned hand-authored `expected-actions.json` scheduler slice, authored before the
 planner — not regenerated from the scheduler's own output.

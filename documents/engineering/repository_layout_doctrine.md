@@ -15,7 +15,7 @@ rule in [`generated_artifacts_doctrine.md`](./generated_artifacts_doctrine.md) i
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -58,90 +58,129 @@ exclude it and it is never an authored input, tracked file, or container-context
 
 ## 2. Complete repository structure
 
-The tree below is exhaustive by ownership. `**` denotes every descendant of the named root. A new top-level
-root requires an amendment here before code is added.
+The tree below is the **target final layout**: the shape the repository has at completion, not a record of
+what a build target once needed. It is exhaustive by ownership; `**` denotes every descendant of the named
+root. Every root is justified by what its contents *are* — the language they are written in, or the reader
+that consumes them — never by which phase or build target introduced them. A new top-level root requires an
+amendment here, reviewed against that justification, before any file is added
+([`development_plan_standards.md` §U](../../DEVELOPMENT_PLAN/development_plan_standards.md#u-the-final-repository-layout)).
 
 ```text
 amoebius/
 ├── .git/**                               local VCS metadata; never a build/context input
 ├── .dockerignore                         authored container-context policy
 ├── .gitignore                            authored worktree policy
-├── AGENTS.md                             authored agent policy
-├── CLAUDE.md                             authored agent policy
+├── AGENTS.md                             authored agent policy; CLAUDE.md is a link to it
 ├── README.md                             authored repository entry point
-├── amoebius.cabal                        authored root package declaration
-├── cabal.project                         authored package set and resolver constraints
-├── package.json                          authored JavaScript tool requirements
-├── package-lock.json                    present generated migration file; delete and ignore
-├── DEVELOPMENT_PLAN/                     authored plan suite
-│   ├── README.md
-│   ├── development_plan_standards.md
-│   ├── later_phases.md
-│   ├── legacy_tracking_for_deletion.md
-│   ├── overview.md
-│   ├── substrates.md
-│   ├── system_components.md
-│   └── phase_00_*.md ... phase_64_*.md
-├── documents/                            authored doctrine suite
-│   ├── README.md
-│   ├── documentation_standards.md
-│   ├── glossary.md
-│   ├── reading_order.md
-│   ├── engineering/**
-│   └── illegal_state/**
-├── app/**                                authored executable entry points
-├── src/**                                authored root Haskell source
-├── dhall/**                              authored schemas, examples, and independent fixtures
-├── pb/**                                 authored Python bootstrap coordinator and bootstrap inputs
-├── ui/**                                 authored UI Haskell/PureScript sources
-├── ui-live/**                            authored live UI package sources and tests
-├── ui-runtime/**                         authored generic browser-runtime source
-├── offline-runtime/**                    authored offline-runtime package
-├── apple-host/**                         authored Apple host-worker package
-├── amoebius-pulsar/**                    authored Pulsar package and source `.proto`
-├── amoebius-pulumi/**                    authored Pulumi package
-├── amoebius-release/**                   authored release package
-├── amoebius-runtime/**                   authored runtime package
-├── amoebius-store/**                     authored store package
-├── infernix/**                           authored lifted infernix library
-├── infernix-ui/**                        authored infernix UI adapter
-├── jitml/**                              authored lifted jitML library
-├── jitml-ui/**                           authored jitML UI adapter
-├── probe/**                              authored toolchain/build probes and independent inputs
-├── pulumi/**                             authored infrastructure programs
-├── test-topology/**                      authored topology package
-├── test/**                               authored tests, fixtures, oracles, and mutants
-├── tests/**                              authored legacy test layout pending convergence
-├── mutants/**                            authored seeded mutants
-├── tools/**                              authored gates, generators, lints, seeds, and mutation recipes
-├── vendor/**                             reviewed external source and local compatibility edits
-├── patches/**                            reviewed authored compatibility patches
-├── docker/**                             authored image inputs only; rendered recipes go to `gen/docker/`
-├── toolchain/requirements.json           authored compatibility requirements; no path, version, URL, or digest
-├── gen/**                                all canonical reproducible local output; never version-controlled
-├── dist-newstyle/**                      present Cabal output; never version-controlled
-└── node_modules/**                       present package-manager output; never version-controlled
+├── amoebius.cabal                        the one authored Haskell package: libraries, executables, suites, flags
+├── cabal.project                         authored package set and out-of-tree source resolution
+├── package.json                          authored JavaScript/PureScript tool requirements
+├── DEVELOPMENT_PLAN/**                   authored plan suite: rulebook, tracker, one contract per phase
+├── documents/**                          authored doctrine suite and illegal-state catalog
+├── src/**                                authored Haskell library source; one module tree, read by GHC
+├── app/<executable>/**                   authored executable main modules; one directory per executable
+├── dhall/**                              authored schemas, examples, and catalogs; read by the Dhall interpreter
+├── proto/**                              authored protobuf schemas; bindings render to gen/proto/
+├── ui/**                                 authored PureScript source and its one spago project
+├── pb/**                                 authored Python distribution whose console script is `pb`
+├── pulumi/**                             authored programs the Pulumi engine executes verbatim
+├── test/**                               authored specs, fixtures, goldens, negatives, oracles, mutants, harnesses
+├── tools/**                              authored gates, generators, lints, policy inputs, declared seed corpora
+├── probe/**                              the standalone toolchain probe: the one package resolved apart
+├── vendor/**                             reviewed external source with recorded upstream provenance
+├── patches/**                            reviewed compatibility patches applied to out-of-tree source
+├── gen/**                                every reproducible local output; ignored by both contracts
+├── dist-*/**                             Cabal build roots; ignored by both contracts
+└── node_modules/**                       package-manager output; ignored by both contracts
 ```
 
-The following present-day roots are migration surfaces, not additional canonical source classes:
+Two roots fix a second level, because their second level is where the taxonomy drifted:
+
+```text
+test/
+├── spec/**                               suite mains and independently authored reference implementations
+├── fixture/**                            authored positive inputs
+├── golden/**                             authored expected outputs, byte-exact under a pinned convention
+├── negative/**                           authored rejected inputs, each beside its expected diagnostic
+├── oracle/**                             independently authored reference tables and predicates
+├── mutant/**                             seeded mutants: one record format, one registry, every operator
+└── harness/**                            fakes, argv shims, OS-boundary observers, gate scripts
+
+app/
+├── amoebius/Main.hs                      the operator and control-plane binary
+├── amoebius-singleton/Main.hs            the in-cluster singleton binary
+├── amoebius-ui-server/Main.hs            the UI server binary
+└── infernix-driver/Main.hs               the native inference driver
+```
+
+Every `test/` second-level name is a **singular** role noun. A plural sibling, a case variant, or an eighth
+role is non-conforming on sight; module hierarchy lives *below* `test/spec/`, never at `test/`'s second level,
+so casing is decided by the module name and cannot fork.
+
+### 2.1 When a unit warrants its own build package
+
+There is exactly one authored Haskell package. The criterion is **separately resolvable, never merely
+separately configured** — three admitted grounds, each independently checkable:
+
+| Ground | Test | Instances |
+|---|---|---|
+| Foreign provenance | its source is not authored in this repository | `vendor/**` |
+| Foreign resolution | it must solve against a different compiler, project file, or dependency set — including a deliberately perturbed one used as a gate mutant | `probe/**` |
+| Foreign consumer | something outside this repository depends on it by name and version | none today |
+
+None of the following is a ground, because cabal answers each *inside* one package: a different flag set
+(flags are package-scoped and `if flag(…)` is per-component), a different module namespace (`library <name>`
+sub-libraries), a different `hs-source-dirs` or warning set (per-component), a different test grouping
+(unlimited `test-suite` stanzas), or an import cycle. The cycle case is the one that matters: an intra-package
+sub-library graph cannot cycle at the package level, so a package split introduced to break a cycle creates
+the cycle it breaks. A `build-type: Custom` `Setup.hs` is likewise not a ground — it is a generator, and
+[§3.1](#31-canonical-gen-tree) already declares its output's home.
+
+The same reasoning names the roots by their reader rather than their owner: `dhall/` is read by the Dhall
+interpreter, `proto/` by protoc, `pb/` by CPython, `ui/` by purs, `pulumi/` by the Pulumi engine, and
+`src/`/`app/` by GHC. Where a subject has both a program the third-party engine executes and Haskell that
+decides what to ask it, the program lives in the reader's root and the Haskell lives in `src/`.
+
+Per-substrate host code is a module tree, not a root. `src/Amoebius/Substrate/**` and
+`src/Amoebius/HostWorker/**` hold every substrate side by side, which is what makes the Apple and Windows host
+workers structurally symmetric as [`substrate_doctrine.md`](./substrate_doctrine.md) requires; a root for one
+substrate and none for the other contradicts that symmetry rather than expressing it.
+
+### 2.2 Present-day roots and their required destination
+
+The roots below exist today and are **migration surfaces, not canonical source classes**. Each is owned by the
+phase named in
+[`legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md), which carries the
+closure condition; none may receive new content.
 
 | Present path | Required destination |
 |---|---|
 | `DEVELOPMENT_PLAN/evidence/**` | `gen/runs/**` plus the external evidence store |
-| `DEVELOPMENT_PLAN/ledgers/**` | authored reasoning retained in a phase doc; generated ledger views move to `gen/docs/**` |
+| `DEVELOPMENT_PLAN/ledgers/**` | authored reasoning retained in a phase doc; generated ledger views to `gen/docs/**` |
 | `test/enumeration/**` | `gen/test-surfaces/**` |
 | `test/golden/phase_*_ledger.json` | `gen/runs/<phase>/<run-id>/ledger.json` |
+| `tests/**` | `test/**`, under the role taxonomy above, each path owned by the phase that authored it |
+| `mutants/**`, `test/live/mutants/**`, `test/host/mutants/**`, `tests/mutants/**` | `test/mutant/**`, one record format |
+| `test/oracle/**` and `tests/oracle/**` | one `test/oracle/**` |
+| `test/goldens/**`, `test/fixtures/**`, `test/negatives/**`, `test/Ui/**` | their singular-role siblings |
+| `toolchain/bin/**`, `toolchain/runtime/**`, `toolchain/downloads/**`, `toolchain/cache/**` | `gen/toolchain/**`; the authored requirements file moves beside its only consumer under `tools/**` |
+| `docker/**` | the typed bake catalog under `dhall/**`, rendering to `gen/docker/**/Dockerfile` |
+| `ui-runtime/**` | `ui/**`, under the one spago project |
+| the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots | stanzas in `amoebius.cabal`; their source to `src/**`, `test/**`, `proto/**`, and `dhall/**` |
+| out-of-tree `hs-source-dirs` reaching a sibling checkout | a `source-repository-package` in `cabal.project`, so the input is resolvable from the source snapshot |
 | root dependency lock/freeze files | `gen/locks/**` |
-| `toolchain/pins.json` | **migrated.** The authored half is `toolchain/requirements.json` — compatibility ranges, release channels, and asset patterns, no paths; the resolved half is `gen/toolchain/resolved.json`, written per run by `tools/toolchain.py` |
+| `toolchain/pins.json` | **migrated.** The authored half is the compatibility requirements — ranges, release channels, asset patterns, no paths; the resolved half is `gen/toolchain/resolved.json`, written per run |
 | `tools/doc_lint_corpus/**/negative_*` and `negative_multi_*` | keep authored positive seeds and mutation recipes; materialize negative copies under `gen/test-corpora/**` |
-| `test/golden/phase_53/job_*.expected` | retain the reference program and authored inputs; produce expected results under the run bundle |
-| Phase-49 frozen-source and expected-hash tables | resolve the reviewed sibling source boundary at run time and record observations under `gen/runs/**` |
+| reference-program expected output beneath `test/golden/**` | retain the reference program and authored inputs; produce expected results under the run bundle |
+| frozen sibling-source and expected-hash tables | resolve the reviewed sibling boundary at run time and record observations under `gen/runs/**` |
 | fixed versions, URLs, paths, or integrity fields in bootstrap/toolchain envelopes | split authored compatibility requirements from run-local resolution under `gen/toolchain/**` |
 | generated digest, checksum, trace, and expected-output fixtures | independently author and review the expectation, or regenerate it under the owning run bundle |
 
-The `test/` and `tests/` roots may coexist during migration. A fixture remains version-controlled only when
-its expectation was authored independently. A generated snapshot, reference-program output, enumeration,
-coverage table, or run ledger cannot remain in either root.
+A fixture remains version-controlled only when its expectation was authored independently. A generated
+snapshot, reference-program output, enumeration, coverage table, or run ledger cannot remain in any authored
+root. No path in either tree above carries a phase ordinal
+([`development_plan_standards.md` §U](../../DEVELOPMENT_PLAN/development_plan_standards.md#u-the-final-repository-layout)
+clause 3).
 
 ## 3. Complete generated-output inventory
 
@@ -309,8 +348,17 @@ a fresh run. Commit timing is orthogonal and is never a gate condition.
 
 ## 6. `.gitignore` contract
 
-The tracked `.gitignore` must cover every generated class. The following block is normative content implemented
-by the current policy; order and stricter additions may differ, but coverage may not regress.
+The tracked `.gitignore` must cover every generated class. The block below is normative and **exhaustive in
+both directions**: order may differ, but a class the block names and the file omits is missing coverage, and a
+pattern the file carries and the block does not name is an undeclared class. Both are findings. A one-way
+subset check lets the file grow patterns nobody reviewed — which is how a build root came to be clean only
+under a developer's personal ignore configuration, invisible to every check that reads the worktree.
+
+A pattern here is also a claim that the path is generated. An ignore rule for a path the
+[§2](#2-complete-repository-structure) target tree does not contain is removed rather than kept, because a rule
+hiding a path nobody intends is how a second home for a generated class survives review. The rules covering
+migration surfaces in [§2.2](#22-present-day-roots-and-their-required-destination) are therefore temporary:
+each retires with the root it covers, owned by the phase that relocates it.
 
 ```gitignore
 # Canonical generated roots
@@ -329,7 +377,7 @@ npm-shrinkwrap.json
 pnpm-lock.yaml
 go.sum
 
-# Haskell
+# Haskell and formal-model output
 /dist-newstyle/
 /.cabal-sandbox/
 .ghc.environment.*
@@ -339,6 +387,9 @@ cabal.project.local
 *.dyn_o
 *.dyn_hi
 *.hie
+/.phase1-store/
+*.tla
+*.cfg
 
 # JavaScript and PureScript
 /node_modules/
@@ -388,7 +439,18 @@ coverage/
 !/.env.example
 /.secrets/
 /.credentials/
+/test-secrets.dhall
 /kubeconfig
+
+# Build-tool scratch written into the working directory. cabal and hie-bios emit hash-named
+# exec shims that hardcode a resolved compiler path, so they are machine-specific output.
+/ghc-pkg-*
+/repl-wrapper-*
+/wrapper-*
+
+# Editor settings are kept at the user level; the sibling repository is not re-embedded.
+/.vscode/
+/daemon-substrate/
 ```
 
 A generic ignore pattern never substitutes for the provenance check. CI must also reject a tracked file whose
@@ -397,7 +459,9 @@ header or generator registry classifies it as derived.
 ## 7. `.dockerignore` contract
 
 The Docker context excludes every derived, evidentiary, secret, and runtime-state class. It is at least as
-strict as `.gitignore` for generated content.
+strict as `.gitignore` for generated content, and the block below is normative and **exhaustive in both
+directions** on the same terms as [§6](#6-gitignore-contract): a class named here and absent from the file is
+missing coverage, and a pattern the file carries and this block does not name is an undeclared class.
 
 ```dockerignore
 .git
@@ -477,7 +541,29 @@ browser-profile/**
 .secrets/**
 .credentials
 .credentials/**
+test-secrets.dhall
 kubeconfig
+.cabal-sandbox
+.cabal-sandbox/**
+.ghc.environment.*
+.phase1-store
+.phase1-store/**
+**/*.o
+**/*.hi
+**/*.dyn_o
+**/*.dyn_hi
+**/*.hie
+**/*.tla
+**/*.cfg
+.coverage
+.coverage.*
+toolchain/cache
+toolchain/cache/**
+ghc-pkg-*
+repl-wrapper-*
+wrapper-*
+/.vscode/
+/daemon-substrate/
 ```
 
 An image build that needs a derived artifact regenerates it inside a staged build or receives it as an

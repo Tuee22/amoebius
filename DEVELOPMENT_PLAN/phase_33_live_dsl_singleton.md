@@ -114,17 +114,9 @@ substrate is exercised by this phase's gate.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** on a single-node linux-cpu `kind` cluster, one `.dhall` decodes and the **Deployment-`replicas=1` control-plane singleton** — single-writer authority delegated to k8s/etcd, with **no amoebius election** — reconciles
-the standard platform-service stack plus a trivial app to convergence and tears down leak-free, while the
-pre-cluster (Phase-6) negative corpus, re-run against the same live deploy path, still fails at Gate 1 or
-Gate 2 — a **Register-3** live-infrastructure check. Before the singleton's first mutation, the gate observes
-the exact bootstrap-host holder drain and release, holder absence at a fresh resourceVersion, then acquisition
-by the authenticated singleton Pod UID; the apiserver audit/watch history admits no overlapping holder or
-mutation authority. That `.dhall` is delivered **only** through the singleton's admin REST surface — the
-operator drives `vault init/unseal` → `dhall update` → `kv put/get/list/delete` and nothing else — with the
-operator password never persisted, every seal-critical verb refused from a non-node-local reach before any Vault
-contact, and every named `SecretRef` whose capability probe fails rejected before any reconcile with its own
-distinct reason tag.
+**Gate:** `python3 tools/phase33_gate.py` passes on a single-node linux-cpu `kind` cluster: one `.dhall`,
+delivered through the singleton's admin REST surface, reconciles the standard platform-service stack plus a
+trivial app to convergence and tears down leak-free. [Gate integrity](#gate-integrity) carries the rest.
 
 ```mermaid
 flowchart LR
@@ -183,6 +175,21 @@ flowchart LR
   admission).
 
 ## Gate integrity
+
+**What the acceptance run must show.** The run is a **Register-3** live-infrastructure check, and the
+singleton it exercises is a **Deployment `replicas=1`** whose single-writer authority is delegated to
+k8s/etcd, with **no amoebius election**. Before that singleton's first mutation the gate observes the exact
+bootstrap-host holder drain and release, holder absence at a fresh resourceVersion, and then acquisition by
+the authenticated singleton Pod UID; the apiserver audit and watch history must admit no overlapping holder
+and no overlapping mutation authority. The pre-cluster (Phase-6) negative corpus is re-run against that same
+live deploy path and each fixture still fails at Gate 1 or Gate 2, so the live path is shown to inherit the
+type discipline rather than to re-establish it.
+
+**The `.dhall` reaches the cluster through one door.** The operator drives `vault init/unseal`, then
+`dhall update`, then `kv put/get/list/delete`, and nothing else. The operator password is never persisted;
+every seal-critical verb attempted from a non-node-local reach is refused before any Vault contact; and every
+named `SecretRef` whose capability probe fails is rejected before any reconcile, each with its own distinct
+reason tag rather than a generic refusal.
 
 **Secret-admission criteria — added 2026-08-13.** This phase is the first to apply an `InForceSpec` against a
 live cluster, so it is where the admission contract of
@@ -345,17 +352,10 @@ re-observe` loop wrapping the Phase-26 typed reconciler and its observed-Pod/run
 acquire); `src/Amoebius/Capacity/RuntimeStorage.hs` (shared component-role/layout and scope-indexed
 node-accounting fold), plus `app/singleton/Main.hs` and `tools/phase33_runtime_helper.py` — delivered.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: on
-the single-node linux-cpu cluster the singleton manifest is a **Deployment with `replicas=1`** carrying **no PVC**; the Pod comes up, runs the daemon spine, and serves `/healthz` / `/readyz` / `/metrics`; deleting the
-Pod causes Kubernetes to converge a replacement with no data loss; the manifest contains **no amoebius election controller, no ranked-failover config, and no standby Pod**. **"At most one writer" is observed concretely (§M.5):** an apiserver watch records every Pod UID, owner chain, protected source annotation,
-phase, and Lease transition across the full delete→reschedule window; at every resource version at most one
-authenticated UID holds the Lease, while every simultaneously present or reserved UID remains in the
-capacity ledger. Initial bring-up must additionally show bootstrap holder → quiesced/released → fresh
-same-Lease holder absence → authenticated singleton Pod UID holder, with no host mutation after release and
-no singleton mutation before acquire. **"No data loss" names the durable state probed:** before the delete
-the singleton's `InForceSpec` object is written to the Vault-Transit-enveloped MinIO bucket; after the
-replacement reports `/readyz` ready it reads that object back and the decrypted bytes are byte-identical to
-the pre-delete write (a stateless pod losing its durable MinIO state would fail this).
+**Independent Validation**: on the single-node linux-cpu cluster the singleton is a Deployment `replicas=1`
+with no PVC, serves the daemon spine's health endpoints, survives Pod deletion without losing durable state,
+and holds the Lease alone at every resource version. The numbered validation list below states each observed
+condition, the handoff sequence, and the readback that proves no data loss.
 **Docs to update**:
 `documents/engineering/daemon_topology_doctrine.md`,
 `documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
@@ -406,19 +406,27 @@ bootstrap-host-to-singleton Lease handoff, and no amoebius election.
   four-endpoint surface by [Sprint 33.4](#sprint-334-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-).
 
 ### Validation
-1. The singleton manifest is a `Deployment replicas=1` with no PVC. During initial handoff, assert the Pod
+1. The singleton manifest is a `Deployment replicas=1` with no PVC and carries no amoebius election
+   controller, no ranked-failover configuration, and no standby Pod; the Pod comes up, runs the daemon spine,
+   and serves `/healthz`, `/readyz`, and `/metrics`. During initial handoff, assert the Pod
    remains non-Serving and performs zero mutations while the bootstrap host holds the Lease; then observe host
-   quiescence, release, fresh holder absence, exact singleton UID acquisition, and only then `/readyz`. A Pod
-   delete converges a replacement, and the apiserver watch proves at most one
-   authenticated Pod UID holds the Lease at each resource version while all present/reserved UIDs remain
-   capacity-debited, with the MinIO-held `InForceSpec` read back byte-identical afterward.
-2. The reconcile loop runs one idempotent pass to convergence from a decoded spec and a re-run is a no-op,
+   quiescence, release, fresh same-Lease holder absence, exact singleton UID acquisition, and only then
+   `/readyz`, with no host mutation after release and no singleton mutation before acquire.
+2. A Pod delete converges a replacement with no data loss. "At most one writer" is observed concretely
+   (§M.5): an apiserver watch records every Pod UID, owner chain, protected source annotation, phase, and
+   Lease transition across the whole delete-to-reschedule window, and at every resource version at most one
+   authenticated UID holds the Lease while every simultaneously present or reserved UID stays in the capacity
+   ledger. "No data loss" names the durable state probed: the `InForceSpec` object written to the
+   Vault-Transit-enveloped MinIO bucket before the delete is read back once the replacement reports `/readyz`
+   ready, and its decrypted bytes are byte-identical to the pre-delete write — which a stateless pod that had
+   lost its durable MinIO state could not produce.
+3. The reconcile loop runs one idempotent pass to convergence from a decoded spec and a re-run is a no-op,
    where **"no-op" is defined observably (§M.6) as: the second pass's apiserver audit log records zero mutating writes (`create`/`update`/`patch`/`delete`) under the singleton field manager** — unchanged end-state
    readiness alone does not satisfy this. To prove the compute path actually ran on the second pass (not a
    skipped/memoized short-circuit), the second pass executes with any reconcile result cache bypassed and its
    `discover` step is observed to have re-read live cluster state before concluding the empty diff. The
    codebase contains no election/ranked-failover module and no standby pod is ever scheduled.
-3. Make each singleton CPU, memory, ephemeral, image/import, writable/log, projected-file, runtime-metadata,
+4. Make each singleton CPU, memory, ephemeral, image/import, writable/log, projected-file, runtime-metadata,
    pod-slot, Deployment-cardinality, and Deployment-rollout operand one unit short; change the pinned metadata
    model; drop/swap a component role; mismatch the planned-slot/observed-UID domain; overlap/leak qualified
    Pod/image ownership; double-debit an alias; make either SplitRuntime nodefs or imagefs/containerfs one byte
@@ -426,7 +434,7 @@ bootstrap-host-to-singleton Lease handoff, and no amoebius election.
    short or omit one state kind/admission envelope. Every negative rejects before Deployment creation or MinIO
    mutation. For the exact-fit twin, live Pod/Deployment and exact object-key readback equal the provisioned
    projection, including the replacement-Pod transition epoch.
-4. Inject simultaneous acquire, stale-resourceVersion release, lost release/acquire response, watch gap,
+5. Inject simultaneous acquire, stale-resourceVersion release, lost release/acquire response, watch gap,
    bootstrap crash before and after release, singleton crash before and after acquire, and replacement-Pod UID
    churn. Every trace either reaches one authenticated singleton holder or refuses with no overlapping
    mutation; audit history shows zero host writes after observed release and zero singleton writes before
@@ -452,19 +460,10 @@ restores the retained stack during teardown.
 deploy fixture); `src/Amoebius/ControlPlane/Deploy.hs` (the singleton's platform + trivial-app reconcile
 entry), with live effects in `tools/phase33_runtime_helper.py` — delivered.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: one `.dhall` decodes through `Dhall.inputFile auto` to its IR and the
-singleton reconciles the standard platform stack plus a trivial single-service app to ready on the linux-cpu
-cluster. **Because Phases 24–32 leave the platform and edge pre-converged, the harness first perturbs the Phase-30/31 service set (§M.6, forecloses the pre-converged-ride cheat):** before the first pass it deletes
-the named components in `test/fixtures/phase33/perturb-targets.txt` (at minimum one platform `Deployment`
-and its `Service` — e.g. the Prometheus `Deployment`+`Service`), then asserts **per-pass enact records read from the apiserver audit log (§M.5), not the singleton's self-report:** the **first** pass's created/patched
-set is **non-empty** and matches `expected-enact-pass1.json` (it restores the deleted components to Ready),
-and the **second** invocation's enact set is **empty** and matches `expected-enact-pass2.json` — a `no-op`
-meaning **zero mutating writes under the singleton field manager in the audit log**, not merely unchanged
-end-state readiness. A teardown then leaves **no leaked resources**: the postflight sweep is scoped
-explicitly to **this run's provisioned objects, identified by the run-unique label `amoebius.dev/phase33-run=<run-id>` the singleton stamps on every object it creates** (Phase-54
-flag-at-creation machinery is not assumed; this label set is authored here), and the sweep is empty over
-that label set; separately, every platform component perturbed by the harness is asserted back at Ready so
-the shared Phase-30/31 stack is left as found.
+**Independent Validation**: one `.dhall` decodes through `Dhall.inputFile auto` and the singleton reconciles
+the standard platform stack plus a trivial single-service app to ready on the linux-cpu cluster, then tears
+down leaving the shared stack as found. Because Phases 24–32 leave that stack pre-converged, the numbered
+validation list below fixes the perturbation, the audit-log enact oracles, and the sweep scope.
 **Docs to update**: `documents/engineering/dsl_doctrine.md`,
 `documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -488,7 +487,7 @@ itself was proven in-process in the pre-cluster band; here it is exercised, not 
   witness for each apply/ready edge is externally observable apiserver
   evidence (the object's live `status`/managed-fields and the audit-log write record), never a log line or
   metric the singleton emits about itself (§M.5)** — with a re-run proven idempotent (no drift, no re-apply)
-  under the audit-log no-op definition above.
+  under the audit-log no-op definition the validation list below fixes.
 - A hard effect boundary: pure whole-deployment provision includes the singleton, mutation-admission gateway,
   every desired Pod/controller child and producer, durable claims, Pod/CSI slots, and planned transition peaks.
   Snapshot-bound preflight then joins every observed/reserved/terminating/terminal-retained identity and builds
@@ -496,18 +495,26 @@ itself was proven in-process in the pre-cluster band; here it is exercised, not 
   `Left ProvisionError` or live-preflight refusal exits before state PUT or SSA apply; no renderer accepts raw
   `InForceSpec`/`BoundDeployment` values.
 - A leak-free teardown obligation carried by the deploy fixture — a test-topology `.dhall` whose postflight
-  sweep asserts every provisioned object (the run-unique-labelled set defined in Independent Validation) was
+  sweep asserts every provisioned object (the run-unique-labelled set defined in the validation list below) was
   reclaimed, while the pre-existing Phase-30/31 service set and Phase-32 edge are restored to Ready rather than
   swept.
 
 ### Validation
-1. After the harness perturbs the named platform components, the `.dhall` reconcile's first pass restores them
-   and brings the platform + trivial app up on the linux-cpu cluster (first-pass audit-log enact set non-empty,
-   matching `expected-enact-pass1.json`); the app is reachable through the Phase-32 Keycloak-owned edge; a
-   re-run is a no-op (second-pass audit-log enact set empty, matching `expected-enact-pass2.json`).
-2. Teardown leaves no leaked resources (the postflight sweep over the run-unique label set is empty and the
-   perturbed platform components are back at Ready); the apiserver audit log records that **every** platform/app
-   write was issued by the singleton's in-cluster ServiceAccount and none by the harness principal.
+1. Before the first pass the harness deletes the components named in
+   `test/fixtures/phase33/perturb-targets.txt` — at minimum one platform `Deployment` and its `Service`, for
+   example Prometheus's — so a pre-converged Phase-30/31 stack cannot ride the gate (§M.6). The first pass
+   then restores them and brings the platform + trivial app up on the linux-cpu cluster, its created/patched
+   set read from the apiserver audit log rather than the singleton's self-report (§M.5), non-empty, and equal
+   to `expected-enact-pass1.json`; the app is reachable through the Phase-32 Keycloak-owned edge; and a re-run
+   is a no-op — zero mutating writes under the singleton field manager in the audit log, matching
+   `expected-enact-pass2.json` — which unchanged end-state readiness alone would not establish.
+2. Teardown leaves no leaked resources. The postflight sweep is scoped to this run's provisioned objects,
+   identified by the run-unique label `amoebius.dev/phase33-run=<run-id>` the singleton stamps on every object
+   it creates — that label set is authored here, and Phase-54 flag-at-creation machinery is not assumed — and
+   the sweep is empty over it. Separately, every platform component the harness perturbed is asserted back at
+   Ready so the shared Phase-30/31 stack is left as found, and the apiserver audit log records that **every**
+   platform/app write was issued by the singleton's in-cluster ServiceAccount and none by the harness
+   principal.
 3. A committed provision-bypass mutant that renders the raw bound spec, and omission mutants that drop the
    singleton, trivial-app, or gateway envelope, a present producer instance, or a union match branch must turn
    the gate red before apply. The positive run compares normalized live requests/limits/images/local storage,
@@ -528,19 +535,10 @@ equality, reservation/observed no-double-debit, and alias controls); the reused 
 under `dhall/examples/illegal_*.dhall` (re-run, not re-authored), `test/live/Phase33SingletonLiveSpec.hs`,
 `tools/phase33_singleton_live.py`, and `tools/phase33_gate.py` — delivered.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: the harness deploys the platform + trivial app from one `.dhall` on
-linux-cpu (under the perturbation + attribution regime of the Gate-integrity clauses and Sprint 33.2) and
-tears down leak-free, then re-runs each Phase-6 negative fixture against the live deploy path and asserts
-each still **fails at Gate 1 or Gate 2**, and each positive fixture still decodes; the run emits a
-**Register-3** proven/tested/assumed ledger naming the live substrate. **"The live deploy path" is pinned to the identical entry point the positive fixture used (§M.3, forecloses the host-side re-run cheat):** each
-negative `.dhall` is submitted through the exact same singleton spec-ingestion/`Deploy.hs` entry the
-positive gate fixture flowed through (not a separate host-side CorpusSpec decoder), and each yields a
-**structured Gate-1 (`dhall type` error) or Gate-2 (`DecodeError` tag) rejection whose emitted tag equals
-the oracle-pinned expected tag for that fixture in `test/fixtures/phase33/negative-expected-tags.tsv`
-(§M.8)** — a bare "it failed" does not satisfy this. **"No fixture reaches the apiserver" is proven, not
-assumed (§M.5):** across the entire negative corpus run the apiserver audit log shows **zero**
-platform/app-object writes, and a full-cluster `resourceVersion` snapshot taken before and after the corpus
-run is equal — cluster state is byte-for-byte unchanged.
+**Independent Validation**: the harness deploys the platform plus trivial app from one `.dhall` on linux-cpu
+under the perturbation and attribution regime of Sprint 33.2, tears down leak-free, then re-runs the Phase-6
+negative corpus against the same live deploy path and emits a **Register-3** ledger naming the live
+substrate. The numbered list below pins the entry point and its rejection oracle.
 **Docs to update**:
 `DEVELOPMENT_PLAN/substrates.md`, `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md`
 (flip the Phase-33 status when the gate passes).
@@ -584,11 +582,16 @@ the pre-cluster band; here the guard confirms the live deploy path never admits 
    audit-log enact set matches `expected-enact-pass1.json`, all writes attributed to the singleton SA), the app
    is reachable through the Keycloak edge, and teardown leaves no leaked resources over the run-unique label
    set; the committed `enact-noop` mutant turns this red.
-2. Every Phase-6 negative fixture, submitted through the same singleton `Deploy.hs` entry the positive used, is
-   rejected at Gate 1/Gate 2 with its emitted tag equal to the committed `negative-expected-tags.tsv` oracle;
-   the apiserver audit log shows zero writes and the pre/post full-cluster `resourceVersion` snapshot is equal
-   across the corpus run; the positive fixtures decode; and the ledger honestly classifies each foreclosure (no
-   runtime-checked or deferred claim — tenancy, gateway-migration — is reported as proven).
+2. "The live deploy path" is pinned to the identical entry point the positive fixture used, foreclosing the
+   host-side re-run cheat (§M.3): every Phase-6 negative fixture is submitted through the exact same singleton
+   spec-ingestion/`Deploy.hs` entry, never a separate host-side CorpusSpec decoder, and each yields a
+   structured Gate-1 (`dhall type` error) or Gate-2 (`DecodeError` tag) rejection whose emitted tag equals the
+   committed `negative-expected-tags.tsv` oracle for that fixture (§M.8) — a bare "it failed" does not satisfy
+   this. That no fixture reaches the apiserver is proven rather than assumed (§M.5): across the whole corpus
+   run the audit log shows zero platform/app-object writes and the pre/post full-cluster `resourceVersion`
+   snapshot is equal, so cluster state is byte-for-byte unchanged. The positive fixtures decode, and the
+   ledger honestly classifies each foreclosure (no runtime-checked or deferred claim — tenancy,
+   gateway-migration — is reported as proven).
 3. Run the resource-boundary and provision-bypass mutants through that same singleton entry. Assert each
    returns its specific `ProvisionError` before effects, while the exact-fit twin's live normalized
    Pod/controller/object-store projection is equal to the private provisioned value.
@@ -609,16 +612,10 @@ mode of the two-mode `pb` CLI, deferred to "the singleton" by
 envelope, the Phase-29 Vault client, or the Sprint-33.2 reconcile loop — it is the operator-facing channel
 into all three.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: an operator drives the full
-post-handoff sequence **only** through the amoebius NodePort admin surface — `vault init/unseal`, then
-`dhall update`, then `kv put/get/list/delete` — and the cluster reconciles toward the delivered
-`InForceSpec`. The operator password crosses CLI → NodePort → singleton and is **never persisted**: an
-OS-boundary observer (§M.5 — a write/`strace` observer over the singleton process and its container
-filesystem plus the apiserver audit log, never a log the endpoint emits about itself) shows it in no file,
-no environment variable, no k8s object, and no log line. Each seal-critical call attempted from a
-non-node-local reach is **refused before any Vault contact** with its own reach-violation tag. Each `dhall
-update` whose named `SecretRef` fails its capability probe is rejected **before any reconcile** with its own
-distinct reason tag, and the apiserver audit log records zero writes for that attempt.
+**Independent Validation**: an operator drives the whole post-handoff sequence — `vault init/unseal`, then
+`dhall update`, then `kv put/get/list/delete` — through the amoebius NodePort admin surface alone, and the
+cluster reconciles toward the delivered `InForceSpec`. The numbered list below states the non-persistence
+observer, the reach matrix, and the paired admission negatives that make that claim falsifiable.
 **Docs to update**:
 `documents/engineering/bootstrap_sequence_doctrine.md`, `documents/engineering/substrate_doctrine.md`,
 `documents/engineering/vault_pki_doctrine.md`, `documents/engineering/tenancy_doctrine.md`,
@@ -695,18 +692,23 @@ is untouched by its existence.
 ### Validation
 1. **The post-handoff operator sequence, end to end.** After Sprint 33.1's observed handoff, drive `vault
    init/unseal` → `dhall update` → `kv put/get/list/delete` through the NodePort surface only, and assert the
-   cluster converges to the delivered `InForceSpec` via the Sprint-33.2 loop. Assert from the §M.5 OS-boundary
-   observer that the operator password appears in no file, environment variable, k8s object, or log line; the
-   committed `persist-password` mutant MUST turn this red.
+   cluster converges to the delivered `InForceSpec` via the Sprint-33.2 loop. The operator password crosses
+   CLI → NodePort → singleton and is never persisted, and the observer that settles it is an OS-boundary one
+   (§M.5): a write/`strace` observer over the singleton process and its container filesystem plus the
+   apiserver audit log, never a log the endpoint emits about itself. Assert from that observer that the
+   password appears in no file, environment variable, k8s object, or log line; the committed
+   `persist-password` mutant MUST turn this red.
 2. **The reach matrix (§M.3).** For every (endpoint family × reach class) cell, assert the observed
    admit/refuse decision and the exact refusal tag equal `reach-matrix.tsv`. A seal-critical verb attempted over
-   a fabric or LAN source is refused **before any Vault contact** (asserted from the Vault audit device: zero
-   contact for the refused attempt, not merely a failed one). The committed `reach-any` mutant MUST turn this red.
-3. **Specific-reason admission negatives (§M.8).** Each of the four `secrets-capability` negatives is rejected
-   with its **own** tag from `admission-tags.tsv` — a generic "rejected" fails the check — and each is paired
-   with a positive differing only in the foreclosed dimension that is admitted. Assert the apiserver audit log
-   records **zero** writes for every rejected attempt (rejection precedes reconcile, not merely precedes
-   convergence). The committed `admit-unproven-secret` mutant MUST turn this red.
+   a fabric or LAN source is refused **before any Vault contact**, with its own reach-violation tag (asserted
+   from the Vault audit device: zero contact for the refused attempt, not merely a failed one). The committed
+   `reach-any` mutant MUST turn this red.
+3. **Specific-reason admission negatives (§M.8).** Each `dhall update` whose named `SecretRef` fails its
+   capability probe is rejected before any reconcile: each of the four `secrets-capability` negatives is
+   rejected with its **own** tag from `admission-tags.tsv` — a generic "rejected" fails the check — and each
+   is paired with a positive differing only in the foreclosed dimension that is admitted. Assert the apiserver
+   audit log records **zero** writes for every rejected attempt (rejection precedes reconcile, not merely
+   precedes convergence). The committed `admit-unproven-secret` mutant MUST turn this red.
 4. **The ledger** is emitted and honestly classifies the admission gate as runtime-checked/live, marking the
    tenant-admin and parent→child uses UNVERIFIED; a ledger reporting either as proven fails the gate.
 

@@ -117,17 +117,20 @@ a live Keycloak/provider, deployment/HA, a second register, or a substrate.
 **Dependency:** Phase 20 — canonical `UiServerPlan`, public contracts, route dispatch, and authority digests.
 **Substrate:** none — harness-owned local authority/handler processes only; no cluster or external service.
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `python3 tools/phase22_gate.py` passes the Phase-0-pinned request/access/startup/asset matrices,
-cryptographically minted least-privilege own/foreign credentials, post-start nonce round trip, stale-epoch,
-private-plan and bypass negatives, independent HTTP plus OS-boundary effect observations, and every seeded mutant in
-[Gate integrity](#gate-integrity). Phase 23 does not open on the server branch unless this command emits a
-green Register-2 ledger with live identity/provider/HA layers UNVERIFIED.
+**Gate:** `python3 tools/phase22_gate.py` emits a green Register-2 ledger with live identity, provider, and
+HA layers UNVERIFIED, and Phase 23's server branch waits on it. The apparatus is
+[Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
 Phase 0 commits request fixtures, access decisions, expected HTTP responses and security headers, expected
 effect rows, and mutant outcomes before `Amoebius.Ui.Server` exists. The authority and handler are separate
 harness processes; neither reads a decision trace emitted by the server under test.
+
+The command passes only when all of it holds together: the Phase-0-pinned request, access, startup, and asset
+matrices; cryptographically minted least-privilege own- and foreign-scope credentials; the post-start nonce
+round trip; the stale-epoch, private-plan, and bypass negatives; the independent HTTP and OS-boundary effect
+observations; and every seeded mutant below turning its own oracle row red.
 
 - **Representative set:** public `ClientPlan` fetch, authenticated route read, scoped data read/mutation, workflow
   start/observe, bounded upload, subscription resume, ready-artifact use, sign-out, idempotent replay, and

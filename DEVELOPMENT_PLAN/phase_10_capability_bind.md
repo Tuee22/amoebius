@@ -122,19 +122,10 @@ corpus battery, analogous to the Phase-5 decode battery.
 
 **Register:** 1 — pure/golden, in-process, no cluster.
 
-**Gate:** the pure capability bind is green under `cabal test capability-bind-spec` — for the **representative set** (one positive `CapabilityNeed` fixture per each of the **nine** capability arms — `ObjectStore`,
-`SecretStore`, `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge`, `InferenceEngine` — bound
-under **both** a `SingleNode` and a `Distributed { nodes = n }` (n ≥ 2) shape) every positive need decodes and
-`bind`s to a well-typed `BoundServiceSpec` and assembles into a `BoundDeployment` in-process, with the two bound
-values **structurally different by the object-node-multiset oracle** (deep structural diff that **fails when the difference is a single scalar-field edit — e.g. `replicas: 1 → 3` — or a copied shape tag**) and each equal to
-its oracle-pinned reviewer-authored golden `golden_servicespec_<arm>_<shape>`, while the **app-surface bytes are byte-identical** across the two shapes (beta-normalized app-surface slices extracted from two *distinct*
-composed spec files); `illegal_product_in_app` / `illegal_engine_by_url` / `illegal_shape_in_app` each **fail Gate 1** at their asserted `dhall type` error locus (each paired with a minimally-differing positive);
-`illegal_unbuilt_provider` / `illegal_unbound_capability` / `illegal_cyclic_extension` /
-`illegal_shadowing_extension` each return a structured `Left` **tagged with its specific `DecodeError`**
-(Gate 2); and the committed `mutant_copy_shape_tag` seeded mutant turns the suite **red**. The full apparatus —
-fixtures, goldens, the independent oracle, the four seeded mutants — is in [`## Gate integrity`](#gate-integrity).
-A **Register-1** in-process check on no substrate; provision, the folds, and accelerator/inference availability
-are Phases 11/12.
+**Gate:** `cabal test capability-bind-spec` passes the nine-arm two-shape corpus, its reviewer-authored
+goldens, the object-node-multiset and app-surface-byte oracles, the seven specific-reason negatives, and the
+four seeded mutants of [Gate integrity](#gate-integrity). Provision, the folds, and accelerator/inference
+availability stay UNVERIFIED here; they are Phases 11 and 12.
 
 ## Gate integrity
 
@@ -173,13 +164,14 @@ flowchart LR
   (including the specifically-named `legal_objectstore_{singlenode,distributed}` and `legal_inference_cuda`), each
   a full `CapabilityNeed` fixture — the corpus is **not** scope-shrunk to the three named fixtures.
 - The **oracle-pinned hand-authored arm list** enumerating exactly the nine capability arms, **independent of the union's own definition** — the exhaustiveness check keys against it, not against `bind`'s case analysis.
-- The **expected error/locus tags** for every negative: the asserted `dhall type` error locus (Gate 1) or the
-  specific `DecodeError` tag (Gate 2) for each of `illegal_product_in_app`, `illegal_engine_by_url`,
-  `illegal_shape_in_app`, `illegal_unbuilt_provider`, `illegal_unbound_capability`, `illegal_cyclic_extension`,
-  and `illegal_shadowing_extension`.
+- The **expected error/locus tags** for every negative in `dhall/examples/`: the asserted `dhall type` error
+  locus (Gate 1) or the specific `DecodeError` tag (Gate 2) for each of `illegal_product_in_app`,
+  `illegal_engine_by_url`, `illegal_shape_in_app`, `illegal_unbuilt_provider`, `illegal_unbound_capability`,
+  `illegal_cyclic_extension`, and `illegal_shadowing_extension`.
 
-**Committed mutation quota (§M.2).** Four committed seeded mutants — committed and re-run (not run once), drawn
-from the defined operator set — that the gate **must** turn red when substituted:
+**Committed mutation quota (§M.2).** Four committed seeded mutants under `tests/mutants/phase10/` — committed
+and re-run (not run once), drawn from the defined operator set — that the gate **must** turn red when
+substituted:
 
 - `mutant_copy_shape_tag` *(effect swap)* — `bind` copies the shape tag into a `providerGraph` field instead of
   selecting a manifest graph. It defeats a plain `/=`-only diff but is caught by the object-node-multiset oracle
@@ -211,8 +203,10 @@ independently of the code under test:
 obligations forcing each of the **nine** need constructors to fire ≥ 8% — a generator that emits only the three
 covered constructors fails coverage, so a scope-shrunk corpus cannot pass.
 
-**Concrete corpus (§M.7).** The representative set is named explicitly: one positive per each of the nine arms,
-each under both shapes — enumerated above, not an undefined "representative set."
+**Concrete corpus (§M.7).** The representative set is named explicitly: one positive `CapabilityNeed` fixture
+per each of the nine arms, each bound under both a `SingleNode` and a `Distributed { nodes = n }` (n ≥ 2)
+shape, and each required to decode, `bind` to a well-typed `BoundServiceSpec`, and assemble into a
+`BoundDeployment` in process — enumerated above, not an undefined "representative set."
 
 **Specific-reason negatives (§M.8).** Each negative asserts **why** it fails (its `dhall type` error locus or its
 `DecodeError` tag) and is **paired with a positive differing only in the foreclosed dimension** — so a negative
@@ -294,23 +288,14 @@ at the wholly unprovisioned `BoundDeployment`.
 ## Sprint 10.1: The closed capability union + the no-product-arm Gate-1 foreclosure ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `dhall/amoebius/Capability.dhall` (the closed nine-arm capability
-union — the eight ordinary capabilities plus the ninth `InferenceEngine` head, whose closed `EngineRuntime`
-lane union — `AppleMetal` · `Cuda` · `LinuxCpu` — carries **no arbitrary-`Url`/`Download` arm** — on the app
-surface + the app-surface `CapabilityNeed` records: buckets against `ObjectStore`, a database against `Sql`,
-topic lifecycles against `MessageBus`, OIDC rules against `Identity`, published routes against `Edge`,
-etc.); `src/Amoebius/Capability/Types.hs` (the Haskell `CapabilityNeed` and the `BoundServiceSpec` skeleton
-the binder targets), both built and validated by this phase.
+**Implementation**: `dhall/amoebius/Capability.dhall` carries the closed union and the app-surface
+`CapabilityNeed` records; `src/Amoebius/Capability/Types.hs` carries their Haskell counterparts and the
+`BoundServiceSpec` skeleton the binder targets.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `dhall type` accepts every positive
-`CapabilityNeed` fixture and rejects both the `illegal_product_in_app` fixture (naming `minio` at authoring
-time) and the `illegal_engine_by_url` fixture (naming an engine by URL) **at their asserted `dhall type` error loci** — an *unknown-constructor / no-such-alternative* type error on the capability union and on the
-`EngineRuntime` lane union respectively — each paired with its positive (`legal_objectstore_singlenode`;
-`legal_inference_cuda`) differing only in that the product name / URL is replaced by a capability / named
-engine identity, so the negative cannot pass for an unrelated reason (typo, missing field); a unit check
-confirms the union has exactly **nine** arms (the eight ordinary capabilities plus the `InferenceEngine`
-head) and **no product arm** and **no "other service" escape arm**, enumerated against the
-**oracle-pinned hand-authored arm list** independent of the union's own definition.
+**Independent Validation**: `dhall type` accepts every positive `CapabilityNeed` fixture and rejects the
+product-named and URL-named ones at their asserted loci, each paired with a minimally differing positive; a
+unit check counts the union's arms against the oracle-pinned hand-authored arm list rather than against the
+union's own definition. The Validation list below names the fixtures and the loci.
 **Docs to update**:
 `documents/engineering/service_capability_doctrine.md` (Phase-10 status backlink for §1/§2 and the §4.1
 no-URL union shape), `documents/engineering/app_vs_deployment_doctrine.md` (the app-surface
@@ -331,8 +316,9 @@ contains.
   has no syntax and fails Gate 1. This sprint delivers the *representational shape* of that union only; its
   family×lane availability relation, target-offering→lane quotient, and `CudaOwnerDemand`/`MetalOwnerDemand`
   owner demands are [Phase 12](phase_12_inference_accelerator_provision.md).
-- The app-surface `CapabilityNeed` records (buckets, a database, topic lifecycles, OIDC rules, published routes)
-  read as *resources of a capability*, and the `BoundServiceSpec` skeleton the binder projects into.
+- The app-surface `CapabilityNeed` records read as *resources of a capability* — buckets against `ObjectStore`,
+  a database against `Sql`, topic lifecycles against `MessageBus`, OIDC rules against `Identity`, published
+  routes against `Edge`, and so on — and the `BoundServiceSpec` skeleton the binder projects into.
 - An in-file honesty note that this union is the app-facing *what*; the provider/shape *how* is Sprint 10.2, the
   provision seal is [Phase 11](phase_11_provision_seal.md), and the capability set is invariant across every
   cluster (a different capability *set* per cluster stays refused).
@@ -341,6 +327,13 @@ contains.
 1. `dhall type` accepts each positive `CapabilityNeed` and rejects both a product-named app and a URL-named
    engine at authoring time (Gate 1), each at its asserted error locus; the union has exactly nine arms, no
    product arm, and no escape arm, checked against the oracle-pinned hand-authored arm list.
+2. Each Gate-1 negative fails at a named locus rather than merely somewhere. `illegal_product_in_app`, which
+   names `minio` at authoring time, raises an unknown-constructor / no-such-alternative type error on the
+   capability union; `illegal_engine_by_url`, which names an engine by URL, raises the same error on the
+   `EngineRuntime` lane union. Each is paired with its positive — `legal_objectstore_singlenode` and
+   `legal_inference_cuda` respectively — differing only in that the product name or the URL is replaced by a
+   capability or a named engine identity, so neither negative can pass for an unrelated reason such as a typo
+   or a missing field.
 
 ### Remaining Work
 None. The closed union, need records, and Gate-1 corpus are sealed by the Phase-10 gate.
@@ -348,35 +341,14 @@ None. The closed union, need records, and Gate-1 corpus are sealed by the Phase-
 ## Sprint 10.2: The `CapabilityBinding` + total representational `bind` ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `dhall/amoebius/Capability.dhall` (extend: the `CapabilityBinding`
-records — the one-arm-today provider union + the typed `shape`); `src/Amoebius/Capability/Binding.hs` (the
-pure total `bind` selecting and fully expanding the provider's manifest graph for the chosen shape, the
-kind-indexed `BoundExecutionUnit` vocabulary, controller-child lowering into `ControllerChildEnvelope`, the
-canonical identity-keyed `BoundExecutionSet`/`BoundExecutionInventory`, and the `BoundDeployment` assembly
-retaining the single opaque `FirstDeployment | UpdateFrom PriorExecutionProvisionRef` source). This Phase-10
-source inventory deliberately does not import the Phase-11
-`provision`/`ProvisionedSpec` machinery, the Phase-9 execution-epoch fold, or the Phase-13 `K8sObject`/Aeson
-renderer.
+**Implementation**: `dhall/amoebius/Capability.dhall`, extended with the `CapabilityBinding` records, and
+`src/Amoebius/Capability/Binding.hs`, which carries the total `bind`, the kind-indexed execution vocabulary,
+and the `BoundDeployment` assembly.
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: a unit + property suite binds the same app `ObjectStore`/`Sql` need under a `SingleNode` shape
-and a `Distributed { nodes = n }` (n ≥ 2) shape and asserts: (a) the **app-surface bytes are byte-identical**, where *app-surface bytes* is the **beta-normalized Dhall expression of the app-surface slice extracted from each of two *distinct* composed spec files** — the two composed fixtures do **not**
-share one app-surface import, so the equality is never a file-compared-to-itself tautology; (b) the bound
-`BoundServiceSpec` differs **structurally** by the oracle: the provider object graphs differ in
-**object-node multiset** (`Distributed { nodes = n }` → n member elements, `SingleNode` → 1), asserted by a
-deep structural diff (per
-[`service_capability_doctrine.md §5`](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values))
-that **fails when the difference is expressible as a single scalar-field edit (e.g. `replicas: 1 → 3`) or a copied shape tag** — plain `/=` does not satisfy it — and each bound value is checked equal to its
-**oracle-pinned reviewer-authored golden** `golden_servicespec_<arm>_<shape>` (authored before `bind`
-exists, never regenerated from `bind`'s output); (c) the `illegal_shape_in_app` negative — a shape or
-provider authored on the **app** surface — **fails `dhall type`** at its asserted type-error locus (the
-app-surface record has no `shape`/`provider` field), paired with its positive differing only in that the
-shape moves to the deployment-rules surface, witnessing the byte invariant the check in (a) is meant to
-prove; a binding naming a provider arm amoebius has not built returns a structured `Left` at decode (Gate 2)
-**tagged with its specific `DecodeError` (unbuilt-provider-arm)**. A structural inventory proves
-`BoundDeployment` contains **no `Provisioned*` field** and that the canonical identity-keyed
-`BoundExecutionSet` equals the expanded runnable-source inventory (an omitted worker/controller/gateway/Job
-rejects), with every unit carrying exactly one compatible controller body and every controller-lowered child
-appearing exactly once with its private witness and no second unit.
+**Independent Validation**: a unit + property suite binds one `ObjectStore` and one `Sql` need under both the
+single-node and the distributed shape and compares each result against the independently authored oracles and
+the reviewer-authored goldens rather than against `bind`; the numbered Validation list below carries the
+assertions, the loci, and the mutants.
 **Docs to update**:
 `documents/engineering/service_capability_doctrine.md` (§3/§4/§5 binding backlink),
 `documents/engineering/app_vs_deployment_doctrine.md` (the deployment-rules shape/provider surface),
@@ -432,7 +404,10 @@ stopping at the wholly unprovisioned `BoundDeployment`.
 - An in-file honesty note: a single-node shape is the canonical provider deployed honestly at small scale (a
   one-member Patroni `Sql`, never a bare `postgres` Pod); `bind` produces a **value**, not a live provider, and
   not a provisioned deployment — the provision seal is [Phase 11](phase_11_provision_seal.md) and the live
-  realization is the live band.
+  realization is the live band. The source inventory this sprint authors imports none of that: not the
+  [Phase 11](phase_11_provision_seal.md) `provision`/`ProvisionedSpec` machinery, not the
+  [Phase 9](phase_09_execution_accelerator_folds.md) execution-epoch fold, and not the
+  [Phase 13](phase_13_render_manifest_goldens.md) `K8sObject`/Aeson renderer.
 
 ### Validation
 1. The same `CapabilityNeed`, bound under two shapes, produces two `BoundServiceSpec`s that are **structurally different by the object-node-multiset oracle** (deep structural diff per [§5](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values), red on a scalar-only or copied-shape-tag difference; each equal to its oracle-pinned golden), while the **app-surface bytes**
@@ -445,6 +420,11 @@ stopping at the wholly unprovisioned `BoundDeployment`.
    `bind` copy the shape tag into a `providerGraph` field instead of selecting a manifest graph, passing a plain
    `/=` but failing the multiset oracle — and on `mutant_provisioned_value_in_bound_deployment` (a `Provisioned*`
    value injected into `BoundDeployment`).
+2. Each negative names its locus rather than merely failing. `illegal_shape_in_app` fails `dhall type`
+   because the app-surface record has no `shape` or `provider` field, and its paired positive differs only in
+   that the shape moves to the deployment-rules surface — which is what makes the app-surface byte invariant
+   above worth asserting at all. A binding that names a provider arm amoebius has not built returns its
+   specific unbuilt-provider-arm `DecodeError`, never a bare `Left`.
 
 ### Remaining Work
 None. The total binder, explicit object graphs, exact execution inventory, and unprovisioned deployment boundary are sealed.
@@ -452,22 +432,9 @@ None. The total binder, explicit object graphs, exact execution inventory, and u
 ## Sprint 10.3: The bind property/corpus + the Register-1 gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/capability/BindProps.hs` (the property battery),
-`test/capability/ShapeOracle.hs` (the independent object-node-multiset structural diff — authored separately
-from `bind` so the oracle is not `bind`'s own fold), `test/capability/BindGate.hs` (the gate +
-validation-locus ledger with coverage-assertion machinery), the **oracle-pinned** per-arm positive
-fixtures `dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` for all nine arms, the
-reviewer-authored goldens `test/capability/goldens/golden_servicespec_<arm>_<shape>.golden` (authored before
-`bind` exists), the seeded mutants under
-`tests/mutants/phase10/{mutant_copy_shape_tag,mutant_catchall_arm,mutant_shared_app_import,
-mutant_provisioned_value_in_bound_deployment}`, and the negatives
-`dhall/examples/{legal_objectstore_singlenode,legal_objectstore_distributed,legal_inference_cuda,
-illegal_product_in_app,illegal_engine_by_url,illegal_shape_in_app,illegal_unbound_capability,
-illegal_unbuilt_provider,illegal_cyclic_extension,illegal_shadowing_extension}.dhall`. The
-`illegal_cyclic_extension` (a provide-and-require self-loop) and
-`illegal_shadowing_extension` (an anti-shadow merge) negatives each pair with a minimal legal `{infernix,
-jitML}` positive and fail Gate 2 at the committed `extRequires`-graph locus
-([`capability_extension_doctrine.md §3`](../documents/engineering/capability_extension_doctrine.md#3-the-provide-and-require-contract)).
+**Implementation**: `test/capability/BindProps.hs`, `test/capability/ShapeOracle.hs`, and
+`test/capability/BindGate.hs`, over the corpus in `dhall/examples/`, the goldens in
+`test/capability/goldens/`, and the seeded mutants in `tests/mutants/phase10/`.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `cabal
 test capability-bind-spec` is green — see below.
@@ -489,6 +456,10 @@ binding returns its specific `DecodeError` — and emit the per-entry validation
 honest foreclosure layer of each.
 
 ### Deliverables
+- Three test modules with disjoint jobs: `test/capability/BindProps.hs` holds the property battery,
+  `test/capability/ShapeOracle.hs` holds the object-node-multiset structural diff — authored separately from
+  `bind`, so the oracle is never `bind`'s own fold — and `test/capability/BindGate.hs` holds the gate and the
+  validation-locus ledger with its coverage-assertion machinery.
 - The **concrete positive corpus** — **one fixture per each of the nine capability arms** (`ObjectStore`,
   `SecretStore`, `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge`, `InferenceEngine`), each
   bound under **both** a `SingleNode` and a `Distributed { nodes = n }` (n ≥ 2) shape — so the corpus is not
@@ -511,7 +482,8 @@ honest foreclosure layer of each.
   self-loop, Gate 2 at the `extRequires` locus), and `illegal_shadowing_extension` (an anti-shadow merge, Gate 2
   at the `extRequires` locus) — each asserting **its specific failure reason** (its expected `dhall type` error
   locus or `DecodeError` tag) and each **paired with a positive differing only in the foreclosed dimension**,
-  alongside the positive nine-arm corpus above. The accelerator/provision-seal negatives
+  alongside the positive nine-arm corpus above. The two extension negatives pair with a minimal legal
+  `{infernix, jitML}` positive, the closed v1 extension set. The accelerator/provision-seal negatives
   (`illegal_cuda_on_cpu_target`, `illegal_accelerator_*`, `illegal_engine_family_unavailable_on_lane`,
   `illegal_monitoring_work_over_budget`, `illegal_post_bind_expansion_overcommit`,
   `illegal_prior_provision_ref_*`, …) are **not** in this gate — they belong to
