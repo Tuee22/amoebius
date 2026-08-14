@@ -13,7 +13,7 @@ child. It does not own the specification-side spelling of a secret reference bey
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -128,16 +128,15 @@ and stored. So a sensitive field encodes a typed **reference** to a secret, neve
 ([dsl_doctrine.md §6](./dsl_doctrine.md#6-secrets-are-names-never-values) owns the DSL-surface rule; this section owns the *typed mechanism* it defers to). The reference names *where* a secret will be;
 Vault holds *what* it is.
 
-Conceptual Dhall union, imported by every app/cluster schema (adapted from prodbox's proven `SecretRef`
-in its `config_doctrine.md` / `vault_doctrine.md §3`):
+Shared Dhall union, imported by every app/cluster schema. It is adapted from prodbox's proven `SecretRef`
+(its `config_doctrine.md` / `vault_doctrine.md §3`) with **one arm removed** — see the divergence below:
 
 ```dhall
--- Example: shared SecretRef type, imported wherever a sensitive value would otherwise appear
+-- The shared SecretRef type, imported wherever a sensitive value would otherwise appear
 let SecretRef =
       < Vault : { mount : Text, path : Text, field : Text }
       | TransitKey : { name : Text }
       | Prompt : { name : Text, purpose : Text }
-      | TestPlaintext : Text
       >
 
 in  SecretRef
@@ -146,17 +145,32 @@ in  SecretRef
 | Constructor | Production `.dhall` | Notes |
 |---|---|---|
 | `Vault` / `TransitKey` | Allowed | The target for every in-cluster-consumed secret and every envelope key. |
-| `Prompt` | Allowed (CLI only) | One-off elevated operator material (e.g. the cloud-admin credential that mints a least-privilege identity); supplied at the prompt, used, and discarded — never written to disk. |
-| `TestPlaintext` | **Rejected** | Accepted only by the test harness, only from a flagged test-secrets file. |
+| `Prompt` | Allowed (CLI only) | One-off elevated operator material (e.g. the cloud-admin credential that mints a least-privilege identity); supplied at the prompt, written straight into Vault, and discarded — never written to disk, an environment variable, or a process argument. |
+
+**There is no inline-value arm, in any mode.** The sibling projects carry a `TestPlaintext` constructor
+because their core is deliberately secret-store-agnostic: it cannot resolve a secret, so a test must be able
+to hand it one. amoebius is not in that position — it *owns* Vault, and every environment it runs in has one.
+Keeping an inline arm would therefore buy nothing except a second way for a secret to exist, gated by a
+mode flag that has to be right. Removing it makes "no cleartext secret on the filesystem" true by
+construction rather than by configuration: **no code path anywhere reads a secret value out of a file.** The
+test seam ([§3.3](#33-the-test-secrets-seam-the-operators-prompt-automated)) reaches Vault through the same
+write the operator's prompt performs, so tests exercise the production path instead of bypassing it.
 
 The contract is enforced by the same **typed spec gates** that guard every `InForceSpec`
-([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)): Gate 1 (the Dhall typechecker) admits only a well-typed `SecretRef`, and Gate 2 (the in-process Haskell decoder under the dynamically resolved compatible compiler) runs a validator that **rejects any literal secret value and any `TestPlaintext` arm in production mode**. A plaintext secret in a production config is therefore not "linted later" — it
-fails to decode, and an undecoded config is never reconciled. *If it decodes, it carries no secret.*
+([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)): Gate 1 (the Dhall
+typechecker) admits only a well-typed `SecretRef`, so a `Text` in a sensitive field has no inhabitant; and
+Gate 2 (the in-process Haskell decoder under the dynamically resolved compatible compiler) rejects any
+literal secret value. A plaintext secret in a production config is therefore not "linted later" — it fails to
+decode, and an undecoded config is never reconciled. *If it decodes, it carries no secret.*
 
-The corollary — *flagged* test credentials — is a locked amoebius rule: credentials used for test
-deployments are specifically flagged so the harness can recognize and clean them up.
-`TestPlaintext` is that flag in the type system; its lifecycle (spin-up →
-run → always tear down, elevated-only storage deletion) is owned by
+Both gates stay **pure**. Neither opens a socket, and neither needs to: the type and the decoder decide
+*shape*, and shape is all they can decide offline. Whether the named secret actually exists is a live
+question, answered at admission ([§3.4](#34-admission-proves-the-named-secret-exists-before-any-effect)).
+
+The corollary — *flagged* test credentials — remains a locked amoebius rule: credentials used for test
+deployments are specifically flagged so the harness can recognize and clean them up. With the inline arm
+gone, the flag lives on the credential's Vault path rather than in the type; its lifecycle (spin-up → run →
+always tear down, elevated-only storage deletion) is owned by
 [testing_doctrine.md](./testing_doctrine.md).
 
 ### 3.1 The parent-custody KV secret family: SSH keys, WireGuard keys, and the `Rke2NodeToken`
@@ -254,48 +268,84 @@ layers: pin *presence* type-foreclosed, pin *match* decode-foreclosed, "the pin 
 is owned by content_addressing [§4.5](../illegal_state/illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content); vault_pki owns only that the credential resolving the pull is a name,
 never a value.
 
-### 3.3 The test-secrets seam: the only cleartext, and it is flagged
+### 3.3 The test-secrets seam: the operator's prompt, automated
 
-**The problem.** A live provider gate needs a real cloud credential before Vault can hold one. The gate that
-proves Vault works cannot itself read from Vault, and the gate that mints a least-privilege identity needs an
-elevated credential to mint it with. Left unspecified, that need is met the way it is usually met: a
-`.env` file, an exported `AWS_SECRET_ACCESS_KEY`, or a literal in a test `.dhall`. Each is a cleartext
-credential at rest that no type rejects, that greps like ordinary configuration, and that reaches a commit
-the first time someone runs `git add -A`. The defect surfaces at author time and is invisible until the
-credential is already published.
+**The problem.** A live provider gate needs a real cloud credential, and the gate that mints a
+least-privilege identity needs an elevated one to mint it with. Left unspecified, that need is met the way it
+is usually met: a `.env` file, an exported `AWS_SECRET_ACCESS_KEY`, or a literal in a test `.dhall`. Each is a
+cleartext credential at rest that no type rejects, that greps like ordinary configuration, and that reaches a
+commit the first time someone runs `git add -A`. The defect surfaces at author time and stays invisible until
+the credential is already published.
 
-**Why the obvious alternative fails.** The tempting answer is a lint: scan tracked files for credential-shaped
-strings and fail the build. A scanner cannot distinguish a live key from a fixture that looks like one, so it
-either blocks legitimate test data or learns an exception list that the next real key is added to. More
-fundamentally it runs *after* authoring, on a file that already exists; the property wanted is that a
-production config cannot express a secret value at all.
+**Why the obvious alternative fails.** The tempting answer is the sibling's: add a `TestPlaintext` arm and
+substitute it for the `Vault` pointers at test time. It works, and it costs the property that matters — the
+test path stops being the production path. Whatever the harness proves about resolution, injection, and
+fail-closed behaviour is then proven about a substitute, and the one code path that reads a secret from a
+file exists forever, guarded by a mode flag. The second tempting answer, a credential-shaped-string scanner,
+runs after authoring and cannot tell a live key from a fixture.
 
-**The rule.** There is exactly one cleartext-secret file, it is **test-only, flagged, and never tracked**:
+**The rule.** The seam **simulates the operator at the prompt, not the store**:
 
-- **The type does the rejecting, not a scanner.** Every sensitive field is a `SecretRef`
-  ([§3](#3-the-secretref-contract-a-name-never-a-value)), so a `Text` literal does not typecheck there. Gate 1
-  admits only a well-typed `SecretRef`; Gate 2 rejects the `TestPlaintext` arm in production mode. A
-  production config that decodes carries no secret, and one that carries a secret does not decode.
-- **The production path is prompt-to-Vault, never a file.** Elevated operator material — the cloud-admin
-  credential that mints a least-privilege identity, the unseal password — is supplied at an interactive CLI
-  prompt (`SecretRef.Prompt`), used to write Vault, and discarded. It is never written to disk, never placed
-  in an environment variable, and never staged in a config the reconciler reads.
-- **The test seam is one file, named, ignored, and flagged.** A test run may supply cleartext through a
-  single `test-secrets.dhall` at the repository root. It is covered by `.gitignore`, every value it carries
-  enters the config as `SecretRef.TestPlaintext`, and every credential it stands up is a *flagged* test
-  credential whose teardown the harness owns ([testing_doctrine.md](./testing_doctrine.md)). It is a
-  convenience for standing up a live test, and it is never a production input.
-- **Vault comes first in the numeric order, and that ordering is load-bearing.** A live provider gate
-  ([phase_44](../../DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md) onward) consumes credentials as
-  `SecretRef.Vault` names, so the Vault root ([phase_29](../../DEVELOPMENT_PLAN/phase_29_vault_pki.md)) must
-  already exist for those phases to be runnable at all. The phase order is not merely a convention here: a
-  provider phase run before Vault would have nowhere to resolve a name from, and the only way to make it run
-  would be the cleartext fallback this section forbids.
+- **One file, named, ignored, never tracked.** A test run may supply cleartext through a single
+  `test-secrets.dhall` at the repository root. It is covered by `.gitignore` and `.dockerignore`. Its
+  *shape* — a tracked `test-secrets-types.dhall` carrying field names and types and no values — is authored
+  source and reviewable; only the values are ignored.
+- **It feeds the prompt, and the prompt writes Vault.** The harness reads it and performs exactly the write
+  `SecretRef.Prompt` performs interactively. After that write, a test resolves its secrets the way production
+  does: by name, from Vault. There is no substitution and no second resolution path.
+- **It carries only what a phase reads.** A field no amoebius phase consumes does not belong in the seam,
+  because an unread secret is pure liability. This is why amoebius's shape is narrower than the sibling's:
+  no phase requires a public DNS zone or email sender ([`phase_32`](../../DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md)
+  accepts a local ACME chain), and the provider checkpoint backend is Vault-Transit-enveloped objects in the
+  cluster's own MinIO rather than a cloud state bucket
+  ([`phase_44`](../../DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md)).
+- **Production has no seam at all.** Elevated operator material is supplied at an interactive prompt, written
+  into Vault, and discarded. It is never written to disk, never placed in an environment variable, and never
+  passed as a process argument.
 
-**What it forecloses.** Convenience. There is no supported way to run a live provider gate from an exported
-environment variable or a checked-in credential, so a fresh clone cannot reach a provider without either an
-operator at a prompt or a Vault that already holds the name. That cost is deliberate: the alternative is a
-credential whose only protection is that nobody has looked.
+**What it forecloses.** Unattended first runs. A fresh clone cannot reach a provider without either an
+operator at a prompt or a Vault that already holds the name, and CI cannot be handed a credential through the
+environment. That cost is deliberate: the alternative is a credential whose only protection is that nobody
+has looked.
+
+### 3.4 Admission proves the named secret exists, before any effect
+
+**The problem.** A spec that names `secret/provider/aws#access_key_id` is well-typed and decodes cleanly
+whether or not that path exists. Without a further check, the first thing that discovers the secret is
+missing is the workload that needed it — mid-rollout, after objects have been applied, with the failure
+surfacing as a crash-looping pod rather than as a rejected spec. Worse, a spec can be rolled out to a child
+cluster whose Vault never received the injection, and nothing upstream notices.
+
+**Why the obvious alternative fails.** The tempting place to put the check is Gate 1 or Gate 2, beside the
+other spec validation. Neither can host it. Gate 1 runs in an author's editor and in CI with no cluster in
+reach, and Gate 2's whole justification is that it runs over the full config tree *without touching
+sensitive material* ([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)).
+Giving either a Vault dependency would make offline validation impossible and put a secrets client in the
+path of every typecheck.
+
+**The rule.** Presence is proven at **admission** — the live step that already performs receipt-bound
+readback before a spec may render:
+
+- **It ranges over the `SecretRef`s the spec names.** Admission collects the references the decoded spec
+  carries and requires each to resolve. A spec naming no secret requires no Vault and is admissible with
+  Vault absent — which is what keeps phases that deploy no secret-bearing workload from depending on the
+  phase that builds Vault.
+- **Presence, never value.** The check reads existence — a KV metadata read — and never the bytes. The
+  validator therefore handles no plaintext, and an operator running it needs no read capability on the
+  secret itself.
+- **It fails fast and completely.** A missing reference refuses the spec **before any effect**, naming
+  *every* missing reference rather than the first, so an operator fixes one round of prompts instead of
+  discovering them one deployment at a time.
+- **A sealed Vault is a refusal, not a degradation.** Consistent with [§2](#2-vault-is-the-fail-closed-secrets-root):
+  admission cannot fall back to "assume present".
+
+**What it forecloses.** Deploying anything secret-bearing before Vault exists, and with it the ability to
+stand up a provider quickly "just to test". That ordering is the point rather than a side effect: because a
+spec cannot be admitted until its names resolve, **Vault necessarily precedes every live provider
+deployment**, and no phase ordering has to be remembered for that to hold. The root Vault this check reaches
+is built by [`phase_29`](../../DEVELOPMENT_PLAN/phase_29_vault_pki.md); the check itself is first enforced on
+a live apply path by [`phase_33`](../../DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md).
+
 
 ---
 

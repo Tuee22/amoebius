@@ -4,17 +4,21 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
 from typing import Sequence
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
 
 ROOT = Path(__file__).resolve().parents[1]
-CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 MUTANT = ROOT / "mutants/phase25/noop-egress-policy.mutant"
-LIVE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_25/sprint-25.4-no-public-pull.json"
 BASELINE_FLAGS = (
     "-f-phase25-bootstrap-domain-expansion-mutant",
     "-f-phase25-handoff-without-equality-mutant",
@@ -38,10 +42,24 @@ def fixture() -> dict[str, str]:
     return rows
 
 
+@functools.cache
+def build_tools() -> tuple[str, str]:
+    """Resolve cabal and the compiler per run from the authored requirements.
+
+    Passing the resolved compiler explicitly matters as much as resolving cabal: an
+    invocation without it inherits whichever GHC the host's PATH happens to offer, which
+    need not satisfy the authored range at all.
+    """
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    return resolved["cabal"]["path"], resolved["ghc"]["path"]
+
+
 def run_test(*flags: str) -> subprocess.CompletedProcess[str]:
+    cabal, compiler = build_tools()
     return subprocess.run(
         (
-            CABAL,
+            cabal,
+            f"--with-compiler={compiler}",
             "test",
             "phase25-image-spec",
             *flags,
@@ -57,9 +75,9 @@ def run_test(*flags: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def gate() -> dict[str, object]:
+def gate(live_path: Path) -> dict[str, object]:
     description = fixture()
-    live = json.loads(LIVE.read_text(encoding="utf-8"))
+    live = json.loads(live_path.read_text(encoding="utf-8"))
     live_mutant = live.get("mutant", {})
     if (
         live_mutant.get("mechanism") != "kindnet-NetworkPolicy"
@@ -97,9 +115,13 @@ def gate() -> dict[str, object]:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--evidence", type=Path)
+    # The live observation is supplied by the caller from this run's own bundle. It has no
+    # default on purpose: a default would name a location, and the last run to write there
+    # would decide this gate instead of the run in progress.
+    parser.add_argument("--live", type=Path, required=True, help="this run's no-public-pull observation")
     arguments = parser.parse_args(argv)
     try:
-        result = gate()
+        result = gate(arguments.live)
         encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
         if arguments.evidence is None:
             print(encoded, end="")

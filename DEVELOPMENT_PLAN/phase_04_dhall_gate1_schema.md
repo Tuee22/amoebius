@@ -33,6 +33,7 @@ The complete Gate-1 gate passed on 2026-08-09; Gate-2 semantics and runtime fide
 - [Sprint 4.1: Dhall prelude + typed surfaces + smart constructors ✅](#sprint-41-dhall-prelude--typed-surfaces--smart-constructors-)
 - [Sprint 4.2: Gate-1 positive corpus ✅](#sprint-42-gate-1-positive-corpus-)
 - [Sprint 4.3: Gate-1-class negative corpus + partial-foreclosure ledger ✅](#sprint-43-gate-1-class-negative-corpus--partial-foreclosure-ledger-)
+- [Sprint 4.4: The shared `SecretRef` union and the plaintext-secret negative ✅](#sprint-44-the-shared-secretref-union-and-the-plaintext-secret-negative-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -40,9 +41,37 @@ The complete Gate-1 gate passed on 2026-08-09; Gate-2 semantics and runtime fide
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:81c596c46e9c8772…`
-(1929 non-ignored files) and published verified external attestation
-`sha256:00bfda42ed8e2ddc333713e05262a92f41d9bc76b2dad1219202e12099a9c019`.
+✅ Done — resealed 2026-08-13 after the secrets amendment, attestation
+`sha256:e08489a637b107c5da2770a1b7265d526705963bcd321f8c93b330311c6469e9`.
+
+**What the reseal added.** `dhall/amoebius/SecretRef.dhall` is the shared three-arm union — `Vault`,
+`TransitKey`, `Prompt`, and no inline-value arm — with a `Sensitive` record giving a sensitive field its type.
+Its arms are pinned in the independent arm-inventory oracle, so an escape arm is caught by a table authored
+away from the schema. A new secret-policy negative differs from its paired positive in exactly one place, a
+literal where a reference belongs, and fails `dhall type` against a committed golden. The oracle moved from 17
+schema modules to 18 with its reviewed inventory extended beside it, and the enumeration carries a
+`secret-reference-policy` surface joined to that negative's metric.
+
+**Reopened 2026-08-13.** This phase was ✅ Done, sealed 2026-08-12 against source snapshot
+`sha256:81c596c46e9c8772…` with attestation
+`sha256:00bfda42ed8e2ddc333713e05262a92f41d9bc76b2dad1219202e12099a9c019`. That seal is invalidated by a
+scope amendment, not by a defect in the run: Gate 1 must now admit a `SecretRef` and give a `Text` in a
+sensitive field no inhabitant
+([vault_pki_doctrine.md §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)).
+That adds an authored module to the Gate-1 corpus, which moves this phase's `schema-modules` oracle and its
+reviewed module inventory — the gate's own count changes, so the gate changes
+([§N](development_plan_standards.md#n-reopening-and-amending-a-phase)).
+
+**Why the type lands here and not in Phase 29.** Phase 29 builds Vault; Gate 1 is *this* phase's boundary.
+"A production config cannot express a secret value" is a statement about the typechecker, and putting it in
+the phase that happens to need it first would leave Phases 4 and 5 claiming a complete Gate-1/Gate-2
+admission boundary that a later phase quietly completes — the forward dependency
+[§E](development_plan_standards.md#e-one-canonical-phase-model) forbids. Reopening is the cheaper honesty:
+this is a pure Register-1 gate.
+
+**Remaining work.** None. Sprint 4.4 discharged the amendment and the gate is green on all eight sides.
+
+**Invalidated seal — historical record:**
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** The Gate-1 capability result is unchanged and
 re-run: four positive fixtures typecheck, eight catalog, three image/process, and two import-policy negatives
@@ -145,6 +174,16 @@ positive — the same spec with the import replaced by a frozen local one — wh
 policy negatives rather than illegal-state catalog entries, so they are recorded here and excluded from the
 representative set's green; the enforcing resolve-and-freeze stage is owned by
 [Phase 5](phase_05_gadt_decoder_gate2.md).
+
+**Secret-policy negative (not counted toward the eight).** One further committed fixture,
+`dhall/examples/illegal_plaintext_secret.dhall`, pins the typed half of the `SecretRef` contract of
+[`vault_pki_doctrine.md §3`](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value):
+a sensitive field holding a literal instead of a reference must have no inhabitant. Its §M.8 paired positive
+is `dhall/examples/legal_secret_reference.dhall`, which differs in exactly one place and type-checks, and its
+golden pins the observed `dhall type` error. Rejecting a literal *value* at decode is Gate-2 surface and
+belongs to [Phase 5](phase_05_gadt_decoder_gate2.md); whether the named secret exists is a live question
+neither gate can answer, and is owned by
+[Phase 29](phase_29_vault_pki.md).
 
 ### Paired positive per negative (§M.8 / §M.3)
 
@@ -803,6 +842,46 @@ at Gate 2.
 Eight paired catalog negatives and two import-policy negatives must be red for their authored reasons, the
 capability-arm mutant must be caught, and the run-local ledger must record every deferred Gate-2/runtime
 residue as UNVERIFIED. The historical repository-resident ledger must not be consumed.
+
+## Sprint 4.4: The shared `SecretRef` union and the plaintext-secret negative ✅
+
+**Status**: Done — the union is Gate-1 surface, its arms are pinned, and the literal is uninhabitable
+**Implementation**: `dhall/amoebius/SecretRef.dhall`, `dhall/examples/legal_secret_reference.dhall`,
+`dhall/examples/illegal_plaintext_secret.dhall`, `tools/dhall_gate1.py`, `tools/phase4_gate.py`
+**Blocked by**: Sprint 4.3
+**Requires**: `host-toolchain` — the `dhall` CLI only.
+**Independent Validation**: the arm-inventory table authored away from the schema pins the three arms, so an
+added inline-value arm is red; the paired positive type-checks and its one-place mutation does not.
+**Docs to update**: `documents/engineering/vault_pki_doctrine.md` (Gate-1 backlink),
+`DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `DEVELOPMENT_PLAN/README.md`
+
+### Objective
+
+Adopt [`vault_pki_doctrine.md §3`](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)
+at the boundary that owns it: give a sensitive field a type whose only inhabitants are references, so a
+production config cannot express a secret value.
+
+### Deliverables
+
+- `dhall/amoebius/SecretRef.dhall`: the closed union with `Vault`, `TransitKey`, and `Prompt` arms, no
+  inline-value arm, smart constructors, and the `Sensitive` record that types a sensitive field.
+- A row in the arm-inventory oracle pinning those three arms, and one in the surface-field oracle pinning
+  `Sensitive`.
+- A paired positive and its one-place negative, with a committed error golden and a recorded metric.
+- The `schema-modules` oracle amended from intent to 18 with its reviewed inventory extended.
+
+### Validation
+
+1. The schema module is `dhall type` and `dhall lint` clean and joins the module inventory.
+2. The positive fixture type-checks with all three arms exercised.
+3. The negative fails `dhall type`, names the sensitive field, and matches its golden byte-exactly.
+4. The `secret-reference-policy` surface joins to the recorded metric.
+
+### Remaining Work
+
+None at this register. Gate 1 decides shape; the decoder's rejection of a literal is
+[Phase 5](phase_05_gadt_decoder_gate2.md)'s and the live presence proof is
+[Phase 29](phase_29_vault_pki.md)'s.
 
 ## Documentation Requirements
 

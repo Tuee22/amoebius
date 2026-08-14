@@ -70,6 +70,11 @@ resolveSecret transport identity jwt reference ciphertext = do
         (\key -> case ciphertext of
           Nothing -> pure (Left VaultDecryptDenied)
           Just encrypted -> decryptTransit transport token key encrypted)
+        -- A prompt reference names material the operator supplies at the CLI and
+        -- writes into Vault; nothing is stored at the reference itself, so an
+        -- in-cluster consumer resolving one fails closed.  The write path that
+        -- turns it into a readable Vault reference belongs to Phase 29.
+        (\_name _purpose -> pure (Left VaultSecretMissing))
         reference
 
 data HttpVaultAddress = HttpVaultAddress

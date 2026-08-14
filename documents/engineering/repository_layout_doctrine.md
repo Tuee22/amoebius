@@ -255,6 +255,26 @@ follows:
 Renaming a run ledger to “golden” or an emitted table to “oracle” does not make it source. Phase 0 records the
 provenance decision for shared corpora; each later phase owns its domain-specific tables before revalidation.
 
+### 3.6 Authored negative corpora and their audit scope
+
+A corpus that seeds a defect contains that defect on purpose, so the repository audit would otherwise report
+its own fixtures. The exemption that resolves this is **one authored declaration**, not a special case per
+corpus: the table below names every authored negative corpus and the audit rules it deliberately seeds, and
+the audit steps over exactly those pairings. A rule the corpus does not seed still applies to it, and a path
+the table does not name is never exempt.
+
+| Corpus | Rules it seeds | Why the corpus must contain what the rule rejects |
+|---|---|---|
+| `tools/ledger_lint_corpus/` | r2 | A hand-written run ledger is the only way to seed the ledger-shape classifier |
+| `tools/artifact_policy_selftest.py` | r1, r5, r6 | The audit's own per-rule mutants: an invented output class, a generated path beneath an authored root, and a resolved home path |
+| `tools/phase1_negative_corpus.py` | r6 | The toolchain gate's build configurations carry a developer-home compiler path and an archive checksum beside its URL |
+| `tools/attestation_negative_corpus.py` | r5 | A refused run bundle must name a plan-tree evidence path for the store to reject it |
+
+Two properties keep the declaration from becoming a silence. A corpus is a **dedicated module or directory**
+whose entire purpose is visible in one reading, so seeded bodies move out of the tool that consumes them
+rather than exempting that tool. And every declared pairing must **actually suppress a finding**: a corpus
+that stops seeding its rule, or a path that no longer exists, is reported as a stale exemption and removed.
+
 ## 4. Dependency and toolchain resolution
 
 amoebius records requirements, not resolver output. An authored requirement may state a compiler/API

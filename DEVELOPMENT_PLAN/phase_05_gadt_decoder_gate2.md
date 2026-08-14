@@ -34,6 +34,7 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 - [Sprint 5.2: GADT-indexed IR + smart constructors + phantom tenant refs + ownership indices ✅](#sprint-52-gadt-indexed-ir--smart-constructors--phantom-tenant-refs--ownership-indices-)
 - [Sprint 5.3: The fail-closed decoder (`Dhall.inputFile auto` + exception-catch) + structured `DecodeError` ✅](#sprint-53-the-fail-closed-decoder-dhallinputfile-auto--exception-catch--structured-decodeerror-)
 - [Sprint 5.4: The Gate-2 decode battery (`dsl-spec`) — the gate ✅](#sprint-54-the-gate-2-decode-battery-dsl-spec--the-gate-)
+- [Sprint 5.5: Decoding the shared `SecretRef` and rejecting a literal ✅](#sprint-55-decoding-the-shared-secretref-and-rejecting-a-literal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,9 +42,36 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:52a29644c13595a7…`
-(1930 non-ignored files) and published verified external attestation
-`sha256:3dfdee987647704b9e62dd70e6c31c4fe96b58df533b216a7b59f73f38ad1a1f`.
+✅ Done — resealed 2026-08-13 after the secrets amendment, attestation
+`sha256:bd7e03f3d8f33d5359d89cd453437d2101e31ec10ffdcdc278e82a54eeaee04a`.
+
+**What the reseal added.** The decoder refines every sensitive field into the shared
+`Amoebius.Vault.SecretRef`, which gained the `Prompt` arm the Dhall union has, so all three arms decode
+through one type rather than two that can drift. A fourth tag, `PlaintextSecret`, is returned when that field
+holds a value instead of a reference, and a new negative pins it against a paired positive differing in
+exactly one place. The paired positive of *every* negative is now decoded and required to succeed: §M.8's
+control was authored in the oracle but never run, so a twin that stopped decoding would not have been noticed.
+
+**Why `structural-tree-rows` is unchanged.** The paired positive is a decode control, not a structural-oracle
+row. The structural oracle pins five fixtures whose node trees *are* the corpus its deletion and substitution
+mutant families range over; adding a sixth would restate a measured sum without adding a distinct claim, and
+the amendment only required restating it *if* a positive fixture gained the type.
+
+**Reopened 2026-08-13.** This phase was ✅ Done, sealed 2026-08-12 against source snapshot
+`sha256:52a29644c13595a7…` with attestation
+`sha256:3dfdee987647704b9e62dd70e6c31c4fe96b58df533b216a7b59f73f38ad1a1f`. That seal is invalidated by the
+same scope amendment that reopened Phase 4: Gate 2 must decode the shared `SecretRef` and reject any literal
+secret value, which is a decoder surface this phase's gate does not yet carry
+([§N](development_plan_standards.md#n-reopening-and-amending-a-phase)).
+
+**The decoder stays pure.** Gate 2 decides *shape* and nothing else — it opens no socket and needs no Vault.
+Whether a named secret exists is a live question answered at admission
+([vault_pki_doctrine.md §3.4](../documents/engineering/vault_pki_doctrine.md#34-admission-proves-the-named-secret-exists-before-any-effect)),
+which is what keeps Gate 2 runnable over a whole config tree with no cluster in reach.
+
+**Remaining work.** None. Sprint 5.5 discharged the amendment and the gate is green on all ten sides.
+
+**Invalidated seal — historical record:**
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** The Gate-2 capability result is unchanged and
 re-run: five positive fixtures decode to their authored trees, three tagged negatives fail at distinct
@@ -820,6 +848,47 @@ provisioning boundary.
 
 ### Remaining Work
 None. The exhaustive per-catalog-entry corpus begins in Phase 6.
+
+## Sprint 5.5: Decoding the shared `SecretRef` and rejecting a literal ✅
+
+**Status**: Done — one shared type across both gates, and a fourth pinned `DecodeError` tag
+**Implementation**: `src/Amoebius/Vault/SecretRef.hs`, `src/Amoebius/Dsl/Error.hs`,
+`src/Amoebius/Dsl/Decode.hs`, `test/dsl/DecodeSpec.hs`, `dhall/examples/legal_secret_app.dhall`,
+`dhall/examples/illegal_decode_plaintext_secret.dhall`
+**Blocked by**: Sprint 5.4
+**Requires**: `host-toolchain` — the resolved `ghc`, `cabal`, and `dhall`.
+**Independent Validation**: the negative is Gate-1 green and must still be rejected, so the claim cannot be
+satisfied by the typechecker; its paired positive decodes, and every other negative's twin now does too.
+**Docs to update**: `documents/engineering/vault_pki_doctrine.md` (Gate-2 backlink),
+`DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `DEVELOPMENT_PLAN/README.md`
+
+### Objective
+
+Give the decoder the second half of the secrets contract of
+[`vault_pki_doctrine.md` §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value):
+*if it decodes, it carries no secret* — decided from the value, not from whether the author reached for the
+type.
+
+### Deliverables
+
+- The `Prompt` arm on `Amoebius.Vault.SecretRef`, so the Haskell type spans the same three arms as the Dhall
+  union and one shared type serves both gates.
+- A `PlaintextSecret` `DecodeError` tag and the refinement that returns it.
+- A Gate-1-green negative that must still be rejected, with its one-place paired positive.
+- The §M.8 paired positive of every negative decoded and required to succeed.
+
+### Validation
+
+1. `cabal test dsl-spec` is green with four tagged negatives at four distinct tags.
+2. The plaintext negative passes `dhall type` and returns `PlaintextSecret`.
+3. Each negative's paired positive decodes; a twin that stopped decoding fails the suite.
+4. The decoder stays pure — no socket, no Vault, no filesystem read beyond the spec's own import graph.
+
+### Remaining Work
+
+None at this register. Whether a named secret exists is a live question owned by
+[Phase 29](phase_29_vault_pki.md), and the prompt write path that turns a `Prompt` reference into a readable
+one is Phase 29's too.
 
 ## Documentation Requirements
 

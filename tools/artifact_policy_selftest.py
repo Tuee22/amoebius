@@ -3,9 +3,10 @@
 
 `development_plan_standards.md` section M clause 2 requires every gate to name at least
 one committed seeded mutant it must turn red. This module is that mutant set for the
-eleven artifact-policy rules: one authored negative per rule, each asserted to be
+twelve artifact-policy rules: one authored negative per rule, each asserted to be
 reported **at its own rule**, so a rule that silently stops working fails here rather
-than passing an audit it no longer performs.
+than passing an audit it no longer performs. The count follows `policy.RULES`; adding a
+rule without a negative here leaves it unproven and the surface join reports it.
 
 The negatives drive the pure per-file scanners and the injectable audit entry points, so
 none of them touches the real worktree.
@@ -20,6 +21,7 @@ from pathlib import Path
 
 import artifact_policy as policy
 import attestation
+import attestation_negative_corpus
 import phase0_artifact_lint as legacy
 
 
@@ -149,7 +151,7 @@ def negative_r9_attestation() -> policy.Report:
         store = attestation.Store(Path(directory))
         positive = attestation.sample_bundle()
         refused = 0
-        for _name, broken, _expect in attestation.negative_corpus(positive):
+        for _name, broken, _expect in attestation_negative_corpus.negative_corpus(positive):
             if attestation.schema_check(broken):
                 refused += 1
                 continue
@@ -157,7 +159,7 @@ def negative_r9_attestation() -> policy.Report:
                 store.put(broken)
             except attestation.AttestationError:
                 refused += 1
-        total = len(attestation.negative_corpus(positive))
+        total = len(attestation_negative_corpus.negative_corpus(positive))
         if refused == total:
             report.findings.append(
                 policy.Finding("r9", "run-bundle", f"all {total} negative bundles refused")
@@ -191,6 +193,31 @@ def negative_r11_no_leak() -> policy.Report:
     return report
 
 
+def negative_r12_corpora() -> policy.Report:
+    """The three ways a corpus declaration decays: unknown rule, dead path, dead row.
+
+    The fourth shape — a corpus that suppresses the rule it declares — is the positive
+    control, and it is asserted to leave `r12` silent.
+    """
+    report = policy.Report()
+    live = policy.Corpus("tools/ledger_lint_corpus/", frozenset({"r2"}))
+    stale_rule = policy.Corpus("tools/ledger_lint_corpus/", frozenset({"r99"}))
+    absent = policy.Corpus("tools/no_such_corpus.py", frozenset({"r6"}))
+    unused = policy.Corpus("tools/attestation_negative_corpus.py", frozenset({"r5"}))
+
+    seeded = policy.Report()
+    seeded.findings.append(
+        policy.Finding("r2", "tools/ledger_lint_corpus/positive.json", "tracked JSON has the run-ledger shape")
+    )
+    policy.apply_corpora(seeded, [live])
+    if seeded.findings:
+        report.findings.append(
+            policy.Finding("r12", "positive", "a declared corpus failed to suppress its own seed")
+        )
+    policy.audit_corpus_integrity(report, [live, stale_rule, absent, unused])
+    return report
+
+
 NEGATIVES = {
     "r1": ("registry_class_unowned", negative_r1_registry),
     "r2": ("tracked_reproducible_copy", negative_r2_provenance),
@@ -203,6 +230,7 @@ NEGATIVES = {
     "r9": ("malformed_run_bundle", negative_r9_attestation),
     "r10": ("retired_predecessor_name", negative_r10_terminology),
     "r11": ("gate_leaks_output", negative_r11_no_leak),
+    "r12": ("stale_corpus_exemption", negative_r12_corpora),
 }
 
 

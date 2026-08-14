@@ -12,10 +12,6 @@ from pathlib import Path
 from typing import Any, Sequence
 
 
-EXPECTED_IMAGE = (
-    "moby/buildkit:buildx-stable-1@"
-    "sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec"
-)
 EXPECTED_CPU_NANO = 7_000_000_000
 EXPECTED_CPU_MAX = "700000 100000"
 EXPECTED_MEMORY = 7_516_192_768
@@ -64,6 +60,7 @@ def require(condition: bool, tag: str) -> None:
 
 def inspect_builder(
     container: str,
+    builder_image: str,
     cache_root: Path,
     scratch_root: Path,
     config: Path,
@@ -73,7 +70,7 @@ def inspect_builder(
     inspected = decoded[0]
     host = inspected["HostConfig"]
     require(inspected["State"]["Running"] is True, "builder-not-running")
-    require(inspected["Config"]["Image"] == EXPECTED_IMAGE, "builder-image-drift")
+    require(inspected["Config"]["Image"] == builder_image, "builder-image-drift")
     require(host["Runtime"] == "runc", "builder-runtime-not-runc")
     require(not host.get("DeviceRequests"), "builder-accelerator-exposed")
     require(host["NanoCpus"] == EXPECTED_CPU_NANO, "builder-cpu-limit-drift")
@@ -127,7 +124,7 @@ def inspect_builder(
     return {
         "schema": "amoebius.phase25.builder-boundary.v1",
         "container": container,
-        "image": EXPECTED_IMAGE,
+        "image": builder_image,
         "runtime": host["Runtime"],
         "acceleratorDeviceRequests": host.get("DeviceRequests"),
         "cpuNano": host["NanoCpus"],
@@ -147,6 +144,12 @@ def inspect_builder(
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--container", default="amoebius-phase25-buildkitd")
+    # The reference the caller resolved and started this builder from. There is deliberately
+    # no default: a constant would pin an image that need not be the one this container is
+    # running, so the drift check would compare the live builder against a stale claim.
+    parser.add_argument(
+        "--builder-image", required=True, help="the resolved BuildKit builder image reference"
+    )
     parser.add_argument("--cache-root", type=Path, required=True)
     parser.add_argument("--scratch-root", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
@@ -155,6 +158,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         result = inspect_builder(
             arguments.container,
+            arguments.builder_image,
             arguments.cache_root,
             arguments.scratch_root,
             arguments.config,

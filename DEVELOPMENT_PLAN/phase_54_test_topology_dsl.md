@@ -48,6 +48,13 @@ The scoped gate passed on 2026-08-11; full Kubernetes/provider cleanup observati
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
 gate against its source snapshot and publish external evidence without changing an authored path.
 
+**Scope amendment — 2026-08-13 (one credential type, not two).** `dhall/test/TestCredential.dhall` types its
+credential `{ secretRef : Text, testSimulation : Bool }`, and `src/Amoebius/Test/Credentials.hs` wraps a bare
+`Text` in a second `SecretRef` newtype unrelated to `Amoebius.Vault.SecretRef`. A `Text` field is precisely
+the shape the type-level rule exists to forbid, and two unrelated types of the same name mean the production
+validator cannot see the test one. This phase narrows the test-topology credential onto the shared
+`SecretRef`, keeping its existing flagged-test-simulation requirement.
+
 **Invalidated historical record:**
 
 🟡 **Scoped gate passed 2026-08-11.** The topology/credential/resource types, deterministic generator,

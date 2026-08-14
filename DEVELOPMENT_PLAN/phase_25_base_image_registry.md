@@ -41,9 +41,97 @@ All four sprints and the complete Phase-25 Register-3 gate are sealed.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+🔄 Active since 2026-08-14. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
+postcondition. Phase 24 sealed on 2026-08-14, so this is now the lowest unsealed phase and the only one that
+may take new implementation work. Closure requires the capability gate to rerun against its source snapshot
+and publish external evidence without changing an authored path.
+
+**Observed progress — 2026-08-14: Known partial.** The gate is migrated and runs; the capability it gates is
+not yet the amended one. Three of the phase's four obligations are closed and the fourth is fully scoped.
+
+*The gate runs now, and fails honestly.* `tools/phase25_gate.py` was the last phase-scale gate not built on
+`tools/gate_common.py`. It read eighteen named files out of the retired Phase-25 evidence directory, compared a
+committed ledger byte-for-byte, and pinned the index digest of a build that no longer exists — so it certified
+whoever wrote those files last, and since none of those paths exists on disk it could not run at all. It is now
+a `PhaseGate` over seven capability sides. Its evidence is a run bundle under `gen/runs/phase_25/`, the four
+sprint receipts must agree with *each other* on the index digest rather than with a constant, and the four
+universal sides pass: the ledger schema-checks, the external attestation verifies against a 1,958-file source
+snapshot, and the write guard confirms no authored path changed. The `toolchain`, `oracle`, and `static` sides
+pass; `ladder` and the live sides fail, naming what is missing.
+
+*The surface expectation exists for the first time.* `test/phase_25_surface_expectations.tsv` authors 44
+surfaces — 11 check-backed, 15 metric-backed, and one per committed mutant — so the run-time enumeration has an
+independently authored opinion to join against. The retired gate read its surface list out of an ignored
+generated root, which is not an opinion about anything.
+
+*The 24 deferral rows this phase owned are cleared at their source, not re-deferred.* Twelve `r5` rows named
+the retired evidence root; twelve `r6` rows carried a hardcoded index digest, a BuildKit image pin, an archive
+checksum, or a developer-home `cabal`. The evidence directory, index digest, builder image, and archive
+checksum are now required arguments the caller supplies from this run's own bundle; cabal, the compiler, and
+`dhall-to-json` resolve per run from the authored requirements, and every `cabal test` carries
+`--with-compiler` instead of inheriting whichever GHC the host PATH offers. The audit is clean with the rows
+gone, so nothing is deferred out of the phase that owns it.
+
+*The monocontainer amendment remains unimplemented, and is now fully specified.* The step union still offers
+exactly `CopyOci` and `BuildProduct`, so scavenging a public image is still the only way a third-party binary
+can enter; the rendered Dockerfile is 23 `FROM` stages on a CUDA devel base with no `apt-get` at all, and 35
+`supportCopies` entries carry the hand-maintained shared-library closure the amendment names as the cost of
+scavenging. What is new is that the target is now pinned by an oracle rather than by prose:
+`test/fixtures/phase25/acquisition_rungs.tsv` places all 21 baked binaries on a rung, each verified against the
+archive or the publisher for **both** arches before it was authored — `apt-cache policy` in a real
+`ubuntu:24.04` container and the `ports.ubuntu.com` arm64 `Packages` index for rung 1, and a fetched asset plus
+the publisher's own checksum manifest actually compared for rung 2.
+
+**The result that decides the amendment's shape: no binary needs the scavenge rung.** Seven reach rung 1
+(`docker-registry`, `redis-server`, `redis-tools`, `postgresql-16`, `patroni`, `openjdk-21-jre-headless`,
+`g++`), nine reach rung 2, five need rung 3, and the last-resort set is empty — so all 22 `CopyOci` steps and
+all 35 `supportCopies` entries go away together. The rung table records what each rung costs where it is not
+free: apt gives Redis 7.0.15 where the scavenged image gave 7.4.5, PostgreSQL 16.14 rather than 17.6,
+`/usr/bin/patroni` rather than `/usr/local/bin/patroni`, and `/usr/bin/redis-server` as a symlink onto the
+`redis-check-rdb` multi-call ELF rather than an ELF of its own.
+
+**Two design decisions this phase makes, recorded so the diff explains itself.**
+
+*The ladder lives in the catalog, not in the Gate-1 schema.* `dhall/amoebius/Image.dhall` carries a different
+`BakeStep` union (`CopyArtifact | InstallPackage | Configure`) that Phase 4 owns and pins in its
+`schema-module-inventory`. Adding the ladder there would reopen a sealed phase under
+[§N](development_plan_standards.md#n-reopening-and-amending-a-phase) for a change Phase 25 owns, so the arms
+land in `dhall/amoebius/BakeCatalog.dhall` alone and the two vocabularies stay separate on purpose.
+
+*The rung is read from the decoder, not from JSON.* The installed `dhall-json` has no union-preservation
+option, so a union alternative with a record payload is emitted as the bare payload and the arm name — the one
+thing the ladder side is about — is exactly what the encoding drops. The gate therefore asks the
+implementation what it decoded, through a `bake-inventory --json` command the amendment must add, and compares
+that against the committed table the implementation never reads. The subject supplies the observation; the
+oracle stays independent ([§M.3](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
+
+**Remaining work, in order.** Add the four arms to the catalog with a mandatory `lastResortReason` on
+`CopyOci`, teach `BakeInventory`/`RenderDockerfile` to decode and emit them, add `bake-inventory --json`,
+re-author the byte-exact Dockerfile golden from the intended output, re-author the build execution envelope for
+the plain-Ubuntu base — the 96 GiB scratch and 64 GiB cache provisions were sized for the CUDA devel base and
+exceed the substrate's free space — wire `mutants/phase25/scavenge-available-apt-rung.mutant` so it turns
+`last-resort-count` red, then run sprints 25.1–25.4 live and seal.
+
+**Scope amendment — 2026-08-13 (monocontainer conformance).** `image_build_doctrine.md`
+[§2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)
+has always said amoebius "does not pull or mirror public *images* for the platform services", preferring
+apt, then an official tarball, then build-from-source. `dhall/amoebius/BakeCatalog.dhall` offers exactly two
+step arms — `CopyOci` and `BuildProduct` — so the only way a third-party binary can enter is to be copied out
+of a public image, and the rendered Dockerfile is 23 `FROM` stages of public images with no `apt-get` at all,
+on an `nvidia/cuda:…-devel-ubuntu24.04` base. The doctrine's ladder is not implemented; it is advice the type
+cannot express.
+
+This phase gains the ladder as **typed arms**: `AptPackage`, `OfficialArtifact` (verified against the
+publisher's own checksum manifest resolved at build time, not a digest copied into the catalog),
+`BuildProduct`, and `CopyOci` retained as an explicit last resort that records why the rungs above it did not
+apply. The base becomes a plain Ubuntu image and the accelerator toolchain moves to the `linux-cuda` lane.
+The deliberate absence of a `RunShell` arm is retained. Extraction's real cost is already visible in the
+current golden, which hand-copies `libxml2` and `libgssapi_krb5` out of the Postgres image: scavenging a
+binary means owning its shared-library closure by hand, forever.
+
+**Ordering note.** This amendment introduces no dependency on a later phase. The in-cluster registry's read
+path stays credential-free on the node, and the Vault credential that hardens it remains Phase 29's, exactly
+as this contract already states.
 
 **Invalidated historical record:**
 
@@ -252,6 +340,16 @@ not passed unless, in addition to the above:
   re-run each gate pass and **must go red**.
 
 ## Gate integrity
+
+**Acquisition-arm criteria — added 2026-08-13.** The bake gate additionally proves, per baked binary, that
+its catalog step names the highest applicable rung: an `apt` package where one exists, otherwise an
+`OfficialArtifact` whose checksum was resolved from the publisher's own manifest during this build, otherwise
+a `BuildProduct`. Every retained `CopyOci` step carries a recorded reason, and the count of such steps is a
+pinned metric that the gate compares against an authored expectation — so a silent return to scavenging
+fails rather than passing quietly. A seeded mutant substitutes a `CopyOci` step for an available `apt` rung
+and must turn that metric red. The rendered Dockerfile's `FROM` set is checked against the base image plus
+exactly the recorded last-resort set, and the deny-all egress test already required by the `**Gate:**` line
+above continues to prove zero public-registry pulls at run time.
 
 Per [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
 the oracles below are authored and **committed in this phase's oracle-pinning sprint** — before the Phase 25 implementation exists — and

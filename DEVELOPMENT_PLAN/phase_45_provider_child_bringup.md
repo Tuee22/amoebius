@@ -308,7 +308,7 @@ bootstrap-scheduler creation, add-on cutover, and managed-authority mint for a p
 Phase-27 `Amoebius.Scheduler.*` role and its two-stage bootstrap-cutover / execution-identity-admission
 machinery (BUILT/SCOPED-VALIDATED)
 **Blocked by**: reopened numeric predecessor gates.
-**Requires**: `cloud-account` — the credentialed account a provider child is brought up inside. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-29 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-only-cleartext-and-it-is-flagged)).
+**Requires**: `cloud-account` — the credentialed account a provider child is brought up inside. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-29 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-operators-prompt-automated)).
 **Independent Validation**: against a Phase-44-deployed child, the parent
 bootstrap holder creates `amoebius-capacity-scheduler` (`pods=1`) referencing the preloaded CRI digest,
 observes the default-scheduled scheduler's exact active generation/config/root as

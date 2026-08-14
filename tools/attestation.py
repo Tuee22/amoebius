@@ -12,11 +12,14 @@ is not a gate input (`development_plan_standards.md` section S), so a bundle rec
 revision it happened to sit on only as context and is refused for a missing digest, not
 for uncommitted work.
 
-This module owns three things and nothing else:
+This module owns two things and nothing else:
 
     schema_check(bundle)   the run-bundle shape, checked before anything is stored
     Store                  a content-addressed, write-once evidence backend
-    negative_corpus        the synthetic bundles a conforming store must refuse
+
+The bundles a conforming store must refuse live in `tools/attestation_negative_corpus.py`,
+because a corpus has to contain the defect it seeds and this adapter must stay fully
+scanned by the repository audit.
 
 The default backend is a local content-addressed directory outside the repository.
 A deployment swaps it for object storage by supplying a `Store`-compatible object; the
@@ -28,7 +31,6 @@ gate only needs `put` and `verify`.
 from __future__ import annotations
 
 import argparse
-import copy
 import hashlib
 import json
 import os
@@ -187,35 +189,10 @@ def sample_bundle() -> dict:
     }
 
 
-def negative_corpus(positive: dict) -> list[tuple[str, dict, str]]:
-    """(name, bundle a conforming store must refuse, the locus it must be refused at)."""
-    corpus: list[tuple[str, dict, str]] = []
-
-    missing = copy.deepcopy(positive)
-    missing.pop("commit")
-    corpus.append(("missing_commit", missing, "schema"))
-
-    unbound = copy.deepcopy(positive)
-    unbound["source_digest"] = ""
-    corpus.append(("unbound_source", unbound, "schema"))
-
-    empty = copy.deepcopy(positive)
-    empty["checks"] = []
-    corpus.append(("no_checks", empty, "schema"))
-
-    unbound = copy.deepcopy(positive)
-    unbound["contract_digest"] = ""
-    corpus.append(("unbound_contract", unbound, "schema"))
-
-    stray = copy.deepcopy(positive)
-    stray["evidence_path"] = "DEVELOPMENT_PLAN/evidence/phase_00"
-    corpus.append(("extra_key", stray, "schema"))
-
-    return corpus
-
-
 def run_self_test() -> bool:
     import tempfile
+
+    from attestation_negative_corpus import negative_corpus
 
     ok = True
     with tempfile.TemporaryDirectory(prefix="amoebius-attest-selftest-") as directory:

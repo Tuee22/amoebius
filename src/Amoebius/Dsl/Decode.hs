@@ -9,6 +9,7 @@ module Amoebius.Dsl.Decode
   ) where
 
 import Amoebius.Dsl.Error (DecodeError (..))
+import Amoebius.Vault.SecretRef (SecretRef, promptRef, transitKeyRef, vaultSecretRef)
 import Amoebius.Dsl.Decision (distinctHostIds)
 import Amoebius.Dsl.SmartConstructors
   ( mkDaemonSetUnit
@@ -109,7 +110,7 @@ decodeClusterUnchecked file = do
         Right surfaceValue -> do
           raw <- inputStructuralTable digest surfaceValue structural
           let retained = fmap toStructuralNode (nodes raw)
-          case refineExecutions retained of
+          case refineSecretRefs retained >> refineExecutions retained of
             Left problem -> pure (Left problem)
             Right executions -> do
               let ir = ClusterIR surfaceValue (semanticHash raw) canonical retained executions
@@ -253,6 +254,63 @@ quote valueText = "\"" <> Core.escapeText valueText <> "\""
 
 toStructuralNode :: RawNode -> StructuralNode
 toStructuralNode RawNode {path, kind, value} = StructuralNode path kind value
+
+-- | The label a sensitive field carries.  One name, so the rule is decidable
+-- from the structural tree alone and does not need a per-surface schema walk.
+sensitiveLabel :: Text
+sensitiveLabel = "secretRef"
+
+-- | Refine every sensitive field into the shared 'SecretRef'.
+--
+-- Gate 1 already gives a @Text@ no inhabitant where the field is *typed*
+-- @SecretRef@.  This is the decoder's independent half: it decides the same
+-- question from the decoded value, so a config that never reached for the type
+-- is rejected too.  It stays pure — whether the named secret exists is a live
+-- question answered at admission, not here.
+refineSecretRefs :: [StructuralNode] -> Either DecodeError [SecretRef]
+refineSecretRefs structural = traverse refine sensitiveNodes
+ where
+  sensitiveNodes =
+    [ (nodePath, nodeKind, nodeValue)
+    | StructuralNode nodePath nodeKind nodeValue <- structural
+    , Just (_, label) <- [unsnoc nodePath]
+    , label == sensitiveLabel
+    ]
+
+  refine (nodePath, "Union", arm) = build nodePath arm
+  refine (nodePath, nodeKind, _) =
+    Left
+      ( PlaintextSecret
+          ( render nodePath
+              <> " holds a "
+              <> nodeKind
+              <> " value; a sensitive field carries a SecretRef, never a secret"
+          )
+      )
+
+  build nodePath arm = case arm of
+    "Vault" -> do
+      mount <- payload nodePath arm "mount"
+      path <- payload nodePath arm "path"
+      field <- payload nodePath arm "field"
+      admit nodePath (vaultSecretRef mount path field)
+    "TransitKey" -> do
+      name <- payload nodePath arm "name"
+      admit nodePath (transitKeyRef name)
+    "Prompt" -> do
+      name <- payload nodePath arm "name"
+      purpose <- payload nodePath arm "purpose"
+      admit nodePath (promptRef name purpose)
+    _ -> Left (OutOfDomainArm (render nodePath <> " names no SecretRef arm: " <> arm))
+
+  payload nodePath arm name =
+    case [value | StructuralNode candidate "Text" value <- structural, candidate == nodePath <> [arm, name]] of
+      [value] -> Right value
+      _ -> Left (SchemaMismatch (render nodePath <> " SecretRef." <> arm <> " has no " <> name <> " field"))
+
+  admit nodePath = either (Left . SchemaMismatch . (\reason -> render nodePath <> ": " <> reason)) Right
+
+  render nodePath = Text.intercalate "." nodePath
 
 refineExecutions :: [StructuralNode] -> Either DecodeError [SomeExecutionUnit]
 refineExecutions structural = do

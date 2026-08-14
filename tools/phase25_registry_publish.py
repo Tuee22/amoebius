@@ -25,7 +25,6 @@ from typing import Any, BinaryIO, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_25"
 ARCHIVE = Path("/var/tmp/amoebius-phase25-scratch/oci/amoebius-phase25.oci.tar")
 PCAP = Path("/var/tmp/amoebius-phase25-publish.pcap")
 NODE = "amoebius-phase24-control-plane"
@@ -424,16 +423,16 @@ def verify_ephemeral_docker_config(capability: str, proof: str, tag: str, index_
         shutil.rmtree(config_directory)
 
 
-def publish() -> dict[str, Any]:
-    artifact = json.loads((EVIDENCE / "image-artifact.json").read_text(encoding="utf-8"))
-    preflight = json.loads((EVIDENCE / "sprint-25.2-preflight.json").read_text(encoding="utf-8"))
+def publish(evidence: Path) -> dict[str, Any]:
+    artifact = json.loads((evidence / "image-artifact.json").read_text(encoding="utf-8"))
+    preflight = json.loads((evidence / "sprint-25.2-preflight.json").read_text(encoding="utf-8"))
     domain_oracle = STANDUP.oracle()
-    generated = STANDUP.manifest(preflight, domain_oracle)
+    index_digest = str(artifact["imageIndexDigest"])
+    generated = STANDUP.manifest(preflight, domain_oracle, evidence, index_digest)
     capability = str(generated["capability"])
     proof = str(generated["publicationProof"])
     tag = str(generated["publicationTag"])
     auth = authorization(capability, proof)
-    index_digest = str(artifact["imageIndexDigest"])
     if tag == "latest" or ":latest" in f"registry.amoebius.invalid/{REPOSITORY}:{tag}":
         raise PublishFailure("latest-reference")
     objects = {str(row["digest"]): row for row in artifact["registryObjects"]}
@@ -598,20 +597,20 @@ def publish() -> dict[str, Any]:
     }
 
 
-def verify_current() -> dict[str, Any]:
-    recorded = json.loads((EVIDENCE / "sprint-25.3-publication.json").read_text(encoding="utf-8"))
+def verify_current(evidence: Path) -> dict[str, Any]:
+    recorded = json.loads((evidence / "sprint-25.3-publication.json").read_text(encoding="utf-8"))
     if (
         recorded.get("containerdPublicRegistryLines") != 0
         or recorded.get("publicRegistryTcpConnections") != 0
     ):
         raise PublishFailure("recorded-publication-public-registry-observation")
-    preflight = json.loads((EVIDENCE / "sprint-25.2-preflight.json").read_text(encoding="utf-8"))
+    preflight = json.loads((evidence / "sprint-25.2-preflight.json").read_text(encoding="utf-8"))
     domain_oracle = STANDUP.oracle()
-    generated = STANDUP.manifest(preflight, domain_oracle)
+    index_digest = str(recorded["indexDigest"])
+    generated = STANDUP.manifest(preflight, domain_oracle, evidence, index_digest)
     capability = str(generated["capability"])
     proof = str(generated["publicationProof"])
     tag = str(generated["publicationTag"])
-    index_digest = str(recorded["indexDigest"])
     logs_before = registry_logs()
     with STANDUP.port_forward("distribution-read", 15000, 5000):
         state = tag_state(15000, tag)
@@ -648,9 +647,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--verify-only", action="store_true")
+    # The bundle this publication reads its audited artifact and preflight from is supplied
+    # by the caller. There is deliberately no default: a default names a location, and
+    # whatever a previous run left there would decide what gets published instead of the
+    # run in progress.
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
     arguments = parser.parse_args(argv)
     try:
-        result = verify_current() if arguments.verify_only else publish()
+        result = (
+            verify_current(arguments.evidence)
+            if arguments.verify_only
+            else publish(arguments.evidence)
+        )
         encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
         if arguments.output is None:
             print(encoded, end="")

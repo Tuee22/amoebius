@@ -1,0 +1,58 @@
+# The authored acquisition-rung expectation for the Phase-25 bake catalog.
+#
+# `image_build_doctrine.md` §7 orders the ladder: an `apt` package where an official one
+# exists, otherwise an official multi-arch artifact verified against the publisher's own
+# checksum manifest resolved at build time, otherwise build-from-source. Extracting a binary
+# out of a public image sits *below* rung 3, and every retained use records why the rungs
+# above it did not apply.
+#
+# §M.3: this table is the reference side, authored independently of `BakeCatalog.dhall` and
+# never imported from it. It is authored *before* the catalog gains its arms, so the
+# chronology is Git-established. A catalog reconciled against its own value would pass for any
+# catalog, including one that scavenges everything.
+#
+# Every row was verified against the publisher or the archive, for BOTH linux/amd64 and
+# linux/arm64, before it was written here — not recalled. The apt rows were confirmed against
+# `apt-cache policy` in a real `ubuntu:24.04` container and against the `ports.ubuntu.com`
+# arm64 `Packages` index; the official-artifact rows were confirmed by fetching the asset and
+# the publisher's own checksum manifest and running the checksum comparison.
+#
+# The result worth stating plainly: **no binary needs the scavenge rung.** The catalog this
+# table describes has zero `CopyOci` steps, against 22 in the pre-amendment catalog, so the
+# 35 hand-maintained `supportCopies` entries that carried other images' shared-library
+# closures go away with them.
+#
+# name<TAB>rung<TAB>what was verified, and for a CopyOci row why the rungs above did not apply
+
+# --- rung 1: apt, where Ubuntu 24.04 ships the binary for both arches ------------------
+distribution	AptPackage	docker-registry 2.8.2+ds1-1ubuntu0.24.04.3, identical on both arches (noble-updates/universe); ships /usr/bin/docker-registry
+redis-server	AptPackage	redis-server 5:7.0.15-1ubuntu0.24.04.4, identical on both arches (noble-updates/universe); apt gives 7.0.15 where the scavenged image gave 7.4.5, and /usr/bin/redis-server is a symlink onto the redis-check-rdb multi-call ELF rather than an ELF of its own
+redis-cli	AptPackage	redis-tools 5:7.0.15-1ubuntu0.24.04.4, identical on both arches (noble-updates/universe); a real ELF, and the same package supplies redis-server's multi-call target
+postgres	AptPackage	postgresql-16 16.14-0ubuntu0.24.04.1, identical on both arches (noble-updates/main); apt on noble means 16.14, not the 17.6 that was scavenged, and it replaces the hand-copied 23-library closure taken out of postgres:17.6-bookworm
+patroni	AptPackage	patroni 3.2.2-2, identical on both arches (noble/universe); apt installs /usr/bin/patroni, not the /usr/local/bin/patroni the scavenged step declared, and it stays a Launcher (#!/usr/bin/python3)
+temurin	AptPackage	openjdk-21-jre-headless 21.0.11+10-1~24.04.2, identical on both arches (noble-updates/main); the JVM the doctrine calls a multi-arch Temurin requirement is in the archive
+g++	AptPackage	g++ 13.3.0-6ubuntu2~24.04.1 (noble/main); the CUDA devel image it was scavenged from leaves with the accelerator lane
+
+# --- rung 2: the publisher's own multi-arch artifact + its own checksum manifest -------
+minio	OfficialArtifact	dl.min.io release binaries for both arches with the publisher's sibling .sha256sum
+vault	OfficialArtifact	releases.hashicorp.com zip for both arches with the release's own SHA256SUMS
+prometheus	OfficialArtifact	github prometheus/prometheus v3.5.0 tarballs for both arches; sha256sums.txt in the same release covers both and was checked with sha256sum -c
+alertmanager	OfficialArtifact	github prometheus/alertmanager v0.28.1 tarballs for both arches with the release's sha256sums.txt
+thanos	OfficialArtifact	github thanos-io/thanos v0.39.2 tarballs for both arches with the release's checksum manifest
+envoy	OfficialArtifact	the published Envoy release binaries for both arches; from-source is Bazel, which amoebius does not adopt
+grafana	OfficialArtifact	the Grafana download tarballs for both arches with the publisher's own checksum
+keycloak	OfficialArtifact	github keycloak/keycloak 26.3.2 distribution tarball, arch-independent JVM payload, with the release's checksum
+pulsar	OfficialArtifact	the Apache dist archive for 4.0.6 with Apache's own .sha512, arch-independent JVM payload
+
+# --- rung 3: built from source, because no package and no official binary exists -------
+envoy-gateway	BuildProduct	published as an image only; the control plane is Go and builds for both arches
+metallb-controller	BuildProduct	published as an image only; Go, builds for both arches
+metallb-speaker	BuildProduct	published as an image only; Go, builds for both arches
+percona-postgresql-operator	BuildProduct	published as an image only; Go, builds for both arches
+pgadmin	BuildProduct	the Python distribution is published for pip/apt-repo consumption rather than as a per-arch binary, and the scavenged image carried a musl loader and a wholesale /usr/lib/*.so* copy
+amoebius-jit-build-resolver	BuildProduct	amoebius's own binary; the one thing this phase builds rather than acquires
+
+# --- rung 4: scavenge from a public image ---------------------------------------------
+# Deliberately empty. A row here must state why rungs 1-3 do not apply, and the gate pins
+# this count: `mutants/phase25/scavenge-available-apt-rung.mutant` substitutes a CopyOci step
+# for redis-server's available apt rung and must turn `last-resort-count` red.

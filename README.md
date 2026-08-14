@@ -49,12 +49,29 @@ ignore coverage are owned by the
 Python interpreter bytecode is the one source-adjacent cache exception: Python uses its normal cache behavior,
 while `.gitignore` and `.dockerignore` exclude every `__pycache__` directory and bytecode suffix.
 
-**Observed implementation — 2026-08-11 committed-baseline audit.** The clean, pushed tree is not yet
-policy-conformant. It still depends on ignored authored compatibility patches, tracks reproducible test
-material and resolution/integrity observations, and cannot run the complete Phase-0 verifier from a fresh
-clone. The exact current and historical divergences, their owners, and their closure conditions are recorded
-in the [legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md); the
-[development-plan tracker](./DEVELOPMENT_PLAN/README.md#current-implementation-audit) controls migration order.
+Secrets never appear in the DSL. A sensitive field carries a typed *reference* — a name — and the value lives
+only in the cluster's Vault: the CLI prompts the operator and writes straight into Vault, so no cleartext
+secret is ever at rest on the filesystem in production. Because admitting a spec proves that every secret it
+names already exists in Vault, and refuses before any effect otherwise, **Vault necessarily precedes every
+live provider deployment**. The typed reference, the prompt-to-Vault path, the admission proof, and the
+test-only seam that automates the prompt are owned by the
+[Vault/PKI doctrine](./documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value).
+
+Every service the cluster runs ships in **one image amoebius builds** — a single Ubuntu-based container
+carrying every third-party service binary, installed by preference from `apt`, then an official artifact, then
+source. No workload pulls from a public registry, and there is one Dockerfile, rendered from a typed bake
+catalog rather than hand-maintained. The build/publish contract, the acquisition ladder, and the bounded
+host-bootstrap exception are owned by the
+[image-build doctrine](./documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster).
+
+**Observed implementation — refreshed 2026-08-13.** The pre-cluster band (Phases 0–23) is sealed, each against
+a recorded source snapshot with a verified external attestation. Phase 24's live capability is established but
+unsealed, and Phases 4 and 5 are reopened by the secrets amendment above. The tree is not policy-conformant as
+a whole: later phases still track reproducible test material and resolution/integrity observations. The exact
+current and historical divergences, their owners, and their closure conditions are recorded in the
+[legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md); the
+[development-plan tracker](./DEVELOPMENT_PLAN/README.md#current-implementation-audit) controls migration order
+and is the authority on status.
 
 The binary manages Kubernetes cluster lifecycle and interprets checked `.dhall` values into opinionated
 deployments and bounded low-code applications. A low-code app is finite `UiSource` data compiled into matching

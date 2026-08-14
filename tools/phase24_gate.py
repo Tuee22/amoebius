@@ -87,10 +87,13 @@ EXPECTED_RESULTS = {
     "host-engine-throttle": "observed-carve-fits",
     "process-envelopes": "7/7-bounded",
     "leak-free-postflight": "pass",
-    "mutants": "5/6-red",
-    "split-runtime-boundary": "UNVERIFIED",
-    "etcd-transition-highwater": "UNVERIFIED",
-    "audit-system-log-highwater": "UNVERIFIED",
+    # Amended 2026-08-13 from intent: the pristine run now prepares split backing and
+    # brings the cluster up on it after the Unified lifecycle is swept, so M6 and the two
+    # high-water surfaces have an observation of their own instead of being unreachable.
+    "mutants": "6/6-red",
+    "split-runtime-boundary": "distinct-nodefs-shared-imagefs",
+    "etcd-transition-highwater": "bounded",
+    "audit-system-log-highwater": "bounded",
 }
 
 SURFACE_METRIC = {
@@ -230,6 +233,16 @@ def measure(evidence: Path, mutant_results: Mapping[str, str]) -> dict[str, str]
 
     red = sum(1 for outcome in mutant_results.values() if outcome.startswith("red:"))
 
+    # The three surfaces that only a SplitRuntime bring-up can decide. Each is measured
+    # from evidence this run produced; absent that evidence they stay UNVERIFIED rather
+    # than being reported from a layout where they could not have failed.
+    roles = read_role_identities(evidence / "pristine-split-runtime-readback.tsv")
+    boundary = "UNVERIFIED"
+    if roles:
+        distinct = roles.get("nodefs") != roles.get("imagefs-content")
+        shared = roles.get("imagefs-content") == roles.get("imagefs-snapshots")
+        boundary = "distinct-nodefs-shared-imagefs" if distinct and shared else "aliased"
+
     return {
         "managed-tools-absent": f"{absent}/{len(EXPECTED_ABSENT)}-absent",
         "single-ready-node": f"{ready}/{len(ready_rows)}-Ready",
@@ -246,10 +259,30 @@ def measure(evidence: Path, mutant_results: Mapping[str, str]) -> dict[str, str]
         "process-envelopes": f"{bounded}/{len(envelopes)}-bounded",
         "leak-free-postflight": "pass" if "leak-sweep\tpass" in postflight else "leaked",
         "mutants": f"{red}/{len(EXPECTED_MUTANTS)}-red",
-        "split-runtime-boundary": "UNVERIFIED",
-        "etcd-transition-highwater": "UNVERIFIED",
-        "audit-system-log-highwater": "UNVERIFIED",
+        "split-runtime-boundary": boundary,
+        "etcd-transition-highwater": highwater_verdict(evidence / "pristine-etcd-transition-highwater.tsv"),
+        "audit-system-log-highwater": highwater_verdict(evidence / "pristine-audit-system-log-highwater.tsv"),
     }
+
+
+def read_role_identities(readback: Path) -> dict[str, str]:
+    if not readback.is_file():
+        return {}
+    rows = [row.split("\t") for row in readback.read_text(encoding="utf-8").splitlines()[1:] if row]
+    return {row[0]: row[3] for row in rows if len(row) > 3}
+
+
+def highwater_verdict(observation: Path) -> str:
+    """`bounded` when the role's own finite backing held it, from this run's readback."""
+    if not observation.is_file():
+        return "UNVERIFIED"
+    for row in observation.read_text(encoding="utf-8").splitlines():
+        fields = row.split("\t")
+        if len(fields) < 4:
+            continue
+        used, size = int(fields[2]), int(fields[3])
+        return "bounded" if 0 < size and used < size else "overrun"
+    return "UNVERIFIED"
 
 
 def surface_decisions(
@@ -341,7 +374,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         results["live"] = True
 
         print("\nmutant side — the committed domain, each decided by its own observation\n")
-        mutation = run((sys.executable, str(ROOT / "tools/phase24_mutation_gate.py")))
+        mutation = run((
+            sys.executable, str(ROOT / "tools/phase24_mutation_gate.py"),
+            "--split-runtime-readback", str(evidence / "pristine-split-runtime-readback.tsv"),
+        ))
         for line in mutation.stdout.splitlines():
             if line.startswith("M") and "\t" in line:
                 label, outcome = line.split("\t", 1)

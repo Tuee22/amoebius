@@ -19,7 +19,6 @@ from typing import Any, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_25"
 NODE = "amoebius-phase24-control-plane"
 KUBECONFIG = Path.home() / ".amoebius/phase24/kubeconfig"
 FIXTURE = ROOT / "test/fixtures/phase25/public_registry_endpoints.txt"
@@ -27,8 +26,7 @@ EXPECTED_FAILURE = ROOT / "test/fixtures/phase25/expected_pull_failure.txt"
 NAMESPACE = "amoebius-phase25-gate"
 MUTANT_NAMESPACE = "amoebius-phase25-mutant"
 BUSYBOX = "docker.io/library/busybox:1.36.1"
-INDEX_DIGEST = "sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4"
-IN_CLUSTER_IMAGE = f"registry.amoebius.invalid:5000/amoebius/base@{INDEX_DIGEST}"
+IN_CLUSTER_REPOSITORY = "registry.amoebius.invalid:5000/amoebius/base"
 FIREWALL_COMMENT = "amoebius-phase25-public-registry-deny"
 PCAP = Path("/var/tmp/amoebius-phase25-no-public-pull.pcap")
 
@@ -495,12 +493,15 @@ def established_public_connections(packet_text: str, addresses: set[str]) -> tup
     return attempts, established
 
 
-def run_enforced_gate(endpoints: dict[str, list[str]], firewall_rules: int) -> dict[str, Any]:
+def run_enforced_gate(
+    endpoints: dict[str, list[str]], firewall_rules: int, index_digest: str
+) -> dict[str, Any]:
     namespace_absent(NAMESPACE)
     namespace = {"apiVersion": "v1", "kind": "Namespace", "metadata": {"name": NAMESPACE}}
+    in_cluster_image = f"{IN_CLUSTER_REPOSITORY}@{index_digest}"
     positive = pod(
         "in-cluster-pull-canary",
-        IN_CLUSTER_IMAGE,
+        in_cluster_image,
         ["/usr/bin/redis-cli", "--version"],
     )
     negative = pod(
@@ -539,11 +540,11 @@ def run_enforced_gate(endpoints: dict[str, list[str]], firewall_rules: int) -> d
         raise GateFailure(f"public-registry-connection-established:{established}")
     statuses = positive_observed["status"]["containerStatuses"]
     image_id = str(statuses[0].get("imageID", ""))
-    if INDEX_DIGEST not in image_id:
+    if index_digest not in image_id:
         raise GateFailure(f"in-cluster-image-id:{image_id}")
     logs_after = registry_logs()
     registry_delta = logs_after[len(logs_before):] if logs_after.startswith(logs_before) else logs_after
-    if INDEX_DIGEST not in registry_delta or "ns=registry.amoebius.invalid%3A5000" not in registry_delta:
+    if index_digest not in registry_delta or "ns=registry.amoebius.invalid%3A5000" not in registry_delta:
         raise GateFailure("in-cluster-registry-read-not-observed")
     journal = docker_exec(
         "journalctl",
@@ -560,7 +561,7 @@ def run_enforced_gate(endpoints: dict[str, list[str]], firewall_rules: int) -> d
     result = {
         "positive": {
             "phase": positive_observed["status"]["phase"],
-            "image": IN_CLUSTER_IMAGE,
+            "image": in_cluster_image,
             "imageId": image_id,
             "registryReadObserved": True,
         },
@@ -586,10 +587,10 @@ def run_enforced_gate(endpoints: dict[str, list[str]], firewall_rules: int) -> d
     return result
 
 
-def gate() -> dict[str, Any]:
+def gate(evidence: Path, index_digest: str) -> dict[str, Any]:
     STANDUP.observe_backend_firewall()
-    publication = json.loads((EVIDENCE / "sprint-25.3-publication.json").read_text(encoding="utf-8"))
-    standup = json.loads((EVIDENCE / "sprint-25.2-standup.json").read_text(encoding="utf-8"))
+    publication = json.loads((evidence / "sprint-25.3-publication.json").read_text(encoding="utf-8"))
+    standup = json.loads((evidence / "sprint-25.2-standup.json").read_text(encoding="utf-8"))
     if publication["rerunMutatingRequests"] != 0:
         raise GateFailure("publication-rerun-mutated")
     remove_public_firewall()
@@ -597,7 +598,7 @@ def gate() -> dict[str, Any]:
     endpoints = resolve_endpoints()
     firewall_rules = install_public_firewall(endpoints)
     wiring = configure_in_cluster_registry()
-    enforced = run_enforced_gate(endpoints, firewall_rules)
+    enforced = run_enforced_gate(endpoints, firewall_rules, index_digest)
     return {
         "schema": "amoebius.phase25.sprint25.4-no-public-pull.v1",
         "capturedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -612,16 +613,16 @@ def gate() -> dict[str, Any]:
         "standupPublicRegistryTcpConnections": standup["publicRegistryTcpConnections"],
         "publicationPublicRegistryTcpConnections": publication["publicRegistryTcpConnections"],
         "publicationRerunMutatingRequests": publication["rerunMutatingRequests"],
-        "indexDigest": INDEX_DIGEST,
+        "indexDigest": index_digest,
     }
 
 
-def verify_current() -> dict[str, Any]:
-    recorded = json.loads((EVIDENCE / "sprint-25.4-no-public-pull.json").read_text(encoding="utf-8"))
+def verify_current(evidence: Path, index_digest: str) -> dict[str, Any]:
+    recorded = json.loads((evidence / "sprint-25.4-no-public-pull.json").read_text(encoding="utf-8"))
     endpoints = resolve_endpoints()
     firewall_rules = install_public_firewall(endpoints)
     wiring = configure_in_cluster_registry()
-    enforced = run_enforced_gate(endpoints, firewall_rules)
+    enforced = run_enforced_gate(endpoints, firewall_rules, index_digest)
     return {
         "schema": "amoebius.phase25.sprint25.4-current-verification.v1",
         "verifiedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -631,7 +632,7 @@ def verify_current() -> dict[str, Any]:
         "standupPublicRegistryTcpConnections": recorded["standupPublicRegistryTcpConnections"],
         "publicationPublicRegistryTcpConnections": recorded["publicationPublicRegistryTcpConnections"],
         "publicationRerunMutatingRequests": recorded["publicationRerunMutatingRequests"],
-        "indexDigest": INDEX_DIGEST,
+        "indexDigest": index_digest,
     }
 
 
@@ -639,9 +640,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--verify-only", action="store_true")
+    # The bundle holding this run's prior-sprint observations is supplied by the caller.
+    # There is deliberately no default: a default names a location, and whatever a previous
+    # run left there would decide this gate instead of the run in progress.
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    # The digest is the caller's for the same reason: the canary must pull the index this
+    # run built, never a constant pinning a build that no longer exists.
+    parser.add_argument("--index-digest", required=True, help="the index digest this run produced")
     arguments = parser.parse_args(argv)
     try:
-        result = verify_current() if arguments.verify_only else gate()
+        result = (
+            verify_current(arguments.evidence, arguments.index_digest)
+            if arguments.verify_only
+            else gate(arguments.evidence, arguments.index_digest)
+        )
         encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
         if arguments.output is None:
             print(encoded, end="")

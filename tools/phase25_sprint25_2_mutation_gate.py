@@ -4,15 +4,20 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
 from typing import Sequence
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
 
 ROOT = Path(__file__).resolve().parents[1]
-CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 MUTANTS = ROOT / "mutants/phase25"
 MUTANT_CASES = (
     (
@@ -43,10 +48,24 @@ def fixture(name: str) -> dict[str, str]:
     return rows
 
 
+@functools.cache
+def build_tools() -> tuple[str, str]:
+    """Resolve cabal and the compiler per run from the authored requirements.
+
+    Passing the resolved compiler explicitly matters as much as resolving cabal: an
+    invocation without it inherits whichever GHC the host's PATH happens to offer, which
+    need not satisfy the authored range at all.
+    """
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    return resolved["cabal"]["path"], resolved["ghc"]["path"]
+
+
 def cabal_test(*flags: str) -> subprocess.CompletedProcess[str]:
+    cabal, compiler = build_tools()
     return subprocess.run(
         (
-            CABAL,
+            cabal,
+            f"--with-compiler={compiler}",
             "test",
             "phase25-image-spec",
             *flags,

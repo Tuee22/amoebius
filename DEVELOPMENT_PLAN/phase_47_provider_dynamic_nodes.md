@@ -345,7 +345,7 @@ move (including the broadened sweep) marks that layer **UNVERIFIED**, never gree
 (declarative node-set reconcile), `amoebius-pulumi/src/Amoebius/Pulumi/NodeGroup.hs` (Pulumi add/drain of
 EC2/managed nodes), and `amoebius-runtime/test/provider/Phase47ContractSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
-**Requires**: `cloud-account` — the account whose node quota this gate scales against. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-29 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-only-cleartext-and-it-is-flagged)).
+**Requires**: `cloud-account` — the account whose node quota this gate scales against. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-29 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-operators-prompt-automated)).
 **Independent Validation**: a `.dhall`-declared node rule (load /
 workflow-completion) drives the live node set toward its desired shape by choosing only a declared
 `ProviderNodeClass` whose complete capacity/capability shape can host the pending `ResourceEnvelope`;

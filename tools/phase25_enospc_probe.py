@@ -18,10 +18,6 @@ DOCKER = "/usr/bin/docker"
 SUDO = "/usr/bin/sudo"
 ROOT = Path(__file__).resolve().parents[1]
 BUILDKIT_CONFIG = ROOT / "test/fixtures/phase25/buildkitd.toml"
-IMAGE = (
-    "moby/buildkit:buildx-stable-1@"
-    "sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec"
-)
 MEMORY_BYTES = 7_516_192_768
 EXPECTED_MARKERS = ("no space left on device", "enospc")
 
@@ -111,6 +107,7 @@ def require_enospc(result: subprocess.CompletedProcess[str], scenario: str) -> s
 
 def scenario(
     root: Path,
+    image: str,
     name: str,
     worker_bytes: int,
     payload_bytes: int,
@@ -151,7 +148,7 @@ def scenario(
                 "--mount", f"type=bind,source={socket_root},target=/run/phase25",
                 "--mount",
                 f"type=bind,source={BUILDKIT_CONFIG},target=/etc/buildkit/buildkitd.toml,readonly",
-                IMAGE, "--addr", "unix:///run/phase25/buildkitd.sock",
+                image, "--addr", "unix:///run/phase25/buildkitd.sock",
                 "--group", str(os.getgid()),
                 "--config", "/etc/buildkit/buildkitd.toml",
             )
@@ -201,17 +198,23 @@ def scenario(
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--evidence", type=Path)
+    # The disposable builders this probe starts run the image the caller resolved for this
+    # run. There is deliberately no default: a constant would pin a build that no longer
+    # exists, and the boundary would then be proven against an image nobody is building on.
+    parser.add_argument(
+        "--builder-image", required=True, help="the resolved BuildKit builder image reference"
+    )
     arguments = parser.parse_args(argv)
     try:
         with tempfile.TemporaryDirectory(prefix="amoebius-phase25-enospc-", dir="/var/tmp") as temporary:
             root = Path(temporary)
             results = [
-                scenario(root, "scratch", 536_870_912, 805_306_368, None),
-                scenario(root, "cache", 1_073_741_824, 67_108_864, 16_777_216),
+                scenario(root, arguments.builder_image, "scratch", 536_870_912, 805_306_368, None),
+                scenario(root, arguments.builder_image, "cache", 1_073_741_824, 67_108_864, 16_777_216),
             ]
         evidence = {
             "schema": "amoebius.phase25.builder-enospc.v1",
-            "image": IMAGE,
+            "image": arguments.builder_image,
             "results": results,
         }
         encoded = json.dumps(evidence, indent=2, sort_keys=True) + "\n"

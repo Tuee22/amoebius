@@ -45,16 +45,32 @@ the Lima and WSL2 command plans remain portability equivalents for their corresp
 
 ## Phase Status
 
-🔄 Active — artifact migration. The capability is established and the migrated gate passes on all ten
-sides, but the phase is **not Done**: one artifact-hygiene obligation it owns is still open.
+✅ Done — sealed 2026-08-14. All ten sides of `python3 tools/phase24_gate.py --execute` pass against a newly
+materialized pristine Incus guest, every one of the six committed mutants is red from its own observation, and
+all 28 surfaces join to the run's enumeration with none left UNVERIFIED.
 
-**Reverse transition — 2026-08-13.** This phase was briefly marked Done on the strength of the live run and
-then returned to Active the same day, before any commit, because the seal was wrong. `pb/bootstrap_execution_envelope.json`
-tracks a package integrity digest beside its source, which rule `r6` reports and
-[§S clause 5](development_plan_standards.md#s-universal-artifact-hygiene-gate) says may be deferred to the
-phase that owns it and **never out of** that phase. Phase 24 is the owner, so the finding has to close before
-Phase 24 does; deferring it past this phase's own closure is the one thing the deferral mechanism forbids.
-The row is restored to `tools/migration_allowlist.tsv` and the Phase-0 policy audit is green again.
+**The two obligations that had kept it open are both closed.**
+
+*The tracked integrity pin.* `pb/bootstrap_execution_envelope.json` carried a package integrity digest beside
+its source, which rule `r6` reports and [§S clause 5](development_plan_standards.md#s-universal-artifact-hygiene-gate)
+says may be deferred *to* the phase that owns it and **never out of** it. The envelope now carries only the
+bounded capacity requirements and `load_envelope` rejects it outright if a resolution key reappears, rather
+than reading around one. `pb/pb/bootstrap_toolchain.py` resolves ghcup, kubectl, and kind per run from the
+authored requirements — newest release satisfying the requirement, verified against the **publisher's own**
+checksum fetched in the same run — and asks the installed ghcup which ghc and cabal it can supply. The tool
+candidate paths lost their version stamps too, so a tool already present is admitted by checking it against
+the authored requirement instead of by a filename that quietly stops matching. The deferral row is gone from
+`tools/migration_allowlist.tsv` and the Phase-0 audit is clean without it. The live run resolved cabal to
+3.18.1.0 where the deleted pin said 3.16.1.0, and amoebius built and bootstrapped under it unchanged.
+
+*The unreachable mutant.* M6 swaps the nodefs identity into the snapshot role, so it is only decidable where
+those roles have different identities. The guest prepared Unified backing, where all three share one
+filesystem, so M6 and the `split-runtime-boundary`, `etcd-transition-highwater`, and
+`audit-system-log-highwater` surfaces had no observation. The pristine run now prepares two loop-backed ext4
+filesystems and brings the cluster up a second time on `--layout=split-runtime`, after the Unified lifecycle is
+swept, reading each role's filesystem id from inside the node's own mount namespace. The readback separated
+them — the kubelet on one device, containerd's content store and snapshotter together on another — and the two
+high-water surfaces are measured against their role's own finite backing instead of declared unknown.
 
 **What the live run did establish — 2026-08-13.** A newly materialized Incus guest started with all seven
 managed tools absent; `pb bootstrap --distro=kind` resolved a toolchain, built the binary, and `exec`ed
@@ -89,18 +105,24 @@ the same stopped-node divergence the production path repairs, and required to le
 production planner then repairs that identical start without recreating the container, so the mutant result
 and its control come from one run against one cluster.
 
-**Two surfaces are honestly UNVERIFIED, and M6 with them.** M6 swaps the nodefs identity into the snapshot
-role, which is only detectable where those roles have different identities — the SplitRuntime layout. The
-pristine guest prepares Unified backing, where all three roles share one filesystem and the swap is
-invisible. Reporting M6 red from a Unified run would report a check that could not have failed, so the
-mutant battery is 5/6 and `split-runtime-boundary`, `etcd-transition-highwater`, and
-`audit-system-log-highwater` carry UNVERIFIED metrics. The gap is recorded against Phase 24 in the legacy
-register.
+**A mutant that could not have failed is worse than a missing one.** While wiring the SplitRuntime readback in,
+the M6 observer turned out to carry a third check identical to its first, so that clause could never fire: M6
+was reported red whenever the readback was merely well-formed, and the mutation was never applied to anything.
+Re-running the gate alone would therefore have flipped the battery to 6/6 on the strength of a check incapable
+of failing — the "passed by a stub" outcome [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
+exists to prevent. The observer now builds the swapped mapping — the nodefs identity moved into the snapshot
+role, every value still a real filesystem id — and requires one shared role-mapping predicate to reject it,
+with the same predicate deciding the reference readback so a non-distinct layout fails as a bad control rather
+than passing as a good mutant.
 
-**Observed artifact migration — 2026-08-11:** `pb/bootstrap_execution_envelope.json` mixes authored capacity
-requirements with fixed tool versions, download URLs, and integrity values. Sprint 24.3 must split those
-classes: the bounded resource envelope remains authored, while Phase-1-compatible resolution and integrity
-observations are generated per run.
+**Artifact migration — implemented 2026-08-13, live re-run outstanding.** `pb/bootstrap_execution_envelope.json`
+mixed authored capacity requirements with fixed tool versions, download URLs, and integrity values. The classes
+are now split: the bounded resource envelope stays authored and the envelope is rejected if a resolution key
+returns, while `pb/pb/bootstrap_toolchain.py` resolves ghcup, kubectl, and kind per run from the authored
+requirements, verifies each download against the publisher's own checksum, and writes what it observed to
+`gen/toolchain/`. `ghc` and `cabal` come from whatever the installed ghcup offers that satisfies their authored
+ranges. The `r6` deferral row is removed from `tools/migration_allowlist.tsv` and the Phase-0 audit is clean
+without it.
 
 **Invalidated historical record:**
 
@@ -309,7 +331,7 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
 
 ## Sprint 24.1: Live substrate detection ✅
 
-**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. The phase seal waits on the bootstrap envelope's tracked integrity pins
+**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. Sealed 2026-08-14 with the phase
 the pristine no-device Incus guest returns and runs `linux-cpu`.
 **Implementation**: `src/Amoebius/Host/Substrate.hs` (target: the total `classify` plus
 the three-read `detect`)
@@ -361,7 +383,7 @@ hardware/provider routes are independently pinned.
 
 ## Sprint 24.2: No-`PATH` lazy tool-ensure — closed enum, `AbsExe`, install-and-verify ✅
 
-**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. The phase seal waits on the bootstrap envelope's tracked integrity pins
+**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. Sealed 2026-08-14 with the phase
 snapshot-bound installer/build cgroup readback pass on the `linux-cuda` parent's pristine CPU guest.
 **Implementation**: `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs`
 (target: the `HostTool` enum + `AbsExe` newtype + `HostConfig` tool map + the `installAndVerify` driver)
@@ -422,7 +444,7 @@ bootstrap coordinator run reads `cpu.max=350000 100000` and `memory.max=75161927
 
 ## Sprint 24.3: The Python `pb` bootstrap coordinator (package-manager root → toolchain → build → `exec`) ✅
 
-**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. The phase seal waits on the bootstrap envelope's tracked integrity pins
+**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. Sealed 2026-08-14 with the phase
 CPU/RSS cgroup and disk boundary, and `exec`-handed off; the identical rerun performed no install/build mutation.
 **Implementation**: `pb/pyproject.toml`, `pb/pb/cli.py`, `pb/pb/bootstrap_coordinator.py` (the
 **bootstrap coordinator** mode delivered here; the two-mode CLI was completed by the delivered admin-REST client
@@ -488,12 +510,19 @@ one `linux-cpu` route per the one-substrate rule.
 
 ### Remaining Work
 
-Split `pb/bootstrap_execution_envelope.json`, remove its fixed resolution and integrity fields, and connect the
-bootstrap coordinator to Phase 1's run-local resolver before rerunning the live gate.
+The split is done; the live re-run against it is not. `pb/bootstrap_execution_envelope.json` now carries only
+the bounded capacity envelope, and `load_envelope` refuses it outright if a version, URL, or digest key
+reappears rather than reading around one. `pb/pb/bootstrap_toolchain.py` resolves ghcup, kubectl, and kind per
+run from the authored requirements in `toolchain/requirements.json` — newest release satisfying the
+requirement, verified against the **publisher's own** checksum fetched in the same run — and asks the installed
+ghcup which ghc and cabal it can supply. Nothing resolved is written back: the observations land in
+`gen/toolchain/bootstrap.json`. The tool candidate paths lost their version stamps too, so an already-present
+tool is admitted by checking it against the authored requirement rather than by a filename that quietly stops
+matching. What remains is to rerun the live gate on a pristine guest against this path and reseal.
 
 ## Sprint 24.4: The in-binary `bootstrap` command — idempotent single-node kind bring-up ✅
 
-**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. The phase seal waits on the bootstrap envelope's tracked integrity pins
+**Status**: Capability re-established by the migrated gate against a pristine guest; the sprint's committed-evidence and repository-resident ledger mechanics are superseded. Sealed 2026-08-14 with the phase
 finite layout and transition high-water, all process/add-on envelopes, stopped-node and missing-kubeconfig
 repairs, M1–M6 rejection, and leak-free teardown are live and retained.
 **Implementation**: `src/Amoebius/Cluster/Bootstrap.hs`, `src/Amoebius/Cluster/Kind.hs`,

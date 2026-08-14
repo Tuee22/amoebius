@@ -4,18 +4,22 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import hashlib
 import json
+import os
 import shlex
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Sequence
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
 
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_25"
-INDEX_DIGEST = "sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4"
 
 
 class GateFailure(RuntimeError):
@@ -54,14 +58,25 @@ def fingerprint(payload: dict[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
 
 
-def validate_evidence() -> dict[str, Any]:
-    original = json_object(EVIDENCE / "sprint-25.4-no-public-pull.json")
-    current = json_object(EVIDENCE / "sprint-25.4-current-verification.json")
-    mutants = json_object(EVIDENCE / "sprint-25.4-mutants.json")
-    standup = json_object(EVIDENCE / "sprint-25.2-receipt.json")
-    publication = json_object(EVIDENCE / "sprint-25.3-receipt.json")
+@functools.cache
+def build_tools() -> tuple[str, str]:
+    """Resolve cabal and the compiler per run from the authored requirements.
 
-    if original["indexDigest"] != INDEX_DIGEST or current["indexDigest"] != INDEX_DIGEST:
+    A bare `cabal` is a PATH lookup, and a `cabal test` without `--with-compiler` inherits
+    whichever GHC the host's PATH offers — which need not satisfy the authored range.
+    """
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    return resolved["cabal"]["path"], resolved["ghc"]["path"]
+
+
+def validate_evidence(evidence: Path, index_digest: str) -> dict[str, Any]:
+    original = json_object(evidence / "sprint-25.4-no-public-pull.json")
+    current = json_object(evidence / "sprint-25.4-current-verification.json")
+    mutants = json_object(evidence / "sprint-25.4-mutants.json")
+    standup = json_object(evidence / "sprint-25.2-receipt.json")
+    publication = json_object(evidence / "sprint-25.3-receipt.json")
+
+    if original["indexDigest"] != index_digest or current["indexDigest"] != index_digest:
         raise GateFailure("index-digest")
     endpoint_names = set(original["resolvedEndpoints"])
     fixture_names = {
@@ -98,8 +113,8 @@ def validate_evidence() -> dict[str, Any]:
         if (
             positive["phase"] != "Succeeded"
             or not positive["registryReadObserved"]
-            or INDEX_DIGEST not in positive["image"]
-            or INDEX_DIGEST not in positive["imageId"]
+            or index_digest not in positive["image"]
+            or index_digest not in positive["imageId"]
         ):
             raise GateFailure(f"{label}-in-cluster-positive")
         if (
@@ -136,7 +151,7 @@ def validate_evidence() -> dict[str, Any]:
         "firewallDroppedPackets": original["enforced"]["firewall"]["droppedPackets"],
         "negativePullReason": original["enforced"]["negative"]["waitingReason"],
         "positivePullPhase": original["enforced"]["positive"]["phase"],
-        "imageIndexDigest": INDEX_DIGEST,
+        "imageIndexDigest": index_digest,
         "publicEstablishedConnections": original["enforced"]["observer"]["publicEstablishedConnections"],
         "standupPublicRegistryTcpConnections": original["standupPublicRegistryTcpConnections"],
         "publicationPublicRegistryTcpConnections": original["publicationPublicRegistryTcpConnections"],
@@ -147,8 +162,9 @@ def validate_evidence() -> dict[str, Any]:
     return {**stable, "receiptFingerprint": fingerprint(stable)}
 
 
-def seal() -> tuple[list[dict[str, str]], dict[str, Any]]:
+def seal(evidence: Path, index_digest: str) -> tuple[list[dict[str, str]], dict[str, Any]]:
     python = sys.executable
+    cabal, compiler = build_tools()
     baseline_flags = (
         "-f-phase25-bootstrap-domain-expansion-mutant",
         "-f-phase25-handoff-without-equality-mutant",
@@ -159,7 +175,8 @@ def seal() -> tuple[list[dict[str, str]], dict[str, Any]]:
         invoke(
             "haskell-image-spec",
             (
-                "/home/matthewnowak/.ghcup/bin/cabal",
+                cabal,
+                f"--with-compiler={compiler}",
                 "test",
                 "phase25-image-spec",
                 *baseline_flags,
@@ -177,8 +194,12 @@ def seal() -> tuple[list[dict[str, str]], dict[str, Any]]:
                 python,
                 "tools/phase25_no_public_pull_gate.py",
                 "--verify-only",
+                "--evidence",
+                str(evidence),
+                "--index-digest",
+                index_digest,
                 "--output",
-                str(EVIDENCE / "sprint-25.4-current-verification.json"),
+                str(evidence / "sprint-25.4-current-verification.json"),
             ),
             timeout=600,
         ),
@@ -187,21 +208,23 @@ def seal() -> tuple[list[dict[str, str]], dict[str, Any]]:
             (
                 python,
                 "tools/phase25_sprint25_4_mutation_gate.py",
+                "--live",
+                str(evidence / "sprint-25.4-no-public-pull.json"),
                 "--evidence",
-                str(EVIDENCE / "sprint-25.4-mutants.json"),
+                str(evidence / "sprint-25.4-mutants.json"),
             ),
             timeout=1800,
         ),
         invoke("documentation-lint", (python, "tools/doc_lint.py")),
     ]
-    return rows, validate_evidence()
+    return rows, validate_evidence(evidence, index_digest)
 
 
-def write_results(rows: list[dict[str, str]], receipt: dict[str, Any]) -> None:
-    (EVIDENCE / "sprint-25.4-receipt.json").write_text(
+def write_results(evidence: Path, rows: list[dict[str, str]], receipt: dict[str, Any]) -> None:
+    (evidence / "sprint-25.4-receipt.json").write_text(
         json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    (EVIDENCE / "sprint-25.4-phase-results.tsv").write_text(
+    (evidence / "sprint-25.4-phase-results.tsv").write_text(
         "check\tresult\n" + "".join(f"{row['name']}\t{row['result']}\n" for row in rows),
         encoding="utf-8",
     )
@@ -209,19 +232,27 @@ def write_results(rows: list[dict[str, str]], receipt: dict[str, Any]) -> None:
     for row in rows:
         log.extend((f"CHECK {row['name']}", f"COMMAND {row['command']}", row["output"], "RESULT PASS"))
     log.append(f"SPRINT-25.4-GATE PASS {receipt['receiptFingerprint']}")
-    (EVIDENCE / "sprint-25.4-gate.log").write_text("\n".join(log) + "\n", encoding="utf-8")
+    (evidence / "sprint-25.4-gate.log").write_text("\n".join(log) + "\n", encoding="utf-8")
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    # The bundle this run reads and seals is supplied by the caller. There is deliberately
+    # no default: a default names a location, and whatever a previous run left there would
+    # decide this gate instead of the run in progress.
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    # The digest is likewise the caller's, for the same reason: it has to be the index this
+    # run built, never a constant pinning a build that no longer exists.
+    parser.add_argument("--index-digest", required=True, help="the index digest this run produced")
     parser.add_argument("--derive-receipt", action="store_true")
     arguments = parser.parse_args(argv)
     try:
         if arguments.derive_receipt:
-            print(json.dumps(validate_evidence(), indent=2, sort_keys=True))
+            receipt = validate_evidence(arguments.evidence, arguments.index_digest)
+            print(json.dumps(receipt, indent=2, sort_keys=True))
             return 0
-        rows, receipt = seal()
-        write_results(rows, receipt)
+        rows, receipt = seal(arguments.evidence, arguments.index_digest)
+        write_results(arguments.evidence, rows, receipt)
         print(f"phase25-sprint25.4-gate: PASS ({len(rows)} checks; {receipt['receiptFingerprint']})")
         return 0
     except (

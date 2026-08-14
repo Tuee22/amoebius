@@ -44,6 +44,7 @@ Resources,ResourceEnvelope,Pod|Host
 Resources,RootFilesystem,ReadOnlyRootfs|WritableRootfs
 Resources,StatefulSetRollout,OnDelete|RollingUpdate
 Retention,RetentionPolicy,SizeBounded|TimeAndSizeBounded
+SecretRef,SecretRef,Vault|TransitKey|Prompt
 Storage,ControlPlaneStateEntryKind,InForceSpecSnapshot|ManagedResourceRegistry|ReconcileJournal|ValidationLedger|JobCompletion
 Storage,ObjectStoreProducerIntent,AppBucket|Content|Registry|PulsarOffload|PulumiCheckpoint|ControlPlaneState
 Storage,PriorProvisionResource,Execution|Volume|Registry

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import hashlib
 import json
 import os
@@ -13,15 +14,16 @@ import sys
 from pathlib import Path
 from typing import Any, Sequence
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
 
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_25"
 ARTIFACT = Path("/var/tmp/amoebius-phase25-scratch/oci/amoebius-phase25.oci.tar")
 CACHE = Path("/var/tmp/amoebius-phase25-cache/buildx-cache")
 SCRATCH = Path("/var/tmp/amoebius-phase25-scratch")
 BUILDKIT_CONFIG = ROOT / "test/fixtures/phase25/buildkitd.toml"
-FINAL_AMD64 = EVIDENCE / "final-probes-amd64.tsv"
-FINAL_ARM64 = EVIDENCE / "final-probes-arm64.tsv"
 
 
 class GateFailure(RuntimeError):
@@ -68,12 +70,29 @@ def json_file(path: Path) -> dict[str, Any]:
     return decoded
 
 
-def seal() -> tuple[list[dict[str, str]], dict[str, Any]]:
+@functools.cache
+def build_tools() -> tuple[str, str]:
+    """Resolve cabal and the compiler per run from the authored requirements.
+
+    A bare `cabal` is a PATH lookup, and a `cabal test` without `--with-compiler` inherits
+    whichever GHC the host's PATH offers — which need not satisfy the authored range.
+    """
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    return resolved["cabal"]["path"], resolved["ghc"]["path"]
+
+
+def seal(evidence: Path, builder_image: str) -> tuple[list[dict[str, str]], dict[str, Any]]:
     python = sys.executable
+    cabal, compiler = build_tools()
+    final_amd64 = evidence / "final-probes-amd64.tsv"
+    final_arm64 = evidence / "final-probes-arm64.tsv"
     rows = [
         invoke(
             "haskell-image-spec",
-            ("cabal", "test", "phase25-image-spec", "--test-show-details=direct", "-j1"),
+            (
+                cabal, f"--with-compiler={compiler}", "test", "phase25-image-spec",
+                "--test-show-details=direct", "-j1",
+            ),
         ),
         invoke(
             "python-image-specs",
@@ -88,24 +107,26 @@ def seal() -> tuple[list[dict[str, str]], dict[str, Any]]:
             (
                 python, "tools/phase25_builder_probe.py",
                 "--container", "amoebius-phase25-buildkitd",
+                "--builder-image", builder_image,
                 "--cache-root", "/var/tmp/amoebius-phase25-cache",
                 "--scratch-root", str(SCRATCH),
                 "--config", str(BUILDKIT_CONFIG),
-                "--evidence", str(EVIDENCE / "builder-boundary-gate.json"),
+                "--evidence", str(evidence / "builder-boundary-gate.json"),
             ),
         ),
         invoke(
             "cpu-memory-overruns",
             (
                 python, "tools/phase25_cgroup_overrun_probe.py",
-                "--evidence", str(EVIDENCE / "builder-cgroup-overruns.json"),
+                "--evidence", str(evidence / "builder-cgroup-overruns.json"),
             ),
         ),
         invoke(
             "scratch-cache-enospc",
             (
                 python, "tools/phase25_enospc_probe.py",
-                "--evidence", str(EVIDENCE / "builder-enospc.json"),
+                "--builder-image", builder_image,
+                "--evidence", str(evidence / "builder-enospc.json"),
             ),
         ),
         invoke(
@@ -113,7 +134,7 @@ def seal() -> tuple[list[dict[str, str]], dict[str, Any]]:
             (
                 python, "tools/phase25_oci_probe.py", str(ARTIFACT),
                 "--bounds", "test/fixtures/phase25/image_artifact_bounds.json",
-                "--evidence", str(EVIDENCE / "image-artifact.json"),
+                "--evidence", str(evidence / "image-artifact.json"),
             ),
             timeout=1800,
         ),
@@ -121,9 +142,9 @@ def seal() -> tuple[list[dict[str, str]], dict[str, Any]]:
             "official-file-execution-join",
             (
                 python, "tools/phase25_oci_file_probe.py", str(ARTIFACT),
-                "--executed-probes", str(FINAL_AMD64),
-                "--executed-probes", str(FINAL_ARM64),
-                "--evidence", str(EVIDENCE / "official-file-execution-join.json"),
+                "--executed-probes", str(final_amd64),
+                "--executed-probes", str(final_arm64),
+                "--evidence", str(evidence / "official-file-execution-join.json"),
             ),
             timeout=1800,
         ),
@@ -131,27 +152,27 @@ def seal() -> tuple[list[dict[str, str]], dict[str, Any]]:
             "spdx-file-inventory",
             (
                 python, "tools/phase25_sbom.py",
-                "--probe", str(FINAL_AMD64), "--probe", str(FINAL_ARM64),
-                "--output", str(EVIDENCE / "file-sbom.spdx.json"),
+                "--probe", str(final_amd64), "--probe", str(final_arm64),
+                "--output", str(evidence / "file-sbom.spdx.json"),
             ),
         ),
         invoke(
             "seeded-mutants",
             (
                 python, "tools/phase25_mutation_gate.py",
-                "--official-file-join", str(EVIDENCE / "official-file-execution-join.json"),
-                "--evidence", str(EVIDENCE / "sprint-25.1-mutants.json"),
+                "--official-file-join", str(evidence / "official-file-execution-join.json"),
+                "--evidence", str(evidence / "sprint-25.1-mutants.json"),
             ),
         ),
     ]
 
-    preflight = json_file(EVIDENCE / "build-preflight-corrected.json")
-    artifact = json_file(EVIDENCE / "image-artifact.json")
-    file_join = json_file(EVIDENCE / "official-file-execution-join.json")
-    mutants = json_file(EVIDENCE / "sprint-25.1-mutants.json")
-    enospc = json_file(EVIDENCE / "builder-enospc.json")
-    cgroups = json_file(EVIDENCE / "builder-cgroup-overruns.json")
-    sbom = json_file(EVIDENCE / "file-sbom.spdx.json")
+    preflight = json_file(evidence / "build-preflight-corrected.json")
+    artifact = json_file(evidence / "image-artifact.json")
+    file_join = json_file(evidence / "official-file-execution-join.json")
+    mutants = json_file(evidence / "sprint-25.1-mutants.json")
+    enospc = json_file(evidence / "builder-enospc.json")
+    cgroups = json_file(evidence / "builder-cgroup-overruns.json")
+    sbom = json_file(evidence / "file-sbom.spdx.json")
     if preflight["scratchCapacityBytes"] != 103_079_215_104:
         raise GateFailure("corrected-preflight-scratch-capacity")
     if artifact["imageIndexDigest"] != file_join["imageIndexDigest"]:
@@ -195,12 +216,12 @@ def seal() -> tuple[list[dict[str, str]], dict[str, Any]]:
     return rows, receipt
 
 
-def write_results(rows: list[dict[str, str]], receipt: dict[str, Any]) -> None:
-    EVIDENCE.mkdir(parents=True, exist_ok=True)
-    (EVIDENCE / "sprint-25.1-receipt.json").write_text(
+def write_results(evidence: Path, rows: list[dict[str, str]], receipt: dict[str, Any]) -> None:
+    evidence.mkdir(parents=True, exist_ok=True)
+    (evidence / "sprint-25.1-receipt.json").write_text(
         json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    with (EVIDENCE / "sprint-25.1-phase-results.tsv").open("w", encoding="utf-8") as handle:
+    with (evidence / "sprint-25.1-phase-results.tsv").open("w", encoding="utf-8") as handle:
         handle.write("check\tresult\n")
         for row in rows:
             handle.write(f"{row['name']}\t{row['result']}\n")
@@ -208,14 +229,24 @@ def write_results(rows: list[dict[str, str]], receipt: dict[str, Any]) -> None:
     for row in rows:
         log.extend((f"CHECK {row['name']}", f"COMMAND {row['command']}", row["output"], "RESULT PASS"))
     log.append(f"SPRINT-25.1-GATE PASS {receipt['imageIndexDigest']}")
-    (EVIDENCE / "sprint-25.1-gate.log").write_text("\n".join(log) + "\n", encoding="utf-8")
+    (evidence / "sprint-25.1-gate.log").write_text("\n".join(log) + "\n", encoding="utf-8")
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    argparse.ArgumentParser(description=__doc__).parse_args(argv)
+    parser = argparse.ArgumentParser(description=__doc__)
+    # The bundle this run writes into is supplied by the caller. There is deliberately no
+    # default: a default names a location, and whatever a previous run left there would
+    # decide this gate instead of the run in progress.
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    # Passed straight through to the two builder probes, for the same reason they refuse a
+    # default: the boundary has to be proven against the image this run actually started.
+    parser.add_argument(
+        "--builder-image", required=True, help="the resolved BuildKit builder image reference"
+    )
+    arguments = parser.parse_args(argv)
     try:
-        rows, receipt = seal()
-        write_results(rows, receipt)
+        rows, receipt = seal(arguments.evidence, arguments.builder_image)
+        write_results(arguments.evidence, rows, receipt)
         print(
             "phase25-sprint25.1-gate: PASS "
             f"({len(rows)} checks; {receipt['imageIndexDigest']})"

@@ -13,7 +13,16 @@
     "                 the installed node_modules tree",
     "  github-release the tool is published as a release asset; resolution asks the project for",
     "                 its current release, then materializes the asset under an ignored root",
-    "  hackage        the tool is a Haskell package installed by the resolved cabal"
+    "  hackage        the tool is a Haskell package installed by the resolved cabal",
+    "  kubernetes-release  the tool is published on dl.k8s.io behind a release channel; resolution",
+    "                 reads the channel, then fetches the binary and the publisher's own checksum",
+    "  ghcup-managed  the tool is installed by the resolved ghcup; resolution asks ghcup which",
+    "                 versions it can supply and takes the newest that satisfies the requirement",
+    "",
+    "The Bootstrap Coordinator acquires ghcup, kubectl, and kind on a pristine host before any",
+    "amoebius binary exists, so it reads these same authored requirements and writes its own",
+    "run-local resolution to gen/toolchain/. Every checksum it uses is the publisher's, fetched",
+    "in the same run; none is retained here."
   ],
   "tools": {
     "ghc": {
@@ -37,6 +46,58 @@
       ],
       "requirement": ">=3.16 <4",
       "reason": "multi-package projects with per-run --builddir and --store-dir isolation"
+    },
+    "ghcup": {
+      "source": "github-release",
+      "project": "haskell/ghcup-hs",
+      "asset_pattern": "^{platform}-ghcup-[0-9.]+$",
+      "platform_map": {
+        "linux-x86_64": "x86_64-linux",
+        "linux-aarch64": "aarch64-linux",
+        "darwin-arm64": "aarch64-apple-darwin"
+      },
+      "checksum_asset": "SHA256SUMS",
+      "install_name": "ghcup",
+      "version_argv": [
+        "--numeric-version"
+      ],
+      "requirement": ">=0.1.50 <1",
+      "reason": "the Bootstrap Coordinator installs ghc and cabal through it on a pristine host"
+    },
+    "kind": {
+      "source": "github-release",
+      "project": "kubernetes-sigs/kind",
+      "asset_pattern": "^kind-{platform}$",
+      "platform_map": {
+        "linux-x86_64": "linux-amd64",
+        "linux-aarch64": "linux-arm64",
+        "darwin-arm64": "darwin-arm64"
+      },
+      "checksum_asset": "{asset}.sha256sum",
+      "install_name": "kind",
+      "version_argv": [
+        "version"
+      ],
+      "requirement": ">=0.30 <1",
+      "reason": "the single-node bootstrap cluster of the pre-cluster band"
+    },
+    "kubectl": {
+      "source": "kubernetes-release",
+      "channel": "stable-1",
+      "binary_path": "bin/{platform}/kubectl",
+      "platform_map": {
+        "linux-x86_64": "linux/amd64",
+        "linux-aarch64": "linux/arm64",
+        "darwin-arm64": "darwin/arm64"
+      },
+      "install_name": "kubectl",
+      "version_argv": [
+        "version",
+        "--client=true",
+        "--output=yaml"
+      ],
+      "requirement": ">=1.33 <2",
+      "reason": "the Kubernetes client every live band drives the cluster through"
     },
     "dhall": {
       "source": "host",

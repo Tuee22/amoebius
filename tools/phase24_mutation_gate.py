@@ -151,16 +151,33 @@ def observe_split_runtime_mutant(readback: Path | None = None) -> str:
         return "unverified:requires-split-runtime-live-observation"
     rows = readback.read_text(encoding="utf-8").splitlines()
     fields = [row.split("\t") for row in rows[1:] if row]
-    identities = {row[0]: row[3] for row in fields}
-    if identities.get("nodefs") == identities.get("imagefs-content"):
-        raise MutationGateError("M6-reference-layout-not-distinct")
-    if identities.get("imagefs-content") != identities.get("imagefs-snapshots"):
-        raise MutationGateError("M6-reference-containerd-roots-not-shared")
-    # Swapping the independently observed nodefs identity into the snapshot
-    # role violates the pinned role mapping even though all values are real.
-    if identities["nodefs"] == identities["imagefs-content"]:
+    identities = {row[0]: row[3] for row in fields if len(row) > 3}
+    problem = validate_role_mapping(identities)
+    if problem:
+        raise MutationGateError(f"M6-reference-{problem}")
+    # The mutant swaps the independently observed nodefs identity into the snapshot role.
+    # Every value stays a real filesystem id; only the mapping is wrong. That is precisely
+    # the defect a readback keyed on path rather than on role would report as healthy, so
+    # the mutation has to be applied and rejected rather than argued about.
+    swapped = {**identities, "imagefs-snapshots": identities["nodefs"]}
+    if not validate_role_mapping(swapped):
         raise MutationGateError("M6-swapped-root-stayed-green")
     return "red:independent-role-root-readback"
+
+
+def validate_role_mapping(identities: dict[str, str]) -> str:
+    """The SplitRuntime role contract, as one predicate the control and mutant share.
+
+    The kubelet's nodefs is a different filesystem from containerd's imagefs, while
+    containerd's content store and snapshotter necessarily sit on the same one. Returning
+    the violated clause rather than a bool is what lets the reference readback fail with a
+    diagnosis instead of the mutant silently standing in for it.
+    """
+    if identities.get("nodefs") == identities.get("imagefs-content"):
+        return "layout-not-distinct"
+    if identities.get("imagefs-content") != identities.get("imagefs-snapshots"):
+        return "containerd-roots-not-shared"
+    return ""
 
 
 def live_one_shot_mutant() -> str:

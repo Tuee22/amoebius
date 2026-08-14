@@ -21,7 +21,7 @@ ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -29,6 +29,7 @@ ledger `external-run-reference`.
 ## Contents
 - [Phase Status](#phase-status)
 - [Phase Summary](#phase-summary)
+- [Gate integrity](#gate-integrity)
 - [Resource provision — the singleton's sealed whole-deployment envelope](#resource-provision--the-singletons-sealed-whole-deployment-envelope)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
@@ -46,6 +47,15 @@ ledger `external-run-reference`.
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
 gate against its source snapshot and publish external evidence without changing an authored path.
+
+**Scope amendment — 2026-08-13 (first live enforcement of secret admission).** This is the first phase that
+applies an `InForceSpec` against a live cluster, so it is where
+[vault_pki_doctrine.md §3.4](../documents/engineering/vault_pki_doctrine.md#34-admission-proves-the-named-secret-exists-before-any-effect)
+is first enforced: admission collects the `SecretRef`s the decoded spec names and refuses **before any
+effect** if any is absent from Vault, naming every missing reference rather than the first. A spec naming no
+secret is admissible with no Vault interaction at all, which is what leaves Phases 25–28 independent of
+Phase 29. The paired positive — the same spec admitted after the Phase-29 prompt CLI writes the secret — is
+this claim's other half; neither alone is evidence.
 
 **Invalidated historical record:**
 
@@ -171,6 +181,27 @@ flowchart LR
   adds three more that MUST each turn the gate red: `persist-password` (dropped effect), `reach-any` (guard
   weakening on the seal-critical reach), and `admit-unproven-secret` (guard weakening on `dhall update`
   admission).
+
+## Gate integrity
+
+**Secret-admission criteria — added 2026-08-13.** This phase is the first to apply an `InForceSpec` against a
+live cluster, so it is where the admission contract of
+[vault_pki_doctrine.md §3.4](../documents/engineering/vault_pki_doctrine.md#34-admission-proves-the-named-secret-exists-before-any-effect)
+is first enforced. It is proven as paired cases, never as a single assertion:
+
+- **The refusal.** A spec naming a `SecretRef` absent from Vault is refused **before any effect** — the
+  external observer records zero applied objects and zero provider calls — and the refusal names every
+  missing reference, not the first. A spec naming two absent secrets that reports one is a failure.
+- **The paired positive.** The identical spec, after the Phase-29 prompt CLI writes those secrets, is
+  admitted and reconciles. Neither half alone is evidence: the refusal alone cannot distinguish *checked and
+  refused* from *broken*, and the positive alone cannot distinguish *checked* from *never looked*.
+- **The vacuous case.** A spec naming no `SecretRef` is admitted with Vault sealed. This proves the check
+  ranges over what a spec names rather than gating every apply on Vault — the property that keeps Phases
+  25–28 independent of Phase 29.
+- **Presence, not value.** The admission path is exercised with a token carrying existence but not read
+  capability on the secret, and still admits.
+- **Seeded mutant.** A mutant that treats an unresolvable reference as present must turn the refusal case
+  red.
 
 ## Resource provision — the singleton's sealed whole-deployment envelope
 

@@ -468,6 +468,119 @@ def prepare_unified_backing(guest: Guest) -> str:
     )))
 
 
+# The three filesystem roles the kubelet and containerd occupy. Under Unified they share
+# one filesystem, which is why a role swap is undetectable there; under SplitRuntime the
+# kubelet's nodefs is a different filesystem from containerd's imagefs, while containerd's
+# own content store and snapshotter necessarily share theirs.
+ROLE_PATHS = (
+    ("nodefs", "/var/lib/kubelet"),
+    ("imagefs-content", "/var/lib/containerd/io.containerd.content.v1.content"),
+    ("imagefs-snapshots", "/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs"),
+)
+SPLIT_ROLE_MOUNTS = (
+    ("nodefs", "/var/lib/amoebius/phase24/nodefs", ("kubelet", "system/etcd", "system/audit", "system/pods")),
+    ("imagefs", "/var/lib/amoebius/phase24/imagefs", ("containerd",)),
+)
+
+
+def prepare_split_runtime_backing(guest: Guest) -> str:
+    """Give the kubelet and containerd genuinely different finite filesystems.
+
+    Two loop-backed ext4 images rather than one. That is the whole prerequisite for the
+    SplitRuntime layout: `validateLayoutIdentities` rejects the layout outright if the
+    nodefs and content roots share a device or a quota id, so a bind mount or a pair of
+    directories on one filesystem would not do.
+    """
+    rows: list[str] = []
+    for _role, mountpoint, subdirectories in SPLIT_ROLE_MOUNTS:
+        image = f"{mountpoint}.img"
+        guest.execute(("/usr/bin/mkdir", "-p", mountpoint))
+        guest.execute(("/usr/bin/truncate", "-s", "12G", image))
+        guest.execute(("/usr/sbin/mkfs.ext4", "-F", "-m", "0", "-L", Path(mountpoint).name, image))
+        guest.execute(("/usr/bin/mount", "-o", "loop", image, mountpoint))
+        targets = [f"{mountpoint}/{name}" for name in subdirectories]
+        guest.execute(("/usr/bin/mkdir", "-p", *targets))
+        guest.execute(("/usr/bin/chmod", "0777", *targets))
+        rows.append(text(guest.execute((
+            "/usr/bin/findmnt", "-bno", "SOURCE,FSTYPE,SIZE,AVAIL,TARGET", mountpoint,
+        ))).strip())
+    return "\n".join(rows) + "\n"
+
+
+def observe_role_roots(guest: Guest) -> str:
+    """Read each filesystem role's identity from inside the running node container.
+
+    The identity is the kernel's own filesystem id for the path, read through the node's
+    mount namespace rather than the host's, so it reports what the kubelet and containerd
+    actually see.
+    """
+    rows = ["role\tpath\tsource\tidentity"]
+    for role, path in ROLE_PATHS:
+        source = text(guest.execute((
+            "/usr/bin/docker", "exec", NODE, "findmnt", "-no", "SOURCE", "-T", path,
+        ))).strip()
+        identity = text(guest.execute((
+            "/usr/bin/docker", "exec", NODE, "stat", "-f", "-c", "%i", path,
+        ))).strip()
+        if not identity:
+            raise GateError(f"phase24-split-runtime-role-identity-absent:{role}")
+        rows.append(f"{role}\t{path}\t{source}\t{identity}")
+    return "\n".join(rows) + "\n"
+
+
+def observe_role_highwater(guest: Guest, role: str, path: str) -> str:
+    """Used and total bytes for one role's backing, as seen inside the node."""
+    observed = text(guest.execute((
+        "/usr/bin/docker", "exec", NODE, "findmnt", "-bno", "USED,SIZE,SOURCE", "-T", path,
+    ))).split()
+    if len(observed) < 2:
+        raise GateError(f"phase24-{role}-highwater-unreadable")
+    used, size = int(observed[0]), int(observed[1])
+    if size <= 0:
+        raise GateError(f"phase24-{role}-backing-not-finite")
+    if used >= size:
+        raise GateError(f"phase24-{role}-highwater-overrun")
+    return f"{role}\t{path}\t{used}\t{size}\t{observed[2] if len(observed) > 2 else ''}\n"
+
+
+def observe_split_runtime_layout(guest: Guest) -> dict[str, str | bytes]:
+    """Bring the cluster up on SplitRuntime backing and read the three roles apart.
+
+    This is what makes M6 decidable. The mutant swaps the nodefs identity into the
+    snapshot role; on Unified backing every role reports the same filesystem, so the swap
+    changes nothing and reporting the mutant red would be reporting a check that could not
+    have failed. Here the roles genuinely differ, so the readback either separates them or
+    the gate is red.
+    """
+    prerequisite = prepare_split_runtime_backing(guest)
+    result = pb_trace(guest, "/root/phase24-split-runtime-execve.log", layout="split-runtime")
+    if b"bootstrap-handoff: ready" not in result.stdout:
+        raise GateError("phase24-split-runtime-bootstrap-not-ready")
+    readback = observe_role_roots(guest)
+    identities = {row.split("\t")[0]: row.split("\t")[3] for row in readback.splitlines()[1:]}
+    if identities["nodefs"] == identities["imagefs-content"]:
+        raise GateError("phase24-split-runtime-roots-aliased")
+    if identities["imagefs-content"] != identities["imagefs-snapshots"]:
+        raise GateError("phase24-split-runtime-containerd-roots-split")
+    highwater = {
+        "etcd": observe_role_highwater(guest, "etcd", "/var/lib/etcd"),
+        "audit": observe_role_highwater(guest, "audit", "/var/log/kubernetes/audit"),
+    }
+    trace = guest.execute(("/usr/bin/cat", "/root/phase24-split-runtime-execve.log")).stdout
+    guest.execute((
+        "/root/.local/bin/kind", "delete", "cluster", "--name", CLUSTER,
+        "--kubeconfig", str(KUBECONFIG),
+    ))
+    return {
+        "prerequisite": prerequisite,
+        "readback": readback,
+        "etcd-highwater": highwater["etcd"],
+        "audit-highwater": highwater["audit"],
+        "log": result.stdout,
+        "trace": trace,
+    }
+
+
 def source_filter(info: tarfile.TarInfo) -> tarfile.TarInfo | None:
     parts = Path(info.name).parts
     excluded = {".git", "dist-newstyle", "node_modules", "__pycache__"}
@@ -490,12 +603,14 @@ def transfer_source(guest: Guest, source: Path) -> None:
         raise GateError("phase24-source-transfer-incomplete")
 
 
-def pb_trace(guest: Guest, trace_path: str) -> subprocess.CompletedProcess[bytes]:
+def pb_trace(
+    guest: Guest, trace_path: str, layout: str = "unified"
+) -> subprocess.CompletedProcess[bytes]:
     unit = "amoebius-" + Path(trace_path).stem.replace("_", "-").replace(".", "-") + ".service"
     output_path = trace_path + ".stdout"
     service_command = (
         f"/usr/bin/strace -f -e trace=execve,execveat -o {trace_path} "
-        "/usr/bin/python3 -m pb.cli bootstrap --distro=kind "
+        f"/usr/bin/python3 -m pb.cli bootstrap --distro=kind --layout={layout} "
         f"> {output_path} 2>&1; status=$?; /usr/bin/sleep 2; exit $status"
     )
     launch = (
@@ -575,14 +690,17 @@ def observe_one_shot_guard_mutant(guest: Guest) -> tuple[str, bytes]:
     It runs last, immediately before teardown, so overwriting the production binary in the
     shared build directory costs nothing.
     """
+    # The unversioned names are the ones `ghcup --set` maintains, and they are what the
+    # Bootstrap Coordinator resolved this guest's toolchain onto. Naming a version here
+    # would re-pin, in a gate script, exactly what this phase just stopped pinning.
     build = guest.shell(f"""
 set -eu
 cd {GUEST_ROOT}
-/root/.ghcup/bin/cabal-3.16.1.0 build exe:amoebius -j2 \
-  --with-compiler=/root/.ghcup/bin/ghc-9.12.4 \
+/root/.ghcup/bin/cabal build exe:amoebius -j2 \
+  --with-compiler=/root/.ghcup/bin/ghc \
   --flags=+phase24-one-shot-kind-guard-mutant >/root/phase24-m3-build.log 2>&1
-/root/.ghcup/bin/cabal-3.16.1.0 list-bin exe:amoebius \
-  --with-compiler=/root/.ghcup/bin/ghc-9.12.4 \
+/root/.ghcup/bin/cabal list-bin exe:amoebius \
+  --with-compiler=/root/.ghcup/bin/ghc \
   --flags=+phase24-one-shot-kind-guard-mutant
 """)
     mutant_binary = text(build).strip().splitlines()[-1]
@@ -703,8 +821,25 @@ def run_gate(config: GateConfig) -> None:
         if CLUSTER.encode() in clusters.splitlines() or containers.strip():
             raise GateError("phase24-postflight-leak")
 
+        # The Unified lifecycle is complete and swept. Only now is a second bring-up on
+        # genuinely split backing possible, and it is the only place M6 and the two
+        # high-water surfaces can be observed rather than assumed.
+        split = observe_split_runtime_layout(guest)
+        split_clusters = guest.execute(("/root/.local/bin/kind", "get", "clusters")).stdout
+        split_containers = guest.execute((
+            "/usr/bin/docker", "ps", "-a", "--filter", f"name={NODE}", "--format", "{{.ID}}",
+        )).stdout
+        if CLUSTER.encode() in split_clusters.splitlines() or split_containers.strip():
+            raise GateError("phase24-split-runtime-postflight-leak")
+
         evidence = config.evidence
         evidence.mkdir(parents=True, exist_ok=True)
+        write_evidence(evidence / "pristine-split-runtime-prerequisite.txt", split["prerequisite"])
+        write_evidence(evidence / "pristine-split-runtime-readback.tsv", split["readback"])
+        write_evidence(evidence / "pristine-etcd-transition-highwater.tsv", split["etcd-highwater"])
+        write_evidence(evidence / "pristine-audit-system-log-highwater.tsv", split["audit-highwater"])
+        write_evidence(evidence / "pristine-split-runtime.log", split["log"])
+        write_evidence(evidence / "pristine-split-runtime-execve.log", split["trace"])
         with gzip.open(evidence / "pristine-initial-execve.log.gz", "wb") as handle:
             handle.write(initial_trace)
         write_evidence(evidence / "pristine-preflight.txt", preflight)

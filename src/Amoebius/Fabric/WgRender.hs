@@ -184,6 +184,7 @@ renderSecretRef :: SecretRef -> Text
 renderSecretRef = foldSecretRef
   (\mount path field -> "vault:" <> mount <> "/" <> path <> "#" <> field)
   (\key -> "transit:" <> key)
+  (\name _purpose -> "prompt:" <> name)
 
 type Prefix = (Integer, Int)
 

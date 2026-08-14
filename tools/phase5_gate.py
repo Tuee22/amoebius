@@ -72,7 +72,10 @@ EXEC_LINE = re.compile(r'execve\("([^"]+)"')
 EXPECTED_RESULTS = {
     "dsl-core-build": "green",
     "positive-fixtures": "5/5-green-exact",
-    "tagged-negatives": "3/3-red-distinct",
+    # Amended 2026-08-13 from intent, not from a failing run: the secrets amendment adds
+    # the fourth tag, PlaintextSecret. Its paired positive is a decode control rather
+    # than a structural-oracle row, so `structural-tree-rows` stays where it was.
+    "tagged-negatives": "4/4-red-distinct",
     "gate1-preconditions": "3/3-green",
     "import-policy-negatives": "4/4-red-ForbiddenImport-including-nested",
     "compile-fail-pairs": "3/3-legal-green-illegal-red",

@@ -17,31 +17,6 @@
 # Created 2026-08-12 against the Phase-0 redesign.
 #
 # rule<TAB>path_glob<TAB>message_glob<TAB>owner<TAB>legacy-register anchor
-r6	pb/bootstrap_execution_envelope.json	tracked file pins a package integrity digest*	phase-24	Hard-coded library/package SHA values
-r5	tools/phase25_bootstrap_preflight.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-25	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase25_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-25	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase25_gate.py	names generated path test/enumeration/*	phase-25	`test/enumeration/**`
-r5	tools/phase25_gate.py	names generated path test/golden/*	phase-25	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
-r5	tools/phase25_no_public_pull_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-25	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase25_registry_publish.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-25	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase25_registry_standup.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-25	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase25_sprint25_1_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-25	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase25_sprint25_2_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-25	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase25_sprint25_3_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-25	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase25_sprint25_4_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-25	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase25_sprint25_4_mutation_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-25	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	test/image/test_phase25_source_probe.py	tracked file pins a package integrity digest*	phase-25	Hard-coded library/package SHA values
-r6	tools/phase25_bootstrap_preflight.py	tracked file pins a package integrity digest*	phase-25	Hard-coded library/package SHA values
-r6	tools/phase25_builder_probe.py	tracked file pins a package integrity digest*	phase-25	Hard-coded library/package SHA values
-r6	tools/phase25_gate.py	tracked file carries a resolved home path*	phase-25	Absolute developer-home executable paths
-r6	tools/phase25_registry_standup.py	tracked file carries a resolved home path*	phase-25	Absolute developer-home executable paths
-r6	tools/phase25_registry_standup.py	tracked file pins a package integrity digest*	phase-25	Hard-coded library/package SHA values
-r6	tools/phase25_sprint25_2_gate.py	tracked file carries a resolved home path*	phase-25	Absolute developer-home executable paths
-r6	tools/phase25_sprint25_2_mutation_gate.py	tracked file carries a resolved home path*	phase-25	Absolute developer-home executable paths
-r6	tools/phase25_sprint25_3_gate.py	tracked file carries a resolved home path*	phase-25	Absolute developer-home executable paths
-r6	tools/phase25_sprint25_3_mutation_gate.py	tracked file carries a resolved home path*	phase-25	Absolute developer-home executable paths
-r6	tools/phase25_sprint25_4_gate.py	tracked file carries a resolved home path*	phase-25	Absolute developer-home executable paths
-r6	tools/phase25_sprint25_4_mutation_gate.py	tracked file carries a resolved home path*	phase-25	Absolute developer-home executable paths
 r5	tools/phase26_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-26	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
 r5	tools/phase26_gate.py	names generated path test/enumeration/*	phase-26	`test/enumeration/**`
 r5	tools/phase26_gate.py	names generated path test/golden/*	phase-26	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger

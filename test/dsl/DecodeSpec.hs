@@ -43,6 +43,7 @@ data PositiveCase = PositiveCase
 data NegativeCase = NegativeCase
   { negativeFile :: FilePath
   , negativeTag :: Text
+  , negativeTwin :: FilePath
   }
 
 -- The suite invokes ghc and dhall by absolute path on purpose: the Phase-5 argv observer
@@ -261,7 +262,7 @@ hasExactValue suffix expectedKind expectedValue = any matches
     suffix `isSuffixOf` nodePath && actualKind == expectedKind && actualValue == expectedValue
 
 checkNegative :: Maybe FilePath -> NegativeCase -> IO ()
-checkNegative schemaOverride NegativeCase {negativeFile, negativeTag} = do
+checkNegative schemaOverride NegativeCase {negativeFile, negativeTag, negativeTwin} = do
   let selected = case (negativeTag, schemaOverride) of
         ("SchemaMismatch", Just replacement) -> replacement
         _ -> negativeFile
@@ -275,6 +276,13 @@ checkNegative schemaOverride NegativeCase {negativeFile, negativeTag} = do
       assert
         (decodeErrorTag problem == negativeTag)
         (selected <> " returned " <> Text.unpack (decodeErrorTag problem) <> ", expected " <> Text.unpack negativeTag)
+  -- Section M.8: the paired positive is only a control if it is run. Reverting the one
+  -- tagged construct must decode, or the negative proves nothing about that construct.
+  twinResult <- decodeCluster negativeTwin
+  case twinResult of
+    Left twinProblem ->
+      die (negativeTwin <> " is the paired positive for " <> selected <> " but was rejected: " <> show twinProblem)
+    Right _ -> pure ()
 
 checkImportPolicy :: IO ()
 checkImportPolicy = do
@@ -328,7 +336,8 @@ loadNegativeCases :: FilePath -> IO [NegativeCase]
 loadNegativeCases oracle = do
   contents <- Text.readFile oracle
   forM (dropHeader (Text.lines contents)) $ \row -> case Text.splitOn "\t" row of
-    [fixture, expected, _catalog, _twin] -> pure (NegativeCase (Text.unpack fixture) expected)
+    [fixture, expected, _catalog, twin] ->
+      pure (NegativeCase (Text.unpack fixture) expected (Text.unpack twin))
     _ -> die ("malformed negative row: " <> Text.unpack row)
 
 dropHeader :: [Text] -> [Text]

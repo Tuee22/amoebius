@@ -291,7 +291,7 @@ provider program — the phase-new module), built on the `amoebius-pulumi` engin
 `PulumiExecutionDemand` / `PulumiCheckpointObjectDemand` types land alongside (target paths from
 [system_components.md](system_components.md); not yet built)
 **Blocked by**: reopened numeric predecessor gates.
-**Requires**: `cloud-account` — the credentialed provider account this deploy checkpoint targets. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-29 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-only-cleartext-and-it-is-flagged)).
+**Requires**: `cloud-account` — the credentialed provider account this deploy checkpoint targets. Its credential reaches the run as a `SecretRef.Vault` name resolved from the Phase-29 root, or at an interactive `SecretRef.Prompt`; never from an environment variable or a tracked cleartext file ([vault_pki_doctrine.md §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-operators-prompt-automated)).
 **Independent Validation**: from a linux-cpu parent, a
 `pulumi up` issued by the in-cluster singleton reaches a ready EKS control plane + base node group built
 from the fixture's named base-node-class capacity/capability shape; the parent first places the complete

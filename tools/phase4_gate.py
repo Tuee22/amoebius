@@ -52,11 +52,14 @@ EXPECTED_RESULTS = {
     # because Phase 16 added SanctionedApi, Phase 60 added UiOffline, and Phase 25 added
     # BakeCatalog. A count is not the oracle; the reviewed inventory beside it is, and a
     # module added without review breaks the inventory rather than sliding past a number.
-    "schema-modules": "17",
-    "schema-module-inventory": "dhall/amoebius/App.dhall,dhall/amoebius/Backup.dhall,dhall/amoebius/BakeCatalog.dhall,dhall/amoebius/Capability.dhall,dhall/amoebius/Capacity.dhall,dhall/amoebius/Cluster.dhall,dhall/amoebius/Consistency.dhall,dhall/amoebius/Deployment.dhall,dhall/amoebius/Extension.dhall,dhall/amoebius/Image.dhall,dhall/amoebius/Resources.dhall,dhall/amoebius/Retention.dhall,dhall/amoebius/SanctionedApi.dhall,dhall/amoebius/Storage.dhall,dhall/amoebius/Topology.dhall,dhall/amoebius/UiOffline.dhall,dhall/amoebius/prelude/package.dhall",
+    # Amended again 2026-08-13 by the secrets amendment: 17 -> 18 for the shared
+    # SecretRef union, which is Gate-1 surface and so belongs to this phase.
+    "schema-modules": "18",
+    "schema-module-inventory": "dhall/amoebius/App.dhall,dhall/amoebius/Backup.dhall,dhall/amoebius/BakeCatalog.dhall,dhall/amoebius/Capability.dhall,dhall/amoebius/Capacity.dhall,dhall/amoebius/Cluster.dhall,dhall/amoebius/Consistency.dhall,dhall/amoebius/Deployment.dhall,dhall/amoebius/Extension.dhall,dhall/amoebius/Image.dhall,dhall/amoebius/Resources.dhall,dhall/amoebius/Retention.dhall,dhall/amoebius/SanctionedApi.dhall,dhall/amoebius/SecretRef.dhall,dhall/amoebius/Storage.dhall,dhall/amoebius/Topology.dhall,dhall/amoebius/UiOffline.dhall,dhall/amoebius/prelude/package.dhall",
     "positive-fixtures": "4/4-green",
     "gate1-negatives": "8/8-red-specific",
     "image-process-negatives": "3/3-red-specific",
+    "secret-policy-negatives": "1/1-red-specific",
     "import-policy-negatives": "2/2-red-ForbiddenImport",
     "constructor-rejections": "12/12-red",
     "arm-inventory": "equal",
@@ -73,10 +76,11 @@ EXPECTED_RESULTS = {
 }
 
 SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
-    "dhall-schema-wellformed": ("schema-modules", "17"),
+    "dhall-schema-wellformed": ("schema-modules", "18"),
     "gate1-positive-corpus": ("positive-fixtures", "4/4-green"),
     "gate1-catalog-negatives": ("gate1-negatives", "8/8-red-specific"),
     "image-process-negatives": ("image-process-negatives", "3/3-red-specific"),
+    "secret-reference-policy": ("secret-policy-negatives", "1/1-red-specific"),
     "import-policy": ("import-policy-negatives", "2/2-red-ForbiddenImport"),
     "smart-constructor-rejections": ("constructor-rejections", "12/12-red"),
     "arm-inventory": ("arm-inventory", "equal"),

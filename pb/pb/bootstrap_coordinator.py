@@ -17,6 +17,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any, NoReturn, Sequence
 
+from . import bootstrap_toolchain
+
 
 class BootstrapCoordinatorError(RuntimeError):
     pass
@@ -82,17 +84,28 @@ def home_directory() -> Path:
 
 
 def load_envelope(root: Path) -> dict[str, Any]:
+    """The authored capacity envelope, and nothing else.
+
+    A resolved version, URL, or digest appearing here would be resolver output in a
+    tracked file, so the envelope is rejected if one reappears rather than being read
+    around: the whole point of the split is that this file cannot pin a tool again.
+    """
     path = root / "pb/bootstrap_execution_envelope.json"
     with path.open(encoding="utf-8") as handle:
         envelope = json.load(handle)
+    assert_authored_envelope(envelope)
+    return envelope
+
+
+AUTHORED_ENVELOPE_KEYS = frozenset({"schema", "_comment", "installer", "build"})
+
+
+def assert_authored_envelope(envelope: dict[str, Any]) -> None:
     steps = tuple(step["tool"] for step in envelope["installer"]["steps"])
     if steps != EXPECTED_STEP_TOOLS or len(steps) != len(set(steps)):
         raise BootstrapCoordinatorError("install-plan-envelope-exact-join-failed")
-    if envelope["toolchain"] != {
-        "ghc": "9.12.4", "cabal": "3.16.1.0", "kind": "0.32.0", "kubectl": "1.35.6"
-    }:
-        raise BootstrapCoordinatorError("toolchain-pin-mismatch")
-    return envelope
+    if set(envelope) - AUTHORED_ENVELOPE_KEYS:
+        raise BootstrapCoordinatorError("envelope-carries-resolver-output")
 
 
 def _read_memory_available() -> int:
@@ -160,11 +173,18 @@ def _first_executable(paths: Sequence[Path]) -> Path | None:
 
 
 def candidate_paths(home: Path) -> dict[str, tuple[Path, ...]]:
+    """Where each managed tool lands, by name only.
+
+    No candidate carries a version. `ghcup install … --set` maintains the unversioned
+    name, so the path is a fact about the layout while *which* version sits behind it is
+    a run-local resolution — checked against the authored requirement in `ensure_tools`
+    rather than encoded in a filename that quietly stops matching.
+    """
     return {
         "apt_get": (Path("/usr/bin/apt-get"),),
         "ghcup": (home / ".ghcup/bin/ghcup", Path("/usr/local/bin/ghcup")),
-        "ghc": (home / ".ghcup/bin/ghc-9.12.4", home / ".ghcup/bin/ghc"),
-        "cabal": (home / ".ghcup/bin/cabal-3.16.1.0", home / ".ghcup/bin/cabal"),
+        "ghc": (home / ".ghcup/bin/ghc",),
+        "cabal": (home / ".ghcup/bin/cabal",),
         "kubectl": (home / ".local/bin/kubectl", Path("/usr/local/bin/kubectl"), Path("/usr/bin/kubectl")),
         "kind": (Path("/usr/local/bin/kind"), home / ".local/bin/kind"),
     }
@@ -206,24 +226,32 @@ def run_absolute(
     return result.stdout
 
 
-def _download(download: dict[str, str], target: Path) -> None:
+def _download(record: dict[str, Any], target: Path) -> str:
+    """Download a resolved asset and refuse anything the publisher does not vouch for.
+
+    The digest compared against is the publisher's own, fetched in this same run by the
+    resolver. It is a corruption check for this download, not a permanent pin, and the
+    observed value is returned so the run can record what it actually got.
+    """
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(prefix=target.name + ".", dir=target.parent, delete=False) as handle:
         temporary = Path(handle.name)
         digest = hashlib.sha256()
         try:
-            with urllib.request.urlopen(download["url"], timeout=120) as response:
+            with urllib.request.urlopen(record["url"], timeout=120) as response:
                 while block := response.read(1024 * 1024):
                     handle.write(block)
                     digest.update(block)
         except BaseException:
             temporary.unlink(missing_ok=True)
             raise
-    if digest.hexdigest() != download["sha256"]:
+    observed = digest.hexdigest()
+    if observed != record["publisher_sha256"]:
         temporary.unlink(missing_ok=True)
         raise BootstrapCoordinatorError(f"download-digest-mismatch:{target.name}")
     temporary.chmod(stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP)
     os.replace(temporary, target)
+    return observed
 
 
 def _validated_mutation(envelope: dict[str, Any], root: Path, stage: str) -> ValidatedExecution:
@@ -233,48 +261,107 @@ def _validated_mutation(envelope: dict[str, Any], root: Path, stage: str) -> Val
     return token
 
 
+def _reported_version(executable: Path, argv: Sequence[str], home: Path) -> str:
+    result = subprocess.run(
+        [str(executable), *argv], env=_fixed_environment(home), text=True,
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
+    )
+    return result.stdout if result.returncode == 0 else ""
+
+
+def _admissible(executable: Path | None, argv: Sequence[str], requirement: str, home: Path) -> bool:
+    """Does an already-present tool satisfy the authored requirement?
+
+    A tool that exists is not automatically the right tool. Keying on presence alone is
+    what a version-stamped filename used to hide: the path stopped matching and the check
+    silently became "install it again" instead of "is this one admissible?".
+    """
+    if executable is None:
+        return False
+    reported = _reported_version(executable, argv, home)
+    if not reported.strip():
+        return False
+    try:
+        return bootstrap_toolchain.satisfies(bootstrap_toolchain.parse_version(reported), requirement)
+    except bootstrap_toolchain.ResolutionError:
+        return False
+
+
 def ensure_tools(envelope: dict[str, Any], root: Path, home: Path) -> ToolPaths:
     if platform.system().lower() != "linux" or platform.machine().lower() not in {"x86_64", "amd64"}:
         raise BootstrapCoordinatorError("phase24-bootstrap-coordinator-requires-linux-amd64")
     candidates = candidate_paths(home)
+    requirements = bootstrap_toolchain.load_requirements(root)
     apt_get = _first_executable(candidates["apt_get"])
     if apt_get is None:
         raise BootstrapCoordinatorError("package-manager-root-absent")
     memory = int(envelope["installer"]["memory_bytes"])
-    ghcup = _first_executable(candidates["ghcup"])
+    observations: dict[str, Any] = {}
+
+    # Resolution reaches the network, so it happens only when something is actually
+    # missing. A converged re-run installs nothing and therefore resolves nothing, which
+    # is what keeps the idempotent re-run free of new observations.
+    acquired: dict[str, Any] = {}
+
+    def resolved(name: str) -> dict[str, Any]:
+        if not acquired:
+            acquired.update(bootstrap_toolchain.resolve_acquired(root))
+        return acquired[name]
+
     prerequisite_executables = (Path("/usr/bin/git"), Path("/usr/bin/gcc"), Path("/usr/bin/make"), Path("/usr/bin/xz"))
     if any(not _executable(path) for path in prerequisite_executables):
         _validated_mutation(envelope, root, "installer")
         run_absolute(apt_get, ["update"], home=home, memory_bytes=memory)
         _validated_mutation(envelope, root, "installer")
         run_absolute(apt_get, ["install", "-y", *APT_BUILD_PACKAGES], home=home, memory_bytes=memory)
-    if ghcup is None:
+
+    ghcup = _first_executable(candidates["ghcup"])
+    if not _admissible(ghcup, requirements["ghcup"]["version_argv"], requirements["ghcup"]["requirement"], home):
+        record = resolved("ghcup")
         ghcup = candidates["ghcup"][0]
         _validated_mutation(envelope, root, "installer")
-        _download(envelope["downloads"]["ghcup-linux-amd64"], ghcup)
+        observations["ghcup"] = {**record, "observed_sha256": _download(record, ghcup), "path": str(ghcup)}
+
+    managed: dict[str, Any] = {}
+
+    def ghcup_version(tool: str) -> str:
+        if not managed:
+            managed.update(bootstrap_toolchain.resolve_ghcup_managed(root, ghcup, home))
+        return managed[tool]["version"]
+
     ghc = _first_executable(candidates["ghc"])
-    if ghc is None:
+    if not _admissible(ghc, requirements["ghc"]["version_argv"], requirements["ghc"]["requirement"], home):
+        version = ghcup_version("ghc")
         _validated_mutation(envelope, root, "installer")
-        run_absolute(ghcup, ["install", "ghc", "9.12.4", "--set"], home=home, memory_bytes=memory)
+        run_absolute(ghcup, ["install", "ghc", version, "--set"], home=home, memory_bytes=memory)
         ghc = _first_executable(candidates["ghc"])
+        observations["ghc"] = {**managed["ghc"], "path": str(ghc)}
     cabal = _first_executable(candidates["cabal"])
-    if cabal is None:
+    if not _admissible(cabal, requirements["cabal"]["version_argv"], requirements["cabal"]["requirement"], home):
+        version = ghcup_version("cabal")
         _validated_mutation(envelope, root, "installer")
-        run_absolute(ghcup, ["install", "cabal", "3.16.1.0", "--set"], home=home, memory_bytes=memory)
+        run_absolute(ghcup, ["install", "cabal", version, "--set"], home=home, memory_bytes=memory)
         cabal = _first_executable(candidates["cabal"])
+        observations["cabal"] = {**managed["cabal"], "path": str(cabal)}
+
     kubectl = _first_executable(candidates["kubectl"])
     if kubectl is None:
+        record = resolved("kubectl")
         kubectl = candidates["kubectl"][0]
         _validated_mutation(envelope, root, "installer")
-        _download(envelope["downloads"]["kubectl-linux-amd64"], kubectl)
+        observations["kubectl"] = {**record, "observed_sha256": _download(record, kubectl), "path": str(kubectl)}
     kind = _first_executable(candidates["kind"])
     if kind is None:
+        record = resolved("kind")
         kind = candidates["kind"][1]
         _validated_mutation(envelope, root, "installer")
-        _download(envelope["downloads"]["kind-linux-amd64"], kind)
-    resolved = (ghcup, ghc, cabal, kubectl, kind)
-    if any(path is None or not _executable(path) for path in resolved):
+        observations["kind"] = {**record, "observed_sha256": _download(record, kind), "path": str(kind)}
+
+    installed = (ghcup, ghc, cabal, kubectl, kind)
+    if any(path is None or not _executable(path) for path in installed):
         raise BootstrapCoordinatorError("tool-install-did-not-converge")
+    if observations:
+        bootstrap_toolchain.store(root, observations)
     return ToolPaths(apt_get, ghcup, ghc, cabal, kubectl, kind)  # type: ignore[arg-type]
 
 

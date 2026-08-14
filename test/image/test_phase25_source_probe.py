@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import subprocess
 import tempfile
@@ -11,6 +12,10 @@ from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[2]
+# The bytes the fake copy puts on disk. The expected digest is derived from them below
+# rather than restated as a literal, so the assertion stays a claim about the probe
+# hashing what it copied instead of a constant that has to be re-typed alongside it.
+LAUNCHER_PAYLOAD = b"#!/bin/sh\n"
 SPEC = importlib.util.spec_from_file_location("phase25_source_probe", ROOT / "tools/phase25_source_probe.py")
 assert SPEC and SPEC.loader
 PROBE = importlib.util.module_from_spec(SPEC)
@@ -56,7 +61,7 @@ class SourceProbeTest(unittest.TestCase):
         }
         completed = subprocess.CompletedProcess([], 0, "launcher 1.2.3\n")
         def fake_copy(_docker: str, _reference: str, _platform: str, _path: str, destination: Path) -> None:
-            destination.write_bytes(b"#!/bin/sh\n")
+            destination.write_bytes(LAUNCHER_PAYLOAD)
 
         with mock.patch.object(PROBE, "run", return_value=completed) as invoked, mock.patch.object(
             PROBE, "copy_binary", side_effect=fake_copy
@@ -67,7 +72,7 @@ class SourceProbeTest(unittest.TestCase):
         self.assertEqual("linux/arm64", result["platform"])
         self.assertEqual("launcher", result["elf_machine"])
         self.assertEqual(
-            "sha256:a8076d3d28d21e02012b20eaf7dbf75409a6277134439025f282e368e3305abf",
+            "sha256:" + hashlib.sha256(LAUNCHER_PAYLOAD).hexdigest(),
             result["sha256"],
         )
         self.assertEqual(

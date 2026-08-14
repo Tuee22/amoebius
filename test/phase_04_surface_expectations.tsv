@@ -19,6 +19,7 @@ dhall-schema-wellformed	metrics	schema-modules,schema-module-inventory
 gate1-positive-corpus	metrics	positive-fixtures
 gate1-catalog-negatives	metrics	gate1-negatives
 image-process-negatives	metrics	image-process-negatives
+secret-reference-policy	metrics	secret-policy-negatives
 import-policy	metrics	import-policy-negatives
 smart-constructor-rejections	metrics	constructor-rejections
 arm-inventory	metrics	arm-inventory

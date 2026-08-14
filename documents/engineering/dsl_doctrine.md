@@ -714,9 +714,17 @@ So the DSL carries a typed **reference** to each secret — a *name/coordinate*,
   only a reference. This is what lets Gate 1 and Gate 2 ([§5](#5-the-illegal-state-unrepresentable-contract)) run over the full config tree without ever
   touching sensitive material.
 
-This is the SSoT-deferring summary. The typed reference (the `SecretRef`-style union), the
-production-reference-vs-test-plaintext split, the parent→child injection protocol, the fail-closed
-sealed-Vault posture, and the root PKI trust anchor are **all owned by**
+**Presence is a live question, and Gates 1 and 2 do not answer it.** A reference is well-typed and decodes
+cleanly whether or not the secret exists, so *that* the named secret is actually in Vault is proven at
+admission — the live step before a spec may render — and never by the typechecker or the decoder. Keeping it
+out of both is what preserves the property this section rests on: Gate 1 runs in an editor with no cluster in
+reach, and Gate 2 runs over the whole config tree without a secrets client in the path. The admission check
+ranges over the references a spec actually names, so a spec naming none needs no Vault at all
+([vault_pki_doctrine.md §3.4](./vault_pki_doctrine.md#34-admission-proves-the-named-secret-exists-before-any-effect)).
+
+This is the SSoT-deferring summary. The typed reference (the `SecretRef` union), the absence of any
+inline-value arm, the parent→child injection protocol, the fail-closed sealed-Vault posture, the
+admission-time presence proof, and the root PKI trust anchor are **all owned by**
 [vault_pki_doctrine.md](./vault_pki_doctrine.md) — and proven in the sibling prodbox project's `SecretRef`
 model (its `config_doctrine.md` §6.2) as evidence, not yet in amoebius. This doc owns only the DSL-surface
 rule: *a name, never a value.*

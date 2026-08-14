@@ -19,7 +19,7 @@ The gate passed 2026-08-10.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -53,6 +53,25 @@ the sealed Gate-1/Gate-2 phases because this is where the Vault root that resolv
 and 5 sealed against the surfaces they actually name, and adding a type they never carried does not reopen
 them ([§N](development_plan_standards.md#n-reopening-and-amending-a-phase)). The corresponding divergence rows
 are recorded in [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md).
+
+**Scope amendment — 2026-08-13 (secrets reach a workload only from Vault).** This phase additionally owns:
+
+- the `Prompt` arm and the **prompt-to-Vault write path** — a CLI subcommand that reads elevated material
+  with echo disabled and writes it straight into Vault, never to disk, an environment variable, or a process
+  argument;
+- `writeKvField` and a **presence-only** `kvFieldExists` on `VaultTransport`, which today carries a read and
+  a transit decrypt and so cannot express either half of this contract;
+- `assertSecretsPresent`, the admission API of
+  [vault_pki_doctrine.md §3.4](../documents/engineering/vault_pki_doctrine.md#34-admission-proves-the-named-secret-exists-before-any-effect):
+  it ranges over the `SecretRef`s a spec names, reads existence rather than value, and reports **every**
+  missing reference at once rather than the first;
+- deletion of the `PHASE29_OPERATOR_PASSWORD` / `PHASE29_DEVELOPMENT_PASSWORD` environment path in this
+  phase's live runner, which is the exact pattern §3.3 forbids;
+- the tracked `test-secrets-types.dhall` shape — field names and types, no values — narrowed to what an
+  amoebius phase actually reads.
+
+The `SecretRef` *type* is not here: it is Gate-1/Gate-2 surface and belongs to Phases 4 and 5, which are
+reopened for it. This phase consumes that type; it does not define it.
 
 **Invalidated historical record:**
 

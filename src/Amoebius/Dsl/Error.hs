@@ -19,6 +19,11 @@ data DecodeError
   | OutOfDomainArm Text
   | UnspellableCombination Text
   | ForbiddenImport Text
+  | -- | A sensitive field carries a value instead of a reference.  Gate 1 gives a
+    -- @Text@ no inhabitant where the field is typed @SecretRef@; this tag is the
+    -- decoder's independent half, which does not depend on the author having
+    -- reached for the type.
+    PlaintextSecret Text
   | MalformedPayload Text
   | DhallFailure Text
   | StrictnessFailure Text
@@ -35,6 +40,7 @@ decodeErrorTag decodeError = case decodeError of
   OutOfDomainArm _ -> "OutOfDomainArm"
   UnspellableCombination _ -> "UnspellableCombination"
   ForbiddenImport _ -> "ForbiddenImport"
+  PlaintextSecret _ -> "PlaintextSecret"
   MalformedPayload _ -> "MalformedPayload"
   DhallFailure _ -> "DhallFailure"
   StrictnessFailure _ -> "StrictnessFailure"

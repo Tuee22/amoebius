@@ -14,6 +14,7 @@ from pb.bootstrap_coordinator import (  # noqa: E402
     HostObservation,
     BootstrapCoordinatorError,
     ValidatedExecution,
+    assert_authored_envelope,
     bootstrap_arguments,
     candidate_paths,
     load_envelope,
@@ -31,17 +32,37 @@ class BootstrapCoordinatorSpec(unittest.TestCase):
             fingerprint="fixed",
         )
 
-    def test_exact_tool_plan_and_pins(self) -> None:
+    def test_exact_tool_plan(self) -> None:
         self.assertEqual(
             [step["tool"] for step in self.envelope["installer"]["steps"]],
             ["ghcup", "ghc", "cabal", "kubectl", "kind"],
         )
-        self.assertEqual(self.envelope["toolchain"]["ghc"], "9.12.4")
-        self.assertEqual(self.envelope["toolchain"]["cabal"], "3.16.1.0")
 
-    def test_absolute_candidates_and_handoff_arguments(self) -> None:
-        for paths in candidate_paths(Path("/home/operator")).values():
+    def test_envelope_carries_no_resolver_output(self) -> None:
+        """The split is the point: a version, URL, or digest here is a tracked pin."""
+        self.assertEqual(set(self.envelope), {"schema", "_comment", "installer", "build"})
+        source = (ROOT / "pb/bootstrap_execution_envelope.json").read_text(encoding="utf-8")
+        prose = source.replace("toolchain/requirements.json", "").replace("gen/toolchain/", "")
+        for token in ("sha256", "https://", '"toolchain"', '"downloads"'):
+            self.assertNotIn(token, prose)
+        for restored in ("toolchain", "downloads"):
+            polluted = copy.deepcopy(self.envelope)
+            polluted[restored] = {}
+            with self.subTest(key=restored):
+                with self.assertRaisesRegex(BootstrapCoordinatorError, "envelope-carries-resolver-output"):
+                    assert_authored_envelope(polluted)
+
+    def test_candidates_carry_no_resolved_version(self) -> None:
+        """A version-stamped filename is a pin that also stops matching silently."""
+        for name, paths in candidate_paths(Path("/home/operator")).items():
             self.assertTrue(all(path.is_absolute() for path in paths))
+            for path in paths:
+                self.assertFalse(
+                    any(character.isdigit() for character in path.name),
+                    f"{name} candidate {path} carries a resolved version",
+                )
+
+    def test_handoff_arguments(self) -> None:
         self.assertEqual(
             bootstrap_arguments("kind", 1),
             ["bootstrap", "--distro=kind", "--replicas=1", "--layout=unified"],

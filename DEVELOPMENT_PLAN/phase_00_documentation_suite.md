@@ -37,6 +37,7 @@ and remaining implementation are stated below.
 - [Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate ✅](#sprint-05-verification-formal-model-doctrine--the-documentation-lint-gate-)
 - [Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts ✅](#sprint-06-readability-discipline--document-shape-the-two-diagram-registers-and-the-routing-artifacts-)
 - [Sprint 0.7: Artifact provenance, ignore coverage, and external evidence ✅](#sprint-07-artifact-provenance-ignore-coverage-and-external-evidence-)
+- [Sprint 0.8: The authored negative corpora as one declared set ✅](#sprint-08-the-authored-negative-corpora-as-one-declared-set-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -44,11 +45,31 @@ and remaining implementation are stated below.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-12. All nine sides of `python3 tools/doc_lint_verify.py` pass, including a snapshot
+✅ Done — resealed 2026-08-13 after the negative-corpus reopening. All nine sides of
+`python3 tools/doc_lint_verify.py` pass and the run publishes a verified external attestation bound to its
+source-snapshot digest.
+
+**Reopened and closed on 2026-08-13.** Commit `0526152` first tracked this phase's own machinery —
+`artifact_policy.py`, `artifact_policy_selftest.py`, `attestation.py`, `gate_common.py`,
+`phase1_negative_corpus.py`, and the registry/allowlist tables. The scan keyed on the tracked tree, so it had
+never seen its own **seeded negative corpora**; once it did, the `policy` side reported seven findings against
+synthetic inputs whose only purpose is to make each rule fire. That is a finding Phase 0 owns, and
+[§S clause 5](development_plan_standards.md#s-universal-artifact-hygiene-gate) allows a finding to be deferred
+*to* its owning phase and never *out of* it, so it closed before this phase resealed.
+
+**What closed it.** [`repository_layout_doctrine.md` §3.6](../documents/engineering/repository_layout_doctrine.md#36-authored-negative-corpora-and-their-audit-scope)
+now declares the authored negative corpora as **one set**, each row naming the rules that corpus deliberately
+seeds. The audit parses that table, suppresses exactly those pairings, and reports at the new twelfth rule any
+row that names an unknown rule, a path that no longer exists, or a rule it has stopped seeding — so an
+exemption cannot widen or outlive its reason. Sprint 0.8 records the two structural consequences: the
+attestation refusal corpus moved into its own module so the adapter itself stays fully scanned, and every rule
+that asks what a build or gate reads and writes now keys on the source snapshot rather than the tracked tree.
+
+**Superseded seal — historical record:** ✅ Done — sealed 2026-08-12. All nine sides of `python3 tools/doc_lint_verify.py` passed, including a snapshot
 side that copies every non-ignored file into a scratch tree and lints the governed corpus there, so no ignored
 worktree file can be an input. The run publishes a verified external attestation bound to the snapshot digest. The seeded negatives materialize under `gen/test-corpora/doc_lint/` instead of being
 committed, the run-time surface enumeration joins completely to an authored expectation, the ledger is emitted
-into `gen/runs/phase_00/<run-id>/`, the eleven artifact-policy rules each turn red on their own seeded
+into `gen/runs/phase_00/<run-id>/`, the artifact-policy rules each turn red on their own seeded
 negative, and the write guard observes no authored path change.
 
 **2026-08-12 amendment.** The gate precondition changed shape in the same change that closed the phase. The
@@ -136,6 +157,8 @@ numbering, gate ownership, illegal-state coverage, and documentation negative ca
 - a case-insensitive repository scan finds no retired predecessor terminology for the Bootstrap Coordinator;
 - reachable history is audited for secrets, generated files, and obsolete names, with the required disposition
   recorded separately from unreachable local objects;
+- every authored negative corpus is declared in doctrine with the rules it seeds, and a declared row that
+  names an unknown rule, a missing path, or a rule it no longer seeds is reported as a stale exemption;
 - every seeded negative for these rules turns the gate red at its expected locus.
 
 The independent oracle is the authored positive seed, mutation definition, and expected diagnostic for every
@@ -663,7 +686,7 @@ does not gate the phase.
 
 ## Sprint 0.7: Artifact provenance, ignore coverage, and external evidence ✅
 
-**Status**: Done — eleven artifact-policy rules, each proven red by its own seeded negative
+**Status**: Done — the artifact-policy rules, each proven red by its own seeded negative
 **Implementation**: `tools/doc_lint_verify.py`, planned artifact-policy lint and generator registry,
 `.gitignore`, `.dockerignore`, and the external-attestation test adapter
 **Blocked by**: Sprint 0.5, Sprint 0.6
@@ -704,10 +727,10 @@ evidence, dynamic dependency resolution, exact ignore/context coverage, and the 
 
 ### Remaining Work
 
-The eleven rules of `tools/artifact_policy.py` are implemented, each with a seeded negative in
+The rules of `tools/artifact_policy.py` are implemented, each with a seeded negative in
 `tools/artifact_policy_selftest.py` that the gate proves red. `tools/attestation.py` supplies the write-once
-content-addressed backend and its refusal corpus. Every green run publishes its attestation, bound to the
-source snapshot it observed rather than to a revision.
+content-addressed backend and `tools/attestation_negative_corpus.py` the bundles it must refuse. Every green
+run publishes its attestation, bound to the source snapshot it observed rather than to a revision.
 
 One decision is recorded rather than assumed. Read literally, [§S](development_plan_standards.md#s-universal-artifact-hygiene-gate)
 clause 5 would keep Phase 0 open until every later phase had migrated its own tables, inverting the numeric
@@ -716,6 +739,43 @@ instead gives Phase 0 the shared corpora and each later phase its domain tables.
 `tools/migration_allowlist.tsv` implements that reading: every deferred finding is still reported, attributed
 to the phase whose gate must clear it, and cross-checked against the legacy register, and a row matching
 nothing fails the gate — so the list can only shrink.
+
+## Sprint 0.8: The authored negative corpora as one declared set ✅
+
+**Status**: Done — the corpus declaration is authored in doctrine and its stale-row rule is proven red
+**Implementation**: `documents/engineering/repository_layout_doctrine.md`, `tools/artifact_policy.py`,
+`tools/artifact_policy_selftest.py`, `tools/attestation.py`, `tools/attestation_negative_corpus.py`
+**Blocked by**: Sprint 0.7
+**Independent Validation**: a corpus row that names an unknown rule, a path that does not exist, or a rule it
+no longer seeds is reported, while a row that suppresses its own seed stays silent.
+**Docs to update**: `documents/engineering/repository_layout_doctrine.md`,
+`DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `DEVELOPMENT_PLAN/README.md`
+
+### Objective
+
+Stop the audit from reporting its own seeded fixtures, without letting the mechanism that achieves it become a
+place where a real defect can hide.
+
+### Deliverables
+
+- A doctrine-authored table naming every negative corpus and the rules that corpus deliberately seeds.
+- A parser and a central suppression pass that narrows a finding only at a declared pairing.
+- A twelfth rule reporting a corpus row that names an unknown rule, a missing path, or a rule it no longer
+  seeds, with its own seeded negative and a positive control.
+- The attestation refusal corpus relocated into its own module, leaving the adapter fully scanned.
+- Every read-and-write rule keyed on the source snapshot rather than the tracked tree.
+
+### Validation
+
+1. Run the phase command and confirm the `policy` side reports no finding against an authored corpus.
+2. Confirm the twelfth rule turns red on each of its three decay shapes and stays silent on the control.
+3. Confirm the surface enumeration joins the new rule to an authored expectation row.
+4. Confirm a file that is not yet committed is scanned by the read-and-write rules.
+
+### Remaining Work
+
+None. The declaration is minimal by construction: a row survives only while it suppresses a real finding, so
+the exemption set can shrink but not silently widen.
 
 ## Documentation Requirements
 

@@ -19,7 +19,7 @@ nor the runtime asset cache that is the deliberate exception, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -91,6 +91,17 @@ rate limits, and a warm cluster is air-gapped by construction.
   is amoebius's own image carrying a trusted binary, not someone's public container. The only contact with
   upstream is the **base-image build** downloading those binaries/packages on the builder, never an
   in-cluster pull. This reverses prodbox's mirror-into-registry model (`local_registry_pipeline.md` [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)).
+- **The ladder is a typed arm set, not a preference anyone has to remember.** The bake catalog's step union
+  carries one arm per rung — an `apt` package, an official artifact with a publisher-resolved checksum, an
+  amoebius-built product — so choosing a rung is a modelling decision a reviewer can see in the diff. A
+  scavenge-from-image arm may exist as an explicit last resort, and every remaining use records why the rungs
+  above it did not apply. Without the upper arms in the type there is only one way in, and the ladder becomes
+  advice: the catalog says "copy from a public image" because that is the only sentence it can say.
+- **The rule binds workloads, and the bootstrap tools are a named exception.** "No public pull" is a statement
+  about what the *cluster runs*. The host-side tools that bring a cluster into existence before there is a
+  registry to pull from — the kind node image that Phase 24 boots, and the buildx/buildkit builder that
+  produces the image in the first place — are build and bootstrap infrastructure, not workloads. They are
+  named here so the exception is bounded and visible rather than discovered later in a Dockerfile.
 - **The in-cluster registry is `distribution`, not Harbor.** The registry every workload pulls from is the
   single-binary `distribution` (`registry:2`) OCI registry — itself a baked binary ([§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)) — which **replaces Harbor**. It serves amoebius-built images — the base image and every `Runtime` variant
   ([§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)); it is *not* a
@@ -366,13 +377,26 @@ Prometheus/Grafana, the **alert receiver** that holds the firing set for the `Ob
 pod startup — [monitoring_doctrine.md](./monitoring_doctrine.md)), Patroni/Postgres, Envoy, cert-manager,
 MetalLB, the `distribution` registry, and provider-only infrastructure binaries such as the AWS EBS CSI
 controller/node implementation and its required sidecars are installed into the multi-arch base image at
-build time, by a strict preference ladder:
+build time, by a strict preference ladder, each rung a distinct arm of the typed bake catalog:
 1. **`apt`** where an official package exists (Vault, Grafana, FRR, Redis, Postgres/pgBouncer/pgBackRest,
    code-server, pgAdmin, curl/busybox, …).
 2. **official multi-arch binary/tarball** otherwise (MinIO/mc, `distribution`, the Prometheus stack,
    Thanos, the Envoy-gateway control plane + the Envoy data plane, cert-manager, MetalLB, kube-rbac-proxy,
-   the Percona operator, the exporters).
-3. **build-from-source** only as a last resort, adding the language as a first-class build target. The one
+   the Percona operator, the exporters), verified against the **publisher's own checksum manifest resolved at
+   build time** rather than a digest copied into the catalog.
+3. **build-from-source** only as a last resort, adding the language as a first-class build target.
+
+**Extracting a binary from a public image is below rung 3, not beside rung 2.** It reintroduces exactly the
+public-image dependency the first bullet of [§2](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)
+removes, and it transfers the upstream image's shared-library closure into amoebius's hands: a service copied
+out of a foreign image brings its `libxml2`/`libgssapi_krb5`-shaped dependencies with it, and every one of
+them becomes a path someone must maintain by hand forever. Where it is unavoidable it is recorded with the
+reason the rungs above it did not apply.
+
+**The base is a plain Ubuntu image.** The accelerator toolchain belongs to the `linux-cuda` lane, not to
+every lane: a CPU-only cluster that carries a CUDA *devel* base pays for a compiler stack it can never use,
+and the `linux-cpu` lane's "no accelerator offering" claim is easier to believe when the accelerator
+toolchain is not sitting in the image. The one
    new toolchain required is a **multi-arch Temurin JRE/JDK** for the JVM services (Keycloak,
    keycloak-config-cli, Pulsar+ZooKeeper+BookKeeper) — which are a tarball + a per-arch JRE, not source
    builds. Envoy's data plane is taken as an **official binary** (its from-source path is Bazel, which

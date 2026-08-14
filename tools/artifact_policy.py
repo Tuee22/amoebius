@@ -6,7 +6,7 @@ half of the Phase-0 contract: that the repository separates authored inputs from
 generated output the way
 `documents/engineering/repository_layout_doctrine.md` section 8 requires.
 
-Eleven rules, each independently seeded:
+Twelve rules, each independently seeded:
 
     r1  generator-registry     every doctrine output class has a declared generator
     r2  provenance             no tracked file is a reproducible copy
@@ -19,6 +19,7 @@ Eleven rules, each independently seeded:
     r9  external-attestation   a run bundle schema-checks, stores, and verifies
     r10 terminology            no retired predecessor name survives in the tree
     r11 no-leak                the gate changes no tracked file and creates no unignored path
+    r12 negative-corpora       every audit exemption is authored, in use, and rule-scoped
 
 Python 3 standard library only, and no dependency on the amoebius binary.
 
@@ -49,6 +50,7 @@ ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 
 import attestation  # noqa: E402
+import attestation_negative_corpus  # noqa: E402
 import phase0_artifact_lint as legacy  # noqa: E402
 
 RULES = {
@@ -63,6 +65,7 @@ RULES = {
     "r9": "external attestation: a run bundle schema-checks, stores, and verifies",
     "r10": "terminology: no retired predecessor name survives in the tree",
     "r11": "no-leak: the gate changes no tracked file and creates no unignored path",
+    "r12": "negative corpora: every audit exemption is authored, in use, and rule-scoped",
 }
 
 REGISTRY = HERE / "generator_registry.tsv"
@@ -211,9 +214,11 @@ MIGRATION_ROOTS = (
 )
 MIGRATION_LEDGER = re.compile(r"test/golden/phase_\d{2}_ledger\.json")
 
-# The authored negative corpus for ledger_lint is a hand-written ledger by design;
-# doctrine section 3.5 classifies it as a candidate authored negative corpus.
-LEDGER_SHAPE_EXEMPT = "tools/ledger_lint_corpus/"
+# An authored negative corpus seeds the very defect a rule detects, so the audit must
+# step over that one pairing or report its own fixtures. The corpora and the rules each
+# one seeds are declared in doctrine section 3.6 and parsed from there, never restated
+# here: the exemption set is authored independently of the module it exempts.
+NEGATIVE_CORPUS_HEADING = "### 3.6 Authored negative corpora"
 
 # A home-directory path in a tracked file is resolver output. A guest path the image
 # itself owns is contractual; those live under a declared guest prefix.
@@ -259,6 +264,42 @@ class Allowance:
 
 
 @dataclass
+class Corpus:
+    """One authored negative corpus and the rules doctrine says it deliberately seeds.
+
+    `covers` records which rules the corpus actually suppressed, so `r12` can report a
+    pairing that has stopped seeding anything instead of letting it widen silently.
+    """
+
+    path: str
+    rules: frozenset[str]
+    used: set[str] = field(default_factory=set)
+
+    def covers(self, relative: str, rule: str) -> bool:
+        if rule not in self.rules:
+            return False
+        if relative != self.path and not relative.startswith(self.path):
+            return False
+        self.used.add(rule)
+        return True
+
+
+def apply_corpora(report: Report, corpora: list[Corpus]) -> None:
+    """Drop a finding an authored corpus declares it seeds, and record that use.
+
+    Suppression happens here rather than inside each scanner for two reasons: every
+    rule keeps scanning every file, so a corpus is only ever narrowed at the pairing
+    doctrine names; and a row counts as used only when it removed a real finding, which
+    is what lets `r12` retire a corpus that has stopped seeding its rule.
+    """
+    report.findings = [
+        finding
+        for finding in report.findings
+        if not any(corpus.covers(finding.locus, finding.rule) for corpus in corpora)
+    ]
+
+
+@dataclass
 class Report:
     findings: list[Finding] = field(default_factory=list)
     deferred: list[Finding] = field(default_factory=list)
@@ -293,6 +334,11 @@ def snapshot_paths(root: Path = ROOT) -> list[str]:
     Tracked and untracked-but-not-ignored files both count, because both are inputs a
     run can read. Commit state deliberately does not enter into it —
     `development_plan_standards.md` section S withdrew commit timing as a gate input.
+
+    Every rule that asks what a build or gate *reads and writes* keys on this set, so a
+    defect cannot hide in a file merely because nobody has committed it yet. Only `r2`
+    keys on `tracked_paths`, because its subject is literally the tracked tree
+    (repository-layout doctrine section 8 clauses 5 and 10).
     """
     out = git("ls-files", "-z", "--cached", "--others", "--exclude-standard", cwd=root)
     return sorted(p for p in out.split("\0") if p and (root / p).is_file())
@@ -391,6 +437,69 @@ def audit_allowlist_integrity(report: Report, allowances: list[Allowance]) -> No
                     ALLOWLIST.name,
                     f"allowance {row.glob!r} cites {row.anchor!r}, absent from the legacy register",
                 )
+            )
+
+
+# --------------------------------------------------------------------------
+# r12 — the authored negative-corpus declaration
+# --------------------------------------------------------------------------
+
+CORPUS_ROW = re.compile(r"^\|\s*`([^`]+)`\s*\|\s*([r0-9,\s]+?)\s*\|")
+
+
+def parse_corpora(text: str) -> list[Corpus]:
+    """Read the corpus table of repository-layout doctrine section 3.6.
+
+    Parsed from the doctrine rather than restated in this module, for the same reason
+    the output-class inventory is: the set that narrows this audit is authored where a
+    reviewer reads it, not where the audit could quietly widen it.
+    """
+    start = text.find(NEGATIVE_CORPUS_HEADING)
+    if start < 0:
+        return []
+    end = text.find("\n## ", start)
+    block = text[start : end if end > 0 else len(text)]
+    corpora: list[Corpus] = []
+    for line in block.splitlines():
+        match = CORPUS_ROW.match(line.strip())
+        if not match:
+            continue
+        rules = frozenset(r.strip() for r in match.group(2).split(",") if r.strip())
+        if rules:
+            corpora.append(Corpus(match.group(1).strip(), rules))
+    return corpora
+
+
+def load_corpora() -> list[Corpus]:
+    return parse_corpora(read_text(LAYOUT_DOCTRINE))
+
+
+def audit_corpus_integrity(report: Report, corpora: list[Corpus]) -> None:
+    """A declared exemption must name a real rule, a real path, and stay in use.
+
+    Without the last clause the declaration is a ratchet: a corpus that stops seeding
+    its rule leaves behind a permanent hole nobody has to justify again.
+    """
+    if not corpora:
+        report.findings.append(
+            Finding("r12", str(LAYOUT_DOCTRINE.name), "doctrine declares no negative corpus")
+        )
+        return
+    for corpus in corpora:
+        for rule in sorted(corpus.rules):
+            if rule not in RULES:
+                report.findings.append(
+                    Finding("r12", corpus.path, f"corpus declares unknown rule {rule!r}")
+                )
+        target = ROOT / corpus.path
+        if not (target.is_file() or target.is_dir()):
+            report.findings.append(
+                Finding("r12", corpus.path, "declared corpus does not exist; remove the row")
+            )
+            continue
+        for rule in sorted(corpus.rules - corpus.used):
+            report.findings.append(
+                Finding("r12", corpus.path, f"corpus no longer seeds {rule}; narrow the row")
             )
 
 
@@ -505,7 +614,7 @@ def audit_generator_targets(
     if sources is None:
         sources = {
             p: read_text(ROOT / p)
-            for p in tracked_paths()
+            for p in snapshot_paths()
             if p.startswith("tools/")
             and p.endswith(".py")
             and p != "tools/artifact_policy.py"
@@ -545,7 +654,7 @@ def classify_tracked(relative: str, text: str | None, twin: str = "") -> list[Fi
                 Finding("r2", relative, f"tracked file carries a generated banner ({banner!r})")
             )
             break
-    if relative.endswith(".json") and not relative.startswith(LEDGER_SHAPE_EXEMPT):
+    if relative.endswith(".json"):
         try:
             value = json.loads(text)
         except (json.JSONDecodeError, ValueError):
@@ -770,7 +879,7 @@ def scan_resolution(relative: str, text: str) -> list[Finding]:
 
 
 def audit_dynamic_resolution(report: Report, paths: list[str] | None = None) -> None:
-    for relative in tracked_paths() if paths is None else paths:
+    for relative in snapshot_paths() if paths is None else paths:
         path = ROOT / relative
         if not path.is_file() or path.suffix not in TEXT_SUFFIXES:
             continue
@@ -826,7 +935,7 @@ def ignored_paths(candidates: list[str]) -> set[str]:
 
 def path_references(globs) -> dict[str, set[str]]:
     referenced: dict[str, set[str]] = {}
-    for relative in tracked_paths():
+    for relative in snapshot_paths():
         if not matches_any(relative, globs):
             continue
         path = ROOT / relative
@@ -971,7 +1080,7 @@ def audit_external_attestation(report: Report, bundle: dict | None = None) -> No
             report.findings.append(
                 Finding("r9", reference, "stored attestation did not verify against its digest")
             )
-        for name, broken, expect in attestation.negative_corpus(sample):
+        for name, broken, expect in attestation_negative_corpus.negative_corpus(sample):
             if attestation.schema_check(broken):
                 continue
             try:
@@ -1026,6 +1135,12 @@ def audit(gen_root: Path | None = None) -> Report:
     audit_revision_history(report)
     audit_external_attestation(report)
     audit_terminology(report)
+
+    # A seeded fixture is not a finding at all, so the corpora narrow the report before
+    # the migration allowlist defers what is left to its owning phase.
+    corpora = load_corpora()
+    apply_corpora(report, corpora)
+    audit_corpus_integrity(report, corpora)
 
     allowances = load_allowances()
     apply_allowances(report, allowances)
@@ -1083,7 +1198,8 @@ def main(argv: list[str]) -> int:
         print(f"artifact-policy: FAIL — {len(report.findings)} finding(s)", file=sys.stderr)
         return 1
     print(
-        f"  ok   11 rules clean; {len(report.deferred)} finding(s) deferred to their owning phase"
+        f"  ok   {len(RULES)} rules clean; "
+        f"{len(report.deferred)} finding(s) deferred to their owning phase"
     )
     return 0
 

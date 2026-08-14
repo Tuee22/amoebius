@@ -42,6 +42,9 @@ cabal.project.local
 **/*.hie
 .phase1-store
 .phase1-store/**
+ghc-pkg-*
+repl-wrapper-*
+wrapper-*
 **/*.tla
 **/*.cfg
 node_modules

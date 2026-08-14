@@ -14,12 +14,10 @@ from typing import Any, Iterable, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_25/image-artifact.json"
 ARTIFACT = Path("/var/tmp/amoebius-phase25-scratch/oci/amoebius-phase25.oci.tar")
 KUBECONFIG = Path.home() / ".amoebius/phase24/kubeconfig"
 NODE = "amoebius-phase24-control-plane"
 IMAGE = "amoebius.invalid/amoebius-base:phase25"
-EXPECTED_ARCHIVE_SHA256 = "ae2919165c48504d45e1ec471f85968fb41d21f9d87983cf5371e500fb8003c8"
 PUBLIC_HOSTS = ("docker.io", "quay.io", "ghcr.io")
 
 
@@ -155,8 +153,8 @@ def filesystem_observation() -> dict[str, Any]:
     }
 
 
-def artifact_demand() -> dict[str, Any]:
-    artifact = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+def artifact_demand(evidence: Path) -> dict[str, Any]:
+    artifact = json.loads((evidence / "image-artifact.json").read_text(encoding="utf-8"))
     platforms = [row for row in artifact["platforms"] if row["os"] == "linux" and row["architecture"] == "amd64"]
     if len(platforms) != 1:
         raise PreflightFailure("selected-platform-domain")
@@ -187,8 +185,8 @@ def artifact_demand() -> dict[str, Any]:
     }
 
 
-def registry_demand() -> dict[str, Any]:
-    artifact = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+def registry_demand(evidence: Path) -> dict[str, Any]:
+    artifact = json.loads((evidence / "image-artifact.json").read_text(encoding="utf-8"))
     objects: dict[str, int] = {}
     for row in artifact["registryObjects"]:
         digest, size = str(row["digest"]), int(row["storedBytes"])
@@ -211,11 +209,11 @@ def resolve_public_hosts() -> dict[str, list[str]]:
     return {host: sorted({row[4][0] for row in socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)}) for host in PUBLIC_HOSTS}
 
 
-def observe() -> dict[str, Any]:
+def observe(evidence: Path, expected_archive_sha256: str) -> dict[str, Any]:
     if not ARTIFACT.is_file():
         raise PreflightFailure("artifact-absent")
     archive_sha = sha256_file(ARTIFACT)
-    if archive_sha != EXPECTED_ARCHIVE_SHA256:
+    if archive_sha != expected_archive_sha256:
         raise PreflightFailure(f"artifact-sha256:{archive_sha}")
     node = kubectl_json("get", "node", NODE)
     pods = kubectl_json("get", "pods", "--all-namespaces")
@@ -223,8 +221,8 @@ def observe() -> dict[str, Any]:
     allocatable = node.get("status", {}).get("allocatable", {})
     node_supply = vector(allocatable)
     pod_supply = int(allocatable.get("pods", "0"))
-    image = artifact_demand()
-    registry = registry_demand()
+    image = artifact_demand(evidence)
+    registry = registry_demand(evidence)
     filesystem = filesystem_observation()
     registry_private = 512 * 1024**2
     proxy_ephemeral = 64 * 1024**2
@@ -297,8 +295,17 @@ def observe() -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path)
+    # The bundle this run reads its artifact observation from is supplied by the caller.
+    # There is deliberately no default: a default names a location, and whatever a previous
+    # run left there would decide this admission instead of the run in progress.
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    # The archive checksum is the one this run built, never a constant pinning a build that
+    # no longer exists.
+    parser.add_argument(
+        "--expected-archive-sha256", required=True, help="the OCI archive checksum this run produced"
+    )
     arguments = parser.parse_args()
-    result = observe()
+    result = observe(arguments.evidence, arguments.expected_archive_sha256)
     encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
     if arguments.output is not None:
         arguments.output.parent.mkdir(parents=True, exist_ok=True)

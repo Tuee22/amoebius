@@ -42,3 +42,4 @@ repository.revision_history	artifact_policy	r8
 repository.external_attestation	artifact_policy	r9
 repository.terminology	artifact_policy	r10
 repository.no_leak	artifact_policy	r11
+repository.negative_corpora	artifact_policy	r12

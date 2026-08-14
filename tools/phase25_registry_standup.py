@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import datetime as dt
+import functools
 import hashlib
 import http.client
 import json
@@ -14,21 +15,22 @@ import shlex
 import signal
 import socket
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any, Iterator, Sequence
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
 KUBECONFIG = Path.home() / ".amoebius/phase24/kubeconfig"
 NODE = "amoebius-phase24-control-plane"
 NAMESPACE = "amoebius-bootstrap"
-IMAGE_DIGEST = "sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4"
-IMAGE = f"amoebius.invalid/amoebius-base@{IMAGE_DIGEST}"
+IMAGE_REPOSITORY = "amoebius.invalid/amoebius-base"
 ORACLE = ROOT / "test/fixtures/phase25/bootstrap_registry_domain.dhall"
-PREFLIGHT = ROOT / "DEVELOPMENT_PLAN/evidence/phase_25/sprint-25.2-preflight.json"
-STANDUP_EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_25/sprint-25.2-standup.json"
-ARTIFACT_EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_25/image-artifact.json"
 PUBLIC_HOSTS = ("docker.io", "quay.io", "ghcr.io")
 PCAP = Path("/var/tmp/amoebius-phase25-standup.pcap")
 FIREWALL_COMMENT = "amoebius-phase25-registry-private"
@@ -52,8 +54,18 @@ def kubectl(*arguments: str, stdin: str | None = None, check: bool = True) -> su
     return run(("/usr/bin/kubectl", "--kubeconfig", str(KUBECONFIG), *arguments), stdin=stdin, check=check)
 
 
+@functools.cache
+def dhall_to_json() -> str:
+    """Resolve the dhall-to-json companion per run from the authored requirements.
+
+    A bare `dhall-to-json` is a PATH lookup, which need not be the sibling of the dhall
+    the authored range admits; the companion is taken from beside the resolved executable.
+    """
+    return str(Path(toolchain.resolve(["dhall"])["dhall"]["path"]).with_name("dhall-to-json"))
+
+
 def oracle() -> dict[str, Any]:
-    result = run(("/home/matthewnowak/.local/bin/dhall-to-json", "--file", str(ORACLE)))
+    result = run((dhall_to_json(), "--file", str(ORACLE)))
     decoded = json.loads(result.stdout)
     if not isinstance(decoded, dict):
         raise StandupFailure("oracle-object")
@@ -65,6 +77,7 @@ def proxy_source(
     admitted_objects: dict[str, int],
     publication_proof: str,
     publication_tag: str,
+    index_digest: str,
 ) -> str:
     source = (ROOT / "tools/phase25_registry_proxy_runtime.py").read_text(encoding="utf-8")
     source = source.removeprefix(
@@ -74,7 +87,7 @@ def proxy_source(
         source.replace("__CAPABILITY__", repr(capability))
         .replace("__PUBLICATION_PROOF__", repr(publication_proof))
         .replace("__PUBLICATION_TAG__", repr(publication_tag))
-        .replace("__INDEX_DIGEST__", repr(IMAGE_DIGEST))
+        .replace("__INDEX_DIGEST__", repr(index_digest))
         .replace("__ADMITTED__", repr(json.dumps(admitted_objects, sort_keys=True)))
     )
 
@@ -125,14 +138,20 @@ ThreadingHTTPServer(("0.0.0.0", 5002), Handler).serve_forever()
 '''
 
 
-def manifest(preflight: dict[str, Any], domain_oracle: dict[str, Any]) -> dict[str, Any]:
+def manifest(
+    preflight: dict[str, Any],
+    domain_oracle: dict[str, Any],
+    evidence: Path,
+    index_digest: str,
+) -> dict[str, Any]:
+    image = f"{IMAGE_REPOSITORY}@{index_digest}"
     digest = str(domain_oracle["handoffDigest"])
     capability = "sha256:" + hashlib.sha256((str(preflight["fingerprint"]) + digest).encode()).hexdigest()
-    publication_tag = f"source-{digest[7:19]}-content-{IMAGE_DIGEST[7:19]}"
+    publication_tag = f"source-{digest[7:19]}-content-{index_digest[7:19]}"
     publication_proof = "sha256:" + hashlib.sha256(
-        (capability + "|" + publication_tag + "|" + IMAGE_DIGEST).encode()
+        (capability + "|" + publication_tag + "|" + index_digest).encode()
     ).hexdigest()
-    artifact = json.loads(ARTIFACT_EVIDENCE.read_text(encoding="utf-8"))
+    artifact = json.loads((evidence / "image-artifact.json").read_text(encoding="utf-8"))
     admitted_objects = {
         str(row["digest"]): int(row["storedBytes"])
         for row in artifact["registryObjects"]
@@ -171,7 +190,9 @@ http:
             "apiVersion": "v1", "kind": "ConfigMap", "metadata": metadata("registry-config"),
             "data": {
                 "config.yml": registry_config,
-                "proxy.py": proxy_source(capability, admitted_objects, publication_proof, publication_tag),
+                "proxy.py": proxy_source(
+                    capability, admitted_objects, publication_proof, publication_tag, index_digest
+                ),
                 "read-proxy.py": read_proxy_source(),
             },
         },
@@ -188,7 +209,7 @@ http:
                         "nodeSelector": {"kubernetes.io/hostname": NODE},
                         "securityContext": {"runAsUser": 65532, "runAsGroup": 65532, "fsGroup": 65532, "seccompProfile": {"type": "RuntimeDefault"}},
                         "containers": [{
-                            "name": "distribution", "image": IMAGE, "imagePullPolicy": "Never",
+                            "name": "distribution", "image": image, "imagePullPolicy": "Never",
                             "command": ["/usr/bin/registry", "serve", "/etc/distribution/config.yml"],
                             "resources": {
                                 "requests": {"cpu": "200m", "memory": "192Mi", "ephemeral-storage": str(registry_request - 64 * 1024**2)},
@@ -200,7 +221,7 @@ http:
                                 {"name": "blobs", "mountPath": "/var/lib/registry"},
                             ],
                         }, {
-                            "name": "registry-read-proxy", "image": IMAGE, "imagePullPolicy": "Never",
+                            "name": "registry-read-proxy", "image": image, "imagePullPolicy": "Never",
                             "command": ["/usr/bin/python3", "/etc/distribution/read-proxy.py"],
                             "ports": [{"name": "read", "containerPort": 5002}],
                             "resources": {
@@ -243,7 +264,7 @@ http:
                         "nodeSelector": {"kubernetes.io/hostname": NODE},
                         "securityContext": {"runAsUser": 65532, "runAsGroup": 65532, "seccompProfile": {"type": "RuntimeDefault"}},
                         "containers": [{
-                            "name": "registry-mutation-proxy", "image": IMAGE, "imagePullPolicy": "Never",
+                            "name": "registry-mutation-proxy", "image": image, "imagePullPolicy": "Never",
                             "command": ["/usr/bin/python3", "/etc/distribution/proxy.py"],
                             "ports": [{"name": "proxy", "containerPort": 5001}],
                             "resources": {
@@ -452,7 +473,10 @@ def validate_live(
     generated: dict[str, Any],
     packet_text: str,
     journal_since: str | None,
+    evidence: Path,
+    index_digest: str,
 ) -> dict[str, Any]:
+    image = f"{IMAGE_REPOSITORY}@{index_digest}"
     resources = json.loads(kubectl("-n", NAMESPACE, "get", "namespace,configmap,deployment,service", "-l", "amoebius.io/bootstrap=registry", "-o", "json").stdout)
     observed_ids = sorted(identities(resources["items"]))
     expected_ids = sorted(str(value) for value in domain_oracle["identities"])
@@ -464,21 +488,21 @@ def validate_live(
     deployments = json.loads(kubectl("-n", NAMESPACE, "get", "deployments", "-o", "json").stdout)
     for deployment in deployments["items"]:
         containers = deployment["spec"]["template"]["spec"]["containers"]
-        if any(container.get("imagePullPolicy") != "Never" or container.get("image") != IMAGE for container in containers):
+        if any(container.get("imagePullPolicy") != "Never" or container.get("image") != image for container in containers):
             raise StandupFailure(f"pull-policy-or-image:{deployment['metadata']['name']}")
     pods = json.loads(kubectl("-n", NAMESPACE, "get", "pods", "-o", "json").stdout)
     image_ids = []
     for pod in pods["items"]:
         for status in pod.get("status", {}).get("containerStatuses", []):
             image_ids.append(status.get("imageID", ""))
-    if len(image_ids) != 3 or any(IMAGE_DIGEST not in value for value in image_ids):
+    if len(image_ids) != 3 or any(index_digest not in value for value in image_ids):
         raise StandupFailure(f"image-byte-identity:{image_ids}")
     if journal_since is not None:
         journal = run(("/usr/bin/docker", "exec", NODE, "journalctl", "-u", "containerd", "--since", journal_since, "--no-pager")).stdout
         forbidden = [line for line in journal.splitlines() if any(host in line for host in PUBLIC_HOSTS)]
         if forbidden:
             raise StandupFailure("containerd-public-registry:" + " | ".join(forbidden))
-    preflight = json.loads(PREFLIGHT.read_text(encoding="utf-8"))
+    preflight = json.loads((evidence / "sprint-25.2-preflight.json").read_text(encoding="utf-8"))
     validate_no_public_connections(packet_text, preflight["publicEndpoints"])
     capability = str(generated["capability"])
     with port_forward("distribution-read", 15000, 5000):
@@ -498,7 +522,7 @@ def validate_live(
     return {
         "domain": observed_ids,
         "handoffDigest": domain_oracle["handoffDigest"],
-        "image": IMAGE,
+        "image": image,
         "imageIds": image_ids,
         "registryRead": {"status": read_status, "body": read_body},
         "directMutation": {"status": direct_write_status, "body": direct_write_body},
@@ -514,15 +538,15 @@ def validate_live(
     }
 
 
-def enact() -> dict[str, Any]:
+def enact(evidence: Path, index_digest: str) -> dict[str, Any]:
     domain_oracle = oracle()
-    preflight = json.loads(PREFLIGHT.read_text(encoding="utf-8"))
+    preflight = json.loads((evidence / "sprint-25.2-preflight.json").read_text(encoding="utf-8"))
     image_rows = run(("/usr/bin/docker", "exec", NODE, "/usr/local/bin/ctr", "--namespace", "k8s.io", "images", "list", "--quiet")).stdout.splitlines()
-    if IMAGE not in image_rows:
+    if f"{IMAGE_REPOSITORY}@{index_digest}" not in image_rows:
         raise StandupFailure("side-loaded-image-absent")
     if kubectl("get", "namespace", NAMESPACE, "--ignore-not-found", "-o", "name").stdout.strip():
         raise StandupFailure("bootstrap-domain-already-present")
-    generated = manifest(preflight, domain_oracle)
+    generated = manifest(preflight, domain_oracle, evidence, index_digest)
     if sorted(identities(generated["items"])) != sorted(str(value) for value in domain_oracle["identities"]):
         raise StandupFailure("generated-domain-mismatch")
     payload = dict(generated)
@@ -540,7 +564,7 @@ def enact() -> dict[str, Any]:
         time.sleep(2)
     finally:
         packet_text = stop_capture(capture)
-    result = validate_live(domain_oracle, generated, packet_text, journal_since)
+    result = validate_live(domain_oracle, generated, packet_text, journal_since, evidence, index_digest)
     result.update({
         "schema": "amoebius.phase25.sprint25.2-standup.v1",
         "preflightFingerprint": preflight["fingerprint"],
@@ -550,24 +574,27 @@ def enact() -> dict[str, Any]:
     return result
 
 
-def verify_current() -> dict[str, Any]:
-    if not STANDUP_EVIDENCE.is_file() or not PCAP.is_file():
+def verify_current(evidence: Path, index_digest: str) -> dict[str, Any]:
+    standup = evidence / "sprint-25.2-standup.json"
+    if not standup.is_file() or not PCAP.is_file():
         raise StandupFailure("standup-evidence-or-pcap-absent")
-    recorded = json.loads(STANDUP_EVIDENCE.read_text(encoding="utf-8"))
+    recorded = json.loads(standup.read_text(encoding="utf-8"))
     if (
         recorded.get("containerdPublicRegistryLines") != 0
         or recorded.get("publicRegistryTcpConnections") != 0
     ):
         raise StandupFailure("recorded-standup-public-registry-observation")
     domain_oracle = oracle()
-    preflight = json.loads(PREFLIGHT.read_text(encoding="utf-8"))
-    generated = manifest(preflight, domain_oracle)
+    preflight = json.loads((evidence / "sprint-25.2-preflight.json").read_text(encoding="utf-8"))
+    generated = manifest(preflight, domain_oracle, evidence, index_digest)
     packet_text = run(("/usr/bin/tcpdump", "-nn", "-r", str(PCAP))).stdout
     result = validate_live(
         domain_oracle,
         generated,
         packet_text,
         None,
+        evidence,
+        index_digest,
     )
     result.update(
         {
@@ -584,8 +611,19 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path)
     parser.add_argument("--verify-only", action="store_true")
+    # The bundle this run reads its preflight, artifact, and standup observations from is
+    # supplied by the caller. There is deliberately no default: a default names a location,
+    # and whatever a previous run left there would decide this standup instead of the run
+    # in progress.
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    # Likewise the index digest: a constant here would pin a build that no longer exists.
+    parser.add_argument("--index-digest", required=True, help="the index digest this run produced")
     arguments = parser.parse_args()
-    result = verify_current() if arguments.verify_only else enact()
+    result = (
+        verify_current(arguments.evidence, arguments.index_digest)
+        if arguments.verify_only
+        else enact(arguments.evidence, arguments.index_digest)
+    )
     encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
     if arguments.output is not None:
         arguments.output.parent.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,3 @@
+surface=BakeCatalog
+mutation=replace-rung:redis-server:AptPackage->CopyOci
+expected_oracle=AcquisitionRungNotHighestApplicable

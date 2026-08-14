@@ -35,6 +35,15 @@ cabal.project.local
 *.tla
 *.cfg
 
+# Haskell tooling scratch. cabal and hie-bios — the project-discovery library HLS uses —
+# write hash-named exec shims into the directory they are invoked from. Each hardcodes a
+# resolved developer-home path and a resolved GHC version, so it is machine-specific
+# generated output that is meaningless on another host and never a repository input. These
+# regenerate whenever an editor opens the project, so they are excluded rather than swept.
+/ghc-pkg-*
+/repl-wrapper-*
+/wrapper-*
+
 # JavaScript and PureScript build output.
 /node_modules/
 /ui-runtime/.spago/

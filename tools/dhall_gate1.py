@@ -309,6 +309,34 @@ def check_image_negatives() -> int:
     return len(rows)
 
 
+def check_secret_negatives() -> int:
+    """A `Text` where a `SecretRef` belongs must have no inhabitant at Gate 1.
+
+    This is the typed half of the secrets contract: the negative differs from its paired
+    positive in exactly one place — a sensitive field holding a literal instead of a
+    reference — so a green result cannot come from an unrelated error.
+    """
+    rows = []
+    lines = (ORACLE / "secret_cases.tsv").read_text(encoding="utf-8").splitlines()
+    for line in lines[1:]:
+        if line:
+            rows.append(line.split("\t"))
+    if len(rows) != 1:
+        raise GateFailure(f"expected one secret-policy negative, found {len(rows)}")
+    for name, negative, paired, golden, required in rows:
+        require_typed(ROOT / paired)
+        result = dhall_type(ROOT / negative)
+        if result.returncode == 0:
+            raise GateFailure(f"plaintext secret unexpectedly type-checked: {negative}")
+        if required not in ANSI.sub("", result.stderr):
+            raise GateFailure(f"{name} failed for the wrong reason; {required!r} absent:\n{result.stderr}")
+        expected = (ROOT / golden).read_text(encoding="utf-8")
+        actual = normalize_error(result.stderr)
+        if actual != expected:
+            raise GateFailure(f"{name} normalized error drift:\n--- expected\n{expected}--- actual\n{actual}")
+    return len(rows)
+
+
 def check_import_policy() -> None:
     require_typed(ROOT / "dhall/examples/legal_import_local.dhall")
     policy = [
@@ -350,6 +378,7 @@ def check_mutant() -> None:
 def write_results(
     negative_count: int,
     image_negative_count: int,
+    secret_negative_count: int,
     constructor_count: int,
     deletion_count: int,
     substitution_count: int,
@@ -366,6 +395,7 @@ def write_results(
         f"positive-fixtures\t{len(POSITIVES)}/4-green\n"
         f"gate1-negatives\t{negative_count}/8-red-specific\n"
         f"image-process-negatives\t{image_negative_count}/3-red-specific\n"
+        f"secret-policy-negatives\t{secret_negative_count}/1-red-specific\n"
         "import-policy-negatives\t2/2-red-ForbiddenImport\n"
         f"constructor-rejections\t{constructor_count}/{constructor_count}-red\n"
         "arm-inventory\tequal\n"
@@ -410,6 +440,7 @@ def main() -> int:
             return 0
         negative_count = check_negatives()
         image_negative_count = check_image_negatives()
+        secret_negative_count = check_secret_negatives()
         check_import_policy()
         constructor_count = check_constructor_rejections()
         check_mutant()
@@ -426,6 +457,7 @@ def main() -> int:
         write_results(
             negative_count,
             image_negative_count,
+            secret_negative_count,
             constructor_count,
             deletion_count,
             substitution_count,
