@@ -1,0 +1,48 @@
+# Authored expectation for the Phase-26 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. Phase 26 had no authored expectation at all — the
+# retired gate read a surface list out of a committed enumeration file and compared a
+# committed ledger against a derived one, so the list described whatever the gate last
+# emitted. This file is the first authored opinion its gate is checked against.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   metrics  a value this run measured from its own evidence, compared against the authored
+#            expectation in the gate's EXPECTED_RESULTS table
+#   items    a committed seeded mutant, evidenced by that mutant's own red observation and
+#            never by the battery's total
+#   checks   a gate side that either ran or did not
+#
+# A surface with no ids is one this register cannot decide. It stays UNVERIFIED in the
+# ledger, which is a statement about what the run reached, not an omission.
+five-sprint-seal	metrics	sprint-receipts
+register-partition	metrics	sprint-registers
+byte-stable-rerun	metrics	rerun-byte-stability
+zero-mutation-rerun	metrics	rerun-planned-mutations
+observed-non-instantaneous-readiness	metrics	readiness-non-instantaneous
+serial-ondelete-ordering	metrics	serial-replacement-transitions
+job-terminal-retention	metrics	job-terminal-retention
+custom-resource-child-envelope	metrics	custom-resource-child-conformance
+quota-race-single-admission	metrics	quota-race-admission
+leak-free-postflight	metrics	postflight-leaks
+deterministic-schedule-battery	metrics	deterministic-schedules
+no-sleep-gated-readiness	metrics	forbidden-readiness-symbols
+seeded-mutant-battery	metrics	mutants
+authenticated-deletion-required	items	delete-from-owner-label-alone
+readiness-is-observed	items	wait-for-ready-pure
+diff-ignores-per-run-generation	items	generation-stamped-after-diff
+child-envelope-decides-health	items	healthy-cr-over-bound-child
+stale-token-rejected	items	lost-lease-resourceversion-retry
+write-requires-exact-holder	items	mutation-without-holder
+simulated-readiness-not-sleep-gated	items	sleep-gated-readiness
+serial-stage-not-collapsed	items	serial-stage-collapse
+completion-durable-before-cleanup	items	completion-cleanup-before-persist
+simulated-delete-requires-authority	items	label-only-delete
+fresh-snapshot-before-mutation	items	cached-observation
+corpus-authored-before-planner	checks	corpus-domain-exact,never-ready-fixture-present
+pure-renderer-unchanged	checks	phase13-render-gate
+toolchain-from-authored-requirements	checks	toolchain-satisfies-requirements
+recorded-metrics-match-oracle	checks	recorded-results-match-oracle,emitted-results-untracked
+modeled-apiserver-fidelity	metrics
+completion-release-ledger	metrics
+rollback-ledger	metrics

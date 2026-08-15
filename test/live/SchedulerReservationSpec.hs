@@ -6,6 +6,7 @@ import Data.Aeson (FromJSON (parseJSON), eitherDecodeFileStrict', withObject, (.
 import Data.List (nub)
 import Data.Text (Text)
 import Data.Text qualified as Text
+import System.Environment (getArgs)
 import System.Exit (die)
 import Text.Read (readMaybe)
 
@@ -66,9 +67,16 @@ instance FromJSON Postflight where
       <*> value .: "bootstrapPolicyAbsent" <*> value .: "bootstrapPolicyBindingAbsent"
       <*> value .: "bindingRbacAbsent" <*> value .: "managedTaintAbsent"
 
+-- The evidence path is the sole argument, supplied by the gate through
+-- `--test-options`. A constant here named a plan-tree directory that no longer exists, and
+-- a suite reading a fixed location decides on whatever a previous run left behind.
 main :: IO ()
 main = do
-  decoded <- eitherDecodeFileStrict' "DEVELOPMENT_PLAN/evidence/phase_27/live-scheduler.json"
+  arguments <- getArgs
+  evidence <- case arguments of
+    [path] -> pure path
+    _ -> die "usage: <suite> <live-scheduler.json>; the gate supplies this run's bundle path"
+  decoded <- eitherDecodeFileStrict' evidence
   case decoded of
     Left problem -> die problem
     Right evidence -> verify evidence

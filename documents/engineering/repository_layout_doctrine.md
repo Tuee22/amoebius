@@ -15,7 +15,7 @@ rule in [`generated_artifacts_doctrine.md`](./generated_artifacts_doctrine.md) i
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -70,7 +70,8 @@ amoebius/
 ├── .git/**                               local VCS metadata; never a build/context input
 ├── .dockerignore                         authored container-context policy
 ├── .gitignore                            authored worktree policy
-├── AGENTS.md                             authored agent policy; CLAUDE.md is a link to it
+├── AGENTS.md                             authored agent policy, read by every agent
+├── CLAUDE.md                             the same policy's second entry point; a link, never a copy
 ├── README.md                             authored repository entry point
 ├── amoebius.cabal                        the one authored Haskell package: libraries, executables, suites, flags
 ├── cabal.project                         authored package set and out-of-tree source resolution
@@ -305,6 +306,7 @@ the table does not name is never exempt.
 | Corpus | Rules it seeds | Why the corpus must contain what the rule rejects |
 |---|---|---|
 | `tools/ledger_lint_corpus/` | r2 | A hand-written run ledger is the only way to seed the ledger-shape classifier |
+| `tools/doc_lint_corpus/` | r15 | The documentation lint checks plan-document naming, so its positive seed must be a synthetic `phase_NN_<slug>.md`; the ordinal is the property under test, not a label on a capability |
 | `tools/artifact_policy_selftest.py` | r1, r5, r6 | The audit's own per-rule mutants: an invented output class, a generated path beneath an authored root, and a resolved home path |
 | `tools/phase1_negative_corpus.py` | r6 | The toolchain gate's build configurations carry a developer-home compiler path and an archive checksum beside its URL |
 | `tools/attestation_negative_corpus.py` | r5 | A refused run bundle must name a plan-tree evidence path for the store to reject it |
@@ -361,15 +363,20 @@ migration surfaces in [§2.2](#22-present-day-roots-and-their-required-destinati
 each retires with the root it covers, owned by the phase that relocates it.
 
 ```gitignore
-# Canonical generated roots
+# Every pattern here is a claim that the path it names is generated, and that the
+# repository-layout doctrine section 2 target tree contains it. A rule for a path the
+# tree does not contain is removed rather than kept — a rule hiding a path nobody
+# intends is how a second home for a generated class survives review. The rules covering
+# section 2.2 migration surfaces are temporary and retire with the root they cover.
+
+# Canonical generated root, and the migration surfaces still written by later phases.
 /gen/
 /DEVELOPMENT_PLAN/evidence/
-/DEVELOPMENT_PLAN/ledgers/
 /test/enumeration/
 /test/golden/phase_*_ledger.json
 /test/golden/phase_54_expected_run_ledger.json
 
-# Dependency resolver output
+# Dependency resolution is refreshed dynamically and never committed.
 *.lock
 *.freeze
 package-lock.json
@@ -377,9 +384,9 @@ npm-shrinkwrap.json
 pnpm-lock.yaml
 go.sum
 
-# Haskell and formal-model output
-/dist-newstyle/
-/.cabal-sandbox/
+# Haskell and formal-model build output. The build-root pattern is the tree's own
+# `dist-*/**` root, so a clone is clean without a personal ignore configuration.
+/dist-*/
 .ghc.environment.*
 cabal.project.local
 *.o
@@ -387,70 +394,43 @@ cabal.project.local
 *.dyn_o
 *.dyn_hi
 *.hie
-/.phase1-store/
 *.tla
 *.cfg
 
-# JavaScript and PureScript
+# Haskell tooling scratch. cabal and hie-bios — the project-discovery library HLS uses —
+# write hash-named exec shims into the directory they are invoked from. Each hardcodes a
+# resolved developer-home path and a resolved GHC version, so it is machine-specific
+# generated output that is meaningless on another host and never a repository input. These
+# regenerate whenever an editor opens the project, so they are excluded rather than swept.
+/ghc-pkg-*
+/repl-wrapper-*
+/wrapper-*
+
+# JavaScript and PureScript build output.
 /node_modules/
 /ui-runtime/.spago/
 /ui-runtime/output/
 /ui-runtime/dist/
 
-# Python
+# Python may keep source-adjacent interpreter caches. They are always generated
+# and must never become repository inputs.
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-.coverage.*
-htmlcov/
-coverage/
 
-# Tool acquisition and phase builds
+# Tool acquisition.
 /toolchain/bin/
 /toolchain/runtime/
 /toolchain/downloads/
 /toolchain/cache/
-/.phase*-build/
-/phase*-build/
-/build/
-/_build/
-/out/
-/output/
-/dist/
-/.cache/
-/tmp/
-/temp/
 
-# Test and runtime output
-/playwright-report/
-/test-results/
-/screenshots/
-/browser-profile/
+# Runtime output written beside a run.
 *.log
 *.pid
 *.sock
 
-# Local credentials and runtime state
-/.env
-/.env.*
-!/.env.example
-/.secrets/
-/.credentials/
+# The single sanctioned cleartext-secret file is the test-secrets seam of
+# vault_pki_doctrine.md section 3.3: test-only, flagged, never tracked.
 /test-secrets.dhall
-/kubeconfig
-
-# Build-tool scratch written into the working directory. cabal and hie-bios emit hash-named
-# exec shims that hardcode a resolved compiler path, so they are machine-specific output.
-/ghc-pkg-*
-/repl-wrapper-*
-/wrapper-*
-
-# Editor settings are kept at the user level; the sibling repository is not re-embedded.
-/.vscode/
-/daemon-substrate/
 ```
 
 A generic ignore pattern never substitutes for the provenance check. CI must also reject a tracked file whose
@@ -464,27 +444,47 @@ directions** on the same terms as [§6](#6-gitignore-contract): a class named he
 missing coverage, and a pattern the file carries and this block does not name is an undeclared class.
 
 ```dockerignore
+# Every pattern here is a claim that the path it names is generated, and that the
+# repository-layout doctrine section 2 target tree contains it, on the same terms as
+# `.gitignore`. This contract is at least as strict as that one for generated content.
+
+# Version-control metadata is never a build input.
 .git
 .git/**
+
+# Canonical generated root, and the migration surfaces still written by later phases.
 gen
 gen/**
 DEVELOPMENT_PLAN/evidence
 DEVELOPMENT_PLAN/evidence/**
-DEVELOPMENT_PLAN/ledgers
-DEVELOPMENT_PLAN/ledgers/**
 test/enumeration
 test/enumeration/**
 test/golden/phase_*_ledger.json
 test/golden/phase_54_expected_run_ledger.json
+
+# Dependency resolution is refreshed dynamically.
 **/*.lock
 **/*.freeze
 **/package-lock.json
 **/npm-shrinkwrap.json
 **/pnpm-lock.yaml
 **/go.sum
-dist-newstyle
-dist-newstyle/**
+
+# Haskell, JavaScript, and PureScript build products.
+dist-*
+dist-*/**
+.ghc.environment.*
 cabal.project.local
+**/*.o
+**/*.hi
+**/*.dyn_o
+**/*.dyn_hi
+**/*.hie
+ghc-pkg-*
+repl-wrapper-*
+wrapper-*
+**/*.tla
+**/*.cfg
 node_modules
 node_modules/**
 ui-runtime/.spago
@@ -493,77 +493,33 @@ ui-runtime/output
 ui-runtime/output/**
 ui-runtime/dist
 ui-runtime/dist/**
+
+# Source-adjacent Python interpreter caches are local accelerators, never image
+# build inputs.
 **/__pycache__
 **/__pycache__/**
 **/*.pyc
 **/*.pyo
 **/*.pyd
-.pytest_cache
-.mypy_cache
-.ruff_cache
-htmlcov
-coverage
+
+# Tool acquisition. Authored resolver policy beneath toolchain/ remains available.
 toolchain/bin
 toolchain/bin/**
 toolchain/runtime
 toolchain/runtime/**
 toolchain/downloads
 toolchain/downloads/**
-.phase*-build
-phase*-build
-build
-build/**
-_build
-_build/**
-out
-out/**
-output
-output/**
-dist
-dist/**
-.cache
-.cache/**
-tmp
-tmp/**
-temp
-temp/**
-playwright-report
-test-results
-screenshots
-browser-profile
-browser-profile/**
+toolchain/cache
+toolchain/cache/**
+
+# Runtime output written beside a run.
 **/*.log
 **/*.pid
 **/*.sock
-.env
-.env.*
-.secrets
-.secrets/**
-.credentials
-.credentials/**
+
+# The test-secrets seam of vault_pki_doctrine.md section 3.3 is test-only and never
+# enters a build context.
 test-secrets.dhall
-kubeconfig
-.cabal-sandbox
-.cabal-sandbox/**
-.ghc.environment.*
-.phase1-store
-.phase1-store/**
-**/*.o
-**/*.hi
-**/*.dyn_o
-**/*.dyn_hi
-**/*.hie
-**/*.tla
-**/*.cfg
-.coverage
-.coverage.*
-toolchain/cache
-toolchain/cache/**
-ghc-pkg-*
-repl-wrapper-*
-wrapper-*
-/.vscode/
-/daemon-substrate/
 ```
 
 An image build that needs a derived artifact regenerates it inside a staged build or receives it as an

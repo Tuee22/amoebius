@@ -6,10 +6,17 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
+import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any, Callable, Sequence
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,7 +31,34 @@ SPRINT_MUTANTS = (
     "redis-version-skew",
     "dockerfile-handedit",
     "unbounded-buildkit-worker",
+    "scavenge-available-apt-rung",
+    "public-redis-image",
 )
+
+# The redis-server step, matched from its rung constructor to the first binary
+# kind after its name. A regex rather than a literal block so that reformatting
+# the catalog does not silently make the mutation a no-op — and the substitution
+# below asserts exactly one match, so a catalog this stops matching fails the
+# gate rather than passing it.
+REDIS_APT_STEP = re.compile(r"apt\s*\n\s*\"redis-server\"\s*\n(?:.*?\n)*?\s*BinaryKind\.Elf")
+
+# What the mutation puts there instead: the public image the pre-amendment
+# catalog scavenged redis out of, retained as a `CopyOci` with a reason, which is
+# exactly the shape a quiet return to scavenging would take.
+REDIS_SCAVENGE_STEP = """BakeStep.CopyOci
+                  { name = "redis-server"
+                  , sourceImage = "redis:7.4.5-bookworm"
+                  , sourceDigest =
+                      "sha256:90e7a336d044f1abc9e9dbc05d65566850896d11453bbd1dd0fb7e5059f0e8fb"
+                  , sourcePath = "/usr/local/bin/redis-server"
+                  , targetPath = "/usr/bin/redis-server"
+                  , arguments = [ "--version" ]
+                  , expectedVersion = "7.0.15"
+                  , kind = BinaryKind.Elf
+                  , supportCopies = [] : List SupportCopy
+                  , lastResortReason =
+                      "seeded mutant: an available apt rung replaced by a scavenge step"
+                  }"""
 
 
 def load_module(name: str, path: Path) -> Any:
@@ -142,6 +176,92 @@ def unbounded_worker(_mutation: dict[str, str], _rows: dict[tuple[str, str], dic
     return "BuildWorkerEnvelopeMismatch" if baseline and escaped else "SURVIVED"
 
 
+def mutated_catalog(directory: Path) -> Path:
+    """Write the catalog with redis-server's rung-1 step replaced by a scavenge step.
+
+    A real mutation of the authored source, decoded and rendered by the real
+    implementation — not a Python restatement of what the check would have said.
+    """
+    source = SOURCE.CATALOG.read_text(encoding="utf-8")
+    mutated, substitutions = REDIS_APT_STEP.subn(REDIS_SCAVENGE_STEP, source, count=1)
+    if substitutions != 1:
+        raise MutationFailure(
+            "mutant-anchor-lost:scavenge-available-apt-rung: the redis-server rung-1 step "
+            "is no longer where the mutation applies, so the mutant proves nothing"
+        )
+    path = directory / "BakeCatalog.mutated.dhall"
+    path.write_text(mutated, encoding="utf-8")
+    return path
+
+
+def amoebius(subcommand: Sequence[str]) -> str:
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    result = subprocess.run(
+        (resolved["cabal"]["path"], f"--with-compiler={resolved['ghc']['path']}",
+         "run", "-v0", "amoebius", "--", *subcommand),
+        cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, timeout=1800,
+    )
+    if result.returncode:
+        raise MutationFailure(f"amoebius:{subcommand[0]}:{result.returncode}:{(result.stderr or result.stdout)[-800:]}")
+    return result.stdout
+
+
+def authored_rungs() -> dict[str, str]:
+    rows: dict[str, str] = {}
+    for line in (ROOT / "test/fixtures/phase25/acquisition_rungs.tsv").read_text(encoding="utf-8").splitlines():
+        if line.strip() and not line.startswith("#"):
+            fields = line.split("\t")
+            rows[fields[0].strip()] = fields[1].strip()
+    return rows
+
+
+def scavenge_available_apt_rung(
+    _mutation: dict[str, str], _rows: dict[tuple[str, str], dict[str, Any]]
+) -> str:
+    """The decoder locus: the mutated step reports a rung the authored table did not."""
+    with tempfile.TemporaryDirectory(prefix="amoebius-phase25-mutant-") as temporary:
+        catalog = mutated_catalog(Path(temporary))
+        decoded = json.loads(amoebius(("bake-inventory", "--json", "--catalog", str(catalog))))
+    observed = {str(step["name"]): str(step["rung"]) for step in decoded["steps"]}
+    expected = authored_rungs()
+    scavenged = [step for step in decoded["steps"] if step["rung"] == "CopyOci"]
+    authored_scavenge = sum(1 for rung in expected.values() if rung == "CopyOci")
+    if observed.get("redis-server") == expected.get("redis-server"):
+        return "SURVIVED"
+    if len(scavenged) == authored_scavenge:
+        return "SURVIVED"
+    return "AcquisitionRungNotHighestApplicable"
+
+
+def public_redis_image(
+    _mutation: dict[str, str], _rows: dict[tuple[str, str], dict[str, Any]]
+) -> str:
+    """The renderer locus: a `FROM` the base-plus-authored-last-resort set forbids.
+
+    Distinct from the rung check above and decided by different code: this one
+    never reads the rung, only what the rendered Dockerfile reaches for. The
+    authored last-resort set is empty, so any `FROM` beyond the base is a public
+    image the monocontainer would pull a workload binary out of.
+    """
+    with tempfile.TemporaryDirectory(prefix="amoebius-phase25-mutant-") as temporary:
+        catalog = mutated_catalog(Path(temporary))
+        rendered = amoebius(("render-bake-dockerfile", str(catalog)))
+        baseline = amoebius(("render-bake-dockerfile", str(SOURCE.CATALOG)))
+    references = {
+        line.split()[1].split("@")[0]
+        for line in rendered.splitlines()
+        if line.startswith("FROM ")
+    }
+    permitted = {
+        line.split()[1].split("@")[0]
+        for line in baseline.splitlines()
+        if line.startswith("FROM ")
+    }
+    if len(permitted) != 1:
+        raise MutationFailure(f"mutant-baseline-from-set:{sorted(permitted)}")
+    return "NonMonocontainerImageReference" if references - permitted else "SURVIVED"
+
+
 def run_gate(join: Path) -> dict[str, Any]:
     rows = official_rows(join)
     handlers: dict[str, Callable[[dict[str, str], dict[tuple[str, str], dict[str, Any]]], str]] = {
@@ -153,6 +273,8 @@ def run_gate(join: Path) -> dict[str, Any]:
         "redis-version-skew": lambda mutant, evidence: version_skew(mutant, evidence, "arm64", "redis-cli"),
         "dockerfile-handedit": dockerfile_handedit,
         "unbounded-buildkit-worker": unbounded_worker,
+        "scavenge-available-apt-rung": scavenge_available_apt_rung,
+        "public-redis-image": public_redis_image,
     }
     results: list[dict[str, str]] = []
     for name in SPRINT_MUTANTS:

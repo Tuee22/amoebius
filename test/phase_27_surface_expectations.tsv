@@ -1,0 +1,52 @@
+# Authored expectation for the Phase-27 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. Phase 27 had no authored expectation at all — the
+# retired gate read a surface list out of a committed enumeration file and compared a
+# committed ledger against a derived one, so the list described whatever the gate last
+# emitted. This file is the first authored opinion its gate is checked against.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   metrics  a value this run measured from its own evidence, compared against the authored
+#            expectation in the gate's EXPECTED_RESULTS table
+#   items    a committed seeded mutant, evidenced by that mutant's own red observation and
+#            never by the battery's total
+#   checks   a gate side that either ran or did not
+#
+# The four id-less surfaces are the ones this register cannot decide: modeled-apiserver
+# fidelity is the Register-2.5 assumption, the completion and rollback ledgers are the
+# content-store phase's, and the in-cluster singleton that owns the scheduler is Phase 33's.
+# They stay UNVERIFIED in the ledger, which is a statement, not an omission.
+five-sprint-seal	metrics	sprint-receipts
+register-partition	metrics	sprint-registers
+two-stage-cutover-order	metrics	cutover-sequence
+byte-stable-rerun	metrics	rerun-byte-stability
+no-new-binding-on-rerun	metrics	rerun-new-binding-requests
+leak-free-postflight	metrics	postflight-leaks
+universal-linux-cpu-lane	metrics	universal-linux-cpu-lane
+deterministic-schedule-battery	metrics	deterministic-schedules
+fault-class-partition	metrics	simulation-fault-classes
+same-seed-byte-replay	metrics	byte-identical-replay
+seeded-mutant-battery	metrics	mutants
+readiness-stages-stay-distinct	items	collapsed-readiness
+no-generic-ssa-before-cutover	items	stage-drop-generic-SSA-before-cutover
+managed-node-refuses-default-scheduler	items	default-scheduler-managed-node-bypass
+binding-requires-reservation-cas	items	bind-before-reservation-CAS
+reservation-refolds-the-whole-ledger	items	numeric-add-instead-of-whole-ledger-refold
+one-debit-per-pod-uid	items	same-UID-double-debit
+bound-survives-restart	items	bound-deleted-on-restart
+simulated-exact-lease-holder	items	lost-lease-resourceversion-retry
+simulated-distinct-readiness-stages	items	collapsed-scheduler-readiness
+simulated-no-action-before-managed	items	premature-managed-authority
+simulated-cas-before-binding	items	bind-before-cas
+simulated-one-debit-per-uid	items	same-uid-double-debit
+simulated-bound-retained-on-restart	items	bound-dropped-on-restart
+simulated-fresh-snapshot-after-watch-gap	items	cached-observation
+ledger-is-a-whole-ledger-refold	checks	ledger-source-is-a-refold
+pure-ledger-algebra-holds	checks	pure-ledger-algebra
+toolchain-from-authored-requirements	checks	toolchain-satisfies-requirements
+recorded-metrics-match-oracle	checks	recorded-results-match-oracle,emitted-results-untracked
+modeled-apiserver-fidelity	metrics
+completion-release-ledger	metrics
+rollback-ledger	metrics
+in-cluster-singleton-ownership	metrics

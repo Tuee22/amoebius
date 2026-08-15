@@ -351,12 +351,90 @@ def mutant_outcomes(evidence: Path) -> dict[str, str]:
     return outcomes
 
 
-def execute_sprints(evidence: Path, builder_image: str, index_digest: str) -> None:
+def execute_live_build(
+    evidence: Path, builder_image: str, artifact: Path,
+    cache: Path, scratch: Path, context: Path, docker_config: Path,
+) -> str:
+    """Build into this run's bundle, and take the index digest from what it exported.
+
+    Step zero of `--execute`, because the four sprint gates audit inputs nothing
+    produced: the host snapshot the build was admitted against and one
+    executed-probe table per architecture. Running it here rather than accepting a
+    directory is what makes those inputs this run's — and the index digest the four
+    receipts must agree on is read out of the export instead of asserted by a flag.
+    """
+    evidence.mkdir(parents=True, exist_ok=True)
+    run([
+        sys.executable, "tools/phase25_live_build.py",
+        "--evidence", str(evidence), "--context", str(context),
+        "--artifact", str(artifact), "--cache-root", str(cache.parent),
+        "--scratch-root", str(scratch), "--docker-config", str(docker_config),
+        "--builder-image", builder_image,
+    ], timeout=86400)
+    built = json_object(evidence / "live-build.json")
+    print(f"  ok    live build exported {built['imageIndexDigest']}")
+    return str(built["imageIndexDigest"])
+
+
+def enact_sprint(number: int, evidence: Path, index_digest: str, artifact: Path) -> None:
+    """Perform the live transition sprint N seals, before its gate audits it.
+
+    Each of the three cluster sprints has a `--verify-only` reading of a live
+    transition, and each reading is of evidence some *other* invocation must have
+    written: the preflight and standup for 25.2, the publication for 25.3, the
+    enforced-egress run for 25.4. Nothing wrote them, so the three gates could only
+    ever have audited a cluster somebody had brought up by hand — the same gap
+    `tools/phase25_live_build.py` closes for 25.1, and closed the same way, by having
+    the run that is being sealed be the run that acted.
+    """
+    if number == 2:
+        receipt = json_object(evidence / "sprint-25.1-receipt.json")
+        run([
+            sys.executable, "tools/phase25_bootstrap_preflight.py",
+            "--evidence", str(evidence), "--artifact", str(artifact),
+            "--expected-archive-sha256", str(receipt["artifactArchiveSha256"]).removeprefix("sha256:"),
+            "--output", str(evidence / "sprint-25.2-preflight.json"),
+        ], timeout=3600)
+        print("  ok    sprint 25.2 admission observed")
+        run([
+            sys.executable, "tools/phase25_registry_standup.py",
+            "--evidence", str(evidence), "--index-digest", index_digest,
+            "--artifact", str(artifact),
+            "--output", str(evidence / "sprint-25.2-standup.json"),
+        ], timeout=10800)
+        print("  ok    sprint 25.2 image side-loaded and registry stood up")
+    elif number == 3:
+        run([
+            sys.executable, "tools/phase25_registry_publish.py",
+            "--evidence", str(evidence), "--artifact", str(artifact),
+            "--output", str(evidence / "sprint-25.3-publication.json"),
+        ], timeout=10800)
+        print("  ok    sprint 25.3 manifest list published")
+    elif number == 4:
+        run([
+            sys.executable, "tools/phase25_no_public_pull_gate.py",
+            "--evidence", str(evidence), "--index-digest", index_digest,
+            "--output", str(evidence / "sprint-25.4-no-public-pull.json"),
+        ], timeout=10800)
+        print("  ok    sprint 25.4 enforced egress denial exercised")
+
+
+def execute_sprints(
+    evidence: Path, builder_image: str, index_digest: str,
+    artifact: Path, cache: Path, scratch: Path,
+) -> None:
     evidence.mkdir(parents=True, exist_ok=True)
     for number in (1, 2, 3, 4):
+        enact_sprint(number, evidence, index_digest, artifact)
         arguments = [sys.executable, f"tools/phase25_sprint25_{number}_gate.py", "--evidence", str(evidence)]
-        arguments += ["--builder-image", builder_image] if number == 1 else ["--index-digest", index_digest]
-        run(arguments)
+        if number == 1:
+            arguments += [
+                "--builder-image", builder_image,
+                "--artifact", str(artifact), "--cache", str(cache), "--scratch", str(scratch),
+            ]
+        else:
+            arguments += ["--index-digest", index_digest]
+        run(arguments, timeout=43200)
         print(f"  ok    sprint 25.{number} sealed")
 
 
@@ -382,7 +460,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--execute", action="store_true", help="run the four live sprints into this run's bundle")
     parser.add_argument("--evidence", type=Path, default=None, help="reuse a completed live run's bundle")
     parser.add_argument("--builder-image", default=None, help="the resolved BuildKit builder image reference")
-    parser.add_argument("--index-digest", default=None, help="the index digest this run's build produced")
+    parser.add_argument("--artifact", type=Path, default=None, help="this run's OCI export")
+    parser.add_argument("--context", type=Path, default=None, help="the build context carrying out/")
+    parser.add_argument("--docker-config", type=Path, default=None, help="the ephemeral docker config directory")
+    parser.add_argument("--cache", type=Path, default=None, help="this run's buildx cache directory")
+    parser.add_argument("--scratch", type=Path, default=None, help="this run's scratch root")
     arguments = parser.parse_args(argv)
 
     gate = gate_common.PhaseGate(
@@ -425,10 +507,27 @@ def main(argv: Sequence[str] | None = None) -> int:
         evidence = arguments.evidence
         if arguments.execute:
             evidence = gate.run_dir / "sprints"
-            if not arguments.builder_image or not arguments.index_digest:
-                raise GateFailure("--execute needs --builder-image and --index-digest from this run's build")
-            print("\nlive side — the four Register-3 sprints on the linux-cpu substrate\n")
-            execute_sprints(evidence, arguments.builder_image, arguments.index_digest)
+            missing = [
+                flag for flag, value in (
+                    ("--builder-image", arguments.builder_image),
+                    ("--artifact", arguments.artifact),
+                    ("--cache", arguments.cache),
+                    ("--scratch", arguments.scratch),
+                    ("--context", arguments.context),
+                    ("--docker-config", arguments.docker_config),
+                ) if not value
+            ]
+            if missing:
+                raise GateFailure(f"--execute needs {' '.join(missing)}")
+            print("\nlive side — the build, then the four Register-3 sprints on linux-cpu\n")
+            index_digest = execute_live_build(
+                evidence, arguments.builder_image, arguments.artifact,
+                arguments.cache, arguments.scratch, arguments.context, arguments.docker_config,
+            )
+            execute_sprints(
+                evidence, arguments.builder_image, index_digest,
+                arguments.artifact, arguments.cache, arguments.scratch,
+            )
         elif evidence is None:
             raise GateFailure("phase-25 needs --execute or an --evidence bundle from a completed live run")
         else:

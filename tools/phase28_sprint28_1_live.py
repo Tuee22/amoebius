@@ -148,7 +148,9 @@ def execute() -> dict[str, Any]:
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=ROOT / "DEVELOPMENT_PLAN/evidence/phase_28/sprint-28.1-live.json")
+    # No default: a default names a location, and whatever a previous run left there
+    # would be audited as this run's observation.
+    parser.add_argument("--output", type=Path, required=True, help="this run's observation")
     arguments = parser.parse_args(argv)
     try:
         value = execute()

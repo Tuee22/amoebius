@@ -16,7 +16,9 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 KUBECONFIG = Path.home() / ".amoebius/phase24/kubeconfig"
 NAMESPACE = "amoebius-phase26-sprint3"
-IMAGE = "registry.amoebius.invalid:5000/amoebius/base@sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4"
+# Supplied by the caller, for the reason `tools/phase26_reconcile_live.py` records: a
+# pinned digest here names a build that no longer exists.
+IMAGE = ""
 
 
 class LiveFailure(RuntimeError):
@@ -196,7 +198,9 @@ def execute() -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--image", required=True, help="the Phase-25 published digest reference")
     arguments = parser.parse_args()
+    globals()["IMAGE"] = arguments.image
     try:
         result = execute()
         encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"

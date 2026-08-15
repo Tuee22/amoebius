@@ -1,14 +1,12 @@
-# daemon-substrate is its own repository (github.com/Tuee22/daemon-substrate);
-# keep it from being re-embedded as a gitlink by a broad `git add`.
-/daemon-substrate/
+# Every pattern here is a claim that the path it names is generated, and that the
+# repository-layout doctrine section 2 target tree contains it. A rule for a path the
+# tree does not contain is removed rather than kept — a rule hiding a path nobody
+# intends is how a second home for a generated class survives review. The rules covering
+# section 2.2 migration surfaces are temporary and retire with the root they cover.
 
-# Editor settings are kept at the user/global level, not in the repo.
-/.vscode/
-
-# Canonical generated roots and legacy generated migration surfaces.
+# Canonical generated root, and the migration surfaces still written by later phases.
 /gen/
 /DEVELOPMENT_PLAN/evidence/
-/DEVELOPMENT_PLAN/ledgers/
 /test/enumeration/
 /test/golden/phase_*_ledger.json
 /test/golden/phase_54_expected_run_ledger.json
@@ -21,9 +19,9 @@ npm-shrinkwrap.json
 pnpm-lock.yaml
 go.sum
 
-# Haskell and formal-model build output.
-/dist-newstyle/
-/.cabal-sandbox/
+# Haskell and formal-model build output. The build-root pattern is the tree's own
+# `dist-*/**` root, so a clone is clean without a personal ignore configuration.
+/dist-*/
 .ghc.environment.*
 cabal.project.local
 *.o
@@ -31,7 +29,6 @@ cabal.project.local
 *.dyn_o
 *.dyn_hi
 *.hie
-/.phase1-store/
 *.tla
 *.cfg
 
@@ -54,45 +51,18 @@ cabal.project.local
 # and must never become repository inputs.
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-.coverage.*
-htmlcov/
-coverage/
 
-# Tool acquisition and phase/build output.
+# Tool acquisition.
 /toolchain/bin/
 /toolchain/runtime/
 /toolchain/downloads/
 /toolchain/cache/
-/.phase*-build/
-/phase*-build/
-/build/
-/_build/
-/out/
-/output/
-/dist/
-/.cache/
-/tmp/
-/temp/
 
-# Test and runtime output.
-/playwright-report/
-/test-results/
-/screenshots/
-/browser-profile/
+# Runtime output written beside a run.
 *.log
 *.pid
 *.sock
 
-# Local credentials and runtime state. The single sanctioned cleartext-secret file is the
-# test-secrets seam of vault_pki_doctrine.md section 3.3: test-only, flagged, never tracked.
-/.env
-/.env.*
-!/.env.example
-/.secrets/
-/.credentials/
+# The single sanctioned cleartext-secret file is the test-secrets seam of
+# vault_pki_doctrine.md section 3.3: test-only, flagged, never tracked.
 /test-secrets.dhall
-/kubeconfig

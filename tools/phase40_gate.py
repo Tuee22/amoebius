@@ -21,7 +21,7 @@ EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_40"
 LIVE = EVIDENCE / "ui-program-release-live.json"
 ENUMERATION = ROOT / "test/enumeration/phase_40_surfaces.txt"
 LEDGER = ROOT / "test/golden/phase_40_ledger.json"
-ORACLE_MANIFEST = ROOT / "test/phase0_oracle_manifest.tsv"
+ORACLE_MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 UNVERIFIED = {"future-ui-release-compatibility-witnesses", "rolling-overlap-and-reconnect"}
 MUTANTS = (
@@ -91,7 +91,7 @@ def phase0_domain() -> dict[str, str]:
     for row in rows:
         path = ROOT / row.split("\t")[2]
         require(path.is_file(), f"phase0-custody-missing:{path}")
-    return {"name": "phase0-custody", "command": "read test/phase0_oracle_manifest.tsv", "output": "5 oracles; 3 mutants", "result": "PASS"}
+    return {"name": "phase0-custody", "command": "read test/oracle/preimplementation_artifacts.tsv", "output": "5 oracles; 3 mutants", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:

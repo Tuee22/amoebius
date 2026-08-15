@@ -31,7 +31,7 @@ def main():
   try:
     if "--derive-ledger" in sys.argv: print(json.dumps(derive(),separators=(",",":"))); return 0
     rows=[invoke("build",(CABAL,"build","test-topology:lib:test-topology","test-topology:test-topology-contract","test-topology:test-topology-live-gate","-w",GHC,*config(),"-j1","-v0"))]
-    manifest=[x for x in (ROOT/"test/phase0_oracle_manifest.tsv").read_text().splitlines() if x.startswith("54\t")]; require(len(manifest)==20,"custody")
+    manifest=[x for x in (ROOT/"test/oracle/preimplementation_artifacts.tsv").read_text().splitlines() if x.startswith("54\t")]; require(len(manifest)==20,"custody")
     rows.append({"name":"phase0-custody","command":"read manifest","output":"12 oracles; 8 mutants","result":"PASS"})
     rows.append(invoke("topology-dhall",(DHALL,"type","--file","test/dhall/phase_54_failover.dhall","--quiet")))
     bad=subprocess.run((DHALL,"type","--file","test/dhall/phase_54_pvc_binding_illegal.dhall","--quiet"),cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT); require(bad.returncode!=0 and "Assertion failed" in bad.stdout,"illegal-pvc")

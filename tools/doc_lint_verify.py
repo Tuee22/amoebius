@@ -31,14 +31,14 @@ import artifact_policy  # noqa: E402
 import attestation  # noqa: E402
 import doc_lint  # noqa: E402
 import ledger_lint  # noqa: E402
-import phase0_artifact_lint  # noqa: E402
+import artifact_manifest_lint  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CORPUS = os.path.join(HERE, "doc_lint_corpus")
 ROOT = os.path.dirname(HERE)
 NEGATIVES = os.path.join(ROOT, "gen", "test-corpora", "doc_lint")
 SURFACES = os.path.join(ROOT, "gen", "test-surfaces", "phase_00.json")
-EXPECTATIONS = os.path.join(ROOT, "test", "phase_00_surface_expectations.tsv")
+EXPECTATIONS = os.path.join(ROOT, "test", "oracle", "documentation_suite_surfaces.tsv")
 
 SIDE_NAMES = (
     "fixture",
@@ -148,7 +148,7 @@ def surface_side():
         "doc_lint": set(doc_lint.CHECKS),
         "ledger_lint": set(ledger_lint.CHECKS),
         "artifact_policy": set(artifact_policy.RULES),
-        "phase0_artifact_lint": set(phase0_artifact_lint.CHECKS),
+        "artifact_manifest_lint": set(artifact_manifest_lint.CHECKS),
     }
 
     if not os.path.isfile(EXPECTATIONS):
@@ -384,7 +384,7 @@ def attestation_side(run_dir, ledger_path):
 
 def artifact_side():
     """Audit the independently authored Phase-0 oracle and mutant manifest."""
-    command = [sys.executable, os.path.join(HERE, "phase0_artifact_lint.py")]
+    command = [sys.executable, os.path.join(HERE, "artifact_manifest_lint.py")]
     result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
     print("\nartifact side — pre-implementation oracles and mutants\n")
     if result.stdout:

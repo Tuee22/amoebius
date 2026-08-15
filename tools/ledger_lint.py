@@ -289,7 +289,7 @@ def verify_corpus() -> bool:
 
     ok = True
     for name, expected in rows:
-        path = CORPUS / name / "phase_16_ledger.json"
+        path = CORPUS / name / "ledger.json"
         enumeration = CORPUS / name / "surfaces.txt"
         problems = validate_ledger(path, enumeration)
         checks = {problem.check for problem in problems}

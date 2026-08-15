@@ -540,17 +540,15 @@ flowchart TD
 ```
 *Phase-26/27/28 validation boundary. Phase 26 tested the generic reconciler. Phase 27 then tested the scheduler's five-state ledger, two readiness witnesses, whole-root reservation CAS, real Kubernetes Binding ordering, crash-gap recovery, execution-identity admission, and byte-stable live rerun. Phase 28 used that renderer/reconciler seam to apply the sole inert StorageClass and deterministic retained PVs, including fresh uid-less claimRefs after a real cluster recreate. Durable completion/rollback and the release ledger remain deferred.*
 
-> **Honesty.** Phase 26 now supplies amoebius evidence for the object-reconciler slice: Register 3 observed
-> the live Kubernetes mechanisms and Register 2.5 exercised the real actions through 2,048 deterministic
-> schedules. The modeled-apiserver fidelity of Register 2.5 is assumed and bounded by that separate live run.
-> Phase 27's Register-3 scheduler evidence is recorded in
-> `live-scheduler.json`. Its modeled-apiserver
-> fidelity remains assumed and bounded by that separate live run; Sprint 27.5 sealed the deterministic battery.
-> Phase 28's Register-3 retained-storage evidence is recorded in
-> `rebind-live.json`: the reconciler applied the
-> one StorageClass and exact PV/claimRef projections on both sides of a true cluster delete/recreate, and the
-> external readers matched the independent oracle tables. This proves only that retained-host slice; later
-> provider and rollout arms remain deferred.
+> **Honesty.** Phase 26, sealed 2026-08-14, supplies amoebius evidence for the object-reconciler slice:
+> Register 3 observed the live Kubernetes mechanisms — convergence, a byte-stable zero-mutation re-run,
+> observed readiness, ordered `OnDelete` replacement, terminal-Job retention, child-envelope conformance, and
+> single admission under a one-Pod quota — and Register 2.5 exercised the same real action modules through
+> 2,048 deterministic schedules. The modeled-apiserver fidelity of Register 2.5 is assumed and bounded by that
+> separate live run, and the content-addressed release ledger and rollback stay deferred to the content-store
+> phase, carried UNVERIFIED. The scheduler CAS/Binding half (Phase 27) and the retained-storage arm (Phase 28)
+> are **UNVERIFIED**: both phases are open under the reopened numeric sequence, and their pre-amendment records
+> do not carry forward.
 
 [Phase 41](../../DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md) extends the same pure-render/reconcile boundary to host networking. Its committed two-peer inventory
 renders byte-for-byte to an independent WireGuard config golden containing only `SecretRef` names. Live

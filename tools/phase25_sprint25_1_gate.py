@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import functools
 import hashlib
+import importlib.util
 import json
 import os
 import shlex
@@ -19,10 +20,19 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import toolchain  # noqa: E402
 
 
+def _load(name: str, path: Path) -> Any:
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"module-load:{path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+SOURCE = _load("phase25_source_probe", Path(__file__).resolve().parent / "phase25_source_probe.py")
+
+
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACT = Path("/var/tmp/amoebius-phase25-scratch/oci/amoebius-phase25.oci.tar")
-CACHE = Path("/var/tmp/amoebius-phase25-cache/buildx-cache")
-SCRATCH = Path("/var/tmp/amoebius-phase25-scratch")
 BUILDKIT_CONFIG = ROOT / "test/fixtures/phase25/buildkitd.toml"
 
 
@@ -71,6 +81,12 @@ def json_file(path: Path) -> dict[str, Any]:
 
 
 @functools.cache
+def catalog_capacities() -> dict[str, Any]:
+    """The scratch and cache provisions this run's catalog declares."""
+    return SOURCE.decode_dhall(SOURCE.CATALOG)
+
+
+@functools.cache
 def build_tools() -> tuple[str, str]:
     """Resolve cabal and the compiler per run from the authored requirements.
 
@@ -81,7 +97,9 @@ def build_tools() -> tuple[str, str]:
     return resolved["cabal"]["path"], resolved["ghc"]["path"]
 
 
-def seal(evidence: Path, builder_image: str) -> tuple[list[dict[str, str]], dict[str, Any]]:
+def seal(
+    evidence: Path, builder_image: str, artifact: Path, cache: Path, scratch: Path
+) -> tuple[list[dict[str, str]], dict[str, Any]]:
     python = sys.executable
     cabal, compiler = build_tools()
     final_amd64 = evidence / "final-probes-amd64.tsv"
@@ -108,8 +126,8 @@ def seal(evidence: Path, builder_image: str) -> tuple[list[dict[str, str]], dict
                 python, "tools/phase25_builder_probe.py",
                 "--container", "amoebius-phase25-buildkitd",
                 "--builder-image", builder_image,
-                "--cache-root", "/var/tmp/amoebius-phase25-cache",
-                "--scratch-root", str(SCRATCH),
+                "--cache-root", str(cache.parent),
+                "--scratch-root", str(scratch),
                 "--config", str(BUILDKIT_CONFIG),
                 "--evidence", str(evidence / "builder-boundary-gate.json"),
             ),
@@ -132,7 +150,7 @@ def seal(evidence: Path, builder_image: str) -> tuple[list[dict[str, str]], dict
         invoke(
             "oci-object-audit",
             (
-                python, "tools/phase25_oci_probe.py", str(ARTIFACT),
+                python, "tools/phase25_oci_probe.py", str(artifact),
                 "--bounds", "test/fixtures/phase25/image_artifact_bounds.json",
                 "--evidence", str(evidence / "image-artifact.json"),
             ),
@@ -141,7 +159,7 @@ def seal(evidence: Path, builder_image: str) -> tuple[list[dict[str, str]], dict
         invoke(
             "official-file-execution-join",
             (
-                python, "tools/phase25_oci_file_probe.py", str(ARTIFACT),
+                python, "tools/phase25_oci_file_probe.py", str(artifact),
                 "--executed-probes", str(final_amd64),
                 "--executed-probes", str(final_arm64),
                 "--evidence", str(evidence / "official-file-execution-join.json"),
@@ -167,50 +185,64 @@ def seal(evidence: Path, builder_image: str) -> tuple[list[dict[str, str]], dict
     ]
 
     preflight = json_file(evidence / "build-preflight-corrected.json")
-    artifact = json_file(evidence / "image-artifact.json")
+    measured = json_file(evidence / "image-artifact.json")
     file_join = json_file(evidence / "official-file-execution-join.json")
     mutants = json_file(evidence / "sprint-25.1-mutants.json")
     enospc = json_file(evidence / "builder-enospc.json")
     cgroups = json_file(evidence / "builder-cgroup-overruns.json")
     sbom = json_file(evidence / "file-sbom.spdx.json")
-    if preflight["scratchCapacityBytes"] != 103_079_215_104:
-        raise GateFailure("corrected-preflight-scratch-capacity")
-    if artifact["imageIndexDigest"] != file_join["imageIndexDigest"]:
+    # The provisions the build was admitted against come from the catalog this run
+    # decoded, not from constants typed in here. The retired form pinned 96 GiB of
+    # scratch and 64 GiB of cache — sized for a base image that no longer exists,
+    # and larger than the free space on the substrate the linux-cpu lane runs on,
+    # so the assertion could only ever have been satisfied by a host nobody had.
+    scratch_provision = int(catalog_capacities()["scratchCapacityBytes"])
+    cache_provision = int(catalog_capacities()["cacheCapacityBytes"])
+    # One join and one SBOM row per authored binary per architecture. Derived from
+    # the oracle's own length, so adding a binary cannot leave the count behind.
+    expected_rows = 2 * len(SOURCE.oracle_inventory())
+    if preflight["scratchCapacityBytes"] != scratch_provision:
+        raise GateFailure(
+            f"preflight-scratch-capacity:{preflight['scratchCapacityBytes']}!={scratch_provision}"
+        )
+    if measured["imageIndexDigest"] != file_join["imageIndexDigest"]:
         raise GateFailure("artifact-file-join-index-mismatch")
-    if len(artifact["platforms"]) != 2 or len(artifact["registryObjects"]) < 5:
+    if len(measured["platforms"]) != 2 or len(measured["registryObjects"]) < 5:
         raise GateFailure("artifact-domain")
-    if len(file_join["rows"]) != 46 or len(sbom["files"]) != 46:
-        raise GateFailure("file-inventory-domain")
+    if len(file_join["rows"]) != expected_rows or len(sbom["files"]) != expected_rows:
+        raise GateFailure(
+            f"file-inventory-domain:{len(file_join['rows'])}/{len(sbom['files'])}!={expected_rows}"
+        )
     if any(row["result"] != "RED" for row in mutants["results"]):
         raise GateFailure("mutant-survived")
     if len(enospc["results"]) != 2 or any(row["exit"] == 0 for row in enospc["results"]):
         raise GateFailure("enospc-domain")
     if cgroups["cpuThrottleDelta"] <= 0 or cgroups["oomKillDelta"] <= 0:
         raise GateFailure("cgroup-overrun-domain")
-    cache_bytes = directory_bytes(CACHE)
-    if cache_bytes > 68_719_476_736:
+    cache_bytes = directory_bytes(cache)
+    if cache_bytes > cache_provision:
         raise GateFailure("cache-capacity-overrun")
-    scratch_stats = os.statvfs(SCRATCH)
+    scratch_stats = os.statvfs(scratch)
     scratch_used = (scratch_stats.f_blocks - scratch_stats.f_bfree) * scratch_stats.f_frsize
-    if scratch_used > 103_079_215_104:
+    if scratch_used > scratch_provision:
         raise GateFailure("scratch-capacity-overrun")
     receipt = {
         "schema": "amoebius.phase25.sprint25.1-receipt.v1",
         "register": 3,
         "substrate": "linux-cpu",
         "preflightFingerprint": preflight["observedBuildFingerprint"],
-        "artifactArchiveBytes": ARTIFACT.stat().st_size,
-        "artifactArchiveSha256": sha256(ARTIFACT),
-        "imageIndexDigest": artifact["imageIndexDigest"],
-        "platforms": [f"{row['os']}/{row['architecture']}" for row in artifact["platforms"]],
-        "registryObjectCount": len(artifact["registryObjects"]),
+        "artifactArchiveBytes": artifact.stat().st_size,
+        "artifactArchiveSha256": sha256(artifact),
+        "imageIndexDigest": measured["imageIndexDigest"],
+        "platforms": [f"{row['os']}/{row['architecture']}" for row in measured["platforms"]],
+        "registryObjectCount": len(measured["registryObjects"]),
         "officialFileExecutionJoins": len(file_join["rows"]),
         "sbomFiles": len(sbom["files"]),
         "seededMutantsRed": len(mutants["results"]),
         "scratchFilesystemUsedBytes": scratch_used,
-        "scratchProvisionBytes": 103_079_215_104,
+        "scratchProvisionBytes": scratch_provision,
         "cacheFilesystemUsedBytes": cache_bytes,
-        "cacheProvisionBytes": 68_719_476_736,
+        "cacheProvisionBytes": cache_provision,
         "result": "PASS",
     }
     return rows, receipt
@@ -243,9 +275,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--builder-image", required=True, help="the resolved BuildKit builder image reference"
     )
+    # The OCI export, the cache directory, and the scratch root are this run's, not a
+    # location. The retired form read the artifact from a fixed path, so whatever a
+    # previous build left there decided the gate -- and a sixteen-gigabyte export of a
+    # catalog that no longer exists was sitting at exactly that path.
+    parser.add_argument("--artifact", type=Path, required=True, help="this run's OCI export")
+    parser.add_argument("--cache", type=Path, required=True, help="this run's buildx cache directory")
+    parser.add_argument("--scratch", type=Path, required=True, help="this run's scratch root")
     arguments = parser.parse_args(argv)
     try:
-        rows, receipt = seal(arguments.evidence, arguments.builder_image)
+        rows, receipt = seal(
+            arguments.evidence, arguments.builder_image,
+            arguments.artifact, arguments.cache, arguments.scratch,
+        )
         write_results(arguments.evidence, rows, receipt)
         print(
             "phase25-sprint25.1-gate: PASS "

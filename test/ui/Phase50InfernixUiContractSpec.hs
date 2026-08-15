@@ -91,7 +91,7 @@ main = do
 
 validatePhase0 :: FilePath -> IO ()
 validatePhase0 root = do
-  manifest <- Text.lines <$> TextIO.readFile (root </> "test/phase0_oracle_manifest.tsv")
+  manifest <- Text.lines <$> TextIO.readFile (root </> "test/oracle/preimplementation_artifacts.tsv")
   let rows = filter (Text.isPrefixOf "50\t") manifest
   assertEqual "phase50 phase0 cardinality" 8 (length rows)
   assertEqual "phase50 oracle cardinality" 6 (length (filter (Text.isInfixOf "\toracle\t") rows))

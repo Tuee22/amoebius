@@ -34,7 +34,7 @@ main = do
   putStrLn "phase56-ui-multi-tenant-live: PASS-SCOPED (opaque choice; current membership; epoch rotation; stale handle refusal; tenant/subject/epoch keys; Keycloak/browser/provider live surfaces UNVERIFIED)"
 
 verifyCustody = do
-  rows <- lines <$> readFile "test/phase0_oracle_manifest.tsv"
+  rows <- lines <$> readFile "test/oracle/preimplementation_artifacts.tsv"
   let phaseRows = filter (Text.isPrefixOf "56\t" . Text.pack) rows
   assertEqual "Phase-0 custody" 9 (length phaseRows)
   forM_ phaseRows $ \row -> case splitTabs row of (_ : _ : path : _) -> doesFileExist path >>= flip assert ("missing " <> path); _ -> die "bad custody"

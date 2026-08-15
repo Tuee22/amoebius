@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import functools
 import hashlib
 import json
 import os
@@ -13,9 +15,24 @@ from pathlib import Path
 from typing import Any, Sequence
 
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
+
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_26"
-LIVE = EVIDENCE / "sprint-26.2-live.json"
+
+
+@functools.cache
+def build_tools() -> tuple[str, str]:
+    """Resolve cabal and the compiler per run from the authored requirements.
+
+    The retired form named a developer-home `cabal` outright, so the gate could only run on
+    one machine and inherited whichever GHC that installation offered — which need not
+    satisfy the authored range.
+    """
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    return resolved["cabal"]["path"], resolved["ghc"]["path"]
 
 
 class GateFailure(RuntimeError):
@@ -34,8 +51,8 @@ def fingerprint(value: dict[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
-def validate_live() -> dict[str, Any]:
-    observed = json.loads(LIVE.read_text(encoding="utf-8"))
+def validate_live(live: Path) -> dict[str, Any]:
+    observed = json.loads(live.read_text(encoding="utf-8"))
     if observed["coldStartOrder"] != ["Namespace/amoebius-phase26-sprint2", "Lease/amoebius-phase26-sprint2/amoebius-reconciler"]:
         raise GateFailure("cold-start-authority-order")
     if observed["lease"]["holder"] != "phase26-bootstrap-host" or observed["lease"]["staleCasExit"] == 0:
@@ -56,21 +73,30 @@ def validate_live() -> dict[str, Any]:
     }
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    # The bundle this run writes into is supplied by the caller, so a previous run's
+    # observation cannot decide this one.
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    arguments = parser.parse_args(argv)
+    evidence = arguments.evidence
+    evidence.mkdir(parents=True, exist_ok=True)
+    live = evidence / "sprint-26.2-live.json"
     try:
+        cabal, compiler = build_tools()
         flags = (
             "-f-phase26-wait-for-ready-pure-mutant", "-f-phase26-generation-after-diff-mutant",
             "-f-phase26-label-only-delete-mutant", "-f-phase26-healthy-overbound-child-mutant",
         )
         rows = [
-            invoke("haskell-reconcile-spec", ("/home/matthewnowak/.ghcup/bin/cabal", "test", "phase26-reconcile-spec", *flags, "--test-show-details=direct", "-j1")),
-            invoke("live-lease-scoped-ssa", (sys.executable, "tools/phase26_sprint26_2_live.py", "--output", str(LIVE))),
+            invoke("haskell-reconcile-spec", (cabal, f"--with-compiler={compiler}", "test", "phase26-reconcile-spec", *flags, "--test-show-details=direct", "-j1")),
+            invoke("live-lease-scoped-ssa", (sys.executable, "tools/phase26_sprint26_2_live.py", "--output", str(live))),
             invoke("documentation-lint", (sys.executable, "tools/doc_lint.py")),
         ]
-        stable = {"schema": "amoebius.phase26.sprint26.2-receipt.v1", "register": 3, "substrate": "linux-cpu", **validate_live(), "result": "PASS"}
+        stable = {"schema": "amoebius.phase26.sprint26.2-receipt.v1", "register": 3, "substrate": "linux-cpu", **validate_live(live), "result": "PASS"}
         receipt = {**stable, "receiptFingerprint": fingerprint(stable)}
-        (EVIDENCE / "sprint-26.2-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        (EVIDENCE / "sprint-26.2-phase-results.tsv").write_text("check\tresult\n" + "".join(f"{row['name']}\tPASS\n" for row in rows), encoding="utf-8")
+        (evidence / "sprint-26.2-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (evidence / "sprint-26.2-phase-results.tsv").write_text("check\tresult\n" + "".join(f"{row['name']}\tPASS\n" for row in rows), encoding="utf-8")
         print(f"phase26-sprint26.2-gate: PASS ({len(rows)} checks; {receipt['receiptFingerprint']})")
         return 0
     except (GateFailure, OSError, ValueError, KeyError, json.JSONDecodeError, subprocess.TimeoutExpired) as problem:

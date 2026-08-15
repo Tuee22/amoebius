@@ -34,7 +34,7 @@ main = do
 
 verifyCustody :: IO ()
 verifyCustody = do
-  rows <- lines <$> readFile "test/phase0_oracle_manifest.tsv"
+  rows <- lines <$> readFile "test/oracle/preimplementation_artifacts.tsv"
   let phaseRows = filter (Text.isPrefixOf "64\t" . Text.pack) rows
   assertEqual "phase-0 custody" 13 (length phaseRows)
   forM_ phaseRows $ \row -> case splitTabs row of

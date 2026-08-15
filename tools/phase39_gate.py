@@ -21,7 +21,7 @@ EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_39"
 LIVE = EVIDENCE / "release-lifecycle-live.json"
 ENUMERATION = ROOT / "test/enumeration/phase_39_surfaces.txt"
 LEDGER = ROOT / "test/golden/phase_39_ledger.json"
-ORACLE_MANIFEST = ROOT / "test/phase0_oracle_manifest.tsv"
+ORACLE_MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
 UNVERIFIED = {
@@ -134,7 +134,7 @@ def phase0_domain() -> dict[str, str]:
     require(fixtures["release_protocol_unverified"]["expected"] == "PromotionRefused:ProtocolEvidenceMissing", "protocol-refusal-fixture")
     require(fixtures["release_verified"]["expected"] == "advance", "verified-fixture")
     return {
-        "name": "phase0-custody", "command": "read test/phase0_oracle_manifest.tsv",
+        "name": "phase0-custody", "command": "read test/oracle/preimplementation_artifacts.tsv",
         "output": "12 oracles; 8 mutants", "result": "PASS",
     }
 

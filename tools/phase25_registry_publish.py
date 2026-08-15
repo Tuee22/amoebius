@@ -25,7 +25,6 @@ from typing import Any, BinaryIO, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE = Path("/var/tmp/amoebius-phase25-scratch/oci/amoebius-phase25.oci.tar")
 PCAP = Path("/var/tmp/amoebius-phase25-publish.pcap")
 NODE = "amoebius-phase24-control-plane"
 NAMESPACE = "amoebius-bootstrap"
@@ -423,7 +422,7 @@ def verify_ephemeral_docker_config(capability: str, proof: str, tag: str, index_
         shutil.rmtree(config_directory)
 
 
-def publish(evidence: Path) -> dict[str, Any]:
+def publish(evidence: Path, archive: Path) -> dict[str, Any]:
     artifact = json.loads((evidence / "image-artifact.json").read_text(encoding="utf-8"))
     preflight = json.loads((evidence / "sprint-25.2-preflight.json").read_text(encoding="utf-8"))
     domain_oracle = STANDUP.oracle()
@@ -452,7 +451,7 @@ def publish(evidence: Path) -> dict[str, Any]:
     try:
         with STANDUP.port_forward("registry-mutation-proxy", 15001, 5001), STANDUP.port_forward(
             "distribution-read", 15000, 5000
-        ), tarfile.open(ARCHIVE, "r:") as tar:
+        ), tarfile.open(archive, "r:") as tar:
             # Complete amd64 staging first.  It remains digest-addressed and
             # therefore cannot advertise the multi-arch tag.
             for digest in sorted(amd_digests | {str(amd64["configDigest"])}):
@@ -652,12 +651,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     # whatever a previous run left there would decide what gets published instead of the
     # run in progress.
     parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    # The export whose blobs this publication streams. A constant here named one fixed
+    # path, so whichever archive was last left there would have been published no matter
+    # which one the run in progress built. Verification streams nothing, so it is only
+    # required to publish.
+    parser.add_argument("--artifact", type=Path, help="this run's OCI export, the source of the pushed blobs")
     arguments = parser.parse_args(argv)
+    if not arguments.verify_only and arguments.artifact is None:
+        parser.error("--artifact is required to publish: its blobs are what gets pushed")
     try:
         result = (
             verify_current(arguments.evidence)
             if arguments.verify_only
-            else publish(arguments.evidence)
+            else publish(arguments.evidence, arguments.artifact)
         )
         encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
         if arguments.output is None:

@@ -124,7 +124,7 @@ buildCommittedArtifact started input = do
 
 validatePhase0 :: FilePath -> IO ()
 validatePhase0 root = do
-  manifest <- Text.lines <$> TextIO.readFile (root </> "test/phase0_oracle_manifest.tsv")
+  manifest <- Text.lines <$> TextIO.readFile (root </> "test/oracle/preimplementation_artifacts.tsv")
   let rows = filter (Text.isPrefixOf "52\t") manifest
   assertEqual "phase52 Phase-0 cardinality" 11 (length rows)
   assertEqual "phase52 oracle cardinality" 6 (length (filter (Text.isInfixOf "\toracle\t") rows))

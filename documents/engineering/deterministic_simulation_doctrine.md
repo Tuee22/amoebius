@@ -91,14 +91,16 @@ this interface; Phase 15 does not claim those later programs have already been e
 [Phase 26](../../DEVELOPMENT_PLAN/phase_26_object_reconciler.md) is the first such production-code adoption:
 its real Lease-token, scoped-SSA, serial, host/device-release, Job-terminal, authenticated-delete, and readiness
 modules passed eight fault classes × 256 schedules, bounded `IOSimPOR` exploration, same-seed byte replay, and
-seven red mutants. That is a Register-2.5 tested result; modeled-apiserver fidelity remains assumed and is
-checked independently by Phase 26's Register-3 live corpus.
+seven red mutants, sealed 2026-08-14. That is a Register-2.5 tested result; modeled-apiserver fidelity remains
+assumed and is checked independently by the Register-3 live corpus in the same run.
 
 [Phase 27](../../DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md) is the second production-code adoption. Its
 readiness, execution-admission, reservation, Binding-preparation, recovery, and modeled-apiserver paths passed
 seven scheduler fault classes × 256 schedules, bounded `IOSimPOR`, byte-identical replay, and seven red
 mutants. Modeled-apiserver fidelity remains assumed and is bounded independently by Phase 27's Register-3
-admission, custom-resource CAS, Binding, UID, resourceVersion, readiness, and cleanup observations.
+admission, custom-resource CAS, Binding, UID, resourceVersion, readiness, and cleanup observations. Sealed 2026-08-14: 1,792 deterministic schedules across seven fault classes,
+byte-identical same-seed replay, and seven red mutants, with modeled-apiserver fidelity assumed and
+bounded by the same run's Register-3 live cutover.
 
 ---
 

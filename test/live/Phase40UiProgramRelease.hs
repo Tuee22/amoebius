@@ -115,7 +115,7 @@ loadFixtures root = do
     _ -> die "phase40-stale-matrix-shape"
   assertEqual "phase40-plan-matrix-domain" 6 (length plans)
   assertEqual "phase40-stale-matrix-domain" 5 (length stale)
-  custody <- filter (Text.isPrefixOf "40\t") . Text.lines <$> TextIO.readFile (root </> "test/phase0_oracle_manifest.tsv")
+  custody <- filter (Text.isPrefixOf "40\t") . Text.lines <$> TextIO.readFile (root </> "test/oracle/preimplementation_artifacts.tsv")
   assertEqual "phase40-phase0-custody" 8 (length custody)
   pure (plans, stale)
 

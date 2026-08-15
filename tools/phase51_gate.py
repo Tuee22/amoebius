@@ -23,7 +23,7 @@ import phase37_workflow_live as phase37
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "DEVELOPMENT_PLAN/evidence/phase_51"
 LIVE = EVIDENCE_DIR / "jitml-cuda-live.json"
-MANIFEST = ROOT / "test/phase0_oracle_manifest.tsv"
+MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 ENUMERATION = ROOT / "test/enumeration/phase_51_surfaces.txt"
 LEDGER = ROOT / "test/golden/phase_51_ledger.json"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"

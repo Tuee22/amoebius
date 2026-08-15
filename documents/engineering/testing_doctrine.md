@@ -187,15 +187,15 @@ all 45 committed mutants turn red, and both Phase-9-owned registry rows have exa
 exhaustiveness covers the ten owner modules; scheduler, storage, accelerator, and provider runtime fidelity
 remain **UNVERIFIED** (ledger `external-run-reference`).
 
-**First complete Register-3 application now validated.** The
+**First complete Register-3 application now validated — sealed 2026-08-14.** The
 [Phase 25 gate](../../DEVELOPMENT_PLAN/phase_25_base_image_registry.md) composes the pure image/registry
 decisions, the capability-gated bootstrap/publication protocol, and live runtime observations on the
 `linux-cpu` substrate. Its independent OS-boundary evidence pairs a successful exact in-cluster digest pull
 with an `ErrImagePull`/`ImagePullBackOff` public canary under an enforcing node firewall, records firewall
 drops and zero established public-registry connections, and reruns the committed no-op-policy mutant. The
 ledger marks Decision, Protocol, and Runtime tested for the enumerated Phase-25 boundary while keeping the
-Phase-26 reconciler correspondence and Phase-30 MinIO rehome **UNVERIFIED** (ledger
-`dynamically-resolved`).
+Phase-26 reconciler correspondence and Phase-30 MinIO rehome **UNVERIFIED**; the ledger itself is written into
+that run's bundle and bound to its source snapshot, never into this document.
 
 The third register is the amoebius novelty and the subject of the rest of this document. It is where "a
 test is a spec" ([§1](#1-a-test-is-an-amoebius-spec)) cashes out, and it is the only register that can prove the deployed system survives a

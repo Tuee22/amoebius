@@ -20,7 +20,7 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "DEVELOPMENT_PLAN/evidence/phase_52"
 LIVE = EVIDENCE_DIR / "jitml-ui-live.json"
-MANIFEST = ROOT / "test/phase0_oracle_manifest.tsv"
+MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 ENUMERATION = ROOT / "test/enumeration/phase_52_surfaces.txt"
 LEDGER = ROOT / "test/golden/phase_52_ledger.json"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"

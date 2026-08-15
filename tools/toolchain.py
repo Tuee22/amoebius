@@ -309,6 +309,11 @@ def resolve_github_release(name: str, spec: dict[str, Any]) -> dict[str, Any]:
         target_dir.mkdir(parents=True, exist_ok=True)
         target = target_dir / spec.get("install_name", asset["name"])
         shutil.copyfile(archive, target)
+        # A release asset that *is* the binary arrives without a mode bit, and
+        # `shutil.copyfile` copies content only. Every other branch here chmods; this one
+        # did not, so resolving `kind` or `ghcup` returned a path the caller could not
+        # execute — a resolver that reports success and hands back an unrunnable file.
+        target.chmod(0o755)
     elif zipfile.is_zipfile(archive):
         TOOL_BIN.mkdir(parents=True, exist_ok=True)
         target = TOOL_BIN / spec["install_name"]

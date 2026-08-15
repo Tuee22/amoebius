@@ -313,10 +313,10 @@ CNI/CSI/OCI/backing-pool inventory. This is the delivered Phase-24 `linux-cpu` b
 substrate can run that lane, using Incus on Linux, Lima on Apple, or WSL2 on Windows for a pristine Linux host.
 
 Phase 25 then applied the same declared/provisioned/observed discipline to the host build and bootstrap
-registry: live validation
-rejected a 48 GiB scratch declaration before export, corrected it to a 96 GiB provision with a 32 GiB
-concurrent cache-write peak, and independently observed CPU throttling, child OOM kill, and bounded scratch
-and cache `ENOSPC`. Registry admission then deduplicated the exact digest/object inventory against observed
+registry, and sealed it on 2026-08-14: the build is admitted against the catalog's own 32 GiB scratch and
+16 GiB cache provisions — sized for the plain-Ubuntu monocontainer, where the retired 96/64 GiB pair had been
+sized for a CUDA devel base and exceeded the substrate's free space — and independent observers recorded CPU
+throttling, child OOM kill, and bounded scratch and cache `ENOSPC` inside them. Registry admission then deduplicated the exact digest/object inventory against observed
 residents, charged upload workspaces and failed-upload residue, rejected conflicting metadata and one-byte
 under-provision before mutation, and placed the finite registry/proxy execution and storage demand on the
 Phase-24 node. Phase 30 then live-tested the MinIO-backed rehome and backbone resource projection.

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import functools
 import hashlib
 import json
 import os
@@ -13,13 +15,28 @@ from pathlib import Path
 from typing import Any, Sequence
 
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
+
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_26"
-LIVE = EVIDENCE / "sprint-26.3-live.json"
 BASELINE_FLAGS = (
     "-f-phase26-wait-for-ready-pure-mutant", "-f-phase26-generation-after-diff-mutant",
     "-f-phase26-label-only-delete-mutant", "-f-phase26-healthy-overbound-child-mutant",
 )
+
+
+@functools.cache
+def build_tools() -> tuple[str, str]:
+    """Resolve cabal and the compiler per run from the authored requirements.
+
+    The retired form named a developer-home `cabal` outright, so the gate could only run on
+    one machine and inherited whichever GHC that installation offered — which need not
+    satisfy the authored range.
+    """
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    return resolved["cabal"]["path"], resolved["ghc"]["path"]
 
 
 class GateFailure(RuntimeError):
@@ -37,15 +54,16 @@ def invoke(name: str, arguments: Sequence[str], timeout: int = 1800, expect_fail
 
 
 def cabal(*extra: str) -> tuple[str, ...]:
-    return ("/home/matthewnowak/.ghcup/bin/cabal", "test", "phase26-reconcile-spec", *BASELINE_FLAGS, *extra, "--test-show-details=direct", "-j1")
+    executable, compiler = build_tools()
+    return (executable, f"--with-compiler={compiler}", "test", "phase26-reconcile-spec", *BASELINE_FLAGS, *extra, "--test-show-details=direct", "-j1")
 
 
 def fingerprint(value: dict[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
-def validate_live() -> dict[str, Any]:
-    observed = json.loads(LIVE.read_text(encoding="utf-8"))
+def validate_live(live: Path) -> dict[str, Any]:
+    observed = json.loads(live.read_text(encoding="utf-8"))
     transitions = observed["serial"]["transitions"]
     if observed["serial"]["policy"] != "OnDelete" or len(transitions) != 2:
         raise GateFailure("serial-domain")
@@ -67,20 +85,28 @@ def validate_live() -> dict[str, Any]:
     }
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    # The corpus pod pulls the Phase-25 published digest from the in-cluster registry.
+    parser.add_argument("--image", required=True, help="the Phase-25 published digest reference")
+    arguments = parser.parse_args(argv)
+    evidence = arguments.evidence
+    evidence.mkdir(parents=True, exist_ok=True)
+    live = evidence / "sprint-26.3-live.json"
     try:
         rows = [
             invoke("haskell-transition-spec", cabal()),
-            invoke("live-staged-transitions", (sys.executable, "tools/phase26_sprint26_3_live.py", "--output", str(LIVE))),
+            invoke("live-staged-transitions", (sys.executable, "tools/phase26_sprint26_3_live.py", "--output", str(live), "--image", arguments.image)),
             invoke("label-only-delete-mutant", cabal("-fphase26-label-only-delete-mutant"), expect_failure="changed resourceVersion"),
             invoke("baseline-restored", cabal()),
             invoke("documentation-lint", (sys.executable, "tools/doc_lint.py")),
         ]
-        stable = {"schema": "amoebius.phase26.sprint26.3-receipt.v1", "register": 3, "substrate": "linux-cpu", **validate_live(), "seededMutantsRed": 1, "result": "PASS"}
+        stable = {"schema": "amoebius.phase26.sprint26.3-receipt.v1", "register": 3, "substrate": "linux-cpu", **validate_live(live), "seededMutantsRed": 1, "result": "PASS"}
         receipt = {**stable, "receiptFingerprint": fingerprint(stable)}
-        (EVIDENCE / "sprint-26.3-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        (EVIDENCE / "sprint-26.3-phase-results.tsv").write_text("check\tresult\n" + "".join(f"{row['name']}\t{row['result']}\n" for row in rows), encoding="utf-8")
-        (EVIDENCE / "sprint-26.3-mutants.json").write_text(json.dumps({"schema": "amoebius.phase26.sprint26.3-mutants.v1", "baselineRestored": True, "results": [{"mutant": "delete-from-owner-label-alone", "result": "RED", "observedFailureMarker": "changed resourceVersion"}]}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (evidence / "sprint-26.3-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (evidence / "sprint-26.3-phase-results.tsv").write_text("check\tresult\n" + "".join(f"{row['name']}\t{row['result']}\n" for row in rows), encoding="utf-8")
+        (evidence / "sprint-26.3-mutants.json").write_text(json.dumps({"schema": "amoebius.phase26.sprint26.3-mutants.v1", "baselineRestored": True, "results": [{"mutant": "delete-from-owner-label-alone", "result": "RED", "observedFailureMarker": "changed resourceVersion"}]}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(f"phase26-sprint26.3-gate: PASS ({len(rows)} checks; {receipt['receiptFingerprint']})")
         return 0
     except (GateFailure, OSError, ValueError, KeyError, json.JSONDecodeError, subprocess.TimeoutExpired) as problem:

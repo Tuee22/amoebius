@@ -603,8 +603,8 @@ The three asset kinds, **one cache shape** (`resolve = {download | build}` on fi
   download — the identity is drawn from a closed catalog. The base image and the resolver's build inputs are
   owned by [`image_build_doctrine.md`](./image_build_doctrine.md); this **replaces** `infernix`'s per-engine
   Poetry-venv + curl-tar-at-image-build with the one shared resolve-on-miss path.
-  Phase 25.1 has live-proved only the base image's resolver/toolchain presence and byte identity on both Linux
-  architectures; first-miss materialization into `CacheBudget` remains a Phase 48 gate.
+  Phase 25.1, sealed 2026-08-14, has live-tested only the base image's resolver/toolchain presence and byte
+  identity on both Linux architectures; first-miss materialization into `CacheBudget` remains a Phase 48 gate.
 - **Tier 2 — `ModelArtifact` = eager STAGE-THEN-SERVE, and *staging by name IS a provenance-carrying import*.**
   The parent-minted nested `infernix.dhall` names the model *set*; the in-cluster singleton stages each
   model into the shared bounded cache, and the `.ready` sentinel is written **last** so the `model` pointer ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)) commits only a complete

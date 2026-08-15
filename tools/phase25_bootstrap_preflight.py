@@ -14,10 +14,9 @@ from typing import Any, Iterable, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACT = Path("/var/tmp/amoebius-phase25-scratch/oci/amoebius-phase25.oci.tar")
 KUBECONFIG = Path.home() / ".amoebius/phase24/kubeconfig"
 NODE = "amoebius-phase24-control-plane"
-IMAGE = "amoebius.invalid/amoebius-base:phase25"
+IMAGE_REPOSITORY = "amoebius.invalid/amoebius-base"
 PUBLIC_HOSTS = ("docker.io", "quay.io", "ghcr.io")
 
 
@@ -209,10 +208,10 @@ def resolve_public_hosts() -> dict[str, list[str]]:
     return {host: sorted({row[4][0] for row in socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)}) for host in PUBLIC_HOSTS}
 
 
-def observe(evidence: Path, expected_archive_sha256: str) -> dict[str, Any]:
-    if not ARTIFACT.is_file():
+def observe(evidence: Path, artifact: Path, expected_archive_sha256: str) -> dict[str, Any]:
+    if not artifact.is_file():
         raise PreflightFailure("artifact-absent")
-    archive_sha = sha256_file(ARTIFACT)
+    archive_sha = sha256_file(artifact)
     if archive_sha != expected_archive_sha256:
         raise PreflightFailure(f"artifact-sha256:{archive_sha}")
     node = kubectl_json("get", "node", NODE)
@@ -259,8 +258,13 @@ def observe(evidence: Path, expected_archive_sha256: str) -> dict[str, Any]:
     transition = image["peakBytes"] + registry["peakBytes"]
     if transition > filesystem["availableBytes"]:
         raise PreflightFailure(f"filesystem-overdraw:{transition}:{filesystem['availableBytes']}")
+    # The reference the side-load will create, which is the one the standup requires
+    # and the one a Deployment names. The retired form checked a `:phase25` tag that
+    # nothing in the flow ever creates, so the check could not fire: a resident image
+    # from a previous run would have been admitted as headroom this run still has.
+    selected_reference = f"{IMAGE_REPOSITORY}@{image['imageIndexDigest']}"
     image_rows = docker_exec("/usr/local/bin/ctr", "--namespace", "k8s.io", "images", "list", "--quiet").splitlines()
-    if IMAGE in image_rows:
+    if selected_reference in image_rows:
         raise PreflightFailure("selected-image-already-resident")
     content = docker_exec("/usr/local/bin/ctr", "--namespace", "k8s.io", "content", "list", "--quiet").splitlines()
     snapshots = docker_exec("/usr/local/bin/ctr", "--namespace", "k8s.io", "snapshots", "list").splitlines()[1:]
@@ -299,13 +303,17 @@ def main() -> None:
     # There is deliberately no default: a default names a location, and whatever a previous
     # run left there would decide this admission instead of the run in progress.
     parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    # The export this admission is about, for the same reason: a constant here named one
+    # fixed path, so whichever archive was last left there would have been admitted no
+    # matter which one the run in progress built.
+    parser.add_argument("--artifact", type=Path, required=True, help="this run's OCI export")
     # The archive checksum is the one this run built, never a constant pinning a build that
     # no longer exists.
     parser.add_argument(
         "--expected-archive-sha256", required=True, help="the OCI archive checksum this run produced"
     )
     arguments = parser.parse_args()
-    result = observe(arguments.evidence, arguments.expected_archive_sha256)
+    result = observe(arguments.evidence, arguments.artifact, arguments.expected_archive_sha256)
     encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
     if arguments.output is not None:
         arguments.output.parent.mkdir(parents=True, exist_ok=True)

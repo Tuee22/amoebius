@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import functools
 import hashlib
 import json
 import os
@@ -13,8 +15,12 @@ from pathlib import Path
 from typing import Any, Sequence
 
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
+
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_26"
 MUTANTS = (
     ("reconcile-sim", "lost-lease-resourceversion-retry", "NoStaleTokenReuse"),
     ("reconcile-sim", "mutation-without-holder", "NoWriteWithoutExactLeaseHolder"),
@@ -24,6 +30,18 @@ MUTANTS = (
     ("reconcile-sim", "label-only-delete", "DeleteRequiresExactAuthority"),
     ("reconcile-sim", "cached-observation", "FreshSnapshotBeforeMutation"),
 )
+
+
+@functools.cache
+def build_tools() -> tuple[str, str]:
+    """Resolve cabal and the compiler per run from the authored requirements.
+
+    The retired form named a developer-home `cabal` outright, so the gate could only run on
+    one machine and inherited whichever GHC that installation offered — which need not
+    satisfy the authored range.
+    """
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    return resolved["cabal"]["path"], resolved["ghc"]["path"]
 
 
 class GateFailure(RuntimeError):
@@ -41,7 +59,8 @@ def invoke(name: str, arguments: Sequence[str], timeout: int = 1800, expect_fail
 
 
 def cabal(*targets: str, options: str | None = None) -> tuple[str, ...]:
-    command = ["/home/matthewnowak/.ghcup/bin/cabal", "test", *targets, "--test-show-details=direct", "-j1"]
+    executable, compiler = build_tools()
+    command = [executable, f"--with-compiler={compiler}", "test", *targets, "--test-show-details=direct", "-j1"]
     if options is not None:
         command.append(f"--test-options={options}")
     return tuple(command)
@@ -75,7 +94,12 @@ def validate_source() -> dict[str, str]:
     return {"name": "simulation-source-boundary", "command": "internal source scan", "output": "real action modules + IOSimPOR + 256 schedules/class + MonadSTM tokens", "result": "PASS"}
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    arguments = parser.parse_args(argv)
+    evidence = arguments.evidence
+    evidence.mkdir(parents=True, exist_ok=True)
     try:
         rows = [
             invoke("phase15-simulation-substrate-regression", cabal("sim-spec")),
@@ -106,8 +130,8 @@ def main() -> int:
             "result": "PASS",
         }
         receipt = {**stable, "receiptFingerprint": fingerprint(stable)}
-        (EVIDENCE / "sprint-26.5-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        (EVIDENCE / "sprint-26.5-phase-results.tsv").write_text("check\tresult\n" + "".join(f"{row['name']}\t{row['result']}\n" for row in rows), encoding="utf-8")
+        (evidence / "sprint-26.5-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (evidence / "sprint-26.5-phase-results.tsv").write_text("check\tresult\n" + "".join(f"{row['name']}\t{row['result']}\n" for row in rows), encoding="utf-8")
         mutants = {
             "schema": "amoebius.phase26.sprint26.5-mutants.v1", "baselineRestored": True,
             "results": [
@@ -115,9 +139,9 @@ def main() -> int:
                 for suite, name, invariant in MUTANTS
             ],
         }
-        (EVIDENCE / "sprint-26.5-mutants.json").write_text(json.dumps(mutants, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (evidence / "sprint-26.5-mutants.json").write_text(json.dumps(mutants, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         message = f"phase26-sprint26.5-gate: PASS ({len(rows)} checks; {receipt['receiptFingerprint']})"
-        (EVIDENCE / "sprint-26.5-gate.log").write_text(message + "\n", encoding="utf-8")
+        (evidence / "sprint-26.5-gate.log").write_text(message + "\n", encoding="utf-8")
         print(message)
         return 0
     except (GateFailure, OSError, ValueError, KeyError, json.JSONDecodeError, subprocess.TimeoutExpired) as problem:

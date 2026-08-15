@@ -51,7 +51,7 @@ main = do
 
 verifyPhase0 :: IO ()
 verifyPhase0 = do
-  rows <- lines <$> readFile "test/phase0_oracle_manifest.tsv"
+  rows <- lines <$> readFile "test/oracle/preimplementation_artifacts.tsv"
   let phaseRows = filter (Text.isInfixOf "phase_53" . Text.pack) rows
   assertEqual "Phase-0 row cardinality" 20 (length phaseRows)
   forM_ phaseRows $ \row -> case splitTabs row of

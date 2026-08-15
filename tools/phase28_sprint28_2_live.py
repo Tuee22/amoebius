@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import argparse
 import json
 import os
 import secrets
@@ -18,7 +19,6 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[1]
 KUBECONFIG = Path.home() / ".amoebius/phase24/kubeconfig"
 FIXTURES = ROOT / "test/live/fixtures"
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_28/sprint-28.2-live.json"
 RETAINED_ROOT = Path("/var/tmp/amoebius-phase28-retained")
 IMAGE = RETAINED_ROOT / "images/pg-witness.ext4"
 MOUNT = RETAINED_ROOT / "mounts/pg-witness"
@@ -32,7 +32,9 @@ STATEFULSET = "pg-witness"
 STORAGE_CLASS = "amoebius-retained"
 NODE = "amoebius-phase24-control-plane"
 NODE_PATH = "/var/tmp/amoebius-phase28-pg-witness"
-PRIVATE_IMAGE = "registry.amoebius.invalid:5000/amoebius/base@sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4"
+# The digest Phase 25 published, supplied by the caller: a constant here named a build
+# that no longer exists, so the retained-volume Pod would have failed `ImagePull`.
+PRIVATE_IMAGE = ""
 
 
 class LiveFailure(RuntimeError):
@@ -262,11 +264,16 @@ def execute() -> dict[str, Any]:
     }
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, required=True, help="this run's observation")
+    parser.add_argument("--image", required=True, help="the Phase-25 published digest reference")
+    arguments = parser.parse_args(argv)
+    globals()["PRIVATE_IMAGE"] = arguments.image
     try:
         value = execute()
-        EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
-        EVIDENCE.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        arguments.output.parent.mkdir(parents=True, exist_ok=True)
+        arguments.output.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print("phase28-sprint28.2-live: PASS (image cap, exact bind, Released-to-Bound rebind, nonce readback)")
         return 0
     except (LiveFailure, OSError, ValueError, KeyError, json.JSONDecodeError, subprocess.TimeoutExpired) as problem:

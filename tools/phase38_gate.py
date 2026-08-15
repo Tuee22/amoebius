@@ -21,7 +21,7 @@ EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_38"
 LIVE = EVIDENCE / "ui-projection-runtime-live.json"
 ENUMERATION = ROOT / "test/enumeration/phase_38_surfaces.txt"
 LEDGER = ROOT / "test/golden/phase_38_ledger.json"
-ORACLE_MANIFEST = ROOT / "test/phase0_oracle_manifest.tsv"
+ORACLE_MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 UNVERIFIED = {
     "browser-presentation-and-reconnect",
@@ -129,7 +129,7 @@ def phase0_domain() -> dict[str, str]:
         path = ROOT / row.split("\t")[2]
         require(path.is_file(), f"phase0-custody-missing:{path}")
     return {
-        "name": "phase0-custody", "command": "read test/phase0_oracle_manifest.tsv",
+        "name": "phase0-custody", "command": "read test/oracle/preimplementation_artifacts.tsv",
         "output": "4 oracles; 3 mutants", "result": "PASS",
     }
 

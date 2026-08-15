@@ -5,7 +5,7 @@ import Amoebius.Cluster.Bootstrap (runBootstrap)
 import Amoebius.Exec.Boundary (mkBoundaryTools, runBoundaryCorpus)
 import Amoebius.Ui.Server.Main (runServeUi)
 import Amoebius.Image.Resolver (runResolverCommand)
-import Amoebius.Image.Build (runAdmittedBuildxOci, runRenderBakeDockerfile)
+import Amoebius.Image.Build (runAdmittedBuildxOci, runBakeInventory, runRenderBakeDockerfile)
 import Amoebius.Vault.Client (runVaultReadCommand, runVaultTransitCommand)
 import Amoebius.Vault.Seal (openUnlockMaterial, sealUnlockMaterialIO)
 import Data.ByteString.Base64 qualified as Base64
@@ -21,6 +21,7 @@ main = do
     "serve-ui" : options -> runServeUi options
     "jit-build-resolver" : options -> runResolverCommand options
     "render-bake-dockerfile" : options -> runRenderBakeDockerfile options
+    "bake-inventory" : options -> runBakeInventory options
     "admitted-buildx-oci" : options -> runAdmittedBuildxOci options
     "vault-read" : options -> runVaultReadCommand options
     "vault-transit-decrypt" : options -> runVaultTransitCommand options

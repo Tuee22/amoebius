@@ -18,7 +18,6 @@ from typing import Any, Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 KUBECONFIG = Path.home() / ".amoebius/phase24/kubeconfig"
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_27"
 SYSTEM_NAMESPACE = "amoebius-capacity-scheduler"
 NAMESPACE = "amoebius-phase27-gate"
 RACE_NAMESPACE = "amoebius-phase27-race"
@@ -32,7 +31,10 @@ CLUSTER_ROLE_BINDING = "amoebius-phase27-binding"
 OWNER = "phase27-live-gate"
 GENERATION = "phase27-generation-1"
 CONFIG_DIGEST = "sha256:fd5c9e99104e9baee88947825f0658d19ef43d62219fdfc692174fcaa71acc12"
-IMAGE = "registry.amoebius.invalid:5000/amoebius/base@sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4"
+# The digest Phase 25 published on the run that stood the in-cluster registry up,
+# supplied by the caller: a constant here named a build that no longer exists, so every
+# scheduled Pod would have failed `ImagePull` on any host but the one that produced it.
+IMAGE = ""
 TAINT_KEY = "amoebius.io/managed-capacity"
 SCHEDULER_NAME = "amoebius-capacity"
 
@@ -738,8 +740,10 @@ def execute() -> dict[str, Any]:
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=EVIDENCE / "live-scheduler.json")
+    parser.add_argument("--output", type=Path, required=True, help="this run's observation")
+    parser.add_argument("--image", required=True, help="the Phase-25 published digest reference")
     arguments = parser.parse_args(argv)
+    globals()["IMAGE"] = arguments.image
     try:
         value = execute()
         arguments.output.parent.mkdir(parents=True, exist_ok=True)

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import functools
 import hashlib
 import json
 import os
@@ -14,12 +16,28 @@ from pathlib import Path
 from typing import Any, Sequence
 
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
+
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_27"
 BASELINE_FLAGS = (
     "-f-phase27-collapsed-readiness-mutant", "-f-phase27-stage-drop-mutant",
     "-f-phase27-default-scheduler-bypass-mutant",
 )
+
+
+@functools.cache
+def build_tools() -> tuple[str, str]:
+    """Resolve cabal and the compiler per run from the authored requirements.
+
+    The retired form named a developer-home `cabal` outright, so the gate could only run on
+    one machine and inherited whichever GHC that installation offered — which need not
+    satisfy the authored range.
+    """
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    return resolved["cabal"]["path"], resolved["ghc"]["path"]
 
 
 class GateFailure(RuntimeError):
@@ -37,7 +55,7 @@ def invoke(name: str, arguments: Sequence[str], timeout: int = 1800, expect_fail
 
 
 def cabal(*extra: str) -> tuple[str, ...]:
-    return ("/home/matthewnowak/.ghcup/bin/cabal", "test", "scheduler-readiness-spec", *BASELINE_FLAGS, *extra, "--test-show-details=direct", "-j1")
+    return (build_tools()[0], f"--with-compiler={build_tools()[1]}", "test", "scheduler-readiness-spec", *BASELINE_FLAGS, *extra, "--test-show-details=direct", "-j1")
 
 
 def fingerprint(value: dict[str, Any]) -> str:
@@ -57,7 +75,15 @@ def forbidden_symbols() -> dict[str, str]:
     return {"name": "forbidden-readiness-symbol-lint", "command": "internal source scan", "output": "3 modules clean", "result": "PASS"}
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    # The bundle this run writes into is supplied by the caller. There is deliberately no
+    # default: a default names a location, and whatever a previous run left there would
+    # decide this gate instead of the run in progress.
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    arguments = parser.parse_args(argv)
+    evidence = arguments.evidence
+    evidence.mkdir(parents=True, exist_ok=True)
     try:
         rows = [
             invoke("scheduler-readiness-spec", cabal()),
@@ -75,15 +101,15 @@ def main() -> int:
             "seededMutantsRed": 3, "forbiddenReadinessSymbols": 0, "result": "PASS",
         }
         receipt = {**stable, "receiptFingerprint": fingerprint(stable)}
-        (EVIDENCE / "sprint-27.2-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        (EVIDENCE / "sprint-27.2-phase-results.tsv").write_text("check\tresult\n" + "".join(f"{row['name']}\t{row['result']}\n" for row in rows), encoding="utf-8")
-        (EVIDENCE / "sprint-27.2-mutants.json").write_text(json.dumps({"schema": "amoebius.phase27.sprint27.2-mutants.v1", "baselineRestored": True, "results": [
+        (evidence / "sprint-27.2-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (evidence / "sprint-27.2-phase-results.tsv").write_text("check\tresult\n" + "".join(f"{row['name']}\t{row['result']}\n" for row in rows), encoding="utf-8")
+        (evidence / "sprint-27.2-mutants.json").write_text(json.dumps({"schema": "amoebius.phase27.sprint27.2-mutants.v1", "baselineRestored": True, "results": [
             {"mutant": "collapsed-readiness", "result": "RED", "observedFailureMarker": "config digest mismatch"},
             {"mutant": "stage-drop-generic-SSA-before-cutover", "result": "RED", "observedFailureMarker": "managed authority cannot install"},
             {"mutant": "default-scheduler-managed-node-bypass", "result": "RED", "observedFailureMarker": "default-scheduler managed-node bypass"},
         ]}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         message = f"phase27-sprint27.2-gate: PASS ({len(rows)} checks; {receipt['receiptFingerprint']})"
-        (EVIDENCE / "sprint-27.2-gate.log").write_text(message + "\n", encoding="utf-8")
+        (evidence / "sprint-27.2-gate.log").write_text(message + "\n", encoding="utf-8")
         print(message)
         return 0
     except (GateFailure, OSError, ValueError, KeyError, json.JSONDecodeError, subprocess.TimeoutExpired) as problem:

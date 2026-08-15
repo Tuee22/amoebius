@@ -211,7 +211,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     locus = read_tsv(LOCUS)
     if len(locus) != 35 or len({row["entry"] for row in locus}) != 35:
         raise GateFailure("Phase-20 validation locus must contain thirty-five unique rows")
-    phase0_rows = read_tsv(ROOT / "test/phase0_oracle_manifest.tsv")
+    phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
     if len([row for row in phase0_rows if row["# phase"] == "20"]) != 11:
         raise GateFailure("Phase-0 manifest must pin eleven Phase-20 artifacts")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)

@@ -21,7 +21,7 @@ EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_41"
 LIVE = EVIDENCE / "wireguard-live.json"
 ENUMERATION = ROOT / "test/enumeration/phase_41_surfaces.txt"
 LEDGER = ROOT / "test/golden/phase_41_ledger.json"
-ORACLE_MANIFEST = ROOT / "test/phase0_oracle_manifest.tsv"
+ORACLE_MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
 MODEL_PROVEN = {
@@ -104,7 +104,7 @@ def phase0_domain() -> dict[str, str]:
     for row in rows:
         path = ROOT / row.split("\t")[2]
         require(path.is_file() and path.stat().st_size > 0, f"phase0-custody-missing:{path}")
-    return {"name": "phase0-custody", "command": "read test/phase0_oracle_manifest.tsv", "output": "5 oracles; 4 mutants", "result": "PASS"}
+    return {"name": "phase0-custody", "command": "read test/oracle/preimplementation_artifacts.tsv", "output": "5 oracles; 4 mutants", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:

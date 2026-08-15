@@ -34,11 +34,11 @@ Sprints 27.1–27.5 and the phase-level acceptance gate have passed.
 - [Resource provision — the `CapacitySchedulerSystemDemand` envelope](#resource-provision--the-capacityschedulersystemdemand-envelope)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 27.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms ⏸️](#sprint-271-state-indexed-reservation-ledger--normalization--absent-pod-recovery-arms-)
-- [Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses ⏸️](#sprint-272-scheduler-bootstrap-authority--two-stage-taintrbac-cutover--readiness-witnesses-)
-- [Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery ⏸️](#sprint-273-scheduler-loop--reservedbindinginflightbindingbound-cas--placement--recovery-)
-- [Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate ⏸️](#sprint-274-live-scheduler-binding--bootstrapsteady-cutover-gate-)
-- [Sprint 27.5: Register-2.5 scheduler convergence under simulated faults ⏸️](#sprint-275-register-25-scheduler-convergence-under-simulated-faults-)
+- [Sprint 27.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms ✅](#sprint-271-state-indexed-reservation-ledger--normalization--absent-pod-recovery-arms-)
+- [Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses ✅](#sprint-272-scheduler-bootstrap-authority--two-stage-taintrbac-cutover--readiness-witnesses-)
+- [Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery ✅](#sprint-273-scheduler-loop--reservedbindinginflightbindingbound-cas--placement--recovery-)
+- [Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate ✅](#sprint-274-live-scheduler-binding--bootstrapsteady-cutover-gate-)
+- [Sprint 27.5: Register-2.5 scheduler convergence under simulated faults ✅](#sprint-275-register-25-scheduler-convergence-under-simulated-faults-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -46,9 +46,40 @@ Sprints 27.1–27.5 and the phase-level acceptance gate have passed.
 
 ## Phase Status
 
-⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+✅ Done — sealed 2026-08-14, attestation `sha256:d576e18d7180eef7a8ee6aaf0b2e53c7d38d90d6ba81050539ea3fa7c68f9c79`. Reopened 2026-08-11 because the prior seal did not
+include the universal artifact-hygiene postcondition; `python3 tools/phase27_gate.py --execute` now passes on
+**all ten sides** against the run's own source snapshot, and left no authored path created, changed, or
+removed.
+
+**What the seal added — 2026-08-14: Policy-conformant.** The two-stage cutover ran on the live single-node
+`kind` cluster in the authored order — `BootstrapCapacitySchedulerReady`, `BootstrapAddonCutover`,
+`BootstrapReplacementBoundReady`, `ManagedCapacityReady`, `GeneralGuardedPodAdmitted`,
+`GeneralGuardedPodBoundReady` — and the immediate re-run issued **zero** new Binding requests while staying
+byte-stable. Postflight left nothing behind, and the universal-`linux-cpu` contract is recorded as observed
+rather than asserted. The Register-2.5 half replayed 1,792 deterministic schedules across seven fault classes
+with byte-identical same-seed replay. All **14** committed mutants went red — seven pure ones re-run against
+the live cutover and seven attacking the same invariants through `IOSim` — 11 recorded metrics equal their
+authored values, and 33 surfaces join to 30 enumerated items. `modeled-apiserver-fidelity`,
+`completion-release-ledger`, `rollback-ledger`, and `in-cluster-singleton-ownership` stay **UNVERIFIED**: the
+first is the Register-2.5 assumption this run's own live half bounds, the middle two belong to the
+content-store phase, and the singleton that will own the scheduler is [Phase 33](phase_33_live_dsl_singleton.md)'s.
+
+*The gate was unrunnable in the same four ways Phase 26's was.* It read five receipts, four mutant batteries,
+a simulation record, and the live observation out of `DEVELOPMENT_PLAN/evidence/phase_27` — a directory that
+no longer exists — compared a committed golden ledger against a derived one, read its surface list from a
+missing enumeration file, and named a **developer-home `cabal`** in six places. It is now a six-side
+`PhaseGate` over a run bundle; `test/phase_27_surface_expectations.tsv` authors 33 surfaces for the first time,
+and cabal and the compiler resolve per run. `tools/phase27_scheduler_live.py` pinned the Phase-25 base image
+by a digest from a build that is gone, so every scheduled Pod would have failed `ImagePull`; the reference is
+supplied by the caller. The two external live-evidence readers — the ones §M.5 requires to be independent of
+the scheduler — read the retired evidence path as a string constant, and now take this run's bundle path as
+their argument.
+
+*The oracle side is the one source property the reservation claim rests on.* A reservation is decided by
+refolding the **whole** ledger rather than adding to a running total, which is exactly what the
+`numeric-add-instead-of-whole-ledger-refold` mutant attacks; the gate checks that `refoldSchedulerPlacement`
+still exists and that `Reservation.hs` still calls it, so an accumulate-in-place rewrite fails the gate before
+any live work starts.
 
 **Invalidated historical record:**
 
@@ -334,17 +365,18 @@ planner — not regenerated from the scheduler's own output.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Current revalidation rule.** Every sprint below was revalidated by the 2026-08-14 seal, and the dates,
+> pass claims, and `Remaining Work: None` statements describe that run. Any historical date, repository-resident
+> evidence path, or pre-amendment capability claim retained in the prose describes the retired record only, and
+> is superseded by the current generated-artifact and dynamic-resolution doctrine: nothing below licenses
+> committing generated output, freezing dependency resolution, retaining a resolved version, path, or integrity
+> hash, or consuming repository-resident evidence, ledgers, or enumerations.
 
-## Sprint 27.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms ⏸️
+## Sprint 27.1: State-indexed reservation ledger + normalization + absent-Pod recovery arms ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase27_gate.py --execute`; the five-state
+ledger, its normalization, and the absent-Pod recovery arms passed their pure spec, and
+`sprint-27.1-receipt.json` in that run's bundle records it.
 **Implementation**: `src/Amoebius/Scheduler/Ledger.hs` — the state-indexed reservation
 ledger join and normalization that extends Phase 26's `src/Amoebius/Execution/Normalize.hs` observed
 snapshot with the scheduler dimension; built and validated.
@@ -417,11 +449,13 @@ double-debited, no absent Pod makes a debit disappear, and no unclassified recor
 
 ### Remaining Work
 
-None. Receipt and phase results are under `evidence/phase_27/`.
+None. The receipt and phase results are written into this run's bundle under `gen/runs/`.
 
-## Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses ⏸️
+## Sprint 27.2: Scheduler bootstrap authority + two-stage taint/RBAC cutover + readiness witnesses ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase27_gate.py --execute`; the bootstrap
+authority, two-stage cutover, and both readiness witnesses held with all three mutants red, and
+`sprint-27.2-receipt.json` in that run's bundle records it.
 **Implementation**: `src/Amoebius/Scheduler/Readiness.hs`, the scheduler-authority slice
 of `src/Amoebius/Manifest/Authority.hs` (`CapacitySchedulerSystemDemand` admission and the
 scheduler-system-only token; the cold-start `Lease` authority itself is Phase 26), and
@@ -498,11 +532,13 @@ independently mint `ManagedCapacityReady`.
 
 ### Remaining Work
 
-None. Receipt and mutation results are under `evidence/phase_27/`.
+None. The receipt and mutation results are written into this run's bundle under `gen/runs/`.
 
-## Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery ⏸️
+## Sprint 27.3: Scheduler loop + `Reserved`→`BindingInFlight`→Binding→`Bound` CAS + placement + recovery ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase27_gate.py --execute`; the reservation CAS,
+placement refold, and recovery arms held with all four mutants red, and `sprint-27.3-receipt.json` in that
+run's bundle records it.
 **Implementation**:
 `src/Amoebius/Scheduler/{Loop,Placement,Reservation,Binding,Recovery}.hs` and the authentication path of
 `src/Amoebius/Admission/ExecutionIdentity.hs`, built and validated by
@@ -567,11 +603,13 @@ failure — so a Pod is never bound before its reservation CAS and never double-
 
 ### Remaining Work
 
-None. Receipt and mutation results are under `evidence/phase_27/`.
+None. The receipt and mutation results are written into this run's bundle under `gen/runs/`.
 
-## Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate ⏸️
+## Sprint 27.4: Live scheduler binding + bootstrap→steady cutover gate ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase27_gate.py --execute`; the six cutover
+events were observed in order and the re-run issued zero new Binding requests, and
+`sprint-27.4-receipt.json` in that run's bundle records it.
 **Implementation**: `test/live/SchedulerReservationSpec.hs` and
 `test/live/SchedulerBootstrapCutoverSpec.hs`, driving the Sprint 27.1–27.3 `Scheduler/*` and
 `Admission/ExecutionIdentity` modules against the live Phase-24 `kind` cluster and the converged Phase-26
@@ -641,11 +679,13 @@ namespace down leak-free.
 ### Remaining Work
 
 None. Live evidence, receipt, and repeated mutation results are under
-`evidence/phase_27/`.
+this run's bundle under `gen/runs/`.
 
-## Sprint 27.5: Register-2.5 scheduler convergence under simulated faults ⏸️
+## Sprint 27.5: Register-2.5 scheduler convergence under simulated faults ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase27_gate.py --execute`; 1,792 deterministic
+schedules ran across seven fault classes with all seven mutants red, and `sprint-27.5-receipt.json` in that
+run's bundle records it.
 **Implementation**: `test/sim/SchedulerSim.hs`, driving the real `Scheduler/*` and
 `Admission/ExecutionIdentity` modules through `test/sim/Phase27SchedulerSimCommon.hs` on the Phase-14
 `io-classes` `Env` / modeled apiserver. This is the scheduler slice of the deterministic-simulation battery; Phase 26 owns the
@@ -691,7 +731,7 @@ neither pure-value checks nor the live sample exhausts.
 ### Remaining Work
 
 None. The 1,792-schedule summary, receipt, and mutation results are under
-`evidence/phase_27/`.
+this run's bundle under `gen/runs/`.
 
 ## Documentation Requirements
 

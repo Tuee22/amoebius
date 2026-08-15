@@ -18,7 +18,8 @@ from typing import Any, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_26"
+# Where a red-before-correction diagnostic lands; the caller's output directory once known.
+DIAGNOSTIC_DIR = ROOT / "gen/tmp"
 KUBECONFIG = Path.home() / ".amoebius/phase24/kubeconfig"
 NAMESPACE = "amoebius-phase26-gate"
 RACE_NAMESPACE = "amoebius-phase26-quota-race"
@@ -26,7 +27,12 @@ CRD = "capacityreservations.amoebius.io"
 PV = "amoebius-phase26-reservation-child"
 OWNER = "phase26-corpus"
 GENERATION = "phase26-generation-1"
-IMAGE = "registry.amoebius.invalid:5000/amoebius/base@sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4"
+# The corpus pulls this from the in-cluster registry, so it is the digest Phase 25
+# published on the run that stood that registry up, supplied by the caller. A constant
+# here pinned an image from a build that no longer exists: the corpus would have failed
+# `ImagePull` on every host but the one that built it, and a rebuilt base would have been
+# reconciled against a reference nothing published.
+IMAGE = ""
 
 
 class LiveFailure(RuntimeError):
@@ -327,7 +333,7 @@ def execute() -> dict[str, Any]:
         after = object_snapshot()
         if before != after:
             changed = sorted(set(before) ^ set(after) | {key for key in set(before) & set(after) if before[key] != after[key]})
-            (EVIDENCE / "live-rerun-red-before-correction.json").write_text(
+            (DIAGNOSTIC_DIR / "live-rerun-red-before-correction.json").write_text(
                 json.dumps({"changed": changed, "before": {key: before.get(key) for key in changed}, "after": {key: after.get(key) for key in changed}}, indent=2, sort_keys=True) + "\n",
                 encoding="utf-8",
             )
@@ -359,8 +365,12 @@ def execute() -> dict[str, Any]:
 
         private_pods = json.loads(kubectl("-n", NAMESPACE, "get", "pods", "-l", "app=private-pull", "-o", "json").stdout)["items"]
         private_image_id = str(private_pods[0]["status"]["containerStatuses"][0]["imageID"])
-        if "224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4" not in private_image_id:
-            raise LiveFailure("private-image-id")
+        # The running pod has to carry the digest this run was told to reconcile, not a
+        # digest typed in beside the assertion: the retired constant named a build that no
+        # longer exists, so the one check that ties the corpus to Phase 25's published
+        # artifact could only ever have passed on the host that produced it.
+        if IMAGE.rsplit("@", 1)[-1] not in private_image_id:
+            raise LiveFailure(f"private-image-id:{private_image_id}!={IMAGE}")
         result = {
             "schema": "amoebius.phase26.live-reconcile.v1", "capturedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
             "register": 3, "substrate": "linux-cpu", "challenge": challenge,
@@ -394,7 +404,17 @@ def execute() -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
+    # The digest-pinned in-cluster reference the corpus pulls. Required, and deliberately
+    # without a default: a default names one build, and the corpus's whole point is that a
+    # running pod exercises the registry dependency of the run in progress.
+    parser.add_argument("--image", required=True, help="the Phase-25 published digest reference")
     arguments = parser.parse_args()
+    globals()["IMAGE"] = arguments.image
+    # The Sprint-26.3 module builds the corpus StatefulSet and Job, so it needs the same
+    # reference: a value set only here left those two objects with an empty image.
+    S3.IMAGE = arguments.image
+    if arguments.output is not None:
+        globals()["DIAGNOSTIC_DIR"] = arguments.output.parent
     try:
         result = execute()
         encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"

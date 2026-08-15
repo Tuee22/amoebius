@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import functools
 import hashlib
 import json
 import os
@@ -13,10 +15,26 @@ from pathlib import Path
 from typing import Any, Sequence
 
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
+
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_27"
 LEDGER_SOURCE = ROOT / "src/Amoebius/Scheduler/Ledger.hs"
 FIXTURE = ROOT / "test/scheduler/fixtures/ledger-corpus.json"
+
+
+@functools.cache
+def build_tools() -> tuple[str, str]:
+    """Resolve cabal and the compiler per run from the authored requirements.
+
+    The retired form named a developer-home `cabal` outright, so the gate could only run on
+    one machine and inherited whichever GHC that installation offered — which need not
+    satisfy the authored range.
+    """
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    return resolved["cabal"]["path"], resolved["ghc"]["path"]
 
 
 class GateFailure(RuntimeError):
@@ -60,11 +78,19 @@ def validate_read_only() -> dict[str, str]:
     return {"name": "read-only-ledger-source", "command": "internal import/symbol scan", "output": "no writer capability in Scheduler/Ledger.hs", "result": "PASS"}
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    # The bundle this run writes into is supplied by the caller. There is deliberately no
+    # default: a default names a location, and whatever a previous run left there would
+    # decide this gate instead of the run in progress.
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    arguments = parser.parse_args(argv)
+    evidence = arguments.evidence
+    evidence.mkdir(parents=True, exist_ok=True)
     try:
         rows = [
             validate_fixture(),
-            invoke("scheduler-ledger-spec", ("/home/matthewnowak/.ghcup/bin/cabal", "test", "scheduler-ledger-spec", "--test-show-details=direct", "-j1")),
+            invoke("scheduler-ledger-spec", (build_tools()[0], f"--with-compiler={build_tools()[1]}", "test", "scheduler-ledger-spec", "--test-show-details=direct", "-j1")),
             validate_read_only(),
             invoke("documentation-lint", (sys.executable, "tools/doc_lint.py")),
         ]
@@ -74,11 +100,10 @@ def main() -> int:
             "schedulerActionsPinned": 9, "writerImports": 0, "result": "PASS",
         }
         receipt = {**stable, "receiptFingerprint": fingerprint(stable)}
-        EVIDENCE.mkdir(parents=True, exist_ok=True)
-        (EVIDENCE / "sprint-27.1-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        (EVIDENCE / "sprint-27.1-phase-results.tsv").write_text("check\tresult\n" + "".join(f"{row['name']}\tPASS\n" for row in rows), encoding="utf-8")
+        (evidence / "sprint-27.1-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (evidence / "sprint-27.1-phase-results.tsv").write_text("check\tresult\n" + "".join(f"{row['name']}\tPASS\n" for row in rows), encoding="utf-8")
         message = f"phase27-sprint27.1-gate: PASS ({len(rows)} checks; {receipt['receiptFingerprint']})"
-        (EVIDENCE / "sprint-27.1-gate.log").write_text(message + "\n", encoding="utf-8")
+        (evidence / "sprint-27.1-gate.log").write_text(message + "\n", encoding="utf-8")
         print(message)
         return 0
     except (GateFailure, OSError, ValueError, KeyError, json.JSONDecodeError, subprocess.TimeoutExpired) as problem:

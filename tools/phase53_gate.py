@@ -90,7 +90,7 @@ def reject_mutant(flag: str, marker: str) -> dict[str, str]:
 
 
 def phase0() -> dict[str, str]:
-    rows = [line for line in (ROOT / "test/phase0_oracle_manifest.tsv").read_text().splitlines() if line.startswith("53\t")]
+    rows = [line for line in (ROOT / "test/oracle/preimplementation_artifacts.tsv").read_text().splitlines() if line.startswith("53\t")]
     require(len(rows) == 20 and sum("\toracle\t" in row for row in rows) == 13
             and sum("\tmutant\t" in row for row in rows) == 7, "phase0-cardinality")
     for row in rows:

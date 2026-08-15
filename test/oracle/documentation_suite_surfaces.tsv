@@ -12,7 +12,7 @@
 # conjure one.
 #
 # owner is the module whose registry supplies the ids: doc_lint, ledger_lint,
-# artifact_policy, or phase0_artifact_lint.
+# artifact_policy, or artifact_manifest_lint.
 #
 # surface<TAB>owner<TAB>check ids (comma-separated)
 documentation.header_metadata	doc_lint	a1,a2,a3,a4,a5
@@ -30,7 +30,7 @@ documentation.shape_and_navigation	doc_lint	o1,o2,o3,o4,o5
 documentation.diagram_registers	doc_lint	q1,q3,q4,q5
 documentation.readability_budgets	doc_lint	p1,p2,p3,p4,p5,p6
 documentation.ledger_schema	ledger_lint	json,schema,phase,status,layers,honesty,tracker,path,enumeration,surface,hash
-documentation.preimplementation_artifacts	phase0_artifact_lint	manifest
+documentation.preimplementation_artifacts	artifact_manifest_lint	manifest
 repository.generator_registry	artifact_policy	r1
 repository.provenance_classification	artifact_policy	r2
 repository.ignore_coverage	artifact_policy	r3
@@ -43,3 +43,6 @@ repository.external_attestation	artifact_policy	r9
 repository.terminology	artifact_policy	r10
 repository.no_leak	artifact_policy	r11
 repository.negative_corpora	artifact_policy	r12
+repository.target_tree	artifact_policy	r13
+repository.ignore_partition	artifact_policy	r14
+repository.de_phased_naming	artifact_policy	r15

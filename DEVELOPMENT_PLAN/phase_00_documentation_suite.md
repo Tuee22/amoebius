@@ -38,6 +38,7 @@ and remaining implementation are stated below.
 - [Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts ✅](#sprint-06-readability-discipline--document-shape-the-two-diagram-registers-and-the-routing-artifacts-)
 - [Sprint 0.7: Artifact provenance, ignore coverage, and external evidence ✅](#sprint-07-artifact-provenance-ignore-coverage-and-external-evidence-)
 - [Sprint 0.8: The authored negative corpora as one declared set ✅](#sprint-08-the-authored-negative-corpora-as-one-declared-set-)
+- [Sprint 0.9: The target tree as a partition the gate decides ✅](#sprint-09-the-target-tree-as-a-partition-the-gate-decides-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -45,9 +46,38 @@ and remaining implementation are stated below.
 
 ## Phase Status
 
-🔄 Active — reopened 2026-08-14 by the final-layout amendment. The prior seal stands as the record of the run
-it describes; what it does not cover is the obligation this phase has just acquired, so the gate is widened
-and rerun rather than treated as already satisfied.
+✅ Done — resealed 2026-08-14 after the final-layout amendment. All nine sides of
+`python3 tools/doc_lint_verify.py` pass against the widened gate: fifteen artifact-policy rules clean, each
+proven red by its own seeded negative. The run published attestation
+`sha256:a45fc9bb9ff0fab2f0c84b8a4789df4a8fb5dacd4b230b08606701e90fab379f`, bound to source snapshot
+`sha256:f960e4eb9e326527…` over 1,961 files.
+
+**What the reseal added, 2026-08-14.** Three checks and one repair, delivered by
+[Sprint 0.9](#sprint-09-the-target-tree-as-a-partition-the-gate-decides-). The target tree of
+[`repository_layout_doctrine.md` §2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure)
+is now parsed from doctrine and decided against the source snapshot, the two ignore contracts are checked to
+name only paths that tree contains, and no path, build flag, build-component name, or ignore rule outside the
+plan suite may carry a phase ordinal. The write guard fails closed on a declared authored root that is no
+longer a directory, which is what made the other three trustworthy enough to run before any rename.
+
+**What Phase 0 cleared rather than deferred.** `tools/phase0_artifact_lint.py`,
+`test/phase0_oracle_manifest.tsv`, `test/phase_00_surface_expectations.tsv`, and the ledger corpus's seven
+ordinal-named ledgers carry capability names now; the two oracle tables moved to `test/oracle/`, the one
+`test/` second-level role that admits them. The root-level agent policy existed as two byte-identical tracked
+copies and is now one file and a link. Thirty-two ignore rules named paths nothing in this repository
+generates — editor settings, a sibling checkout, six build roots that doctrine sends to `gen/`, four language
+caches no command here writes, and five credential paths with no home in the finished tree — and each was
+deleted rather than kept, on [§6](../documents/engineering/repository_layout_doctrine.md#6-gitignore-contract)'s
+terms that a rule hiding a path nobody intends is how a second home survives review. A stray credential is
+now reported by the context and snapshot rules instead of being silently hidden. The build-root pattern is
+the tree's own `dist-*/`, so a fresh clone is clean without a personal ignore configuration.
+
+**What it reports, and to whom.** 1,327 findings across 78 locations, every one attributed to the phase whose
+closure retires it and justified by a row in
+[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#layout-and-naming-divergence-snapshot--2026-08-14).
+No deferral names Phase 0 — [§S clause 5](development_plan_standards.md#s-universal-artifact-hygiene-gate)
+forbids deferring out of the owning phase, and the four surfaces the mechanical check found that the authored
+snapshot had missed took rows of their own rather than being folded into a neighbour.
 
 **Why it reopened.** [§U](development_plan_standards.md#u-the-final-repository-layout) makes the target
 repository tree normative and gives it to this phase, alongside the doctrine suite, the two ignore contracts,
@@ -191,6 +221,10 @@ numbering, gate ownership, illegal-state coverage, and documentation negative ca
   recorded separately from unreachable local objects;
 - every authored negative corpus is declared in doctrine with the rules it seeds, and a declared row that
   names an unknown rule, a missing path, or a rule it no longer seeds is reported as a stale exemption;
+- every source-snapshot path lies in the target tree, judged at the prefix that must move;
+- every ignore rule names a path that tree contains, in both pattern syntaxes;
+- no path, build flag, build-component name, or ignore rule outside the plan suite carries a phase ordinal;
+- every declared authored root is a directory, so a rename cannot shrink the write guard in silence;
 - every seeded negative for these rules turns the gate red at its expected locus.
 
 The independent oracle is the authored positive seed, mutation definition, and expected diagnostic for every
@@ -806,6 +840,58 @@ place where a real defect can hide.
 
 None. The declaration is minimal by construction: a row survives only while it suppresses a real finding, so
 the exemption set can shrink but not silently widen.
+
+## Sprint 0.9: The target tree as a partition the gate decides ✅
+
+**Status**: Done — the three partition checks are implemented, each proven red by its own seeded negative, and
+the write guard fails closed on a root that is no longer a directory
+**Implementation**: `tools/artifact_policy.py`, `tools/artifact_policy_selftest.py`,
+`tools/artifact_manifest_lint.py`, `documents/engineering/repository_layout_doctrine.md`,
+`tools/migration_allowlist.tsv`, `.gitignore`, `.dockerignore`
+**Blocked by**: Sprint 0.8
+**Independent Validation**: a path outside the section-2 tree, an ignore rule for a path that tree does not
+contain, and a phase ordinal in a path, build flag, suite name, or ignore rule are each reported at their own
+rule; a declared authored root that is not a directory is reported rather than skipped.
+**Docs to update**: `documents/engineering/repository_layout_doctrine.md`,
+`DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `DEVELOPMENT_PLAN/README.md`
+
+### Objective
+
+Adopt [`repository_layout_doctrine.md` §2 — the complete repository structure](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure)
+as a decidable membership test rather than a description, so
+[§U](development_plan_standards.md#u-the-final-repository-layout)'s rule that no phase creates a path outside
+the target tree is enforced by the gate instead of asserted by a document.
+
+### Deliverables
+
+- A parser that reads the target tree, its three ignorable roots, and its two fixed second levels from
+  doctrine, so the audit and a reviewer read the same words.
+- A thirteenth rule reporting every source-snapshot path the tree does not admit, at the prefix that must
+  move rather than once per file beneath it.
+- A fourteenth rule reporting every ignore rule that names a path beneath an authored root or a root the tree
+  does not have, in both the `.gitignore` and `.dockerignore` pattern syntaxes.
+- A fifteenth rule reporting a phase ordinal in a path, a build flag, a build-component name, or an ignore
+  rule, with the sanctioned plan-document and `gen/**` exceptions.
+- The write guard failing closed on a declared authored root that is not a directory, with a negative that
+  renames a root on a synthetic tree.
+- The two ignore contracts derived from their doctrine blocks in both directions, replacing the restated copy.
+- Phase 0's own findings cleared: three ordinal-bearing paths renamed to capability names, the duplicated
+  root-level agent policy reduced to a link, and every ignore rule for a path nothing generates deleted.
+
+### Validation
+
+1. Run the phase command and confirm all nine sides pass with fifteen rules clean.
+2. Confirm each of the three new rules turns red on its own seeded negative and on no other rule.
+3. Confirm the renamed-root negative reddens the write guard, which previously skipped it in silence.
+4. Confirm every remaining partition finding is deferred to an owning phase with a register row, and that no
+   deferral names Phase 0.
+
+### Remaining Work
+
+None. What the checks report is 1,327 deferred findings across the tree, each attributed to the phase whose
+closure retires it — the migration itself is those phases' work, in numeric order, and
+[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#layout-and-naming-divergence-snapshot--2026-08-14)
+carries each owner and closure condition.
 
 ## Documentation Requirements
 

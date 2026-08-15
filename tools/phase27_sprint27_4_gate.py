@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import functools
 import hashlib
 import json
 import os
@@ -13,15 +15,30 @@ from pathlib import Path
 from typing import Any, Sequence
 
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
+
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_27"
-LIVE = EVIDENCE / "live-scheduler.json"
 BASELINE_FLAGS = (
     "-f-phase27-collapsed-readiness-mutant", "-f-phase27-stage-drop-mutant",
     "-f-phase27-default-scheduler-bypass-mutant", "-f-phase27-bind-before-reservation-cas-mutant",
     "-f-phase27-numeric-add-mutant", "-f-phase27-same-uid-double-debit-mutant",
     "-f-phase27-bound-deleted-restart-mutant",
 )
+
+
+@functools.cache
+def build_tools() -> tuple[str, str]:
+    """Resolve cabal and the compiler per run from the authored requirements.
+
+    The retired form named a developer-home `cabal` outright, so the gate could only run on
+    one machine and inherited whichever GHC that installation offered — which need not
+    satisfy the authored range.
+    """
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    return resolved["cabal"]["path"], resolved["ghc"]["path"]
 
 
 class GateFailure(RuntimeError):
@@ -46,7 +63,7 @@ def invoke(name: str, arguments: Sequence[str], *, timeout: int = 1800, expect_f
 
 def cabal(suite: str, *extra: str) -> tuple[str, ...]:
     return (
-        "/home/matthewnowak/.ghcup/bin/cabal", "test", suite, *BASELINE_FLAGS, *extra,
+        build_tools()[0], f"--with-compiler={build_tools()[1]}", "test", suite, *BASELINE_FLAGS, *extra,
         "--test-show-details=direct", "-j1",
     )
 
@@ -55,8 +72,8 @@ def fingerprint(value: dict[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
-def validate_live() -> None:
-    value = json.loads(LIVE.read_text(encoding="utf-8"))
+def validate_live(live: Path) -> None:
+    value = json.loads(live.read_text(encoding="utf-8"))
     if value.get("register") != 3 or value.get("substrate") != "linux-cpu":
         raise GateFailure("live-register-or-substrate")
     if [row.get("event") for row in value.get("sequence", [])] != [
@@ -75,12 +92,23 @@ def validate_live() -> None:
         raise GateFailure("universal-linux-cpu-contract")
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    # The bundle this run writes into is supplied by the caller. There is deliberately no
+    # default: a default names a location, and whatever a previous run left there would
+    # decide this gate instead of the run in progress.
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    # The scheduled Pods pull the Phase-25 published digest from the in-cluster registry.
+    parser.add_argument("--image", required=True, help="the Phase-25 published digest reference")
+    arguments = parser.parse_args(argv)
+    evidence = arguments.evidence
+    evidence.mkdir(parents=True, exist_ok=True)
+    live = evidence / "live-scheduler.json"
     try:
         python = sys.executable
         rows = [
-            invoke("live-scheduler-cutover", (python, "tools/phase27_scheduler_live.py", "--output", str(LIVE))),
-            invoke("external-live-evidence-readers", cabal("scheduler-reservation", "scheduler-bootstrap-cutover")),
+            invoke("live-scheduler-cutover", (python, "tools/phase27_scheduler_live.py", "--output", str(live), "--image", arguments.image), timeout=7200),
+            invoke("external-live-evidence-readers", cabal("scheduler-reservation", "scheduler-bootstrap-cutover", f"--test-options={live}")),
             invoke("collapsed-readiness-mutant", cabal("scheduler-readiness-spec", "-fphase27-collapsed-readiness-mutant"), expect_failure="config digest mismatch"),
             invoke("stage-drop-mutant", cabal("scheduler-readiness-spec", "-fphase27-stage-drop-mutant"), expect_failure="managed authority cannot install"),
             invoke("default-scheduler-bypass-mutant", cabal("scheduler-readiness-spec", "-fphase27-default-scheduler-bypass-mutant"), expect_failure="default-scheduler managed-node bypass"),
@@ -88,10 +116,10 @@ def main() -> int:
             invoke("numeric-add-mutant", cabal("scheduler-reservation-spec", "-fphase27-numeric-add-mutant"), expect_failure="whole-ledger refold did not reject overspend"),
             invoke("same-UID-double-debit-mutant", cabal("scheduler-reservation-spec", "-fphase27-same-uid-double-debit-mutant"), expect_failure="same UID retry does not debit or bump CAS"),
             invoke("bound-deleted-on-restart-mutant", cabal("scheduler-reservation-spec", "-fphase27-bound-deleted-restart-mutant"), expect_failure="Bound survives restart"),
-            invoke("baseline-restored", cabal("scheduler-readiness-spec", "scheduler-reservation-spec", "scheduler-reservation", "scheduler-bootstrap-cutover")),
+            invoke("baseline-restored", cabal("scheduler-readiness-spec", "scheduler-reservation-spec", "scheduler-reservation", "scheduler-bootstrap-cutover", f"--test-options={live}")),
             invoke("documentation-lint", (python, "tools/doc_lint.py")),
         ]
-        validate_live()
+        validate_live(live)
         stable = {
             "schema": "amoebius.phase27.sprint27.4-receipt.v1", "register": 3, "substrate": "linux-cpu",
             "readinessStages": ["BootstrapCapacitySchedulerReady", "ManagedCapacityReady"],
@@ -101,8 +129,8 @@ def main() -> int:
             "seededMutantsRed": 7, "postflightLeakFree": True, "result": "PASS",
         }
         receipt = {**stable, "receiptFingerprint": fingerprint(stable)}
-        (EVIDENCE / "sprint-27.4-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        (EVIDENCE / "sprint-27.4-phase-results.tsv").write_text(
+        (evidence / "sprint-27.4-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (evidence / "sprint-27.4-phase-results.tsv").write_text(
             "check\tresult\n" + "".join(f"{row['name']}\t{row['result']}\n" for row in rows), encoding="utf-8",
         )
         mutants = [
@@ -114,12 +142,12 @@ def main() -> int:
             ("same-UID-double-debit", "same UID retry does not debit or bump CAS"),
             ("bound-deleted-on-restart", "Bound survives restart"),
         ]
-        (EVIDENCE / "sprint-27.4-mutants.json").write_text(json.dumps({
+        (evidence / "sprint-27.4-mutants.json").write_text(json.dumps({
             "schema": "amoebius.phase27.sprint27.4-mutants.v1", "baselineRestored": True,
             "results": [{"mutant": name, "result": "RED", "observedFailureMarker": marker} for name, marker in mutants],
         }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         message = f"phase27-sprint27.4-gate: PASS ({len(rows)} checks; {receipt['receiptFingerprint']})"
-        (EVIDENCE / "sprint-27.4-gate.log").write_text(message + "\n", encoding="utf-8")
+        (evidence / "sprint-27.4-gate.log").write_text(message + "\n", encoding="utf-8")
         print(message)
         return 0
     except (GateFailure, OSError, ValueError, KeyError, json.JSONDecodeError, subprocess.TimeoutExpired) as problem:

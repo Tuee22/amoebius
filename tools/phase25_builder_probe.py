@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -15,9 +16,9 @@ from typing import Any, Sequence
 EXPECTED_CPU_NANO = 7_000_000_000
 EXPECTED_CPU_MAX = "700000 100000"
 EXPECTED_MEMORY = 7_516_192_768
-EXPECTED_SCRATCH_CAPACITY = 103_079_215_104
-EXPECTED_CACHE_CAPACITY = 68_719_476_736
 DOCKER = "/usr/bin/docker"
+ROOT = Path(__file__).resolve().parents[1]
+CATALOG = ROOT / "dhall/amoebius/BakeCatalog.dhall"
 
 
 class BuilderFailure(RuntimeError):
@@ -32,6 +33,17 @@ def run(arguments: Sequence[str]) -> str:
     if result.returncode:
         raise BuilderFailure(f"command-failed:{arguments[0]}:{result.stdout}")
     return result.stdout
+
+
+def provisions() -> tuple[int, int]:
+    """The scratch and cache capacities this run's catalog declares.
+
+    Read rather than restated. The constants that stood here were sized for a base
+    image the 2026-08-13 amendment removed, and were larger than the free space of
+    any host in the linux-cpu lane.
+    """
+    decoded = json.loads(run((shutil.which("dhall-to-json") or "dhall-to-json", "--file", str(CATALOG))))
+    return int(decoded["scratchCapacityBytes"]), int(decoded["cacheCapacityBytes"])
 
 
 def docker_json(*arguments: str) -> Any:
@@ -101,13 +113,14 @@ def inspect_builder(
         "builder-state-root-drift",
     )
 
+    scratch_capacity, cache_capacity = provisions()
     cache_fs = filesystem(cache_root)
     scratch_fs = filesystem(scratch_root)
     require(cache_fs["device"] != scratch_fs["device"], "builder-backing-alias")
-    require(cache_fs["sizeBytes"] >= EXPECTED_CACHE_CAPACITY, "builder-cache-capacity")
-    require(scratch_fs["sizeBytes"] >= EXPECTED_SCRATCH_CAPACITY, "builder-scratch-capacity")
-    require(cache_fs["usedBytes"] <= EXPECTED_CACHE_CAPACITY, "builder-cache-write-overrun")
-    require(scratch_fs["usedBytes"] <= EXPECTED_SCRATCH_CAPACITY, "builder-scratch-write-overrun")
+    require(cache_fs["sizeBytes"] >= cache_capacity, "builder-cache-capacity")
+    require(scratch_fs["sizeBytes"] >= scratch_capacity, "builder-scratch-capacity")
+    require(cache_fs["usedBytes"] <= cache_capacity, "builder-cache-write-overrun")
+    require(scratch_fs["usedBytes"] <= scratch_capacity, "builder-scratch-write-overrun")
 
     cpu_max = cgroup_value(container, "/sys/fs/cgroup/cpu.max")
     memory_max = cgroup_value(container, "/sys/fs/cgroup/memory.max")

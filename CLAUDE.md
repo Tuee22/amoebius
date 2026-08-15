@@ -1,5 +1,5 @@
-## Git Restrictions
+The authored agent policy for this repository is [AGENTS.md](AGENTS.md). This file is a
+link to it, never a second copy: two tracked copies of one policy diverge the first time
+one of them is edited, and nothing would report it.
 
-LLMs must not run `git add`, `git commit`, or `git push`.
-
-Staging, committing, and pushing changes are reserved solely for the human user.
+@AGENTS.md

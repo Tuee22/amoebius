@@ -6,7 +6,7 @@ half of the Phase-0 contract: that the repository separates authored inputs from
 generated output the way
 `documents/engineering/repository_layout_doctrine.md` section 8 requires.
 
-Twelve rules, each independently seeded:
+Fifteen rules, each independently seeded:
 
     r1  generator-registry     every doctrine output class has a declared generator
     r2  provenance             no tracked file is a reproducible copy
@@ -20,6 +20,9 @@ Twelve rules, each independently seeded:
     r10 terminology            no retired predecessor name survives in the tree
     r11 no-leak                the gate changes no tracked file and creates no unignored path
     r12 negative-corpora       every audit exemption is authored, in use, and rule-scoped
+    r13 target-tree            every tracked path lies in the doctrine section 2 final layout
+    r14 ignore-partition       every ignore rule names a path that layout contains
+    r15 de-phased-naming       no authored name outside the plan suite carries a phase ordinal
 
 Python 3 standard library only, and no dependency on the amoebius binary.
 
@@ -51,7 +54,7 @@ sys.path.insert(0, str(HERE))
 
 import attestation  # noqa: E402
 import attestation_negative_corpus  # noqa: E402
-import phase0_artifact_lint as legacy  # noqa: E402
+import artifact_manifest_lint as legacy  # noqa: E402
 
 RULES = {
     "r1": "generator registry covers every doctrine output class",
@@ -66,6 +69,9 @@ RULES = {
     "r10": "terminology: no retired predecessor name survives in the tree",
     "r11": "no-leak: the gate changes no tracked file and creates no unignored path",
     "r12": "negative corpora: every audit exemption is authored, in use, and rule-scoped",
+    "r13": "target tree: every tracked path lies in the final layout",
+    "r14": "ignore partition: every ignore rule names a path the target tree contains",
+    "r15": "de-phased naming: no authored name outside the plan suite carries a phase ordinal",
 }
 
 REGISTRY = HERE / "generator_registry.tsv"
@@ -75,6 +81,13 @@ LEGACY_REGISTER = ROOT / "DEVELOPMENT_PLAN" / "legacy_tracking_for_deletion.md"
 LAYOUT_DOCTRINE = ROOT / "documents" / "engineering" / "repository_layout_doctrine.md"
 
 # Roots whose contents are authored inputs. A gate may not write beneath one.
+#
+# The list is authored rather than derived, because it must cover the present-day
+# migration roots of doctrine section 2.2 as well as the target roots of section 2 — a
+# root on its way out is still authored while it exists, and the write guard would
+# otherwise stop covering a tree exactly while it is being moved. `audit_authored_roots`
+# keeps the two honest: a name here that is not a directory is a finding, so a rename
+# cannot silently shrink the guard.
 AUTHORED_ROOTS = (
     "DEVELOPMENT_PLAN",
     "documents",
@@ -336,9 +349,9 @@ def snapshot_paths(root: Path = ROOT) -> list[str]:
     `development_plan_standards.md` section S withdrew commit timing as a gate input.
 
     Every rule that asks what a build or gate *reads and writes* keys on this set, so a
-    defect cannot hide in a file merely because nobody has committed it yet. Only `r2`
-    keys on `tracked_paths`, because its subject is literally the tracked tree
-    (repository-layout doctrine section 8 clauses 5 and 10).
+    defect cannot hide in a file merely because nobody has committed it yet — including
+    the provenance rules, whose subject reads as "tracked" in doctrine section 8 clauses
+    5 and 10 but whose defect is one `git add` away either way.
     """
     out = git("ls-files", "-z", "--cached", "--others", "--exclude-standard", cwd=root)
     return sorted(p for p in out.split("\0") if p and (root / p).is_file())
@@ -501,6 +514,273 @@ def audit_corpus_integrity(report: Report, corpora: list[Corpus]) -> None:
             report.findings.append(
                 Finding("r12", corpus.path, f"corpus no longer seeds {rule}; narrow the row")
             )
+
+
+# --------------------------------------------------------------------------
+# The target tree — parsed from doctrine, never restated here
+# --------------------------------------------------------------------------
+
+TREE_HEADING = "## 2. Complete repository structure"
+TREE_STOP = "### 2.1"
+FENCE = re.compile(r"```text\n(.*?)```", re.S)
+BOX_PREFIX = re.compile(r"^[\s│├└─]+")
+IGNORED_ROLE = "ignored by both contracts"
+# The one declared root that is neither authored input nor this repository's output. An
+# ignore rule may name it for the same reason the tree does: it is never a build input.
+EXCLUDED_ROLE = "never a build/context input"
+
+
+@dataclass(frozen=True)
+class TargetTree:
+    """The section-2 final layout, as a decidable membership test.
+
+    Parsed from `repository_layout_doctrine.md` rather than restated, for the reason the
+    output-class inventory and the corpus declaration are: the tree is normative
+    (`development_plan_standards.md` section U), so the audit must read the same words a
+    reviewer does. A tree this module transcribed could drift from the one under review
+    and the drift would be invisible — which is the exact defect section U was written
+    against, one level down.
+    """
+
+    directories: dict[str, str]
+    files: dict[str, str]
+    ignorable: frozenset[str]
+    subtrees: dict[str, frozenset[str]]
+
+    def root_of(self, name: str) -> str | None:
+        for declared in self.directories:
+            if name == declared or fnmatch.fnmatch(name, declared):
+                return declared
+        return None
+
+    def is_ignorable_root(self, name: str) -> bool:
+        """A declared root an ignore rule may name: this repository's output, or `.git`."""
+        declared = self.root_of(name)
+        return declared is not None and declared in self.ignorable
+
+
+def _tree_entries(block: str) -> list[tuple[str, str]]:
+    """(entry, role) for each drawn line, with the box-drawing prefix stripped."""
+    entries: list[tuple[str, str]] = []
+    for line in block.splitlines():
+        stripped = BOX_PREFIX.sub("", line).rstrip()
+        if not stripped or stripped.endswith("/") and " " not in stripped:
+            continue  # the tree's own header line, e.g. `amoebius/` or `test/`
+        entry, _, role = stripped.partition(" ")
+        entries.append((entry, role.strip()))
+    return entries
+
+
+def parse_target_tree(text: str) -> TargetTree:
+    start = text.find(TREE_HEADING)
+    if start < 0:
+        return TargetTree({}, {}, frozenset(), {})
+    end = text.find(TREE_STOP, start)
+    section = text[start : end if end > 0 else len(text)]
+    blocks = FENCE.findall(section)
+    if not blocks:
+        return TargetTree({}, {}, frozenset(), {})
+
+    directories: dict[str, str] = {}
+    files: dict[str, str] = {}
+    generated: set[str] = set()
+    for entry, role in _tree_entries(blocks[0]):
+        head = entry.split("/")[0]
+        if "/" in entry:
+            directories[head] = role
+            if IGNORED_ROLE in role or EXCLUDED_ROLE in role:
+                generated.add(head)
+        else:
+            files[entry] = role
+
+    # The second fence fixes the second level of the roots whose second level is where
+    # the taxonomy drifted. Each sub-tree is introduced by its own `<root>/` header.
+    subtrees: dict[str, set[str]] = {}
+    current: str | None = None
+    for line in (blocks[1] if len(blocks) > 1 else "").splitlines():
+        stripped = BOX_PREFIX.sub("", line).rstrip()
+        if not stripped:
+            continue
+        if " " not in stripped and stripped.endswith("/"):
+            current = stripped[:-1]
+            subtrees.setdefault(current, set())
+            continue
+        if current is None:
+            continue
+        entry = stripped.partition(" ")[0]
+        subtrees[current].add(entry.split("/")[0])
+
+    return TargetTree(
+        directories,
+        files,
+        frozenset(generated),
+        {root: frozenset(names) for root, names in subtrees.items()},
+    )
+
+
+def load_target_tree() -> TargetTree:
+    return parse_target_tree(read_text(LAYOUT_DOCTRINE))
+
+
+# --------------------------------------------------------------------------
+# r13 — every tracked path lies in the target tree
+# --------------------------------------------------------------------------
+
+
+def offending_prefix(relative: str, tree: TargetTree) -> str | None:
+    """The shortest prefix of `relative` the target tree does not admit, or None.
+
+    Findings are reported at the prefix rather than at each file beneath it, because the
+    prefix *is* the unit of remedy: doctrine section 2.2 gives a destination per root and
+    per second-level role, and a phase moves a tree, not a thousand paths. A new file
+    under an already-reported prefix therefore adds no noise, and a new prefix is a new
+    finding nobody has justified.
+    """
+    parts = relative.split("/")
+    head = parts[0]
+    if len(parts) == 1:
+        return None if head in tree.files else relative
+    if tree.root_of(head) is None:
+        return head + "/"
+    fixed = tree.subtrees.get(head)
+    if fixed is not None:
+        if len(parts) == 2:
+            return relative  # a file where the fixed second level is a directory
+        if parts[1] not in fixed:
+            return f"{head}/{parts[1]}/"
+    return None
+
+
+def audit_target_tree(report: Report, paths: list[str], tree: TargetTree) -> None:
+    """Section S clause 11 over the source snapshot rather than the index.
+
+    The clause says "a tracked path outside that tree", and the snapshot is the honest
+    reading of it here: clause 1 withdrew commit timing as a gate input, so a directory
+    this run moved into place must be judged where it now is, not where the index still
+    remembers it. The snapshot is the wider set — it also catches a path nobody has
+    committed yet — which is the direction section U clause 2's partition points.
+    """
+    if not tree.directories:
+        report.findings.append(
+            Finding("r13", LAYOUT_DOCTRINE.name, "cannot parse the section 2 target tree")
+        )
+        return
+    counts: dict[str, int] = {}
+    for relative in paths:
+        prefix = offending_prefix(relative, tree)
+        if prefix is not None:
+            counts[prefix] = counts.get(prefix, 0) + 1
+    for prefix in sorted(counts):
+        report.findings.append(
+            Finding("r13", prefix, "path is outside the target tree; section 2.2 owns its destination")
+        )
+    if counts:
+        report.notes.append(
+            f"r13: {sum(counts.values())} source-snapshot path(s) outside the target tree "
+            f"in {len(counts)} location(s)"
+        )
+
+
+# --------------------------------------------------------------------------
+# r14 — every ignore rule names a path the target tree contains
+# --------------------------------------------------------------------------
+
+IGNORE_FILES = (".gitignore", ".dockerignore")
+
+
+def ignore_rules(root: Path = ROOT) -> list[tuple[str, str]]:
+    rules: list[tuple[str, str]] = []
+    for name in IGNORE_FILES:
+        for line in read_text(root / name).splitlines():
+            pattern = line.strip()
+            if pattern and not pattern.startswith("#"):
+                rules.append((name, pattern))
+    return rules
+
+
+def rule_names_a_root(source: str, pattern: str) -> str | None:
+    """The root component a rule anchors to, or None when it names a class anywhere.
+
+    The two syntaxes differ and the difference is the whole question. A `.gitignore`
+    pattern is anchored only when it carries a slash before its end; otherwise it matches
+    at any depth, so it names a file class rather than a location. Every `.dockerignore`
+    pattern is relative to the context root unless it opens with `**/`. An unanchored
+    class pattern is admitted without further question: paths matching it exist inside the
+    generated roots the tree does declare.
+    """
+    body = pattern.lstrip("!")
+    if source == ".dockerignore":
+        if body.startswith("**/"):
+            return None
+    else:
+        trimmed = body[:-1] if body.endswith("/") else body
+        if "/" not in trimmed.strip("/") and not trimmed.startswith("/"):
+            return None
+    return body.strip("/").split("/")[0]
+
+
+def audit_ignore_partition(report: Report, rules: list[tuple[str, str]], tree: TargetTree) -> None:
+    """Doctrine section 6: a pattern is a claim that the path it names is generated.
+
+    The target tree declares exactly three generated roots, so a rule anchored anywhere
+    else claims a second home for generated output — beneath an authored root, or beneath
+    a root the finished repository does not have. Either way the rule retires with the
+    path it covers, owned by the phase that relocates it.
+    """
+    for source, pattern in rules:
+        root = rule_names_a_root(source, pattern)
+        if root is None or tree.is_ignorable_root(root):
+            continue
+        if root in tree.files:
+            continue
+        where = "beneath an authored root" if tree.root_of(root) else "the tree does not contain"
+        report.findings.append(
+            Finding("r14", source, f"ignore rule {pattern!r} names a path {where}")
+        )
+
+
+# --------------------------------------------------------------------------
+# r15 — no authored name outside the plan suite carries a phase ordinal
+# --------------------------------------------------------------------------
+
+PHASE_ORDINAL = re.compile(r"[Pp]hase[_-]?(\d{1,2})(?!\d)")
+PLAN_ROOT = "DEVELOPMENT_PLAN/"
+CABAL_UNIT = re.compile(r"^(flag|library|executable|test-suite|benchmark)\s+(\S+)", re.M)
+
+
+def scan_phase_ordinal(kind: str, locus: str, name: str) -> list[Finding]:
+    """One authored name checked against section U clause 3. Pure, so the negatives drive it."""
+    match = PHASE_ORDINAL.search(name)
+    if not match:
+        return []
+    return [
+        Finding(
+            "r15",
+            locus,
+            f"{kind} names phase ordinal {int(match.group(1))}; "
+            "rename to the capability derived from that phase's slug",
+        )
+    ]
+
+
+def audit_phase_ordinals(
+    report: Report, paths: list[str], cabal_text: str = "", rules: list[tuple[str, str]] | None = None
+) -> None:
+    """Paths, build units, and ignore rules — the three places a name becomes a path.
+
+    Section U clause 3 puts build flags and component names in scope explicitly, because
+    cabal turns each into a build path; counting paths alone would report 837 names and
+    miss 112 that behave identically.
+    """
+    for relative in paths:
+        if relative.startswith(PLAN_ROOT):
+            continue
+        report.findings.extend(scan_phase_ordinal("path", relative, relative))
+    for kind, name in CABAL_UNIT.findall(cabal_text):
+        label = "build flag" if kind == "flag" else f"{kind} name"
+        report.findings.extend(scan_phase_ordinal(label, "amoebius.cabal", name))
+    for source, pattern in rules or []:
+        report.findings.extend(scan_phase_ordinal("ignore rule", source, pattern))
 
 
 # --------------------------------------------------------------------------
@@ -669,8 +949,17 @@ def classify_tracked(relative: str, text: str | None, twin: str = "") -> list[Fi
 
 
 def audit_provenance(report: Report, generated_digests: dict[str, str] | None = None) -> None:
+    """Classify every path the snapshot would carry into the tracked tree.
+
+    This once keyed on the index alone, on the reading that clause 5's subject is
+    literally "tracked". That reading made staging a gate input by the back door: a
+    rename the operator had not staged yet removed the new path from the audit and put
+    the old one — now absent from disk — in its place, so a corpus could appear to stop
+    seeding the rule it seeds. An unignored file is one `git add` from being tracked and
+    is already an input under clause 9, so the snapshot is the honest domain.
+    """
     generated_digests = generated_digests or {}
-    for relative in tracked_paths():
+    for relative in snapshot_paths():
         path = ROOT / relative
         if not path.is_file():
             continue
@@ -852,6 +1141,25 @@ def compare_snapshots(before: dict[str, str], after: dict[str, str]) -> list[tup
 def audit_write_guard(report: Report, before: dict[str, str], after: dict[str, str]) -> None:
     for relative, message in compare_snapshots(before, after):
         report.findings.append(Finding("r5", relative, message))
+
+
+def audit_authored_roots(report: Report, root: Path = ROOT, names=AUTHORED_ROOTS) -> None:
+    """A declared authored root that is not a directory fails closed.
+
+    `authored_snapshot` can only digest a tree that exists, so a root renamed, mistyped,
+    or moved simply vanishes from the guard — silently, and precisely when the tree is
+    changing and the guard matters most. Reporting it here is what keeps the guard's
+    coverage a decidable fact rather than a property of the list happening to be right.
+    """
+    for name in names:
+        if not (root / name).is_dir():
+            report.findings.append(
+                Finding(
+                    "r5",
+                    name,
+                    "declared authored root is not a directory; the write guard cannot cover it",
+                )
+            )
 
 
 # --------------------------------------------------------------------------
@@ -1135,6 +1443,13 @@ def audit(gen_root: Path | None = None) -> Report:
     audit_revision_history(report)
     audit_external_attestation(report)
     audit_terminology(report)
+    audit_authored_roots(report)
+
+    tree = load_target_tree()
+    rules = ignore_rules()
+    audit_target_tree(report, snapshot_paths(), tree)
+    audit_ignore_partition(report, rules, tree)
+    audit_phase_ordinals(report, snapshot_paths(), read_text(ROOT / "amoebius.cabal"), rules)
 
     # A seeded fixture is not a finding at all, so the corpora narrow the report before
     # the migration allowlist defers what is left to its owning phase.

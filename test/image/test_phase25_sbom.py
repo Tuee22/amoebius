@@ -17,12 +17,16 @@ SBOM = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(SBOM)
 
 
+# The amended oracle shape: `acquisition` names what the rung acquires from and
+# `integrity` names where the integrity value is resolved during the build. The
+# retired `sourceImage`/`sourceDigest` pair could only describe the scavenge rung,
+# which the 2026-08-13 monocontainer amendment removed from the catalog entirely.
 ORACLE = {
     "catalogName": "redis-server",
     "binary": "/usr/bin/redis-server",
-    "version": "7.4.5",
-    "sourceImage": "redis:7.4.5-bookworm",
-    "sourceDigest": "sha256:" + "1" * 64,
+    "version": "7.0.15",
+    "acquisition": "apt:redis-server=5:7.0.15-1ubuntu0.24.04.4",
+    "integrity": "sha256:resolved-from-the-archive-at-build",
 }
 
 
@@ -68,10 +72,10 @@ class Phase25SbomTest(unittest.TestCase):
                     "catalog_name": "redis-server",
                     "platform": platform,
                     "exit": "0",
-                    "marker": "7.4.5",
+                    "marker": "7.0.15",
                     "elf_machine": "62" if platform.endswith("amd64") else "183",
                     "sha256": "sha256:" + digest_character * 64,
-                    "output": "Redis server v=7.4.5",
+                    "output": "Redis server v=7.0.15",
                 }
             )
         return path

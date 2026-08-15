@@ -303,9 +303,10 @@ not only UI-server or Redis self-reports.
 The routing and failure semantics above are design intent until their phase gates run. Multiple replicas and
 Sentinel configuration are topology evidence, not availability proof. A live fault test may establish tested
 behavior for its declared envelope; it does not prove behavior for every network partition or Redis defect.
-Phase 25.1 has established only that the pinned `redis-server` and `redis-cli` file bytes are present,
-SBOM-joined, and executable in both official Linux image architectures; it does not establish Redis/Sentinel
-deployment, coordination, failover, or realtime availability.
+Phase 25.1, sealed 2026-08-14, has established only that the pinned `redis-server` and `redis-cli` file bytes
+are present, SBOM-joined, and executable by absolute path at their pinned archive version in **both**
+architectures of the published monocontainer; it does not establish Redis/Sentinel deployment, coordination,
+failover, or realtime availability.
 
 Sequencing, implementation status, and acceptance commands are owned by the
 [Development Plan](../../DEVELOPMENT_PLAN/README.md). Online WebSocket/Redis work is integrated into the

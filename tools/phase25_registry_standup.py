@@ -31,6 +31,12 @@ NODE = "amoebius-phase24-control-plane"
 NAMESPACE = "amoebius-bootstrap"
 IMAGE_REPOSITORY = "amoebius.invalid/amoebius-base"
 ORACLE = ROOT / "test/fixtures/phase25/bootstrap_registry_domain.dhall"
+INVENTORY_ORACLE = ROOT / "test/fixtures/phase25/bake_inventory_expected.dhall"
+# Both proxies run inside the base image, so the interpreter they name must be the one
+# the image carries. The oracle pins `/usr/bin/python3` as the launcher of the `pgadmin`
+# row — the archive interpreter patroni's rung-1 closure already puts in the image — so
+# that row is where the path is read from rather than typed in beside it.
+INTERPRETER_ROW = "pgadmin"
 PUBLIC_HOSTS = ("docker.io", "quay.io", "ghcr.io")
 PCAP = Path("/var/tmp/amoebius-phase25-standup.pcap")
 FIREWALL_COMMENT = "amoebius-phase25-registry-private"
@@ -70,6 +76,24 @@ def oracle() -> dict[str, Any]:
     if not isinstance(decoded, dict):
         raise StandupFailure("oracle-object")
     return decoded
+
+
+@functools.cache
+def baked_binary(catalog_name: str) -> str:
+    """The absolute path the inventory oracle pins for one baked binary.
+
+    Read rather than written here because the standup and the bake gate have to mean
+    the same binary. The monocontainer amendment moved the registry from a scavenged
+    `registry:2` image, which installs `/usr/bin/registry`, onto the archive's
+    `docker-registry` package, which installs `/usr/bin/docker-registry`; a path typed
+    into this file went on naming the old one, and the Deployment failed to start with
+    a binary the gate had just executed by absolute path on both arches.
+    """
+    rows = json.loads(run((dhall_to_json(), "--file", str(INVENTORY_ORACLE))).stdout)
+    for row in rows:
+        if str(row["catalogName"]) == catalog_name:
+            return str(row["binary"])
+    raise StandupFailure(f"no-inventory-row:{catalog_name}")
 
 
 def proxy_source(
@@ -210,7 +234,7 @@ http:
                         "securityContext": {"runAsUser": 65532, "runAsGroup": 65532, "fsGroup": 65532, "seccompProfile": {"type": "RuntimeDefault"}},
                         "containers": [{
                             "name": "distribution", "image": image, "imagePullPolicy": "Never",
-                            "command": ["/usr/bin/registry", "serve", "/etc/distribution/config.yml"],
+                            "command": [baked_binary("distribution"), "serve", "/etc/distribution/config.yml"],
                             "resources": {
                                 "requests": {"cpu": "200m", "memory": "192Mi", "ephemeral-storage": str(registry_request - 64 * 1024**2)},
                                 "limits": {"cpu": "400m", "memory": "384Mi", "ephemeral-storage": str(registry_limit - 128 * 1024**2)},
@@ -222,7 +246,7 @@ http:
                             ],
                         }, {
                             "name": "registry-read-proxy", "image": image, "imagePullPolicy": "Never",
-                            "command": ["/usr/bin/python3", "/etc/distribution/read-proxy.py"],
+                            "command": [baked_binary(INTERPRETER_ROW), "/etc/distribution/read-proxy.py"],
                             "ports": [{"name": "read", "containerPort": 5002}],
                             "resources": {
                                 "requests": {"cpu": "50m", "memory": "64Mi", "ephemeral-storage": "64Mi"},
@@ -265,7 +289,7 @@ http:
                         "securityContext": {"runAsUser": 65532, "runAsGroup": 65532, "seccompProfile": {"type": "RuntimeDefault"}},
                         "containers": [{
                             "name": "registry-mutation-proxy", "image": image, "imagePullPolicy": "Never",
-                            "command": ["/usr/bin/python3", "/etc/distribution/proxy.py"],
+                            "command": [baked_binary(INTERPRETER_ROW), "/etc/distribution/proxy.py"],
                             "ports": [{"name": "proxy", "containerPort": 5001}],
                             "resources": {
                                 "requests": {"cpu": "100m", "memory": "128Mi", "ephemeral-storage": "64Mi"},
@@ -295,6 +319,57 @@ http:
         "capability": capability,
         "publicationProof": publication_proof,
         "publicationTag": publication_tag,
+    }
+
+
+def resident_images() -> list[str]:
+    return run((
+        "/usr/bin/docker", "exec", NODE,
+        "/usr/local/bin/ctr", "--namespace", "k8s.io", "images", "list", "--quiet",
+    )).stdout.splitlines()
+
+
+def side_load(artifact: Path, index_digest: str) -> dict[str, Any]:
+    """Import this run's export into the node's containerd, by digest, from disk.
+
+    The import is the sprint's own deliverable — "no public pull" is only a claim
+    about a cluster whose image arrived some other way — and nothing in the tree
+    performed it, so the standup could only ever run against an image an operator
+    had placed by hand.
+
+    `--digests` is what makes the resulting image name the digest-pinned reference a
+    Deployment can carry with `imagePullPolicy: Never`; `--all-platforms` keeps both
+    architectures' content, since the published manifest list is the artifact and one
+    architecture of it is not. `ctr` also names the archive's own top-level index,
+    which is a wrapper around this run's index rather than the artifact anything
+    references, so it is removed: an unreferenced second image name is exactly the
+    ambiguity a digest-pinned reference exists to remove.
+    """
+    reference = f"{IMAGE_REPOSITORY}@{index_digest}"
+    with artifact.open("rb") as stream:
+        imported = subprocess.run(
+            ("/usr/bin/docker", "exec", "--interactive", NODE,
+             "/usr/local/bin/ctr", "--namespace", "k8s.io", "images", "import",
+             "--all-platforms", "--base-name", IMAGE_REPOSITORY, "--digests", "-"),
+            cwd=ROOT, stdin=stream, text=True,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
+        )
+    if imported.returncode:
+        raise StandupFailure(f"side-load:exit-{imported.returncode}:{imported.stdout[-4000:]}")
+    resident = resident_images()
+    wrappers = [
+        row for row in resident
+        if row.startswith(f"{IMAGE_REPOSITORY}@") and row != reference
+    ]
+    for wrapper in wrappers:
+        run(("/usr/bin/docker", "exec", NODE,
+             "/usr/local/bin/ctr", "--namespace", "k8s.io", "images", "rm", wrapper))
+    if reference not in resident_images():
+        raise StandupFailure(f"side-loaded-image-absent:{reference}")
+    return {
+        "reference": reference,
+        "archiveBytes": artifact.stat().st_size,
+        "discardedWrapperNames": wrappers,
     }
 
 
@@ -538,12 +613,11 @@ def validate_live(
     }
 
 
-def enact(evidence: Path, index_digest: str) -> dict[str, Any]:
+def enact(evidence: Path, artifact: Path, index_digest: str) -> dict[str, Any]:
     domain_oracle = oracle()
     preflight = json.loads((evidence / "sprint-25.2-preflight.json").read_text(encoding="utf-8"))
-    image_rows = run(("/usr/bin/docker", "exec", NODE, "/usr/local/bin/ctr", "--namespace", "k8s.io", "images", "list", "--quiet")).stdout.splitlines()
-    if f"{IMAGE_REPOSITORY}@{index_digest}" not in image_rows:
-        raise StandupFailure("side-loaded-image-absent")
+    if preflight["artifact"]["imageIndexDigest"] != index_digest:
+        raise StandupFailure("preflight-admitted-a-different-artifact")
     if kubectl("get", "namespace", NAMESPACE, "--ignore-not-found", "-o", "name").stdout.strip():
         raise StandupFailure("bootstrap-domain-already-present")
     generated = manifest(preflight, domain_oracle, evidence, index_digest)
@@ -556,7 +630,12 @@ def enact(evidence: Path, index_digest: str) -> dict[str, Any]:
     journal_since = dt.datetime.now(dt.timezone.utc).isoformat()
     capture = start_capture()
     backend_firewall: dict[str, Any] = {}
+    side_load_result: dict[str, Any] = {}
     try:
+        # Inside the observation window, because the import is the half of standup a
+        # public pull could hide in: an image that arrived over the network would
+        # still leave the cluster serving the right digest afterwards.
+        side_load_result = side_load(artifact, index_digest)
         kubectl("apply", "--server-side", "--field-manager=amoebius-bootstrap-registry", "-f", "-", stdin=json.dumps(payload))
         kubectl("-n", NAMESPACE, "rollout", "status", "deployment/distribution", "--timeout=300s")
         kubectl("-n", NAMESPACE, "rollout", "status", "deployment/registry-mutation-proxy", "--timeout=300s")
@@ -569,6 +648,7 @@ def enact(evidence: Path, index_digest: str) -> dict[str, Any]:
         "schema": "amoebius.phase25.sprint25.2-standup.v1",
         "preflightFingerprint": preflight["fingerprint"],
         "backendFirewall": backend_firewall,
+        "sideLoad": side_load_result,
         "capturedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
     })
     return result
@@ -618,11 +698,16 @@ def main() -> None:
     parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
     # Likewise the index digest: a constant here would pin a build that no longer exists.
     parser.add_argument("--index-digest", required=True, help="the index digest this run produced")
+    # The export the enactment side-loads. Only the enacting run needs it; verification
+    # reads what the node already carries.
+    parser.add_argument("--artifact", type=Path, help="this run's OCI export, side-loaded by the enactment")
     arguments = parser.parse_args()
+    if not arguments.verify_only and arguments.artifact is None:
+        parser.error("--artifact is required to enact: the standup side-loads it")
     result = (
         verify_current(arguments.evidence, arguments.index_digest)
         if arguments.verify_only
-        else enact(arguments.evidence, arguments.index_digest)
+        else enact(arguments.evidence, arguments.artifact, arguments.index_digest)
     )
     encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
     if arguments.output is not None:

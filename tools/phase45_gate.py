@@ -22,7 +22,7 @@ EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_45"
 LIVE = EVIDENCE / "provider-child-live.json"
 ENUMERATION = ROOT / "test/enumeration/phase_45_surfaces.txt"
 LEDGER = ROOT / "test/golden/phase_45_ledger.json"
-MANIFEST = ROOT / "test/phase0_oracle_manifest.tsv"
+MANIFEST = ROOT / "test/oracle/preimplementation_artifacts.tsv"
 CABAL = "/home/matthewnowak/.ghcup/bin/cabal"
 GHC = "/home/matthewnowak/.ghcup/ghc/9.12.4/bin/ghc"
 DHALL_TO_JSON = "/home/matthewnowak/.local/bin/dhall-to-json"
@@ -105,7 +105,7 @@ def phase0_domain() -> dict[str, str]:
     for row in rows:
         path = ROOT / row.split("\t")[2]
         require(path.is_file() and path.stat().st_size > 0, f"phase0-custody-missing:{path}")
-    return {"name": "phase0-custody", "command": "read test/phase0_oracle_manifest.tsv", "output": "6 oracles; 1 mutant", "result": "PASS"}
+    return {"name": "phase0-custody", "command": "read test/oracle/preimplementation_artifacts.tsv", "output": "6 oracles; 1 mutant", "result": "PASS"}
 
 
 def oracle_domain() -> dict[str, str]:

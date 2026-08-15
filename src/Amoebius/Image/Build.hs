@@ -1,16 +1,28 @@
 {-# LANGUAGE OverloadedRecordDot #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Image.Build
   ( runRenderBakeDockerfile
   , runAdmittedBuildxOci
+  , runBakeInventory
   ) where
 
 import Amoebius.Image.BakeInventory
   ( BakeCatalog (..)
+  , BakeStep
   , catalogBuildEnvelope
+  , catalogSteps
   , decodeBakeCatalog
+  , stepLastResortReason
+  , stepName
+  , stepRung
+  , stepSourceImage
   , validateBakeCatalog
   )
+import Data.Aeson qualified as Aeson
+import Data.Aeson ((.=))
+import Data.ByteString.Lazy.Char8 qualified as LazyChar8
+import Data.Maybe (catMaybes)
 import Amoebius.Image.BuildAdmission
   ( ObservedBuildHost (..)
   , admitBuildTarget
@@ -30,6 +42,40 @@ import Numeric.Natural (Natural)
 import System.Exit (die, exitWith, ExitCode (..))
 import System.Process.Typed qualified as Process
 import Text.Read (readMaybe)
+
+-- | Report which acquisition rung the decoder saw for each step.
+--
+-- The rung is exactly what `dhall-to-json` drops: this dhall-json has no
+-- union-preservation option, so a union alternative carrying a record is emitted
+-- as the bare record and the arm name goes with it. The decoder is the last reader
+-- that still knows, so the gate asks it — and compares the answer against a table
+-- authored independently of this catalog.
+runBakeInventory :: [String] -> IO ()
+runBakeInventory arguments = case arguments of
+  ["--json", "--catalog", catalogPath] -> emit catalogPath
+  ["--catalog", catalogPath, "--json"] -> emit catalogPath
+  _ -> die "bake-inventory requires --json --catalog <path>"
+ where
+  emit catalogPath = do
+    catalog <- decodeBakeCatalog catalogPath >>= either (die . show) pure
+    either (die . show) pure (validateBakeCatalog catalog)
+    LazyChar8.putStrLn . Aeson.encode $
+      Aeson.object
+        [ "baseImage" .= catalog.baseImage
+        , "baseDigest" .= catalog.baseDigest
+        , "steps" .= fmap describeStep (catalogSteps catalog)
+        ]
+
+describeStep :: BakeStep -> Aeson.Value
+describeStep step =
+  Aeson.object $
+    [ "name" .= stepName step
+    , "rung" .= stepRung step
+    ]
+      <> catMaybes
+        [ ("lastResortReason" .=) <$> stepLastResortReason step
+        , ("sourceImage" .=) <$> stepSourceImage step
+        ]
 
 runRenderBakeDockerfile :: [String] -> IO ()
 runRenderBakeDockerfile arguments = case arguments of

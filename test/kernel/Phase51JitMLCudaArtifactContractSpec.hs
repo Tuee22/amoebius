@@ -101,7 +101,7 @@ currentFreeOneShort = fittingCapacity {cudaCurrentFreeVramBytes = 67108863}
 validatePhase0 :: FilePath -> IO ()
 validatePhase0 root = do
   rows <- filter (Text.isPrefixOf "51\t") . Text.lines
-    <$> TextIO.readFile (root </> "test/phase0_oracle_manifest.tsv")
+    <$> TextIO.readFile (root </> "test/oracle/preimplementation_artifacts.tsv")
   assertEqual "Phase51 manifest cardinality" 9 (length rows)
   assertEqual "Phase51 oracle cardinality" 5 (length (filter (Text.isInfixOf "\toracle\t") rows))
   assertEqual "Phase51 mutant cardinality" 4 (length (filter (Text.isInfixOf "\tmutant\t") rows))

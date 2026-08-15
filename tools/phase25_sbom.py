@@ -71,9 +71,14 @@ def make_sbom(probe_paths: Sequence[Path]) -> dict[str, Any]:
                 "fileName": str(pinned["binary"]),
                 "checksums": [{"algorithm": "SHA256", "checksumValue": checksum}],
                 "fileTypes": ["BINARY"],
+                # `acquisition`/`integrity` replace the retired `sourceImage`/`sourceDigest`
+                # pair of the pre-amendment oracle. Those two named a scavenged image, and
+                # once every binary sits on a rung above scavenging there is no source image
+                # to record: what the row carries is the identity the rung acquires from and
+                # where the integrity value is resolved, never a digest an author typed.
                 "comment": (
                     f"catalog={name}; platform={platform}; version={pinned['version']}; "
-                    f"source={pinned['sourceImage']}@{pinned['sourceDigest']}; "
+                    f"acquisition={pinned['acquisition']}; integrity={pinned['integrity']}; "
                     f"probe-exit={row['exit']}; elf-machine={row['elf_machine']}"
                 ),
             }

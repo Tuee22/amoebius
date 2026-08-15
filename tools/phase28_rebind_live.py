@@ -10,6 +10,7 @@ import datetime as dt
 import hashlib
 import hmac
 import http.client
+import argparse
 import json
 import os
 import secrets
@@ -25,14 +26,25 @@ from typing import Any, Iterator, Sequence
 import yaml
 
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
+
 ROOT = Path(__file__).resolve().parents[1]
-KIND = "/home/matthewnowak/.local/bin/kind"
+# Resolved per run from the authored requirements: a developer-home path bound this
+# driver to one machine, and the tool that deletes and recreates the cluster is exactly
+# the one that must not be whatever happens to be on PATH.
+KIND = ""
 KUBECTL = "/usr/bin/kubectl"
 KUBECONFIG = Path.home() / ".amoebius/phase24/kubeconfig"
 KIND_CONFIG = ROOT / "test/live/fixtures/phase28-kind.yaml"
-IMAGE_ARCHIVE = Path("/var/tmp/amoebius-phase25-scratch/oci/amoebius-phase25.oci.tar")
-IMAGE_DIGEST = "sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4"
-PRIVATE_IMAGE = f"registry.amoebius.invalid:5000/amoebius/base@{IMAGE_DIGEST}"
+IMAGE_ARCHIVE = Path()
+# The digest Phase 25 published and the export it published from, both caller-supplied:
+# a constant named a build that no longer exists, and the recreated cluster imports the
+# archive directly because the in-cluster registry does not survive its own node.
+IMAGE_DIGEST = ""
+PRIVATE_IMAGE = ""
 NODE_IMAGE = "kindest/node:v1.36.1"
 CLUSTER = "amoebius-phase24"
 NODE = f"{CLUSTER}-control-plane"
@@ -40,7 +52,6 @@ NAMESPACE = "retained-witness"
 STORAGE_CLASS = "amoebius-retained"
 RETAINED_ROOT = Path("/var/tmp/amoebius-phase28-retained")
 AUDIT_ROOT = Path("/var/tmp/amoebius-phase28-audit")
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_28/rebind-live.json"
 ROWS = ROOT / "test/live/fixtures/claimref_table.csv"
 POSTGRES_SUPPORT_URL = "https://apt.postgresql.org/pub/repos/apt/pool/main/p/postgresql-17/postgresql-17_17.8-1.pgdg12+1_amd64.deb"
 POSTGRES_SUPPORT_SHA256 = "6adde31d7bec9a921b06fbd74669d395c41a46bcf575e23a7568293b84f91729"
@@ -474,11 +485,20 @@ def execute() -> dict[str, Any]:
     }
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, required=True, help="this run's observation")
+    parser.add_argument("--artifact", type=Path, required=True, help="the Phase-25 OCI export to import")
+    parser.add_argument("--image-digest", required=True, help="the index digest that export advertises")
+    arguments = parser.parse_args(argv)
+    globals()["IMAGE_ARCHIVE"] = arguments.artifact
+    globals()["IMAGE_DIGEST"] = arguments.image_digest
+    globals()["PRIVATE_IMAGE"] = f"registry.amoebius.invalid:5000/amoebius/base@{arguments.image_digest}"
+    globals()["KIND"] = toolchain.resolve(["kind"])["kind"]["path"]
     try:
         value = execute()
-        EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
-        EVIDENCE.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        arguments.output.parent.mkdir(parents=True, exist_ok=True)
+        arguments.output.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print("phase28-rebind-live: PASS (Postgres row + MinIO object survived real cluster delete/recreate)")
         return 0
     except (RebindFailure, OSError, ValueError, KeyError, json.JSONDecodeError, subprocess.TimeoutExpired, yaml.YAMLError) as problem:

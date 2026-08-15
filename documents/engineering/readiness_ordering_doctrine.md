@@ -316,8 +316,12 @@ the two-stage scheduler cutover, and the bootstrap-holder→singleton-holder Lea
 catalog foreclosure land in **Phase 33** with the orchestration DSL and the control-plane singleton. This doc
 states the target shape and links back for status.
 
-> **Honesty.** Phase 26 now provides tested amoebius evidence for the reconciler's observed-condition loop.
-> Phase 31 now adds tested evidence for the standard-service DAG. The broader daemon spine, scheduler cutover,
+> **Honesty.** Phase 26, sealed 2026-08-14, provides tested amoebius evidence for the reconciler's
+> observed-condition loop: readiness was observed non-instantaneously on a live Deployment, and a source scan
+> proves no `threadDelay`, `registerDelay`, `getMonotonicTime`, `usleep`, or `unsafePerformIO` in the manifest
+> and execution modules. Phase 27 adds the scheduler-readiness proof: `BootstrapCapacitySchedulerReady` and
+> `ManagedCapacityReady` are observed witnesses in a recorded event order, never sleeps. The standard-service
+> DAG (Phase 31) is **UNVERIFIED** pending its reopened gate. The broader daemon spine,
 > other service-specific DAGs, and migration edges retain their own
 > later-phase validation boundaries; sibling demonstrations are not substituted for those results
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).

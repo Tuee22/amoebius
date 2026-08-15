@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import functools
 import hashlib
 import json
 import os
@@ -13,8 +15,12 @@ from pathlib import Path
 from typing import Any, Sequence
 
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
+
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE = ROOT / "DEVELOPMENT_PLAN/evidence/phase_26"
 CORPUS = ROOT / "test/live/fixtures/reconcile-corpus/corpus.json"
 EXPECTED = ROOT / "test/live/fixtures/reconcile-corpus/expected-actions.json"
 READ_ONLY_MODULES = (
@@ -25,6 +31,18 @@ READ_ONLY_MODULES = (
     "src/Amoebius/Execution/Normalize.hs",
     "src/Amoebius/Execution/RuntimeStorage.hs",
 )
+
+
+@functools.cache
+def build_tools() -> tuple[str, str]:
+    """Resolve cabal and the compiler per run from the authored requirements.
+
+    The retired form named a developer-home `cabal` outright, so the gate could only run on
+    one machine and inherited whichever GHC that installation offered — which need not
+    satisfy the authored range.
+    """
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    return resolved["cabal"]["path"], resolved["ghc"]["path"]
 
 
 class GateFailure(RuntimeError):
@@ -80,8 +98,16 @@ def validate_read_only_boundary() -> None:
             raise GateFailure(f"preflight-writer-import:{relative}:{hits}")
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    # The bundle this run writes into is supplied by the caller. There is deliberately no
+    # default: a default names a location, and whatever a previous run left there would
+    # decide this gate instead of the run in progress.
+    parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
+    arguments = parser.parse_args(argv)
+    evidence = arguments.evidence
     try:
+        cabal, compiler = build_tools()
         fixture = validate_fixture()
         validate_read_only_boundary()
         flags = (
@@ -95,7 +121,7 @@ def main() -> int:
             invoke(
                 "phase26-reconcile-spec",
                 (
-                    "/home/matthewnowak/.ghcup/bin/cabal", "test", "phase26-reconcile-spec", *flags,
+                    cabal, f"--with-compiler={compiler}", "test", "phase26-reconcile-spec", *flags,
                     "--test-show-details=direct", "-j1",
                 ),
             ),
@@ -110,16 +136,16 @@ def main() -> int:
             "result": "PASS",
         }
         receipt = {**stable, "receiptFingerprint": fingerprint(stable)}
-        EVIDENCE.mkdir(parents=True, exist_ok=True)
-        (EVIDENCE / "sprint-26.1-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        (EVIDENCE / "sprint-26.1-phase-results.tsv").write_text(
+        evidence.mkdir(parents=True, exist_ok=True)
+        (evidence / "sprint-26.1-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (evidence / "sprint-26.1-phase-results.tsv").write_text(
             "check\tresult\n" + "".join(f"{row['name']}\tPASS\n" for row in rows), encoding="utf-8"
         )
         log: list[str] = []
         for row in rows:
             log.extend((f"CHECK {row['name']}", f"COMMAND {row['command']}", row["output"], "RESULT PASS"))
         log.append(f"SPRINT-26.1-GATE PASS {receipt['receiptFingerprint']}")
-        (EVIDENCE / "sprint-26.1-gate.log").write_text("\n".join(log) + "\n", encoding="utf-8")
+        (evidence / "sprint-26.1-gate.log").write_text("\n".join(log) + "\n", encoding="utf-8")
         print(f"phase26-sprint26.1-gate: PASS ({len(rows)} checks; {receipt['receiptFingerprint']})")
         return 0
     except (GateFailure, OSError, ValueError, KeyError, json.JSONDecodeError, subprocess.TimeoutExpired) as problem:

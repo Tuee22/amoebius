@@ -27,6 +27,8 @@ renderDockerfile catalog = do
          , "LABEL org.opencontainers.image.title=\"amoebius monocontainer\""
          , "LABEL io.amoebius.bake-catalog=\"dhall/amoebius/BakeCatalog.dhall\""
          ]
+      <> renderApt catalog.acquisitionTools aptSteps
+      <> concatMap renderArtifact artifactSteps
       <> concatMap renderCopies indexedCopies
       <> fmap renderBuilt indexedBuilt
       <> fmap renderEnvironment catalog.runtimeEnvironment
@@ -36,6 +38,75 @@ renderDockerfile catalog = do
  where
   indexedCopies = [(index, source) | (index, CopyOci source) <- zip [0 :: Int ..] (catalogSteps catalog)]
   indexedBuilt = [(index, built) | (index, BuildProduct built) <- zip [0 :: Int ..] (catalogSteps catalog)]
+  aptSteps = [packaged | AptPackage packaged <- catalogSteps catalog]
+  artifactSteps = [artifact | OfficialArtifact artifact <- catalogSteps catalog]
+  -- One layer for the whole rung, plus the acquisition tooling rung 2 needs to
+  -- fetch anything at all. Each package is pinned to the exact version the
+  -- catalog names, so the layer is the same on both architectures or apt refuses
+  -- it — which is the property the rung was chosen for. The tools are listed
+  -- first because a failure there is a failure to acquire, not a missing service.
+  renderApt [] [] = []
+  renderApt tools packages =
+    [ "RUN apt-get update \\"
+    , "    && apt-get install -y --no-install-recommends \\"
+    ]
+      <> fmap (\tool -> "         " <> tool.package <> "=" <> tool.packageVersion <> " \\") tools
+      <> fmap (\packaged -> "         " <> packaged.package <> "=" <> packaged.packageVersion <> " \\") packages
+      <> [ "    && rm -rf /var/lib/apt/lists/*" ]
+  -- The publisher's own checksum manifest is fetched beside the asset and verified
+  -- in the same layer, so the integrity value is resolved at build time and never
+  -- authored. TARGETARCH selects the asset the publisher released for this arch.
+  renderArtifact artifact =
+    [ "RUN set -eu \\"
+    , "    && url=\"$(case ${TARGETARCH} in " <> cases (\a -> a.assetUrl) artifact <> " esac)\" \\"
+    , "    && sums=\"$(case ${TARGETARCH} in " <> cases (\a -> a.checksumManifest) artifact <> " esac)\" \\"
+    , "    && asset=\"${url##*/}\" \\"
+    , "    && curl -fsSL -o /tmp/asset \"${url}\" \\"
+    , "    && curl -fsSL -o /tmp/asset.sums \"${sums}\" \\"
+    , "    && " <> verify artifact
+    , "    && " <> extract artifact
+    , "    && rm -f /tmp/asset /tmp/asset.sums"
+    ]
+  -- The publisher decides both halves of this, and the nine differ. `DigestOnly`
+  -- manifests carry no name to match, so the digest is compared directly;
+  -- `DigestNamed` manifests may name the asset bare, `./`-prefixed, or by the
+  -- publisher's own build path, so the match is on the trailing basename. Either
+  -- way the value is fetched now and never authored.
+  verify artifact =
+    let tool = case artifact.checksumAlgorithm of
+          Sha1 -> "sha1sum"
+          Sha256 -> "sha256sum"
+          Sha512 -> "sha512sum"
+     in case artifact.checksumShape of
+          DigestOnly ->
+            "test \"$(" <> tool <> " /tmp/asset | cut -d' ' -f1)\" = \"$(cut -d' ' -f1 /tmp/asset.sums)\" \\"
+          DigestNamed ->
+            "test \"$(" <> tool <> " /tmp/asset | cut -d' ' -f1)\""
+              <> " = \"$(grep -E \"[ /]${asset}$\" /tmp/asset.sums | head -n1 | cut -d' ' -f1)\" \\"
+  cases field artifact =
+    Text.intercalate " " [arch asset <> ") echo " <> field asset <> " ;;" | asset <- artifact.assets]
+  arch asset = case asset.platform of
+    Amd64 -> "amd64"
+    Arm64 -> "arm64"
+  -- Three shapes, because the nine publishers ship three. A bare binary is
+  -- installed; a named member is extracted out of its archive by trailing match, so
+  -- the per-architecture top-level directory never has to be spelled; an unnamed
+  -- member means the whole archive is the payload and lands under the target root.
+  extract artifact = case (artifact.archiveFormat, Text.null artifact.archiveMember) of
+    (Bare, _) -> "install -m 0755 /tmp/asset " <> artifact.targetPath <> " \\"
+    (TarGz, True) ->
+      "mkdir -p " <> artifact.targetPath
+        <> " && tar -xzf /tmp/asset --strip-components=1 -C " <> artifact.targetPath <> " \\"
+    (TarGz, False) ->
+      -- The top-level directory carries the arch and the release, so the member is
+      -- matched under one quoted wildcard rather than spelled out per platform.
+      -- Quoted, because an unquoted glob would be the build shell's to expand.
+      "tar -xzf /tmp/asset --wildcards -O \"*/" <> artifact.archiveMember
+        <> "\" > " <> artifact.targetPath <> " && chmod 0755 " <> artifact.targetPath <> " \\"
+    (Zip, True) -> "mkdir -p " <> artifact.targetPath <> " && unzip -q -d " <> artifact.targetPath <> " /tmp/asset \\"
+    (Zip, False) ->
+      "unzip -p /tmp/asset " <> artifact.archiveMember <> " > " <> artifact.targetPath
+        <> " && chmod 0755 " <> artifact.targetPath <> " \\"
   alias index source = "source_" <> Text.pack (show index) <> "_" <> sanitize source.name
   renderSource (index, source) =
     [ "FROM " <> source.sourceImage <> "@" <> source.sourceDigest <> " AS " <> alias index source ]

@@ -592,23 +592,24 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 
 ## 10. Honesty and planning ownership
 
-> **Validated Phase-25 boundary.** Sprints 25.1–25.2 live-validated the typed bake catalog, generated Dockerfile, bounded
-> host build, one `linux/amd64` + `linux/arm64` OCI index, architecture-native executable probes,
-> deterministic file SBOMs, selected-platform node side-load, resource/storage-complete bootstrap action, and
-> exact six-object `distribution`/mutation-proxy standup from the side-loaded digest. The standup observer saw
-> zero public-registry connections. Sprint 25.3 then live-validated a proxy-induced mid-upload failure with an
-> unadvertised tag and retained residue, the one-request byte-exact manifest-list commit, immutable digest
-> reference, and a zero-mutation rerun. Sprint 25.4 installed an enforcing node firewall, made the public
-> `PullAlways` canary fail at containerd with the expected timeout while the exact private digest pull
-> succeeded, and observed zero established public-registry connections; the unenforced kindnet policy mutant
-> went red. Phase 26 subsequently validated reconciler correspondence, and Phase 30 validated the MinIO S3
-> storage rehome: the source stayed stable through verified old-digest copy/cutover, a post-cutover blob was
-> observed in MinIO, all runtime image IDs matched the baked Phase-25 digest, and the node pull-event window
-> recorded zero public pulls. These are Register-3 *tested* results, never proofs. Per
+> **Validated Phase-25 boundary — sealed 2026-08-14.** One `python3 tools/phase25_gate.py --execute` run
+> live-validated the typed acquisition ladder, the generated Dockerfile against its committed golden, the
+> bounded host build, one `linux/amd64` + `linux/arm64` OCI index, architecture-native execution of all 22
+> baked binaries by absolute path, deterministic file SBOMs, the selected-platform node side-load, the
+> resource/storage-complete bootstrap action, and the exact six-object `distribution`/mutation-proxy standup
+> from the side-loaded digest — with the standup observer seeing zero public-registry connections. The same run
+> then validated a proxy-induced mid-upload failure leaving the tag unadvertised with residue retained, the
+> one-request byte-exact manifest-list commit, the immutable digest reference, a zero-mutation rerun, and an
+> enforcing node firewall under which the public `PullAlways` canary failed at containerd with the expected
+> timeout while the exact private digest pull succeeded. All fourteen committed mutants went red, including the
+> unenforced kindnet policy. These are Register-3 *tested* results, never proofs. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): inherited prodbox proof is evidence from a
 > sibling system, not proof in amoebius. Phase 25 resolved the immutable-reference and host-builder decisions
-> for the validated v1 boundary; broader mechanisms remain governed by their later phase gates.
+> for the validated v1 boundary; broader mechanisms remain governed by their later phase gates. The
+> reconciler-owned rendering correspondence (Phase 26) and the MinIO-backed storage rehome (Phase 30) are
+> **UNVERIFIED**: both phases are open under the reopened numeric sequence, and their pre-amendment records do
+> not carry forward.
 
 The validated `linux-cpu` image and registry lane is always available on every hardware substrate. When an
 image or registry gate requires a pristine Linux host, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2

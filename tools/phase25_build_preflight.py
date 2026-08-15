@@ -7,14 +7,15 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Sequence
 
 
-SCRATCH_CAPACITY = 103_079_215_104
-CACHE_CAPACITY = 68_719_476_736
+ROOT = Path(__file__).resolve().parents[1]
+CATALOG = ROOT / "dhall/amoebius/BakeCatalog.dhall"
 CPU_CARVE_MILLIS = 8_000
 # Live host carve: one GiB above the independently derived 7 GiB transition.
 # The Phase-0 pure fixture retains a larger 12 GiB residual to exercise exact
@@ -35,6 +36,19 @@ def run(arguments: Sequence[str]) -> str:
     if result.returncode:
         raise PreflightFailure(f"command-failed:{arguments[0]}:{result.stdout}")
     return result.stdout.strip()
+
+
+def provisions() -> tuple[int, int]:
+    """The scratch and cache capacities the catalog declares.
+
+    Read rather than restated: the pre-amendment constants here were sized for a
+    CUDA devel base and exceeded the free space of every host in the linux-cpu
+    lane, so the admission they gated could not have passed anywhere.
+    """
+    decoded = json.loads(
+        run((shutil.which("dhall-to-json") or "dhall-to-json", "--file", str(CATALOG)))
+    )
+    return int(decoded["scratchCapacityBytes"]), int(decoded["cacheCapacityBytes"])
 
 
 def memory_available() -> int:
@@ -62,13 +76,14 @@ def directory_bytes(path: Path) -> int:
 
 
 def observe(cache_root: Path, scratch_root: Path, docker_config: Path) -> dict[str, Any]:
+    scratch_capacity, cache_capacity = provisions()
     cache = filesystem(cache_root)
     scratch = filesystem(scratch_root)
     if cache["device"] == scratch["device"]:
         raise PreflightFailure("build-backing-alias")
-    if int(cache["availableBytes"]) < CACHE_CAPACITY:
+    if int(cache["availableBytes"]) < cache_capacity:
         raise PreflightFailure("build-cache-capacity")
-    if int(scratch["availableBytes"]) < SCRATCH_CAPACITY:
+    if int(scratch["availableBytes"]) < scratch_capacity:
         raise PreflightFailure("build-scratch-capacity")
 
     # Docker emits one JSON object per line when multiple containers exist.
@@ -95,7 +110,7 @@ def observe(cache_root: Path, scratch_root: Path, docker_config: Path) -> dict[s
     if available_memory < MEMORY_CARVE_BYTES:
         raise PreflightFailure(f"host-memory-short:{available_memory}")
     cache_resident = directory_bytes(cache_root)
-    if cache_resident > CACHE_CAPACITY:
+    if cache_resident > cache_capacity:
         raise PreflightFailure(f"cache-resident-over-capacity:{cache_resident}")
 
     observation = {
@@ -105,9 +120,9 @@ def observe(cache_root: Path, scratch_root: Path, docker_config: Path) -> dict[s
         "memoryAvailableBytes": available_memory,
         "residualMemoryBytes": MEMORY_CARVE_BYTES,
         "scratch": scratch,
-        "scratchCapacityBytes": SCRATCH_CAPACITY,
+        "scratchCapacityBytes": scratch_capacity,
         "cache": cache,
-        "cacheCapacityBytes": CACHE_CAPACITY,
+        "cacheCapacityBytes": cache_capacity,
         "cacheResidentBytes": cache_resident,
         "architectureConcurrency": 2,
         "stageConcurrency": 2,

@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-MANIFEST = ROOT / "test" / "phase0_oracle_manifest.tsv"
+MANIFEST = ROOT / "test" / "oracle" / "preimplementation_artifacts.tsv"
 # The one enumerable surface this module owns, declared so the run-time enumeration can
 # discover it rather than the expectation file asserting it unilaterally.
 CHECKS = {"manifest": "every pre-implementation oracle and mutant resolves and is owned"}
@@ -42,146 +42,34 @@ DOCKERIGNORE_BYTECODE_PATTERNS = {
     "**/*.pyo",
     "**/*.pyd",
 }
-GITIGNORE_REQUIRED_PATTERNS = GITIGNORE_BYTECODE_PATTERNS | {
-    "/gen/",
-    "/DEVELOPMENT_PLAN/evidence/",
-    "/DEVELOPMENT_PLAN/ledgers/",
-    "/test/enumeration/",
-    "/test/golden/phase_*_ledger.json",
-    "/test/golden/phase_54_expected_run_ledger.json",
-    "*.lock",
-    "*.freeze",
-    "package-lock.json",
-    "npm-shrinkwrap.json",
-    "pnpm-lock.yaml",
-    "go.sum",
-    "/dist-newstyle/",
-    "/.cabal-sandbox/",
-    ".ghc.environment.*",
-    "cabal.project.local",
-    "*.o",
-    "*.hi",
-    "*.dyn_o",
-    "*.dyn_hi",
-    "*.hie",
-    "/node_modules/",
-    "/ui-runtime/.spago/",
-    "/ui-runtime/output/",
-    "/ui-runtime/dist/",
-    ".pytest_cache/",
-    ".mypy_cache/",
-    ".ruff_cache/",
-    ".coverage",
-    ".coverage.*",
-    "htmlcov/",
-    "coverage/",
-    "/toolchain/bin/",
-    "/toolchain/runtime/",
-    "/toolchain/downloads/",
-    "/toolchain/cache/",
-    "/.phase*-build/",
-    "/phase*-build/",
-    "/build/",
-    "/_build/",
-    "/out/",
-    "/output/",
-    "/dist/",
-    "/.cache/",
-    "/tmp/",
-    "/temp/",
-    "/playwright-report/",
-    "/test-results/",
-    "/screenshots/",
-    "/browser-profile/",
-    "*.log",
-    "*.pid",
-    "*.sock",
-    "/.env",
-    "/.env.*",
-    "!/.env.example",
-    "/.secrets/",
-    "/.credentials/",
-    "/kubeconfig",
-}
-DOCKERIGNORE_REQUIRED_PATTERNS = DOCKERIGNORE_BYTECODE_PATTERNS | {
-    ".git",
-    ".git/**",
-    "gen",
-    "gen/**",
-    "DEVELOPMENT_PLAN/evidence",
-    "DEVELOPMENT_PLAN/evidence/**",
-    "DEVELOPMENT_PLAN/ledgers",
-    "DEVELOPMENT_PLAN/ledgers/**",
-    "test/enumeration",
-    "test/enumeration/**",
-    "test/golden/phase_*_ledger.json",
-    "test/golden/phase_54_expected_run_ledger.json",
-    "**/*.lock",
-    "**/*.freeze",
-    "**/package-lock.json",
-    "**/npm-shrinkwrap.json",
-    "**/pnpm-lock.yaml",
-    "**/go.sum",
-    "dist-newstyle",
-    "dist-newstyle/**",
-    "cabal.project.local",
-    "node_modules",
-    "node_modules/**",
-    "ui-runtime/.spago",
-    "ui-runtime/.spago/**",
-    "ui-runtime/output",
-    "ui-runtime/output/**",
-    "ui-runtime/dist",
-    "ui-runtime/dist/**",
-    ".pytest_cache",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".coverage",
-    ".coverage.*",
-    "htmlcov",
-    "coverage",
-    "toolchain/bin",
-    "toolchain/bin/**",
-    "toolchain/runtime",
-    "toolchain/runtime/**",
-    "toolchain/downloads",
-    "toolchain/downloads/**",
-    "toolchain/cache",
-    "toolchain/cache/**",
-    ".phase*-build",
-    "phase*-build",
-    "build",
-    "build/**",
-    "_build",
-    "_build/**",
-    "out",
-    "out/**",
-    "output",
-    "output/**",
-    "dist",
-    "dist/**",
-    ".cache",
-    ".cache/**",
-    "tmp",
-    "tmp/**",
-    "temp",
-    "temp/**",
-    "playwright-report",
-    "test-results",
-    "screenshots",
-    "browser-profile",
-    "browser-profile/**",
-    "**/*.log",
-    "**/*.pid",
-    "**/*.sock",
-    ".env",
-    ".env.*",
-    ".secrets",
-    ".secrets/**",
-    ".credentials",
-    ".credentials/**",
-    "kubeconfig",
-}
+LAYOUT_DOCTRINE = ROOT / "documents" / "engineering" / "repository_layout_doctrine.md"
+IGNORE_FENCE = re.compile(r"```(gitignore|dockerignore)\n(.*?)```", re.S)
+
+
+def declared_ignore_patterns() -> dict[str, set[str]]:
+    """The two contracts as repository-layout doctrine sections 6 and 7 declare them.
+
+    Parsed, not restated. Doctrine calls both blocks exhaustive in both directions, and a
+    second copy of an exhaustive list is how a pattern comes to exist that no reviewer
+    ever approved: the copies agree on the day they are written and nothing rechecks them.
+    """
+    declared: dict[str, set[str]] = {"gitignore": set(), "dockerignore": set()}
+    try:
+        text = LAYOUT_DOCTRINE.read_text(encoding="utf-8")
+    except OSError:
+        return declared
+    for kind, block in IGNORE_FENCE.findall(text):
+        for line in block.splitlines():
+            pattern = line.strip()
+            if pattern and not pattern.startswith("#"):
+                declared[kind].add(pattern)
+    return declared
+
+
+_DECLARED = declared_ignore_patterns()
+GITIGNORE_REQUIRED_PATTERNS = _DECLARED["gitignore"]
+DOCKERIGNORE_REQUIRED_PATTERNS = _DECLARED["dockerignore"]
+
 BYTECODE_POLICY_SUFFIXES = {
     ".cabal",
     ".dhall",
@@ -274,6 +162,16 @@ def audit_ignore_contract(
         errors.append(f".gitignore: missing generated-artifact pattern {pattern!r}")
     for pattern in sorted(DOCKERIGNORE_REQUIRED_PATTERNS - dockerignore):
         errors.append(f".dockerignore: missing generated-artifact pattern {pattern!r}")
+    # The other direction, which doctrine claims and nothing checked: a pattern the file
+    # carries and section 6 or 7 does not name is a class no reviewer approved.
+    for pattern in sorted(gitignore - GITIGNORE_REQUIRED_PATTERNS):
+        errors.append(f".gitignore: undeclared pattern {pattern!r}; doctrine section 6 must name it")
+    for pattern in sorted(dockerignore - DOCKERIGNORE_REQUIRED_PATTERNS):
+        errors.append(f".dockerignore: undeclared pattern {pattern!r}; doctrine section 7 must name it")
+    for pattern in sorted(GITIGNORE_BYTECODE_PATTERNS - GITIGNORE_REQUIRED_PATTERNS):
+        errors.append(f".gitignore: doctrine section 6 drops bytecode pattern {pattern!r}")
+    for pattern in sorted(DOCKERIGNORE_BYTECODE_PATTERNS - DOCKERIGNORE_REQUIRED_PATTERNS):
+        errors.append(f".dockerignore: doctrine section 7 drops bytecode pattern {pattern!r}")
 
 
 def audit_bytecode_policy(

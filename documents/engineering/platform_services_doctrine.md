@@ -146,8 +146,9 @@ either baked into the base container or built by amoebius and served from here. 
   ordering seam rather than a second storage architecture. Phase 25.3 atomically published the exact audited
   two-architecture index and proved a zero-mutation rerun; Phase 25.4 paired a successful exact private pull
   with a public-pull timeout under an enforcing node firewall and observed zero established public-registry
-  connections. Phase 30 subsequently live-tested the HA-shaped backbone and the MinIO-backed driver,
-  including old-digest migration/readback and a post-cutover object observed in MinIO.
+  connections. All four sprints are sealed by the 2026-08-14 Phase-25 run. The MinIO-backed driver and the
+  migration of those admitted bytes remain **UNVERIFIED**: Phase 30 is open under the reopened numeric
+  sequence, and its pre-amendment record does not carry forward.
 - **It needs no relational database, and no PV of its own.** Unlike Harbor, `distribution` stores its blobs
   in **MinIO via the S3 storage driver** ([§4](#4-minio--the-object-substrate)) — it holds no PersistentVolume and runs no Postgres/Redis of
   its own, so it takes neither a Patroni cluster under the [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) rule nor a retained PV under the storage

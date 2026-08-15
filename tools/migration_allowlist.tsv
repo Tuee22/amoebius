@@ -273,3 +273,171 @@ r5	tools/phase64_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-6
 r5	tools/phase64_gate.py	names generated path test/enumeration/*	phase-64	`test/enumeration/**`
 r5	tools/phase64_gate.py	names generated path test/golden/*	phase-64	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
 r6	tools/phase64_gate.py	tracked file carries a resolved home path*	phase-64	Absolute developer-home executable paths
+
+# Layout-partition deferrals, added 2026-08-14 with rules r13, r14, and r15.
+#
+# Attribution rule for these three. A finding is attributed to the phase whose closure
+# actually retires it, which for a shared surface is the LAST phase that still needs it,
+# not the first: an ignore rule covering `DEVELOPMENT_PLAN/evidence/` cannot be deleted
+# while any gate still writes there, and a root cannot be deleted while any phase still
+# builds from it. Attributing such a row to the earliest owner would retire the row while
+# the divergence remained. Where the finding names one phase's own path — every r15
+# ordinal, and every per-phase surface-expectation table — the owner is that phase.
+#
+# Phase 0 defers nothing of its own here. Its three ordinal-bearing paths were renamed,
+# its `CLAUDE.md` copy became a link, and the ignore rules for paths nothing generates
+# were deleted rather than deferred.
+r13	amoebius-pulsar/	path is outside the target tree*	phase-35	Four roots contain only a package declaration
+r13	amoebius-pulumi/	path is outside the target tree*	phase-47	Four roots contain only a package declaration
+r13	amoebius-release/	path is outside the target tree*	phase-39	Four roots contain only a package declaration
+r13	amoebius-runtime/	path is outside the target tree*	phase-47	Four roots contain only a package declaration
+r13	amoebius-store/	path is outside the target tree*	phase-37	Four roots contain only a package declaration
+r13	app/Amoebius/	path is outside the target tree*	phase-22	`app/` holds `Main.hs`, `singleton/`, and `Amoebius/Ui/Server/`
+r13	app/Main.hs	path is outside the target tree*	phase-22	`app/` holds `Main.hs`, `singleton/`, and `Amoebius/Ui/Server/`
+r13	app/singleton/	path is outside the target tree*	phase-33	`app/` holds `Main.hs`, `singleton/`, and `Amoebius/Ui/Server/`
+r13	apple-host/	path is outside the target tree*	phase-53	Four roots contain only a package declaration
+r13	docker/	path is outside the target tree*	phase-25	`docker/` contains exactly one tracked file
+r13	infernix-ui/	path is outside the target tree*	phase-50	Four roots contain only a package declaration
+r13	infernix/	path is outside the target tree*	phase-49	Four roots contain only a package declaration
+r13	jitml-ui/	path is outside the target tree*	phase-52	Four roots contain only a package declaration
+r13	jitml/	path is outside the target tree*	phase-51	Four roots contain only a package declaration
+r13	mutants/	path is outside the target tree*	phase-31	Seeded mutants live under five roots in three record formats
+r13	offline-runtime/	path is outside the target tree*	phase-64	Four roots contain only a package declaration
+r13	test-topology/	path is outside the target tree*	phase-54	Four roots contain only a package declaration
+r13	test/Amoebius/	path is outside the target tree*	phase-31	`test/` carries `golden/` beside `goldens/`
+r13	test/Ui/	path is outside the target tree*	phase-59	`test/` carries `golden/` beside `goldens/`
+r13	test/accept/	path is outside the target tree*	phase-39	`test/` carries `golden/` beside `goldens/`
+r13	test/boundary/	path is outside the target tree*	phase-14	`test/` carries `golden/` beside `goldens/`
+r13	test/browser/	path is outside the target tree*	phase-60	`test/` carries `golden/` beside `goldens/`
+r13	test/capability/	path is outside the target tree*	phase-12	`test/` carries `golden/` beside `goldens/`
+r13	test/ci/	path is outside the target tree*	phase-28	`test/` carries `golden/` beside `goldens/`
+r13	test/compile-fail/	path is outside the target tree*	phase-49	`test/` carries `golden/` beside `goldens/`
+r13	test/dhall/	path is outside the target tree*	phase-54	`test/` carries `golden/` beside `goldens/`
+r13	test/dsl/	path is outside the target tree*	phase-7	`test/` carries `golden/` beside `goldens/`
+r13	test/fake/	path is outside the target tree*	phase-48	`test/` carries `golden/` beside `goldens/`
+r13	test/fixtures/	path is outside the target tree*	phase-59	`test/` carries `golden/` beside `goldens/`
+r13	test/formal/	path is outside the target tree*	phase-3	`test/` carries `golden/` beside `goldens/`
+r13	test/goldens/	path is outside the target tree*	phase-46	`test/` carries `golden/` beside `goldens/`
+r13	test/host/	path is outside the target tree*	phase-53	`test/` carries `golden/` beside `goldens/`
+r13	test/image/	path is outside the target tree*	phase-25	`test/` carries `golden/` beside `goldens/`
+r13	test/inject/	path is outside the target tree*	phase-43	`test/` carries `golden/` beside `goldens/`
+r13	test/integration/	path is outside the target tree*	phase-47	`test/` carries `golden/` beside `goldens/`
+r13	test/kernel/	path is outside the target tree*	phase-51	`test/` carries `golden/` beside `goldens/`
+r13	test/live/	path is outside the target tree*	phase-64	`test/` carries `golden/` beside `goldens/`
+r13	test/manifest/	path is outside the target tree*	phase-13	`test/` carries `golden/` beside `goldens/`
+r13	test/mutants/	path is outside the target tree*	phase-64	Seeded mutants live under five roots in three record formats
+r13	test/negatives/	path is outside the target tree*	phase-47	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_01_surface_expectations.tsv	path is outside the target tree*	phase-1	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_02_surface_expectations.tsv	path is outside the target tree*	phase-2	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_03_surface_expectations.tsv	path is outside the target tree*	phase-3	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_04_surface_expectations.tsv	path is outside the target tree*	phase-4	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_05_surface_expectations.tsv	path is outside the target tree*	phase-5	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_06_surface_expectations.tsv	path is outside the target tree*	phase-6	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_07_surface_expectations.tsv	path is outside the target tree*	phase-7	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_08_surface_expectations.tsv	path is outside the target tree*	phase-8	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_09_surface_expectations.tsv	path is outside the target tree*	phase-9	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_10_surface_expectations.tsv	path is outside the target tree*	phase-10	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_11_surface_expectations.tsv	path is outside the target tree*	phase-11	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_12_surface_expectations.tsv	path is outside the target tree*	phase-12	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_13_surface_expectations.tsv	path is outside the target tree*	phase-13	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_14_surface_expectations.tsv	path is outside the target tree*	phase-14	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_15_surface_expectations.tsv	path is outside the target tree*	phase-15	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_16_surface_expectations.tsv	path is outside the target tree*	phase-16	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_17_surface_expectations.tsv	path is outside the target tree*	phase-17	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_18_surface_expectations.tsv	path is outside the target tree*	phase-18	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_19_surface_expectations.tsv	path is outside the target tree*	phase-19	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_20_surface_expectations.tsv	path is outside the target tree*	phase-20	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_21_surface_expectations.tsv	path is outside the target tree*	phase-21	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_22_surface_expectations.tsv	path is outside the target tree*	phase-22	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_23_surface_expectations.tsv	path is outside the target tree*	phase-23	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_24_surface_expectations.tsv	path is outside the target tree*	phase-24	`test/` carries `golden/` beside `goldens/`
+r13	test/phase_25_surface_expectations.tsv	path is outside the target tree*	phase-25	`test/` carries `golden/` beside `goldens/`
+r13	test/platform/	path is outside the target tree*	phase-32	`test/` carries `golden/` beside `goldens/`
+r13	test/reconcile/	path is outside the target tree*	phase-26	`test/` carries `golden/` beside `goldens/`
+r13	test/reject/	path is outside the target tree*	phase-39	`test/` carries `golden/` beside `goldens/`
+r13	test/scheduler/	path is outside the target tree*	phase-27	`test/` carries `golden/` beside `goldens/`
+r13	test/sim/	path is outside the target tree*	phase-27	`test/` carries `golden/` beside `goldens/`
+r13	test/storage/	path is outside the target tree*	phase-28	`test/` carries `golden/` beside `goldens/`
+r13	test/topology/	path is outside the target tree*	phase-54	`test/` carries `golden/` beside `goldens/`
+r13	test/ui/	path is outside the target tree*	phase-52	`test/` carries `golden/` beside `goldens/`
+r13	test/vault/	path is outside the target tree*	phase-29	`test/` carries `golden/` beside `goldens/`
+r13	tests/	path is outside the target tree*	phase-23	`test/` holds 889 tracked paths and `tests/` 133
+r13	toolchain/	path is outside the target tree*	phase-1	Acquired tools have two declared homes
+r13	ui-live/	path is outside the target tree*	phase-58	Four roots contain only a package declaration
+r13	ui-runtime/	path is outside the target tree*	phase-56	`ui-runtime/**` holds the one spago project
+r14	.*ignore	ignore rule *DEVELOPMENT_PLAN/evidence*	phase-64	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
+r14	.*ignore	ignore rule *test/enumeration*	phase-64	`test/enumeration/**`
+r14	.*ignore	ignore rule *phase_54_expected_run_ledger.json*	phase-54	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
+r14	.*ignore	ignore rule *phase_*_ledger.json*	phase-64	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
+r14	.*ignore	ignore rule *ui-runtime*	phase-56	`ui-runtime/**` holds the one spago project
+r14	.*ignore	ignore rule *toolchain/*	phase-1	Acquired tools have two declared homes
+r14	.*ignore	ignore rule *ghc-pkg-*	phase-1	exec shims are written into the repository root
+r14	.*ignore	ignore rule *repl-wrapper-*	phase-1	exec shims are written into the repository root
+r14	.*ignore	ignore rule *wrapper-*	phase-1	exec shims are written into the repository root
+r14	.*ignore	ignore rule *.ghc.environment.*	phase-1	exec shims are written into the repository root
+r14	.*ignore	ignore rule *cabal.project.local*	phase-1	exec shims are written into the repository root
+r14	.*ignore	ignore rule *test-secrets.dhall*	phase-29	`test-secrets.dhall` is a root-level cleartext-secret file
+r15	*	* names phase ordinal 1;*	phase-1	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 2;*	phase-2	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 3;*	phase-3	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 4;*	phase-4	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 5;*	phase-5	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 6;*	phase-6	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 7;*	phase-7	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 8;*	phase-8	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 9;*	phase-9	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 10;*	phase-10	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 11;*	phase-11	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 12;*	phase-12	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 13;*	phase-13	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 14;*	phase-14	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 15;*	phase-15	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 16;*	phase-16	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 17;*	phase-17	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 18;*	phase-18	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 19;*	phase-19	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 20;*	phase-20	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 21;*	phase-21	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 22;*	phase-22	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 23;*	phase-23	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 24;*	phase-24	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 25;*	phase-25	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 26;*	phase-26	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 27;*	phase-27	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 28;*	phase-28	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 29;*	phase-29	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 30;*	phase-30	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 31;*	phase-31	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 32;*	phase-32	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 33;*	phase-33	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 34;*	phase-34	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 35;*	phase-35	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 36;*	phase-36	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 37;*	phase-37	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 38;*	phase-38	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 39;*	phase-39	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 40;*	phase-40	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 41;*	phase-41	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 42;*	phase-42	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 43;*	phase-43	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 44;*	phase-44	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 45;*	phase-45	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 46;*	phase-46	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 47;*	phase-47	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 48;*	phase-48	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 49;*	phase-49	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 50;*	phase-50	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 51;*	phase-51	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 52;*	phase-52	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 53;*	phase-53	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 54;*	phase-54	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 55;*	phase-55	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 56;*	phase-56	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 57;*	phase-57	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 58;*	phase-58	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 59;*	phase-59	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 60;*	phase-60	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 61;*	phase-61	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 62;*	phase-62	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 63;*	phase-63	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r15	*	* names phase ordinal 64;*	phase-64	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal

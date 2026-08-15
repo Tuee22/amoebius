@@ -123,7 +123,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     locus = read_tsv(LOCUS)
     if len(locus) != 30 or len({row["entry"] for row in locus}) != 30:
         raise GateFailure("validation locus must contain thirty unique rows")
-    phase0 = read_tsv(ROOT / "test/phase0_oracle_manifest.tsv")
+    phase0 = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
     phase16 = [row for row in phase0 if row["# phase"] == "16"]
     if len(phase16) != 24:
         raise GateFailure(f"Phase-0 manifest must pin 24 Phase-16 artifacts, got {len(phase16)}")

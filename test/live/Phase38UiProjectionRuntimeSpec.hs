@@ -118,7 +118,7 @@ loadFixtures root = do
   latest <- parseTsv (fixture "expected_latest_values.tsv") parseLatest
   receipts <- parseTsv (fixture "expected_receipts.tsv") parseReceipt
   watermarks <- parseTsv (fixture "expected_watermarks.tsv") parseWatermark
-  manifest <- Text.lines <$> TextIO.readFile (root </> "test/phase0_oracle_manifest.tsv")
+  manifest <- Text.lines <$> TextIO.readFile (root </> "test/oracle/preimplementation_artifacts.tsv")
   let custody = filter (Text.isPrefixOf "38\t") manifest
   assertEqual "phase0-custody" 7 (length custody)
   assertEqual "fixture matrix domain" 8 (length matrix)

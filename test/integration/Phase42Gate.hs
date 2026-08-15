@@ -41,7 +41,7 @@ main = do
 
 verifyCustody :: IO ()
 verifyCustody = do
-  manifest <- TextIO.readFile "test/phase0_oracle_manifest.tsv"
+  manifest <- TextIO.readFile "test/oracle/preimplementation_artifacts.tsv"
   let rows = filter (Text.isPrefixOf "42\t") (Text.lines manifest)
   require (length rows == 15) "phase42 Phase-0 custody must contain twelve oracles and three mutants"
   require (length (filter (Text.isInfixOf "\toracle\t") rows) == 12) "phase42 oracle custody cardinality"

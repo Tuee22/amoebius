@@ -3,7 +3,7 @@
 
 `development_plan_standards.md` section M clause 2 requires every gate to name at least
 one committed seeded mutant it must turn red. This module is that mutant set for the
-twelve artifact-policy rules: one authored negative per rule, each asserted to be
+fifteen artifact-policy rules: one authored negative per rule, each asserted to be
 reported **at its own rule**, so a rule that silently stops working fails here rather
 than passing an audit it no longer performs. The count follows `policy.RULES`; adding a
 rule without a negative here leaves it unproven and the surface join reports it.
@@ -22,7 +22,7 @@ from pathlib import Path
 import artifact_policy as policy
 import attestation
 import attestation_negative_corpus
-import phase0_artifact_lint as legacy
+import artifact_manifest_lint as legacy
 
 
 def _rules(findings) -> set[str]:
@@ -87,7 +87,13 @@ def negative_r4_docker_context() -> policy.Report:
 
 
 def negative_r5_write_guard() -> policy.Report:
-    """A generator that writes beneath an authored root, and one that declares it."""
+    """A write beneath an authored root, a generator declaring one, and a renamed root.
+
+    The third case is the one the guard used to miss. A root that is no longer a
+    directory — renamed, mistyped, or moved — simply dropped out of `authored_snapshot`,
+    so the guard covered less and said nothing. Here the root is renamed on a synthetic
+    tree and the audit must redden.
+    """
     report = policy.Report()
     policy.audit_write_guard(
         report,
@@ -101,6 +107,11 @@ def negative_r5_write_guard() -> policy.Report:
             "gen/runs/phase_99/run.json": {"tools/synthetic_gate.py"},
         },
     )
+    with tempfile.TemporaryDirectory(prefix="amoebius-authored-root-negative-") as directory:
+        tree = Path(directory)
+        (tree / "documents").mkdir()
+        (tree / "renamed-away").mkdir()  # what `src` became
+        policy.audit_authored_roots(report, tree, ("documents", "src"))
     return report
 
 
@@ -218,6 +229,86 @@ def negative_r12_corpora() -> policy.Report:
     return report
 
 
+SYNTHETIC_TREE = """
+```text
+amoebius/
+├── .gitignore                            authored worktree policy
+├── DEVELOPMENT_PLAN/**                   authored plan suite
+├── src/**                                authored Haskell library source
+├── test/**                               authored specs, fixtures, goldens
+├── gen/**                                every reproducible local output; ignored by both contracts
+└── dist-*/**                             Cabal build roots; ignored by both contracts
+```
+
+Two roots fix a second level:
+
+```text
+test/
+├── fixture/**                            authored positive inputs
+└── golden/**                             authored expected outputs
+```
+"""
+
+
+def synthetic_tree() -> policy.TargetTree:
+    """A four-root tree in the section-2 dialect, so the negatives never read doctrine.
+
+    The parser is exercised against the real document by the audit itself; here the point
+    is the membership decision, and a fixture tree makes each rejection reason explicit
+    instead of implying it from whatever the repository happens to contain today.
+    """
+    return policy.parse_target_tree(policy.TREE_HEADING + SYNTHETIC_TREE + policy.TREE_STOP)
+
+
+def negative_r13_target_tree() -> policy.Report:
+    """An undeclared root, a stray root-level file, and a non-role second level."""
+    report = policy.Report()
+    policy.audit_target_tree(
+        report,
+        [
+            "src/Amoebius/Kernel.hs",
+            "gen/runs/documentation_suite/ledger.json",
+            "scratch/notes.md",
+            "LICENCE.txt",
+            "test/fixtures/spec.dhall",
+            "test/golden/rendered.yaml",
+        ],
+        synthetic_tree(),
+    )
+    return report
+
+
+def negative_r14_ignore_partition() -> policy.Report:
+    """A rule beneath an authored root, one for a root the tree lacks, both syntaxes."""
+    report = policy.Report()
+    policy.audit_ignore_partition(
+        report,
+        [
+            (".gitignore", "/gen/"),
+            (".gitignore", "*.o"),
+            (".gitignore", "/src/generated/"),
+            (".gitignore", "/scratch/"),
+            (".dockerignore", "gen/**"),
+            (".dockerignore", "**/*.o"),
+            (".dockerignore", "scratch"),
+        ],
+        synthetic_tree(),
+    )
+    return report
+
+
+def negative_r15_phase_ordinal() -> policy.Report:
+    """An ordinal in a path, a build flag, a suite name, and an ignore rule."""
+    report = policy.Report()
+    policy.audit_phase_ordinals(
+        report,
+        ["tools/phase7_gate.py", "DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md", "src/Kernel.hs"],
+        "flag phase7-fold-mutant\n  default: False\ntest-suite phase7-capacity-spec\nlibrary amoebius\n",
+        [(".gitignore", "/.phase7-store/"), (".gitignore", "/gen/")],
+    )
+    return report
+
+
 NEGATIVES = {
     "r1": ("registry_class_unowned", negative_r1_registry),
     "r2": ("tracked_reproducible_copy", negative_r2_provenance),
@@ -231,6 +322,9 @@ NEGATIVES = {
     "r10": ("retired_predecessor_name", negative_r10_terminology),
     "r11": ("gate_leaks_output", negative_r11_no_leak),
     "r12": ("stale_corpus_exemption", negative_r12_corpora),
+    "r13": ("path_outside_target_tree", negative_r13_target_tree),
+    "r14": ("ignore_rule_off_tree", negative_r14_ignore_partition),
+    "r15": ("phase_ordinal_in_name", negative_r15_phase_ordinal),
 }
 
 

@@ -24,7 +24,7 @@ main=do
  assert (not (routable epochA drained)) "stale registration routable"
  putStrLn "phase57-ui-rollout-reconnect: PASS-SCOPED (watermark-gated A-B-A; stale-plan reload; scoped cursor resume; registration drain; live Gateway/Pulsar/browser UNVERIFIED)"
 verifyCustody=do
- rows<-lines<$>readFile "test/phase0_oracle_manifest.tsv"
+ rows<-lines<$>readFile "test/oracle/preimplementation_artifacts.tsv"
  let xs=filter(Text.isPrefixOf "57\t".Text.pack) rows
  assertEqual "custody" 7(length xs)
  forM_ xs $ \r->case splitTabs r of
