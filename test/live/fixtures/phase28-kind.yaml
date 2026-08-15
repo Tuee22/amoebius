@@ -3,11 +3,13 @@ apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
   extraMounts:
-  - hostPath: /var/tmp/amoebius-phase28-retained/mounts
-    containerPath: /amoebius-retained
+  - hostPath: /var/tmp/amoebius-phase28-retained/mounts/pg-witness
+    containerPath: /amoebius-retained/pg-witness
+  - hostPath: /var/tmp/amoebius-phase28-retained/mounts/minio-witness
+    containerPath: /amoebius-retained/minio-witness
   - hostPath: /var/tmp/amoebius-phase28-audit
     containerPath: /var/log/kubernetes/audit
-  - hostPath: /home/matthewnowak/amoebius/test/live/fixtures/phase28-audit-policy.yaml
+  - hostPath: __AMOEBIUS_ROOT__/test/live/fixtures/phase28-audit-policy.yaml
     containerPath: /kind/phase28-audit-policy.yaml
 kubeadmConfigPatches:
 - |

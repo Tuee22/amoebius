@@ -206,10 +206,10 @@ table `rebind_witness(nonce text)`; (2) a single-ordinal MinIO StatefulSet in na
 one PVC `miniodata` on one retained PV, marker = one object `rebind/nonce` in bucket `rebind-witness`. Each
 witness executes the exact Phase-25 baked binary from the run-audited Phase-25 OCI archive, restored
 locally into each fresh node under the Phase-25 digest with `imagePullPolicy: Never`; an OS-boundary observer
-confirms zero public-registry pull during the cycle. The Phase-25 Postgres image contains the executable but
-not its `/usr/share/postgresql/17` catalog, so the harness dynamically resolves a compatible Debian package,
-records its observed identity/checksum under `gen/toolchain/`, and mounts only its package-data tree read-only;
-it does not replace or modify the baked executable.
+confirms zero public-registry pull during the cycle. The harness reads the PostgreSQL executable and major
+version from Phase 25's independently authored bake-inventory expectation, then uses that exact baked
+executable and its matching baked catalog. It carries no second package resolver and cannot drift to a
+different PostgreSQL major than the sealed image.
 
 **oracle-pinned oracles (independent of the implementation).**
 - `test/live/fixtures/storageclass_expected.yaml` — the exact single-StorageClass golden (Sprint 28.1),

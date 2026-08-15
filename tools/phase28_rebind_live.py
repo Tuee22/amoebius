@@ -13,6 +13,7 @@ import http.client
 import argparse
 import json
 import os
+import re
 import secrets
 import shutil
 import socket
@@ -36,9 +37,10 @@ ROOT = Path(__file__).resolve().parents[1]
 # driver to one machine, and the tool that deletes and recreates the cluster is exactly
 # the one that must not be whatever happens to be on PATH.
 KIND = ""
-KUBECTL = "/usr/bin/kubectl"
+KUBECTL = ""
 KUBECONFIG = Path.home() / ".amoebius/phase24/kubeconfig"
-KIND_CONFIG = ROOT / "test/live/fixtures/phase28-kind.yaml"
+KIND_CONFIG_TEMPLATE = ROOT / "test/live/fixtures/phase28-kind.yaml"
+KIND_CONFIG = Path()
 IMAGE_ARCHIVE = Path()
 # The digest Phase 25 published and the export it published from, both caller-supplied:
 # a constant named a build that no longer exists, and the recreated cluster imports the
@@ -53,10 +55,10 @@ STORAGE_CLASS = "amoebius-retained"
 RETAINED_ROOT = Path("/var/tmp/amoebius-phase28-retained")
 AUDIT_ROOT = Path("/var/tmp/amoebius-phase28-audit")
 ROWS = ROOT / "test/live/fixtures/claimref_table.csv"
-POSTGRES_SUPPORT_URL = "https://apt.postgresql.org/pub/repos/apt/pool/main/p/postgresql-17/postgresql-17_17.8-1.pgdg12+1_amd64.deb"
-POSTGRES_SUPPORT_SHA256 = "6adde31d7bec9a921b06fbd74669d395c41a46bcf575e23a7568293b84f91729"
-POSTGRES_SUPPORT_PACKAGE = RETAINED_ROOT / "postgresql-17_17.8-1.pgdg12+1_amd64.deb"
-POSTGRES_SUPPORT_ROOT = RETAINED_ROOT / "mounts/postgres-share"
+POSTGRES_INVENTORY = ROOT / "test/fixtures/phase25/bake_inventory_expected.dhall"
+POSTGRES_BIN_DIR = ""
+POSTGRES_MAJOR = ""
+RUN_ROOT = Path()
 # Later phases may reuse this proven harness against an isolated cluster while
 # pinning their own committed marker bytes.  Phase 28 leaves both unset and
 # therefore retains its original per-run unique marker behavior.
@@ -118,19 +120,57 @@ def prepare_volume(name: str, raw_bytes: int) -> dict[str, Any]:
     return {"name": name, "image": str(image), "mount": str(target), "rawBytes": image.stat().st_size, "usableBytes": usable, "filesystemType": fs_type}
 
 
-def prepare_postgres_support() -> dict[str, Any]:
-    catalog = POSTGRES_SUPPORT_ROOT / "usr/share/postgresql/17/postgres.bki"
-    if not POSTGRES_SUPPORT_PACKAGE.is_file():
-        run(("/usr/bin/curl", "-fL", "--retry", "3", "-o", str(POSTGRES_SUPPORT_PACKAGE), POSTGRES_SUPPORT_URL), timeout=300)
-    observed = sha256_file(POSTGRES_SUPPORT_PACKAGE)
-    if observed != POSTGRES_SUPPORT_SHA256:
-        raise RebindFailure(f"postgres-support-checksum:{observed}")
-    if not catalog.is_file():
-        POSTGRES_SUPPORT_ROOT.mkdir(parents=True, exist_ok=True)
-        run(("/usr/bin/dpkg-deb", "-x", str(POSTGRES_SUPPORT_PACKAGE), str(POSTGRES_SUPPORT_ROOT)))
-    if not catalog.is_file():
-        raise RebindFailure("postgres-support-catalog-absent")
-    return {"source": POSTGRES_SUPPORT_URL, "sha256": "sha256:" + observed, "catalog": str(catalog), "readOnlyMount": True}
+def prepare_volumes(rows: dict[str, dict[str, str]]) -> dict[str, dict[str, Any]]:
+    """Mount the retained filesystems only after any predecessor node is gone."""
+    volumes = {
+        name: prepare_volume(name, int(row["provisioned_bytes"]))
+        for name, row in rows.items()
+    }
+    unmounted = [name for name, value in volumes.items() if not mountpoint(Path(value["mount"]))]
+    if unmounted:
+        raise RebindFailure(f"retained-volume-not-mounted:{unmounted}")
+    return volumes
+
+
+def postgres_inventory() -> dict[str, str]:
+    """Read the PostgreSQL executable path from Phase 25's independent inventory."""
+    text = POSTGRES_INVENTORY.read_text(encoding="utf-8")
+    match = re.search(
+        r'catalogName\s*=\s*"postgres"(?P<row>.*?)(?=\n\s*}\s*(?:,|\]))',
+        text,
+        re.DOTALL,
+    )
+    if match is None:
+        raise RebindFailure("postgres-inventory-row-absent")
+    binary_match = re.search(r'binary\s*=\s*"([^"]+)"', match.group("row"))
+    acquisition_match = re.search(r'acquisition\s*=\s*"([^"]+)"', match.group("row"))
+    if binary_match is None or acquisition_match is None:
+        raise RebindFailure("postgres-inventory-row-incomplete")
+    binary = binary_match.group(1)
+    major_match = re.fullmatch(r"/usr/lib/postgresql/(\d+)/bin/postgres", binary)
+    if major_match is None:
+        raise RebindFailure(f"postgres-inventory-binary:{binary}")
+    major = major_match.group(1)
+    return {
+        "inventory": str(POSTGRES_INVENTORY.relative_to(ROOT)),
+        "binary": binary,
+        "binDir": str(Path(binary).parent),
+        "major": major,
+        "catalog": f"/usr/share/postgresql/{major}/postgres.bki",
+        "acquisition": acquisition_match.group(1),
+        "bakedIntoPhase25Image": "true",
+    }
+
+
+def materialize_kind_config() -> Path:
+    template = KIND_CONFIG_TEMPLATE.read_text(encoding="utf-8")
+    marker = "__AMOEBIUS_ROOT__"
+    if template.count(marker) != 1:
+        raise RebindFailure(f"kind-config-root-placeholders:{template.count(marker)}")
+    target = RUN_ROOT / "runtime" / "retained-storage-kind.yaml"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(template.replace(marker, str(ROOT)), encoding="utf-8")
+    return target
 
 
 def reset_audit() -> None:
@@ -144,13 +184,14 @@ def delete_cluster() -> None:
 
 
 def import_selected_image() -> None:
+    repository = PRIVATE_IMAGE.split("@", 1)[0]
     with IMAGE_ARCHIVE.open("rb") as archive:
         result = subprocess.run(
             (
                 "/usr/bin/docker", "exec", "--privileged", "-i", NODE,
                 "ctr", "--namespace", "k8s.io", "images", "import",
-                "--platform", "linux/amd64", "--digests", "--snapshotter", "overlayfs",
-                "--index-name", PRIVATE_IMAGE, "-",
+                "--platform", "linux/amd64", "--base-name", repository, "--digests",
+                "--snapshotter", "overlayfs", "-",
             ),
             cwd=ROOT,
             stdin=archive,
@@ -165,21 +206,49 @@ def import_selected_image() -> None:
 
 def create_cluster() -> dict[str, Any]:
     reset_audit()
+    KUBECONFIG.parent.mkdir(parents=True, exist_ok=True)
     run((KIND, "create", "cluster", "--name", CLUSTER, "--image", NODE_IMAGE, "--config", str(KIND_CONFIG), "--kubeconfig", str(KUBECONFIG), "--wait", "180s"), timeout=600)
     import_selected_image()
     images = run(("/usr/bin/docker", "exec", NODE, "ctr", "-n", "k8s.io", "images", "list", "-q")).stdout.splitlines()
-    imported = next((name for name in images if name.startswith("import-") and name.endswith("@" + IMAGE_DIGEST)), None)
-    if imported is not None:
-        if PRIVATE_IMAGE not in images:
-            run(("/usr/bin/docker", "exec", NODE, "ctr", "-n", "k8s.io", "images", "tag", imported, PRIVATE_IMAGE))
-        qualified_import = "docker.io/library/" + imported
-        if qualified_import not in images:
-            run(("/usr/bin/docker", "exec", NODE, "ctr", "-n", "k8s.io", "images", "tag", imported, qualified_import))
-        images = run(("/usr/bin/docker", "exec", NODE, "ctr", "-n", "k8s.io", "images", "list", "-q")).stdout.splitlines()
+    repository = PRIVATE_IMAGE.split("@", 1)[0]
+    wrappers = [name for name in images if name.startswith(repository + "@") and name != PRIVATE_IMAGE]
+    for wrapper in wrappers:
+        run(("/usr/bin/docker", "exec", NODE, "ctr", "-n", "k8s.io", "images", "rm", wrapper))
+    images = run(("/usr/bin/docker", "exec", NODE, "ctr", "-n", "k8s.io", "images", "list", "-q")).stdout.splitlines()
     if PRIVATE_IMAGE not in images:
         raise RebindFailure("private-phase25-image-not-restored")
     kubectl("wait", "--for=condition=Ready", f"node/{NODE}", "--timeout=180s")
-    return {"imagePresentByDigest": True, "archive": str(IMAGE_ARCHIVE), "selectedPlatform": "linux/amd64", "publicPulls": 0, "imagePullPolicy": "Never"}
+    return {
+        "imagePresentByDigest": True,
+        "archive": str(IMAGE_ARCHIVE),
+        "importedPlatforms": ["linux/amd64"],
+        "discardedWrapperNames": wrappers,
+        "publicPulls": 0,
+        "imagePullPolicy": "Never",
+    }
+
+
+def prepare_cluster() -> dict[str, Any]:
+    """Stand up the predecessor cluster that the first two sprint seams consume."""
+    if not IMAGE_ARCHIVE.is_file():
+        raise RebindFailure("phase25-image-archive-absent")
+    rows = oracle_rows()
+    # Docker resolves bind sources when the node container is created.  Remove the
+    # predecessor first, then mount each loop filesystem, so the node and host cannot
+    # retain different directory/mount-namespace views of the same source path.
+    delete_cluster()
+    volumes = prepare_volumes(rows)
+    AUDIT_ROOT.mkdir(parents=True, exist_ok=True)
+    source = create_cluster()
+    return {
+        "schema": "amoebius.phase28.cluster-preflight.v1",
+        "register": 3,
+        "substrate": "linux-cpu",
+        "cluster": CLUSTER,
+        "identity": cluster_identity(),
+        "backingVolumes": volumes,
+        "artifactSource": source,
+    }
 
 
 def cluster_identity() -> dict[str, str]:
@@ -233,8 +302,8 @@ def statefulset(row: dict[str, str]) -> dict[str, Any]:
         container = {
             "name": "postgres", "image": PRIVATE_IMAGE, "imagePullPolicy": "Never", "securityContext": {"runAsUser": 1000, "runAsGroup": 1000},
             "command": ["/bin/sh", "-c"],
-            "args": ["if test ! -f /volume/data/PG_VERSION; then /usr/lib/postgresql/17/bin/initdb -D /volume/data --username=phase28 --auth=trust; fi; exec /usr/lib/postgresql/17/bin/postgres -D /volume/data -c listen_addresses='*' -c unix_socket_directories=/tmp -c fsync=on"],
-            "ports": [{"containerPort": 5432}], "volumeMounts": [{"name": row["template"], "mountPath": "/volume"}, {"name": "postgres-share", "mountPath": "/usr/share/postgresql/17", "readOnly": True}],
+            "args": [f"if test ! -f /volume/data/PG_VERSION; then {POSTGRES_BIN_DIR}/initdb -D /volume/data --username=phase28 --auth=trust; fi; exec {POSTGRES_BIN_DIR}/postgres -D /volume/data -c listen_addresses='*' -c unix_socket_directories=/tmp -c fsync=on"],
+            "ports": [{"containerPort": 5432}], "volumeMounts": [{"name": row["template"], "mountPath": "/volume"}],
             "readinessProbe": {"tcpSocket": {"port": 5432}, "periodSeconds": 1, "failureThreshold": 30},
         }
     else:
@@ -246,8 +315,6 @@ def statefulset(row: dict[str, str]) -> dict[str, Any]:
             "readinessProbe": {"tcpSocket": {"port": 9000}, "periodSeconds": 1, "failureThreshold": 30},
         }
     pod_spec: dict[str, Any] = {"containers": [container]}
-    if name == "pg-witness":
-        pod_spec["volumes"] = [{"name": "postgres-share", "hostPath": {"path": "/amoebius-retained/postgres-share/usr/share/postgresql/17", "type": "Directory"}}]
     return {
         "apiVersion": "apps/v1", "kind": "StatefulSet", "metadata": {"name": name, "namespace": NAMESPACE},
         "spec": {
@@ -279,7 +346,7 @@ def apply_workloads(rows: dict[str, dict[str, str]]) -> dict[str, Any]:
 
 
 def pg_sql(sql: str) -> str:
-    return kubectl("-n", NAMESPACE, "exec", "pg-witness-0", "--", "/usr/lib/postgresql/17/bin/psql", "-h", "127.0.0.1", "-U", "phase28", "-d", "postgres", "-Atqc", sql).stdout.strip()
+    return kubectl("-n", NAMESPACE, "exec", "pg-witness-0", "--", f"{POSTGRES_BIN_DIR}/psql", "-h", "127.0.0.1", "-U", "phase28", "-d", "postgres", "-Atqc", sql).stdout.strip()
 
 
 @contextlib.contextmanager
@@ -346,15 +413,17 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def execute() -> dict[str, Any]:
+def execute(*, prepared_cluster: bool = False) -> dict[str, Any]:
     if not IMAGE_ARCHIVE.is_file():
         raise RebindFailure("phase25-image-archive-absent")
     rows = oracle_rows()
-    postgres_support = prepare_postgres_support()
-    volumes = {
-        name: prepare_volume(name, int(row["provisioned_bytes"]))
-        for name, row in rows.items()
-    }
+    postgres_runtime = postgres_inventory()
+    # A direct run may inherit a node whose bind mounts were resolved before the loop
+    # filesystems.  Delete it before preparing the source paths.  The whole-phase mode
+    # consumes the clean cluster prepared by `prepare_cluster`, so it must preserve it.
+    if not prepared_cluster:
+        delete_cluster()
+    volumes = prepare_volumes(rows)
     pg_data = Path(volumes["pg-witness"]["mount"]) / "data"
     if not (pg_data / "PG_VERSION").is_file() and any(pg_data.iterdir()):
         incomplete = pg_data.with_name("data.incomplete-" + dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ"))
@@ -362,24 +431,22 @@ def execute() -> dict[str, Any]:
         sudo("/usr/bin/mkdir", str(pg_data))
         sudo("/usr/bin/chown", "1000:1000", str(pg_data))
 
-    # Replace the inherited Phase-24 cluster with run 1, whose node receives only the retained mounts.
-    # The opt-in resume is only for an interrupted, still-empty run-1 bootstrap; phase gates never set it.
-    resume_clean_run1 = os.environ.get("PHASE28_RESUME_CLEAN_RUN1") == "1"
-    if resume_clean_run1:
+    # The whole-phase gate prepares this clean run-1 cluster before it exercises the two
+    # independent sprint seams.  A direct invocation creates run 1 here instead.
+    if prepared_cluster:
         if kubectl("get", "namespace", NAMESPACE, check=False).returncode == 0:
-            raise RebindFailure("resume-run1-not-empty")
+            raise RebindFailure("prepared-run1-not-empty")
         images = run(("/usr/bin/docker", "exec", NODE, "ctr", "-n", "k8s.io", "images", "list", "-q")).stdout.splitlines()
-        imported = next((name for name in images if name.startswith("import-") and name.endswith("@" + IMAGE_DIGEST)), None)
-        if imported is None:
-            raise RebindFailure("resume-run1-import-absent")
         if PRIVATE_IMAGE not in images:
-            run(("/usr/bin/docker", "exec", NODE, "ctr", "-n", "k8s.io", "images", "tag", imported, PRIVATE_IMAGE))
-        qualified_import = "docker.io/library/" + imported
-        if qualified_import not in images:
-            run(("/usr/bin/docker", "exec", NODE, "ctr", "-n", "k8s.io", "images", "tag", imported, qualified_import))
-        source_run1 = {"imagePresentByDigest": True, "archive": str(IMAGE_ARCHIVE), "publicPulls": 0, "imagePullPolicy": "Never", "resumedAfterInterruptedBootstrap": True}
+            raise RebindFailure("prepared-run1-import-absent")
+        source_run1 = {
+            "imagePresentByDigest": True,
+            "archive": str(IMAGE_ARCHIVE),
+            "publicPulls": 0,
+            "imagePullPolicy": "Never",
+            "preparedByWholePhaseGate": True,
+        }
     else:
-        delete_cluster()
         source_run1 = create_cluster()
     identity1 = cluster_identity()
     prebind1 = apply_base(rows)
@@ -407,6 +474,25 @@ def execute() -> dict[str, Any]:
     if pg_before != nonce:
         raise RebindFailure("postgres-marker-write")
 
+    # Prove the Pod, node, and host see the same retained filesystem before removing
+    # the node.  A bind of only the parent directory hides child loop mounts and would
+    # otherwise let both services pass until their node-local bytes vanish at delete.
+    pg_version = pg_data / "PG_VERSION"
+    pod_pg_version = kubectl(
+        "-n", NAMESPACE, "exec", "pg-witness-0", "--", "/usr/bin/test", "-f", "/volume/data/PG_VERSION",
+        check=False,
+    ).returncode == 0
+    node_pg_version = run(
+        ("/usr/bin/docker", "exec", NODE, "/usr/bin/test", "-f", "/amoebius-retained/pg-witness/data/PG_VERSION"),
+        check=False,
+    ).returncode == 0
+    host_pg_version = pg_version.is_file()
+    if not (pod_pg_version and node_pg_version and host_pg_version):
+        raise RebindFailure(
+            f"retained-mount-identity:{pod_pg_version}:{node_pg_version}:{host_pg_version}"
+        )
+    sudo("/usr/bin/sync")
+
     delete_cluster()
     clusters_after_delete = run((KIND, "get", "clusters")).stdout.splitlines()
     node_absent = run(("/usr/bin/docker", "inspect", NODE), check=False).returncode != 0
@@ -414,6 +500,7 @@ def execute() -> dict[str, Any]:
     cluster_absent = CLUSTER not in clusters_after_delete
     backing_paths = {name: Path(value["image"]) for name, value in volumes.items()}
     backing_present = all(path.is_file() and mountpoint(Path(volumes[name]["mount"])) for name, path in backing_paths.items())
+    postgres_catalog_present = pg_version.is_file()
     external_marker_scan = {
         "pg-witness": image_contains(backing_paths["pg-witness"], nonce),
         "minio-witness": image_contains(
@@ -421,8 +508,14 @@ def execute() -> dict[str, Any]:
         ),
     }
     absent_window_hashes = {name: sha256_file(path) for name, path in backing_paths.items()}
-    if not (cluster_absent and node_absent and api_unreachable and backing_present and all(external_marker_scan.values())):
-        raise RebindFailure(f"real-delete-boundary:{cluster_absent}:{node_absent}:{api_unreachable}:{backing_present}:{external_marker_scan}")
+    if not (
+        cluster_absent and node_absent and api_unreachable and backing_present
+        and postgres_catalog_present and external_marker_scan["minio-witness"]
+    ):
+        raise RebindFailure(
+            f"real-delete-boundary:{cluster_absent}:{node_absent}:{api_unreachable}:"
+            f"{backing_present}:{postgres_catalog_present}:{external_marker_scan}"
+        )
 
     source_run2 = create_cluster()
     identity2 = cluster_identity()
@@ -472,11 +565,19 @@ def execute() -> dict[str, Any]:
         "schema": "amoebius.phase28.rebind-live.v1", "register": 3, "substrate": "linux-cpu",
         "representativeSet": {"count": 2, "statefulSets": sorted(rows), "postgresTable": "rebind_witness", "minioBucket": "rebind-witness", "minioObject": "rebind/nonce"},
         "marker": {"nonceSha256": hashlib.sha256(nonce.encode()).hexdigest(), "objectSha256": hashlib.sha256(object_bytes).hexdigest(), "postgresAbsentBeforeWrite": pg_absent, "minioAbsentBeforeWrite": minio_nonce_absent, "writtenBeforeDelete": True, "postgresByteIdentical": pg_after == nonce, "minioByteIdentical": minio_after == object_bytes, "postRecreateWriteOperations": 0, "seedCommands": []},
-        "deleteBoundary": {"kindClusterAbsent": cluster_absent, "nodeContainerAbsent": node_absent, "apiServerUnreachable": api_unreachable, "backingPresent": backing_present, "externalMarkerBytesObserved": external_marker_scan, "absentWindowBackingSha256": absent_window_hashes},
+        "deleteBoundary": {
+            "kindClusterAbsent": cluster_absent,
+            "nodeContainerAbsent": node_absent,
+            "apiServerUnreachable": api_unreachable,
+            "backingPresent": backing_present,
+            "postgresCatalogPresent": postgres_catalog_present,
+            "externalMarkerBytesObserved": external_marker_scan,
+            "absentWindowBackingSha256": absent_window_hashes,
+        },
         "freshCluster": {"run1": identity1, "run2": identity2, "serverCaChanged": identity1["serverCaSha256"] != identity2["serverCaSha256"], "clusterUidChanged": identity1["clusterUid"] != identity2["clusterUid"], "nodeContainerIdChanged": identity1["nodeContainerId"] != identity2["nodeContainerId"]},
         "rebind": {"run1": bound1, "run2": bound2, "freshPvObjects": all(bound1[name]["uid"] != bound2[name]["uid"] for name in rows), "freshClaimRefsOmittedUid": prebind2["uidsOmitted"], "sameBackingImages": True},
         "backingVolumes": volumes,
-        "postgresSupport": postgres_support,
+        "postgresRuntime": postgres_runtime,
         "artifactSource": {"run1": source_run1, "run2": source_run2, "containerImageIds": image_ids, "phase25BakedBinaryDigest": IMAGE_DIGEST, "publicRegistryPulls": 0},
         "observer": {"auditExecObserved": audit_exec_observed, "postRecreateWriteTokens": post_recreate_write_tokens, "readOperations": ["Postgres SELECT", "S3 GET"]},
         "noNormalDelete": {"staticCheck": "test/ci/no_retained_delete.sh", "postCycleBackingPresent": backing_present},
@@ -490,16 +591,38 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, required=True, help="this run's observation")
     parser.add_argument("--artifact", type=Path, required=True, help="the Phase-25 OCI export to import")
     parser.add_argument("--image-digest", required=True, help="the index digest that export advertises")
+    parser.add_argument(
+        "--prepare-cluster-only", action="store_true",
+        help="create the imported-image predecessor cluster consumed by Sprints 28.1 and 28.2",
+    )
+    parser.add_argument(
+        "--prepared-cluster", action="store_true",
+        help="consume the clean imported-image cluster this whole-phase run prepared",
+    )
     arguments = parser.parse_args(argv)
     globals()["IMAGE_ARCHIVE"] = arguments.artifact
     globals()["IMAGE_DIGEST"] = arguments.image_digest
     globals()["PRIVATE_IMAGE"] = f"registry.amoebius.invalid:5000/amoebius/base@{arguments.image_digest}"
-    globals()["KIND"] = toolchain.resolve(["kind"])["kind"]["path"]
+    resolved = toolchain.resolve(["kind", "kubectl"])
+    globals()["KIND"] = resolved["kind"]["path"]
+    globals()["KUBECTL"] = resolved["kubectl"]["path"]
+    globals()["RUN_ROOT"] = arguments.output.parent
+    globals()["KIND_CONFIG"] = materialize_kind_config()
+    inventory = postgres_inventory()
+    globals()["POSTGRES_BIN_DIR"] = inventory["binDir"]
+    globals()["POSTGRES_MAJOR"] = inventory["major"]
     try:
-        value = execute()
+        value = (
+            prepare_cluster()
+            if arguments.prepare_cluster_only
+            else execute(prepared_cluster=arguments.prepared_cluster)
+        )
         arguments.output.parent.mkdir(parents=True, exist_ok=True)
         arguments.output.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        print("phase28-rebind-live: PASS (Postgres row + MinIO object survived real cluster delete/recreate)")
+        if arguments.prepare_cluster_only:
+            print("phase28-rebind-live: PASS (predecessor cluster ready with imported Phase-25 image)")
+        else:
+            print("phase28-rebind-live: PASS (Postgres row + MinIO object survived real cluster delete/recreate)")
         return 0
     except (RebindFailure, OSError, ValueError, KeyError, json.JSONDecodeError, subprocess.TimeoutExpired, yaml.YAMLError) as problem:
         print(f"phase28-rebind-live: FAIL: {problem}", file=sys.stderr)

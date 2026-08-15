@@ -358,6 +358,61 @@ def resolve_github_release(name: str, spec: dict[str, Any]) -> dict[str, Any]:
     return record
 
 
+def resolve_kubernetes_release(name: str, spec: dict[str, Any]) -> dict[str, Any]:
+    """Resolve a Kubernetes release channel and verify the publisher's checksum."""
+    channel_url = f"https://dl.k8s.io/release/{spec['channel']}.txt"
+    release = fetch(channel_url).decode("utf-8", errors="replace").strip()
+    version = parse_version(release)
+    if not satisfies(version, spec["requirement"]):
+        raise ResolutionError(
+            f"{name}: channel {spec['channel']} offers {release}, "
+            f"which does not satisfy {spec['requirement']}"
+        )
+    platform_token = spec.get("platform_map", {}).get(host_platform())
+    if platform_token is None:
+        raise ResolutionError(f"{name}: no binary mapping for platform {host_platform()}")
+    binary_path = spec["binary_path"].replace("{platform}", platform_token)
+    url = f"https://dl.k8s.io/release/{release}/{binary_path}"
+    checksum_text = fetch(url + ".sha256").decode("utf-8", errors="replace").strip()
+    checksum_match = re.search(r"(?<![0-9a-f])[0-9a-f]{64}(?![0-9a-f])", checksum_text.lower())
+    if checksum_match is None:
+        raise ResolutionError(f"{name}: publisher checksum document named no sha256 digest")
+    expected = checksum_match.group(0)
+    payload = fetch(url)
+    observed = hashlib.sha256(payload).hexdigest()
+    if observed != expected:
+        raise ResolutionError(f"{name}: publisher checksum mismatch for {release}")
+    TOOL_BIN.mkdir(parents=True, exist_ok=True)
+    target = TOOL_BIN / spec["install_name"]
+    temporary = target.with_suffix(".partial")
+    temporary.write_bytes(payload)
+    temporary.chmod(0o755)
+    temporary.replace(target)
+    reported = run_version([str(target), *spec["version_argv"]])
+    reported_match = re.search(r"^\s*gitVersion:\s*v?(\d+(?:\.\d+)*)", reported, re.MULTILINE)
+    reported_version = (
+        tuple(int(part) for part in reported_match.group(1).split("."))
+        if reported_match is not None
+        else version
+    )
+    if not satisfies(reported_version, spec["requirement"]):
+        raise ResolutionError(
+            f"{name}: downloaded {reported.splitlines()[0]}, which does not satisfy {spec['requirement']}"
+        )
+    return {
+        "source": "kubernetes-release",
+        "channel": spec["channel"],
+        "release": release,
+        "url": url,
+        "path": str(target),
+        "version": ".".join(str(part) for part in reported_version),
+        "reported": reported.splitlines()[0],
+        "requirement": spec["requirement"],
+        "observed": {"size": len(payload), "sha256": observed},
+        "publisher_checksum": expected,
+    }
+
+
 def resolve_hackage(name: str, spec: dict[str, Any], resolved: dict[str, Any]) -> dict[str, Any]:
     cabal = resolved.get("cabal", {}).get("path")
     if cabal is None:
@@ -421,6 +476,7 @@ RESOLVERS = {
     "host": lambda name, spec, resolved: resolve_host(name, spec),
     "node-package": lambda name, spec, resolved: resolve_node_package(name, spec),
     "github-release": lambda name, spec, resolved: resolve_github_release(name, spec),
+    "kubernetes-release": lambda name, spec, resolved: resolve_kubernetes_release(name, spec),
     "hackage": resolve_hackage,
 }
 

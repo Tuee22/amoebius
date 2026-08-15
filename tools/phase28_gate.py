@@ -156,6 +156,12 @@ def execute_sprints(evidence: Path, image: str, artifact: Path, index_digest: st
     """
     evidence.mkdir(parents=True, exist_ok=True)
     run([
+        sys.executable, "tools/phase28_rebind_live.py",
+        "--prepare-cluster-only", "--output", str(evidence / "cluster-preflight.json"),
+        "--artifact", str(artifact), "--image-digest", index_digest,
+    ], timeout=7200)
+    print("  ok    predecessor cluster ready with the Phase-25 image imported")
+    run([
         sys.executable, "tools/phase28_sprint28_1_live.py",
         "--output", str(evidence / "sprint-28.1-live.json"),
     ], timeout=7200)
@@ -167,6 +173,7 @@ def execute_sprints(evidence: Path, image: str, artifact: Path, index_digest: st
     print("  ok    sprint 28.2 retained volume bound and rebound")
     run([
         sys.executable, "tools/phase28_rebind_live.py",
+        "--prepared-cluster",
         "--output", str(evidence / "rebind-live.json"),
         "--artifact", str(artifact), "--image-digest", index_digest,
     ], timeout=14400)
@@ -264,9 +271,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     outcomes: dict[str, str] = {}
 
     try:
-        resolved = toolchain.resolve(["cabal", "ghc", "kind"])
-        print("toolchain side — cabal, ghc, and kind resolved from authored requirements\n")
-        for name in ("cabal", "ghc", "kind"):
+        resolved = toolchain.resolve(["cabal", "ghc", "kind", "kubectl"])
+        print("toolchain side — cabal, ghc, kind, and kubectl resolved from authored requirements\n")
+        for name in ("cabal", "ghc", "kind", "kubectl"):
             record = resolved[name]
             print(f"  ok    {name:<8} {record['version']:<12} satisfies {record['requirement']}")
         results["toolchain"] = True
