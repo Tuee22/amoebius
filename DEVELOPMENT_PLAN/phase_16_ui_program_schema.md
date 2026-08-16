@@ -37,15 +37,23 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/ui_program_schema_gate.py` passed all twelve sides: three
+positives, ten exact negatives, graph/wire oracles, eight coverage classes, the compile seal, network
+isolation, all six mutants, and all ten metrics pass; 29 surfaces join to 46 enumerated items. The
+project-contained attestation is `sha256:2016b288fe76e5fa1d609d203269c7b17ea81c202eaa341f18e12ea99440e2b9`,
+bound to source snapshot `sha256:7c8debd11c8ba98a…`; Phase 16 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:89b25d3a…`
-(1941 non-ignored files) and published verified external attestation
+(1941 non-ignored files) and published a verified pre-containment external attestation
 `sha256:4580dcd430b5608434256528d6500153f7aac31b5bfe27bcf1b484e53ab44c9c`.
 
 **Observed progress — 2026-08-13:** **Policy-conformant.** The bounded UI-program schema result is unchanged
 and re-run: three positive programs decode and ten negatives fail with exact diagnostics, the graph reference
 and normalized wire golden hold byte-identically, the eight generated classes each clear their coverage floor,
 the checked-program compile seal rejects its illegal construction, and all six seeded mutants redden. Evidence
-and the ledger move into `gen/runs/phase_16/<run-id>/`, and 30 run-time items partition one-to-one across the
+and the ledger move into `.build/runs/phase_16/<run-id>/`, and 30 run-time items partition one-to-one across the
 schema's foreclosure surfaces.
 
 **Each foreclosure surface takes both halves of its evidence.** The bound check joins its negative fixture
@@ -84,7 +92,7 @@ plan emission, a browser/server interpreter, a second register, or a substrate.
 gate itself is pure and does not consume simulated effects.
 **Substrate:** none — no host, browser, network, credential, provider service, or cluster is contacted.
 **Register:** 1 — pure/golden.
-**Gate:** `python3 tools/phase16_gate.py` passes the Phase-0 corpus, structural and
+**Gate:** `python3 tools/ui_program_schema_gate.py` passes the Phase-0 corpus, structural and
 wire oracles, coverage floors, constructor compile seal, network observer, six explicit mutant-red runs, and
 ledger check.
 
@@ -133,20 +141,20 @@ noninterference.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 16.1: Bounded `UiSource` and total structural checker ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/amoebius/ui/`, `src/Amoebius/Ui/{Source,Check}.hs`, and
-`test/ui/Phase16UiProgramSchemaSpec.hs` — built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+`test/ui/UiProgramSchemaSpec.hs` — built and validated.
+**Blocked by**: None.
 **Independent Validation**: the suite reads the Phase-0 decisions and independent graph/wire tables. Three
 positives and ten exact negatives pass, eight generated classes meet their floors, and all six mutants fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/dsl_doctrine.md`,

@@ -30,7 +30,7 @@
     "ApplyBootstrapSchedulerSystem:Deployment/amoebius-capacity-scheduler/amoebius-capacity",
     "ObserveBootstrapCapacitySchedulerReady:Scheduler/amoebius-capacity",
     "CutoverBootstrapController:Deployment/amoebius-phase27-gate/bootstrap-addon",
-    "InstallManagedCapacityAuthority:Node/amoebius-phase24-control-plane",
+    "InstallManagedCapacityAuthority:Node/amoebius-bootstrap-coordinator-control-plane",
     "ObserveManagedCapacityReady:Scheduler/amoebius-capacity",
     "Reserve:CapacityReservation/amoebius-phase27-gate/guarded-pod",
     "MarkBindingInFlight:CapacityReservation/amoebius-phase27-gate/guarded-pod",

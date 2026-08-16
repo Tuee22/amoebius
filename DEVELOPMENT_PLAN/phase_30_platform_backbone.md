@@ -32,7 +32,7 @@ The complete gate passed on 2026-08-10.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 30.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming ⏸️](#sprint-301-metallb-loadbalancer--minio-object-substrate--registry-s3-driver-rehoming-)
+- [Sprint 30.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming 🔄](#sprint-301-metallb-loadbalancer--minio-object-substrate--registry-s3-driver-rehoming-)
 - [Sprint 30.2: Pulsar native-protocol backbone + size-triggered S3 offload drill ⏸️](#sprint-302-pulsar-native-protocol-backbone--size-triggered-s3-offload-drill-)
 - [Sprint 30.3: The backbone HA bring-up gate ⏸️](#sprint-303-the-backbone-ha-bring-up-gate-)
 - [Documentation Requirements](#documentation-requirements)
@@ -42,9 +42,19 @@ The complete gate passed on 2026-08-10.
 
 ## Phase Status
 
+⏸️ Blocked — Phase 30's 2026-08-16 live validation proved that the Phase-25 image omitted Pulsar's separately published S3 offloader bundle. Phase 25 is reopened; Phases 26–29 must be revalidated in numerical order before this phase resumes. The registry executable correction and private-fixture containment hardening remain implemented.
+
+**Superseded active record:** opened 2026-08-16 after the amended Phase-29 Vault/PKI gate sealed as
+`sha256:4f029c9f8fe3fa35da3da2cd1a6b94cdc7f2d2a808a821540d290848d6130dcb`.
+The current work audits and migrates the backbone gate in sprint order, dynamically consumes the verified
+Phase-25 image handoff and exact Phase-29 predecessor, confines every generated/live byte to `.build/**` or
+the marker-owned `.test_data/**` run, and reruns the full Register-3 contract before Phase 31 opens.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Observed artifact migration — 2026-08-11:** `test/fixtures/phase30/expected-base-digest.txt` duplicates the
 Phase-25 image observation. It must be removed. Image identity remains a live provenance check against the
@@ -312,7 +322,7 @@ Phase 25) is present as a rehoming consumer of MinIO, not re-delivered here.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current revalidation rule.** Sprint 30.1 is active; later sprints remain blocked by their preceding sprint. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -320,13 +330,13 @@ Phase 25) is present as a rehoming consumer of MinIO, not re-delivered here.
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 30.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming ⏸️
+## Sprint 30.1: MetalLB LoadBalancer + MinIO object substrate + registry S3-driver rehoming 🔄
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Active; prior capability footprint retained for migration and current validation
 **Implementation**: `src/Amoebius/Platform/LoadBalancer.hs`,
 `src/Amoebius/Platform/Minio.hs`, `src/Amoebius/Platform/Registry.hs`,
 `tools/phase30_backbone_live.py`
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: Phase 29 gate.
 **Independent Validation**: the numbered Validation list below, which needs nothing from Sprints 30.2–30.3:
 MetalLB advertising an address, a MinIO put/get through the gateway, the registry serving from the S3 driver
 with every Phase-25 digest copied and still pullable, the independent MinIO capacity corpus, and the exact
@@ -442,9 +452,9 @@ None.
 
 ## Sprint 30.2: Pulsar native-protocol backbone + size-triggered S3 offload drill ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Blocked by Sprint 30.1; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Platform/Pulsar.hs`, `tools/phase30_backbone_live.py`
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: Sprint 30.1.
 **Independent Validation**: the numbered Validation list below, which needs only the Sprint-30.1 MinIO
 substrate: an HA native-protocol bring-up that fails closed against a sealed Vault, a dedup round-trip
 exercised rather than configured, the size-triggered offload drill, the independent BookKeeper and ZooKeeper
@@ -520,10 +530,10 @@ None.
 
 ## Sprint 30.3: The backbone HA bring-up gate ⏸️
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Blocked by Sprint 30.2; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Platform/Backbone.hs`, `test/platform/Phase30BackboneSpec.hs`,
 `test/platform/Phase30BackboneLive.hs`, `tools/phase30_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: Sprint 30.2.
 **Independent Validation**: the numbered Validation list below, run on a fresh single-node linux-cpu `kind`
 cluster: the whole set up, HA-shaped, and reachable in-cluster; both data planes round-tripping; the registry
 on the S3 driver; the offload holding the hot tier; no image request leaving for a public registry; and a

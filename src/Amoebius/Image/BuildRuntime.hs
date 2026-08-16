@@ -27,15 +27,13 @@ import GHC.Generics (Generic)
 import System.Exit (ExitCode (..))
 import System.FilePath (isAbsolute, isRelative, makeRelative, normalise, splitDirectories, (</>))
 
-boundedBuildkitImage :: Text
-boundedBuildkitImage =
-  "moby/buildkit:buildx-stable-1@sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec"
-
 -- | The only Phase-25.1 build process shape.  Platforms and OCI output are
 -- fixed here so callers cannot quietly turn an admitted multi-arch build into
 -- two unrelated image builds or a daemon-local image export.
 data BuildRequest = BuildRequest
   { buildDockerExecutable :: FilePath
+  , buildDockerHost :: Text
+  , buildTestRoot :: FilePath
   , buildDockerConfig :: FilePath
   , buildBuilderName :: Text
   , buildDockerfile :: FilePath
@@ -57,6 +55,7 @@ data BuildEnactmentResult = BuildSucceeded | BuildFailed Int
 
 data BuildRuntimeError
   = BuildRequestPathNotAbsolute FilePath
+  | BuildRequestDockerHostInvalid Text
   | BuildRequestBuilderNameInvalid Text
   | BuildRequestBuildkitImageInvalid Text
   | BuildRequestPathOutsideScratch FilePath
@@ -123,6 +122,7 @@ enactBuildAction action observed runProcess
 renderBuildRuntimeError :: BuildRuntimeError -> Text
 renderBuildRuntimeError problem = case problem of
   BuildRequestPathNotAbsolute _ -> "BuildRequestPathNotAbsolute"
+  BuildRequestDockerHostInvalid _ -> "BuildRequestDockerHostInvalid"
   BuildRequestBuilderNameInvalid _ -> "BuildRequestBuilderNameInvalid"
   BuildRequestBuildkitImageInvalid _ -> "BuildRequestBuildkitImageInvalid"
   BuildRequestPathOutsideScratch _ -> "BuildRequestPathOutsideScratch"
@@ -135,6 +135,7 @@ validateRequest :: BuildRequest -> Either BuildRuntimeError ()
 validateRequest request = do
   mapM_ requireAbsolute
     [ buildDockerExecutable request
+    , buildTestRoot request
     , buildDockerConfig request
     , buildDockerfile request
     , buildContext request
@@ -143,7 +144,14 @@ validateRequest request = do
     , buildScratchRoot request
     , buildBuildkitConfig request
     ]
-  if buildBuildkitImage request /= boundedBuildkitImage
+  socketPath <- case Text.stripPrefix "unix://" (buildDockerHost request) of
+    Just value
+      | isAbsolute (Text.unpack value) -> Right (Text.unpack value)
+    _ -> Left (BuildRequestDockerHostInvalid (buildDockerHost request))
+  case requireWithin (buildTestRoot request) socketPath of
+    Right () -> Right ()
+    Left _ -> Left (BuildRequestDockerHostInvalid (buildDockerHost request))
+  if not (validBuildkitImage (buildBuildkitImage request))
     then Left (BuildRequestBuildkitImageInvalid (buildBuildkitImage request))
     else Right ()
   if all validBuilderName
@@ -176,6 +184,23 @@ validBuilderName :: Text -> Bool
 validBuilderName value =
   not (Text.null value)
     && Text.all (\character -> isAlphaNum character || character `elem` ['-', '_', '.']) value
+
+-- | Builder channels are resolved by the boundary on every run.  The typed
+-- request therefore fixes the allowed repository and requires an immutable
+-- sha256 digest, but must not freeze yesterday's resolved digest into source.
+-- A channel tag may be retained for readability; Docker still addresses the
+-- manifest by the digest after the @ separator.
+validBuildkitImage :: Text -> Bool
+validBuildkitImage value =
+  let (repositoryAndTag, digest) = Text.breakOn "@" value
+      tag = Text.stripPrefix "moby/buildkit:" repositoryAndTag
+      repositoryAllowed =
+        repositoryAndTag == "moby/buildkit"
+          || maybe False validBuilderName tag
+   in repositoryAllowed
+        && Text.length digest == 72
+        && "@sha256:" `Text.isPrefixOf` digest
+        && Text.all (`elem` ("0123456789abcdef" :: String)) (Text.drop 8 digest)
 
 buildInvocations :: BuildRequest -> [(FilePath, [String])]
 buildInvocations request =
@@ -229,7 +254,9 @@ buildInvocations request =
  where
   docker arguments =
     ( buildDockerExecutable request
-    , ["--config", buildDockerConfig request] <> arguments
+    , [ "--host", Text.unpack (buildDockerHost request)
+      , "--config", buildDockerConfig request
+      ] <> arguments
     )
 
 runInvocations

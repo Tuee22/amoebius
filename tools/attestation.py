@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""The external-attestation adapter for amoebius phase gates.
+"""The project-contained attestation adapter for amoebius phase gates.
 
 `documents/engineering/repository_layout_doctrine.md` section 5 requires each gate to
-emit its evidence under `gen/runs/**` and upload an **immutable** attestation to an
-evidence store outside Git, binding the source snapshot, phase contract, command,
+emit its evidence under `.build/runs/**` and retain an **immutable** attestation in the
+project-local `.build/evidence-store/**`, binding the source snapshot, phase contract, command,
 resolved dependency graph, toolchain, substrate, checks, mutants, coverage, cleanup,
 and raw-observation digests.
 
@@ -21,9 +21,8 @@ The bundles a conforming store must refuse live in `tools/attestation_negative_c
 because a corpus has to contain the defect it seeds and this adapter must stay fully
 scanned by the repository audit.
 
-The default backend is a local content-addressed directory outside the repository.
-A deployment swaps it for object storage by supplying a `Store`-compatible object; the
-gate only needs `put` and `verify`.
+The default backend is the repository's local content-addressed evidence directory.
+No ambient environment variable or user-home default may redirect it outside amoebius.
 
     python3 tools/attestation.py --self-test
 """
@@ -35,9 +34,12 @@ import hashlib
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 SCHEMA = 1
+ROOT = Path(__file__).resolve().parent.parent
+BUILD_TMP = ROOT / ".build" / "tmp"
 
 REQUIRED_KEYS = {
     "schema",
@@ -161,9 +163,7 @@ class Store:
 
 
 def default_store() -> Store:
-    configured = os.environ.get("AMOEBIUS_EVIDENCE_STORE")
-    root = Path(configured) if configured else Path.home() / ".local" / "share" / "amoebius" / "evidence"
-    return Store(root)
+    return Store(ROOT / ".build" / "evidence-store")
 
 
 def sample_bundle() -> dict:
@@ -190,12 +190,13 @@ def sample_bundle() -> dict:
 
 
 def run_self_test() -> bool:
-    import tempfile
-
     from attestation_negative_corpus import negative_corpus
 
     ok = True
-    with tempfile.TemporaryDirectory(prefix="amoebius-attest-selftest-") as directory:
+    BUILD_TMP.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(
+        prefix="amoebius-attest-selftest-", dir=BUILD_TMP
+    ) as directory:
         store = Store(Path(directory))
         positive = sample_bundle()
         problems = schema_check(positive)
@@ -232,7 +233,7 @@ def run_self_test() -> bool:
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description="The amoebius external-attestation adapter.")
+    ap = argparse.ArgumentParser(description="The amoebius project-contained attestation adapter.")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args(argv)
     if args.self_test:

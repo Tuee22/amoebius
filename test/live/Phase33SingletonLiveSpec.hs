@@ -25,7 +25,7 @@ verify expected evidence = do
   equal ["schema"] ("amoebius.phase33.singleton-live.v1" :: Text)
   equal ["register"] (3 :: Int)
   equal ["substrate"] ("linux-cpu" :: Text)
-  equal ["prerequisites", "retainedCluster"] ("amoebius-phase24" :: Text)
+  equal ["prerequisites", "retainedCluster"] ("amoebius-bootstrap-coordinator" :: Text)
   true ["historyCapacity", "withinEngineSystemReserve"]
   positive ["historyCapacity", "retainedByteCapacity"]
   true ["artifacts", "staticallyLinked"]

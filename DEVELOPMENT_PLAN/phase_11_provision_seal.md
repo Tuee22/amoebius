@@ -44,15 +44,23 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/provision_seal_gate.py` passed all ten sides: 26 activation,
+planner, provision, and mutant items, all ten mutants, all twelve metrics, and the honesty ledger pass; 34
+surfaces join to 42 enumerated items. The project-contained attestation is
+`sha256:308b526838567e092e59afdff70e48337acd988bb39f67f857e95357f7fc21b5`, bound to source snapshot
+`sha256:450cd22ff1ff6667…`; Phase 11 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:78503b2cb8dc1a0a…`
-(1936 non-ignored files) and published verified external attestation
+(1936 non-ignored files) and published a verified pre-containment external attestation
 `sha256:46f666a4abf03ac312c5f90f695e87670dbe1855f8d068e1152f3e5b991d1cb8`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: 18
 inherited capability positives provision, both infrastructure-planner paths hold, the creation plan validates
 under CAS and enacts against its readback, the render source set is one equal-keyed map across four activation
 stages, ten specific negatives redden at their tags, both property boundaries hold exact-versus-one-short, and
-all ten seeded mutants redden. Evidence and the ledger move into `gen/runs/phase_11/<run-id>/`, and 26
+all ten seeded mutants redden. Evidence and the ledger move into `.build/runs/phase_11/<run-id>/`, and 26
 run-time items — four activation witnesses, two planner cases, ten provision cases, and ten mutant names —
 partition one-to-one across the claim surfaces.
 
@@ -135,7 +143,7 @@ What is **not** here:
 expanded deployment composes and fits its declared target, not that any provider came up. The live realization
 of every provider and the jit-resolve of every engine are marked **UNVERIFIED**, owned by the live band.
 
-**Gate:** `python3 tools/phase11_gate.py` passed on no substrate, Register 1.
+**Gate:** `python3 tools/provision_seal_gate.py` passed on no substrate, Register 1.
 It covers both planner paths, 18 provision positives, ten specific negatives, two boundary properties, and ten
 mutants. The complete apparatus is named in [`## Gate integrity`](#gate-integrity).
 
@@ -313,20 +321,20 @@ each one-resource-or-one-byte-short minimally-differing pair rejects, exercising
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 11.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/Provision.hs` implements the planner, supply/result types, internal
 demand derivation, validation/enaction, observed readback, and receipt-bound context. It imports no renderer.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: pre-existing standalone and forest supplies return `NoInfrastructureRequired`.
 Creation returns one exact action batch; fresh snapshot validation and exact readback construct the context.
 Replay, stale snapshots, missing identities, and promised identities reject. QuickCheck compares internally
@@ -369,7 +377,7 @@ The whole sprint (✅ Done).
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/Provision.hs` implements `provision` and the opaque seal.
 `src/Amoebius/Capacity/RuntimeStorage.hs` supplies scope-indexed metadata and node runtime/image accounting.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: all nine arms under both shapes retain independently counted desired instances,
 runtime rows, provider objects, and intents. Exact runtime backing accepts and one byte short rejects.
 Monitoring, accelerator, controller-child, elastic, and four prior-reference failures return distinct tags.
@@ -478,7 +486,7 @@ The whole sprint (✅ Done).
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/RenderSource.hs` implements opaque, identity-keyed sources,
 their four activation stages, and the checked source-set constructor without importing a renderer.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: the source domain equals provider objects plus four globals. Keys equal embedded
 identities, witnesses independently fix owners, and all four activation stages appear. Duplicate, omitted,
 key-mismatched, owner-mismatched, activation-mismatched, and missing-stage candidates reject.
@@ -521,10 +529,10 @@ The whole sprint (✅ Done).
 ## Sprint 11.4: The provision-seal property/corpus + the Register-1 gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/capability/{ProvisionProps,RuntimeStorageBindingProps,ProvisionSealGate}.hs`,
-`tests/oracle/phase11/`, `tests/mutants/phase11/`, the paired Dhall corpus, and `tools/phase11_gate.py`.
+**Implementation**: `test/spec/capability/{ProvisionProps,RuntimeStorageBindingProps,ProvisionSealGate}.hs`,
+`test/oracle/provision_seal/`, `test/mutant/provision_seal/`, the paired Dhall corpus, and `tools/provision_seal_gate.py`.
 The 18 per-arm/shape fixtures remain inherited from [Phase 10](phase_10_capability_bind.md).
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: `cabal test provision-seal-spec` covers 18 positives, two planner paths, ten exact
 negative tags, four activation stages, and two boundary properties. The phase gate runs all ten mutants
 individually, checks complete locus coverage, emits retained evidence, and validates the hashed ledger.
@@ -547,8 +555,8 @@ UNVERIFIED.
   against their declared targets, the pre-existing and creation `ProvisionTargetSupply` boundary fixtures, and
   the ten named seal-locus negatives. A committed exhaustiveness unit check asserts every positive provisions
   and every negative returns a `Left`.
-- The property battery (`test/capability/ProvisionProps.hs`,
-  `test/capability/RuntimeStorageBindingProps.hs`): `provision` is total and its successful values pass an
+- The property battery (`test/spec/capability/ProvisionProps.hs`,
+  `test/spec/capability/RuntimeStorageBindingProps.hs`): `provision` is total and its successful values pass an
   implementation-independent check that every private `ProvisionedServiceSpec` projection carries placement,
   pod/CSI-slot, mapped/API-object, execution/admission, storage/migration/cache/database/metadata, and (for the
   Phase-12-provided accelerator arms) accelerator witnesses; the structural inventory proves `BoundDeployment`

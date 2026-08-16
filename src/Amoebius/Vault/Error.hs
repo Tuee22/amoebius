@@ -24,7 +24,7 @@ errorTag failure = case failure of
   VaultUninitialized -> "uninitialized"
   VaultSealed -> "sealed"
   VaultPolicyMissing -> "policy-missing"
-#ifdef PHASE29_ERROR_COLLAPSE_MUTANT
+#ifdef VAULT_PKI_ERROR_COLLAPSE_MUTANT
   VaultSecretMissing -> "sealed"
 #else
   VaultSecretMissing -> "secret-missing"
@@ -35,7 +35,7 @@ errorTag failure = case failure of
 -- only varying field, so this log cannot become a secret-presence oracle.
 redactedErrorLog :: VaultError -> Text
 redactedErrorLog failure =
-#ifdef PHASE29_ERROR_COLLAPSE_MUTANT
+#ifdef VAULT_PKI_ERROR_COLLAPSE_MUTANT
   "vault-read-failed tag=" <> errorTag failure <> " path=amoebius/canary"
 #else
   "vault-read-failed tag=" <> errorTag failure <> " detail=redacted"

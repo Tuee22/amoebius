@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # battery the requirement describes.
 DHALL = Path(os.environ["AMOEBIUS_DHALL"]) if os.environ.get("AMOEBIUS_DHALL") else None
 ORACLE = ROOT / "tests" / "oracle" / "gate1"
-RESULTS = ROOT / "gen" / "dhall" / "gate1" / "phase-results.tsv"
+RESULTS = ROOT / ".build" / "dhall" / "gate1" / "phase-results.tsv"
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 
 SCHEMAS = [
@@ -210,8 +210,8 @@ def check_resource_mutants() -> tuple[int, int, int]:
     manifest = (ROOT / "mutants/gate1_resource_mutations.tsv").read_text(encoding="utf-8").splitlines()
     expected_manifest = [
         "family\toracle\toperator\texpected",
-        "resource-field-deletion\ttests/oracle/gate1/resource_fields.csv\tdelete-each-field\tresource-inventory-red",
-        "resource-type-substitution\ttests/oracle/gate1/resource_type_requirements.csv\tdelete-each-required-token\ttype-requirement-red",
+        "resource-field-deletion\ttest/oracle/dhall_gate1_schema/resource_fields.csv\tdelete-each-field\tresource-inventory-red",
+        "resource-type-substitution\ttest/oracle/dhall_gate1_schema/resource_type_requirements.csv\tdelete-each-required-token\ttype-requirement-red",
     ]
     if manifest != expected_manifest:
         raise GateFailure("resource mutation manifest drifted")
@@ -354,7 +354,7 @@ def check_import_policy() -> None:
 
 
 def check_constructor_rejections() -> int:
-    fixtures = sorted((ROOT / "tests/gate1/ctor_reject").glob("*.dhall"))
+    fixtures = sorted((ROOT / "test/fixture/dhall_gate1_schema/ctor_reject").glob("*.dhall"))
     if len(fixtures) < 9:
         raise GateFailure("constructor rejection manifest is incomplete")
     for path in fixtures:
@@ -420,8 +420,8 @@ def main() -> int:
     try:
         if DHALL is None:
             raise GateFailure(
-                "AMOEBIUS_DHALL is unset: run this battery through tools/phase4_gate.py, "
-                "which resolves dhall from toolchain/requirements.json"
+                "AMOEBIUS_DHALL is unset: run this battery through tools/dhall_gate1_schema_gate.py, "
+                "which resolves dhall from tools/toolchain_requirements.json"
             )
         if not DHALL.is_file():
             raise GateFailure(f"pinned dhall executable is missing: {DHALL}")

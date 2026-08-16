@@ -77,18 +77,18 @@ completeStorageMigration
   -> Bool
   -> Either MigrationError [MigrationStep]
 completeStorageMigration provisioned observedDigest deletionObserved
-#ifndef PHASE28_FAKE_VERIFY_MUTANT
+#ifndef RETAINED_STORAGE_FAKE_VERIFY_MUTANT
   | observedDigest /= provisionedMigrationDigest provisioned = Left (ByteVerificationMismatch (provisionedMigrationDigest provisioned) observedDigest)
 #endif
-#ifndef PHASE28_CREDIT_BEFORE_CLEANUP_MUTANT
+#ifndef RETAINED_STORAGE_CREDIT_BEFORE_CLEANUP_MUTANT
   | not deletionObserved = Left OldExtentDeletionNotObserved
 #endif
   | otherwise = Right sequenceSteps
  where
   sequenceSteps =
-#ifdef PHASE28_CUTOVER_BEFORE_VERIFY_MUTANT
+#ifdef RETAINED_STORAGE_CUTOVER_BEFORE_VERIFY_MUTANT
     [CopyJobRan, ClaimCutOver, ReclaimEligible, IndependentByteVerifyPassed, NewVolumeNonceReadBack, OldExtentDeletionObserved, OldExtentRetired]
-#elif defined(PHASE28_CREDIT_BEFORE_CLEANUP_MUTANT)
+#elif defined(RETAINED_STORAGE_CREDIT_BEFORE_CLEANUP_MUTANT)
     [CopyJobRan, IndependentByteVerifyPassed, ClaimCutOver, ReclaimEligible, NewVolumeNonceReadBack, OldExtentRetired, OldExtentDeletionObserved]
 #else
     [CopyJobRan, IndependentByteVerifyPassed, ClaimCutOver, ReclaimEligible, NewVolumeNonceReadBack, OldExtentDeletionObserved, OldExtentRetired]

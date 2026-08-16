@@ -44,9 +44,15 @@ The scoped gate passed on 2026-08-11; full Kubernetes/provider cleanup observati
 
 ## Phase Status
 
+⏸️ Blocked — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
+invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
+repository roots defined by Phase 0. Scope amendments below remain normative.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Scope amendment — 2026-08-13 (one credential type, not two).** `dhall/test/TestCredential.dhall` types its
 credential `{ secretRef : Text, testSimulation : Bool }`, and `src/Amoebius/Test/Credentials.hs` wraps a bare
@@ -195,7 +201,7 @@ The gate is checked against these committed, oracle-pinned criteria (see
    `FaultKind`→invariant map, never declared by the emitter. The emitted ledger's applicable-move projection
    MUST match the independently authored `test/oracles/phase_54_expected_moves.json`; the run-local result then
    records the Runtime-layer (Inject) move as *tested on that substrate* and marks the oracle's
-   applicable-but-unperformed move UNVERIFIED. The generated ledger remains under `gen/runs/`.
+   applicable-but-unperformed move UNVERIFIED. The generated ledger remains under `.build/runs/`.
 5. **Determinism by cache-bypass recompute.** The idempotent-teardown re-run and any "deterministic emit"
    claim recompute in a fresh namespace with any content-addressed store bypassed, and assert the compute path
    executed; a store-hit second run does not satisfy the gate.
@@ -231,6 +237,14 @@ The gate is checked against these committed, oracle-pinned criteria (see
    positive (the standby sharing that one `Failover` subscription) that the broker reports promoted.
 
 ## Gate integrity
+
+The harness first resolves the physical checkout and exclusively creates
+`.test_data/runs/<run-id>/**` with an ownership marker. Every temp directory, kubeconfig, virtual disk,
+retained backing, service state, container-engine data root/runtime directory/volume/cache, and generated
+project spec stays beneath that root; run evidence alone stays beneath `.build/**`. Preflight rejects a root
+inside `.data/**`, any production configuration, a pre-existing marker, and any system/user/global-engine
+fallback. Teardown re-resolves and marker-verifies the exact run root before deletion; changed ownership
+evidence causes quarantine and a red gate, never broader deletion.
 
 **What the acceptance run must show.** The run happens in Register 3, on live infrastructure. Its `.dhall`
 comes from a real `amoebius suggest-test` execution on the gate host: a real Phase-24 host classification,
@@ -654,7 +668,7 @@ Portable contracts are implemented; the full Kubernetes/Pulsar/provider Register
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Test/SuggestTest.hs`,
 `app/Amoebius/Command/SuggestTest.hs` (the `amoebius suggest-test` subcommand), and
-`test/dsl/SuggestTestRuntimeStorageSpec.hs` (planned-slot shapes, component roles/layout backings, node
+`test/spec/dsl/SuggestTestRuntimeStorageSpec.hs` (planned-slot shapes, component roles/layout backings, node
 scope/domain/ownership/grouping, SplitRuntime boundary and alias mutants) (target paths; not yet built)
 **Blocked by**: reopened numeric predecessor gates.
 **Requires**: `cloud-account` — credentials whose authority this sprint *probes*; it asserts what they may

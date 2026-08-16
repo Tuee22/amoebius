@@ -7,7 +7,6 @@ import hashlib
 import json
 import os
 import platform
-import pwd
 import resource
 import shutil
 import stat
@@ -80,7 +79,9 @@ def repository_root() -> Path:
 
 
 def home_directory() -> Path:
-    return Path(pwd.getpwuid(os.getuid()).pw_dir)
+    home = repository_root() / ".build/toolchain/runtime/home"
+    home.mkdir(parents=True, exist_ok=True)
+    return home
 
 
 def load_envelope(root: Path) -> dict[str, Any]:
@@ -199,7 +200,27 @@ def preflight(home: Path) -> Preflight:
 
 
 def _fixed_environment(home: Path) -> dict[str, str]:
-    return {"HOME": str(home), "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8", "PATH": "/usr/bin:/bin"}
+    root = repository_root()
+    temporary = repository_root() / ".build/tmp/bootstrap-coordinator"
+    cache = repository_root() / ".build/toolchain/cache"
+    for path in (temporary, cache):
+        path.mkdir(parents=True, exist_ok=True)
+    return {
+        "HOME": str(home),
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        # Cabal's reviewed source-repository patch hook is an authored helper in
+        # `tools/`.  The remaining entries are immutable system-tool roots; every
+        # writable home, cache, and temporary directory stays inside the checkout.
+        "PATH": f"{root / 'tools'}:/usr/bin:/bin",
+        "TMPDIR": str(temporary),
+        "TMP": str(temporary),
+        "TEMP": str(temporary),
+        "XDG_CACHE_HOME": str(cache / "xdg"),
+        "XDG_CONFIG_HOME": str(home / ".config"),
+        "XDG_DATA_HOME": str(home / ".local/share"),
+        "XDG_STATE_HOME": str(home / ".local/state"),
+    }
 
 
 def _limits(memory_bytes: int) -> None:
@@ -289,7 +310,7 @@ def _admissible(executable: Path | None, argv: Sequence[str], requirement: str, 
 
 def ensure_tools(envelope: dict[str, Any], root: Path, home: Path) -> ToolPaths:
     if platform.system().lower() != "linux" or platform.machine().lower() not in {"x86_64", "amd64"}:
-        raise BootstrapCoordinatorError("phase24-bootstrap-coordinator-requires-linux-amd64")
+        raise BootstrapCoordinatorError("bootstrap-coordinator-requires-linux-amd64")
     candidates = candidate_paths(home)
     requirements = bootstrap_toolchain.load_requirements(root)
     apt_get = _first_executable(candidates["apt_get"])
@@ -365,24 +386,59 @@ def ensure_tools(envelope: dict[str, Any], root: Path, home: Path) -> ToolPaths:
     return ToolPaths(apt_get, ghcup, ghc, cabal, kubectl, kind)  # type: ignore[arg-type]
 
 
+def cabal_update_arguments(root: Path) -> list[str]:
+    """Refresh only the package index, never resolve the checkout's project."""
+    return [
+        f"--store-dir={root / '.build/cabal-store'}",
+        "update",
+        "--ignore-project",
+        f"--builddir={root / '.build/dist-newstyle/bootstrap-coordinator-update'}",
+    ]
+
+
+def cabal_build_arguments(root: Path, tools: ToolPaths, jobs: str) -> list[str]:
+    """Place Cabal's global and command-scoped flags on their 3.18 boundaries."""
+    return [
+        f"--store-dir={root / '.build/cabal-store'}",
+        "build",
+        f"--builddir={root / '.build/dist-newstyle/bootstrap-coordinator'}",
+        f"-j{jobs}",
+        f"--with-compiler={tools.ghc}",
+        "./amoebius.cabal:exe:amoebius",
+    ]
+
+
+def cabal_list_bin_arguments(root: Path, tools: ToolPaths) -> list[str]:
+    return [
+        f"--store-dir={root / '.build/cabal-store'}",
+        "list-bin",
+        f"--builddir={root / '.build/dist-newstyle/bootstrap-coordinator'}",
+        f"--with-compiler={tools.ghc}",
+        "./amoebius.cabal:exe:amoebius",
+    ]
+
+
 def build_binary(envelope: dict[str, Any], root: Path, home: Path, tools: ToolPaths) -> Path:
     build = envelope["build"]
     memory = int(build["memory_bytes"])
     jobs = str(int(build["concurrency"]))
     package_indexes = (
+        root / ".build/toolchain/cache/xdg/cabal/packages/hackage.haskell.org/01-index.tar",
         home / ".cache/cabal/packages/hackage.haskell.org/01-index.tar",
         home / ".cabal/packages/hackage.haskell.org/01-index.tar",
     )
     if not any(path.is_file() for path in package_indexes):
         _validated_mutation(envelope, root, "build")
-        run_absolute(tools.cabal, ["update"], home=home, memory_bytes=memory, cwd=root)
+        run_absolute(tools.cabal, cabal_update_arguments(root), home=home, memory_bytes=memory, cwd=root)
     _validated_mutation(envelope, root, "build")
     run_absolute(
-        tools.cabal, ["build", "exe:amoebius", f"-j{jobs}", f"--with-compiler={tools.ghc}"],
+        tools.cabal,
+        cabal_build_arguments(root, tools, jobs),
         home=home, memory_bytes=memory, cwd=root,
     )
     output = run_absolute(
-        tools.cabal, ["list-bin", "exe:amoebius", f"--with-compiler={tools.ghc}"],
+        tools.cabal,
+        cabal_list_bin_arguments(root, tools),
         home=home, memory_bytes=memory, cwd=root,
     )
     binary = Path(output.strip())

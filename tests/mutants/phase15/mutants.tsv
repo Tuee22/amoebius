@@ -1,2 +1,0 @@
-id	surface	expected
-m1-dropped-partition-handling	test/sim/mutants/dropped_partition_handling/DroppedPartitionMutant.hs	Violated:NoActOnStaleRead

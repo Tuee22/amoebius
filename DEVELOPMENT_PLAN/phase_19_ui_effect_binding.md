@@ -37,8 +37,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/ui_effect_binding_gate.py` passed all eleven sides: seven
+ports, two trusted links, eight exact errors, thirteen coverage classes, all seven mutants, all twelve metrics,
+and four closed-sum plus independent key-set checks pass; 55 surfaces join to 85 enumerated items. The
+project-contained attestation is `sha256:7856f436a05c393072bd2fabfc62fe77c7c07a40bc85f8c3c526b50515b2ae7d`,
+bound to source snapshot `sha256:27a64549485f9ff0…`; Phase 19 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:2fb7ae466ee82194…`
-(1944 non-ignored files) and published verified external attestation
+(1944 non-ignored files) and published a verified pre-containment external attestation
 `sha256:470c58ccbca52b5e580058c7e086a5b22d5af0bc506ee58d14e397529903587d`.
 
 **Observed progress — 2026-08-13:** **Policy-conformant.** The effect-binding result is unchanged and re-run:
@@ -46,7 +54,7 @@ seven ports exact-join their handler, capability, scope, idempotency, and audit 
 imports neither production binder, two named links resolve to fixed HTTPS targets, all eight pinned bind
 errors, eight link negatives, and three bounded-input negatives refuse at their own tag with an empty trace,
 thirteen generated classes clear their 5% floor, and all seven seeded mutants redden. Evidence and the ledger
-move into `gen/runs/phase_19/<run-id>/`, and 55 surfaces join two-way to 85 run-time enumerated items.
+move into `.build/runs/phase_19/<run-id>/`, and 55 surfaces join two-way to 85 run-time enumerated items.
 
 **The four closed sums are checked as sums.** `PortEffect`, `CapabilityName`, `ScopeRequirement`, and
 `RetryPolicy` each have a check that reads the declaration, compares the arms against the contract's list, and
@@ -90,7 +98,7 @@ interpreter, a live provider, a second register, or a substrate.
 **Dependency:** Phase 18 — the sealed action registry, scoped authority transition, and stale-authority refusal.
 **Substrate:** none — no network, credential, provider process, browser, or cluster is contacted.
 **Register:** 1 — pure/golden.
-**Gate:** `python3 tools/phase19_gate.py` passes the Phase-0-pinned port/handler/capability corpus,
+**Gate:** `python3 tools/ui_effect_binding_gate.py` passes the Phase-0-pinned port/handler/capability corpus,
 independent binding relation, exact-key checks, negative tags, coverage floors, isolated execution, and every
 seeded mutant in [Gate integrity](#gate-integrity). Handler and provider runtime enforcement stays UNVERIFIED.
 
@@ -140,24 +148,24 @@ prove a handler's implementation, current provider state, live authorization, or
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 19.1: Seal the effect-handler-capability relation ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`,
-`test/ui/Phase19UiEffectBindingSpec.hs`, `test/ui/EffectBindingReference.hs`, and `tools/phase19_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
+`test/ui/UiEffectBindingSpec.hs`, `test/ui/EffectBindingReference.hs`, and `tools/ui_effect_binding_gate.py`
+**Blocked by**: None.
 **Independent Validation**: `cabal test ui-effect-binding-spec`
 compares the private binder's serialized result with the Phase-0 finite relation, verifies empty failure
 traces, and requires every named mutant to fail. The full hermetic gate is
-`python3 tools/phase19_gate.py`.
+`python3 tools/ui_effect_binding_gate.py`.
 **Docs to update**:
 `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/service_capability_doctrine.md`,

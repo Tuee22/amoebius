@@ -26,7 +26,7 @@ data RecoveryAction = RepairReservationBound | ReleaseUnboundReservation | KeepR
   deriving anyclass (NFData)
 
 recoverReservation :: ReservationRecord -> BindingRecoveryObservation -> RecoveryAction
-#ifdef PHASE27_BOUND_DELETED_RESTART_MUTANT
+#ifdef CAPACITY_SCHEDULER_BOUND_DELETED_RESTART_MUTANT
 recoverReservation record _
   | reservationState record == Bound = ReleaseUnboundReservation
 #endif

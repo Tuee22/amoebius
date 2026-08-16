@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """The universal artifact-hygiene half of every amoebius phase gate.
 
-`development_plan_standards.md` section S attaches ten postconditions to *every* phase
+`development_plan_standards.md` section S attaches fourteen postconditions to *every* phase
 gate. Sixty-five gates cannot each re-implement them: the copies drift, and a gate whose
 copy drifted is a gate that passes for the wrong reason. This module owns that half once.
 
 What a phase still owns, and this module deliberately does not:
 
   * its capability checks — the actual claim the phase makes
-  * its authored surface expectation under `test/phase_NN_surface_expectations.tsv`
+  * its authored surface expectation under `test/oracle/`
   * its seeded mutants and its independent oracles
 
 What this module owns:
@@ -16,14 +16,17 @@ What this module owns:
   * the run bundle location and the run id
   * the two-way surface join between a run-time enumeration and the authored expectation
   * the proven/tested/assumed ledger, emitted into the run bundle and schema-checked
-  * the external attestation, bound to the source-snapshot digest
+  * the project-contained attestation, bound to the source-snapshot digest
+  * the closed-root and outside-host inventory check
   * the authored-root write guard bracketing the whole run
   * the pass/fail report
 
 Typical use:
 
     gate = PhaseGate(phase=2, contract="DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md",
-                     command="python3 tools/phase2_gate.py", register="1", substrate="none",
+                     command="python3 tools/formal_model_kernel_gate.py",
+                     expectations="test/oracle/formal_model_kernel_surfaces.tsv",
+                     register="1", substrate="none",
                      sides=("model", "mutant", ...))
     gate.begin()
     results = {...}                      # the phase's own capability sides
@@ -49,13 +52,14 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import artifact_policy  # noqa: E402
 import attestation  # noqa: E402
 import ledger_lint  # noqa: E402
+import containment  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 
 # The three universal sides this module contributes. A phase appends its own names before
 # these, so the report reads capability-first and hygiene-last.
-UNIVERSAL_SIDES = ("surface", "ledger", "attestation", "write-guard")
+UNIVERSAL_SIDES = ("surface", "ledger", "attestation", "containment", "write-guard")
 
 
 def rel(path: Path | str) -> str:
@@ -78,6 +82,7 @@ class PhaseGate:
         phase: int,
         contract: str,
         command: str,
+        expectations: str | None = None,
         register: str,
         substrate: str,
         sides: Iterable[str],
@@ -89,11 +94,16 @@ class PhaseGate:
         self.substrate = substrate
         self.sides = tuple(sides) + UNIVERSAL_SIDES
         self.tag = f"phase_{phase:02d}"
-        self.expectations = ROOT / "test" / f"{self.tag}_surface_expectations.tsv"
-        self.surfaces_path = ROOT / "gen" / "test-surfaces" / f"{self.tag}.json"
-        self.run_dir = ROOT / "gen" / "runs" / self.tag / run_id()
-        self.corpora = ROOT / "gen" / "test-corpora" / self.tag
+        self.expectations = (
+            ROOT / expectations
+            if expectations is not None
+            else ROOT / "test" / f"{self.tag}_surface_expectations.tsv"
+        )
+        self.surfaces_path = ROOT / ".build" / "test-surfaces" / f"{self.tag}.json"
+        self.run_dir = ROOT / ".build" / "runs" / self.tag / run_id()
+        self.corpora = ROOT / ".build" / "test-corpora" / self.tag
         self._before: dict[str, str] = {}
+        self._before_host: containment.HostInventory | None = None
         self._ledger_path: Path | None = None
 
     # -- lifecycle ---------------------------------------------------------
@@ -105,6 +115,7 @@ class PhaseGate:
         rather than whichever part remembered to be careful.
         """
         self._before = artifact_policy.authored_snapshot()
+        self._before_host = containment.host_inventory()
         self.run_dir.mkdir(parents=True, exist_ok=True)
 
     # -- surface join ------------------------------------------------------
@@ -237,13 +248,13 @@ class PhaseGate:
         coverage: list[Mapping[str, str]] | None = None,
         left_resources: bool = False,
     ) -> bool:
-        """Bind this run to its source snapshot and retain the bundle outside Git.
+        """Bind this run to its source snapshot and retain it beneath `.build/`.
 
         The binding is the digest of every non-ignored file as the run saw it. Whether
         that source is committed, and when, is the operator's business and no part of the
         gate (`development_plan_standards.md` section S, commit timing).
         """
-        print("\nattestation side — external retention\n")
+        print("\nattestation side — project-contained retention\n")
         if self._ledger_path is None:
             print("  FAIL  no ledger was emitted, so there is nothing to bind")
             return False
@@ -286,6 +297,30 @@ class PhaseGate:
         self.reference = reference
         return True
 
+    # -- containment ------------------------------------------------------
+
+    def containment_side(self) -> bool:
+        print("\ncontainment side — closed roots and outside-host inventory\n")
+        if self._before_host is None:
+            print("  FAIL  gate did not capture its initial host inventory")
+            return False
+        after = containment.host_inventory()
+        problems = containment.host_inventory_problems(self._before_host, after)
+        for problem in problems:
+            print(f"  FAIL  {problem}")
+        for path in (self.surfaces_path, self.run_dir, self.corpora):
+            try:
+                containment.require_state_path(path, "build", actor="production")
+            except containment.ContainmentError as error:
+                problems.append(str(error))
+                print(f"  FAIL  {error}")
+        if after.observation_errors:
+            for error in after.observation_errors:
+                print(f"  note  {error}")
+        if not problems:
+            print("  ok    gate output is beneath .build/ and the outside-host inventory is unchanged")
+        return not problems
+
     # -- write guard and report -------------------------------------------
 
     def write_guard_side(self) -> bool:
@@ -313,7 +348,7 @@ class PhaseGate:
         observations: Mapping[str, str] | None = None,
         extra_status: Mapping[str, bool] | None = None,
     ) -> int:
-        """Run the four universal sides and report.
+        """Run the five universal sides and report.
 
         Every phase's tail is identical, so it lives here rather than in sixty-five copies
         that would drift apart one edit at a time.
@@ -322,14 +357,24 @@ class PhaseGate:
         status = surface_status(surfaces, rows, evidence)
         status.update(extra_status or {})
         results["ledger"] = self.ledger_side(surfaces, layers, status)
+        # Containment and the authored-root write guard are claims the immutable
+        # record must carry, so decide them before constructing that record.  The
+        # retired order stored both as failures even when the final report printed
+        # PASS.  The attestation check itself is marked pass in the candidate: the
+        # method returns true only after that exact candidate is stored and its
+        # content address verifies.
+        results["containment"] = self.containment_side()
+        results["write-guard"] = self.write_guard_side()
+        attested_checks = dict(results)
+        attested_checks["attestation"] = True
         results["attestation"] = self.attestation_side(
             toolchain=toolchain,
             dependencies=dependencies,
-            checks=results,
+            checks=attested_checks,
             mutants=mutants,
             observations=observations,
+            left_resources=not results["containment"],
         )
-        results["write-guard"] = self.write_guard_side()
         return self.report(results)
 
     def report(self, results: Mapping[str, bool]) -> int:

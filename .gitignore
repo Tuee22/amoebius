@@ -4,7 +4,13 @@
 # intends is how a second home for a generated class survives review. The rules covering
 # section 2.2 migration surfaces are temporary and retire with the root they cover.
 
-# Canonical generated root, and the migration surfaces still written by later phases.
+# Canonical contained-state roots. Production and test state are both local but have
+# different teardown authority; neither is a source or container-context input.
+/.build/
+/.data/
+/.test_data/
+
+# Pre-containment migration surfaces; remove these rules with their legacy paths.
 /gen/
 /DEVELOPMENT_PLAN/evidence/
 /test/enumeration/
@@ -19,11 +25,8 @@ npm-shrinkwrap.json
 pnpm-lock.yaml
 go.sum
 
-# Haskell and formal-model build output. The build-root pattern is the tree's own
-# `dist-*/**` root, so a clone is clean without a personal ignore configuration.
-/dist-*/
-.ghc.environment.*
-cabal.project.local
+# Haskell and formal-model build output. Cabal roots and discovery scratch are
+# redirected beneath `.build/**`; only source-adjacent compiler products need classes.
 *.o
 *.hi
 *.dyn_o
@@ -32,17 +35,7 @@ cabal.project.local
 *.tla
 *.cfg
 
-# Haskell tooling scratch. cabal and hie-bios — the project-discovery library HLS uses —
-# write hash-named exec shims into the directory they are invoked from. Each hardcodes a
-# resolved developer-home path and a resolved GHC version, so it is machine-specific
-# generated output that is meaningless on another host and never a repository input. These
-# regenerate whenever an editor opens the project, so they are excluded rather than swept.
-/ghc-pkg-*
-/repl-wrapper-*
-/wrapper-*
-
-# JavaScript and PureScript build output.
-/node_modules/
+# JavaScript and PureScript legacy build output below the authored UI root.
 /ui-runtime/.spago/
 /ui-runtime/output/
 /ui-runtime/dist/
@@ -51,12 +44,6 @@ cabal.project.local
 # and must never become repository inputs.
 __pycache__/
 *.py[cod]
-
-# Tool acquisition.
-/toolchain/bin/
-/toolchain/runtime/
-/toolchain/downloads/
-/toolchain/cache/
 
 # Runtime output written beside a run.
 *.log

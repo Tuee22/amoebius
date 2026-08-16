@@ -1,0 +1,21 @@
+{
+  "schema": "amoebius.base-image-registry.builder-channels.v1",
+  "images": {
+    "buildkit": {
+      "channel": "moby/buildkit:buildx-stable-1",
+      "requiredPlatforms": ["linux/amd64", "linux/arm64"]
+    },
+    "go": {
+      "channel": "golang:1.25-bookworm",
+      "requiredPlatforms": ["linux/amd64", "linux/arm64"]
+    },
+    "python": {
+      "channel": "python:3.12-bookworm",
+      "requiredPlatforms": ["linux/amd64", "linux/arm64"]
+    },
+    "haskell": {
+      "channel": "haskell:9.12.4-bookworm",
+      "requiredPlatforms": ["linux/amd64", "linux/arm64"]
+    }
+  }
+}

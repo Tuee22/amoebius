@@ -210,8 +210,8 @@ def evidence_domain(*, fresh: bool) -> None:
 def no_live_residue() -> dict[str, str]:
     namespace = subprocess.run((KUBECTL, "--kubeconfig", str(Path.home() / ".amoebius/phase24/kubeconfig"), "get", "namespace", "phase49-system"), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, timeout=60)
     clusters = subprocess.run((KIND, "get", "clusters"), text=True, stdout=subprocess.PIPE, check=False, timeout=60).stdout.splitlines()
-    require(namespace.returncode != 0 and clusters == ["amoebius-phase24"], f"external-residue:{namespace.stdout}:{clusters}")
-    return {"name": "external-cleanup-readback", "command": "namespace and kind inventories", "output": "no Phase-49 namespace; only retained amoebius-phase24 remains", "result": "PASS"}
+    require(namespace.returncode != 0 and clusters == ["amoebius-bootstrap-coordinator"], f"external-residue:{namespace.stdout}:{clusters}")
+    return {"name": "external-cleanup-readback", "command": "namespace and kind inventories", "output": "no Phase-49 namespace; only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:

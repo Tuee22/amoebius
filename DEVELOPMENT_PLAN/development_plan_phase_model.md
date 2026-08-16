@@ -38,7 +38,7 @@ One vocabulary, used in the README Phase Overview, in each phase's **Phase Statu
 
 | Marker | Meaning |
 |--------|---------|
-| ✅ **Done** | Delivered; the redesigned gate passed against a recorded source snapshot and its external attestation verified. |
+| ✅ **Done** | Delivered; the redesigned gate passed against a recorded source snapshot and its repository-local attestation verified. |
 | 🔄 **Active** | In progress now. |
 | 📋 **Planned** | Specified, not started. (The default for every phase and sprint pre-implementation.) |
 | ⏸️ **Blocked** | Waiting on a named earlier-or-same-phase sprint or an external prerequisite. |
@@ -57,7 +57,7 @@ passed current gate. The tracker uses only these progress terms:
 | **No footprint observed** | The audit found no implementation path attributable to the phase. Absence is not proof that no implementation exists outside the audit boundary. |
 | **Observed footprint** | At least one attributable source, test, gate, or generated migration artifact exists; completeness and correctness are not established. |
 | **Known partial** | The footprint exists and the phase contract or static inspection names a missing seam, target, provider, observer, or validation layer. |
-| **Policy-conformant** | The current phase gate passed in numeric order against a recorded source snapshot, including [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate), and its external attestation verified. Only this term is compatible with ✅ Done. |
+| **Policy-conformant** | The current phase gate passed in numeric order against a recorded source snapshot, including [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate), and its repository-local attestation verified. Only this term is compatible with ✅ Done. |
 
 The tracker attaches a date and audit boundary to every progress summary. Doctrine may describe a target or a
 specifically labelled historical observation, but it never converts progress into status.
@@ -133,7 +133,7 @@ phase discharges them. This front-loading introduces no forward dependency and d
 contiguous-numbering / no-fractional-phase-id rule ([§E](#e-one-canonical-phase-model)): the design phase keeps its own integer id and its
 own single-substrate (`none`) gate.
 
-**A ✅ Done flip references verified external evidence.** A phase moves to Done only when its gate runs from
+**A ✅ Done flip references verified repository-local evidence.** A phase moves to Done only when its gate runs from
 a recorded source snapshot, satisfies [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate), and its immutable external
 attestation verifies. The tracker's Done row carries that attestation's reference — the identifier the sealing
 run's bundle was stored under — so the evidence is locatable without copying any generated record into
@@ -147,7 +147,7 @@ Markdown.
 marker in a phase's README Phase-Overview row and the marker in that phase doc's `## Phase Status` line **must be identical**; the documentation lint checks this equality and fails on drift.
 
 **The proven/tested/assumed ledger is generated, schema-checked, and externally retained.** Every gate emits
-the ledger under `gen/runs/`; no ledger or evidence copy is committed. The external attestation binds it to
+the ledger under `.build/runs/`; no ledger or evidence copy is committed. The repository-local attestation binds it to
 the committed source tree and phase contract. The ledger names the reached register and marks every layer
 outside that register UNVERIFIED. [`testing_doctrine.md` §4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
 owns its schema and retention boundary.
@@ -190,7 +190,7 @@ both keep the discipline checkable rather than bending it:
 ## N. Reopening and amending a phase
 
 [§C](#c-status-vocabulary) names five status markers and [§K](#k-honesty-proven--tested--assumed) defines one
-transition: a phase moves **to** ✅ Done only after the redesigned gate and external attestation verify. This
+transition: a phase moves **to** ✅ Done only after the redesigned gate and repository-local attestation verify. This
 section defines reverse and lateral moves so changing a gated phase is recorded rather than silent.
 
 **Reopening is permitted, and a reopened phase may change its validation criteria outright.** A closed phase

@@ -49,7 +49,8 @@ which document to open first.
   header block, SSoT / no-duplication, the proven/tested/assumed honesty discipline, the third-person tone, and
   the `§N` anchor-link conventions.
 - **[`engineering/repository_layout_doctrine.md`](./engineering/repository_layout_doctrine.md)** — the complete
-  authored/generated repository tree and the ignore, dependency-resolution, and evidence-retention rules.
+  authored/generated repository tree; the closed `.build`/`.data`/`.test_data` roots; and the project-engine,
+  test-secrets, ignore, dependency-resolution, and local evidence rules.
 
 ## Where status, progress, and phase order live
 

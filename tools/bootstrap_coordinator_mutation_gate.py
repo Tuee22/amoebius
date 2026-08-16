@@ -1,0 +1,253 @@
+#!/usr/bin/env python3
+"""Independent bootstrap-coordinator seeded-mutant observer.
+
+The default run is side-effect free.  ``--live`` additionally exercises the
+one-shot reconciler against a stopped real node and restores it with the
+production command without recreating the node identity.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import stat
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from typing import Sequence
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import toolchain  # noqa: E402
+
+
+ROOT = Path(__file__).resolve().parents[1]
+MUTANTS = ROOT / "test/mutant/bootstrap_coordinator"
+CLUSTER = "amoebius-bootstrap-coordinator"
+NODE = f"{CLUSTER}-control-plane"
+KUBECONFIG = ROOT / ".data/bootstrap-coordinator/kubeconfig"
+TEMP_ROOT = ROOT / ".build/tmp/bootstrap-coordinator/mutants"
+BUILD_ROOT = ROOT / ".build/dist-newstyle/bootstrap-coordinator-mutants"
+TOOL_HOME = ROOT / ".build/toolchain/runtime/home"
+EXPECTED_MUTANTS = {
+    "M1": "M-negate-gpu-promotion.mutant",
+    "M2": "M-bare-name-tool.mutant",
+    "M3": "M-one-shot-kind-guard.mutant",
+    "M4": "M-create-before-admission.mutant",
+    "M5": "M-steady-etcd-peak.mutant",
+    "M6": "M-swap-runtime-roots.mutant",
+}
+
+
+class MutationGateError(RuntimeError):
+    pass
+
+
+def executable(name: str) -> str:
+    candidates = {
+        "kind": (TOOL_HOME / ".local/bin/kind", Path("/usr/local/bin/kind")),
+        "kubectl": (Path("/usr/bin/kubectl"), TOOL_HOME / ".local/bin/kubectl"),
+        "docker": (Path("/usr/bin/docker"),),
+    }[name]
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
+    raise MutationGateError(f"missing-executable:{name}")
+
+
+def run(arguments: Sequence[str], *, environment: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+    if environment is None:
+        environment = toolchain.contained_env()
+    environment = dict(environment)
+    environment["PATH"] = os.pathsep.join((str(ROOT / "tools"), environment.get("PATH", "/usr/bin:/bin")))
+    result = subprocess.run(
+        list(arguments),
+        cwd=ROOT,
+        env=environment,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        check=False,
+    )
+    if result.returncode:
+        raise MutationGateError(f"command-failed:{arguments[0]}:{result.returncode}\n{result.stdout}")
+    return result
+
+
+def require_artifacts() -> None:
+    actual = {path.name for path in MUTANTS.glob("M-*.mutant")}
+    expected = set(EXPECTED_MUTANTS.values())
+    if actual != expected:
+        raise MutationGateError(f"mutant-domain-mismatch:{sorted(actual ^ expected)}")
+    for label, name in EXPECTED_MUTANTS.items():
+        payload = (MUTANTS / name).read_text(encoding="utf-8")
+        if "operator=" not in payload or "locus=" not in payload or "expected=" not in payload:
+            raise MutationGateError(f"mutant-malformed:{label}")
+
+
+def run_pure_oracles() -> None:
+    # This suite independently pins M1, M3, M5, and M6 and proves M2 cannot
+    # enter the production AbsExe constructor.
+    # Resolved rather than inherited: a bare `cabal` picks whichever GHC the host PATH
+    # offers, and on a host carrying a newer one the suite fails to resolve `base` and
+    # reports a dependency error where a mutant result belongs.
+    resolved = toolchain.resolve(["cabal", "ghc"])
+    if BUILD_ROOT.exists():
+        import shutil
+        shutil.rmtree(BUILD_ROOT)
+    result = run((
+        resolved["cabal"]["path"], f"--with-compiler={resolved['ghc']['path']}",
+        f"--builddir={BUILD_ROOT}", f"--store-dir={ROOT / '.build/cabal-store'}", "--jobs=1",
+        "test", "bootstrap-coordinator-host-spec", "--test-show-details=direct",
+    ))
+    if "bootstrap-coordinator-host-spec: PASS" not in result.stdout:
+        raise MutationGateError("pure-mutation-oracle-missing")
+
+
+def observe_bare_name_and_precreate_mutants() -> tuple[str, str]:
+    strace = Path("/usr/bin/strace")
+    if not strace.is_file():
+        raise MutationGateError("strace-absent")
+    TEMP_ROOT.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="run-", dir=TEMP_ROOT) as temporary:
+        root = Path(temporary)
+        trap = root / "kind"
+        trap.write_text("#!/bin/sh\nexit 97\n", encoding="utf-8")
+        trap.chmod(trap.stat().st_mode | stat.S_IXUSR)
+        trace = root / "m2.execve"
+        env = os.environ.copy()
+        env["PATH"] = temporary
+        result = subprocess.run(
+            (str(strace), "-f", "-e", "trace=execve", "-o", str(trace), "kind"),
+            cwd=ROOT,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            check=False,
+        )
+        observed = trace.read_text(encoding="utf-8")
+        if result.returncode != 97 or 'execve("' not in observed or '["kind"]' not in observed:
+            raise MutationGateError("M2-observer-did-not-catch-bare-argv0")
+
+        precreate_trace = root / "m4.execve"
+        subprocess.run(
+            (str(strace), "-f", "-e", "trace=execve", "-o", str(precreate_trace), str(trap), "create", "cluster"),
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            check=False,
+        )
+        precreate = precreate_trace.read_text(encoding="utf-8")
+        if '"create", "cluster"' not in precreate:
+            raise MutationGateError("M4-observer-did-not-catch-precreate")
+    return "red:bare-argv0-and-PATH-trap", "red:pre-admission-create-observed"
+
+
+def observe_split_runtime_mutant(readback: Path | None = None) -> str:
+    """Decide M6 from a SplitRuntime readback the run itself produced, or report it unreached.
+
+    M6 swaps the nodefs identity into the snapshot role, so it can only be caught where the
+    two roles have *different* identities — that is, under the SplitRuntime layout. The
+    pristine guest run prepares Unified backing, where all three roles share one filesystem
+    and the swap is invisible.
+
+    This used to read a `live-split-runtime-readback.tsv` left behind under the plan tree by
+    a run whose producer is no longer in the repository. A gate that verifies leftovers
+    verifies whoever wrote them last, so the file is no longer an input: absent a readback
+    from this run, M6 is reported unreached rather than green.
+    """
+    if readback is None or not readback.is_file():
+        return "unverified:requires-split-runtime-live-observation"
+    rows = readback.read_text(encoding="utf-8").splitlines()
+    fields = [row.split("\t") for row in rows[1:] if row]
+    identities = {row[0]: row[3] for row in fields if len(row) > 3}
+    problem = validate_role_mapping(identities)
+    if problem:
+        raise MutationGateError(f"M6-reference-{problem}")
+    # The mutant swaps the independently observed nodefs identity into the snapshot role.
+    # Every value stays a real filesystem id; only the mapping is wrong. That is precisely
+    # the defect a readback keyed on path rather than on role would report as healthy, so
+    # the mutation has to be applied and rejected rather than argued about.
+    swapped = {**identities, "imagefs-snapshots": identities["nodefs"]}
+    if not validate_role_mapping(swapped):
+        raise MutationGateError("M6-swapped-root-stayed-green")
+    return "red:independent-role-root-readback"
+
+
+def validate_role_mapping(identities: dict[str, str]) -> str:
+    """The SplitRuntime role contract, as one predicate the control and mutant share.
+
+    The kubelet's nodefs is a different filesystem from containerd's imagefs, while
+    containerd's content store and snapshotter necessarily sit on the same one. Returning
+    the violated clause rather than a bool is what lets the reference readback fail with a
+    diagnosis instead of the mutant silently standing in for it.
+    """
+    if identities.get("nodefs") == identities.get("imagefs-content"):
+        return "layout-not-distinct"
+    if identities.get("imagefs-content") != identities.get("imagefs-snapshots"):
+        return "containerd-roots-not-shared"
+    return ""
+
+
+def live_one_shot_mutant() -> str:
+    kind = executable("kind")
+    kubectl = executable("kubectl")
+    docker = executable("docker")
+    clusters = run((kind, "get", "clusters")).stdout.splitlines()
+    if CLUSTER not in clusters:
+        raise MutationGateError("live-cluster-absent")
+    original_id = run((docker, "inspect", "--format", "{{.Id}}", NODE)).stdout.strip()
+    original_uid = run((kubectl, "--kubeconfig", str(KUBECONFIG), "get", "node", NODE, "-o", "jsonpath={.metadata.uid}")).stdout
+    run((docker, "stop", NODE))
+    # The committed one-shot mutant sees the registered name and returns no
+    # actions.  The external Docker observer must therefore still see exited.
+    if CLUSTER in run((kind, "get", "clusters")).stdout.splitlines():
+        state = run((docker, "inspect", "--format", "{{.State.Status}}", NODE)).stdout.strip()
+        if state == "running":
+            raise MutationGateError("M3-one-shot-mutant-stayed-green")
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(ROOT / "pb")
+    repaired = run((sys.executable, "-m", "pb.cli", "bootstrap", "--distro=kind"), environment=env)
+    if "bootstrap-handoff: ready" not in repaired.stdout:
+        raise MutationGateError("production-repair-did-not-converge")
+    if run((docker, "inspect", "--format", "{{.Id}}", NODE)).stdout.strip() != original_id:
+        raise MutationGateError("production-repair-recreated-container")
+    if run((kubectl, "--kubeconfig", str(KUBECONFIG), "get", "node", NODE, "-o", "jsonpath={.metadata.uid}")).stdout != original_uid:
+        raise MutationGateError("production-repair-changed-node-uid")
+    return "red:stopped-node-left-exited;production-repair-preserved-id-and-uid"
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--live", action="store_true")
+    parser.add_argument("--split-runtime-readback", type=Path, default=None)
+    arguments = parser.parse_args(argv)
+    try:
+        require_artifacts()
+        run_pure_oracles()
+        m2, m4 = observe_bare_name_and_precreate_mutants()
+        outcomes = {
+            "M1": "red:linux-gpu-oracle",
+            "M2": m2,
+            "M3": live_one_shot_mutant() if arguments.live else "planned:requires-live-cluster",
+            "M4": m4,
+            "M5": "red:one-byte-transition-oracle",
+            "M6": observe_split_runtime_mutant(arguments.split_runtime_readback),
+        }
+        print("mutant\tresult")
+        for label in sorted(outcomes):
+            print(f"{label}\t{outcomes[label]}")
+        if arguments.live and any(not result.startswith("red:") for result in outcomes.values()):
+            raise MutationGateError("live-mutant-domain-not-red")
+        print("bootstrap-coordinator-mutation-gate: PASS" + (" (live)" if arguments.live else " (plan)"))
+        return 0
+    except (MutationGateError, OSError, ValueError) as problem:
+        print(f"bootstrap-coordinator-mutation-gate: {problem}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

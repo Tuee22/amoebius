@@ -242,7 +242,7 @@ unique values = case values of
   value : rest -> value : unique (filter (/= value) rest)
 
 advertisedOnFailure :: Bool
-#ifdef PHASE25_RECORD_BEFORE_PUSH_MUTANT
+#ifdef BASE_IMAGE_REGISTRY_RECORD_BEFORE_PUSH_MUTANT
 advertisedOnFailure = True
 #else
 advertisedOnFailure = False

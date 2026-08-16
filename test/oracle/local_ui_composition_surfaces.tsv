@@ -1,0 +1,84 @@
+# Authored expectation for the Phase-23 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. This file replaces the retired committed enumeration,
+# which was a generated projection of the gate rather than an opinion the gate is checked
+# against.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   items     the validation-locus entries and mutant names the run read
+#   metrics   the metric keys in .build/dsl/local-ui-composition/phase-results.tsv
+#   checks    the check ids tools/local_ui_composition_gate.py implements
+#
+# The 47 items are partitioned so each is claimed exactly once. Each of the five mutants
+# joins its own surface beside the locus entry naming its red target.
+#
+# The seven live layers keep one surface each for their locus entry and share one
+# metrics-owned surface for the seven UNVERIFIED metric rows. A metric whose authored value
+# is UNVERIFIED never evidences a surface: matching "UNVERIFIED" against itself is
+# agreement, not evidence, and treating it as a pass is how an unreached layer starts
+# reading as a tested one.
+#
+# Every surface carries at least one id. Nothing this contract names is left standing on an
+# assertion.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+generic-bundle-reuse	checks	generic-bundle-single-artifact
+browser-ui-server-edge-only	checks	browser-edge-source-scan
+server-composition-boundary	checks	ready-handle-boundary-present
+composition-harness-observers	checks	harness-observers-present
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
+single-tenant-authored-application	items	single-source
+multi-tenant-authored-application	items	multi-source
+infernix-shaped-fake-adapter	items	infernix-fake
+jitml-shaped-fake-adapter	items	jitml-fake
+authored-dhall-typecheck	items	bundle-reuse
+single-client-plan-identity	items	single-plan
+multi-client-plan-identity	items	multi-plan
+start-generated-surface	items	surface-start
+observe-generated-surface	items	surface-observe
+use-artifact-generated-surface	items	surface-use
+workflow-running-visible-state	items	visible-running
+artifact-ready-visible-state	items	visible-ready
+fresh-result-visible-state	items	visible-result
+foreign-unavailable-visible-state	items	visible-denial
+ui-server-workflow-start-effect	items	effect-start
+fake-workflow-ready-effect	items	effect-ready
+ui-server-artifact-use-effect	items	effect-use
+ordered-effect-sequence	items	effect-order
+fresh-challenge-in-dom	items	fresh-dom
+fresh-challenge-in-raw-effects	items	fresh-effects
+server-issued-ready-handle	items	handle-issue
+ready-handle-owner-pair	items	handle-owner
+same-tenant-foreign-denial	items	same-tenant-foreign
+foreign-tenant-denial	items	foreign-tenant
+caller-tenant-header-denial	items	tenant-spoof
+non-ready-handle-denial	items	non-ready
+foreign-private-byte-zero	items	private-bytes
+direct-browser-backend-denial	items	direct-backend
+real-chrome-dom-observer	items	browser-edge
+os-network-observer	items	network
+drop-handle-tenant-mutant	items	mutant-handle,M-drop-handle-tenant
+direct-workflow-fetch-mutant	items	mutant-fetch,M-direct-workflow-fetch
+mix-client-server-plan-mutant	items	mutant-plan,M-mix-client-server-plan
+ready-before-receipt-mutant	items	mutant-ready,M-ready-before-receipt
+owner-key-swap-mutant	items	mutant-owner,owner_key_swap
+live-infernix-adapter	items	infernix-live
+live-jitml-adapter	items	jitml-live
+live-keycloak-edge	items	keycloak-live
+live-provider-storage-isolation	items	storage-live
+release-rollout	items	rollout-live
+replica-loss	items	replica-loss
+ha-behavior	items	ha-live
+authored-application-battery	metrics	applications
+generated-authored-action-join	metrics	interactions
+visible-state-battery	metrics	visible
+effect-sequence-battery	metrics	effects
+access-decision-battery	metrics	access
+denial-battery	metrics	denials
+generic-bundle-digest	metrics	bundle
+post-ready-fresh-workflow-challenge	metrics	fresh-challenge
+five-mutant-battery	metrics	mutants
+loopback-only-os-network-observer	metrics	network-observer
+unverified-live-layers	metrics	live-infernix-adapter,live-jitml-adapter,live-keycloak-edge,live-provider-storage-isolation,release-rollout,replica-loss,ha-behavior

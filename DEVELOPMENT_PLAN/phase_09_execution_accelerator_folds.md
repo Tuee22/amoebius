@@ -45,8 +45,16 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/execution_accelerator_gate.py` passed all ten sides: 32 variants
+and twins across eighteen negative families, one Gate-1 barrier, seven properties, all 45 mutants, all 13
+authored metrics, and the honesty ledger pass; 56 surfaces join to 94 run-time items. The project-contained
+attestation is `sha256:c7215afa4852c49dbc4eb9320c41430eef84afeb1ca60b06236a74e354bfa9a8`,
+bound to source snapshot `sha256:374fe1168768d0fe…`; Phase 9 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:5d183b9ec0877167…`
-(1934 non-ignored files) and published verified external attestation
+(1934 non-ignored files) and published a verified pre-containment external attestation
 `sha256:305cadfdf77170e64269d4842fdc9e8a7fea370b991056a7f465db7009c4bd0b`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: 18
@@ -54,7 +62,7 @@ named negative families across 32 variant rows redden at their specific tags bes
 positives decode and place the full resource vector, the single Gate-1 accelerator-owner negative fails at its
 exact locus beside a green twin, seven QuickCheck properties hold with coverage on the decision folds, and all
 45 seeded mutants redden at their own loci. Evidence and the ledger move into
-`gen/runs/phase_09/<run-id>/`.
+`.build/runs/phase_09/<run-id>/`.
 
 **The surface join partitions 77 run-time items across 37 claim surfaces, and found five surfaces with nothing
 behind them.** The 32 oracle variants and 45 mutants are claimed exactly once each, so an item nobody claims or
@@ -68,7 +76,7 @@ and the gap is recorded against Phase 9 in
 
 **Invalidated historical record:**
 
-✅ Done. `python3 tools/phase9_gate.py` passed on 2026-08-09 on **no substrate**
+✅ Done. `python3 tools/execution_accelerator_gate.py` passed on 2026-08-09 on **no substrate**
 (`none`) in **Register 1**, with ledger
 `dynamically-resolved`. The gate stood up no host or
 cluster: it exercised the pure execution, scheduler, runtime/image-storage, accelerator, provider-root, and
@@ -379,13 +387,13 @@ durable/cache (Phase 8), accelerator net-allocatable VRAM, execution/admission e
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 9.1: Execution-epoch expansion + scheduler-reservation algebra ✅
 
@@ -397,7 +405,7 @@ content/CSI/device unions, absent-Pod recovery debits, and Reserved→BindingInF
 `src/Amoebius/Capacity/HostReservation.hs` owns the zero-capable compute and retained physical-artifact release
 partitions. These declarations live beside their owner folds rather than enlarging the Phase-7 base
 `Types.hs`/`Fold.hs` pair.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: a unit + property suite independently expands the deployment-level transition
 source into identity-keyed steady, rollout, and live epochs and exercises the reservation algebra over them;
 the numbered Validation list below carries the cases, the controls, and the mutants it must redden.
@@ -503,7 +511,7 @@ None.
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/NodeLocalStorage.hs`, `src/Amoebius/Capacity/RuntimeStorage.hs`,
 and the runtime-metadata / node-local / physical-disk extensions to `src/Amoebius/Capacity/Types.hs`.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: a reference fold rebuilds the runtime-metadata shape and the two physical-disk
 parent equations from the fixture's own structural counts, never from the fold under test; the numbered
 Validation list below carries the exact-fit cases, the one-byte-short pairs, and the named mutants.
@@ -632,7 +640,7 @@ high-water derivation and node-root quota); `src/Amoebius/Capacity/Etcd.hs` (exa
 transition and churn quota fit before physical WAL/snapshot/defrag expansion);
 `src/Amoebius/Capacity/PulumiExecution.hs` (deploy/plugin join and concurrent executor/workspace peak);
 the modules retain their demand, provisioned, and structured-error types beside their folds.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: a unit + property suite rederives the accelerator, provider-root, and host-only
 compute numbers from the fixture's declared devices, disks, and stage graph rather than from the folds under
 test; the numbered Validation list below carries the cases and the per-term drops it must redden.
@@ -727,11 +735,11 @@ None.
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Capacity/Composed.hs` retains the Phase-7 placement, Phase-8 storage, and
-Phase-9 execution/runtime/accelerator/provider-root witnesses; `test/dsl/ExecutionAcceleratorProps.hs`
+Phase-9 execution/runtime/accelerator/provider-root witnesses; `test/spec/dsl/ExecutionAcceleratorProps.hs`
 contains seven sampled properties and the implementation-independent composed witness validator;
-`test/dsl/ExecutionAcceleratorFixtures.hs` carries deterministic controller, scheduler-state, observed-UID,
+`test/spec/dsl/ExecutionAcceleratorFixtures.hs` carries deterministic controller, scheduler-state, observed-UID,
 host-only compute, replicated-residency/interconnect, and cover-slot identity checks.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: `cabal test dsl-spec` runs the composed-placement soundness, totality,
 execution-epoch equality, runtime-metadata grouping, accelerator-residency, and provider-root properties
 green over generated inputs at their committed coverage floors, and the seeded-mutant battery of
@@ -825,13 +833,13 @@ None.
 ## Sprint 9.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `tests/oracle/phase9/execution_accelerator_cases.tsv` pins 32 direct fold variants across
-the exact eighteen named families and a distinct legal twin for each; `tests/oracle/phase9/gate1_cases.tsv`
-and `dhall/examples/phase9/*` pin the accelerator-owner editor barrier;
-`test/dsl/ExecutionAccelerator{Fixtures,Props,Gate,Mutants,Spec}.hs` implements the dedicated and integrated
-battery; `tests/mutants/phase9/mutants.tsv` pins 45 individually selected mutants; and
-`tools/phase9_gate.py` seals the suite, ownership ledger, totality scan, evidence, and result ledger.
-**Blocked by**: reopened numeric predecessor gates.
+**Implementation**: `test/oracle/execution_accelerator/execution_accelerator_cases.tsv` pins 32 direct fold variants across
+the exact eighteen named families and a distinct legal twin for each; `test/oracle/execution_accelerator/gate1_cases.tsv`
+and `dhall/examples/execution_accelerator/*` pin the accelerator-owner editor barrier;
+`test/spec/dsl/ExecutionAccelerator{Fixtures,Props,Gate,Mutants,Spec}.hs` implements the dedicated and integrated
+battery; `test/mutant/execution_accelerator/mutants.tsv` pins 45 individually selected mutants; and
+`tools/execution_accelerator_gate.py` seals the suite, ownership ledger, totality scan, evidence, and result ledger.
+**Blocked by**: None.
 **Independent Validation**: the gate applies the Phase-9 folds (the execution expansion, scheduler-reservation algebra,
 runtime-metadata/node-local, accelerator-residency, provider-root, and engine/etcd/build/monitoring helper
 folds, composed with the Phase-7 base `fits`/`podFits`/`carve`/`place` and the Phase-8 storage folds)

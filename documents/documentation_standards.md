@@ -114,7 +114,7 @@ The four fields stay at column zero and within the document's first forty lines,
 | `Deprecated` | Scheduled for removal |
 
 Vague status values (e.g. "doctrine / notes") are forbidden. `Generated sections` is mandatory and always
-reads `none`. Generated Markdown and generated sections live only under ignored `gen/docs/` and are never
+reads `none`. Generated Markdown and generated sections live only under ignored `.build/docs/` and are never
 version-controlled. A governed document is an authored input, not a generated view.
 
 ---

@@ -44,18 +44,26 @@ Gate passed on 2026-08-09 with seal
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/capacity_topology_gate.py` passed all ten sides: every fold,
+twin, compile pair, compatibility row, property, and all 19 mutants pass; 25 surfaces join exactly; the
+normalized test role tree and all generated output are contained; and host state is unchanged. The
+project-contained attestation is `sha256:90c1297a9e16a7d316daf6d1bdecb1df4f6b65378519c18db64b05e4bac7eaf6`,
+bound to source snapshot `sha256:6eecf9051956a260…`; Phase 7 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:7e1cd07170ddc0f6…`
-(1932 non-ignored files) and published verified external attestation
+(1932 non-ignored files) and published a verified pre-containment external attestation
 `sha256:61ba75bf3bb6b53846b17ac13903918ec00a1dd14604fbf92c8bb747fc2dd445`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: the
 fold, compile-fail, Gate-1, compatibility, and mutant oracles carry their authored shapes, the three Gate-1
 negatives fail at their exact loci beside green twins, the suite reaches its acceptance token with QuickCheck
 coverage in both directions, and all nineteen seeded mutants redden at their own loci. Evidence and the ledger
-move into `gen/runs/phase_07/<run-id>/`, 25 surfaces join to 25 run-time enumerated items, and the run
+move into `.build/runs/phase_07/<run-id>/`, 25 surfaces join to 25 run-time enumerated items, and the run
 publishes a snapshot-bound attestation.
 
-**Two corrections.** `test/dsl/CapacityTopologyGate.hs` hard-coded one developer's `dhall` path and now
+**Two corrections.** `test/spec/dsl/CapacityTopologyGate.hs` hard-coded one developer's `dhall` path and now
 resolves it per run, failing closed when unset — a PATH fallback would have defeated the Phase-5 absolute-argv
 observer. And no cabal invocation in this gate passed `--with-compiler`, so on a host carrying a newer GHC the
 solver rejected `base` and the gate failed for a reason unrelated to capacity or topology; the resolved
@@ -63,7 +71,7 @@ compiler is now threaded into every cabal call, and `--offline` is dropped so a 
 
 **Invalidated historical record:**
 
-✅ Done. `python3 tools/phase7_gate.py` passed on 2026-08-09 in
+✅ Done. `python3 tools/capacity_topology_gate.py` passed on 2026-08-09 in
 **Register 1** on **no substrate** (`none`) with seal
 `dynamically-resolved`.
 The gate exercised an in-process fold + property battery over the base capacity vocabulary and topology
@@ -208,7 +216,7 @@ remaining twenty-three source negatives (`illegal_store_over_backing`, `illegal_
 representative set. All forty-one fixtures are committed in this phase's oracle-pinning sprint (§M.1); each is exercised by exactly one
 sub-phase.
 
-The emitted `gen/dsl/phase7/validation-locus-ledger.tsv` also reconciles all **11** registry subcases whose
+The emitted `.build/dsl/phase7/validation-locus-ledger.tsv` also reconciles all **11** registry subcases whose
 declared `owner_phase` is `Phase-7`; every row has evidence at its registered Gate-1, GADT-index, or
 `provision-seal` locus. Later-owner storage, execution, accelerator, bind, render, and live rows are not
 claimed by this seal.
@@ -251,7 +259,7 @@ committed `ghc -fno-code` expect-fail compile goldens — source
 snippets wired into `dsl-spec` that must fail to compile with the **specific committed expected type error**
 (e.g. "No instance / no constructor for `bareAppleHost`", the even-quorum refinement rejection), re-checked
 on every run, never an informal typed-hole probe. The seven goldens and their expected error text are
-committed in `tests/oracle/phase7/compile_fail.tsv` and exercised by `tools/phase7_compile_fail.py` (§M.1).
+committed in `test/oracle/capacity_topology/compile_fail.tsv` and exercised by `tools/capacity_topology_compile_fail.py` (§M.1).
 
 ## Doctrine adopted
 
@@ -297,7 +305,7 @@ committed in `tests/oracle/phase7/compile_fail.tsv` and exercised by `tools/phas
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -312,10 +320,10 @@ committed in `tests/oracle/phase7/compile_fail.tsv` and exercised by `tools/phas
   witness, opaque `Topology = { engine, supply : NodeSupply }` with the supply derived from the engine, the
   compatible-pair smart constructor, the total elementwise compatibility fold, and the `mkRke2` distinctness
   fold over `servers ∪ agentFloor`); `dhall/amoebius/Topology.dhall` supplies the closed networking and
-  managed-attachment arms. Both are built and covered by `test/dsl/CapacityTopologyGate.hs`.
+  managed-attachment arms. Both are built and covered by `test/spec/dsl/CapacityTopologyGate.hs`.
 **Prerequisites satisfied**: Phase 5 gate (the GADT-indexed IR + total decoder); Phase 6 gate
 (the property/corpus framework + validation-locus ledger).
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: a unit + property suite decodes both positive topologies, returns a structured
 `Left` naming every incompatible node for a mismatched pair and a duplicate `HostId` for a reused host, and
 machine-gates the no-inhabitant claims rather than arguing them. The numbered Validation list below states
@@ -366,7 +374,7 @@ boundary.
    §M.8), each a source snippet that attempts the construction, wired into `dsl-spec`, that must fail to
    compile with its **specific committed expected type error**, re-checked on every run — not an informal
    typed-hole probe. The goldens and their expected text are pinned by
-   `tests/oracle/phase7/compile_fail.tsv` (§M.1).
+   `test/oracle/capacity_topology/compile_fail.tsv` (§M.1).
 
 ### Remaining Work
 None.
@@ -379,7 +387,7 @@ None.
 carries; the storage, execution, and accelerator members of `Types.hs`, and the sibling
 `Amoebius/Capacity/*.hs` modules, are added by phases 8 and 9.
 **Prerequisites satisfied**: Sprint 7.1 (the `Topology` `place` folds over); Phase 5 gate (the IR + decoder).
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: a unit + property suite runs `fits`/`carve`/`place` over generated envelopes — a
 feasible workload set yields a placement witness or a growth envelope proved sound against the fixture's own
 declared candidates and quota, an over-committed one returns the `Left` naming the offending axis, and the
@@ -455,13 +463,13 @@ None.
 ## Sprint 7.3: QuickCheck properties — soundness, totality, elementwise compatibility + the independent witness validator ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/dsl/CapacityTopologyProps.hs` (QuickCheck generators for
+**Implementation**: `test/spec/dsl/CapacityTopologyProps.hs` (QuickCheck generators for
 `Topology` / base envelope / workload sets + the base property battery and the implementation-independent
-witness validator), `test/dsl/CapacityTopologyMutants.hs`, and `tests/mutants/phase7/mutants.tsv`, reusing
+witness validator), `test/spec/dsl/CapacityTopologyMutants.hs`, and `test/mutant/capacity_topology/mutants.tsv`, reusing
 the Phase-6 property harness. (The
 runtime-metadata and provider-root property modules are the deliverable of phases 8 and 9.)
 **Prerequisites satisfied**: Sprint 7.1, Sprint 7.2.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: `cabal test dsl-spec` runs the base property battery green, every property meets
 its committed coverage minimum, and the committed per-fold seeded-mutant battery of
 [Gate integrity](#gate-integrity) turns the suite red one mutant at a time rather than on one hand-picked
@@ -542,12 +550,12 @@ None.
 ## Sprint 7.4: The base capacity/topology fold-negative corpus + the gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/dsl/CapacityTopologyFixtures.hs`, `test/dsl/compilefail7/`,
-`test/dsl/CapacityTopologyGate.hs`, `test/dsl/CapacityTopologySpec.hs`, and `tools/phase7_gate.py`, pinned by
-`tests/oracle/phase7/fold_cases.tsv`, `tests/oracle/phase7/gate1_cases.tsv`, and
-`tests/oracle/phase7/compile_fail.tsv`.
+**Implementation**: `test/spec/dsl/CapacityTopologyFixtures.hs`, `test/spec/dsl/compilefail7/`,
+`test/spec/dsl/CapacityTopologyGate.hs`, `test/spec/dsl/CapacityTopologySpec.hs`, and `tools/capacity_topology_gate.py`, pinned by
+`test/oracle/capacity_topology/fold_cases.tsv`, `test/oracle/capacity_topology/gate1_cases.tsv`, and
+`test/oracle/capacity_topology/compile_fail.tsv`.
 **Prerequisites satisfied**: Sprint 7.1, Sprint 7.2, Sprint 7.3; Phase 4 gate (the positive Gate-1 corpus).
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: the gate applies the base folds directly to each hand-authored demand/capacity
 fixture, with no `bind` or `provision` call in the path, so every positive yields a sound feasible result and
 every negative returns its specific committed tag, not merely "some `Left`". The numbered Validation list
@@ -584,17 +592,17 @@ validation-locus ledger that names the honest foreclosure layer of each.
   provider-root case tables — Unified/SplitRuntime routing, root-EBS derivation, epoch metadata — are the
   concern of phases 8 and 9; this gate exercises only their compatibility/base-capacity aspects.
   `legal_tmpfs_two_concurrent_writers_single_debit` is routed to phases 8 and 9.)
-- The committed corpus behind those fixtures: `test/dsl/CapacityTopologyFixtures.hs` holds fifteen direct,
+- The committed corpus behind those fixtures: `test/spec/dsl/CapacityTopologyFixtures.hs` holds fifteen direct,
   hand-authored post-decode fold negatives and fifteen legal twins pinned by
-  `tests/oracle/phase7/fold_cases.tsv`; the three Gate-1 Dhall foreclosure pairs are pinned by
-  `tests/oracle/phase7/gate1_cases.tsv`; seven `ghc -fno-code` pairs live under `test/dsl/compilefail7/` and
-  are pinned by `tests/oracle/phase7/compile_fail.tsv`; and the actual Phase-5 `legal_multisubstrate_cluster`
+  `test/oracle/capacity_topology/fold_cases.tsv`; the three Gate-1 Dhall foreclosure pairs are pinned by
+  `test/oracle/capacity_topology/gate1_cases.tsv`; seven `ghc -fno-code` pairs live under `test/spec/dsl/compilefail7/` and
+  are pinned by `test/oracle/capacity_topology/compile_fail.tsv`; and the actual Phase-5 `legal_multisubstrate_cluster`
   / `legal_managed_eks` Dhall positives are decoded and placed. These fixtures and their expected results and
   `Left` tags are independently authored (§M.1, [Gate integrity](#gate-integrity)); the remaining
   storage/execution/accelerator fixtures of the committed forty-one-fixture corpus are exercised by phases 8
   and 9, not here.
-- The gate battery itself: `test/dsl/CapacityTopologyGate.hs`, `test/dsl/CapacityTopologySpec.hs`, and
-  `tools/phase7_gate.py`, which run the base battery and emit the validation-locus ledger.
+- The gate battery itself: `test/spec/dsl/CapacityTopologyGate.hs`, `test/spec/dsl/CapacityTopologySpec.hs`, and
+  `tools/capacity_topology_gate.py`, which run the base battery and emit the validation-locus ledger.
 - A Register-1 validation-locus ledger mapping every base entry to its catalog id, checked-rejection layer, and
   `provision-seal` locus, explicitly marking the runtime residue (VM boot, pod schedule, autoscaler growth)
   deferred to the live band — sibling evidence where the capacity arithmetic generalizes prodbox's teardown

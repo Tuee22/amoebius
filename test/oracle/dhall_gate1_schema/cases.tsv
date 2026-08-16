@@ -1,0 +1,9 @@
+name	negative	paired_positive	golden	required_stderr
+product-named-capability	dhall/examples/illegal_product_named_capability.dhall	dhall/examples/trivial_app.dhall	test/oracle/dhall_gate1_schema/product-named-capability.err	Pulsar
+insecure-ingress	dhall/examples/illegal_insecure_ingress.dhall	dhall/examples/legal_multisubstrate_cluster.dhall	test/oracle/dhall_gate1_schema/insecure-ingress.err	Backdoor
+missing-resource-envelope	dhall/examples/illegal_missing_resource_envelope.dhall	dhall/examples/trivial_app.dhall	test/oracle/dhall_gate1_schema/missing-resource-envelope.err	resource
+unbounded-storage	dhall/examples/illegal_unbounded_storage.dhall	dhall/examples/trivial_app.dhall	test/oracle/dhall_gate1_schema/unbounded-storage.err	Unbounded
+topic-without-retention	dhall/examples/illegal_topic_without_retention.dhall	dhall/examples/trivial_app.dhall	test/oracle/dhall_gate1_schema/topic-without-retention.err	retention
+growth-without-scaling-policy	dhall/examples/illegal_growth_without_scaling_policy.dhall	dhall/examples/trivial_app.dhall	test/oracle/dhall_gate1_schema/growth-without-scaling-policy.err	scalingPolicy
+even-rke2-servers	dhall/examples/illegal_even_rke2_servers.dhall	dhall/examples/legal_multisubstrate_cluster.dhall	test/oracle/dhall_gate1_schema/even-rke2-servers.err	Even
+unsupported-substrate	dhall/examples/illegal_unsupported_substrate.dhall	dhall/examples/legal_multisubstrate_cluster.dhall	test/oracle/dhall_gate1_schema/unsupported-substrate.err	WindowsBare

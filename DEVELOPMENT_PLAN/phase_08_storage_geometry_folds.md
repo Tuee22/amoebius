@@ -45,29 +45,37 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/storage_geometry_gate.py` passed all ten sides: all 27 storage
+variants and twins, both Gate-1 barriers, six properties, all 31 mutants, the honesty ledger, and all 13
+authored metrics pass; 39 surfaces join to 44 run-time items; generated output and host state remain contained.
+The project-contained attestation is `sha256:cea869188d4bb543b62a216ca00c7cc98feb47c7218f3744bae546828680a247`,
+bound to source snapshot `sha256:6eb21174546f6510…`; Phase 8 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:690d8f832a33de37…`
-(1933 non-ignored files) and published verified external attestation
+(1933 non-ignored files) and published a verified pre-containment external attestation
 `sha256:2236282920d39585e287806cab364d279156460312aec61e480abdc812d9435c`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: 27
 storage variants redden at their specific tags beside 27 green twins, five named negatives and two Gate-1
 training cases hold, two positives decode and fit, six QuickCheck properties hold with coverage in both
 directions, and all 31 seeded mutants redden. Evidence and the ledger move into
-`gen/runs/phase_08/<run-id>/`, and the run publishes a snapshot-bound attestation.
+`.build/runs/phase_08/<run-id>/`, and the run publishes a snapshot-bound attestation.
 
 **The surface join found a real gap and it is recorded rather than papered over.** A first draft pointed twenty
 of this phase's claim surfaces at the single acceptance-token metric; the join rejected it, correctly, because
 one token is not independent evidence for twenty claims. The contract names 27 storage claims and the case
 oracle carries 27 cases, so the join is now a one-to-one partition — but the two vocabularies were authored
 separately and three pairs do not match by name. Those three associations are marked provisional in
-`test/phase_08_surface_expectations.tsv` and recorded against Phase 8 in
+`test/oracle/storage_geometry_surfaces.tsv` and recorded against Phase 8 in
 [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) for the owner to confirm or correct.
-`test/dsl/StorageGeometryGate.hs` also stopped hard-coding a developer `dhall` path, and every cabal
+`test/spec/dsl/StorageGeometryGate.hs` also stopped hard-coding a developer `dhall` path, and every cabal
 invocation now carries the resolved compiler.
 
 **Invalidated historical record:**
 
-✅ Done. `python3 tools/phase8_gate.py` passed on 2026-08-09 on
+✅ Done. `python3 tools/storage_geometry_gate.py` passed on 2026-08-09 on
 **no substrate** (`none`) in **Register 1**, with ledger
 `dynamically-resolved`. It stood up no host,
 cluster, or backing: the result is an in-process storage-geometry fold + QuickCheck battery layered on the
@@ -219,7 +227,7 @@ exact corpus, and do not change the five-negative/two-positive representative co
 The committed case table contains **27** independently pinned variant rows and 27 legal twins under those
 five stable negative-family names. It also covers the later registry additions for backup-medium fit,
 disjoint capacity pools, and restore-target fit. Together with the two Gate-1 training-retention barriers,
-the emitted `gen/dsl/phase8/validation-locus-ledger.tsv` supplies evidence for all **5** Phase-8-owned
+the emitted `.build/dsl/phase8/validation-locus-ledger.tsv` supplies evidence for all **5** Phase-8-owned
 registry subcases at their declared loci.
 
 ### Committed per-geometry seeded-mutant battery (§M.2)
@@ -326,7 +334,7 @@ check that runs on no substrate.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -342,7 +350,7 @@ check that runs on no substrate.
 `src/Amoebius/Capacity/Types.hs`. The Deliverables below inventory what each carries.
 **Prerequisites satisfied**: [Phase 7 gate](phase_07_capacity_core_folds.md) (the base capacity types and
 subtraction folds); Phase 5 gate (the GADT-indexed IR + total decoder).
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: a unit suite runs the geometry folds over hand-authored
 logical-demand/backing inputs, so a feasible producer resolves its provisioned bytes once and fits its
 single-owner backing, every over-backing axis returns the fold's tagged `Left` naming it, and dropping any
@@ -479,7 +487,7 @@ None.
 exhaustively pattern-checked.
 **Prerequisite satisfied**: Sprint 8.1 (the `StorageBudget` arithmetic + backing/quota types the envelope
 retains and the plan witnesses).
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: a unit suite constructs a private envelope for each `Growable` producer, feeds a
 complete fingerprinted snapshot, and asserts `planStorageScaling` resolves to exactly one witnessed arm and
 that this phase has **no mutation capability** — it observes and plans only. The numbered Validation list
@@ -527,14 +535,14 @@ None.
 ## Sprint 8.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/dsl/StorageGeometryProps.hs` (QuickCheck generators for
+**Implementation**: `test/spec/dsl/StorageGeometryProps.hs` (QuickCheck generators for
 logical-demand/backing inputs + the property battery: BookKeeper/MinIO scenario derivation,
 presentation/allocation rounding, uniform-claim grouping, the six-arm object-store merge, the two Pulsar
 ceilings, cache nesting, provider-root storage, control-plane physical transition, migration transitions,
 and the storage `Σ ≤ backing` equivalence), reusing the Phase-6 property harness; the independently selected
-mutants live in `test/dsl/StorageGeometryMutants.hs` and `tests/mutants/phase8/mutants.tsv`.
+mutants live in `test/spec/dsl/StorageGeometryMutants.hs` and `test/mutant/storage_geometry/mutants.tsv`.
 **Prerequisites satisfied**: Sprint 8.1, Sprint 8.2.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: `cabal test dsl-spec` proves the storage folds accept exactly the in-backing
 inputs, with each equivalence property clearing its committed coverage floor in both directions, and no
 mutant in the per-geometry battery of [Gate integrity](#gate-integrity) survives. The Validation list below
@@ -613,14 +621,14 @@ None.
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**:
-`test/dsl/StorageGeometryFixtures.hs` holds the 27 direct post-decode geometry variants and twins pinned by
-`tests/oracle/phase8/storage_cases.tsv`; two real Dhall Gate-1 pairs live under `dhall/examples/phase8/` and
-are pinned by `tests/oracle/phase8/gate1_cases.tsv`; the real
+`test/spec/dsl/StorageGeometryFixtures.hs` holds the 27 direct post-decode geometry variants and twins pinned by
+`test/oracle/storage_geometry/storage_cases.tsv`; two real Dhall Gate-1 pairs live under `dhall/examples/storage_geometry/` and
+are pinned by `test/oracle/storage_geometry/gate1_cases.tsv`; the real
 `legal_multisubstrate_cluster`/`legal_managed_eks` specs are decoded before their positive geometry rows run.
-`test/dsl/StorageGeometry{Props,Mutants,Gate,Spec}.hs` and `tools/phase8_gate.py` provide the property,
+`test/spec/dsl/StorageGeometry{Props,Mutants,Gate,Spec}.hs` and `tools/storage_geometry_gate.py` provide the property,
 31-mutant, registry-ledger, and sealing harnesses (§M.1, [Gate integrity](#gate-integrity)).
 **Prerequisites satisfied**: Sprint 8.1, Sprint 8.2, Sprint 8.3; Phase 4 gate.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: the gate applies the storage-geometry folds directly to each hand-authored
 logical-demand/backing fixture, so every positive row fits its backing feasibly and every negative returns
 its specific committed tag on its isolated over-backing axis, not merely "some `Left`". The numbered

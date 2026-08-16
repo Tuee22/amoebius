@@ -27,7 +27,7 @@ observeUnseal identity initialized sealed
 permitSecretDependentStartup :: UnsealResult -> Either VaultError FreshnessWitness
 permitSecretDependentStartup result = case result of
   UnsealReady witness -> Right witness
-#ifdef PHASE29_STALE_READ_MUTANT
+#ifdef VAULT_PKI_STALE_READ_MUTANT
   UnsealFailed _ -> Right (FreshnessWitness (error "stale-vault-identity"))
 #else
   UnsealFailed failure -> Left failure

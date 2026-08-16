@@ -36,15 +36,30 @@ and remaining implementation are stated below.
 - [Sprint 0.4: Secrets/IaC + runtime/transport/determinism doctrine ✅](#sprint-04-secretsiac--runtimetransportdeterminism-doctrine-)
 - [Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate ✅](#sprint-05-verification-formal-model-doctrine--the-documentation-lint-gate-)
 - [Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts ✅](#sprint-06-readability-discipline--document-shape-the-two-diagram-registers-and-the-routing-artifacts-)
-- [Sprint 0.7: Artifact provenance, ignore coverage, and external evidence ✅](#sprint-07-artifact-provenance-ignore-coverage-and-external-evidence-)
+- [Sprint 0.7: Artifact provenance, ignore coverage, and repository-local evidence ✅](#sprint-07-artifact-provenance-ignore-coverage-and-repository-local-evidence-)
 - [Sprint 0.8: The authored negative corpora as one declared set ✅](#sprint-08-the-authored-negative-corpora-as-one-declared-set-)
 - [Sprint 0.9: The target tree as a partition the gate decides ✅](#sprint-09-the-target-tree-as-a-partition-the-gate-decides-)
+- [Sprint 0.10: Repository-contained state contract ✅](#sprint-010-repository-contained-state-contract-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
 ---
 
 ## Phase Status
+
+✅ Done — resealed 2026-08-15 with the repository-containment contract enforced. All ten sides of
+`python3 tools/doc_lint_verify.py` pass: 17 artifact-policy rules are clean and independently mutation-proven,
+Phase-0 output and attestation resolve beneath `.build/**`, and the filesystem/mount/loop/Docker host inventory
+is unchanged outside the physical checkout. The passing run attested
+`sha256:01134ab7c7f2c70ec769116123c1bee9f528dc4e7d351eadd3ba1a7716114ca6`, bound to source snapshot
+`sha256:e72f70c6c53dd83d…` over 1,967 files. The 1,458 remaining migration findings are assigned to their
+owning phases; none is owned by Phase 0.
+
+**Superseded red observation — 2026-08-15.** The first containment run was red with 66 policy findings because
+the verifier still parsed and wrote legacy roots. Sprint 0.10 removed those Phase-0-owned failures before this
+seal; it was never treated as an exception.
+
+**Pre-containment status record (invalidated):**
 
 ✅ Done — resealed 2026-08-14 after the final-layout amendment. All nine sides of
 `python3 tools/doc_lint_verify.py` pass against the widened gate: fifteen artifact-policy rules clean, each
@@ -65,7 +80,7 @@ longer a directory, which is what made the other three trustworthy enough to run
 ordinal-named ledgers carry capability names now; the two oracle tables moved to `test/oracle/`, the one
 `test/` second-level role that admits them. The root-level agent policy existed as two byte-identical tracked
 copies and is now one file and a link. Thirty-two ignore rules named paths nothing in this repository
-generates — editor settings, a sibling checkout, six build roots that doctrine sends to `gen/`, four language
+generates — editor settings, a sibling checkout, six build roots that doctrine sends to `.build/`, four language
 caches no command here writes, and five credential paths with no home in the finished tree — and each was
 deleted rather than kept, on [§6](../documents/engineering/repository_layout_doctrine.md#6-gitignore-contract)'s
 terms that a rule hiding a path nobody intends is how a second home survives review. A stray credential is
@@ -108,12 +123,12 @@ no doctrine declared. Every divergence the amendment exposed is recorded in
 with an owner and a closure condition.
 
 **The prior seal — 2026-08-13.** All nine sides of `python3 tools/doc_lint_verify.py` passed and the run
-published a verified external attestation bound to its source-snapshot digest. That result is not retracted;
+published a verified pre-containment external attestation bound to its source-snapshot digest. That result is not retracted;
 it is superseded as *closure* because the gate it describes did not include the target-tree postcondition.
 
 **Reopened and closed on 2026-08-13.** Commit `0526152` first tracked this phase's own machinery —
 `artifact_policy.py`, `artifact_policy_selftest.py`, `attestation.py`, `gate_common.py`,
-`phase1_negative_corpus.py`, and the registry/allowlist tables. The scan keyed on the tracked tree, so it had
+`toolchain_spike_negative_corpus.py`, and the registry/allowlist tables. The scan keyed on the tracked tree, so it had
 never seen its own **seeded negative corpora**; once it did, the `policy` side reported seven findings against
 synthetic inputs whose only purpose is to make each rule fire. That is a finding Phase 0 owns, and
 [§S clause 5](development_plan_standards.md#s-universal-artifact-hygiene-gate) allows a finding to be deferred
@@ -129,9 +144,9 @@ that asks what a build or gate reads and writes now keys on the source snapshot 
 
 **Superseded seal — historical record:** ✅ Done — sealed 2026-08-12. All nine sides of `python3 tools/doc_lint_verify.py` passed, including a snapshot
 side that copies every non-ignored file into a scratch tree and lints the governed corpus there, so no ignored
-worktree file can be an input. The run publishes a verified external attestation bound to the snapshot digest. The seeded negatives materialize under `gen/test-corpora/doc_lint/` instead of being
+worktree file can be an input. The run publishes a verified repository-local attestation bound to the snapshot digest. The seeded negatives materialize under `.build/test-corpora/doc_lint/` instead of being
 committed, the run-time surface enumeration joins completely to an authored expectation, the ledger is emitted
-into `gen/runs/phase_00/<run-id>/`, the artifact-policy rules each turn red on their own seeded
+into `.build/runs/phase_00/<run-id>/`, the artifact-policy rules each turn red on their own seeded
 negative, and the write guard observes no authored path change.
 
 **2026-08-12 amendment.** The gate precondition changed shape in the same change that closed the phase. The
@@ -198,7 +213,8 @@ runtime surface, or an acceptance command other than the two-sided documentation
 
 **Gate:** against its source snapshot, `python3 tools/doc_lint_verify.py` passes the documentation, semantic
 artifact-provenance, target-tree, ignore/context, authored-root-write, source-closure, dynamic-resolution,
-reachable-history, external-attestation, terminology, and seeded-mutant checks without creating an unignored
+reachable-history, project-contained-attestation, state-containment, test-secrets, terminology, and
+seeded-mutant checks without creating an unignored
 or tracked generated file.
 
 ## Gate integrity
@@ -215,7 +231,7 @@ numbering, gate ownership, illegal-state coverage, and documentation negative ca
 - Python commands use ordinary bytecode caching, and every resulting cache is excluded from Git and Docker;
 - generated Markdown is absent from governed roots;
 - a synthetic generator cannot write beneath an authored root;
-- a synthetic run bundle validates and uploads to the external-attestation test backend;
+- a synthetic run bundle validates and persists to the project-contained attestation backend;
 - a case-insensitive repository scan finds no retired predecessor terminology for the Bootstrap Coordinator;
 - reachable history is audited for secrets, generated files, and obsolete names, with the required disposition
   recorded separately from unreachable local objects;
@@ -225,11 +241,17 @@ numbering, gate ownership, illegal-state coverage, and documentation negative ca
 - every ignore rule names a path that tree contains, in both pattern syntaxes;
 - no path, build flag, build-component name, or ignore rule outside the plan suite carries a phase ordinal;
 - every declared authored root is a directory, so a rename cannot shrink the write guard in silence;
+- the target tree admits exactly `.build/**`, `.data/**`, `.test_data/**`, and root
+  `test-secrets.dhall` for project-owned untracked state, with no system-temp, system-data, user-home, or
+  host-global container-engine fallback;
+- a seeded escaped-path/escaped-Docker-resource negative is caught by a before/after host inventory;
+- production rejects `test-secrets.dhall`, and a seeded test-to-`.data/**` alias fails before mutation;
 - every seeded negative for these rules turns the gate red at its expected locus.
 
 The independent oracle is the authored positive seed, mutation definition, and expected diagnostic for every
 check. Materialized negatives, scan results, enumeration, logs, and ledgers remain under
-`gen/runs/phase_00/`, `gen/test-corpora/`, or temporary storage and are externally attested. They are never
+`.build/runs/phase_00/`, `.build/test-corpora/`, or `.build/tmp/` and are attested beneath
+`.build/evidence-store/`. They are never
 copied into the plan or another authored root.
 
 ```mermaid
@@ -238,7 +260,7 @@ flowchart LR
   src["authored documentation and policy corpus"]:::intent
   neg["authored seeded negatives"]:::intent
   gate{{"Phase-0 documentation and artifact-policy gate"}}:::gate
-  ext((("verified external attestation"))):::seal
+  ext((("verified repository-local attestation"))):::seal
   red>"each negative must fail at its named locus"]:::refuse
   src -->|"positive contract"| gate
   neg -->|"failure contract"| gate
@@ -249,7 +271,7 @@ flowchart LR
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Design intent. The redesigned Phase-0 gate joins authored policy with two-sided failure cases and retains only an external attestation.*
+*Design intent. The redesigned Phase-0 gate joins authored policy with two-sided failure cases and retains only a repository-local attestation.*
 
 ## Doctrine adopted
 
@@ -549,14 +571,14 @@ None.
 ## Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate ✅
 
 **Status**: Done — the two-sided run is green against the source snapshot; the negatives materialize under
-`gen/test-corpora/doc_lint/` and no verifier input is an ignored worktree file
+`.build/test-corpora/doc_lint/` and no verifier input is an ignored worktree file
 **Implementation**: `documents/engineering/chaos_failover_doctrine.md`,
 `testing_doctrine.md`, `test_derivation_analysis.md`, `formal_model_doctrine.md`,
 `gateway_migration_model_doctrine.md`, `tla_modelling_assumptions.md` (deprecated stub),
 `tools/doc_lint.py`, `tools/doc_lint_verify.py` (the two-sided gate runner),
 `tools/doc_lint_corpus/_positive/` and `_build.py`,
 `test/golden/phase_{16..23,36,38,40,50,52,55..58}_*` with the matching
-`test/mutants/phase_{16..23,36,38,40,50,52,55..58}_*`, `test/formal/mutants/emitTLA-mut-0{1..4}`, the
+`test/mutants/phase_{16..23,36,38,40,50,52,55..58}_*`, `test/mutant/formal/emitTLA-mut-0{1..4}`, the
 `ToyModel` hand-derived reachable-distinct-state table, the expected `INVARIANT`/`PROPERTY` name set, and
 `tools/ledger_lint.py`.
 **Blocked by**: Sprint 0.1, Sprint 0.2, Sprint 0.3, Sprint 0.4
@@ -595,9 +617,9 @@ checker that *is* the Phase 0 gate.
   classified by history and independent review. Same-commit additions remain regression fixtures until
   reviewed or replaced. A generated run-local registry maps retained source to its owner and reject locus.
 - The convention-independent Phase-2 formal-model oracles, pinned here before `Interpret.hs`/`EmitTLA.hs`
-  exist ([`phase_02`](phase_02_formal_model_kernel.md)): `test/formal/mutants/emitTLA-mut-0{1..4}`, the
+  exist ([`phase_02`](phase_02_formal_model_kernel.md)): `test/mutant/formal/emitTLA-mut-0{1..4}`, the
   `ToyModel` hand-derived reachable-distinct-state table, and the expected `INVARIANT`/`PROPERTY` name set.
-  The byte-exact `test/formal/golden/ToyModel.{tla,cfg}.golden` is **not** pinned here: under
+  The byte-exact `test/golden/formal/ToyModel.{tla,cfg}.golden` is **not** pinned here: under
   [`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
   a byte-exact golden is pinned no earlier than the sprint fixing its rendering convention, which is
   Phase 2's.
@@ -643,7 +665,7 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
   inbound links alive across a heading rename.
 - `tools/doc_lint_corpus/_positive/`, `_build.py`, and an authored expected-diagnostic table: **at least one
   mutation per check (a)–(f) and (h), with (a) decomposed into one mutation per header facet, and one per
-  sub-check of (g)**. `_build.py` creates each minimal single-defect copy beneath `gen/test-corpora/` from a
+  sub-check of (g)**. `_build.py` creates each minimal single-defect copy beneath `.build/test-corpora/` from a
   conforming positive seed. The lint must detect the seeded defect by check identity, not the generated path,
   so a stub that keys on fixture identity cannot pass both sides. Materialized copies are never committed. The
   malformed-ledger negative is **not** in this corpus; it lives in `ledger_lint`'s own corpus below.
@@ -662,7 +684,7 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
 
 ### Validation
 
-1. From the source snapshot, the lint generates its negative cases under `gen/test-corpora/`, passes the governed
+1. From the source snapshot, the lint generates its negative cases under `.build/test-corpora/`, passes the governed
    suite, and exits non-zero with an actionable message for every generated case.
 2. The authored mutation set covers each check — a broken header (a), a dangling anchor and a bare `§N`
    prose reference (b), a one-way
@@ -682,8 +704,8 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
 ### Remaining Work
 
 None for the negative corpus, the ignored-input dependency, or the fresh-clone run. `_build.py` materializes
-all 41 negatives under `gen/test-corpora/doc_lint/`, the 410 reproducible copies are deleted, the run enumerates
-its own surfaces into `gen/test-surfaces/phase_00.json` and emits its ledger into the run bundle, and both hard
+all 41 negatives under `.build/test-corpora/doc_lint/`, the 410 reproducible copies are deleted, the run enumerates
+its own surfaces into `.build/test-surfaces/phase_00.json` and emits its ledger into the run bundle, and both hard
 check families (`b1`, `c`) are clear because no authored document links into an ignored generated root any
 longer. The fixture-provenance review of the Phase-16–23 UI oracles is carried as an open obligation on those
 phases rather than here, recorded in
@@ -725,7 +747,7 @@ rather than conventional.
   rule of [§R](development_plan_standards.md#r-where-the-cross-cutting-invariants-live).
 - Checks `o1`–`o5`, `q1`–`q5` and `p1`–`p4`, each with a seeded negative. The authored lint seeds, mutation
   definitions, and expected diagnostics for them remain source; only their materialized negative copies move
-  beneath `gen/test-corpora/`.
+  beneath `.build/test-corpora/`.
 - The **`p3` sentence backlog**, carried openly rather than closed. `p3` is registered in the check table and
   reported by every run, but sits in `doc_lint.py`'s `ADVISORY` set until the corpus meets the rule. The
   2026-08-11 committed-baseline run reports 118 `p3` diagnostics. Clearing them is editorial work requiring
@@ -748,7 +770,7 @@ longer collects generated Markdown from inside the plan tree. The `p3`/`p5`/`p6`
 remains open and advisory under the policy above; it is authored editorial work, not a mechanical pass, and it
 does not gate the phase.
 
-## Sprint 0.7: Artifact provenance, ignore coverage, and external evidence ✅
+## Sprint 0.7: Artifact provenance, ignore coverage, and repository-local evidence ✅
 
 **Status**: Done — the artifact-policy rules, each proven red by its own seeded negative
 **Implementation**: `tools/doc_lint_verify.py`, planned artifact-policy lint and generator registry,
@@ -762,7 +784,7 @@ and the complete `DEVELOPMENT_PLAN/` suite
 
 ### Objective
 
-Implement the repository-wide distinction between authored inputs and generated output, including external run
+Implement the repository-wide distinction between authored inputs and generated output, including local run
 evidence, dynamic dependency resolution, exact ignore/context coverage, and the renamed bootstrap coordinator.
 
 ### Deliverables
@@ -783,7 +805,7 @@ evidence, dynamic dependency resolution, exact ignore/context coverage, and the 
 1. Run the redesigned Phase-0 command against the source snapshot with ordinary Python bytecode caching enabled.
 2. Confirm every positive policy and documentation check passes.
 3. Confirm every seeded negative fails at its named locus.
-4. Confirm the gate creates output only beneath ignored `gen/runs/phase_00/`.
+4. Confirm the gate creates output only beneath ignored `.build/runs/phase_00/`.
 5. Confirm the semantic tracked-tree and effective Docker-context scans satisfy the normative contract.
 6. Confirm every referenced authored input exists in the clone and no ignored worktree file is required.
 7. Audit reachable history and record its secret/non-secret disposition separately from unreachable local state.
@@ -871,7 +893,7 @@ the target tree is enforced by the gate instead of asserted by a document.
 - A fourteenth rule reporting every ignore rule that names a path beneath an authored root or a root the tree
   does not have, in both the `.gitignore` and `.dockerignore` pattern syntaxes.
 - A fifteenth rule reporting a phase ordinal in a path, a build flag, a build-component name, or an ignore
-  rule, with the sanctioned plan-document and `gen/**` exceptions.
+  rule, with the sanctioned plan-document and `.build/**` exceptions.
 - The write guard failing closed on a declared authored root that is not a directory, with a negative that
   renames a root on a synthetic tree.
 - The two ignore contracts derived from their doctrine blocks in both directions, replacing the restated copy.
@@ -892,6 +914,51 @@ None. What the checks report is 1,327 deferred findings across the tree, each at
 closure retires it — the migration itself is those phases' work, in numeric order, and
 [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#layout-and-naming-divergence-snapshot--2026-08-14)
 carries each owner and closure condition.
+
+## Sprint 0.10: Repository-contained state contract ✅
+
+**Status**: Done — closed-root enforcement, host observation, and two-sided validation passed 2026-08-15
+**Implementation**: `documents/engineering/repository_layout_doctrine.md`, `.gitignore`, `.dockerignore`,
+`tools/artifact_policy.py`, `tools/artifact_policy_selftest.py`, and the Phase-0 verification command
+**Blocked by**: nothing; this is the lowest open work
+**Independent Validation**: seeded output-to-system-temp, production-to-user-home, test-to-`.data/**`,
+host-global-Docker, and production-reads-`test-secrets.dhall` mutants each fail before effects, while one
+contained positive writes only beneath the closed roots and leaves the host inventory unchanged
+**Docs to update**: `README.md`, `documents/`, `DEVELOPMENT_PLAN/README.md`, standards, phase contracts, and
+`legacy_tracking_for_deletion.md`
+
+### Objective
+
+Turn the hostbootstrap storage philosophy into a decidable amoebius invariant: every project-owned byte is
+inside the physical checkout, with lifecycle and deletion authority fixed by `.build/**`, `.data/**`,
+`.test_data/**`, and root `test-secrets.dhall`.
+
+### Deliverables
+
+- Root resolution independent of the caller's current directory and a closed path classifier used by every
+  gate and subprocess launcher.
+- Redirected temp, cache, build, toolchain, package-store, kubeconfig, virtual-disk, service, and
+  project-scoped container-engine state.
+- A host-inventory pre/post observer covering filesystem paths, mounts, loop devices, containers, volumes,
+  build caches, and daemon roots.
+- Marker-owned `.test_data/runs/<run-id>/**` creation and exact-path deletion, including production-state and
+  changed-marker refusal cases.
+- Production rejection and no-copy validation for `test-secrets.dhall`.
+
+### Validation
+
+1. Run the Phase-0 command and confirm the positive stays entirely beneath the closed roots.
+2. Confirm each escape, root-alias, global-engine, and production-secret mutant fails at its named locus.
+3. Confirm `.gitignore` and `.dockerignore` contain the three state roots and the test-secrets seam, while
+   legacy ignore patterns remain explicitly migration-only.
+4. Confirm the host inventory is byte-for-byte/resource-for-resource equal outside the checkout after the run.
+
+### Remaining Work
+
+None. `tools/containment.py` resolves paths from the physical checkout, rejects state-class aliases and
+host-global resources before effects, provides marker-proven exact test-run cleanup, and closes the production
+test-secrets boundary. The Phase-0 runner brackets all work with the host observer; the whole-tree scanner
+attributes legacy callers to their owning numerical phases through the shrink-only migration allowlist.
 
 ## Documentation Requirements
 

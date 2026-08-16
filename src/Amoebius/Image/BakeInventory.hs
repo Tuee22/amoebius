@@ -16,6 +16,7 @@ module Amoebius.Image.BakeInventory
   , ChecksumAlgorithm (..)
   , ChecksumShape (..)
   , ArchiveFormat (..)
+  , PublishedPayload (..)
   , PublishedArtifact (..)
   , AcquisitionTool (..)
   , GoBuild (..)
@@ -147,6 +148,23 @@ data ArchiveFormat = Bare | TarGz | Zip
   deriving stock (Bounded, Enum, Eq, Generic, Ord, Show)
   deriving anyclass (Dhall.FromDhall, NFData)
 
+-- | A publisher-signed companion archive required by an executable distribution.
+-- It is acquired and verified on the same rung as its owning artifact, but is not
+-- itself an executable inventory row. Pulsar's separately published offloader NARs
+-- are the first instance: the broker binary is unusable for the Phase-30 S3
+-- contract unless that payload is present beside it.
+data PublishedPayload = PublishedPayload
+  { name :: Text
+  , assets :: [ArtifactAsset]
+  , checksumAlgorithm :: ChecksumAlgorithm
+  , checksumShape :: ChecksumShape
+  , archiveFormat :: ArchiveFormat
+  , archiveMember :: Text
+  , targetPath :: Text
+  }
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (Dhall.FromDhall, NFData)
+
 -- | Rung 2. The publisher releases a multi-architecture artifact and a checksum
 -- manifest covering it. The manifest is named; the checksum is not, and
 -- `validateStep` refuses one that is — repository-layout doctrine section 4 makes
@@ -162,6 +180,7 @@ data PublishedArtifact = PublishedArtifact
   , archiveFormat :: ArchiveFormat
   , archiveMember :: Text
   , targetPath :: Text
+  , payloads :: [PublishedPayload]
   , arguments :: [Text]
   , expectedVersion :: Text
   , kind :: BinaryKind
@@ -465,6 +484,7 @@ validateStep step = do
         )
         then Left (CatalogArtifactIntegrityPinned artifact.name)
         else Right ()
+      mapM_ (validatePublishedPayload artifact.name) artifact.payloads
     BuildProduct produced -> do
       validateDockerToken produced.name
       validateDockerToken produced.targetPath
@@ -553,10 +573,31 @@ containsForbidden forbidden step =
   let lowered = Text.unpack (Text.toLower forbidden)
       fields = case step of
         AptPackage packaged -> [packaged.name, packaged.package, packaged.targetPath]
-        OfficialArtifact artifact -> [artifact.name, artifact.publisher, artifact.targetPath]
+        OfficialArtifact artifact ->
+          [artifact.name, artifact.publisher, artifact.targetPath]
+            <> concatMap (\payload -> [payload.name, payload.targetPath]) artifact.payloads
         BuildProduct built -> [built.name, built.targetPath, fst (buildSourceIdentity built.source)]
         CopyOci source -> [source.name, source.sourcePath, source.targetPath]
    in any (isInfixOf lowered . Text.unpack . Text.toLower) fields
+
+validatePublishedPayload :: Text -> PublishedPayload -> Either CatalogError ()
+validatePublishedPayload owner payload = do
+  validateDockerToken payload.name
+  validateDockerToken payload.targetPath
+  if isAbsolute (Text.unpack payload.targetPath)
+    then Right ()
+    else Left (CatalogPathNotAbsolute payload.targetPath)
+  if Set.fromList (fmap (\asset -> asset.platform) payload.assets) == Set.fromList [Amd64, Arm64]
+    && length payload.assets == 2
+    then Right ()
+    else Left (CatalogArtifactAssetsIncomplete (owner <> ":" <> payload.name))
+  if any (\asset -> Text.null (Text.strip asset.assetUrl) || Text.null (Text.strip asset.checksumManifest)) payload.assets
+    then Left (CatalogArtifactReleaseIncomplete (owner <> ":" <> payload.name))
+    else Right ()
+  if any containsDigestLiteral
+    (payload.name : payload.archiveMember : concatMap (\asset -> [asset.assetUrl, asset.checksumManifest]) payload.assets)
+    then Left (CatalogArtifactIntegrityPinned (owner <> ":" <> payload.name))
+    else Right ()
 
 -- | A 64-character hex run is an integrity value wherever it appears.
 containsDigestLiteral :: Text -> Bool

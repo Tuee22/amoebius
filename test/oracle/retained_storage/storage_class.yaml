@@ -1,0 +1,8 @@
+# Independently authored retained-storage oracle.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: amoebius-retained
+provisioner: kubernetes.io/no-provisioner
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer

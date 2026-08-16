@@ -459,7 +459,7 @@ def cleanup_readback(evidence: dict[str, Any], root_token: str) -> dict[str, Any
             vault_metadata.append(status)
     return {
         "namespaceAbsent": namespace.returncode != 0,
-        "onlyRetainedKindCluster": clusters == ["amoebius-phase24"],
+        "onlyRetainedKindCluster": clusters == ["amoebius-bootstrap-coordinator"],
         "minioBucketAbsent": minio_status == 404,
         "pulsarTenantAbsent": names["pulsarTenant"] not in tenants,
         "vaultObjectsAbsent": not any(str(policy).startswith(names["vaultPolicyPrefix"]) for policy in policies) and vault_metadata == [404, 404],

@@ -44,18 +44,26 @@ Phase-10 capability-bind ledger.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/capability_bind_gate.py` passed all ten sides: nine capability
+arms in both shapes, eighteen exact goldens, three Gate-1 and four Gate-2 negatives, the covered property, all
+four mutants, all twelve metrics, and the honesty ledger pass; 29 surfaces join to 36 enumerated items. The
+project-contained attestation is `sha256:2e71dade980d2205a70538ac3db3d20b5f04cc81b52a2a345ea237529e2ba30b`,
+bound to source snapshot `sha256:f11ac11d30e778b9…`; Phase 10 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:a14933f8e034d4ba…`
-(1935 non-ignored files) and published verified external attestation
+(1935 non-ignored files) and published a verified pre-containment external attestation
 `sha256:af29f3726a6b4464436530958b476925360aec3a82a7005ade12fda31a0ad6b6`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: all
 nine capability arms bind in both shapes against 18 exact shape goldens, nine distinct composed app files share
 one normal form while their object-node multisets differ, three Gate-1 and four Gate-2 negatives fail at their
 specific loci and tags, the nine-arm QuickCheck coverage floor holds, and all four seeded mutants redden.
-Evidence and the ledger move into `gen/runs/phase_10/<run-id>/`, and 20 run-time items — the nine arm slugs,
+Evidence and the ledger move into `.build/runs/phase_10/<run-id>/`, and 20 run-time items — the nine arm slugs,
 seven Gate-1/Gate-2 case names, and four mutant names — partition one-to-one across the claim surfaces.
 
-**Two corrections.** `test/capability/BindGate.hs` hard-coded one developer's `dhall` path and now resolves
+**Two corrections.** `test/spec/capability/BindGate.hs` hard-coded one developer's `dhall` path and now resolves
 per run, failing closed when unset. And, as in Phases 9 and 10's siblings, the join found five contract
 surfaces with no case, mutant, or metric of their own — `controller-child-source-expansion`,
 `unresolved-transition-references`, `registry-storage-bound-intent`, `extension-totality`, and
@@ -66,7 +74,7 @@ did not produce, and the gap is recorded against Phase 10 in
 **Invalidated historical record:**
 
 ✅ Done. Validated 2026-08-09 on **no substrate** (`none`) in **Register 1** with
-`python3 tools/phase10_gate.py`; ledger
+`python3 tools/capability_bind_gate.py`; ledger
 `dynamically-resolved`. It stood up
 no host, no cluster, and no provider, only the pure capability union, the app-surface
 `CapabilityNeed` records, the `CapabilityBinding`, the total `bind` producing a `BoundServiceSpec`/`BoundDeployment`,
@@ -156,7 +164,7 @@ flowchart LR
 
 **Oracle-pinning (§M.1).** Authored and committed in **Phase 0** before `bind` exists:
 
-- The **per-arm goldens** `test/capability/goldens/golden_servicespec_<arm>_<shape>.golden` — one reviewer-authored
+- The **per-arm goldens** `test/golden/capability/golden_servicespec_<arm>_<shape>.golden` — one reviewer-authored
   `BoundServiceSpec` golden for each of the nine arms under each of `SingleNode` and `Distributed`. Authored
   before `bind` exists, so a golden **cannot be regenerated from `bind`'s output**; a golden regenerated from the
   implementation passes for any output, a stub's included, and is therefore forbidden.
@@ -169,7 +177,7 @@ flowchart LR
   `illegal_engine_by_url`, `illegal_shape_in_app`, `illegal_unbuilt_provider`, `illegal_unbound_capability`,
   `illegal_cyclic_extension`, and `illegal_shadowing_extension`.
 
-**Committed mutation quota (§M.2).** Four committed seeded mutants under `tests/mutants/phase10/` — committed
+**Committed mutation quota (§M.2).** Four committed seeded mutants under `test/mutant/capability_bind/` — committed
 and re-run (not run once), drawn from the defined operator set — that the gate **must** turn red when
 substituted:
 
@@ -277,13 +285,13 @@ at the wholly unprovisioned `BoundDeployment`.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 10.1: The closed capability union + the no-product-arm Gate-1 foreclosure ✅
 
@@ -291,7 +299,7 @@ at the wholly unprovisioned `BoundDeployment`.
 **Implementation**: `dhall/amoebius/Capability.dhall` carries the closed union and the app-surface
 `CapabilityNeed` records; `src/Amoebius/Capability/Types.hs` carries their Haskell counterparts and the
 `BoundServiceSpec` skeleton the binder targets.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: `dhall type` accepts every positive `CapabilityNeed` fixture and rejects the
 product-named and URL-named ones at their asserted loci, each paired with a minimally differing positive; a
 unit check counts the union's arms against the oracle-pinned hand-authored arm list rather than against the
@@ -344,7 +352,7 @@ None. The closed union, need records, and Gate-1 corpus are sealed by the Phase-
 **Implementation**: `dhall/amoebius/Capability.dhall`, extended with the `CapabilityBinding` records, and
 `src/Amoebius/Capability/Binding.hs`, which carries the total `bind`, the kind-indexed execution vocabulary,
 and the `BoundDeployment` assembly.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: a unit + property suite binds one `ObjectStore` and one `Sql` need under both the
 single-node and the distributed shape and compares each result against the independently authored oracles and
 the reviewer-authored goldens rather than against `bind`; the numbered Validation list below carries the
@@ -432,10 +440,10 @@ None. The total binder, explicit object graphs, exact execution inventory, and u
 ## Sprint 10.3: The bind property/corpus + the Register-1 gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/capability/BindProps.hs`, `test/capability/ShapeOracle.hs`, and
-`test/capability/BindGate.hs`, over the corpus in `dhall/examples/`, the goldens in
-`test/capability/goldens/`, and the seeded mutants in `tests/mutants/phase10/`.
-**Blocked by**: reopened numeric predecessor gates.
+**Implementation**: `test/spec/capability/BindProps.hs`, `test/spec/capability/ShapeOracle.hs`, and
+`test/spec/capability/BindGate.hs`, over the corpus in `dhall/examples/`, the goldens in
+`test/golden/capability/`, and the seeded mutants in `test/mutant/capability_bind/`.
+**Blocked by**: None.
 **Independent Validation**: `cabal
 test capability-bind-spec` is green — see below.
 **Docs to update**:
@@ -456,9 +464,9 @@ binding returns its specific `DecodeError` — and emit the per-entry validation
 honest foreclosure layer of each.
 
 ### Deliverables
-- Three test modules with disjoint jobs: `test/capability/BindProps.hs` holds the property battery,
-  `test/capability/ShapeOracle.hs` holds the object-node-multiset structural diff — authored separately from
-  `bind`, so the oracle is never `bind`'s own fold — and `test/capability/BindGate.hs` holds the gate and the
+- Three test modules with disjoint jobs: `test/spec/capability/BindProps.hs` holds the property battery,
+  `test/spec/capability/ShapeOracle.hs` holds the object-node-multiset structural diff — authored separately from
+  `bind`, so the oracle is never `bind`'s own fold — and `test/spec/capability/BindGate.hs` holds the gate and the
   validation-locus ledger with its coverage-assertion machinery.
 - The **concrete positive corpus** — **one fixture per each of the nine capability arms** (`ObjectStore`,
   `SecretStore`, `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge`, `InferenceEngine`), each

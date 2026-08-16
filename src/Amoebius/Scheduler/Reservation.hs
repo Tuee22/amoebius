@@ -88,7 +88,7 @@ reserveCandidate capacity nonLedger expectedVersion candidate (ReservationRoot r
     else case Map.lookup (candidateUid candidate) (reservationRootRecords snapshot) of
       Just existing
         | existing == candidateRecord candidate -> do
-#ifdef PHASE27_SAME_UID_DOUBLE_DEBIT_MUTANT
+#ifdef CAPACITY_SCHEDULER_SAME_UID_DOUBLE_DEBIT_MUTANT
             let changed = snapshot {reservationRootVersion = reservationRootVersion snapshot + 1}
             writeTVar root changed
             pure (Right (ReservationReused existing (reservationRootVersion changed)))

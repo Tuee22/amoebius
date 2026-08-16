@@ -4,222 +4,227 @@ version: 0.1.0.0
 build-type: Simple
 license: Apache-2.0
 
-flag phase6-mutant
+flag illegal-state-mutant
   description: Build the committed Phase-6 broken-decision mutant
   default: False
   manual: True
 
-flag phase6-normalization-mutant
+flag resource-normalization-mutant
   description: Build the committed Phase-6 dropped-resource-normalization mutant
   default: False
   manual: True
 
-flag phase25-bootstrap-domain-expansion-mutant
+flag base-image-registry-bootstrap-domain-expansion-mutant
   description: Build the committed Phase-25.2 bootstrap-domain-expansion mutant
   default: False
   manual: True
 
-flag phase25-handoff-without-equality-mutant
+flag base-image-registry-handoff-without-equality-mutant
   description: Build the committed Phase-25.2 handoff-without-equality mutant
   default: False
   manual: True
 
-flag phase25-record-before-push-mutant
+flag base-image-registry-record-before-push-mutant
   description: Build the committed Phase-25.3 record-before-push mutant
   default: False
   manual: True
 
-flag phase25-noop-egress-policy-mutant
+flag base-image-registry-noop-egress-policy-mutant
   description: Build the committed Phase-25.4 unenforced kindnet policy mutant
   default: False
   manual: True
 
-flag phase26-wait-for-ready-pure-mutant
+flag object-reconciler-wait-for-ready-pure-mutant
   description: Build the committed Phase-26 dropped readiness observation mutant
   default: False
   manual: True
 
-flag phase26-generation-after-diff-mutant
+flag object-reconciler-generation-after-diff-mutant
   description: Build the committed Phase-26 generation stamped after diff mutant
   default: False
   manual: True
 
-flag phase26-label-only-delete-mutant
+flag object-reconciler-label-only-delete-mutant
   description: Build the committed Phase-26 label-only delete authority mutant
   default: False
   manual: True
 
-flag phase26-healthy-overbound-child-mutant
+flag object-reconciler-healthy-overbound-child-mutant
   description: Build the committed Phase-26 healthy CR over-bound child mutant
   default: False
   manual: True
 
-flag phase27-collapsed-readiness-mutant
+flag capacity-scheduler-collapsed-readiness-mutant
   description: Build the committed Phase-27 collapsed scheduler-readiness mutant
   default: False
   manual: True
 
-flag phase27-stage-drop-mutant
+flag capacity-scheduler-stage-drop-mutant
   description: Build the committed Phase-27 generic-SSA-before-cutover mutant
   default: False
   manual: True
 
-flag phase27-default-scheduler-bypass-mutant
+flag capacity-scheduler-default-scheduler-bypass-mutant
   description: Build the committed Phase-27 managed-node default-scheduler bypass mutant
   default: False
   manual: True
 
-flag phase27-bind-before-reservation-cas-mutant
+flag capacity-scheduler-bind-before-reservation-cas-mutant
   description: Build the committed Phase-27 Binding-before-reservation-CAS mutant
   default: False
   manual: True
 
-flag phase27-numeric-add-mutant
+flag capacity-scheduler-numeric-add-mutant
   description: Build the committed Phase-27 numeric-add instead of whole-ledger-refold mutant
   default: False
   manual: True
 
-flag phase27-same-uid-double-debit-mutant
+flag capacity-scheduler-same-uid-double-debit-mutant
   description: Build the committed Phase-27 same-UID double-debit mutant
   default: False
   manual: True
 
-flag phase27-bound-deleted-restart-mutant
+flag capacity-scheduler-bound-deleted-restart-mutant
   description: Build the committed Phase-27 Bound-record-deleted-on-restart mutant
   default: False
   manual: True
 
-flag phase28-skip-durable-aggregate-mutant
-  description: Build the Phase-28 skipped durable aggregate mutant
+flag retained-storage-skip-durable-aggregate-mutant
+  description: Build the retained-storage skipped durable aggregate mutant
   default: False
   manual: True
 
-flag phase28-sum-unequal-ordinals-mutant
-  description: Build the Phase-28 unequal ordinal sum mutant
+flag retained-storage-sum-unequal-ordinals-mutant
+  description: Build the retained-storage unequal ordinal sum mutant
   default: False
   manual: True
 
-flag phase28-uniform-before-allocation-mutant
-  description: Build the Phase-28 pre-allocation uniformity mutant
+flag retained-storage-uniform-before-allocation-mutant
+  description: Build the retained-storage pre-allocation uniformity mutant
   default: False
   manual: True
 
-flag phase28-collapse-backing-debits-mutant
-  description: Build the Phase-28 collapsed per-backing debit mutant
+flag retained-storage-collapse-backing-debits-mutant
+  description: Build the retained-storage collapsed per-backing debit mutant
   default: False
   manual: True
 
-flag phase28-reclaim-delete-mutant
-  description: Build the Phase-28 reclaim Delete mutant
+flag retained-storage-reclaim-delete-mutant
+  description: Build the retained-storage reclaim Delete mutant
   default: False
   manual: True
 
-flag phase28-no-rebind-mutant
-  description: Build the Phase-28 stale claimRef rebind mutant
+flag retained-storage-no-rebind-mutant
+  description: Build the retained-storage stale claimRef rebind mutant
   default: False
   manual: True
 
-flag phase28-raw-host-directory-mutant
-  description: Build the Phase-28 raw host directory mutant
+flag retained-storage-raw-host-directory-mutant
+  description: Build the retained-storage raw host directory mutant
   default: False
   manual: True
 
-flag phase28-cutover-before-verify-mutant
-  description: Build the Phase-28 migration cutover-before-verify mutant
+flag retained-storage-cutover-before-verify-mutant
+  description: Build the retained-storage migration cutover-before-verify mutant
   default: False
   manual: True
 
-flag phase28-credit-before-cleanup-mutant
-  description: Build the Phase-28 migration credit-before-cleanup mutant
+flag retained-storage-credit-before-cleanup-mutant
+  description: Build the retained-storage migration credit-before-cleanup mutant
   default: False
   manual: True
 
-flag phase28-fake-verify-mutant
-  description: Build the Phase-28 migration fake verification mutant
+flag retained-storage-fake-verify-mutant
+  description: Build the retained-storage migration fake verification mutant
   default: False
   manual: True
 
-flag phase28-soft-delete-mutant
-  description: Build the Phase-28 soft cluster-delete mutant
+flag retained-storage-soft-delete-mutant
+  description: Build the retained-storage soft cluster-delete mutant
   default: False
   manual: True
 
-flag phase28-seed-marker-mutant
-  description: Build the Phase-28 post-recreate marker seeding mutant
+flag retained-storage-seed-marker-mutant
+  description: Build the retained-storage post-recreate marker seeding mutant
   default: False
   manual: True
 
-flag phase29-reinit-existing-mutant
-  description: Build the Phase-29 reinitialize-existing-Vault mutant
+flag vault-pki-reinit-existing-mutant
+  description: Build the Vault/PKI reinitialize-existing-Vault mutant
   default: False
   manual: True
 
-flag phase29-raw-sha256-seal-mutant
-  description: Build the Phase-29 raw-SHA256 unlock envelope mutant
+flag vault-pki-raw-sha256-seal-mutant
+  description: Build the Vault/PKI raw-SHA256 unlock envelope mutant
   default: False
   manual: True
 
-flag phase29-delete-storage-term-mutant
-  description: Build the Phase-29 omitted Vault storage population mutant
+flag vault-pki-delete-storage-term-mutant
+  description: Build the Vault/PKI omitted storage population mutant
   default: False
   manual: True
 
-flag phase29-unbounded-audit-mutant
-  description: Build the Phase-29 unbounded file audit mutant
+flag vault-pki-unbounded-audit-mutant
+  description: Build the Vault/PKI unbounded file audit mutant
   default: False
   manual: True
 
-flag phase29-sealed-issuance-mutant
-  description: Build the Phase-29 PKI issuance-while-sealed mutant
+flag vault-pki-sealed-issuance-mutant
+  description: Build the Vault/PKI issuance-while-sealed mutant
   default: False
   manual: True
 
-flag phase29-unrelated-leaf-mutant
-  description: Build the Phase-29 unrelated leaf signer mutant
+flag vault-pki-unrelated-leaf-mutant
+  description: Build the Vault/PKI unrelated leaf signer mutant
   default: False
   manual: True
 
-flag phase29-preminted-token-mutant
-  description: Build the Phase-29 pre-minted token client mutant
+flag vault-pki-preminted-token-mutant
+  description: Build the Vault/PKI pre-minted token client mutant
   default: False
   manual: True
 
-flag phase29-error-collapse-mutant
-  description: Build the Phase-29 error-tag collapse and path-leak mutant
+flag vault-pki-error-collapse-mutant
+  description: Build the Vault/PKI error-tag collapse and path-leak mutant
   default: False
   manual: True
 
-flag phase29-stale-read-mutant
-  description: Build the Phase-29 stale secret read without freshness mutant
+flag vault-pki-stale-read-mutant
+  description: Build the Vault/PKI stale secret read without freshness mutant
   default: False
   manual: True
 
-flag phase30-registry-fs-driver-mutant
+flag vault-pki-first-missing-mutant
+  description: Build the Vault/PKI first-missing-only admission mutant
+  default: False
+  manual: True
+
+flag platform-backbone-registry-fs-driver-mutant
   description: Build the Phase-30 registry filesystem-driver mutant
   default: False
   manual: True
 
-flag phase30-offload-time-only-mutant
+flag platform-backbone-offload-time-only-mutant
   description: Build the Phase-30 time-only Pulsar offload mutant
   default: False
   manual: True
 
-flag phase30-logical-as-physical-mutant
+flag platform-backbone-logical-as-physical-mutant
   description: Build the Phase-30 logical-as-physical MinIO storage mutant
   default: False
   manual: True
 
-flag phase30-drop-fault-scenario-mutant
+flag platform-backbone-drop-fault-scenario-mutant
   description: Build the Phase-30 dropped MinIO healing-scenario mutant
   default: False
   manual: True
 
-flag phase30-sum-ordinals-mutant
+flag platform-backbone-sum-ordinals-mutant
   description: Build the Phase-30 unequal-ordinal sum mutant
   default: False
   manual: True
 
-flag phase30-content-immediate-gc-mutant
+flag platform-backbone-content-immediate-gc-mutant
   description: Build the Phase-30 immediate failed-write GC mutant
   default: False
   manual: True
@@ -449,7 +454,7 @@ flag phase48-one-byte-short-mutant
   default: False
   manual: True
 
-flag phase24-one-shot-kind-guard-mutant
+flag bootstrap-coordinator-one-shot-kind-guard-mutant
   description: Treat a registered kind cluster as converged, ignoring node and kubeconfig divergence
   default: False
   manual: True
@@ -709,94 +714,96 @@ library dsl-core
       typed-process ==0.2.13.0
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
-  if flag(phase6-mutant)
+  if flag(illegal-state-mutant)
     cpp-options: -DPHASE6_MUTANT
-  if flag(phase6-normalization-mutant)
+  if flag(resource-normalization-mutant)
     cpp-options: -DPHASE6_NORMALIZATION_MUTANT
-  if flag(phase25-bootstrap-domain-expansion-mutant)
-    cpp-options: -DPHASE25_BOOTSTRAP_DOMAIN_EXPANSION_MUTANT
-  if flag(phase25-handoff-without-equality-mutant)
-    cpp-options: -DPHASE25_HANDOFF_WITHOUT_EQUALITY_MUTANT
-  if flag(phase25-record-before-push-mutant)
-    cpp-options: -DPHASE25_RECORD_BEFORE_PUSH_MUTANT
-  if flag(phase25-noop-egress-policy-mutant)
-    cpp-options: -DPHASE25_NOOP_EGRESS_POLICY_MUTANT
-  if flag(phase26-wait-for-ready-pure-mutant)
+  if flag(base-image-registry-bootstrap-domain-expansion-mutant)
+    cpp-options: -DBASE_IMAGE_REGISTRY_BOOTSTRAP_DOMAIN_EXPANSION_MUTANT
+  if flag(base-image-registry-handoff-without-equality-mutant)
+    cpp-options: -DBASE_IMAGE_REGISTRY_HANDOFF_WITHOUT_EQUALITY_MUTANT
+  if flag(base-image-registry-record-before-push-mutant)
+    cpp-options: -DBASE_IMAGE_REGISTRY_RECORD_BEFORE_PUSH_MUTANT
+  if flag(base-image-registry-noop-egress-policy-mutant)
+    cpp-options: -DBASE_IMAGE_REGISTRY_NOOP_EGRESS_POLICY_MUTANT
+  if flag(object-reconciler-wait-for-ready-pure-mutant)
     cpp-options: -DPHASE26_WAIT_FOR_READY_PURE_MUTANT
-  if flag(phase26-generation-after-diff-mutant)
+  if flag(object-reconciler-generation-after-diff-mutant)
     cpp-options: -DPHASE26_GENERATION_AFTER_DIFF_MUTANT
-  if flag(phase26-label-only-delete-mutant)
+  if flag(object-reconciler-label-only-delete-mutant)
     cpp-options: -DPHASE26_LABEL_ONLY_DELETE_MUTANT
-  if flag(phase26-healthy-overbound-child-mutant)
+  if flag(object-reconciler-healthy-overbound-child-mutant)
     cpp-options: -DPHASE26_HEALTHY_OVERBOUND_CHILD_MUTANT
-  if flag(phase27-collapsed-readiness-mutant)
-    cpp-options: -DPHASE27_COLLAPSED_READINESS_MUTANT
-  if flag(phase27-stage-drop-mutant)
-    cpp-options: -DPHASE27_STAGE_DROP_MUTANT
-  if flag(phase27-default-scheduler-bypass-mutant)
-    cpp-options: -DPHASE27_DEFAULT_SCHEDULER_BYPASS_MUTANT
-  if flag(phase27-bind-before-reservation-cas-mutant)
-    cpp-options: -DPHASE27_BIND_BEFORE_RESERVATION_CAS_MUTANT
-  if flag(phase27-numeric-add-mutant)
-    cpp-options: -DPHASE27_NUMERIC_ADD_MUTANT
-  if flag(phase27-same-uid-double-debit-mutant)
-    cpp-options: -DPHASE27_SAME_UID_DOUBLE_DEBIT_MUTANT
-  if flag(phase27-bound-deleted-restart-mutant)
-    cpp-options: -DPHASE27_BOUND_DELETED_RESTART_MUTANT
-  if flag(phase28-skip-durable-aggregate-mutant)
-    cpp-options: -DPHASE28_SKIP_DURABLE_AGGREGATE_MUTANT
-  if flag(phase28-sum-unequal-ordinals-mutant)
-    cpp-options: -DPHASE28_SUM_UNEQUAL_ORDINALS_MUTANT
-  if flag(phase28-uniform-before-allocation-mutant)
-    cpp-options: -DPHASE28_UNIFORM_BEFORE_ALLOCATION_MUTANT
-  if flag(phase28-collapse-backing-debits-mutant)
-    cpp-options: -DPHASE28_COLLAPSE_BACKING_DEBITS_MUTANT
-  if flag(phase28-reclaim-delete-mutant)
-    cpp-options: -DPHASE28_RECLAIM_DELETE_MUTANT
-  if flag(phase28-no-rebind-mutant)
-    cpp-options: -DPHASE28_NO_REBIND_MUTANT
-  if flag(phase28-raw-host-directory-mutant)
-    cpp-options: -DPHASE28_RAW_HOST_DIRECTORY_MUTANT
-  if flag(phase28-cutover-before-verify-mutant)
-    cpp-options: -DPHASE28_CUTOVER_BEFORE_VERIFY_MUTANT
-  if flag(phase28-credit-before-cleanup-mutant)
-    cpp-options: -DPHASE28_CREDIT_BEFORE_CLEANUP_MUTANT
-  if flag(phase28-fake-verify-mutant)
-    cpp-options: -DPHASE28_FAKE_VERIFY_MUTANT
-  if flag(phase28-soft-delete-mutant)
-    cpp-options: -DPHASE28_SOFT_DELETE_MUTANT
-  if flag(phase28-seed-marker-mutant)
-    cpp-options: -DPHASE28_SEED_MARKER_MUTANT
-  if flag(phase29-reinit-existing-mutant)
-    cpp-options: -DPHASE29_REINIT_EXISTING_MUTANT
-  if flag(phase29-raw-sha256-seal-mutant)
-    cpp-options: -DPHASE29_RAW_SHA256_SEAL_MUTANT
-  if flag(phase29-delete-storage-term-mutant)
-    cpp-options: -DPHASE29_DELETE_STORAGE_TERM_MUTANT
-  if flag(phase29-unbounded-audit-mutant)
-    cpp-options: -DPHASE29_UNBOUNDED_AUDIT_MUTANT
-  if flag(phase29-sealed-issuance-mutant)
-    cpp-options: -DPHASE29_SEALED_ISSUANCE_MUTANT
-  if flag(phase29-unrelated-leaf-mutant)
-    cpp-options: -DPHASE29_UNRELATED_LEAF_MUTANT
-  if flag(phase29-preminted-token-mutant)
-    cpp-options: -DPHASE29_PREMINTED_TOKEN_MUTANT
-  if flag(phase29-error-collapse-mutant)
-    cpp-options: -DPHASE29_ERROR_COLLAPSE_MUTANT
-  if flag(phase29-stale-read-mutant)
-    cpp-options: -DPHASE29_STALE_READ_MUTANT
-  if flag(phase30-registry-fs-driver-mutant)
-    cpp-options: -DPHASE30_REGISTRY_FS_DRIVER_MUTANT
-  if flag(phase30-offload-time-only-mutant)
-    cpp-options: -DPHASE30_OFFLOAD_TIME_ONLY_MUTANT
-  if flag(phase30-logical-as-physical-mutant)
-    cpp-options: -DPHASE30_LOGICAL_AS_PHYSICAL_MUTANT
-  if flag(phase30-drop-fault-scenario-mutant)
-    cpp-options: -DPHASE30_DROP_FAULT_SCENARIO_MUTANT
-  if flag(phase30-sum-ordinals-mutant)
-    cpp-options: -DPHASE30_SUM_ORDINALS_MUTANT
-  if flag(phase30-content-immediate-gc-mutant)
-    cpp-options: -DPHASE30_CONTENT_IMMEDIATE_GC_MUTANT
+  if flag(capacity-scheduler-collapsed-readiness-mutant)
+    cpp-options: -DCAPACITY_SCHEDULER_COLLAPSED_READINESS_MUTANT
+  if flag(capacity-scheduler-stage-drop-mutant)
+    cpp-options: -DCAPACITY_SCHEDULER_STAGE_DROP_MUTANT
+  if flag(capacity-scheduler-default-scheduler-bypass-mutant)
+    cpp-options: -DCAPACITY_SCHEDULER_DEFAULT_SCHEDULER_BYPASS_MUTANT
+  if flag(capacity-scheduler-bind-before-reservation-cas-mutant)
+    cpp-options: -DCAPACITY_SCHEDULER_BIND_BEFORE_RESERVATION_CAS_MUTANT
+  if flag(capacity-scheduler-numeric-add-mutant)
+    cpp-options: -DCAPACITY_SCHEDULER_NUMERIC_ADD_MUTANT
+  if flag(capacity-scheduler-same-uid-double-debit-mutant)
+    cpp-options: -DCAPACITY_SCHEDULER_SAME_UID_DOUBLE_DEBIT_MUTANT
+  if flag(capacity-scheduler-bound-deleted-restart-mutant)
+    cpp-options: -DCAPACITY_SCHEDULER_BOUND_DELETED_RESTART_MUTANT
+  if flag(retained-storage-skip-durable-aggregate-mutant)
+    cpp-options: -DRETAINED_STORAGE_SKIP_DURABLE_AGGREGATE_MUTANT
+  if flag(retained-storage-sum-unequal-ordinals-mutant)
+    cpp-options: -DRETAINED_STORAGE_SUM_UNEQUAL_ORDINALS_MUTANT
+  if flag(retained-storage-uniform-before-allocation-mutant)
+    cpp-options: -DRETAINED_STORAGE_UNIFORM_BEFORE_ALLOCATION_MUTANT
+  if flag(retained-storage-collapse-backing-debits-mutant)
+    cpp-options: -DRETAINED_STORAGE_COLLAPSE_BACKING_DEBITS_MUTANT
+  if flag(retained-storage-reclaim-delete-mutant)
+    cpp-options: -DRETAINED_STORAGE_RECLAIM_DELETE_MUTANT
+  if flag(retained-storage-no-rebind-mutant)
+    cpp-options: -DRETAINED_STORAGE_NO_REBIND_MUTANT
+  if flag(retained-storage-raw-host-directory-mutant)
+    cpp-options: -DRETAINED_STORAGE_RAW_HOST_DIRECTORY_MUTANT
+  if flag(retained-storage-cutover-before-verify-mutant)
+    cpp-options: -DRETAINED_STORAGE_CUTOVER_BEFORE_VERIFY_MUTANT
+  if flag(retained-storage-credit-before-cleanup-mutant)
+    cpp-options: -DRETAINED_STORAGE_CREDIT_BEFORE_CLEANUP_MUTANT
+  if flag(retained-storage-fake-verify-mutant)
+    cpp-options: -DRETAINED_STORAGE_FAKE_VERIFY_MUTANT
+  if flag(retained-storage-soft-delete-mutant)
+    cpp-options: -DRETAINED_STORAGE_SOFT_DELETE_MUTANT
+  if flag(retained-storage-seed-marker-mutant)
+    cpp-options: -DRETAINED_STORAGE_SEED_MARKER_MUTANT
+  if flag(vault-pki-reinit-existing-mutant)
+    cpp-options: -DVAULT_PKI_REINIT_EXISTING_MUTANT
+  if flag(vault-pki-raw-sha256-seal-mutant)
+    cpp-options: -DVAULT_PKI_RAW_SHA256_SEAL_MUTANT
+  if flag(vault-pki-delete-storage-term-mutant)
+    cpp-options: -DVAULT_PKI_DELETE_STORAGE_TERM_MUTANT
+  if flag(vault-pki-unbounded-audit-mutant)
+    cpp-options: -DVAULT_PKI_UNBOUNDED_AUDIT_MUTANT
+  if flag(vault-pki-sealed-issuance-mutant)
+    cpp-options: -DVAULT_PKI_SEALED_ISSUANCE_MUTANT
+  if flag(vault-pki-unrelated-leaf-mutant)
+    cpp-options: -DVAULT_PKI_UNRELATED_LEAF_MUTANT
+  if flag(vault-pki-preminted-token-mutant)
+    cpp-options: -DVAULT_PKI_PREMINTED_TOKEN_MUTANT
+  if flag(vault-pki-error-collapse-mutant)
+    cpp-options: -DVAULT_PKI_ERROR_COLLAPSE_MUTANT
+  if flag(vault-pki-stale-read-mutant)
+    cpp-options: -DVAULT_PKI_STALE_READ_MUTANT
+  if flag(vault-pki-first-missing-mutant)
+    cpp-options: -DVAULT_PKI_FIRST_MISSING_MUTANT
+  if flag(platform-backbone-registry-fs-driver-mutant)
+    cpp-options: -DPLATFORM_BACKBONE_REGISTRY_FS_DRIVER_MUTANT
+  if flag(platform-backbone-offload-time-only-mutant)
+    cpp-options: -DPLATFORM_BACKBONE_OFFLOAD_TIME_ONLY_MUTANT
+  if flag(platform-backbone-logical-as-physical-mutant)
+    cpp-options: -DPLATFORM_BACKBONE_LOGICAL_AS_PHYSICAL_MUTANT
+  if flag(platform-backbone-drop-fault-scenario-mutant)
+    cpp-options: -DPLATFORM_BACKBONE_DROP_FAULT_SCENARIO_MUTANT
+  if flag(platform-backbone-sum-ordinals-mutant)
+    cpp-options: -DPLATFORM_BACKBONE_SUM_ORDINALS_MUTANT
+  if flag(platform-backbone-content-immediate-gc-mutant)
+    cpp-options: -DPLATFORM_BACKBONE_CONTENT_IMMEDIATE_GC_MUTANT
   if flag(phase31-patroni-async-default-mutant)
     cpp-options: -DPHASE31_PATRONI_ASYNC_DEFAULT_MUTANT
   if flag(phase31-dag-drop-edge-mutant)
@@ -887,19 +894,19 @@ library dsl-core
     cpp-options: -DPHASE48_PRUNE_NOOP_MUTANT
   if flag(phase48-one-byte-short-mutant)
     cpp-options: -DPHASE48_ONE_BYTE_SHORT_MUTANT
-  if flag(phase24-one-shot-kind-guard-mutant)
-    cpp-options: -DPHASE24_ONE_SHOT_KIND_GUARD_MUTANT
+  if flag(bootstrap-coordinator-one-shot-kind-guard-mutant)
+    cpp-options: -DBOOTSTRAP_COORDINATOR_ONE_SHOT_KIND_GUARD_MUTANT
 
 executable amoebius
   main-is: Main.hs
   -- Amoebius.Ui.Server.Main is the serve-ui entry point: it is reached only through
-  -- app/Main.hs's subcommand table and belongs to the executable, not to the shared
+  -- app/amoebius/Main.hs's subcommand table and belongs to the executable, not to the shared
   -- decision core. Keeping it in lib:dsl-core made every phase that links the core depend
   -- on the Phase-22 UI-server boundary, which is the forward dependency
   -- development_plan_standards.md section E forbids.
   --
-  -- It lives under app/ rather than src/ because hs-source-dirs is a search path, not a
-  -- module filter: listing src here made GHC recompile every module app/Main.hs imports
+  -- It lives under app/amoebius/ rather than src/ because hs-source-dirs is a search path, not a
+  -- module filter: listing src here made GHC recompile every module app/amoebius/Main.hs imports
   -- from source into this component instead of linking lib:dsl-core, against this
   -- component's much shorter build-depends. That is why exe:amoebius failed on
   -- Amoebius.Vault.SecretRef -- a module this executable never mentions -- and it would
@@ -907,7 +914,7 @@ executable amoebius
   other-modules:
       Amoebius.Ui.Server.Main
   hs-source-dirs:
-      app
+      app/amoebius
   build-depends:
       base >=4.21 && <4.22,
       amoebius:formal-model,
@@ -944,7 +951,7 @@ test-suite formal-model-spec
   type: exitcode-stdio-1.0
   main-is: RoundTripSpec.hs
   hs-source-dirs:
-      test/formal
+      test/spec/formal
   build-depends:
       base >=4.21 && <4.22,
       amoebius:formal-model,
@@ -960,7 +967,7 @@ test-suite gateway-migration-model-spec
   type: exitcode-stdio-1.0
   main-is: GatewayMigrationSpec.hs
   hs-source-dirs:
-      test/formal/gateway
+      test/spec/formal/gateway
   build-depends:
       base >=4.21 && <4.22,
       amoebius:formal-model,
@@ -1008,9 +1015,9 @@ test-suite dsl-spec
       StorageGeometryProps
       ValidationLocusLedger
   hs-source-dirs:
-      test/dsl
-      test/capability
-      test/manifest
+      test/spec/dsl
+      test/spec/capability
+      test/spec/manifest
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1034,7 +1041,7 @@ test-suite decision-prop-spec
   other-modules:
       DecisionPropSpec
   hs-source-dirs:
-      test/dsl
+      test/spec/dsl
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1043,11 +1050,11 @@ test-suite decision-prop-spec
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods
 
-test-suite phase24-host-spec
+test-suite bootstrap-coordinator-host-spec
   type: exitcode-stdio-1.0
-  main-is: Phase24HostSpec.hs
+  main-is: BootstrapCoordinatorSpec.hs
   hs-source-dirs:
-      test/host
+      test/spec/host
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1055,11 +1062,11 @@ test-suite phase24-host-spec
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods
 
-test-suite phase25-image-spec
+test-suite base-image-registry-spec
   type: exitcode-stdio-1.0
-  main-is: Phase25ImageSpec.hs
+  main-is: BaseImageRegistrySpec.hs
   hs-source-dirs:
-      test/image
+      test/spec/image
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1070,11 +1077,11 @@ test-suite phase25-image-spec
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite phase26-reconcile-spec
+test-suite object-reconciler-spec
   type: exitcode-stdio-1.0
-  main-is: Phase26ReconcileSpec.hs
+  main-is: ObjectReconcilerSpec.hs
   hs-source-dirs:
-      test/reconcile
+      test/spec/live
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1087,9 +1094,9 @@ test-suite phase26-reconcile-spec
 
 test-suite scheduler-ledger-spec
   type: exitcode-stdio-1.0
-  main-is: Phase27LedgerSpec.hs
+  main-is: CapacitySchedulerLedgerSpec.hs
   hs-source-dirs:
-      test/scheduler
+      test/spec/live
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1102,9 +1109,9 @@ test-suite scheduler-ledger-spec
 
 test-suite scheduler-readiness-spec
   type: exitcode-stdio-1.0
-  main-is: Phase27ReadinessSpec.hs
+  main-is: CapacitySchedulerReadinessSpec.hs
   hs-source-dirs:
-      test/scheduler
+      test/spec/live
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1115,9 +1122,9 @@ test-suite scheduler-readiness-spec
 
 test-suite scheduler-reservation-spec
   type: exitcode-stdio-1.0
-  main-is: Phase27ReservationSpec.hs
+  main-is: CapacitySchedulerReservationSpec.hs
   hs-source-dirs:
-      test/scheduler
+      test/spec/live
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1201,7 +1208,7 @@ test-suite capacity-topology-spec
       CapacityTopologyMutants
       CapacityTopologyProps
   hs-source-dirs:
-      test/dsl
+      test/spec/dsl
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1221,7 +1228,7 @@ test-suite storage-geometry-spec
       StorageGeometryMutants
       StorageGeometryProps
   hs-source-dirs:
-      test/dsl
+      test/spec/dsl
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1242,7 +1249,7 @@ test-suite execution-accelerator-spec
       ExecutionAcceleratorMutants
       ExecutionAcceleratorProps
   hs-source-dirs:
-      test/dsl
+      test/spec/dsl
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1263,7 +1270,7 @@ test-suite capability-bind-spec
       BindProps
       ShapeOracle
   hs-source-dirs:
-      test/capability
+      test/spec/capability
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1287,7 +1294,7 @@ test-suite provision-seal-spec
       ProvisionSealGate
       RuntimeStorageBindingProps
   hs-source-dirs:
-      test/capability
+      test/spec/capability
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1309,7 +1316,7 @@ test-suite capability-spec
       EngineAcceleratorProps
       ProvisionFixtures
   hs-source-dirs:
-      test/capability
+      test/spec/capability
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1331,8 +1338,8 @@ test-suite render-golden
       RenderGoldenProps
       RenderMutants
   hs-source-dirs:
-      test/manifest
-      test/capability
+      test/spec/manifest
+      test/spec/capability
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1353,7 +1360,7 @@ test-suite chain-spec
       ProvisionFixtures
   hs-source-dirs:
       test/kernel
-      test/capability
+      test/spec/capability
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1369,7 +1376,7 @@ test-suite boundary-spec
   type: exitcode-stdio-1.0
   main-is: BoundarySpec.hs
   hs-source-dirs:
-      test/boundary
+      test/spec/boundary
   build-depends:
       base >=4.21 && <4.22,
       bytestring >=0.12 && <0.13,
@@ -1384,7 +1391,7 @@ test-suite astcheck-spec
   type: exitcode-stdio-1.0
   main-is: AstCheckSpec.hs
   hs-source-dirs:
-      test/dsl
+      test/spec/dsl
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1400,8 +1407,8 @@ test-suite sim-spec
       FaultContracts
       DroppedPartitionMutant
   hs-source-dirs:
-      test/sim
-      test/sim/mutants/dropped_partition_handling
+      test/spec/sim
+      test/mutant/deterministic_simulation/dropped_partition_handling
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1421,9 +1428,9 @@ test-suite reconcile-sim
   type: exitcode-stdio-1.0
   main-is: ReconcileSim.hs
   other-modules:
-      Phase26SimCommon
+      ObjectReconcilerSimCommon
   hs-source-dirs:
-      test/sim
+      test/spec/sim
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1441,9 +1448,9 @@ test-suite execution-transition-sim
   type: exitcode-stdio-1.0
   main-is: ExecutionTransitionSim.hs
   other-modules:
-      Phase26SimCommon
+      ObjectReconcilerSimCommon
   hs-source-dirs:
-      test/sim
+      test/spec/sim
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1461,9 +1468,9 @@ test-suite scheduler-sim
   type: exitcode-stdio-1.0
   main-is: SchedulerSim.hs
   other-modules:
-      Phase27SchedulerSimCommon
+      CapacitySchedulerSimCommon
   hs-source-dirs:
-      test/sim
+      test/spec/sim
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1477,22 +1484,22 @@ test-suite scheduler-sim
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite phase28-storageclass-spec
+test-suite retained-storage-class-spec
   type: exitcode-stdio-1.0
-  main-is: Phase28StorageClassSpec.hs
+  main-is: RetainedStorageClassSpec.hs
   hs-source-dirs:
-      test/storage
+      test/spec/live
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite phase28-storageclass-live
+test-suite retained-storage-class-live
   type: exitcode-stdio-1.0
-  main-is: Phase28StorageClassLiveSpec.hs
+  main-is: RetainedStorageClassLiveSpec.hs
   hs-source-dirs:
-      test/live
+      test/spec/live
   build-depends:
       base >=4.21 && <4.22,
       aeson ==2.2.5.0,
@@ -1501,11 +1508,11 @@ test-suite phase28-storageclass-live
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite phase28-retained-pv-spec
+test-suite retained-storage-volume-spec
   type: exitcode-stdio-1.0
-  main-is: Phase28RetainedPVSpec.hs
+  main-is: RetainedStorageVolumeSpec.hs
   hs-source-dirs:
-      test/storage
+      test/spec/live
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1514,11 +1521,11 @@ test-suite phase28-retained-pv-spec
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite phase28-retained-pv-live
+test-suite retained-storage-volume-live
   type: exitcode-stdio-1.0
-  main-is: Phase28RetainedPVLiveSpec.hs
+  main-is: RetainedStorageVolumeLiveSpec.hs
   hs-source-dirs:
-      test/live
+      test/spec/live
   build-depends:
       base >=4.21 && <4.22,
       aeson >=2.2 && <2.3,
@@ -1526,11 +1533,11 @@ test-suite phase28-retained-pv-live
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite phase28-rebind-spec
+test-suite retained-storage-rebind-spec
   type: exitcode-stdio-1.0
-  main-is: Phase28RebindSpec.hs
+  main-is: RetainedStorageRebindSpec.hs
   hs-source-dirs:
-      test/storage
+      test/spec/live
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1538,11 +1545,11 @@ test-suite phase28-rebind-spec
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite phase28-rebind-live
+test-suite retained-storage-rebind-live
   type: exitcode-stdio-1.0
-  main-is: RebindSpec.hs
+  main-is: RetainedStorageRebindLiveSpec.hs
   hs-source-dirs:
-      test/live
+      test/spec/live
   build-depends:
       base >=4.21 && <4.22,
       aeson >=2.2 && <2.3,
@@ -1552,7 +1559,7 @@ test-suite phase28-rebind-live
 
 test-suite ui-program-schema-spec
   type: exitcode-stdio-1.0
-  main-is: Phase16UiProgramSchemaSpec.hs
+  main-is: UiProgramSchemaSpec.hs
   hs-source-dirs:
       test/ui
   build-depends:
@@ -1604,7 +1611,7 @@ test-suite ui-authorization-spec
 
 test-suite ui-effect-binding-spec
   type: exitcode-stdio-1.0
-  main-is: Phase19UiEffectBindingSpec.hs
+  main-is: UiEffectBindingSpec.hs
   other-modules:
       EffectBindingReference
   hs-source-dirs:
@@ -1622,7 +1629,7 @@ test-suite ui-effect-binding-spec
 
 test-suite ui-plan-compiler-spec
   type: exitcode-stdio-1.0
-  main-is: Phase20UiPlanCompilerSpec.hs
+  main-is: UiPlanCompilerSpec.hs
   other-modules:
       PlanCompilerReference
   hs-source-dirs:
@@ -1641,7 +1648,7 @@ test-suite ui-plan-compiler-spec
 
 test-suite ui-browser-interpreter-spec
   type: exitcode-stdio-1.0
-  main-is: Phase21UiBrowserInterpreterSpec.hs
+  main-is: UiBrowserInterpreterSpec.hs
   other-modules:
       ReferenceClientPlan
   hs-source-dirs:
@@ -1660,7 +1667,7 @@ test-suite ui-browser-interpreter-spec
 
 test-suite ui-server-boundary-spec
   type: exitcode-stdio-1.0
-  main-is: Phase22UiServerBoundarySpec.hs
+  main-is: UiServerBoundarySpec.hs
   hs-source-dirs:
       test/ui
   build-depends:
@@ -1678,7 +1685,7 @@ test-suite ui-server-boundary-spec
 
 test-suite ui-local-composition-spec
   type: exitcode-stdio-1.0
-  main-is: Phase23LocalCompositionSpec.hs
+  main-is: LocalCompositionSpec.hs
   hs-source-dirs:
       test/ui
   build-depends:
@@ -1693,11 +1700,11 @@ test-suite ui-local-composition-spec
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite phase29-vault-spec
+test-suite vault-pki-spec
   type: exitcode-stdio-1.0
-  main-is: Phase29VaultSpec.hs
+  main-is: VaultPkiSpec.hs
   hs-source-dirs:
-      test/vault
+      test/spec/vault
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1706,11 +1713,11 @@ test-suite phase29-vault-spec
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite phase29-vault-sim
+test-suite vault-unseal-sim
   type: exitcode-stdio-1.0
   main-is: UnsealFailClosedSpec.hs
   hs-source-dirs:
-      test/Amoebius/Sim/Vault
+      test/spec/vault
   build-depends:
       base >=4.21 && <4.22,
       amoebius:dsl-core,
@@ -1733,11 +1740,11 @@ test-suite vault-pki-live
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite phase30-backbone-spec
+test-suite platform-backbone-spec
   type: exitcode-stdio-1.0
-  main-is: Phase30BackboneSpec.hs
+  main-is: PlatformBackboneSpec.hs
   hs-source-dirs:
-      test/platform
+      test/spec/platform
   build-depends:
       base >=4.21 && <4.22,
       aeson ==2.2.5.0,
@@ -1748,9 +1755,9 @@ test-suite phase30-backbone-spec
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite phase30-backbone-live
+test-suite platform-backbone-live
   type: exitcode-stdio-1.0
-  main-is: Phase30BackboneLiveSpec.hs
+  main-is: PlatformBackboneLiveSpec.hs
   hs-source-dirs:
       test/live
   build-depends:
@@ -1984,7 +1991,7 @@ test-suite gateway-migration-sim
   other-modules:
       GatewayMigrationTrace
   hs-source-dirs:
-      test/sim
+      test/spec/sim
   build-depends:
       base >=4.21 && <4.22,
       amoebius:formal-model,

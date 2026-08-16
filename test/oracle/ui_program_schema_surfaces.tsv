@@ -1,0 +1,50 @@
+# Authored expectation for the Phase-16 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   items     the validation-locus entries and mutant names the run read
+#   metrics   the metric keys in .build/dsl/ui-program-schema/phase-results.tsv
+#   checks    the check ids tools/ui_program_schema_gate.py implements
+#
+# The 30 items are partitioned so each is claimed exactly once. Several foreclosure surfaces
+# take both a negative fixture and the mutant that attacks the same foreclosure — the bound
+# check and its `M-drop-bound-check` mutant, exhaustiveness and `M-skip-exhaustiveness`,
+# port unification and `M-swap-port-contract` — because a foreclosure is only evidenced by
+# both halves: the negative that must fail, and the mutant proving the check has teeth.
+#
+# `runtime-noninterference` carries no id: it is a runtime property this pure register
+# cannot reach, and no observation stands behind it here.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+closed-tenant-mode-union	items	minimal_single_tenant,minimal_multi_tenant
+closed-node-kind-union	items	composed_workflow_ui
+closed-value-type-union	items	ill_typed_generated,checked_ui_illegal
+no-raw-browser-source-arm	checks	forbidden-ui-source-arms
+named-external-link-requirement	items	raw_external_link_url,duplicate_external_link_requirement,add_raw_url_arm
+dhall-ui-source-wire	items	raw_browser_escape,add_raw_js_arm
+deterministic-module-merge	items	duplicate_generated,M-first-id-wins
+qualified-node-identities	items	duplicate_qualified_id
+finite-collection-bounds	items	unbounded_collection,over_bound_generated,M-drop-bound-check
+graph-cycle-rejection	items	recursive_effect,cyclic_generated
+missing-reference-rejection	items	missing_reference,missing_generated
+duplicate-identity-rejection	metrics	graph-oracle
+duplicate-link-rejection	items	duplicate_link_generated
+port-type-unification	items	port_type_mismatch,M-swap-port-contract
+exhaustive-event-branches	items	non_exhaustive_event,non_exhaustive_generated,M-skip-exhaustiveness
+public-value-projection	items	private_value_projection,private_generated
+opaque-checked-ui-program	metrics	compile-seal
+three-positive-programs	metrics	program-corpus
+ten-exact-negative-diagnostics	metrics	wire-golden
+normalized-wire-golden	items	normalized_wire
+independent-graph-reference	items	graph_reference
+eight-class-generated-coverage	metrics	generated-coverage
+six-mutant-battery	metrics	mutants
+network-isolated-pure-gate	metrics	network-observer
+browser-runtime-enforcement	metrics	browser-runtime-enforcement
+authorization-enforcement	metrics	authorization-enforcement
+provider-tenant-isolation	metrics	provider-tenant-isolation
+runtime-noninterference	checks	
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle,checked-program-constructor-opaque,ui-partial-token-scan

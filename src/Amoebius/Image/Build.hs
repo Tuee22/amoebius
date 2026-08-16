@@ -99,6 +99,8 @@ runAdmittedBuildxOci arguments = case arguments of
     , cacheBytesText
     , cacheResidentText
     , dockerExecutable
+    , dockerHost
+    , testRoot
     , dockerConfig
     , builderName
     , dockerfile
@@ -126,6 +128,8 @@ runAdmittedBuildxOci arguments = case arguments of
           observed
           BuildRequest
             { buildDockerExecutable = dockerExecutable
+            , buildDockerHost = Text.pack dockerHost
+            , buildTestRoot = testRoot
             , buildDockerConfig = dockerConfig
             , buildBuilderName = Text.pack builderName
             , buildDockerfile = dockerfile
@@ -145,7 +149,7 @@ runAdmittedBuildxOci arguments = case arguments of
         BuildFailed status -> exitWith (ExitFailure status)
   _ ->
     die
-      "admitted-buildx-oci requires CATALOG FINGERPRINT CPU_MILLIS MEMORY_BYTES SCRATCH_BYTES CACHE_BYTES CACHE_RESIDENT_BYTES DOCKER DOCKER_CONFIG BUILDER DOCKERFILE CONTEXT OCI_OUTPUT CACHE_ROOT SCRATCH_ROOT BUILDKIT_CONFIG BUILDKIT_IMAGE BUILDKIT_CONTAINER STATE_VOLUME"
+      "admitted-buildx-oci requires CATALOG FINGERPRINT CPU_MILLIS MEMORY_BYTES SCRATCH_BYTES CACHE_BYTES CACHE_RESIDENT_BYTES DOCKER DOCKER_HOST TEST_ROOT DOCKER_CONFIG BUILDER DOCKERFILE CONTEXT OCI_OUTPUT CACHE_ROOT SCRATCH_ROOT BUILDKIT_CONFIG BUILDKIT_IMAGE BUILDKIT_CONTAINER STATE_VOLUME"
 
 observedHost
   :: BakeCatalog

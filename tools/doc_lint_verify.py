@@ -8,7 +8,7 @@ Side two   every negative materialized from the authored seed and mutation list 
            cannot do.
 
 The negatives are reproducible projections of `tools/doc_lint_corpus/_positive/` and
-`_build.py`, so the run materializes them beneath `gen/test-corpora/doc_lint/` rather
+`_build.py`, so the run materializes them beneath `.build/test-corpora/doc_lint/` rather
 than reading committed copies.
 
     python3 tools/doc_lint_verify.py            # both sides
@@ -19,6 +19,7 @@ Exit status: 0 both sides pass, 1 otherwise.
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 import shutil
@@ -32,12 +33,13 @@ import attestation  # noqa: E402
 import doc_lint  # noqa: E402
 import ledger_lint  # noqa: E402
 import artifact_manifest_lint  # noqa: E402
+import containment  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CORPUS = os.path.join(HERE, "doc_lint_corpus")
 ROOT = os.path.dirname(HERE)
-NEGATIVES = os.path.join(ROOT, "gen", "test-corpora", "doc_lint")
-SURFACES = os.path.join(ROOT, "gen", "test-surfaces", "phase_00.json")
+NEGATIVES = os.path.join(ROOT, ".build", "test-corpora", "doc_lint")
+SURFACES = os.path.join(ROOT, ".build", "test-surfaces", "phase_00.json")
 EXPECTATIONS = os.path.join(ROOT, "test", "oracle", "documentation_suite_surfaces.tsv")
 
 SIDE_NAMES = (
@@ -49,6 +51,7 @@ SIDE_NAMES = (
     "artifact",
     "policy",
     "attestation",
+    "containment",
     "write-guard",
 )
 
@@ -220,7 +223,7 @@ def snapshot_side():
     closure depend on when the operator committed.
     """
     print("\nsnapshot side — the governed corpus lints from non-ignored source alone\n")
-    target = os.path.join(ROOT, "gen", "tmp", "source-snapshot")
+    target = os.path.join(ROOT, ".build", "tmp", "source-snapshot")
     if os.path.isdir(target):
         shutil.rmtree(target)
     paths = artifact_policy.snapshot_paths()
@@ -334,12 +337,12 @@ def policy_side():
 
 
 def attestation_side(run_dir, ledger_path):
-    """Bind this run to its source snapshot and retain the attestation outside Git.
+    """Bind this run to its source snapshot and retain it beneath `.build/`.
 
     The binding is the digest of every non-ignored file as the run saw it. Whether that
     source is committed, and when, is the operator's business and no part of the gate.
     """
-    print("\nattestation side — external retention\n")
+    print("\nattestation side — project-contained retention\n")
     commit = artifact_policy.git("rev-parse", "HEAD").strip()
     dirty = bool(artifact_policy.git("status", "--porcelain").strip())
     snapshot = artifact_policy.source_digest()
@@ -396,11 +399,37 @@ def artifact_side():
     return False
 
 
+def containment_side(before, after, contained_paths):
+    """Prove closed-root selection and equality of every outside-host observation."""
+    print("\ncontainment side — closed roots and outside-host inventory\n")
+    ok = True
+    for path in contained_paths:
+        try:
+            containment.require_state_path(path, "build", actor="production")
+        except containment.ContainmentError as exc:
+            print(f"  FAIL  {exc}")
+            ok = False
+    problems = containment.host_inventory_problems(before, after)
+    for problem in problems:
+        print(f"  FAIL  {problem}")
+        ok = False
+    if not problems:
+        digest = hashlib.sha256(after.canonical_bytes()).hexdigest()
+        print(f"  ok    outside-host inventory unchanged ({digest[:16]}…)")
+    if after.observation_errors:
+        for error in after.observation_errors:
+            print(f"  note  {error}")
+    if ok:
+        print("  ok    every Phase-0 output resolves beneath .build/")
+    return ok
+
+
 def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--fixtures", action="store_true", help="run the fixture side only")
     args = ap.parse_args(argv)
 
+    before_host = containment.host_inventory()
     fixtures_ok = positive_side() and fixture_side()
     if args.fixtures:
         return 0 if fixtures_ok else 1
@@ -412,11 +441,17 @@ def main(argv):
     tree_ok = tree_side()
     snapshot_ok = snapshot_side()
     surface_ok, surfaces = surface_side()
-    run_dir = os.path.join(ROOT, "gen", "runs", "phase_00", run_id())
+    run_dir = os.path.join(ROOT, ".build", "runs", "phase_00", run_id())
     ledger_ok, ledger_path = ledger_side(run_dir, surfaces)
     artifact_ok = artifact_side()
     policy_ok = policy_side()
     attest_ok = attestation_side(run_dir, ledger_path)
+    after_host = containment.host_inventory()
+    contained_ok = containment_side(
+        before_host,
+        after_host,
+        (NEGATIVES, SURFACES, os.path.join(ROOT, ".build", "tmp", "source-snapshot"), run_dir),
+    )
 
     guard = artifact_policy.Report()
     artifact_policy.audit_write_guard(guard, before_authored, artifact_policy.authored_snapshot())
@@ -437,6 +472,7 @@ def main(argv):
         "artifact": artifact_ok,
         "policy": policy_ok,
         "attestation": attest_ok,
+        "containment": contained_ok,
         "write-guard": guard_ok,
     }
     print()

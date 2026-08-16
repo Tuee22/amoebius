@@ -6,7 +6,7 @@ half of the Phase-0 contract: that the repository separates authored inputs from
 generated output the way
 `documents/engineering/repository_layout_doctrine.md` section 8 requires.
 
-Fifteen rules, each independently seeded:
+Seventeen rules, each independently seeded:
 
     r1  generator-registry     every doctrine output class has a declared generator
     r2  provenance             no tracked file is a reproducible copy
@@ -16,13 +16,15 @@ Fifteen rules, each independently seeded:
     r6  dynamic-resolution     no tracked resolver output, integrity pin, or home path
     r7  source-closure         no build or gate input is an ignored worktree file
     r8  revision-history       reachable history is audited and dispositioned
-    r9  external-attestation   a run bundle schema-checks, stores, and verifies
+    r9  local-attestation      a run bundle schema-checks, stores, and verifies
     r10 terminology            no retired predecessor name survives in the tree
     r11 no-leak                the gate changes no tracked file and creates no unignored path
     r12 negative-corpora       every audit exemption is authored, in use, and rule-scoped
     r13 target-tree            every tracked path lies in the doctrine section 2 final layout
     r14 ignore-partition       every ignore rule names a path that layout contains
     r15 de-phased-naming       no authored name outside the plan suite carries a phase ordinal
+    r16 state-containment      executable source has no host-state escape
+    r17 test-secrets           production cannot read or persist the cleartext test seam
 
 Python 3 standard library only, and no dependency on the amoebius binary.
 
@@ -55,6 +57,7 @@ sys.path.insert(0, str(HERE))
 import attestation  # noqa: E402
 import attestation_negative_corpus  # noqa: E402
 import artifact_manifest_lint as legacy  # noqa: E402
+import containment  # noqa: E402
 
 RULES = {
     "r1": "generator registry covers every doctrine output class",
@@ -65,13 +68,15 @@ RULES = {
     "r6": "dynamic resolution: no tracked resolver output, integrity pin, or home path",
     "r7": "source closure: no build or gate input is an ignored worktree file",
     "r8": "revision history: audited, with secrets absent and findings dispositioned",
-    "r9": "external attestation: a run bundle schema-checks, stores, and verifies",
+    "r9": "project-contained attestation: a run bundle schema-checks, stores, and verifies",
     "r10": "terminology: no retired predecessor name survives in the tree",
     "r11": "no-leak: the gate changes no tracked file and creates no unignored path",
     "r12": "negative corpora: every audit exemption is authored, in use, and rule-scoped",
     "r13": "target tree: every tracked path lies in the final layout",
     "r14": "ignore partition: every ignore rule names a path the target tree contains",
     "r15": "de-phased naming: no authored name outside the plan suite carries a phase ordinal",
+    "r16": "state containment: executable source has no host-state escape",
+    "r17": "test secrets: production cannot read or persist the cleartext test seam",
 }
 
 REGISTRY = HERE / "generator_registry.tsv"
@@ -113,7 +118,6 @@ AUTHORED_ROOTS = (
     "pulumi",
     "test-topology",
     "test",
-    "tests",
     "mutants",
     "tools",
     "vendor",
@@ -128,6 +132,7 @@ PRUNE_DIRS = {".git", "node_modules", "dist-newstyle", ".cabal-sandbox"}
 # A path in any of these families is generated output wherever it appears, so a
 # tracked instance is a provenance defect rather than an ignore-pattern gap.
 GENERATED_PATH_GLOBS = (
+    ".build/*",
     "gen/*",
     "dist-newstyle/*",
     ".cabal-sandbox/*",
@@ -204,6 +209,7 @@ LEDGER_KEYS = {
 }
 
 SECRET_NAME_GLOBS = (
+    "test-secrets.dhall",
     ".env",
     ".env.*",
     "*.pem",
@@ -784,18 +790,60 @@ def audit_phase_ordinals(
 
 
 # --------------------------------------------------------------------------
+# r16/r17 — repository-contained state and the test-secrets boundary
+# --------------------------------------------------------------------------
+
+
+def audit_state_containment(
+    report: Report, sources: dict[str, str] | None = None
+) -> None:
+    """Scan authored executable source for host-default temp and known escape paths."""
+    if sources is None:
+        sources = {
+            relative: read_text(ROOT / relative)
+            for relative in snapshot_paths()
+            if relative.endswith((".py", ".hs", ".sh"))
+        }
+    for relative, text in sorted(sources.items()):
+        for message in containment.scan_source(relative, text):
+            report.findings.append(Finding("r16", relative, message))
+
+
+def audit_test_secrets(
+    report: Report, sources: dict[str, str] | None = None
+) -> None:
+    """Scan production source and state filenames without reading cleartext values."""
+    if sources is None:
+        sources = {
+            relative: read_text(ROOT / relative)
+            for relative in snapshot_paths()
+            if relative.endswith((".py", ".hs", ".sh"))
+        }
+    for relative, text in sorted(sources.items()):
+        for message in containment.production_secret_references(relative, text):
+            report.findings.append(Finding("r17", relative, message))
+    for state_root in containment.STATE_ROOTS.values():
+        if not state_root.is_dir():
+            continue
+        for candidate in state_root.rglob(containment.TEST_SECRETS.name):
+            report.findings.append(
+                Finding("r17", str(candidate.relative_to(ROOT)), "state contains a copied test-secrets.dhall")
+            )
+
+
+# --------------------------------------------------------------------------
 # r1 — generator registry
 # --------------------------------------------------------------------------
 
 
 def doctrine_output_classes() -> set[str]:
-    """The `gen/` inventory of repository-layout doctrine section 3.1.
+    """The `.build/` inventory of repository-layout doctrine section 3.1.
 
     Parsed from the doctrine rather than restated here, so the registry is checked
     against a document authored independently of this module.
     """
     text = read_text(LAYOUT_DOCTRINE)
-    start = text.find("### 3.1 Canonical `gen/` tree")
+    start = text.find("### 3.1 Canonical `.build/` tree")
     if start < 0:
         return set()
     block_start = text.find("```text", start)
@@ -806,7 +854,7 @@ def doctrine_output_classes() -> set[str]:
     classes: set[str] = set()
     stack: dict[int, str] = {}
     for line in block.splitlines():
-        if not line.strip() or line.strip() == "gen/":
+        if not line.strip() or line.strip() == ".build/":
             continue
         marker = re.search(r"[├└]── ", line)
         if not marker:
@@ -830,7 +878,7 @@ def audit_generator_registry(
     classes = doctrine_output_classes() if classes is None else classes
     if not classes:
         report.findings.append(
-            Finding("r1", LAYOUT_DOCTRINE.name, "cannot parse the section 3.1 gen/ inventory")
+            Finding("r1", LAYOUT_DOCTRINE.name, "cannot parse the section 3.1 .build/ inventory")
         )
         return
     if registry_text is None:
@@ -880,13 +928,13 @@ def audit_generator_registry(
     audit_generator_targets(report, {c.split("/")[0] for c in declared})
 
 
-GEN_TARGET = re.compile(r"\bgen/([A-Za-z0-9_.<>-]+)")
+GEN_TARGET = re.compile(r"(?<![A-Za-z0-9_])\.build/([A-Za-z0-9_.<>-]+)")
 
 
 def audit_generator_targets(
     report: Report, declared_roots: set[str], sources: dict[str, str] | None = None
 ) -> None:
-    """A tool may only name a `gen/` sub-root the registry declares.
+    """A tool may only name a `.build/` sub-root the registry declares.
 
     Catching this statically is what stops a new generator inventing an output class
     silently: the doctrine inventory has to be amended before the path can be written.
@@ -907,7 +955,7 @@ def audit_generator_targets(
                 continue
             seen.add(root)
             report.findings.append(
-                Finding("r1", relative, f"writes undeclared output class gen/{root}/")
+                Finding("r1", relative, f"writes undeclared output class .build/{root}/")
             )
 
 
@@ -1209,6 +1257,7 @@ PATH_LITERAL = re.compile(r"[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)+")
 # section S clause 3 admits all three as write destinations, and inside a Dockerfile
 # they name the image's own filesystem rather than the repository.
 CLOSURE_EXEMPT_PREFIXES = (
+    ".build/",
     "gen/",
     "tmp/",
     "temp/",
@@ -1365,13 +1414,15 @@ def audit_revision_history(report: Report, paths: set[str] | None = None) -> Non
 
 
 # --------------------------------------------------------------------------
-# r9 — external attestation
+# r9 — project-contained attestation
 # --------------------------------------------------------------------------
 
 
 def audit_external_attestation(report: Report, bundle: dict | None = None) -> None:
-    """Prove the attestation path end to end on a synthetic bundle in a temp store."""
-    with tempfile.TemporaryDirectory(prefix="amoebius-attest-") as directory:
+    """Prove the attestation path end to end in project-contained scratch state."""
+    temporary_root = ROOT / ".build" / "tmp"
+    temporary_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="amoebius-attest-", dir=temporary_root) as directory:
         store = attestation.Store(Path(directory))
         sample = bundle if bundle is not None else attestation.sample_bundle()
         problems = attestation.schema_check(sample)
@@ -1450,6 +1501,8 @@ def audit(gen_root: Path | None = None) -> Report:
     audit_target_tree(report, snapshot_paths(), tree)
     audit_ignore_partition(report, rules, tree)
     audit_phase_ordinals(report, snapshot_paths(), read_text(ROOT / "amoebius.cabal"), rules)
+    audit_state_containment(report)
+    audit_test_secrets(report)
 
     # A seeded fixture is not a finding at all, so the corpora narrow the report before
     # the migration allowlist defers what is left to its owning phase.

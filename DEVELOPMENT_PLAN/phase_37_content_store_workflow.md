@@ -44,9 +44,15 @@ Register 3, live, on the `linux-cpu` substrate. Validated 2026-08-11 with
 
 ## Phase Status
 
+⏸️ Blocked — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
+invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
+repository roots defined by Phase 0. Scope amendments below remain normative.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Observed artifact migration — 2026-08-11:** `manifest_canonical.cbor`,
 `manifest_canonical.sha256`, and `manifest_noncanonical.cbor` are reproducible from one logical manifest and
@@ -360,7 +366,7 @@ store is a single one-object atomic pointer flip.
 - **Independent canonicalization apparatus:** one reviewed logical manifest, the canonical-CBOR convention,
   and an independent canonicalizer generate the reference bytes and SHA under the run bundle. The tracked
   `.cbor` and `.sha256` copies are removed. A reviewed mutation definition emits the same logical manifest in
-  non-sorted component order under `gen/test-corpora/`; its expected failure is a byte mismatch at the first
+  non-sorted component order under `.build/test-corpora/`; its expected failure is a byte mismatch at the first
   component-ordering offset and a different key. Committed seeded mutant:
   `mutant/insertion-order-encoder` — an encoder that emits map/component bytes in insertion order rather than
   sorted order; the gate MUST turn this mutant **red** against the golden vector. The independently authored
@@ -376,7 +382,7 @@ store is a single one-object atomic pointer flip.
    `If-None-Match: *` and assert first-write success, second-write `412` treated as a no-op success.
 2. Encode the same logical manifest from **two writers that each first construct it with a distinct component
    insertion order/permutation**, then compare both with fresh reference bytes and SHA produced by the
-   independent canonicalizer under `gen/runs/phase_37/`. Assert the generated noncanonical case fails
+   independent canonicalizer under `.build/runs/phase_37/`. Assert the generated noncanonical case fails
    with a **byte mismatch at the first component-ordering offset** (not merely "differs"), and that the
    committed `mutant/insertion-order-encoder` turns this validation **red**.
 3. Race two `pointers/latest` `If-Match` updates; assert one commits, the loser gets `412`, re-reads, and the
@@ -518,7 +524,7 @@ bespoke amoebius election — and assemble the phase gate.
   (the durable test-flagged bytes reclaimed by Phase 54). The sweep emits its **full inventory list and the named retained set** into the per-run ledger; **any non-empty remainder outside the retained set is a hard gate failure**. (Durable-byte reclaim staying with Phase 54 is the *only* exemption, and only for the
   explicitly named retained set — not a blanket class exemption.)
 - **Reference and mutant apparatus:** execute the independent no-fault path during the run and retain its
-  `pointers/latest` HEAD only beneath `gen/runs/phase_37/`; remove
+  `pointers/latest` HEAD only beneath `.build/runs/phase_37/`; remove
   `amoebius-runtime/test/golden/head_nofault.bin`. Retain the promoted-consumer name table
   `amoebius-runtime/test/golden/failover_rank.txt` only after independent review. Committed seeded
   mutants the gate MUST turn **red** — `mutant/ack-before-store-write` (operator: effect reorder — worker acks

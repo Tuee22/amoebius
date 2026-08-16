@@ -47,7 +47,7 @@ nor the phase gates that consume its registers, owned by
 flowchart LR
 %% register: orientation
   spec["authored test spec"] --> gate{{"register gate"}}
-  gate --> evidence[("external evidence")]
+  gate --> evidence[("repository-local evidence")]
   evidence --> ledger(("sealed ledger"))
   gate --> teardown["mandatory teardown"]
 ```
@@ -217,9 +217,16 @@ hosted zone, or a live cluster, then every test would silt up the substrate and 
 from a dirtier world than the last. amoebius forecloses that by making teardown **structural**, not a final
 step whose execution is merely hoped for.
 
-The contract has four clauses (generalized from prodbox's Pulumi-orchestrated infrastructure-test rules:
-isolated ephemeral stacks, unique names per run, aggressive tagging, *always* teardown via
-`bracket`/`finally`):
+Before those lifecycle clauses apply, **tests have one physical root and may not touch production**. The
+harness resolves the checkout root, creates `.test_data/runs/<run-id>/`, writes an exclusive ownership marker,
+and redirects every subordinate temp, cache, kubeconfig, virtual disk, container-engine, and service-state path
+beneath it. Before setup it fails if the selected root resolves beneath `.data/**`, if production configuration
+is present, or if the ownership marker already exists. It never falls back to `/tmp`, `/var/tmp`, a user home,
+or global Docker.
+
+The lifecycle contract then has four clauses (generalized from prodbox's Pulumi-orchestrated
+infrastructure-test rules: isolated ephemeral stacks, unique names per run, aggressive tagging, *always*
+teardown via `bracket`/`finally`):
 
 1. **Resource ownership is explicit and visible.** The topology that allocates a real resource owns its
    primary cleanup path, and that obligation is *in the spec*, not hidden behind ambient machine state. This
@@ -228,9 +235,10 @@ isolated ephemeral stacks, unique names per run, aggressive tagging, *always* te
 2. **Teardown runs on every exit — success, failure, and Ctrl-C.** Teardown is wrapped in structured
    cleanup so an aborted or crashed run still reclaims what it built. "Always tears down" means *by
    construction of the topology type*, not by operator diligence.
-3. **Destroy is idempotent.** Re-running a teardown (after a crash, or because the first attempt half-ran)
-   converges to "nothing left," never errors on already-gone resources. The safe recovery from an
-   interrupted run is to re-run the same topology, not to clean up by hand.
+3. **Destroy is idempotent and path-exact.** Re-running teardown converges to "nothing left." The harness may
+   delete only the exact run root it created after re-resolving it beneath `.test_data/runs/**` and verifying
+   its ownership marker. A missing, replaced, or edited marker quarantines the root and fails the run rather
+   than broadening deletion.
 4. **A cleanup failure is a real failure.** A run whose workflow passed but whose teardown leaked does
    **not** report success. Cleanup errors are surfaced loudly to the operator; if both the workflow and the
    teardown fail, the workflow failure is reported first, but the leak is never swallowed. (prodbox
@@ -267,7 +275,7 @@ A skipped test that reports success misrepresents coverage. amoebius prohibits s
 success by default. A missing prerequisite fails with an actionable error that names the missing substrate,
 credential, authority, or tool.
 
-Every run emits a structured run bundle beneath `gen/runs/<phase>/<run-id>/`. The bundle contains the
+Every run emits a structured run bundle beneath `.build/runs/<phase>/<run-id>/`. The bundle contains the
 proven/tested/assumed ledger, generated surface enumeration, checks, mutants, coverage, command, resolved
 toolchain and dependency graph, substrate observation, cleanup result, and raw-observation references. It is
 generated run evidence and is never version-controlled.
@@ -286,13 +294,13 @@ the phase contract, rejects an unknown enumerated surface, and requires every la
 register to remain `UNVERIFIED`. A substrate-`none` design gate may report `proven-for-the-model`, never
 runtime proof.
 
-The immutable external attestation binds the source-snapshot digest, phase contract, gate command,
+The immutable repository-local attestation binds the source-snapshot digest, phase contract, gate command,
 resolved dependencies, toolchain, substrate, runtime bundle, and cleanup outcome. Git contains no ledger,
 receipt, enumeration, log, trace, report, screenshot, resolved path, or copied attestation. The complete
 placement and retention contract is owned by
 [repository_layout_doctrine.md §5](./repository_layout_doctrine.md#5-run-evidence-and-phase-status).
 
-A phase status may move to Done only after the external attestation verifies against the run's recorded
+A phase status may move to Done only after the repository-local attestation verifies against the run's recorded
 source-snapshot digest and the gate leaves the authored tree unchanged. The digest is what binds a result to
 the source that produced it; whether that source is committed, and when, is the operator's own business and
 never a gate condition.
@@ -309,7 +317,7 @@ transition. The promotion type and environment-strength mapping are owned by
 
 The methodology and strength vocabulary remain owned by
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). This section owns the per-run artifact boundary:
-generate locally, validate independently, attest externally, and never commit the result.
+generate locally, validate independently, attest beneath `.build/evidence-store/**`, and never commit the result.
 
 ---
 
@@ -415,7 +423,8 @@ amoebius adopts the prodbox `aws_admin_for_test_simulation` pattern, generalized
   real secrets-by-name path. It is the one sanctioned place a secret value lives at rest; every other `.dhall`,
   test or not, carries only names ([`dsl_doctrine.md` §6](./dsl_doctrine.md#6-secrets-are-names-never-values)).
 - **The `<project>.dhall` under test is harness-created, or the run fails fast.** The harness **creates** the
-  `<project>.dhall` it deploys and **deletes it on teardown** (the always-teardown contract,
+  `<project>.dhall` it deploys beneath its unique `.test_data/runs/<run-id>/**` root and **deletes it on
+  teardown** (the always-teardown contract,
   [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down)); if a `<project>.dhall` of that name
   **already exists, the run fails fast** rather than clobber an operator's real spec. That spec is a value of
   the topology type, so it inherits the same illegal-state-unrepresentable guarantee as any production `.dhall`
@@ -454,7 +463,7 @@ and the deterministic rebind it protects are **owned by**
 - **Leak detection is broader than the deletion scope.** The flag bounds what the elevated harness may
   destroy; it is not the oracle for whether teardown leaked. An observer outside the typed allocation path
   snapshots the applicable substrate inventories before and after the run: Kubernetes API objects; one
-  allocation-level record per retained host backing under `${RETAINED_ROOT}`, read outside node containers;
+  allocation-level record per retained host backing under the run's `.test_data/**` root, read outside node containers;
   and provider resources through a read-only cloud inventory. Equality is checked over those inventories, so
   an untagged resource or backing left after its PVC/PV objects disappear still fails.
 - **A non-empty postflight inventory diff is a hard failure.** After teardown, the harness asserts both that
@@ -563,7 +572,7 @@ ordering loci. See [Phase 23](../../DEVELOPMENT_PLAN/phase_23_ui_local_compositi
 
 The split also applies to lint and mutation corpora. An authored positive seed, mutation recipe, and expected
 diagnostic may be committed. The recipe's materialized negative copies are generated enumeration/input and
-must be created under `gen/test-corpora/` or a temporary directory. The gate joins each generated case to its
+must be created under `.build/test-corpora/` or `.build/tmp/`. The gate joins each generated case to its
 authored expected diagnostic by stable mutation identity; it does not retain a second source tree of copies.
 
 Git chronology is evidence, not an assumption. A fixture introduced in the same commit as its subject has no

@@ -204,7 +204,7 @@ bootstrapRegistryDomain =
       , K8sObjectIdentity "Deployment/amoebius-bootstrap/registry-mutation-proxy"
       , K8sObjectIdentity "Service/amoebius-bootstrap/registry-mutation-proxy"
       ]
-#ifdef PHASE25_BOOTSTRAP_DOMAIN_EXPANSION_MUTANT
+#ifdef BASE_IMAGE_REGISTRY_BOOTSTRAP_DOMAIN_EXPANSION_MUTANT
         <> [K8sObjectIdentity "Deployment/default/foreign"]
 #endif
     )
@@ -327,7 +327,7 @@ adoptBootstrapRegistryHandoff
   -> Set Text
   -> Text
   -> IO (Either BootstrapRegistryError BootstrapHandoffVerdict)
-#ifdef PHASE25_HANDOFF_WITHOUT_EQUALITY_MUTANT
+#ifdef BASE_IMAGE_REGISTRY_HANDOFF_WITHOUT_EQUALITY_MUTANT
 adoptBootstrapRegistryHandoff provision _liveDomain _liveFields _liveDigest = adoptReady provision
 #else
 adoptBootstrapRegistryHandoff provision liveDomain liveFields liveDigest

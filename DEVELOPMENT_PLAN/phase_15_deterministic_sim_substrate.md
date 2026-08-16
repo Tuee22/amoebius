@@ -40,15 +40,23 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/deterministic_simulation_gate.py` passed all eleven sides: both
+interpreters, six fake contracts, four schedules, trace determinism/sensitivity, IOSimPOR, the seeded mutant,
+all nine metrics, and the exact simulation source checks pass; 26 surfaces join to 36 enumerated items. The
+project-contained attestation is `sha256:6be4c197c0739f6ffaa5950391b49ede59c758bc8373609a545acea513de1465`,
+bound to source snapshot `sha256:4a7809fb4d96d811…`; Phase 15 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:2b3c1bd5…`
-(1940 non-ignored files) and published verified external attestation
+(1940 non-ignored files) and published a verified pre-containment external attestation
 `sha256:8a27796e30cb0da4b538fd20e3d758bdf4dff3417669cbf1766c7bc247eaa0b3`.
 
 **Observed progress — 2026-08-13:** **Policy-conformant.** The Register-2 claim is unchanged and re-run: one
 reference reconciler runs under both the real-client and `IOSim` interpreters, six fake contracts each expose
 their knob controls, four oracle-pinned schedules replay, same-seed traces are byte-identical while a distinct
 seed is demonstrably distinct, four bounded `IOSimPOR` replays are green, and the dropped-partition mutant
-reddens at `NoActOnStaleRead`. Evidence and the ledger move into `gen/runs/phase_15/<run-id>/`.
+reddens at `NoActOnStaleRead`. Evidence and the ledger move into `.build/runs/phase_15/<run-id>/`.
 
 **This is the first phase whose contract vocabulary and battery observations line up completely.** All 25
 surfaces have evidence — 22 validation-locus entries and mutant names partitioned one-to-one, seven recorded
@@ -91,7 +99,7 @@ fixtures.
 substrate the live-band phases later use for their Register-2.5 activity; the phase gate itself keys to Register 2,
 never 2.5 ([`development_plan_standards.md §K`](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `python3 tools/phase15_gate.py` passes the build, six fake-contract,
+**Gate:** `python3 tools/deterministic_simulation_gate.py` passes the build, six fake-contract,
 four-schedule replay, byte-determinism, sensitivity, IOSimPOR, explicit mutant-red, and ledger checks. The
 Phase-15 ledger records the exact tested/model-proven boundary
 and the assumed fidelity premise.
@@ -132,13 +140,13 @@ discriminating power.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 15.1: The `io-classes` `Env` effect interface + its two interpreters + `sim-spec` skeleton ✅
 
@@ -147,7 +155,7 @@ discriminating power.
 publish/consume, put/get-blob, apply-object, write-DNS, vault-op, now/delay — polymorphic over an
 `io-classes` monad `m`), `src/Amoebius/Sim/Interp/{Real,Sim}.hs` (the two interpreters: real clients under
 `IO`; the `IOSim s` model), and the `sim-spec` test-suite stanza in `amoebius.cabal` — built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: the reference reconciler runs under both `Env IO` with no-op clients and
 `Env (IOSim s)`. The non-empty source gate rejects bare-`IO` signatures and raw concurrency primitives while
 requiring the `MonadAsync`, `MonadSTM`, `MonadDelay`, and `IOSim` seams.
@@ -184,9 +192,9 @@ Done. Live client behavior remains UNVERIFIED.
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**:
 `src/Amoebius/Sim/Fakes/{Pulsar,MinIO,ApiServer,Route53,Vault,Clock}.hs` (the in-`IOSim` modeled substrates,
-each with a typed fault model) and `test/sim/FaultContracts.hs` (the committed per-fake fault-contract
+each with a typed fault model) and `test/spec/sim/FaultContracts.hs` (the committed per-fake fault-contract
 assertions) — built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: MinIO 412, apiserver conflict/watch-gap/crash, route53 stale/no-CAS, Vault sealed,
 Pulsar partition/heal/dedup/reorder/duplicate, and modeled-clock delay all match their contract assertions.
 Each fault has a disabled-knob control.
@@ -218,11 +226,11 @@ Done. Model fidelity to each real substrate remains ASSUMED.
 ## Sprint 15.3: The deterministic-replay battery — same-seed determinism + schedule-sensitivity + fault-mutant — the gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/sim/SimSpec.hs` (the `IOSim`/`IOSimPOR` replay battery),
-`test/sim/schedules/` (the committed schedule-fixture corpus — injected partition/redelivery/reorder/crash
-schedules, oracle-pinned), and `test/sim/mutants/dropped_partition_handling/` (the committed seeded
+**Implementation**: `test/spec/sim/SimSpec.hs` (the `IOSim`/`IOSimPOR` replay battery),
+`test/fixture/deterministic_simulation/schedules/` (the committed schedule-fixture corpus — injected partition/redelivery/reorder/crash
+schedules, oracle-pinned), and `test/mutant/deterministic_simulation/dropped_partition_handling/` (the committed seeded
 fault-mutant) — built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: all four schedules match the hand-authored `upheld` table and replay to identical
 trace bytes for the same seed. Perturbing the seed changes message order and trace bytes. IOSimPOR explores each
 fixture, and the dropped-partition mutant yields `Violated "NoActOnStaleRead"` in an explicit red run.
@@ -241,11 +249,11 @@ fidelity *assumed* — the honest premise this substrate buys
 ([`deterministic_simulation_doctrine.md §5`](../documents/engineering/deterministic_simulation_doctrine.md#5-what-dst-establishes-and-the-one-premise-it-buys)).
 
 ### Deliverables
-- The committed **schedule-fixture corpus** (`test/sim/schedules/`, oracle-pinned per [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-1) — injected
+- The committed **schedule-fixture corpus** (`test/fixture/deterministic_simulation/schedules/`, oracle-pinned per [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-1) — injected
   partition/redelivery/reorder/crash schedules over the toy reconcile loop.
-- The committed **seeded fault-mutant** (`test/sim/mutants/dropped_partition_handling/`) with a harness that
+- The committed **seeded fault-mutant** (`test/mutant/deterministic_simulation/dropped_partition_handling/`) with a harness that
   re-runs it and asserts `sim-spec` red ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-2).
-- `test/sim/SimSpec.hs` asserting: same-seed → byte-identical trace; a distinct-seed / distinct-schedule run
+- `test/spec/sim/SimSpec.hs` asserting: same-seed → byte-identical trace; a distinct-seed / distinct-schedule run
   yields a **different** trace ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-6); the named per-fake fault contracts fire ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)-7, from Sprint 15.2); and the
   fault-mutant turns the replayed invariant outcome red.
 - A Register-2 ledger: the invariant-under-the-modeled-schedules-and-faults result is *tested against a modeled

@@ -3,7 +3,7 @@
 
 `development_plan_standards.md` section M clause 2 requires every gate to name at least
 one committed seeded mutant it must turn red. This module is that mutant set for the
-fifteen artifact-policy rules: one authored negative per rule, each asserted to be
+artifact-policy rules: one authored negative per rule, each asserted to be
 reported **at its own rule**, so a rule that silently stops working fails here rather
 than passing an audit it no longer performs. The count follows `policy.RULES`; adding a
 rule without a negative here leaves it unproven and the surface join reports it.
@@ -23,6 +23,13 @@ import artifact_policy as policy
 import attestation
 import attestation_negative_corpus
 import artifact_manifest_lint as legacy
+import containment
+
+
+def _temporary_directory(prefix: str):
+    root = policy.ROOT / ".build" / "tmp"
+    root.mkdir(parents=True, exist_ok=True)
+    return tempfile.TemporaryDirectory(prefix=prefix, dir=root)
 
 
 def _rules(findings) -> set[str]:
@@ -38,7 +45,7 @@ def negative_r1_registry() -> policy.Report:
         classes={"runs/<phase>/<run-id>/**", "tla/**/*.tla"},
     )
     policy.audit_generator_targets(
-        report, {"runs"}, {"tools/synthetic_gate.py": 'OUT = "gen/invented/report.tsv"\n'}
+        report, {"runs"}, {"tools/synthetic_gate.py": 'OUT = ".build/invented/report.tsv"\n'}
     )
     return report
 
@@ -57,7 +64,7 @@ def negative_r2_provenance() -> policy.Report:
         )
     )
     report.findings.extend(
-        policy.classify_tracked("test/fixtures/copy.dhall", "let x = 1", twin="gen/dhall/copy.dhall")
+        policy.classify_tracked("test/fixtures/copy.dhall", "let x = 1", twin=".build/dhall/copy.dhall")
     )
     return report
 
@@ -81,7 +88,7 @@ def negative_r4_docker_context() -> policy.Report:
     """Generated output, run evidence, and a credential surviving into the context."""
     report = policy.Report()
     policy.audit_docker_context(
-        report, ["gen/runs/phase_00/ledger.json", "phase-results.tsv", "kubeconfig", "src/Main.hs"]
+        report, [".build/runs/phase_00/ledger.json", "phase-results.tsv", "kubeconfig", "src/Main.hs"]
     )
     return report
 
@@ -104,10 +111,10 @@ def negative_r5_write_guard() -> policy.Report:
         report,
         {
             "DEVELOPMENT_PLAN/evidence/phase_99/run.json": {"tools/synthetic_gate.py"},
-            "gen/runs/phase_99/run.json": {"tools/synthetic_gate.py"},
+            ".build/runs/phase_99/run.json": {"tools/synthetic_gate.py"},
         },
     )
-    with tempfile.TemporaryDirectory(prefix="amoebius-authored-root-negative-") as directory:
+    with _temporary_directory("amoebius-authored-root-negative-") as directory:
         tree = Path(directory)
         (tree / "documents").mkdir()
         (tree / "renamed-away").mkdir()  # what `src` became
@@ -133,13 +140,13 @@ def negative_r6_resolution() -> policy.Report:
 
 def negative_r7_source_closure() -> policy.Report:
     """A build configuration whose input exists only as ignored worktree state."""
-    # `gen/…` is ignored by construction and `src` is not, so the pair proves the audit
+    # `.build/…` is ignored by construction and `src` is not, so the pair proves the audit
     # keys on the real ignore lookup rather than on the message it prints.
     report = policy.Report()
     policy.audit_source_closure(
         report,
         {
-            "gen/synthetic-resolver-output.json": {"cabal.project"},
+            ".build/synthetic-resolver-output.json": {"cabal.project"},
             "src": {"cabal.project"},
         },
     )
@@ -158,7 +165,7 @@ def negative_r8_history() -> policy.Report:
 def negative_r9_attestation() -> policy.Report:
     """Every bundle in the negative corpus must be refused before it is stored."""
     report = policy.Report()
-    with tempfile.TemporaryDirectory(prefix="amoebius-attest-negative-") as directory:
+    with _temporary_directory("amoebius-attest-negative-") as directory:
         store = attestation.Store(Path(directory))
         positive = attestation.sample_bundle()
         refused = 0
@@ -183,7 +190,7 @@ def negative_r10_terminology() -> policy.Report:
     report = policy.Report()
     errors: list[str] = []
     retired = "mid" + "wife"
-    with tempfile.TemporaryDirectory(prefix="amoebius-terminology-negative-") as directory:
+    with _temporary_directory("amoebius-terminology-negative-") as directory:
         fixture = Path(directory) / f"legacy-{retired}.py"
         fixture.write_text(retired + "\n", encoding="utf-8")
         legacy.audit_bootstrap_coordinator_terminology(errors, paths=[fixture])
@@ -236,8 +243,9 @@ amoebius/
 ├── DEVELOPMENT_PLAN/**                   authored plan suite
 ├── src/**                                authored Haskell library source
 ├── test/**                               authored specs, fixtures, goldens
-├── gen/**                                every reproducible local output; ignored by both contracts
-└── dist-*/**                             Cabal build roots; ignored by both contracts
+├── .build/**                             every reproducible local output; ignored by both contracts
+├── .data/**                              production runtime state; ignored by both contracts
+└── .test_data/**                         harness-owned test state; ignored by both contracts
 ```
 
 Two roots fix a second level:
@@ -267,7 +275,7 @@ def negative_r13_target_tree() -> policy.Report:
         report,
         [
             "src/Amoebius/Kernel.hs",
-            "gen/runs/documentation_suite/ledger.json",
+            ".build/runs/documentation_suite/ledger.json",
             "scratch/notes.md",
             "LICENCE.txt",
             "test/fixtures/spec.dhall",
@@ -284,11 +292,11 @@ def negative_r14_ignore_partition() -> policy.Report:
     policy.audit_ignore_partition(
         report,
         [
-            (".gitignore", "/gen/"),
+            (".gitignore", "/.build/"),
             (".gitignore", "*.o"),
             (".gitignore", "/src/generated/"),
             (".gitignore", "/scratch/"),
-            (".dockerignore", "gen/**"),
+            (".dockerignore", ".build/**"),
             (".dockerignore", "**/*.o"),
             (".dockerignore", "scratch"),
         ],
@@ -302,10 +310,79 @@ def negative_r15_phase_ordinal() -> policy.Report:
     report = policy.Report()
     policy.audit_phase_ordinals(
         report,
-        ["tools/phase7_gate.py", "DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md", "src/Kernel.hs"],
+        ["tools/capacity_topology_gate.py", "DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md", "src/Kernel.hs"],
         "flag phase7-fold-mutant\n  default: False\ntest-suite phase7-capacity-spec\nlibrary amoebius\n",
-        [(".gitignore", "/.phase7-store/"), (".gitignore", "/gen/")],
+        [(".gitignore", "/.phase7-store/"), (".gitignore", "/.build/")],
     )
+    return report
+
+
+def negative_r16_state_containment() -> policy.Report:
+    """System paths, production/test aliasing, global Docker, and marker tampering."""
+    report = policy.Report()
+
+    def rejected(locus: str, action) -> None:
+        try:
+            action()
+        except containment.ContainmentError as exc:
+            report.findings.append(policy.Finding("r16", locus, str(exc)))
+
+    rejected(
+        "synthetic-output",
+        lambda: containment.require_state_path("/tmp/amoebius-output", "build", actor="production"),
+    )
+    rejected(
+        "synthetic-production-home",
+        lambda: containment.require_state_path(
+            "/home/operator/.amoebius/runtime", "production", actor="production"
+        ),
+    )
+    rejected(
+        "synthetic-test-alias",
+        lambda: containment.require_state_path(".data/test-run", "production", actor="test"),
+    )
+    rejected(
+        "synthetic-global-docker",
+        lambda: containment.require_project_resource(
+            "docker-container", "/var/lib/docker", scope="host-global"
+        ),
+    )
+
+    # The positive exercises real marker-owned creation and exact-path cleanup.  The
+    # mutation between them must be refused before deletion, then the original marker
+    # is restored so this seeded negative leaves no run descendant behind.
+    import uuid
+
+    run = containment.create_test_run("policy-" + uuid.uuid4().hex)
+    marker = run.path / containment.MARKER
+    original = marker.read_bytes()
+    marker.write_bytes(original + b"changed\n")
+    rejected("synthetic-changed-marker", lambda: containment.cleanup_test_run(run))
+    marker.write_bytes(original)
+    containment.cleanup_test_run(run)
+
+    contained = containment.state_path("build", "tmp", "positive", actor="production")
+    containment.require_state_path(contained, "build", actor="production")
+    return report
+
+
+def negative_r17_test_secrets() -> policy.Report:
+    """Production access and a filesystem copy of the test seam are both refused."""
+    report = policy.Report()
+    for locus, action in (
+        (
+            "synthetic-production-secret-read",
+            lambda: containment.require_secret_access("production"),
+        ),
+        (
+            "synthetic-secret-copy",
+            lambda: containment.require_secret_sink(".build/tmp/copied-secret"),
+        ),
+    ):
+        try:
+            action()
+        except containment.ContainmentError as exc:
+            report.findings.append(policy.Finding("r17", locus, str(exc)))
     return report
 
 
@@ -325,6 +402,8 @@ NEGATIVES = {
     "r13": ("path_outside_target_tree", negative_r13_target_tree),
     "r14": ("ignore_rule_off_tree", negative_r14_ignore_partition),
     "r15": ("phase_ordinal_in_name", negative_r15_phase_ordinal),
+    "r16": ("state_escapes_checkout", negative_r16_state_containment),
+    "r17": ("production_test_secret", negative_r17_test_secrets),
 }
 
 

@@ -3,7 +3,7 @@
   "checkpointObservers": ["Vault Transit decrypt", "MinIO GET", "filesystem write inventory"],
   "cloudMutationAudit": "must be empty for every refusal fixture",
   "engineObserver": "OS-boundary execve argv and environment",
-  "parent": "Deployment replicas=1 in amoebius-phase24",
+  "parent": "Deployment replicas=1 in amoebius-bootstrap-coordinator",
   "register": 3,
   "requiredExternalMaterialization": ["EKS control plane", "managed node group size 1"],
   "substrate": "linux-cpu"

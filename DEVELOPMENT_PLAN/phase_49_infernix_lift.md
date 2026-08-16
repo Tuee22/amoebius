@@ -41,15 +41,21 @@ materialized with Incus, Lima, and WSL2 respectively.
 
 ## Phase Status
 
+⏸️ Blocked — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
+invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
+repository roots defined by Phase 0. Scope amendments below remain normative.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Observed artifact migration — 2026-08-11:** `frozen_sources.txt` inventories sibling source,
 `expected_hashes.tsv` reproduces its file hashes, and `sibling_golden.cbor` captures sibling-program output.
 The gate also duplicates the hashes as constants. These are generated observations, not authored expectations.
 The owning sprint must resolve and execute the reviewed sibling boundary per run and retain its identity and
-reference output only in external evidence.
+reference output only in repository-local evidence.
 
 **Invalidated historical record:**
 
@@ -144,7 +150,7 @@ independent evidence reader, never the acceptance command.
   `test/mutants/phase_49/mut-49-regenerate-command-id.patch`. The unchanged gate must turn red on the exact
   scope, readiness, cold-recompute, and command-redelivery rows respectively.
 - **Independent oracle and reversibility.** The sibling expected behavior is recomputed by the independently
-  built sibling reference during the run; its output stays under `gen/runs/phase_49/`. The reviewed
+  built sibling reference during the run; its output stays under `.build/runs/phase_49/`. The reviewed
   scope/readiness matrix supplies the behavior expectation. The gate records a run-local sibling-source
   inventory before and after both adapter paths and requires equality, without a tracked inventory or hash.
 - **Teardown and honesty.** An external pre/post inventory must enumerate and clear test-owned Kubernetes,
@@ -257,7 +263,7 @@ cross-substrate bit equality remain explicit UNVERIFIED follow-on surfaces.
 - `documents/engineering/pulsar_client_doctrine.md` and `documents/engineering/vault_pki_doctrine.md` — record
   the live CBOR transport and secrets-by-name observations.
 - `documents/engineering/tenancy_doctrine.md` and `documents/engineering/testing_doctrine.md` — record the
-  tested scope denial, fresh challenge, external evidence, and killed mutants without a general proof claim.
+  tested scope denial, fresh challenge, repository-local evidence, and killed mutants without a general proof claim.
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` and `DEVELOPMENT_PLAN/substrates.md` — link the scoped phase result and its

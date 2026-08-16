@@ -7,8 +7,8 @@ nodes:
     containerPath: /amoebius-retained
   - hostPath: /var/tmp/amoebius-phase32-rebind-audit
     containerPath: /var/log/kubernetes/audit
-  - hostPath: /home/matthewnowak/amoebius/test/live/fixtures/phase28-audit-policy.yaml
-    containerPath: /kind/phase28-audit-policy.yaml
+  - hostPath: /home/matthewnowak/amoebius/test/fixture/retained_storage/audit_policy.yaml
+    containerPath: /kind/retained-storage-audit-policy.yaml
 kubeadmConfigPatches:
 - |
   kind: ClusterConfiguration
@@ -26,7 +26,7 @@ kubeadmConfigPatches:
         value: /etc/kubernetes/audit-policy.yaml
     extraVolumes:
     - name: audit-policy
-      hostPath: /kind/phase28-audit-policy.yaml
+      hostPath: /kind/retained-storage-audit-policy.yaml
       mountPath: /etc/kubernetes/audit-policy.yaml
       readOnly: true
       pathType: File

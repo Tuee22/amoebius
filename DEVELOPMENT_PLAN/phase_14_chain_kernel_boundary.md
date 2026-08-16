@@ -46,8 +46,16 @@ The composite Register-1/2 gate passed on 2026-08-09. Live tools, apiserver appl
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/chain_boundary_gate.py` passed all twelve sides: the chain,
+boundary, AST, compile-fail, and network-isolation suites, all seven mutants, and all eleven metrics pass; 40
+surfaces join to 40 enumerated items. The project-contained attestation is
+`sha256:a3ab699be5f004bd68fd7b3ea0ecbc15bac74328d4b39924d44cd35f61f5dade`, bound to source snapshot
+`sha256:d3d92e8c10c59625…`; Phase 14 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:d79a808594ad51a9…`
-(1939 non-ignored files) and published verified external attestation
+(1939 non-ignored files) and published a verified pre-containment external attestation
 `sha256:95a34d33ad9a72a75072bfd1e905a7f9c811a6871a0ecbbde0b67b9613064eb5`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** This phase's two-register claim is unchanged and
@@ -72,7 +80,7 @@ recorded in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md)
 
 **Invalidated historical record:**
 
-✅ Done. Validated on 2026-08-09 with `python3 tools/phase14_gate.py` on
+✅ Done. Validated on 2026-08-09 with `python3 tools/chain_boundary_gate.py` on
 substrate `none` across Registers 1 and 2. Part A covers the pure chain/descent/render boundary, two cfg
 fixtures, two plan goldens, two descent goldens, zero action executions, and a positive canary. Part B drives
 the real binary through the one absolute-path subprocess seam and checks four exact transcripts across three
@@ -123,7 +131,7 @@ directory (Part B).
 **Register:** 1/2 — a two-register gate: **Part A is Register 1** (pure/golden, in-process, no cluster) and
 **Part B is Register 2** (boundary integration with fake tools, no cluster), both in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `python3 tools/phase14_gate.py` passes the Part-A, Part-B, Gate-3,
+**Gate:** `python3 tools/chain_boundary_gate.py` passes the Part-A, Part-B, Gate-3,
 compile-fail, network-observer, mutant, and ledger checks. The committed
 Phase-14 ledger records the exact commands, oracle coverage,
 and live-runtime residue.
@@ -134,7 +142,7 @@ This section fixes the one shared interpretation of the gate's representative co
 mutants, so two engineers implement the same gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clauses 1–8); it strengthens, never weakens, the Gate and sprint Validations above. Because this phase **merges**
 two former phases, it keeps **both** sources' committed fixtures, mutants, and oracles, **partitioned** into the
 two parts along the register seam: Part A owns the pure plan-render corpus under `test/kernel/`, Part B owns the
-boundary corpus under `test/boundary/`. All artifacts named here are authored and committed in this phase's oracle-pinning sprint before
+boundary corpus under `test/spec/boundary/`. All artifacts named here are authored and committed in this phase's oracle-pinning sprint before
 `Amoebius.Kernel.*` and `Amoebius.Exec.*` exist (the one exception is the executor-argv transcript of Part B,
 pinned at the start of Phase 14 before the executor — the §M.1 named exception).
 
@@ -202,7 +210,7 @@ flowchart LR
   path excludes network/process/credential modules (e.g. `Network.*`, `System.Process`, socket/HTTP/Vault
   clients).
 
-### Part B (Register 2) — the boundary corpus (`test/boundary/`)
+### Part B (Register 2) — the boundary corpus (`test/spec/boundary/`)
 
 - **Representative plan corpus (§M.7, concrete corpus).** A committed `[Step]` fixture containing **at least one step routed to each tool amoebius actually invokes** — `kubectl` apply, `docker` build/push, `pulumi` up — over
   the Part-A cfg fixtures, so every real boundary surface is driven, not just `kubectl`. The `helm` fake is
@@ -210,7 +218,7 @@ flowchart LR
   invoked tool the binary never routed through leaves an empty transcript and the suite is red, foreclosing a
   `kubectl`-only executor.
 - **Oracle-pinning — the expected-argv transcript (§M.1 named exception, §M.3 independent oracle).** The
-  expected-argv transcripts are a separate committed hand-authored oracle (`test/boundary/golden/argv/`), pinned
+  expected-argv transcripts are a separate committed hand-authored oracle (`test/golden/chain_boundary/argv/`), pinned
   at the **start of Phase 14 before the executor implementation** (the §M.1 named exception), authored at
   fixture-authoring time from the spec — **never** by the executor's own `Step→argv` fold or any function
   reachable from it. A source gate rejects any import of executor argv-building code into the oracle; a check
@@ -221,7 +229,7 @@ flowchart LR
   [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)). Neither is
   committed as a runtime artifact.
 - **Committed mutants (§M.2), re-run every gate run.** `cabal test boundary-spec` turns **red** on each of three
-  committed seeded mutants under `test/boundary/mutants/`: **mB1** (`mB1_argv`, an executor argv mutant — drop a
+  committed seeded mutants under `test/mutant/chain_boundary/boundary/`: **mB1** (`mB1_argv`, an executor argv mutant — drop a
   flag / reorder two argv elements / swap a subcommand), **mB2** (`mB2_byte`, a byte mutant — one flipped byte in
   a Phase-13 `renderAll` golden), and **mB3** (`mB3_path_resolve`, a `PATH`-resolution mutant — the seam
   resolving the tool by bare name instead of by absolute path). The suite failing on each is a demonstrated
@@ -242,7 +250,7 @@ flowchart LR
   `typed-process` (`runProcess`/`readProcess`/`startProcess`/`withProcessWait`), `System.Posix.Process`
   (`executeFile`/`forkProcess`/`createSession`), and any raw FFI `c_exec*`/`system` import — and red if the
   enumerated set is empty (guarding against a vacuous scope).
-- **Lossless recorder round-trip (§M.3).** `test/boundary/Fakes.hs` carries a unit check proving the transcript
+- **Lossless recorder round-trip (§M.3).** `test/spec/boundary/Fakes.hs` carries a unit check proving the transcript
   ADT captures argv order and applied-manifest bytes **losslessly** (round-trips the recorded bytes with no
   re-encoding); it is red if any byte or argv element is dropped or re-encoded.
 
@@ -285,13 +293,13 @@ flowchart LR
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 14.1: The `Step` algebra + `chain :: cfg -> [Step]` builder ✅
 
@@ -299,7 +307,7 @@ flowchart LR
 **Implementation**: `src/Amoebius/Kernel/Step.hs` (the `Step` type, `StepKind`, and the
 `stepRun` action field), `src/Amoebius/Kernel/Chain.hs` (the `chain :: cfg -> [Step]` builder) — built and
 validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: both fixtures pass the real path through provision and `chain`. Their plans force
 to normal form while the counted actions remain at zero. Each Step contains an identity-selected subset of one
 whole-deployment `renderAll` result; the disjoint union equals the Phase-13 golden byte-for-byte.
@@ -340,7 +348,7 @@ Done. Live execution remains UNVERIFIED.
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Kernel/Descent.hs` (`nextFrameAfter`, `foldLift`),
 plus the effectful seam `runChainFromFrame` in `src/Amoebius/Kernel/Chain.hs` — built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: both functions remain pure and the multi fixture matches its descent golden. The
 fold-derived plan forces to normal form with a zero action count. Mutant m2 weakens the frame guard and turns
 the golden check red.
@@ -376,7 +384,7 @@ Done. Live execution remains UNVERIFIED.
 **Implementation**: `src/Amoebius/Kernel/Plan.hs` (`renderChainPlan` / `renderChain`),
 `src/Amoebius/Cli.hs` (the `--dry-run` **render** path, kept structurally separate from any apply path) — built
 and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**:
 `renderChainPlan` of the fixture chain (`chain` applied after the fixture has successfully constructed its
 `ProvisionedSpec`) is a pure `Text`/bytes value; the `--dry-run` code path has no branch that opens a
@@ -422,7 +430,7 @@ Done. Live execution remains UNVERIFIED.
 `test/kernel/fixtures/plan/expected_steps.json`, and the committed mutants under `test/kernel/mutants/`
 (`m1_cfg_drop_service`, `m2_descent_inframe`) — built and validated against the independently authored
 goldens and tables.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: `chain-spec` passes with credentials scrubbed and socket calls blocked and
 observed. Both plans and descent assignments match their goldens; Step projections union to the Phase-13
 objects; the expected step set and zero-action canary hold. Both mutants turn the suite red.
@@ -488,8 +496,8 @@ implementation behind `AbsExe` without widening the seam.
 **Implementation**: `src/Amoebius/Exec/Tool.hs` (the Phase-14 boundary facade that invokes a tool by absolute
 path over the `[Step]`/effect data) and, after Phase 24, `src/Amoebius/Host/Ensure.hs` (the sole raw
 `typed-process` implementation), a `boundary-spec` test-suite stanza in
-`amoebius.cabal`, and `test/boundary/` — built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+`amoebius.cabal`, and `test/spec/boundary/` — built and validated.
+**Blocked by**: None.
 **Independent Validation**: the build and boundary suite pass on the pinned toolchain. A non-vacuous source
 gate scans all of `src/` and confirms `Host/Ensure.hs` is the sole subprocess-primitive site while the
 Phase-14 boundary cases continue to pass through `Exec/Tool.hs`.
@@ -508,7 +516,7 @@ prodbox single-IO-seam shape as *sibling evidence, not an amoebius result*.
   `PATH` lookup), threading argv and stdin bytes from the `[Step]`/effect data and returning exit + captured
   streams. Phase 24 preserves this contract while delegating its sole raw process call to the opaque-`AbsExe`
   implementation in `src/Amoebius/Host/Ensure.hs`.
-- The `boundary-spec` test-suite stanza and an empty `test/boundary/` tree wired to the seam.
+- The `boundary-spec` test-suite stanza and an empty `test/spec/boundary/` tree wired to the seam.
 
 ### Validation
 1. `cabal build` and the zero-test `boundary-spec` suite are green on the Phase-1 pin; the source gate reports the
@@ -520,10 +528,10 @@ Done. Live tool fidelity remains UNVERIFIED.
 ## Sprint 14.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/boundary/fakes/{kubectl,helm,docker,pulumi}` (the four fake
+**Implementation**: `test/harness/chain_boundary/fakes/{kubectl,helm,docker,pulumi}` (the four fake
 executables that append argv + stdin bytes to a transcript and exit with a canned response) and
-`test/boundary/Fakes.hs` (the transcript ADT + the canned-response table) — built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+`test/spec/boundary/Fakes.hs` (the transcript ADT + the canned-response table) — built and validated.
+**Blocked by**: None.
 **Independent Validation**: each fake, invoked directly, appends its full argv
 (in order) and its complete stdin bytes to the run transcript and returns its canned exit; a unit check
 proves the transcript captures argv order and applied-manifest bytes **losslessly** (round-trips the
@@ -542,7 +550,7 @@ prerequisite — that distinction is what keeps Register 2 honestly separate fro
 ### Deliverables
 - Four fake tool executables that transcribe argv + stdin (the applied-manifest bytes) and return a canned exit,
   placed at controlled absolute paths for the seam to invoke.
-- `test/boundary/Fakes.hs`: the transcript ADT (an ordered command/argv/bytes log) and the canned-response table,
+- `test/spec/boundary/Fakes.hs`: the transcript ADT (an ordered command/argv/bytes log) and the canned-response table,
   with a lossless round-trip check over recorded bytes.
 
 ### Validation
@@ -555,11 +563,11 @@ Done. Live tool fidelity remains UNVERIFIED.
 ## Sprint 14.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/boundary/BoundarySpec.hs`; the applied-manifest bytes reuse
-the Phase-13 `renderAll` goldens; the **expected-argv transcripts are a separate committed hand-authored oracle** (`test/boundary/golden/argv/`), NOT derived from the Part-A plan golden by any executor-reachable
-function; the committed mutants under `test/boundary/mutants/` (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`)
+**Implementation**: `test/spec/boundary/BoundarySpec.hs`; the applied-manifest bytes reuse
+the Phase-13 `renderAll` goldens; the **expected-argv transcripts are a separate committed hand-authored oracle** (`test/golden/chain_boundary/argv/`), NOT derived from the Part-A plan golden by any executor-reachable
+function; the committed mutants under `test/mutant/chain_boundary/boundary/` (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`)
 — built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: `boundary-spec` drives the real binary through all three invoked tools and keeps
 Helm as a zero-call control. Exact hand-authored argv and manifest-byte transcripts match. Absolute paths
 defeat hostile `PATH` decoys, and all three committed mutants turn the suite red.
@@ -581,11 +589,11 @@ is owned by [phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md) and
 [phase_26_object_reconciler.md](phase_26_object_reconciler.md)).
 
 ### Deliverables
-- The committed **representative plan corpus** — a `[Step]` fixture with at least one step per tool — and the committed **hand-authored expected-argv transcripts** (`test/boundary/golden/argv/`, pinned at the start of Phase 14 before the executor implementation (the §M.1 named exception), authored independently of the executor
+- The committed **representative plan corpus** — a `[Step]` fixture with at least one step per tool — and the committed **hand-authored expected-argv transcripts** (`test/golden/chain_boundary/argv/`, pinned at the start of Phase 14 before the executor implementation (the §M.1 named exception), authored independently of the executor
   per §M.3).
 - The committed **seeded mutants** named in the Gate (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`) with a harness
   that re-runs each and asserts `boundary-spec` red (§M.2).
-- `test/boundary/BoundarySpec.hs` asserting: the recorded argv stream equals the committed hand-authored
+- `test/spec/boundary/BoundarySpec.hs` asserting: the recorded argv stream equals the committed hand-authored
   expected-argv transcript; the applied-manifest bytes equal the Phase-13/Part-A goldens byte-for-byte (the same
   rendered value the `--dry-run` previews, per
   [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)); each of the
@@ -613,9 +621,9 @@ Done. Live apiserver application remains UNVERIFIED.
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Dsl/SanctionedApi.hs`,
 `dhall/amoebius/SanctionedApi.dhall`, and the oracle-pinned oracle
-`test/fixtures/phase14/sanctioned_api_expected.dhall` (the hand-authored module and effect allowlist,
+`test/fixture/chain_boundary/sanctioned_api_expected.dhall` (the hand-authored module and effect allowlist,
 authored **independently** of `SanctionedApi.hs` per §M.3) — built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: the committed allowlist and the implementation's `SanctionedApi` value agree exactly,
 reconciled automatically against the Phase-0 fixture and never against the implementer's own value; every
 entry names a module that exists in the pinned dependency closure; the surface contains **no** arm admitting
@@ -646,10 +654,10 @@ Done. Checked-source runtime behavior remains UNVERIFIED.
 ## Sprint 14.9: Gate 3 — the extension AST checker and the link seal ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `src/Amoebius/Dsl/AstCheck.hs`, `test/dsl/AstCheckSpec.hs`, and
-`test/fixtures/phase14/astcheck/`. The corpus contains positives and one exact-span negative for each of the
+**Implementation**: `src/Amoebius/Dsl/AstCheck.hs`, `test/spec/dsl/AstCheckSpec.hs`, and
+`test/fixture/chain_boundary/astcheck/`. The corpus contains positives and one exact-span negative for each of the
 six `AstViolationReason` arms. The checker and its opaque `CheckedExtensionSource` are built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: positives are accepted; each negative matches its exact tagged reason and source
 span. A compile-fail golden proves the checked-source constructor remains opaque. The raw-IO and exported-
 constructor mutants both turn their checks red.
@@ -703,7 +711,7 @@ Done. Checked-source runtime behavior remains UNVERIFIED.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-14 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Kernel/{Step,Chain,Descent,Plan}.hs`, the
   `--dry-run` render path in `src/Amoebius/Cli.hs`, the `chain-spec` test-suite, `src/Amoebius/Exec/Tool.hs`,
-  `test/boundary/` (the fakes + `Fakes.hs` + `BoundarySpec.hs`), and the `boundary-spec` test-suite as Phase-14
+  `test/spec/boundary/` (the fakes + `Fakes.hs` + `BoundarySpec.hs`), and the `boundary-spec` test-suite as Phase-14
   design-first rows. Phase 24 separately registers `src/Amoebius/Host/Ensure.hs` as the strengthened raw
   process implementation.
 

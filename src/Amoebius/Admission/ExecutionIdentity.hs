@@ -52,7 +52,7 @@ admitExecutionCreate readiness identity
         else Left ExecutionSchedulerMismatch
   | incomplete identity = Left ExecutionIdentityIncomplete
   | not (executionOwnerChainValid identity) = Left ExecutionOwnerChainInvalid
-#ifndef PHASE27_DEFAULT_SCHEDULER_BYPASS_MUTANT
+#ifndef CAPACITY_SCHEDULER_DEFAULT_SCHEDULER_BYPASS_MUTANT
   | executionToleratesManagedTaint identity && executionSchedulerName identity /= "amoebius-capacity" = Left DefaultSchedulerManagedNodeBypass
 #endif
   | executionSchedulerName identity /= "amoebius-capacity" = Left ExecutionSchedulerMismatch

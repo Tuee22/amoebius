@@ -31,7 +31,7 @@ import System.Exit (ExitCode (..))
 import System.FilePath ((</>))
 
 clusterName :: String
-clusterName = "amoebius-phase24"
+clusterName = "amoebius-bootstrap-coordinator"
 
 nodeContainerName :: String
 nodeContainerName = clusterName <> "-control-plane"
@@ -135,7 +135,7 @@ discoverCluster context = do
       )
 
 planActions :: ClusterObservation -> [ReconcileAction]
-#ifdef PHASE24_ONE_SHOT_KIND_GUARD_MUTANT
+#ifdef BOOTSTRAP_COORDINATOR_ONE_SHOT_KIND_GUARD_MUTANT
 -- The seeded M3 mutant: registration alone is treated as convergence, so a stopped node or
 -- a deleted kubeconfig plans no repair at all. It exists to prove the divergence-repair
 -- observation has teeth -- a gate that only ever starts from "absent" cannot tell this
@@ -190,13 +190,13 @@ reconcileKind context layout createToken = do
             Left problem -> pure (Left (renderHostAdmissionError problem))
             Right () -> do
               let config = contextStateDirectory context </> "kind-config.yaml"
-              pathsPresent <- and <$> traverse doesDirectoryExist (layoutHostPaths layout)
+              pathsPresent <- and <$> traverse doesDirectoryExist (layoutHostPaths (contextStateDirectory context) layout)
               if not pathsPresent
                 then pure (Left "FilesystemLayoutMismatch:hard-backing-path-absent")
-                else case renderKindConfigFor layout of
+                else case renderKindConfigAt (contextStateDirectory context) layout of
                   Left problem -> pure (Left (show problem))
                   Right rendered -> do
-                    writeProcessEnvelopePatches
+                    writeProcessEnvelopePatches (contextStateDirectory context)
                     writeFile config rendered
                     command <- runTool (contextKind context)
                       [ "create", "cluster", "--name", clusterName
@@ -282,8 +282,11 @@ renderKindConfig :: String
 renderKindConfig = either (error . show) id (renderKindConfigFor KindUnified)
 
 renderKindConfigFor :: KindFilesystemLayout -> Either LayoutError String
-renderKindConfigFor KindSplitImage = Left (UnsupportedEnforcement KindSplitImage)
-renderKindConfigFor layout = Right (intercalate "\n" (
+renderKindConfigFor = renderKindConfigAt "/root/amoebius/.data/bootstrap-coordinator"
+
+renderKindConfigAt :: FilePath -> KindFilesystemLayout -> Either LayoutError String
+renderKindConfigAt _ KindSplitImage = Left (UnsupportedEnforcement KindSplitImage)
+renderKindConfigAt stateRoot layout = Right (intercalate "\n" (
   [ "kind: Cluster"
   , "apiVersion: kind.x-k8s.io/v1alpha4"
   , "nodes:"
@@ -339,60 +342,60 @@ renderKindConfigFor layout = Right (intercalate "\n" (
  where
   extraMounts KindUnified =
     [ "  extraMounts:"
-    , "  - hostPath: /var/lib/amoebius/phase24/unified/kubelet"
+    , "  - hostPath: " <> stateRoot </> "unified/kubelet"
     , "    containerPath: /var/lib/kubelet"
-    , "  - hostPath: /var/lib/amoebius/phase24/unified/containerd"
+    , "  - hostPath: " <> stateRoot </> "unified/containerd"
     , "    containerPath: /var/lib/containerd"
-    , "  - hostPath: /var/lib/amoebius/phase24/unified/system/etcd"
+    , "  - hostPath: " <> stateRoot </> "unified/system/etcd"
     , "    containerPath: /var/lib/etcd"
-    , "  - hostPath: /var/lib/amoebius/phase24/unified/system/audit"
+    , "  - hostPath: " <> stateRoot </> "unified/system/audit"
     , "    containerPath: /var/log/kubernetes/audit"
-    , "  - hostPath: /var/lib/amoebius/phase24/unified/system/pods"
+    , "  - hostPath: " <> stateRoot </> "unified/system/pods"
     , "    containerPath: /var/log/pods"
-    , "  - hostPath: /var/lib/amoebius/phase24/patches"
+    , "  - hostPath: " <> stateRoot </> "patches"
     , "    containerPath: /kind/patches"
     ]
   extraMounts KindSplitRuntime =
     [ "  extraMounts:"
-    , "  - hostPath: /var/lib/amoebius/phase24/nodefs/kubelet"
+    , "  - hostPath: " <> stateRoot </> "nodefs/kubelet"
     , "    containerPath: /var/lib/kubelet"
-    , "  - hostPath: /var/lib/amoebius/phase24/imagefs/containerd"
+    , "  - hostPath: " <> stateRoot </> "imagefs/containerd"
     , "    containerPath: /var/lib/containerd"
-    , "  - hostPath: /var/lib/amoebius/phase24/nodefs/system/etcd"
+    , "  - hostPath: " <> stateRoot </> "nodefs/system/etcd"
     , "    containerPath: /var/lib/etcd"
-    , "  - hostPath: /var/lib/amoebius/phase24/nodefs/system/audit"
+    , "  - hostPath: " <> stateRoot </> "nodefs/system/audit"
     , "    containerPath: /var/log/kubernetes/audit"
-    , "  - hostPath: /var/lib/amoebius/phase24/nodefs/system/pods"
+    , "  - hostPath: " <> stateRoot </> "nodefs/system/pods"
     , "    containerPath: /var/log/pods"
-    , "  - hostPath: /var/lib/amoebius/phase24/patches"
+    , "  - hostPath: " <> stateRoot </> "patches"
     , "    containerPath: /kind/patches"
     ]
   extraMounts KindSplitImage = []
 
 
-layoutHostPaths :: KindFilesystemLayout -> [FilePath]
-layoutHostPaths KindUnified =
-  [ "/var/lib/amoebius/phase24/unified/kubelet"
-  , "/var/lib/amoebius/phase24/unified/containerd"
-  , "/var/lib/amoebius/phase24/unified/system/etcd"
-  , "/var/lib/amoebius/phase24/unified/system/audit"
-  , "/var/lib/amoebius/phase24/unified/system/pods"
-  , "/var/lib/amoebius/phase24/patches"
+layoutHostPaths :: FilePath -> KindFilesystemLayout -> [FilePath]
+layoutHostPaths stateRoot KindUnified =
+  [ stateRoot </> "unified/kubelet"
+  , stateRoot </> "unified/containerd"
+  , stateRoot </> "unified/system/etcd"
+  , stateRoot </> "unified/system/audit"
+  , stateRoot </> "unified/system/pods"
+  , stateRoot </> "patches"
   ]
-layoutHostPaths KindSplitRuntime =
-  [ "/var/lib/amoebius/phase24/nodefs/kubelet"
-  , "/var/lib/amoebius/phase24/imagefs/containerd"
-  , "/var/lib/amoebius/phase24/nodefs/system/etcd"
-  , "/var/lib/amoebius/phase24/nodefs/system/audit"
-  , "/var/lib/amoebius/phase24/nodefs/system/pods"
-  , "/var/lib/amoebius/phase24/patches"
+layoutHostPaths stateRoot KindSplitRuntime =
+  [ stateRoot </> "nodefs/kubelet"
+  , stateRoot </> "imagefs/containerd"
+  , stateRoot </> "nodefs/system/etcd"
+  , stateRoot </> "nodefs/system/audit"
+  , stateRoot </> "nodefs/system/pods"
+  , stateRoot </> "patches"
   ]
-layoutHostPaths KindSplitImage = []
+layoutHostPaths _ KindSplitImage = []
 
-writeProcessEnvelopePatches :: IO ()
-writeProcessEnvelopePatches = do
+writeProcessEnvelopePatches :: FilePath -> IO ()
+writeProcessEnvelopePatches stateRoot = do
   forM_ processEnvelopes $ \(component, cpuRequest, cpuLimit, memoryRequest, memoryLimit, ephemeralRequest, ephemeralLimit) ->
-    writeFile ("/var/lib/amoebius/phase24/patches/" <> component <> "+strategic.yaml") (intercalate "\n"
+    writeFile (stateRoot </> "patches" </> component <> "+strategic.yaml") (intercalate "\n"
     [ "spec:"
     , "  containers:"
     , "  - name: " <> component
@@ -407,7 +410,7 @@ writeProcessEnvelopePatches = do
     , "        ephemeral-storage: " <> ephemeralLimit
     , ""
     ])
-  writeFile "/var/lib/amoebius/phase24/patches/audit-policy.yaml" (intercalate "\n"
+  writeFile (stateRoot </> "patches/audit-policy.yaml") (intercalate "\n"
     [ "apiVersion: audit.k8s.io/v1"
     , "kind: Policy"
     , "rules:"

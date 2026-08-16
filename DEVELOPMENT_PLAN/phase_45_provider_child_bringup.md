@@ -49,9 +49,15 @@ receipt `external-run-reference`.
 
 ## Phase Status
 
+⏸️ Blocked — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
+invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
+repository roots defined by Phase 0. Scope amendments below remain normative.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Invalidated historical record:**
 
@@ -472,7 +478,7 @@ cloud LoadBalancer behavior, zero Helm calls, and zero public-registry network p
 **Implementation**: `test/dhall/phase_45_provider_provision.dhall` (the committed gate
 topology, exercised here on its provider-child bring-up + standard-service-convergence slice),
 `amoebius-runtime/test/provider/{Phase45ContractSpec,Phase45LiveSpec}.hs`,
-`tools/phase45_{provider_child_live,gate}.py`, with its generated ledger under `gen/runs/phase_45/`
+`tools/phase45_{provider_child_live,gate}.py`, with its generated ledger under `.build/runs/phase_45/`
 (observed footprint; provider OS/cloud observers UNVERIFIED)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: one end-to-end run takes a Phase-44-deployed `Managed Eks` child from bootstrap

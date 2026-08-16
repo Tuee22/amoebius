@@ -1,0 +1,10 @@
+mutant	locus	fixture
+M-trust-tenant-header	foreign-token-spoof	test/mutant/ui_server_boundary/M-trust-tenant-header.mutant
+M-dispatch-before-authorize	zero-denied-handler-bytes	test/mutant/ui_server_boundary/M-dispatch-before-authorize.mutant
+M-skip-current-epoch	stale-epoch	test/mutant/ui_server_boundary/M-skip-current-epoch.mutant
+M-disable-origin-check	origin-denial	test/mutant/ui_server_boundary/M-disable-origin-check.mutant
+M-drop-csp-header	security-header	test/mutant/ui_server_boundary/M-drop-csp-header.mutant
+M-ready-with-unresolved-handler	missing-handler-readiness	test/mutant/ui_server_boundary/M-ready-with-unresolved-handler.mutant
+M-server-first-handler-wins	duplicate-handler-readiness	test/mutant/ui_server_boundary/M-server-first-handler-wins.mutant
+M-serve-server-plan-as-client-asset	private-plan-probe	test/mutant/ui_server_boundary/M-serve-server-plan-as-client-asset.mutant
+M-new-idempotency-key-on-retry	idempotent-replay	test/mutant/ui_server_boundary/M-new-idempotency-key-on-retry.mutant

@@ -33,9 +33,9 @@ The gate passed 2026-08-10.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 28.1: The one inert `no-provisioner` StorageClass ⏸️](#sprint-281-the-one-inert-no-provisioner-storageclass-)
-- [Sprint 28.2: Deterministic retained-PV generation + the explicit bind ⏸️](#sprint-282-deterministic-retained-pv-generation--the-explicit-bind-)
-- [Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip ⏸️](#sprint-283-the-lossless-rebind-gate--postgres-row--minio-marker-round-trip-)
+- [Sprint 28.1: The one inert `no-provisioner` StorageClass ✅](#sprint-281-the-one-inert-no-provisioner-storageclass-)
+- [Sprint 28.2: Deterministic retained-PV generation + the explicit bind ✅](#sprint-282-deterministic-retained-pv-generation--the-explicit-bind-)
+- [Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip ✅](#sprint-283-the-lossless-rebind-gate--postgres-row--minio-marker-round-trip-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -43,9 +43,22 @@ The gate passed 2026-08-10.
 
 ## Phase Status
 
+⏸️ Blocked — reopened 2026-08-16 behind the amended Phase-25 handoff and Phase-27 revalidation. Its prior capability record remains historical until the exact predecessor chain is resealed.
+
+**Superseded containment seal:** revalidated 2026-08-16. `python3 tools/retained_storage_gate.py --execute` passed all eleven
+sides against source snapshot `sha256:9959cb38b6acb85c5e752f5b09b836f4021c227d1a281c6835b2143e58437cd2`.
+The gate verified the exact Phase-27 seal and Phase-25 OCI handoff, sealed all three sprints, matched all
+twelve metrics, reddened all twelve mutants, and joined thirty surfaces to thirty run-time items. Both
+inventory-derived witnesses survived a genuine kind delete/recreate on individually bound child filesystems.
+The private daemon, kubeconfig, loop mounts, retained bytes, and cluster lived only under one marker-owned
+`.test_data/**` run; cleanup removed that run and preserved the unchanged outside-host inventory. The
+immutable attestation is `sha256:a43b78ddbadf7abcfcea715532aa82379861af28e1173c881422d79760d73f19`.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Invalidated historical record:**
 
@@ -57,7 +70,7 @@ that reconciler. The single-node host-path retained-storage scheme this phase ge
 sibling prodbox project (`prodbox/documents/engineering/storage_lifecycle_doctrine.md`); read that as
 **sibling evidence, not an amoebius result** — amoebius now has its own StorageClass, retained-PV, hard-cap,
 explicit-rebind, and real cluster-delete/recreate evidence. The gate ran with
-`python3 tools/phase28_gate.py` on 2026-08-10 and emitted ledger
+the retired phase-numbered gate on 2026-08-10 and emitted ledger
 `dynamically-resolved`. Status
 transitions are recorded reverse-chronologically here once work begins.
 
@@ -167,6 +180,13 @@ seeded mutants named in [Gate integrity](#gate-integrity):
 
 ## Gate integrity
 
+The retained host backing is physical repository state: production paths resolve only beneath
+`.data/storage/**`; this live gate creates the two witnesses only beneath its exclusive
+`.test_data/runs/<run-id>/storage/**` root. Preflight rejects `.data/**`, any external retained root, and the
+host-global container engine. Postflight proves the two markers survived cluster delete/recreate, then
+deletes only the exact ownership-marker-proven test root and reports no external mount, loop device, Docker
+object, kubeconfig, or path.
+
 This section pins the concrete corpus, the oracle-pinned oracles, and the seeded mutants the Gate and each
 sprint Validation above reference. Everything named here is authored and committed in this phase's oracle-pinning sprint, before any
 implementation exists.
@@ -212,26 +232,26 @@ executable and its matching baked catalog. It carries no second package resolver
 different PostgreSQL major than the sealed image.
 
 **oracle-pinned oracles (independent of the implementation).**
-- `test/live/fixtures/storageclass_expected.yaml` — the exact single-StorageClass golden (Sprint 28.1),
+- `test/oracle/retained_storage/storage_class.yaml` — the exact single-StorageClass golden (Sprint 28.1),
   hand-authored, not regenerated from the renderer.
-- `test/live/fixtures/claimref_table.csv` — the independent reference table mapping
+- `test/oracle/retained_storage/claimref_table.csv` — the independent reference table mapping
   `(namespace, statefulset, ordinal)` to the expected `metadata.name`, RFC-1123-valued
   `amoebius.io/pv-identity` label, exact `amoebius.io/pv-logical-identity` annotation,
   `claimRef` `(namespace, PVC-name)`, logical demand, `requiredUsableBytes`, presentation/model,
   backing-minimum/quantum operands, and exact private-witness `provisionedBytes` rendered as PVC/PV capacity;
   authored by hand, never by the renderer's naming or sizing helper (Sprints 28.2, 28.3).
-- `test/live/fixtures/durable-backing-capacity.golden` — the observed named durable-backing ceilings and the
+- `test/oracle/retained_storage/durable_backing_capacity.golden` — the observed named durable-backing ceilings and the
   accepted post-reconcile per-backing rounded-`provisionedBytes` debit map over existing/proposed stable
   identities, authored independently of the allocation fold; cache and node ephemeral pools are separately
   named and excluded.
-- `test/live/fixtures/uniform-claim-boundaries.csv` — hand-authored multi-ordinal usable demands,
+- `test/oracle/retained_storage/uniform_claim_boundaries.csv` — hand-authored multi-ordinal usable demands,
   presentation/overhead versions, backing minimum/quantum policies, expected per-slot provision witnesses,
   backing identities, and expected uniform claim plans/per-backing debit maps. It includes an accepted skewed
   group, a group whose unequal per-slot rounded sum fits the backing but whose
   `max(provisionedBytes) × ordinalCount` debit exceeds it, and a differing-backing group whose aggregate fits
   while one named backing is short; no
   renderer/allocation helper generates this table.
-- `test/ci/no_retained_delete.sh` — the committed static check that no non-harness `src/` module issues a
+- `tools/no_retained_delete_check.sh` — the committed static check that no non-harness `src/` module issues a
   backing-store reclaim/destruction call. Scoped PVC/PV binding-object deletion and whole-cluster deletion are
   explicitly outside this check because the backing lives outside the cluster (Sprint 28.3 Validation 2a).
 - Negative fixtures with pinned failure reasons: `two_storageclasses` (reason `count != 1` /
@@ -243,7 +263,7 @@ different PostgreSQL major than the sealed image.
   `pv_aggregate_over_backing` plus `uniform_claim_skew_over_backing` (reason
   `durable-demand-exceeds-backing` where applicable), each paired with a positive differing only in the
   foreclosed dimension.
-- `test/live/fixtures/migration/` — Phase-0 hand-authored verified-migration transition witnesses for
+- `test/fixture/retained_storage/migration/` — Phase-0 hand-authored verified-migration transition witnesses for
   `ShrinkByVerifiedMigration`, authored independently of the enactor and never emitted by it. Negatives with
   pinned reasons: `migration_backing_below_highwater` (reason `old+new+workspace-exceeds-backing`),
   `migration_copy_envelope_short` (reason `copy-job-envelope-exceeds-headroom`), and `migration_verify_mismatch`
@@ -358,13 +378,13 @@ section it implements; individual sprints cite the same sections where they adop
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 28.1: The one inert `no-provisioner` StorageClass ⏸️
+## Sprint 28.1: The one inert `no-provisioner` StorageClass ✅
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-`python3 tools/phase28_sprint28_1_gate.py`; receipt
+`python3 tools/retained_storage_class_gate.py --evidence <run-bundle>`; receipt
 `dynamically-resolved`.
-**Implementation**: `src/Amoebius/Storage/StorageClass.hs`, `test/storage/Phase28StorageClassSpec.hs`,
-`test/live/Phase28StorageClassLiveSpec.hs`, and `tools/phase28_sprint28_1_live.py`
+**Implementation**: `src/Amoebius/Storage/StorageClass.hs`, `test/spec/live/RetainedStorageClassSpec.hs`,
+`test/spec/live/RetainedStorageClassLiveSpec.hs`, and `tools/retained_storage_class_live.py`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: after bring-up `kubectl get storageclass` shows **exactly one** class —
 `provisioner: kubernetes.io/no-provisioner`, `reclaimPolicy: Retain`, `volumeBindingMode:
@@ -386,7 +406,7 @@ only because amoebius placed them and nothing in the normal cluster lifecycle ca
 
 ### Validation
 1. Assert post-bring-up the live `kubectl get storageclass -o yaml` is byte-equal to the oracle-pinned golden
-   `test/live/fixtures/storageclass_expected.yaml` (an independently hand-authored oracle, not regenerated from
+   `test/oracle/retained_storage/storage_class.yaml` (an independently hand-authored oracle, not regenerated from
    the renderer): exactly one class, `provisioner: kubernetes.io/no-provisioner`, `reclaimPolicy: Retain`,
    `volumeBindingMode: WaitForFirstConsumer`, and no `storageclass.kubernetes.io/is-default-class` annotation on
    any object.
@@ -397,20 +417,20 @@ only because amoebius placed them and nothing in the normal cluster lifecycle ca
    plus a default-class annotation, committed in this phase's oracle-pinning sprint) makes assertion 1 fail with the **specific reason `count != 1` / `default-class annotation present`**, distinguishing it from an unrelated golden mismatch.
 
 ### Remaining Work
-Generate the sprint receipt under `gen/runs/phase_28/` and retain it only through external attestation.
+Generate the sprint receipt under `.build/runs/phase_28/` and retain it only through repository-local attestation.
 
-## Sprint 28.2: Deterministic retained-PV generation + the explicit bind ⏸️
+## Sprint 28.2: Deterministic retained-PV generation + the explicit bind ✅
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-`python3 tools/phase28_sprint28_2_gate.py`; receipt
+`python3 tools/retained_storage_volume_gate.py --evidence <run-bundle> --image <digest-reference>`; receipt
 `dynamically-resolved`.
 **Implementation**: `src/Amoebius/Storage/RetainedPV.hs`,
 `src/Amoebius/Storage/HostVolume.hs`, `src/Amoebius/Storage/RetainedScaling.hs` (retained-carve and
-verified-migration storage-scaling arms), `test/storage/Phase28RetainedPVSpec.hs`,
-`test/live/Phase28RetainedPVLiveSpec.hs`, and `tools/phase28_sprint28_2_live.py`
+verified-migration storage-scaling arms), `test/spec/live/RetainedStorageVolumeSpec.hs`,
+`test/spec/live/RetainedStorageVolumeLiveSpec.hs`, and `tools/retained_storage_volume_live.py`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the pre-allocation durable-backing fold, the uniform `volumeClaimTemplate`
-projection, the deterministic bind against hand-authored `test/live/fixtures/claimref_table.csv`, the
+projection, the deterministic bind against hand-authored `test/oracle/retained_storage/claimref_table.csv`, the
 host-side raw/usable/fs-type/`ENOSPC` observation, the delete-and-re-bind cycle, and the single-use
 storage-scaling dispatcher are each checked live. The numbered Validation below states every predicate.
 **Docs to update**:
@@ -487,7 +507,7 @@ PVC creation path to exactly one shape.
    - The committed **M-skip-durable-aggregate**, **M-sum-unequal-ordinals**, and
      **M-uniform-before-allocation**, and **M-collapse-uniform-backing-debits** mutants must turn these
      checks red.
-   - Run the migration boundary from the Phase-0 `test/live/fixtures/migration/` corpus with steady old and
+   - Run the migration boundary from the Phase-0 `test/fixture/retained_storage/migration/` corpus with steady old and
      target states each fitting but (d) `migration_backing_below_highwater` — backing one byte below
      old+new+workspace, (e) `migration_copy_envelope_short` — copy Job CPU/memory/ephemeral or pod/CSI slots
      one unit short, and (f) `migration_verify_mismatch` — an injected post-copy byte mismatch.
@@ -546,16 +566,16 @@ PVC creation path to exactly one shape.
 
 ### Remaining Work
 None; the live observation, external reader, ten red mutants, and receipt are retained under
-`gen/runs/phase_28/` for external attestation, never an authored root.
+`.build/runs/phase_28/` for repository-local attestation, never an authored root.
 
-## Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip ⏸️
+## Sprint 28.3: The lossless-rebind gate — Postgres row + MinIO marker round-trip ✅
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-`python3 tools/phase28_gate.py`; sprint receipt
+`python3 tools/retained_storage_rebind_gate.py --evidence <run-bundle> --artifact <oci> --image-digest <digest>`; sprint receipt
 `external-run-reference` and phase ledger
 `dynamically-resolved`.
-**Implementation**: `src/Amoebius/Storage/Rebind.hs`, `test/live/RebindSpec.hs`,
-`test/storage/Phase28RebindSpec.hs`, and `tools/phase28_rebind_live.py`
+**Implementation**: `src/Amoebius/Storage/Rebind.hs`, `test/spec/live/RetainedStorageRebindLiveSpec.hs`,
+`test/spec/live/RetainedStorageRebindSpec.hs`, and `tools/retained_storage_rebind_live.py`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a fresh per-run random nonce, written as a Postgres row and as a MinIO object,
 reads back byte-for-byte after a real `cluster delete` + `recreate` — asserted absent before the write, and
@@ -586,7 +606,7 @@ durable backing and no normal-operation path can.
   out of the normal path.
 - The oracle-pinned gate-integrity artifacts of [Gate integrity](#gate-integrity): the two-witness
   representative set, the `claimref_table.csv` / `storageclass_expected.yaml` oracles, the
-  `no_retained_delete.sh` static check, the `test/live/fixtures/migration/` negatives-plus-positive
+  `no_retained_delete_check.sh` static check, the `test/fixture/retained_storage/migration/` negatives-plus-positive
   verified-migration corpus, and the seeded mutants **M-soft-delete**, **M-seed-marker**,
   **M-reclaim-delete**, **M-no-rebind**, **M-raw-host-directory**, **M-skip-durable-aggregate**,
   **M-sum-unequal-ordinals**, **M-uniform-before-allocation**, **M-collapse-uniform-backing-debits**,
@@ -606,7 +626,7 @@ durable backing and no normal-operation path can.
    `${RETAINED_ROOT}` bytes persist throughout). The "no normal-operation code path destroys retained backing
    bytes" universal negative is discharged two concrete ways: (a) a committed static/CI check asserts no
    non-harness module in `src/` issues a backing-store reclaim/destruction call (grep-level, committed as
-   `test/ci/no_retained_delete.sh`; scoped PVC/PV binding-object deletion and whole-cluster deletion are
+   `tools/no_retained_delete_check.sh`; scoped PVC/PV binding-object deletion and whole-cluster deletion are
    allowed because neither deletes the external backing), and (b) post-cycle the fresh PV objects exist and
    host bytes are present. The control-plane singleton is a Phase-33 subject with **no realized instance at Phase 28**, so its "mounts
    no PVC" property is **not asserted as passing here** — it is recorded **UNVERIFIED** in the honesty ledger,
@@ -614,7 +634,7 @@ durable backing and no normal-operation path can.
 
 ### Remaining Work
 Migrate the two-service live evidence, audit observation, mutant results, receipt, and phase ledger to
-`gen/runs/phase_28/`; externally attest the bundle and rerun after Phase 27 closes.
+`.build/runs/phase_28/`; externally attest the bundle and rerun after Phase 27 closes.
 
 ## Documentation Requirements
 

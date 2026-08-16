@@ -289,7 +289,9 @@ runs after authoring and cannot tell a live key from a fixture.
 - **One file, named, ignored, never tracked.** A test run may supply cleartext through a single
   `test-secrets.dhall` at the repository root. It is covered by `.gitignore` and `.dockerignore`. Its
   *shape* — a tracked `test-secrets-types.dhall` carrying field names and types and no values — is authored
-  source and reviewable; only the values are ignored.
+  source and reviewable; only the values are ignored. This is the only cleartext secret-at-rest anywhere in
+  amoebius state: the harness must not copy it into `.build/**`, `.test_data/**`, a container context, a log,
+  a run bundle, or a generated project file.
 - **It feeds the prompt, and the prompt writes Vault.** The harness reads it and performs exactly the write
   `SecretRef.Prompt` performs interactively. After that write, a test resolves its secrets the way production
   does: by name, from Vault. There is no substitution and no second resolution path.
@@ -299,7 +301,8 @@ runs after authoring and cannot tell a live key from a fixture.
   accepts a local ACME chain), and the provider checkpoint backend is Vault-Transit-enveloped objects in the
   cluster's own MinIO rather than a cloud state bucket
   ([`phase_44`](../../DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md)).
-- **Production has no seam at all.** Elevated operator material is supplied at an interactive prompt, written
+- **Production has no seam at all.** Every production entry point rejects `test-secrets.dhall`, its schema,
+  and the test-harness credential arm before any effect. Elevated operator material is supplied at an interactive prompt, written
   into Vault, and discarded. It is never written to disk, never placed in an environment variable, and never
   passed as a process argument.
 

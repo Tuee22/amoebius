@@ -42,17 +42,26 @@ The gate passed on 2026-08-09; live daemon/forest correspondence remains UNVERIF
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/gateway_migration_model_gate.py` passed all nine sides: all 12
+authored results match, every per-invariant, mechanical, fairness, cutoff, and shared-resource mutant reddens,
+34 emitted `.tla`/`.cfg` files remain beneath `.build/**`, 15 surfaces join to 17 run-time items, and the
+outside-host inventory and authored roots are unchanged. The project-contained attestation is
+`sha256:25c7f79b9a5007e6ee9cf0a0a45886242884a6359f92cf37eae4e610051bd7dd`, bound to source snapshot
+`sha256:ab0f84be5f1d3562…`; Phase 3 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:fa98d6036518a43e…`
-(1928 non-ignored files) and published verified external attestation
+(1928 non-ignored files) and published a verified pre-containment external attestation
 `sha256:f640ce89ff0bd972746f1b155446e7b54266c946cf4b6b8f3f925073fd74f189`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** The capability result is unchanged and re-run: the
 explorer and TLC agree on 53 distinct reachable states with identical canonical fingerprints, five safety
 invariants hold, three liveness properties hold under the declared fairness and redden without it, and the
 per-invariant, mechanical, cutoff-clause, and shared-resource mutant families all turn the gate red. The JVM
-and `tla2tools` now resolve from `toolchain/requirements.json`, the twelve recorded metrics are checked
+and `tla2tools` now resolve from `tools/toolchain_requirements.json`, the twelve recorded metrics are checked
 against the authored expectation read off this contract, the ledger is derived from those metrics into
-`gen/runs/phase_03/<run-id>/`, and 15 surfaces join to 17 run-time enumerated items.
+`.build/runs/phase_03/<run-id>/`, and 15 surfaces join to 17 run-time enumerated items.
 
 Two ledger rows that the pre-amendment gate marked `tested` with no recorded metric behind them now name their
 evidence: `vacuity-action-antecedent` is decided by the per-invariant mutants reddening **exactly** — which a
@@ -63,7 +72,7 @@ would be the dishonest reading.
 **Invalidated historical record:**
 
 ✅ Done. The Register-1 gate passed on 2026-08-09 with
-`python3 tools/phase3_gate.py`, emitting ledger
+`python3 tools/gateway_migration_model_gate.py`, emitting ledger
 `dynamically-resolved`. The explorer and pinned TLC
 agree on all 53 reachable states and all five safety invariants; TLC proves all three liveness properties under
 weak fairness, and each property goes red when fairness is removed. IOSimPOR explored 13 schedules within the
@@ -164,8 +173,8 @@ reconverges, is red only in TLC's `PROPERTY`. A single surviving mutant, or any 
 committed falsifying mutant, fails the gate.
 
 **Oracle-pinning (§M.1).** The oracles this gate checks against — the `emitTLA GatewayMigration`
-byte-for-byte `.tla`/`.cfg` golden (a committed test fixture under `test/formal/golden/`, distinct from the
-never-committed emitted `gen/tla/` output), the hand-derived expected reachable-distinct-state fingerprint
+byte-for-byte `.tla`/`.cfg` golden (a committed test fixture under `test/golden/formal/`, distinct from the
+never-committed emitted `.build/tla/` output), the hand-derived expected reachable-distinct-state fingerprint
 set the explorer/TLC run is compared to, and the per-invariant expected-outcome catalogue (which invariant
 each seeded mutant must violate) — are **authored and committed in this phase's oracle-pinning sprint,
 before the migration model they check exists**, on the same terms
@@ -232,7 +241,7 @@ flowchart LR
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -246,7 +255,7 @@ flowchart LR
 **Implementation**: `src/Amoebius/Formal/GatewayMigration.hs` (the concrete `Model`
 value + its five named invariants), atop the Phase-2
 `src/Amoebius/Formal/{Model,Interpret,EmitTLA,Explore}.hs` kernel — built and exercised by the phase gate.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: the value typechecks against the Phase-2 `Model` EDSL, and the reachability
 explorer enumerates a bounded, non-empty state space visiting both a `Planned` and a `Failover` transition,
 with every environment action firing and every implication-form invariant's antecedent materially exercised.
@@ -311,10 +320,10 @@ structurally well formed; the correct explorer state space contains 53 states wi
 ## Sprint 3.2: `emitTLA` render + TLC exhaustive proof (both branches) ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/formal/gateway/GatewayMigrationSpec.hs` (the TLC harness) rendering to
-`gen/tla/gateway-migration-model-spec/` (emitted, git-ignored, never committed) and running pinned `tla2tools`
-against the byte-locked fixtures in `test/formal/gateway/golden/` — built.
-**Blocked by**: reopened numeric predecessor gates.
+**Implementation**: `test/spec/formal/gateway/GatewayMigrationSpec.hs` (the TLC harness) rendering to
+`.build/tla/gateway-migration-model-spec/` (emitted, git-ignored, never committed) and running pinned `tla2tools`
+against the byte-locked fixtures in `test/golden/formal/gateway/` — built.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: TLC reaches every named safety invariant with no counterexample at scope 2 for
 both branches and proves each liveness `PROPERTY` under the declared weak fairness, with the vacuity and
 fairness-sensitivity checks passing and no emitted spec under version control.
@@ -330,7 +339,7 @@ render the one `Model` to a spec via `emitTLA` — a structural walk, never a ha
 exhaustively model-check it at the bounded scope, proving both branches reach every invariant.
 
 ### Deliverables
-- The TLC harness invoking `emitTLA` → git-ignored `gen/tla/GatewayMigration.{tla,cfg}` → `tla2tools`, run
+- The TLC harness invoking `emitTLA` → git-ignored `.build/tla/GatewayMigration.{tla,cfg}` → `tla2tools`, run
   over both the `Planned` and `Failover` branch scenarios, checking the `INVARIANT`s (safety) and the
   `PROPERTY`s (liveness, under the emitted `WF_`/`SF_` fairness).
 - A vacuity assertion — (a) antecedent-reachability of every implication-form invariant (the `PlannedIsLossless`
@@ -344,16 +353,16 @@ exhaustively model-check it at the bounded scope, proving both branches reach ev
   **`CONSTRAINT`-free**, since a state `CONSTRAINT` truncates the behaviour graph and distorts `WF`/`SF`
   enabledness, admitting a spurious green liveness within the bound
   ([`formal_model_doctrine.md §6`](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not)).
-- A committed-artifact scan proving no emitted `.tla`/`.cfg` under `gen/` is versioned (the committed Phase-0
-  golden fixture under `test/formal/golden/` is exempt).
+- A committed-artifact scan proving no emitted `.tla`/`.cfg` under `.build/` is versioned (the committed Phase-0
+  golden fixture under `test/golden/formal/` is exempt).
 
 ### Validation
 1. TLC is green — every safety invariant and every liveness `PROPERTY` (`MergeConverges`,
    `SessionEventuallyRebinds`, `PlannedMigrationTerminates`), both branches, no counterexample at scope 2 —
    with the vacuity check confirming each invariant non-trivially satisfied and no action dead, and the
    fairness-sensitivity check confirming each liveness `PROPERTY` goes red when its fairness annotation is
-   removed, so none was vacuously true. The emitted `.tla`/`.cfg` under `gen/tla/` are absent from version
-   control, which a `.gitignore` entry and a committed-artifact scan of `gen/` together confirm.
+   removed, so none was vacuously true. The emitted `.tla`/`.cfg` under `.build/tla/` are absent from version
+   control, which a `.gitignore` entry and a committed-artifact scan of `.build/` together confirm.
 
 ### Remaining Work
 None. TLC and the explorer agree on the exact 53-state fingerprint set; safety and liveness are green, every
@@ -362,9 +371,9 @@ action/antecedent vacuity obligation is reachable, and all three fairness-remova
 ## Sprint 3.3: io-sim agreement + seeded-mutation catch ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/formal/gateway/GatewayMigrationSpec.hs` (the `IOSimPOR` harness over
-the lifted `interpret`) and its committed model-mutant catalogue under `test/formal/gateway/oracle/` — built.
-**Blocked by**: reopened numeric predecessor gates.
+**Implementation**: `test/spec/formal/gateway/GatewayMigrationSpec.hs` (the `IOSimPOR` harness over
+the lifted `interpret`) and its committed model-mutant catalogue under `test/oracle/formal/gateway/` — built.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: `IOSimPOR` and the in-process reachability explorer, both reading the *same*
 `Model`'s `interpret`, find no safety violation on the correct model over bounded-exhaustive schedules, and
 every mechanical mutant and every entry of the committed per-invariant catalogue is caught. The
@@ -423,9 +432,9 @@ the explorer and TLC, and invariant deletion is caught by the obligation/golden 
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Multicluster/StructuralFit.hs` (the total decode-time fold over an
-`InForceSpec` migration graph) and `test/formal/gateway/GatewayMigrationSpec.hs` (the independent envelope
+`InForceSpec` migration graph) and `test/spec/formal/gateway/GatewayMigrationSpec.hs` (the independent envelope
 predicate/corpus + over-scope stress run) — built.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: a QuickCheck generator over random migration graphs shows the fold **accepts ⟺
 pairwise ∧ independent ∧ acyclic ∧ in-parameter-envelope** against an independently authored reference
 predicate, under committed coverage thresholds, with all eight clause-delete mutants red, the fold total, and
@@ -461,7 +470,7 @@ total fold, never a per-`InForceSpec` TLC.
   `CONSTANTS` — the four regime bounds being the Sprint-3.1 model `CONSTANTS`, oracle-pinned in the §M.1
   oracle **and hard-coded in the reference predicate**, never read back from `StructuralFit.hs`) — decided
   for **both** axes against an **independently-authored naive reference predicate** (§M.3) living in
-  `test/formal/CutoffSpec.hs`, sharing no code with `src/Amoebius/Multicluster/StructuralFit.hs` or its
+  `test/spec/formal/CutoffSpec.hs`, sharing no code with `src/Amoebius/Multicluster/StructuralFit.hs` or its
   helpers, so the equivalence cannot be a tautology; with committed `cover`/`checkCoverage` thresholds
   forcing each graph violation
   class (multi-active, cyclic, shared-DNS, **cluster-reuse-across-records**), each
@@ -496,7 +505,7 @@ total fold, never a per-`InForceSpec` TLC.
 ### Validation
 1. The fold's **accepts ⟺ pairwise ∧ independent ∧ acyclic ∧ in-parameter-envelope** equivalence holds under
    QuickCheck against the independently-authored
-   reference predicate in `test/formal/CutoffSpec.hs` (no code shared with `StructuralFit.hs`), with the coverage thresholds met for **both**
+   reference predicate in `test/spec/formal/CutoffSpec.hs` (no code shared with `StructuralFit.hs`), with the coverage thresholds met for **both**
    the graph violation classes and the four parameter-out-of-envelope classes (over-budget, TTL-out-of-regime,
    freshnessBound-out-of-regime, offset-domain-over-`CONSTANTS`) and each of
    the **eight** fold-mutation checks (pairwise / graph-independence / resource-independence / acyclicity clause
@@ -537,7 +546,7 @@ cutoff is argued/tested rather than claimed proven.
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase 3 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-3 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Formal/GatewayMigration.hs`, the
-  `test/formal/*` TLC + io-sim harnesses, and `src/Amoebius/Multicluster/StructuralFit.hs` as one
+  `test/spec/formal/*` TLC + io-sim harnesses, and `src/Amoebius/Multicluster/StructuralFit.hs` as one
   `GatewayMigration` `Model` row; retire any stale separate `CrossClusterFailover`/`SingletonElection` spec
   rows (there is one obligation, both branches, and no election model).
 - `DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md` — backlink: this design-model is the artifact

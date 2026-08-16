@@ -31,9 +31,9 @@ All four sprints and the complete Phase-25 Register-3 gate are sealed.
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 25.1: Multi-arch base image bake — services + jit-build resolver/toolchain, not engine payloads ✅](#sprint-251-multi-arch-base-image-bake--services--jit-build-resolvertoolchain-not-engine-payloads-)
-- [Sprint 25.2: Node side-load + the single-binary `distribution` registry standup ✅](#sprint-252-node-side-load--the-single-binary-distribution-registry-standup-)
-- [Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs ✅](#sprint-253-atomic-multi-arch-publication--immutable-digest-pinned-refs-)
-- [Sprint 25.4: The no-public-registry-pull gate ✅](#sprint-254-the-no-public-registry-pull-gate-)
+- [Sprint 25.2: Node side-load + the single-binary `distribution` registry standup 🧪](#sprint-252-node-side-load--the-single-binary-distribution-registry-standup-)
+- [Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs ⏸️](#sprint-253-atomic-multi-arch-publication--immutable-digest-pinned-refs-)
+- [Sprint 25.4: The no-public-registry-pull gate ⏸️](#sprint-254-the-no-public-registry-pull-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,11 +41,17 @@ All four sprints and the complete Phase-25 Register-3 gate are sealed.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-14, attestation
-`sha256:e1d9be21b5adc923c05dd13e5f59c4b44dd3dfddd37f76889b92b522ccddcce3`. Reopened 2026-08-11 because the
-prior seal did not include the universal artifact-hygiene postcondition; `python3 tools/phase25_gate.py
---execute` now passes on **all eleven sides** end to end against a 1,963-file source snapshot
-(`sha256:e929ebaebc295b38…`), and left no authored path created, changed, or removed.
+🧪 Live-proof pending — paused by request on 2026-08-16. The typed catalog now verifies Pulsar's companion archive, installs its NARs beneath `/pulsar/offloaders`, requires the jcloud NAR in both OCI children, and rejects the missing-payload mutant. The complete live gate has not sealed the amended successor handoff.
+
+**Most complete diagnostic run:** `20260816T180210Z` built and probed both architectures, passed the OCI companion-file oracle and Sprint 25.1 gate, then side-loaded the exact artifact and stood the registry up. The Sprint 25.2 gate stopped before writing its receipt because documentation lint found the Phase Status section one prose line over budget. That standards defect is fixed, but Sprints 25.2–25.4 and the phase remain unsealed.
+
+**Paused retry:** `20260816T191417Z` passed toolchain, oracle, static, and ladder checks before the requested pause interrupted warm build-product preparation. Its private daemon had already stopped, so cleanup removed the exact orphaned shim and marker-owned test run manually. Post-cleanup inventory found no external path, project firewall rule, loop device, mount, network link, container, or volume.
+
+**Superseded containment seal:** attestation `sha256:e6ff9163d299b66b8ce77c216d5114e13af6fe4beb7e299834ee390e9963816a`. `python3 tools/base_image_registry_gate.py --execute` passed all **12** recorded sides against the 1,970-file source snapshot `sha256:a674ea18bbdd8f8b66c87407a90938fcfddf1ce261a9bf9f9e241b0de8801434`. The run built and probed both architectures, retained the 3,278,246,912-byte successor handoff under its `.build/runs/phase_25/**` bundle, and published index `sha256:4d8891f619fc26276288b3bc7f3586750f81dbb59b9b40b93e3149f4c4666dcd`. All 14 mutants reddened, all 15 metrics matched, and all 40 surfaces joined. Build/cache/evidence bytes stayed under `.build/**`; the private daemon, containerd, cluster, finite backing filesystems, and captures stayed in one marker-owned `.test_data/**` run. Cleanup removed that run, and the immutable record reports every check `pass` with `cleanup.left_resources=false`; the outside-host inventory remained empty.
+
+**Pre-containment status record (invalidated where it claims current completion):**
+
+✅ Done — sealed 2026-08-14, attestation `sha256:e1d9be21b5adc923c05dd13e5f59c4b44dd3dfddd37f76889b92b522ccddcce3`. Reopened 2026-08-11 because the prior seal did not include the universal artifact-hygiene postcondition. `python3 tools/base_image_registry_gate.py --execute` then passed on **all eleven sides** end to end against a 1,963-file source snapshot (`sha256:e929ebaebc295b38…`), and left no authored path created, changed, or removed.
 
 **What the seal added — 2026-08-14 (third refresh): Policy-conformant.** One command builds, side-loads,
 stands up, publishes, and denies: the run rendered the Dockerfile against its committed golden, admitted the
@@ -58,7 +64,7 @@ committed mutants went red, 15 recorded metrics equal their authored values, and
 to 40 enumerated items.
 
 *Three sprints had no driver, and a gate whose inputs nothing produces is not a gate that can run.* Sprint
-25.1's inputs gained `tools/phase25_live_build.py` earlier the same day; sprints 25.2–25.4 still audited
+25.1's inputs gained `tools/base_image_registry_live_build.py` earlier the same day; sprints 25.2–25.4 still audited
 evidence — the bootstrap preflight, the standup, the publication, the enforced-egress run — that no invocation
 in the tree wrote. `--execute` now performs each transition immediately before the gate that seals it, so the
 run being sealed is the run that acted. The **side-load itself did not exist**: `enact` refused unless the
@@ -66,8 +72,8 @@ image was already resident, so "the cluster pulls only from itself" rested on an
 by hand. `phase25_registry_standup.py` imports this run's export by digest, inside the packet-capture window,
 and discards the archive's own wrapper index so exactly one digest-pinned name resolves.
 
-*Two more fixed paths were still deciding runs.* `tools/phase25_bootstrap_preflight.py` and
-`tools/phase25_registry_publish.py` each named the OCI export as a module constant, so whichever archive was
+*Two more fixed paths were still deciding runs.* `tools/base_image_registry_bootstrap_preflight.py` and
+`tools/base_image_registry_publish.py` each named the OCI export as a module constant, so whichever archive was
 last left at that path would have been admitted and published no matter which one the run built; both are now
 caller-supplied. The preflight's "already resident" check named a `:phase25` tag **nothing in the flow ever
 creates** — a check that could not fire — and now names the digest-pinned reference the side-load creates and
@@ -77,15 +83,15 @@ a Deployment carries.
 the scavenged `registry:2` image installed; the archive's `docker-registry` package installs
 `/usr/bin/docker-registry`, so the pod crash-looped on a binary the same gate had just executed by absolute
 path on both arches. Both container commands now read their path from
-`test/fixtures/phase25/bake_inventory_expected.dhall`, so the standup and the bake gate cannot mean different
-binaries. `tools/phase25_sbom.py` was reading the retired `sourceImage`/`sourceDigest` fields and failed
+`test/fixture/base_image_registry/bake_inventory_expected.dhall`, so the standup and the bake gate cannot mean different
+binaries. `tools/base_image_registry_sbom.py` was reading the retired `sourceImage`/`sourceDigest` fields and failed
 outright; it records `acquisition` and `integrity` instead.
 
 **Observed progress — 2026-08-14 (second refresh): Known partial.** The monocontainer amendment is
 implemented and its side is green; the four live sprints have not run, so the phase is not sealed.
 
 *The ladder is applied, and the catalog is off the scavenge rung entirely.* All 22 steps sit on the rung
-`test/fixtures/phase25/acquisition_rungs.tsv` authors — seven `AptPackage`, nine `OfficialArtifact`, six
+`test/fixture/base_image_registry/acquisition_rungs.tsv` authors — seven `AptPackage`, nine `OfficialArtifact`, six
 `BuildProduct`, **zero** `CopyOci`. The rendered Dockerfile has **one** `FROM` where it had 23, and the 35
 `supportCopies` entries that hand-maintained other images' shared-library closures are gone with the steps that
 needed them. The base is plain `ubuntu:24.04`. `dhall/amoebius/BakeCatalog.dhall` gains one field the ladder
@@ -126,13 +132,13 @@ fragment of its own, and every URL in the file must be one the catalog authored,
 *The build envelope no longer asks for a host nobody has.* The 96 GiB scratch and 64 GiB cache provisions were
 sized for the CUDA devel base and exceeded the substrate's free space, so the admission they gated could only
 ever have passed somewhere else. The catalog declares 32 GiB and 16 GiB, the independent oracle 40 GiB and
-16 GiB, and `tools/phase25_sprint25_1_gate.py` now reads both from the catalog this run decoded instead of
+16 GiB, and `tools/base_image_registry_bake_gate.py` now reads both from the catalog this run decoded instead of
 carrying them as constants — as it now reads the file-inventory count from the oracle's own length.
 
 *Two mutants are wired to real mutations at two different loci.*
-`mutants/phase25/scavenge-available-apt-rung.mutant` rewrites redis-server's rung-1 step into a `CopyOci` of
+`test/mutant/base_image_registry/scavenge-available-apt-rung.mutant` rewrites redis-server's rung-1 step into a `CopyOci` of
 `redis:7.4.5-bookworm` in the authored catalog, and the **decoder** reports the rung the authored table did not
-expect. `mutants/phase25/public-redis-image.mutant` uses the same mutation and is decided by the **renderer**:
+expect. `test/mutant/base_image_registry/public-redis-image.mutant` uses the same mutation and is decided by the **renderer**:
 the rendered `FROM` set gains an image the base-plus-authored-last-resort set forbids. Neither is a Python
 restatement of what the check would have said; a catalog edit that moves the anchor fails the mutant rather
 than silently passing it.
@@ -141,17 +147,17 @@ than silently passing it.
 source coordinates in whichever script happened to build them, so the arm gained a `BuildSource` union: an
 upstream Go module with its reference, package path, linker stamp and cgo requirement; a Python distribution
 with the interpreter its closure must resolve against; or amoebius's own cabal target.
-`tools/phase25_build_products.py` reads all of it from the catalog and writes `out/<arch>/<name>` into the
+`tools/base_image_registry_build_products.py` reads all of it from the catalog and writes `out/<arch>/<name>` into the
 build context. The four Go control planes and the pgAdmin closure build and verify for **both** arches; the
 sixth, amoebius's own binary, cross-compiles for neither, so its arm64 half is an emulated compile.
 
 **Observed progress — 2026-08-14 (first refresh): Known partial.** The gate was migrated and ran; the
-capability it gated was not yet the amended one. `tools/phase25_gate.py` was the last phase-scale gate not
+capability it gated was not yet the amended one. `tools/base_image_registry_gate.py` was the last phase-scale gate not
 built on `tools/gate_common.py`: it read eighteen named files out of a retired evidence directory and pinned
 the index digest of a build that no longer existed, so it certified whoever wrote those files last and could
 not run at all once those paths went. It became a seven-side `PhaseGate` over a run bundle whose four sprint
 receipts must agree with *each other* on the index digest rather than with a constant, and
-`test/phase_25_surface_expectations.tsv` authored 40 surfaces for the first time — where the retired gate read
+`test/oracle/base_image_registry_surfaces.tsv` authored 40 surfaces for the first time — where the retired gate read
 its surface list out of a generated root.
 
 `BakeStep` gained its four arms the same day, and the nine publisher artifacts were checked against their
@@ -277,11 +283,20 @@ Linux. This is a **Register 3** (live-infrastructure) gate.
 
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `python3 tools/phase25_gate.py` publishes the multi-arch base image atomically into the in-cluster
+**Gate:** `python3 tools/base_image_registry_gate.py --execute` publishes the multi-arch base image atomically into the in-cluster
 `distribution` registry and satisfies every fixture, oracle, OS-boundary observation, and seeded mutant named
 in [Gate integrity](#gate-integrity). A self-emitted compliance trace cannot satisfy it.
 
 ## Gate integrity
+
+### Repository-containment criteria
+
+The build uses a project-scoped container engine. Its data/exec roots, socket, containerd namespaces,
+volumes, finite sparse backing disks, and kubeconfig live below the gate's marker-owned
+`.test_data/runs/<run-id>/**` root; build cache, mounted scratch workspace, OCI export, packet capture, and
+evidence live below `.build/**`. The gate
+rejects the host-global daemon and proves no `/tmp`, `/var/tmp`, `/var/lib`, or user-home artifact, mount,
+loop device, container, volume, or cache exists after teardown.
 
 **Acquisition-arm criteria — added 2026-08-13.** The bake gate additionally proves, per baked binary, that its
 catalog step names the highest applicable rung: an `apt` package where one exists, otherwise an
@@ -352,7 +367,7 @@ not passed unless, in addition to the above:
   the oracle-pinned **canonical standard-platform-services inventory** — the `DEVELOPMENT_PLAN/README.md`
   standard-platform-services list as ratified in
   [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md), copied verbatim
-  into the committed fixture `test/fixtures/phase25/bake_inventory_expected.dhall` — and the bake-inventory
+  into the committed fixture `test/fixture/base_image_registry/bake_inventory_expected.dhall` — and the bake-inventory
   lint reconciles the image's contents against **that** committed table automatically, never against the
   implementer's own `BakeInventory` value.
 - **Per-arch execution, not presence (§M.5):** each baked service binary and each **linux-runnable** toolchain
@@ -396,7 +411,7 @@ not passed unless, in addition to the above:
   re-run each gate pass and **must go red**.
 
 **Pinned oracles (oracle-pinned):**
-- `test/fixtures/phase25/bake_inventory_expected.dhall` — the canonical standard-platform-services inventory
+- `test/fixture/base_image_registry/bake_inventory_expected.dhall` — the canonical standard-platform-services inventory
   (a verbatim copy of the `DEVELOPMENT_PLAN/README.md` standard-platform-services list as ratified in
   [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md)) with each
   per-arch absolute-path probe and pinned release identity; authored independently of `BakeInventory` (§M.3). The
@@ -405,49 +420,49 @@ not passed unless, in addition to the above:
   lane's at [Phase 51](phase_51_jitml_lift_cuda.md), so its absence from the authored rung table is the
   expectation and not a gap in it — and the Apple-Metal bridge, an apple-substrate Mach-O dylib pinned and
   probed at Phase 53, never a linux ELF here.
-- `test/fixtures/phase25/build_execution_envelope.dhall` — the per-stage host/engine-VM CPU, memory,
+- `test/fixture/base_image_registry/build_execution_envelope.dhall` — the per-stage host/engine-VM CPU, memory,
   intermediate/cache-write operands, scratch/build-cache backings, and architecture/stage-concurrency bounds
   plus the independently calculated transition peak and
   expected per-axis rejection tags. It is authored before `BuildExecutionEnvelope`/BuildKit admission code.
-- `test/fixtures/phase25/image_artifact_bounds.json` — independent finite upper bounds for OCI index,
+- `test/fixture/base_image_registry/image_artifact_bounds.json` — independent finite upper bounds for OCI index,
   child-manifest, config, compressed-layer, unpacked-layer, and import-workspace bytes. The measurement gate
   hashes and sizes the produced layout before admitting it against these bounds.
-- `test/fixtures/phase25/registry_storage_demand.dhall` — the independently authored
+- `test/fixture/base_image_registry/registry_storage_demand.dhall` — the independently authored
   `RegistryStoredArtifact` table (compressed layer blobs, configs, child manifests, and manifest-list object),
   observed-resident overlap, upload concurrency/model-derived workspace, failed-upload residue/GC horizon, exact-fit and
   one-byte-under expected verdicts, plus the expected digest-size-conflict tag. It is authored before the
   registry admission/publisher code and is reused unchanged by Phase 30's MinIO rehome.
-- `test/fixtures/phase25/bootstrap_registry_domain.dhall` — the independently authored registry/proxy
+- `test/fixture/base_image_registry/bootstrap_registry_domain.dhall` — the independently authored registry/proxy
   Kubernetes identity set, initialized-field ownership partition, canonical source/field digest, and expected
   one-time whole-deployment handoff verdicts (equal, one-field mismatch, stale snapshot, repeated transfer).
   It is authored before `ProvisionedBootstrapRegistry` or `BootstrapRegistryAction` exists.
-- `test/fixtures/phase25/public_registry_endpoints.txt` — the concrete public-registry endpoint set the
+- `test/fixture/base_image_registry/public_registry_endpoints.txt` — the concrete public-registry endpoint set the
   OS-boundary observer asserts zero connections to: `registry-1.docker.io`, `auth.docker.io`,
   `production.cloudflare.docker.com`, `quay.io`, `cdn.quay.io`, `ghcr.io`, `pkg-containers.githubusercontent.com`
   (and their resolved IP CIDRs at gate time).
-- `test/fixtures/phase25/expected_pull_failure.txt` — the negative-control canary's expected reason
+- `test/fixture/base_image_registry/expected_pull_failure.txt` — the negative-control canary's expected reason
   (`ErrImagePull`/`ImagePullBackOff`, connection-timeout), paired with the positive in-cluster pull (§M.8).
 
 **Committed seeded mutants (each MUST go red at the named gate, §M.2):**
-- `mutant/phase25/stub-arm64-binary` — a zero-byte binary at a baked path; red at Sprint 25.1 (execution +
+- `test/mutant/base_image_registry/stub-arm64-binary` — a zero-byte binary at a baked path; red at Sprint 25.1 (execution +
   ELF check).
-- `mutant/phase25/wrong-arch-layer` — amd64 bytes placed in the arm64 layer; red at Sprint 25.1 (`e_machine`
+- `test/mutant/base_image_registry/wrong-arch-layer` — amd64 bytes placed in the arm64 layer; red at Sprint 25.1 (`e_machine`
   check).
-- `mutant/phase25/gxx-version-skew` — the baked `g++` shimmed (path: `/usr/bin/g++`; operator:
+- `test/mutant/base_image_registry/gxx-version-skew` — the baked `g++` shimmed (path: `/usr/bin/g++`; operator:
   `--version`-string patch-decrement) to report a version one patch below its oracle-pinned
   `bake_inventory_expected.dhall` entry; red at Sprint 25.1's per-arch `<bin> --version` match, paired with the
   positive that the pinned `g++ --version` matches on both arches (§M.2). This gives the linux-runnable
   toolchain set (`g++`/pinned compilers) its version-match teeth; the Apple-Metal bridge is not a linux
   binary and is exercised only at Phase 53 (apple).
-- `mutant/phase25/drop-build-scratch-accounting` — omits intermediate-layer workspace from host build
+- `test/mutant/base_image_registry/drop-build-scratch-accounting` — omits intermediate-layer workspace from host build
   admission; red at Sprint 25.1's zero-builder-process overdraw fixture.
-- `mutant/phase25/bootstrap-domain-expansion` — lets the bootstrap action initialize an object outside its
+- `test/mutant/base_image_registry/bootstrap-domain-expansion` — lets the bootstrap action initialize an object outside its
   provisioned registry/proxy domain; red at Sprint 25.2's exact-domain/zero-write assertion.
-- `mutant/phase25/handoff-without-equality` — adopts bootstrap objects into the later whole deployment without
+- `test/mutant/base_image_registry/handoff-without-equality` — adopts bootstrap objects into the later whole deployment without
   equal identity/source/owned-field digest readback; red at Sprint 25.2's ownership-handoff assertion.
-- `mutant/phase25/record-before-push` — records the tag as published before the manifest list lands; red at
+- `test/mutant/base_image_registry/record-before-push` — records the tag as published before the manifest list lands; red at
   Sprint 25.3 (registry-API un-advertised assertion).
-- `mutant/phase25/noop-egress-policy` — a vanilla unenforced `kindnetd` `NetworkPolicy` substituted for the
+- `test/mutant/base_image_registry/noop-egress-policy` — a vanilla unenforced `kindnetd` `NetworkPolicy` substituted for the
   enforcing firewall; red at Sprint 25.4 (negative-control canary must fail `ImagePull`).
 
 ## Doctrine adopted
@@ -491,7 +506,7 @@ not passed unless, in addition to the above:
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint below was revalidated by the 2026-08-14 seal, and the dates,
+> **Current revalidation rule.** Every sprint below was revalidated by the 2026-08-16 seal, and the dates,
 > pass claims, and `Remaining Work: None` statements describe that run. Any *historical* date, repository-resident
 > evidence path, or pre-amendment capability claim retained in the prose describes the retired record only, and
 > is superseded by the current generated-artifact and dynamic-resolution doctrine: nothing below licenses
@@ -511,22 +526,22 @@ flowchart LR
   s2 -->|"produces what the next consumes"| s3
   s3 -->|"the last seam the gate closes over"| gate
 ```
-*Orientation. The seams Phase 25 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Sprint 25.1 is sealed; the registry/bootstrap/publication seams have not run.*
+*Orientation. The seams Phase 25 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Sprint 25.1 is sealed; the later sprints remain open at the requested pause.*
 
 ## Sprint 25.1: Multi-arch base image bake — services + jit-build resolver/toolchain, not engine payloads ✅
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase25_gate.py --execute`; all 10 checks passed
-against this run's own OCI export, and `sprint-25.1-receipt.json` in that run's bundle records the index
-digest the other three sprints must agree with.
+**Status**: Done — diagnostic run `20260816T180210Z` completed the amended dual-architecture bake, executed the
+binary probes, proved the companion NAR in both OCI children, reddened the omission mutant, and retained the
+Sprint 25.1 receipt. The phase remains open because later sprint receipts were not completed.
 **Implementation**: `dhall/amoebius/BakeCatalog.dhall`, `src/Amoebius/Image/BakeInventory.hs`,
 `src/Amoebius/Image/RenderDockerfile.hs`, `src/Amoebius/Image/Build.hs` plus `BuildAdmission.hs`,
 `BuildRuntime.hs`, `Artifact.hs`, and `Resolver.hs`, with the consolidated gate and its independent
-OCI/SBOM/execution/cgroup/ENOSPC/mutation probes under `tools/phase25_*.py` — all built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+OCI/SBOM/execution/cgroup/ENOSPC/mutation probes under `tools/base_image_registry_*.py` — all built and validated.
+**Blocked by**: none; the amended Phase-24 gate is sealed.
 **Independent Validation**: `docker buildx imagetools inspect <tag>` lists both
 `linux/amd64` and `linux/arm64` under one manifest list; a bake-inventory lint asserts the image contains
 **every** service binary named in the oracle-pinned canonical inventory
-`test/fixtures/phase25/bake_inventory_expected.dhall` (a verbatim copy of the `DEVELOPMENT_PLAN/README.md`
+`test/fixture/base_image_registry/bake_inventory_expected.dhall` (a verbatim copy of the `DEVELOPMENT_PLAN/README.md`
 standard-platform-services list as ratified in `platform_services_doctrine.md`, reconciled **automatically**
 against that committed table — never against the implementer's own `BakeInventory` value, §M.3) and the
 jit-build resolver + its **linux-runnable** toolchain (`g++`/pinned compilers + any linux
@@ -538,9 +553,9 @@ non-native arch — every baked binary is executed by **absolute path** with the
 in `bake_inventory_expected.dhall`; version-capable binaries match the pinned version and the documented
 non-version diagnostics join execution to the pinned OCI/SBOM release identity. Each arch's layer passes an ELF `e_machine` check
 confirming its binaries carry that arch's machine type (foreclosing zero-byte stubs and amd64 bytes copied
-into the arm64 layer). The committed seeded mutants `mutant/phase25/stub-arm64-binary` (a zero-byte binary
-at a baked path), `mutant/phase25/wrong-arch-layer` (amd64 bytes in the arm64 layer), and
-`mutant/phase25/gxx-version-skew` (the baked `/usr/bin/g++` shimmed to report a `--version` one patch below
+into the arm64 layer). The committed seeded mutants `test/mutant/base_image_registry/stub-arm64-binary` (a zero-byte binary
+at a baked path), `test/mutant/base_image_registry/wrong-arch-layer` (amd64 bytes in the arm64 layer), and
+`test/mutant/base_image_registry/gxx-version-skew` (the baked `/usr/bin/g++` shimmed to report a `--version` one patch below
 its pinned `bake_inventory_expected.dhall` entry) MUST turn this lint red (§M.2) — the last giving the
 per-arch `<bin> --version` match its teeth, paired with the positive that the pinned `g++ --version` matches
 on both arches. The same independent validation begins before `buildx`: a read-only host/engine-VM snapshot
@@ -595,6 +610,9 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
   ([`image_build_doctrine.md` §6](../documents/engineering/image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)),
   so an interpolated shell fragment or an operator-supplied download address is unrepresentable rather than
   discouraged — closing [`illegal_state_lifecycle.md` §3.76](../documents/illegal_state/illegal_state_lifecycle.md#376-a-build-stage-whose-content-is-unmodeled).
+- A typed companion-payload record for separately published release dependencies. It carries the per-platform
+  asset, publisher checksum contract, archive shape, target root, and required file. Pulsar's offloader bundle
+  is the first instance, with its jcloud NAR required beneath `/pulsar/offloaders` on both architectures.
 - `renderDockerfile :: BuildExecutionEnvelope -> Dockerfile`, pure and total, emitting the previously
   hand-authored `ARG`/`RUN … install` blocks from that catalog, plus
   a **byte-for-byte golden** pinning the emitted Dockerfile as a fixture of the *renderer's* behaviour.
@@ -603,14 +621,14 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
   [`generated_artifacts_doctrine.md` §2](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what).
 - A bake-inventory lint proving the resolver/toolchain are present and every ML engine payload is **absent**.
 - An architecture-native Redis probe on both image platforms: absolute-path `redis-server --version` and
-  `redis-cli --version` match the independent catalog pin, and the committed `mutant/phase25/omit-redis`
-  plus `mutant/phase25/redis-version-skew` each turn the gate red.
-- The oracle-pinned oracle `test/fixtures/phase25/bake_inventory_expected.dhall` (the canonical
+  `redis-cli --version` match the independent catalog pin, and the committed `test/mutant/base_image_registry/omit-redis`
+  plus `test/mutant/base_image_registry/redis-version-skew` each turn the gate red.
+- The oracle-pinned oracle `test/fixture/base_image_registry/bake_inventory_expected.dhall` (the canonical
   standard-platform-services set + pinned per-arch versions) and the committed
-  mutants `mutant/phase25/stub-arm64-binary`, `mutant/phase25/wrong-arch-layer`,
-  `mutant/phase25/gxx-version-skew` (the pinned-`g++`-version-skew that bites the per-arch `<bin> --version`
-  match), `mutant/phase25/drop-build-scratch-accounting`, and
-  `mutant/phase25/dockerfile-handedit` (an edit to the *generated* Dockerfile that the catalog does not
+  mutants `test/mutant/base_image_registry/stub-arm64-binary`, `test/mutant/base_image_registry/wrong-arch-layer`,
+  `test/mutant/base_image_registry/gxx-version-skew` (the pinned-`g++`-version-skew that bites the per-arch `<bin> --version`
+  match), `test/mutant/base_image_registry/drop-build-scratch-accounting`, and
+  `test/mutant/base_image_registry/dockerfile-handedit` (an edit to the *generated* Dockerfile that the catalog does not
   license) — which MUST turn the emitted-Dockerfile golden red.
 
   **The oracle stays independent after the promotion.** `BakeInventory` becomes a decode of the committed
@@ -631,6 +649,9 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
    filesystem `ENOSPC` within the declared provision, with no spill outside named backings. A mutant that
    launches an unbounded BuildKit worker must turn these OS-boundary assertions red.
 2. `docker buildx imagetools inspect <tag>` lists both `linux/amd64` and `linux/arm64` under one manifest list.
+   Canonical Docker Hub metadata is preferred; only a canonical 429 may select `mirror.gcr.io`, and the run
+   records that endpoint while retaining the canonical repository-plus-digest identity. The private Docker
+   daemon and bounded BuildKit config both name the cache; neither consults host-global auth or daemon state.
 3. Independently inspect and hash every OCI index, child manifest, config, compressed blob, and unpacked
    snapshot; require exact agreement with `ImageArtifact`. Re-derive `RegistryStoredArtifact` from that value
    and require the digest/kind/stored-byte map to equal the Phase-0 oracle; a missing object or conflicting
@@ -638,32 +659,34 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
 4. The bake-inventory lint is green **against the committed `bake_inventory_expected.dhall`** (services +
    resolver + toolchain present, engine payloads absent), reconciled automatically — not against the SUT's own
    inventory.
-5. For each arch (host arch native; non-native under `binfmt`/QEMU), every baked binary runs by absolute path
+5. For each arch (host arch native; non-native through the static QEMU binary extracted from this run's
+   resolved BuildKit image, with no host-global `binfmt` registration), every baked binary runs by absolute path
    with its pinned harmless probe; native version endpoints match the pinned version, documented non-version
    diagnostics join to the pinned OCI/SBOM identity, and each arch layer passes the ELF `e_machine` check.
-6. The committed mutants `mutant/phase25/stub-arm64-binary`,
-   `mutant/phase25/wrong-arch-layer`, `mutant/phase25/gxx-version-skew` (the pinned-`g++`-version-skew that
-   makes Validation 5's `<bin> --version` match bite), and `mutant/phase25/drop-build-scratch-accounting` turn
+6. Reconcile every companion payload against an independently authored OCI-file oracle. Require the Pulsar
+   jcloud NAR in both platform children, verify its bytes came from the publisher-checksummed offloader
+   archive, and make `omit-pulsar-offloaders` fail at the missing-payload locus.
+7. The committed mutants `test/mutant/base_image_registry/stub-arm64-binary`,
+   `test/mutant/base_image_registry/wrong-arch-layer`, `test/mutant/base_image_registry/gxx-version-skew` (the pinned-`g++`-version-skew that
+   makes Validation 5's `<bin> --version` match bite), and `test/mutant/base_image_registry/drop-build-scratch-accounting` turn
    the validation red (§M.2).
-7. Run both Redis binaries from each architecture by absolute path, verify their pinned versions and SBOM
+8. Run both Redis binaries from each architecture by absolute path, verify their pinned versions and SBOM
    digests, and prove that the generated Redis/Sentinel workload image identity is the published
    monocontainer/base-image digest. The omit/version-skew/public-image mutants fail for their specific reasons.
 
 ### Remaining Work
-None. Sprint 25.2 consumes this run's audited OCI artifact. The scratch and cache provisions are the catalog's
-own 32 GiB and 16 GiB — the retired 96/64 GiB pair was sized for the CUDA devel base and exceeded the
-substrate's free space, so the admission it gated could only have passed on a host nobody had.
+None. Sprint 25.2 consumes this sprint's audited OCI artifact when the full phase run resumes.
 
-## Sprint 25.2: Node side-load + the single-binary `distribution` registry standup ✅
+## Sprint 25.2: Node side-load + the single-binary `distribution` registry standup 🧪
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase25_gate.py --execute`; the run side-loaded
-its own export and stood the registry up from it, and `sprint-25.2-receipt.json` in that run's bundle records
-the six-object domain and the zero public-registry observation.
+**Status**: Live-proof pending — the amended artifact was side-loaded and its registry stood up in diagnostic
+run `20260816T180210Z`, but the sprint gate stopped at documentation lint before writing its receipt. The lint
+defect is fixed; a fresh uninterrupted phase run must repeat and seal this transition.
 **Implementation**: `src/Amoebius/Image/{NodeLoad,Registry,BootstrapRegistry}.hs` (pure
 bootstrap provision, snapshot validation, and the typed side-load/object-initialize action); package-private
 `src/Amoebius/Manifest/Render.hs` supplies the same source serializer Phase 13 uses; live admission/import/
-standup and OS-boundary observation are implemented by `tools/phase25_{bootstrap_preflight,registry_standup}.py`.
-**Blocked by**: reopened numeric predecessor gates.
+standup and OS-boundary observation are implemented by `tools/base_image_registry_{bootstrap_preflight,standup}.py`.
+**Blocked by**: none; Sprint 25.1 and the amended Phase-24 gate are sealed.
 **Independent Validation**: a read-only snapshot preflight admits the whole import, registry, and
 mutation-proxy transition before anything is imported, mints one single-use `BootstrapRegistryAction` for the
 exact provisioned object domain, and leaves every one-field negative with zero imports and zero apiserver
@@ -770,20 +793,19 @@ whole-deployment spec and creates no public service-render boundary.
    registries), recorded for the Sprint 25.4 gate — never from a self-emitted compliance trace.
 
 ### Remaining Work
-None. Atomic publication remains exclusively Sprint 25.3 work; the admitted proxy therefore returns 409 for a
-valid publisher capability until that next ordered sprint performs the mutation. The MinIO-backed backend that
-replaces the interim node-local blob store is Phase 30's, and the reconciler that adopts these six objects
-through the one-time typed handoff is Phase 26's; both stay UNVERIFIED here.
+Repeat the side-load and registry standup in the uninterrupted phase run, then pass the Sprint 25.2 gate and
+retain its receipt. Atomic publication remains exclusively Sprint 25.3 work. The MinIO-backed backend is
+Phase 30's, and Phase 26 owns adoption of these objects through the one-time typed handoff.
 
-## Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs ✅
+## Sprint 25.3: Atomic multi-arch publication + immutable digest-pinned refs ⏸️
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase25_gate.py --execute`; the fault-injected
+**Status**: Blocked by Sprint 25.2's amended standup; the prior capability record is historical. Previously the fault-injected
 one-arch push left the tag un-advertised at the registry API and the exact fit published once, recorded in
 `sprint-25.3-receipt.json` in that run's bundle.
 **Implementation**: `src/Amoebius/Image/Publish.hs`, `src/Amoebius/Image/Ref.hs` (the
 snapshot-bound single-advertisement publisher + immutable, source/content-derived ref scheme), with the live
-OCI protocol/fault/access-log harness in `tools/phase25_registry_publish.py`.
-**Blocked by**: reopened numeric predecessor gates.
+OCI protocol/fault/access-log harness in `tools/base_image_registry_publish.py`.
+**Blocked by**: none; Sprint 25.2 is sealed.
 **Independent Validation**: publication is atomic at the registry boundary — a fault-injected one-arch push
 leaves the tag un-advertised in the registry's own HTTP API, an exact fit publishes once, and the second run
 makes zero mutating requests — and no rejection path touches storage. The numbered Validation list below
@@ -814,7 +836,7 @@ not capacity admission.
   Vault `SecretRef` identity is flagged as the Phase-29+ transport-hardening target.
 - The exclusive registry mutation proxy (the backend has no direct mutating route), with a fault-injecting
   mode that fails one arch's blob/manifest upload mid-push, and the committed mutant
-  `mutant/phase25/record-before-push`, plus the registry access-log capture used for the zero-writes re-run
+  `test/mutant/base_image_registry/record-before-push`, plus the registry access-log capture used for the zero-writes re-run
   assertion.
 
 ### Validation
@@ -835,21 +857,21 @@ not capacity admission.
    registry access log during the second run; the ref is immutable and digest-pinned, never `:latest` as a
    deployment reference.
 5. The build uses the ephemeral `docker --config <dir>` with no environment variable and no `docker login`.
-6. The committed mutant `mutant/phase25/record-before-push` — it records the tag as published before the
+6. The committed mutant `test/mutant/base_image_registry/record-before-push` — it records the tag as published before the
    manifest list lands — turns Validation 2 red (§M.2).
 
 ### Remaining Work
-None. Sprint 25.4 consumes this run's immutable digest reference and the standup/publication OS-boundary
+Revalidate atomic publication of the amended handoff. Sprint 25.4 consumes this run's immutable digest reference and the standup/publication OS-boundary
 captures, and installs the enforcing deny boundary the paired canaries prove.
 
-## Sprint 25.4: The no-public-registry-pull gate ✅
+## Sprint 25.4: The no-public-registry-pull gate ⏸️
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase25_gate.py --execute`; under the enforced
+**Status**: Blocked by Sprint 25.3's amended publication; the prior capability record is historical. Previously under the enforced
 node-level denial the canary failed `ImagePull` while the in-cluster pull succeeded, recorded in
 `sprint-25.4-receipt.json` in that run's bundle.
-**Implementation**: `src/Amoebius/Image/Gate.hs`, `tools/phase25_no_public_pull_gate.py`, and
-`tools/phase25_sprint25_4_gate.py`.
-**Blocked by**: reopened numeric predecessor gates.
+**Implementation**: `src/Amoebius/Image/Gate.hs`, `tools/base_image_registry_private_pull.py`, and
+`tools/base_image_registry_private_pull_gate.py`.
+**Blocked by**: none; Sprint 25.3 is sealed.
 **Independent Validation**: under one enforced node-level egress denial the whole flow stands up, publishes,
 and resolves both arches with zero public-registry requests read at the OS boundary, while the paired
 public-image canary fails `ImagePull` — the negative control that proves the denial is enforced rather than
@@ -871,8 +893,8 @@ later reconciler-owned rendering (Phase 26) and the MinIO-backed blob store (Pha
   (node `containerd` logs + packet capture), and the registry access-log capture; driving the build →
   side-load → standup → publish flow and asserting the negative-control `ImagePull` failure, zero public pulls
   from the observer, both-arch resolution, and zero-writes idempotent re-run.
-- The committed oracle `test/fixtures/phase25/public_registry_endpoints.txt` (the concrete public-registry
-  endpoint set the observer checks against) and the committed mutant `mutant/phase25/noop-egress-policy`.
+- The committed oracle `test/fixture/base_image_registry/public_registry_endpoints.txt` (the concrete public-registry
+  endpoint set the observer checks against) and the committed mutant `test/mutant/base_image_registry/noop-egress-policy`.
 - A Register-3 ledger naming the substrate (linux-cpu) and the register, attaching the OS-boundary observer
   evidence, with the interim-storage and reconciler-rehoming residue flagged UNVERIFIED, never green.
 
@@ -890,11 +912,11 @@ later reconciler-owned rendering (Phase 26) and the MinIO-backed blob store (Pha
 3. Both `linux/amd64` and `linux/arm64` resolve under the one digest-pinned tag; the whole build → side-load
    → standup → publish flow re-runs as a no-op, asserted as **zero mutating requests** in the registry access
    log during the second run.
-4. The committed mutant `mutant/phase25/noop-egress-policy` (unenforced vanilla `NetworkPolicy`) turns
+4. The committed mutant `test/mutant/base_image_registry/noop-egress-policy` (unenforced vanilla `NetworkPolicy`) turns
    Validation 2's negative-control assertion red (§M.2).
 
 ### Remaining Work
-None. The receipt and the acceptance ledger are written into `gen/runs/phase_25/<run-id>/`, the bundle is
+Revalidate the no-public-pull boundary and seal the amended handoff. The receipt and the acceptance ledger are written into `.build/runs/phase_25/<run-id>/`, the bundle is
 externally attested against the run's source snapshot, and the gate ran after Phase 24 closed. The later
 reconciler-owned rendering correspondence and MinIO-backed registry storage correspondence remain
 `UNVERIFIED` and are owned by Phases 26 and 30 respectively.

@@ -205,8 +205,8 @@ def no_live_residue() -> dict[str, str]:
     namespace = subprocess.run((KUBECTL, "--kubeconfig", str(Path.home() / ".amoebius/phase24/kubeconfig"), "get", "namespace", "phase48-system"), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, timeout=60)
     require(namespace.returncode != 0, "phase48-namespace-residue")
     clusters = subprocess.run((KIND, "get", "clusters"), text=True, stdout=subprocess.PIPE, check=False, timeout=60).stdout.splitlines()
-    require(clusters == ["amoebius-phase24"], f"unexpected-kind-clusters:{clusters}")
-    return {"name": "external-cleanup-readback", "command": "namespace and kind inventories", "output": "no Phase-48 namespace; only retained amoebius-phase24 remains", "result": "PASS"}
+    require(clusters == ["amoebius-bootstrap-coordinator"], f"unexpected-kind-clusters:{clusters}")
+    return {"name": "external-cleanup-readback", "command": "namespace and kind inventories", "output": "no Phase-48 namespace; only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:

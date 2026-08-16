@@ -1,0 +1,11 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  extraMounts:
+  - hostPath: __VAULT_MOUNT__
+    containerPath: /amoebius-retained/vault
+  - hostPath: __AUDIT_MOUNT__
+    containerPath: /amoebius-retained/vault-audit
+  - hostPath: __AMOEBIUS_BINARY__
+    containerPath: /amoebius-test/bin/amoebius

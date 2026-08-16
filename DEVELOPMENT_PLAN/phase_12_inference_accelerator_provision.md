@@ -43,8 +43,16 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/inference_accelerator_gate.py` passed all ten sides: 23
+coexistence, family/lane, offering, provision, and mutant items, all five mutants, all twelve metrics, and the
+honesty ledger pass; 28 surfaces join to 39 enumerated items. The project-contained attestation is
+`sha256:656509c77d5b6239bcbb1df1a3d327f6e889aaff87893c093faf5867a45e01d6`, bound to source snapshot
+`sha256:2a81c1595be8d2b2…`; Phase 12 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:32e80b8d1d0ae545…`
-(1937 non-ignored files) and published verified external attestation
+(1937 non-ignored files) and published a verified pre-containment external attestation
 `sha256:eba86a80c57d10c9629d25cd74199104d3df181cb1adbb2f223492d1d3b3a89f`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run:
@@ -52,7 +60,7 @@ three inference positives provision, the target-offering quotient is exact acros
 relation is exact across twelve pairs, the hand-authored coexistence aggregation matches, the URL Gate-1
 negative reddens at its specific locus, eight provision negatives redden at their tags, the eight-branch
 QuickCheck coverage floor holds, and all five seeded mutants redden. Evidence and the ledger move into
-`gen/runs/phase_12/<run-id>/`, and 23 run-time items — one coexistence epoch, four engine families, four
+`.build/runs/phase_12/<run-id>/`, and 23 run-time items — one coexistence epoch, four engine families, four
 target lanes, nine provision cases, and five mutant names — partition one-to-one across the claim surfaces.
 
 **Two contract surfaces carry no id and are now honestly UNVERIFIED**:
@@ -124,7 +132,7 @@ Phase-11 provision seal.
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `python3 tools/phase12_gate.py` passed on no substrate, Register 1.
+**Gate:** `python3 tools/inference_accelerator_gate.py` passed on no substrate, Register 1.
 It covers three positives, all quotient/relation cells, nine negatives, one covered property, and five mutants.
 The complete apparatus is named in [Gate integrity](#gate-integrity).
 
@@ -165,7 +173,7 @@ The gate's positive corpus is *exactly* the three oracle-pinned fixtures
 `dhall/examples/legal_inference_singlenode.dhall`, `dhall/examples/legal_inference_distributed.dhall` (the
 `InferenceEngine` arm bound under `SingleNode` and `Distributed { nodes = n }`, n ≥ 2, satisfying the
 [Phase-10](phase_10_capability_bind.md) object-node-multiset shape oracle against the reviewer-authored
-goldens `test/capability/goldens/golden_servicespec_inference_singlenode.golden` and
+goldens `test/golden/capability/golden_servicespec_inference_singlenode.golden` and
 `golden_servicespec_inference_distributed.golden`), and `dhall/examples/legal_inference_cuda.dhall` (the
 CUDA accelerator positive that binds and provisions by selecting the matching CUDA target offering with its
 residency/coexistence epochs inside net allocatable VRAM). All three fixtures, both goldens, and every
@@ -305,13 +313,13 @@ device count equals the owner requirement) and each minimally-differing one-devi
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 12.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ✅
 
@@ -319,7 +327,7 @@ device count equals the owner requirement) and each minimally-differing one-devi
 **Implementation**: `dhall/amoebius/Capability.dhall` carries the URL-free runtime and family unions.
 `src/Amoebius/Capability/Engine.hs` owns offerings, the lane quotient, family relation, owner demands, policies,
 and the opaque checked accelerator. `src/Amoebius/Capacity/Provision.hs` incorporates it into the seal.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: four offerings match the pinned quotient and all twelve family/lane cells match
 the relation oracle. Owner keys and policy domains are exact; all allowed epochs and shard rules are checked.
 The hand-authored per-device aggregation table catches overlap omissions. URL, count, lane, VRAM, domain,
@@ -390,9 +398,9 @@ The whole sprint (✅ Done).
 ## Sprint 12.2: The accelerator-provision corpus + the Register-1 gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/capability/EngineAccelerator{Fixtures,Props,Gate,Mutants,Spec}.hs`, the paired Dhall
-corpus, `tests/oracle/phase12/`, `tests/mutants/phase12/`, and `tools/phase12_gate.py`.
-**Blocked by**: reopened numeric predecessor gates.
+**Implementation**: `test/spec/capability/EngineAccelerator{Fixtures,Props,Gate,Mutants,Spec}.hs`, the paired Dhall
+corpus, `test/oracle/inference_accelerator/`, `test/mutant/inference_accelerator/`, and `tools/inference_accelerator_gate.py`.
+**Blocked by**: None.
 **Independent Validation**: `cabal test capability-spec` covers three positives, the quotient, the relation,
 one Gate-1 and eight provision negatives, and eight QuickCheck branches. The phase gate runs five mutants,
 checks exact locus coverage, retains evidence, and validates the hashed Register-1 ledger.

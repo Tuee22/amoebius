@@ -41,21 +41,25 @@ complete mapping and its tested/assumed status live in the
 [substrate plan](./DEVELOPMENT_PLAN/substrates.md) and
 [substrate doctrine](./documents/engineering/substrate_doctrine.md).
 
-Only authored inputs and reviewed external source belong in version control. Every reproducible projection,
-dependency resolution, lock/freeze file, generated source, test enumeration, ledger, receipt, log, or report
-is emitted under `gen/` or retained in the external evidence store. The complete repository tree and required
-ignore coverage are owned by the
+Only authored inputs and reviewed external source belong in version control. Every amoebius-owned byte stays
+inside this checkout. `.build/` holds reproducible, transient, and evidentiary output; `.data/` holds
+operator-retained production runtime and durable state; `.test_data/` holds only harness-owned test state and
+is never allowed to alias `.data/`. Builds, temporary files, caches, kubeconfigs, virtual disks, container
+engine data, run bundles, and local attestations all resolve beneath one of those roots. The complete closed
+root set, lifecycle split, repository tree, and required ignore coverage are owned by the
 [repository-layout doctrine](./documents/engineering/repository_layout_doctrine.md).
 Python interpreter bytecode is the one source-adjacent cache exception: Python uses its normal cache behavior,
 while `.gitignore` and `.dockerignore` exclude every `__pycache__` directory and bytecode suffix.
 
-Secrets never appear in the DSL. A sensitive field carries a typed *reference* — a name — and the value lives
+Secrets never appear in the production DSL. A sensitive field carries a typed *reference* — a name — and the value lives
 only in the cluster's Vault: the CLI prompts the operator and writes straight into Vault, so no cleartext
 secret is ever at rest on the filesystem in production. Because admitting a spec proves that every secret it
 names already exists in Vault, and refuses before any effect otherwise, **Vault necessarily precedes every
 live provider deployment**. The typed reference, the prompt-to-Vault path, the admission proof, and the
 test-only seam that automates the prompt are owned by the
 [Vault/PKI doctrine](./documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value).
+Root `test-secrets.dhall` is the sole cleartext secret-at-rest exception. It is ignored, test-only, feeds the
+same prompt-to-Vault path, and every production command must reject it rather than reading or copying it.
 
 Every service the cluster runs ships in **one image amoebius builds** — a single Ubuntu-based container
 carrying every third-party service binary, installed by preference from `apt`, then an official artifact, then
@@ -64,10 +68,13 @@ catalog rather than hand-maintained. The build/publish contract, the acquisition
 host-bootstrap exception are owned by the
 [image-build doctrine](./documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster).
 
-**Observed implementation — refreshed 2026-08-13.** The pre-cluster band (Phases 0–23) is sealed, each against
-a recorded source snapshot with a verified external attestation. Phase 24's live capability is established but
-unsealed, and Phases 4 and 5 are reopened by the secrets amendment above. The tree is not policy-conformant as
-a whole: later phases still track reproducible test material and resolution/integrity observations. The exact
+**Observed implementation — refreshed 2026-08-16.** Phases 0–29 are Done under the repository-containment gate,
+Phase 30 is Active, and Phases 31–64 are Blocked. Phase 29 verifies the exact Phase-28 seal and Phase-25 OCI
+handoff, proves init-once retained Vault and PKI identity across a genuine private-cluster delete/recreate,
+rejects the cleartext test seam in production, destroys its marker-owned fixture, and retains only run
+evidence under `.build/**`.
+Earlier capability results remain historical evidence until their owner phase reruns; later tools still contain
+legacy repository-root, system-temp, user-home, and host-global container-engine assumptions. The exact
 current and historical divergences, their owners, and their closure conditions are recorded in the
 [legacy register](./DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md); the
 [development-plan tracker](./DEVELOPMENT_PLAN/README.md#current-implementation-audit) controls migration order

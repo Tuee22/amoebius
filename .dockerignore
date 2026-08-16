@@ -6,7 +6,15 @@
 .git
 .git/**
 
-# Canonical generated root, and the migration surfaces still written by later phases.
+# Canonical contained-state roots.
+.build
+.build/**
+.data
+.data/**
+.test_data
+.test_data/**
+
+# Pre-containment migration surfaces.
 gen
 gen/**
 DEVELOPMENT_PLAN/evidence
@@ -25,22 +33,13 @@ test/golden/phase_54_expected_run_ledger.json
 **/go.sum
 
 # Haskell, JavaScript, and PureScript build products.
-dist-*
-dist-*/**
-.ghc.environment.*
-cabal.project.local
 **/*.o
 **/*.hi
 **/*.dyn_o
 **/*.dyn_hi
 **/*.hie
-ghc-pkg-*
-repl-wrapper-*
-wrapper-*
 **/*.tla
 **/*.cfg
-node_modules
-node_modules/**
 ui-runtime/.spago
 ui-runtime/.spago/**
 ui-runtime/output
@@ -55,16 +54,6 @@ ui-runtime/dist/**
 **/*.pyc
 **/*.pyo
 **/*.pyd
-
-# Tool acquisition. Authored resolver policy beneath toolchain/ remains available.
-toolchain/bin
-toolchain/bin/**
-toolchain/runtime
-toolchain/runtime/**
-toolchain/downloads
-toolchain/downloads/**
-toolchain/cache
-toolchain/cache/**
 
 # Runtime output written beside a run.
 **/*.log

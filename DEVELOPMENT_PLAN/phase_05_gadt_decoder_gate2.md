@@ -43,6 +43,15 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/gadt_decoder_gate2_gate.py` passed all eleven sides: all 20
+authored metrics match, the decoder, distinct negatives, compile pairs, structural and polarity mutants,
+partiality scan, and absolute-tool observer are green, 23 surfaces join to 26 run-time items, and generated
+output, host inventory, and authored roots remain contained and unchanged. The project-contained attestation
+is `sha256:7f9907ae8c5dde956367f67a1e5663f364b8887625351c654bdd829a8c58112c`, bound to source snapshot
+`sha256:ee3ee22f7aa4b788…`; Phase 5 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — resealed 2026-08-13 after the secrets amendment, attestation
 `sha256:bd7e03f3d8f33d5359d89cd453437d2101e31ec10ffdcdc278e82a54eeaee04a`.
 
@@ -81,13 +90,13 @@ compile-fail pairs separate legal from illegal at their authored loci, the 5527-
 its deletion and substitution mutant families hold, the decoder source carries no partial function, and an
 OS-boundary `execve` observer confirms every `cabal`, `dhall`, and `ghc` invocation used an absolute path.
 23 surfaces join to 26 run-time enumerated items and the ledger is derived into
-`gen/runs/phase_05/<run-id>/`.
+`.build/runs/phase_05/<run-id>/`.
 
 **Three corrections, each recorded rather than absorbed.** First, the results table was *written, not
 measured*: sixteen of its twenty rows were string literals emitted after the checks that would have raised, so
 a weakened check would have gone on reporting the same values. Every observable row is now parsed from the
 suite's acceptance token, the `execve` trace, or the mutant's failure locus. Second,
-`test/dsl/DecodeSpec.hs` hard-coded one developer's `ghc` and `dhall` paths; the suite still invokes both by
+`test/spec/dsl/DecodeSpec.hs` hard-coded one developer's `ghc` and `dhall` paths; the suite still invokes both by
 absolute path — that is what the argv observer checks — but the path is now a run-local resolution and the
 suite fails closed without it. Third, `Amoebius.Ui.Server.Main` — the `serve-ui` entry point, reached only
 through the executable's subcommand table — was an exposed module of `lib:dsl-core`, so every phase linking the
@@ -99,7 +108,7 @@ by the core but listed in no component, is now declared.
 
 **Invalidated historical record:**
 
-✅ Done. `python3 tools/phase5_gate.py` passed on 2026-08-09 with ledger
+✅ Done. `python3 tools/gadt_decoder_gate2_gate.py` passed on 2026-08-09 with ledger
 `dynamically-resolved`. The gate ran on **no substrate**
 (`none`) in **Register 1** — it stood up no host and no cluster, only an
 in-process decode battery. Where a shape below is already exercised in a sibling system (hostbootstrap's
@@ -114,7 +123,7 @@ constructors, phantom tenant references, and ownership indices designed so that 
 inhabitant — together with the fail-closed decoder `decodeCluster :: FilePath -> IO (Either DecodeError ClusterIR)`
 built on the native `dhall` library's `Dhall.inputFile auto` wrapped in an exception-catch. Totality here is
 defined precisely: every input, well-typed or not, yields `Right` or a structured `Left` *without throwing*.
-The Phase-4 prerequisite passed on 2026-08-09 (`python3 tools/phase4_gate.py`, ledger
+The Phase-4 prerequisite passed on 2026-08-09 (`python3 tools/dhall_gate1_schema_gate.py`, ledger
 `dynamically-resolved`). Gate 2 passed with five semantic-hash-pinned positives, exactly three tagged refinement negatives, three legal/illegal compile pairs, and 5,527 exact structural rows. Capacity, binding, provisioning, and runtime remain UNVERIFIED.
 `ClusterIR` is not resource-agnostic: every execution unit carries stable id/revision, arm-specific
 controller/cardinality/policy in a private `BoundExecutionBody`—Deployment, StatefulSet, DaemonSet, Job, or
@@ -267,7 +276,7 @@ independent of the decoder's own output ([§M](development_plan_standards.md#m-g
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -281,7 +290,7 @@ independent of the decoder's own output ([§M](development_plan_standards.md#m-g
 **Implementation**: `amoebius.cabal`, `cabal.project` (the real package, not the Phase-1
 throwaway probe), the `dsl-core` internal library, the `dsl-spec` test-suite stanza, and the built
 `src/Amoebius/Dsl/` module tree.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: `cabal build` of the empty package and `cabal test dsl-spec` (zero tests) succeed
 under the Phase-1 pin, and no tool reaches them through ambient `PATH`. The numbered `### Validation` list
 below carries the resolution rule and the argv observer that decide the second half.
@@ -317,7 +326,7 @@ None for Phase 5. Later DSL expansion belongs to the numerically assigned phases
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Dsl/Types.hs`, `src/Amoebius/Dsl/SmartConstructors.hs`,
 `src/Amoebius/Dsl/Ref.hs`, plus the committed compile-pair corpus.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: the catalog's decode-foreclosed classes
 ([§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally))
 have no inhabitant, proven by **committed minimal-pair compile-fail fixtures** rather than by
@@ -678,7 +687,7 @@ None for Phase 5; exhaustive catalog expansion is Phase 6.
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Dsl/Decode.hs` (`decodeCluster :: FilePath -> IO
 (Either DecodeError ClusterIR)`) and `src/Amoebius/Dsl/Error.hs` (the tagged `DecodeError` type).
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: the decode path returns `Either DecodeError ClusterIR` and never throws into a
 half-applied effect, and `DecodeError` carries each named failure class as its own constructor, so a blanket
 catch-all tag is a type-level regression rather than a passing implementation. The numbered `### Validation`
@@ -732,10 +741,10 @@ None for Phase 5.
 ## Sprint 5.4: The Gate-2 decode battery (`dsl-spec`) — the gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/dsl/DecodeSpec.hs`; positive fixtures reuse Phase 4's
+**Implementation**: `test/spec/dsl/DecodeSpec.hs`; positive fixtures reuse Phase 4's
 `dhall/examples/legal_*.dhall`; the representative Gate-2 negative set `dhall/examples/illegal_decode_*.dhall`;
-the semantic-hash/tree/count oracles; structural mutants; and `tools/phase5_gate.py`.
-**Blocked by**: reopened numeric predecessor gates.
+the semantic-hash/tree/count oracles; structural mutants; and `tools/gadt_decoder_gate2_gate.py`.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: `cabal test dsl-spec` is green, and the expected-tag oracle is the committed
 Phase-0 fixture-header table, independent of the decoder's own fold
 ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 3). The
@@ -756,7 +765,7 @@ checked at [Phase 11](phase_11_provision_seal.md)'s conditional post-bind infras
 provisioning boundary.
 
 ### Deliverables
-- `test/dsl/DecodeSpec.hs` asserting: each `legal_*.dhall` positive fixture decodes to its `ClusterIR`; each
+- `test/spec/dsl/DecodeSpec.hs` asserting: each `legal_*.dhall` positive fixture decodes to its `ClusterIR`; each
   `illegal_decode_*.dhall` Gate-2 negative first passes `dhall type` then returns the expected structured
   `Left DecodeError` whose tag matches its committed header; and every positive's decoded resource/capacity
   traversal exactly preserves execution id/revision and the complete kind-indexed controller/cardinality/
@@ -796,7 +805,7 @@ provisioning boundary.
     source/workload key equality, coexistence-domain equality, structural residency
     byte/shard/interconnect declarations, concrete/template supply raw/reserved/net-VRAM/link declarations,
     and the substrate-indexed host enforcement arm plus finite Apple supervisor operands.
-- An oracle-pinned `tests/oracle/gate2/resource_field_inventory.tsv` that names the complete normalized
+- An oracle-pinned `test/oracle/gadt_decoder_gate2/resource_field_inventory.tsv` that names the complete normalized
   field/union inventory independently of `decodeCluster`, plus committed decoder mutants that drop
   `ephemeralStorage`, erase a physical-carve or `allocatableRawBytes` field, erase a `NamedDiskCarve` parent
   index/extent arm/geometry field, erase `kubeletMetadataModel` or one runtime-metadata source identity,
@@ -858,7 +867,7 @@ None. The exhaustive per-catalog-entry corpus begins in Phase 6.
 
 **Status**: Done — one shared type across both gates, and a fourth pinned `DecodeError` tag
 **Implementation**: `src/Amoebius/Vault/SecretRef.hs`, `src/Amoebius/Dsl/Error.hs`,
-`src/Amoebius/Dsl/Decode.hs`, `test/dsl/DecodeSpec.hs`, `dhall/examples/legal_secret_app.dhall`,
+`src/Amoebius/Dsl/Decode.hs`, `test/spec/dsl/DecodeSpec.hs`, `dhall/examples/legal_secret_app.dhall`,
 `dhall/examples/illegal_decode_plaintext_secret.dhall`
 **Blocked by**: Sprint 5.4
 **Requires**: `host-toolchain` — the resolved `ghc`, `cabal`, and `dhall`.

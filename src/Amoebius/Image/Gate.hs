@@ -131,7 +131,7 @@ renderRegistryPullGateError problem = case problem of
   RegistryRerunMutated _ -> "RegistryRerunMutated"
 
 validateMechanism :: RegistryDenialMechanism -> Either RegistryPullGateError ()
-#ifdef PHASE25_NOOP_EGRESS_POLICY_MUTANT
+#ifdef BASE_IMAGE_REGISTRY_NOOP_EGRESS_POLICY_MUTANT
 validateMechanism _ = Right ()
 #else
 validateMechanism mechanism = case mechanism of

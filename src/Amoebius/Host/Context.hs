@@ -23,6 +23,7 @@ import Data.ByteString.Lazy.Char8 qualified as ByteString
 import Data.List (find)
 import Data.Word (Word64)
 import System.Directory
+import System.Environment (lookupEnv)
 import System.FilePath ((</>))
 import Text.Read (readMaybe)
 
@@ -81,33 +82,36 @@ mkBinaryContext distro replicas
       case detected of
         Left problem -> pure (Left problem)
         Right substrate -> do
-          tools <- initialHostConfig substrate
-          home <- getHomeDirectory
-          let stateDirectory = home </> ".amoebius" </> "phase24"
-              socket = "/var/run/docker.sock"
-          socketPresent <- doesPathExist socket
-          docker <- firstAbs ["/usr/bin/docker", "/usr/local/bin/docker"]
-          df <- firstAbs ["/usr/bin/df", "/bin/df"]
-          case (lookupTool Kind tools, lookupTool Kubectl tools, docker, df, socketPresent) of
-            (Just kind, Just kubectl, Just dockerExe, Just dfExe, True) -> do
-              createDirectoryIfMissing True stateDirectory
-              pure (Right BinaryContext
-                { contextSubstrate = substrate
-                , contextDistro = distro
-                , contextReplicas = replicas
-                , contextKind = kind
-                , contextKubectl = kubectl
-                , contextDocker = dockerExe
-                , contextDf = dfExe
-                , contextDockerSocket = socket
-                , contextStateDirectory = stateDirectory
-                , contextKubeconfig = stateDirectory </> "kubeconfig"
-                })
-            (Nothing, _, _, _, _) -> pure (Left "kind-not-ensured")
-            (_, Nothing, _, _, _) -> pure (Left "kubectl-not-ensured")
-            (_, _, Nothing, _, _) -> pure (Left "container-runtime-prerequisite-absent")
-            (_, _, _, Nothing, _) -> pure (Left "disk-observer-absent")
-            (_, _, _, _, False) -> pure (Left "docker-socket-witness-absent")
+          stateRoot <- lookupEnv "AMOEBIUS_ROOT"
+          case stateRoot of
+            Nothing -> pure (Left "amoebius-root-not-declared")
+            Just checkout -> do
+              tools <- initialHostConfig substrate
+              let stateDirectory = checkout </> ".data" </> "bootstrap-coordinator"
+                  socket = "/var/run/docker.sock"
+              socketPresent <- doesPathExist socket
+              docker <- firstAbs ["/usr/bin/docker", "/usr/local/bin/docker"]
+              df <- firstAbs ["/usr/bin/df", "/bin/df"]
+              case (lookupTool Kind tools, lookupTool Kubectl tools, docker, df, socketPresent) of
+                (Just kind, Just kubectl, Just dockerExe, Just dfExe, True) -> do
+                  createDirectoryIfMissing True stateDirectory
+                  pure (Right BinaryContext
+                    { contextSubstrate = substrate
+                    , contextDistro = distro
+                    , contextReplicas = replicas
+                    , contextKind = kind
+                    , contextKubectl = kubectl
+                    , contextDocker = dockerExe
+                    , contextDf = dfExe
+                    , contextDockerSocket = socket
+                    , contextStateDirectory = stateDirectory
+                    , contextKubeconfig = stateDirectory </> "kubeconfig"
+                    })
+                (Nothing, _, _, _, _) -> pure (Left "kind-not-ensured")
+                (_, Nothing, _, _, _) -> pure (Left "kubectl-not-ensured")
+                (_, _, Nothing, _, _) -> pure (Left "container-runtime-prerequisite-absent")
+                (_, _, _, Nothing, _) -> pure (Left "disk-observer-absent")
+                (_, _, _, _, False) -> pure (Left "docker-socket-witness-absent")
  where
   firstAbs [] = pure Nothing
   firstAbs (path : rest) = do

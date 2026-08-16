@@ -51,10 +51,10 @@ may be source. The same extension emitted by a command is derived output. Copyin
 derived file does not convert it into authored input.
 
 The classification question is mechanical: if repository inputs plus a documented command can reproduce the
-file, the file is generated and cannot be version-controlled. A generated result may be inspected in `gen/`
-or retained in the external evidence store, but it never moves back into an authored root. Python interpreter
-bytecode is the sole location exception: it may be cached beside imported source, but both ignore contracts
-exclude it and it is never an authored input, tracked file, or container-context input.
+file, the file is generated and cannot be version-controlled. A generated result may be inspected or retained
+under `.build/`, but it never moves back into an authored root. Python interpreter bytecode is the sole
+location exception: it may be cached beside imported source, but both ignore contracts exclude it and it is
+never an authored input, tracked file, or container-context input.
 
 ## 2. Complete repository structure
 
@@ -81,7 +81,7 @@ amoebius/
 ├── src/**                                authored Haskell library source; one module tree, read by GHC
 ├── app/<executable>/**                   authored executable main modules; one directory per executable
 ├── dhall/**                              authored schemas, examples, and catalogs; read by the Dhall interpreter
-├── proto/**                              authored protobuf schemas; bindings render to gen/proto/
+├── proto/**                              authored protobuf schemas; bindings render to .build/proto/
 ├── ui/**                                 authored PureScript source and its one spago project
 ├── pb/**                                 authored Python distribution whose console script is `pb`
 ├── pulumi/**                             authored programs the Pulumi engine executes verbatim
@@ -90,9 +90,11 @@ amoebius/
 ├── probe/**                              the standalone toolchain probe: the one package resolved apart
 ├── vendor/**                             reviewed external source with recorded upstream provenance
 ├── patches/**                            reviewed compatibility patches applied to out-of-tree source
-├── gen/**                                every reproducible local output; ignored by both contracts
-├── dist-*/**                             Cabal build roots; ignored by both contracts
-└── node_modules/**                       package-manager output; ignored by both contracts
+├── .build/**                             reproducible, transient, and evidentiary local output; ignored by both contracts
+├── .data/**                              production runtime and durable state; operator-retained; ignored by both contracts
+├── .test_data/**                         harness-owned test runtime and durable state; safely disposable; ignored by both contracts
+├── test-secrets-types.dhall              tracked test-secret field/type shape; contains no values
+└── test-secrets.dhall                    ignored test-only cleartext values; never production input
 ```
 
 Two roots fix a second level, because their second level is where the taxonomy drifted:
@@ -135,7 +137,7 @@ sub-libraries), a different `hs-source-dirs` or warning set (per-component), a d
 (unlimited `test-suite` stanzas), or an import cycle. The cycle case is the one that matters: an intra-package
 sub-library graph cannot cycle at the package level, so a package split introduced to break a cycle creates
 the cycle it breaks. A `build-type: Custom` `Setup.hs` is likewise not a ground — it is a generator, and
-[§3.1](#31-canonical-gen-tree) already declares its output's home.
+[§3.1](#31-canonical-build-tree) already declares its output's home.
 
 The same reasoning names the roots by their reader rather than their owner: `dhall/` is read by the Dhall
 interpreter, `proto/` by protoc, `pb/` by CPython, `ui/` by purs, `pulumi/` by the Pulumi engine, and
@@ -156,26 +158,27 @@ closure condition; none may receive new content.
 
 | Present path | Required destination |
 |---|---|
-| `DEVELOPMENT_PLAN/evidence/**` | `gen/runs/**` plus the external evidence store |
-| `DEVELOPMENT_PLAN/ledgers/**` | authored reasoning retained in a phase doc; generated ledger views to `gen/docs/**` |
-| `test/enumeration/**` | `gen/test-surfaces/**` |
-| `test/golden/phase_*_ledger.json` | `gen/runs/<phase>/<run-id>/ledger.json` |
-| `tests/**` | `test/**`, under the role taxonomy above, each path owned by the phase that authored it |
-| `mutants/**`, `test/live/mutants/**`, `test/host/mutants/**`, `tests/mutants/**` | `test/mutant/**`, one record format |
-| `test/oracle/**` and `tests/oracle/**` | one `test/oracle/**` |
+| `DEVELOPMENT_PLAN/evidence/**` | `.build/runs/**` plus the repository-local evidence store under `.build/evidence-store/` |
+| `DEVELOPMENT_PLAN/ledgers/**` | authored reasoning retained in a phase doc; generated ledger views to `.build/docs/**` |
+| `test/enumeration/**` | `.build/test-surfaces/**` |
+| `test/golden/phase_*_ledger.json` | `.build/runs/<phase>/<run-id>/ledger.json` |
+| `mutants/**`, `test/live/mutants/**`, `test/host/mutants/**` | `test/mutant/**`, one record format |
 | `test/goldens/**`, `test/fixtures/**`, `test/negatives/**`, `test/Ui/**` | their singular-role siblings |
-| `toolchain/bin/**`, `toolchain/runtime/**`, `toolchain/downloads/**`, `toolchain/cache/**` | `gen/toolchain/**`; the authored requirements file moves beside its only consumer under `tools/**` |
-| `docker/**` | the typed bake catalog under `dhall/**`, rendering to `gen/docker/**/Dockerfile` |
+| `toolchain/bin/**`, `toolchain/runtime/**`, `toolchain/downloads/**`, `toolchain/cache/**` | `.build/toolchain/**`; the authored requirements file moves beside its only consumer under `tools/**` |
+| `docker/**` | the typed bake catalog under `dhall/**`, rendering to `.build/docker/**/Dockerfile` |
 | `ui-runtime/**` | `ui/**`, under the one spago project |
 | the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots | stanzas in `amoebius.cabal`; their source to `src/**`, `test/**`, `proto/**`, and `dhall/**` |
 | out-of-tree `hs-source-dirs` reaching a sibling checkout | a `source-repository-package` in `cabal.project`, so the input is resolvable from the source snapshot |
-| root dependency lock/freeze files | `gen/locks/**` |
-| `toolchain/pins.json` | **migrated.** The authored half is the compatibility requirements — ranges, release channels, asset patterns, no paths; the resolved half is `gen/toolchain/resolved.json`, written per run |
-| `tools/doc_lint_corpus/**/negative_*` and `negative_multi_*` | keep authored positive seeds and mutation recipes; materialize negative copies under `gen/test-corpora/**` |
+| root dependency lock/freeze files | `.build/locks/**` |
+| `toolchain/pins.json` | **migrated.** The authored half is the compatibility requirements — ranges, release channels, asset patterns, no paths; the resolved half is `.build/toolchain/resolved.json`, written per run |
+| `tools/doc_lint_corpus/**/negative_*` and `negative_multi_*` | keep authored positive seeds and mutation recipes; materialize negative copies under `.build/test-corpora/**` |
 | reference-program expected output beneath `test/golden/**` | retain the reference program and authored inputs; produce expected results under the run bundle |
-| frozen sibling-source and expected-hash tables | resolve the reviewed sibling boundary at run time and record observations under `gen/runs/**` |
-| fixed versions, URLs, paths, or integrity fields in bootstrap/toolchain envelopes | split authored compatibility requirements from run-local resolution under `gen/toolchain/**` |
+| frozen sibling-source and expected-hash tables | resolve the reviewed sibling boundary at run time and record observations under `.build/runs/**` |
+| fixed versions, URLs, paths, or integrity fields in bootstrap/toolchain envelopes | split authored compatibility requirements from run-local resolution under `.build/toolchain/**` |
 | generated digest, checksum, trace, and expected-output fixtures | independently author and review the expectation, or regenerate it under the owning run bundle |
+| `gen/**`, `dist-*/**`, `node_modules/**`, `toolchain/{bin,runtime,downloads,cache}/**` | the matching class beneath `.build/**` |
+| `/tmp/amoebius*`, `/var/tmp/amoebius*`, `/var/lib/amoebius/**`, `~/.amoebius/**`, `~/.local/share/amoebius/**` | `.build/**`, `.data/**`, or `.test_data/**` according to lifecycle; delete the external path after verified migration |
+| host-global Docker containers, volumes, build cache, and daemon data for amoebius | a project-scoped engine whose entire data root and runtime directory are beneath `.data/**` or `.test_data/**` |
 
 A fixture remains version-controlled only when its expectation was authored independently. A generated
 snapshot, reference-program output, enumeration, coverage table, or run ledger cannot remain in any authored
@@ -183,15 +186,61 @@ root. No path in either tree above carries a phase ordinal
 ([`development_plan_standards.md` §U](../../DEVELOPMENT_PLAN/development_plan_standards.md#u-the-final-repository-layout)
 clause 3).
 
+### 2.3 The closed local-state roots
+
+**The problem.** A path can be ignored and still escape the project. System temporary directories, user-home
+state, global Docker volumes, and `/var/lib` backing survive beyond the checkout, evade the repository audit,
+and make cleanup depend on remembering every tool's private default.
+
+**Why the obvious alternative fails.** Documenting a longer list of external paths does not create
+containment. It merely makes the escape reproducible, while a shared daemon or changed environment variable
+can introduce another storage home without amending the repository contract.
+
+**The rule.** amoebius has a closed set of project-owned local-state roots:
+
+- `.build/**` contains every reproducible or transient byte: builds, acquired tools, package stores, caches,
+  generated source, temporary files, run bundles, logs, and the local content-addressed evidence store.
+- `.data/**` contains production runtime and durable state. Normal teardown may remove ephemeral objects but
+  never this root or durable descendants; destructive reclamation is an explicit operator action.
+- `.test_data/**` contains only harness-created test runtime and durable state. A run owns a unique descendant,
+  records an ownership marker before mutation, and may delete only that exact descendant after proving the
+  marker and path are unchanged. Tests fail before acting when production state or configuration is present.
+- `test-secrets.dhall` is the only cleartext secret-at-rest amoebius permits. It is ignored, excluded from
+  every container context, read only by the elevated test harness, and rejected by every production command.
+
+Path resolution starts from the physical repository root, not the caller's current directory. amoebius sets
+tool-specific cache, store, temp, Docker data-root, Docker runtime, kubeconfig, and service-state paths below
+the appropriate project root before invoking a tool. A container or guest may use conventional internal
+paths only when the image, volume, and virtual disk that back those bytes are themselves stored below the
+project root. Operator-installed prerequisite executables may be shared; amoebius must not place
+project-owned data beside them.
+
+```mermaid
+flowchart LR
+  %% register: orientation
+  repo["physical amoebius checkout"] --> build[".build: reproducible + transient + evidence"]
+  repo --> data[".data: production runtime + durable state"]
+  repo --> test[".test_data: marker-owned test state"]
+  repo --> secrets["test-secrets.dhall: test-only cleartext seam"]
+  test -->|"exact marker-proven teardown"| gone["deleted after the run"]
+  data -->|"normal teardown"| kept["durable bytes retained"]
+```
+*Orientation. The root selected at creation determines lifecycle and deletion authority; the [testing doctrine](./testing_doctrine.md) owns test deletion, and no arrow leaves the physical checkout.*
+
+**What it forecloses.** amoebius cannot use the host's default system Docker daemon for project-owned
+containers, volumes, or build cache, cannot fall back to `/tmp`, `/var/tmp`, `/var/lib/amoebius`, or a user
+home, and cannot run a test against `.data/**`. A tool that cannot redirect all project-owned state into the
+closed roots is not an admissible backend.
+
 ## 3. Complete generated-output inventory
 
 Every generated file belongs to one of the paths below, including the explicitly source-adjacent Python cache
 patterns in §3.2. A generator requiring a new output class must amend this inventory before it writes the file.
 
-### 3.1 Canonical `gen/` tree
+### 3.1 Canonical `.build/` tree
 
 ```text
-gen/
+.build/
 ├── tla/**/*.tla                          emitted TLA+ modules
 ├── tla/**/*.cfg                          emitted TLC configurations
 ├── manifests/**/*.{yaml,yml,json}        rendered Kubernetes and provider objects
@@ -217,6 +266,10 @@ gen/
 │   ├── downloads/**
 │   ├── bin/**
 │   └── runtime/**
+├── cabal-store/**                        repository-local Cabal package store
+├── dist-newstyle/**                      Cabal build root
+├── node_modules/**                       package-manager dependency tree
+├── evidence-store/**                     content-addressed local gate attestations
 ├── runs/<phase>/<run-id>/**              one-run evidence
 │   ├── ledger.{json,tsv}
 │   ├── receipt.{json,tsv}
@@ -272,10 +325,10 @@ implementation, authored expectation, or authored prose remains the source.
 
 A generated negative corpus follows the same rule. Version control retains the smallest independently
 meaningful source: positive seed files, an explicit mutation definition, and the checker. Mutated copies,
-Cartesian expansions, and other mechanically materialized negatives are emitted under `gen/test-corpora/`
-or a temporary directory. Their number, path layout, or usefulness as test input does not make them source.
+Cartesian expansions, and other mechanically materialized negatives are emitted under `.build/test-corpora/`
+or `.build/tmp/`. Their number, path layout, or usefulness as test input does not make them source.
 
-Generated Markdown is written only under `gen/docs/**`. Governed Markdown under `documents/` and
+Generated Markdown is written only under `.build/docs/**`. Governed Markdown under `documents/` and
 `DEVELOPMENT_PLAN/` always declares `**Generated sections**: none`.
 
 ### 3.5 TSV inventory and provenance
@@ -285,12 +338,12 @@ follows:
 
 | Path or filename family | Classification and destination |
 |---|---|
-| `DEVELOPMENT_PLAN/evidence/**/*.tsv` | Generated run evidence; relocate to `gen/runs/<phase>/<run-id>/**`, attest externally, and remove from the plan tree |
-| `gen/**/*.tsv` | Canonical local generated output; ignored and never version-controlled |
+| `DEVELOPMENT_PLAN/evidence/**/*.tsv` | Generated run evidence; relocate to `.build/runs/<phase>/<run-id>/**`, attest in `.build/evidence-store/**`, and remove from the plan tree |
+| `.build/**/*.tsv` | Canonical local generated output; ignored and never version-controlled |
 | `phase-results.tsv`, `validation-locus-ledger.tsv`, `live-*.tsv`, `sprint-*.tsv`, `*-red-before-correction.tsv` in any root | Generated observation or report; canonicalize beneath the owning run bundle |
-| `dhall/examples/locus_registry.tsv`, `test/fixtures/**/*.tsv`, `test/formal/**/oracle/**/*.tsv`, non-ledger `test/golden/**/*.tsv`, `test/oracle/**/*.tsv`, `tests/oracle/**/*.tsv` | Candidate authored fixture/oracle; version-control only with independent authorship or review provenance |
-| `mutants/**/*.tsv`, `test/mutants/**/*.tsv`, `tests/mutants/**/*.tsv`, `tools/ledger_lint_corpus/**/*.tsv` | Candidate authored negative corpus; version-control only when rows are intentionally authored and not emitted by the system under test |
-| Any `expected_hashes.tsv`, `expected_digests.tsv`, `reference_traces.tsv`, expected-output table, or copied inventory | Ambiguous migration input; the owning phase must establish independent authorship or regenerate it under `gen/**` |
+| `dhall/examples/locus_registry.tsv`, `test/fixtures/**/*.tsv`, `test/oracle/formal/**/*.tsv`, non-ledger `test/golden/**/*.tsv`, `test/oracle/**/*.tsv` | Candidate authored fixture/oracle; version-control only with independent authorship or review provenance |
+| `mutants/**/*.tsv`, `test/mutants/**/*.tsv`, `tools/ledger_lint_corpus/**/*.tsv` | Candidate authored negative corpus; version-control only when rows are intentionally authored and not emitted by the system under test |
+| Any `expected_hashes.tsv`, `expected_digests.tsv`, `reference_traces.tsv`, expected-output table, or copied inventory | Ambiguous migration input; the owning phase must establish independent authorship or regenerate it under `.build/**` |
 
 Renaming a run ledger to “golden” or an emitted table to “oracle” does not make it source. Phase 0 records the
 provenance decision for shared corpora; each later phase owns its domain-specific tables before revalidation.
@@ -307,8 +360,8 @@ the table does not name is never exempt.
 |---|---|---|
 | `tools/ledger_lint_corpus/` | r2 | A hand-written run ledger is the only way to seed the ledger-shape classifier |
 | `tools/doc_lint_corpus/` | r15 | The documentation lint checks plan-document naming, so its positive seed must be a synthetic `phase_NN_<slug>.md`; the ordinal is the property under test, not a label on a capability |
-| `tools/artifact_policy_selftest.py` | r1, r5, r6 | The audit's own per-rule mutants: an invented output class, a generated path beneath an authored root, and a resolved home path |
-| `tools/phase1_negative_corpus.py` | r6 | The toolchain gate's build configurations carry a developer-home compiler path and an archive checksum beside its URL |
+| `tools/artifact_policy_selftest.py` | r1, r5, r6, r16 | The audit's own per-rule mutants: an invented output class, a generated path beneath an authored root, a resolved home path, and explicit outside-host state paths |
+| `tools/toolchain_spike_negative_corpus.py` | r6 | The toolchain gate's build configurations carry a developer-home compiler path and an archive checksum beside its URL |
 | `tools/attestation_negative_corpus.py` | r5 | A refused run bundle must name a plan-tree evidence path for the store to reject it |
 
 Two properties keep the declaration from becoming a silence. A corpus is a **dedicated module or directory**
@@ -324,7 +377,7 @@ library archive SHA, package checksum, transitive solver graph, local executable
 
 Each clean run resolves the current compatible set dynamically. The resolver writes versions, source
 identities, download URLs, observed checksums, signatures, executable paths, and the complete dependency graph
-to `gen/toolchain/**` and `gen/locks/**`. Those observations are attached to external run evidence, not copied
+to `.build/toolchain/**` and `.build/locks/**`. Those observations are attached to run evidence, not copied
 into Markdown or a tracked manifest.
 
 Transport authentication and upstream signatures are verified when an ecosystem supplies them. A checksum
@@ -338,12 +391,12 @@ image itself owns them.
 
 ## 5. Run evidence and phase status
 
-A gate emits its evidence under `gen/runs/**` and uploads an immutable attestation to an external evidence
-store. Git contains neither the ledger nor a copy of the receipt. The attestation binds the source tree,
+A gate emits its evidence under `.build/runs/**` and installs an immutable, content-addressed attestation in
+`.build/evidence-store/**`. Git contains neither the ledger nor a copy of the receipt. The attestation binds the source tree,
 phase contract, command, resolved dependency graph, toolchain, substrate, checks, mutants, coverage, cleanup,
 and raw-observation digests.
 
-The development-plan tracker records the human status decision and an external run reference when needed. It
+The development-plan tracker records the human status decision and a content-addressed run reference when needed. It
 does not embed a generated ledger hash or duplicate run output. A Done decision requires a run whose recorded
 source-snapshot digest still matches the tree; editing the source afterwards invalidates the binding and needs
 a fresh run. Commit timing is orthogonal and is never a gate condition.
@@ -369,7 +422,12 @@ each retires with the root it covers, owned by the phase that relocates it.
 # intends is how a second home for a generated class survives review. The rules covering
 # section 2.2 migration surfaces are temporary and retire with the root they cover.
 
-# Canonical generated root, and the migration surfaces still written by later phases.
+# Canonical contained-state roots.
+/.build/
+/.data/
+/.test_data/
+
+# Pre-containment migration surfaces.
 /gen/
 /DEVELOPMENT_PLAN/evidence/
 /test/enumeration/
@@ -384,11 +442,8 @@ npm-shrinkwrap.json
 pnpm-lock.yaml
 go.sum
 
-# Haskell and formal-model build output. The build-root pattern is the tree's own
-# `dist-*/**` root, so a clone is clean without a personal ignore configuration.
-/dist-*/
-.ghc.environment.*
-cabal.project.local
+# Haskell and formal-model build output. Cabal roots and discovery scratch are
+# redirected beneath `.build/**`; only source-adjacent compiler products need classes.
 *.o
 *.hi
 *.dyn_o
@@ -397,17 +452,7 @@ cabal.project.local
 *.tla
 *.cfg
 
-# Haskell tooling scratch. cabal and hie-bios — the project-discovery library HLS uses —
-# write hash-named exec shims into the directory they are invoked from. Each hardcodes a
-# resolved developer-home path and a resolved GHC version, so it is machine-specific
-# generated output that is meaningless on another host and never a repository input. These
-# regenerate whenever an editor opens the project, so they are excluded rather than swept.
-/ghc-pkg-*
-/repl-wrapper-*
-/wrapper-*
-
-# JavaScript and PureScript build output.
-/node_modules/
+# JavaScript and PureScript legacy build output below the authored UI root.
 /ui-runtime/.spago/
 /ui-runtime/output/
 /ui-runtime/dist/
@@ -416,12 +461,6 @@ cabal.project.local
 # and must never become repository inputs.
 __pycache__/
 *.py[cod]
-
-# Tool acquisition.
-/toolchain/bin/
-/toolchain/runtime/
-/toolchain/downloads/
-/toolchain/cache/
 
 # Runtime output written beside a run.
 *.log
@@ -452,7 +491,15 @@ missing coverage, and a pattern the file carries and this block does not name is
 .git
 .git/**
 
-# Canonical generated root, and the migration surfaces still written by later phases.
+# Canonical contained-state roots.
+.build
+.build/**
+.data
+.data/**
+.test_data
+.test_data/**
+
+# Pre-containment migration surfaces.
 gen
 gen/**
 DEVELOPMENT_PLAN/evidence
@@ -471,22 +518,13 @@ test/golden/phase_54_expected_run_ledger.json
 **/go.sum
 
 # Haskell, JavaScript, and PureScript build products.
-dist-*
-dist-*/**
-.ghc.environment.*
-cabal.project.local
 **/*.o
 **/*.hi
 **/*.dyn_o
 **/*.dyn_hi
 **/*.hie
-ghc-pkg-*
-repl-wrapper-*
-wrapper-*
 **/*.tla
 **/*.cfg
-node_modules
-node_modules/**
 ui-runtime/.spago
 ui-runtime/.spago/**
 ui-runtime/output
@@ -501,16 +539,6 @@ ui-runtime/dist/**
 **/*.pyc
 **/*.pyo
 **/*.pyd
-
-# Tool acquisition. Authored resolver policy beneath toolchain/ remains available.
-toolchain/bin
-toolchain/bin/**
-toolchain/runtime
-toolchain/runtime/**
-toolchain/downloads
-toolchain/downloads/**
-toolchain/cache
-toolchain/cache/**
 
 # Runtime output written beside a run.
 **/*.log
@@ -530,18 +558,21 @@ explicit build input from the current run. It never broadens the context to incl
 Every phase gate inherits these postconditions:
 
 1. The run binds to its source snapshot: every non-ignored file as it stands when the gate starts.
-2. Every deliberate generator writes only to `gen/`, a declared build root, or a temporary directory; normal
+2. Every deliberate generator, compiler, resolver, tool, and subprocess writes only to `.build/**`; normal
    source-adjacent Python interpreter caches are the sole location exception.
 3. Test enumeration is regenerated and joined to independently authored expectations by stable identity.
 4. No test or generator writes beneath an authored root except for Python's ignored interpreter cache.
 5. `git ls-files` contains no derived path, generated header, lock/freeze file, bytecode, or run evidence.
 6. The gate leaves every tracked file unchanged and creates no unignored generated file.
 7. The Docker context audit contains no derived output, evidence, cache, credential, or runtime state.
-8. The external attestation verifies before the phase can be marked Done.
+8. The repository-local attestation verifies before the phase can be marked Done.
 9. The source snapshot contains every authored input referenced by a build, test, or gate; an ignored
    worktree file can never complete the repository's source closure.
 10. The tracked-tree audit classifies files semantically, not only by ignore-pattern or path match, and rejects
     reproducible copies even when they live in an otherwise authored root.
+
+The inherited host-inventory, production/test separation, and test-secrets postconditions are stated once in
+[`development_plan_gate_integrity.md` §S](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate).
 
 Python commands run with ordinary bytecode caching enabled. The cache may remain beside source on a developer
 worktree because `.gitignore` excludes `__pycache__/` and all Python bytecode suffixes, while `.dockerignore`
@@ -575,19 +606,19 @@ disposition is tracked in
 Documentation adoption alone supplies no implementation evidence. The 2026-08-11 source-closure audit found the
 Phase-0 verifier depending on ignored inputs; as of 2026-08-12 the provenance classifier, semantic tracked-path
 and effective Docker-context audits, authored-root write guard, history audit, fresh-clone gate,
-dynamic-resolution audit, and external attestation are implemented and pass two-sided from a clone. Phase 0
+dynamic-resolution audit, and repository-local attestation are implemented and pass two-sided from a clone. Phase 0
 is sealed: the gate publishes an attestation bound to the source snapshot it ran against.
 
 The migration surface those checks reveal is not closed by them. Each finding outside the running phase's
 ownership is deferred to the phase named in
 [`../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md),
 reported on every run, and cleared by that phase's gate. Every later phase remains reopened until its gate
-uses the new output paths, produces external evidence, and passes the source-snapshot acceptance above.
+uses the new output paths, produces repository-local evidence, and passes the source-snapshot acceptance above.
 
 ## Related Documents
 
 - [Generated Artifacts](./generated_artifacts_doctrine.md) — semantic rule for projections and authored inputs
-- [Testing Doctrine](./testing_doctrine.md) — enumeration, independent expectations, and external evidence
+- [Testing Doctrine](./testing_doctrine.md) — enumeration, independent expectations, and repository-local evidence
 - [Documentation Standards](../documentation_standards.md) — governed Markdown remains authored
 - [Development Plan Standards](../../DEVELOPMENT_PLAN/development_plan_standards.md) — phase-gate adoption
 - [Legacy Tracking](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) — migration work and deletion owners

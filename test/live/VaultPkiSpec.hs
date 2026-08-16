@@ -5,11 +5,12 @@ module Main (main) where
 import Data.Aeson (FromJSON (parseJSON), eitherDecodeFileStrict', withObject, (.:))
 import Data.Text (Text)
 import Data.Text qualified as Text
+import System.Environment (lookupEnv)
 import System.Exit (die)
 
-data Evidence = Evidence Int Text InitOnce Envelope Storage Rebuild Pki Client Manifest Deferred Universal
+data Evidence = Evidence Int Text InitOnce Envelope Storage Rebuild Pki Client Manifest ArtifactSource Deferred Universal
 data InitOnce = InitOnce Bool Bool Bool Int Bool Bool Bool
-data Envelope = Envelope Text Bool Bool Bool
+data Envelope = Envelope Text Bool Bool Bool Bool Int Int
 data Storage = Storage Volume Volume Bounds
 data Volume = Volume Integer Integer Text
 data Bounds = Bounds Integer Integer Bool
@@ -21,16 +22,17 @@ data Client = Client Binary Consumer Consumer Bool Bool Bool Bool Bool Int Int
 data Binary = Binary Bool Text
 data Consumer = Consumer [Text] [Text] Text
 data Manifest = Manifest Int Int (Maybe Text)
+newtype ArtifactSource = ArtifactSource Text
 data Deferred = Deferred Text Text Text
 data Universal = Universal Bool Pristine
 data Pristine = Pristine Text Text Text Text
 
 instance FromJSON Evidence where
-  parseJSON = withObject "Evidence" $ \v -> Evidence <$> v .: "register" <*> v .: "substrate" <*> v .: "initOnce" <*> v .: "unlockEnvelope" <*> v .: "storage" <*> v .: "clusterRebuild" <*> v .: "pki" <*> v .: "client" <*> v .: "manifestProjection" <*> v .: "deferred" <*> v .: "universalLinuxCpu"
+  parseJSON = withObject "Evidence" $ \v -> Evidence <$> v .: "register" <*> v .: "substrate" <*> v .: "initOnce" <*> v .: "unlockEnvelope" <*> v .: "storage" <*> v .: "clusterRebuild" <*> v .: "pki" <*> v .: "client" <*> v .: "manifestProjection" <*> v .: "artifactSource" <*> v .: "deferred" <*> v .: "universalLinuxCpu"
 instance FromJSON InitOnce where
   parseJSON = withObject "InitOnce" $ \v -> InitOnce <$> v .: "run1InitializedBefore" <*> v .: "run2InitializedBeforeUnseal" <*> v .: "run2SealedBeforeUnseal" <*> v .: "initCount" <*> v .: "vaultClusterIdStable" <*> v .: "run1Unsealed" <*> v .: "run2Unsealed"
 instance FromJSON Envelope where
-  parseJSON = withObject "Envelope" $ \v -> Envelope <$> v .: "format" <*> v .: "wrongPasswordRejected" <*> v .: "passwordPersisted" <*> v .: "observedSurfaceScanPassed"
+  parseJSON = withObject "Envelope" $ \v -> Envelope <$> v .: "format" <*> v .: "wrongPasswordRejected" <*> v .: "passwordPersisted" <*> v .: "observedSurfaceScanPassed" <*> v .: "stdinOnly" <*> v .: "environmentSources" <*> v .: "argumentSources"
 instance FromJSON Storage where
   parseJSON = withObject "Storage" $ \v -> Storage <$> v .: "durable" <*> v .: "audit" <*> v .: "run1HighWater"
 instance FromJSON Volume where
@@ -53,6 +55,8 @@ instance FromJSON Consumer where
   parseJSON = withObject "Consumer" $ \v -> Consumer <$> v .: "containers" <*> v .: "plainSecretVolumes" <*> v .: "imageId"
 instance FromJSON Manifest where
   parseJSON = withObject "Manifest" $ \v -> Manifest <$> v .: "vaultContainers" <*> v .: "storageClassCount" <*> v .: "storageClass"
+instance FromJSON ArtifactSource where
+  parseJSON = withObject "ArtifactSource" $ \v -> ArtifactSource <$> v .: "phase25IndexDigest"
 instance FromJSON Deferred where
   parseJSON = withObject "Deferred" $ \v -> Deferred <$> v .: "parentChildUnseal" <*> v .: "crossClusterIntermediateCa" <*> v .: "parentSecretInjection"
 instance FromJSON Universal where
@@ -62,20 +66,21 @@ instance FromJSON Pristine where
 
 main :: IO ()
 main = do
-  decoded <- eitherDecodeFileStrict' "DEVELOPMENT_PLAN/evidence/phase_29/vault-live.json"
+  path <- maybe (die "AMOEBIUS_VAULT_PKI_EVIDENCE is required") pure =<< lookupEnv "AMOEBIUS_VAULT_PKI_EVIDENCE"
+  decoded <- eitherDecodeFileStrict' path
   either die verify decoded
-  putStrLn "phase29-vault-live-spec: PASS (retained init/unseal, PKI, direct Kubernetes-auth client, bounded storage)"
+  putStrLn "vault-pki-live-spec: PASS (retained init/unseal, PKI, direct Kubernetes-auth client, bounded storage)"
 
 verify :: Evidence -> IO ()
-verify (Evidence register substrate (InitOnce run1Before run2Initialized run2Sealed initCount stableId run1Unsealed run2Unsealed) (Envelope format wrongPassword passwordPersisted scanPassed) (Storage (Volume durableRaw durableUsable durableFs) (Volume auditRaw auditUsable auditFs) (Bounds raftHigh auditHigh within)) (Rebuild caChanged uidChanged clusterAbsent nodeAbsent backingPresent (Prebind prebind1) (Prebind prebind2)) (Pki (PkiRun rootSelf1 leafChain1 root1) (PkiRun rootSelf2 leafChain2 root2) sameRoot sealedStatus) (Client (Binary currentTree binaryHash) (Consumer containers1 secrets1 image1) (Consumer containers2 secrets2 image2) secretSame transitSame roleDenied auditLogin auditRead sidecars secretMounts) (Manifest vaultContainers storageClassCount storageClassName) (Deferred parentChild intermediate parentInjection) (Universal universal (Pristine linux linuxCuda apple windows)))
+verify (Evidence register substrate (InitOnce run1Before run2Initialized run2Sealed initCount stableId run1Unsealed run2Unsealed) (Envelope format wrongPassword passwordPersisted scanPassed stdinOnly environmentSources argumentSources) (Storage (Volume durableRaw durableUsable durableFs) (Volume auditRaw auditUsable auditFs) (Bounds raftHigh auditHigh within)) (Rebuild caChanged uidChanged clusterAbsent nodeAbsent backingPresent (Prebind prebind1) (Prebind prebind2)) (Pki (PkiRun rootSelf1 leafChain1 root1) (PkiRun rootSelf2 leafChain2 root2) sameRoot sealedStatus) (Client (Binary currentTree binaryHash) (Consumer containers1 secrets1 image1) (Consumer containers2 secrets2 image2) secretSame transitSame roleDenied auditLogin auditRead sidecars secretMounts) (Manifest vaultContainers storageClassCount storageClassName) (ArtifactSource imageDigest) (Deferred parentChild intermediate parentInjection) (Universal universal (Pristine linux linuxCuda apple windows)))
   | register /= 3 || substrate /= "linux-cpu" = die "wrong Register/substrate"
   | run1Before || not (run2Initialized && run2Sealed) || initCount /= 1 || not (stableId && run1Unsealed && run2Unsealed) = die "init-once/unseal-existing invariant failed"
-  | format /= "Argon2id-v1.3+ChaCha20-Poly1305-IETF" || not wrongPassword || passwordPersisted || not scanPassed = die "unlock envelope invariant failed"
+  | format /= "Argon2id-v1.3+ChaCha20-Poly1305-IETF" || not wrongPassword || passwordPersisted || not scanPassed || not stdinOnly || environmentSources /= 0 || argumentSources /= 0 = die "unlock envelope invariant failed"
   | durableRaw /= 134217728 || auditRaw /= 67108864 || durableUsable < 2023424 || auditUsable < 4194304 || durableFs /= "ext4" || auditFs /= "ext4" = die "physical Vault provision drifted"
   | not within || raftHigh > durableUsable || auditHigh > auditUsable = die "Raft/audit high-water exceeded backing"
   | not (caChanged && uidChanged && clusterAbsent && nodeAbsent && backingPresent && prebind1 && prebind2) = die "real cluster rebuild boundary failed"
   | not (rootSelf1 && leafChain1 && rootSelf2 && leafChain2 && sameRoot) || root1 /= root2 || sealedStatus == 200 = die "PKI root/leaf/sealed invariant failed"
-  | not currentTree || nullText binaryHash || containers1 /= ["consumer"] || containers2 /= ["consumer"] || not (null secrets1 && null secrets2) || not (digestImage image1 && digestImage image2) = die "built-in consumer projection drifted"
+  | not currentTree || nullText binaryHash || not ("sha256:" `Text.isPrefixOf` imageDigest) || containers1 /= ["consumer"] || containers2 /= ["consumer"] || not (null secrets1 && null secrets2) || not (digestImage imageDigest image1 && digestImage imageDigest image2) = die "built-in consumer projection drifted"
   | not (secretSame && transitSame && roleDenied && auditLogin && auditRead) || sidecars /= 0 || secretMounts /= 0 = die "direct client provenance or read invariant failed"
   | vaultContainers /= 1 || storageClassCount /= 1 || storageClassName /= Just "amoebius-retained" = die "Vault/StorageClass manifest projection drifted"
   | any (/= "UNVERIFIED") [parentChild, intermediate, parentInjection] = die "deferred federation surface was marked green"
@@ -85,5 +90,5 @@ verify (Evidence register substrate (InitOnce run1Before run2Initialized run2Sea
 nullText :: Text -> Bool
 nullText value = value == ""
 
-digestImage :: Text -> Bool
-digestImage value = "sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4" `Text.isInfixOf` value
+digestImage :: Text -> Text -> Bool
+digestImage digestValue value = digestValue `Text.isInfixOf` value

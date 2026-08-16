@@ -37,15 +37,23 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/ui_authorization_gate.py` passed all eleven sides: registry,
+access, parity, epoch, independent-reference, closed-union, constructor-privacy, network-isolation, both
+mutants, and all eleven metrics pass; 40 surfaces join to 57 enumerated items. The project-contained
+attestation is `sha256:713eaf822194a615813fc3a6416124ab04c3e8208ae43a6ddd160d61cab4ccc0`, bound to source snapshot
+`sha256:ff29cbf28bdb6886…`; Phase 18 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:5397884a3bd5b8ad…`
-(1943 non-ignored files) and published verified external attestation
+(1943 non-ignored files) and published a verified pre-containment external attestation
 `sha256:409c13f0c41aec877a4f3f72c3509fd1c17322523920e1deff0abac0b1cca88a`.
 
 **Observed progress — 2026-08-13:** **Policy-conformant.** The authorization result is unchanged and re-run:
 five registry rows normalize exactly, six matrix rows agree with a reference evaluator that does not import
 the module under test, four parity diagnostics and four authority-epoch refusals hold at their pinned tags
 with empty effect traces, nine generated classes clear their 5% floor, and both seeded mutants redden.
-Evidence and the ledger move into `gen/runs/phase_18/<run-id>/`, and 40 surfaces join two-way to 57 run-time
+Evidence and the ledger move into `.build/runs/phase_18/<run-id>/`, and 40 surfaces join two-way to 57 run-time
 enumerated items with every surface carrying at least one id.
 
 **The closed sums are now checked as sums, not implied by their rows.** `ActionEffect` and `Permission` each
@@ -79,7 +87,7 @@ register, or substrate requirement.
 **Dependency:** Phase 17 — scope-indexed request contexts, handles, audiences, and flow witnesses.
 **Substrate:** none — the gate runs hermetically with credential variables scrubbed and network unavailable.
 **Register:** 1 — pure/golden.
-**Gate:** `python3 tools/phase18_gate.py` passes the Phase-0-pinned action/access matrices, current-authority
+**Gate:** `python3 tools/ui_authorization_gate.py` passes the Phase-0-pinned action/access matrices, current-authority
 replay cases, coverage floors, isolated execution, and both seeded mutants in
 [Gate integrity](#gate-integrity). Live enforcement remains UNVERIFIED until its owning Register-3 phases.
 
@@ -123,24 +131,24 @@ HTTP routing, handler implementation correctness, or provider-side isolation.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 18.1: Sealed action registry and authorized-action transition ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Ui/Security/Authorization.hs`,
-`test/ui/AuthorizationSpec.hs`, `test/ui/AuthorizationReference.hs`, and `tools/phase18_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
+`test/ui/AuthorizationSpec.hs`, `test/ui/AuthorizationReference.hs`, and `tools/ui_authorization_gate.py`
+**Blocked by**: None.
 **Independent Validation**: `cabal test ui-authorization-spec` compares
 production results with Phase-0 pins and the separate reference evaluator, verifies empty denied traces, and
 requires each named mutant to fail. The full hermetic gate is
-`python3 tools/phase18_gate.py`.
+`python3 tools/ui_authorization_gate.py`.
 **Docs to update**:
 `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/illegal_state/illegal_state_security.md`, `documents/engineering/testing_doctrine.md`

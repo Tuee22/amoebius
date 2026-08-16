@@ -40,7 +40,7 @@ planInit :: VaultObservation -> InitAction
 planInit observation = case observation of
   EmptyRetainedVolume -> InitializeOnce
   NonEmptyUninitializedVolume -> RefuseNonEmptyUninitialized
-#ifdef PHASE29_REINIT_EXISTING_MUTANT
+#ifdef VAULT_PKI_REINIT_EXISTING_MUTANT
   InitializedSealed _ -> InitializeOnce
 #else
   InitializedSealed identity -> UnsealExisting identity
@@ -92,7 +92,7 @@ provisionVaultStorage durableBacking auditBacking demand auditDemand
   | otherwise = Right (ProvisionedVaultStorageDemand resident required raw auditUsable auditRaw)
  where
   populations = [kvResidentBytes demand, transitResidentBytes demand, pkiResidentBytes demand, authAndLeaseResidentBytes demand]
-#ifdef PHASE29_DELETE_STORAGE_TERM_MUTANT
+#ifdef VAULT_PKI_DELETE_STORAGE_TERM_MUTANT
   resident = sum (take 3 populations)
 #else
   resident = sum populations
@@ -124,7 +124,7 @@ standardVaultAuditDemand =
   VaultAuditDemand
     { auditActiveFileBytes = 1048576
     , auditBackupCount = 3
-#ifdef PHASE29_UNBOUNDED_AUDIT_MUTANT
+#ifdef VAULT_PKI_UNBOUNDED_AUDIT_MUTANT
     , auditMinimumRawBytes = 0
 #else
     , auditMinimumRawBytes = 67108864

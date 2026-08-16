@@ -41,8 +41,17 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/illegal_state_corpus_gate.py` passed all eleven sides: all 19
+metrics match, 88 catalog entries and 104 subcases reconcile, every registry/domain/index/decision mutant
+reddens, the corpus and honesty-bannered ledger pass, 24 surfaces join to 27 run-time items, and host state is
+unchanged. The project-contained attestation is
+`sha256:a0b75311f33ab71f39ee18b5813d271f0dc93239e553b16aa5af1afb153bdc3f`, bound to source snapshot
+`sha256:a086f6a584a75dcd…`; Phase 6 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:a1e246296ecadb42…`
-(1931 non-ignored files) and published verified external attestation
+(1931 non-ignored files) and published a verified pre-containment external attestation
 `sha256:2a18c8372d20736e226b93994c8fcd7e133af9e55bc799889551a653269a8b05`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** The corpus result is unchanged and re-run: 88
@@ -55,14 +64,14 @@ surfaces join to 27 run-time enumerated items.
 
 **Three corrections.** The results table was written rather than measured; the catalog, registry, corpus, and
 locus-ledger counts, the reddened-property set, and the surviving-mutant count are now all parsed from what the
-run observed. `test/dsl/CorpusSpec.hs` hard-coded one developer's `dhall` path and now resolves it per run,
-failing closed when unset. And `gen/dsl/**` — written by nineteen phases — was never declared in the canonical
+run observed. `test/spec/dsl/CorpusSpec.hs` hard-coded one developer's `dhall` path and now resolves it per run,
+failing closed when unset. And `.build/dsl/**` — written by nineteen phases — was never declared in the canonical
 generated-output inventory; the eighteen deferrals covering it were not a migration backlog but a missing
 inventory row, so the class is now declared and all eighteen rows are retired.
 
 **Invalidated historical record:**
 
-✅ Done. `python3 tools/phase6_gate.py` passed on 2026-08-09 with ledger
+✅ Done. `python3 tools/illegal_state_corpus_gate.py` passed on 2026-08-09 with ledger
 `dynamically-resolved`. The gate ran on **no
 substrate** (`none`) in **Register 1** — it stood up no host and no cluster, only an in-process corpus battery
 over the `dhall` typechecker, the Phase-5 decoder, a pinned `ghc -fno-code` expect-fail harness, and
@@ -97,7 +106,7 @@ the representational SPA-composition corpus (Phase 16), and every `live-effect` 
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `python3 tools/phase6_gate.py` passes every fixture, expected-error golden, coverage floor, seeded
+**Gate:** `python3 tools/illegal_state_corpus_gate.py` passes every fixture, expected-error golden, coverage floor, seeded
 mutant, and registry reconciliation named in [Gate integrity](#gate-integrity). Phase 7 does not open unless
 the ledger records Register 1 green and runtime, provisioning, and rendered-output fidelity UNVERIFIED.
 
@@ -180,8 +189,8 @@ alone, before any fixture exists to join against.
 - **Oracle-pinning (§M.1) + specific-reason negatives (§M.8).** Each negative fixture ships a committed expected-failure
   golden authored by hand, not regenerated from the implementation: `dhall/examples/goldens/<name>.typeerr`
   (the `dhall type` error, naming the offending union/field) for each `illegal_gate1_*`;
-  `test/dsl/goldens/<name>.tag` (the expected `DecodeError` constructor tag) for each `illegal_decode_*`;
-  `test/dsl/compilefail/<name>.expected` (the expected GHC type-error class + locus) for each compile-fail golden.
+  `test/golden/dsl/<name>.tag` (the expected `DecodeError` constructor tag) for each `illegal_decode_*`;
+  `test/spec/dsl/compilefail/<name>.expected` (the expected GHC type-error class + locus) for each compile-fail golden.
   The suite asserts the observed failure **equals** its golden, not merely that some failure occurred.
 - **Independent reference predicate (§M.3).** The validation-locus reference side is the catalog's committed
   per-entry `**Validation-locus:**`, `**Delivery-owner:**`, and `**Case-family:**` tags in
@@ -237,7 +246,7 @@ alone, before any fixture exists to join against.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -250,12 +259,12 @@ alone, before any fixture exists to join against.
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/examples/{legal_*,illegal_gate1_*,illegal_decode_*}.dhall`
 (extending the Phase-4 positive + Gate-1 corpus and the Phase-5 Gate-2 set to one fixture per
-Register-1-settleable catalog entry); `test/dsl/CorpusSpec.hs`; `tests/oracle/phase6/{gate1_cases,gate2_cases}.tsv`;
+Register-1-settleable catalog entry); `test/spec/dsl/CorpusSpec.hs`; `test/oracle/illegal_state_corpus/{gate1_cases,gate2_cases}.tsv`;
 `dhall/examples/locus_registry.tsv`; `tools/locus_registry_lint.py`.
 **Prerequisites satisfied**: Phase 5 supplied the total decoder + GADT-indexed IR; Phase 4 supplied the
 Gate-1 schema + positive corpus; Phase 1 supplied the `dhall` CLI and package pin. The catalog-tag/registry
 oracle was authored before `CorpusSpec.hs`.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: the corpus battery rejects every Phase-4/5/6-owned negative at its own tagged
 locus against that fixture's committed expected-error golden, admits every legal twin and positive,
 reconciles its coverage note against `locus_registry.tsv`, and turns red under the two seeded mutants. The
@@ -354,10 +363,10 @@ None for Sprint 6.1.
 ## Sprint 6.2: GADT-index compile-fail goldens (type-foreclosed layer) ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/dsl/compilefail/*.hs` (each a minimal module that spells an
-illegal combination) + `tests/oracle/phase6/compile_fail.tsv` + `tools/{compile_fail.py,compile_fail.sh}`
+**Implementation**: `test/spec/dsl/compilefail/*.hs` (each a minimal module that spells an
+illegal combination) + `test/oracle/illegal_state_corpus/compile_fail.tsv` + `tools/{compile_fail.py,compile_fail.sh}`
 (a pinned `ghc -fno-code` expect-fail harness).
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: the pinned `ghc -fno-code` harness shows every compile-fail golden has no
 inhabitant — it fails on a GHC **type** error matching that golden's committed `.expected` file while its
 one-token legal twin compiles — and turns red under the seeded index-weakening mutant. The numbered
@@ -377,14 +386,14 @@ Phase-4 honesty caveat routed here, since Dhall has no opaque types.
   from no live service handle ([§3.3](../documents/illegal_state/illegal_state_security.md#33-misconfigured-gateway)), plus a non-CBOR Pulsar produce payload
   ([§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)) — each an expect-fail module that must not compile.
 - A pinned `ghc -fno-code` expect-fail harness reporting one aggregate green/red over the golden set, plus a
-  positive control module that compiles. Each golden ships a committed `test/dsl/compilefail/<name>.expected`
+  positive control module that compiles. Each golden ships a committed `test/spec/dsl/compilefail/<name>.expected`
   golden (expected GHC error class = type-error, plus locus) authored in this phase's oracle-pinning sprint, and a one-token legal twin.
 - The committed guard-weakening GADT-index mutant (c) — used to prove the harness actually rejects.
 
 ### Validation
 1. Every compile-fail golden imports only the real exported vocabulary, is scope-clean and parse-clean, and
    fails to compile under the pinned `ghc -fno-code` harness with a GHC **type** error whose class and locus
-   match its committed `test/dsl/compilefail/<name>.expected` golden.
+   match its committed `test/spec/dsl/compilefail/<name>.expected` golden.
 2. The error class is asserted, not merely "fails": it is read from structured diagnostics —
    `-fdiagnostics-as-json`, or a pinned `--json`-derived tag — so a scope, parse, or name error does not
    satisfy a golden.
@@ -401,10 +410,10 @@ None for Sprint 6.2.
 ## Sprint 6.3: QuickCheck property suite ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/dsl/DecisionPropSpec.hs` (`prop_smartCtorClosure`,
+**Implementation**: `test/spec/dsl/DecisionPropSpec.hs` (`prop_smartCtorClosure`,
 `prop_decodeRoundTrip`, `prop_foldTotal`, `prop_compositionPreservesWellFormedness`) and
-`test/dsl/DecisionPropMain.hs`.
-**Blocked by**: reopened numeric predecessor gates.
+`test/spec/dsl/DecisionPropMain.hs`.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: `cabal test` runs the four properties green **under `checkCoverage`** with every
 declared minimum met and each result labelled TESTED or PROVEN, and the committed broken-constructor mutant
 turns all four red. The numbered Validation list below states each condition.
@@ -450,9 +459,9 @@ None for Sprint 6.3.
 ## Sprint 6.4: The per-entry validation-locus ledger — the gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/dsl/ValidationLocusLedger.hs` (the coverage-projection emitter + assertion, run as
-part of `dsl-spec`), `tools/phase6_gate.py`, and independently authored expectations under `test/oracles/`.
-**Blocked by**: reopened numeric predecessor gates.
+**Implementation**: `test/spec/dsl/ValidationLocusLedger.hs` (the coverage-projection emitter + assertion, run as
+part of `dsl-spec`), `tools/illegal_state_corpus_gate.py`, and independently authored expectations under `test/oracles/`.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: the emitter's per-entry locus and disposition are reconciled against the
 committed `dhall/examples/locus_registry.tsv`, which is lint-derived from catalog tags authored before the
 emitter, so the assertion goes red on any locus, owner, or family divergence and on any Phase-4/5/6-owned row
@@ -472,7 +481,7 @@ here; whole-deployment fold/provision rows carry the distinct `provision-seal` l
 Phase 7 or 8; `rendered-output-golden` is owned by
 [Phase 13](phase_13_render_manifest_goldens.md), and `live-effect` by the live band.
 
-The gate discovers surfaces into `gen/test-surfaces/` and emits its run ledger under `gen/runs/`. The emitted
+The gate discovers surfaces into `.build/test-surfaces/` and emits its run ledger under `.build/runs/`. The emitted
 validation-locus artifact is a **coverage projection** of the catalog and the modules under test, so by the
 source-based rule of [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
 it is a **generated** Register-1 output and is **never committed**. It is *not* the run-evidence ledger
@@ -519,7 +528,7 @@ its schema, linter, and path are centrally owned rather than re-derived here.
    a stale hard-coded range, or claimed settled before its owner phase.
 
 ### Remaining Work
-Migrate enumeration and run-ledger output to `gen/`, join it to independently authored expectations, remove
+Migrate enumeration and run-ledger output to `.build/`, join it to independently authored expectations, remove
 all repository-resident generated inputs, and pass the current externally attested gate after Phase 0.
 
 ## Documentation Requirements
@@ -541,8 +550,8 @@ all repository-resident generated inputs, and pass the current externally attest
 **Cross-references added:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-6 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-6 `none` gate row.
-- `DEVELOPMENT_PLAN/system_components.md` — register `dhall/examples/illegal_*`, `test/dsl/CorpusSpec.hs`,
-  `test/dsl/compilefail/`, `test/dsl/DecisionPropSpec.hs`, and `test/dsl/ValidationLocusLedger.hs` as Phase-6
+- `DEVELOPMENT_PLAN/system_components.md` — register `dhall/examples/illegal_*`, `test/spec/dsl/CorpusSpec.hs`,
+  `test/spec/dsl/compilefail/`, `test/spec/dsl/DecisionPropSpec.hs`, and `test/spec/dsl/ValidationLocusLedger.hs` as Phase-6
   design-first rows.
 
 ## Related Documents

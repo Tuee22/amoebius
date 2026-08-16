@@ -46,9 +46,15 @@ The scoped gate passed on 2026-08-11; physical Apple/Lima/Metal and provider obs
 
 ## Phase Status
 
+⏸️ Blocked — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
+invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
+repository roots defined by Phase 0. Scope amendments below remain normative.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Observed artifact migration — 2026-08-11:** `job_A.expected` and `job_B.expected` are exact output of
 `metal_job_ref.py` for the tracked inputs. They are generated files and must be removed. The reference program
@@ -158,7 +164,7 @@ and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation]
 - **Input-dependent output oracle (§M.1/§M.3).** The artifact retrieved from MinIO must equal a fresh output
   from the independent NumPy reference at `test/golden/phase_53/metal_job_ref.py`. The reviewed A/B inputs
   remain under `test/golden/phase_53/`; their expected bytes and content identities are generated under
-  `gen/runs/phase_53/`. A nonce-derived challenge input C is also generated per run. A, B, and C must produce
+  `.build/runs/phase_53/`. A nonce-derived challenge input C is also generated per run. A, B, and C must produce
   distinct expected results where specified, and the worker must match each without a committed expected file.
   Numerical equality is necessary but insufficient: an external Metal observer must recover the real
   `MTLDevice`, compiled `MTLLibrary`, pipeline reflection, and the `MTLBuffer` written by the dispatch.
@@ -220,7 +226,7 @@ same-commit fixtures remain regression fixtures until independently reviewed or 
 contains source and expectations, never copied program output:
 
 - `test/golden/phase_53/metal_job_ref.py` — the independently reviewed CPU/NumPy reference for the kernel.
-  It generates A/B/C expected bytes and identities only at gate-run time beneath `gen/runs/phase_53/`.
+  It generates A/B/C expected bytes and identities only at gate-run time beneath `.build/runs/phase_53/`.
 - `test/golden/phase_53/job_A.input`, `job_B.input` — the two reviewed job inputs, differing only in their
   tensor payload.
 - `test/golden/phase_53/resource_fold.json` — the independently authored physical-host inventory and exact
@@ -606,7 +612,7 @@ this sprint realizes it in amoebius for the first time.
    fitting build, an OS/config observer proves the compiler stays within CPU/RSS and named backing ceilings;
    deliberate overrun is throttled/terminated/`ENOSPC`, never spilled elsewhere.
 2. Compile generated MSL at runtime and dispatch A, B, and nonce-derived C. Generate all three expected outputs
-   with `test/golden/phase_53/metal_job_ref.py` under `gen/runs/phase_53/`; require exact equality, distinct
+   with `test/golden/phase_53/metal_job_ref.py` under `.build/runs/phase_53/`; require exact equality, distinct
    A/B output, and a real `MTLLibrary`/pipeline-reflection/`MTLBuffer` observation. Assert bit-stable output
    under the fast-math-off determinism contract by recomputing `job_A` on a **cache-bypassed** run in a distinct
    content-addressed namespace and asserting the compute path (MSL compile + GPU dispatch) actually executed and

@@ -341,6 +341,12 @@ gracefully reconciled absent and reconstructed. The rebuilt cluster converges to
 round-trip has zero durable-byte loss when the backing remains attachable and the deterministic-rebind
 preconditions hold. (Shorthand: clusters are cattle; their storage is not.)
 
+Production cluster runtime, kubeconfigs, virtual disks, node images, container-engine data, and retained
+backing all live beneath `.data/**`. A test cluster uses only its exclusive `.test_data/runs/<run-id>/**` root.
+Neither lifecycle may fall back to system temporary directories, `/var/lib/amoebius`, a user home, or a
+host-global container engine. These physical paths are part of the preflight and postflight observations,
+not ambient implementation details.
+
 - **Deterministic rebind is owned elsewhere — referenced, not restated.** The mechanism that guarantees a
   rebuilt cluster reattaches the *same* data is the `no-provisioner` retained-PV policy
   (`<namespace>/<statefulset>/pv_<integer>`, sized, host/EBS-bound), owned in full by

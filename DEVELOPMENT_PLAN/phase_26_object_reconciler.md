@@ -47,8 +47,24 @@ Sprints 26.1–26.5 and the complete phase gate have passed.
 
 ## Phase Status
 
+⏸️ Blocked — reopened 2026-08-16 because Phase 25's successor OCI handoff is being amended to include Pulsar's S3 offloader bundle. Revalidate this phase against the amended exact handoff before Phase 27 proceeds.
+
+**Superseded containment seal:** resealed 2026-08-16 under the repository-containment amendment, attestation
+`sha256:85cf27abdea88522d4b4e5d3941d22d11fe68c6ed53fd6ec43bab1305643f9f1`.
+`python3 tools/object_reconciler_gate.py --execute` passed all **11** recorded sides against source snapshot
+`sha256:7b588caeaa7a2507366c389138d7a860b9edabc20a52d502da9a37c62cd97751`.
+The run verified Phase 25 attestation `sha256:e6ff9163d299b66b8ce77c216d5114e13af6fe4beb7e299834ee390e9963816a`
+and image index `sha256:4d8891f619fc26276288b3bc7f3586750f81dbb59b9b40b93e3149f4c4666dcd`,
+created a fresh project-private daemon, kind cluster, registry, and node pull route beneath one marker-owned
+`.test_data/**` run, then destroyed the fixture before attestation. All five sprints passed; all 11 mutants
+reddened; all 13 metrics matched; and all 31 surfaces joined to 30 run-time items. Generated output and the
+five sprint receipts stayed beneath `.build/**`; the immutable record reports every check `pass` with
+`cleanup.left_resources=false`, and the outside-host inventory remained empty.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-14, attestation `sha256:0ba91376b2c536930ba52ade70c9581798a9dfb861d468a28f5bb0d13fc353e0`. Reopened 2026-08-11 because the prior seal
-did not include the universal artifact-hygiene postcondition; `python3 tools/phase26_gate.py --execute` now
+did not include the universal artifact-hygiene postcondition; `python3 tools/object_reconciler_gate.py --execute` now
 passes on **all ten sides** against the run's own source snapshot, and left no authored path created, changed,
 or removed.
 
@@ -69,12 +85,12 @@ batteries, and two live observations out of `DEVELOPMENT_PLAN/evidence/phase_26`
 no longer exists — compared a committed golden ledger against a derived one, read its surface list out of a
 committed enumeration file that was also gone, and invoked a **developer-home `cabal`** in eight places, so it
 was bound to one machine and to whichever GHC that installation offered. It is now a six-side `PhaseGate` over
-a run bundle: `test/phase_26_surface_expectations.tsv` authors 31 surfaces for the first time, the ledger is
+a run bundle: `test/oracle/object_reconciler_surfaces.tsv` authors 31 surfaces for the first time, the ledger is
 emitted into the bundle and bound to a source-snapshot digest, and cabal and the compiler resolve per run from
-`toolchain/requirements.json`.
+`tools/toolchain_requirements.json`.
 
-*The corpus was reconciling a digest that no longer existed.* `tools/phase26_reconcile_live.py` and
-`tools/phase26_sprint26_3_live.py` each pinned the Phase-25 base image by a literal digest from a build that is
+*The corpus was reconciling a digest that no longer existed.* `tools/object_reconciler_live.py` and
+`tools/object_reconciler_execution_live.py` each pinned the Phase-25 base image by a literal digest from a build that is
 gone, and the one assertion tying the running pod to Phase 25's published artifact compared against that same
 literal — so on any host but the one that produced it the corpus would have failed `ImagePull`, and the check
 that should have caught it was comparing a constant to itself. The reference is supplied by the caller, and the
@@ -404,25 +420,25 @@ every mutation surface.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass claims and `Remaining Work: None` statements below describe the 2026-08-14 seal. Any repository-resident
-> evidence path retained in the prose describes the retired record only: this phase's evidence is written into
-> its run bundle under `gen/runs/`. Functional and validation outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
+> **Current seal rule.** Sprints 26.1–26.5 were resealed in order by the 2026-08-16 repository-contained run.
+> Historical evidence paths retained in the prose describe the retired record only: current evidence is written
+> into its run bundle under `.build/runs/`. Functional and validation outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
 ## Sprint 26.1: Deployment-global desired state + authenticated live inventory + typed action plan ✅
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase26_gate.py --execute`; the corpus, its
+**Status**: Done — resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; the corpus, its
 independently authored action table, and the read-only preflight boundary all held, and
-`sprint-26.1-receipt.json` in that run's bundle records it.
+`sprint-26.1-receipt.json` records fingerprint
+`sha256:80bebfeb5b649416fa923f4ac811fa3097d5025d10448143d9dfadf2b6916312`.
 **Implementation**:
 `src/Amoebius/Manifest/{Preflight,Reconcile,Diff,Actions,Authority}.hs`,
 `src/Amoebius/Execution/{Observe,Normalize,RuntimeStorage}.hs`, and `src/Amoebius/Storage/ScalingAction.hs`
 (fresh storage observation, validation, and state-indexed action token). (The
 `src/Amoebius/Scheduler/Ledger.hs` reservation-ledger normalization is partitioned to Phase 27.)
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the amended Phase-25 gate is sealed.
 **Independent Validation**: a fresh snapshot produces exactly the committed
 `test/live/fixtures/reconcile-corpus/expected-actions.json`, authored before the planner. It includes the
 full object-action and `ValidatedExecutionTransitionAction` domains, not merely add/update/prune names. All
@@ -503,19 +519,20 @@ Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_
 
 ### Remaining Work
 
-None. The receipt and its three-check transcript are written into this run's bundle under `gen/runs/`, never
+None. The receipt and its three-check transcript are written into this run's bundle under `.build/runs/`, never
 into the plan tree. Sprint 26.2 consumes the typed action/authority boundary.
 
 ## Sprint 26.2: Bootstrap Lease authority + generic typed-action dispatcher + scoped SSA + storage-scaling dispatch ✅
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase26_gate.py --execute`; the Lease CAS, scoped
+**Status**: Done — resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; the Lease CAS, scoped
 managed fields, stable no-op, and clean postflight were observed live, and `sprint-26.2-receipt.json` in
-that run's bundle records it.
+that run's bundle records fingerprint
+`sha256:1d406509991c0942996918564d6cc03a7756b053513e15fb02c3a6bd0e319459`.
 **Implementation**: `src/Amoebius/Manifest/{Apply,Enact,Authority}.hs` and
-`src/Amoebius/Storage/ScalingAction.hs`, plus `tools/phase26_sprint26_2_live.py`. The `amoebius-capacity` scheduler
+`src/Amoebius/Storage/ScalingAction.hs`, plus `tools/object_reconciler_authority_live.py`. The `amoebius-capacity` scheduler
 (`src/Amoebius/Scheduler/*.hs`) and execution-identity admission
 (`src/Amoebius/Admission/ExecutionIdentity.hs`) are layered on this dispatcher in Phase 27.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; Sprint 26.1 is sealed.
 **Independent Validation**: the host holds the mandatory reconciler `Lease` (via the typed
 `Absent → BootstrapHeld` action) before any non-authority mutation; ordinary object actions retain correct
 SSA field ownership; storage-scaling actions dispatch only their transition-indexed capability and never
@@ -582,13 +599,14 @@ None. The live receipt records the Lease CAS, scoped managed fields, stable no-o
 
 ## Sprint 26.3: Staged execution transitions, Job terminal protocol, and authenticated deletion ✅
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase26_gate.py --execute`; both ordered
+**Status**: Done — resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; both ordered
 replacements, the retained terminal Pod, and the authenticated delete were observed live, and
-`sprint-26.3-receipt.json` in that run's bundle records it.
+`sprint-26.3-receipt.json` records fingerprint
+`sha256:b17161985d4653dde53726be7b85516db998eea93d4b6fc833cfd879c29faeee`.
 **Implementation**:
 `src/Amoebius/Execution/{SerialOnDelete,HostTransition,AcceleratorRelease,JobTerminal}.hs` and
-`src/Amoebius/Manifest/Delete.hs`, plus `tools/phase26_sprint26_3_live.py`.
-**Blocked by**: reopened numeric predecessor gates.
+`src/Amoebius/Manifest/Delete.hs`, plus `tools/object_reconciler_execution_live.py`.
+**Blocked by**: none; Sprint 26.2 is sealed.
 **Independent Validation**: no stage can use evidence from the prior snapshot, no second serial Pod is deleted before the
 expected replacement is Bound+Ready, no CUDA/Metal/host replacement starts before its resource-indexed
 release, the abstract Job protocol cannot clean a terminal Pod before durable completion, and the live
@@ -655,14 +673,14 @@ None. Sprint 26.4 composes these actions into the full convergence/no-op corpus.
 
 ## Sprint 26.4: Wait-for-ready + the idempotent-convergence gate (re-run no-op) ✅
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase26_gate.py --execute`; the corpus converged
+**Status**: Done — resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; the corpus converged
 and re-ran byte-stable with zero mutations, with all four red controls red, and `sprint-26.4-receipt.json`
-in that run's bundle records it.
+records fingerprint `sha256:ef271e8922c15f89ea77931620810130df2ad59ba9c63ada158a7f9301202a7d`.
 **Implementation**: `src/Amoebius/Manifest/Wait.hs`,
 `test/live/ReconcileConvergeSpec.hs`, `test/live/SerialOnDeleteSpec.hs`,
-`test/live/JobTerminalRetentionSpec.hs`, and `tools/phase26_reconcile_live.py` — built and validated. (The
+`test/live/JobTerminalRetentionSpec.hs`, and `tools/object_reconciler_live.py` — built and validated. (The
 `test/live/SchedulerReservationSpec.hs` live scheduler suite is Phase 27.)
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; Sprint 26.3 is sealed.
 **Independent Validation**: the representative corpus reconciles a non-instantaneous
 Deployment, a serial replacement Bound+Ready between deletions, CR health plus child conformance on
 amoebius's own in-phase capacity/reservation CRD, and terminal Job retention without a gateway. The
@@ -724,19 +742,20 @@ This is the phase gate.
 
 ### Remaining Work
 
-None. The receipt and the live/mutation results are written into this run's bundle under `gen/runs/`. The
+None. The receipt and the live/mutation results are written into this run's bundle under `.build/runs/`. The
 content-addressed completion gateway and the rollback/release ledger stay deferred to the content-store phase
 and are carried UNVERIFIED, never green.
 
 ## Sprint 26.5: Register-2.5 reconciler + staged-execution convergence under simulated faults ✅
 
-**Status**: Done — sealed 2026-08-14 inside `python3 tools/phase26_gate.py --execute`; 2,048 deterministic
+**Status**: Done — resealed 2026-08-16 inside `python3 tools/object_reconciler_gate.py --execute`; 2,048 deterministic
 schedules ran against the real action modules with all seven mutants red, and `sprint-26.5-receipt.json` in
-that run's bundle records it.
-**Implementation**: `test/sim/{ReconcileSim,ExecutionTransitionSim,Phase26SimCommon}.hs`, driving the
+that run's bundle records fingerprint
+`sha256:7aca66fa137adc421efd00da590e6731612781c065cc2bf1f3271d28afadc05e`.
+**Implementation**: `test/spec/sim/{ReconcileSim,ExecutionTransitionSim,ObjectReconcilerSimCommon}.hs`, driving the
 real Manifest/Execution modules above on the Phase-14 `io-classes` `Env` — built and validated. (The
-`test/sim/SchedulerSim.hs` schedule battery is Phase 27.)
-**Blocked by**: reopened numeric predecessor gates.
+`test/spec/sim/SchedulerSim.hs` schedule battery is Phase 27.)
+**Blocked by**: none; Sprint 26.4 is sealed.
 **Independent Validation**: `IOSimPOR` interleaves object
 resourceVersion conflicts, bootstrap-`Lease` acquire/renew ambiguity, serial stage changes,
 host/device-release ordering, completion-write failure, and external mutation inside critical sections.
@@ -780,7 +799,7 @@ open. The scheduler's CAS-race schedules are Phase 27's `SchedulerSim`.
 ### Remaining Work
 
 None. The Register-2.5 receipt and its seven-mutant ledger are written into this run's bundle under
-`gen/runs/`; modeled-apiserver fidelity remains assumed, as the register boundary requires, and the same run's
+`.build/runs/`; modeled-apiserver fidelity remains assumed, as the register boundary requires, and the same run's
 Register-3 half supplies the live boundary evidence that bounds it.
 
 ## Documentation Requirements

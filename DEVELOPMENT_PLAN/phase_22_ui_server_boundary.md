@@ -37,15 +37,26 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/ui_server_boundary_gate.py` passed every boundary and universal
+side: seven HTTP rows, five access rows, five sanitized audit rows, five handler-effect rows, five startup
+rows, five public assets, five private probes, seven WebSocket rows, loopback-only OS observation, and all
+nine mutants. All 77 surfaces join to 94 run-time items. Build, test scratch, generated ledgers, and evidence
+remain beneath `.build/**`; the outside-host inventory is unchanged; Phase 22 owns no migration deferral. The
+project-contained attestation is
+`sha256:eb3b77ef745fb93f5b3c423f1e2e37b19f1fd4de2f61eade51f9c5e63ce3ec80`, bound to source snapshot
+`sha256:430c1570a582be9c…`.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:3f78cc6ef4e5814e…`
-(1945 non-ignored files) and published verified external attestation
+(1945 non-ignored files) and published a verified pre-containment external attestation
 `sha256:eec403a9845ec9acf5201e49bf916cd7d3c8e69cdd66c5daef743efb90aac59e`.
 
 **Observed progress — 2026-08-13:** **Policy-conformant.** Seven HTTP rows, five access rows, five sanitized
 audit rows, five effect rows, five pre-readiness startup rows, five public assets, five private probes, seven
 WebSocket rows, one stable idempotent retry, and all nine mutants pass against separately started signing-authority
 and handler processes, with the OS observer seeing loopback traffic only. Evidence and the ledger move into
-`gen/runs/phase_22/<run-id>/`, and 77 surfaces join two-way to 94 run-time enumerated items.
+`.build/runs/phase_22/<run-id>/`, and 77 surfaces join two-way to 94 run-time enumerated items.
 
 **This is the first run of this gate that could ever have passed.** The boundary ABI the entry point consumes —
 `ActionRequest`, `BoundaryResponse`, `HandlerInvocation`, `HandlerBinding`, `HandlerContract`, `UiServerAbi`,
@@ -60,11 +71,11 @@ rebuild per mutant, and a rebuild is a different binary from the one the gate ob
 `BoundaryMutant` through the decision means all nine run against exactly the binary under test.
 
 **The executable's packaging defect is fixed with it.** `hs-source-dirs` is a search path, not a module filter:
-listing `src` in the `amoebius` executable made GHC recompile every module `app/Main.hs` imports into that
+listing `src` in the `amoebius` executable made GHC recompile every module `app/amoebius/Main.hs` imports into that
 component against its own much shorter `build-depends` — which is why the build failed on
 `Amoebius.Vault.SecretRef`, a module the executable never mentions, and would have put two separately compiled
-copies of the shared core in one program. The entry point moved to `app/Amoebius/Ui/Server/Main.hs`, the
-executable searches `app` alone, and a gate check holds both properties.
+copies of the shared core in one program. The entry point moved to `app/amoebius/Amoebius/Ui/Server/Main.hs`, the
+executable searches `app/amoebius` alone, and a gate check holds both properties.
 
 **One contract surface has no recorded observation and is honestly UNVERIFIED.**
 `unreferenced-handler-unreachable` — extra linked handlers staying legal and unreachable, which is what lets one
@@ -112,12 +123,12 @@ on every denial. This phase does not implement the browser interpreter, a domain
 manifests, replicas, failover, or a separate server artifact.
 
 **Session scope:** one `serve-ui` HTTPS/WebSocket/session-to-`AuthorizedAction`-to-handler boundary in the existing executable;
-acceptance command `python3 tools/phase22_gate.py`; split immediately if work requires browser rendering,
+acceptance command `python3 tools/ui_server_boundary_gate.py`; split immediately if work requires browser rendering,
 a live Keycloak/provider, deployment/HA, a second register, or a substrate.
 **Dependency:** Phase 20 — canonical `UiServerPlan`, public contracts, route dispatch, and authority digests.
 **Substrate:** none — harness-owned local authority/handler processes only; no cluster or external service.
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `python3 tools/phase22_gate.py` emits a green Register-2 ledger with live identity, provider, and
+**Gate:** `python3 tools/ui_server_boundary_gate.py` emits a green Register-2 ledger with live identity, provider, and
 HA layers UNVERIFIED, and Phase 23's server branch waits on it. The apparatus is
 [Gate integrity](#gate-integrity).
 
@@ -189,7 +200,7 @@ edge exclusivity, provider policy, storage isolation, and behavior after replica
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -201,11 +212,11 @@ edge exclusivity, provider policy, storage isolation, and behavior after replica
 
 **Status**: Done — the boundary ABI is implemented and the migrated gate passes; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**:
-`app/Amoebius/Ui/Server/Main.hs`, `src/Amoebius/Ui/Server/{Dispatch,RequestContext,SecurityHeaders,WebSocket}.hs`,
-`src/Amoebius/Ui/Realtime/{Class,Envelope}.hs`, `test/ui/Phase22UiServerBoundarySpec.hs`,
-`test/ui/server/phase22_server_boundary.mjs`, and `tools/phase22_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/phase22_gate.py` starts the
+`app/amoebius/Amoebius/Ui/Server/Main.hs`, `src/Amoebius/Ui/Server/{Dispatch,RequestContext,SecurityHeaders,WebSocket}.hs`,
+`src/Amoebius/Ui/Realtime/{Class,Envelope}.hs`, `test/ui/UiServerBoundarySpec.hs`,
+`test/harness/ui_server/server_boundary.mjs`, and `tools/ui_server_boundary_gate.py`
+**Blocked by**: None.
+**Independent Validation**: `python3 tools/ui_server_boundary_gate.py` starts the
 authority/server/handler as separate processes, drives paired HTTP
 requests, reads independent raw effect/network observations, and requires every named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,

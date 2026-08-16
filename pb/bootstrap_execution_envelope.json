@@ -7,7 +7,7 @@
     "",
     "It deliberately carries no tool version, download URL, or integrity digest. Those",
     "are resolver output: pb/pb/bootstrap_toolchain.py resolves them per run from the",
-    "authored requirements in toolchain/requirements.json, verifies each download against",
+    "authored requirements in tools/toolchain_requirements.json, verifies each download against",
     "the publisher's own checksum, and writes what it observed to gen/toolchain/."
   ],
   "installer": {

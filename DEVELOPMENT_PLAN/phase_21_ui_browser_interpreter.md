@@ -38,8 +38,17 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/ui_browser_interpreter_gate.py` passed all eleven sides in
+resolved Chrome: two plans, five event arms, four independently derived traces, two DOM snapshots, three
+accessibility rows, five focus rows, four transport rows, CSP and WebSocket checks, all nine mutants, and all
+sixteen metrics pass; 66 surfaces join to 84 enumerated items. The project-contained attestation is
+`sha256:9813b93d168470d07173b797177ef225e38f619edf9320865fa8c9c1ef48a47b`, bound to source snapshot
+`sha256:a70b1cd50e69733b…`; Phase 21 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:05f7d7c56b159a83…`
-(1944 non-ignored files) and published verified external attestation
+(1944 non-ignored files) and published a verified pre-containment external attestation
 `sha256:9494bf7e55160959786c7028baa5d9e0dad2ecb7227e541a03164cd08e6ed3e8`.
 
 **Observed progress — 2026-08-13:** **Policy-conformant.** The browser-boundary result is unchanged and
@@ -48,7 +57,7 @@ generated event set exactly, four differential trace steps agree with the indepe
 DOM snapshots, three accessibility rows, five keyboard/focus rows, and four transport rows match their pins, a
 fresh post-ready nonce carries through, the built-artifact scanner and browser CSP canary hold, the OS
 observer sees only loopback, and all nine mutants redden. Evidence and the ledger move into
-`gen/runs/phase_21/<run-id>/`, and 66 surfaces join two-way to 84 run-time enumerated items.
+`.build/runs/phase_21/<run-id>/`, and 66 surfaces join two-way to 84 run-time enumerated items.
 
 **`reference_traces.tsv` is deleted, which is what this phase owed.** The table held exactly what
 `ReferenceClientPlan.referenceTraces` returns from the authored interactions, so the assertion that compared
@@ -62,7 +71,7 @@ derives the authored side from the same independent semantics, and a route added
 interaction before the join can cover it.
 
 **The browser driver resolves instead of being typed in.** The gate carried the literal `1.62.1` in two
-places and refused anything else. `playwright` is now an entry in `toolchain/requirements.json` with a
+places and refused anything else. `playwright` is now an entry in `tools/toolchain_requirements.json` with a
 `>=1.55 <2` range, resolved per run like every other tool.
 
 **Three enumeration names were collapsed into the observations that decide them.** `home-route`,
@@ -98,13 +107,13 @@ step-for-step on visible state, requested effects, cancellations, and route tran
 server only as a boundary peer; server authorization semantics belong to Phase 22.
 
 **Session scope:** one generic `ClientPlan` browser interpreter and its differential/Playwright conformance harness;
-acceptance command `python3 tools/phase21_gate.py`; split immediately if work requires server policy
+acceptance command `python3 tools/ui_browser_interpreter_gate.py`; split immediately if work requires server policy
 evaluation, a second production interpreter, a live identity/provider service, release publication, a second
 register, or a substrate.
 **Dependency:** Phase 20 — canonical immutable `ClientPlan` encoding and public contracts.
 **Substrate:** none — local Chromium and harness-owned fake processes only; no cluster or external service.
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `python3 tools/phase21_gate.py` builds the generic bundle and passes every check and seeded mutant
+**Gate:** `python3 tools/ui_browser_interpreter_gate.py` builds the generic bundle and passes every check and seeded mutant
 in [Gate integrity](#gate-integrity), emitting a Register-2 ledger whose live layers stay UNVERIFIED. Phase 23
 does not open on the browser branch until it does.
 
@@ -176,22 +185,22 @@ authority-paired own/foreign enforcement is owned by the UI-server boundary and 
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 21.1: Generic `ClientPlan` interpreter and browser boundary gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `ui-runtime/src/Amoebius/Ui/{Interpreter,Components}.purs`, `ui-runtime/src/Main.{purs,js}`,
-`test/ui/{Phase21UiBrowserInterpreterSpec,ReferenceClientPlan}.hs`,
-`test/ui/browser/phase21_browser.mjs`, `test/ui/scan-ui-artifact`, and `tools/phase21_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/phase21_gate.py` builds via `spago`, drives Chromium with authored
+`test/ui/{UiBrowserInterpreterSpec,ReferenceClientPlan}.hs`,
+`test/harness/ui_browser/browser.mjs`, `test/harness/ui_browser/scan_artifact.py`, and `tools/ui_browser_interpreter_gate.py`
+**Blocked by**: None.
+**Independent Validation**: `python3 tools/ui_browser_interpreter_gate.py` builds via `spago`, drives Chromium with authored
 Playwright interactions, reads DOM plus OS-boundary traffic, and requires every named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/generated_artifacts_doctrine.md`,

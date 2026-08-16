@@ -37,15 +37,23 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/scoped_identity_gate.py` passed all twelve sides: all owner
+joins/swaps, the independent flow matrix, three compile loci, six coverage classes, the owner-equality mutant,
+all ten metrics, and nine constructor-privacy checks pass; 40 surfaces join to 47 enumerated items. The
+project-contained attestation is `sha256:9aeed4fb73be7214c732f671f86c14a0f376f50ffd5197b980f7ad5f2df1ab58`,
+bound to source snapshot `sha256:823a8dffbc72114a…`; Phase 17 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:f6ee1e7d69f37a07…`
-(1942 non-ignored files) and published verified external attestation
+(1942 non-ignored files) and published a verified pre-containment external attestation
 `sha256:45ba0ed3a546b6dd436f611f2d12e80378bc64c5d349d8f9fdf44f32c727b18a`.
 
 **Observed progress — 2026-08-13:** **Policy-conformant.** The scoped-identity result is unchanged and
 re-run: six owner-join rows and two swap rows match the independent tables at their exact `ScopeError` tags,
 four flow rows agree with a reference relation that shares no helper with the kernel, three compile loci hold,
 six generated classes clear their 5% floor, and the owner-equality mutant reddens on both swap pins. Evidence
-and the ledger move into `gen/runs/phase_17/<run-id>/`, and 40 surfaces join two-way to 47 run-time enumerated
+and the ledger move into `.build/runs/phase_17/<run-id>/`, and 40 surfaces join two-way to 47 run-time enumerated
 items.
 
 **Every cabal invocation now carries the resolved compiler.** The pre-migration gate ran `cabal exec ghc`
@@ -86,7 +94,7 @@ register, or a substrate.
 **Dependency:** Phase 16 — the checked low-code UI program and its reified public value universe.
 **Substrate:** none — no host, browser, identity provider, provider service, or cluster is contacted.
 **Register:** 1 — pure/golden.
-**Gate:** `python3 tools/phase17_gate.py` passes the paired scope corpus, independent
+**Gate:** `python3 tools/scoped_identity_gate.py` passes the paired scope corpus, independent
 flow relation, three compile failures, six coverage floors, isolated execution, explicit mutant-red run, and
 ledger check.
 
@@ -129,20 +137,20 @@ does not prove Keycloak truth, provider row policy, network isolation, or nonint
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 17.1: Scope-indexed handles and total flow checking ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Ui/Security/{Scope,Flow}.hs`, `test/ui/ScopeSpec.hs`,
 and `test/fixtures/ui_scope/compile_fail/` — built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: `ui-scope-spec` matches all owner/swap and flow rows, and six generated reject
 classes meet their floors. Three external construction attempts fail to compile; the committed mutant fails.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,

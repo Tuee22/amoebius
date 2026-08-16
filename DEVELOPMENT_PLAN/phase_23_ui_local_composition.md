@@ -37,8 +37,20 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/local_ui_composition_gate.py` passed all thirteen sides in
+resolved Chrome: two Dhall-typed applications, five interactions, four exact visible states, four ordered
+effects, three access rows, five zero-leak denials, loopback-only OS observation, all five mutants, and all
+seventeen metrics pass; 58 surfaces join to 71 run-time items. The final legacy `tests/` root is normalized
+into `test/{fixture,oracle,mutant}/**`; bundle workspace, build/test scratch, generated evidence, and tool state
+remain beneath `.build/**`; the outside-host inventory is unchanged; Phase 23 owns no migration deferral. The
+project-contained attestation is
+`sha256:ce0760e84c49139141af398ca54f1b85beeb6407440c2f068650bda4ac37feee`, bound to source snapshot
+`sha256:6ad71f3725a0c4db…`.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:d08a350888547a54…`
-(1946 non-ignored files) and published verified external attestation
+(1946 non-ignored files) and published a verified pre-containment external attestation
 `sha256:363ae0c7c14e334f0455a1ffb67c9ce14eae0f33c736ca555187b076f596bc1a`.
 
 **Observed progress — 2026-08-13:** **Policy-conformant.** Two Dhall-typed applications drive one generic
@@ -46,7 +58,7 @@ browser bundle against the real `serve-ui` boundary and two separately started d
 five interactions join the generated action set, four visible states and the ordered three-step effect
 sequence match their pins with the fresh nonce reaching both the DOM and the raw effect log, four denials
 return their pinned status and tag with zero private bytes, the direct-to-backend probe is refused at the
-network, and all five mutants redden. Evidence and the ledger move into `gen/runs/phase_23/<run-id>/`, and 58
+network, and all five mutants redden. Evidence and the ledger move into `.build/runs/phase_23/<run-id>/`, and 58
 surfaces join two-way to 71 run-time enumerated items.
 
 **The composition only became runnable when Phase 22's ABI landed.** `use-artifact` had no row in the closed
@@ -85,12 +97,12 @@ amoebius contracts and runtimes, not ML semantics. Application-authored expectat
 replica counts, topology, fault schedules, and failover remain absent from app logic.
 
 **Session scope:** one local end-to-end composition harness over the already built browser and server seams;
-acceptance command `python3 tools/phase23_gate.py`; split immediately if work requires a production
+acceptance command `python3 tools/local_ui_composition_gate.py`; split immediately if work requires a production
 domain adapter, live identity/provider/cluster, deployment/HA, a second register, or a substrate.
 **Dependencies:** Phase 21 — generic browser interpreter; Phase 22 — authenticated scoped UI-server boundary.
 **Substrate:** none — local browser, authority, server, and fake data/workflow/artifact processes only.
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `python3 tools/phase23_gate.py` passes the Phase-0-pinned apps, authored interactions,
+**Gate:** `python3 tools/local_ui_composition_gate.py` passes the Phase-0-pinned apps, authored interactions,
 generated-surface join, fresh challenge, scope pairs, external observations, bypass probes, and seeded mutants
 of [Gate integrity](#gate-integrity). Phase 24 does not open unless it emits a green Register-2 ledger with all
 live/domain/HA layers UNVERIFIED.
@@ -140,7 +152,7 @@ isolation, live ingress/identity, release rollout, replica failure, and HA remai
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -151,11 +163,11 @@ isolation, live ingress/identity, release rollout, replica failure, and HA remai
 ## Sprint 23.1: Single-/multi-tenant workflow-to-artifact composition gate ✅
 
 **Status**: Done — the composition runs end to end on the Phase-22 boundary; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/ui/Phase23LocalCompositionSpec.hs`,
-`test/ui/local/phase23_local_composition.mjs`, `test/fixtures/ui_local_composition/`, and
-`tools/phase23_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/phase23_gate.py` drives authored Playwright
+**Implementation**: `test/ui/LocalCompositionSpec.hs`,
+`test/harness/local_ui_composition/composition.mjs`, `test/fixtures/ui_local_composition/`, and
+`tools/local_ui_composition_gate.py`
+**Blocked by**: None.
+**Independent Validation**: `python3 tools/local_ui_composition_gate.py` drives authored Playwright
 interactions, joins every generated surface, reads raw fake-process/network observations, and requires every
 named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,

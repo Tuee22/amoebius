@@ -56,7 +56,7 @@ observeBootstrapCapacitySchedulerReady
   -> Either BootstrapReadinessError BootstrapCapacitySchedulerReady
 observeBootstrapCapacitySchedulerReady observed
   | bootstrapExpectedGeneration observed /= bootstrapObservedGeneration observed = Left BootstrapGenerationMismatch
-#ifndef PHASE27_COLLAPSED_READINESS_MUTANT
+#ifndef CAPACITY_SCHEDULER_COLLAPSED_READINESS_MUTANT
   | bootstrapExpectedConfigDigest observed /= bootstrapObservedConfigDigest observed = Left BootstrapConfigDigestMismatch
 #endif
   | bootstrapExpectedRootResourceVersion observed /= bootstrapObservedRootResourceVersion observed = Left BootstrapRootMismatch
@@ -129,7 +129,7 @@ data BootstrapAction = CutoverEnumeratedController Text | InstallManagedAuthorit
   deriving anyclass (NFData)
 
 authorizeBootstrapAction :: BootstrapCapacitySchedulerReady -> BootstrapAction -> Bool
-#ifdef PHASE27_STAGE_DROP_MUTANT
+#ifdef CAPACITY_SCHEDULER_STAGE_DROP_MUTANT
 authorizeBootstrapAction _ _ = True
 #else
 authorizeBootstrapAction _ CutoverEnumeratedController {} = True

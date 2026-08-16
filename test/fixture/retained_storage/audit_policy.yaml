@@ -1,0 +1,10 @@
+# Observe post-recreate exec requests independently of the witness harness.
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+- level: Request
+  verbs: ["create"]
+  resources:
+  - group: ""
+    resources: ["pods/exec"]
+- level: Metadata

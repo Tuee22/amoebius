@@ -4,7 +4,7 @@
 # require the run to enumerate its test surfaces and join them **completely** to an
 # independently authored expectation. This file is that expectation. It is authored;
 # the enumeration it joins against is discovered at run time from the check registries
-# the three checkers actually implement, and written to `gen/test-surfaces/phase_00.json`.
+# the four checkers actually implement, and written to `.build/test-surfaces/phase_00.json`.
 #
 # The join is two-way and total. A check that exists but is claimed by no surface fails
 # the gate, and a surface claiming a check no checker implements fails it too — so
@@ -39,10 +39,12 @@ repository.authored_root_write_guard	artifact_policy	r5
 repository.dynamic_resolution	artifact_policy	r6
 repository.source_closure	artifact_policy	r7
 repository.revision_history	artifact_policy	r8
-repository.external_attestation	artifact_policy	r9
+repository.project_contained_attestation	artifact_policy	r9
 repository.terminology	artifact_policy	r10
 repository.no_leak	artifact_policy	r11
 repository.negative_corpora	artifact_policy	r12
 repository.target_tree	artifact_policy	r13
 repository.ignore_partition	artifact_policy	r14
 repository.de_phased_naming	artifact_policy	r15
+repository.state_containment	artifact_policy	r16
+repository.test_secrets_boundary	artifact_policy	r17

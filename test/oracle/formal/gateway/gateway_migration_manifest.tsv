@@ -1,0 +1,7 @@
+kind	path	provenance
+oracle	test/oracle/formal/gateway/model_contract.tsv	hand-authored-contract; StandbyCrash sensitivity and final state count amended before gate
+oracle	test/oracle/formal/gateway/invariant_mutants.tsv	hand-authored-before-GatewayMigration.hs
+oracle	test/oracle/formal/gateway/cutoff_cases.tsv	independent-envelope-corpus
+mutant	test/oracle/formal/gateway/cutoff_mutants.tsv	eight-clause-delete-catalog
+golden	test/golden/formal/gateway/GatewayMigration.tla.golden	canonical-rendering oracle patched before gate for StandbyCrash sensitivity
+golden	test/golden/formal/gateway/GatewayMigration.cfg.golden	canonical-rendering obligation oracle

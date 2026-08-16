@@ -201,8 +201,8 @@ def no_live_residue() -> dict[str, str]:
     pvs = [item["metadata"]["name"] for item in json.loads(pvs_result.stdout)["items"] if item["metadata"]["name"].startswith("phase46-")]
     require(not pvs, f"phase46-pv-residue:{pvs}")
     clusters = subprocess.run((KIND, "get", "clusters"), text=True, stdout=subprocess.PIPE, check=False, timeout=60).stdout.splitlines()
-    require(clusters == ["amoebius-phase24"], f"unexpected-kind-clusters:{clusters}")
-    return {"name": "external-cleanup-readback", "command": "namespace, PV, and kind inventories", "output": "no Phase-46 objects; only retained amoebius-phase24 remains", "result": "PASS"}
+    require(clusters == ["amoebius-bootstrap-coordinator"], f"unexpected-kind-clusters:{clusters}")
+    return {"name": "external-cleanup-readback", "command": "namespace, PV, and kind inventories", "output": "no Phase-46 objects; only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:

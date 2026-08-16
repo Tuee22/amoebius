@@ -46,6 +46,12 @@ LAYOUT_DOCTRINE = ROOT / "documents" / "engineering" / "repository_layout_doctri
 IGNORE_FENCE = re.compile(r"```(gitignore|dockerignore)\n(.*?)```", re.S)
 
 
+def temporary_directory(prefix: str):
+    root = ROOT / ".build" / "tmp"
+    root.mkdir(parents=True, exist_ok=True)
+    return tempfile.TemporaryDirectory(prefix=prefix, dir=root)
+
+
 def declared_ignore_patterns() -> dict[str, set[str]]:
     """The two contracts as repository-layout doctrine sections 6 and 7 declare them.
 
@@ -217,7 +223,7 @@ def verify_artifact_policy() -> list[str]:
     if len(missing_errors) != len(GITIGNORE_REQUIRED_PATTERNS) + len(DOCKERIGNORE_REQUIRED_PATTERNS):
         failures.append("artifact-policy negative: missing ignore patterns were not all rejected")
 
-    with tempfile.TemporaryDirectory(prefix="amoebius-bytecode-policy-") as directory:
+    with temporary_directory("amoebius-bytecode-policy-") as directory:
         fixture = Path(directory) / "suppression.py"
         environment_switch = "PYTHON" + "DONTWRITEBYTECODE"
         no_cache_flag = "-" + "B"
@@ -233,7 +239,7 @@ def verify_artifact_policy() -> list[str]:
     if len(suppression_errors) != 2:
         failures.append("bytecode-policy negative: command suppression was not rejected at both loci")
 
-    with tempfile.TemporaryDirectory(prefix="amoebius-terminology-policy-") as directory:
+    with temporary_directory("amoebius-terminology-policy-") as directory:
         retired_term = "mid" + "wife"
         fixture = Path(directory) / f"legacy-{retired_term}.py"
         fixture.write_text(retired_term + "\n", encoding="utf-8")
@@ -281,8 +287,10 @@ def main() -> int:
         prefix = "gate-red:" if kind == "mutant" else "independent-pin:"
         if not expectation.startswith(prefix) or len(expectation) == len(prefix):
             errors.append(f"manifest:{number}: expectation must begin {prefix!r} and name its locus")
-        if kind == "mutant" and "/mutants/" not in path_raw:
-            errors.append(f"manifest:{number}: mutant must live under a mutants directory")
+        if kind == "mutant" and not (
+            path_raw.startswith("test/mutant/") or "/mutants/" in path_raw
+        ):
+            errors.append(f"manifest:{number}: mutant must live under a governed mutant tree")
 
     for phase in sorted(PHASES):
         missing = {"oracle", "mutant"} - by_phase.get(phase, set())

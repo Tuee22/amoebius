@@ -44,9 +44,15 @@ ledger `external-run-reference`.
 
 ## Phase Status
 
+⏸️ Blocked — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
+invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
+repository roots defined by Phase 0. Scope amendments below remain normative.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Invalidated historical record:**
 
@@ -129,7 +135,7 @@ delivery values hold at once.
 
 **Hygiene and honesty.** The whole topology spins up, runs, tears down **leak-free**, and **re-runs
 idempotently under a distinct per-run store namespace** — a cache-bypassing independent recompute of the
-`releaseHash`, not a store-hit. It emits a generated proven/tested/assumed ledger under `gen/runs/` naming its
+`releaseHash`, not a store-hit. It emits a generated proven/tested/assumed ledger under `.build/runs/` naming its
 register (3) and substrate (linux-cpu), marking the runtime layer **tested, never proven** and the
 cross-cluster and canary layers **UNVERIFIED**.
 

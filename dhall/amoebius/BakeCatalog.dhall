@@ -22,12 +22,6 @@ let OciCopy =
       , lastResortReason : Text
       }
 
--- What rung 3 builds *from*.  A `BuildProduct` that named only what it produces
--- would leave the source coordinate of five third-party projects living in
--- whichever script happened to build them — the same "advice the type cannot
--- express" the acquisition ladder exists to remove.  None of the three arms
--- carries an integrity value: Go resolves one from the module checksum database
--- and pip from the index, both during the build.
 let GoBuild =
       { repository : Text
       , reference : Text
@@ -74,14 +68,21 @@ let AptPackaged =
 let ArtifactAsset =
       { platform : Platform, assetUrl : Text, checksumManifest : Text }
 
--- Verified against each publisher on 2026-08-14, for both arches.  The nine
--- artifacts use three digest algorithms and two manifest shapes between them, so
--- a single hard-coded `sha256sum -c` would verify seven and silently skip two.
 let ChecksumAlgorithm = < Sha1 | Sha256 | Sha512 >
 
 let ChecksumShape = < DigestOnly | DigestNamed >
 
 let ArchiveFormat = < Bare | TarGz | Zip >
+
+let PublishedPayload =
+      { name : Text
+      , assets : List ArtifactAsset
+      , checksumAlgorithm : ChecksumAlgorithm
+      , checksumShape : ChecksumShape
+      , archiveFormat : ArchiveFormat
+      , archiveMember : Text
+      , targetPath : Text
+      }
 
 let PublishedArtifact =
       { name : Text
@@ -93,14 +94,12 @@ let PublishedArtifact =
       , archiveFormat : ArchiveFormat
       , archiveMember : Text
       , targetPath : Text
+      , payloads : List PublishedPayload
       , arguments : List Text
       , expectedVersion : Text
       , kind : BinaryKind
       }
 
--- The acquisition ladder of `image_build_doctrine.md` section 7, highest rung
--- first.  Making the rungs arms is what lets a gate ask which one a binary sits
--- on; a preference stated in prose cannot be read back out of a catalog.
 let BakeStep =
       < AptPackage : AptPackaged
       | OfficialArtifact : PublishedArtifact
@@ -108,13 +107,6 @@ let BakeStep =
       | CopyOci : OciCopy
       >
 
--- Build-time acquisition tooling, and deliberately not a `BakeStep`.  Rung 2
--- fetches an asset and its publisher's manifest, which needs a TLS trust store,
--- an HTTP client, and an unzipper; none of the three is a platform-service
--- binary, so none belongs in the inventory the gate reconciles against the
--- standard-services oracle or on a rung the acquisition table has to rank.  The
--- alternative was a fixed list inside the renderer, which is the same dependency
--- with nowhere to review it.
 let AcquisitionTool =
       { package : Text, packageVersion : Text, archiveSuite : Text }
 
@@ -163,10 +155,6 @@ let apt =
           , kind
           }
 
--- Rung 2 in the two shapes the publishers actually ship: one manifest per asset
--- (MinIO, Grafana, Keycloak) and one per release covering every asset (HashiCorp,
--- the Prometheus family, Envoy, Apache).  A single release-level field would have
--- forced the first three into a shape they do not have.
 let perAssetArtifact =
       \(name : Text) ->
       \(publisher : Text) ->
@@ -202,6 +190,7 @@ let perAssetArtifact =
           , archiveFormat
           , archiveMember
           , targetPath
+          , payloads = [] : List PublishedPayload
           , arguments
           , expectedVersion
           , kind
@@ -238,6 +227,73 @@ let perReleaseArtifact =
           expectedVersion
           kind
 
+let perReleasePayload =
+      \(name : Text) ->
+      \(amd64Url : Text) ->
+      \(arm64Url : Text) ->
+      \(manifest : Text) ->
+      \(checksumAlgorithm : ChecksumAlgorithm) ->
+      \(archiveFormat : ArchiveFormat) ->
+      \(archiveMember : Text) ->
+      \(targetPath : Text) ->
+        { name
+        , assets =
+          [ { platform = Platform.Amd64
+            , assetUrl = amd64Url
+            , checksumManifest = manifest
+            }
+          , { platform = Platform.Arm64
+            , assetUrl = arm64Url
+            , checksumManifest = manifest
+            }
+          ]
+        , checksumAlgorithm
+        , checksumShape = ChecksumShape.DigestNamed
+        , archiveFormat
+        , archiveMember
+        , targetPath
+        }
+
+let perReleaseArtifactWithPayloads =
+      \(name : Text) ->
+      \(publisher : Text) ->
+      \(releaseVersion : Text) ->
+      \(amd64Url : Text) ->
+      \(arm64Url : Text) ->
+      \(manifest : Text) ->
+      \(checksumAlgorithm : ChecksumAlgorithm) ->
+      \(archiveFormat : ArchiveFormat) ->
+      \(archiveMember : Text) ->
+      \(targetPath : Text) ->
+      \(payloads : List PublishedPayload) ->
+      \(arguments : List Text) ->
+      \(expectedVersion : Text) ->
+      \(kind : BinaryKind) ->
+        BakeStep.OfficialArtifact
+          { name
+          , publisher
+          , releaseVersion
+          , assets =
+            [ { platform = Platform.Amd64
+              , assetUrl = amd64Url
+              , checksumManifest = manifest
+              }
+            , { platform = Platform.Arm64
+              , assetUrl = arm64Url
+              , checksumManifest = manifest
+              }
+            ]
+          , checksumAlgorithm
+          , checksumShape = ChecksumShape.DigestNamed
+          , archiveFormat
+          , archiveMember
+          , targetPath
+          , payloads
+          , arguments
+          , expectedVersion
+          , kind
+          }
+
 let built =
       \(name : Text) ->
       \(source : BuildSource) ->
@@ -266,28 +322,28 @@ let goModule =
 
 in  { architectureConcurrency = 2
     , stageConcurrency = 2
-    , scratchBacking = "phase25-build-scratch"
+    , scratchBacking = "base-image-registry-build-scratch"
     , scratchCapacityBytes = 34359738368
-    , cacheBacking = "phase25-build-cache"
+    , cacheBacking = "base-image-registry-build-cache"
     , cacheCapacityBytes = 21474836480
     , baseImage = "ubuntu:24.04"
     , baseDigest =
         "sha256:561618e2c15bf2397621dd04f96926663a3b5616c189cf7e38db7e82f5c538ea"
     , acquisitionTools =
-      [ { package = "ca-certificates"
-        , packageVersion = "20260601~24.04.1"
-        , archiveSuite = nobleUpdatesMain
-        }
-      , { package = "curl"
-        , packageVersion = "8.5.0-2ubuntu10.11"
-        , archiveSuite = nobleUpdatesMain
-        }
-      , { package = "unzip"
-        , packageVersion = "6.0-28ubuntu4.1"
-        , archiveSuite = nobleUpdatesMain
-        }
-      ]
-      : List AcquisitionTool
+          [ { package = "ca-certificates"
+            , packageVersion = "20260601~24.04.1"
+            , archiveSuite = nobleUpdatesMain
+            }
+          , { package = "curl"
+            , packageVersion = "8.5.0-2ubuntu10.11"
+            , archiveSuite = nobleUpdatesMain
+            }
+          , { package = "unzip"
+            , packageVersion = "6.0-28ubuntu4.1"
+            , archiveSuite = nobleUpdatesMain
+            }
+          ]
+        : List AcquisitionTool
     , runtimeEnvironment =
         -- Ubuntu names the JVM directory by architecture, and `TARGETARCH` is
         -- already declared, so one authored value covers both arches.  The
@@ -361,10 +417,7 @@ in  { architectureConcurrency = 2
                   [ "--version" ]
                   "3.2.2"
                   BinaryKind.Launcher
-              , -- The slot the doctrine names "a multi-arch Temurin JRE"; the
-                -- archive supplies the same JVM requirement for both arches, so
-                -- rung 1 applies and the vendor changes while the slot does not.
-                apt
+              , apt
                   "temurin"
                   "openjdk-21-jre-headless"
                   "21.0.11+10-1~24.04.2"
@@ -373,12 +426,7 @@ in  { architectureConcurrency = 2
                   [ "--version" ]
                   "21.0.11"
                   BinaryKind.Elf
-              , -- The metapackage version and the compiler version differ: apt
-                -- pins `4:13.2.0-7ubuntu1`, which installs g++-13 and makes
-                -- `/usr/bin/g++ --version` report 13.3.0.  Both are recorded,
-                -- because the gate checks the second and a reviewer checks the
-                -- first.
-                apt
+              , apt
                   "g++"
                   "g++"
                   "4:13.2.0-7ubuntu1"
@@ -475,11 +523,7 @@ in  { architectureConcurrency = 2
                 [ "--version" ]
                 "0.39.2"
                 BinaryKind.Elf
-            , -- The publisher spells the arches `x86_64`/`aarch_64` and signs one
-              -- clearsigned list whose entries name its own build paths, so the
-              -- match is on the trailing basename.  The armor is not itself
-              -- verified: this is a digest claim, not a signature check.
-              perReleaseArtifact
+            , perReleaseArtifact
                 "envoy"
                 "github.com/envoyproxy/envoy"
                 "1.35.1"
@@ -493,9 +537,7 @@ in  { architectureConcurrency = 2
                 [ "--version" ]
                 "1.35.1"
                 BinaryKind.Elf
-            , -- Grafana publishes one `.sha256` per asset whose whole body is the
-              -- digest, so there is no filename to match on.
-              perAssetArtifact
+            , perAssetArtifact
                 "grafana"
                 "dl.grafana.com"
                 "12.1.1"
@@ -511,14 +553,7 @@ in  { architectureConcurrency = 2
                 [ "--version" ]
                 "12.1.1"
                 BinaryKind.Elf
-            , -- An arch-independent JVM payload, so both arches name one asset.
-              -- ANOMALY: Keycloak publishes `.md5`, `.sha1`, and `.asc` and no
-              -- SHA-256, so the strongest digest manifest available is SHA-1,
-              -- whose collision resistance is broken.  The stronger option is the
-              -- PGP signature, which needs a trust anchor this phase does not yet
-              -- author; the SHA-1 claim is recorded as what the publisher offers,
-              -- not as adequate.
-              perAssetArtifact
+            , perAssetArtifact
                 "keycloak"
                 "github.com/keycloak/keycloak"
                 "26.3.2"
@@ -534,11 +569,7 @@ in  { architectureConcurrency = 2
                 [ "--version" ]
                 "26.3.2"
                 BinaryKind.Launcher
-            , -- Also an arch-independent JVM payload.  ANOMALY: the tarball has
-              -- rolled off `downloads.apache.org` to `archive.apache.org` while
-              -- its `.sha512` has not, so asset and manifest come from different
-              -- Apache hosts.
-              perReleaseArtifact
+            , perReleaseArtifactWithPayloads
                 "pulsar"
                 "archive.apache.org"
                 "4.0.6"
@@ -549,6 +580,16 @@ in  { architectureConcurrency = 2
                 ArchiveFormat.TarGz
                 ""
                 "/pulsar"
+                [ perReleasePayload
+                    "pulsar-offloaders"
+                    "https://archive.apache.org/dist/pulsar/pulsar-4.0.6/apache-pulsar-offloaders-4.0.6-bin.tar.gz"
+                    "https://archive.apache.org/dist/pulsar/pulsar-4.0.6/apache-pulsar-offloaders-4.0.6-bin.tar.gz"
+                    "https://archive.apache.org/dist/pulsar/pulsar-4.0.6/apache-pulsar-offloaders-4.0.6-bin.tar.gz.sha512"
+                    ChecksumAlgorithm.Sha512
+                    ArchiveFormat.TarGz
+                    ""
+                    "/pulsar"
+                ]
                 [ "version" ]
                 "4.0.6"
                 BinaryKind.Launcher
@@ -574,10 +615,7 @@ in  { architectureConcurrency = 2
                 "0.1.0.0"
                 BinaryKind.Elf
           , tail =
-            [ -- The publisher stamps the version through the linker, so the
-              -- symbol and the value it takes are catalog data rather than a
-              -- flag remembered by whatever ran the build.
-              built
+            [ built
                 "envoy-gateway"
                 ( goModule
                     "https://github.com/envoyproxy/gateway"
@@ -591,9 +629,7 @@ in  { architectureConcurrency = 2
                 [ "version" ]
                 "1.4.2"
                 BinaryKind.Elf
-            , -- MetalLB carries its own version in source, so there is no symbol
-              -- to stamp; both binaries come out of one checkout.
-              built
+            , built
                 "metallb-controller"
                 ( goModule
                     "https://github.com/metallb/metallb"
@@ -621,10 +657,7 @@ in  { architectureConcurrency = 2
                 [ "-h" ]
                 "0.15.2"
                 BinaryKind.Elf
-            , -- The only rung-3 product that needs cgo: its SQL parser is a C
-              -- library, so the arm64 build needs a cross toolchain and the
-              -- catalog says so rather than the builder discovering it.
-              built
+            , built
                 "percona-postgresql-operator"
                 ( goModule
                     "https://github.com/percona/percona-postgresql-operator"
@@ -638,10 +671,7 @@ in  { architectureConcurrency = 2
                 [ "--version" ]
                 "2.6.0"
                 BinaryKind.Elf
-            , -- Published for pip consumption rather than as a per-arch binary:
-              -- the application wheel is architecture-independent and its
-              -- dependency closure is not, so the tree is resolved once per arch.
-              built
+            , built
                 "pgadmin"
                 ( BuildSource.PythonPackage
                     { distribution = "pgadmin4"

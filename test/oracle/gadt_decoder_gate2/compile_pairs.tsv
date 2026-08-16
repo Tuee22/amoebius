@@ -1,0 +1,4 @@
+pair	legal	illegal	expected_locus	positive_fixture
+phantom-tenant	test/spec/dsl/compile/tenant_legal.hs	test/spec/dsl/compile/tenant_illegal.hs	TenantBeta	dhall/examples/legal_deployment_rules.dhall
+gadt-transition	test/spec/dsl/compile/transition_legal.hs	test/spec/dsl/compile/transition_illegal.hs	Authored	dhall/examples/legal_deployment_rules.dhall
+ownership-index	test/spec/dsl/compile/owner_legal.hs	test/spec/dsl/compile/owner_illegal.hs	OwnerPrimary	dhall/examples/trivial_app.dhall

@@ -4,11 +4,11 @@
 `documents/engineering/repository_layout_doctrine.md` section 4 splits the toolchain into
 two halves that must never be stored together:
 
-    toolchain/requirements.json   authored, tracked  — what amoebius needs
-    gen/toolchain/resolved.json   generated, ignored — what this host resolved
+    tools/toolchain_requirements.json   authored, tracked  — what amoebius needs
+    .build/toolchain/resolved.json generated, ignored — what this host resolved
 
 This module is the only bridge between them. It reads the authored requirement, finds or
-materializes a satisfying tool, records the observation under `gen/toolchain/`, and hands
+materializes a satisfying tool, records the observation under `.build/toolchain/`, and hands
 the caller a resolved record. Nothing it writes lands under an authored root, and nothing
 it returns is ever copied back into a tracked file.
 
@@ -41,15 +41,21 @@ import zipfile
 from pathlib import Path
 from typing import Any, Iterable
 
+import containment
+
 ROOT = Path(__file__).resolve().parent.parent
-REQUIREMENTS = ROOT / "toolchain" / "requirements.json"
-RESOLVED = ROOT / "gen" / "toolchain" / "resolved.json"
+REQUIREMENTS = ROOT / "tools" / "toolchain_requirements.json"
+RESOLVED = containment.state_path("build", "toolchain", "resolved.json", actor="production")
 
 # Acquisition targets. Every one of these is an ignored generated root; the authored half
-# of `toolchain/` is `requirements.json` and nothing else.
-TOOL_BIN = ROOT / "toolchain" / "bin"
-TOOL_RUNTIME = ROOT / "toolchain" / "runtime"
-DOWNLOADS = ROOT / "toolchain" / "downloads"
+# is `tools/toolchain_requirements.json`; acquired state never shares that authored root.
+TOOL_BIN = containment.state_path("build", "toolchain", "bin", actor="production")
+TOOL_RUNTIME = containment.state_path("build", "toolchain", "runtime", actor="production")
+DOWNLOADS = containment.state_path("build", "toolchain", "downloads", actor="production")
+TOOL_CACHE = containment.state_path("build", "toolchain", "cache", actor="production")
+NODE_ROOT = containment.state_path("build", "node_modules", ".keep-parent", actor="production").parent
+CABAL_STORE_ROOT = containment.state_path("build", "cabal-store", "tool-installs", actor="production")
+TOOL_BUILD_ROOT = containment.state_path("build", "dist-newstyle", "tool-installs", actor="production")
 
 # A leading `\b` would not fire inside a tag such as `v35.1`, because `v` and `3` are both
 # word characters, and the search would then settle on the `1` after the dot — a silently
@@ -61,6 +67,49 @@ NETWORK_TIMEOUT = 120
 
 class ResolutionError(RuntimeError):
     """A requirement could not be satisfied on this host."""
+
+
+def contained_env() -> dict[str, str]:
+    """Subprocess state roots; executable discovery still uses the caller's PATH."""
+    environment = dict(os.environ)
+    home = TOOL_RUNTIME / "home"
+    temporary = containment.state_path("build", "tmp", "toolchain", actor="production")
+    xdg_config = TOOL_RUNTIME / "xdg-config"
+    xdg_cache = TOOL_CACHE / "xdg"
+    for path in (home, temporary, TOOL_CACHE, xdg_config, xdg_cache):
+        path.mkdir(parents=True, exist_ok=True)
+    # cabal-install creates its default file on the first invocation but does not
+    # reload that file in the same process.  A pristine contained HOME would
+    # therefore fail its first project build with `unknown repo`, even though the
+    # newly-created file was correct for the next run.  Materialize the minimal
+    # generated configuration before invoking Cabal so a fresh checkout and a
+    # warm checkout have identical behaviour.  Both the configuration and its
+    # package index remain beneath `.build/toolchain/**`.
+    cabal_config = xdg_config / "cabal" / "config"
+    if not cabal_config.exists():
+        cabal_config.parent.mkdir(parents=True, exist_ok=True)
+        cabal_config.write_text(
+            "repository hackage.haskell.org\n"
+            "  url: https://hackage.haskell.org/\n"
+            f"remote-repo-cache: {xdg_cache / 'cabal' / 'packages'}\n"
+            f"logs-dir: {xdg_cache / 'cabal' / 'logs'}\n",
+            encoding="utf-8",
+        )
+    environment.update(
+        {
+            "HOME": str(home),
+            "TMPDIR": str(temporary),
+            "TMP": str(temporary),
+            "TEMP": str(temporary),
+            "XDG_CACHE_HOME": str(xdg_cache),
+            "XDG_CONFIG_HOME": str(xdg_config),
+            "XDG_DATA_HOME": str(TOOL_RUNTIME / "xdg-data"),
+            "XDG_STATE_HOME": str(TOOL_RUNTIME / "xdg-state"),
+            "npm_config_cache": str(TOOL_CACHE / "npm"),
+            "PLAYWRIGHT_BROWSERS_PATH": str(TOOL_RUNTIME / "playwright"),
+        }
+    )
+    return environment
 
 
 # --------------------------------------------------------------------------
@@ -117,7 +166,7 @@ def host_platform() -> str:
 
 
 def run_version(argv: list[str]) -> str:
-    result = subprocess.run(argv, capture_output=True, check=False)
+    result = subprocess.run(argv, env=contained_env(), capture_output=True, check=False)
     decode = lambda raw: (raw or b"").decode("utf-8", errors="replace")
     result = subprocess.CompletedProcess(
         argv, result.returncode, decode(result.stdout), decode(result.stderr)
@@ -132,7 +181,7 @@ def observe(path: Path) -> dict[str, Any]:
     """Content identity of a materialized tool, computed after resolution.
 
     This digest detects corruption inside the run that produced it. It is never promoted
-    into `toolchain/requirements.json`, which is what would turn it into a package pin.
+    into `tools/toolchain_requirements.json`, which is what would turn it into a package pin.
     """
     return {"size": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
 
@@ -228,12 +277,44 @@ def resolve_host(name: str, spec: dict[str, Any]) -> dict[str, Any]:
     return record
 
 
+def ensure_node_package_graph() -> None:
+    """Materialize package.json's authored development graph as one contained install.
+
+    Installing one `--no-save` package at a time lets npm prune earlier packages as
+    extraneous. The graph includes supporting executables such as esbuild that do not need
+    their own resolver record but are still required by the resolved Spago tool.
+    """
+    packages = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["devDependencies"]
+    if all((NODE_ROOT / package).is_dir() for package in packages):
+        return
+    NODE_ROOT.parent.mkdir(parents=True, exist_ok=True)
+    node_packages = [f"{package}@{requirement}" for package, requirement in sorted(packages.items())]
+    install = subprocess.run(
+        [
+            "npm",
+            "install",
+            "--no-audit",
+            "--no-fund",
+            "--no-save",
+            "--prefix",
+            str(NODE_ROOT.parent),
+            *node_packages,
+        ],
+        cwd=ROOT,
+        env=contained_env(),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if install.returncode != 0:
+        raise ResolutionError(f"node tool graph: npm install failed: {install.stderr[-2000:]}")
+
+
 def resolve_node_package(name: str, spec: dict[str, Any]) -> dict[str, Any]:
-    package_root = ROOT / "node_modules" / spec["package"]
+    ensure_node_package_graph()
+    package_root = NODE_ROOT / spec["package"]
     if not package_root.is_dir():
-        install = subprocess.run(["npm", "install", "--no-audit", "--no-fund"], cwd=ROOT, text=True, capture_output=True, check=False)
-        if install.returncode != 0:
-            raise ResolutionError(f"{name}: npm install failed: {install.stderr[-2000:]}")
+        raise ResolutionError(f"{name}: authored Node graph did not install {spec['package']}")
     for relative in spec["relative_paths"]:
         candidate = package_root / relative
         if not candidate.is_file():
@@ -420,8 +501,22 @@ def resolve_hackage(name: str, spec: dict[str, Any], resolved: dict[str, Any]) -
     TOOL_BIN.mkdir(parents=True, exist_ok=True)
     target = TOOL_BIN / spec["install_name"]
     constraint = " && ".join(spec["requirement"].split())
-    with tempfile.TemporaryDirectory(prefix="amoebius-hackage-") as store:
-        with tempfile.TemporaryDirectory(prefix="amoebius-hackage-build-") as build:
+    CABAL_STORE_ROOT.mkdir(parents=True, exist_ok=True)
+    TOOL_BUILD_ROOT.mkdir(parents=True, exist_ok=True)
+    environment = contained_env()
+    update = subprocess.run(
+        [cabal, "--ignore-project", "update"],
+        cwd=ROOT,
+        env=environment,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if update.returncode != 0:
+        transcript = (update.stdout or "") + (update.stderr or "")
+        raise ResolutionError(f"{name}: project-local cabal update failed: {transcript[-2000:]}")
+    with tempfile.TemporaryDirectory(prefix="amoebius-hackage-", dir=CABAL_STORE_ROOT) as store:
+        with tempfile.TemporaryDirectory(prefix="amoebius-hackage-build-", dir=TOOL_BUILD_ROOT) as build:
             install = subprocess.run(
                 [
                     cabal,
@@ -438,6 +533,7 @@ def resolve_hackage(name: str, spec: dict[str, Any], resolved: dict[str, Any]) -
                     "--overwrite-policy=always",
                 ],
                 cwd=ROOT,
+                env=environment,
                 text=True,
                 capture_output=True,
                 check=False,

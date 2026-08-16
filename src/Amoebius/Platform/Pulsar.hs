@@ -77,7 +77,7 @@ provisionPulsarBackbone demand = do
         | value == 0 || value > pulsarHotTierCapBytes demand -> Left "size-trigger-outside-hot-tier-cap"
         | otherwise -> Right (ProvisionedPulsarBackbone demand storage metadata)
  where
-#ifdef PHASE30_OFFLOAD_TIME_ONLY_MUTANT
+#ifdef PLATFORM_BACKBONE_OFFLOAD_TIME_ONLY_MUTANT
   effectiveTrigger _ = Nothing
 #else
   effectiveTrigger = pulsarSizeTriggerBytes

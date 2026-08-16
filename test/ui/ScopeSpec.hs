@@ -183,7 +183,7 @@ rejectsClass fixture rejectClass = case rejectClass of
 
 checkMutantControl :: FilePath -> KernelFixture -> IO ()
 checkMutantControl root fixture = do
-  source <- readFile (root </> "test/mutants/phase_17_drop_owner_equality.mutant")
+  source <- readFile (root </> "test/mutant/scoped_identity/drop_owner_equality.mutant")
   assert ("guard-deletion" `contains` source) "owner-equality mutant fixture drifted"
   rows <- loadTable (root </> "test/fixtures/ui_scope/owner_tenant_swaps.tsv")
   outcomes <- forM rows $ \row -> case row of
@@ -198,7 +198,7 @@ checkMutantControl root fixture = do
 runMutant :: FilePath -> KernelFixture -> IO ()
 runMutant root fixture = do
   checkMutantControl root fixture
-  putStrLn "phase17-scope-mutant: RED drop_owner_equality same-tenant+cross-tenant"
+  putStrLn "scoped-identity-mutant: RED drop_owner_equality same-tenant+cross-tenant"
   exitFailure
 
 dropOwnerEqualityMutant :: RequestContext -> Tenant -> Subject -> Bool

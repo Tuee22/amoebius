@@ -259,7 +259,7 @@ def cleanup(path: str) -> dict[str, Any]:
     reset()
     if not path.startswith("/var/lib/amoebius/phase46/") or len(path) < len("/var/lib/amoebius/phase46/") + 8:
         raise Phase46Failure("unsafe-hostpath-cleanup")
-    run((DOCKER, "exec", "amoebius-phase24-control-plane", "/bin/rm", "-rf", path))
+    run((DOCKER, "exec", "amoebius-bootstrap-coordinator-control-plane", "/bin/rm", "-rf", path))
     namespace_absent = kubectl("get", "namespace", NAMESPACE, check=False).returncode != 0
     pvs = [item["metadata"]["name"] for item in get_json("get", "persistentvolume")["items"] if item["metadata"]["name"].startswith("phase46-")]
     if not namespace_absent or pvs:

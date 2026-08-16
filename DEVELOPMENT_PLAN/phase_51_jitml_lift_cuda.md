@@ -44,9 +44,15 @@ Linux/Linux-CUDA hardware, Lima for Apple hardware, or WSL2 for Windows hardware
 
 ## Phase Status
 
+⏸️ Blocked — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
+invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
+repository roots defined by Phase 0. Scope amendments below remain normative.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Invalidated historical record:**
 
@@ -201,7 +207,7 @@ four compiled mutants, documentation, and the ledger. Details are delegated to [
 device vector. It is part of what makes the host `linux-cuda`, not a phase deliverable.
 **Independent Validation**: the single live command checks the positive
 CUDA-to-commit chain, both pre-effect capacity negatives, the pointer-conflict and command-id conflict
-negatives, and all four committed mutants against external evidence.
+negatives, and all four committed mutants against repository-local evidence.
 **Docs to update**:
 `documents/engineering/lift_and_compose_doctrine.md`,
 `documents/engineering/capability_extension_doctrine.md`,

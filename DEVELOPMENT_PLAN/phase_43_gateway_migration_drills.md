@@ -46,9 +46,15 @@ the two Linux classes to Incus, Apple to Lima, and Windows to WSL2.
 
 ## Phase Status
 
+⏸️ Blocked — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
+invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
+repository roots defined by Phase 0. Scope amendments below remain normative.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Invalidated historical record:**
 
@@ -413,8 +419,8 @@ None inside the sealed single-host child-forest boundary.
 ## Sprint 43.3: Register-2.5 gateway-migration runtime fidelity — simulation + trace validation ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/sim/GatewayMigrationSimSpec.hs` (the `IOSimPOR` battery over
-the modeled route53 + geo-replicated Pulsar) and `test/sim/GatewayMigrationTrace.hs` (the trace-validator
+**Implementation**: `test/spec/sim/GatewayMigrationSimSpec.hs` (the `IOSimPOR` battery over
+the modeled route53 + geo-replicated Pulsar) and `test/spec/sim/GatewayMigrationTrace.hs` (the trace-validator
 checking observed transitions against the emitted `Next`), driving the real `src/Amoebius/Multicluster/*`
 forest code lifted onto the Phase-15 `io-classes` `Env` interface — delivered as the deterministic pure
 runtime/trace battery.
@@ -495,7 +501,7 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
   histories, and always tear down leak-free (verified by the OS-boundary kind/network-namespace/journal/DNS observer) —
   emitting the machine-derived per-run ledger artifact. The gate topology `.dhall`, `test/inject/journal/` (the
   out-of-forest write-ID journal schema), and the authored run-ledger schema validator are **committed in this
-  phase's oracle-pinning sprint before the runtime exists**; generated ledgers remain under `gen/runs/`. The runtime-dependent `test/inject/mutants/` seeded mutants (the `verify-caught-up`-stub
+  phase's oracle-pinning sprint before the runtime exists**; generated ledgers remain under `.build/runs/`. The runtime-dependent `test/inject/mutants/` seeded mutants (the `verify-caught-up`-stub
   and `promote-before-fence` mutants that must go red) mutate the Sprint-43.1 implementation, so they are
   **committed at the start of Phase 43, before that implementation is trusted** (the §M.1
   start-of-owning-phase form for oracles that depend on later code).

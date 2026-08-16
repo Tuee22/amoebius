@@ -96,7 +96,7 @@ the recipe becomes a projection of typed data and the committed artifact is the 
 
 ## 3. The rule
 
-- **No production generated artifact lives in the repository.** No `gen/tla/*.tla`, rendered manifest YAML, reflected
+- **No production generated artifact lives in the repository.** No `.build/tla/*.tla`, rendered manifest YAML, reflected
   `*.dhall` schema, checked `ClientPlan`/`UiServerPlan`, offline codec/migration/compatibility or service-worker
   manifest, per-app content manifest, generated `*.purs` catalog codec, or compiled generic client bundle is
   committed. The repository holds Haskell and generic PureScript
@@ -121,18 +121,18 @@ the recipe becomes a projection of typed data and the committed artifact is the 
   or same-commit manifest assertion cannot promote it to an independent oracle.
 - **Generated negative copies are not authored mutants.** A positive seed, mutation operator, and mutation
   selection may be authored source. The materialized negative files produced from them are generated test
-  input and belong under `gen/test-corpora/` or a temporary directory, even when committed copies would make a
+  input and belong under `.build/test-corpora/` or `.build/tmp/`, even when committed copies would make a
   checker convenient to run.
 - **One emitted path, one suffix convention, one scan.** So that "generated" and "authored oracle" can never
   be confused by a reader or a check, three conventions are normative and are stated **here**, not
   re-derived per phase:
-  1. **Emitted artifacts are written only under the git-ignored `gen/` tree**, in a per-kind subdirectory
-     (`gen/tla/`, `gen/manifests/`, `gen/dhall/`, `gen/ui/`). No emitted artifact is written anywhere else,
-     and nothing under `gen/` is ever tracked.
+  1. **Emitted artifacts are written only under the git-ignored `.build/` tree**, in a per-kind subdirectory
+     (`.build/tla/`, `.build/manifests/`, `.build/dhall/`, `.build/ui/`). No emitted artifact is written anywhere else,
+     and nothing under `.build/` is ever tracked.
   2. **A committed oracle carries a `.golden` suffix appended to its natural extension**
      (`ToyModel.tla.golden`, `<deployment-id>.json.golden`) and lives under `test/`. The suffix is what makes
      an authored fixture textually distinguishable from the artifact it pins.
-  3. **The never-committed check is one command**: `git ls-files -- 'gen/*'` plus a per-kind extension sweep
+  3. **The never-committed check is one command**: `git ls-files -- '.build/*'` plus a per-kind extension sweep
      over tracked paths whose extension is *literally* the generated one — for TLA+,
      `git ls-files -- '*.tla' '*.cfg'` — each returning empty. A `.golden`-suffixed fixture does not match
      either, by construction; an actually-emitted `.tla`/`.cfg` under version control fails.
@@ -145,8 +145,8 @@ the recipe becomes a projection of typed data and the committed artifact is the 
   snapshot and is prohibited at any phase.
 - **Run evidence is generated and never committed.** Ledgers, receipts, logs, traces, coverage, enumeration,
   resolved toolchains, dependency graphs, screenshots, and machine observations are written beneath
-  `gen/runs/` and uploaded to the external evidence store. Their durability comes from immutable external
-  retention and attestation, not from copying generated files into Git.
+  `.build/runs/` and installed in the content-addressed `.build/evidence-store/`. Optional publication may
+  copy an attestation to a remote service, but no local evidence or staging path may live outside the checkout.
 - **Dependency resolution is generated and never committed.** Lock/freeze files, solver plans, package
   checksum tables, resolved paths, and hard-coded library or package SHA values are prohibited in tracked
   files. The current compatible graph and observed integrity data are resolved dynamically for every clean
@@ -176,8 +176,8 @@ be committed; output copied from the subject, a reference program, a resolver, o
   Phase 2 validates this discipline with the `amoebius dev model emit` path, a byte-exact independent golden,
   four renderer mutants, and a tracked-file scan that rejects generated `.tla`/`.cfg` artifacts.
   Phase 3 applies the same path to `GatewayMigration`: the committed files under
-  `test/formal/gateway/golden/` are renderer oracles, while every executable TLC input remains under ignored
-  `gen/tla/`; the phase gate checks their byte equality before model checking.
+  `test/golden/formal/gateway/` are renderer oracles, while every executable TLC input remains under ignored
+  `.build/tla/`; the phase gate checks their byte equality before model checking.
 - **One place to change a shape.** Editing a manifest shape, an invariant, or a schema field is an edit to one
   Haskell source; every rendering follows.
 
@@ -291,4 +291,4 @@ or WSL2 on Windows.
 - [Conformance Harness Doctrine](./conformance_harness_doctrine.md) — golden rendering tests, no committed artifact
 - [Documentation Standards](../documentation_standards.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
-- [Testing Doctrine](./testing_doctrine.md) — run-time enumeration, authored expectation, and external evidence
+- [Testing Doctrine](./testing_doctrine.md) — run-time enumeration, authored expectation, and repository-local evidence

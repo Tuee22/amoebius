@@ -19,7 +19,7 @@ import Data.ByteString qualified as ByteString
 import Data.ByteString.Builder qualified as Builder
 import Data.ByteString.Lazy qualified as LazyByteString
 import Data.Word (Word32, Word8)
-#ifdef PHASE29_RAW_SHA256_SEAL_MUTANT
+#ifdef VAULT_PKI_RAW_SHA256_SEAL_MUTANT
 import Crypto.Hash.SHA256 qualified as SHA256
 import Data.Bits (xor)
 #endif
@@ -44,7 +44,7 @@ sealUnlockMaterialIO password plaintext = do
   pure (sealUnlockMaterial password salt nonce plaintext)
 
 sealUnlockMaterial :: ByteString -> ByteString -> ByteString -> ByteString -> Either String ByteString
-#ifdef PHASE29_RAW_SHA256_SEAL_MUTANT
+#ifdef VAULT_PKI_RAW_SHA256_SEAL_MUTANT
 sealUnlockMaterial password _ _ plaintext =
   Right ("RAW-SHA256\0" <> xorCycle (SHA256.hash password) plaintext)
 #else
@@ -63,7 +63,7 @@ sealUnlockMaterial password salt nonceBytes plaintext
 #endif
 
 openUnlockMaterial :: ByteString -> ByteString -> Either String ByteString
-#ifdef PHASE29_RAW_SHA256_SEAL_MUTANT
+#ifdef VAULT_PKI_RAW_SHA256_SEAL_MUTANT
 openUnlockMaterial password envelope
   | "RAW-SHA256\0" `ByteString.isPrefixOf` envelope =
       Right (xorCycle (SHA256.hash password) (ByteString.drop 11 envelope))
@@ -167,7 +167,7 @@ cryptoEither message result = case result of
   CryptoPassed value -> Right value
   CryptoFailed _ -> Left message
 
-#ifdef PHASE29_RAW_SHA256_SEAL_MUTANT
+#ifdef VAULT_PKI_RAW_SHA256_SEAL_MUTANT
 xorCycle :: ByteString -> ByteString -> ByteString
 xorCycle key input =
   let repetitions = (ByteString.length input + ByteString.length key - 1) `div` ByteString.length key

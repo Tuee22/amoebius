@@ -266,9 +266,15 @@ moment a node is replaced. amoebius requires the two backings to deliver that in
   `spec.csi.driver: ebs.csi.aws.com`, the Pulumi-created EBS ID as `volumeHandle`, and node affinity for the
   EBS Availability Zone. Node churn is invisible to the data, and cluster rebuild recreates only the PV
   binding plus the ephemeral CSI control components — never the durable volume.
-- **Host-backed:** the bytes live in the host's retained storage root, not in the container or the kubelet's
-  ephemeral scratch. A Pod reschedule re-mounts the same host path; the node-affinity pin ([§4](#4-deterministic-pv-naming-and-the-explicit-bind)) keeps the
+- **Host-backed:** production bytes live beneath the physical checkout's `.data/storage/**`, not in the
+  container, kubelet scratch, a user home, or a system data directory. A Pod reschedule re-mounts the same
+  project-contained host path; the node-affinity pin ([§4](#4-deterministic-pv-naming-and-the-explicit-bind)) keeps the
   ordinal landing where its bytes are.
+
+Tests never point this contract at `.data/**`. Their equivalent backing is created below one unique
+`.test_data/runs/<run-id>/storage/**` root and is governed by the ownership and deletion proofs in the testing
+doctrine. A retained root outside the physical repository, or an unresolved root supplied through ambient
+environment state, is rejected before any mount or allocation.
 
 Either way, the rule is the same: **node lifecycle and storage lifecycle are decoupled**, which is the
 node-level precondition for the cluster-level guarantee in [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind).

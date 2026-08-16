@@ -26,7 +26,7 @@ refoldSchedulerPlacement
   -> SchedulerResourceVector
   -> Either PlacementError SchedulerResourceVector
 refoldSchedulerPlacement capacity existing candidate =
-#ifdef PHASE27_NUMERIC_ADD_MUTANT
+#ifdef CAPACITY_SCHEDULER_NUMERIC_ADD_MUTANT
   let total = candidate
 #else
   let total = foldl addSchedulerVector candidate existing

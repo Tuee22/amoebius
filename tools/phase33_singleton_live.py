@@ -30,7 +30,7 @@ LIVE_EVIDENCE = EVIDENCE / "singleton-live.json"
 NAMESPACE = "phase33-system"
 SINGLETON = "amoebius-control-plane"
 LEASE = "amoebius-reconciler"
-NODE = "amoebius-phase24-control-plane"
+NODE = "amoebius-bootstrap-coordinator-control-plane"
 NODE_ARTIFACTS = "/var/local/amoebius/phase33"
 NODE_PORT = 32034
 IMAGE = "registry.amoebius.invalid:5000/amoebius/base@sha256:224ce702545f17825dd18eb7108c9a72ea914e1b5ae01218ad955ab624cd94d4"
@@ -639,7 +639,7 @@ def main() -> int:
         raise LiveFailure("harness-issued-platform-write")
     result = {
         "schema": "amoebius.phase33.singleton-live.v1", "register": 3, "substrate": "linux-cpu",
-        "prerequisites": {"phase32ReceiptFingerprint": phase32_receipt.get("receiptFingerprint"), "retainedCluster": "amoebius-phase24"},
+        "prerequisites": {"phase32ReceiptFingerprint": phase32_receipt.get("receiptFingerprint"), "retainedCluster": "amoebius-bootstrap-coordinator"},
         "historyCapacity": history, "artifacts": artifacts, "vaultProvision": vault,
         "manifest": {"kind": "Deployment", "replicas": 1, "strategy": "Recreate", "persistentVolumeClaims": [], "standbyReplicas": 0, "amoebiusElection": False, "image": IMAGE, "fieldManager": "amoebius-phase33-singleton"},
         "handoff": handoff, "adminSequence": admin, "edge": edge, "adminReach": reach,

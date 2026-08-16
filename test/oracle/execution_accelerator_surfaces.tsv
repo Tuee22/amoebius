@@ -1,0 +1,81 @@
+# Authored expectation for the Phase-9 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   items     the 32 variant names and 45 mutant names the run actually read, as one pool
+#   metrics   the metric keys in .build/dsl/execution-accelerator/phase-results.tsv
+#   checks    the check ids tools/execution_accelerator_gate.py implements
+#
+# The 77 cases and mutants are partitioned across this phase's claim surfaces so each item
+# is claimed exactly once. That is what makes the join evidence rather than decoration:
+# an item nobody claims, or one claimed twice, fails the gate.
+#
+# **Five contract surfaces carry no id, and that is a finding, not an oversight.**
+# `accelerator-interconnect`, `build-execution-envelope`, `engine-system-reserve`,
+# `monitoring-work-budget`, and `pulumi-execution-envelope` are named in the Phase-9
+# contract, but the battery records no distinct observation for any of them: they have no
+# oracle case, no mutant, and no metric of their own. The ledger therefore carries them
+# UNVERIFIED, and the gap is recorded against Phase 9 in legacy_tracking_for_deletion.md.
+# Pointing them at a shared acceptance token would have made the ledger claim five results
+# the run did not produce.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+execution-transition-source	items	copy-new-execution-as-old,drop-removed-execution
+exact-prior-generation-resolution	items	execution-prior-old-revision,drop-execution-old-revision
+kind-indexed-controller-expansion	items	execution-rollout-surge,drop-execution-surge
+empty-capable-execution-epochs	items	invent-first-deploy-old,resolve-latest-execution
+componentwise-execution-peak	items	execution-replica-peak,drop-execution-replica
+scheduler-reservation-projection	items	scheduler-projection,scheduler-drop-pad
+aggregate-root-ledger-cas	items	scheduler-aggregate-root,scheduler-per-record-cas
+binding-inflight-retained-debit	items	scheduler-snapshot-cas,scheduler-timeout-release
+ledger-only-absent-recovery	items	scheduler-binding-crash-release
+zero-capable-host-release-partitions	items	partition-parent,partition-drop-system-reserve
+kubelet-runtime-metadata-model	items	runtime-model,runtime-missing-model
+planned-slot-observed-uid-separation	items	runtime-scope-domain,runtime-scope-confusion
+runtime-component-role-routing	items	runtime-nodefs,runtime-swap-role
+runtime-accounting-domain-equality	items	runtime-imagefs,runtime-drop-largest-metadata
+node-image-content-join	items	image-content-join,image-manifest-join,image-drop-index
+node-image-snapshot-join	items	image-snapshot-join,image-drop-snapshot
+node-image-model-version	items	image-storage-model,image-ignore-model
+node-image-pull-workspace	items	node-image-workspace,image-drop-workspace,image-drop-manifest
+filesystem-layout-routing	items	split-image-containerd-v1,layout-enable-v1-split-image
+alias-aware-backing-grouping	items	filesystem-layout-alias,layout-allow-alias,partition-carve-alias
+physical-disk-parent-accounting	items	filesystem-layout-swapped,layout-ignore-observation,partition-double-debit-child
+vm-usable-raw-unit-separation	items	partition-unit-mismatch,partition-mix-vm-usable,partition-use-vm-usable-as-raw
+provider-instance-store-root	items	instance-store-root,provider-under-size-instance-store
+provider-root-ebs-rounding	items	root-ebs-bytes-quota,provider-skip-allocation-rounding,provider-skip-presentation
+provider-node-root-quota	items	root-ebs-volume-quota,provider-debit-durable
+provider-cover-slot-identities	items	provider-reuse-template-id
+accelerator-family-and-profile	items	cuda-family-absent,accelerator-treat-none-as-cuda
+whole-accelerator-device-count	items	cuda-device-count,accelerator-drop-device-count
+accelerator-source-workload-domains	items	accelerator-drop-source-domain
+accelerator-coexistence-epochs	items	accelerator-favorable-epoch
+accelerator-unsharded-residency	items	cuda-unsharded-fragmentation,accelerator-split-unsharded
+accelerator-replicated-residency	items	metal-profile,accelerator-ignore-metal-profile
+accelerator-sharded-residency	items	cuda-shard-byte-sum,accelerator-ignore-shard-sum
+accelerator-interconnect	checks	
+accelerator-net-allocatable-vram	items	cuda-vram-reserve,accelerator-spend-raw-vram
+accelerator-exclusive-ownership	items	accelerator-shared-owner,accelerator-share-device
+etcd-logical-transition	items	etcd-drop-preallocated-next,etcd-drop-wal
+etcd-physical-transition	items	etcd-transition-physical,etcd-drop-snapshot-save,etcd-drop-defrag
+build-execution-envelope	checks	
+engine-system-reserve	checks	
+monitoring-work-budget	checks	
+pulumi-execution-envelope	checks	
+composed-full-resource-vector	metrics	acceptance-token
+independent-composed-validator	metrics	positive-specs
+phase9-negative-corpus	metrics	named-negatives,variant-rows,legal-twins
+phase9-gate1-accelerator-owner	metrics	gate1-accelerator-owner
+phase9-property-battery	metrics	quickcheck-properties
+phase9-mutant-battery	metrics	mutants
+phase9-validation-locus-ledger	metrics	registry-subcases
+phase9-fold-compile-totality	metrics	phase9-fold-totality
+live-scheduler-binding	metrics	live-scheduler-and-storage
+live-runtime-storage-observation	checks	
+live-accelerator-observation	metrics	live-accelerator-and-provider
+live-provider-root-materialization	checks	
+runtime-model-correspondence	metrics	runtime-correspondence
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle,locus-ledger-honesty-banner

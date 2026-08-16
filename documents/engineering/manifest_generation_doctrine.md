@@ -105,7 +105,7 @@ and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-
 
 > **Validated boundary (Phase 13, Register 1).** The pure whole-deployment renderer, canonical Aeson
 > encoding, eighteen capability/shape goldens, exact source-domain projection, and output-safety battery pass
-> under `tools/phase13_gate.py` (ledger `external-run-reference`). This establishes rendered values only;
+> under `tools/render_manifest_gate.py` (ledger `external-run-reference`). This establishes rendered values only;
 > the [§5 live reconciler](#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is independently
 > validated by Phase 26; scheduler CAS/Binding is independently validated by Phase 27, and later
 > service-specific enforcement keeps its own phase boundary.

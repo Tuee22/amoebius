@@ -14,7 +14,7 @@ and remains authoritative for the rulebook's structure.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, documents/engineering/repository_layout_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -40,7 +40,7 @@ happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gat
    - A golden or expected value regenerated from the implementation's own output is not a test: it passes
      for any output, a stub's included.
    - A reference implementation may generate an expected value at run time, but that expected file remains
-     under `gen/runs/` and is never committed. The reference implementation and its authored inputs may be
+     under `.build/runs/` and is never committed. The reference implementation and its authored inputs may be
      version-controlled when they do not import or reuse the subject's decision logic.
    - Authorship before the implementation is strong provenance when Git history establishes it. An existing
      oracle whose chronology or independent review cannot be established is a regression fixture, not an
@@ -138,16 +138,16 @@ gate cannot pass unless all of these conditions hold:
 
 1. The result is bound to a recorded **source-snapshot** digest, and commit timing is not a gate input
    ([the enforcement contract](../documents/engineering/repository_layout_doctrine.md#8-enforcement-and-source-snapshot-acceptance) defines the snapshot).
-2. Test surfaces are enumerated at run time into `gen/test-surfaces/` and joined to authored expectations.
-3. All deliberate compilation, generation, resolution, and run evidence stays under `gen/`, a declared build
-   root, or a temporary directory; ignored Python interpreter caches are the sole source-adjacent exception.
+2. Test surfaces are enumerated at run time into `.build/test-surfaces/` and joined to authored expectations.
+3. All deliberate compilation, generation, resolution, caching, temporary output, and run evidence stays
+   under `.build/**`; ignored Python interpreter caches are the sole source-adjacent exception.
 4. No command writes beneath an authored root except for Python's ignored interpreter cache.
 5. No `.lock`, `.freeze`, package checksum database, hard-coded library/package SHA, resolved user-home path,
    generated ledger, evidence file, enumeration, bytecode, or generated source is tracked.
 6. The gate leaves tracked files unchanged and creates no unignored generated path.
 7. The Docker context contains no generated output, evidence, dependency tree, cache, secret, or runtime state.
-8. The generated run bundle is schema-checked and uploaded as an immutable external attestation bound to the
-   source-snapshot digest and phase contract.
+8. The generated run bundle is schema-checked and installed as an immutable, content-addressed attestation
+   under `.build/evidence-store/**`, bound to the source-snapshot digest and phase contract.
 9. The source snapshot contains every authored input the build, tests, and gate use, and the same documented
    command succeeds against the snapshot alone; an ignored worktree file is never an input.
 10. The semantic provenance scan rejects tracked reproducible copies even when their paths are not ignored or
@@ -158,6 +158,14 @@ gate cannot pass unless all of these conditions hold:
     ignore rule for a path the tree does not contain, and a path naming a phase ordinal outside
     [§U](#u-the-final-repository-layout) clause 3's exception set each fail the gate. Clause 5's deferral
     mechanism applies unchanged.
+12. A before/after host inventory proves that the run created no amoebius-owned path, mount, loop device,
+    container, volume, cache, or daemon state outside the physical repository root.
+13. Production runtime and durable state use only `.data/**`; test runtime and durable state use only one
+    harness-owned `.test_data/runs/<run-id>/**` root. A test fails before mutation if production state or
+    configuration is selected, and teardown deletes only its exact marker-proven run root.
+14. `test-secrets.dhall` is the sole cleartext secret-at-rest. Only the elevated test harness may read it;
+    production rejects it, and no run copies it into output, state, logs, arguments, environments, container
+    contexts, or attestations.
 
 <a id="s-commit-timing"></a>
 **Commit timing is not a gate input, and no document may reintroduce it as one.** A result is bound to the
@@ -213,7 +221,7 @@ The plan, implementation, tests, and historical evidence are independent inputs 
 presumed correct merely because it already exists or is authoritative for a different concern. Target intent
 comes from current doctrine and explicit operator decisions; sequencing and acceptance come from this plan;
 implementation presence comes from dated repository inspection; current proof comes only from the redesigned
-gate and verified external attestation.
+gate and verified repository-local attestation.
 
 Every documentation sweep follows this policy:
 
@@ -303,7 +311,7 @@ already owns. Four clauses follow.
    | Sanctioned | Why |
    |---|---|
    | `DEVELOPMENT_PLAN/phase_NN_<slug>.md` | [§B](development_plan_standards.md#b-canonical-file-layout-snake_case) makes `NN` the document's sort order and [§E](development_plan_phase_model.md#e-one-canonical-phase-model) makes it the document's identity. The ordinal is not a label on a capability; it *is* the file. |
-   | `gen/**` paths keyed by phase | The phase is a run's partition key. These paths are generated, ignored by both contracts, and never repository names. The rule still binds the **authored constant** that spells such a path, so one constant is the only place a generated path learns a phase. |
+   | `.build/**` paths keyed by phase | The phase is a run's partition key. These paths are generated, ignored by both contracts, and never repository names. The rule still binds the **authored constant** that spells such a path, so one constant is the only place a generated path learns a phase. |
 
    Everything else is out: source files and directories, fixtures, goldens, negatives, oracles, mutants,
    harness scripts, tool filenames, build flags, build-component names (they become build paths), and literal

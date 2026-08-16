@@ -106,7 +106,7 @@ planRetainedInventory observedBackings existing proposed = do
   traverse_ validateGroup groups
   let capacityByGroup = fmap groupCapacity groups
       debit = foldl' (debitGroup capacityByGroup) Map.empty (Map.elems provisioned)
-#ifndef PHASE28_SKIP_DURABLE_AGGREGATE_MUTANT
+#ifndef RETAINED_STORAGE_SKIP_DURABLE_AGGREGATE_MUTANT
   validateDebits observedBackings debit
 #endif
   pvs <- traverse (renderOne capacityByGroup) provisioned
@@ -158,7 +158,7 @@ validateGroup rows = case rows of
 
 groupCapacity :: [ProvisionedRetained] -> Natural
 groupCapacity rows =
-#ifdef PHASE28_UNIFORM_BEFORE_ALLOCATION_MUTANT
+#ifdef RETAINED_STORAGE_UNIFORM_BEFORE_ALLOCATION_MUTANT
   maximumOrZero [geometryPhysicalBytes (provisionedGeometryWitness (provisionedRetained row)) | row <- rows]
 #else
   maximumOrZero [provisionedBytes (provisionedRetained row) | row <- rows]
@@ -171,7 +171,7 @@ debitGroup
   -> Map BackingId Natural
 debitGroup capacities accumulated row =
   let owner = provisionedBacking (provisionedRetained row)
-#ifdef PHASE28_SUM_UNEQUAL_ORDINALS_MUTANT
+#ifdef RETAINED_STORAGE_SUM_UNEQUAL_ORDINALS_MUTANT
       bytes = provisionedBytes (provisionedRetained row)
 #else
       bytes = Map.findWithDefault 0 (groupKey row) capacities
@@ -179,7 +179,7 @@ debitGroup capacities accumulated row =
    in Map.insertWith (+) owner bytes accumulated
 
 validateDebits :: Map BackingId Natural -> Map BackingId Natural -> Either RetainedInventoryError ()
-#ifdef PHASE28_COLLAPSE_BACKING_DEBITS_MUTANT
+#ifdef RETAINED_STORAGE_COLLAPSE_BACKING_DEBITS_MUTANT
 validateDebits observed debit
   | sum (Map.elems debit) <= sum (Map.elems observed) = Right ()
   | otherwise = Left (DurableDemandExceedsBacking (BackingId "collapsed") (sum (Map.elems debit)) (sum (Map.elems observed)))
@@ -200,7 +200,7 @@ renderOne capacities row = do
       capacity = Map.findWithDefault 0 (groupKey row) capacities
       required = geometryPhysicalBytes (provisionedGeometryWitness (provisionedRetained row))
       reclaim =
-#ifdef PHASE28_RECLAIM_DELETE_MUTANT
+#ifdef RETAINED_STORAGE_RECLAIM_DELETE_MUTANT
         "Delete"
 #else
         "Retain"
@@ -221,7 +221,7 @@ renderOne capacities row = do
       }
 
 sanitizeClaimRefForRebind :: RetainedClaimRef -> RetainedClaimRef
-#ifdef PHASE28_NO_REBIND_MUTANT
+#ifdef RETAINED_STORAGE_NO_REBIND_MUTANT
 sanitizeClaimRefForRebind = id
 #else
 sanitizeClaimRefForRebind reference = reference {retainedClaimUid = Nothing, retainedClaimResourceVersion = Nothing}

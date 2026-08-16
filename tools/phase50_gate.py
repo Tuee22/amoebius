@@ -187,7 +187,7 @@ def external_cleanup() -> dict[str, str]:
     )
     require(namespace.returncode == 0 and not any("phase50-ui-" in line for line in namespace.stdout.splitlines()), "phase50-namespace-residue")
     clusters = subprocess.run((KIND, "get", "clusters"), text=True, stdout=subprocess.PIPE, check=False, timeout=60).stdout.splitlines()
-    require(clusters == ["amoebius-phase24"], f"kind-clusters:{clusters}")
+    require(clusters == ["amoebius-bootstrap-coordinator"], f"kind-clusters:{clusters}")
     pulsar_tenants = phase35.admin_cli("tenants", "list", allow_missing=True)
     require(not any(line.strip().startswith("p50") for line in pulsar_tenants.splitlines()), "phase50-pulsar-residue")
     with phase34.port_forward("edge-system", "service/keycloak", phase36.KEYCLOAK_PORT, 8080):

@@ -1,0 +1,16 @@
+{
+  "oracleRole": "retained-storage",
+  "case": "migration_shrink_complete",
+  "expectedDigest": "sha256:nonce",
+  "observedDigest": "sha256:nonce",
+  "deletionObserved": true,
+  "expectedSequence": [
+    "copy-job-ran",
+    "independent-byte-verify-passed",
+    "claim-cut-over",
+    "reclaim-eligible",
+    "new-volume-nonce-read-back",
+    "old-extent-deletion-observed",
+    "old-extent-retired"
+  ]
+}

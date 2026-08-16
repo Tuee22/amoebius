@@ -41,9 +41,15 @@ use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ## Phase Status
 
+⏸️ Blocked — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
+invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
+repository roots defined by Phase 0. Scope amendments below remain normative.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Invalidated historical record:**
 
@@ -178,7 +184,7 @@ per-app frontend image, half-published plan, mixed-plan execution, or stale-plan
 - Compatibility checking and fail-closed `ReloadRequired` admission before handler lookup.
 - One amoebius runtime image identity shared by the two gate releases.
 - Phase-0 manifests, plan-pair/stale-digest matrices, fresh-action oracle, and three named mutants.
-- A Register-3 ledger recording authenticated challenge and external evidence digests.
+- A Register-3 ledger recording authenticated challenge and repository-local evidence digests.
 
 ### Validation
 
@@ -204,7 +210,7 @@ their later phases and are not claimed by this gate.
   manifests as generated, content-addressed, and absent from the committed tree.
 - `documents/engineering/release_lifecycle_doctrine.md` — record the immutable UI objects and two-release
   pointer history under the release hash.
-- `documents/engineering/testing_doctrine.md` — record the fresh action, external evidence, independent
+- `documents/engineering/testing_doctrine.md` — record the fresh action, repository-local evidence, independent
   manifests, and killed stale-digest/image-rebuild mutants.
 
 **Cross-references to add:**

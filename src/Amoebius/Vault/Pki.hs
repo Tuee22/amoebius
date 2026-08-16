@@ -19,7 +19,7 @@ data LeafCertificate = LeafCertificate
   deriving stock (Eq, Show)
 
 issueInternalLeaf :: Bool -> RootCa -> String -> Either VaultError LeafCertificate
-#ifdef PHASE29_SEALED_ISSUANCE_MUTANT
+#ifdef VAULT_PKI_SEALED_ISSUANCE_MUTANT
 issueInternalLeaf _ root commonName = Right (mkLeaf root commonName)
 #else
 issueInternalLeaf sealed root commonName
@@ -28,7 +28,7 @@ issueInternalLeaf sealed root commonName
 #endif
 
 mkLeaf :: RootCa -> String -> LeafCertificate
-#ifdef PHASE29_UNRELATED_LEAF_MUTANT
+#ifdef VAULT_PKI_UNRELATED_LEAF_MUTANT
 mkLeaf _ commonName = LeafCertificate commonName "unrelated-key"
 #else
 mkLeaf root commonName = LeafCertificate commonName (rootKeyId root)

@@ -22,7 +22,7 @@ runBootstrap arguments = do
   case contextSubstrate context of
     LinuxCpu -> pure ()
     LinuxCuda -> pure ()
-    substrate -> die ("phase24-linux-cpu-lane-requires-linux-guest;detected=" <> renderSubstrate substrate)
+    substrate -> die ("bootstrap-coordinator-linux-cpu-lane-requires-linux-guest;detected=" <> renderSubstrate substrate)
   before <- discoverCluster context
   token <- if clusterRegistered before
     then pure Nothing

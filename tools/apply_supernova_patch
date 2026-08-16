@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+# Apply the one reviewed compatibility patch from this physical checkout. Keeping
+# this helper POSIX-only lets the same authored command run in minimal builder
+# images without adding an interpreter to the supply-chain boundary.
+expected_patch=patches/supernova_ghc_9_12.patch
+if [ "$#" -ne 1 ] || [ "$1" != "$expected_patch" ]; then
+    echo "apply-supernova-patch: expected $expected_patch" >&2
+    exit 2
+fi
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+repository_root=$(dirname -- "$script_dir")
+candidate=$repository_root/$1
+if [ ! -f "$candidate" ]; then
+    echo "apply-supernova-patch: missing $candidate" >&2
+    exit 2
+fi
+
+exec git apply "$candidate"

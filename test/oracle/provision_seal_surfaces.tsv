@@ -1,0 +1,54 @@
+# Authored expectation for the Phase-11 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   items     the activation witnesses, planner cases, provision cases, and mutant names
+#             the run read
+#   metrics   the metric keys in .build/dsl/provision-seal/phase-results.tsv
+#   checks    the check ids tools/provision_seal_gate.py implements
+#
+# The 26 items are partitioned so each is claimed exactly once.
+#
+# **6 contract surfaces carry no id**: `creation-provider-action-batch`, `plan-token-replay-rejection`, `action-token-replay-rejection`, `receipt-bound-materialization-readback`, `promised-identity-rejection`, `phase11-validation-locus-ledger`.
+# None has an oracle case, a mutant, or a metric of its own, so the ledger carries them
+# UNVERIFIED rather than asserting results the run did not produce. The gap is recorded
+# against Phase 11 in legacy_tracking_for_deletion.md.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+conditional-infrastructure-planner	items	preexisting,creation
+internally-derived-infrastructure-demand	items	illegal_elastic_per_node_expansion_overcommit
+standalone-root-supply	items	illegal_cuda_on_cpu_target
+forest-member-budget	items	illegal_monitoring_work_over_budget
+preexisting-no-infrastructure-required	metrics	infrastructure-planner-paths
+creation-provider-action-batch	checks	
+plan-token-replay-rejection	checks	
+action-token-replay-rejection	checks	
+snapshot-cas-validation	metrics	creation-plan-validation-readback
+receipt-bound-materialization-readback	checks	
+promised-identity-rejection	checks	
+whole-deployment-provision-seal	metrics	acceptance-token
+phase7-placement-fold-composition	items	illegal_post_bind_expansion_overcommit
+phase8-storage-fold-composition	items	illegal_accelerator_vram_shortage
+phase9-execution-fold-composition	items	illegal_controller_child_unbounded,mutant_double_debit_controller_child
+kind-indexed-execution-expansion	items	mutant_drop_surge,mutant_drop_execution_replica
+planned-runtime-storage-binding	items	mutant_drop_largest_kubelet_metadata,mutant_missing_metadata_model
+finite-monitoring-work-envelope	items	mutant_fixed_prometheus
+prior-artifact-reference-resolution	items	illegal_prior_provision_ref_missing,illegal_prior_provision_ref_stale,illegal_prior_provision_ref_wrong_generation,illegal_prior_provision_ref_wrong_arm,mutant_unchecked_prior
+opaque-provisioned-spec	items	mutant_provisioned_in_bound
+identity-keyed-render-source-set	metrics	render-source-domain
+render-source-key-identity-equality	metrics	render-activation-stages
+render-source-owner-correspondence	items	mutant_wrong_revision_join
+four-stage-render-activation	items	NamespacePart,CapacitySchedulerPart,BootstrapAddonCutoverPart,ManagedCapacityAdmissionPart
+bound-deployment-no-provisioned-values	items	mutant_old_revision
+phase11-negative-corpus	metrics	specific-negatives
+phase11-property-boundaries	metrics	quickcheck-properties
+phase11-mutant-battery	metrics	mutants
+phase11-validation-locus-ledger	checks	
+provision-seal-compile-totality	metrics	inherited-capability-positives
+live-provider-realization	metrics	live-provider-realization
+live-engine-resolution	metrics	live-engine-resolution
+runtime-model-correspondence	metrics	runtime-correspondence
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle,locus-ledger-honesty-banner

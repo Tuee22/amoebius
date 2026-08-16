@@ -198,7 +198,7 @@ def evidence_domain(*, fresh: bool) -> None:
 def external_cleanup() -> dict[str, str]:
     clusters = subprocess.run((KIND, "get", "clusters"), text=True, stdout=subprocess.PIPE,
                               check=False, timeout=60).stdout.splitlines()
-    require(clusters == ["amoebius-phase24"], f"kind-clusters:{clusters}")
+    require(clusters == ["amoebius-bootstrap-coordinator"], f"kind-clusters:{clusters}")
     namespaces = subprocess.run(
         (KUBECTL, "--kubeconfig", str(Path.home() / ".amoebius/phase24/kubeconfig"),
          "get", "namespace", "-o", "name"), text=True, stdout=subprocess.PIPE,

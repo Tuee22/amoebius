@@ -39,8 +39,17 @@ The gate passed on 2026-08-09; Phase-3 code correspondence and runtime fidelity 
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/formal_model_kernel_gate.py` passed all nine sides: the
+31 authored metrics match, all model and renderer mutants are caught, 608 emitted `.tla`/`.cfg` files remain
+beneath `.build/**` and outside the 1968-file source snapshot, 14 surfaces join to 39 run-time items, and the
+outside-host inventory and authored roots are unchanged. The project-contained attestation is
+`sha256:fae2ea35bd57b40dd1a054a362ba53a63bc4fbab0833672a08687b1406ab7d0f`, bound to source snapshot
+`sha256:a0b29d7c344b8990…`; Phase 2 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:12481410e5094291…`
-(1927 non-ignored files) and published verified external attestation
+(1927 non-ignored files) and published a verified pre-containment external attestation
 `sha256:a6c345e051ff96ff3c66c98a4ea2832f56ada1d50c0d91524a0ce9763b19710e`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** The capability result is unchanged and re-run: the
@@ -48,18 +57,18 @@ explorer and TLC agree on `ToyModel`'s eight distinct reachable states and its s
 canonical fingerprints, TLC proves liveness under the declared fairness and reddens with fairness removed, and
 all five model-safety, one spec-weakening, two renderer-golden, and two renderer-differential mutants are
 caught. What changed is the apparatus around it. The JVM and `tla2tools` are resolved from
-`toolchain/requirements.json` through `tools/toolchain.py` rather than acquired from URLs and archive checksums
+`tools/toolchain_requirements.json` through `tools/toolchain.py` rather than acquired from URLs and archive checksums
 pinned in a tracked manifest, and the two hard-coded runtime version strings are replaced by requirement
 satisfaction plus a live TLC banner probe. The 31 recorded metrics are checked against the authored expectation
 read off this contract's Gate paragraph, the ledger is derived from those same recorded metrics into
-`gen/runs/phase_02/<run-id>/`, and 14 surfaces join to 39 run-time enumerated items. A new `artifact` side
+`.build/runs/phase_02/<run-id>/`, and 14 surfaces join to 39 run-time enumerated items. A new `artifact` side
 asserts what this phase has always claimed but never checked: all 608 emitted `.tla`/`.cfg` files are outside
 the source snapshot, and no specification file sits in authored source.
 
 **Invalidated historical record:**
 
 ✅ Done. The Register-1 gate passed on 2026-08-09 with
-`python3 tools/phase2_gate.py`, emitting ledger
+`python3 tools/formal_model_kernel_gate.py`, emitting ledger
 `dynamically-resolved`. The explorer and pinned TLC
 agree on all eight distinct `ToyModel` states and its safety verdict; TLC proves its three temporal properties
 under the declared weak/strong fairness, and removing fairness makes liveness red. The deterministic
@@ -97,7 +106,7 @@ runs on the emitted spec through the version-stable JVM `tla2tools` toolchain. T
 **Substrate:** none
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `cabal test formal-model-spec` is green over the committed `ToyModel` round-trip, the Phase-0
+**Gate:** `python3 tools/formal_model_kernel_gate.py` is green over the committed `ToyModel` round-trip, the Phase-0
 oracles, the mechanical model-mutation set, the four `emitTLA` renderer mutants, and the 200-model
 differential coverage floors of [Gate integrity](#gate-integrity), and its machine-derived Register-1 ledger
 agrees with that run.
@@ -164,7 +173,7 @@ golden itself, **not** by any in-process liveness checker: the Sprint 2.1 struct
 `ToyModel` to carry all five liveness/fairness constructors, so the pre-renderer committed golden fixes the
 rendered bytes of every one (`WF_vars`/`SF_vars` conjuncts, `[]`/`<>`/`~>` operators). **Two further committed
 liveness-path renderer mutants** — `emitTLA-mut-03` (`StrongFair` rendered as `WF_vars`) and `emitTLA-mut-04`
-(`Always` rendered as `<>`), committed under `test/formal/mutants/` — which the golden **must turn red**,
+(`Always` rendered as `<>`), committed under `test/mutant/formal/` — which the golden **must turn red**,
 close the gap that a renderer swapping `StrongFair`→`WeakFair` or `[]`↔`<>` would otherwise slip through.
 
 **The oracles** this gate checks against are the hand-derived `ToyModel` reachable-distinct-state count and
@@ -237,20 +246,17 @@ flowchart LR
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates and
+> implementation observations below remain diagnostic; the Phase Status and current gate result own the seal.
+> Any historical instruction to commit generated output, freeze dependency resolution, retain resolved values,
+> or consume repository-resident evidence remains superseded by current doctrine.
 
 ## Sprint 2.1: The `Model` fragment EDSL (the reifiable value) ✅
 
 **Status**: Done — the capability is re-established by the migrated 2026-08-12 gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Formal/Model.hs` (the `Model`/`Action`/`Expr` fragment
 types), the `formal-model` Cabal library, and the `formal-model-spec` test suite — built.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: the fragment types compile under the pinned GHC 9.12.4 / Cabal 3.16.1.0; a hand-authored small
 model (`ToyModel`) is expressible entirely inside the fragment with no opaque Haskell function in its
 transition relation.
@@ -300,8 +306,8 @@ None. The closed fragment and structurally complete `ToyModel` are built and exe
 **Status**: Done — the capability is re-established by the migrated 2026-08-12 gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Formal/Interpret.hs` (`interpret`),
 `src/Amoebius/Formal/Explore.hs` (the bounded breadth-first reachability checker),
-`test/formal/RoundTripSpec.hs` — built; the phase suite owns the hand table and explorer checks.
-**Blocked by**: reopened numeric predecessor gates.
+`test/spec/formal/RoundTripSpec.hs` — built; the phase suite owns the hand table and explorer checks.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: `interpret` computes the next state for a hand-checked (event, state) pair and the
 explorer visits exactly `ToyModel`'s reachable-state set under its constraint — a `cabal test`, no cluster —
 with the reference side read from a committed Phase-0 hand table, never from the code under test. Validation 2
@@ -345,10 +351,10 @@ checked-but-not-expanded boundary convention are green.
 **Status**: Done — the capability is re-established by the migrated 2026-08-12 gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Formal/EmitTLA.hs` (`emitTLA`),
 `src/Amoebius/Cli/Formal.hs` (the `amoebius dev model emit` subcommand),
-`test/formal/RoundTripSpec.hs`, and the two committed liveness-path renderer mutants
-`emitTLA-mut-03`/`emitTLA-mut-04` under `test/formal/mutants/`; emitted output lands in the git-ignored
-`gen/tla/` tree — built.
-**Blocked by**: reopened numeric predecessor gates.
+`test/spec/formal/RoundTripSpec.hs`, and the two committed liveness-path renderer mutants
+`emitTLA-mut-03`/`emitTLA-mut-04` under `test/mutant/formal/`; emitted output lands in the git-ignored
+`.build/tla/` tree — built.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**:
 `emitTLA ToyModel` renders a `.tla` + `.cfg`; the renderer is byte-for-byte golden-locked against a
 **pre-implementation golden authored before `EmitTLA.hs` exists** (§M.1 — a golden regenerated from the
@@ -358,9 +364,9 @@ without which a byte-exact golden cannot be hand-authored at all; the emitted ar
 scan and the golden-fixture layout follow the normative conventions owned by
 [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
 (one emitted path, one `.golden` suffix, one scan), instantiated here: the committed golden fixtures live at
-`test/formal/golden/ToyModel.tla.golden` and `test/formal/golden/ToyModel.cfg.golden` — *"independent
+`test/golden/formal/ToyModel.tla.golden` and `test/golden/formal/ToyModel.cfg.golden` — *"independent
 expected-output fixtures are authored test inputs, not captured generated artifacts"* — while the emitted
-artifacts land under `gen/tla/` and the scan (`git ls-files -- 'gen/*' '*.tla' '*.cfg'`) returns empty. A
+artifacts land under `.build/tla/` and the scan (`git ls-files -- '.build/*' '*.tla' '*.cfg'`) returns empty. A
 `.golden`-suffixed fixture matches neither pattern by construction; an actual emitted
 `ToyModel.tla`/`ToyModel.cfg` under version control fails it.
 **Docs to update**:
@@ -404,21 +410,21 @@ never committed.
 - An `amoebius dev model` subcommand that emits the `.tla`/`.cfg` fresh into an ignored build directory with a
   generated-by header; no `.tla`/`.cfg` is added to version control.
 - A Register-1 golden test pinning the *renderer's* byte-for-byte output against the Phase-0-committed
-  `test/formal/golden/ToyModel.{tla,cfg}.golden` fixtures (authored before `EmitTLA.hs`) — the golden is a
+  `test/golden/formal/ToyModel.{tla,cfg}.golden` fixtures (authored before `EmitTLA.hs`) — the golden is a
   fixture of the renderer, not a committed spec, and is not regenerated from the renderer's own output.
 - Because the Sprint 2.1 structural assertion forces `ToyModel` to carry **all five** liveness/fairness
   constructors, this same byte golden is the **only** oracle that pins liveness/fairness *rendering*
   faithfulness (the Sprint 2.4 differential test is legitimately safety-scoped and cannot see a
   `SF_vars`→`WF_vars` or `[]`↔`<>` swap): it fixes the `WF_vars`/`SF_vars` conjuncts and the `[]`/`<>`/`~>` operators byte-for-byte. **Two committed liveness-path renderer mutants** prove that oracle has teeth — `emitTLA-mut-03` (`StrongFair` rendered as `WF_vars`, breaking the golden's `SF_vars` conjunct) and
   `emitTLA-mut-04` (`Always` rendered as `<>`, breaking the golden's `[]` operator), committed under
-  `test/formal/mutants/`, each paired with the positive it breaks (§M.2 — the correct golden byte is the
+  `test/mutant/formal/`, each paired with the positive it breaks (§M.2 — the correct golden byte is the
   positive, the mutant that flips it the negative) and each of which the byte golden **must turn red**; a
   surviving liveness-path renderer mutant fails the gate.
 
 ### Validation
 1. `emitTLA ToyModel` is byte-for-byte golden-locked against the Phase-0-committed
-   `test/formal/golden/ToyModel.{tla,cfg}.golden` fixtures; the emitted files appear only under the ignored
-   build path and carry the generated stamp; the `git ls-files -- 'gen/*' '*.tla' '*.cfg'` scan returns empty (the
+   `test/golden/formal/ToyModel.{tla,cfg}.golden` fixtures; the emitted files appear only under the ignored
+   build path and carry the generated stamp; the `git ls-files -- '.build/*' '*.tla' '*.cfg'` scan returns empty (the
    `.golden`-suffixed fixtures do not match it).
 2. The byte golden pins the rendered bytes of **all five** liveness/fairness constructors carried by `ToyModel`
    (`WF_vars`/`SF_vars` conjuncts, `[]`/`<>`/`~>` operators), and the two committed liveness-path renderer
@@ -432,11 +438,11 @@ None. The emitter and CLI are byte-golden locked; generated `.tla`/`.cfg` files 
 ## Sprint 2.4: Round-trip + single-source correspondence on `ToyModel` ✅
 
 **Status**: Done — the capability is re-established by the migrated 2026-08-12 gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/formal/RoundTripSpec.hs` (drives the explorer and TLC over the
+**Implementation**: `test/spec/formal/RoundTripSpec.hs` (drives the explorer and TLC over the
 same `Model`), a `tla2tools` invocation wrapper, the committed mechanical model-mutation catalog, and the
-two committed seeded renderer mutants `emitTLA-mut-01`/`emitTLA-mut-02` under `test/formal/mutants/` —
-built and run by `tools/phase2_gate.py`.
-**Blocked by**: reopened numeric predecessor gates.
+two committed seeded renderer mutants `emitTLA-mut-01`/`emitTLA-mut-02` under `test/mutant/formal/` —
+built and run by `tools/formal_model_kernel_gate.py`.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: on the correct `ToyModel` the in-process explorer and TLC reach the identical
 safety verdict; every mechanical model mutant and both renderer mutants are caught; the fairness-sensitivity
 check and the safety-scoped >=200-model differential hold. The numbered Validation below states each
@@ -492,9 +498,9 @@ operational form of "the two renderings mean the same thing."
   ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence)).
 - **Two committed seeded renderer mutants** proving the differential suite has teeth against `emitTLA` bugs (not
   only model bugs): `emitTLA-mut-01` (a deliberately dropped `UNCHANGED` conjunct) and `emitTLA-mut-02` (a
-  finite quantifier `\A`↔`\E` mistranslation), committed under `test/formal/mutants/`, each of which the
+  finite quantifier `\A`↔`\E` mistranslation), committed under `test/mutant/formal/`, each of which the
   differential generator must expose as an explorer/TLC divergence — a surviving renderer mutant fails the gate.
-- The **generated, schema-checked Register-1 ledger** under `gen/runs/` ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed); its schema and external retention are owned by `testing_doctrine.md` and Phase 0), whose Phase-2 rows are:
+- The **generated, schema-checked Register-1 ledger** under `.build/runs/` ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed); its schema and external retention are owned by `testing_doctrine.md` and Phase 0), whose Phase-2 rows are:
   (a) safety proven-for-the-model at the declared bound with the recorded reachable-distinct-state count; (b)
   liveness proven under the named fairness with the recorded fairness-sensitivity outcome; (c) the
   differential-test case count and per-constructor coverage percentages; (d) model-correspondence-to-Phase-3-code

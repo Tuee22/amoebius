@@ -430,7 +430,7 @@ any other document.
 - [Testing Doctrine](./testing_doctrine.md)
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
 - [Generated Artifacts Doctrine](./generated_artifacts_doctrine.md)
-- [Repository Layout and Artifact Provenance](./repository_layout_doctrine.md) — generated paths, ignore contracts, and external evidence
+- [Repository Layout and Artifact Provenance](./repository_layout_doctrine.md) — generated paths, ignore contracts, and repository-local evidence
 - [Application Logic vs Deployment Rules](./app_vs_deployment_doctrine.md)
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md)
 - [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md)

@@ -1,0 +1,7 @@
+case,backing,ordinal,logical_bytes,required_usable_bytes,minimum_bytes,quantum_bytes,slot_provisioned_bytes,uniform_capacity_bytes,backing_capacity_bytes,expected_reason,oracle_role
+accepted-skew,durable-a,0,16777216,20971520,8388608,8388608,25165824,33554432,100663296,accepted,retained-storage
+accepted-skew,durable-a,1,25165824,29360128,8388608,8388608,33554432,33554432,100663296,accepted,retained-storage
+uniform-claim-skew-over-backing,durable-a,0,16777216,20971520,8388608,8388608,25165824,33554432,58720256,durable-demand-exceeds-backing,retained-storage
+uniform-claim-skew-over-backing,durable-a,1,25165824,29360128,8388608,8388608,33554432,33554432,58720256,durable-demand-exceeds-backing,retained-storage
+collapsed-backing-debits,durable-a,0,25165824,29360128,8388608,8388608,33554432,33554432,33554431,durable-demand-exceeds-backing,retained-storage
+collapsed-backing-debits,durable-b,1,16777216,20971520,8388608,8388608,25165824,33554432,67108865,durable-demand-exceeds-backing,retained-storage

@@ -37,4 +37,4 @@ source-repository-package
   location: https://github.com/cr-org/supernova.git
   tag: master
   subdir: lib proto
-  post-checkout-command: git apply ../../../patches/supernova_ghc_9_12.patch
+  post-checkout-command: apply_supernova_patch patches/supernova_ghc_9_12.patch

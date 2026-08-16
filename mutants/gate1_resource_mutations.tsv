@@ -1,3 +1,3 @@
 family	oracle	operator	expected
-resource-field-deletion	tests/oracle/gate1/resource_fields.csv	delete-each-field	resource-inventory-red
-resource-type-substitution	tests/oracle/gate1/resource_type_requirements.csv	delete-each-required-token	type-requirement-red
+resource-field-deletion	test/oracle/dhall_gate1_schema/resource_fields.csv	delete-each-field	resource-inventory-red
+resource-type-substitution	test/oracle/dhall_gate1_schema/resource_type_requirements.csv	delete-each-required-token	type-requirement-red

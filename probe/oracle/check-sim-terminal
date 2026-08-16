@@ -4,7 +4,7 @@
 The expected terminal state is authored in `probe/fixtures/sim-terminal.expected` and is
 not derived from the probe's output. The toolchain this oracle drives is supplied by the
 caller: the resolved compiler and `cabal` are run-local observations
-(`gen/toolchain/resolved.json`), and a tracked file that named either of them would be
+(`.build/toolchain/resolved.json`), and a tracked file that named either of them would be
 carrying resolver output (`repository_layout_doctrine.md` section 4).
 """
 

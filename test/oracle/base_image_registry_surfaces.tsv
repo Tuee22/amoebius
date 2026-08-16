@@ -1,0 +1,71 @@
+# Authored expectation for the Phase-25 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. Phase 25 had no committed enumeration at all — the
+# retired gate read a surface list out of an ignored generated root — so this file is the
+# first authored opinion its gate is checked against.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   items     the seeded mutant names the run read from the committed mutant domain
+#   metrics   the metric keys in gen/dsl/phase25/phase-results.tsv
+#   checks    the check ids tools/phase25_gate.py implements
+#
+# Every metric here is measured from evidence this run produced in its own bundle. The
+# retired gate pinned the image index digest of a build that no longer exists and compared a
+# committed ledger byte-for-byte, so it certified a past run rather than the one in progress.
+# The four sprint receipts are now required to agree with *each other* on the index digest,
+# which is a statement about this run's build and cannot be satisfied by a constant.
+#
+# The three ladder surfaces are the 2026-08-13 monocontainer amendment. They are the reason a
+# rung choice is visible in a diff: `acquisition-rung-ladder` joins each baked binary to the
+# rung an independently authored table says it belongs on, `last-resort-justification` requires
+# every retained scavenge step to say why the rungs above it did not apply, and
+# `rendered-from-set-bound` pins the rendered FROM set to the base plus exactly that recorded
+# set — so a silent return to scavenging widens a set the gate is watching.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+committed-mutant-domain	checks	mutant-domain-exact
+no-leftover-evidence-input	checks	evidence-inputs-produced-by-this-run
+pure-image-spec-oracle	checks	haskell-image-spec
+python-probe-oracles	checks	python-image-specs
+catalog-inventory-reconciliation	checks	catalog-oracle-reconciliation
+acquisition-rung-ladder	checks	acquisition-rung-criteria
+last-resort-justification	checks	last-resort-steps-justified
+rendered-from-set-bound	checks	rendered-from-set-bounded
+resolved-toolchain-satisfies-requirements	checks	toolchain-satisfies-requirements
+recorded-results-join-oracle	checks	recorded-results-match-oracle
+emitted-output-stays-generated	checks	emitted-results-untracked
+
+four-sprint-seal	metrics	sprint-receipts
+one-index-digest-across-sprints	metrics	index-digest-agreement
+multi-arch-manifest-list	metrics	manifest-list-platforms
+per-arch-official-file-execution	metrics	official-file-execution-join
+published-companion-payloads	metrics	published-payload-files
+spdx-file-inventory	metrics	sbom-file-inventory
+standup-without-public-pull	metrics	standup-public-connections
+idempotent-republication	metrics	publication-rerun-mutations
+public-pull-canary-fails	metrics	enforced-negative-canary
+in-cluster-pull-succeeds	metrics	enforced-positive-pull
+egress-firewall-drops-observed	metrics	enforced-firewall-drops
+observer-sees-no-public-connection	metrics	enforced-observer-connections
+seeded-mutant-battery	metrics	mutants
+binaries-sit-on-authored-rung	metrics	acquisition-rungs
+last-resort-count-pinned	metrics	last-resort-count
+rendered-from-set-pinned	metrics	rendered-from-set
+
+m-stub-arm64-binary	items	stub-arm64-binary
+m-wrong-arch-layer	items	wrong-arch-layer
+m-gxx-version-skew	items	gxx-version-skew
+m-drop-build-scratch-accounting	items	drop-build-scratch-accounting
+m-dockerfile-handedit	items	dockerfile-handedit
+m-omit-redis	items	omit-redis
+m-omit-pulsar-offloaders	items	omit-pulsar-offloaders
+m-redis-version-skew	items	redis-version-skew
+m-public-redis-image	items	public-redis-image
+m-scavenge-available-apt-rung	items	scavenge-available-apt-rung
+m-unbounded-buildkit-worker	items	unbounded-buildkit-worker
+m-bootstrap-domain-expansion	items	bootstrap-domain-expansion
+m-handoff-without-equality	items	handoff-without-equality
+m-record-before-push	items	record-before-push
+m-noop-egress-policy	items	noop-egress-policy

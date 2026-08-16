@@ -74,7 +74,7 @@ Phase order and status live only in [../../DEVELOPMENT_PLAN/README.md](../../DEV
 
 > **Validated boundary (Phase 14, Registers 1/2).** The opaque counted `Step`, whole-deployment `chain`, pure
 > descent, canonical plan renderer, absolute-path tool seam, and Gate-3 checked-source seal pass under
-> `tools/phase14_gate.py` (ledger `external-run-reference`). Live apply and checked-source runtime behavior
+> `tools/chain_boundary_gate.py` (ledger `external-run-reference`). Live apply and checked-source runtime behavior
 > remain UNVERIFIED.
 
 The amoebius DSL is not a scripting language, and it does not contain the deployment logic. Templating
@@ -482,7 +482,7 @@ every PVC gives no way to omit it. The schema is the boundary, and the boundary 
 **amoebius validation status.** Phase 4 supplies this Gate-1 boundary as fourteen authored Dhall modules,
 four wired positive surfaces, eight catalog negatives, three image/process negatives, import-policy checks,
 and independent closed-union/required-field/nested-type oracles with seeded mutations. The Register-1 gate
-passed on 2026-08-09 with `python3 tools/phase4_gate.py`; ledger
+passed on 2026-08-09 with `python3 tools/dhall_gate1_schema_gate.py`; ledger
 `dynamically-resolved`. That result establishes only the
 recorded structural spec-composition claims. Gate 2 is separately validated below; bind/provision arithmetic
 and live runtime enforcement remain **UNVERIFIED** here.
@@ -505,7 +505,7 @@ things happen here:
   decide whole-deployment placement, storage peaks, live target compatibility, or inventory sufficiency.
 
 **amoebius validation status.** Phase 5 implements the `dsl-core` library and fail-closed decoder. Its
-Register-1 gate passed on 2026-08-09 with `python3 tools/phase5_gate.py`; ledger
+Register-1 gate passed on 2026-08-09 with `python3 tools/gadt_decoder_gate2_gate.py`; ledger
 `dynamically-resolved`. Five independently semantic-hash-pinned
 positive surfaces retain 5,527 normalized structural rows, the three named Gate-2 classes reach distinct
 constructors after a Gate-1-green precondition, and tenant/state/owner compile pairs reject at their pinned

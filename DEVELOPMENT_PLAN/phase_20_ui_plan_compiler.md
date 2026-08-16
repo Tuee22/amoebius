@@ -37,15 +37,24 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/ui_plan_compiler_gate.py` passed all eleven sides: four
+independent projections, four byte-exact canonical artifacts, four independently derived digests, six finite
+demand cells, two fresh-process determinism checks, all six mutants, and all thirteen metrics pass; 55
+surfaces join to 66 enumerated items. The project-contained attestation is
+`sha256:a9f17c21a0a39642219d8b31e3d666d06baa9c02db1b9a4cdd7d2db1a7d91d4a`, bound to source snapshot
+`sha256:f6739fd9fd7f6fd2…`; Phase 20 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:3587049c696ded8e…`
-(1944 non-ignored files) and published verified external attestation
+(1944 non-ignored files) and published a verified pre-containment external attestation
 `sha256:6e567d5b9a009a424ba1974e7d62957e579bd56f928e9bc1076365584aaaa8be`.
 
 **Observed progress — 2026-08-13:** **Policy-conformant.** The paired-plan result is unchanged and re-run:
 four logical projections match a reference relation that imports no production projection code, four canonical
 artifacts are byte-exact, four digests agree with an independent adapter, six demand cells are finite and
 exact, two fresh cache-disabled processes with reversed insertion order emit identical bytes, and all six
-seeded mutants redden. Evidence and the ledger move into `gen/runs/phase_20/<run-id>/`, and 55 surfaces join
+seeded mutants redden. Evidence and the ledger move into `.build/runs/phase_20/<run-id>/`, and 55 surfaces join
 two-way to 66 run-time enumerated items.
 
 **`expected_digests.tsv` is deleted, which is what this phase owed.** A table of four SHA-256 values over
@@ -92,7 +101,7 @@ HTTP, publishing a Release, a second register, or a substrate.
 **Dependency:** Phase 19 — the sealed `BoundUiProgram` with complete effect bindings.
 **Substrate:** none — no browser, network, credential, artifact store, provider, or cluster is contacted.
 **Register:** 1 — pure/golden.
-**Gate:** `python3 tools/phase20_gate.py` passes the projection/key oracle, run-time-derived reference
+**Gate:** `python3 tools/ui_plan_compiler_gate.py` passes the projection/key oracle, run-time-derived reference
 digests, canonical-encoding and cache-bypassed determinism checks, private-field negatives, isolated
 execution, and all seeded mutants in [Gate integrity](#gate-integrity). Both interpreter fidelities stay
 UNVERIFIED.
@@ -143,23 +152,23 @@ interpreter, release publication, transport security, or runtime freshness enfor
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 20.1: Deterministic paired-plan projection ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Ui/Compile/{ClientPlan,ServerPlan,Manifest,Demand}.hs`
-and `test/ui/{Phase20UiPlanCompilerSpec,PlanCompilerReference}.hs`, plus `tools/phase20_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
+and `test/ui/{UiPlanCompilerSpec,PlanCompilerReference}.hs`, plus `tools/ui_plan_compiler_gate.py`
+**Blocked by**: None.
 **Independent Validation**: `cabal test ui-plan-compiler-spec` compares fresh compiler output with the
 Phase-0 tables/goldens and requires every named projection/determinism mutant to fail. The full hermetic gate
-is `python3 tools/phase20_gate.py`.
+is `python3 tools/ui_plan_compiler_gate.py`.
 **Docs to update**:
 `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/ui_realtime_coordination_doctrine.md`,

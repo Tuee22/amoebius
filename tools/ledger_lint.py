@@ -7,8 +7,8 @@ independent of the amoebius binary so a ledger cannot certify itself.
 
 Examples:
 
-  python3 tools/ledger_lint.py gen/runs/phase_16/<run-id>/ledger.json \
-      --enumeration gen/test-surfaces/phase_16.json
+  python3 tools/ledger_lint.py .build/runs/phase_16/<run-id>/ledger.json \
+      --enumeration .build/test-surfaces/phase_16.json
   python3 tools/ledger_lint.py --verify-corpus
 """
 
@@ -94,7 +94,7 @@ def load_enumeration(path: Path) -> set[str]:
     """Read a run-time surface enumeration.
 
     `repository_layout_doctrine.md` section 3.1 places the enumeration at
-    `gen/test-surfaces/phase_*.json`; the plain-text form is still read so a corpus
+    `.build/test-surfaces/phase_*.json`; the plain-text form is still read so a corpus
     case or an older caller keeps working.
     """
     raw = path.read_text(encoding="utf-8")
@@ -209,11 +209,11 @@ def validate_ledger(
 
         # A ledger emitted into the run bundle is named by the bundle, not by the
         # phase: repository-layout doctrine section 3.1 fixes it at
-        # gen/runs/<phase>/<run-id>/ledger.json. The phase-named form is only the
+        # .build/runs/<phase>/<run-id>/ledger.json. The phase-named form is only the
         # legacy committed convention, and that convention is what is being retired.
         expected_name = f"phase_{phase:02d}_ledger.json"
         resolved = ledger_path.resolve()
-        in_run_bundle = (ROOT / "gen" / "runs") in resolved.parents
+        in_run_bundle = (ROOT / ".build" / "runs") in resolved.parents
         if (
             ledger_path.name != expected_name
             and not in_run_bundle

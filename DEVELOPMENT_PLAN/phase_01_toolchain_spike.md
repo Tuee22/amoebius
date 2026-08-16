@@ -38,14 +38,22 @@ Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15 under the containment amendment. `python3 tools/toolchain_spike_gate.py`
+resolved the same 225-package graph twice and from the source snapshot, built the representative set from an
+empty project-local store, passed every probe and mutant, left the outside-host inventory unchanged, and
+published attestation `sha256:915a26a7b76634ac544f9a3c81296b0699ad26193b76b5548d3f6a5d6133438f`.
+The global artifact audit has zero Phase-1-owned deferrals.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The redesigned nine-sided gate passed against source snapshot
-`sha256:6ee45846d4d5066b…` (1927 non-ignored files) and published verified external attestation
+`sha256:6ee45846d4d5066b…` (1927 non-ignored files) and published a verified pre-containment external attestation
 `sha256:353cafb9d60d6e4205d84fef33dd92ea4c0f198c5dfcdf16455c5a217e95bb24`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** `toolchain/pins.json` is deleted; the authored half
-is `toolchain/requirements.json`, which carries compatibility ranges, release channels, and asset patterns and
+is `tools/toolchain_requirements.json`, which carries compatibility ranges, release channels, and asset patterns and
 no path, resolved version, URL, or checksum. `tools/toolchain.py` resolves all ten requirements per run into
-ignored `gen/toolchain/resolved.json`, acquiring the released tools from their current upstream releases rather
+ignored `.build/toolchain/resolved.json`, acquiring the released tools from their current upstream releases rather
 than from pinned URLs. `cabal.project` names a release channel instead of a revision, carries no developer path
 and no frozen `index-state`, and applies the tracked `patches/supernova_ghc_9_12.patch`; the superseded `dual`
 patch is deleted and `vendor/dual/PROVENANCE.md` records that package's provenance instead. The gate resolves
@@ -66,7 +74,7 @@ its ignored root, so it proved nothing; it now seeds a non-dotted ignored root.
 **Invalidated historical record:**
 
 ✅ Done. The consolidated clean-store gate passed on 2026-08-08 with
-`python3 tools/phase1_gate.py`, emitting ledger
+`python3 tools/toolchain_spike_gate.py`, emitting ledger
 `dynamically-resolved`. This is a tested buildability result,
 not a runtime or Gate-2-semantics result. This phase opened after the Phase 0 documentation lint passed and ran on **no substrate**
 (`none`): it stands up no host and no cluster, resolving and building only Hackage packages on the developer
@@ -77,22 +85,22 @@ in-process integrity checks all rest on the dependencies probed here.
 
 This phase settles buildability without freezing a dependency graph into Git. The authored project files state
 package names, source channels, and compatibility requirements. A clean gate resolves the current compatible
-compiler, libraries, browser tools, protocol generator, and transitive graph into `gen/toolchain/` and
-`gen/locks/`.
+compiler, libraries, browser tools, protocol generator, and transitive graph into `.build/toolchain/` and
+`.build/locks/`.
 
 The probe covers the in-process Dhall decoder, `io-sim`/`io-classes`, jit-build resolver dependencies,
 PureScript contract generation, and the native Pulsar client's protocol code generation. Resolved versions,
 source identities, compatibility adjustments, observed checksums, executable paths, and transcripts are run
-evidence. They are externally attested and never copied into Markdown or a tracked manifest.
+evidence. They are attested beneath `.build/evidence-store/**` and never copied into Markdown or a tracked manifest.
 
 **Substrate:** `none` — no host, no cluster; the gate resolves and compiles Hackage packages on the developer
 toolchain only.
 
 **Register:** 1 — pure/build, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** against its source snapshot, `python3 tools/phase1_gate.py` dynamically resolves a compatible graph,
+**Gate:** against its source snapshot, `python3 tools/toolchain_spike_gate.py` dynamically resolves a compatible graph,
 builds and runs every named probe and mutant, verifies every reviewed patch is tracked under an authored root,
-writes only ignored run output, leaves authored paths unchanged, and publishes a verified external attestation.
+writes only ignored run output, leaves authored paths unchanged, and publishes a verified repository-local attestation.
 
 ## Gate integrity
 
@@ -108,25 +116,27 @@ whole tree would consume what a later phase delivers — the forward dependency
 whenever a later phase's source stopped compiling, which is exactly what it did on 2026-08-12
 ([legacy register](legacy_tracking_for_deletion.md)).
 
-The gate starts with empty package/build caches for the probed graph. It generates solver results, bindings,
-transcripts, enumerations, and ledgers beneath `gen/`. The external attestation records actual versions,
+The gate starts with empty `.build/cabal-store/**`, `.build/dist-newstyle/**`, `.build/node_modules/**`, and
+tool caches for the probed graph, with subprocess temp/cache variables resolved to `.build/tmp/**`. It
+generates solver results, bindings, transcripts, enumerations, and ledgers beneath `.build/` and proves from a
+host inventory that no tool wrote outside the checkout. The repository-local attestation records actual versions,
 sources, integrity observations, compatibility changes, and tool paths. A hard blocker is a red gate with
 external diagnostics, never a prose substitute for success.
 
 The source-closure check rejects a project or gate that references an ignored patch. Retained compatibility
 patches are reviewed external/authored inputs beneath `patches/**` or `vendor/**`; generated patch application
-results remain under `gen/`. The semantic scan also rejects a fixed dependency commit, package integrity hash,
+results remain under `.build/`. The semantic scan also rejects a fixed dependency commit, package integrity hash,
 or developer path even when no ignore pattern matches the file containing it.
 
 ```mermaid
 flowchart LR
   %% register: orientation
   req[authored compatibility requirements] --> resolve[dynamic resolver]
-  resolve --> gen[ignored gen output]
+  resolve --> gen[ignored .build output]
   gen --> probe[probe and committed seeded mutants]
-  probe --> attest[external attestation]
+  probe --> attest[repository-local attestation]
 ```
-*Design intent. Phase 1 resolves a current compatible graph per run and retains only external evidence, as owned by [repository-layout doctrine §4](../documents/engineering/repository_layout_doctrine.md#4-dependency-and-toolchain-resolution).*
+*Design intent. Phase 1 resolves a current compatible graph per run and retains only repository-local evidence, as owned by [repository-layout doctrine §4](../documents/engineering/repository_layout_doctrine.md#4-dependency-and-toolchain-resolution).*
 
 ## Doctrine adopted
 
@@ -391,15 +401,15 @@ consolidated gate.
    the compile-fail locus. Prose alone never passes.
 
 ### Remaining Work
-None. The exact fork commit, compatibility patch, codegen pins, clean-store transcript, and both generated
-protobuf modules are retained under `DEVELOPMENT_PLAN/evidence/phase_01/`.
+None. The observed fork identity, compatibility patch application, clean-store transcript, and generated
+protobuf module digests are retained in the Phase-1 run bundle beneath `.build/runs/phase_01/**`.
 
 ## Sprint 1.6: Dynamic resolution and generated-output migration ✅
 
-**Status**: Done — the capability this sprint recorded is re-established by the redesigned 2026-08-12 gate; its pin, freeze, and repository-resident evidence mechanics are superseded
-**Implementation**: `cabal.project`, `toolchain/requirements.json`, `tools/toolchain.py`,
-`tools/phase1_gate.py`, `tools/phase1_negative_corpus.py`, `test/phase_01_surface_expectations.tsv`,
-`patches/supernova_ghc_9_12.patch`, `vendor/dual/PROVENANCE.md`; generated `gen/{toolchain,locks,proto,runs,test-surfaces,test-corpora}/**`
+**Status**: Done — re-established by the project-contained 2026-08-15 gate
+**Implementation**: `cabal.project`, `tools/toolchain_requirements.json`, `tools/toolchain.py`,
+`tools/toolchain_spike_gate.py`, `tools/toolchain_spike_negative_corpus.py`, `test/oracle/toolchain_spike_surfaces.tsv`,
+`patches/supernova_ghc_9_12.patch`, `vendor/dual/PROVENANCE.md`; generated `.build/{toolchain,locks,proto,runs,test-surfaces,test-corpora}/**`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a clean run resolves twice, builds and executes every probe, produces equivalent
 admissible graphs, changes no authored file, and passes tracked-path and Docker-context scans.
@@ -410,7 +420,7 @@ admissible graphs, changes no authored file, and passes tracked-path and Docker-
 ### Objective
 
 Replace permanent pins, lock/freeze files, hard-coded package/library SHA values, developer-home paths, and
-committed generated evidence with dynamic run-local resolution and external attestation.
+committed generated evidence with dynamic run-local resolution and repository-local attestation.
 
 ### Deliverables
 
@@ -421,9 +431,9 @@ committed generated evidence with dynamic run-local resolution and external atte
   developer path, fixed dependency commit, or ignored evidence path.
 - Replacement of `toolchain/pins.json`: keep only authored compatibility requirements in a clearly named
   source manifest and generate every resolved path, version, URL, identity, and integrity observation.
-- A resolver that writes the selected graph and tools only beneath `gen/`.
-- Generated protocol bindings and checksums only beneath `gen/proto/` or the build tree.
-- An authored-root write guard and external attestation covering every probe and mutant.
+- A resolver that writes the selected graph and tools only beneath `.build/`.
+- Generated protocol bindings and checksums only beneath `.build/proto/` or the build tree.
+- An authored-root write guard and repository-local attestation covering every probe and mutant.
 - Tracked-path and container-context checks that reject every legacy generated class.
 
 ### Validation
@@ -434,23 +444,24 @@ committed generated evidence with dynamic run-local resolution and external atte
 4. Confirm that no lock/freeze file, package integrity pin, or developer-home path is tracked.
 5. Confirm every referenced patch exists in the clone beneath an authored root; a seeded ignored-patch
    reference and a seeded fixed dependency commit both fail at the source-closure/provenance locus.
-6. Verify the external attestation and all positive, negative, and mutant outcomes.
+6. Verify the repository-local attestation and all positive, negative, and mutant outcomes.
 
 ### Remaining Work
 
 None. Both ignored patches are dispositioned — `supernova_ghc_9_12.patch` relocated to `patches/` with non-SHA
 provenance, the superseded `dual` patch deleted in favour of `vendor/dual/PROVENANCE.md`. `toolchain/pins.json`
-is gone, split into authored `toolchain/requirements.json` and run-local `gen/toolchain/resolved.json`.
+is gone, split into authored `tools/toolchain_requirements.json` and run-local `.build/toolchain/resolved.json`.
 `cabal.project` carries no developer path, frozen `index-state`, fixed revision, or ignored input. The gate
 resolves twice to the same graph, resolves it again from non-ignored source alone, and publishes a verified
-external attestation.
+repository-local attestation. Cabal metadata, its package store, build roots, npm dependencies, tool downloads,
+and all temp/cache homes are confined to `.build/**`; the host inventory is unchanged.
 
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/repository_layout_doctrine.md` — **done 2026-08-12.** The migration table records
-  `toolchain/pins.json` as split into authored `toolchain/requirements.json` and run-local
-  `gen/toolchain/resolved.json`; the tree drops `cabal.project.freeze` and names the requirements manifest.
+  `toolchain/pins.json` as split into authored `tools/toolchain_requirements.json` and run-local
+  `.build/toolchain/resolved.json`; the tree drops `cabal.project.freeze` and names the requirements manifest.
 - `documents/engineering/dsl_doctrine.md` — §9's Toolchain note gets a backlink to the recorded `dhall`
   `allow-newer`/patch set once Sprint 1.2/1.4 lands.
 - `documents/engineering/gateway_migration_model_doctrine.md` — §4's io-sim instrument gets a backlink to the
@@ -482,5 +493,5 @@ external attestation.
 - [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — the `jit-build`
   resolver and the `CacheBudget`-bounded cache whose deps this probe includes.
 - [Repository Layout and Artifact Provenance](../documents/engineering/repository_layout_doctrine.md) — the
-  authored requirements, generated resolution, external evidence, and ignore/context contract that Sprint 1.6
+  authored requirements, generated resolution, repository-local evidence, and ignore/context contract that Sprint 1.6
   implements.

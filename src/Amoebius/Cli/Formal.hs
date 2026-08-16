@@ -13,11 +13,11 @@ import System.FilePath ((</>))
 
 runFormalCommand :: [String] -> IO ()
 runFormalCommand ["dev", "model", "emit"] = do
-  emitModelFiles "gen/tla" toyModel
-  putStrLn "emitted gen/tla/ToyModel.tla and gen/tla/ToyModel.cfg"
+  emitModelFiles ".build/tla" toyModel
+  putStrLn "emitted .build/tla/ToyModel.tla and .build/tla/ToyModel.cfg"
 runFormalCommand ["dev", "model", "emit", "gateway-migration"] = do
-  emitModelFiles "gen/tla" gatewayMigrationModel
-  putStrLn "emitted gen/tla/GatewayMigration.tla and gen/tla/GatewayMigration.cfg"
+  emitModelFiles ".build/tla" gatewayMigrationModel
+  putStrLn "emitted .build/tla/GatewayMigration.tla and .build/tla/GatewayMigration.cfg"
 runFormalCommand _ = fail "usage: amoebius dev model emit [gateway-migration]"
 
 emitModelFiles :: FilePath -> Model -> IO ()

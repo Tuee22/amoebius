@@ -69,7 +69,7 @@ registryStorageConfiguration backend = case effectiveBackend backend of
       , "    v4auth: true"
       ]
  where
-#ifdef PHASE30_REGISTRY_FS_DRIVER_MUTANT
+#ifdef PLATFORM_BACKBONE_REGISTRY_FS_DRIVER_MUTANT
   effectiveBackend _ = RegistryFilesystem "/var/lib/registry"
 #else
   effectiveBackend = id
@@ -96,7 +96,7 @@ renderRegistryRehome image resources _provision =
       name
       replicas
       image
-      ["/usr/bin/registry", "serve", "/etc/distribution/config.yml"]
+      ["/usr/bin/docker-registry", "serve", "/etc/distribution/config.yml"]
       (Just resources)
       Nothing
       Nothing

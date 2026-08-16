@@ -1,0 +1,36 @@
+# Authored Phase-29 Vault/PKI surface expectation.
+init-once-and-unseal-existing	metrics	init-once
+real-delete-recreate-preserves-vault	metrics	retained-rebuild
+self-signed-root-and-leaf	metrics	pki-root
+direct-kubernetes-auth-client	metrics	direct-client
+operator-material-arrives-only-at-stdin	metrics	secret-input
+cleartext-secret-is-never-copied	metrics	secret-copies
+raft-and-audit-stay-bounded	metrics	storage-bounds
+no-public-registry-pull	metrics	public-registry-pulls
+all-four-sprints-sealed	metrics	sprint-receipts
+complete-mutant-battery	metrics	mutants
+rebuild-does-not-reinitialize	items	M-reinit-existing
+unlock-envelope-uses-real-kdf-and-aead	items	M-raw-sha256-seal
+complete-raft-population-is-sized	items	M-delete-storage-term
+audit-storage-is-bounded	items	M-unbounded-audit
+sealed-vault-cannot-issue	items	M-sealed-issuance
+leaf-chains-to-the-root	items	M-unrelated-leaf-key
+client-authenticates-itself	items	M-preminted-token
+errors-remain-typed-and-redacted	items	M-error-collapse
+stale-read-fails-closed	items	M-stale-read
+admission-reports-every-missing-name	items	M-first-missing
+production-cannot-read-test-secrets	items	M-production-secret-read
+no-secret-copy-sink-exists	items	M-copy-secret
+authored-oracles-present	checks	authored-vault-oracles
+toolchain-from-authored-requirements	checks	toolchain-satisfies-requirements
+exact-phase28-predecessor	checks	phase28-predecessor-verified
+exact-phase25-image-handoff	checks	phase25-image-handoff-verified
+prompt-only-secret-boundary	checks	prompt-only-secret-boundary
+pure-vault-contract	checks	pure-vault-contract
+deterministic-fault-simulation	checks	fault-simulation
+live-private-delete-recreate	checks	live-delete-recreate
+independent-live-reader	checks	external-live-reader
+recorded-results-are-generated	checks	recorded-results-match-oracle,emitted-results-untracked
+parent-child-unseal	metrics
+cross-cluster-intermediate-ca	metrics
+parent-secret-injection	metrics

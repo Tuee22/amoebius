@@ -3,12 +3,12 @@
 The coordinator runs on a host where nothing amoebius needs exists yet, so it cannot ask
 the repository's own resolver — that one finds tools, and here there are none to find.
 What it can do is the same thing for the same reason: read the **authored requirements**
-in `toolchain/requirements.json`, ask each publisher what it currently offers, take the
+in `tools/toolchain_requirements.json`, ask each publisher what it currently offers, take the
 newest release that satisfies the requirement, and verify the download against the
 publisher's own checksum.
 
 Nothing this module learns is written back into a tracked file. The resolved versions,
-URLs, and observed digests go to `gen/toolchain/bootstrap.json`, which is ignored, and
+URLs, and observed digests go to `.build/toolchain/bootstrap.json`, which is ignored, and
 travel onward as run evidence (`repository_layout_doctrine.md` section 4). A checksum
 computed here detects corruption inside this run; it never becomes a package pin.
 
@@ -28,8 +28,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-REQUIREMENTS = "toolchain/requirements.json"
-RESOLUTION = "gen/toolchain/bootstrap.json"
+REQUIREMENTS = "tools/toolchain_requirements.json"
+RESOLUTION = ".build/toolchain/bootstrap.json"
 NETWORK_TIMEOUT = 120
 VERSION_TOKEN = re.compile(r"(\d+(?:\.\d+)+)")
 CHANNEL_URL = "https://dl.k8s.io/release/{channel}.txt"

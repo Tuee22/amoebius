@@ -1,0 +1,2 @@
+owner	payload	target_root	required_file
+pulsar	pulsar-offloaders	/pulsar	/pulsar/offloaders/tiered-storage-jcloud-4.0.6.nar

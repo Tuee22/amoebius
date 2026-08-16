@@ -30,8 +30,8 @@ detail of each subsystem; this overview summarizes and links, and **never restat
 vision; the plan is its binding, executable decomposition.
 
 > **Reopened implementation, read this first.** Source and tests exist, but the generated-artifact redesign
-> invalidates every prior phase seal. Phase 0 is Active and phases 1–64 are Blocked pending numeric-order
-> revalidation. Every prescriptive sentence remains design intent unless a new external attestation supports it. Where this overview leans on the sibling `prodbox` project, that is cited as
+> invalidates every prior phase seal. Phases 0–29 are Done, Phase 30 is Active, and phases 31–64 are Blocked pending numeric-order
+> revalidation. Every prescriptive sentence remains design intent unless a new repository-local attestation supports it. Where this overview leans on the sibling `prodbox` project, that is cited as
 > *evidence* that a shape works — never as amoebius proof.
 
 ## 1. The everything-orchestrator shape: one runtime binary, three contexts
@@ -153,7 +153,8 @@ owned by exactly one doctrine SSoT; the overview only names and links them.
 | **Keycloak owns all wild ingress** via the LB + Gateway API; the sole exception is host-origin, localhost-only traffic. | [`platform_services_doctrine.md` §9 — The LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path); the host-only carve-out in [`host_cluster_comms_doctrine.md` §1](../documents/engineering/host_cluster_comms_doctrine.md#1-the-host-origin-surface-two-channels-both-localhost-only) |
 | **No Helm, no third-party charts** — every k8s object comes from the sole public whole-deployment `renderAll :: ProvisionedSpec -> [K8sObject]`; private service/global projections first seal one identity-keyed source set, and live mutation proceeds through activation-gated typed actions. | [`manifest_generation_doctrine.md` §1 — Why this doctrine exists: types render manifests, Helm does not](../documents/engineering/manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not) |
 | **Baked service binaries + the `distribution` registry** — every third-party *service* binary, explicitly including `redis-server`/Sentinel mode and `redis-cli` on both architectures, is baked into the multi-arch base container (in-cluster pulls only); the ML **engine payloads** are the exception — jit-resolved into a `CacheBudget`-bounded cache, never baked or URL-fetched. | [`image_build_doctrine.md` §2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster); [`content_addressing_doctrine.md` §4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) |
-| **Generated artifacts are never committed** — manifests, emitted `.tla`/`.cfg`, reflected Dhall schema, PureScript contracts, dependency resolution, enumerations, ledgers, receipts, and run evidence are generated under `gen/` or retained externally; only independently authored and reviewed test inputs/oracles are version-controlled. | [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md); [`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md) |
+| **All amoebius-owned state is repository-contained** — `.build/**` is reproducible/transient/evidentiary, `.data/**` is production runtime/durable state, `.test_data/**` is marker-owned test state, and root `test-secrets.dhall` is the sole cleartext secret-at-rest and is rejected by production. No system temp/data root, user home, or host-global engine is an amoebius storage backend. | [`repository_layout_doctrine.md` §2.3](../documents/engineering/repository_layout_doctrine.md#23-the-closed-local-state-roots); [`testing_doctrine.md` §3](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down); [`vault_pki_doctrine.md` §3.3](../documents/engineering/vault_pki_doctrine.md#33-the-test-secrets-seam-the-operators-prompt-automated) |
+| **Generated artifacts are never committed** — manifests, emitted `.tla`/`.cfg`, reflected Dhall schema, PureScript contracts, dependency resolution, enumerations, ledgers, receipts, and run evidence are generated under `.build/**`; only independently authored and reviewed test inputs/oracles are version-controlled. | [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md); [`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md) |
 | **The one formal obligation is the cross-cluster gateway migration** (both `Planned` and `Failover` branches), modelled as data, **safety + liveness-under-fairness** proven (TLC) and simulated (io-sim) once; its runtime fidelity is bridged by deterministic simulation + trace validation before live; intra-cluster consensus is delegated, not re-proven. | [`gateway_migration_model_doctrine.md`](../documents/engineering/gateway_migration_model_doctrine.md); [`formal_model_doctrine.md`](../documents/engineering/formal_model_doctrine.md); [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) |
 | **A test generates the enumeration, authors the expectation** — the spec generates the *enumeration* of surfaces requiring coverage; the operator authors the *expectations* asserted against them; an uncovered surface emits an UNVERIFIED `coverage` ledger row, never a silent pass. | [`testing_doctrine.md` §9 — Derivation: generated enumeration, authored expectation](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation); [`chaos_failover_doctrine.md` §11.2](../documents/engineering/chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation) |
 | **An effectful gate cannot pass on a replay or self-report.** A post-start challenge must appear in an authenticated observation outside the subject; security gates pair authority-minted own-scope success with foreign-scope denial, zero forbidden effect, and direct-bypass probes. | [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect) |
@@ -169,7 +170,7 @@ inventoried in [system_components.md](system_components.md) and owned by
 Each phase ends in a single, checkable acceptance gate on **at most one** substrate (the one-substrate
 discipline, [development_plan_standards.md §L](development_plan_standards.md#l-one-substrate-discipline)). Each
 phase document owns its gate text; the tracker owns phase order and status. The lines below are a navigation
-index, not a second status ledger. Phase 0 is 🔄 Active and phases 1–64 are ⏸️ Blocked pending numeric-order
+index, not a second status ledger. Phases 0–29 are ✅ Done, Phase 30 is 🔄 Active, and phases 31–64 are ⏸️ Blocked pending numeric-order
 revalidation.
 
 The DSL is designed to be validated and **simulated per phase**, never as a monolithic pre-implementation: each pre-cluster
@@ -272,7 +273,7 @@ self-tearing-down test topology of [`testing_doctrine.md`](../documents/engineer
   implemented, substituted, missing, and generated surface before any phase recloses.
 - **Every prior seal is invalidated.** Earlier gates used repository-resident enumeration and ledgers, wrote run
   evidence beneath `DEVELOPMENT_PLAN/`, or depended on tracked resolver output and host-specific paths.
-- **Status posture:** Phase 0 is Active. Phases 1–64 are Blocked by the reopened numeric sequence and reopen in numeric order.
+- **Status posture:** Phases 0–29 are Done, Phase 30 is Active, and Phases 31–64 are Blocked by the reopened numeric sequence.
   Authoritative status lives only in [README.md](README.md).
 - **Artifact posture:** only authored inputs and reviewed external source may be version-controlled. The
   complete repository and generated-output structure is owned by
@@ -280,7 +281,7 @@ self-tearing-down test topology of [`testing_doctrine.md`](../documents/engineer
   bytecode may remain source-adjacent only as a Git- and Docker-ignored cache; commands use ordinary caching.
 - **Toolchain posture:** dependencies and tools resolve dynamically from authored compatibility requirements.
   Lock/freeze files, resolved paths, and hard-coded library/package SHA values are generated and untracked.
-- **Evidence posture:** a gate writes to `gen/runs/` and an external immutable evidence store. Existing
+- **Evidence posture:** a gate writes to `.build/runs/` and an external immutable evidence store. Existing
   ledgers and receipts are historical migration material, not current completion evidence.
 
 ---

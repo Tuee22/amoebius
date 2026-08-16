@@ -40,7 +40,7 @@ data HostVolumeError
 
 validateHostVolume :: RetainedPV -> HostVolumeObservation -> Either HostVolumeError ()
 validateHostVolume planned observed
-#ifndef PHASE28_RAW_HOST_DIRECTORY_MUTANT
+#ifndef RETAINED_STORAGE_RAW_HOST_DIRECTORY_MUTANT
   | observedHostVolumeKind observed /= FixedRawFilesystemImage = Left RawHostDirectoryForbidden
 #endif
   | observedRawBytes observed /= retainedPvCapacityBytes planned = Left (RawCapacityBelowWitness (retainedPvCapacityBytes planned) (observedRawBytes observed))

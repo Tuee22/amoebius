@@ -34,7 +34,7 @@ def main(argv: list[str]) -> int:
     args = parser.parse_args(argv)
     pins = toolchain.resolve(["ghc"])
     ghc = pins["ghc"]["path"]
-    with (ROOT / "tests/oracle/phase6/compile_fail.tsv").open(encoding="utf-8", newline="") as handle:
+    with (ROOT / "test/oracle/illegal_state_corpus/compile_fail.tsv").open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle, delimiter="\t"))
     if len(rows) != 5:
         print("compile-fail: expected five oracle rows", file=sys.stderr)

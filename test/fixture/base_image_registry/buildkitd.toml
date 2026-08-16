@@ -1,0 +1,16 @@
+# Independent OS-boundary policy for the bounded Phase-25 builder.  The
+# docker-container driver supplies the CPU and memory cgroup ceilings; this
+# worker policy independently caps simultaneous stage execution.
+debug = false
+trace = false
+
+[registry."docker.io"]
+  mirrors = ["mirror.gcr.io"]
+
+[worker.oci]
+  enabled = true
+  max-parallelism = 2
+  gc = true
+
+[worker.containerd]
+  enabled = false

@@ -17,66 +17,6 @@
 # Created 2026-08-12 against the Phase-0 redesign.
 #
 # rule<TAB>path_glob<TAB>message_glob<TAB>owner<TAB>legacy-register anchor
-r5	tools/phase26_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-26	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase26_gate.py	names generated path test/enumeration/*	phase-26	`test/enumeration/**`
-r5	tools/phase26_gate.py	names generated path test/golden/*	phase-26	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
-r5	tools/phase26_reconcile_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-26	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase26_sprint26_1_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-26	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase26_sprint26_2_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-26	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase26_sprint26_3_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-26	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase26_sprint26_4_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-26	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase26_sprint26_5_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-26	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/phase26_gate.py	tracked file carries a resolved home path*	phase-26	Absolute developer-home executable paths
-r6	tools/phase26_reconcile_live.py	tracked file pins a package integrity digest*	phase-26	Hard-coded library/package SHA values
-r6	tools/phase26_sprint26_1_gate.py	tracked file carries a resolved home path*	phase-26	Absolute developer-home executable paths
-r6	tools/phase26_sprint26_2_gate.py	tracked file carries a resolved home path*	phase-26	Absolute developer-home executable paths
-r6	tools/phase26_sprint26_3_gate.py	tracked file carries a resolved home path*	phase-26	Absolute developer-home executable paths
-r6	tools/phase26_sprint26_4_gate.py	tracked file carries a resolved home path*	phase-26	Absolute developer-home executable paths
-r6	tools/phase26_sprint26_5_gate.py	tracked file carries a resolved home path*	phase-26	Absolute developer-home executable paths
-r5	tools/phase27_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-27	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase27_gate.py	names generated path test/enumeration/*	phase-27	`test/enumeration/**`
-r5	tools/phase27_gate.py	names generated path test/golden/*	phase-27	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
-r5	tools/phase27_scheduler_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-27	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase27_sprint27_1_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-27	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase27_sprint27_2_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-27	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase27_sprint27_3_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-27	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase27_sprint27_4_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-27	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase27_sprint27_5_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-27	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/phase27_gate.py	tracked file carries a resolved home path*	phase-27	Absolute developer-home executable paths
-r6	tools/phase27_sprint27_1_gate.py	tracked file carries a resolved home path*	phase-27	Absolute developer-home executable paths
-r6	tools/phase27_sprint27_2_gate.py	tracked file carries a resolved home path*	phase-27	Absolute developer-home executable paths
-r6	tools/phase27_sprint27_3_gate.py	tracked file carries a resolved home path*	phase-27	Absolute developer-home executable paths
-r6	tools/phase27_sprint27_4_gate.py	tracked file carries a resolved home path*	phase-27	Absolute developer-home executable paths
-r6	tools/phase27_sprint27_5_gate.py	tracked file carries a resolved home path*	phase-27	Absolute developer-home executable paths
-r5	tools/phase28_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-28	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase28_gate.py	names generated path test/enumeration/*	phase-28	`test/enumeration/**`
-r5	tools/phase28_gate.py	names generated path test/golden/*	phase-28	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
-r5	tools/phase28_rebind_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-28	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase28_sprint28_1_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-28	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase28_sprint28_1_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-28	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase28_sprint28_2_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-28	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase28_sprint28_2_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-28	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	test/live/fixtures/phase28-kind.yaml	tracked file carries a resolved home path*	phase-28	Absolute developer-home executable paths
-r6	tools/phase28_gate.py	tracked file carries a resolved home path*	phase-28	Absolute developer-home executable paths
-r6	tools/phase28_rebind_live.py	tracked file carries a resolved home path*	phase-28	Absolute developer-home executable paths
-r6	tools/phase28_rebind_live.py	tracked file pins a package integrity digest*	phase-28	Hard-coded library/package SHA values
-r6	tools/phase28_sprint28_1_gate.py	tracked file carries a resolved home path*	phase-28	Absolute developer-home executable paths
-r6	tools/phase28_sprint28_2_gate.py	tracked file carries a resolved home path*	phase-28	Absolute developer-home executable paths
-r6	tools/phase28_sprint28_2_live.py	tracked file pins a package integrity digest*	phase-28	Hard-coded library/package SHA values
-r5	tools/phase29_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-29	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase29_gate.py	names generated path test/enumeration/*	phase-29	`test/enumeration/**`
-r5	tools/phase29_gate.py	names generated path test/golden/*	phase-29	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
-r5	tools/phase29_vault_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-29	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/phase29_gate.py	tracked file carries a resolved home path*	phase-29	Absolute developer-home executable paths
-r6	tools/phase29_vault_live.py	tracked file carries a resolved home path*	phase-29	Absolute developer-home executable paths
-r6	tools/phase29_vault_live.py	tracked file pins a package integrity digest*	phase-29	Hard-coded library/package SHA values
-r5	tools/phase30_backbone_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-30	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase30_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-30	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/phase30_gate.py	names generated path test/enumeration/*	phase-30	`test/enumeration/**`
-r5	tools/phase30_gate.py	names generated path test/golden/*	phase-30	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
-r6	tools/phase30_backbone_live.py	tracked file carries a resolved home path*	phase-30	Absolute developer-home executable paths
-r6	tools/phase30_backbone_live.py	tracked file pins a package integrity digest*	phase-30	Hard-coded library/package SHA values
-r6	tools/phase30_gate.py	tracked file carries a resolved home path*	phase-30	Absolute developer-home executable paths
 r5	tools/phase31_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-31	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
 r5	tools/phase31_gate.py	names generated path test/enumeration/*	phase-31	`test/enumeration/**`
 r5	tools/phase31_gate.py	names generated path test/golden/*	phase-31	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
@@ -287,16 +227,46 @@ r6	tools/phase64_gate.py	tracked file carries a resolved home path*	phase-64	Abs
 # Phase 0 defers nothing of its own here. Its three ordinal-bearing paths were renamed,
 # its `CLAUDE.md` copy became a link, and the ignore rules for paths nothing generates
 # were deleted rather than deferred.
+r16	tools/phase31_*	*	phase-31	Phase-30 through Phase-32 live fixtures and drivers use `/var/tmp/amoebius-phase*`
+r16	tools/phase32_*	*	phase-32	Phase-30 through Phase-32 live fixtures and drivers use `/var/tmp/amoebius-phase*`
+r16	tools/phase33_*	*	phase-33	Many gate scripts and tests use `tempfile`
+r16	tools/phase34_*	*	phase-34	Many gate scripts and tests use `tempfile`
+r16	tools/phase35_*	*	phase-35	Many gate scripts and tests use `tempfile`
+r16	tools/phase36_*	*	phase-36	Many gate scripts and tests use `tempfile`
+r16	tools/phase37_*	*	phase-37	Many gate scripts and tests use `tempfile`
+r16	tools/phase38_*	*	phase-38	Many gate scripts and tests use `tempfile`
+r16	tools/phase39_*	*	phase-39	Many gate scripts and tests use `tempfile`
+r16	tools/phase40_*	*	phase-40	Many gate scripts and tests use `tempfile`
+r16	tools/phase41_*	*	phase-41	Many gate scripts and tests use `tempfile`
+r16	tools/phase42_*	*	phase-42	Many gate scripts and tests use `tempfile`
+r16	tools/phase43_*	*	phase-43	Many gate scripts and tests use `tempfile`
+r16	tools/phase44_*	*	phase-44	Many gate scripts and tests use `tempfile`
+r16	tools/phase45_*	*	phase-45	Many gate scripts and tests use `tempfile`
+r16	tools/phase46_*	*	phase-46	Many gate scripts and tests use `tempfile`
+r16	tools/phase47_*	*	phase-47	Many gate scripts and tests use `tempfile`
+r16	tools/phase48_*	*	phase-48	Many gate scripts and tests use `tempfile`
+r16	tools/phase49_*	*	phase-49	Many gate scripts and tests use `tempfile`
+r16	tools/phase50_*	*	phase-50	Many gate scripts and tests use `tempfile`
+r16	tools/phase51_*	*	phase-51	Many gate scripts and tests use `tempfile`
+r16	tools/phase52_*	*	phase-52	Many gate scripts and tests use `tempfile`
+r16	tools/phase53_*	*	phase-53	Many gate scripts and tests use `tempfile`
+r16	tools/phase54_*	*	phase-54	Many gate scripts and tests use `tempfile`
+r16	tools/phase55_*	*	phase-55	Many gate scripts and tests use `tempfile`
+r16	tools/phase56_*	*	phase-56	Many gate scripts and tests use `tempfile`
+r16	tools/phase57_*	*	phase-57	Many gate scripts and tests use `tempfile`
+r16	tools/phase58_*	*	phase-58	Many gate scripts and tests use `tempfile`
+r16	tools/phase60_*	*	phase-60	Many gate scripts and tests use `tempfile`
+r16	tools/phase61_*	*	phase-61	Many gate scripts and tests use `tempfile`
+r16	tools/phase62_*	*	phase-62	Many gate scripts and tests use `tempfile`
+r16	tools/phase63_*	*	phase-63	Many gate scripts and tests use `tempfile`
+r16	tools/phase64_*	*	phase-64	Many gate scripts and tests use `tempfile`
 r13	amoebius-pulsar/	path is outside the target tree*	phase-35	Four roots contain only a package declaration
 r13	amoebius-pulumi/	path is outside the target tree*	phase-47	Four roots contain only a package declaration
 r13	amoebius-release/	path is outside the target tree*	phase-39	Four roots contain only a package declaration
 r13	amoebius-runtime/	path is outside the target tree*	phase-47	Four roots contain only a package declaration
 r13	amoebius-store/	path is outside the target tree*	phase-37	Four roots contain only a package declaration
-r13	app/Amoebius/	path is outside the target tree*	phase-22	`app/` holds `Main.hs`, `singleton/`, and `Amoebius/Ui/Server/`
-r13	app/Main.hs	path is outside the target tree*	phase-22	`app/` holds `Main.hs`, `singleton/`, and `Amoebius/Ui/Server/`
 r13	app/singleton/	path is outside the target tree*	phase-33	`app/` holds `Main.hs`, `singleton/`, and `Amoebius/Ui/Server/`
 r13	apple-host/	path is outside the target tree*	phase-53	Four roots contain only a package declaration
-r13	docker/	path is outside the target tree*	phase-25	`docker/` contains exactly one tracked file
 r13	infernix-ui/	path is outside the target tree*	phase-50	Four roots contain only a package declaration
 r13	infernix/	path is outside the target tree*	phase-49	Four roots contain only a package declaration
 r13	jitml-ui/	path is outside the target tree*	phase-52	Four roots contain only a package declaration
@@ -307,62 +277,23 @@ r13	test-topology/	path is outside the target tree*	phase-54	Four roots contain 
 r13	test/Amoebius/	path is outside the target tree*	phase-31	`test/` carries `golden/` beside `goldens/`
 r13	test/Ui/	path is outside the target tree*	phase-59	`test/` carries `golden/` beside `goldens/`
 r13	test/accept/	path is outside the target tree*	phase-39	`test/` carries `golden/` beside `goldens/`
-r13	test/boundary/	path is outside the target tree*	phase-14	`test/` carries `golden/` beside `goldens/`
 r13	test/browser/	path is outside the target tree*	phase-60	`test/` carries `golden/` beside `goldens/`
-r13	test/capability/	path is outside the target tree*	phase-12	`test/` carries `golden/` beside `goldens/`
-r13	test/ci/	path is outside the target tree*	phase-28	`test/` carries `golden/` beside `goldens/`
 r13	test/compile-fail/	path is outside the target tree*	phase-49	`test/` carries `golden/` beside `goldens/`
 r13	test/dhall/	path is outside the target tree*	phase-54	`test/` carries `golden/` beside `goldens/`
-r13	test/dsl/	path is outside the target tree*	phase-7	`test/` carries `golden/` beside `goldens/`
 r13	test/fake/	path is outside the target tree*	phase-48	`test/` carries `golden/` beside `goldens/`
 r13	test/fixtures/	path is outside the target tree*	phase-59	`test/` carries `golden/` beside `goldens/`
-r13	test/formal/	path is outside the target tree*	phase-3	`test/` carries `golden/` beside `goldens/`
 r13	test/goldens/	path is outside the target tree*	phase-46	`test/` carries `golden/` beside `goldens/`
 r13	test/host/	path is outside the target tree*	phase-53	`test/` carries `golden/` beside `goldens/`
-r13	test/image/	path is outside the target tree*	phase-25	`test/` carries `golden/` beside `goldens/`
 r13	test/inject/	path is outside the target tree*	phase-43	`test/` carries `golden/` beside `goldens/`
 r13	test/integration/	path is outside the target tree*	phase-47	`test/` carries `golden/` beside `goldens/`
 r13	test/kernel/	path is outside the target tree*	phase-51	`test/` carries `golden/` beside `goldens/`
 r13	test/live/	path is outside the target tree*	phase-64	`test/` carries `golden/` beside `goldens/`
-r13	test/manifest/	path is outside the target tree*	phase-13	`test/` carries `golden/` beside `goldens/`
 r13	test/mutants/	path is outside the target tree*	phase-64	Seeded mutants live under five roots in three record formats
 r13	test/negatives/	path is outside the target tree*	phase-47	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_01_surface_expectations.tsv	path is outside the target tree*	phase-1	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_02_surface_expectations.tsv	path is outside the target tree*	phase-2	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_03_surface_expectations.tsv	path is outside the target tree*	phase-3	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_04_surface_expectations.tsv	path is outside the target tree*	phase-4	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_05_surface_expectations.tsv	path is outside the target tree*	phase-5	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_06_surface_expectations.tsv	path is outside the target tree*	phase-6	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_07_surface_expectations.tsv	path is outside the target tree*	phase-7	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_08_surface_expectations.tsv	path is outside the target tree*	phase-8	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_09_surface_expectations.tsv	path is outside the target tree*	phase-9	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_10_surface_expectations.tsv	path is outside the target tree*	phase-10	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_11_surface_expectations.tsv	path is outside the target tree*	phase-11	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_12_surface_expectations.tsv	path is outside the target tree*	phase-12	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_13_surface_expectations.tsv	path is outside the target tree*	phase-13	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_14_surface_expectations.tsv	path is outside the target tree*	phase-14	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_15_surface_expectations.tsv	path is outside the target tree*	phase-15	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_16_surface_expectations.tsv	path is outside the target tree*	phase-16	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_17_surface_expectations.tsv	path is outside the target tree*	phase-17	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_18_surface_expectations.tsv	path is outside the target tree*	phase-18	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_19_surface_expectations.tsv	path is outside the target tree*	phase-19	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_20_surface_expectations.tsv	path is outside the target tree*	phase-20	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_21_surface_expectations.tsv	path is outside the target tree*	phase-21	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_22_surface_expectations.tsv	path is outside the target tree*	phase-22	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_23_surface_expectations.tsv	path is outside the target tree*	phase-23	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_24_surface_expectations.tsv	path is outside the target tree*	phase-24	`test/` carries `golden/` beside `goldens/`
-r13	test/phase_25_surface_expectations.tsv	path is outside the target tree*	phase-25	`test/` carries `golden/` beside `goldens/`
 r13	test/platform/	path is outside the target tree*	phase-32	`test/` carries `golden/` beside `goldens/`
-r13	test/reconcile/	path is outside the target tree*	phase-26	`test/` carries `golden/` beside `goldens/`
 r13	test/reject/	path is outside the target tree*	phase-39	`test/` carries `golden/` beside `goldens/`
-r13	test/scheduler/	path is outside the target tree*	phase-27	`test/` carries `golden/` beside `goldens/`
-r13	test/sim/	path is outside the target tree*	phase-27	`test/` carries `golden/` beside `goldens/`
-r13	test/storage/	path is outside the target tree*	phase-28	`test/` carries `golden/` beside `goldens/`
 r13	test/topology/	path is outside the target tree*	phase-54	`test/` carries `golden/` beside `goldens/`
 r13	test/ui/	path is outside the target tree*	phase-52	`test/` carries `golden/` beside `goldens/`
-r13	test/vault/	path is outside the target tree*	phase-29	`test/` carries `golden/` beside `goldens/`
-r13	tests/	path is outside the target tree*	phase-23	`test/` holds 889 tracked paths and `tests/` 133
-r13	toolchain/	path is outside the target tree*	phase-1	Acquired tools have two declared homes
 r13	ui-live/	path is outside the target tree*	phase-58	Four roots contain only a package declaration
 r13	ui-runtime/	path is outside the target tree*	phase-56	`ui-runtime/**` holds the one spago project
 r14	.*ignore	ignore rule *DEVELOPMENT_PLAN/evidence*	phase-64	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
@@ -370,43 +301,7 @@ r14	.*ignore	ignore rule *test/enumeration*	phase-64	`test/enumeration/**`
 r14	.*ignore	ignore rule *phase_54_expected_run_ledger.json*	phase-54	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
 r14	.*ignore	ignore rule *phase_*_ledger.json*	phase-64	`test/golden/phase_*_ledger.json` and Phase-54 expected-run ledger
 r14	.*ignore	ignore rule *ui-runtime*	phase-56	`ui-runtime/**` holds the one spago project
-r14	.*ignore	ignore rule *toolchain/*	phase-1	Acquired tools have two declared homes
-r14	.*ignore	ignore rule *ghc-pkg-*	phase-1	exec shims are written into the repository root
-r14	.*ignore	ignore rule *repl-wrapper-*	phase-1	exec shims are written into the repository root
-r14	.*ignore	ignore rule *wrapper-*	phase-1	exec shims are written into the repository root
-r14	.*ignore	ignore rule *.ghc.environment.*	phase-1	exec shims are written into the repository root
-r14	.*ignore	ignore rule *cabal.project.local*	phase-1	exec shims are written into the repository root
-r14	.*ignore	ignore rule *test-secrets.dhall*	phase-29	`test-secrets.dhall` is a root-level cleartext-secret file
-r15	*	* names phase ordinal 1;*	phase-1	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 2;*	phase-2	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 3;*	phase-3	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 4;*	phase-4	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 5;*	phase-5	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 6;*	phase-6	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 7;*	phase-7	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 8;*	phase-8	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 9;*	phase-9	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 10;*	phase-10	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 11;*	phase-11	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 12;*	phase-12	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 13;*	phase-13	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 14;*	phase-14	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 15;*	phase-15	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 16;*	phase-16	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 17;*	phase-17	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 18;*	phase-18	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 19;*	phase-19	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 20;*	phase-20	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 21;*	phase-21	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 22;*	phase-22	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 23;*	phase-23	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 24;*	phase-24	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 25;*	phase-25	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 26;*	phase-26	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 27;*	phase-27	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 28;*	phase-28	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 29;*	phase-29	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
-r15	*	* names phase ordinal 30;*	phase-30	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
+r14	.*ignore	ignore rule *gen*	phase-64	Generated output, run bundles, tool acquisition, Cabal builds/stores, Node dependencies, and temporary files were spread across
 r15	*	* names phase ordinal 31;*	phase-31	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
 r15	*	* names phase ordinal 32;*	phase-32	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal
 r15	*	* names phase ordinal 33;*	phase-33	837 tracked paths outside `DEVELOPMENT_PLAN/` carry a phase ordinal

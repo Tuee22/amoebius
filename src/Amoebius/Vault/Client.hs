@@ -5,16 +5,21 @@ module Amoebius.Vault.Client
   ( KubernetesIdentity (..)
   , VaultToken (..)
   , VaultTransport (..)
+  , SecretPresenceFailure (..)
   , resolveSecret
+  , writePromptSecret
+  , assertSecretsPresent
   , HttpVaultAddress (..)
   , mkHttpVaultTransport
   , runVaultReadCommand
   , runVaultTransitCommand
+  , runVaultPromptWriteCommand
   ) where
 
 import Amoebius.Vault.Error
 import Amoebius.Vault.SecretRef
-import Control.Exception (IOException, try)
+import Control.Exception (IOException, finally, try)
+import Control.Monad (when)
 import Data.Aeson (Value (..), eitherDecodeStrict', encode, object, withObject, (.:), (.=))
 import Data.Aeson.Key qualified as Key
 import Data.Aeson.KeyMap qualified as KeyMap
@@ -30,7 +35,7 @@ import Data.Text.Encoding qualified as TextEncoding
 import Network.Socket
 import Network.Socket.ByteString (recv, sendAll)
 import System.Exit (exitFailure)
-import System.IO (hPutStrLn, stderr)
+import System.IO (hIsTerminalDevice, hPutStr, hPutStrLn, hSetEcho, stderr, stdin)
 
 data KubernetesIdentity = KubernetesIdentity
   { identityNamespace :: Text
@@ -45,8 +50,16 @@ newtype VaultToken = VaultToken {unVaultToken :: ByteString}
 data VaultTransport m = VaultTransport
   { authenticateKubernetes :: KubernetesIdentity -> ByteString -> m (Either VaultError VaultToken)
   , readKvField :: VaultToken -> Text -> Text -> Text -> m (Either VaultError ByteString)
+  , writeKvField :: VaultToken -> Text -> Text -> Text -> ByteString -> m (Either VaultError ())
+  , kvFieldExists :: VaultToken -> Text -> Text -> Text -> m (Either VaultError Bool)
+  , transitKeyExists :: VaultToken -> Text -> m (Either VaultError Bool)
   , decryptTransit :: VaultToken -> Text -> ByteString -> m (Either VaultError ByteString)
   }
+
+data SecretPresenceFailure
+  = SecretPresenceBackend VaultError
+  | MissingSecrets [SecretRef]
+  deriving stock (Eq, Show)
 
 resolveSecret
   :: Monad m
@@ -57,7 +70,7 @@ resolveSecret
   -> Maybe ByteString
   -> m (Either VaultError ByteString)
 resolveSecret transport identity jwt reference ciphertext = do
-#ifdef PHASE29_PREMINTED_TOKEN_MUTANT
+#ifdef VAULT_PKI_PREMINTED_TOKEN_MUTANT
   let authenticated = Right (VaultToken "login-token")
 #else
   authenticated <- authenticateKubernetes transport identity jwt
@@ -77,6 +90,59 @@ resolveSecret transport identity jwt reference ciphertext = do
         (\_name _purpose -> pure (Left VaultSecretMissing))
         reference
 
+writePromptSecret
+  :: Monad m
+  => VaultTransport m
+  -> KubernetesIdentity
+  -> ByteString
+  -> SecretRef
+  -> Text
+  -> Text
+  -> Text
+  -> ByteString
+  -> m (Either VaultError ())
+writePromptSecret transport identity jwt reference mount path field value =
+  foldSecretRef
+    (\_ _ _ -> pure (Left VaultPolicyMissing))
+    (\_ -> pure (Left VaultPolicyMissing))
+    (\_ _ -> do
+      authenticated <- authenticateKubernetes transport identity jwt
+      case authenticated of
+        Left failure -> pure (Left failure)
+        Right token -> writeKvField transport token mount path field value)
+    reference
+
+assertSecretsPresent
+  :: Monad m
+  => VaultTransport m
+  -> KubernetesIdentity
+  -> ByteString
+  -> [SecretRef]
+  -> m (Either SecretPresenceFailure ())
+assertSecretsPresent _transport _identity _jwt [] = pure (Right ())
+assertSecretsPresent transport identity jwt references = do
+  authenticated <- authenticateKubernetes transport identity jwt
+  case authenticated of
+    Left failure -> pure (Left (SecretPresenceBackend failure))
+    Right token -> collect token [] references
+ where
+  collect _ missing [] =
+#ifdef VAULT_PKI_FIRST_MISSING_MUTANT
+    pure $ if null missing then Right () else Left (MissingSecrets (take 1 (reverse missing)))
+#else
+    pure $ if null missing then Right () else Left (MissingSecrets (reverse missing))
+#endif
+  collect token missing (reference : remaining) = do
+    present <- foldSecretRef
+      (kvFieldExists transport token)
+      (transitKeyExists transport token)
+      (\_ _ -> pure (Right False))
+      reference
+    case present of
+      Left failure -> pure (Left (SecretPresenceBackend failure))
+      Right True -> collect token missing remaining
+      Right False -> collect token (reference : missing) remaining
+
 data HttpVaultAddress = HttpVaultAddress
   { vaultHost :: String
   , vaultPort :: String
@@ -88,6 +154,9 @@ mkHttpVaultTransport address =
   VaultTransport
     { authenticateKubernetes = httpLogin address
     , readKvField = httpReadKv address
+    , writeKvField = httpWriteKv address
+    , kvFieldExists = httpKvFieldExists address
+    , transitKeyExists = httpTransitKeyExists address
     , decryptTransit = httpDecryptTransit address
     }
 
@@ -110,6 +179,44 @@ httpReadKv address token mount path field = do
     if status == 200
       then parseJson payload (parseKvField field)
       else Left (readFailure status payload)
+
+httpWriteKv :: HttpVaultAddress -> VaultToken -> Text -> Text -> Text -> ByteString -> IO (Either VaultError ())
+httpWriteKv address token mount path field value = do
+  let requestPath = "/v1/" <> TextEncoding.encodeUtf8 mount <> "/data/" <> TextEncoding.encodeUtf8 path
+      metadataPath = "/v1/" <> TextEncoding.encodeUtf8 mount <> "/metadata/" <> TextEncoding.encodeUtf8 path
+      fieldValue = String (TextEncoding.decodeUtf8 value)
+      body = LazyByteString.toStrict (encode (object ["data" .= Object (KeyMap.singleton (Key.fromText field) fieldValue)]))
+      metadata = LazyByteString.toStrict (encode (object ["custom_metadata" .= object ["amoebius-fields" .= field]]))
+  written <- httpJson address "POST" requestPath (Just token) body
+  case written of
+    Left failure -> pure (Left failure)
+    Right (status, payload)
+      | status == 200 || status == 204 -> do
+          marked <- httpJson address "POST" metadataPath (Just token) metadata
+          pure $ case marked of
+            Left failure -> Left failure
+            Right (metadataStatus, metadataPayload)
+              | metadataStatus == 200 || metadataStatus == 204 -> Right ()
+              | otherwise -> Left (readFailure metadataStatus metadataPayload)
+      | otherwise -> pure (Left (readFailure status payload))
+
+httpKvFieldExists :: HttpVaultAddress -> VaultToken -> Text -> Text -> Text -> IO (Either VaultError Bool)
+httpKvFieldExists address token mount path field = do
+  let requestPath = "/v1/" <> TextEncoding.encodeUtf8 mount <> "/metadata/" <> TextEncoding.encodeUtf8 path
+  response <- httpJson address "GET" requestPath (Just token) ByteString.empty
+  pure $ do
+    (status, payload) <- response
+    if status == 200
+      then parseJson payload (parseKvPresence field)
+      else if status == 404 then Right False else Left (readFailure status payload)
+
+httpTransitKeyExists :: HttpVaultAddress -> VaultToken -> Text -> IO (Either VaultError Bool)
+httpTransitKeyExists address token key = do
+  let requestPath = "/v1/transit/keys/" <> TextEncoding.encodeUtf8 key
+  response <- httpJson address "GET" requestPath (Just token) ByteString.empty
+  pure $ do
+    (status, payload) <- response
+    if status == 200 then Right True else if status == 404 then Right False else Left (readFailure status payload)
 
 httpDecryptTransit :: HttpVaultAddress -> VaultToken -> Text -> ByteString -> IO (Either VaultError ByteString)
 httpDecryptTransit address token key ciphertext = do
@@ -142,6 +249,15 @@ parseKvField field = withObject "kv-response" $ \root -> do
     withObject "kv-fields" (\fields -> case KeyMap.lookup (Key.fromText field) fields of
       Just (String value) -> pure (TextEncoding.encodeUtf8 value)
       _ -> fail "secret-field-missing") innerData) outerData
+
+parseKvPresence :: Text -> Value -> Parser Bool
+parseKvPresence field = withObject "kv-metadata-response" $ \root -> do
+  metadata <- root .: "data"
+  withObject "kv-metadata" (\fields -> do
+    custom <- fields .: "custom_metadata"
+    withObject "kv-custom-metadata" (\values -> case KeyMap.lookup "amoebius-fields" values of
+      Just (String names) -> pure (field `elem` Text.splitOn "," names)
+      _ -> pure False) custom) metadata
 
 parseTransitPlaintext :: Value -> Parser ByteString
 parseTransitPlaintext = withObject "transit-response" $ \root -> do
@@ -252,3 +368,35 @@ runVaultTransitCommand arguments = case arguments of
       Left failure -> hPutStrLn stderr (Text.unpack (redactedErrorLog failure)) >> exitFailure
       Right value -> ByteString8.putStrLn value
   _ -> fail "usage: vault-transit-decrypt HOST PORT ROLE NAMESPACE SERVICEACCOUNT KEY CIPHERTEXT JWT_PATH"
+
+runVaultPromptWriteCommand :: [String] -> IO ()
+runVaultPromptWriteCommand arguments = case arguments of
+  [host, port, role, namespace, serviceAccount, mount, path, field, jwtPath, name, purpose] -> do
+    jwt <- ByteString8.strip <$> ByteString.readFile jwtPath
+    reference <- either (fail . Text.unpack) pure (promptRef (Text.pack name) (Text.pack purpose))
+    value <- readSecretPrompt (Text.pack name) (Text.pack purpose)
+    let identity = KubernetesIdentity (Text.pack namespace) (Text.pack serviceAccount) (Text.pack role)
+    result <- writePromptSecret
+      (mkHttpVaultTransport (HttpVaultAddress host port))
+      identity
+      jwt
+      reference
+      (Text.pack mount)
+      (Text.pack path)
+      (Text.pack field)
+      value
+    case result of
+      Left failure -> hPutStrLn stderr (Text.unpack (redactedErrorLog failure)) >> exitFailure
+      Right () -> hPutStrLn stderr "secret stored in Vault"
+  _ -> fail "usage: vault-prompt-write HOST PORT ROLE NAMESPACE SERVICEACCOUNT MOUNT PATH FIELD JWT_PATH NAME PURPOSE"
+
+readSecretPrompt :: Text -> Text -> IO ByteString
+readSecretPrompt name purpose = do
+  hPutStr stderr (Text.unpack name <> " (" <> Text.unpack purpose <> "): ")
+  terminal <- hIsTerminalDevice stdin
+  when terminal (hSetEcho stdin False)
+  value <- ByteString8.getLine `finally` when terminal (hSetEcho stdin True)
+  when terminal (hPutStrLn stderr "")
+  if ByteString.null value
+    then fail "empty prompt value refused"
+    else pure value

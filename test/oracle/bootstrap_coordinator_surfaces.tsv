@@ -1,0 +1,53 @@
+# Authored expectation for the Phase-24 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. Phase 24 had no committed enumeration at all, so this
+# file is the first authored opinion its gate is checked against.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   items     the seeded mutant labels the run read from the committed mutant domain
+#   metrics   the metric keys in .build/dsl/bootstrap-coordinator/phase-results.tsv
+#   checks    the check ids tools/bootstrap_coordinator_gate.py implements
+#
+# Every metric here is measured from evidence this run produced in its own bundle. The
+# retired gate verified a `live-*` battery that no tool in the repository writes — it
+# checked whatever an earlier run had left under the plan tree, which certifies whoever
+# wrote those files last rather than anything about this run. Those files are no longer
+# inputs, and the three surfaces they used to stand behind carry UNVERIFIED metrics.
+#
+# `split-runtime-boundary` and `m6-swap-runtime-roots` are the same gap seen twice. M6 swaps
+# the nodefs identity into the snapshot role, which is only detectable where the two roles
+# have different identities — the SplitRuntime layout. The pristine guest prepares Unified
+# backing, where all three roles share one filesystem and the swap is invisible. Reporting
+# M6 red from a Unified run would be reporting a check that could not have failed.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+committed-mutant-domain	checks	mutant-domain-exact
+bootstrap-coordinator-unit-oracle	checks	bootstrap-coordinator-unit
+pristine-harness-unit-oracle	checks	pristine-gate-unit
+host-spec-pure-oracle	checks	host-spec
+no-leftover-evidence-input	checks	evidence-inputs-produced-by-this-run
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
+m1-negate-gpu-promotion	items	M1
+m2-bare-name-tool	items	M2
+m3-one-shot-kind-guard	items	M3
+m4-create-before-admission	items	M4
+m5-steady-etcd-peak	items	M5
+m6-swap-runtime-roots	items	M6
+managed-tools-absent-at-start	metrics	managed-tools-absent
+single-ready-node	metrics	single-ready-node
+idempotent-rerun-observable-triple	metrics	observable-triple
+rerun-zero-mutating-invocation	metrics	rerun-mutation
+divergence-repair-without-recreate	metrics	divergence-repair
+absolute-path-tool-resolution	metrics	bare-name-path-lookups
+helm-never-ensured-or-invoked	metrics	helm-invocations
+complete-pod-commitment-inventory	metrics	inventory-pod-commitments
+linux-cpu-lane-has-no-accelerator	metrics	accelerator-offering
+host-engine-carve-observed	metrics	host-engine-throttle
+bounded-process-envelopes	metrics	process-envelopes
+leak-free-postflight	metrics	leak-free-postflight
+seeded-mutant-battery	metrics	mutants
+split-runtime-boundary	metrics	split-runtime-boundary
+etcd-transition-highwater	metrics	etcd-transition-highwater
+audit-system-log-highwater	metrics	audit-system-log-highwater

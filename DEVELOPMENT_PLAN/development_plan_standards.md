@@ -81,7 +81,7 @@ Every file in `DEVELOPMENT_PLAN/` opens with the standard block from
 
 - `**Referenced by**` lists the **actual** inbound links (bidirectional rule, [documentation_standards.md §4](../documents/documentation_standards.md#4-cross-referencing)) —
   not a blanket "everything." It is reconciled from the true link graph, never hand-guessed.
-- `**Generated sections**` is always `none`. Generated Markdown lives under ignored `gen/docs/`, never in the
+- `**Generated sections**` is always `none`. Generated Markdown lives under ignored `.build/docs/`, never in the
   governed plan suite ([§I](#i-generated-documentation-remains-untracked)).
 - `**Status**` is `Authoritative source` for every plan doc (the plan is the SSoT for sequencing/status);
   the README is additionally the *live tracker*.
@@ -98,7 +98,7 @@ Every file in `DEVELOPMENT_PLAN/` opens with the standard block from
 | `development_plan_gate_integrity.md` | Family slice: gate integrity, the universal artifact-hygiene postcondition, plan-to-implementation reconciliation, and the final repository layout. |
 | `overview.md` | Target architecture / vision / current-baseline narrative (the "why/what"). |
 | `system_components.md` | Target component inventory: surface → owning doctrine → planned module path. |
-| `substrates.md` | Authored substrate registry and per-phase substrate map. Generated views go to `gen/docs/`. |
+| `substrates.md` | Authored substrate registry and per-phase substrate map. Generated views go to `.build/docs/`. |
 | `legacy_tracking_for_deletion.md` | The implementation/plan divergence and migration-removal ledger: observed mismatch, owner, and closure condition. |
 | `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_64_offline_multizone_continuity.md`). |
 | `later_phases.md` | The in-scope, high-numbered phases not yet given their own document. |
@@ -259,7 +259,7 @@ unbuildable when it is not.**
 |---|---|---|
 | `accelerator-device-plugin` | A Kubernetes device plugin advertising `nvidia.com/gpu` for the host's device vector — part of what *makes* a host `linux-cuda`, so it belongs to the host, not to a phase | Phase 51 |
 | `cloud-account` | A credentialed provider account carrying the quota and permissions the `Managed Eks` registry entry names | Phases 44–47, 54 |
-| `host-toolchain` | The `ghc`/`cabal`/`dhall`/`spago`/`purs`/Chromium binaries present on the developer host. Phase 1 authors compatibility requirements; resolved versions and absolute paths are run-local generated observations under `gen/toolchain/` | Phase 1 |
+| `host-toolchain` | The `ghc`/`cabal`/`dhall`/`spago`/`purs`/Chromium binaries present on the developer host. Phase 1 authors compatibility requirements; resolved versions and absolute paths are run-local generated observations under `.build/toolchain/` | Phase 1 |
 
 No phase requires a live public DNS zone: [`phase_32`](phase_32_keycloak_ingress.md) accepts a local ACME
 chain in place of public issuance, and Phase 3's `dnsRecord` TTLs are model parameters, not live records.
@@ -311,12 +311,12 @@ doctrine suite in lockstep.
 
 Every governed plan document is a human-authored input and declares `**Generated sections**: none`.
 Tool-produced tables, indexes, dashboards, contents blocks, status projections, and run summaries are written
-only below ignored `gen/docs/`. They may be inspected or published from CI, but they are never copied into a
+only below ignored `.build/docs/`. They may be inspected or published from CI, but they are never copied into a
 tracked Markdown file.
 
 A table that must remain in a phase contract is authored and reviewed as a requirement. A table that can be
 regenerated from code, a phase contract, repository discovery, or an evidence store is generated output and
-belongs in `gen/docs/`. This rule removes generated-marker fences from the version-controlled corpus.
+belongs in `.build/docs/`. This rule removes generated-marker fences from the version-controlled corpus.
 
 ## J. Cross-reference path rules
 
@@ -430,9 +430,11 @@ The argument is carried by [`development_plan_phase_model.md`](development_plan_
 <a id="s-commit-timing"></a>
 <a id="gate-integrity-delegation"></a>
 
-Eleven postconditions every gate inherits on top of its own capability check: the source-snapshot binding,
-run-time surface enumeration, generated output confined to `gen/`, the authored-root write guard, the
-external attestation, and the target-tree partition. Commit timing is never a gate input.
+Fourteen postconditions every gate inherits on top of its own capability check: the source-snapshot binding,
+run-time surface enumeration, generated output confined to `.build/**`, production state confined to
+`.data/**`, test state confined to marker-owned `.test_data/**`, `test-secrets.dhall` rejected by production,
+the authored-root write guard, the repository-local attestation, the host inventory, and the target-tree
+partition. Commit timing is never a gate input.
 
 The argument is carried by [`development_plan_gate_integrity.md`](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate).
 

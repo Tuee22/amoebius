@@ -55,7 +55,7 @@ data RebindError
   deriving anyclass (NFData)
 
 validateClusterAbsence :: ClusterAbsenceObservation -> Either RebindError ()
-#ifdef PHASE28_SOFT_DELETE_MUTANT
+#ifdef RETAINED_STORAGE_SOFT_DELETE_MUTANT
 validateClusterAbsence observation
   | observedBackingPresent observation = Right ()
   | otherwise = Left BackingMissingWhileClusterAbsent
@@ -74,7 +74,7 @@ validateFreshCluster observation
 
 validateMarkerPath :: MarkerPathObservation -> Either RebindError ()
 validateMarkerPath observation
-#ifndef PHASE28_SEED_MARKER_MUTANT
+#ifndef RETAINED_STORAGE_SEED_MARKER_MUTANT
   | not (markerAbsentBeforeWrite observation) || not (null (witnessSeedCommands observation)) = Left MarkerWasPreseeded
 #endif
   | not (markerWrittenBeforeDelete observation && markerReadAfterRecreate observation) = Left MarkerNotRoundTripped

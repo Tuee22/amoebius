@@ -228,8 +228,8 @@ attempt fixture name policy requested owner presented = case findAction fixture 
 
 checkMutantControls :: FilePath -> Fixture -> IO ()
 checkMutantControls root _fixture = do
-  defaultSource <- readFile (root </> "test/mutants/phase_18_default_allow.mutant")
-  visibilitySource <- readFile (root </> "test/mutants/phase_18_visibility_is_authorization.mutant")
+  defaultSource <- readFile (root </> "test/mutant/ui_authorization/default_allow.mutant")
+  visibilitySource <- readFile (root </> "test/mutant/ui_authorization/visibility_is_authorization.mutant")
   assert ("absent-policy=>allow" `contains` defaultSource) "default-allow mutant fixture drifted"
   assert ("authorize-from-visibility" `contains` visibilitySource) "visibility mutant fixture drifted"
   defaultRows <- loadTable (root </> "test/fixtures/ui_authorization/authorization_matrix.tsv")
@@ -243,13 +243,13 @@ checkMutantControls root _fixture = do
 runDefaultAllowMutant :: FilePath -> Fixture -> IO ()
 runDefaultAllowMutant root fixture = do
   checkMutantControls root fixture
-  putStrLn "phase18-auth-mutant: RED default_allow default-deny"
+  putStrLn "ui-authorization-mutant: RED default_allow default-deny"
   exitFailure
 
 runVisibilityMutant :: FilePath -> Fixture -> IO ()
 runVisibilityMutant root fixture = do
   checkMutantControls root fixture
-  putStrLn "phase18-auth-mutant: RED visibility_is_authorization hidden-invocable+stale"
+  putStrLn "ui-authorization-mutant: RED visibility_is_authorization hidden-invocable+stale"
   exitFailure
 
 defaultAllowMutant :: [String] -> Bool

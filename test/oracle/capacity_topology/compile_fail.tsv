@@ -1,0 +1,8 @@
+case	legal	illegal	expected	entry
+bare-apple-host	test/spec/dsl/compilefail7/bare_apple_legal.hs	test/spec/dsl/compilefail7/bare_apple_illegal.hs	test/spec/dsl/compilefail7/bare_apple.expected	3.14
+bare-windows-host	test/spec/dsl/compilefail7/bare_windows_legal.hs	test/spec/dsl/compilefail7/bare_windows_illegal.hs	test/spec/dsl/compilefail7/bare_windows.expected	3.14
+even-server-quorum	test/spec/dsl/compilefail7/quorum_legal.hs	test/spec/dsl/compilefail7/quorum_illegal.hs	test/spec/dsl/compilefail7/quorum.expected	3.24
+single-topology-place	test/spec/dsl/compilefail7/single_topology_legal.hs	test/spec/dsl/compilefail7/single_topology_illegal.hs	test/spec/dsl/compilefail7/single_topology.expected	3.31
+control-plane-reach	test/spec/dsl/compilefail7/control_plane_reach_legal.hs	test/spec/dsl/compilefail7/control_plane_reach_illegal.hs	test/spec/dsl/compilefail7/control_plane_reach.expected	3.36
+host-worker-reach	test/spec/dsl/compilefail7/host_worker_reach_legal.hs	test/spec/dsl/compilefail7/host_worker_reach_illegal.hs	test/spec/dsl/compilefail7/host_worker_reach.expected	3.38
+site-indexed-quorum	test/spec/dsl/compilefail7/site_quorum_legal.hs	test/spec/dsl/compilefail7/site_quorum_illegal.hs	test/spec/dsl/compilefail7/site_quorum.expected	3.39

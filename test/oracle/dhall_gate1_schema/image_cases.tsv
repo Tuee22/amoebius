@@ -1,0 +1,4 @@
+name	negative	golden	required_stderr
+foreign-image	dhall/examples/illegal_foreign_image.dhall	test/oracle/dhall_gate1_schema/foreign-image.err	Foreign
+run-shell-bake-step	dhall/examples/illegal_run_shell_bake_step.dhall	test/oracle/dhall_gate1_schema/run-shell-bake-step.err	RunShell
+container-without-process	dhall/examples/illegal_container_without_process.dhall	test/oracle/dhall_gate1_schema/container-without-process.err	process

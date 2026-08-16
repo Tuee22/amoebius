@@ -120,8 +120,8 @@ rejectMutant name mutation = do
   let (mutantPlan, mutantDescent) = mutation steps
       caught = mutantPlan /= expectedPlan || mutantDescent /= expectedDescent
   if caught
-    then putStrLn ("phase14-chain-mutant: RED " <> name) >> fail ("Phase-14 chain mutant rejected: " <> name)
-    else putStrLn ("phase14-chain-mutant: SURVIVED " <> name)
+    then putStrLn ("chain-boundary-chain-mutant: RED " <> name) >> fail ("chain boundary mutant rejected: " <> name)
+    else putStrLn ("chain-boundary-chain-mutant: SURVIVED " <> name)
 
 mutateDropStep :: [Step cfg] -> (ByteString.ByteString, ByteString.ByteString)
 mutateDropStep steps = (renderChainPlan (dropLast steps), renderDescent (dropLast steps))

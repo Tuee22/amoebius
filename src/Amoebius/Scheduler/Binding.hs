@@ -34,7 +34,7 @@ prepareBinding
   -> Either BindingError BindingRequest
 prepareBinding expectedHolder observedHolder rootVersion record
   | expectedHolder /= observedHolder = Left BindingLeaseHolderMismatch
-#ifndef PHASE27_BIND_BEFORE_RESERVATION_CAS_MUTANT
+#ifndef CAPACITY_SCHEDULER_BIND_BEFORE_RESERVATION_CAS_MUTANT
   | reservationState record /= BindingInFlight = Left BindingReservationNotInFlight
 #endif
   | otherwise = Right (BindingRequest (reservationUid record) (reservationNode record) rootVersion observedHolder)

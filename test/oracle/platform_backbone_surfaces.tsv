@@ -1,0 +1,30 @@
+# Authored Phase-30 platform-backbone surface expectation.
+all-three-sprints-sealed	metrics	sprint-receipts
+vault-readiness-precedes-backbone	metrics	vault-readiness
+stable-external-load-balancer	metrics	load-balancer
+four-drive-minio-roundtrip	metrics	minio
+verified-registry-s3-rehome	metrics	registry
+pulsar-ha-members-ready	metrics	pulsar
+native-cbor-deduplication	metrics	native-dedup
+size-triggered-offload-bounds-hot-tier	metrics	offload
+haskell-render-byte-identity	metrics	render
+no-public-registry-pull	metrics	public-registry-pulls
+complete-mutant-battery	metrics	mutants
+registry-cannot-retain-filesystem-driver	items	M-registry-fs-driver
+offload-cannot-be-time-only	items	M-offload-time-only
+logical-bytes-cannot-stand-in-for-physical	items	M-storage-logical-as-physical
+all-storage-fault-scenarios-remain	items	M-storage-drop-fault-scenario
+ordinal-debit-remains-uniform	items	M-storage-sum-ordinals
+failed-write-orphans-remain-charged	items	M-content-immediate-gc
+authored-oracles-present	checks	authored-backbone-oracles
+toolchain-from-authored-requirements	checks	toolchain-satisfies-requirements
+exact-phase29-predecessor	checks	phase29-predecessor-verified
+exact-phase25-image-handoff	checks	phase25-image-handoff-verified
+pure-backbone-contract	checks	pure-backbone-contract
+live-private-backbone	checks	live-private-backbone
+independent-live-reader	checks	external-live-reader
+recorded-results-are-generated	checks	recorded-results-match-oracle,emitted-results-untracked
+keycloak-edge	metrics
+phase31-postgres-observability	metrics
+singleton-owned-reconcile	metrics
+amoebius-pulsar-full-native-client	metrics

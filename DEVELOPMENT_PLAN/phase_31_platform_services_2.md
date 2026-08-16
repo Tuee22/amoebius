@@ -41,9 +41,15 @@ Validated 2026-08-10 with `python3 tools/phase31_gate.py`; ledger
 
 ## Phase Status
 
+⏸️ Blocked — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
+invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
+repository roots defined by Phase 0. Scope amendments below remain normative.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ⏸️ Blocked by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish external evidence without changing an authored path.
+gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Observed artifact migration — 2026-08-11:** `expected-base-digest.txt` duplicates Phase-25 run output, and
 `postgres-share-package.sha256` is a package/archive integrity observation. Both are generated. Phase 31 must
@@ -400,7 +406,7 @@ dashboards.
   `None`/no device claim on linux-cpu; durable bytes live
   on retained PVs.
 - Run-local resolution of the Postgres shared package through Phase 1's compatibility policy. The selected
-  package identity and observed integrity are generated under `gen/toolchain/**`; no checksum fixture is
+  package identity and observed integrity are generated under `.build/toolchain/**`; no checksum fixture is
   committed or read by the Haskell/live gate.
 
 ### Validation
@@ -449,7 +455,7 @@ dashboards.
    backing byte one unit short. Each case rejects before CR/volume creation; mutants omitting the webhook or
    treating the finite data size as the complete physical peak go red.
 5. Reject a seeded tracked package-checksum input, resolve the Postgres shared package dynamically, and verify
-   its selected identity and integrity only through the run-local toolchain record and external attestation.
+   its selected identity and integrity only through the run-local toolchain record and repository-local attestation.
 
 ### Remaining Work
 Remove `postgres-share-package.sha256`, route package acquisition through Phase 1's dynamic resolver, and

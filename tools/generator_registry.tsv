@@ -1,6 +1,6 @@
 # The amoebius generator registry.
 #
-# One row per output class in the canonical `gen/` inventory of
+# One row per output class in the canonical `.build/` inventory of
 # documents/engineering/repository_layout_doctrine.md section 3.1. The inventory is
 # the independent side: this file is checked against the doctrine's own code block,
 # not against itself, so adding a generator without amending the doctrine fails.
@@ -9,19 +9,23 @@
 # built it yet. An unbuilt class must name the phase that will own it.
 #
 # output_class<TAB>generator<TAB>owner
+cabal-store/**	tools/toolchain.py	phase-1
 docs/**	-	phase-54
 dhall/**/*.dhall	tools/dhall_gate1.py	phase-4
-dsl/**	tools/phase5_gate.py	phase-5
-docker/**/Dockerfile	-	phase-25
-locks/**	tools/phase1_gate.py	phase-1
+dist-newstyle/**	tools/toolchain_spike_gate.py	phase-1
+dsl/**	tools/gadt_decoder_gate2_gate.py	phase-5
+docker/**/Dockerfile	tools/base_image_registry_live_build.py	phase-25
+evidence-store/**	tools/attestation.py	phase-0
+locks/**	tools/toolchain_spike_gate.py	phase-1
 manifests/**/*.{yaml,yml,json}	-	phase-13
-proto/**/*.hs	tools/phase1_gate.py	phase-1
+node_modules/**	tools/toolchain.py	phase-1
+proto/**/*.hs	tools/toolchain_spike_gate.py	phase-1
 proto/**/*.{hi,o,dyn_hi,dyn_o}	-	phase-1
 runs/<phase>/<run-id>/**	tools/doc_lint_verify.py	phase-0
 test-corpora/**	tools/doc_lint_corpus/_build.py	phase-0
 test-surfaces/phase_*.json	tools/doc_lint_verify.py	phase-0
-tla/**/*.cfg	-	phase-2
-tla/**/*.tla	-	phase-2
-tmp/**	-	phase-0
+tla/**/*.cfg	src/Amoebius/Cli/Formal.hs	phase-2
+tla/**/*.tla	src/Amoebius/Cli/Formal.hs	phase-2
+tmp/**	tools/doc_lint_verify.py	phase-0
 toolchain/**	tools/toolchain.py	phase-1
 ui/**	-	phase-20

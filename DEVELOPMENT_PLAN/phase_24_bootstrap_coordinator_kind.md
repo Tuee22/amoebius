@@ -45,7 +45,19 @@ the Lima and WSL2 command plans remain portability equivalents for their corresp
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-14. All ten sides of `python3 tools/phase24_gate.py --execute` pass against a newly
+✅ Done — resealed 2026-08-15. `python3 tools/bootstrap_coordinator_gate.py --execute` passed all eleven
+sides against a newly materialized pristine Incus Ubuntu guest: toolchain, oracle, static, mutant, live,
+results, surface, ledger, attestation, containment, and authored-root write guard. All six committed mutants
+are independently red; all sixteen metrics equal their authored values; 28 surfaces join completely to 30
+run-time items. Tool acquisition, Cabal state, guest transport, evidence, production state, and test state are
+confined to `.build/**`, `.data/**`, and the marker-owned `.test_data/runs/bootstrap-coordinator/**` root;
+the host inventory is unchanged and the guest was destroyed. The project-contained attestation is
+`sha256:cf31b7eb39b7419bc51375e18cc24e56aac1b697150029f52257be751dce4b66`, bound to source snapshot
+`sha256:7503a6e8d86c0f95…` (1,968 files).
+
+**Pre-containment status record (invalidated where it claims completion):**
+
+✅ Done — sealed 2026-08-14. All ten sides of `python3 tools/bootstrap_coordinator_gate.py --execute` pass against a newly
 materialized pristine Incus guest, every one of the six committed mutants is red from its own observation, and
 all 28 surfaces join to the run's enumeration with none left UNVERIFIED.
 
@@ -79,7 +91,7 @@ observable triple byte-identical and zero forbidden invocations; both divergent 
 deleted kubeconfig — repaired without recreating the container or changing the node UID; **zero bare-name PATH
 lookups across 88,654 execve calls in four audit traces**; zero helm; nine complete pod commitments; the
 `linux-cpu` lane offered no accelerator even though its physical parent is `linux-cuda`; teardown swept clean.
-Evidence and the ledger land in `gen/runs/phase_24/<run-id>/`, and 28 surfaces join two-way to 30 items.
+Evidence and the ledger land in `.build/runs/phase_24/<run-id>/`, and 28 surfaces join two-way to 30 items.
 That run is the capability record; it is not a seal, because a seal requires the hygiene half too.
 
 **Observed progress — 2026-08-13:** **Policy-conformant.** A newly materialized Incus guest started with all
@@ -89,7 +101,7 @@ observable triple byte-identical and zero forbidden invocations; both divergent 
 deleted kubeconfig — repaired without recreating the container or changing the node UID; **zero bare-name PATH
 lookups across 88,654 execve calls in four audit traces**; zero helm; nine complete pod commitments; the
 `linux-cpu` lane offered no accelerator even though its physical parent is `linux-cuda`; teardown swept clean.
-Evidence and the ledger land in `gen/runs/phase_24/<run-id>/`, and 28 surfaces join two-way to 30 items.
+Evidence and the ledger land in `.build/runs/phase_24/<run-id>/`, and 28 surfaces join two-way to 30 items.
 
 **The gate used to verify leftovers.** It required a `live-*` evidence battery — SplitRuntime boundary and
 readback, etcd and audit high-water tables — that **no tool in this repository writes**. Those files sat under
@@ -100,7 +112,7 @@ produced, and a check fails if the retired battery directory reappears.
 
 **M3 is now observed where the phase's gate runs.** The one-shot kind guard is a seeded mutant that needs a
 live cluster, and it was recorded `planned:requires-live-cluster` — an unrun mutant in a six-mutant domain.
-It is now built inside the disposable guest behind a `phase24-one-shot-kind-guard-mutant` flag, run against
+It is now built inside the disposable guest behind a `bootstrap-coordinator-one-shot-kind-guard-mutant` flag, run against
 the same stopped-node divergence the production path repairs, and required to leave the node exited. The
 production planner then repairs that identical start without recreating the container, so the mutant result
 and its control come from one run against one cluster.
@@ -120,7 +132,7 @@ mixed authored capacity requirements with fixed tool versions, download URLs, an
 are now split: the bounded resource envelope stays authored and the envelope is rejected if a resolution key
 returns, while `pb/pb/bootstrap_toolchain.py` resolves ghcup, kubectl, and kind per run from the authored
 requirements, verifies each download against the publisher's own checksum, and writes what it observed to
-`gen/toolchain/`. `ghc` and `cabal` come from whatever the installed ghcup offers that satisfies their authored
+`.build/toolchain/`. `ghc` and `cabal` come from whatever the installed ghcup offers that satisfies their authored
 ranges. The `r6` deferral row is removed from `tools/migration_allowlist.tsv` and the Phase-0 audit is clean
 without it.
 
@@ -143,7 +155,7 @@ test. Live runs boundary-filled finite `Unified` and distinct-nodefs `SplitRunti
 `SplitImage` before create; exercised etcd WAL/snapshot/defrag, mapped-file, audit, and kubelet-log high-water;
 read every bootstrap coordinator, host-engine, node, service, static-pod, and add-on cgroup envelope; serialized the complete
 CNI/CSI/backing/runtime/add-on inventory; and turned M1–M6 red. The re-runnable gate is
-`python3 tools/phase24_gate.py --execute`; it passed 2026-08-09 on Register-3 `linux-cpu` with ledger
+`python3 tools/bootstrap_coordinator_gate.py --execute`; it passed 2026-08-09 on Register-3 `linux-cpu` with ledger
 `dynamically-resolved`.
 
 ## Phase Summary
@@ -194,7 +206,7 @@ exactly one such route. A specialized CUDA/Metal lane is not exercised.
 **Register:** 3 (live infrastructure) — the gate provisions a real kind cluster in a pristine `linux-cpu` guest and
 tears down leak-free; a Register-1/2 in-process check cannot discharge it.
 
-**Gate:** `python3 tools/phase24_gate.py --execute` drives a pristine `linux-cpu` guest to exactly one `Ready`
+**Gate:** `python3 tools/bootstrap_coordinator_gate.py --execute` drives a pristine `linux-cpu` guest to exactly one `Ready`
 kind node through the Python `pb` bootstrap coordinator, and the identical re-run changes nothing. Its
 inventory, absolute-path, divergence-repair, and teardown obligations are delegated to
 [Gate integrity](#gate-integrity).
@@ -223,7 +235,10 @@ flowchart LR
 *Orientation. The seams Phase 24 built in order; [Gate integrity](#gate-integrity) owns the now-passed apparatus.*
 
 **What one gate run must establish.** The run starts in a newly materialized `linux-cpu` guest with a
-container runtime pre-installed. There the Python `pb` bootstrap coordinator's `pb bootstrap --distro=kind`
+container runtime pre-installed. Its guest image, runtime state, kubeconfig, kind node data, and retained
+backing are project-owned and resolve beneath the checkout's `.test_data/runs/<run-id>/**`; the host-global
+daemon and `/var/lib/amoebius`, `/tmp`, `/var/tmp`, and user-home state are forbidden. There the Python `pb`
+bootstrap coordinator's `pb bootstrap --distro=kind`
 ensures the package-manager root, dynamically resolves a Phase-1-compatible toolchain, and builds the binary,
 then `exec`s `amoebius bootstrap --distro=kind`. That command brings an empty single-node kind cluster to
 exactly one `Ready` node (`kubectl get nodes` shows one node, `Ready`) **only after** a physical-host
@@ -243,7 +258,8 @@ start state the identical run **converges without recreating the cluster** (dive
 the `execve` audit log — every `argv[0]` absolute, drawn from the resolved tool map, no bare-name `PATH`
 lookup — and Helm is never ensured or invoked (no `helm` `execve`, no `helm` trap fired). The gate ends by
 tearing the cluster down (`kind delete cluster`) and asserting a **leak-free postflight sweep**: no residual
-kind cluster, node container, or kubeconfig context.
+kind cluster, node container, kubeconfig context, mount, loop device, volume, daemon object, or path outside
+the exact marker-owned test root, followed by safe deletion of that root.
 
 **Gate prerequisite (stated, not ensured):** a container runtime (Docker or Podman) is a **pre-installed host prerequisite** of this gate, *not* a member of the closed `HostTool` enum. `kind` cannot create a cluster
 without one, but amoebius does not provision it; the enum stays exactly `ghcup`, `cabal`, `kubectl`, `kind`,
@@ -331,7 +347,7 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current revalidation rule.** This phase is active after its numeric predecessor resealed. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -345,7 +361,7 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
 the pristine no-device Incus guest returns and runs `linux-cpu`.
 **Implementation**: `src/Amoebius/Host/Substrate.hs` (target: the total `classify` plus
 the three-read `detect`)
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: a unit table of `classify` over the enumerated cross-product asserts
 each expected substrate and each expected hard failure with zero host I/O, checked against a
 **oracle-pinned hand-authored decision table** (§M.1, §M.3) that is written independently of `classify`
@@ -397,7 +413,7 @@ hardware/provider routes are independently pinned.
 snapshot-bound installer/build cgroup readback pass on the `linux-cuda` parent's pristine CPU guest.
 **Implementation**: `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs`
 (target: the `HostTool` enum + `AbsExe` newtype + `HostConfig` tool map + the `installAndVerify` driver)
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: pure per-substrate `[InstallStep]` plans checked against oracle-pinned golden
 plans (§M.1, §M.3), an `mkAbsExe` reject property under coverage obligations (§M.4), and a host ensure from
 machine-verified absence whose re-run is a no-op measured in the `execve` audit log (§M.5, §M.6). The numbered
@@ -458,7 +474,7 @@ CPU/RSS cgroup and disk boundary, and `exec`-handed off; the identical rerun per
 **bootstrap coordinator** mode delivered here; the two-mode CLI was completed by the delivered admin-REST client
 `pb/pb/admin.py` in [phase_33](phase_33_live_dsl_singleton.md) Sprint 33.4). No shell script: amoebius owns
 none.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: on a pristine `linux-cpu` guest proved clean by a ledger-recorded preflight probe,
 `pb bootstrap --distro=kind` walks the four steps to the `exec`, a second run with the toolchain present is a
 no-op measured in the `execve` audit log (§M.5, §M.6), and the tree holds no shell script. The
@@ -491,7 +507,7 @@ with the operator CLI as `pb`'s bootstrap coordinator mode, the second mode bein
   workspace` at each step and admits the maximum; no step can execute if omitted from the envelope.
 - The authored envelope contains no resolved version, download URL, archive/package SHA, or executable path.
   The bootstrap coordinator resolves those values from Phase 1's compatibility requirements into
-  `gen/toolchain/**` and binds the observations to external evidence before mutation.
+  `.build/toolchain/**` and binds the observations to repository-local evidence before mutation.
 - The retirement of `bootstrap.sh` recorded in the removal ledger; amoebius owns no shell script.
 
 ### Validation
@@ -509,7 +525,7 @@ with the operator CLI as `pb`'s bootstrap coordinator mode, the second mode bein
    plus the next download/unpack workspace exceed a `ToolInstall` backing by one byte. Exact plan/envelope
    coverage or the ordered transition formula rejects each with zero package/build mutation.
 6. Reject a seeded envelope containing a tool version, download URL, package/archive SHA, or absolute developer
-   path; verify the successful run records all resolved values only under `gen/toolchain/**` and externally.
+   path; verify the successful run records all resolved values only under `.build/toolchain/**` and externally.
 
 ### Validation Evidence
 The complete Incus route passed from machine-verified absence. Lima and WSL2 are the corresponding pristine
@@ -521,10 +537,10 @@ one `linux-cpu` route per the one-substrate rule.
 The split is done; the live re-run against it is not. `pb/bootstrap_execution_envelope.json` now carries only
 the bounded capacity envelope, and `load_envelope` refuses it outright if a version, URL, or digest key
 reappears rather than reading around one. `pb/pb/bootstrap_toolchain.py` resolves ghcup, kubectl, and kind per
-run from the authored requirements in `toolchain/requirements.json` — newest release satisfying the
+run from the authored requirements in `tools/toolchain_requirements.json` — newest release satisfying the
 requirement, verified against the **publisher's own** checksum fetched in the same run — and asks the installed
 ghcup which ghc and cabal it can supply. Nothing resolved is written back: the observations land in
-`gen/toolchain/bootstrap.json`. The tool candidate paths lost their version stamps too, so an already-present
+`.build/toolchain/bootstrap.json`. The tool candidate paths lost their version stamps too, so an already-present
 tool is admitted by checking it against the authored requirement rather than by a filename that quietly stops
 matching. What remains is to rerun the live gate on a pristine guest against this path and reseal.
 
@@ -537,7 +553,7 @@ repairs, M1–M6 rejection, and leak-free teardown are live and retained.
 `src/Amoebius/Cluster/Inventory.hs`, `src/Amoebius/Host/Context.hs` (target: the `bootstrap` command chain,
 the kind bring-up reconciler, the complete observed-inventory reader/cross-check, and the
 parameters/context/witness host context)
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: `amoebius bootstrap --distro=kind` must reach one `Ready` node behind a pre-create
 host→engine admission, re-run as a measured no-op, repair a named divergent start without recreating the
 cluster, resolve every invocation through an `AbsExe` path (§M.5), cross-check the declared target against a
@@ -770,7 +786,7 @@ and discharging the live-inventory cross-check of
 ### Generated validation output
 
 The gate writes the pristine run, hard-boundary/high-water observations, complete inventory, process cgroups,
-throttling, mutant results, rerun/repair observations, and postflight sweep under `gen/runs/phase_24/`. The
+throttling, mutant results, rerun/repair observations, and postflight sweep under `.build/runs/phase_24/`. The
 schema-checked bundle is externally attested; no evidence or ledger file beneath an authored root is consumed.
 
 ## Documentation Requirements

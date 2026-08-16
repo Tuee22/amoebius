@@ -40,15 +40,23 @@ The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/render_manifest_gate.py` passed all ten sides: 30 deployment and
+mutant items, all twelve mutants, all ten metrics, and the honesty ledger pass; 31 surfaces join to 46
+enumerated items. The project-contained attestation is
+`sha256:ea494782b218d35a2dc64587b97224850f903cb44d9af61bd2f0a24f7770b24f`, bound to source snapshot
+`sha256:3a9622cca7322c7e…`; Phase 13 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:34f6b508a276b5b0…`
-(1938 non-ignored files) and published verified external attestation
+(1938 non-ignored files) and published a verified pre-containment external attestation
 `sha256:105d193d15c907176c594bb81305890191d2f818081bf11c081bb499cd046794`.
 
 **Observed progress — 2026-08-12:** **Policy-conformant.** Every capability check is unchanged and re-run: 18
 deployment goldens are byte-locked, nine capability arms render in two shapes each, the nine emitted object
 variants are exact, three safety predicates are non-vacuous, the QuickCheck arm/shape coverage floor holds, and
 all twelve seeded projection mutants redden at their property loci. Evidence and the ledger move into
-`gen/runs/phase_13/<run-id>/`, and 30 run-time items — eighteen corpus deployments and twelve mutant names —
+`.build/runs/phase_13/<run-id>/`, and 30 run-time items — eighteen corpus deployments and twelve mutant names —
 partition one-to-one across the claim surfaces.
 
 **Two surfaces gained the evidence they always had, and seven lost evidence they never had.**
@@ -62,7 +70,7 @@ UNVERIFIED. The gap is recorded against Phase 13 in
 
 **Invalidated historical record:**
 
-✅ Done. Validated on 2026-08-09 with `python3 tools/phase13_gate.py` on
+✅ Done. Validated on 2026-08-09 with `python3 tools/render_manifest_gate.py` on
 substrate `none` in Register 1. The gate covers eighteen byte-locked deployment goldens, nine emitted object
 variants, three non-vacuous rendered-output safety predicates, one QuickCheck property over all capability
 arms and both shapes, and twelve property-locus mutants. The sealed ledger is
@@ -120,7 +128,7 @@ analogous to the Phase-5 decode battery and the Phase-4 `dhall type` corpus.
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** `python3 tools/phase13_gate.py` passes the oracle-pinned corpus,
+**Gate:** `python3 tools/render_manifest_gate.py` passes the oracle-pinned corpus,
 property coverage, source-totality scan, twelve mutant runs, and ledger checks. See the
 Phase-13 ledger for the exact tested and UNVERIFIED boundary.
 
@@ -195,20 +203,20 @@ flowchart LR
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
 > retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
+> established by the current phase gate plus universal artifact hygiene.
 
 ## Sprint 13.1: The typed `K8sObject` model + Aeson serialization ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Manifest/{K8sObject,Types}.hs`; the closed object-kind sum, typed specs,
 Aeson instances, and canonical encoder are built and validated.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: the object model compiles under the pinned GHC 9.12.4; a hand-built object round-trips through
 Aeson (`toJSON`/`fromJSON`) to an equal value, and its encoding matches a small byte-for-byte golden —
 proving the record *is* the manifest with no template layer.
@@ -241,7 +249,7 @@ Done. Live Kubernetes decoding and apiserver correspondence remain UNVERIFIED.
 **Implementation**: `src/Amoebius/Manifest/Render.hs` (`renderSourcePrivate ::
 ProvisionedRenderSource identity -> K8sObject`) and `src/Amoebius/Manifest/RenderAll.hs` (`renderAll ::
 ProvisionedSpec -> [K8sObject]` over the sealed unique source map and deterministic serialization) — built.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: None.
 **Independent Validation**: exhaustive compiler options, source-boundary checks, and the public export scan
 establish the total pure facade. QuickCheck covers every capability arm and both shapes through the real
 provision fold; exact-output properties inspect the returned object values.
@@ -365,9 +373,9 @@ Done. SSA, ApplySet pruning, readiness, and live convergence remain Phase-26 wor
 ## Sprint 13.3: The rendered-output golden battery (`render-golden`) — the gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/manifest/{RenderGoldenSpec,RenderGoldenGate,RenderGoldenProps,DepGraphOracle}.hs`
-and eighteen `test/manifest/golden/*.json.golden` fixtures cover every capability arm and both shapes.
-**Blocked by**: reopened numeric predecessor gates.
+**Implementation**: `test/spec/manifest/{RenderGoldenSpec,RenderGoldenGate,RenderGoldenProps,DepGraphOracle}.hs`
+and eighteen `test/golden/manifest/*.json.golden` fixtures cover every capability arm and both shapes.
+**Blocked by**: None.
 **Independent Validation**: `cabal test render-golden` checks canonical bytes and all three non-vacuous
 properties. The independent dependency oracle catches extra edges, and all twelve property mutants turn red.
 **Docs to update**: `documents/engineering/conformance_harness_doctrine.md` (record the
@@ -427,7 +435,7 @@ Each committed mutant must turn its targeted property red, independently of the 
    the byte diff.
 
 ### Remaining Work
-Migrate the gate's generated output to `gen/runs/`, externally attest it, and rerun after Phase 12 closes.
+Migrate the gate's generated output to `.build/runs/`, externally attest it, and rerun after Phase 12 closes.
 Live enforcement remains UNVERIFIED.
 
 ## Documentation Requirements

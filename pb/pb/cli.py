@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import getpass
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -104,6 +105,8 @@ def main(argv: list[str] | None = None) -> int:
         tools = ensure_tools(envelope, root, home)
         binary = build_binary(envelope, root, home, tools)
         print(f"pb-handoff: {binary} {' '.join(binary_arguments)}", flush=True)
+        os.environ["AMOEBIUS_ROOT"] = str(root)
+        os.environ["HOME"] = str(home)
         handoff(binary, binary_arguments)
     except (AdminError, BootstrapCoordinatorError, OSError, ValueError, json.JSONDecodeError) as problem:
         print(f"pb: {problem}", file=sys.stderr)

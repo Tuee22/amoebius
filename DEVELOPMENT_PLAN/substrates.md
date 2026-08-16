@@ -284,8 +284,9 @@ row's full objective, gate, and sprint breakdown lives in its phase document
 
 The fourth column owns substrate rationale only. Dates, checkmarks, ledger references, and outcome prose in
 that column are invalidated pre-amendment observations retained to explain why the lane was selected; they are
-not current status or evidence. The tracker is authoritative: Phase 0 is Active and phases 1–64 are Blocked.
-Each row must be rewritten from a new external attestation when its owning phase revalidates.
+not current status or evidence. The tracker is authoritative: Phases 0–23 are Done, Phase 24 is Active, and
+phases 25–64 are Blocked.
+Each row must be rewritten from a new repository-local attestation when its owning phase revalidates.
 
 | Phase | Name | Substrate | Substrate rationale; any outcome is historical and invalidated |
 |-------|------|-----------|--------------------|
@@ -368,7 +369,7 @@ This map owns only the **one substrate per gate** assignment.
 **None.** Both tables above are authored policy. Governed documentation never contains generated sections,
 as required by
 [`development_plan_standards.md` §I](development_plan_standards.md#i-generated-documentation-remains-untracked).
-A future stack-surface or compute-engine compatibility projection belongs under `gen/docs/**`; it does not
+A future stack-surface or compute-engine compatibility projection belongs under `.build/docs/**`; it does not
 replace or edit the authored registry in this file.
 
 Delivery sequencing, completion status, and validation gates for everything above are owned by

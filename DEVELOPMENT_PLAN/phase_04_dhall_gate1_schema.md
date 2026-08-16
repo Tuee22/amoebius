@@ -41,6 +41,15 @@ The complete Gate-1 gate passed on 2026-08-09; Gate-2 semantics and runtime fide
 
 ## Phase Status
 
+✅ Done — resealed 2026-08-15. `python3 tools/dhall_gate1_schema_gate.py` passed all nine sides after canonical
+Dhall normalization: all 18 authored metrics match, every field-deletion, type-substitution, special-resource,
+and custom-arm mutant reddens, 18 surfaces join to 21 run-time items, and generated results, host inventory,
+and authored roots remain contained and unchanged. The project-contained attestation is
+`sha256:4a315c09a5250c2c35e9461cee0a3390fbfa4e0afa969333c4c483c931c0eb85`, bound to source snapshot
+`sha256:1cd60cf72d7ad324…`; Phase 4 owns no remaining migration deferral.
+
+**Pre-containment status record (invalidated where it claims completion):**
+
 ✅ Done — resealed 2026-08-13 after the secrets amendment, attestation
 `sha256:e08489a637b107c5da2770a1b7265d526705963bcd321f8c93b330311c6469e9`.
 
@@ -77,7 +86,7 @@ this is a pure Register-1 gate.
 re-run: four positive fixtures typecheck, eight catalog, three image/process, and two import-policy negatives
 each fail at their own specific error, the arm, surface-field, and resource-field inventories match their
 authored expectations exactly, and the 525 field-deletion, 176 type-substitution, four special-resource, and
-one custom-arm mutants all turn the battery red. `dhall` now resolves from `toolchain/requirements.json`, the
+one custom-arm mutants all turn the battery red. `dhall` now resolves from `tools/toolchain_requirements.json`, the
 run bundle replaces the plan-tree evidence directory, the ledger is derived into that bundle, and 17 surfaces
 join to 20 run-time enumerated items. The battery no longer reads back a generated Markdown ledger from the
 plan tree to confirm its own honesty caveat — that reasoning is authored prose and lives in this contract,
@@ -96,7 +105,7 @@ the inventory instead of sliding past a number
 
 **Invalidated historical record:**
 
-✅ Done. The Register-1 gate passed on 2026-08-09 with `python3 tools/phase4_gate.py`, emitting ledger
+✅ Done. The Register-1 gate passed on 2026-08-09 with `python3 tools/dhall_gate1_schema_gate.py`, emitting ledger
 `dynamically-resolved`. Fourteen schema modules are
 `dhall type`/`dhall lint` clean; all four representative positives type-check; all eight catalog negatives
 and three image/process negatives fail for their byte-locked normalized structural reason. Both import-policy
@@ -194,13 +203,13 @@ type-checks. `tools/dhall_gate1_negatives.sh` asserts BOTH directions per fixtur
 ### Specific-reason error goldens (§M.8 / §M.1)
 
 For each negative, a golden `dhall type` error transcript is authored and COMMITTED IN THIS PHASE'S ORACLE-PINNING SPRINT
-(`tests/oracle/gate1/<entry>.err`), pinning the failure to name the targeted union/arm/field/record; the
+(`test/oracle/dhall_gate1_schema/<entry>.err`), pinning the failure to name the targeted union/arm/field/record; the
 harness is red if the observed `dhall type` stderr does not match its committed golden (a negative that
 fails for an unrelated typo/import/field error mismatches and goes red).
 
 ### Arm-inventory oracle, independent of the schema (§M.3)
 
-A committed hand-authored catalog table (`tests/oracle/gate1/arm_inventory.csv`, authored in this phase's oracle-pinning sprint from
+A committed hand-authored catalog table (`test/oracle/dhall_gate1_schema/arm_inventory.csv`, authored in this phase's oracle-pinning sprint from
 `illegal_state_catalog`
 [§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)/[§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)/[§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress),
 NOT derived from the schema modules) pins each union's exact arm set; the harness normalizes each shipped
@@ -219,7 +228,7 @@ inventory — no other transformation.
 
 ### Resource-shape oracle, independent of the schema (§M.3)
 
-A committed hand-authored `tests/oracle/gate1/resource_fields.csv` pins the recursive field/arm inventory
+A committed hand-authored `test/oracle/dhall_gate1_schema/resource_fields.csv` pins the recursive field/arm inventory
 for `PodResourceVec`, `Resources`, lifecycle-tagged `ContainerEnvelope`, `PodLocalStorageDemand`,
 `PodRuntimeMetadataSource`, raw `ExecutionUnitIntent { id, revision, controller, resource }`, with the
 closed controller inventory:
@@ -444,7 +453,7 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -458,7 +467,7 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
 **Implementation**:
 `dhall/amoebius/{prelude,Cluster,App,Deployment,Capability,Topology,Capacity,Resources,Storage,Retention,Image,Extension,Consistency,Backup}.dhall`
 — the typed surfaces and their smart constructors.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Requires**: `host-toolchain` — the `dhall` CLI only; this sprint needs **no** Haskell skeleton (that
 arrives with the Gate-2 decoder in Phase 5).
 **Independent Validation**: every schema module stands on its own under `dhall type` / `dhall lint`, and its
@@ -686,7 +695,7 @@ VolumePresentation }, tsdbCostModel }`, with positive counts/rate, finite interv
 typed CPU/memory, and an exact StatefulSet claim/backing/presentation; no default, omitted field, scalar
 query-temp, or descriptor-independent fixed Prometheus provision is an alternate arm. Non-applicable
 resource arms use their closed `None`/empty form; omission of the envelope or capacity declaration itself is
-impossible. A committed schema-shape oracle (`tests/oracle/gate1/surface_fields.csv`, hand-authored in Phase
+impossible. A committed schema-shape oracle (`test/oracle/dhall_gate1_schema/surface_fields.csv`, hand-authored in Phase
 0) pins these required field-name→type bindings; Sprint 4.1 validation compares the shipped record types
 against it byte-exactly. The companion `resource_fields.csv` recursively pins every nested resource field
 and closed arm, so an envelope containing only CPU/memory, a bucket name without its structural
@@ -696,10 +705,10 @@ cache/registry/Vault storage cannot pass.
 
 ### Validation
 1. `dhall type` and `dhall lint` accept each schema module on its own, every surface type is well-formed, and
-   each shipped union's arm inventory matches the committed `tests/oracle/gate1/arm_inventory.csv`
+   each shipped union's arm inventory matches the committed `test/oracle/dhall_gate1_schema/arm_inventory.csv`
    byte-exactly, so no freeform escape arm survives. Every smart constructor elaborates to a value of its
    declared type, and a smart constructor cannot be applied to an out-of-schema argument
-   without a type error — discharged by a named committed fixture set `tests/gate1/ctor_reject/*.dhall`
+   without a type error — discharged by a named committed fixture set `test/fixture/dhall_gate1_schema/ctor_reject/*.dhall`
    (≥1 expect-fail application fixture per smart constructor, enumerated in the harness manifest), each of
    which MUST fail `dhall type`; this is not discharged by appeal to Dhall function typing alone.
 2. The shipped record types match the committed `surface_fields.csv` and `resource_fields.csv` oracles
@@ -731,7 +740,7 @@ None. The schema modules and independently authored union, required-field, and n
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/examples/legal_*.dhall` (worked-example cluster / app /
 deployment specs); `tools/dhall_gate1.sh` (a `dhall type` corpus harness) — built.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: every positive fixture type-checks under `dhall
 type` against the Sprint-4.1 schema; the harness exit code is a single green/red over the whole positive
 set.
@@ -784,7 +793,7 @@ engine, transition, accelerator, and monitoring structures required above.
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/examples/illegal_*.dhall` (the Gate-1 subset);
 `tools/dhall_gate1_negatives.sh` (an expect-fail `dhall type` harness) — built.
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: none; the phase is sealed.
 **Independent Validation**: each of the eight canonical Gate-1-class negatives fails `dhall type` for its
 pinned reason while its reverted paired positive type-checks, the committed seeded mutant goes red, and the
 partial-foreclosure ledger accounts for every entry. The numbered `### Validation` list below carries the
@@ -815,11 +824,11 @@ at Gate 2.
   Gate-1 fixture: it is layer-2 decode-foreclosed and appears in the ledger as a deferred row owned by
   [Phase 5](phase_05_gadt_decoder_gate2.md)'s Gate 2. The separate produce-side no-constructor subcase is
   outside this representative set and lands in Phase 6's exhaustive registry-driven corpus.
-- A committed per-negative golden `dhall type` error transcript (`tests/oracle/gate1/<entry>.err`, authored
+- A committed per-negative golden `dhall type` error transcript (`test/oracle/dhall_gate1_schema/<entry>.err`, authored
   in Phase 0) pinning each failure's targeted union/arm/field.
 - The committed seeded mutant `mutants/gate1_capability_custom_arm.dhall` (union-arm-addition operator) that
   the harness re-runs and MUST report red.
-- The **partial-foreclosure ledger** is the [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) proven/tested/assumed artifact this phase emits under `gen/runs/`,
+- The **partial-foreclosure ledger** is the [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) proven/tested/assumed artifact this phase emits under `.build/runs/`,
   with schema and external retention per `testing_doctrine.md`. It names Register 1,
   carries the acceptance token *spec-composition proven*, maps each of the eight negatives to its catalog
   entry and foreclosure layer (fully no-arm/required-field vs. conventional binding/index residue), marks
@@ -853,7 +862,7 @@ residue as UNVERIFIED. The historical repository-resident ledger must not be con
 
 **Status**: Done — the union is Gate-1 surface, its arms are pinned, and the literal is uninhabitable
 **Implementation**: `dhall/amoebius/SecretRef.dhall`, `dhall/examples/legal_secret_reference.dhall`,
-`dhall/examples/illegal_plaintext_secret.dhall`, `tools/dhall_gate1.py`, `tools/phase4_gate.py`
+`dhall/examples/illegal_plaintext_secret.dhall`, `tools/dhall_gate1.py`, `tools/dhall_gate1_schema_gate.py`
 **Blocked by**: Sprint 4.3
 **Requires**: `host-toolchain` — the `dhall` CLI only.
 **Independent Validation**: the arm-inventory table authored away from the schema pins the three arms, so an

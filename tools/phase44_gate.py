@@ -183,8 +183,8 @@ def no_live_residue() -> dict[str, str]:
     require(namespace.returncode != 0, "phase44-namespace-residue")
     require(not Path("/var/tmp/amoebius-phase44-live").exists(), "phase44-root-residue")
     clusters = subprocess.run((KIND, "get", "clusters"), text=True, stdout=subprocess.PIPE, check=False, timeout=60).stdout.splitlines()
-    require(clusters == ["amoebius-phase24"], f"unexpected-kind-clusters:{clusters}")
-    return {"name": "external-cleanup-readback", "command": "namespace/root/kind inventories", "output": "only retained amoebius-phase24 remains", "result": "PASS"}
+    require(clusters == ["amoebius-bootstrap-coordinator"], f"unexpected-kind-clusters:{clusters}")
+    return {"name": "external-cleanup-readback", "command": "namespace/root/kind inventories", "output": "only retained amoebius-bootstrap-coordinator remains", "result": "PASS"}
 
 
 def derive_ledger() -> dict[str, Any]:

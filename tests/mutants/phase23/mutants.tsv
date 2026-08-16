@@ -1,6 +1,0 @@
-mutant	locus	fixture
-M-drop-handle-tenant	copied-handle-scope	test/mutants/phase_23_M-drop-handle-tenant.mutant
-M-direct-workflow-fetch	browser-backend-edge	test/mutants/phase_23_M-direct-workflow-fetch.mutant
-M-mix-client-server-plan	plan-pair-digest	test/mutants/phase_23_M-mix-client-server-plan.mutant
-M-ready-before-receipt	ready-order	test/mutants/phase_23_M-ready-before-receipt.mutant
-owner_key_swap	owner-key-dom	test/mutants/phase_23_owner_key_swap.mutant

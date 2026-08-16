@@ -97,6 +97,12 @@ rate limits, and a warm cluster is air-gapped by construction.
   scavenge-from-image arm may exist as an explicit last resort, and every remaining use records why the rungs
   above it did not apply. Without the upper arms in the type there is only one way in, and the ladder becomes
   advice: the catalog says "copy from a public image" because that is the only sentence it can say.
+- **Separately published companion payloads are first-class catalog data.** An executable release may require
+  a second publisher archive that is neither another service nor an optional runtime download. The payload
+  records its per-platform asset, publisher checksum contract, archive shape, extraction target, and required
+  file. The build verifies and extracts it with the owning artifact. An independent OCI-file oracle requires
+  the file on every platform, and an omission mutant must fail. Pulsar's tiered-storage bundle is the concrete
+  case: its jcloud NAR belongs under `/pulsar/offloaders`, not in a later network fetch.
 - **The rule binds workloads, and the bootstrap tools are a named exception.** "No public pull" is a statement
   about what the *cluster runs*. The host-side tools that bring a cluster into existence before there is a
   registry to pull from — the kind node image that Phase 24 boots, and the buildx/buildkit builder that
@@ -139,7 +145,7 @@ Concretely:
   (QEMU emulation or a cross-toolchain). The host-vs-pod choice ([§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)) determines which builder backs the
   build; the *output contract* — one fat manifest covering both arches — is identical either way.
 - **Both architectures use one dynamically resolved toolchain graph.** The current compatible compiler and
-  packages are resolved once per run and used for both `amd64` and `arm64`. The external attestation records
+  packages are resolved once per run and used for both `amd64` and `arm64`. The repository-local attestation records
   both observations and rejects per-architecture dependency drift; no resolution file is committed.
 
 This is the principal generalization over prodbox, which published **native-host-architecture images only**
@@ -264,8 +270,9 @@ The second open design question: whether the amoebius pod itself eventually take
 that continues to be a host-daemon responsibility. Flagged as a
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision; recommended default below.
 
-A builder needs a Docker/buildx engine *somewhere*. Two homes are possible — the host's
-build daemon (the prodbox model: `docker build` on the host, `local_registry_pipeline.md` [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)) or an in-pod
+A builder needs a Docker/buildx engine *somewhere*. Two homes are possible — a project-scoped host
+daemon whose data root, runtime directory, contexts, volumes, and build cache all live beneath `.data/**`
+for production or `.test_data/**` for a test (the hostbootstrap model), or an in-pod
 builder running inside the cluster. The vision states the argument for host directly: a host
 builder is "guaranteed to keep all builds in the same place" — including Apple-Silicon native `arm64`
 container images. (Two build kinds must not be conflated: the native `arm64` **container image** build on
@@ -529,14 +536,24 @@ which forces a concrete divergence from prodbox's mechanics:
   on `PATH`; it ensures the engine via the substrate package manager and calls the resolved absolute path.
   The lazy-ensure contract is owned by [substrate_doctrine.md](./substrate_doctrine.md); this doc owns only
   that the build step obeys it.
+- **The engine is project-contained.** amoebius never uses the host-global daemon for project-owned state.
+  Production selects the project daemon beneath `.data/docker/**`; a gate creates its daemon beneath its
+  unique `.test_data/runs/<run-id>/docker/**`. A daemon that reports any data-root, runtime directory, context,
+  volume source, or build-cache path outside the physical checkout is rejected before the build starts.
+- **Public acquisition uses a cache, not credentials or a platform-image mirror.** Canonical Docker Hub
+  builder/base identities remain the authored channels. The project-private Docker daemon and bounded
+  BuildKit worker use Google's `mirror.gcr.io` cache for those public build inputs; canonical metadata is
+  preferred, with cache metadata accepted only after a canonical 429 and recorded as `resolvedVia` beside
+  the canonical digest. This cache is never configured on the host-global daemon, never used by a workload,
+  and never changes the rule that only the amoebius-built image enters the in-cluster registry.
 - **No `DOCKER_CONFIG` environment variable — use `docker --config <dir>`.** prodbox isolated registry-push
   auth from public-pull auth with an **ephemeral `DOCKER_CONFIG`** (`local_registry_pipeline.md` §6.1).
   That mechanism is an environment variable, which amoebius forbids. amoebius instead points the build at an
-  ephemeral config directory via the `docker --config <ephemeral-dir>` global flag (which also locates
+  `.build/tmp/` config directory via the `docker --config <dir>` global flag (which also locates
   buildx state), achieving the same isolation **without** an env var. The directory is created per build,
   used for the flow, and scrubbed afterward.
 - **No `docker login`; credentials are secrets-by-name.** amoebius never runs `docker login` and never
-  writes the operator's global Docker config. The ephemeral config directory holds the registry push
+  writes the operator's global Docker config. The `.build/tmp/` config directory holds the registry push
   credential — **not a literal in Dhall** — resolved as a `SecretRef` from Vault at build time
   (secrets-never-live-in-Dhall, [vault_pki_doctrine.md](./vault_pki_doctrine.md); [dsl_doctrine.md](./dsl_doctrine.md)). This is the amoebius generalization of prodbox's inline-registry-auth
   mechanism, which used a literal credential; amoebius keeps the *ephemeral-config-no-login* shape but sources
@@ -592,7 +609,7 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 
 ## 10. Honesty and planning ownership
 
-> **Validated Phase-25 boundary — sealed 2026-08-14.** One `python3 tools/phase25_gate.py --execute` run
+> **Validated Phase-25 boundary — sealed 2026-08-14.** One `python3 tools/base_image_registry_gate.py --execute` run
 > live-validated the typed acquisition ladder, the generated Dockerfile against its committed golden, the
 > bounded host build, one `linux/amd64` + `linux/arm64` OCI index, architecture-native execution of all 22
 > baked binaries by absolute path, deterministic file SBOMs, the selected-platform node side-load, the

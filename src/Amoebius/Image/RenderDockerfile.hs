@@ -57,14 +57,21 @@ renderDockerfile catalog = do
   -- in the same layer, so the integrity value is resolved at build time and never
   -- authored. TARGETARCH selects the asset the publisher released for this arch.
   renderArtifact artifact =
+    renderPublished artifact.assets artifact.checksumAlgorithm artifact.checksumShape
+      artifact.archiveFormat artifact.archiveMember artifact.targetPath
+      <> concatMap renderPayload artifact.payloads
+  renderPayload payload =
+    renderPublished payload.assets payload.checksumAlgorithm payload.checksumShape
+      payload.archiveFormat payload.archiveMember payload.targetPath
+  renderPublished assets algorithm shape format member target =
     [ "RUN set -eu \\"
-    , "    && url=\"$(case ${TARGETARCH} in " <> cases (\a -> a.assetUrl) artifact <> " esac)\" \\"
-    , "    && sums=\"$(case ${TARGETARCH} in " <> cases (\a -> a.checksumManifest) artifact <> " esac)\" \\"
+    , "    && url=\"$(case ${TARGETARCH} in " <> cases (\a -> a.assetUrl) assets <> " esac)\" \\"
+    , "    && sums=\"$(case ${TARGETARCH} in " <> cases (\a -> a.checksumManifest) assets <> " esac)\" \\"
     , "    && asset=\"${url##*/}\" \\"
     , "    && curl -fsSL -o /tmp/asset \"${url}\" \\"
     , "    && curl -fsSL -o /tmp/asset.sums \"${sums}\" \\"
-    , "    && " <> verify artifact
-    , "    && " <> extract artifact
+    , "    && " <> verify algorithm shape
+    , "    && " <> extract format member target
     , "    && rm -f /tmp/asset /tmp/asset.sums"
     ]
   -- The publisher decides both halves of this, and the nine differ. `DigestOnly`
@@ -72,19 +79,19 @@ renderDockerfile catalog = do
   -- `DigestNamed` manifests may name the asset bare, `./`-prefixed, or by the
   -- publisher's own build path, so the match is on the trailing basename. Either
   -- way the value is fetched now and never authored.
-  verify artifact =
-    let tool = case artifact.checksumAlgorithm of
+  verify algorithm shape =
+    let tool = case algorithm of
           Sha1 -> "sha1sum"
           Sha256 -> "sha256sum"
           Sha512 -> "sha512sum"
-     in case artifact.checksumShape of
+     in case shape of
           DigestOnly ->
             "test \"$(" <> tool <> " /tmp/asset | cut -d' ' -f1)\" = \"$(cut -d' ' -f1 /tmp/asset.sums)\" \\"
           DigestNamed ->
             "test \"$(" <> tool <> " /tmp/asset | cut -d' ' -f1)\""
               <> " = \"$(grep -E \"[ /]${asset}$\" /tmp/asset.sums | head -n1 | cut -d' ' -f1)\" \\"
-  cases field artifact =
-    Text.intercalate " " [arch asset <> ") echo " <> field asset <> " ;;" | asset <- artifact.assets]
+  cases field assets =
+    Text.intercalate " " [arch asset <> ") echo " <> field asset <> " ;;" | asset <- assets]
   arch asset = case asset.platform of
     Amd64 -> "amd64"
     Arm64 -> "arm64"
@@ -92,21 +99,21 @@ renderDockerfile catalog = do
   -- installed; a named member is extracted out of its archive by trailing match, so
   -- the per-architecture top-level directory never has to be spelled; an unnamed
   -- member means the whole archive is the payload and lands under the target root.
-  extract artifact = case (artifact.archiveFormat, Text.null artifact.archiveMember) of
-    (Bare, _) -> "install -m 0755 /tmp/asset " <> artifact.targetPath <> " \\"
+  extract format member target = case (format, Text.null member) of
+    (Bare, _) -> "install -m 0755 /tmp/asset " <> target <> " \\"
     (TarGz, True) ->
-      "mkdir -p " <> artifact.targetPath
-        <> " && tar -xzf /tmp/asset --strip-components=1 -C " <> artifact.targetPath <> " \\"
+      "mkdir -p " <> target
+        <> " && tar -xzf /tmp/asset --strip-components=1 -C " <> target <> " \\"
     (TarGz, False) ->
       -- The top-level directory carries the arch and the release, so the member is
       -- matched under one quoted wildcard rather than spelled out per platform.
       -- Quoted, because an unquoted glob would be the build shell's to expand.
-      "tar -xzf /tmp/asset --wildcards -O \"*/" <> artifact.archiveMember
-        <> "\" > " <> artifact.targetPath <> " && chmod 0755 " <> artifact.targetPath <> " \\"
-    (Zip, True) -> "mkdir -p " <> artifact.targetPath <> " && unzip -q -d " <> artifact.targetPath <> " /tmp/asset \\"
+      "tar -xzf /tmp/asset --wildcards -O \"*/" <> member
+        <> "\" > " <> target <> " && chmod 0755 " <> target <> " \\"
+    (Zip, True) -> "mkdir -p " <> target <> " && unzip -q -d " <> target <> " /tmp/asset \\"
     (Zip, False) ->
-      "unzip -p /tmp/asset " <> artifact.archiveMember <> " > " <> artifact.targetPath
-        <> " && chmod 0755 " <> artifact.targetPath <> " \\"
+      "unzip -p /tmp/asset " <> member <> " > " <> target
+        <> " && chmod 0755 " <> target <> " \\"
   alias index source = "source_" <> Text.pack (show index) <> "_" <> sanitize source.name
   renderSource (index, source) =
     [ "FROM " <> source.sourceImage <> "@" <> source.sourceDigest <> " AS " <> alias index source ]

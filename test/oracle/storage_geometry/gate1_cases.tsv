@@ -1,0 +1,3 @@
+entry	negative	legal	required
+3.32	dhall/examples/storage_geometry/illegal_continuous_training_no_cadence.dhall	dhall/examples/storage_geometry/legal_continuous_training.dhall	checkpointCadence
+3.32	dhall/examples/storage_geometry/illegal_training_feed_no_retention.dhall	dhall/examples/storage_geometry/legal_bounded_training_feed.dhall	retentionBudget
