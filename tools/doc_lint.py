@@ -51,6 +51,7 @@ CHECKS = {
     "t": "commit independence: no document makes committing a gate precondition",
     "s1": "substrate discipline: one catalog member, at most one specialized",
     "s2": "requires: every Requires token is in the closed section-F vocabulary",
+    "s3": "lane discipline: a gate names one lane its substrate runs natively",
     "g1": "catalog integrity: every entry carries a Validation-locus field",
     "g2": "catalog integrity: entry numbering contiguous, no gaps or duplicates",
     "g3": "catalog integrity: every index bullet anchor resolves",
@@ -662,15 +663,11 @@ def check_e_status(docs_by_rel, v):
     tracker = docs_by_rel.get("DEVELOPMENT_PLAN/README.md")
     if tracker is None:
         return
-    for line in tracker.stripped_lines:
-        cells = [c.strip() for c in line.split("|")]
-        if len(cells) < 8:
+    for phase, row in _phase_table(tracker).items():
+        if "status" not in row:
             continue
-        if not re.fullmatch(r"\d+", cells[1]):
-            continue
-        phase, status_cell, doc_cell = cells[1], cells[6], cells[7]
-        tracker_marker = _first_marker(status_cell)
-        m = re.search(r"\((phase_\d+[a-z0-9_]*\.md)\)", doc_cell)
+        tracker_marker = _first_marker(row["status"])
+        m = re.search(r"\((phase_\d+[a-z0-9_]*\.md)\)", " ".join(row.values()))
         if not m or tracker_marker is None:
             continue
         target = docs_by_rel.get("DEVELOPMENT_PLAN/" + m.group(1))
@@ -1012,7 +1009,26 @@ CATALOG = SPECIALIZED | {"linux-cpu", "none"}
 # Section F: the closed environment-precondition vocabulary.
 REQUIRES_VOCAB = {"accelerator-device-plugin", "cloud-account", "host-toolchain"}
 SUBSTRATE_RE = re.compile(r"^\*\*Substrate:\*\*\s*(.+?)(?=\n\*\*|\n##|\n\n)", re.M | re.S)
+LANE_RE = re.compile(r"^\*\*Lane:\*\*\s*(.+?)(?=\n\*\*|\n##|\n\n)", re.M | re.S)
 REQUIRES_RE = re.compile(r"^\*\*Requires\*\*:\s*`([^`]+)`", re.M)
+# Section S clause 15: a lane carries the architecture it ran on, because a lane
+# without one lets a single host claim both and prove neither
+# (substrate_doctrine.md section 1.1, the natural-architecture rule).
+LANES = {"none", "linux-cpu/amd64", "linux-cpu/arm64", "metal", "cuda"}
+# The lanes each substrate reaches at its own natural architecture. `linux-cuda` and
+# `linux-cpu` are Linux on either architecture; `apple` is arm64 always; `windows` is
+# amd64 always. A pairing outside this map is a claim no host can execute without
+# translation, which is exactly what clause 15 refuses.
+NATURAL_LANES = {
+    "none": {"none"},
+    "apple": {"linux-cpu/arm64", "metal"},
+    "linux-cpu": {"linux-cpu/amd64", "linux-cpu/arm64"},
+    "linux-cuda": {"cuda", "linux-cpu/amd64", "linux-cpu/arm64"},
+    "windows": {"linux-cpu/amd64"},
+}
+# Section L's deferred forms name a rule rather than a fixed lane: a generated test
+# picks its own, and a provider stage runs on whatever the provider materializes.
+LANE_DEFERRED = "per generated test"
 # A gate routinely *mentions* later phases — to disclaim them, to say who owns an
 # apparatus, to record what supersedes its evidence. Those are healthy and the suite
 # is full of them. What section E forbids is a gate that **requires** a later phase.
@@ -1035,6 +1051,90 @@ SUBSTRATE_DEFERRED_RE = re.compile(r"per generated test|→\s*provider|parent-dr
 def _phase_no(rel):
     m = re.match(r"DEVELOPMENT_PLAN/phase_(\d+)", rel)
     return int(m.group(1)) if m else None
+
+
+def _phase_table(doc):
+    """Read a phase-keyed Markdown table as {phase: {column name: cell}}.
+
+    Keyed on the header row's own names rather than on cell positions. A positional
+    reader silently reads the wrong column the moment a table gains one — which is
+    how the tracker's new `Lane` column shifted `Register` out from under every
+    reader that counted cells.
+    """
+    rows = {}
+    if doc is None:
+        return rows
+    header = None
+    for line in doc.stripped_lines:
+        cells = [c.strip() for c in line.split("|")]
+        if len(cells) < 4 or cells[0] or cells[-1]:
+            continue
+        cells = cells[1:-1]
+        if header is None:
+            if cells[0].lower() == "phase":
+                header = [c.lower() for c in cells]
+            continue
+        if len(cells) != len(header) or not re.fullmatch(r"\d+", cells[0]):
+            continue
+        rows[int(cells[0])] = dict(zip(header, cells))
+    return rows
+
+
+def _declaration_head(text):
+    """The declaration itself, without the prose that explains or disclaims it."""
+    return re.split(r"[—(]", text, 1)[0].replace("`", "").strip()
+
+
+def _lane_token(text):
+    """The lane a cell or a **Lane:** line declares, or None if it names none."""
+    head = _declaration_head(text)
+    head = re.split(r"→", head, 1)[0].strip()     # a provider stage keeps its own lane
+    if head == LANE_DEFERRED:
+        return LANE_DEFERRED
+    return head if head in LANES else None
+
+
+def _substrate_token(text):
+    """The substrate a **Substrate:** line declares, under the section-L rule."""
+    head = _declaration_head(text)
+    named = {t for t in CATALOG if re.search(rf"\b{re.escape(t)}\b", head)}
+    specialized = sorted(named & SPECIALIZED)
+    if specialized:
+        return specialized[0]
+    if "none" in named:
+        return "none"
+    return "linux-cpu" if "linux-cpu" in named else None
+
+
+def check_s3_lane(docs, docs_by_rel, v):
+    """Section S clause 15: one lane, natural to its substrate, and both maps agree."""
+    tables = (
+        ("the tracker", _phase_table(docs_by_rel.get("DEVELOPMENT_PLAN/README.md"))),
+        ("substrates.md", _phase_table(docs_by_rel.get("DEVELOPMENT_PLAN/substrates.md"))),
+    )
+    for doc in docs:
+        ph = _phase_no(doc.rel)
+        if ph is None:
+            continue
+        m = LANE_RE.search(doc.text)
+        if not m:
+            v.append(Violation("s3", doc.rel, 1, "no **Lane:** line"))
+            continue
+        line_no = doc.text.count("\n", 0, m.start()) + 1
+        lane = _lane_token(m.group(1))
+        if lane is None:
+            v.append(Violation("s3", doc.rel, line_no, "lane names no catalog member"))
+            continue
+        sm = SUBSTRATE_RE.search(doc.text)
+        substrate = _substrate_token(sm.group(1)) if sm else None
+        if substrate and lane != LANE_DEFERRED and lane not in NATURAL_LANES[substrate]:
+            v.append(Violation("s3", doc.rel, line_no,
+                               f"substrate {substrate} does not run lane {lane} natively"))
+        for source, table in tables:
+            cell = table.get(ph, {}).get("lane")
+            if cell is not None and _lane_token(cell) != lane:
+                v.append(Violation("s3", doc.rel, line_no,
+                                   f"lane {lane} but {source} row {ph} says {_lane_token(cell)}"))
 
 
 def check_s_substrate(docs, docs_by_rel, v):
@@ -1070,7 +1170,7 @@ def check_s_substrate(docs, docs_by_rel, v):
             v.append(Violation("s1", doc.rel, line_no,
                                f"gate requires two specialized substrates: {', '.join(sorted(spec))}"))
         if ph in smap:
-            declared = sorted(spec)[0] if spec else ("none" if "none" in named else "linux-cpu")
+            declared = _substrate_token(m.group(1))
             if smap[ph] != declared:
                 v.append(Violation("s1", doc.rel, line_no,
                                    f"substrate {declared} but substrates.md row {ph} says {smap[ph]}"))
@@ -1542,6 +1642,7 @@ def run(root, only=None):
     check_h_backlink(docs, v)
     check_m_type_uniqueness(docs, v)
     check_s_substrate(docs, docs_by_rel, v)
+    check_s3_lane(docs, docs_by_rel, v)
     check_f3_forward_gate(docs, v)
 
     if only:

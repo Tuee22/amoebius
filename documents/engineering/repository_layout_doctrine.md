@@ -165,7 +165,7 @@ closure condition; none may receive new content.
 | `mutants/**`, `test/live/mutants/**`, `test/host/mutants/**` | `test/mutant/**`, one record format |
 | `test/goldens/**`, `test/fixtures/**`, `test/negatives/**`, `test/Ui/**` | their singular-role siblings |
 | `toolchain/bin/**`, `toolchain/runtime/**`, `toolchain/downloads/**`, `toolchain/cache/**` | `.build/toolchain/**`; the authored requirements file moves beside its only consumer under `tools/**` |
-| `docker/**` | the typed bake catalog under `dhall/**`, rendering to `.build/docker/**/Dockerfile` |
+| `docker/**` | **migrated.** The root is gone; the typed bake catalog under `dhall/**` is the authored half and `.build/docker/**/Dockerfile` the rendered one |
 | `ui-runtime/**` | `ui/**`, under the one spago project |
 | the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots | stanzas in `amoebius.cabal`; their source to `src/**`, `test/**`, `proto/**`, and `dhall/**` |
 | out-of-tree `hs-source-dirs` reaching a sibling checkout | a `source-repository-package` in `cabal.project`, so the input is resolvable from the source snapshot |

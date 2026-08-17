@@ -40,7 +40,8 @@ CHECKS = {
     "status": "every row status is in the honesty vocabulary",
     "layers": "the three correctness layers, with out-of-register ones UNVERIFIED",
     "honesty": "a substrate-none ledger claims no runtime or unqualified proof",
-    "tracker": "register and substrate equal the tracker row",
+    "tracker": "register, substrate and lane equal the tracker row",
+    "architecture": "the recorded architecture is the one its lane names",
     "path": "a committed ledger uses its phase's filename",
     "enumeration": "the run enumeration loads",
     "surface": "coverage joins completely to the enumeration",
@@ -52,6 +53,8 @@ REQUIRED_KEYS = {
     "gate_command",
     "register",
     "substrate",
+    "lane",
+    "architecture",
     "date",
     "layers",
     "coverage",
@@ -59,6 +62,15 @@ REQUIRED_KEYS = {
 }
 STATUSES = {"proven", "proven-for-the-model", "tested", "assumed", "UNVERIFIED"}
 LAYERS = {"Decision", "Protocol", "Runtime"}
+# Section S clause 15: the closed architecture set, and the architecture each lane
+# names. A lane that names one is a claim about the hardware the run executed on, so
+# the two cannot disagree; a lane that names none still records where it ran.
+ARCHITECTURES = {"amd64", "arm64"}
+LANE_ARCHITECTURE = {
+    "linux-cpu/amd64": "amd64",
+    "linux-cpu/arm64": "arm64",
+    "metal": "arm64",
+}
 
 
 @dataclass(frozen=True)
@@ -78,16 +90,39 @@ def canonical_hash(value: dict[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
-def parse_tracker(path: Path) -> dict[int, tuple[str, str]]:
-    rows: dict[int, tuple[str, str]] = {}
-    row_re = re.compile(r"^\|\s*(\d+)\s*\|(?:[^|]*\|){1}\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|")
+def parse_tracker(path: Path) -> dict[int, dict[str, str]]:
+    """Read the tracker's phase overview as {phase: {column name: cell}}.
+
+    Keyed on the header row's names, never on cell positions: a positional reader
+    starts reading the wrong column the moment the table gains one, which is exactly
+    what the `Lane` column did to the reader this replaces.
+    """
+    rows: dict[int, dict[str, str]] = {}
+    header: list[str] | None = None
     for line in path.read_text(encoding="utf-8").splitlines():
-        match = row_re.match(line)
-        if match:
-            rows[int(match.group(1))] = (match.group(2).strip(), match.group(3).strip())
+        cells = [cell.strip() for cell in line.split("|")]
+        if len(cells) < 4 or cells[0] or cells[-1]:
+            continue
+        cells = cells[1:-1]
+        if header is None:
+            if cells[0].lower() == "phase":
+                header = [cell.lower() for cell in cells]
+            continue
+        if len(cells) != len(header) or not re.fullmatch(r"\d+", cells[0]):
+            continue
+        rows[int(cells[0])] = dict(zip(header, cells))
     if not rows:
         raise ValueError(f"no phase rows found in tracker {path}")
     return rows
+
+
+def declared(cell: str) -> str:
+    """The value a tracker cell declares, without its backticks or trailing prose.
+
+    The separator is a *spaced* em dash, because the no-register marker is an em dash
+    on its own and a bare split would read it as an empty declaration.
+    """
+    return re.split(r"\s+—\s+|\s+\(", cell, 1)[0].replace("`", "").strip()
 
 
 def load_enumeration(path: Path) -> set[str]:
@@ -179,10 +214,25 @@ def validate_ledger(
 
     register = value.get("register")
     substrate = value.get("substrate")
+    lane = value.get("lane")
+    architecture = value.get("architecture")
     if not isinstance(register, str) or not register:
         problems.append(Problem("schema", "register must be a non-empty string"))
     if not isinstance(substrate, str) or not substrate:
         problems.append(Problem("schema", "substrate must be a non-empty string"))
+    if not isinstance(lane, str) or not lane:
+        problems.append(Problem("schema", "lane must be a non-empty string"))
+    if architecture not in ARCHITECTURES:
+        problems.append(
+            Problem("architecture", f"architecture {architecture!r} is not one of {sorted(ARCHITECTURES)}")
+        )
+    elif isinstance(lane, str) and LANE_ARCHITECTURE.get(lane, architecture) != architecture:
+        problems.append(
+            Problem(
+                "architecture",
+                f"lane {lane!r} names {LANE_ARCHITECTURE[lane]}, but the run recorded {architecture}",
+            )
+        )
 
     problems.extend(validate_rows(value.get("layers"), "layers", "name"))
     problems.extend(validate_rows(value.get("coverage"), "coverage", "surface"))
@@ -193,19 +243,23 @@ def validate_ledger(
         problems.append(Problem("tracker", str(exc)))
         tracker = {}
     if isinstance(phase, int):
-        expected = tracker.get(phase)
-        if expected is None:
+        row = tracker.get(phase)
+        if row is None:
             problems.append(Problem("tracker", f"phase {phase} has no tracker row"))
         else:
-            expected_substrate, expected_register = expected
-            if substrate != expected_substrate:
-                problems.append(
-                    Problem("tracker", f"substrate {substrate!r} != tracker value {expected_substrate!r}")
-                )
-            if register != expected_register:
-                problems.append(
-                    Problem("tracker", f"register {register!r} != tracker value {expected_register!r}")
-                )
+            for field, recorded in (
+                ("substrate", substrate),
+                ("lane", lane),
+                ("register", register),
+            ):
+                if field not in row:
+                    problems.append(Problem("tracker", f"the tracker declares no {field} column"))
+                    continue
+                expected = declared(row[field])
+                if recorded != expected:
+                    problems.append(
+                        Problem("tracker", f"{field} {recorded!r} != tracker value {expected!r}")
+                    )
 
         # A ledger emitted into the run bundle is named by the bundle, not by the
         # phase: repository-layout doctrine section 3.1 fixes it at

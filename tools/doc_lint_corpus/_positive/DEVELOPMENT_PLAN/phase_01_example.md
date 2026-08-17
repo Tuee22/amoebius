@@ -27,6 +27,7 @@ Its design belongs to [example_doctrine.md](../documents/engineering/example_doc
 The reconciler observes the live shape and enacts only the typed actions its stage admits.
 
 **Substrate:** none
+**Lane:** none
 **Register:** 1
 **Gate:** `cabal test example-spec` is green — the committed golden corpus decodes against an independent oracle and one committed seeded mutant turns it red (Gate; 1.2 V1).
 

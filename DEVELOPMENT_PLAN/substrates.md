@@ -291,8 +291,8 @@ row's full objective, gate, and sprint breakdown lives in its phase document
 
 The fourth column owns substrate rationale only. Dates, checkmarks, ledger references, and outcome prose in
 that column are invalidated pre-amendment observations retained to explain why the lane was selected; they are
-not current status or evidence. The tracker is authoritative: Phases 0–23 are Done, Phase 24 is Active, and
-phases 25–65 are Blocked.
+not current status or evidence. The tracker is authoritative: after the natural-architecture amendment,
+Phase 0 is Done, Phase 1 is Active, and phases 2–65 are Blocked.
 Each row must be rewritten from a new repository-local attestation when its owning phase revalidates.
 
 | Phase | Name | Substrate | Lane | Substrate rationale; any outcome is historical and invalidated |

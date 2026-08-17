@@ -1,0 +1,30 @@
+{
+  "phase": 24,
+  "gate_command": "python3 tools/bootstrap_coordinator_gate.py --execute",
+  "register": "3",
+  "substrate": "linux-cpu",
+  "lane": "linux-cpu/amd64",
+  "architecture": "arm64",
+  "date": "2026-08-16",
+  "layers": [
+    {
+      "name": "Decision",
+      "status": "tested"
+    },
+    {
+      "name": "Protocol",
+      "status": "tested"
+    },
+    {
+      "name": "Runtime",
+      "status": "tested"
+    }
+  ],
+  "coverage": [
+    {
+      "surface": "bootstrap.substrate_detect",
+      "status": "tested"
+    }
+  ],
+  "ledger_hash": "sha256:6f17aa9879c56a2cd050eb261d0d10dc9dcfffe99daea5d8ae93694632e09fe6"
+}

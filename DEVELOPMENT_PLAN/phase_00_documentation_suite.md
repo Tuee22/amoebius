@@ -40,6 +40,7 @@ and remaining implementation are stated below.
 - [Sprint 0.8: The authored negative corpora as one declared set ✅](#sprint-08-the-authored-negative-corpora-as-one-declared-set-)
 - [Sprint 0.9: The target tree as a partition the gate decides ✅](#sprint-09-the-target-tree-as-a-partition-the-gate-decides-)
 - [Sprint 0.10: Repository-contained state contract ✅](#sprint-010-repository-contained-state-contract-)
+- [Sprint 0.11: The natural-architecture postcondition ✅](#sprint-011-the-natural-architecture-postcondition-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -47,12 +48,31 @@ and remaining implementation are stated below.
 
 ## Phase Status
 
-🔄 Active — **reopened 2026-08-16 by the natural-architecture amendment**, whose postcondition this phase
-owns. [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) gains clause 15: a run records
-the detected substrate, the selected lane, and the natural architecture it proved, and executes no artifact of
-another. Phase 0 adds that clause to the universal gate and to the documentation lint — the `Lane:` field of
-[§D](development_plan_standards.md#d-the-per-phase-document-skeleton), checked against the tracker and
-[substrates.md](substrates.md) the way the substrate already is. Until it reseals, no later phase reruns.
+✅ Done — **resealed 2026-08-17 with the natural-architecture postcondition adopted.** All eleven sides of
+`python3 tools/doc_lint_verify.py` pass: 43 seeded documentation negatives each redden their own check, 35
+surfaces join completely to 74 implemented checks, 17 artifact-policy rules are clean with every remaining
+finding attributed to an owning phase, and the run records the substrate, lane, and natural architecture it
+executed on. Its immutable attestation is retained beneath `.build/evidence-store/` and verifies against the
+source snapshot that run saw; per
+[development_plan_standards.md §I](development_plan_standards.md#i-generated-documentation-remains-untracked)
+the digest itself stays in the run bundle rather than in this document.
+
+**What the reseal added, 2026-08-17.** Clause 15 of
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) — a run records the detected
+substrate, the selected lane, and the natural architecture it proved, and executes no artifact of another —
+became a check in four places rather than a sentence: the `Lane:` field of
+[§D](development_plan_standards.md#d-the-per-phase-document-skeleton) is decided against the tracker and
+[substrates.md](substrates.md) the way the substrate already was, the run ledger and the stored attestation
+both carry the lane and the architecture, and a gate that declares no lane is refused at construction.
+[Sprint 0.11](#sprint-011-the-natural-architecture-postcondition-) records the delivery and the re-baseline's
+mechanical consequences it closed.
+
+**What Phase 0 owns here and what it does not.** The re-baseline renumbered every phase at or above old 26,
+and this phase renumbered the owner columns of the two tables its own gate reads. It did **not** rename the
+354 ordinal-bearing paths under `test/` and `mutants/`: those belong to their owning phases, which rename them
+for the capability rather than for the new ordinal, so a pin the plan cites at its post-amendment ordinal is
+resolved through the audit map and reported as a deferral until then
+([`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#natural-architecture-rebaseline--2026-08-16)).
 
 **Pre-natural-architecture status record (invalidated where it claims completion):**
 
@@ -222,10 +242,10 @@ runtime surface, or an acceptance command other than the two-sided documentation
 
 **Register:** — (no register: the documentation-lint gate validates text and the link graph, not amoebius behaviour, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** against its source snapshot, `python3 tools/doc_lint_verify.py` passes the documentation, semantic
-artifact-provenance, target-tree, ignore/context, authored-root-write, source-closure, dynamic-resolution,
-reachable-history, project-contained-attestation, state-containment, test-secrets, terminology, and
-seeded-mutant checks without creating an unignored
+**Gate:** against its source snapshot, `python3 tools/doc_lint_verify.py` passes the documentation,
+natural-architecture, semantic artifact-provenance, target-tree, ignore/context, authored-root-write,
+source-closure, dynamic-resolution, reachable-history, project-contained-attestation, state-containment,
+test-secrets, terminology, and seeded-mutant checks without creating an unignored
 or tracked generated file.
 
 ## Gate integrity
@@ -257,6 +277,10 @@ numbering, gate ownership, illegal-state coverage, and documentation negative ca
   host-global container-engine fallback;
 - a seeded escaped-path/escaped-Docker-resource negative is caught by a before/after host inventory;
 - production rejects `test-secrets.dhall`, and a seeded test-to-`.data/**` alias fails before mutation;
+- every phase gate names one lane from the closed vocabulary, natural to its substrate and equal in the phase
+  document, the tracker, and the substrate map;
+- the run records the architecture it executed on, refuses a translated process, and both the ledger and the
+  stored attestation carry that architecture and the lane that named it;
 - every seeded negative for these rules turns the gate red at its expected locus.
 
 The independent oracle is the authored positive seed, mutation definition, and expected diagnostic for every
@@ -971,6 +995,59 @@ host-global resources before effects, provides marker-proven exact test-run clea
 test-secrets boundary. The Phase-0 runner brackets all work with the host observer; the whole-tree scanner
 attributes legacy callers to their owning numerical phases through the shrink-only migration allowlist.
 
+## Sprint 0.11: The natural-architecture postcondition ✅
+
+**Status**: Done — the lane and architecture checks are implemented, each proven red by its own seeded
+negative, and the eleven-sided run passed 2026-08-17
+**Implementation**: `tools/doc_lint.py`, `tools/ledger_lint.py`, `tools/gate_common.py`,
+`tools/attestation.py`, `tools/doc_lint_verify.py`, `tools/artifact_manifest_lint.py`,
+`tools/migration_allowlist.tsv`, `test/oracle/documentation_suite_surfaces.tsv`
+**Blocked by**: Sprint 0.10
+**Independent Validation**: a phase doc whose lane its substrate cannot run natively, a ledger whose
+architecture is not the one its lane names, and a run bundle naming no architecture are each reported at their
+own check, while the run's own architecture observation reddens against the complement.
+**Docs to update**: `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`,
+`DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`,
+`documents/engineering/repository_layout_doctrine.md`
+
+### Objective
+
+Adopt [`substrate_doctrine.md` §1.1 — the natural-architecture rule](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule)
+as clause 15 of the universal gate: a run records the substrate it detected, the lane it selected, and the
+architecture that lane ran on, and executes no artifact of another. A lane without an architecture is what
+lets one host claim both and prove neither.
+
+### Deliverables
+
+- A lane check over the plan suite: one lane from the closed vocabulary, natural to the phase's substrate, and
+  equal in the phase document, the tracker, and the substrate map.
+- The two phase-keyed tables read by their header names rather than by cell position, so a new column cannot
+  silently shift a reader onto the wrong one.
+- The run ledger carrying `lane` and `architecture`, with the architecture a lane names checked against the
+  one the run recorded.
+- The stored attestation carrying the same pair, at a raised schema version, with a bundle naming no
+  architecture refused.
+- A shared observation of the executing architecture that refuses a translated process, offered to every phase
+  gate once, with the complement comparison as its mutant.
+- The re-baseline's mechanical consequences closed: owner columns renumbered, the pre-amendment pin
+  translation authored in the audit map and reported as a deferral, and the migrated `docker/` root dropped
+  from the write guard's declaration.
+
+### Validation
+
+1. Run the phase command and confirm all eleven sides pass, the architecture side naming the host's own.
+2. Confirm the seeded lane negative reddens `s3` and the seeded architecture negatives redden the ledger
+   checker and the attestation store, each at its own locus.
+3. Confirm the run ledger and the stored attestation both name the lane and the architecture.
+4. Confirm every pin resolved through the pre-amendment ordinal is reported and attributed, and that the
+   translation stops the moment the register row does.
+
+### Remaining Work
+
+None for Phase 0. Every later phase's gate now declares the lane it runs, and a gate that does not is refused
+at construction rather than sealing without one; each phase adopts that line at its own rerun, which is the
+single difference the amendment asks of it.
+
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
@@ -983,6 +1060,8 @@ attributes legacy callers to their owning numerical phases through the shrink-on
 - The secrets/IaC and runtime/transport/determinism docs — authored in Sprint 0.4.
 - `chaos_failover_doctrine.md`, `testing_doctrine.md`, `formal_model_doctrine.md`,
   `gateway_migration_model_doctrine.md`, `tla_modelling_assumptions.md` — authored in Sprint 0.5.
+- `repository_layout_doctrine.md` — the migrated `docker/**` row records that the root is gone and only its
+  rendering half is still owed (Sprint 0.11).
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` Phase Overview links its Phase 0 row to this document.

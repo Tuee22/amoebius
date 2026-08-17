@@ -145,8 +145,9 @@ The **2026-08-16 natural-architecture amendment** reopens every phase, and re-ba
 predicate is [development_plan_gate_integrity.md §S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate)
 clause 15: a run records the natural architecture it proved, and executes no artifact of another. No seal
 recorded before 2026-08-16 names an architecture, and the one that named two reached the second under an
-emulator, so no prior seal satisfies the amended gate. Phase 0 is Active and Phases 1–65 are Blocked; each
-returns to work only in numerical order after its predecessor validates.
+emulator, so no prior seal satisfies the amended gate. Phase 0 adopted the clause and resealed on 2026-08-17;
+Phase 1 is Active and Phases 2–65 are Blocked, each returning to work only in numerical order after its
+predecessor validates.
 
 The re-baseline is the amendment's second half. No host can build an architecture it cannot execute, so the
 old Phase 25 — one gate claiming a two-architecture image — became two: Phase 25 builds, proves, and publishes
@@ -256,10 +257,11 @@ so a spec naming none needs no Vault — which is what keeps Phases 25–29 free
 
 ## Current implementation audit
 
-**Current conclusion — 2026-08-16 (natural-architecture amendment):** **no phase is Policy-conformant.**
+**Current conclusion — 2026-08-17:** **Phase 0 is Policy-conformant; no other phase is.**
 [§C](development_plan_standards.md#c-status-vocabulary) reserves that term for a pass of the *current* gate,
-and the current gate is [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15,
-which no recorded run satisfies: none names the architecture it proved. Every row below therefore drops to
+and the current gate is [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15.
+Phase 0's 2026-08-17 run is the first to satisfy it: it records the substrate, lane, and natural architecture
+it executed on, and refuses a translated one. Every other row below stays at
 **Observed footprint** or **Known partial**, which is a change of label, not a claim that the work is gone —
 each phase's capability evidence stands as history and is what makes its rerun short.
 The existing later-phase implementation still
@@ -280,8 +282,8 @@ policy-conformant. Exact counts, paths, historical findings, and actionable mism
 
 | Phase(s) | Progress | Observed state | Required next boundary |
 |---|---|---|---|
-| 0 | **Observed footprint** | Historical, refreshed 2026-08-15: The ten-sided gate passes with 17 clean, mutation-proven artifact rules; all Phase-0 state and attestation are beneath `.build/**`; the outside-host inventory is unchanged; and every remaining migration finding has a nonzero owner phase. None of it records the architecture it proved, so clause 15 leaves the result UNVERIFIED for every architecture | Rerun the amended gate, recording the substrate, lane, and natural architecture |
-| 1 | **Observed footprint** | Historical, refreshed 2026-08-15: Dynamic tools, npm dependencies, Cabal metadata/store/build roots, temp/cache homes, run evidence, and attestation are project-contained; the 225-package graph resolves twice and from the snapshot; probes and mutants pass; the host inventory is unchanged. None of it records the architecture it proved, so clause 15 leaves the result UNVERIFIED for every architecture | Rerun the amended gate, recording the substrate, lane, and natural architecture |
+| 0 | **Policy-conformant** | 2026-08-17: the eleven-sided gate passes with 17 clean, mutation-proven artifact rules, 43 seeded documentation negatives red at their own checks, and 35 surfaces joined to 74 implemented checks. All Phase-0 state and attestation are beneath `.build/**`, the outside-host inventory is unchanged, every remaining migration finding has a nonzero owner phase, and the run records substrate `none`, lane `none`, and the `arm64` host it executed on untranslated | None. The next boundary belongs to Phase 1 |
+| 1 | **Observed footprint** | Historical, refreshed 2026-08-15: Dynamic tools, npm dependencies, Cabal metadata/store/build roots, temp/cache homes, run evidence, and attestation are project-contained; the 225-package graph resolves twice and from the snapshot; probes and mutants pass; the host inventory is unchanged. None of it records the architecture it proved, so clause 15 leaves the result UNVERIFIED for every architecture. The 2026-08-17 rerun adopted clause 15 and passed its architecture side on `arm64`, then stopped at the declared `host-toolchain` precondition: the host carries no `dhall` and no `chromium` | Supply the two host binaries, then rerun the amended gate to completion |
 | 2 | **Observed footprint** | Historical, refreshed 2026-08-15: The complete nine-sided gate passes: 31 authored metrics match, all model and renderer mutants are caught, 608 emitted `.tla`/`.cfg` files stay beneath `.build/**` and outside the source snapshot, 14 surfaces join to 39 run-time items, and the outside-host inventory is unchanged. None of it records the architecture it proved, so clause 15 leaves the result UNVERIFIED for every architecture | Rerun the amended gate, recording the substrate, lane, and natural architecture |
 | 3 | **Observed footprint** | Historical, refreshed 2026-08-15: The complete nine-sided gate passes: all 12 authored results match, every per-invariant, mechanical, fairness, cutoff, and shared-resource mutant reddens, 34 emitted `.tla`/`.cfg` files remain beneath `.build/**`, 15 surfaces join to 17 run-time items, and the outside-host inventory is unchanged. None of it records the architecture it proved, so clause 15 leaves the result UNVERIFIED for every architecture | Rerun the amended gate, recording the substrate, lane, and natural architecture |
 | 4 | **Observed footprint** | Historical, refreshed 2026-08-15: The complete nine-sided gate passes after canonical Dhall normalization: all 18 authored metrics match, every field-deletion, type-substitution, special-resource, and custom-arm mutant reddens, 18 surfaces join to 21 run-time items, generated results remain beneath `.build/**`, and the outside-host inventory is unchanged. None of it records the architecture it proved, so clause 15 leaves the result UNVERIFIED for every architecture | Rerun the amended gate, recording the substrate, lane, and natural architecture |
@@ -331,8 +333,8 @@ inherits the universal postcondition above.
 
 | Phase | Name | Substrate | Lane | Register | Status | Validation contract |
 |---|---|---|---|---|---|---|
-| 0 | Documentation suite + the final repository layout | none | `none` | — | 🔄 Active — reopened 2026-08-16 by the natural-architecture amendment; adopts [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 | [phase_00](phase_00_documentation_suite.md) |
-| 1 | Toolchain spike | none | `none` | 1 | ⏸️ Blocked pending Phase-0 revalidation | [phase_01](phase_01_toolchain_spike.md) |
+| 0 | Documentation suite + the final repository layout | none | `none` | — | ✅ Done — resealed 2026-08-17 with [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 adopted; attestation `sha256:d6fdeca9e2dc4aa8b7cb6f6ecd9204658d1d56bce7acdbbe404620bdc7a5732c` | [phase_00](phase_00_documentation_suite.md) |
+| 1 | Toolchain spike | none | `none` | 1 | 🔄 Active — rerunning its gate to record the lane and architecture | [phase_01](phase_01_toolchain_spike.md) |
 | 2 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | none | `none` | 1 | ⏸️ Blocked pending Phase-1 revalidation | [phase_02](phase_02_formal_model_kernel.md) |
 | 3 | Gateway-migration model (both branches) | none | `none` | 1 | ⏸️ Blocked pending Phase-2 revalidation | [phase_03](phase_03_gateway_migration_model.md) |
 | 4 | Dhall Gate-1 schema + smart-constructor prelude | none | `none` | 1 | ⏸️ Blocked pending Phase-3 revalidation | [phase_04](phase_04_dhall_gate1_schema.md) |

@@ -3,6 +3,8 @@
   "gate_command": "cabal test ui-program-schema-spec",
   "register": "1",
   "substrate": "none",
+  "lane": "none",
+  "architecture": "amd64",
   "date": "2026-08-08",
   "layers": [
     {"name": "Decision", "status": "proven-for-the-model"},

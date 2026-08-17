@@ -38,7 +38,19 @@ Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-0 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+🔄 Active — **reopened 2026-08-16 by the natural-architecture amendment**, and open for work since Phase 0
+resealed on 2026-08-17.
+
+**Blocked on its declared environment precondition — 2026-08-17.** The gate now adopts clause 15: it records
+the substrate, the lane, and the architecture it executes on, refuses a translated process, and enumerates
+that observation as a check of its own. On the current host the architecture side passes — `darwin/arm64`,
+natural `arm64`, untranslated — and resolution then stops at the `host-toolchain` precondition this phase
+declares under **Requires**: no `dhall` satisfying `>=1.42 <2` and no `chromium` satisfying `>=120` is on the
+host. That is an environment fact no phase builds
+([development_plan_standards.md §F](development_plan_standards.md#f-the-sprint-block-format)), so the gate
+reports it and stops rather than skipping to green
+([README.md phase discipline](README.md#phase-discipline) rule 7). The rerun completes once the host supplies
+both binaries.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from

@@ -34,6 +34,7 @@ import doc_lint  # noqa: E402
 import ledger_lint  # noqa: E402
 import artifact_manifest_lint  # noqa: E402
 import containment  # noqa: E402
+import gate_common  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CORPUS = os.path.join(HERE, "doc_lint_corpus")
@@ -44,6 +45,7 @@ EXPECTATIONS = os.path.join(ROOT, "test", "oracle", "documentation_suite_surface
 
 SIDE_NAMES = (
     "fixture",
+    "architecture",
     "corpus",
     "snapshot",
     "surface",
@@ -246,13 +248,15 @@ def snapshot_side():
     return False
 
 
-def emit_ledger(run_dir, surfaces, results):
+def emit_ledger(run_dir, surfaces, results, architecture):
     """Write this run's proven/tested/assumed ledger into the run bundle."""
     ledger = {
         "phase": 0,
         "gate_command": "python3 tools/doc_lint_verify.py",
         "register": "—",
         "substrate": "none",
+        "lane": "none",
+        "architecture": architecture,
         "date": dt.date.today().isoformat(),
         # Phase 0 validates text, the link graph, and repository provenance. It
         # exercises no amoebius decision, protocol, or runtime, so all three
@@ -276,7 +280,7 @@ def emit_ledger(run_dir, surfaces, results):
     return path
 
 
-def ledger_side(run_dir, surfaces):
+def ledger_side(run_dir, surfaces, architecture):
     """Prove the ledger checker accepts and rejects its corpus, then check this run's."""
     command = [sys.executable, os.path.join(HERE, "ledger_lint.py"), "--verify-corpus"]
     result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
@@ -284,7 +288,7 @@ def ledger_side(run_dir, surfaces):
     if result.stdout:
         print(result.stdout.rstrip())
 
-    emitted = emit_ledger(run_dir, surfaces, {})
+    emitted = emit_ledger(run_dir, surfaces, {}, architecture)
     run_check = subprocess.run(
         [sys.executable, os.path.join(HERE, "ledger_lint.py"), emitted, "--enumeration", SURFACES],
         cwd=ROOT,
@@ -336,7 +340,7 @@ def policy_side():
     return negatives.returncode == 0 and audit.returncode == 0
 
 
-def attestation_side(run_dir, ledger_path):
+def attestation_side(run_dir, ledger_path, architecture):
     """Bind this run to its source snapshot and retain it beneath `.build/`.
 
     The binding is the digest of every non-ignored file as the run saw it. Whether that
@@ -357,6 +361,8 @@ def attestation_side(run_dir, ledger_path):
         "command": "python3 tools/doc_lint_verify.py",
         "register": "—",
         "substrate": "none",
+        "lane": "none",
+        "architecture": architecture,
         "toolchain": {"python": sys.version.split()[0]},
         "dependencies": {},
         "checks": [{"name": name, "status": "pass"} for name in SIDE_NAMES],
@@ -364,6 +370,7 @@ def attestation_side(run_dir, ledger_path):
             {"name": "doc_lint seeded negatives", "status": "red"},
             {"name": "ledger_lint seeded negatives", "status": "red"},
             {"name": "artifact_policy seeded negatives", "status": "red"},
+            {"name": "architecture complement comparison", "status": "red"},
         ],
         "coverage": [{"surface": "phase_00", "status": "tested"}],
         "cleanup": {"left_resources": False},
@@ -438,14 +445,18 @@ def main(argv):
     # appear, change, or vanish beneath an authored root while they do it.
     before_authored = artifact_policy.authored_snapshot()
 
+    # Clause 15 first: a run that cannot name the architecture it executed on has
+    # nothing to bind the rest of the evidence to.
+    architecture_ok, architecture = gate_common.architecture_side()
+
     tree_ok = tree_side()
     snapshot_ok = snapshot_side()
     surface_ok, surfaces = surface_side()
     run_dir = os.path.join(ROOT, ".build", "runs", "phase_00", run_id())
-    ledger_ok, ledger_path = ledger_side(run_dir, surfaces)
+    ledger_ok, ledger_path = ledger_side(run_dir, surfaces, architecture)
     artifact_ok = artifact_side()
     policy_ok = policy_side()
-    attest_ok = attestation_side(run_dir, ledger_path)
+    attest_ok = attestation_side(run_dir, ledger_path, architecture)
     after_host = containment.host_inventory()
     contained_ok = containment_side(
         before_host,
@@ -465,6 +476,7 @@ def main(argv):
 
     results = {
         "fixture": fixtures_ok,
+        "architecture": architecture_ok,
         "corpus": tree_ok,
         "snapshot": snapshot_ok,
         "surface": surface_ok,

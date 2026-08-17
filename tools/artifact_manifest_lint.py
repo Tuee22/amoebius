@@ -16,7 +16,16 @@ MANIFEST = ROOT / "test" / "oracle" / "preimplementation_artifacts.tsv"
 # The one enumerable surface this module owns, declared so the run-time enumeration can
 # discover it rather than the expectation file asserting it unilaterally.
 CHECKS = {"manifest": "every pre-implementation oracle and mutant resolves and is owned"}
-PHASES = {2, *range(16, 24), 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, *range(55, 65)}
+PHASES = {2, *range(16, 24), *range(37, 66)}
+# The natural-architecture re-baseline moved every phase at or above old 26 up by one.
+# A phase document therefore cites a pin at its **post**-amendment ordinal while the
+# file keeps the **pre**-amendment one until its owning phase renames it for the
+# capability. The translation is authored in the legacy register's audit map, not
+# invented here: without that row this reader refuses to translate anything.
+REBASELINE_FLOOR = 27
+REBASELINE_ANCHOR = "pre-amendment"
+LEGACY_REGISTER = ROOT / "DEVELOPMENT_PLAN" / "legacy_tracking_for_deletion.md"
+PIN_ORDINAL = re.compile(r"(?<=phase)([_-]?)(\d{2})(?=[/_.-]|$)")
 PHASE_LOCAL_ROOTS = (
     ROOT / "test" / "manifest" / "golden",
     ROOT / "test" / "kernel" / "fixtures",
@@ -44,6 +53,28 @@ DOCKERIGNORE_BYTECODE_PATTERNS = {
 }
 LAYOUT_DOCTRINE = ROOT / "documents" / "engineering" / "repository_layout_doctrine.md"
 IGNORE_FENCE = re.compile(r"```(gitignore|dockerignore)\n(.*?)```", re.S)
+
+
+def rebaseline_authorized() -> bool:
+    """Whether the legacy register still carries the pre-amendment naming deferral.
+
+    A translation is a deferral, and a deferral with no register row is an exemption
+    nobody approved. When the row goes — because every phase has renamed its own
+    artifacts — this reader stops translating and the stale pins become errors again.
+    """
+    try:
+        return REBASELINE_ANCHOR in LEGACY_REGISTER.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+
+def pre_amendment(path: str) -> str:
+    """The same pin under the ordinal it carried before the re-baseline."""
+    def shift(match: re.Match) -> str:
+        ordinal = int(match.group(2))
+        return match.group(1) + (f"{ordinal - 1:02d}" if ordinal >= REBASELINE_FLOOR else match.group(2))
+
+    return PIN_ORDINAL.sub(shift, path)
 
 
 def temporary_directory(prefix: str):
@@ -346,6 +377,8 @@ def main() -> int:
     # listed.  Brace/glob forms, directories, and Phase-2 byte goldens are excluded:
     # Phase 2.3 deliberately pins those only after fixing the rendering convention.
     explicit_re = re.compile(r"`(test/(?:fixtures|golden|mutants|dhall)/[^` ]+)`")
+    translatable = rebaseline_authorized()
+    translated: list[str] = []
     for prefix in PLAN_DOCS:
         doc = phase_doc(prefix)
         document = doc.read_text(encoding="utf-8")
@@ -362,8 +395,13 @@ def main() -> int:
             paragraph = document[paragraph_start:paragraph_end]
             if "generated artifact" in paragraph and "never committed" in paragraph:
                 continue
-            if path not in rows:
-                errors.append(f"{doc.name}: concrete Phase-0 pin is absent from manifest: {path}")
+            if path in rows:
+                continue
+            legacy = pre_amendment(path)
+            if translatable and legacy in rows:
+                translated.append(f"{doc.name}: {path} is manifested as {legacy}")
+                continue
+            errors.append(f"{doc.name}: concrete Phase-0 pin is absent from manifest: {path}")
 
     if errors:
         for error in errors:
@@ -373,6 +411,11 @@ def main() -> int:
         f"  ok   {len(rows)} artifacts across {len(PHASES)} owning gates; "
         "complete ignore/terminology contract plus four seeded negative classes"
     )
+    if translated:
+        print(
+            f"  note {len(translated)} pin(s) resolve through the pre-amendment ordinal; each "
+            "closes when its owning phase renames the artifact for its capability"
+        )
     return 0
 
 

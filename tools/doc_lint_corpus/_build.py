@@ -89,12 +89,18 @@ MUTATIONS = [
         ("DEVELOPMENT_PLAN/phase_01_example.md",
          "(Gate; 1.2 V1).",
          "(Gate; 1.2 V1). The Phase 9 reconciler must be Ready before this gate runs.")]),
-    ("s1_two_specialized_substrates", "s1", set(), [
+    # a substrate the lane cannot belong to is also a lane its substrate cannot run:
+    # the two names disagree in one direction or the other whichever is read first
+    ("s1_two_specialized_substrates", "s1", {"s3"}, [
         ("DEVELOPMENT_PLAN/phase_01_example.md",
          "**Substrate:** none", "**Substrate:** apple and linux-cuda")]),
     ("s2_requires_unknown_token", "s2", set(), [
         ("DEVELOPMENT_PLAN/phase_01_example.md",
          "**Register:** 1", "**Register:** 1\n**Requires**: `a-precondition-nobody-declared`")]),
+    # section S clause 15: a substrate-none gate claiming an architecture-bearing lane
+    ("s3_lane_off_its_substrate", "s3", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "**Lane:** none", "**Lane:** linux-cpu/amd64")]),
 
     # -- (p5/p6) the section P.3 gate cap and the section P.2 field cap ------
     ("p5_gate_over_cap", "p5", set(), [

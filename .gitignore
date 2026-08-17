@@ -15,7 +15,7 @@
 /DEVELOPMENT_PLAN/evidence/
 /test/enumeration/
 /test/golden/phase_*_ledger.json
-/test/golden/phase_54_expected_run_ledger.json
+/test/golden/phase_55_expected_run_ledger.json
 
 # Dependency resolution is refreshed dynamically and never committed.
 *.lock

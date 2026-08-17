@@ -10,7 +10,7 @@
 #
 # output_class<TAB>generator<TAB>owner
 cabal-store/**	tools/toolchain.py	phase-1
-docs/**	-	phase-54
+docs/**	-	phase-55
 dhall/**/*.dhall	tools/dhall_gate1.py	phase-4
 dist-newstyle/**	tools/toolchain_spike_gate.py	phase-1
 dsl/**	tools/gadt_decoder_gate2_gate.py	phase-5

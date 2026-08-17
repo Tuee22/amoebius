@@ -37,7 +37,10 @@ import sys
 import tempfile
 from pathlib import Path
 
-SCHEMA = 1
+SCHEMA = 2
+# The closed architecture set of section S clause 15, named here so a stored record
+# carries the architecture it proved rather than leaving a reader to infer one.
+ARCHITECTURES = {"amd64", "arm64"}
 ROOT = Path(__file__).resolve().parent.parent
 BUILD_TMP = ROOT / ".build" / "tmp"
 
@@ -51,6 +54,8 @@ REQUIRED_KEYS = {
     "command",
     "register",
     "substrate",
+    "lane",
+    "architecture",
     "toolchain",
     "dependencies",
     "checks",
@@ -100,7 +105,15 @@ def schema_check(bundle: object) -> list[str]:
     digest = bundle["source_digest"]
     if not isinstance(digest, str) or not digest.startswith("sha256:") or len(digest) != 71:
         problems.append("source_digest must be the sha256 digest of the source snapshot")
-    for key in ("contract", "contract_digest", "command", "register", "substrate", "ledger_hash"):
+    for key in (
+        "contract",
+        "contract_digest",
+        "command",
+        "register",
+        "substrate",
+        "lane",
+        "ledger_hash",
+    ):
         if not isinstance(bundle[key], str) or not bundle[key].strip():
             problems.append(f"{key} must be a non-empty string")
     for key in ("toolchain", "dependencies", "observations"):
@@ -112,6 +125,12 @@ def schema_check(bundle: object) -> list[str]:
             problems.append(f"{key} must be a non-empty array")
     if not isinstance(bundle["cleanup"], dict) or "left_resources" not in bundle["cleanup"]:
         problems.append("cleanup must record whether the run left resources behind")
+    # Section S clause 15: a record that cannot name the architecture it proved has
+    # proved it for none, so the closed set is checked here rather than trusted.
+    if bundle["architecture"] not in ARCHITECTURES:
+        problems.append(
+            f"architecture must be one of {sorted(ARCHITECTURES)}, not {bundle['architecture']!r}"
+        )
     return problems
 
 
@@ -178,6 +197,8 @@ def sample_bundle() -> dict:
         "command": "python3 tools/doc_lint_verify.py",
         "register": "—",
         "substrate": "none",
+        "lane": "none",
+        "architecture": "arm64",
         "toolchain": {"python": "synthetic"},
         "dependencies": {},
         "checks": [{"name": "synthetic", "status": "pass"}],

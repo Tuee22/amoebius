@@ -57,3 +57,4 @@ probe.decode_negative	checks	decode-negative
 probe.dependency_link	checks	dependency-link
 probe.simulation_terminal	checks	simulation-terminal
 codegen.protocol_bindings	checks	protocol-codegen
+architecture.natural_lane	checks	natural-architecture

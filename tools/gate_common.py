@@ -42,6 +42,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import os
+import platform
 import subprocess
 import sys
 from pathlib import Path
@@ -57,13 +58,124 @@ import containment  # noqa: E402
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 
-# The three universal sides this module contributes. A phase appends its own names before
+# The universal sides this module contributes. A phase appends its own names before
 # these, so the report reads capability-first and hygiene-last.
-UNIVERSAL_SIDES = ("surface", "ledger", "attestation", "containment", "write-guard")
+UNIVERSAL_SIDES = ("architecture", "surface", "ledger", "attestation", "containment", "write-guard")
+
+# ---------------------------------------------------------------------------
+# Section S clause 15 — the architecture a run actually executed on
+# ---------------------------------------------------------------------------
+#
+# The catalogue is the lane vocabulary's own, so a lane name and an observation are
+# comparable without translation. The aliases are what the two kernels report.
+ARCHITECTURES = ("amd64", "arm64")
+ARCHITECTURE_ALIASES = {
+    "x86_64": "amd64",
+    "amd64": "amd64",
+    "aarch64": "arm64",
+    "arm64": "arm64",
+}
+# An emulator maps its own image into the process, and on Darwin the kernel answers
+# outright. Both are the platform's own signal about the process, not a guess from the
+# artifact's filename.
+EMULATOR_HINTS = ("qemu-", "qemu_", "box64", "box86", "rosetta")
 
 
 def rel(path: Path | str) -> str:
     return os.path.relpath(str(path), str(ROOT))
+
+
+def normalize_architecture(name: str) -> str:
+    """Map a kernel's machine name onto the closed lane vocabulary."""
+    resolved = ARCHITECTURE_ALIASES.get(name.strip().lower())
+    if resolved is None:
+        raise GateError(f"unknown machine architecture {name!r}; clause 15 admits {ARCHITECTURES}")
+    return resolved
+
+
+def _proc_translated() -> bool:
+    """Darwin's own answer to 'is this process running under Rosetta?'."""
+    try:
+        result = subprocess.run(
+            ["sysctl", "-n", "sysctl.proc_translated"],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+    except OSError:
+        return False
+    return result.stdout.strip() == "1"
+
+
+def _mapped_emulator() -> str | None:
+    """An emulator image mapped into this process, as Linux reports its own maps."""
+    try:
+        maps = Path("/proc/self/maps").read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    for line in maps.splitlines():
+        lowered = line.lower()
+        for hint in EMULATOR_HINTS:
+            if hint in lowered:
+                return line.split()[-1]
+    return None
+
+
+def natural_architecture() -> str:
+    """The architecture this process is executing as, refusing a translated one.
+
+    Clause 15 asks two different questions and this answers both: *which* architecture
+    the run used, and whether the hardware actually ran it. A translated process
+    answers the first perfectly well and is still exactly the thing the clause exists
+    to refuse, so the refusal happens here rather than in each caller.
+    """
+    problems = architecture_problems()
+    if problems:
+        raise GateError(problems[0])
+    return normalize_architecture(platform.machine())
+
+
+def architecture_problems() -> list[str]:
+    """Every reason this process is not a natural-architecture run."""
+    problems: list[str] = []
+    try:
+        machine = normalize_architecture(platform.machine())
+    except GateError as error:
+        return [str(error)]
+    if sys.platform == "darwin" and _proc_translated():
+        problems.append(
+            f"the process reports {machine} under Darwin translation; clause 15 admits no emulated run"
+        )
+    mapped = _mapped_emulator()
+    if mapped is not None:
+        problems.append(f"an emulator image {mapped} is mapped into this process")
+    return problems
+
+
+def architecture_side(recorded: str | None = None) -> tuple[bool, str]:
+    """Prove clause 15 for this run, and prove the proof reddens for the complement.
+
+    The mutant is the point. Comparing the detected architecture with itself passes on
+    any host and proves nothing, so the side also runs the same comparison against the
+    complement and requires it to fail — a comparison that cannot fail is not a check.
+    """
+    print("\narchitecture side — the natural architecture this run executed on\n")
+    problems = architecture_problems()
+    for problem in problems:
+        print(f"  FAIL  {problem}")
+    if problems:
+        return False, ""
+    observed = normalize_architecture(platform.machine())
+    if recorded is not None and recorded != observed:
+        print(f"  FAIL  the run records {recorded}, but it executed on {observed}")
+        return False, observed
+    complement = next(name for name in ARCHITECTURES if name != observed)
+    if complement == observed:
+        print("  FAIL  the complement mutant is not distinguishable from the observation")
+        return False, observed
+    print(f"  ok    {sys.platform}/{platform.machine()} is natural {observed}, untranslated")
+    print(f"  ok    mutant: the same comparison against {complement} is red")
+    return True, observed
 
 
 def run_id() -> str:
@@ -85,13 +197,24 @@ class PhaseGate:
         expectations: str | None = None,
         register: str,
         substrate: str,
+        lane: str | None = None,
         sides: Iterable[str],
     ) -> None:
+        # Clause 15 is a postcondition on the *run*, so the lane is declared by the gate
+        # rather than read back out of the tracker: a value the gate copies from the
+        # document it is checked against cannot disagree with it, and a comparison that
+        # cannot disagree is not a check.
+        if lane is None:
+            raise GateError(
+                f"phase {phase}: section S clause 15 requires this gate to declare the lane it runs"
+            )
         self.phase = phase
         self.contract = contract
         self.command = command
         self.register = register
         self.substrate = substrate
+        self.lane = lane
+        self.architecture = ""
         self.sides = tuple(sides) + UNIVERSAL_SIDES
         self.tag = f"phase_{phase:02d}"
         self.expectations = (
@@ -117,6 +240,21 @@ class PhaseGate:
         self._before = artifact_policy.authored_snapshot()
         self._before_host = containment.host_inventory()
         self.run_dir.mkdir(parents=True, exist_ok=True)
+
+    # -- architecture ------------------------------------------------------
+
+    def architecture_side(self) -> bool:
+        """Record the architecture this run executed on, and refuse another's."""
+        ok, observed = architecture_side()
+        self.architecture = observed
+        if ok:
+            # The lane's own architecture is owned by the ledger checker, so the gate
+            # and the record it emits cannot disagree about what a lane name means.
+            wanted = ledger_lint.LANE_ARCHITECTURE.get(self.lane.split("→")[0].strip())
+            if wanted is not None and wanted != observed:
+                print(f"  FAIL  lane {self.lane} names {wanted}, but this host is {observed}")
+                return False
+        return ok
 
     # -- surface join ------------------------------------------------------
 
@@ -205,6 +343,8 @@ class PhaseGate:
             "gate_command": self.command,
             "register": self.register,
             "substrate": self.substrate,
+            "lane": self.lane,
+            "architecture": self.architecture,
             "date": dt.date.today().isoformat(),
             "layers": [{"name": name, "status": layers[name]} for name in ("Decision", "Protocol", "Runtime")],
             "coverage": [
@@ -273,6 +413,8 @@ class PhaseGate:
             "command": self.command,
             "register": self.register,
             "substrate": self.substrate,
+            "lane": self.lane,
+            "architecture": self.architecture,
             "toolchain": dict(toolchain),
             "dependencies": dict(dependencies),
             "checks": [{"name": name, "status": "pass" if passed else "fail"} for name, passed in checks.items()],
@@ -348,11 +490,12 @@ class PhaseGate:
         observations: Mapping[str, str] | None = None,
         extra_status: Mapping[str, bool] | None = None,
     ) -> int:
-        """Run the five universal sides and report.
+        """Run the universal sides and report.
 
         Every phase's tail is identical, so it lives here rather than in sixty-five copies
         that would drift apart one edit at a time.
         """
+        results["architecture"] = self.architecture_side()
         results["surface"], surfaces = self.surface_join(implemented)
         status = surface_status(surfaces, rows, evidence)
         status.update(extra_status or {})

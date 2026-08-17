@@ -4,6 +4,7 @@
 Phase 1 settles buildability without freezing a dependency graph into Git. The gate is
 therefore two claims at once, and it runs them as separate sides:
 
+  architecture the run records the natural architecture it executed on, untranslated
   provenance   no tracked file carries a resolved path, a package integrity pin, or a
                fixed dependency revision, and every input a build configuration names is
                present in non-ignored source
@@ -50,6 +51,7 @@ import artifact_policy  # noqa: E402
 import attestation  # noqa: E402
 import ledger_lint  # noqa: E402
 import containment  # noqa: E402
+import gate_common  # noqa: E402
 import toolchain_spike_negative_corpus  # noqa: E402
 import toolchain  # noqa: E402
 
@@ -94,9 +96,15 @@ CHECKS = {
     "dependency-link": "the representative dependency surface links and runs",
     "simulation-terminal": "the IOSim probe reaches the independently authored terminal state",
     "protocol-codegen": "protoc plus the plugin emit both non-empty protocol modules",
+    "natural-architecture": "the run executes untranslated on the architecture it records",
 }
 
+# Section S clause 15: the lane this gate runs, declared by the gate rather than read
+# out of the tracker it is checked against.
+LANE = "none"
+
 SIDE_NAMES = (
+    "architecture",
     "provenance",
     "resolution",
     "build",
@@ -808,12 +816,14 @@ def surface_side(resolved: dict[str, Any], plan: dict[str, Any]) -> tuple[bool, 
     return ok, surfaces
 
 
-def emit_ledger(run_dir: Path, surfaces: list[str], results: dict[str, bool]) -> Path:
+def emit_ledger(run_dir: Path, surfaces: list[str], results: dict[str, bool], architecture: str) -> Path:
     ledger = {
         "phase": 1,
         "gate_command": GATE_COMMAND,
         "register": "1",
         "substrate": "none",
+        "lane": LANE,
+        "architecture": architecture,
         "date": dt.date.today().isoformat(),
         # Phase 1 resolves and compiles. It exercises no amoebius decision or protocol
         # behaviour and stands up no runtime, so all three layers stay outside its reach
@@ -836,9 +846,9 @@ def emit_ledger(run_dir: Path, surfaces: list[str], results: dict[str, bool]) ->
     return path
 
 
-def ledger_side(run_dir: Path, surfaces: list[str]) -> tuple[bool, Path]:
+def ledger_side(run_dir: Path, surfaces: list[str], architecture: str) -> tuple[bool, Path]:
     print("\nledger side — the run ledger inside the run bundle\n")
-    path = emit_ledger(run_dir, surfaces, {})
+    path = emit_ledger(run_dir, surfaces, {}, architecture)
     result = capture([sys.executable, str(HERE / "ledger_lint.py"), str(path), "--enumeration", str(SURFACES)])
     if result.returncode == 0:
         print(f"  ok    {rel(path)}  schema, tracker, surfaces, hash")
@@ -847,7 +857,7 @@ def ledger_side(run_dir: Path, surfaces: list[str]) -> tuple[bool, Path]:
     return False, path
 
 
-def attestation_side(run_dir: Path, ledger_path: Path, resolved: dict[str, Any], plan: dict[str, Any], results: dict[str, bool]) -> bool:
+def attestation_side(run_dir: Path, ledger_path: Path, resolved: dict[str, Any], plan: dict[str, Any], results: dict[str, bool], architecture: str) -> bool:
     print("\nattestation side — project-contained retention\n")
     commit = artifact_policy.git("rev-parse", "HEAD").strip()
     dirty = bool(artifact_policy.git("status", "--porcelain").strip())
@@ -862,6 +872,8 @@ def attestation_side(run_dir: Path, ledger_path: Path, resolved: dict[str, Any],
         "command": GATE_COMMAND,
         "register": "1",
         "substrate": "none",
+        "lane": LANE,
+        "architecture": architecture,
         "toolchain": {
             name: {"version": record["version"], "requirement": record["requirement"]}
             for name, record in resolved.items()
@@ -873,6 +885,7 @@ def attestation_side(run_dir: Path, ledger_path: Path, resolved: dict[str, Any],
             {"name": "drop-allow-newer", "status": "red"},
             {"name": "perturb-sim-schedule", "status": "red"},
             {"name": "phase-1 seeded provenance negatives", "status": "red"},
+            {"name": "architecture complement comparison", "status": "red"},
         ],
         "coverage": [{"surface": "phase_01", "status": "tested"}],
         "cleanup": {"left_resources": False},
@@ -911,6 +924,12 @@ def main() -> int:
     run_dir.mkdir(parents=True, exist_ok=True)
     results = dict.fromkeys(SIDE_NAMES, False)
 
+    # Clause 15 first: a run that cannot name the architecture it executed on, or that
+    # is executing under translation, has nothing worth resolving a toolchain for.
+    results["architecture"], architecture = gate_common.architecture_side()
+    if not results["architecture"]:
+        return 1
+
     try:
         resolved = toolchain.resolve(TOOLS_REQUIRED)
     except toolchain.ResolutionError as error:
@@ -932,8 +951,8 @@ def main() -> int:
             else:
                 print("\nprobe side and mutant side are UNREACHED: the clean-store build did not complete\n")
             results["surface"], surfaces = surface_side(resolved, plan)
-            results["ledger"], ledger_path = ledger_side(run_dir, surfaces)
-            results["attestation"] = attestation_side(run_dir, ledger_path, resolved, plan, results)
+            results["ledger"], ledger_path = ledger_side(run_dir, surfaces, architecture)
+            results["attestation"] = attestation_side(run_dir, ledger_path, resolved, plan, results, architecture)
         except GateFailure as error:
             print(f"phase1-gate: FAIL: {error}", file=sys.stderr)
         finally:

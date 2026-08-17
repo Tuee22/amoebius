@@ -39,6 +39,11 @@ def negative_corpus(positive: dict) -> list[tuple[str, dict, str]]:
     unbound_contract["contract_digest"] = ""
     corpus.append(("unbound_contract", unbound_contract, "schema"))
 
+    # section S clause 15: a record that names no architecture proves one for none
+    unnamed_architecture = copy.deepcopy(positive)
+    unnamed_architecture["architecture"] = "any"
+    corpus.append(("unnamed_architecture", unnamed_architecture, "schema"))
+
     stray = copy.deepcopy(positive)
     stray["evidence_path"] = "DEVELOPMENT_PLAN/evidence/phase_00"
     corpus.append(("extra_key", stray, "schema"))

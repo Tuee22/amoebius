@@ -26,10 +26,12 @@ documentation.plan_backlinks	doc_lint	h
 documentation.terminology_and_honesty	doc_lint	j,k,l
 documentation.commit_independence	doc_lint	t
 documentation.substrate_discipline	doc_lint	s1,s2
+documentation.lane_discipline	doc_lint	s3
 documentation.shape_and_navigation	doc_lint	o1,o2,o3,o4,o5
 documentation.diagram_registers	doc_lint	q1,q3,q4,q5
 documentation.readability_budgets	doc_lint	p1,p2,p3,p4,p5,p6
 documentation.ledger_schema	ledger_lint	json,schema,phase,status,layers,honesty,tracker,path,enumeration,surface,hash
+documentation.natural_architecture	ledger_lint	architecture
 documentation.preimplementation_artifacts	artifact_manifest_lint	manifest
 repository.generator_registry	artifact_policy	r1
 repository.provenance_classification	artifact_policy	r2

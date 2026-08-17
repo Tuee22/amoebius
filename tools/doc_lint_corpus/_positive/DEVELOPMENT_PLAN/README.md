@@ -20,6 +20,6 @@ Rules belong to [the rulebook](development_plan_standards.md).
 
 ## Phase overview
 
-| Phase | Name | Substrate | Register | Gate | Status | Document |
-|-------|------|-----------|----------|------|--------|----------|
-| 1 | Example | none | 1 | the example gate | 📋 Planned | [phase_01](phase_01_example.md) |
+| Phase | Name | Substrate | Lane | Register | Gate | Status | Document |
+|-------|------|-----------|------|----------|------|--------|----------|
+| 1 | Example | none | none | 1 | the example gate | 📋 Planned | [phase_01](phase_01_example.md) |
