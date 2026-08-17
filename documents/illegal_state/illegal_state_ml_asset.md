@@ -16,7 +16,7 @@ it, so these entries bound what that exception may do. Their numbering is held b
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -121,7 +121,7 @@ mandatory `checkpointCadence` / bounded-retention `StorageBudget` fields, fail `
 
 ### 3.33 A multi-partition training feed with no defined merge order
 
-**Delivery-owner:** `Phase-35`
+**Delivery-owner:** `Phase-36`
 
 **Case-family:** `messaging`
 
@@ -137,7 +137,7 @@ function is a decode-checked total order, the total decoder returns `Left` on a 
 
 ### 3.34 An app serving or continuing another app's model without a grant
 
-**Delivery-owner:** `Phase-37`
+**Delivery-owner:** `Phase-38`
 
 **Case-family:** `ml-asset`
 

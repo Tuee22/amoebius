@@ -14,7 +14,7 @@ and remains authoritative for the rulebook's structure.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, documents/engineering/repository_layout_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_second_arch_attested_index.md, DEVELOPMENT_PLAN/phase_27_object_reconciler.md, DEVELOPMENT_PLAN/phase_28_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_29_retained_storage.md, DEVELOPMENT_PLAN/phase_30_vault_pki.md, DEVELOPMENT_PLAN/phase_31_platform_backbone.md, DEVELOPMENT_PLAN/phase_32_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_34_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_40_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_ui_program_release.md, DEVELOPMENT_PLAN/phase_42_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_43_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_44_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_45_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_46_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_48_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_50_infernix_lift.md, DEVELOPMENT_PLAN/phase_51_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_53_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_54_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_55_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_56_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_58_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_59_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_60_offline_language_plan.md, DEVELOPMENT_PLAN/phase_61_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_62_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_63_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_64_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_65_offline_multizone_continuity.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -166,6 +166,26 @@ gate cannot pass unless all of these conditions hold:
 14. `test-secrets.dhall` is the sole cleartext secret-at-rest. Only the elevated test harness may read it;
     production rejects it, and no run copies it into output, state, logs, arguments, environments, container
     contexts, or attestations.
+15. The run records the detected substrate, the selected lane, and the **natural architecture** that lane ran
+    on, and every executed artifact belongs to that architecture. A run that cannot name its architecture, that
+    executes an artifact of another architecture under emulation, or that builds one through a cross-toolchain
+    fails ([`substrate_doctrine.md` §1.1](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule)).
+
+**Clause 15 invalidates every phase seal recorded before 2026-08-16.** No earlier gate recorded the
+architecture it proved, so no earlier attestation can be read as a claim about one — and the seal that did
+name two architectures reached the second under an emulator. This is the same shape as the containment
+amendment's clauses 11–14: a postcondition the prior contract did not have, which every phase must now satisfy
+in numeric order. What each phase's status becomes is recorded in [README.md](README.md), never here
+([§R](development_plan_phase_model.md#r-where-the-cross-cutting-invariants-live)).
+
+```mermaid
+flowchart LR
+  %% register: orientation
+  run["a phase gate run"] -->|"records"| prov["detected substrate, selected lane, natural architecture"]
+  prov -->|"every executed artifact is that architecture"| seal["the phase seal"]
+  prov -->|"unnamed, emulated, or cross-built"| refuse["no seal"]
+```
+*Orientation. Clause 15 of [§S](#s-universal-artifact-hygiene-gate), whose lane vocabulary is owned by [`substrate_doctrine.md` §1.1](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule): a run that cannot name the architecture it proved has proven it for none.*
 
 <a id="s-commit-timing"></a>
 **Commit timing is not a gate input, and no document may reintroduce it as one.** A result is bound to the
@@ -193,7 +213,7 @@ acceptance, and revision-history disposition are owned by
 states only its capability-specific acceptance condition; it does not duplicate these eleven clauses.
 
 **Clause 5 is enforced by every gate and remediated by the owning phase.** Read as a whole-tree condition it
-would make Phase 0 wait on phases 1–64, because the tracked resolver output, digest tables, and generated-root
+would make Phase 0 wait on phases 1–65, because the tracked resolver output, digest tables, and generated-root
 consumers those phases own are spread across the tree — which inverts the numeric order this plan is built on.
 [`repository_layout_doctrine.md §3.5`](../documents/engineering/repository_layout_doctrine.md#35-tsv-inventory-and-provenance)
 settles it: Phase 0 owns the shared corpora and the machinery, and each later phase owns its domain tables

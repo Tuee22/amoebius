@@ -56,7 +56,7 @@ substrate doctrine already owns (Lima on apple, WSL2 on windows). This document 
 topology it induces; it owns **no** substrate names, no detection, no VM-provider mechanics, and no capacity
 numbers (those are [substrate_doctrine.md](./substrate_doctrine.md) and [resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 
-The target below begins with Phase 4's type discipline and ends with runtime realization in Phases 42/43/44.
+The target below begins with Phase 4's type discipline and ends with runtime realization in Phases 43/44/44.
 The [Phase 7 gate](../../DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md) has now built and Register-1
 validated `Amoebius.Dsl.Topology` and the corresponding Dhall networking/managed-attachment arms: three
 Gate-1 pairs, seven compile-time index pairs, the exhausted 3×3 engine/environment compatibility matrix,
@@ -630,7 +630,7 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
 > **Honesty.** Everything here is Phase-0 design intent. The type demands ([§3](#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable)-[§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor)) are type-foreclosed/decode-foreclosed
 > spec-layer properties *when implemented as specified* (Phase 4); the runtime residue — the VM actually
 > booting, N rke2 nodes actually joining on N hosts, an EKS cluster actually coming up — is runtime-checked, owned by
-> the Phase 53/43/44 gates and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Where a mechanism
+> the Phase 54/44/45 gates and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Where a mechanism
 > generalizes hostbootstrap's virtualization providers or prodbox's EKS reality, that is sibling evidence,
 > not amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
@@ -641,9 +641,9 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
 This document is normative topology doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the `ComputeEngine` /
 `LinuxHost` / `Topology` types and the compatibility relation land in **Phase 4** (with the negative `.dhall`
-gate); the Lima `LinuxHost` witness is exercised on **Phase 53** (`apple`); live kind topology lands in
-**Phases 24/42**, while live multi-node rke2 remains an explicitly unassigned Phase-N gate; the `Managed Eks`
-arm lands in **Phase 44**. This doc never maintains a competing status ledger; it
+gate); the Lima `LinuxHost` witness is exercised on **Phase 54** (`apple`); live kind topology lands in
+**Phases 24/43**, while live multi-node rke2 remains an explicitly unassigned Phase-N gate; the `Managed Eks`
+arm lands in **Phase 45**. This doc never maintains a competing status ledger; it
 states the target shape and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---

@@ -22,7 +22,7 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_48_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -45,7 +45,16 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/execution_accelerator_gate.py` passed all ten sides: 32 variants
+⏸️ Blocked pending Phase-8 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/execution_accelerator_gate.py` passed all ten sides: 32 variants
 and twins across eighteen negative families, one Gate-1 barrier, seven properties, all 45 mutants, all 13
 authored metrics, and the honesty ledger pass; 56 surfaces join to 94 run-time items. The project-contained
 attestation is `sha256:c7215afa4852c49dbc4eb9320c41430eef84afeb1ca60b06236a74e354bfa9a8`,
@@ -53,7 +62,7 @@ bound to source snapshot `sha256:374fe1168768d0fe…`; Phase 9 owns no remaining
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:5d183b9ec0877167…`
+Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:5d183b9ec0877167…`
 (1934 non-ignored files) and published a verified pre-containment external attestation
 `sha256:305cadfdf77170e64269d4842fdc9e8a7fea370b991056a7f465db7009c4bd0b`.
 
@@ -76,7 +85,7 @@ and the gap is recorded against Phase 9 in
 
 **Invalidated historical record:**
 
-✅ Done. `python3 tools/execution_accelerator_gate.py` passed on 2026-08-09 on **no substrate**
+Done (invalidated). `python3 tools/execution_accelerator_gate.py` passed on 2026-08-09 on **no substrate**
 (`none`) in **Register 1**, with ledger
 `dynamically-resolved`. The gate stood up no host or
 cluster: it exercised the pure execution, scheduler, runtime/image-storage, accelerator, provider-root, and
@@ -154,15 +163,17 @@ binder ([phase_10_capability_bind.md](phase_10_capability_bind.md)) and the whol
 `InferenceEngine` capability + accelerator coexistence provision
 ([phase_12_inference_accelerator_provision.md](phase_12_inference_accelerator_provision.md)); and the live
 residue — the same-binary scheduler role's Reserved→BindingInFlight→Bound around real Kubernetes Binding
-([phase_27_capacity_scheduler.md](phase_27_capacity_scheduler.md)), the snapshot-bound live preflight and
-action/token/CAS plumbing ([phase_26_object_reconciler.md](phase_26_object_reconciler.md)), retained-carve
-allocation ([phase_28_retained_storage.md](phase_28_retained_storage.md)), provider-capacity creation
-([phase_44_provider_deploy_checkpoint.md](phase_44_provider_deploy_checkpoint.md), [phase_47_provider_dynamic_nodes.md](phase_47_provider_dynamic_nodes.md)), and live CUDA/Metal enaction
-([phase_51_jitml_lift_cuda.md](phase_51_jitml_lift_cuda.md), [phase_53_apple_metal_host_daemon.md](phase_53_apple_metal_host_daemon.md)). Phase 9 owns the pure
+([phase_28_capacity_scheduler.md](phase_28_capacity_scheduler.md)), the snapshot-bound live preflight and
+action/token/CAS plumbing ([phase_27_object_reconciler.md](phase_27_object_reconciler.md)), retained-carve
+allocation ([phase_29_retained_storage.md](phase_29_retained_storage.md)), provider-capacity creation
+([phase_45_provider_deploy_checkpoint.md](phase_45_provider_deploy_checkpoint.md), [phase_48_provider_dynamic_nodes.md](phase_48_provider_dynamic_nodes.md)), and live CUDA/Metal enaction
+([phase_52_jitml_lift_cuda.md](phase_52_jitml_lift_cuda.md), [phase_54_apple_metal_host_daemon.md](phase_54_apple_metal_host_daemon.md)). Phase 9 owns the pure
 representation and fold only; it cannot validate or enact a live transition.
 
 **Substrate:** none — no host, no cluster; the gate is an in-process `cabal test` fold + QuickCheck battery,
 analogous to the Phase 5 decode battery, the Phase 6 property suite, and the sibling Phase 7/8 fold gates.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -463,7 +474,7 @@ numbers only — the pure expansion fold Phase 11's `provision` seal later invok
   admission, and the exact scheduler-reservation projection. A ledger row whose Pod has disappeared selects the
   exact full or retained `LedgerOnlyAbsentRecovery` debit until state-specific release/cleanup CAS; changed
   observed/root/config/capacity state invalidates the token. The live same-binary role (implemented in
-  [phase_27_capacity_scheduler.md](phase_27_capacity_scheduler.md)) performs Reserved→BindingInFlight→Bound
+  [phase_28_capacity_scheduler.md](phase_28_capacity_scheduler.md)) performs Reserved→BindingInFlight→Bound
   around Kubernetes Binding, keeping unknown outcomes charged; Ordinary/CUDA/Job release partitions credit only
   separately observed axes, and physical artifacts stay in the root resident baseline until deletion/GC.
 - A private `ControllerChildEnvelope` remains the descriptor/source-expansion explanation: its children lower to
@@ -939,7 +950,7 @@ None.
 - `documents/engineering/daemon_topology_doctrine.md` — reconcile §3's control-plane singleton reservation /
   five-kind control-plane-state producer read-side with the as-built scheduler-reservation and
   `EtcdLogicalDemand` folds; keep the live scheduler role residue deferred to
-  [phase_27_capacity_scheduler.md](phase_27_capacity_scheduler.md).
+  [phase_28_capacity_scheduler.md](phase_28_capacity_scheduler.md).
 - `documents/engineering/monitoring_doctrine.md` — reconcile the `MonitoringWorkBudget` compute read-side with
   the as-built fold; it remains the single owner of its number.
 - `documents/engineering/substrate_doctrine.md` — reconcile the §8 node inventory / kubelet layout / accelerator
@@ -987,7 +998,7 @@ None.
   these folds post-bind
 - [phase_12_inference_accelerator_provision.md](phase_12_inference_accelerator_provision.md) — the
   `InferenceEngine` capability + accelerator residency/coexistence provision built atop the accelerator fold
-- [phase_27_capacity_scheduler.md](phase_27_capacity_scheduler.md) — the live same-binary scheduler role that
+- [phase_28_capacity_scheduler.md](phase_28_capacity_scheduler.md) — the live same-binary scheduler role that
   enacts Reserved→BindingInFlight→Bound around Kubernetes Binding
 - Phase 9 execution/accelerator ledger — the human-readable
   Register-1 proof/test/assumption boundary

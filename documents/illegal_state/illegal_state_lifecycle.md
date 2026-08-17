@@ -18,7 +18,7 @@ be observed as having happened. The numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_40_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -133,7 +133,7 @@ foreclosure layer above.
 
 ### 3.26 An unverified environment promotion (promote → prod without the required evidence)
 
-**Delivery-owner:** `Phase-39`
+**Delivery-owner:** `Phase-40`
 
 **Case-family:** `lifecycle`
 
@@ -156,10 +156,10 @@ actually ran and that prod actually converged on the promoted `Release`, owned b
 doctrines). Per the validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md),
 orthogonal to the foreclosure layer above.
 
-**Validated instance:** Phase 39 compiled the closed `Environment`/opaque `EvidenceWitness` boundary and
+**Validated instance:** Phase 40 compiled the closed `Environment`/opaque `EvidenceWitness` boundary and
 exercised it live. Runtime- and Protocol-missing fixtures returned their specific refusal tags and produced no
 pointer mutation; the tested Runtime witness produced the only Prod advance. The live wiring is tested, never
-proven; Phase 54 later automates topology derivation rather than owning this illegal-state boundary.
+proven; Phase 55 later automates topology derivation rather than owning this illegal-state boundary.
 
 ### 3.43 An unmonitored workflow or extension (or an unauthenticated monitoring surface)
 

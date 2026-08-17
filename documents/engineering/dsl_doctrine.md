@@ -17,7 +17,7 @@ into, owned by [manifest_generation_doctrine.md](./manifest_generation_doctrine.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_34_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -633,7 +633,7 @@ flowchart TD
   prov -->|"remaining incompatible demand"| rej3
   prov -->|"success"| sealed
   sealed --> render
-  render -->|"Phase 33 live apply/readback"| live
+  render -->|"Phase 34 live apply/readback"| live
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef provenPB fill:#dbeafe,stroke:#1e5fa8,color:#0b2f57,stroke-width:2px
   classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
@@ -644,7 +644,7 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Delivered boundary. Phases 4–14 validate the Tier-1 Dhall/decode/bind/provision/render path in amoebius; Phase 33 validates its Tier-2 live apply/readback through the singleton. Provider and cross-cluster arms remain owned by their later phases.*
+*Delivered boundary. Phases 4–14 validate the Tier-1 Dhall/decode/bind/provision/render path in amoebius; Phase 34 validates its Tier-2 live apply/readback through the singleton. Provider and cross-cluster arms remain owned by their later phases.*
 
 **Where the contract shape is discharged: front-loaded to Phases 4–13 (Tier 1).** Gate 1 is
 `dhall type` at authoring time; Gate 2 is the in-process `Dhall.inputFile auto` decode and its focused
@@ -652,7 +652,7 @@ properties (Phases 4–9); Phase 10 owns binding, pure infrastructure-plan const
 materialization validation, and the opaque provision seal; Phase 13 proves the sole public `renderAll`
 boundary and its goldens. These contract/golden checks are pure or in-process and need no cluster. Live CAS
 enaction and provider/host readback of an `InfrastructureRequired` plan are exercised only by the later live
-infrastructure phases; they are not silently claimed by the Phase-10 type gate. Phase 33 now discharges the
+infrastructure phases; they are not silently claimed by the Phase-10 type gate. Phase 34 now discharges the
 **Tier-2 runtime-enforcement residue** for its pinned linux-cpu platform-plus-trivial-app fixture: the running
 cluster enforces what the sealed spec composes, with exact audit-attributed enact and no-op evidence. A green
 typecheck or decode alone still proves neither target feasibility nor live enforcement for later provider,
@@ -819,11 +819,11 @@ QuickCheck + whole-deployment plan/provision + `renderAll` goldens) — is **fro
 while live enaction/readback of a required initial-infrastructure batch belongs to the later live
 infrastructure phase that owns that substrate. The DSL's
 **runtime-enforcement** half (the live deploy + singleton reconcile that makes the running cluster
-enforce what the spec composed, Tier 2) is delivered by **Phase 33**, atop the Phase 14 `dsl-step`/`chain` kernel
+enforce what the spec composed, Tier 2) is delivered by **Phase 34**, atop the Phase 14 `dsl-step`/`chain` kernel
 seeded from hostbootstrap. This doc never maintains a competing status ledger; it states the target shape and
 links back for status.
 
-> **Honesty.** amoebius has built and validated the Phase 4–14 Tier-1 DSL path and the Phase-33 Tier-2 live
+> **Honesty.** amoebius has built and validated the Phase 4–14 Tier-1 DSL path and the Phase-34 Tier-2 live
 > singleton runtime-enforcement slice. Full tenant projection, provider materialization, recursive children,
 > and cross-cluster correspondence remain owned and UNVERIFIED in later phases. Behaviour borrowed from
 > prodbox or hostbootstrap remains sibling-system evidence, not proof in amoebius. Read prescriptive statements

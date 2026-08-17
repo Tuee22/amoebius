@@ -13,7 +13,7 @@ rule disagree, the rule is correct and the example is the defect. Nothing here h
 
 **Status**: Reference only
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_44_gateway_migration_drills.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -50,7 +50,7 @@ rule disagree, the rule is correct and the example is the defect. Nothing here h
 > The Second-Axis example, and the one the whole async-replication concern exists for: **what happens if a > cluster goes down mid geo-sync and the gateway is failed over to it?** It crosses the cluster boundary
 > (R1/[§17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier), R9), rests on a bounded-staleness / data-loss premise and an explicit failover budget (R8, R9),
 > and reconciles divergent histories under an availability-first choice (R7). It is **forward-looking**:
-> amoebius runs no cross-cluster geo-replication today, but Phase 42 is exactly this shape, so the doctrine
+> amoebius runs no cross-cluster geo-replication today, but Phase 43 is exactly this shape, so the doctrine
 > works it through before the need is live.
 
 **The system.** Two sibling child clusters with the same parent geo-replicate a realtime workflow
@@ -165,7 +165,7 @@ replication-lag bound (R8/R9), monitored never proven; the PACELC latency-for-co
 runtime fidelity and behaviour beyond 2 clusters. **Under the two-tier schedule, the two-cluster
 design-model's safety/liveness properties are *proven for the model at scope 2* in Phase 3 (design-first), and
 model↔code correspondence is differentially checked; the runtime fidelity (real physics) and live
-cross-cluster-failover-in-a-running-forest remain UNVERIFIED — the Tier-2 Phase-43 obligation, and the single
+cross-cluster-failover-in-a-running-forest remain UNVERIFIED — the Tier-2 Phase-44 obligation, and the single
 place the per-system proof concentrates.**
 
 **Appendix B rests on doctrine (zero orphans).**

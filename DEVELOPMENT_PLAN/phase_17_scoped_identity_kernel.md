@@ -37,7 +37,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/scoped_identity_gate.py` passed all twelve sides: all owner
+⏸️ Blocked pending Phase-16 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/scoped_identity_gate.py` passed all twelve sides: all owner
 joins/swaps, the independent flow matrix, three compile loci, six coverage classes, the owner-equality mutant,
 all ten metrics, and nine constructor-privacy checks pass; 40 surfaces join to 47 enumerated items. The
 project-contained attestation is `sha256:9aeed4fb73be7214c732f671f86c14a0f376f50ffd5197b980f7ad5f2df1ab58`,
@@ -45,7 +54,7 @@ bound to source snapshot `sha256:823a8dffbc72114a…`; Phase 17 owns no remainin
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:f6ee1e7d69f37a07…`
+Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:f6ee1e7d69f37a07…`
 (1942 non-ignored files) and published a verified pre-containment external attestation
 `sha256:45ba0ed3a546b6dd436f611f2d12e80378bc64c5d349d8f9fdf44f32c727b18a`.
 
@@ -75,7 +84,7 @@ Phase 17 in the legacy register rather than asserted away.
 
 **Invalidated historical record:**
 
-✅ Done. The owner/grant and flow relations, constructor-closure compile failures, generated coverage, and
+Done (invalidated). The owner/grant and flow relations, constructor-closure compile failures, generated coverage, and
 owner-equality mutant pass. Identity-provider and provider-runtime enforcement remain UNVERIFIED. See the
 Phase-17 ledger.
 
@@ -93,6 +102,8 @@ do not use a weaker unscoped representation.
 register, or a substrate.
 **Dependency:** Phase 16 — the checked low-code UI program and its reified public value universe.
 **Substrate:** none — no host, browser, identity provider, provider service, or cluster is contacted.
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+
 **Register:** 1 — pure/golden.
 **Gate:** `python3 tools/scoped_identity_gate.py` passes the paired scope corpus, independent
 flow relation, three compile failures, six coverage floors, isolated execution, explicit mutant-red run, and
@@ -119,7 +130,7 @@ must parse the pins independently; it may not call the kernel under test to manu
 - **Generator coverage:** QuickCheck classifies tenant mismatch, subject mismatch, absent/revoked grant,
   audience widening, integrity elevation, and transitive-only leak, with each reject class meeting a 5% floor.
 - **Effect discipline:** a fresh effect challenge and real authority credentials are not applicable in this
-  Register-1 phase. Denied cases must nevertheless leave the independent pure effect trace empty; Phase 36 owns
+  Register-1 phase. Denied cases must nevertheless leave the independent pure effect trace empty; Phase 37 owns
   the corresponding real-credential and external-observer claim.
 - **Seeded mutant:** `drop_owner_equality` deletes the owner-equality guard from the join. It is committed and
   must turn the gate red on both the same-tenant owner swap and the cross-tenant owner swap pins.

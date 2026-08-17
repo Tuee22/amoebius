@@ -1770,7 +1770,7 @@ and one-short mutants for `maxInstances`, `maxVcpu`, each `acceleratorCaps` entr
 `ClusterBudget` or provider action is constructed.
 
 Distributing a workload across clusters is **geo-replication** — *N* independent clusters, each running its own
-`place` over its own `Topology`, related only by async transport (Phase-42 design intent,
+`place` over its own `Topology`, related only by async transport (Phase-43 design intent,
 [app_vs_deployment_doctrine.md §9](./app_vs_deployment_doctrine.md#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change)).
 It is emphatically **not** the stateless attach pool, which is **single-cluster** and lives **inside** `place`'s
 elastic branch: [single_logical_data_plane_doctrine.md §4](./single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology)
@@ -1780,7 +1780,7 @@ forecloses. The **reason** a cluster is the *pod-placement* boundary — the pha
 `FabricMember` — is owned by [single_logical_data_plane_doctrine.md §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)
 and [§3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe); this
 subsection consumes that WHY, it does not restate it. The only runtime-checked residue is the deferred geo-replication
-enaction (Phase 42). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
+enaction (Phase 43). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
 two `Site`s, folded **once** ([§4](./resource_capacity_folds.md#4-the-total-fold-fits-carve-place-and-the-nesting)).
 
 ### 9.2 Monitoring cost folds through the standard machinery, and the forest has no parent-rollup budget

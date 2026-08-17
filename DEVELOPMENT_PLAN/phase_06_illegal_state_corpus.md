@@ -41,7 +41,16 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/illegal_state_corpus_gate.py` passed all eleven sides: all 19
+⏸️ Blocked pending Phase-5 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/illegal_state_corpus_gate.py` passed all eleven sides: all 19
 metrics match, 88 catalog entries and 104 subcases reconcile, every registry/domain/index/decision mutant
 reddens, the corpus and honesty-bannered ledger pass, 24 surfaces join to 27 run-time items, and host state is
 unchanged. The project-contained attestation is
@@ -50,7 +59,7 @@ unchanged. The project-contained attestation is
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:a1e246296ecadb42…`
+Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:a1e246296ecadb42…`
 (1931 non-ignored files) and published a verified pre-containment external attestation
 `sha256:2a18c8372d20736e226b93994c8fcd7e133af9e55bc799889551a653269a8b05`.
 
@@ -71,7 +80,7 @@ inventory row, so the class is now declared and all eighteen rows are retired.
 
 **Invalidated historical record:**
 
-✅ Done. `python3 tools/illegal_state_corpus_gate.py` passed on 2026-08-09 with ledger
+Done (invalidated). `python3 tools/illegal_state_corpus_gate.py` passed on 2026-08-09 with ledger
 `dynamically-resolved`. The gate ran on **no
 substrate** (`none`) in **Register 1** — it stood up no host and no cluster, only an in-process corpus battery
 over the `dhall` typechecker, the Phase-5 decoder, a pinned `ghc -fno-code` expect-fail harness, and
@@ -103,6 +112,8 @@ the representational SPA-composition corpus (Phase 16), and every `live-effect` 
 
 **Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` + `dhall type` +
 `ghc -fno-code` corpus battery analogous to the Phase-0 documentation lint.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -264,7 +275,7 @@ Register-1-settleable catalog entry); `test/spec/dsl/CorpusSpec.hs`; `test/oracl
 **Prerequisites satisfied**: Phase 5 supplied the total decoder + GADT-indexed IR; Phase 4 supplied the
 Gate-1 schema + positive corpus; Phase 1 supplied the `dhall` CLI and package pin. The catalog-tag/registry
 oracle was authored before `CorpusSpec.hs`.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: the corpus battery rejects every Phase-4/5/6-owned negative at its own tagged
 locus against that fixture's committed expected-error golden, admits every legal twin and positive,
 reconciles its coverage note against `locus_registry.tsv`, and turns red under the two seeded mutants. The
@@ -366,7 +377,7 @@ None for Sprint 6.1.
 **Implementation**: `test/spec/dsl/compilefail/*.hs` (each a minimal module that spells an
 illegal combination) + `test/oracle/illegal_state_corpus/compile_fail.tsv` + `tools/{compile_fail.py,compile_fail.sh}`
 (a pinned `ghc -fno-code` expect-fail harness).
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: the pinned `ghc -fno-code` harness shows every compile-fail golden has no
 inhabitant — it fails on a GHC **type** error matching that golden's committed `.expected` file while its
 one-token legal twin compiles — and turns red under the seeded index-weakening mutant. The numbered
@@ -413,7 +424,7 @@ None for Sprint 6.2.
 **Implementation**: `test/spec/dsl/DecisionPropSpec.hs` (`prop_smartCtorClosure`,
 `prop_decodeRoundTrip`, `prop_foldTotal`, `prop_compositionPreservesWellFormedness`) and
 `test/spec/dsl/DecisionPropMain.hs`.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: `cabal test` runs the four properties green **under `checkCoverage`** with every
 declared minimum met and each result labelled TESTED or PROVEN, and the committed broken-constructor mutant
 turns all four red. The numbered Validation list below states each condition.
@@ -461,7 +472,7 @@ None for Sprint 6.3.
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/spec/dsl/ValidationLocusLedger.hs` (the coverage-projection emitter + assertion, run as
 part of `dsl-spec`), `tools/illegal_state_corpus_gate.py`, and independently authored expectations under `test/oracles/`.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: the emitter's per-entry locus and disposition are reconciled against the
 committed `dhall/examples/locus_registry.tsv`, which is lint-derived from catalog tags authored before the
 emitter, so the assertion goes red on any locus, owner, or family divergence and on any Phase-4/5/6-owned row
@@ -574,4 +585,4 @@ all repository-resident generated inputs, and pass the current externally attest
 - [phase_10](phase_10_capability_bind.md) — the post-bind provisioning/capability negatives selected from the
   registry as deferred from here
 - [phase_13](phase_13_render_manifest_goldens.md) — the `rendered-output-golden` locus this ledger points at
-- [phase_33](phase_33_live_dsl_singleton.md) — the live band where the `live-effect` locus is discharged
+- [phase_34](phase_34_live_dsl_singleton.md) — the live band where the `live-effect` locus is discharged

@@ -13,7 +13,7 @@ by [resource_capacity_folds.md](./resource_capacity_folds.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_34_live_dsl_singleton.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md, documents/glossary.md
 **Generated sections**: none
 
 </details>

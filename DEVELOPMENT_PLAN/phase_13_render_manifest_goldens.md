@@ -20,7 +20,7 @@ The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_27_object_reconciler.md, DEVELOPMENT_PLAN/phase_28_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -40,7 +40,16 @@ The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/render_manifest_gate.py` passed all ten sides: 30 deployment and
+⏸️ Blocked pending Phase-12 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/render_manifest_gate.py` passed all ten sides: 30 deployment and
 mutant items, all twelve mutants, all ten metrics, and the honesty ledger pass; 31 surfaces join to 46
 enumerated items. The project-contained attestation is
 `sha256:ea494782b218d35a2dc64587b97224850f903cb44d9af61bd2f0a24f7770b24f`, bound to source snapshot
@@ -48,7 +57,7 @@ enumerated items. The project-contained attestation is
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:34f6b508a276b5b0…`
+Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:34f6b508a276b5b0…`
 (1938 non-ignored files) and published a verified pre-containment external attestation
 `sha256:105d193d15c907176c594bb81305890191d2f818081bf11c081bb499cd046794`.
 
@@ -70,12 +79,12 @@ UNVERIFIED. The gap is recorded against Phase 13 in
 
 **Invalidated historical record:**
 
-✅ Done. Validated on 2026-08-09 with `python3 tools/render_manifest_gate.py` on
+Done (invalidated). Validated on 2026-08-09 with `python3 tools/render_manifest_gate.py` on
 substrate `none` in Register 1. The gate covers eighteen byte-locked deployment goldens, nine emitted object
 variants, three non-vacuous rendered-output safety predicates, one QuickCheck property over all capability
 arms and both shapes, and twelve property-locus mutants. The sealed ledger is
 `dynamically-resolved`.
-This phase implements only the pure `renderAll` half; Phase 26 still owns live reconciliation and runtime
+This phase implements only the pure `renderAll` half; Phase 27 still owns live reconciliation and runtime
 enforcement remains UNVERIFIED.
 
 ## Phase Summary
@@ -93,7 +102,7 @@ the generic apply projection and remain exclusively mutable through their typed 
 reset either live state machine.
 Each source also retains its closed `RenderActivation` (`Immediate | BootstrapSchedulerStage |
 AfterBootstrapAddonCutover | AfterManagedCapacityReady`). `renderAll` lists the complete desired object set
-and never hides later-stage objects; Phase 26's typed diff/enactor filters actions by that sealed activation,
+and never hides later-stage objects; Phase 27's typed diff/enactor filters actions by that sealed activation,
 so managed-node taint/admission cannot be generically applied during the initial scheduler bootstrap.
 The same serializer module is available only inside the amoebius package for Phase 25's
 `BootstrapRegistryAction`: it can serialize the already provisioned registry/proxy source subset, but that
@@ -119,12 +128,14 @@ is a *value* the suite inspects end to end. The battery does two things: it pins
 unsafe manifest is not a value `renderAll` can return, so a golden test over the output proves the property with
 no cluster. What is *not* here: snapshot-bound typed actions (including scoped SSA, staged delete/resume,
 host actions, scheduler-ledger CAS, and Job completion/cleanup), wait-for-ready, drift-heal, and live
-convergence — all deferred to [Phase 26](phase_26_object_reconciler.md); and
+convergence — all deferred to [Phase 27](phase_27_object_reconciler.md); and
 the `chain`/`[Step]` `--dry-run` plan render, which is [Phase 14](phase_14_chain_kernel_boundary.md). This phase
 locks the **`renderAll`** step of the pre-cluster spine.
 
 **Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` render-and-golden battery
 analogous to the Phase-5 decode battery and the Phase-4 `dhall type` corpus.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -161,7 +172,7 @@ flowchart LR
   is not a value `renderAll` can emit — the rendered-output enactment that gates the namespace-layout foreclosure.
 - [`manifest_generation_doctrine.md §2`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)
   — **the typed manifest model: `renderAll` is a pure, total function to objects.** Adopt the pure, total,
-  cluster-free `renderAll :: ProvisionedSpec -> [K8sObject]` whose output is a value amoebius inspects before any object reaches a cluster; the record *is* the manifest, serialized via Aeson, with no intermediate template and no `values.yaml`. **Only the pure-render half is adopted here**; the apply/reconcile engine of that doctrine's [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is the live-band [Phase 26](phase_26_object_reconciler.md) residue.
+  cluster-free `renderAll :: ProvisionedSpec -> [K8sObject]` whose output is a value amoebius inspects before any object reaches a cluster; the record *is* the manifest, serialized via Aeson, with no intermediate template and no `values.yaml`. **Only the pure-render half is adopted here**; the apply/reconcile engine of that doctrine's [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is the live-band [Phase 27](phase_27_object_reconciler.md) residue.
 - [`manifest_generation_doctrine.md §3`](../documents/engineering/manifest_generation_doctrine.md#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)
   — **best practice by construction: an unsafe manifest is not constructible.** The renderer emits a hardened
   `securityContext` on every pod, least-privilege per-workload RBAC, default-deny-plus-derived-allow
@@ -317,7 +328,7 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
   the complete desired set irrespective of stage, while a companion partition oracle proves the later action
   planner can select only the identities active at a given readiness witness.
 - An in-file honesty note: this is the render half only — the SSA/ApplySet apply, prune, wait-for-ready, and
-  release ledger are the live-band [Phase 26](phase_26_object_reconciler.md) reconciler, run by the
+  release ledger are the live-band [Phase 27](phase_27_object_reconciler.md) reconciler, run by the
   Deployment-`replicas=1` singleton under its mandatory Lease (no bespoke election).
 
 ### Validation
@@ -368,7 +379,7 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
    mutants turn the partition property red.
 
 ### Remaining Work
-Done. SSA, ApplySet pruning, readiness, and live convergence remain Phase-26 work.
+Done. SSA, ApplySet pruning, readiness, and live convergence remain Phase-27 work.
 
 ## Sprint 13.3: The rendered-output golden battery (`render-golden`) — the gate ✅
 
@@ -443,7 +454,7 @@ Live enforcement remains UNVERIFIED.
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/manifest_generation_doctrine.md` — backlink §2/§3 to the Phase-13 pure renderer and
   rendered-output goldens; keep §5's snapshot-bound typed action reconciler explicitly as the live-band
-  [Phase 26](phase_26_object_reconciler.md) residue, run by the Deployment-`replicas=1` singleton under its
+  [Phase 27](phase_27_object_reconciler.md) residue, run by the Deployment-`replicas=1` singleton under its
   mandatory Lease.
 - `documents/engineering/conformance_harness_doctrine.md` — record the rendered-output-golden validation
   locus this phase realizes as the **`renderAll`** step of the pre-cluster spine, in Register 1.
@@ -479,5 +490,5 @@ Live enforcement remains UNVERIFIED.
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_10](phase_10_capability_bind.md) — the capability→provider→shape binder and provision fold producing
   the opaque whole-deployment `ProvisionedSpec` and its sealed identity-keyed render-source set
-- [phase_14](phase_14_chain_kernel_boundary.md) — the `chain`/`[Step]` `--dry-run` plan render deferred from here - [phase_26](phase_26_object_reconciler.md) — the live action-driven reconciler that consumes
+- [phase_14](phase_14_chain_kernel_boundary.md) — the `chain`/`[Step]` `--dry-run` plan render deferred from here - [phase_27](phase_27_object_reconciler.md) — the live action-driven reconciler that consumes
   `renderAll`'s desired object set

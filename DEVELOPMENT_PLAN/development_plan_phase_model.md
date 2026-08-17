@@ -15,7 +15,7 @@ authoritative for the rulebook's structure. No phase's status is stated here; th
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_26_second_arch_attested_index.md, DEVELOPMENT_PLAN/phase_27_object_reconciler.md, DEVELOPMENT_PLAN/phase_28_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_29_retained_storage.md, DEVELOPMENT_PLAN/phase_30_vault_pki.md, DEVELOPMENT_PLAN/phase_31_platform_backbone.md, DEVELOPMENT_PLAN/phase_32_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_34_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_40_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_ui_program_release.md, DEVELOPMENT_PLAN/phase_42_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_43_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_44_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_45_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_46_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_48_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_50_infernix_lift.md, DEVELOPMENT_PLAN/phase_51_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_53_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_54_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_55_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_56_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_58_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_59_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_60_offline_language_plan.md, DEVELOPMENT_PLAN/phase_61_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_62_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_63_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_64_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_65_offline_multizone_continuity.md
 **Generated sections**: none
 
 </details>
@@ -106,8 +106,8 @@ behaviour; and **Phase 14** (the chain/Step kernel + `--dry-run` + boundary fake
 (the in-process `chain`/`Step` corpus) and Register 2 (the boundary fake-tool harness). Every bounded-UI phase
 has one register: pure schema/check/bind/compiler work in Phases 16–20 and boundary browser/server/composition
 work in Phases 21–23 are deliberately separate. The pre-cluster band (phases 1–23, substrate `none`) discharges
-Registers 1–2; the initial live band (phases 24–58) is Register 3. Promoted phases retain the register their
-gate actually needs (Phases 59–60 are Registers 1–2; Phases 61–64 are Register 3) rather than inheriting a
+Registers 1–2; the initial live band (phases 24–59) is Register 3. Promoted phases retain the register their
+gate actually needs (Phases 60–61 are Registers 1–2; Phases 62–65 are Register 3) rather than inheriting a
 register from their number. **Rendering a plan / `--dry-run` must never require live infrastructure.** The per-phase proven/tested/assumed ledger names the register(s) its gate reached; a
 Register-1/2 in-process ledger marks the Register-3 runtime layer UNVERIFIED and can never advance a production
 `PromotionGate`.
@@ -166,24 +166,41 @@ a gate row labelled `linux-cpu` names the CPU-only execution lane, not an assert
 Linux or has no accelerator.
 **No gate may require two specialized substrates.** The pre-cluster band names `none` — no host at all.
 
+**A lane is named with its architecture, and a gate proves only the one it ran on.** Each substrate derives
+its baseline at its **natural architecture** — `arm64` on `apple`, `amd64` on `windows`, the detected one on
+either Linux member — as owned by
+[`substrate_doctrine.md` §1.1 — the natural-architecture rule](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule).
+So a phase carries a **`Lane:`** field beside its `Substrate:` field, reading `linux-cpu/amd64`,
+`linux-cpu/arm64`, `metal`, `cuda`, or `none`; `linux-cpu` alone is not a lane, because it names a claim two
+different machines would satisfy differently. No gate emulates another architecture or cross-builds an
+artifact for one, so a phase needing both is split exactly as a phase needing two substrates is.
+
 The gate's substrate is named in the phase's `Phase Summary` and tracked in
 [`substrates.md`](substrates.md). This prevents cross-substrate flip-flopping mid-development: a phase whose
 work would need both an Apple host and a CUDA host is split until each gate needs at most one.
 
 `windows` remains a catalog member ([`substrates.md` §2](substrates.md#2-substrate-inventory)) but **no phase
-in 0–64 gates it**; it is a declared future member, not a validated one.
+in 0–65 gates it**; it is a declared future member, not a validated one. Its `linux-cpu/amd64` lane is the
+same lane a `linux-cuda` host supplies, which is why no phase has needed to gate `windows` to reach it.
 
-**Two named forms satisfy the one-substrate rule without naming a fixed catalog member on the parent gate**, and
-both keep the discipline checkable rather than bending it:
+**Three named forms satisfy the one-substrate rule without naming a fixed catalog member on the parent gate**, and
+all three keep the discipline checkable rather than bending it:
 
-- **Deferred-to-generation** (Phase 54, `per generated test`). A gate that *emits* a test `.dhall` names the
+- **Deferred-to-generation** (Phase 55, `per generated test`). A gate that *emits* a test `.dhall` names the
   **rule** that each generated test is substrate-locked to exactly one substrate, chosen at generation time — the
   single-substrate property holds per generated artifact, not as a fixed member on the emitting gate.
-- **Parent-drives-provider** (Phases 44–47 and 58, `linux-cpu → provider`). The gate runs from one selected
+- **Parent-drives-provider** (Phases 45–48 and 59, `linux-cpu → provider`). The gate runs from one selected
   `linux-cpu` parent lane and *targets* a provider it does not itself run — EKS is a **declared managed engine,
   not a detected substrate** ([`substrates.md` §2](substrates.md#2-substrate-inventory)). The parent lane may be
   native Linux or the Incus/Lima/WSL2 guest appropriate to its detected hardware; the provider is a
-  compute-engine axis, never a fifth substrate.
+  compute-engine axis, never a fifth substrate. The parent's lane architecture must still be the one the
+  provider's nodes run, because the images the parent publishes are what those nodes pull.
+- **Complementary-architecture pair** (Phases 25 and 26). One artifact must exist for both architectures, and
+  no host may build the half it cannot execute. The capability is therefore split across two adjacent phases,
+  each gating **one** substrate at **one** natural architecture: the first builds, proves, and publishes its
+  own architecture's child, and the second does the same on the complementary substrate and then joins both
+  into one index. The join admits a child only on the attestation produced by the hardware that executed it,
+  so the pair proves what one emulated run only appeared to.
 
 ---
 

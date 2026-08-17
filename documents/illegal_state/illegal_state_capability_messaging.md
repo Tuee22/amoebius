@@ -17,7 +17,7 @@ or put an untyped payload on the wire. The numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_36_pulsar_client.md, DEVELOPMENT_PLAN/phase_57_ui_multi_tenant_live.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -91,7 +91,7 @@ on the *consume* side (the total
 **not** a `live-effect` locus: there is no runtime-checked claim that a received body is valid — the decode
 either succeeds or fails fast.
 
-**Phase-35 evidence:** realized. The exported producer surface accepts only typed `Serialise` values, the
+**Phase-36 evidence:** realized. The exported producer surface accepts only typed `Serialise` values, the
 `CborPayload` constructor is private, and a fixture importing `produceRaw` fails for the pinned missing-export
 reason. A hand-authored API golden and the committed re-added-raw-arm mutant keep that foreclosure live; a
 malformed received body returns `Left`, while two live namespaces round-trip typed CBOR through the native wire.

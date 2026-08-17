@@ -18,7 +18,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_35_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -37,7 +37,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/ui_authorization_gate.py` passed all eleven sides: registry,
+⏸️ Blocked pending Phase-17 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_authorization_gate.py` passed all eleven sides: registry,
 access, parity, epoch, independent-reference, closed-union, constructor-privacy, network-isolation, both
 mutants, and all eleven metrics pass; 40 surfaces join to 57 enumerated items. The project-contained
 attestation is `sha256:713eaf822194a615813fc3a6416124ab04c3e8208ae43a6ddd160d61cab4ccc0`, bound to source snapshot
@@ -45,7 +54,7 @@ attestation is `sha256:713eaf822194a615813fc3a6416124ab04c3e8208ae43a6ddd160d61c
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:5397884a3bd5b8ad…`
+Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:5397884a3bd5b8ad…`
 (1943 non-ignored files) and published a verified pre-containment external attestation
 `sha256:409c13f0c41aec877a4f3f72c3509fd1c17322523920e1deff0abac0b1cca88a`.
 
@@ -68,7 +77,7 @@ the two halves went missing.
 
 **Invalidated historical record:**
 
-✅ Done. The sealed five-action registry, independent authorization matrix, exact parity and stale-epoch errors,
+Done (invalidated). The sealed five-action registry, independent authorization matrix, exact parity and stale-epoch errors,
 coverage floors, empty denial traces, and both authority mutants pass. This proves the closed authorization
 relation in process; it makes no claim that a live edge, identity provider, or UI-server deployment enforces
 the relation. See the Phase-18 ledger.
@@ -86,6 +95,8 @@ command `cabal test ui-authorization-spec`; split on any HTTP server, browser ru
 register, or substrate requirement.
 **Dependency:** Phase 17 — scope-indexed request contexts, handles, audiences, and flow witnesses.
 **Substrate:** none — the gate runs hermetically with credential variables scrubbed and network unavailable.
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+
 **Register:** 1 — pure/golden.
 **Gate:** `python3 tools/ui_authorization_gate.py` passes the Phase-0-pinned action/access matrices, current-authority
 replay cases, coverage floors, isolated execution, and both seeded mutants in
@@ -114,7 +125,7 @@ functions under test.
   for absent policy, wrong scope, wrong permission, and stale epoch, plus positive coverage for every effect arm.
 - **Effect discipline:** the pure reference interpreter records an effect only after `AuthorizedAction` exists;
   every denial and stale replay has an empty trace. Fresh external challenges and real credentials are not
-  applicable in Register 1 and are deliberately deferred to Phases 36 and 56.
+  applicable in Register 1 and are deliberately deferred to Phases 37 and 56.
 - **Seeded mutants:** `default_allow` changes absent-policy refusal to allow, and
   `visibility_is_authorization` substitutes the client visibility projection for current server policy. Both
   are committed from the adopted authorization brief and must turn the matrix red.

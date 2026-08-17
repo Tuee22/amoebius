@@ -18,7 +18,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_39_ui_projection_runtime.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -37,7 +37,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/ui_server_boundary_gate.py` passed every boundary and universal
+⏸️ Blocked pending Phase-21 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_server_boundary_gate.py` passed every boundary and universal
 side: seven HTTP rows, five access rows, five sanitized audit rows, five handler-effect rows, five startup
 rows, five public assets, five private probes, seven WebSocket rows, loopback-only OS observation, and all
 nine mutants. All 77 surfaces join to 94 run-time items. Build, test scratch, generated ledgers, and evidence
@@ -48,7 +57,7 @@ project-contained attestation is
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:3f78cc6ef4e5814e…`
+Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:3f78cc6ef4e5814e…`
 (1945 non-ignored files) and published a verified pre-containment external attestation
 `sha256:eec403a9845ec9acf5201e49bf916cd7d3c8e69cdd66c5daef743efb90aac59e`.
 
@@ -85,7 +94,7 @@ Phase 22 in the legacy register.
 
 **Invalidated historical record:**
 
-✅ Done. The amoebius executable now owns `serve-ui`; a separate signing-authority process mints post-start
+Done (invalidated). The amoebius executable now owns `serve-ui`; a separate signing-authority process mints post-start
 own/foreign/revoked credentials and a separate capability-guarded handler process records raw effects. Seven
 HTTP rows, five access/audit/effect rows, five startup rows, five public assets, five private probes, seven
 WebSocket rows, one stable retry, 29 loopback network syscalls, and all nine mutants pass. Live Keycloak/Envoy,
@@ -127,6 +136,8 @@ acceptance command `python3 tools/ui_server_boundary_gate.py`; split immediately
 a live Keycloak/provider, deployment/HA, a second register, or a substrate.
 **Dependency:** Phase 20 — canonical `UiServerPlan`, public contracts, route dispatch, and authority digests.
 **Substrate:** none — harness-owned local authority/handler processes only; no cluster or external service.
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+
 **Register:** 2 — boundary integration with fakes.
 **Gate:** `python3 tools/ui_server_boundary_gate.py` emits a green Register-2 ledger with live identity, provider, and
 HA layers UNVERIFIED, and Phase 23's server branch waits on it. The apparatus is

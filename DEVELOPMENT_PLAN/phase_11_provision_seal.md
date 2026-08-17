@@ -22,7 +22,7 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_48_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -44,7 +44,16 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/provision_seal_gate.py` passed all ten sides: 26 activation,
+⏸️ Blocked pending Phase-10 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/provision_seal_gate.py` passed all ten sides: 26 activation,
 planner, provision, and mutant items, all ten mutants, all twelve metrics, and the honesty ledger pass; 34
 surfaces join to 42 enumerated items. The project-contained attestation is
 `sha256:308b526838567e092e59afdff70e48337acd988bb39f67f857e95357f7fc21b5`, bound to source snapshot
@@ -52,7 +61,7 @@ surfaces join to 42 enumerated items. The project-contained attestation is
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:78503b2cb8dc1a0a…`
+Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:78503b2cb8dc1a0a…`
 (1936 non-ignored files) and published a verified pre-containment external attestation
 `sha256:46f666a4abf03ac312c5f90f695e87670dbe1855f8d068e1152f3e5b991d1cb8`.
 
@@ -72,7 +81,7 @@ gap is recorded against Phase 11 in [`legacy_tracking_for_deletion.md`](legacy_t
 
 **Invalidated historical record:**
 
-✅ Done. The pure planner, provision fold, opaque seal, corpus, properties, and mutant battery passed on
+Done (invalidated). The pure planner, provision fold, opaque seal, corpus, properties, and mutant battery passed on
 2026-08-09. The retained evidence is in `evidence/phase_11/` and the exact claim boundary
 is recorded in `ledgers/phase_11_provision_seal.md`. This phase opened after the [Phase 10](phase_10_capability_bind.md)
 gate (the capability union + representational `bind` + object-node-multiset shape oracle, which produces the
@@ -131,12 +140,14 @@ What is **not** here:
 - the *soundness* of the `fits`/`carve`/`place` folds and the composed full-resource-vector place-witness
   gate this phase merely invokes ([Phase 7](phase_07_capacity_core_folds.md), [Phase 8](phase_08_storage_geometry_folds.md), [Phase 9](phase_09_execution_accelerator_folds.md))
 - the pure `renderAll :: ProvisionedSpec -> [K8sObject]` that consumes the sealed set ([Phase 13](phase_13_render_manifest_goldens.md))
-- the live `amoebius-capacity` scheduler runtime ([Phase 27](phase_27_capacity_scheduler.md))
+- the live `amoebius-capacity` scheduler runtime ([Phase 28](phase_28_capacity_scheduler.md))
 - and the live realization of any provider or the actual jit-resolve of an engine
-  ([Phase 48](phase_48_determinism_jitcache.md), the live band).
+  ([Phase 49](phase_49_determinism_jitcache.md), the live band).
 
 **Substrate:** none — no host, no cluster, no provider; the gate is an in-process `cabal test` over
 `planInfrastructure` + `provision` + `provisionRenderSources`, analogous to the Phase-9 fold battery it invokes.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1 — pure/golden, in-process, no cluster. The emitted ledger's acceptance token reads
 *binding-composition proven* / *proven for the model*, never *runtime proven*: a green seal establishes that the
@@ -361,7 +372,7 @@ already materialized or returns exactly one non-renderable plan owning the close
   (`ObservedInfrastructureMaterialization`) construct `ProvisionContext`; a `NoInfrastructureRequired` result
   supplies the already-materialized arm directly. Replay, missing readback, or promised identities reject.
 - An in-file honesty note: `planInfrastructure` produces a *plan value*, not a live provider action; the live
-  validation/CAS-enaction of any batch is the live band ([Phase 44](phase_44_provider_deploy_checkpoint.md)).
+  validation/CAS-enaction of any batch is the live band ([Phase 45](phase_45_provider_deploy_checkpoint.md)).
 
 ### Validation
 1. The pre-existing fixture yields `NoInfrastructureRequired`; the creation fixture returns exactly one
@@ -461,7 +472,7 @@ and an impossible target has no deployable value.
   materialized/provisioned results occur only inside `provision` and its opaque output, so direct multiplicity
   fields never weaken the wholly-unprovisioned `BoundDeployment` boundary.
 - An in-file honesty note: `provision` produces a value, not a live provider; the same pure identity/revision
-  epoch algebra is later reused by live admission ([Phase 27](phase_27_capacity_scheduler.md)), which performs
+  epoch algebra is later reused by live admission ([Phase 28](phase_28_capacity_scheduler.md)), which performs
   the real read this phase does not.
 
 ### Validation
@@ -646,7 +657,7 @@ The whole sprint (✅ Done).
   union and the identity-complete accelerator source/workload/residency/coexistence provision that layers on
   this seal
 - [phase_13](phase_13_render_manifest_goldens.md) — the pure deployment-global
-  `renderAll :: ProvisionedSpec -> [K8sObject]` that consumes the identity-keyed render-source set this phase seals - [phase_27](phase_27_capacity_scheduler.md) — the live `amoebius-capacity` scheduler that reuses this seal's
+  `renderAll :: ProvisionedSpec -> [K8sObject]` that consumes the identity-keyed render-source set this phase seals - [phase_28](phase_28_capacity_scheduler.md) — the live `amoebius-capacity` scheduler that reuses this seal's
   pure identity/revision epoch algebra
-- [phase_48](phase_48_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
+- [phase_49](phase_49_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
   materializes the named `EngineRuntime` identity this seal only decodes

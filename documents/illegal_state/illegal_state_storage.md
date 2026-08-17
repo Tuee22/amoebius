@@ -70,7 +70,7 @@ foreclosure layer, from [`illegal_state_techniques.md`](./illegal_state_techniqu
 
 ### 3.1 Bad / illegal durable storage
 
-**Delivery-owner:** `Phase-28`
+**Delivery-owner:** `Phase-29`
 
 **Case-family:** `storage`
 
@@ -468,7 +468,7 @@ orthogonal to the foreclosure layer above.
 
 ### 3.86 A new generation that orphans a retained coordinate
 
-**Delivery-owner:** `Phase-39`
+**Delivery-owner:** `Phase-40`
 
 **Case-family:** `storage`
 

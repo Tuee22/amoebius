@@ -20,7 +20,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_27_object_reconciler.md, DEVELOPMENT_PLAN/phase_28_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -40,7 +40,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/deterministic_simulation_gate.py` passed all eleven sides: both
+⏸️ Blocked pending Phase-14 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/deterministic_simulation_gate.py` passed all eleven sides: both
 interpreters, six fake contracts, four schedules, trace determinism/sensitivity, IOSimPOR, the seeded mutant,
 all nine metrics, and the exact simulation source checks pass; 26 surfaces join to 36 enumerated items. The
 project-contained attestation is `sha256:6be4c197c0739f6ffaa5950391b49ede59c758bc8373609a545acea513de1465`,
@@ -48,7 +57,7 @@ bound to source snapshot `sha256:4a7809fb4d96d811…`; Phase 15 owns no remainin
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:2b3c1bd5…`
+Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:2b3c1bd5…`
 (1940 non-ignored files) and published a verified pre-containment external attestation
 `sha256:8a27796e30cb0da4b538fd20e3d758bdf4dff3417669cbf1766c7bc247eaa0b3`.
 
@@ -69,7 +78,7 @@ real reconciler against a model, never against a substrate.
 
 **Invalidated historical record:**
 
-✅ Done. The Register-2 gate passes on no substrate. It validates the committed reference reconciler under the
+Done (invalidated). The Register-2 gate passes on no substrate. It validates the committed reference reconciler under the
 real-client and `IOSim` interpreters, six modeled fault contracts, four deterministic schedules, IOSimPOR
 exploration, schedule sensitivity, and the dropped-partition mutant. Model fidelity to live substrates remains
 ASSUMED and live runtime remains UNVERIFIED. See the
@@ -94,6 +103,8 @@ never waved away.
 **Substrate:** none — no host, no cluster; the gate is an in-process `cabal test sim-spec` battery replaying the
 real daemon/reconciler code under `IOSim`/`IOSimPOR` against the modeled substrates from committed schedule
 fixtures.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 2 — an in-process deterministic-replay battery, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)). This phase *builds and gates* the
 substrate the live-band phases later use for their Register-2.5 activity; the phase gate itself keys to Register 2,
@@ -175,7 +186,7 @@ test (`m = IOSim s`) from one source, generalizing the Phase-14 single IO seam.
 ### Deliverables
 - `src/Amoebius/Sim/Env.hs`: the typed `Env m` effect interface (publish/consume, put/get-blob, apply-object,
   write-DNS, vault-op, now/delay), polymorphic over an `io-classes` monad `m`, reusing the `MonadTime`/`MonadTimer`
-  clock and the seed seams the determinism kernel ([phase_48](phase_48_determinism_jitcache.md)) also uses — one
+  clock and the seed seams the determinism kernel ([phase_49](phase_49_determinism_jitcache.md)) also uses — one
   determinism substrate, two uses.
 - `src/Amoebius/Sim/Interp/{Real,Sim}.hs`: the two interpreters (real clients under `IO`; the `IOSim s` model).
 - The `sim-spec` test-suite stanza and a toy reconcile loop exercising the interface under both interpreters.
@@ -304,5 +315,5 @@ Done. Later phases must replay their own reconcilers; live conformance remains U
   loop consumes
 - [phase_14](phase_14_chain_kernel_boundary.md) — the boundary fake-tool harness whose single IO seam Sprint
   12.1 generalizes into the typed `Env m` effect interface
-- [phase_48](phase_48_determinism_jitcache.md) — the determinism kernel that shares the seed / `MonadTime` seams
+- [phase_49](phase_49_determinism_jitcache.md) — the determinism kernel that shares the seed / `MonadTime` seams
   (one determinism substrate, two uses)

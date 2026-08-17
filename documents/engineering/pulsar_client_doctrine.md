@@ -16,7 +16,7 @@ misinterpreted payload impossible rather than silent. It does not own the topics
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_31_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_pulsar_client.md, DEVELOPMENT_PLAN/phase_38_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_50_infernix_lift.md, DEVELOPMENT_PLAN/phase_54_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_58_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -63,7 +63,7 @@ Both transports are deleted. One native client replaces both, with four concrete
   contract in [§6](#6-the-declarative-topology-algebra) clean rather than a workaround.
 
 > **Honesty (per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).** "Performance via the
-> native protocol" remains a design rationale, not a benchmark result. Phase 35 did validate the native wire,
+> native protocol" remains a design rationale, not a benchmark result. Phase 36 did validate the native wire,
 > persistent producer/consumer sessions, and absence of WebSocket or second-language client transport; it did
 > not measure a speedup over the sibling paths.
 
@@ -104,7 +104,7 @@ It deliberately does **not** own, and only references:
 | Intra-cluster HA correctness (delegated to brokers/bookies) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 
 Phase order and status are owned only by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
-(the client lands in **Phase 35**); this doc states the target shape and links back, never a status ledger.
+(the client lands in **Phase 36**); this doc states the target shape and links back, never a status ledger.
 
 ---
 
@@ -213,9 +213,9 @@ flowchart TD
   classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
 ```
 
-*Validated Phase-35 chain: the CBOR encode/frame path and total decoder are tested in process; the broker seam and running consumer are Register-3 runtime-checked, not proven.*
+*Validated Phase-36 chain: the CBOR encode/frame path and total decoder are tested in process; the broker seam and running consumer are Register-3 runtime-checked, not proven.*
 
-> **Honesty.** Phase 35 validates the typed producer/consumer API, a hand-authored API-surface golden, a raw
+> **Honesty.** Phase 36 validates the typed producer/consumer API, a hand-authored API-surface golden, a raw
 > producer compile refusal, corrupt-body total refusal, and byte-preserving live CBOR round-trips. The
 > produce-side raw-body arm is type/API-foreclosed; received bytes still cross a runtime broker boundary and
 > are accepted only through total `Either` decoding. No broader canonicalization or performance claim follows.
@@ -241,7 +241,7 @@ Forking — rather than depending on the published package — is the honest cho
 3. **Layering.** The topology algebra ([§6](#6-the-declarative-topology-algebra)) and the dedup contract ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) are amoebius doctrine, not generic
    client features; they live in the fork, above supernova's transport core.
 
-> **Honesty.** Supernova remains provenance, not evidence. Phase 35 independently validates amoebius's
+> **Honesty.** Supernova remains provenance, not evidence. Phase 36 independently validates amoebius's
 > generated framing, CONNECT/LOOKUP, produce/consume/subscribe/seek surface, broker dedup, redelivery, and
 > cleanup. Reconnection hardening beyond the exercised close/reopen paths remains unclaimed.
 
@@ -299,7 +299,7 @@ choice so the omissions are auditable, not silent.
   filter convention
   ([low_code_ui_runtime_doctrine.md §14](./low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability)).
   They are a *projection*, never a decision primitive: no ownership or election logic lives in a TableView.
-  [Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md) validates this application live: native
+  [Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_projection_runtime.md) validates this application live: native
   consumers observe eight keyed workflow events, seven owner-qualified projection messages, five original-
   command-qualified receipt messages, and successful broker compaction for both derived topics. Equal-shaped
   Alice/Bob/Carol rows remain isolated, and dropping the owner from either key or subscription turns the gate
@@ -513,7 +513,7 @@ content-address to their owner in [content_addressing_doctrine.md](./content_add
   the retained span, is the same `SEEK` primitive ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)) already provides for rebuild-from-log and the
   geo-replication catch-up [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) reasons about — no new client capability.
 
-> **Honesty.** The training-feed view is Phase-33-and-later design intent layered on the client, not a built
+> **Honesty.** The training-feed view is Phase-34-and-later design intent layered on the client, not a built
 > or benchmarked amoebius result. The single-active-trainer property is **delegated** to Pulsar's
 > Failover subscription (jitML/infernix already coordinate this way — *sibling evidence*), not an
 > amoebius election proof; per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read this as the specified composition, not a
@@ -579,13 +579,13 @@ A recurring derivation amoebius adopts from infernix: when a message has a causa
 64-bit `sequence_id` (both are monotonic per topic-partition); otherwise fall back to a stable hash of a
 generated request id, paired with a request-scoped producer name so unordered hashes never share a cursor.
 
-> **Honesty.** Phase 35 now validates the reusable Haskell client at Register 3: two distinct namespaces use
+> **Honesty.** Phase 36 now validates the reusable Haskell client at Register 3: two distinct namespaces use
 > native command/event CBOR round-trips, broker-side duplicate collapse, all four subscription types,
 > unacknowledged redelivery, seek replay, and external cleanup readback. The 720-schedule Register-2.5 battery
 > validates the amoebius dedup fold under its modeled reorder/duplicate domain. Broker consensus and
 > cross-cluster correspondence remain UNVERIFIED.
 
-Phase 37 consumes this surface through native ranked `Failover` subscriptions. The protocol subset now carries
+Phase 38 consumes this surface through native ranked `Failover` subscriptions. The protocol subset now carries
 consumer priority, active-consumer change, and redeliver-unacknowledged frames; outbound frames are serialized
 per client. In two live namespaces, Pulsar selected `worker-a`, promoted `worker-b` after an abrupt kill, and
 redispatched the outstanding command while an independent subscription observed its own command exactly once.
@@ -597,14 +597,14 @@ The tested backbone uses the universally available `linux-cpu` lane. Every hardw
 that lane; use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows when a pristine Linux host is
 required.
 
-Phase 49 adds a scoped infernix adapter and a separate native driver using typed CBOR command/event payloads,
+Phase 50 adds a scoped infernix adapter and a separate native driver using typed CBOR command/event payloads,
 one stable scope-qualified command/work id, and the linked sibling compacted-topic view. A fresh retained-
 Pulsar run records two producer attempts and one consumer delivery under broker dedup. It does not establish
 the complete Pulsar-command-to-worker causal chain or migration of the full sibling inference engine; those
 remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; use Incus on Linux/Linux-CUDA, Lima on
 Apple, or WSL2 on Windows for a pristine Linux host.
 
-Phase 57's scoped UI rollout result tests cursor keys containing tenant, owner, and stream and preserves the
+Phase 58's scoped UI rollout result tests cursor keys containing tenant, owner, and stream and preserves the
 same sequence through a host-local durable reconnect probe. It also gates simulated traffic shifts on
 projector watermarks. No real Pulsar broker or independently consumed broker message id participated, so live
 watermark and resume behavior remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; use
@@ -634,7 +634,7 @@ itself is not this doc's claim.
 | infernix dedup wiring | namespace dedup policy + `(producer_name, sequence_id)` + `initialSequenceId` URL workaround | broker-side dedup with `sequence_id` as a native field ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) |
 
 infernix and jitML remain **ML extension libraries**; they stop shipping their own transports and consume
-`amoebius-pulsar` instead — one subsystem at a time, per the Phase 49 migration in
+`amoebius-pulsar` instead — one subsystem at a time, per the Phase 50 migration in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -643,8 +643,8 @@ infernix and jitML remain **ML extension libraries**; they stop shipping their o
 
 This document is normative client doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the native client,
-the topology algebra, and the round-trip gate landed in **Phase 35**, and the infernix/jitML migration onto it
-is **Phases 49 (infernix) and 51 (jitML)**. This doc never maintains a competing status ledger.
+the topology algebra, and the round-trip gate landed in **Phase 36**, and the infernix/jitML migration onto it
+is **Phases 50 (infernix) and 52 (jitML)**. This doc never maintains a competing status ledger.
 
 ---
 

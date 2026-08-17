@@ -19,7 +19,7 @@ owned by [namespace_layout_doctrine.md](./namespace_layout_doctrine.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_27_object_reconciler.md, DEVELOPMENT_PLAN/phase_28_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_29_retained_storage.md, DEVELOPMENT_PLAN/phase_31_platform_backbone.md, DEVELOPMENT_PLAN/phase_32_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_40_release_lifecycle.md, DEVELOPMENT_PLAN/phase_42_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -107,7 +107,7 @@ and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-
 > encoding, eighteen capability/shape goldens, exact source-domain projection, and output-safety battery pass
 > under `tools/render_manifest_gate.py` (ledger `external-run-reference`). This establishes rendered values only;
 > the [§5 live reconciler](#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is independently
-> validated by Phase 26; scheduler CAS/Binding is independently validated by Phase 27, and later
+> validated by Phase 27; scheduler CAS/Binding is independently validated by Phase 28, and later
 > service-specific enforcement keeps its own phase boundary.
 
 The core is a per-projection renderer closed by one whole-deployment pure function:
@@ -394,7 +394,7 @@ specialized from "any resource the forest can create" down to "Kubernetes object
 [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) —
 never by a CLI invocation racing another writer.
 
-Phase 33 delivers that role and this loop on linux-cpu. Its live gate records the exact seven-object
+Phase 34 delivers that role and this loop on linux-cpu. Its live gate records the exact seven-object
 first-pass SSA set under field manager `amoebius-phase33-singleton`, a second pass that re-runs discovery and
 emits zero mutating audit records, Lease-gated authority across replacement, and leak-free restoration of the
 retained stack. The singleton itself is a generated `Deployment replicas=1`, `Recreate`, with no PVC or
@@ -538,19 +538,19 @@ flowchart TD
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
-*Phase-26/27/28 validation boundary. Phase 26 tested the generic reconciler. Phase 27 then tested the scheduler's five-state ledger, two readiness witnesses, whole-root reservation CAS, real Kubernetes Binding ordering, crash-gap recovery, execution-identity admission, and byte-stable live rerun. Phase 28 used that renderer/reconciler seam to apply the sole inert StorageClass and deterministic retained PVs, including fresh uid-less claimRefs after a real cluster recreate. Durable completion/rollback and the release ledger remain deferred.*
+*Phase-27/28/29 validation boundary. Phase 27 tested the generic reconciler. Phase 28 then tested the scheduler's five-state ledger, two readiness witnesses, whole-root reservation CAS, real Kubernetes Binding ordering, crash-gap recovery, execution-identity admission, and byte-stable live rerun. Phase 29 used that renderer/reconciler seam to apply the sole inert StorageClass and deterministic retained PVs, including fresh uid-less claimRefs after a real cluster recreate. Durable completion/rollback and the release ledger remain deferred.*
 
-> **Honesty.** Phase 26, sealed 2026-08-14, supplies amoebius evidence for the object-reconciler slice:
+> **Honesty.** Phase 27, sealed 2026-08-14, supplies amoebius evidence for the object-reconciler slice:
 > Register 3 observed the live Kubernetes mechanisms — convergence, a byte-stable zero-mutation re-run,
 > observed readiness, ordered `OnDelete` replacement, terminal-Job retention, child-envelope conformance, and
 > single admission under a one-Pod quota — and Register 2.5 exercised the same real action modules through
 > 2,048 deterministic schedules. The modeled-apiserver fidelity of Register 2.5 is assumed and bounded by that
 > separate live run, and the content-addressed release ledger and rollback stay deferred to the content-store
-> phase, carried UNVERIFIED. The scheduler CAS/Binding half (Phase 27) and the retained-storage arm (Phase 28)
+> phase, carried UNVERIFIED. The scheduler CAS/Binding half (Phase 28) and the retained-storage arm (Phase 29)
 > are **UNVERIFIED**: both phases are open under the reopened numeric sequence, and their pre-amendment records
 > do not carry forward.
 
-[Phase 41](../../DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md) extends the same pure-render/reconcile boundary to host networking. Its committed two-peer inventory
+[Phase 42](../../DEVELOPMENT_PLAN/phase_42_network_fabric_wireguard.md) extends the same pure-render/reconcile boundary to host networking. Its committed two-peer inventory
 renders byte-for-byte to an independent WireGuard config golden containing only `SecretRef` names. Live
 enactment then reads effective state with `wg show`, and an unchanged second discover/diff pass emits zero
 mutations. Keyless peers are unconstructible; duplicate VPN addresses and out-of-fabric `AllowedIPs` return
@@ -621,9 +621,9 @@ flowchart TD
 > **no Helm**. This is
 > sibling evidence, not an amoebius result.
 
-> **Honesty.** The `RolloutPlan` is **Phase-39 design intent** — it rides the tier-(c) typed-action reconciler,
-> whose generic action engine Phase 26 delivered; the DB-schema-migration `RolloutPhase` itself is part of
-> that unbuilt Phase-39 shape, proven
+> **Honesty.** The `RolloutPlan` is **Phase-40 design intent** — it rides the tier-(c) typed-action reconciler,
+> whose generic action engine Phase 27 delivered; the DB-schema-migration `RolloutPhase` itself is part of
+> that unbuilt Phase-40 shape, proven
 > *only* as the Helm-driven pattern in the jitML sibling. Read as the contract amoebius intends, never as a
 > tested amoebius result.
 
@@ -778,8 +778,8 @@ replaying stored YAML.
 - **Still not a Helm release store.** Neither immutable record stores mutable rendered YAML. The environment
   pointer selects a `Release`; object derivation is recomputed; the application record is append-only evidence.
 
-> **Validated instance.** Phase 39 appends an immutable `AppliedGeneration` only after the final live
-> Deployment reports `Available`, distinct from the pre-promotion `Release`, and uses the Phase-26 tier-(c)
+> **Validated instance.** Phase 40 appends an immutable `AppliedGeneration` only after the final live
+> Deployment reports `Available`, distinct from the pre-promotion `Release`, and uses the Phase-27 tier-(c)
 > SSA/readiness engine for the ordered plan. The observed convergence and write are runtime-tested, not proven.
 
 ---
@@ -835,11 +835,11 @@ This document is normative manifest-generation-and-reconcile doctrine only. Deli
 status, validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the **typed manifest renderer and the server-side-apply reconciler** land
-in **Phases 13 and 26**; the **capability abstraction and per-cluster shapes** ride the Phase-10 binder and
+in **Phases 13 and 27**; the **capability abstraction and per-cluster shapes** ride the Phase-10 binder and
 Phase-13 renderer; the **content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional))** composes with the
-Phase-37 content store; and the **`RolloutPlan` / `RolloutPhase`** enactment, including its
+Phase-38 content store; and the **`RolloutPlan` / `RolloutPhase`** enactment, including its
 DB-schema-migration phase ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c)),
-lands in Phase 39 on the tier-(c) reconciler. This doc states the target shape and links back for status.
+lands in Phase 40 on the tier-(c) reconciler. This doc states the target shape and links back for status.
 
 ---
 
@@ -870,9 +870,9 @@ lands in Phase 39 on the tier-(c) reconciler. This doc states the target shape a
 
 > **Honesty.** The complete end-state in this doctrine remains design intent, but its foundations are no
 > longer wholly prospective: Phase 10 delivered the capability abstraction, Phase 13 the typed whole-set
-> renderer, Phase 26 the server-side-apply/staged-action reconciler, Phase 27 the scheduler seam, Phase 28
-> the retained StorageClass/PV/rebind application slice, Phases 29–32 the retained platform/edge stack, and
-> Phase 33 the Lease-held singleton's exact live reconcile/no-op loop. Later provider, rollout, and release-ledger subjects
+> renderer, Phase 27 the server-side-apply/staged-action reconciler, Phase 28 the scheduler seam, Phase 29
+> the retained StorageClass/PV/rebind application slice, Phases 30–33 the retained platform/edge stack, and
+> Phase 34 the Lease-held singleton's exact live reconcile/no-op loop. Later provider, rollout, and release-ledger subjects
 > remain unbuilt and must not inherit those results. The approach was **generalized from the prodbox sibling**, which already renders a slice
 > of its object set from typed Haskell to Aeson and applies it with `kubectl`, stamps every object with an
 > owner label, and orchestrates a pure deployment planner — but prodbox still ships its workloads as Helm

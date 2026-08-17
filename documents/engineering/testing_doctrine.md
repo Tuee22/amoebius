@@ -19,7 +19,7 @@ nor the phase gates that consume its registers, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_27_object_reconciler.md, DEVELOPMENT_PLAN/phase_28_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_29_retained_storage.md, DEVELOPMENT_PLAN/phase_31_platform_backbone.md, DEVELOPMENT_PLAN/phase_32_platform_services_2.md, DEVELOPMENT_PLAN/phase_35_app_tenancy.md, DEVELOPMENT_PLAN/phase_37_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_40_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_ui_program_release.md, DEVELOPMENT_PLAN/phase_43_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_44_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_45_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_46_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_48_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_50_infernix_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_55_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_56_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_58_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_59_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_61_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_62_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_63_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_64_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_65_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -95,7 +95,7 @@ Three consequences fall straight out of "a test is a spec":
   a *test* rather than a deployment are the chaos schedule, the expectation surface, and the always-teardown
   contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
 
-> **Honesty.** Phase 54 implements the topology, suggestion, credential, runner, inventory, delete-authorization,
+> **Honesty.** Phase 55 implements the topology, suggestion, credential, runner, inventory, delete-authorization,
 > and ledger kernels; its scoped live run proves host-process cleanup and untagged-leak detection. Kubernetes,
 > retained backing deletion, Pulsar takeover, and Vault/AWS authority remain **UNVERIFIED**. Status is owned by
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); prodbox remains sibling evidence. Per
@@ -194,7 +194,7 @@ decisions, the capability-gated bootstrap/publication protocol, and live runtime
 with an `ErrImagePull`/`ImagePullBackOff` public canary under an enforcing node firewall, records firewall
 drops and zero established public-registry connections, and reruns the committed no-op-policy mutant. The
 ledger marks Decision, Protocol, and Runtime tested for the enumerated Phase-25 boundary while keeping the
-Phase-26 reconciler correspondence and Phase-30 MinIO rehome **UNVERIFIED**; the ledger itself is written into
+Phase-27 reconciler correspondence and Phase-31 MinIO rehome **UNVERIFIED**; the ledger itself is written into
 that run's bundle and bound to its source snapshot, never into this document.
 
 The third register is the amoebius novelty and the subject of the rest of this document. It is where "a
@@ -261,7 +261,7 @@ flowchart TD
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Phase-54 scoped result: the structured host runner and external temporary-scope diff exercise the failure sink; cluster/provider allocation and reclamation remain UNVERIFIED.*
+*Phase-55 scoped result: the structured host runner and external temporary-scope diff exercise the failure sink; cluster/provider allocation and reclamation remain UNVERIFIED.*
 
 The "no explicit list of tests" principle is what makes this a *contract* rather
 than a checklist: amoebius does not maintain an enumerated test catalog that each could forget the teardown
@@ -478,14 +478,14 @@ and the deterministic rebind it protects are **owned by**
 
 > **Honesty.** The flag-and-elevated-sweep mechanism above is a *design resolution* of an explicitly open
 > question in the vision, not a built or tested amoebius capability. Treat
-> the leak-free guarantee as a specification to be validated, never as a proven result. Delivery (Phase 54)
+> the leak-free guarantee as a specification to be validated, never as a proven result. Delivery (Phase 55)
 > is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
 ## 8. One substrate per validation
 
-Phase 37 is the concrete three-provider-class sweep example: the gate records the complete Kubernetes,
+Phase 38 is the concrete three-provider-class sweep example: the gate records the complete Kubernetes,
 MinIO, and Pulsar inventory plus the named retained set, then fails unless every non-retained remainder is
 empty. It runs two full cycles under distinct experiment namespaces and seals both Register-3 live and
 Register-2.5 simulation receipts. Its `linux-cpu` execution follows the universal baseline and pristine-host
@@ -494,7 +494,8 @@ provider table owned by [substrate_doctrine.md §4](./substrate_doctrine.md#4-vi
 A test that silently falls back from a requested specialized lane to CPU proves nothing about that specialized
 lane. amoebius forbids that fallback: **a validation names its execution lane up front and fails fast if that
 lane's inputs are missing.** This does not make `linux-cpu` hardware-exclusive. The baseline is deliberately
-selectable on every detected hardware substrate.
+selectable on every detected hardware substrate — at that host's natural architecture, never at another's
+([substrate_doctrine.md §1.1](./substrate_doctrine.md#11-the-natural-architecture-rule)).
 
 The canonical rule — *at most one substrate (`apple` | `linux-cuda` | `linux-cpu` | `windows`) per
 validation* — is **phase discipline owned by** [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
@@ -513,6 +514,10 @@ doctrine:
   `linux-cpu`, `linux-cuda`, `apple`, or `windows` hardware. It runs natively or through the canonical
   Incus/Lima/WSL2 guest and exposes no accelerator. If the gate requires a pristine Linux host, that guest is
   newly created and its clean preflight is evidence.
+- **An architecture is proven only where it runs.** A validation names `linux-cpu/amd64` or
+  `linux-cpu/arm64`, and the lane it names is the host's natural architecture. Emulating the other
+  architecture, or cross-building an artifact for it, produces no evidence about it: covering both is two
+  runs on two machines, the same way covering two substrates is.
 - **Fixtures are reusable across substrates; substrate config is not.** A *fixture* fakes a boundary (a CLI,
   a probe) and may be reused anywhere; a *substrate* is the real environment a topology targets. The two are
   not interchangeable — a fixture never silences a missing-substrate-config error. (This is the prodbox
@@ -520,8 +525,10 @@ doctrine:
 
 What "at most one substrate per validation" buys is precisely the thing the ledger ([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)) needs to stay
 honest. A `linux-cpu` result means the CPU-only lane was selected and observed; the ledger separately records
-whether its physical parent was `linux-cpu`, `linux-cuda`, `apple`, or `windows`, and whether the lane was
-native, Incus, Lima, or WSL2. A requested CUDA/Metal run may never relabel itself CPU after failure.
+whether its physical parent was `linux-cpu`, `linux-cuda`, `apple`, or `windows`, whether the lane was
+native, Incus, Lima, or WSL2, and **which architecture that lane ran**. A result whose architecture the
+ledger cannot name is UNVERIFIED for every architecture, not a pass on the convenient one. A requested
+CUDA/Metal run may never relabel itself CPU after failure.
 
 ---
 
@@ -649,20 +656,20 @@ To keep the SSoT boundaries crisp:
 
 ---
 
-The Phase-29 Register-3 ledger combines a pristine real delete/recreate cycle, an independent Haskell reader, Kubernetes-auth/audit provenance, storage high-water observations, and nine red mutants; its Register-2.5 companion explores 500 deterministic seeds per fault family plus the combined sequence, with modeled fidelity discharged only by the live gate and the three federation surfaces left UNVERIFIED. The gate uses `linux-cpu`, always available on every hardware substrate; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+The Phase-30 Register-3 ledger combines a pristine real delete/recreate cycle, an independent Haskell reader, Kubernetes-auth/audit provenance, storage high-water observations, and nine red mutants; its Register-2.5 companion explores 500 deterministic seeds per fault family plus the combined sequence, with modeled fidelity discharged only by the live gate and the three federation surfaces left UNVERIFIED. The gate uses `linux-cpu`, always available on every hardware substrate; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-The Phase-33 Register-3 instance validates the Lease-held singleton with an exact seven-object first pass and zero-write rediscovery rerun; 26 pinned Gate-1/Gate-2 negatives; the complete admin reach matrix and four paired capability-admission cases; byte-identical durable state after replacement; password non-persistence; and five committed mutants red for their pinned causes. Full tenant admin, parent→child use, provider materialization, and cross-cluster gateway correspondence remain UNVERIFIED. Ledger `external-run-reference`.
+The Phase-34 Register-3 instance validates the Lease-held singleton with an exact seven-object first pass and zero-write rediscovery rerun; 26 pinned Gate-1/Gate-2 negatives; the complete admin reach matrix and four paired capability-admission cases; byte-identical durable state after replacement; password non-persistence; and five committed mutants red for their pinned causes. Full tenant admin, parent→child use, provider materialization, and cross-cluster gateway correspondence remain UNVERIFIED. Ledger `external-run-reference`.
 
-The Phase-34 Register-3 instance validates two equal-shaped tenants through all six provider-admin arms using six separated provider-native observers, fresh challenge correspondence, paired illegal-input zero-effect checks, teardown equality, and the `drop_provider_arm` and `collapse_tenant_key` mutants. It establishes tested provider projection readiness, not the Phase-36 application data path or real-user credential enforcement. Ledger `external-run-reference`; the gate uses universally available `linux-cpu`, with pristine Linux supplied by Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+The Phase-35 Register-3 instance validates two equal-shaped tenants through all six provider-admin arms using six separated provider-native observers, fresh challenge correspondence, paired illegal-input zero-effect checks, teardown equality, and the `drop_provider_arm` and `collapse_tenant_key` mutants. It establishes tested provider projection readiness, not the Phase-37 application data path or real-user credential enforcement. Ledger `external-run-reference`; the gate uses universally available `linux-cpu`, with pristine Linux supplied by Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-The Phase-35 Register-3 instance validates a native Haskell Pulsar client through two distinct namespaces,
+The Phase-36 Register-3 instance validates a native Haskell Pulsar client through two distinct namespaces,
 with broker-admin readback of duplicate collapse, redelivery, seek, all four subscription types, and empty
 postflight inventory. Compile-refusal fixtures pin the CBOR-only and derived-topic API boundaries; three
 source mutants turn red. Its Register-2.5 companion covers 720 dedup schedules. Ledger
 `dynamically-resolved`. Every hardware substrate can
 always run this `linux-cpu` lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-The Phase-36 Register-3 instance specializes the fresh-effect envelope for user/tenant isolation. Three real
+The Phase-37 Register-3 instance specializes the fresh-effect envelope for user/tenant isolation. Three real
 Keycloak credentials and authenticated introspection establish authority; separate Postgres, MinIO, Pulsar,
 Keycloak, and Kubernetes/CNI observations pair sanctioned effects with zero foreign state, message, cursor,
 or reachability effect. Exact cleanup and two authority mutants pass. Complete provider-audit-log
@@ -671,7 +678,7 @@ Ledger `external-run-reference`. Every hardware substrate always
 retains the `linux-cpu` option. When this gate needs a clean machine, Linux and Linux-CUDA hosts materialize it
 with Incus, Apple hosts with Lima, and Windows hosts with WSL2.
 
-The Phase-42 Register-3 instance combines a compile-fail projection corpus, a separately authored Dhall
+The Phase-43 Register-3 instance combines a compile-fail projection corpus, a separately authored Dhall
 classification table, content-addressed and demand goldens, two in-parent Pulumi Jobs, and external
 kind/Pulumi/Vault/MinIO/native-Pulsar/Patroni observers. It requires a no-op second pass, exact stack/cluster
 cleanup, and three red mutants. Its ledger marks physically independent child-local brokers and child-local
@@ -679,7 +686,7 @@ Vault processes UNVERIFIED rather than inferring them from the two real child cl
 substrate can always run this `linux-cpu` lane. For pristine Linux use Incus on Linux/Linux-CUDA, Lima on
 Apple, or WSL2 on Windows.
 
-The Phase-43 gate binds a pre-pinned numeric budget and journal schema to 24 fresh source acknowledgements per
+The Phase-44 gate binds a pre-pinned numeric budget and journal schema to 24 fresh source acknowledgements per
 branch. An external file journal, retained MinIO reads, authoritative DNS queried with `dig`, Kubernetes
 authority readback, raw-kernel WireGuard inventory, and exact postflight inventories agree on Planned RPO=0
 and fenced Failover inside the declared RTO. Two guard mutants turn red. Its honesty rows keep data loss
@@ -688,7 +695,7 @@ assumed-and-monitored and leave Route53/WAN fidelity UNVERIFIED.
 ## 11. Planning ownership
 
 This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates, and remaining work — the test-topology DSL, `suggest-test`, flagged credentials, the elevated storage-deleting harness, and the per-run ledger artifact — are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 54; with the cross-cluster failover proof artifacts in Phase 43). This doc never maintains a competing status ledger; it states the target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 55; with the cross-cluster failover proof artifacts in Phase 44). This doc never maintains a competing status ledger; it states the target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
 the phase-specific validated instances above are amoebius results; the unimplemented test-topology and cross-cluster shapes remain design intent generalized from prodbox.
 
 ---
@@ -757,21 +764,21 @@ and independent oracle in its `## Gate integrity` section. A pure gate marks fre
 credentials not applicable and names the independent reference predicate instead; it does not fabricate an
 effectful observer.
 
-**Owner-projection multi-observer instance.** Phase 38 combines three freshly introspected Keycloak sessions,
+**Owner-projection multi-observer instance.** Phase 39 combines three freshly introspected Keycloak sessions,
 separate native Haskell consumers for workflow/projection/receipt messages, broker-admin counters and compaction
 status, and an OS-side scoped-query transcript. The observers agree on owner-qualified keys, original commands,
 watermarks, denials, and zero foreign subscription effect before authenticated Keycloak/Pulsar/Kubernetes
 inventories return empty. The evidence retains only challenge/issuer/topic/raw-observation digests; three
 committed scope-collapse mutants turn the unchanged Phase-0 oracle red.
 
-**Atomic UI-release multi-observer instance.** Phase 40 obtains a fresh Keycloak token through Envoy after the
+**Atomic UI-release multi-observer instance.** Phase 41 obtains a fresh Keycloak token through Envoy after the
 gate-only servers start, then sends fresh canaries through two exact paired releases. MinIO pointer/object
 history, the external append-only action journal, Envoy/Keycloak counters, and Kubernetes/containerd image
 inventory agree that exactly the A/A and B/B actions occurred, all eight stale/missing/mixed/bypass cases had
 zero effect, and both revisions used one generic image. Phase-0-authored matrices and three committed mutants
 prevent the projector or subject from defining its own success.
 
-**Raw-kernel fabric multi-observer instance.** [Phase 41](../../DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md) resolves fresh Vault-custodied keypairs through the
+**Raw-kernel fabric multi-observer instance.** [Phase 42](../../DEVELOPMENT_PLAN/phase_42_network_fabric_wireguard.md) resolves fresh Vault-custodied keypairs through the
 current Haskell Kubernetes-auth client, starts two real `wg0` interfaces, and sends a fresh canary from the
 spoke to the gateway-role hub. Independent `wg show`, ICMP/TCP, underlay `tcpdump`, cgroup-v2, `tc`, log/nodefs,
 process/socket, and cleanup observers agree with five pre-pinned oracles. The capture must contain WireGuard
@@ -779,7 +786,7 @@ UDP/51820 and not the plaintext canary; four committed key/endpoint/resource/rep
 their exact locus. The ledger marks the static tunnel and resource controls tested while geo-replication,
 hub repoint, and stretched control-plane peering remain UNVERIFIED.
 
-**Scoped provider-checkpoint multi-observer instance.** Phase 44 combines Kubernetes Deployment/Job
+**Scoped provider-checkpoint multi-observer instance.** Phase 45 combines Kubernetes Deployment/Job
 readback, OS `execve`, Vault seal/Transit APIs, MinIO object inventory/readback, exact cleanup, and independent
 Phase-0 Dhall/JSON/TSV/process oracles. It observed two concurrent executor Jobs, an absolute Pulumi 3.228.0
 process with zero environment entries, sealed-Vault HTTP 503 before checkpoint PUT, and six opaque objects
@@ -789,17 +796,17 @@ EKS, the managed node group, CloudTrail, AWS-plugin `execve`, pod-filesystem obs
 UNVERIFIED. A green scoped receipt is not a green full provider gate. Every hardware substrate can always run
 the linux-cpu parent lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-**Scoped provider-child multi-observer instance.** Phase 45 combines independently authored Dhall/text/JSON/
+**Scoped provider-child multi-observer instance.** Phase 46 combines independently authored Dhall/text/JSON/
 TSV oracles, pure contract refusals, retained Kubernetes API readback, a sealed live-evidence reader, exact
 cleanup, and a committed public-pull mutant. It observed the scheduler and initially non-Serving singleton,
 four cutovers, one-Lease parent→absence→child handoff, sixteen Service objects, zero second-pass Kubernetes
 mutations, private `Never` image policy, and namespace cleanup. The ledger marks EKS, managed-node and cloud
 LoadBalancer materialization, full reachability/HA, provider ingress, cloud/network/OS audit, actual Managed
-EKS topology readback, and the Phase-47 leak sweep UNVERIFIED. Retained kind is named as a scoped Kubernetes
+EKS topology readback, and the Phase-48 leak sweep UNVERIFIED. Retained kind is named as a scoped Kubernetes
 child-shape boundary and never accepted as EKS evidence. Substrate portability is asserted separately by the
 universal CPU and pristine-host route oracles, rather than inferred from this retained cluster.
 
-**Scoped provider-EBS multi-observer instance.** Phase 46 combines six Phase-0 oracles, a pure admission/
+**Scoped provider-EBS multi-observer instance.** Phase 47 combines six Phase-0 oracles, a pure admission/
 credential/static-CSI/scaling contract, five separately compiled red mutants, Kubernetes StorageClass/PV
 readback, a marker written through two retained PV identities, Vault-Transit-enveloped MinIO keys for distinct
 checkpoint classes, a sealed Haskell evidence reader, and exact cleanup. Its ledger leaves all AWS EBS, IAM,
@@ -807,7 +814,7 @@ CSI execution, provider attachment/reattachment, raw/usable geometry, provider m
 elevated reclamation surfaces UNVERIFIED. The retained hostPath marker is explicitly an analogue and cannot
 satisfy an EBS acceptance row. CPU portability and pristine-host routes are separately enumerated obligations.
 
-**Scoped provider-node and teardown multi-observer instance.** Phase 47 combines seven Phase-0 oracles, pure
+**Scoped provider-node and teardown multi-observer instance.** Phase 48 combines seven Phase-0 oracles, pure
 signal/quota/capability/identity/join/teardown contracts, eight separately compiled red mutants, a retained-
 Kubernetes signal reconcile, broadened ownership-metadata enumeration, a sealed Haskell reader, and exact
 cleanup. The ownership analogue catches two untagged run-owned objects missed by tag-only enumeration, but it
@@ -817,7 +824,7 @@ sweep, durable sole-survivor, and the second provider cycle UNVERIFIED. Every ha
 run the `linux-cpu` parent lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on
 Windows.
 
-**Determinism and Tier-1 JIT-cache multi-observer instance.** Phase 48 has 23 pre-existing Phase-0 oracles and
+**Determinism and Tier-1 JIT-cache multi-observer instance.** Phase 49 has 23 pre-existing Phase-0 oracles and
 19 committed mutants: seven separately compiled production mutants turn the pure contract red, while twelve
 resource-shape mutants remain under direct custody. Four fresh compute Jobs write retained MinIO outputs;
 out-of-band reads establish equal bytes for equal seed/input and unequal bytes for altered seed or input. A real replaceable cache owner, two clients with no cache mount, an in-cluster `distribution` registry, first-
@@ -827,12 +834,12 @@ production model inference. Cross-substrate equality, cross-node reuse, Tier-2 m
 remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; a pristine Linux host uses Incus on
 Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-**Scoped infernix artifact-lift multi-observer instance.** Phase 49 combines authored oracles, frozen sibling hashes, one compiled sibling module, closed constructors, pure contracts, four red mutants, and a sealed reader.
+**Scoped infernix artifact-lift multi-observer instance.** Phase 50 combines authored oracles, frozen sibling hashes, one compiled sibling module, closed constructors, pure contracts, four red mutants, and a sealed reader.
 Retained services observe MinIO publication, Pulsar dedup, two deterministic Jobs, cache reuse, and cleanup.
 The micro-model does not verify production TinyLlama, the full engine, end-to-end worker causality, general
 isolation, or cross-substrate equality. The CPU lane is universal; clean guests use Incus, Lima, or WSL2.
 
-**Scoped jitML CUDA-artifact instance.** Phase 51 combines five Phase-0 oracles, one compiled sibling CUDA generator, a constructor-hidden adapter, four independently red mutants, and a sealed reader. A fresh 24-byte challenge drives 200 `libcuda` kernel launches across ten million floats; `nvidia-smi`, full 40 MB byte comparison, and retained-MinIO blob/manifest/pointer readback are independent observers. The 412 conflict, unchanged pointer, unauthenticated 403, allocation release, and bucket cleanup are tested. Kubernetes GPU ownership, native CBOR/Pulsar, Vault authority, the complete sibling trainer/checkpoint format, mutable ETag-CAS, failover, and general correctness/isolation remain UNVERIFIED. Every substrate retains a `linux-cpu` execution path. For pristine Linux, select Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+**Scoped jitML CUDA-artifact instance.** Phase 52 combines five Phase-0 oracles, one compiled sibling CUDA generator, a constructor-hidden adapter, four independently red mutants, and a sealed reader. A fresh 24-byte challenge drives 200 `libcuda` kernel launches across ten million floats; `nvidia-smi`, full 40 MB byte comparison, and retained-MinIO blob/manifest/pointer readback are independent observers. The 412 conflict, unchanged pointer, unauthenticated 403, allocation release, and bucket cleanup are tested. Kubernetes GPU ownership, native CBOR/Pulsar, Vault authority, the complete sibling trainer/checkpoint format, mutable ETag-CAS, failover, and general correctness/isolation remain UNVERIFIED. Every substrate retains a `linux-cpu` execution path. For pristine Linux, select Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 This contract prevents spoofing of gate evidence at the modeled boundary. It does not prove that the kernel, identity provider, provider API, observer, or hardware is uncompromised. Those trust assumptions remain named in the proven/tested/assumed ledger.
 
@@ -850,15 +857,15 @@ the inspected boundary, not proof that the browser/OS is uncompromised.
 
 ---
 
-Phase 58's scoped evidence uses a fresh challenge, three independently addressable host-process roles, and a separate durable receipt/cursor file while forcing one role down. It deliberately records provider isolation, off-cluster OIDC, managed placement, Kubernetes/CNI, and provider data/audit readers as UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 59's scoped evidence uses a fresh challenge, three independently addressable host-process roles, and a separate durable receipt/cursor file while forcing one role down. It deliberately records provider isolation, off-cluster OIDC, managed placement, Kubernetes/CNI, and provider data/audit readers as UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 60 exercises the browser boundary with a fresh canary and a second Chrome process that reads the same raw IndexedDB/cache profile. It checks ciphertext, recovery, isolation, fencing, immutable assets, and quota outcomes independently of the Haskell model. PureScript production compilation and server replay remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 61 exercises the browser boundary with a fresh canary and a second Chrome process that reads the same raw IndexedDB/cache profile. It checks ciphertext, recovery, isolation, fencing, immutable assets, and quota outcomes independently of the Haskell model. PureScript production compilation and server replay remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 61 issues fresh scalar/infernix command ids through two local UI endpoints, drops one response after commit, clears transient route state, and lets a separate SQLite reader establish exactly one effect plus the original durable receipt. Real OIDC, Redis, broker, provider, Kubernetes, and CNI evidence remains UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 62 issues fresh scalar/infernix command ids through two local UI endpoints, drops one response after commit, clears transient route state, and lets a separate SQLite reader establish exactly one effect plus the original durable receipt. Real OIDC, Redis, broker, provider, Kubernetes, and CNI evidence remains UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 62 uses a fresh Chrome-encrypted blob, a second browser process, raw ciphertext inspection, interrupted/resumed upload, server hashing, independent filesystem readback, and paired denial to test the scoped dependency boundary. Real MinIO audit, Keycloak/Gateway, Kubernetes/CNI, and production PureScript remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 63 uses a fresh Chrome-encrypted blob, a second browser process, raw ciphertext inspection, interrupted/resumed upload, server hashing, independent filesystem readback, and paired denial to test the scoped dependency boundary. Real MinIO audit, Keycloak/Gateway, Kubernetes/CNI, and production PureScript remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 63 uses separate Chrome processes for A seed, B stage, crash inspection, B resume, reload, rollback, and final A inspection. A separate append-only local ledger observes A→B→A and one effect. Real Gateway/Pulsar/provider/Keycloak/Kubernetes/CNI and production PureScript remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows. Phase 64 uses real Chrome, three host-local endpoint roles, an actual role stop, SQLite and filesystem observers, route loss, current-authority denial/admission, exact retry, and eight red mutants. Provider whole-zone isolation, managed topology, real Redis/Sentinel and other platform services, Kubernetes/CNI, production PureScript, and offline jitML/CUDA remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; when a pristine Linux host is needed, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 64 uses separate Chrome processes for A seed, B stage, crash inspection, B resume, reload, rollback, and final A inspection. A separate append-only local ledger observes A→B→A and one effect. Real Gateway/Pulsar/provider/Keycloak/Kubernetes/CNI and production PureScript remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows. Phase 65 uses real Chrome, three host-local endpoint roles, an actual role stop, SQLite and filesystem observers, route loss, current-authority denial/admission, exact retry, and eight red mutants. Provider whole-zone isolation, managed topology, real Redis/Sentinel and other platform services, Kubernetes/CNI, production PureScript, and offline jitML/CUDA remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; when a pristine Linux host is needed, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)

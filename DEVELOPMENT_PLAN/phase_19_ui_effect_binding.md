@@ -37,7 +37,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/ui_effect_binding_gate.py` passed all eleven sides: seven
+⏸️ Blocked pending Phase-18 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_effect_binding_gate.py` passed all eleven sides: seven
 ports, two trusted links, eight exact errors, thirteen coverage classes, all seven mutants, all twelve metrics,
 and four closed-sum plus independent key-set checks pass; 55 surfaces join to 85 enumerated items. The
 project-contained attestation is `sha256:7856f436a05c393072bd2fabfc62fe77c7c07a40bc85f8c3c526b50515b2ae7d`,
@@ -45,7 +54,7 @@ bound to source snapshot `sha256:27a64549485f9ff0…`; Phase 19 owns no remainin
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:2fb7ae466ee82194…`
+Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:2fb7ae466ee82194…`
 (1944 non-ignored files) and published a verified pre-containment external attestation
 `sha256:470c58ccbca52b5e580058c7e086a5b22d5af0bc506ee58d14e397529903587d`.
 
@@ -73,7 +82,7 @@ as two independent results.
 
 **Invalidated historical record:**
 
-✅ Done. Seven ports exact-join their handler/capability/contract tuples, two named links resolve through the
+Done (invalidated). Seven ports exact-join their handler/capability/contract tuples, two named links resolve through the
 fixed-HTTPS catalog, all pinned and bounded-input failures are exact with empty traces, coverage floors pass,
 and seven mutants turn red. This pure seal does not establish that a live handler or provider enforces its
 declared authorization, tenancy, idempotency, or storage behavior. See the
@@ -97,6 +106,8 @@ current-authority kernel from Phase 18; it does not reproduce policy evaluation,
 interpreter, a live provider, a second register, or a substrate.
 **Dependency:** Phase 18 — the sealed action registry, scoped authority transition, and stale-authority refusal.
 **Substrate:** none — no network, credential, provider process, browser, or cluster is contacted.
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+
 **Register:** 1 — pure/golden.
 **Gate:** `python3 tools/ui_effect_binding_gate.py` passes the Phase-0-pinned port/handler/capability corpus,
 independent binding relation, exact-key checks, negative tags, coverage floors, isolated execution, and every

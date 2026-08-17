@@ -14,7 +14,7 @@ Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_34_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -38,7 +38,16 @@ Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15 under the containment amendment. `python3 tools/toolchain_spike_gate.py`
+⏸️ Blocked pending Phase-0 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15 under the containment amendment. `python3 tools/toolchain_spike_gate.py`
 resolved the same 225-package graph twice and from the source snapshot, built the representative set from an
 empty project-local store, passed every probe and mutant, left the outside-host inventory unchanged, and
 published attestation `sha256:915a26a7b76634ac544f9a3c81296b0699ad26193b76b5548d3f6a5d6133438f`.
@@ -46,7 +55,7 @@ The global artifact audit has zero Phase-1-owned deferrals.
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-12. The redesigned nine-sided gate passed against source snapshot
+Done (invalidated) — sealed 2026-08-12. The redesigned nine-sided gate passed against source snapshot
 `sha256:6ee45846d4d5066b…` (1927 non-ignored files) and published a verified pre-containment external attestation
 `sha256:353cafb9d60d6e4205d84fef33dd92ea4c0f198c5dfcdf16455c5a217e95bb24`.
 
@@ -63,7 +72,7 @@ both seeded mutants, joins 29 surfaces to 48 run-time enumerated items, and leav
 unchanged. Twenty-two downstream gate scripts now consume run-local resolution.
 
 **Two corrections this closure made, both recorded rather than absorbed.** The gate's predecessor built `all`,
-which made a Phase-1 gate depend on packages phases 2–64 own — the forward dependency
+which made a Phase-1 gate depend on packages phases 2–65 own — the forward dependency
 [§E](development_plan_standards.md#e-one-canonical-phase-model) forbids. Narrowing it to the representative set
 exposed that `lib:dsl-core` does not compile, because the UI-server boundary ABI
 `src/Amoebius/Ui/Server/Main.hs` imports does not exist anywhere in the tree; that seam is Phase 22's and is
@@ -73,7 +82,7 @@ its ignored root, so it proved nothing; it now seeds a non-dotted ignored root.
 
 **Invalidated historical record:**
 
-✅ Done. The consolidated clean-store gate passed on 2026-08-08 with
+Done (invalidated). The consolidated clean-store gate passed on 2026-08-08 with
 `python3 tools/toolchain_spike_gate.py`, emitting ledger
 `dynamically-resolved`. This is a tested buildability result,
 not a runtime or Gate-2-semantics result. This phase opened after the Phase 0 documentation lint passed and ran on **no substrate**
@@ -96,6 +105,8 @@ evidence. They are attested beneath `.build/evidence-store/**` and never copied 
 **Substrate:** `none` — no host, no cluster; the gate resolves and compiles Hackage packages on the developer
 toolchain only.
 
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+
 **Register:** 1 — pure/build, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** against its source snapshot, `python3 tools/toolchain_spike_gate.py` dynamically resolves a compatible graph,
@@ -110,7 +121,7 @@ and `protoc`. The authored Dhall positive/negative pair, independent simulation 
 dependency-resolution mutant, and protocol round-trip fixture remain the oracle side.
 
 The gate builds that set and nothing later: the `probe` executables plus the Pulsar `proto` package, which
-between them link every member. It does not build the packages phases 2–64 own. A Phase-1 gate that built the
+between them link every member. It does not build the packages phases 2–65 own. A Phase-1 gate that built the
 whole tree would consume what a later phase delivers — the forward dependency
 [§E](development_plan_standards.md#e-one-canonical-phase-model) forbids — and would report a toolchain failure
 whenever a later phase's source stopped compiling, which is exactly what it did on 2026-08-12

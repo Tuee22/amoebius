@@ -18,7 +18,7 @@ owned by [platform_services_doctrine.md](../engineering/platform_services_doctri
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_33_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_35_app_tenancy.md, DEVELOPMENT_PLAN/phase_37_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_57_ui_multi_tenant_live.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -130,7 +130,7 @@ human never writes the policy. **Owner:**
 a declared dependency is never a connection the policy blocks; Phase 13 validates exact edge-set equality
 against its independent test-side oracle) + `Gate-2-decoder` (the consumer handle exists
 only once the dependency edge does; the ownership fold over the dependency graph) + `live-effect` residue
-(that the CNI actually admits the derived flow). Phase 32 discharged that residue on linux-cpu with an
+(that the CNI actually admits the derived flow). Phase 33 discharged that residue on linux-cpu with an
 independent scratch Pod: absent edge denied, adding `scratch→minio` admitted, and removing it denied again;
 the policy-swap mutant failed the independently pinned set oracle.
 
@@ -156,11 +156,10 @@ NodePort arm) + `rendered-output-golden` (the no-backdoor-ingress golden on the 
 NodePort or Keycloak-skipping Ingress in the rendered manifest, validated by Phase 13 in Register 1) + `Gate-2-decoder` (only the edge holds
 the expose-to-wild capability, and endpoint kinds are distinct non-interconverting indices — a self-published
 wild endpoint has no constructor) + `live-effect` residue (that the running cluster in fact exposes no
-unauthenticated path). Phase 32 discharged that residue on linux-cpu: the sole LoadBalancer was the
+unauthenticated path). Phase 33 discharged that residue on linux-cpu: the sole LoadBalancer was the
 Keycloak/Envoy edge, a committed raw NodePort seed turned the scanner red and removal restored green, and the
 only allowed `HostLocalPeer` NodePort succeeded on node loopback while an actual WAN-Pod source was denied.
-Every hardware substrate can always supply this linux-cpu baseline; pristine Linux uses Incus on
-Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Every hardware substrate can always supply this linux-cpu baseline at its own natural architecture; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ### 3.8 Cross-tenant references and literal secrets
 
@@ -185,7 +184,7 @@ the child's Vault at runtime).
 
 ### 3.9 A plaintext spec at rest
 
-**Delivery-owner:** `Phase-29`
+**Delivery-owner:** `Phase-30`
 
 **Case-family:** `security`
 
@@ -287,7 +286,7 @@ runtime).
 
 ### 3.42 An admin mutation without a root-token capability + an unsealed-Vault witness
 
-**Delivery-owner:** `Phase-29`
+**Delivery-owner:** `Phase-30`
 
 **Case-family:** `security`
 
@@ -368,12 +367,12 @@ graph, with no grant crossing a tenant tag) + `live-effect` residue (provider-st
 normalized content digests, one coalesced target/base witness, store-global MinIO components, and the sealed
 transition high-water; the policies refuse a live cross-tenant read).
 
-**Phase-34 evidence.** The Register-3 gate derives 18 qualified actions for two equal-shaped tenants and reads
+**Phase-35 evidence.** The Register-3 gate derives 18 qualified actions for two equal-shaped tenants and reads
 the resulting Keycloak, Vault, Pulsar, MinIO, Kubernetes, and Postgres administrative objects through six
 separated observers. The hand-authored-grant and outer/inner-tenant-mismatch twins have zero provider effects;
 `drop_provider_arm` and `collapse_tenant_key` both turn the unchanged gate red, and complete target inventories
-return to preflight. The actual cross-subject/cross-tenant request refusal remains the Phase-36 live-effect
-residue, not a Phase-34 claim. Ledger `external-run-reference`.
+return to preflight. The actual cross-subject/cross-tenant request refusal remains the Phase-37 live-effect
+residue, not a Phase-35 claim. Ledger `external-run-reference`.
 
 ### 3.79 A UI action whose server authorization does not match its declaration
 
@@ -484,7 +483,7 @@ mutation may occur.
 to compile, and the committed owner-equality mutant makes both swaps red. Provider enforcement remains the live
 residue. See [Phase 17](../../DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md).
 
-**Phase-36 evidence.** The Register-3 gate authenticates and introspects three real Keycloak credentials across
+**Phase-37 evidence.** The Register-3 gate authenticates and introspects three real Keycloak credentials across
 two tenants, then drives a constructor-private Haskell request context through paired own/foreign Postgres RLS,
 derived MinIO-key, and derived Pulsar-namespace operations. Independent provider and CNI observations find no
 foreign state, message, cursor, or network effect; exact teardown passes. `drop_user_predicate` and

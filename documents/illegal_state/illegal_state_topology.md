@@ -165,10 +165,10 @@ surface-provider-vs-build discipline owned by [`cluster_lifecycle_doctrine.md`](
 arm is surfaced; runtime-checked residue — that the provider's hybrid mechanism actually joins the node.
 **Validation-locus:** `Gate-1-editor` (the closed provider-arm union — the hybrid arm is absent, so a full member node on a hostless `Managed Eks` control plane has no constructor and fails `dhall type`) + `live-effect` (that the provider's hybrid mechanism actually joins the node, once a provider-native arm is surfaced).
 
-The Phase-45 paired pure contract and retained-kind object inventory exercise the closed managed/self-managed
+The Phase-46 paired pure contract and retained-kind object inventory exercise the closed managed/self-managed
 shape and the `NoHostSubstrateOnManagedEks` refusal without claiming provider runtime proof. Actual Managed EKS
 host-foreclosure readback remains a `live-effect` obligation because AWS authority could not create the child.
-The parent always has a `linux-cpu` option on every hardware substrate; use Incus on Linux/Linux-CUDA, Lima on
+The parent always has a `linux-cpu` option on every hardware substrate, at that host's natural architecture; use Incus on Linux/Linux-CUDA, Lima on
 Apple, or WSL2 on Windows when the observation requires a pristine Linux host.
 
 ### 3.39 A split-Site etcd quorum

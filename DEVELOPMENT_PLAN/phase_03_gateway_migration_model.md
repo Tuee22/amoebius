@@ -20,7 +20,7 @@ The gate passed on 2026-08-09; live daemon/forest correspondence remains UNVERIF
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/gateway_migration_model_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_43_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_44_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/gateway_migration_model_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -42,7 +42,16 @@ The gate passed on 2026-08-09; live daemon/forest correspondence remains UNVERIF
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/gateway_migration_model_gate.py` passed all nine sides: all 12
+⏸️ Blocked pending Phase-2 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/gateway_migration_model_gate.py` passed all nine sides: all 12
 authored results match, every per-invariant, mechanical, fairness, cutoff, and shared-resource mutant reddens,
 34 emitted `.tla`/`.cfg` files remain beneath `.build/**`, 15 surfaces join to 17 run-time items, and the
 outside-host inventory and authored roots are unchanged. The project-contained attestation is
@@ -51,7 +60,7 @@ outside-host inventory and authored roots are unchanged. The project-contained a
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:fa98d6036518a43e…`
+Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:fa98d6036518a43e…`
 (1928 non-ignored files) and published a verified pre-containment external attestation
 `sha256:f640ce89ff0bd972746f1b155446e7b54266c946cf4b6b8f3f925073fd74f189`.
 
@@ -71,7 +80,7 @@ would be the dishonest reading.
 
 **Invalidated historical record:**
 
-✅ Done. The Register-1 gate passed on 2026-08-09 with
+Done (invalidated). The Register-1 gate passed on 2026-08-09 with
 `python3 tools/gateway_migration_model_gate.py`, emitting ledger
 `dynamically-resolved`. The explorer and pinned TLC
 agree on all 53 reachable states and all five safety invariants; TLC proves all three liveness properties under
@@ -103,6 +112,8 @@ the spec-decode path.
 
 **Substrate:** `none` — no host, no cluster. The gate is an in-process check battery (TLC + io-sim +
 explorer), analogous to the Phase-0 documentation lint and the Phase-2 kernel round-trip.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -255,7 +266,7 @@ flowchart LR
 **Implementation**: `src/Amoebius/Formal/GatewayMigration.hs` (the concrete `Model`
 value + its five named invariants), atop the Phase-2
 `src/Amoebius/Formal/{Model,Interpret,EmitTLA,Explore}.hs` kernel — built and exercised by the phase gate.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: the value typechecks against the Phase-2 `Model` EDSL, and the reachability
 explorer enumerates a bounded, non-empty state space visiting both a `Planned` and a `Failover` transition,
 with every environment action firing and every implication-form invariant's antecedent materially exercised.
@@ -323,7 +334,7 @@ structurally well formed; the correct explorer state space contains 53 states wi
 **Implementation**: `test/spec/formal/gateway/GatewayMigrationSpec.hs` (the TLC harness) rendering to
 `.build/tla/gateway-migration-model-spec/` (emitted, git-ignored, never committed) and running pinned `tla2tools`
 against the byte-locked fixtures in `test/golden/formal/gateway/` — built.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: TLC reaches every named safety invariant with no counterexample at scope 2 for
 both branches and proves each liveness `PROPERTY` under the declared weak fairness, with the vacuity and
 fairness-sensitivity checks passing and no emitted spec under version control.
@@ -373,7 +384,7 @@ action/antecedent vacuity obligation is reachable, and all three fairness-remova
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `test/spec/formal/gateway/GatewayMigrationSpec.hs` (the `IOSimPOR` harness over
 the lifted `interpret`) and its committed model-mutant catalogue under `test/oracle/formal/gateway/` — built.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: `IOSimPOR` and the in-process reachability explorer, both reading the *same*
 `Model`'s `interpret`, find no safety violation on the correct model over bounded-exhaustive schedules, and
 every mechanical mutant and every entry of the committed per-invariant catalogue is caught. The
@@ -434,7 +445,7 @@ the explorer and TLC, and invariant deletion is caught by the obligation/golden 
 **Implementation**: `src/Amoebius/Multicluster/StructuralFit.hs` (the total decode-time fold over an
 `InForceSpec` migration graph) and `test/spec/formal/gateway/GatewayMigrationSpec.hs` (the independent envelope
 predicate/corpus + over-scope stress run) — built.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: a QuickCheck generator over random migration graphs shows the fold **accepts ⟺
 pairwise ∧ independent ∧ acyclic ∧ in-parameter-envelope** against an independently authored reference
 predicate, under committed coverage thresholds, with all eight clause-delete mutants red, the fold total, and
@@ -549,7 +560,7 @@ cutoff is argued/tested rather than claimed proven.
   `test/spec/formal/*` TLC + io-sim harnesses, and `src/Amoebius/Multicluster/StructuralFit.hs` as one
   `GatewayMigration` `Model` row; retire any stale separate `CrossClusterFailover`/`SingletonElection` spec
   rows (there is one obligation, both branches, and no election model).
-- `DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md` — backlink: this design-model is the artifact
+- `DEVELOPMENT_PLAN/phase_43_multicluster_spawn_georepl.md` — backlink: this design-model is the artifact
   whose Register-3 correspondence against the built `Multicluster/*` forest is discharged there, never here.
 
 ## Related Documents

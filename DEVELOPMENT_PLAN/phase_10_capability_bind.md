@@ -44,7 +44,16 @@ Phase-10 capability-bind ledger.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/capability_bind_gate.py` passed all ten sides: nine capability
+⏸️ Blocked pending Phase-9 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/capability_bind_gate.py` passed all ten sides: nine capability
 arms in both shapes, eighteen exact goldens, three Gate-1 and four Gate-2 negatives, the covered property, all
 four mutants, all twelve metrics, and the honesty ledger pass; 29 surfaces join to 36 enumerated items. The
 project-contained attestation is `sha256:2e71dade980d2205a70538ac3db3d20b5f04cc81b52a2a345ea237529e2ba30b`,
@@ -52,7 +61,7 @@ bound to source snapshot `sha256:f11ac11d30e778b9…`; Phase 10 owns no remainin
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:a14933f8e034d4ba…`
+Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:a14933f8e034d4ba…`
 (1935 non-ignored files) and published a verified pre-containment external attestation
 `sha256:af29f3726a6b4464436530958b476925360aec3a82a7005ade12fda31a0ad6b6`.
 
@@ -73,7 +82,7 @@ did not produce, and the gap is recorded against Phase 10 in
 
 **Invalidated historical record:**
 
-✅ Done. Validated 2026-08-09 on **no substrate** (`none`) in **Register 1** with
+Done (invalidated). Validated 2026-08-09 on **no substrate** (`none`) in **Register 1** with
 `python3 tools/capability_bind_gate.py`; ledger
 `dynamically-resolved`. It stood up
 no host, no cluster, and no provider, only the pure capability union, the app-surface
@@ -123,10 +132,12 @@ object-store/observability/migration/scheduler-reservation demand derivation and
 target-offering→lane quotient, and the accelerator residency/coexistence provision
 ([Phase 12](phase_12_inference_accelerator_provision.md)); the pure
 `renderAll :: ProvisionedSpec -> [K8sObject]` ([Phase 13](phase_13_render_manifest_goldens.md)); and the live
-jit-resolve of an engine into its `CacheBudget`-bounded cache ([Phase 48](phase_48_determinism_jitcache.md)).
+jit-resolve of an engine into its `CacheBudget`-bounded cache ([Phase 49](phase_49_determinism_jitcache.md)).
 
 **Substrate:** none — no host, no cluster, no provider; the gate is an in-process `cabal test` bind + property +
 corpus battery, analogous to the Phase-5 decode battery.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1 — pure/golden, in-process, no cluster.
 
@@ -252,7 +263,7 @@ the engine actually resolving into its bounded cache) deferred to the live band,
   grounded in [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).
   **This phase adopts only the union's representational shape** — the closed `EngineRuntime` lane union with **no arbitrary-`Url`/`Download` arm**, so "name the engine by URL" has no syntax and fails Gate 1. The family×lane
   availability relation, the target-offering→lane quotient, the accelerator owner demands, and the actual
-  jit-resolve are **not** here (Phases 12 / 38).
+  jit-resolve are **not** here (Phases 12 / 39).
 - [`service_capability_doctrine.md §8`](../documents/engineering/service_capability_doctrine.md#8-capabilities-and-the-illegal-state-contract)
   — **capabilities and the illegal-state contract:** an app cannot name a product (no arm — Gate 1), a
   capability cannot bind to a provider with no inhabitant (an unbuilt alternate does not decode — Gate 2), and a
@@ -547,7 +558,7 @@ None. The 18 goldens, three Gate-1 negatives, four Gate-2 negatives, coverage pr
   engine resolved) deferred.
 - `documents/engineering/content_addressing_doctrine.md` — reconcile §4.5's Tier-1 engine as the
   `InferenceEngine` provider whose named identity this binder decodes; keep the jit-resolve into the bounded
-  cache as the live-band residue ([Phase 48](phase_48_determinism_jitcache.md)).
+  cache as the live-band residue ([Phase 49](phase_49_determinism_jitcache.md)).
 - `documents/engineering/app_vs_deployment_doctrine.md` — the app-surface capability resources vs the
   deployment-rules shape/provider surface; `documents/engineering/dsl_doctrine.md` — the capability-model
   instance of the two-gate contract.
@@ -588,5 +599,5 @@ None. The 18 goldens, three Gate-1 negatives, four Gate-2 negatives, coverage pr
 - [phase_12](phase_12_inference_accelerator_provision.md) — the `InferenceEngine` family×lane availability
   relation and the accelerator residency/coexistence provision layered on this phase's capability union
 - [phase_13](phase_13_render_manifest_goldens.md) — the pure deployment-global
-  `renderAll :: ProvisionedSpec -> [K8sObject]` downstream of the provision seal - [phase_48](phase_48_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
+  `renderAll :: ProvisionedSpec -> [K8sObject]` downstream of the provision seal - [phase_49](phase_49_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
   materializes the named `EngineRuntime` identity this phase only decodes

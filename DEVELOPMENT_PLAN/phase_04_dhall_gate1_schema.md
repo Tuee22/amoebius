@@ -41,7 +41,16 @@ The complete Gate-1 gate passed on 2026-08-09; Gate-2 semantics and runtime fide
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/dhall_gate1_schema_gate.py` passed all nine sides after canonical
+⏸️ Blocked pending Phase-3 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/dhall_gate1_schema_gate.py` passed all nine sides after canonical
 Dhall normalization: all 18 authored metrics match, every field-deletion, type-substitution, special-resource,
 and custom-arm mutant reddens, 18 surfaces join to 21 run-time items, and generated results, host inventory,
 and authored roots remain contained and unchanged. The project-contained attestation is
@@ -50,7 +59,7 @@ and authored roots remain contained and unchanged. The project-contained attesta
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — resealed 2026-08-13 after the secrets amendment, attestation
+Done (invalidated) — resealed 2026-08-13 after the secrets amendment, attestation
 `sha256:e08489a637b107c5da2770a1b7265d526705963bcd321f8c93b330311c6469e9`.
 
 **What the reseal added.** `dhall/amoebius/SecretRef.dhall` is the shared three-arm union — `Vault`,
@@ -61,7 +70,7 @@ literal where a reference belongs, and fails `dhall type` against a committed go
 schema modules to 18 with its reviewed inventory extended beside it, and the enumeration carries a
 `secret-reference-policy` surface joined to that negative's metric.
 
-**Reopened 2026-08-13.** This phase was ✅ Done, sealed 2026-08-12 against source snapshot
+**Reopened 2026-08-13.** This phase was Done (invalidated), sealed 2026-08-12 against source snapshot
 `sha256:81c596c46e9c8772…` with attestation
 `sha256:00bfda42ed8e2ddc333713e05262a92f41d9bc76b2dad1219202e12099a9c019`. That seal is invalidated by a
 scope amendment, not by a defect in the run: Gate 1 must now admit a `SecretRef` and give a `Text` in a
@@ -71,7 +80,7 @@ That adds an authored module to the Gate-1 corpus, which moves this phase's `sch
 reviewed module inventory — the gate's own count changes, so the gate changes
 ([§N](development_plan_standards.md#n-reopening-and-amending-a-phase)).
 
-**Why the type lands here and not in Phase 29.** Phase 29 builds Vault; Gate 1 is *this* phase's boundary.
+**Why the type lands here and not in Phase 29.** Phase 30 builds Vault; Gate 1 is *this* phase's boundary.
 "A production config cannot express a secret value" is a statement about the typechecker, and putting it in
 the phase that happens to need it first would leave Phases 4 and 5 claiming a complete Gate-1/Gate-2
 admission boundary that a later phase quietly completes — the forward dependency
@@ -97,7 +106,7 @@ replaced by a hard failure when the resolver has not supplied one.
 `dhall/amoebius/SanctionedApi.dhall` and `dhall/amoebius/UiOffline.dhall` were not `dhall lint` clean, which
 this phase has always required; both are now normalized, and the change is pure formatting — list collapsing
 and record punning. Separately, the `schema-modules` oracle read 14 while the tree holds 17, because Phase 16
-added `SanctionedApi`, Phase 25 added `BakeCatalog`, and Phase 60 added `UiOffline`. A bare count is a weak
+added `SanctionedApi`, Phase 25 added `BakeCatalog`, and Phase 61 added `UiOffline`. A bare count is a weak
 oracle that drifts silently as later phases grow the schema, so it is amended to 17 **and** paired with a new
 `schema-module-inventory` metric carrying the reviewed module list — a module added without review now breaks
 the inventory instead of sliding past a number
@@ -105,7 +114,7 @@ the inventory instead of sliding past a number
 
 **Invalidated historical record:**
 
-✅ Done. The Register-1 gate passed on 2026-08-09 with `python3 tools/dhall_gate1_schema_gate.py`, emitting ledger
+Done (invalidated). The Register-1 gate passed on 2026-08-09 with `python3 tools/dhall_gate1_schema_gate.py`, emitting ledger
 `dynamically-resolved`. Fourteen schema modules are
 `dhall type`/`dhall lint` clean; all four representative positives type-check; all eight catalog negatives
 and three image/process negatives fail for their byte-locked normalized structural reason. Both import-policy
@@ -133,6 +142,8 @@ corpus and touches no infrastructure.
 
 **Substrate:** none — no host, no cluster; the gate is an in-process `dhall type` battery over the fixture
 corpus.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -191,7 +202,7 @@ is `dhall/examples/legal_secret_reference.dhall`, which differs in exactly one p
 golden pins the observed `dhall type` error. Rejecting a literal *value* at decode is Gate-2 surface and
 belongs to [Phase 5](phase_05_gadt_decoder_gate2.md); whether the named secret exists is a live question
 neither gate can answer, and is owned by
-[Phase 29](phase_29_vault_pki.md).
+[Phase 30](phase_30_vault_pki.md).
 
 ### Paired positive per negative (§M.8 / §M.3)
 
@@ -467,7 +478,7 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
 **Implementation**:
 `dhall/amoebius/{prelude,Cluster,App,Deployment,Capability,Topology,Capacity,Resources,Storage,Retention,Image,Extension,Consistency,Backup}.dhall`
 — the typed surfaces and their smart constructors.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Requires**: `host-toolchain` — the `dhall` CLI only; this sprint needs **no** Haskell skeleton (that
 arrives with the Gate-2 decoder in Phase 5).
 **Independent Validation**: every schema module stands on its own under `dhall type` / `dhall lint`, and its
@@ -492,10 +503,10 @@ an authoring-time boundary that fires before any binary runs.
     so an extension declaring no monitoring has no inhabitant.
   - `Consistency.dhall` carries the PACELC surface
     ([`consistency_pacelc_doctrine.md`](../documents/engineering/consistency_pacelc_doctrine.md)) that
-    [Phase 43](phase_43_gateway_migration_drills.md) consumes.
+    [Phase 44](phase_44_gateway_migration_drills.md) consumes.
   - `Backup.dhall` carries the closed `BackupPolicy`
     ([`backup_recovery_doctrine.md`](../documents/engineering/backup_recovery_doctrine.md)), cross-cutting
-    invariant #23. Phases 0–64 own the *declarable* policy; its live enactment — the put-only credential and
+    invariant #23. Phases 0–65 own the *declarable* policy; its live enactment — the put-only credential and
     the copy/verify `Job` — is the named candidate phase in [`later_phases.md`](later_phases.md), so the
     surface is owned rather than merely absent.
 - A Dhall prelude and record/union types exposing only *smart constructors* — a vocabulary with no illegal
@@ -740,7 +751,7 @@ None. The schema modules and independently authored union, required-field, and n
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/examples/legal_*.dhall` (worked-example cluster / app /
 deployment specs); `tools/dhall_gate1.sh` (a `dhall type` corpus harness) — built.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: every positive fixture type-checks under `dhall
 type` against the Sprint-4.1 schema; the harness exit code is a single green/red over the whole positive
 set.
@@ -793,7 +804,7 @@ engine, transition, accelerator, and monitoring structures required above.
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/examples/illegal_*.dhall` (the Gate-1 subset);
 `tools/dhall_gate1_negatives.sh` (an expect-fail `dhall type` harness) — built.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: each of the eight canonical Gate-1-class negatives fails `dhall type` for its
 pinned reason while its reverted paired positive type-checks, the committed seeded mutant goes red, and the
 partial-foreclosure ledger accounts for every entry. The numbered `### Validation` list below carries the
@@ -896,7 +907,7 @@ production config cannot express a secret value.
 
 None at this register. Gate 1 decides shape; the decoder's rejection of a literal is
 [Phase 5](phase_05_gadt_decoder_gate2.md)'s and the live presence proof is
-[Phase 29](phase_29_vault_pki.md)'s.
+[Phase 30](phase_30_vault_pki.md)'s.
 
 ## Documentation Requirements
 

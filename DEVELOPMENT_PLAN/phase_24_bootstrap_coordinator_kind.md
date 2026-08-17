@@ -23,7 +23,7 @@ the Lima and WSL2 command plans remain portability equivalents for their corresp
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_sources.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_27_object_reconciler.md, DEVELOPMENT_PLAN/phase_28_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_34_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_45_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_48_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_sources.md
 **Generated sections**: none
 
 </details>
@@ -45,7 +45,16 @@ the Lima and WSL2 command plans remain portability equivalents for their corresp
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/bootstrap_coordinator_gate.py --execute` passed all eleven
+⏸️ Blocked pending Phase-23 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/bootstrap_coordinator_gate.py --execute` passed all eleven
 sides against a newly materialized pristine Incus Ubuntu guest: toolchain, oracle, static, mutant, live,
 results, surface, ledger, attestation, containment, and authored-root write guard. All six committed mutants
 are independently red; all sixteen metrics equal their authored values; 28 surfaces join completely to 30
@@ -57,7 +66,7 @@ the host inventory is unchanged and the guest was destroyed. The project-contain
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-14. All ten sides of `python3 tools/bootstrap_coordinator_gate.py --execute` pass against a newly
+Done (invalidated) — sealed 2026-08-14. All ten sides of `python3 tools/bootstrap_coordinator_gate.py --execute` pass against a newly
 materialized pristine Incus guest, every one of the six committed mutants is red from its own observation, and
 all 28 surfaces join to the run's enumeration with none left UNVERIFIED.
 
@@ -138,7 +147,7 @@ without it.
 
 **Invalidated historical record:**
 
-✅ **Done.** The detector, closed five-member `HostTool`
+**Done.** The detector, closed five-member `HostTool`
 enum, opaque `AbsExe` execution boundary, Python `pb` bootstrap coordinator, single-node kind reconciler, and observed
 inventory reader now exist in the paths named below. Pure oracles pass under GHC 9.12.4. A machine-clean
 Incus VM proved absent→installed pinned tools, a from-source build, Python `exec` handoff, exactly
@@ -195,13 +204,15 @@ The bootstrap coordinator is a **Python `pb` CLI, not a shell script**. amoebius
 `bootstrap.sh` igniter is retired ([legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md)). `pb`
 is one CLI with two modes — **bootstrap coordinator** (bare host → toolchain → build → `exec` the binary, this phase) and
 **admin-REST client** (the operator CLI that drives the singleton after handoff, delivered by
-[phase_33](phase_33_live_dsl_singleton.md) Sprint 33.4) — so the
+[phase_34](phase_34_live_dsl_singleton.md) Sprint 34.4) — so the
 per-substrate pre-binary surface is exactly the package-manager-root bootstrap and nothing else.
 
 **Substrate:** linux-cpu (the universal baseline execution lane; tracked in [substrates.md](substrates.md), per
 [development_plan_standards.md §L](development_plan_standards.md#l-one-substrate-discipline)). It can run on
 any detected hardware: natively or in Incus on Linux, Lima on Apple, and WSL2 on Windows. This gate exercises
 exactly one such route. A specialized CUDA/Metal lane is not exercised.
+
+**Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure) — the gate provisions a real kind cluster in a pristine `linux-cpu` guest and
 tears down leak-free; a Register-1/2 in-process check cannot discharge it.
@@ -472,7 +483,7 @@ bootstrap coordinator run reads `cpu.max=350000 100000` and `memory.max=75161927
 CPU/RSS cgroup and disk boundary, and `exec`-handed off; the identical rerun performed no install/build mutation.
 **Implementation**: `pb/pyproject.toml`, `pb/pb/cli.py`, `pb/pb/bootstrap_coordinator.py` (the
 **bootstrap coordinator** mode delivered here; the two-mode CLI was completed by the delivered admin-REST client
-`pb/pb/admin.py` in [phase_33](phase_33_live_dsl_singleton.md) Sprint 33.4). No shell script: amoebius owns
+`pb/pb/admin.py` in [phase_34](phase_34_live_dsl_singleton.md) Sprint 34.4). No shell script: amoebius owns
 none.
 **Blocked by**: None.
 **Independent Validation**: on a pristine `linux-cpu` guest proved clean by a ledger-recorded preflight probe,
@@ -676,7 +687,7 @@ and discharging the live-inventory cross-check of
   These bootstrap add-ons may still use `default-scheduler` in this Phase-24 empty-cluster state; the later
   cutover of these `default-scheduler` bootstrap add-ons onto the managed capacity scheduler — subtracting them
   as foreign/static commitments, minting `BootstrapCapacitySchedulerReady` then `ManagedCapacityReady`, and
-  leaving the scheduler bootstrap Pod as the sole `default-scheduler` exception — is Phase 27's scope and is
+  leaving the scheduler bootstrap Pod as the sole `default-scheduler` exception — is Phase 28's scope and is
   specified there.
 - **oracle-pinned divergent-start fixtures** (§M.1) with their expected converged observation, and the
   committed mutant M3 (reconciler replaced by a `kind get clusters | grep <name>` one-shot guard) that the
@@ -796,8 +807,8 @@ schema-checked bundle is externally attested; no evidence or ledger file beneath
   Python `pb` bootstrap coordinator land, flip the §9 planning-ownership orientation note for this phase from intent to a
   delivered-status pointer (status stays in the plan) and reconcile any seed-vs-target discovery caveats in §3.
 - `documents/engineering/bootstrap_sequence_doctrine.md` — record that `pb`'s **bootstrap coordinator** mode is delivered here
-  and that its **admin-REST client** mode (§5) is delivered by [phase_33](phase_33_live_dsl_singleton.md)
-  Phase 33 Sprint 33.4, not left to an unassigned "later phase".
+  and that its **admin-REST client** mode (§5) is delivered by [phase_34](phase_34_live_dsl_singleton.md)
+  Phase 34 Sprint 34.4, not left to an unassigned "later phase".
 - `documents/engineering/cluster_lifecycle_doctrine.md` — confirm the §2/§9 "bring-up is itself a reconcile"
   no-op shape is exercised by this phase's gate.
 - `documents/engineering/resource_capacity_doctrine.md` — record Phase 24 as the first live producer of the
@@ -826,6 +837,6 @@ schema-checked bundle is externally attested; no evidence or ledger file beneath
 - [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — two cluster kinds and
   bring-up-as-reconcile.
 - [Bootstrap Sequence Doctrine](../documents/engineering/bootstrap_sequence_doctrine.md) — the unified `pb` CLI's
-  two modes (bootstrap coordinator here; admin-REST client in [phase_33](phase_33_live_dsl_singleton.md) Sprint 33.4).
+  two modes (bootstrap coordinator here; admin-REST client in [phase_34](phase_34_live_dsl_singleton.md) Sprint 34.4).
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the parameters/context/witness orchestration surface
   the `bootstrap` command carries.

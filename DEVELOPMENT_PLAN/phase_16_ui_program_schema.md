@@ -37,7 +37,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/ui_program_schema_gate.py` passed all twelve sides: three
+⏸️ Blocked pending Phase-15 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_program_schema_gate.py` passed all twelve sides: three
 positives, ten exact negatives, graph/wire oracles, eight coverage classes, the compile seal, network
 isolation, all six mutants, and all ten metrics pass; 29 surfaces join to 46 enumerated items. The
 project-contained attestation is `sha256:2016b288fe76e5fa1d609d203269c7b17ea81c202eaa341f18e12ea99440e2b9`,
@@ -45,7 +54,7 @@ bound to source snapshot `sha256:7c8debd11c8ba98a…`; Phase 16 owns no remainin
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:89b25d3a…`
+Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:89b25d3a…`
 (1941 non-ignored files) and published a verified pre-containment external attestation
 `sha256:4580dcd430b5608434256528d6500153f7aac31b5bfe27bcf1b484e53ab44c9c`.
 
@@ -69,7 +78,7 @@ route still passes.
 
 **Invalidated historical record:**
 
-✅ Done. The closed Dhall wire, total structural checker, independent oracles, generated coverage, constructor
+Done (invalidated). The closed Dhall wire, total structural checker, independent oracles, generated coverage, constructor
 seal, and all six mutants pass. Browser, UI-server, identity-provider, and storage-provider enforcement remain
 UNVERIFIED. See the Phase-16 ledger.
 
@@ -91,6 +100,8 @@ plan emission, a browser/server interpreter, a second register, or a substrate.
 **Dependency:** Phase 15 — the pre-cluster design band and deterministic test substrate are available; this
 gate itself is pure and does not consume simulated effects.
 **Substrate:** none — no host, browser, network, credential, provider service, or cluster is contacted.
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+
 **Register:** 1 — pure/golden.
 **Gate:** `python3 tools/ui_program_schema_gate.py` passes the Phase-0 corpus, structural and
 wire oracles, coverage floors, constructor compile seal, network observer, six explicit mutant-red runs, and

@@ -47,7 +47,16 @@ and remaining implementation are stated below.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15 with the repository-containment contract enforced. All ten sides of
+🔄 Active — **reopened 2026-08-16 by the natural-architecture amendment**, whose postcondition this phase
+owns. [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) gains clause 15: a run records
+the detected substrate, the selected lane, and the natural architecture it proved, and executes no artifact of
+another. Phase 0 adds that clause to the universal gate and to the documentation lint — the `Lane:` field of
+[§D](development_plan_standards.md#d-the-per-phase-document-skeleton), checked against the tracker and
+[substrates.md](substrates.md) the way the substrate already is. Until it reseals, no later phase reruns.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15 with the repository-containment contract enforced. All ten sides of
 `python3 tools/doc_lint_verify.py` pass: 17 artifact-policy rules are clean and independently mutation-proven,
 Phase-0 output and attestation resolve beneath `.build/**`, and the filesystem/mount/loop/Docker host inventory
 is unchanged outside the physical checkout. The passing run attested
@@ -61,7 +70,7 @@ seal; it was never treated as an exception.
 
 **Pre-containment status record (invalidated):**
 
-✅ Done — resealed 2026-08-14 after the final-layout amendment. All nine sides of
+Done (invalidated) — resealed 2026-08-14 after the final-layout amendment. All nine sides of
 `python3 tools/doc_lint_verify.py` pass against the widened gate: fifteen artifact-policy rules clean, each
 proven red by its own seeded negative. The run published attestation
 `sha256:a45fc9bb9ff0fab2f0c84b8a4789df4a8fb5dacd4b230b08606701e90fab379f`, bound to source snapshot
@@ -142,7 +151,7 @@ exemption cannot widen or outlive its reason. Sprint 0.8 records the two structu
 attestation refusal corpus moved into its own module so the adapter itself stays fully scanned, and every rule
 that asks what a build or gate reads and writes now keys on the source snapshot rather than the tracked tree.
 
-**Superseded seal — historical record:** ✅ Done — sealed 2026-08-12. All nine sides of `python3 tools/doc_lint_verify.py` passed, including a snapshot
+**Superseded seal — historical record:** Done (invalidated) — sealed 2026-08-12. All nine sides of `python3 tools/doc_lint_verify.py` passed, including a snapshot
 side that copies every non-ignored file into a scratch tree and lints the governed corpus there, so no ignored
 worktree file can be an input. The run publishes a verified repository-local attestation bound to the snapshot digest. The seeded negatives materialize under `.build/test-corpora/doc_lint/` instead of being
 committed, the run-time surface enumeration joins completely to an authored expectation, the ledger is emitted
@@ -208,6 +217,8 @@ runtime surface, or an acceptance command other than the two-sided documentation
 
 **Substrate:** none ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the gate is a pure documentation lint over text and the link graph; it touches no
 `apple`, `linux-cpu`, `linux-cuda`, or `windows` host and stands up no resources.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** — (no register: the documentation-lint gate validates text and the link graph, not amoebius behaviour, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -383,10 +394,10 @@ flowchart LR
 `DEVELOPMENT_PLAN/development_plan_standards.md`, `DEVELOPMENT_PLAN/README.md`,
 `DEVELOPMENT_PLAN/overview.md`, `DEVELOPMENT_PLAN/system_components.md`, `DEVELOPMENT_PLAN/substrates.md`,
 `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `DEVELOPMENT_PLAN/later_phases.md`, and the
-`phase_00`…`phase_64` phase docs (authored; artifact audit remains)
+`phase_00`…`phase_65` phase docs (authored; artifact audit remains)
 **Blocked by**: none
 **Independent Validation**: lint the spine files in isolation — each carries a valid header block, the status vocabulary
-and per-phase/per-sprint skeletons are defined, the 65-phase overview table is internally consistent, and
+and per-phase/per-sprint skeletons are defined, the 66-phase overview table is internally consistent, and
 every intra-plan link resolves.
 **Docs to update**: the spine files above and
 `documents/engineering/README.md`
@@ -404,7 +415,7 @@ amoebius's snake_case rule), and the tracker is rebuilt for 65 contiguous single
 - The documentation standard (header block, naming, SSoT/no-duplication, bidirectional links, honesty, tone,
   diagram rules).
 - The plan rulebook (`development_plan_standards.md`): the [§A](development_plan_standards.md#a-header-metadata-same-block-as-the-doctrine-suite)–[§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) disciplines (header, snake_case layout, status vocabulary, per-phase skeleton, one-phase model, sprint block format, Documentation Requirements, doctrine-citation rule, generated markers, cross-ref path rules, honesty, one-substrate, gate integrity).
-- The live tracker (`README.md`): the Document Index, the 65-phase Overview table with its one-line gates and
+- The live tracker (`README.md`): the Document Index, the 66-phase Overview table with its one-line gates and
   substrate/register columns, the status vocabulary, the phase discipline, and the cross-cutting invariants.
 - `overview.md`, `system_components.md`, `substrates.md`, `legacy_tracking_for_deletion.md`, `later_phases.md`,
   and the per-phase docs' spine.
@@ -611,7 +622,7 @@ checker that *is* the Phase 0 gate.
   `gateway_migration_model_doctrine.md` (the one obligation, both `Planned` and `Failover` branches, reduced by
   a decode-time structural-fit fold).
 - `tla_modelling_assumptions.md`: a `Deprecated` redirect stub pointing at the two docs above.
-- The UI-gate fixture set named by Phases 16–23, 36, 38, 40, 50, 52, and 55–58 — the
+- The UI-gate fixture set named by Phases 16–23, 37, 39, 41, 51, 53, and 56–59 — the
   `test/golden/phase_*` regression fixtures and the correspondingly named `test/mutants/phase_*` seeded
   mutants, which are what the provenance review below runs on. Each candidate expectation is
   classified by history and independent review. Same-commit additions remain regression fixtures until
@@ -798,7 +809,7 @@ evidence, dynamic dependency resolution, exact ignore/context coverage, and the 
 - Lints rejecting locks/freezes, generated evidence, package integrity pins, developer-home paths, and obsolete
   terminology.
 - A synthetic external-attestation positive and negative corpus.
-- Reconciled phase status showing Phase 0 Active and phases 1–64 Blocked.
+- Reconciled phase status showing Phase 0 Active and phases 1–65 Blocked.
 
 ### Validation
 

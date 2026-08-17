@@ -23,7 +23,7 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md
 **Generated sections**: none
 
 </details>
@@ -43,7 +43,16 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/inference_accelerator_gate.py` passed all ten sides: 23
+⏸️ Blocked pending Phase-11 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/inference_accelerator_gate.py` passed all ten sides: 23
 coexistence, family/lane, offering, provision, and mutant items, all five mutants, all twelve metrics, and the
 honesty ledger pass; 28 surfaces join to 39 enumerated items. The project-contained attestation is
 `sha256:656509c77d5b6239bcbb1df1a3d327f6e889aaff87893c093faf5867a45e01d6`, bound to source snapshot
@@ -51,7 +60,7 @@ honesty ledger pass; 28 surfaces join to 39 enumerated items. The project-contai
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:32e80b8d1d0ae545…`
+Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:32e80b8d1d0ae545…`
 (1937 non-ignored files) and published a verified pre-containment external attestation
 `sha256:eba86a80c57d10c9629d25cd74199104d3df181cb1adbb2f223492d1d3b3a89f`.
 
@@ -69,7 +78,7 @@ Phase 12 in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md)
 
 **Invalidated historical record:**
 
-✅ Done. The target-offering quotient, family relation, identity-complete owner checks, provision corpus,
+Done (invalidated). The target-offering quotient, family relation, identity-complete owner checks, provision corpus,
 properties, and mutant battery passed on 2026-08-09. Evidence is retained under
 `evidence/phase_12/`, with the claim boundary in
 `ledgers/phase_12_inference_accelerator_provision.md`.
@@ -121,7 +130,7 @@ What this sub-phase does **not** own:
 - the render of a provisioned deployment into `[K8sObject]` (the pure `renderAll` phase)
 - and the **live** jit-build resolve of the named `EngineRuntime` identity into its `CacheBudget`-bounded
   content-addressed cache plus the runtime-checked cross-lane weight-load residue — the live band
-  ([Phase 48](phase_48_determinism_jitcache.md)).
+  ([Phase 49](phase_49_determinism_jitcache.md)).
 
 This phase builds the *representational* union + relation and the pure accelerator-provision fold only; it
 performs no live device read and claims no runtime proof.
@@ -129,6 +138,8 @@ performs no live device read and claims no runtime proof.
 **Substrate:** none — no CUDA device, no Metal host, no cluster; the gate is an in-process `cabal test` bind +
 accelerator-provision fold + property/corpus battery, analogous to the Phase-9 accelerator fold and the
 Phase-11 provision seal.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -276,7 +287,7 @@ device count equals the owner requirement) and each minimally-differing one-devi
   provider is the Tier-1 read-side of this lifecycle: an ML engine is a **named catalog identity** the shared
   jit-build resolver materializes on first miss into a `CacheBudget`-bounded content-addressed cache — never
   baked, never fetched by URL. This phase decodes that named identity; the resolve is
-  [Phase 48](phase_48_determinism_jitcache.md).
+  [Phase 49](phase_49_determinism_jitcache.md).
 - [`service_capability_doctrine.md §4`](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding)
   and [`§3`](../documents/engineering/service_capability_doctrine.md#3-one-canonical-provider-the-type-admits-alternates)
   — **Capability → provider → shape: the binding**, and **one canonical provider (the type admits alternates).**
@@ -379,7 +390,7 @@ resolve.
   `renderAll`.
 - An in-file honesty note: this is the representational union + relation and the pure accelerator-provision fold
   only; the actual jit-build resolve into the `CacheBudget`-bounded content-addressed cache, and the
-  runtime-checked cross-lane weight-load residue, are the live band ([Phase 48](phase_48_determinism_jitcache.md))
+  runtime-checked cross-lane weight-load residue, are the live band ([Phase 49](phase_49_determinism_jitcache.md))
   — sibling evidence where infernix's `Worker.hs` selects (never fetches) its engine, not an amoebius result.
 
 ### Validation
@@ -502,5 +513,5 @@ The whole sprint (✅ Done).
 - [phase_10](phase_10_capability_bind.md) — the closed nine-arm capability union (whose reserved `InferenceEngine` head this phase fills), the representational `bind`, and the object-node-multiset shape oracle
 - [phase_11](phase_11_provision_seal.md) — the whole-deployment provision seal that constructs the accelerator
   epoch witnesses and returns the `provision-seal` `Left`s this phase exercises
-- [phase_48](phase_48_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
+- [phase_49](phase_49_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
   materializes the named `EngineRuntime` identity this phase only decodes

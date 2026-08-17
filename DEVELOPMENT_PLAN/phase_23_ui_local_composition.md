@@ -37,7 +37,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/local_ui_composition_gate.py` passed all thirteen sides in
+⏸️ Blocked pending Phase-22 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/local_ui_composition_gate.py` passed all thirteen sides in
 resolved Chrome: two Dhall-typed applications, five interactions, four exact visible states, four ordered
 effects, three access rows, five zero-leak denials, loopback-only OS observation, all five mutants, and all
 seventeen metrics pass; 58 surfaces join to 71 run-time items. The final legacy `tests/` root is normalized
@@ -49,7 +58,7 @@ project-contained attestation is
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:d08a350888547a54…`
+Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:d08a350888547a54…`
 (1946 non-ignored files) and published a verified pre-containment external attestation
 `sha256:363ae0c7c14e334f0455a1ffb67c9ce14eae0f33c736ca555187b076f596bc1a`.
 
@@ -76,7 +85,7 @@ come from the gate's resolution, with PATH as the fallback.
 
 **Invalidated historical record:**
 
-✅ Done. Two Dhall-authored applications reuse one generic bundle and the `serve-ui` boundary in real Chrome.
+Done (invalidated). Two Dhall-authored applications reuse one generic bundle and the `serve-ui` boundary in real Chrome.
 Five interactions join all three generated workflow surfaces; four visible pins, four ordered-effect rows,
 three access rows, five denials, a fresh workflow-to-artifact nonce, 36 loopback network syscalls, and all five
 mutants pass. This is Register-2 evidence with separate infernix-/jitML-shaped fakes, not live adapters,
@@ -101,6 +110,8 @@ acceptance command `python3 tools/local_ui_composition_gate.py`; split immediate
 domain adapter, live identity/provider/cluster, deployment/HA, a second register, or a substrate.
 **Dependencies:** Phase 21 — generic browser interpreter; Phase 22 — authenticated scoped UI-server boundary.
 **Substrate:** none — local browser, authority, server, and fake data/workflow/artifact processes only.
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+
 **Register:** 2 — boundary integration with fakes.
 **Gate:** `python3 tools/local_ui_composition_gate.py` passes the Phase-0-pinned apps, authored interactions,
 generated-surface join, fresh challenge, scope pairs, external observations, bypass probes, and seeded mutants

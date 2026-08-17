@@ -17,7 +17,7 @@ owned by [browser_offline_runtime_doctrine.md](./browser_offline_runtime_doctrin
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_37_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_39_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_41_ui_program_release.md, DEVELOPMENT_PLAN/phase_51_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_53_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_56_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_58_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_59_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_60_offline_language_plan.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -538,14 +538,14 @@ membership, grant, and scope epochs plus a successful scope join can construct `
 independent matrix includes hidden-but-invocable and absent-policy cases. Live edge, identity-provider,
 UI-server, and provider enforcement remains UNVERIFIED.
 
-[Phase 36](../../DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md) discharges the live provider-enforcement
+[Phase 37](../../DEVELOPMENT_PLAN/phase_37_user_tenant_isolation_live.md) discharges the live provider-enforcement
 slice for scoped actions. A private Haskell adapter accepts verified Keycloak credential context and ignores
 hostile caller tenant/subject fields; paired own/foreign requests are checked through Postgres RLS, derived
 MinIO keys, native Pulsar namespaces, and enforcing NetworkPolicy. Three real credentials, external provider
 readback, zero forbidden state/cursor effects, exact cleanup, and two red authority mutants pass in Register 3.
-Browser tenant switching remains Phase 56, and complete provider-audit-log correspondence remains `UNVERIFIED`.
+Browser tenant switching remains Phase 57, and complete provider-audit-log correspondence remains `UNVERIFIED`.
 
-[Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md) validates the next private UI seam. Fresh
+[Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_projection_runtime.md) validates the next private UI seam. Fresh
 Keycloak sessions become trusted request contexts; a server-sealed owner handle returns only its own challenged
 projection and watermark, while same-tenant foreign-owner, foreign-tenant, swapped-handle, guessed-id, forged-
 field, and stale-epoch variants return the same public denial. User credentials have no direct Pulsar path.
@@ -655,7 +655,7 @@ declared byte and media constraints, performs configured quarantine/validation s
 short-lived opaque handles. Dhall cannot request a bucket, key, filesystem path, pre-signed provider URL, or
 arbitrary content type. The browser never receives MinIO, SQL, Pulsar, Vault, or inference-engine credentials.
 
-The Phase-38 live fold realizes this rule for workflow read models: every row key and subscription retains
+The Phase-39 live fold realizes this rule for workflow read models: every row key and subscription retains
 `(AppId, TenantId, Owner, ProjectionId)`, every receipt retains the original scoped `CommandId`, workflow work
 id, and handle, and conflicting normalized input produces `IdempotencyConflict` with zero new effect. Update,
 tombstone, recreate, exact redelivery, and resume from a non-final cursor match the independent Phase-0 tables.
@@ -723,7 +723,7 @@ different digest yields a typed conflict before Pulsar publication. Starts are i
 authored bounded dependency DAG orders them; no same-owner global FIFO is inferred. Count, encoded-byte, and
 age limits are positive finite values in the bound port contract, never adapter defaults. Expiry produces
 `Expired` before publish. Reconnect rechecks the current program/ABI, authentication, membership, policy,
-scope, catalog identities, and dependency receipts before replay. `Accepted` comes only from the Phase-38
+scope, catalog identities, and dependency receipts before replay. `Accepted` comes only from the Phase-39
 effect-owner-derived receipt carrying the same command/workflow identity; Redis and WebSocket delivery remain
 non-authoritative.
 
@@ -731,19 +731,19 @@ A specialized infernix or jitML interaction that the core algebra cannot express
 component implemented in the generic PureScript runtime and a matching Haskell contract witness. Extension
 Dhall configures that component; it does not ship arbitrary JavaScript or a separately trusted browser bundle.
 
-The scoped Phase-50 infernix instance now supplies the first concrete adapter for this rule. A constructor-
+The scoped Phase-51 infernix instance now supplies the first concrete adapter for this rule. A constructor-
 hidden ready handle flows through a bounded Dhall program into trusted, owner/tenant/port-qualified start and
-invoke operations; exact resend returns the original Phase-38-style receipt, changed input conflicts before an
+invoke operations; exact resend returns the original Phase-39-style receipt, changed input conflicts before an
 effect, and compiled scope/terminal-identity mutants turn red. Real Chrome, fresh Keycloak tenant sessions,
 retained Pulsar and MinIO, and a fresh Kubernetes reference worker exercise one own-tenant interaction and a
 foreign-tenant zero-effect denial; a second loopback server origin reads the terminal receipt from MinIO.
-This is a `reference-uppercase` computation, not the full Phase-49 output path. Browser-through-Envoy UI
-routing, Kubernetes UI-server replicas, Phase-50 native CBOR, production inference, Redis/socket recovery,
+This is a `reference-uppercase` computation, not the full Phase-50 output path. Browser-through-Envoy UI
+routing, Kubernetes UI-server replicas, Phase-51 native CBOR, production inference, Redis/socket recovery,
 direct-service isolation, and general noninterference remain UNVERIFIED. The portable fallback is always
 `linux-cpu`, regardless of the hardware substrate; where a clean Linux environment is required, select Incus
 for Linux or Linux-CUDA hosts, Lima for Apple hosts, and WSL2 for Windows hosts.
 
-The scoped Phase-52 jitML instance supplies the second adapter. Its hidden Ready-model constructor accepts only a matching Phase-51 committed artifact; pure tests pin owner, tenant, scope, identity, idempotency, transient-route loss, durable repair, and five mutation loci. Chrome exercises Ready, in-flight, failed, same-tenant non-owner, and foreign-tenant cases across two loopback origins, while a temporary durable-file observer and physical CUDA establish the bounded live result. Fresh Keycloak, retained MinIO/Pulsar/Redis, Envoy, Kubernetes UI replicas, native CBOR, complete sibling serving, and same-flow training remain UNVERIFIED. CPU-only Linux execution stays available for every host kind. An isolated Linux guest comes from Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+The scoped Phase-53 jitML instance supplies the second adapter. Its hidden Ready-model constructor accepts only a matching Phase-52 committed artifact; pure tests pin owner, tenant, scope, identity, idempotency, transient-route loss, durable repair, and five mutation loci. Chrome exercises Ready, in-flight, failed, same-tenant non-owner, and foreign-tenant cases across two loopback origins, while a temporary durable-file observer and physical CUDA establish the bounded live result. Fresh Keycloak, retained MinIO/Pulsar/Redis, Envoy, Kubernetes UI replicas, native CBOR, complete sibling serving, and same-flow training remain UNVERIFIED. CPU-only Linux execution stays available for every host kind. An isolated Linux guest comes from Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 Workflow monitoring remains mandatory. A workflow view consumes the authenticated workflow-monitor projection
 or a typed monitoring link. The UI cannot introduce a public monitoring surface or redefine workflow health.
@@ -752,13 +752,13 @@ or a typed monitoring link. The UI cannot introduce a public monitoring surface 
 
 ## 13. Generic PureScript client and amoebius UI server
 
-Phase 55's scoped result implements and tests the single-tenant authorization, Origin/CSRF, provider-edge, cross-replica routing, and durable-receipt kernels. A real local socket transfers a fresh challenge between distinct endpoint roles. Fresh OIDC/browser, Keycloak/Envoy, Kubernetes replicas, and retained provider observations remain UNVERIFIED.
+Phase 56's scoped result implements and tests the single-tenant authorization, Origin/CSRF, provider-edge, cross-replica routing, and durable-receipt kernels. A real local socket transfers a fresh challenge between distinct endpoint roles. Fresh OIDC/browser, Keycloak/Envoy, Kubernetes replicas, and retained provider observations remain UNVERIFIED.
 
-Phase 56's scoped result adds opaque tenant choices, current-membership selection, scope-epoch rotation, stale-handle invalidation, and tenant/subject/epoch-keyed routing. Phase 57 adds immutable A→B→A transition state, watermark-gated traffic shifts, stale-plan reload, tenant/owner/stream cursor isolation, and old-epoch registration drain. Their local contract, durability, and mutation evidence is tested; real Keycloak, Gateway API/Envoy, Pulsar, browser, Kubernetes, CNI, and provider observations remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; when pristine Linux is needed, use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows.
+Phase 57's scoped result adds opaque tenant choices, current-membership selection, scope-epoch rotation, stale-handle invalidation, and tenant/subject/epoch-keyed routing. Phase 58 adds immutable A→B→A transition state, watermark-gated traffic shifts, stale-plan reload, tenant/owner/stream cursor isolation, and old-epoch registration drain. Their local contract, durability, and mutation evidence is tested; real Keycloak, Gateway API/Envoy, Pulsar, browser, Kubernetes, CNI, and provider observations remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; when pristine Linux is needed, use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 
-Phase 58's scoped result admits only three-zone hard-spread UI-server, projector, Redis, and Keycloak shapes; it also pins PDB, non-sticky, whole-zone fault, current-authority, and durable-repair rules. A three-role loopback process probe survives loss of one role with one durable effect. Real provider-zone failure and off-cluster identity/data/network observers remain UNVERIFIED, so this is not an HA claim. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 59's scoped result admits only three-zone hard-spread UI-server, projector, Redis, and Keycloak shapes; it also pins PDB, non-sticky, whole-zone fault, current-authority, and durable-repair rules. A three-role loopback process probe survives loss of one role with one durable effect. Real provider-zone failure and off-cluster identity/data/network observers remain UNVERIFIED, so this is not an HA claim. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 59 implements `OnlineOnly | Offline` and exact-key paired client/replay projections at Register 1. The closed compiler makes bounds and replay semantics mandatory, permits only the two initial ML start operations, and exposes no browser or Redis mechanism. Runtime behavior remains UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 60 implements `OnlineOnly | Offline` and exact-key paired client/replay projections at Register 1. The closed compiler makes bounds and replay semantics mandatory, permits only the two initial ML start operations, and exposes no browser or Redis mechanism. Runtime behavior remains UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 The client is one generic PureScript interpreter, versioned with the UI language and component catalog. It
 loads an immutable `ClientPlan`, verifies its envelope and digest, decodes public values, renders only trusted
@@ -806,7 +806,7 @@ real Chrome carries a fresh nonce through workflow start, ready receipt, an owne
 result rendering against separate infernix-/jitML-shaped fakes. Foreign users, copied/non-ready handles, and a
 direct browser/backend probe remain effect-free. Real domain adapters and all live layers remain UNVERIFIED.
 
-[Phase 36](../../DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md) validates the downstream live
+[Phase 37](../../DEVELOPMENT_PLAN/phase_37_user_tenant_isolation_live.md) validates the downstream live
 request-context-to-provider boundary used by this responsibility: real Keycloak password credentials are
 authenticated and introspected, authority is supplied through a constructor-private request value, and
 provider operations stay tenant/subject scoped under hostile body fields. It does not claim a browser,
@@ -878,7 +878,7 @@ and contract identity required by its port. During a rolling release, the server
 only when a checked compatibility witness covers the accepted pair. Without that witness, a stale client
 receives a typed `ReloadRequired` response and no effect executes.
 
-[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_program_release.md) validates the fail-closed base case with two
+[Phase 41](../../DEVELOPMENT_PLAN/phase_41_ui_program_release.md) validates the fail-closed base case with two
 immutable releases: only the exact A-client/A-server and B-client/B-server pairs dispatch, while stale
 authority/content digests, either missing half, either mixed pair, an omitted digest, and a hand-authored tuple
 all return `ReloadRequired` before effect. Both releases use the same Phase-25 generic runtime image; no
@@ -994,8 +994,8 @@ The implementation requires evidence at the repository's established verificatio
 Public contract generators, Haskell server decoders, and PureScript client codecs are tested from the same
 reified contract value. Hand-maintained correspondence tables do not satisfy the obligation.
 
-The adopted implementation and validation work is distributed across Phases 16–23, 36, 38, 40, 50, 52,
-55–58, and 59–64 in the [Development Plan](../../DEVELOPMENT_PLAN/README.md). That set identifies planning ownership; phase
+The adopted implementation and validation work is distributed across Phases 16–23, 37, 39, 41, 51, 53,
+56–59, and 60–65 in the [Development Plan](../../DEVELOPMENT_PLAN/README.md). That set identifies planning ownership; phase
 order, completion state, validation gates, and remaining work remain solely in the development-plan index.
 
 ---

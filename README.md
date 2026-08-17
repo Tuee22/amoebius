@@ -33,11 +33,13 @@ is an operator frontend, not another runtime role or control plane. The worker s
 includes the generic UI server and owner-scoped UI projector as well as linked workflow and ML roles; an
 application does not introduce another executable or privileged server.
 
-Every detected hardware substrate can always run the baseline **`linux-cpu`** lane. Linux runs it natively,
-Apple supplies it through Lima, and Windows supplies it through WSL2; a Linux-CUDA host can select the same
-CPU-only lane without exposing its accelerator. When a gate needs a **pristine Linux host**, the provider is
-fixed by the physical substrate: **Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows**. The
-complete mapping and its tested/assumed status live in the
+Every detected hardware substrate can always run the baseline **`linux-cpu`** lane, at that host's **natural
+architecture** and at no other. Linux runs it natively, Apple supplies it through Lima at `arm64`, and
+Windows supplies it through WSL2 at `amd64`; a Linux-CUDA host can select the same CPU-only lane, at its own
+architecture, without exposing its accelerator. Nothing is validated under emulation or built through a
+cross-toolchain, so covering both architectures takes two machines. When a gate needs a **pristine Linux
+host**, the provider is fixed by the physical substrate: **Incus on Linux or Linux-CUDA, Lima on Apple, and
+WSL2 on Windows**. The complete mapping and its tested/assumed status live in the
 [substrate plan](./DEVELOPMENT_PLAN/substrates.md) and
 [substrate doctrine](./documents/engineering/substrate_doctrine.md).
 
@@ -68,11 +70,12 @@ catalog rather than hand-maintained. The build/publish contract, the acquisition
 host-bootstrap exception are owned by the
 [image-build doctrine](./documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster).
 
-**Observed implementation — refreshed 2026-08-16.** Phases 0–29 are Done under the repository-containment gate,
-Phase 30 is Active, and Phases 31–64 are Blocked. Phase 29 verifies the exact Phase-28 seal and Phase-25 OCI
-handoff, proves init-once retained Vault and PKI identity across a genuine private-cluster delete/recreate,
-rejects the cleartext test seam in production, destroys its marker-owned fixture, and retains only run
-evidence under `.build/**`.
+**Observed implementation — refreshed 2026-08-16.** The natural-architecture amendment reopened every phase:
+Phase 0 is Active and Phases 1–65 are Blocked, each returning to work in numeric order. No prior seal records
+the architecture it proved, and the one that claimed two reached the second under emulation, so every earlier
+result is an observed footprint rather than a current pass. The amendment also split the image phase — Phase 25
+builds and publishes its own architecture's child, and a new Phase 26 adds the complementary child on its own
+hardware and joins both into one attested index — which shifted the phases above it by one.
 Earlier capability results remain historical evidence until their owner phase reruns; later tools still contain
 legacy repository-root, system-temp, user-home, and host-global container-engine assumptions. The exact
 current and historical divergences, their owners, and their closure conditions are recorded in the

@@ -15,7 +15,7 @@ amoebius carries a formal proof obligation rather than delegating it.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_44_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -110,7 +110,7 @@ proper begins only from a target that already holds the source's state.
    per-cluster (stretched-cluster) construct owned by that cluster, never a shared address repointed here.
 
 **Guarantee — RPO=0.** No committed write is lost — the `PlannedIsLossless` model invariant, proven-for-the-model
-at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 43;
+at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 44;
 [§6](#6-honesty-and-layer-markers)) — because writes were frozen and the replica was verified
 caught-up before authority moved. This is a coordinated cross-cluster switchover (Patroni-style), **not** an
 asynchronous [Second-Axis](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
@@ -275,10 +275,10 @@ source it admits is owned by [`backup_recovery_doctrine.md` §8](./backup_recove
 
 ## 6. Honesty and layer markers
 
-The forest/geo-replication substrate is **Phase 42**. Phase 43 realizes the migration shell in
+The forest/geo-replication substrate is **Phase 43**. Phase 44 realizes the migration shell in
 `Amoebius.Multicluster.GatewayMigration`, `PlannedHandover`, `PromotionGate`, `DnsRepoint`, and
 `ClientRebind`. Phase order, status, and the acceptance gate are owned by
-[DEVELOPMENT_PLAN/README.md → Phase 43](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
+[DEVELOPMENT_PLAN/README.md → Phase 44](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
 status.
 
 - The `Planned` branch's **RPO=0** is the model invariant **`PlannedIsLossless`** — cutover is reachable only
@@ -286,7 +286,7 @@ status.
   ([gateway_migration_model_doctrine.md §3](./gateway_migration_model_doctrine.md#3-the-model), [§6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)), not merely argued. What stays
   **assumed** is the *runtime physics* the model abstracts — that the caught-up verification and the
   MinIO/Pulsar/Patroni lossless delegation actually hold live — a **runtime-observed** caught-up edge, not a
-  constructive type-level impossibility. Phase 43 observed it with an outside-forest journal and positive lag. Per the
+  constructive type-level impossibility. Phase 44 observed it with an outside-forest journal and positive lag. Per the
   honesty rule ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)),
   the model property is *proven-for-the-model* and the drilled runtime fidelity is *tested*.
 - **Both** branches are the subject of amoebius's one proof obligation, owned by
@@ -330,5 +330,5 @@ status.
 - [Illegal-State Catalog](../illegal_state/illegal_state_catalog.md) — the "session that cannot rebind on migration" entry ([§3.44](../illegal_state/illegal_state_multicluster.md#344-a-session-that-cannot-rebind-on-gateway-migration)) and the GADT-indexed-state-machine technique ([§4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)).
 - [DSL Doctrine](./dsl_doctrine.md) — the typed `GatewayFailover` forest relation as a parent-minted, child-projected subtree field.
 - [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of both the `Planned` and `Failover` branches (Phase 3).
-- [Development Plan → Phase 43](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
+- [Development Plan → Phase 44](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
 - [Documentation Standards](../documentation_standards.md) — header, SSoT, and the proven/tested/assumed honesty rule.

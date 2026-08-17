@@ -13,7 +13,7 @@ child. It does not own the specification-side spelling of a secret reference bey
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_30_vault_pki.md, DEVELOPMENT_PLAN/phase_31_platform_backbone.md, DEVELOPMENT_PLAN/phase_32_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_42_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_43_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_45_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_46_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_48_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_50_infernix_lift.md, DEVELOPMENT_PLAN/phase_54_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_55_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -190,7 +190,7 @@ gives every named secret:
 - **Rotatable.** Because consumers resolve by name, rotating the value is a Vault write plus a reconcile —
   no `.dhall` edit and no re-roll from the root.
 
-[Phase 41](../../DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md) validates the WireGuard member of this
+[Phase 42](../../DEVELOPMENT_PLAN/phase_42_network_fabric_wireguard.md) validates the WireGuard member of this
 family live. The gate writes fresh Curve25519 public/private fields to two temporary KV-v2 objects, names them
 only by mount/path/field `SecretRef`s, and resolves all four fields through the current-tree Haskell
 Kubernetes-auth client. An absent field returns the redacted `secret-missing` reason; raw key bytes enter no
@@ -297,10 +297,10 @@ runs after authoring and cannot tell a live key from a fixture.
   does: by name, from Vault. There is no substitution and no second resolution path.
 - **It carries only what a phase reads.** A field no amoebius phase consumes does not belong in the seam,
   because an unread secret is pure liability. This is why amoebius's shape is narrower than the sibling's:
-  no phase requires a public DNS zone or email sender ([`phase_32`](../../DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md)
+  no phase requires a public DNS zone or email sender ([`phase_33`](../../DEVELOPMENT_PLAN/phase_33_keycloak_ingress.md)
   accepts a local ACME chain), and the provider checkpoint backend is Vault-Transit-enveloped objects in the
   cluster's own MinIO rather than a cloud state bucket
-  ([`phase_44`](../../DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md)).
+  ([`phase_45`](../../DEVELOPMENT_PLAN/phase_45_provider_deploy_checkpoint.md)).
 - **Production has no seam at all.** Every production entry point rejects `test-secrets.dhall`, its schema,
   and the test-harness credential arm before any effect. Elevated operator material is supplied at an interactive prompt, written
   into Vault, and discarded. It is never written to disk, never placed in an environment variable, and never
@@ -346,8 +346,8 @@ readback before a spec may render:
 stand up a provider quickly "just to test". That ordering is the point rather than a side effect: because a
 spec cannot be admitted until its names resolve, **Vault necessarily precedes every live provider
 deployment**, and no phase ordering has to be remembered for that to hold. The root Vault this check reaches
-is built by [`phase_29`](../../DEVELOPMENT_PLAN/phase_29_vault_pki.md); the check itself is first enforced on
-a live apply path by [`phase_33`](../../DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md).
+is built by [`phase_30`](../../DEVELOPMENT_PLAN/phase_30_vault_pki.md); the check itself is first enforced on
+a live apply path by [`phase_34`](../../DEVELOPMENT_PLAN/phase_34_live_dsl_singleton.md).
 
 
 ---
@@ -442,8 +442,8 @@ re-enters the sealed régime, that reach is the **seal-critical, node-local** ar
 reach class — Vault-independent, never over the fabric — so a reboot's unseal never depends on the very Vault
 it is unsealing.
 
-> **Honesty.** Phase 29 implements and validates the password-encrypted root-unseal backend in amoebius;
-> Phase 33 implements and live-validates the node-local `vault init/unseal` singleton endpoint and `pb`
+> **Honesty.** Phase 30 implements and validates the password-encrypted root-unseal backend in amoebius;
+> Phase 34 implements and live-validates the node-local `vault init/unseal` singleton endpoint and `pb`
 > transport with a zero-persistence observer. Parent/child unseal remains owned by later phases. Status lives
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -724,9 +724,9 @@ the verification surface owned by [chaos_failover_doctrine.md](./chaos_failover_
 
 ---
 
-### Phase-29 validated root boundary
+### Phase-30 validated root boundary
 
-Phase 29 validated the root-only portion of this doctrine on the universal `linux-cpu` lane. A pristine
+Phase 30 validated the root-only portion of this doctrine on the universal `linux-cpu` lane. A pristine
 single-node cluster initialized a Shamir-sealed Vault exactly once on fixed ext4 retained backings; the unlock
 material used pinned Argon2id v1.3 parameters and ChaCha20-Poly1305-IETF in a mode-0600 host envelope, while
 the human password was never persisted. After the real cluster and API objects were deleted, a fresh cluster
@@ -739,7 +739,7 @@ Parent/child unseal, parent secret injection, and cross-cluster intermediate CAs
 Every hardware substrate can always run this `linux-cpu` lane. When a pristine Linux host is needed, the
 canonical VM is Incus on Linux/Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 
-The Phase-42 Register-3 instance realizes the child policy seams in
+The Phase-43 Register-3 instance realizes the child policy seams in
 `Amoebius.Multicluster.ChildUnseal`, `Amoebius.Vault.TransitChildKey`, and
 `Amoebius.Multicluster.SecretInjection`. The pure gate admits both sanctioned unseal modes, proves that the
 parent-held mode bricks while the parent is sealed, and rejects cross-child subtree decrypt. The live gate
@@ -749,7 +749,7 @@ cross-cluster intermediate-CA hierarchy remain UNVERIFIED. The CPU-only Linux fa
 every detected hardware class. Fresh guest isolation is provided by Incus for either Linux class, by Lima for
 Apple, and by WSL2 for Windows.
 
-The Phase-49 scoped infernix exercise keeps adapter configuration to Vault secret names, mints one-use
+The Phase-50 scoped infernix exercise keeps adapter configuration to Vault secret names, mints one-use
 tenant-scoped challenge credentials, observes tenant B denial against tenant A's model path, and records only
 audit metadata. Secret values never enter evidence. A worker consuming the Vault credential for direct MinIO
 artifact fetch remains UNVERIFIED, as do the full production inference chain and general isolation. Every

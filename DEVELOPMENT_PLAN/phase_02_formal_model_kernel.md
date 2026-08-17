@@ -39,7 +39,16 @@ The gate passed on 2026-08-09; Phase-3 code correspondence and runtime fidelity 
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/formal_model_kernel_gate.py` passed all nine sides: the
+⏸️ Blocked pending Phase-1 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/formal_model_kernel_gate.py` passed all nine sides: the
 31 authored metrics match, all model and renderer mutants are caught, 608 emitted `.tla`/`.cfg` files remain
 beneath `.build/**` and outside the 1968-file source snapshot, 14 surfaces join to 39 run-time items, and the
 outside-host inventory and authored roots are unchanged. The project-contained attestation is
@@ -48,7 +57,7 @@ outside-host inventory and authored roots are unchanged. The project-contained a
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:12481410e5094291…`
+Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:12481410e5094291…`
 (1927 non-ignored files) and published a verified pre-containment external attestation
 `sha256:a6c345e051ff96ff3c66c98a4ea2832f56ada1d50c0d91524a0ce9763b19710e`.
 
@@ -67,7 +76,7 @@ the source snapshot, and no specification file sits in authored source.
 
 **Invalidated historical record:**
 
-✅ Done. The Register-1 gate passed on 2026-08-09 with
+Done (invalidated). The Register-1 gate passed on 2026-08-09 with
 `python3 tools/formal_model_kernel_gate.py`, emitting ledger
 `dynamically-resolved`. The explorer and pinned TLC
 agree on all eight distinct `ToyModel` states and its safety verdict; TLC proves its three temporal properties
@@ -104,6 +113,8 @@ runs on the emitted spec through the version-stable JVM `tla2tools` toolchain. T
 (pure/golden, in-process, no cluster) design-proof phase.
 
 **Substrate:** none
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** `python3 tools/formal_model_kernel_gate.py` is green over the committed `ToyModel` round-trip, the Phase-0
@@ -256,7 +267,7 @@ flowchart LR
 **Status**: Done — the capability is re-established by the migrated 2026-08-12 gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Formal/Model.hs` (the `Model`/`Action`/`Expr` fragment
 types), the `formal-model` Cabal library, and the `formal-model-spec` test suite — built.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: the fragment types compile under the pinned GHC 9.12.4 / Cabal 3.16.1.0; a hand-authored small
 model (`ToyModel`) is expressible entirely inside the fragment with no opaque Haskell function in its
 transition relation.
@@ -307,7 +318,7 @@ None. The closed fragment and structurally complete `ToyModel` are built and exe
 **Implementation**: `src/Amoebius/Formal/Interpret.hs` (`interpret`),
 `src/Amoebius/Formal/Explore.hs` (the bounded breadth-first reachability checker),
 `test/spec/formal/RoundTripSpec.hs` — built; the phase suite owns the hand table and explorer checks.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: `interpret` computes the next state for a hand-checked (event, state) pair and the
 explorer visits exactly `ToyModel`'s reachable-state set under its constraint — a `cabal test`, no cluster —
 with the reference side read from a committed Phase-0 hand table, never from the code under test. Validation 2
@@ -354,7 +365,7 @@ checked-but-not-expanded boundary convention are green.
 `test/spec/formal/RoundTripSpec.hs`, and the two committed liveness-path renderer mutants
 `emitTLA-mut-03`/`emitTLA-mut-04` under `test/mutant/formal/`; emitted output lands in the git-ignored
 `.build/tla/` tree — built.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**:
 `emitTLA ToyModel` renders a `.tla` + `.cfg`; the renderer is byte-for-byte golden-locked against a
 **pre-implementation golden authored before `EmitTLA.hs` exists** (§M.1 — a golden regenerated from the
@@ -442,7 +453,7 @@ None. The emitter and CLI are byte-golden locked; generated `.tla`/`.cfg` files 
 same `Model`), a `tla2tools` invocation wrapper, the committed mechanical model-mutation catalog, and the
 two committed seeded renderer mutants `emitTLA-mut-01`/`emitTLA-mut-02` under `test/mutant/formal/` —
 built and run by `tools/formal_model_kernel_gate.py`.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: on the correct `ToyModel` the in-process explorer and TLC reach the identical
 safety verdict; every mechanical model mutant and both renderer mutants are caught; the fairness-sensitivity
 check and the safety-scoped >=200-model differential hold. The numbered Validation below states each

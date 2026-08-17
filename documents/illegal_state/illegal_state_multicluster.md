@@ -83,7 +83,7 @@ Distributing one workload across clusters looks like "just fold capacity over bo
 therefore has **no constructor** — the same type-foreclosed "no arm" idiom that forecloses the worker pool as a fourth
 `ComputeEngine`. Distributing across clusters is **geo-replication** (N independent clusters, each its own
 `place`, related only by async Pulsar replication — outside the single-cluster `place` fold and enacted by
-Phase 42); it is **not** the stateless
+Phase 43); it is **not** the stateless
 attach pool, which is single-cluster and already **inside** `place`'s elastic branch
 ([`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) [§4](../engineering/single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology) re-runs the same `place` fold on the enlarged topology) — modeling the attach pool as cross-cluster machinery is the category error [§5](../engineering/single_logical_data_plane_doctrine.md#5-the-category-error-this-doctrine-forecloses) of
 that doctrine forecloses. A single **stretched** cluster ([§3.35](#335-a-stretched-host-worker-with-no-declared-networking-capability)–[§3.39](./illegal_state_topology.md#339-a-split-site-etcd-quorum))
@@ -93,12 +93,12 @@ folding its capacity as *two* `Topology`s is precisely this uninhabitable cross-
 [`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) for the *why* (a cluster is the consistency boundary). **Technique:** [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
 (the relation/collection is over one cluster's `NonEmpty Node`; a second `Topology` has no place in the fold's
 arity). **Layer:** type-foreclosed uninhabitable-by-arity; runtime-checked residue lives only in the deferred geo-replication
-enaction (Phase 42).
+enaction (Phase 43).
 **Validation-locus:** `Gate-2-decoder` (the arity is a property of the **Haskell** `place`, so a fold written
 over two `Topology`s is a compile-fail golden at the Gate-2 layer — **not** a `dhall type` failure: a root
 `InForceSpec` legitimately names many clusters, so nothing at the Dhall layer forbids naming a second one;
 what has no inhabitant is a single `place` call folding both); `live-effect` (the only residue is
-the deferred geo-replication enaction, Phase 42).
+the deferred geo-replication enaction, Phase 43).
 
 ### 3.35 A stretched host worker with no declared networking capability
 
@@ -169,7 +169,7 @@ per-kind `witness` dispatch). **Layer:** type-foreclosed uninhabitable.
 
 ### 3.44 A session that cannot rebind on gateway migration
 
-**Delivery-owner:** `Phase-43`
+**Delivery-owner:** `Phase-44`
 
 **Case-family:** `multicluster`
 
@@ -195,7 +195,7 @@ residue — that the `drain-complete` edge (old-gateway traffic ≈ 0) is truthf
 
 ### 3.47 A failover data-loss budget authored below the replication-lag bound
 
-**Delivery-owner:** `Phase-42`
+**Delivery-owner:** `Phase-43`
 
 **Case-family:** `multicluster`
 
@@ -220,7 +220,7 @@ upload-time push-back of the declared bound against monitored lag).
 
 ### 3.48 A geo-replication pair whose active and standby are the same cluster
 
-**Delivery-owner:** `Phase-42`
+**Delivery-owner:** `Phase-43`
 
 **Case-family:** `multicluster`
 
@@ -238,7 +238,7 @@ cross-referencing the parent-owned relation of [`gateway_migration_doctrine.md` 
 
 ### 3.49 A child spec that authors its own gateway-failover pairing
 
-**Delivery-owner:** `Phase-42`
+**Delivery-owner:** `Phase-43`
 
 **Case-family:** `multicluster`
 
@@ -261,7 +261,7 @@ survives decode).
 
 ### 3.50 A standing spec that authors an emergency `Failover` as desired state
 
-**Delivery-owner:** `Phase-42`
+**Delivery-owner:** `Phase-43`
 
 **Case-family:** `multicluster`
 
@@ -286,7 +286,7 @@ observed at the gateway-change moment).
 
 ### 3.51 An operator-authored `Confluent` cross-boundary disposition
 
-**Delivery-owner:** `Phase-42`
+**Delivery-owner:** `Phase-43`
 
 **Case-family:** `multicluster`
 
@@ -309,7 +309,7 @@ honest limit — a genuinely-confluent invariant's confluence is proven at desig
 
 ### 3.52 A gateway-failover graph reusing one cluster across two DNS records
 
-**Delivery-owner:** `Phase-42`
+**Delivery-owner:** `Phase-43`
 
 **Case-family:** `multicluster`
 
@@ -336,7 +336,7 @@ before any `ProvisionedSpec` exists); the over-scope stress run that *models* a 
 
 ### 3.69 A cold-seeded secondary taking the gateway without proven freshness
 
-**Delivery-owner:** `Phase-42`
+**Delivery-owner:** `Phase-43`
 
 **Case-family:** `multicluster`
 
@@ -359,7 +359,7 @@ model check.
 
 ### 3.70 A `ColdSeedFromBackup` whose freshness bound is below the backup cadence
 
-**Delivery-owner:** `Phase-42`
+**Delivery-owner:** `Phase-43`
 
 **Case-family:** `multicluster`
 
@@ -375,7 +375,7 @@ signal is consulted. **Owner:** [`backup_recovery_doctrine.md` §8](../engineeri
 
 ### 3.71 A freshness watermark asserted rather than derived from captured content
 
-**Delivery-owner:** `Phase-42`
+**Delivery-owner:** `Phase-43`
 
 **Case-family:** `multicluster`
 
@@ -392,7 +392,7 @@ authorable field) + `live-effect` residue (that the derived watermark reflects r
 
 ### 3.88 A `Planned` gateway migration resting with no owner
 
-**Delivery-owner:** `Phase-43`
+**Delivery-owner:** `Phase-44`
 
 **Case-family:** `multicluster`
 

@@ -70,7 +70,8 @@ as the set its first-use rule ranges over.
 - [spoof-resistant gate](./engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect) — a gate observing an unforgeable post-start effect rather than a self-report.
 - [mutant](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — a committed seeded defect; a gate is trusted only once the mutant turns it red.
 - [gate integrity](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the twelve clauses ensuring a gate cannot be passed by a stub.
-- [substrate](./engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob) — the detected hardware platform family; it always derives a `linux-cpu` execution lane and may add an accelerator lane. A pristine Linux lane uses Incus on Linux, Lima on Apple, or WSL2 on Windows.
+- [natural architecture](./engineering/substrate_doctrine.md#11-the-natural-architecture-rule) — the architecture a detected host executes without translation; the only one its lanes may be validated at.
+- [substrate](./engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob) — the detected hardware platform family; it always derives a `linux-cpu` execution lane at its natural architecture and may add an accelerator lane. A pristine Linux lane uses Incus on Linux, Lima on Apple, or WSL2 on Windows.
 - [status vocabulary](../DEVELOPMENT_PLAN/development_plan_standards.md#c-status-vocabulary) — the five phase markers, and the rule confining status to the plan.
 - [Single Source of Truth](./documentation_standards.md#1-philosophy) — the rule that exactly one document owns a concept and the rest link to it.
 

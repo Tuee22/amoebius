@@ -432,7 +432,7 @@ each retires with the root it covers, owned by the phase that relocates it.
 /DEVELOPMENT_PLAN/evidence/
 /test/enumeration/
 /test/golden/phase_*_ledger.json
-/test/golden/phase_54_expected_run_ledger.json
+/test/golden/phase_55_expected_run_ledger.json
 
 # Dependency resolution is refreshed dynamically and never committed.
 *.lock
@@ -507,7 +507,7 @@ DEVELOPMENT_PLAN/evidence/**
 test/enumeration
 test/enumeration/**
 test/golden/phase_*_ledger.json
-test/golden/phase_54_expected_run_ledger.json
+test/golden/phase_55_expected_run_ledger.json
 
 # Dependency resolution is refreshed dynamically.
 **/*.lock

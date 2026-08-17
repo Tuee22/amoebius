@@ -15,7 +15,7 @@ with the doctrine that defines its output.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/phase_60_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_27_object_reconciler.md, DEVELOPMENT_PLAN/phase_41_ui_program_release.md, DEVELOPMENT_PLAN/phase_60_offline_language_plan.md, DEVELOPMENT_PLAN/phase_61_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_64_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -77,7 +77,7 @@ evidence. The pinned PureScript/Spago build emits the bundle only into ignored b
 scanner checks its allowlisted runtime surface, and two application plans execute without rebuilding or adding
 an application-authored browser artifact.
 
-[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_program_release.md) supplies the live release instance. Its
+[Phase 41](../../DEVELOPMENT_PLAN/phase_41_ui_program_release.md) supplies the live release instance. Its
 deterministic projection writes paired client/server plans, public contracts, and release manifests as
 immutable content objects, while the repository scan keeps those per-application outputs absent from the
 committed generated tree. The serializable server plan contains handler/dispatch identities and codecs, never
@@ -112,7 +112,7 @@ the recipe becomes a projection of typed data and the committed artifact is the 
   the golden is prohibited: that copy is a generated artifact and supplies no independent expectation.
   Phase 13 applies this distinction to `renderAll`: the emitted `[K8sObject]` deployment is never committed,
   while the eighteen `.json.golden` digest fixtures are committed byte locks exercised by the Register-1
-  gate. They do not grant authority to deploy. Phase 26 consumes the generated object values directly at
+  gate. They do not grant authority to deploy. Phase 27 consumes the generated object values directly at
   apply time and validates their live convergence without writing rendered manifests into the repository;
   only independently authored fixtures are committed. Receipts are run evidence and remain outside Git.
 - **History must establish or review independence.** When a fixture and the implementation it tests first
@@ -264,18 +264,18 @@ result.
 
 - [Repository Layout and Artifact Provenance](./repository_layout_doctrine.md) — complete tree, generated inventory, and ignore contracts
 
-Phase 59 now emits the deterministic `emit-client-offline-plan` and `emit-server-replay-plan` projections
+Phase 60 now emits the deterministic `emit-client-offline-plan` and `emit-server-replay-plan` projections
 from one checked offline source. Their independently pinned port-key sets match exactly, private fields remain
 absent from the public artifact, and five mutants pass. Runtime interpretation remains UNVERIFIED. Every
 hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple,
 or WSL2 on Windows.
 
-Phase 60 pins the immutable public asset manifest and admits only public, content-digested, non-mutable cache
+Phase 61 pins the immutable public asset manifest and admits only public, content-digested, non-mutable cache
 entries. Real Chrome preserves exactly those assets across restart and registers the Service Worker. The
 production PureScript-generated client bundle remains UNVERIFIED. Every hardware substrate can always run
 `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 63 emits `emit-offline-compatibility-manifest` and `emit-offline-migration-table` from the checked
+Phase 64 emits `emit-offline-compatibility-manifest` and `emit-offline-migration-table` from the checked
 witness. The scoped gate checks complete key coverage, finite horizon, deterministic names, migration/retained
 paths, and incompatible refusal. Production PureScript and live provider rollout remain UNVERIFIED. Every
 hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple,

@@ -43,7 +43,16 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/gadt_decoder_gate2_gate.py` passed all eleven sides: all 20
+⏸️ Blocked pending Phase-4 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/gadt_decoder_gate2_gate.py` passed all eleven sides: all 20
 authored metrics match, the decoder, distinct negatives, compile pairs, structural and polarity mutants,
 partiality scan, and absolute-tool observer are green, 23 surfaces join to 26 run-time items, and generated
 output, host inventory, and authored roots remain contained and unchanged. The project-contained attestation
@@ -52,7 +61,7 @@ is `sha256:7f9907ae8c5dde956367f67a1e5663f364b8887625351c654bdd829a8c58112c`, bo
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — resealed 2026-08-13 after the secrets amendment, attestation
+Done (invalidated) — resealed 2026-08-13 after the secrets amendment, attestation
 `sha256:bd7e03f3d8f33d5359d89cd453437d2101e31ec10ffdcdc278e82a54eeaee04a`.
 
 **What the reseal added.** The decoder refines every sensitive field into the shared
@@ -67,7 +76,7 @@ row. The structural oracle pins five fixtures whose node trees *are* the corpus 
 mutant families range over; adding a sixth would restate a measured sum without adding a distinct claim, and
 the amendment only required restating it *if* a positive fixture gained the type.
 
-**Reopened 2026-08-13.** This phase was ✅ Done, sealed 2026-08-12 against source snapshot
+**Reopened 2026-08-13.** This phase was Done (invalidated), sealed 2026-08-12 against source snapshot
 `sha256:52a29644c13595a7…` with attestation
 `sha256:3dfdee987647704b9e62dd70e6c31c4fe96b58df533b216a7b59f73f38ad1a1f`. That seal is invalidated by the
 same scope amendment that reopened Phase 4: Gate 2 must decode the shared `SecretRef` and reject any literal
@@ -108,7 +117,7 @@ by the core but listed in no component, is now declared.
 
 **Invalidated historical record:**
 
-✅ Done. `python3 tools/gadt_decoder_gate2_gate.py` passed on 2026-08-09 with ledger
+Done (invalidated). `python3 tools/gadt_decoder_gate2_gate.py` passed on 2026-08-09 with ledger
 `dynamically-resolved`. The gate ran on **no substrate**
 (`none`) in **Register 1** — it stood up no host and no cluster, only an
 in-process decode battery. Where a shape below is already exercised in a sibling system (hostbootstrap's
@@ -148,7 +157,7 @@ The pure decode code carries no `error`/`undefined`/partial head (checked non-pa
 `Dhall.inputFile auto` alone throws (`DhallErrors`, IO exceptions) rather than returning `Left`, the
 exception-catch wrapper catches those and maps them to a structured `Left DecodeError` (fail-closed) so no
 throw escapes into a half-applied effect. What is *not* here: the chain
-/ reconcile / singleton runtime (Phase 33), the pure capacity/topology fold implementation and properties
+/ reconcile / singleton runtime (Phase 34), the pure capacity/topology fold implementation and properties
 (Phase 7) consumed by the conditional infrastructure-planning/post-materialization provision seal (Phase 11),
 the capability→provider binder (Phase 10), and
 the exhaustive illegal-state corpus with its per-entry validation-locus
@@ -175,6 +184,8 @@ container, volume, cache owner, and accelerator owner explicit.
 
 **Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` battery analogous to the
 Phase-0 documentation lint and the Phase-4 `dhall type` corpus.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -290,7 +301,7 @@ independent of the decoder's own output ([§M](development_plan_standards.md#m-g
 **Implementation**: `amoebius.cabal`, `cabal.project` (the real package, not the Phase-1
 throwaway probe), the `dsl-core` internal library, the `dsl-spec` test-suite stanza, and the built
 `src/Amoebius/Dsl/` module tree.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: `cabal build` of the empty package and `cabal test dsl-spec` (zero tests) succeed
 under the Phase-1 pin, and no tool reaches them through ambient `PATH`. The numbered `### Validation` list
 below carries the resolution rule and the argv observer that decide the second half.
@@ -326,7 +337,7 @@ None for Phase 5. Later DSL expansion belongs to the numerically assigned phases
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Dsl/Types.hs`, `src/Amoebius/Dsl/SmartConstructors.hs`,
 `src/Amoebius/Dsl/Ref.hs`, plus the committed compile-pair corpus.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: the catalog's decode-foreclosed classes
 ([§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally))
 have no inhabitant, proven by **committed minimal-pair compile-fail fixtures** rather than by
@@ -687,7 +698,7 @@ None for Phase 5; exhaustive catalog expansion is Phase 6.
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Dsl/Decode.hs` (`decodeCluster :: FilePath -> IO
 (Either DecodeError ClusterIR)`) and `src/Amoebius/Dsl/Error.hs` (the tagged `DecodeError` type).
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: the decode path returns `Either DecodeError ClusterIR` and never throws into a
 half-applied effect, and `DecodeError` carries each named failure class as its own constructor, so a blanket
 catch-all tag is a type-level regression rather than a passing implementation. The numbered `### Validation`
@@ -744,7 +755,7 @@ None for Phase 5.
 **Implementation**: `test/spec/dsl/DecodeSpec.hs`; positive fixtures reuse Phase 4's
 `dhall/examples/legal_*.dhall`; the representative Gate-2 negative set `dhall/examples/illegal_decode_*.dhall`;
 the semantic-hash/tree/count oracles; structural mutants; and `tools/gadt_decoder_gate2_gate.py`.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: `cabal test dsl-spec` is green, and the expected-tag oracle is the committed
 Phase-0 fixture-header table, independent of the decoder's own fold
 ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 3). The
@@ -757,7 +768,7 @@ exercised here → layer-2 Register-1), `documents/engineering/testing_doctrine.
 Adopt [`testing_doctrine.md §2 — Register 1`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing): assemble the
 in-process decode battery that exercises the fail-closed decoder over every positive fixture and confirms it
 returns a structured `Left` on each representative Gate-2 negative, emitting a Register-1 proven/tested/assumed ledger
-with model↔runtime correspondence marked UNVERIFIED (owned by Phase 33). The exhaustive per-catalog-entry
+with model↔runtime correspondence marked UNVERIFIED (owned by Phase 34). The exhaustive per-catalog-entry
 corpus, the QuickCheck closure/round-trip/fold-totality properties, and the per-entry validation-locus ledger
 are the front-loaded next phase ([Phase 6](phase_06_illegal_state_corpus.md)); the capacity/topology fold
 negatives are [Phase 7](phase_07_capacity_core_folds.md), and provider-expanded/capability feasibility is
@@ -901,8 +912,8 @@ type.
 ### Remaining Work
 
 None at this register. Whether a named secret exists is a live question owned by
-[Phase 29](phase_29_vault_pki.md), and the prompt write path that turns a `Prompt` reference into a readable
-one is Phase 29's too.
+[Phase 30](phase_30_vault_pki.md), and the prompt write path that turns a `Prompt` reference into a readable
+one is Phase 30's too.
 
 ## Documentation Requirements
 
@@ -937,4 +948,4 @@ one is Phase 29's too.
 - [phase_07](phase_07_capacity_core_folds.md) — the pure capacity/topology fold implementation and
   properties deferred from here; Phase 11 invokes them after bind/expansion while deriving the conditional
   infrastructure plan and again at the post-materialization provision seal
-- [phase_33](phase_33_live_dsl_singleton.md) — the Tier-2 runtime-enforcement half of the DSL
+- [phase_34](phase_34_live_dsl_singleton.md) — the Tier-2 runtime-enforcement half of the DSL

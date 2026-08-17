@@ -37,7 +37,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/ui_plan_compiler_gate.py` passed all eleven sides: four
+⏸️ Blocked pending Phase-19 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_plan_compiler_gate.py` passed all eleven sides: four
 independent projections, four byte-exact canonical artifacts, four independently derived digests, six finite
 demand cells, two fresh-process determinism checks, all six mutants, and all thirteen metrics pass; 55
 surfaces join to 66 enumerated items. The project-contained attestation is
@@ -46,7 +55,7 @@ surfaces join to 66 enumerated items. The project-contained attestation is
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:3587049c696ded8e…`
+Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:3587049c696ded8e…`
 (1944 non-ignored files) and published a verified pre-containment external attestation
 `sha256:6e567d5b9a009a424ba1974e7d62957e579bd56f928e9bc1076365584aaaa8be`.
 
@@ -73,7 +82,7 @@ that, and the obligation stays open in the legacy register rather than being abs
 
 **Invalidated historical record:**
 
-✅ Done. Four logical rows compile inseparably into four canonical artifacts, four concrete SHA-256 identities,
+Done (invalidated). Four logical rows compile inseparably into four canonical artifacts, four concrete SHA-256 identities,
 and six finite-demand cells; reversed source insertion in two cache-disabled fresh processes is byte-identical,
 and six mutants turn red. This proves pure projection and serialization only. It does not claim interpreter
 correctness or a live release. See the Phase-20 ledger.
@@ -100,6 +109,8 @@ command `cabal test ui-plan-compiler-spec`; split immediately if work requires i
 HTTP, publishing a Release, a second register, or a substrate.
 **Dependency:** Phase 19 — the sealed `BoundUiProgram` with complete effect bindings.
 **Substrate:** none — no browser, network, credential, artifact store, provider, or cluster is contacted.
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+
 **Register:** 1 — pure/golden.
 **Gate:** `python3 tools/ui_plan_compiler_gate.py` passes the projection/key oracle, run-time-derived reference
 digests, canonical-encoding and cache-bypassed determinism checks, private-field negatives, isolated

@@ -22,7 +22,7 @@ Gate passed on 2026-08-09 with seal
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_28_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_48_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -44,7 +44,16 @@ Gate passed on 2026-08-09 with seal
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/capacity_topology_gate.py` passed all ten sides: every fold,
+⏸️ Blocked pending Phase-6 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/capacity_topology_gate.py` passed all ten sides: every fold,
 twin, compile pair, compatibility row, property, and all 19 mutants pass; 25 surfaces join exactly; the
 normalized test role tree and all generated output are contained; and host state is unchanged. The
 project-contained attestation is `sha256:90c1297a9e16a7d316daf6d1bdecb1df4f6b65378519c18db64b05e4bac7eaf6`,
@@ -52,7 +61,7 @@ bound to source snapshot `sha256:6eecf9051956a260…`; Phase 7 owns no remaining
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:7e1cd07170ddc0f6…`
+Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:7e1cd07170ddc0f6…`
 (1932 non-ignored files) and published a verified pre-containment external attestation
 `sha256:61ba75bf3bb6b53846b17ac13903918ec00a1dd14604fbf92c8bb747fc2dd445`.
 
@@ -71,7 +80,7 @@ compiler is now threaded into every cabal call, and `--offline` is dropped so a 
 
 **Invalidated historical record:**
 
-✅ Done. `python3 tools/capacity_topology_gate.py` passed on 2026-08-09 in
+Done (invalidated). `python3 tools/capacity_topology_gate.py` passed on 2026-08-09 in
 **Register 1** on **no substrate** (`none`) with seal
 `dynamically-resolved`.
 The gate exercised an in-process fold + property battery over the base capacity vocabulary and topology
@@ -125,6 +134,8 @@ bind/expansion. Phase 7 does not move the folds into `Dhall.inputFile`.
 
 **Substrate:** none — no host, no cluster; the gate is an in-process `cabal test` fold + QuickCheck battery,
 analogous to the Phase 5 decode battery and the Phase 6 property suite.
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
@@ -305,6 +316,21 @@ committed in `test/oracle/capacity_topology/compile_fail.tsv` and exercised by `
 
 ## Sprints
 
+```mermaid
+flowchart LR
+  %% register: orientation
+  s1["Sprint 7.1: the Topology relation and its witnesses"]
+  s2["Sprint 7.2: the base capacity fold"]
+  s3["Sprint 7.3: QuickCheck properties and the independent validator"]
+  s4["Sprint 7.4: the negative corpus and the gate"]
+  g{{"the phase 7 gate"}}
+  s1 -->|"compatible engine/host pairs"| s2
+  s2 -->|"fits, carve, place"| s3
+  s3 -->|"properties that must hold"| s4
+  s4 -->|"every negative and mutant decided"| g
+```
+*Orientation. The sprint-seam map [§Q](development_plan_standards.md#q-the-two-phase-diagrams) sanctions: each sprint produces what the next consumes, ending at the phase gate.*
+
 > **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
@@ -323,7 +349,7 @@ committed in `test/oracle/capacity_topology/compile_fail.tsv` and exercised by `
   managed-attachment arms. Both are built and covered by `test/spec/dsl/CapacityTopologyGate.hs`.
 **Prerequisites satisfied**: Phase 5 gate (the GADT-indexed IR + total decoder); Phase 6 gate
 (the property/corpus framework + validation-locus ledger).
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: a unit + property suite decodes both positive topologies, returns a structured
 `Left` naming every incompatible node for a mismatched pair and a duplicate `HostId` for a reused host, and
 machine-gates the no-inhabitant claims rather than arguing them. The numbered Validation list below states
@@ -387,7 +413,7 @@ None.
 carries; the storage, execution, and accelerator members of `Types.hs`, and the sibling
 `Amoebius/Capacity/*.hs` modules, are added by phases 8 and 9.
 **Prerequisites satisfied**: Sprint 7.1 (the `Topology` `place` folds over); Phase 5 gate (the IR + decoder).
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: a unit + property suite runs `fits`/`carve`/`place` over generated envelopes — a
 feasible workload set yields a placement witness or a growth envelope proved sound against the fixture's own
 declared candidates and quota, an over-committed one returns the `Left` naming the offending axis, and the
@@ -469,7 +495,7 @@ witness validator), `test/spec/dsl/CapacityTopologyMutants.hs`, and `test/mutant
 the Phase-6 property harness. (The
 runtime-metadata and provider-root property modules are the deliverable of phases 8 and 9.)
 **Prerequisites satisfied**: Sprint 7.1, Sprint 7.2.
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: `cabal test dsl-spec` runs the base property battery green, every property meets
 its committed coverage minimum, and the committed per-fold seeded-mutant battery of
 [Gate integrity](#gate-integrity) turns the suite red one mutant at a time rather than on one hand-picked
@@ -555,7 +581,7 @@ None.
 `test/oracle/capacity_topology/fold_cases.tsv`, `test/oracle/capacity_topology/gate1_cases.tsv`, and
 `test/oracle/capacity_topology/compile_fail.tsv`.
 **Prerequisites satisfied**: Sprint 7.1, Sprint 7.2, Sprint 7.3; Phase 4 gate (the positive Gate-1 corpus).
-**Blocked by**: none; the phase is sealed.
+**Blocked by**: none within the phase.
 **Independent Validation**: the gate applies the base folds directly to each hand-authored demand/capacity
 fixture, with no `bind` or `provision` call in the path, so every positive yields a sound feasible result and
 every negative returns its specific committed tag, not merely "some `Left`". The numbered Validation list

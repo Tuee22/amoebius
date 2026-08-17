@@ -15,7 +15,7 @@ between the parts, owned by [host_cluster_comms_doctrine.md](./host_cluster_comm
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_27_object_reconciler.md, DEVELOPMENT_PLAN/phase_28_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_34_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_36_pulsar_client.md, DEVELOPMENT_PLAN/phase_38_content_store_workflow.md, DEVELOPMENT_PLAN/phase_45_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_46_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_48_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_52_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_55_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_59_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -37,7 +37,7 @@ between the parts, owned by [host_cluster_comms_doctrine.md](./host_cluster_comm
 
 **Pure scheduler read-side status.** The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md)
 validates the aggregate snapshot/root-version reservation guard, absent-Pod recovery debit, and the pure
-Reserved→BindingInFlight→Bound state algebra. Phase 27 subsequently delivered the same-binary live scheduler
+Reserved→BindingInFlight→Bound state algebra. Phase 28 subsequently delivered the same-binary live scheduler
 role and Kubernetes Binding effects; the earlier Phase-9 ledger is `external-run-reference`.
 
 <a id="1-one-binary-three-contexts"></a>
@@ -208,7 +208,7 @@ singleton never promotes a node from agent to server at runtime; it re-provision
 
 ## 3. The control-plane singleton
 
-> **Current delivery boundary.** Phase 33 delivers and live-validates the in-cluster `replicas=1` singleton,
+> **Current delivery boundary.** Phase 34 delivers and live-validates the in-cluster `replicas=1` singleton,
 > including the fresh-resourceVersion bootstrap-holder release/absence/singleton-acquire handoff, separate
 > Lease-renewal authority, exact first-pass reconcile and zero-write rerun, durable replacement, and admin
 > surface. The Register-3 ledger is
@@ -333,10 +333,10 @@ extents deduplicate by physical allocation identity with workload extents, while
 additive. The root ledger is scheduler-field-owned and is neither server-side-applied nor pruned by the
 singleton's generic object path.
 
-Phase 27's Register-3 gate validated this role boundary with a namespace `pods=1` quota, the sole
+Phase 28's Register-3 gate validated this role boundary with a namespace `pods=1` quota, the sole
 default-scheduler bootstrap Pod, restricted cutover authority, independently read managed taint/admission/
 Binding RBAC, real Binding assignment after reservation CAS, and leak-free removal of every gate-scoped
-cluster resource. Phase 33 subsequently delivered the in-cluster singleton without giving it scheduler
+cluster resource. Phase 34 subsequently delivered the in-cluster singleton without giving it scheduler
 authority.
 
 ---
@@ -434,7 +434,7 @@ Properties shared by all workers:
   (unlike Apple-Metal's `apple_metal_headless_builds.md`), inheriting the honesty framing below.
 
 > **Honesty.** The Pulsar / ML / inference worker roles are **new relative to prodbox** — prodbox had no
-> Pulsar and no ML workers. Phase 35 validates the client substrate workers consume: all four Pulsar
+> Pulsar and no ML workers. Phase 36 validates the client substrate workers consume: all four Pulsar
 > subscription encodings are exposed and exercised without an amoebius election. The worker deployments,
 > continuous trainer, and ML/inference roles remain forward work for their owning phases; status lives only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
@@ -573,8 +573,8 @@ bounded/tiered/retained topic lifecycle offloading to **MinIO/S3** as the cold t
   latest value`; it decides nothing about who leads, because nothing leads by election. The SLO obligation that
   feeds it is owned by [monitoring_doctrine.md](./monitoring_doctrine.md).
 
-Phase 35 validates that the native client exposes and live-delivers `Exclusive`, `Failover`, `Shared`, and
-`Key_Shared`. Phase 37 now validates the topology choice: three workers attach to one broker-ranked `Failover`
+Phase 36 validates that the native client exposes and live-delivers `Exclusive`, `Failover`, `Shared`, and
+`Key_Shared`. Phase 38 now validates the topology choice: three workers attach to one broker-ranked `Failover`
 subscription with priority/name order `worker-a`, `worker-b`, `worker-c`; killing `worker-a` after its store
 commit and before command acknowledgement promotes `worker-b`. The broker owns active/standby selection;
 amoebius acquires no Lease and links no election/lock client. The orchestrator, workers, gateway, and collector
@@ -618,19 +618,19 @@ Lifecycle"); this doc records only the contract amoebius daemons share:
   separate desired-state value updated through the singleton admin API and stored as a Vault-Transit-enveloped
   MinIO object/ref, not by this file-watch path.
 
-> **Honesty.** Phase 33 validates the singleton branch of this spine in amoebius: health/readiness/metrics,
+> **Honesty.** Phase 34 validates the singleton branch of this spine in amoebius: health/readiness/metrics,
 > Lease-gated service, bounded concurrent HTTP connections, serialized admin effects, independent Lease
 > renewal, and replacement recovery. Applying the same spine to later worker roles remains phase-owned design
 > intent. The broader sibling evidence is context, not an amoebius result.
 
-Phase 44 extends the singleton contract in code with a private `SingletonContext`: an empty context produces
+Phase 45 extends the singleton contract in code with a private `SingletonContext`: an empty context produces
 the pinned `NoSingletonContext` refusal, a replica count other than one refuses, and a prepared provider
 invocation requires absolute Pulumi/plugin paths and supplies no child environment. Scoped live readback
-confirmed the Phase-33 Deployment at one desired/ready/available replica and placed the two bounded executor
+confirmed the Phase-34 Deployment at one desired/ready/available replica and placed the two bounded executor
 Jobs. Because AWS authority was invalid, an actual provider `pulumi up` did not run inside that singleton and
 remains UNVERIFIED; the scoped result must not be read as EKS evidence.
 
-Phase 45 implements the hostless managed-child topology contract in
+Phase 46 implements the hostless managed-child topology contract in
 `Amoebius.Daemon.InClusterSingleton`: exactly one singleton role, one capacity-scheduler role, and zero host
 daemon roles, host NodePort peers, or host-substrate witnesses. Its positive pair keeps a self-managed
 `linux-cpu` host witness, so the managed arm cannot silently erase all hosts. Pure tests and retained-kind
@@ -669,7 +669,7 @@ flowchart TD
 ```
 *Orientation. Design intent; the context-and-role grid is owned by [§2](#2-context--role-an-orthogonal-grid). One binary appears in every box — the distinction is which context selects which role, never which executable runs.*
 
-Phase 51 validates only a host-CUDA execution slice of the accelerator-owner target. A physical GTX 970,
+Phase 52 validates only a host-CUDA execution slice of the accelerator-owner target. A physical GTX 970,
 `libcuda`, and `nvidia-smi` agree on one process executing 200 kernels over ten million parameters, followed by
 device-memory release. The retained kind node advertises no `nvidia.com/gpu`, so no device-plugin allocation,
 DaemonSet-like owner Pod, resource request/limit, node affinity, Pod UID/cgroup join, or Kubernetes audit row
@@ -684,7 +684,7 @@ This document is normative daemon-topology doctrine only. Delivery sequencing, c
 validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and never restated here. For orientation
 only (the plan is authoritative): the contexts and the same-binary spine ride the bootstrap-kernel phase; the
-in-cluster **control-plane singleton** was delivered by the Phase-33 live DSL deploy (per
+in-cluster **control-plane singleton** was delivered by the Phase-34 live DSL deploy (per
 [cluster_lifecycle_doctrine.md §10](./cluster_lifecycle_doctrine.md#10-planning-ownership)); single-instance is a
 k8s/etcd property, while amoebius's Lease client/handoff protocol is live-validated; and the **cross-cluster gateway migration** — the one
 simulation/proof obligation — is owned, modeled, and gated by
@@ -694,7 +694,7 @@ shape and links back for status.
 
 ---
 
-Phase 58's scoped UI-worker result admits three hard-spread unelected worker roles and demonstrates non-sticky
+Phase 59's scoped UI-worker result admits three hard-spread unelected worker roles and demonstrates non-sticky
 host-process recovery after one role stops. It does not observe real Kubernetes scheduling or a provider-zone
 fault, so multi-zone worker availability remains UNVERIFIED. Every hardware substrate can always run
 `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.

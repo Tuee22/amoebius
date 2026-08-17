@@ -14,7 +14,7 @@ model-as-data machinery it is expressed in, owned by
 
 **Status**: Authoritative source
 **Supersedes**: documents/engineering/tla_modelling_assumptions.md
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_44_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -252,7 +252,7 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
 - **Single-source correspondence narrows drift; runtime fidelity is bridged, not only sampled.** Because
   `interpret` and `emitTLA` consume one `Model`, there is no separate variable→module correspondence table to
   complete later, but renderer faithfulness remains a differential-test obligation —
-  the inversion the superseded doc left "empty and UNVERIFIED until Phase 42" is dissolved. The residual
+  the inversion the superseded doc left "empty and UNVERIFIED until Phase 43" is dissolved. The residual
   **runtime-fidelity** obligation (that the effectful daemon only takes transitions the `Model` sanctions) is
   discharged in two stages, not one: **trace validation**
   ([formal_model_doctrine.md §8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge)) —
@@ -268,7 +268,7 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
 ## 7. Planning ownership
 
 This document is normative model doctrine only. The `Model`, io-sim harness, and `emitTLA` model-check were
-validated by Phase 3. Phase 43 adds the trace validator, full modeled-action coverage, and live Planned/Failover
+validated by Phase 3. Phase 44 adds the trace validator, full modeled-action coverage, and live Planned/Failover
 drills. Its external journal showed zero Planned loss under positive lag and a fenced Failover inside the
 declared RTO. The data-loss bound remains assumed-and-monitored; Route53, real WAN, and physically independent
 child brokers remain UNVERIFIED. Phase order, status, and gates live only in

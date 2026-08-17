@@ -19,7 +19,7 @@ does not own the cluster engine that runs on it, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/engineering/repository_layout_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_second_arch_attested_index.md, DEVELOPMENT_PLAN/phase_36_pulsar_client.md, DEVELOPMENT_PLAN/phase_45_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_54_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -57,36 +57,59 @@ The canonical amoebius substrate catalog — the "at most one substrate per vali
 its phase gates to (see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)) — is four
 members:
 
-| Substrate | Host OS | Native arch | GPU axis | Canonical role |
-|-----------|---------|-------------|----------|----------------|
+| Substrate | Host OS | Natural arch | GPU axis | Canonical role |
+|-----------|---------|--------------|----------|----------------|
 | **apple** | macOS (Apple Silicon) | `arm64` (always) | Metal (on-host, not containerizable) | Admin laptop root cluster; Apple-Metal host worker nodes |
-| **linux-cpu** | Linux | `amd64` or `arm64` | none | The default validation substrate; kind/rke2 control plane |
-| **linux-cuda** | Linux | `amd64` or `arm64` | NVIDIA present | In-cluster CUDA workloads via the NVIDIA container runtime |
+| **linux-cpu** | Linux | the detected one, `amd64` or `arm64` | none | The CPU-only validation substrate; kind/rke2 control plane |
+| **linux-cuda** | Linux | the detected one, `amd64` or `arm64` | NVIDIA present | In-cluster CUDA workloads via the NVIDIA container runtime |
 | **windows** | Windows | `amd64` | CUDA present ⇒ on-host worker node | Linux substrates via WSL2; Windows-CUDA host worker nodes |
 
-**`linux-cpu` is the mandatory baseline offered by every hardware substrate.** The four detected names are
-not four mutually exclusive workload ceilings. They describe the physical host and its additional
-capabilities. Every one has a route to a CPU-only Linux execution lane:
+**`linux-cpu` is the mandatory baseline offered by every hardware substrate — at that host's natural
+architecture, and at no other.** The four detected names are not four mutually exclusive workload ceilings.
+They describe the physical host and its additional capabilities. Every one has a route to a CPU-only Linux
+execution lane, and that lane's architecture is the host's own:
 
-| Detected hardware substrate | `linux-cpu` route | Optional additional lane |
-|-----------------------------|-------------------|--------------------------|
-| `linux-cpu` | native Linux, or a fresh Incus guest when isolation/pristineness is required | none |
-| `linux-cuda` | native CPU-only Linux, or a fresh Incus guest; NVIDIA devices are not passed through | in-cluster CUDA |
-| `apple` | a Lima Linux guest | on-host Apple Metal |
-| `windows` | a WSL2 Linux distro | on-host CUDA when observed |
+| Detected hardware substrate | `linux-cpu` lane it derives | Optional additional lane |
+|-----------------------------|-----------------------------|--------------------------|
+| `linux-cpu` | `linux-cpu/<natural arch>`, on native Linux or a fresh Incus guest when isolation/pristineness is required | none |
+| `linux-cuda` | `linux-cpu/<natural arch>`, on native CPU-only Linux or a fresh Incus guest; NVIDIA devices are not passed through | in-cluster CUDA |
+| `apple` | `linux-cpu/arm64`, in a Lima Linux guest | on-host Apple Metal |
+| `windows` | `linux-cpu/amd64`, in a WSL2 Linux distro | on-host CUDA when observed |
 
 Thus detecting `linux-cuda`, `apple`, or `windows` **never removes `linux-cpu`**. Specialized hardware is an
 additive offering, not a promotion that forbids the baseline. In phase and ledger prose, “runs on
-`linux-cpu`” names this selected CPU-only Linux lane; it does not assert that the physical machine lacks a GPU
-or natively runs Linux. Where the distinction matters, evidence records both the detected hardware substrate
-and the selected execution lane.
+`linux-cpu/arm64`” names this selected CPU-only Linux lane at a stated architecture; it does not assert that
+the physical machine lacks a GPU or natively runs Linux. Evidence records the detected hardware substrate, the
+selected execution lane, and that lane's architecture.
 
-Two axes are orthogonal and both matter: the **OS** chooses the package manager and the VM-provider
-strategy ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)); the **architecture** (`amd64` / `arm64`) is what makes mixed-arch clusters and multi-arch
-images expressible — it feeds the buildx pipeline owned by
-[image_build_doctrine.md](./image_build_doctrine.md). amoebius supports mixed-arch clusters; it does
-**not** support Windows containers (in or outside WSL2) — Windows participates either as a Linux host (via
-WSL2) or as the on-host CUDA worker case ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)).
+### 1.1 The natural-architecture rule
+
+**The problem.** A lane name that carries no architecture lets one host claim both of them. A gate on an
+`arm64` host can build an `amd64` image under emulation, execute its binaries under a `qemu-user` shim, and
+record a `linux-cpu` pass. The defect that pass was supposed to exclude then surfaces at run time, on the
+`amd64` machine the artifact was never executed on.
+
+**Why the obvious alternative fails.** One `buildx` invocation over `--platform linux/amd64,linux/arm64`
+produces a correct-looking manifest list from a single host, and a cross-toolchain produces a correct-looking
+foreign binary. Neither produces an observation of that architecture *executing*, because no hardware of that
+architecture took part in the run — so the check that would refuse a broken artifact has nothing to read, and
+an emulator's report of itself is the self-emitted compliance trace
+[development_plan_gate_integrity.md §M](../../DEVELOPMENT_PLAN/development_plan_gate_integrity.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) refuses everywhere else.
+
+**The rule.** Every substrate derives its `linux-cpu` lane at its **natural architecture** — the architecture
+the detected host executes without translation — and at no other. No validation executes a
+foreign-architecture artifact under emulation, and none builds one through a cross-toolchain. An artifact for
+an architecture is produced and executed on a host whose natural architecture is that one.
+
+**What it forecloses.** No single host produces a two-architecture image. A multi-architecture artifact
+becomes a pair of natively built children joined by attestation, which costs a second physical machine
+([image_build_doctrine.md §3](./image_build_doctrine.md#3-multi-architecture-images--one-natively-built-child-per-architecture)).
+The two axes stay orthogonal and both still matter: the **OS** chooses the package manager and the VM-provider
+strategy ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)), while the
+**architecture** decides which lane a host can prove. Mixed-arch clusters remain expressible, because a
+cluster joins nodes each proven on its own hardware. amoebius does **not** support Windows containers (in or
+outside WSL2) — Windows participates either as a Linux host (via WSL2) or as the on-host CUDA worker case
+([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)).
 
 > **Honesty.** The four-name catalog is the amoebius DSL surface. The seed detector in the `hostbootstrap`
 > library distinguishes a *finer* granularity — `apple-silicon`, `linux-cpu`, `linux-gpu`, `windows-cpu`,
@@ -136,7 +159,10 @@ Either String Substrate` wrapped by `detect :: IO (Either String Substrate)`:
 
 - **OS** comes from `System.Info.os` (`darwin` / `linux` / `mingw32`).
 - **Architecture** comes from `System.Info.arch`, normalized by `parseDockerArch` to `amd64` / `arm64`;
-  anything else is a hard `Left` (unsupported architecture), not a guess.
+  anything else is a hard `Left` (unsupported architecture), not a guess. The normalized value is **carried
+  out of the classification, not discarded**: it is the natural architecture of
+  [§1.1](#11-the-natural-architecture-rule), so the classification names a substrate *and* the one lane
+  architecture that substrate can prove.
 - **GPU presence** is an NVIDIA probe (`hasNvidiaGpu`): the kernel markers `/proc/driver/nvidia/version`
   and `/dev/nvidiactl` first, then `nvidia-smi -L` as the fallback. On a positive probe the detector reads
   each device's UUID/profile, `memory.total`, and `memory.free` by invoking `nvidia-smi`
@@ -158,7 +184,7 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 - **GPU presence enriches the detected substrate.** A Linux host with an NVIDIA GPU classifies physically as
   `linux-cuda` (seed: `linux-gpu`), not `linux-cpu`; this makes the CUDA lane available and makes the NVIDIA
   container runtime a precondition only when that lane is selected. The host still always offers the
-  `linux-cpu` lane, where the GPU is neither passed through nor advertised.
+  `linux-cpu` lane at its own natural architecture, where the GPU is neither passed through nor advertised.
 
 > **A non-NVIDIA accelerator classifies as `linux-cpu` — a named detection gap.** The probe is NVIDIA-only
 > (`hasNvidiaGpu`), so a Linux host carrying a non-NVIDIA accelerator (AMD/ROCm, a TPU-class part) classifies
@@ -262,7 +288,7 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 > that is type-enforced now; package-manager-canonical *discovery* is the part still to land. Do not read
 > the current discovery seam as the finished contract.
 
-**Phase-35 code generation.** `amoebius-pulsar/Setup.hs` resolves the repository-pinned `protoc` and
+**Phase-36 code generation.** `amoebius-pulsar/Setup.hs` resolves the repository-pinned `protoc` and
 `proto-lens-protoc` files by absolute path, verifies both exist, and gives `proto-lens-setup` a closed scoped
 search domain with that pinned directory first and only Cabal's fixed compiler directories afterward. It never
 inherits or consults the ambient host `PATH`, so an unrelated executable cannot shadow code generation. The
@@ -276,13 +302,15 @@ amoebius is Kubernetes-centric and does not support Windows containers; the unit
 wants is a **Linux host**. Every hardware substrate can supply that `linux-cpu` lane. A native Linux host may
 supply it directly, while Apple and Windows synthesize it in a VM. When a gate requires a **pristine Linux
 host**, native Linux is also interposed: the gate runs in a newly created guest rather than pretending a
-populated parent is clean. The VM is plumbing; the substrate the cluster sees is CPU-only Linux.
+populated parent is clean. The VM is plumbing; the substrate the cluster sees is CPU-only Linux. **A guest
+runs the parent's natural architecture** ([§1.1](#11-the-natural-architecture-rule)) — virtualization
+synthesizes an operating system, never an instruction set.
 
 | Host substrate | VM provider | What it synthesizes | Seed module |
 |----------------|-------------|---------------------|-------------|
-| **apple** | **Lima** (`limactl`) | An Ubuntu-24.04 `linux-cpu` VM | `HostBootstrap.Ensure.Lima`, `HostBootstrap.Lima` |
-| **windows** | **WSL2** | An Ubuntu-24.04 `linux-cpu` distro | `HostBootstrap.Ensure.Wsl2`, `HostBootstrap.Wsl2` |
-| **linux-cpu** / **linux-cuda** | **Incus** | An Ubuntu-24.04 `linux-cpu` VM; CUDA devices are absent unless a different specialized gate explicitly requests passthrough | `HostBootstrap.Incus` |
+| **apple** | **Lima** (`limactl`) | An Ubuntu-24.04 `linux-cpu/arm64` VM | `HostBootstrap.Ensure.Lima`, `HostBootstrap.Lima` |
+| **windows** | **WSL2** | An Ubuntu-24.04 `linux-cpu/amd64` distro | `HostBootstrap.Ensure.Wsl2`, `HostBootstrap.Wsl2` |
+| **linux-cpu** / **linux-cuda** | **Incus** | An Ubuntu-24.04 `linux-cpu` VM at the parent's natural architecture; CUDA devices are absent unless a different specialized gate explicitly requests passthrough | `HostBootstrap.Incus` |
 
 This provider mapping is mandatory for pristine-host gates: **Incus on either Linux hardware substrate,
 Lima on Apple, WSL2 on Windows**. “Pristine” means the guest is newly materialized from the pinned image and
@@ -338,10 +366,12 @@ a host worker*.
 > **Honesty.** Lima, WSL2, and Incus are implemented VM providers in the `hostbootstrap` seed. The headless,
 > on-host Apple build/run shape is **proven in the sibling jitML project** (its implemented fixed-Metal-bridge
 > path) and the sibling `infernix` library **removed** its own legacy Tart path in favour of it — that is
-> sibling evidence for physical Metal. Phase 53 now implements the Lima/brew plan, private disk/capacity fold,
+> sibling evidence for physical Metal. Phase 54 now implements the Lima/brew plan, private disk/capacity fold,
 > and headless bridge/build/lifecycle contracts, but its Linux `x86_64` scoped gate leaves live Apple/Lima/brew
-> and Metal **UNVERIFIED**. There is no amoebius Tart code, now or planned. Every hardware substrate always
-> retains `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+> and Metal **UNVERIFIED**. Under [§1.1](#11-the-natural-architecture-rule) that scoped gate cannot close them
+> later either: an `apple` claim is provable only on Apple Silicon, whose natural architecture is `arm64`.
+> There is no amoebius Tart code, now or planned. Every hardware substrate always retains `linux-cpu` at its
+> own natural architecture; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 > Phase/status: [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -398,7 +428,7 @@ unified memory; CUDA under WSL2) cannot be reached performantly from inside that
 
 **The Windows in-cluster node is `linux-cpu` only.** To keep the one physical GPU from being claimed twice —
 once as an in-cluster bin-packable node resource and again by the wholesale host worker — a Windows host's
-WSL2-backed in-cluster node advertises **`linux-cpu`** capacity only; a WSL2-backed **`linux-cuda`**
+WSL2-backed in-cluster node advertises **`linux-cpu/amd64`** capacity only; a WSL2-backed **`linux-cuda`**
 in-cluster node on Windows has **no constructor** (type-foreclosed). The GPU escapes to the host worker, never to a
 WSL2 pod, and is owned wholesale by that one worker.
 
@@ -433,17 +463,18 @@ CLI (`pb`) with two modes, **bootstrap coordinator** (bare host → build → `e
 amoebius owns **no shell script**; the earlier `bootstrap.sh` is retired
 ([../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md)).
 
-Phase 24 delivered the bootstrap coordinator mode; Phase 33 Sprint 33.4 now delivers the second mode in
+Phase 24 delivered the bootstrap coordinator mode; Phase 34 Sprint 34.4 now delivers the second mode in
 `pb/pb/admin.py` and `pb/pb/cli.py`, live-validating node-local Vault init/unseal plus Dhall update and KV CRUD
 against the singleton. This does not change the universal baseline: every hardware substrate can always run
-`linux-cpu`, and a pristine Linux host uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+`linux-cpu` at its own natural architecture ([§1.1](#11-the-natural-architecture-rule)), and a pristine Linux
+host uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-The Phase-44 provider-parent instance follows the same rule. The actual Pulumi 3.228.0 binary was resolved by
+The Phase-45 provider-parent instance follows the same rule. The actual Pulumi 3.228.0 binary was resolved by
 absolute path and observed through `strace` with zero child-environment entries, while the pure engine boundary
 also requires an absolute AWS-plugin path and rejects `PATH`, `PULUMI_*`, and `AWS_*`. The provider `up` and
 AWS-plugin `execve` remain UNVERIFIED because the configured AWS identity is invalid. This does not alter the
-universal route: every hardware substrate can always run the linux-cpu parent, with pristine Linux supplied by
-Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+universal route: every hardware substrate can always run the linux-cpu parent at its own natural
+architecture, with pristine Linux supplied by Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 The contract, on the canonical Apple lane (`pb bootstrap` mode):
 
@@ -734,16 +765,17 @@ this doc owns only the declared `Site` **fact**, not the classification.
 This document is normative substrate doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): substrate detection
 and the `bootstrap` contract land in **Phase 24** (`linux-cpu`); host compute daemons, the Lima/WSL2
-providers, and the headless Apple-Metal fixed-bridge contracts land in **Phase 53** (`apple`; physical Apple
+providers, and the headless Apple-Metal fixed-bridge contracts land in **Phase 54** (`apple`; physical Apple
 surfaces remain UNVERIFIED after its scoped Linux-host gate); the in-cluster CUDA path is exercised in
-**Phase 51** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
+**Phase 52** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
 and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
-Phase 48 validates deterministic recomputation and Tier-1 executable-engine cache reuse on the retained
+Phase 49 validates deterministic recomputation and Tier-1 executable-engine cache reuse on the retained
 `linux-cpu` platform. It does not establish cross-substrate bit equality, cross-node reuse, production
 llama.cpp inference, or CUDA/Metal cache behavior; those surfaces remain UNVERIFIED. This scoped result does
-not narrow platform availability: every hardware substrate can always run `linux-cpu`. When a pristine Linux
-host is required, Linux and Linux-CUDA use Incus, Apple uses Lima, and Windows uses WSL2.
+not narrow platform availability: every hardware substrate can always run `linux-cpu` at its own natural
+architecture. When a pristine Linux host is required, Linux and Linux-CUDA use Incus, Apple uses Lima, and
+Windows uses WSL2.
 
 ---
 

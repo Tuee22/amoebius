@@ -38,7 +38,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/ui_browser_interpreter_gate.py` passed all eleven sides in
+⏸️ Blocked pending Phase-20 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_browser_interpreter_gate.py` passed all eleven sides in
 resolved Chrome: two plans, five event arms, four independently derived traces, two DOM snapshots, three
 accessibility rows, five focus rows, four transport rows, CSP and WebSocket checks, all nine mutants, and all
 sixteen metrics pass; 66 surfaces join to 84 enumerated items. The project-contained attestation is
@@ -47,7 +56,7 @@ sixteen metrics pass; 66 surfaces join to 84 enumerated items. The project-conta
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:05f7d7c56b159a83…`
+Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:05f7d7c56b159a83…`
 (1944 non-ignored files) and published a verified pre-containment external attestation
 `sha256:9494bf7e55160959786c7028baa5d9e0dad2ecb7227e541a03164cd08e6ed3e8`.
 
@@ -82,7 +91,7 @@ three surfaces reads as three independent results.
 
 **Invalidated historical record:**
 
-✅ Done. Two immutable plans run through one generic PureScript bundle in real Chrome and agree with an
+Done (invalidated). Two immutable plans run through one generic PureScript bundle in real Chrome and agree with an
 independent Haskell transition oracle. Five interactions, four differential trace steps, two DOM snapshots,
 three accessibility rows, five keyboard/focus rows, four transport rows, a fresh nonce, browser-enforced CSP,
 the built-artifact scanner, the OS network observer, and all nine mutants pass. Live identity, server
@@ -112,6 +121,8 @@ evaluation, a second production interpreter, a live identity/provider service, r
 register, or a substrate.
 **Dependency:** Phase 20 — canonical immutable `ClientPlan` encoding and public contracts.
 **Substrate:** none — local Chromium and harness-owned fake processes only; no cluster or external service.
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+
 **Register:** 2 — boundary integration with fakes.
 **Gate:** `python3 tools/ui_browser_interpreter_gate.py` builds the generic bundle and passes every check and seeded mutant
 in [Gate integrity](#gate-integrity), emitting a Register-2 ledger whose live layers stay UNVERIFIED. Phase 23

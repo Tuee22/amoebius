@@ -720,7 +720,7 @@ Success returns a `Placement` — a **witness** that a feasible schedule exists;
    real pod→node witness. Unplaced workloads continue into the candidate cover.
 2. **Derive effective candidate capacity, then construct a class-count cover.** For each candidate class,
    subtract every topology-expanded per-node execution unit required on that class — CNI/device-plugin and
-   other DaemonSet-like services, the Phase-48 cache owner, and an accelerator owner where applicable — from
+   other DaemonSet-like services, the Phase-49 cache owner, and an accelerator owner where applicable — from
    declared allocatable CPU/memory/ephemeral/device/storage capacity. This is one subtraction per selected
    node, not hidden overhead. Each remaining atomic pod must `podFits` one such effective instance across CPU
    request and finite CPU-limit budget, memory, ephemeral storage, storage locality/zone, accelerator

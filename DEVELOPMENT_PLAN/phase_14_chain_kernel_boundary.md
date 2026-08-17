@@ -19,7 +19,7 @@ The composite Register-1/2 gate passed on 2026-08-09. Live tools, apiserver appl
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_27_object_reconciler.md, DEVELOPMENT_PLAN/phase_28_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -46,7 +46,16 @@ The composite Register-1/2 gate passed on 2026-08-09. Live tools, apiserver appl
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-15. `python3 tools/chain_boundary_gate.py` passed all twelve sides: the chain,
+⏸️ Blocked pending Phase-13 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
+the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
+architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+[§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
+
+**Pre-natural-architecture status record (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-15. `python3 tools/chain_boundary_gate.py` passed all twelve sides: the chain,
 boundary, AST, compile-fail, and network-isolation suites, all seven mutants, and all eleven metrics pass; 40
 surfaces join to 40 enumerated items. The project-contained attestation is
 `sha256:a3ab699be5f004bd68fd7b3ea0ecbc15bac74328d4b39924d44cd35f61f5dade`, bound to source snapshot
@@ -54,7 +63,7 @@ surfaces join to 40 enumerated items. The project-contained attestation is
 
 **Pre-containment status record (invalidated where it claims completion):**
 
-✅ Done — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:d79a808594ad51a9…`
+Done (invalidated) — sealed 2026-08-12. The migrated gate passed against source snapshot `sha256:d79a808594ad51a9…`
 (1939 non-ignored files) and published a verified pre-containment external attestation
 `sha256:95a34d33ad9a72a75072bfd1e905a7f9c811a6871a0ecbbde0b67b9613064eb5`.
 
@@ -80,7 +89,7 @@ recorded in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md)
 
 **Invalidated historical record:**
 
-✅ Done. Validated on 2026-08-09 with `python3 tools/chain_boundary_gate.py` on
+Done (invalidated). Validated on 2026-08-09 with `python3 tools/chain_boundary_gate.py` on
 substrate `none` across Registers 1 and 2. Part A covers the pure chain/descent/render boundary, two cfg
 fixtures, two plan goldens, two descent goldens, zero action executions, and a positive canary. Part B drives
 the real binary through the one absolute-path subprocess seam and checks four exact transcripts across three
@@ -117,9 +126,9 @@ host's `PATH` — with the `helm` fake present only as a **negative control that
 (amoebius renders and applies its own typed manifests and never shells to Helm).
 
 What is *not* here: the effectful interpreter's *invocation* against a **real** cluster with **real** tools — the
-live SSA reconciler that replaces the fakes ([phase_26_object_reconciler.md](phase_26_object_reconciler.md)), and
+live SSA reconciler that replaces the fakes ([phase_27_object_reconciler.md](phase_27_object_reconciler.md)), and
 the runtime-enforcement claim that a cluster admits what the fakes accepted, exercised against the live
-Deployment-`replicas=1` singleton ([phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md)) — the
+Deployment-`replicas=1` singleton ([phase_34_live_dsl_singleton.md](phase_34_live_dsl_singleton.md)) — the
 Tier-2 residue this two-register gate leaves UNVERIFIED by construction. The deterministic-simulation activity
 that this boundary harness unblocks lives in [phase_15_deterministic_sim_substrate.md](phase_15_deterministic_sim_substrate.md).
 
@@ -127,6 +136,8 @@ that this boundary harness unblocks lives in [phase_15_deterministic_sim_substra
 `cabal test chain-spec` plan-render battery (Part A, analogous to the Phase-13 rendered-output goldens) plus an
 in-process `cabal test boundary-spec` battery driving the real binary against fake tool binaries in a controlled
 directory (Part B).
+
+**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1/2 — a two-register gate: **Part A is Register 1** (pure/golden, in-process, no cluster) and
 **Part B is Register 2** (boundary integration with fake tools, no cluster), both in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
@@ -266,7 +277,7 @@ flowchart LR
   preview is byte-for-byte what a live apply would submit, and the plan and manifest bytes the fakes receive in
   Part B were rendered in Part A with no cluster (the fake-apply adds no infrastructure dependency); prerequisite
   checks (is a cluster reachable, are credentials present) belong on the *apply* path
-  ([phase_26_object_reconciler.md](phase_26_object_reconciler.md)), never the render or boundary path.
+  ([phase_27_object_reconciler.md](phase_27_object_reconciler.md)), never the render or boundary path.
 - [`conformance_harness_doctrine.md §2 — the registers as amoebius uses them for pre-cluster validation`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
   (Register 1 — pure/golden, in-process, Part A; **and** Register 2 — boundary integration with fakes, no
   cluster, Part B: the real binary run with fake `helm`/`kubectl`/`docker`/`pulumi` that record their argv and
@@ -287,8 +298,8 @@ flowchart LR
   [`§4 — no skips, fail-fast, and the per-run ledger artifact`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact):
   the composite gate emits a per-run proven/tested/assumed ledger led by a Tier-2-UNVERIFIED banner, marking
   model↔runtime correspondence and runtime fidelity UNVERIFIED (owned by
-  [phase_26_object_reconciler.md](phase_26_object_reconciler.md) and
-  [phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md)); fail-fast, no skips — a missing fake or a
+  [phase_27_object_reconciler.md](phase_27_object_reconciler.md) and
+  [phase_34_live_dsl_singleton.md](phase_34_live_dsl_singleton.md)); fail-fast, no skips — a missing fake or a
   missing golden fails with an actionable error, never a pass-with-a-skip.
 
 ## Sprints
@@ -364,7 +375,7 @@ the chain into the lift/plan structure) — and only *declares* the effectful se
 Part B (Register 2) and Register 3.
 
 ### Deliverables
-- Pure `nextFrameAfter :: Frame -> [Step] -> Maybe Frame` and `foldLift :: cfg -> [Step] -> Plan`, neither carrying `IO`, computing the frame/step assignment and the fold-derived plan with no action run. - The effectful `runChainFromFrame` **declared** as the single IO seam, with an in-file honesty note that its *invocation* is out of scope in Part A — Part B exercises it against fake tools (Sprints 14.5–14.7) and Register 3 against the live Deployment-`replicas=1` singleton ([phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md)); there is no election or standby anywhere in
+- Pure `nextFrameAfter :: Frame -> [Step] -> Maybe Frame` and `foldLift :: cfg -> [Step] -> Plan`, neither carrying `IO`, computing the frame/step assignment and the fold-derived plan with no action run. - The effectful `runChainFromFrame` **declared** as the single IO seam, with an in-file honesty note that its *invocation* is out of scope in Part A — Part B exercises it against fake tools (Sprints 14.5–14.7) and Register 3 against the live Deployment-`replicas=1` singleton ([phase_34_live_dsl_singleton.md](phase_34_live_dsl_singleton.md)); there is no election or standby anywhere in
   the kernel.
 
 ### Validation
@@ -471,7 +482,7 @@ correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Regis
   `--dry-run` path reach no network/process/credential module.
 - A Register-1 ledger led by a Tier-2-UNVERIFIED banner: the plan is proven pure and exact in-process, but no
   runtime-enforcement or effectful-fidelity claim is made — that residue is Part B (fake-tool, Sprints 14.5–14.7)
-  and [phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md) (live singleton).
+  and [phase_34_live_dsl_singleton.md](phase_34_live_dsl_singleton.md) (live singleton).
 
 ### Validation
 1. `cabal test chain-spec`, run with credentials scrubbed and socket calls blocked and observed, is green. For each
@@ -585,8 +596,8 @@ Adopt [`testing_doctrine.md §2 — Register 2`](../documents/engineering/testin
 commands and applied bytes, and prove at the boundary that every tool was invoked by absolute path (the
 cross-cutting no-`PATH` invariant, [README.md](README.md)) — then emit the composite Register-1/2
 proven/tested/assumed ledger led by a Tier-2-UNVERIFIED banner (no cluster admitted anything; runtime enforcement
-is owned by [phase_33_live_dsl_singleton.md](phase_33_live_dsl_singleton.md) and the live apply by
-[phase_26_object_reconciler.md](phase_26_object_reconciler.md)).
+is owned by [phase_34_live_dsl_singleton.md](phase_34_live_dsl_singleton.md) and the live apply by
+[phase_27_object_reconciler.md](phase_27_object_reconciler.md)).
 
 ### Deliverables
 - The committed **representative plan corpus** — a `[Step]` fixture with at least one step per tool — and the committed **hand-authored expected-argv transcripts** (`test/golden/chain_boundary/argv/`, pinned at the start of Phase 14 before the executor implementation (the §M.1 named exception), authored independently of the executor
@@ -739,6 +750,6 @@ Done. Checked-source runtime behavior remains UNVERIFIED.
   harness unblocks
 - [phase_16](phase_16_ui_program_schema.md) — the bounded UI source/checker phase that consumes the same
   pre-cluster Gate-1/Gate-2 discipline without adding a second boundary-runtime claim
-- [phase_26](phase_26_object_reconciler.md) — the live SSA reconciler that replaces the fakes with real tools
-- [phase_33](phase_33_live_dsl_singleton.md) — Register 3 runs the chain via the Deployment-`replicas=1` singleton
+- [phase_27](phase_27_object_reconciler.md) — the live SSA reconciler that replaces the fakes with real tools
+- [phase_34](phase_34_live_dsl_singleton.md) — Register 3 runs the chain via the Deployment-`replicas=1` singleton
   (no election); the Tier-2 runtime-enforcement half this two-register gate leaves UNVERIFIED
