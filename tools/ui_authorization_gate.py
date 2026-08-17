@@ -39,7 +39,7 @@ RESULTS = ROOT / ".build/dsl/ui-authorization/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-authorization/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-authorization"
 TEMP_ROOT = ROOT / ".build/tmp/ui-authorization"
-CONTRACT = "DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_21_ui_authorization_kernel.md"
 GATE_COMMAND = "python3 tools/ui_authorization_gate.py"
 EXPECTATIONS = "test/oracle/ui_authorization_surfaces.tsv"
 
@@ -194,13 +194,13 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         raise GateFailure("authority epoch errors drifted")
     mutants = read_tsv(MUTANTS)
     if len(mutants) != 2 or {row["mutant"] for row in mutants} != set(MUTANT_TOKENS):
-        raise GateFailure("Phase-18 mutant manifest must contain exactly the two contract mutants")
+        raise GateFailure("Phase-21 mutant manifest must contain exactly the two contract mutants")
     locus = read_tsv(LOCUS)
     if len(locus) != 30 or len({row["entry"] for row in locus}) != 30:
-        raise GateFailure("Phase-18 validation locus must contain thirty unique rows")
+        raise GateFailure("Phase-21 validation locus must contain thirty unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
     if len([row for row in phase0_rows if row["# phase"] == "18"]) != 6:
-        raise GateFailure("Phase-0 manifest must pin six Phase-18 artifacts")
+        raise GateFailure("Phase-0 manifest must pin six Phase-21 artifacts")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 1 only; identity/provider/runtime enforcement UNVERIFIED\n"
@@ -308,7 +308,7 @@ def run_green(cabal: Path) -> tuple[str, str]:
         "(5 actions, 6 matrix rows, 4 parity errors, 4 stale epochs, 9 coverage classes, 2 mutants)"
     )
     if token not in suite.stdout or token not in isolated:
-        raise GateFailure("Phase-18 acceptance token is absent from normal or isolated execution")
+        raise GateFailure("Phase-21 acceptance token is absent from normal or isolated execution")
     return suite.stdout + isolated, observer
 
 
@@ -480,7 +480,7 @@ def main() -> int:
         },
         dependencies={"ui-authorization-spec": "cabal test"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-18 mutants", "status": "unrun"}],
+        or [{"name": "phase-21 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

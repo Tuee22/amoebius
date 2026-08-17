@@ -19,7 +19,7 @@ does not own the cluster engine that runs on it, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_24_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_second_arch_attested_index.md, DEVELOPMENT_PLAN/phase_36_pulsar_client.md, DEVELOPMENT_PLAN/phase_45_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_54_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_29_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_67_second_arch_attested_index.md, DEVELOPMENT_PLAN/phase_40_pulsar_client.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -40,7 +40,7 @@ does not own the cluster engine that runs on it, owned by
 
 ---
 
-**Pure inventory read-side status.** The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md)
+**Pure inventory read-side status.** The [Phase 10 gate](../../DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md)
 validates closed kubelet filesystem layouts, OCI/runtime metadata routing, provider-root template identities,
 accelerator family/profile ownership, and raw/reserved/allocatable VRAM arithmetic in Register 1. Detection,
 materialization, attachment, and observed readback remain unverified; ledger `external-run-reference`.
@@ -201,7 +201,7 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 > **Honesty.** The detector, universal-CPU/provider mapping, `AbsExe` tool boundary, and Python bootstrap coordinator are now
 > implemented. A pristine Incus VM on the physical `linux-cuda` parent exercised clean install, build, handoff,
 > idempotence, divergence repair, and teardown; evidence is retained under
-> `DEVELOPMENT_PLAN/evidence/phase_24`. This is not a complete Phase-24 pass because the full live enforcement
+> `DEVELOPMENT_PLAN/evidence/phase_24`. This is not a complete Phase-29 pass because the full live enforcement
 > inventory remains unfinished. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -222,6 +222,72 @@ The four-step ensure contract is:
 2. **Install if absent.** Use the package manager to install it.
 3. **Resolve the absolute path** from the package manager itself (e.g. `brew --prefix` on Apple).
 4. **Invoke by full path** in a subprocess — never a `PATH`-resolved bare name.
+
+### 3.1 The per-substrate floor: what only the operator can supply
+
+The contract above says what amoebius does when a tool is absent. This section says what must
+already be true for it to be able to do anything at all — the **floor**. Only three classes belong
+to it: the **package-manager root**, because it cannot be installed through a resolved tool; a
+**hardware or firmware fact**, because software cannot enable it; and a **credentialed account**,
+because it is not amoebius's to create. Anything else with a supported install plan is ensured,
+never written down as a manual prerequisite.
+
+The floor is a fact about the **host operating system**, not about a phase. On apple and windows
+its whole job is to reach a Linux frame at the host's natural architecture
+([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)); inside
+that frame the linux floor applies and amoebius owns everything, because amoebius made the frame.
+The table shape is the one
+[`apple_metal_headless_builds.md` §4](./apple_metal_headless_builds.md#4-build-and-prerequisite-model)
+already uses for the Apple worker: a prerequisite, what needs it, and how it is ensured or verified.
+
+**apple** — natural architecture `arm64`, always
+([§1.1](#11-the-natural-architecture-rule)):
+
+| Prerequisite | Required for | Ensure / verify |
+|---|---|---|
+| `apple.package-manager-root` | every ensured tool, and Lima | Homebrew. Verified, never installed: a verified no-op when `brew` is present, a refusal carrying the install instruction when it is absent |
+| `apple.command-line-tools` | the fixed Metal bridge, and every on-host source build | `/usr/bin/clang` and the Foundation/Metal headers, verified through `xcode-select -p`. Full Xcode remains deliberately excluded ([`apple_metal_headless_builds.md` §1](./apple_metal_headless_builds.md#1-the-commitment-headless-on-host-no-vm)) |
+| `apple.silicon` | the substrate itself | Detection refuses macOS on any other architecture outright, so this is decided before the floor runs ([§2](#2-detection-a-pure-classification-over-three-reads)) |
+
+**linux-cpu** and **linux-cuda** — natural architecture is the detected one:
+
+| Prerequisite | Required for | Ensure / verify |
+|---|---|---|
+| `linux.package-manager-root` | the C libraries the compiler links, and the container engine | The system package manager, verified at its absolute path; absent is a refusal naming it |
+| `linux.privilege` | package installation and provider initialisation | Passwordless sudo, verified without a prompt |
+| `linux.virtualization` | the pristine-guest provider | `/dev/kvm`, present and writable by the invoking user. An unloaded module and an unwritable node are both reconciled; firmware virtualization disabled is a refusal |
+| `linux-cuda.accelerator` | the CUDA lane only | The NVIDIA kernel driver. **Not a refusal:** a host without it classifies as `linux-cpu` ([§2](#2-detection-a-pure-classification-over-three-reads)), so the lane is simply never offered |
+
+**windows** — natural architecture `amd64`, always:
+
+| Prerequisite | Required for | Ensure / verify |
+|---|---|---|
+| `windows.package-manager-root` | every ensured tool | winget, verified at its absolute path; absent is a refusal naming it |
+| `windows.shell` | the pre-binary bootstrap and every host-boundary invocation | PowerShell |
+| `windows.firmware-virtualization` | WSL2, and therefore the whole Linux lane | `VirtualizationFirmwareEnabled` and `HyperVisorPresent`, read before any install is attempted. Disabled is a refusal naming BIOS/UEFI, because no software can enable it ([§4.2](#42-wsl2-on-windows)) |
+| `windows.elevation` | the WSL2 feature install and the hypervisor launch setting | Administrator rights |
+| `windows.reboot` | completing a WSL2 or hypervisor change | A first-class outcome — "reboot and retry" — never a silent hang |
+
+**Everything else is ensured, on every substrate**: the VM provider, the container engine inside
+the frame, `ghcup` and the GHC/Cabal pair it supplies, the cluster tools, the schema and browser
+tools, and on `linux-cuda` the container toolkit, its runtime registration, and CDI. The
+Kubernetes accelerator device plugin is ensured too — it is a DaemonSet the reconciler renders
+like every other operator install
+([`manifest_generation_doctrine.md` §4](./manifest_generation_doctrine.md#4-no-third-party-charts--no-third-party-software-operators-are-generated)),
+not an operator obligation.
+
+**A refusal is a value, not a crash.** Each floor check that fails yields the prerequisite it
+names and the remedy that clears it, so the whole floor is decidable for a substrate the running
+host is not — which is what lets an apple host check that its plan for windows is well-formed.
+
+**How an ensured tool is acquired, and why the package manager is not the default.** A
+package-manager install cannot be verified against a publisher digest, because the package manager
+is its own trust root. So the package manager is used for the floor's root and for what only it
+can supply; every other tool is taken from its publisher's own release, verified against that
+publisher's own checksum fetched in the same run, and installed beneath the repository's ignored
+build root rather than into a shared host location
+([`repository_layout_doctrine.md` §4](./repository_layout_doctrine.md#4-dependency-and-toolchain-resolution)).
+That keeps acquisition auditable and leaves no amoebius-owned state outside the checkout.
 
 ### Why this is structurally enforced, not merely a guideline
 
@@ -288,7 +354,7 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 > that is type-enforced now; package-manager-canonical *discovery* is the part still to land. Do not read
 > the current discovery seam as the finished contract.
 
-**Phase-36 code generation.** `amoebius-pulsar/Setup.hs` resolves the repository-pinned `protoc` and
+**Phase-40 code generation.** `amoebius-pulsar/Setup.hs` resolves the repository-pinned `protoc` and
 `proto-lens-protoc` files by absolute path, verifies both exist, and gives `proto-lens-setup` a closed scoped
 search domain with that pinned directory first and only Cabal's fixed compiler directories afterward. It never
 inherits or consults the ambient host `PATH`, so an unrelated executable cannot shadow code generation. The
@@ -310,7 +376,7 @@ synthesizes an operating system, never an instruction set.
 |----------------|-------------|---------------------|-------------|
 | **apple** | **Lima** (`limactl`) | An Ubuntu-24.04 `linux-cpu/arm64` VM | `HostBootstrap.Ensure.Lima`, `HostBootstrap.Lima` |
 | **windows** | **WSL2** | An Ubuntu-24.04 `linux-cpu/amd64` distro | `HostBootstrap.Ensure.Wsl2`, `HostBootstrap.Wsl2` |
-| **linux-cpu** / **linux-cuda** | **Incus** | An Ubuntu-24.04 `linux-cpu` VM at the parent's natural architecture; CUDA devices are absent unless a different specialized gate explicitly requests passthrough | `HostBootstrap.Incus` |
+| **linux-cpu** / **linux-cuda** | **Incus** | An Ubuntu-24.04 `linux-cpu` VM at the parent's natural architecture; CUDA devices are absent unless a different specialized gate explicitly requests passthrough | `HostBootstrap.Ensure.Incus`, `HostBootstrap.Incus` |
 
 This provider mapping is mandatory for pristine-host gates: **Incus on either Linux hardware substrate,
 Lima on Apple, WSL2 on Windows**. “Pristine” means the guest is newly materialized from the pinned image and
@@ -321,7 +387,7 @@ capacity.
 
 There is deliberately **no macOS build VM** row. The Apple-Metal host worker's Swift/Metal parts are **not**
 built in a VM (no Tart) — they build headless, directly on the macOS host; that shape and its rationale are
-owned by [§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host) and
+owned by [§4.4](#44-no-macos-build-vm-apple-builds-are-headless-on-host) and
 [apple_metal_headless_builds.md](./apple_metal_headless_builds.md).
 
 ### 4.1 Lima on Apple
@@ -343,15 +409,27 @@ layers. The reconciler (`HostBootstrap.Ensure.Wsl2`):
 - checks `VirtualizationFirmwareEnabled` and `HyperVisorPresent` via PowerShell before attempting install,
   and **fails fast with an actionable message** when firmware virtualization is off (the operator must
   enable it in BIOS/UEFI);
-- installs via `winget install --id Microsoft.WSL`, then `wsl --install --no-distribution`, then
-  `wsl --set-default-version 2`, setting Ubuntu-24.04 as the distro;
+- installs via `winget install --id Microsoft.WSL`, then `wsl --install --no-distribution` — which is what
+  enables the `VirtualMachinePlatform` and `Microsoft-Windows-Subsystem-Linux` optional features, so amoebius
+  never toggles them directly — then `wsl --set-default-version 2`, setting Ubuntu-24.04 as the distro;
 - treats a **required host reboot** as a first-class fail-fast outcome ("reboot and retry"), not a silent
   hang — installing WSL2 and configuring `bcdedit` hypervisor launch both can require a reboot.
 
 On Windows the nested-invocation tool is `wsl`, and (on a Windows host) the seed even routes `wsl` through
 PowerShell so the absolute-path discipline holds at the host boundary.
 
-### 4.3 No macOS build VM: Apple builds are headless on-host
+### 4.3 Incus on Linux
+
+`ensure incus` is the Linux counterpart of the two above, and it has the same probe-first shape: install
+Incus through the system package manager when it is absent, then run its one-time minimal initialisation so a
+storage pool and bridge exist, then verify. A guest is created only after that verification succeeds.
+
+Its floor is `linux.virtualization` ([§3.1](#31-the-per-substrate-floor-what-only-the-operator-can-supply)):
+an Incus **VM** — as opposed to a container — needs `/dev/kvm`. The reconciler loads an unloaded `kvm` module
+and grants the invoking user access to a present-but-unwritable node, because both are software states it can
+change; firmware virtualization disabled is a refusal, because it is not.
+
+### 4.4 No macOS build VM: Apple builds are headless on-host
 
 The Apple-Metal host worker's native Swift/Metal parts are **built headless, directly on the macOS host** —
 **there is no macOS build VM, and specifically no Tart.** amoebius commits to this by design: a single fixed
@@ -366,7 +444,7 @@ a host worker*.
 > **Honesty.** Lima, WSL2, and Incus are implemented VM providers in the `hostbootstrap` seed. The headless,
 > on-host Apple build/run shape is **proven in the sibling jitML project** (its implemented fixed-Metal-bridge
 > path) and the sibling `infernix` library **removed** its own legacy Tart path in favour of it — that is
-> sibling evidence for physical Metal. Phase 54 now implements the Lima/brew plan, private disk/capacity fold,
+> sibling evidence for physical Metal. Phase 68 now implements the Lima/brew plan, private disk/capacity fold,
 > and headless bridge/build/lifecycle contracts, but its Linux `x86_64` scoped gate leaves live Apple/Lima/brew
 > and Metal **UNVERIFIED**. Under [§1.1](#11-the-natural-architecture-rule) that scoped gate cannot close them
 > later either: an `apple` claim is provable only on Apple Silicon, whose natural architecture is `arm64`.
@@ -383,13 +461,13 @@ host subprocess of the host binary:
 
 | Hardware | Substrate | Why not a container / VM | What runs on the host |
 |----------|-----------|--------------------------|-----------------------|
-| **Apple Metal GPU** | apple | Metal needs Apple Silicon **unified memory**; it cannot run in a Linux container or a Linux VM | An on-host inference/ML worker, built natively **headless on the host — no VM** ([§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host), [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)) |
+| **Apple Metal GPU** | apple | Metal needs Apple Silicon **unified memory**; it cannot run in a Linux container or a Linux VM | An on-host inference/ML worker, built natively **headless on the host — no VM** ([§4.4](#44-no-macos-build-vm-apple-builds-are-headless-on-host), [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)) |
 | **NVIDIA CUDA on Windows** | windows | The CUDA stack does **not** run performantly from inside WSL2 | An on-host CUDA worker, built natively **headless on the host — no VM**, on Windows (symmetric to the Apple-Metal worker, [§5.1](#51-windows-cuda-and-apple-metal-are-the-same-host-worker-shape)) |
 
 The defining properties of a host worker node:
 
 - **Built directly on the host** — headless, with **no VM** (the Apple Swift/Metal parts build on-host via
-  the fixed Metal bridge, [§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host) / [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), not
+  the fixed Metal bridge, [§4.4](#44-no-macos-build-vm-apple-builds-are-headless-on-host) / [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), not
   pulled as a container image. This is the one place amoebius compute lives *outside* a cluster pod.
 - **Managed as a subprocess by the host amoebius binary**, which owns its lifecycle. The stateless-role
   skeleton the seed uses is Load → Prereq → Acquire → Ready → Serve → Drain → Exit
@@ -402,11 +480,17 @@ The defining properties of a host worker node:
   [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md); the carve-out is recorded in
   [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). This doc owns only *which hardware
   forces a host worker and why*, not the wire.
-- **Is a worker role, not the control plane.** The worker-role taxonomy and the in-cluster control-plane
-  singleton are owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md). The CUDA *in-cluster*
+- **Is a worker role, not the control plane.** A host worker is the `Worker` arm of `InClusterRole` under the
+  host-daemon context, owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md). The CUDA *in-cluster*
   path (the `linux-cuda` container runtime, `HostBootstrap.Ensure.Cuda`: NVIDIA container toolkit +
-  `nvidia` Docker runtime registration) is the **contrast** case — CUDA in a Linux container is fine; CUDA
-  on Windows and GPU on Apple are the ones that escape to the host.
+  `nvidia` Docker runtime registration + CDI) is the **contrast** case — CUDA in a Linux container is fine;
+  CUDA on Windows and GPU on Apple are the ones that escape to the host. Registering the runtime is not the
+  whole path: a pod can request `nvidia.com/gpu` only once the accelerator **device plugin** is running, and
+  that plugin is a DaemonSet the reconciler renders like every other operator install
+  ([`manifest_generation_doctrine.md` §4](./manifest_generation_doctrine.md#4-no-third-party-charts--no-third-party-software-operators-are-generated)),
+  never a prerequisite the operator installs by hand. The kernel driver beneath it stays the operator's, and
+  its absence is a classification outcome rather than a refusal
+  ([§3.1](#31-the-per-substrate-floor-what-only-the-operator-can-supply)).
 
 ### 5.1 Windows-CUDA and Apple-Metal are the same host-worker shape
 
@@ -422,7 +506,7 @@ sibling evidence, whereas the on-host Windows-CUDA build/run path is **forward d
 
 **Co-resident *on* the host, not *in* the VM.** On Windows the CUDA worker runs on the **same physical host as** — never *inside* — the WSL2 distro that backs the in-cluster Linux node; on Apple it runs on the same
 host as the Lima VM. The worker keeps its "no VM, on-host, headless" property
-([§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host)): the VM synthesizes the *in-cluster* Linux
+([§4.4](#44-no-macos-build-vm-apple-builds-are-headless-on-host)): the VM synthesizes the *in-cluster* Linux
 node, while the accelerator worker lives beside it on the bare host, precisely because the accelerator (Metal
 unified memory; CUDA under WSL2) cannot be reached performantly from inside that VM.
 
@@ -463,13 +547,13 @@ CLI (`pb`) with two modes, **bootstrap coordinator** (bare host → build → `e
 amoebius owns **no shell script**; the earlier `bootstrap.sh` is retired
 ([../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md)).
 
-Phase 24 delivered the bootstrap coordinator mode; Phase 34 Sprint 34.4 now delivers the second mode in
+Phase 29 delivered the bootstrap coordinator mode; Phase 38 Sprint 38.4 now delivers the second mode in
 `pb/pb/admin.py` and `pb/pb/cli.py`, live-validating node-local Vault init/unseal plus Dhall update and KV CRUD
 against the singleton. This does not change the universal baseline: every hardware substrate can always run
 `linux-cpu` at its own natural architecture ([§1.1](#11-the-natural-architecture-rule)), and a pristine Linux
 host uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-The Phase-45 provider-parent instance follows the same rule. The actual Pulumi 3.228.0 binary was resolved by
+The Phase-49 provider-parent instance follows the same rule. The actual Pulumi 3.228.0 binary was resolved by
 absolute path and observed through `strace` with zero child-environment entries, while the pure engine boundary
 also requires an absolute AWS-plugin path and rejects `PATH`, `PULUMI_*`, and `AWS_*`. The provider `up` and
 AWS-plugin `execve` remain UNVERIFIED because the configured AWS identity is invalid. This does not alter the
@@ -490,7 +574,7 @@ The contract, on the canonical Apple lane (`pb bootstrap` mode):
 5. **Hand off to the binary.** The bootstrap coordinator's final act is to `exec` the freshly built binary's `bootstrap`
    subcommand with its mandatory distro flag — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]` (`replicas` defaults to `1` on `kind`). From here the binary takes over: it installs further build tools
    and dependencies through the package manager **as needed and by full path** ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)) — including, on Apple,
-   source-building the fixed Metal bridge headless on the host with `/usr/bin/clang` ([§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host) / [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), never in a VM — and drives cluster
+   source-building the fixed Metal bridge headless on the host with `/usr/bin/clang` ([§4.4](#44-no-macos-build-vm-apple-builds-are-headless-on-host) / [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), never in a VM — and drives cluster
    bring-up.
 
 The bootstrap coordinator is **substrate-specific** because step 1 differs: brew on apple, the system package manager
@@ -553,7 +637,7 @@ that the rest of amoebius reads. It is the **single owner** (an ownership index,
 *which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
 consumers read it, and each is a foreclosure that depends on there being exactly one such list.
 
-**Phase 7 read-side status.** The [Phase 7 gate](../../DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md)
+**Phase 8 read-side status.** The [Phase 8 gate](../../DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md)
 validates the capacity/topology fold against authored in-process `NodeCapacity`, host, candidate-class, taint,
 and quota values (ledger `external-run-reference`).
 It performs no live inventory read. The required `declared allocatable ≤ observed allocatable` cross-check,
@@ -764,13 +848,13 @@ this doc owns only the declared `Site` **fact**, not the classification.
 
 This document is normative substrate doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): substrate detection
-and the `bootstrap` contract land in **Phase 24** (`linux-cpu`); host compute daemons, the Lima/WSL2
-providers, and the headless Apple-Metal fixed-bridge contracts land in **Phase 54** (`apple`; physical Apple
+and the `bootstrap` contract land in **Phase 29** (`linux-cpu`); host compute daemons, the Lima/WSL2
+providers, and the headless Apple-Metal fixed-bridge contracts land in **Phase 68** (`apple`; physical Apple
 surfaces remain UNVERIFIED after its scoped Linux-host gate); the in-cluster CUDA path is exercised in
-**Phase 52** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
+**Phase 65** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
 and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
-Phase 49 validates deterministic recomputation and Tier-1 executable-engine cache reuse on the retained
+Phase 53 validates deterministic recomputation and Tier-1 executable-engine cache reuse on the retained
 `linux-cpu` platform. It does not establish cross-substrate bit equality, cross-node reuse, production
 llama.cpp inference, or CUDA/Metal cache behavior; those surfaces remain UNVERIFIED. This scoped result does
 not narrow platform availability: every hardware substrate can always run `linux-cpu` at its own natural

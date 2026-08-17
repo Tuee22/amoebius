@@ -18,7 +18,7 @@ never names a product. It does not own how those providers are deployed, owned b
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_35_app_tenancy.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_12_provision_seal.md, DEVELOPMENT_PLAN/phase_13_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_22_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_39_app_tenancy.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -121,7 +121,7 @@ capability and reference a policy, but it cannot construct a permission, provide
 or resource handle. The UI-specific port and request-context contract is owned by
 [low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations).
 
-[Phase 19](../../DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md) supplies Register-1 evidence for that consumer:
+[Phase 22](../../DEVELOPMENT_PLAN/phase_22_ui_effect_binding.md) supplies Register-1 evidence for that consumer:
 all seven fixture ports bind exactly once to closed semantic capabilities through independently checked
 handler/codec/scope tuples, while an absent capability and a raw provider coordinate fail at distinct loci.
 Actual handler behavior and provider state remain UNVERIFIED.
@@ -174,7 +174,7 @@ arm, `Sql` could admit a managed cloud Postgres — without any app spec changin
 the provider. But a union arm is not an adapter. amoebius **does not build a provider adapter it does not yet need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
 would be reporting a designed extension point as a built one.
 
-> **Validated representation.** [Phase 10](../../DEVELOPMENT_PLAN/phase_10_capability_bind.md) implements the
+> **Validated representation.** [Phase 11](../../DEVELOPMENT_PLAN/phase_11_capability_bind.md) implements the
 > one-built-arm `CanonicalProvider` representation and rejects an unbuilt alternate with a distinct Gate-2
 > tag. Alternate arms remain deliberately unbuilt; this validation proves binding composition, not provider
 > realization.
@@ -183,7 +183,7 @@ would be reporting a designed extension point as a built one.
 
 ## 4. Capability → provider → shape: the binding
 
-[Phase 10](../../DEVELOPMENT_PLAN/phase_10_capability_bind.md) realizes this representational seam in
+[Phase 11](../../DEVELOPMENT_PLAN/phase_11_capability_bind.md) realizes this representational seam in
 `Amoebius.Capability.{Types,Binding}`. Its gate binds all nine arms under both shapes, checks 18 exact graph
 goldens, and proves normalized app bytes remain invariant while an independent object-node-multiset oracle
 observes structural graph differences. Provision and runtime provider health remain outside that result.
@@ -487,7 +487,7 @@ canonical provider deployed honestly at small scale, never a hand-special-cased 
 single-node `Sql` is a one-member Patroni cluster, never a bare `postgres` Pod. The dial got richer; it did
 not get bypassed.
 
-> **Honesty.** Per-cluster structural shapes are Phase 13 design intent. The sibling **prodbox** project is
+> **Honesty.** Per-cluster structural shapes are Phase 14 design intent. The sibling **prodbox** project is
 > evidence that typed records render the manifests a provider needs — its
 > `prodbox/src/Prodbox/Lib/Storage.hs` (sibling source)
 > renders `Namespace`/`PV`/`PVC`/`StorageClass` from a typed `ChartStorageSpec → ChartStorageBinding →
@@ -636,12 +636,12 @@ surface, never asserted here.
 
 This document is normative capability-model doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
-never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed reconciler that render and apply a chosen shape** land with platform services in **Phase 27**, and the
+never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed reconciler that render and apply a chosen shape** land with platform services in **Phase 31**, and the
 **capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster
-shapes** — was delivered by **Phase 10**. This doc states the normative shape; the plan owns the validation
+shapes** — was delivered by **Phase 11**. This doc states the normative shape; the plan owns the validation
 status and ledger.
 
-Phase 49 validates the CPU arm of the closed engine-runtime binding with a pinned executable resolver fixture:
+Phase 53 validates the CPU arm of the closed engine-runtime binding with a pinned executable resolver fixture:
 its build/download recipes converge on one content digest and version, and two real clients reuse one owner-
 managed cache entry. This is Tier-1 resolver and cache evidence, not production model inference; full llama.cpp,
 cross-substrate equality, the Tier-2 model cache, and Tier-3 CUDA kernels remain UNVERIFIED. `linux-cpu` is an
@@ -666,8 +666,8 @@ Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 
-> **Honesty.** The pure capability representation and binder are built and tested by Phase 10; manifest
-> generation and the typed reconciler remain Phase 27 work. The design is generalized from evidence in the
+> **Honesty.** The pure capability representation and binder are built and tested by Phase 11; manifest
+> generation and the typed reconciler remain Phase 31 work. The design is generalized from evidence in the
 > sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering, a chart-platform planner), and
 > prodbox itself names products and
 > enforces the very substrate-equivalence lint this doctrine reverses. Per

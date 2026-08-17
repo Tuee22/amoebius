@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the Phase-6 catalog ownership oracle against its authored tags."""
+"""Validate the Phase-7 catalog ownership oracle against its authored tags."""
 
 from __future__ import annotations
 

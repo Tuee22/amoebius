@@ -15,7 +15,7 @@ bridges model and implementation, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_44_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_04_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_17_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_18_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_48_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -72,13 +72,13 @@ invariants, and an optional state constraint that bounds exploration. The expres
 the amoebius safety and liveness properties need — booleans, bounded integer arithmetic and comparison, finite
 sets with cardinality, quantifiers over finite sets, function literals/update/application, and a conditional —
 and no more. The constructor set is declared below rather than described, so the differential generator's
-per-constructor coverage floor ([DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md))
+per-constructor coverage floor ([DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md))
 quantifies over an enumerated set and not over prose.
 
-**Implementation status.** Phase 2 built this fragment in `src/Amoebius/Formal/Model.hs` and validated both
+**Implementation status.** Phase 3 built this fragment in `src/Amoebius/Formal/Model.hs` and validated both
 readings on 2026-08-09 with the Register-1 gate in
-[phase_02](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md). The gate exercised every constructor below
-across 200 generated models; this is tested renderer correspondence, not Phase-3 code or runtime fidelity.
+[phase_03](../../DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md). The gate exercised every constructor below
+across 200 generated models; this is tested renderer correspondence, not Phase-4 code or runtime fidelity.
 
 ```haskell
 data Model = Model
@@ -347,11 +347,23 @@ golden change, and a golden may be amended only under the oracle-amendment disci
 never rewritten from a failing run's actual output. That rigidity is the point: it is what makes the byte
 comparison an oracle. The concrete reference model — its name, its protocol, its committed fixture paths, and
 the mutants that must break it — is a build artifact of the formal-model phase and is named in
-[DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md);
+[DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md);
 this doctrine owns only the obligation and its rationale. The reference model proves the **kernel**; it is not
-an amoebius protocol, and no claim about amoebius follows from it. The one real obligation is the gateway
-migration ([gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md)), which rides the
-kernel this fixture validates.
+an amoebius protocol, and no claim about amoebius follows from it. The obligations that ride the kernel this
+fixture validates are the **cross-cluster gateway migration**
+([gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md)) and the **DSL's own semantics**
+— the decoder, the folds, `renderAll`, the `chain`/`Step` descent, the reconcile invariants, and the
+snapshot-token/CAS and reservation protocols.
+
+**Why the DSL is modelled, when its pure surfaces are already total.** A model adds nothing to totality that
+the type system has not already settled, and for those surfaces the obligation is stated as **refinement**:
+the TLA+ operator is the specification, the Haskell fold is the implementation, and the checker compares them
+over a bounded domain. That catches a fold disagreeing with its own specification, and it is honestly weaker
+than a proof over the unbounded domain. The obligations that a model alone can discharge are the ones about
+**behaviour over time** — a token that must not be reused after an observed transition, a reservation that
+must not double-debit, a Lease that must admit one writer. No type in the decoder constrains their
+interleavings, and until they were modelled the only proof claim attached to the reconcile loop was evidence
+from a sibling project.
 
 ---
 
@@ -414,10 +426,10 @@ confirmed the load-bearing claims end to end: the in-process explorer and TLC re
 generated spec (identical reachable-state count), and a seeded mutation of the model produced the *expected*
 counterexample in both. The spike has been removed; per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) this
-was historical evidence that the mechanism worked. Phase 2 has now superseded that spike with the built
+was historical evidence that the mechanism worked. Phase 3 has now superseded that spike with the built
 amoebius kernel: eight exact `ToyModel` fingerprints, safety and liveness under fairness, fairness sensitivity,
 all committed mutants killed, and 200 differential models green. The result remains scoped to the model and
-does not by itself establish Phase-3 protocol correspondence or runtime fidelity. Phase 3 subsequently used
+does not by itself establish Phase-4 protocol correspondence or runtime fidelity. Phase 4 subsequently used
 that kernel for the concrete `GatewayMigration` value: explorer/TLC agreement on 53 states, five safety and
 three liveness obligations green, bounded IOSimPOR agreement, and all committed mutants caught. Runtime
 fidelity remains UNVERIFIED.
@@ -447,8 +459,8 @@ live forest). The concrete obligation for the one model is owned by
 ## 9. Planning ownership
 
 This document remains the normative formal-model doctrine. The `Model` EDSL, the `interpret` explorer, and the
-`emitTLA` renderer were built and validated in Phase 2; the one concrete model (`GatewayMigration`, both
-branches) was built and validated in Phase 3. Phase order, status, and gates live only in
+`emitTLA` renderer were built and validated in Phase 3; the one concrete model (`GatewayMigration`, both
+branches) was built and validated in Phase 4. Phase order, status, and gates live only in
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). The kernel and protocol claims above are
 tested/proven-for-the-model at their recorded scopes; effectful-daemon and live-runtime fidelity remain design
 intent and UNVERIFIED.

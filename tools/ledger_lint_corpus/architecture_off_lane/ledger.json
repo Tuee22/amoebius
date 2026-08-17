@@ -1,5 +1,5 @@
 {
-  "phase": 24,
+  "phase": 29,
   "gate_command": "python3 tools/bootstrap_coordinator_gate.py --execute",
   "register": "3",
   "substrate": "linux-cpu",
@@ -26,5 +26,5 @@
       "status": "tested"
     }
   ],
-  "ledger_hash": "sha256:6f17aa9879c56a2cd050eb261d0d10dc9dcfffe99daea5d8ae93694632e09fe6"
+  "ledger_hash": "sha256:8111a71b9c8503be8e9218151dd6ba3edeea275bc2d6a20780926fe941f75e9f"
 }

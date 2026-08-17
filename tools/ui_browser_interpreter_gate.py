@@ -47,7 +47,7 @@ BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-browser-interpreter"
 TEMP_ROOT = ROOT / ".build/tmp/ui-browser-interpreter"
 BUNDLE_ROOT = ROOT / ".build/ui/browser-interpreter"
 WORKSPACE_ROOT = BUNDLE_ROOT / "workspace"
-CONTRACT = "DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_25_ui_browser_interpreter.md"
 GATE_COMMAND = "python3 tools/ui_browser_interpreter_gate.py"
 EXPECTATIONS = "test/oracle/ui_browser_interpreter_surfaces.tsv"
 
@@ -250,13 +250,13 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
             raise GateFailure(f"derived-trace-table-untracked: {relative} tracks a reproducible trace table")
     mutants = read_tsv(MUTANTS)
     if len(mutants) != 9 or {row["mutant"] for row in mutants} != set(MUTANT_LOCI):
-        raise GateFailure("Phase-21 mutant manifest must contain exactly the nine contract mutants")
+        raise GateFailure("Phase-25 mutant manifest must contain exactly the nine contract mutants")
     locus = read_tsv(LOCUS)
     if len(locus) != 45 or len({row["entry"] for row in locus}) != 45:
-        raise GateFailure("Phase-21 validation locus must contain forty-five unique rows")
+        raise GateFailure("Phase-25 validation locus must contain forty-five unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
     if len([row for row in phase0_rows if row["# phase"] == "21"]) != 19:
-        raise GateFailure("Phase-0 manifest must pin nineteen Phase-21 artifacts")
+        raise GateFailure("Phase-0 manifest must pin nineteen Phase-25 artifacts")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 2 with local Chrome/fakes; server/provider/live runtime UNVERIFIED\n"
@@ -319,7 +319,7 @@ def verify_source_boundaries() -> None:
 def run_green(cabal: Path) -> str:
     result = run([str(cabal), "test", "ui-browser-interpreter-spec", "--test-show-details=direct"])
     if ACCEPTANCE_TOKEN not in result.stdout:
-        raise GateFailure("Phase-21 acceptance token is absent")
+        raise GateFailure("Phase-25 acceptance token is absent")
     return result.stdout
 
 
@@ -531,7 +531,7 @@ def main() -> int:
         },
         dependencies={"ui-browser-interpreter-spec": "cabal test"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-21 mutants", "status": "unrun"}],
+        or [{"name": "phase-25 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

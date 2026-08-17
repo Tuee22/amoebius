@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise bootstrap Lease authority and scoped SSA on the Phase-24 cluster."""
+"""Exercise bootstrap Lease authority and scoped SSA on the Phase-29 cluster."""
 
 from __future__ import annotations
 

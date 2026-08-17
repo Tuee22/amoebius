@@ -20,7 +20,7 @@ half of the partition is derived directly from it.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -97,9 +97,9 @@ derived — not a layout an installer hand-maintains:
 
 Three properties make the set a *derivation*, not a convention:
 
-Phase 13's Register-1 `render-golden` battery is the validated rendering enactment of this partition: every
+Phase 14's Register-1 `render-golden` battery is the validated rendering enactment of this partition: every
 sealed render-source identity is emitted once in deterministic order, and the output-domain property rejects
-missing, duplicate, or cross-owned identities. Live namespace admission remains Phase-27/runtime residue.
+missing, duplicate, or cross-owned identities. Live namespace admission remains Phase-31/runtime residue.
 
 - **One namespace per capability, never a shared one.** The Identity edge (Keycloak) and the L7 edge
   (Envoy/Gateway) are distinct capabilities and therefore distinct namespaces (`amoebius-keycloak`,
@@ -154,7 +154,7 @@ flowchart LR
   end
 
   capset -->|"derives, one per capability"| plat
-  roles -->|"derives, one per closed role"| sys
+  roles -->|"derives, one per system role; workers live beside what they serve"| sys
   apps -->|"derives, one per app identity"| appns
 
   plat -->|"default-deny, allow edges derived from declared dependencies"| policy["the NetworkPolicy boundary"]

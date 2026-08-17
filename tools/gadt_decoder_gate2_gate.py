@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-5 gate — the GADT-indexed IR and its total decoder (Gate 2).
+"""The Phase-6 gate — the GADT-indexed IR and its total decoder (Gate 2).
 
 The capability claim is unchanged: `dsl-spec` decodes every positive fixture to its
 authored tree, each tagged negative fails at its own distinct `DecodeError`, three
@@ -48,7 +48,7 @@ GENERATED = ROOT / ".build" / "dsl" / "gate2"
 RESULTS = GENERATED / "phase-results.tsv"
 TRACE = GENERATED / "execve.log"
 BUILD_ROOT = ROOT / ".build" / "dist-newstyle" / "gadt-decoder-gate2"
-CONTRACT = "DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md"
 GATE_COMMAND = "python3 tools/gadt_decoder_gate2_gate.py"
 EXPECTATIONS = "test/oracle/gadt_decoder_gate2_surfaces.tsv"
 

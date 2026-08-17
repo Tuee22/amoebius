@@ -16,7 +16,7 @@ nor the extensions themselves, owned by [lift_and_compose_doctrine.md](./lift_an
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_52_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/monitoring_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_65_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/monitoring_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -126,7 +126,7 @@ wired by the same graph every other extension is wired by.
 
 ## 3. The PROVIDE and REQUIRE contract
 
-[Phase 10](../../DEVELOPMENT_PLAN/phase_10_capability_bind.md) implements the closed `{infernix, jitML}`
+[Phase 11](../../DEVELOPMENT_PLAN/phase_11_capability_bind.md) implements the closed `{infernix, jitML}`
 provide/require refinement in `Amoebius.Capability.Binding`: requirements must resolve, duplicate providers
 are rejected as anti-shadow violations, and provider edges must be acyclic. Its paired legal/cyclic/shadowing
 fixtures establish this only for the pure Gate-2 model; linked runtime behavior remains unverified.
@@ -311,7 +311,7 @@ rejections; amoebius reuses that algebra, discards hostbootstrap's packaging (no
 image, no `dlopen`, [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability)), and adds the total/acyclic
 graph checks specified here. The graph checks themselves are net-new amoebius design intent.
 
-Phase 52 supplies a scoped consumer instance, not a proof of the whole graph: `dhall/jitml/package.dhall`
+Phase 65 supplies a scoped consumer instance, not a proof of the whole graph: `dhall/jitml/package.dhall`
 names exactly `JitBuild`, `Coordination`, and `InferenceEngine`, exposes no infrastructure field, and forbids a
 CPU fallback, while the leaf package compiles one untouched sibling CUDA generator. Physical host CUDA and
 retained MinIO are tested; provider readiness for the three requirements, Kubernetes device ownership, the
@@ -331,7 +331,7 @@ DSL type families and the extension seam of [dsl_doctrine.md §4](./dsl_doctrine
 capabilities the two capability-extensions provide are exercised by their owning doctrines
 ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) for `jit-build`, [daemon_topology_doctrine.md §4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated) for `coordination`). This doc states the target shape and links back for status.
 
-> **Honesty.** Except for the explicitly scoped Phase-52 consumer instance above, this doctrine is design
+> **Honesty.** Except for the explicitly scoped Phase-65 consumer instance above, this doctrine is design
 > intent specified before implementation. The
 > `ProjectSpec` stream algebra and the anti-shadow `validateProjectSpec` are proven in the hostbootstrap
 > sibling; that is **sibling evidence, not a tested amoebius result**, and the total/acyclic PROVIDE/REQUIRE

@@ -15,7 +15,7 @@ with the doctrine that defines its output.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_27_object_reconciler.md, DEVELOPMENT_PLAN/phase_41_ui_program_release.md, DEVELOPMENT_PLAN/phase_60_offline_language_plan.md, DEVELOPMENT_PLAN/phase_61_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_64_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_04_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_17_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_23_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_24_offline_language_plan.md, DEVELOPMENT_PLAN/phase_28_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_31_object_reconciler.md, DEVELOPMENT_PLAN/phase_45_ui_program_release.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -50,7 +50,7 @@ Each generated artifact names its typed source of truth and the deterministic re
 | Generated artifact | Source of truth (committed) | Renderer | Owning doctrine |
 |---|---|---|---|
 | Kubernetes objects (Deployment/Service/RBAC/NetworkPolicy/HTTPRoute/…) | the opaque post-bind, capacity/capability-checked whole-deployment `ProvisionedSpec` derived from `InForceSpec` + target inventory | `renderAll :: ProvisionedSpec -> [K8sObject]` (pure, total; private service/global projections merge by object identity) | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
-| TLA+ `.tla` + `.cfg` | the reifiable Haskell `Model` | `emitTLA :: Model -> (Tla, Cfg)` (built and byte-golden validated in [Phase 2](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md)) | [formal_model_doctrine.md](./formal_model_doctrine.md) |
+| TLA+ `.tla` + `.cfg` | the reifiable Haskell `Model` | `emitTLA :: Model -> (Tla, Cfg)` (built and byte-golden validated in [Phase 3](../../DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md)) | [formal_model_doctrine.md](./formal_model_doctrine.md) |
 | Haskell Gate-2 decoder mirror/parity report | the authored Dhall Gate-1 schema plus Haskell checked-IR types | decoder/schema parity check; the Dhall schema itself is committed source, not generated output | [dsl_doctrine.md](./dsl_doctrine.md) |
 | Paired `ClientPlan`/serializable `UiServerPlan` manifests, resolved external-link subset, per-app public-contract/content manifest, route manifest, and sealed dispatch projection | authored `UiSource` plus the reified Haskell public contracts, bound handlers, policies, scopes, capability graph, and trusted external-link catalog | UI Gate 1/Gate 2/bind followed by the client/server/content projections from one private `BoundUiProgram` | [low_code_ui_runtime_doctrine.md §3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) |
 | Offline client/replay projections, record codecs, migration/compatibility table, local-store descriptors, and service-worker asset manifest | the checked `UiSource.continuity`, queue/blob contracts, runtime ABI catalog, and deployment `OfflinePolicy` | the offline projection of the same private `BoundUiProgram` and release-compatibility fold | [browser_offline_runtime_doctrine.md §§5, 11](./browser_offline_runtime_doctrine.md#5-one-bound-program-paired-online-and-offline-plans) |
@@ -67,17 +67,17 @@ The paired UI artifacts have asymmetric visibility. `ClientPlan` is an allowlist
 `UiServerPlan` is readable only by the UI-server service identity and has no client-asset route. A content
 address names bytes but does not make those bytes public or grant authority to fetch them.
 
-[Phase 20](../../DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md) supplies concrete build-boundary evidence: the
+[Phase 23](../../DEVELOPMENT_PLAN/phase_23_ui_plan_compiler.md) supplies concrete build-boundary evidence: the
 paired plans, public contracts, and content manifest are produced in memory from `BoundUiProgram`, match only
 committed test goldens, and remain byte-identical across fresh randomized-order compiler processes. No emitted
 per-application artifact is added to the authored source tree.
 
-[Phase 21](../../DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md) supplies the complementary generic-bundle
+[Phase 25](../../DEVELOPMENT_PLAN/phase_25_ui_browser_interpreter.md) supplies the complementary generic-bundle
 evidence. The pinned PureScript/Spago build emits the bundle only into ignored build directories, an independent
 scanner checks its allowlisted runtime surface, and two application plans execute without rebuilding or adding
 an application-authored browser artifact.
 
-[Phase 41](../../DEVELOPMENT_PLAN/phase_41_ui_program_release.md) supplies the live release instance. Its
+[Phase 45](../../DEVELOPMENT_PLAN/phase_45_ui_program_release.md) supplies the live release instance. Its
 deterministic projection writes paired client/server plans, public contracts, and release manifests as
 immutable content objects, while the repository scan keeps those per-application outputs absent from the
 committed generated tree. The serializable server plan contains handler/dispatch identities and codecs, never
@@ -110,9 +110,9 @@ the recipe becomes a projection of typed data and the committed artifact is the 
   renderer and committed under `test/` as an oracle
   ([conformance_harness_doctrine.md](./conformance_harness_doctrine.md)). Copying the renderer's own output into
   the golden is prohibited: that copy is a generated artifact and supplies no independent expectation.
-  Phase 13 applies this distinction to `renderAll`: the emitted `[K8sObject]` deployment is never committed,
+  Phase 14 applies this distinction to `renderAll`: the emitted `[K8sObject]` deployment is never committed,
   while the eighteen `.json.golden` digest fixtures are committed byte locks exercised by the Register-1
-  gate. They do not grant authority to deploy. Phase 27 consumes the generated object values directly at
+  gate. They do not grant authority to deploy. Phase 31 consumes the generated object values directly at
   apply time and validates their live convergence without writing rendered manifests into the repository;
   only independently authored fixtures are committed. Receipts are run evidence and remain outside Git.
 - **History must establish or review independence.** When a fixture and the implementation it tests first
@@ -167,15 +167,15 @@ be committed; output copied from the subject, a reference program, a resolver, o
 - **Dry-run needs no cluster and no repository artifact.** Rendering the plan, the manifests, or the `.tla` is a
   pure function of committed source, so it runs in-process (Register 1). The "rendering a plan MUST NOT require
   live infrastructure" invariant of [conformance_harness_doctrine.md](./conformance_harness_doctrine.md) is a
-  direct consequence. Phase 14 validates this for the chain plan: emitted dry-run bytes remain uncommitted,
+  direct consequence. Phase 15 validates this for the chain plan: emitted dry-run bytes remain uncommitted,
   independently authored `.plan.golden` fixtures pin them, and the fake boundary consumes the same input bytes.
 - **The formal-model correspondence is mechanical.** Because the `.tla` is *only ever* emitted from the `Model`,
   a stale or hand-edited spec cannot exist; the model↔code correspondence of
   [formal_model_doctrine.md §5](./formal_model_doctrine.md#5-the-tlacfg-are-generated-never-committed) is
   guaranteed by there being nothing else to check.
-  Phase 2 validates this discipline with the `amoebius dev model emit` path, a byte-exact independent golden,
+  Phase 3 validates this discipline with the `amoebius dev model emit` path, a byte-exact independent golden,
   four renderer mutants, and a tracked-file scan that rejects generated `.tla`/`.cfg` artifacts.
-  Phase 3 applies the same path to `GatewayMigration`: the committed files under
+  Phase 4 applies the same path to `GatewayMigration`: the committed files under
   `test/golden/formal/gateway/` are renderer oracles, while every executable TLC input remains under ignored
   `.build/tla/`; the phase gate checks their byte equality before model checking.
 - **One place to change a shape.** Editing a manifest shape, an invariant, or a schema field is an edit to one
@@ -200,9 +200,9 @@ The rule is about *rendered* artifacts, not all non-Haskell files. The committed
 - **Phase contracts and policies** — human-authored requirements that contain no generated status view,
   ledger copy, dependency resolution, or package integrity value.
 
-The Phase-16 UI schema gate treats `UiSource` fixtures and independent graph/wire tables as authored inputs.
+The Phase-19 UI schema gate treats `UiSource` fixtures and independent graph/wire tables as authored inputs.
 Checked values, coverage reports, and later client/server plans are derived outputs; only test goldens are
-committed as oracles. See [Phase 16](../../DEVELOPMENT_PLAN/phase_16_ui_program_schema.md).
+committed as oracles. See [Phase 19](../../DEVELOPMENT_PLAN/phase_19_ui_program_schema.md).
 
 The line: a human-authored input or reviewed external source is version-controlled. An artifact projected,
 compiled, resolved, observed, or reported from another input is generated and is not version-controlled.
@@ -264,18 +264,18 @@ result.
 
 - [Repository Layout and Artifact Provenance](./repository_layout_doctrine.md) — complete tree, generated inventory, and ignore contracts
 
-Phase 60 now emits the deterministic `emit-client-offline-plan` and `emit-server-replay-plan` projections
+Phase 24 now emits the deterministic `emit-client-offline-plan` and `emit-server-replay-plan` projections
 from one checked offline source. Their independently pinned port-key sets match exactly, private fields remain
 absent from the public artifact, and five mutants pass. Runtime interpretation remains UNVERIFIED. Every
 hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple,
 or WSL2 on Windows.
 
-Phase 61 pins the immutable public asset manifest and admits only public, content-digested, non-mutable cache
+Phase 28 pins the immutable public asset manifest and admits only public, content-digested, non-mutable cache
 entries. Real Chrome preserves exactly those assets across restart and registers the Service Worker. The
 production PureScript-generated client bundle remains UNVERIFIED. Every hardware substrate can always run
 `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 64 emits `emit-offline-compatibility-manifest` and `emit-offline-migration-table` from the checked
+Phase 63 emits `emit-offline-compatibility-manifest` and `emit-offline-migration-table` from the checked
 witness. The scoped gate checks complete key coverage, finite horizon, deterministic names, migration/retained
 paths, and incompatible refusal. Production PureScript and live provider rollout remain UNVERIFIED. Every
 hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple,

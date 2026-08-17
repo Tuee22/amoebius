@@ -13,7 +13,7 @@ by [resource_capacity_folds.md](./resource_capacity_folds.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_34_live_dsl_singleton.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -202,7 +202,7 @@ flowchart TD
   svc((("SubtreeValidated C = localProof C times SV G"))):::seal
   plp[["localProof P"]]:::intent
   svp((("SubtreeValidated P = localProof P times SV C"))):::seal
-  gate1{"Phase 2 gate: a complete SV P is required"}:::decision
+  gate1{"Phase 3 gate: a complete SV P is required"}:::decision
   ep[/"effect P: fresh snapshot token per mutation"/]:::effect
   ec[/"effect C"/]:::effect
   eg[/"effect G"/]:::effect
@@ -220,11 +220,11 @@ flowchart TD
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
 ```
-*Design intent. Phase 1 assembles the product bottom-up; Phase 2 effect is gated top-down on the complete proof.*
+*Design intent. Phase 1 assembles the product bottom-up; Phase 3 effect is gated top-down on the complete proof.*
 
 ### 4.4 Diff-gating: two distinct predicates
 
-Two predicates govern an unchanged node, and conflating them reopens the partial-acknowledgement hole. `Unchanged(node) = NoOpLocal ⊗ Π children SubtreeValidated(c)` degrades only the local conjunct to a no-local-effect proof; the child product is always retained, so validation still descends the whole subtree. `subtreeNoOp(node) = NoOpLocal(node) ∧ ⋀ children subtreeNoOp(c)` is strictly stronger, recursively computed, and is the only predicate that prunes the Phase-2 effect walk; `subtreeNoOp` implies `Unchanged`, never the converse. Pruning the effect walk on the node-local `Unchanged` predicate is the defect: a parent that is locally unchanged above a changed grandchild would drop the grandchild's mutation, a silently skipped effect. Pruning only on `subtreeNoOp` is fail-closed, mirroring `Unreachable → refuse`. Across the eight parent/child/grandchild change combinations, an unchanged middle node never severs the chain, because its retained child product keeps the parent's proof embedding the grandchild's, so the parent cannot enact until the grandchild has validated.
+Two predicates govern an unchanged node, and conflating them reopens the partial-acknowledgement hole. `Unchanged(node) = NoOpLocal ⊗ Π children SubtreeValidated(c)` degrades only the local conjunct to a no-local-effect proof; the child product is always retained, so validation still descends the whole subtree. `subtreeNoOp(node) = NoOpLocal(node) ∧ ⋀ children subtreeNoOp(c)` is strictly stronger, recursively computed, and is the only predicate that prunes the Phase-3 effect walk; `subtreeNoOp` implies `Unchanged`, never the converse. Pruning the effect walk on the node-local `Unchanged` predicate is the defect: a parent that is locally unchanged above a changed grandchild would drop the grandchild's mutation, a silently skipped effect. Pruning only on `subtreeNoOp` is fail-closed, mirroring `Unreachable → refuse`. Across the eight parent/child/grandchild change combinations, an unchanged middle node never severs the chain, because its retained child product keeps the parent's proof embedding the grandchild's, so the parent cannot enact until the grandchild has validated.
 
 ```mermaid
 flowchart TD
@@ -246,12 +246,12 @@ flowchart TD
 ```
 *Design intent. A grandchild acknowledgement followed by a child rejection is an uninhabited product, not a caught schedule.*
 
-### 4.5 The Phase-2 seal stack and transport
+### 4.5 The Phase-3 seal stack and transport
 
 The effect of a subtree consumes a stack of three seals, in order.
 First the pure `ProvisionedSpec` that `renderAll` accepts, settled per node in Phase 1; then the recursive
 `SubtreeValidated`, settled for the whole subtree in Phase 1; then a fresh `ValidatedInfrastructureActionBatch` and single-use snapshot token, re-read immediately before
-each mutation in Phase 2
+each mutation in Phase 3
 ([pulumi_iac_doctrine.md §8](./pulumi_iac_doctrine.md#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated)). The first two are settled before any effect, which is what validate-before-effect means; the third handles world-drift per mutation, and a stale token restarts observation with zero mutation. The acknowledgement rides the `ParentReachChannel` projected from each child's compute engine, so a child its parent cannot reach has no inhabitant ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)); reachability is a factor of `localProof`, so an unreachable child collapses every ancestor's product.
 
 ---

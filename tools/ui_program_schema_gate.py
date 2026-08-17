@@ -32,7 +32,7 @@ RESULTS = ROOT / ".build/dsl/ui-program-schema/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-program-schema/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-program-schema"
 TEMP_ROOT = ROOT / ".build/tmp/ui-program-schema"
-CONTRACT = "DEVELOPMENT_PLAN/phase_16_ui_program_schema.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_19_ui_program_schema.md"
 GATE_COMMAND = "python3 tools/ui_program_schema_gate.py"
 EXPECTATIONS = "test/oracle/ui_program_schema_surfaces.tsv"
 
@@ -97,7 +97,7 @@ def verify_pins() -> tuple[Path, Path, str]:
 def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     cases = read_tsv(CASES)
     if len(cases) != 13 or sum(row["expected"] == "accept" for row in cases) != 3:
-        raise GateFailure("Phase-16 corpus must contain three positives and ten negatives")
+        raise GateFailure("Phase-19 corpus must contain three positives and ten negatives")
     expected_tags = {
         "RawBrowserEscape",
         "RecursiveEffect",
@@ -131,7 +131,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     phase0 = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
     phase16 = [row for row in phase0 if row["# phase"] == "16"]
     if len(phase16) != 24:
-        raise GateFailure(f"Phase-0 manifest must pin 24 Phase-16 artifacts, got {len(phase16)}")
+        raise GateFailure(f"Phase-0 manifest must pin 24 Phase-19 artifacts, got {len(phase16)}")
     for path in (
         ROOT / "dhall/amoebius/ui/Types.dhall",
         ROOT / "dhall/amoebius/ui/Constructors.dhall",
@@ -206,7 +206,7 @@ def run_green(cabal: Path) -> tuple[str, str]:
     isolated, observer = isolated_green(cabal)
     token = "ui-program-schema-spec: PASS (3 positives, 10 exact negatives, 3 graph rows, 8 coverage classes, 6 mutants, opaque seal)"
     if token not in suite.stdout or token not in isolated:
-        raise GateFailure("Phase-16 acceptance token is absent from normal or isolated execution")
+        raise GateFailure("Phase-19 acceptance token is absent from normal or isolated execution")
     return suite.stdout + isolated, observer
 
 
@@ -392,7 +392,7 @@ def main() -> int:
             if name != "platform"
         },
         dependencies={"ui-program-spec": "cabal test"},
-        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-16 mutants", "status": "unrun"}],
+        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-19 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

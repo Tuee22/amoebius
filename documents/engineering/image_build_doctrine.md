@@ -19,7 +19,7 @@ nor the runtime asset cache that is the deliberate exception, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_second_arch_attested_index.md, DEVELOPMENT_PLAN/phase_31_platform_backbone.md, DEVELOPMENT_PLAN/phase_32_platform_services_2.md, DEVELOPMENT_PLAN/phase_45_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_46_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_67_second_arch_attested_index.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_50_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_51_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -106,7 +106,7 @@ rate limits, and a warm cluster is air-gapped by construction.
   case: its jcloud NAR belongs under `/pulsar/offloaders`, not in a later network fetch.
 - **The rule binds workloads, and the bootstrap tools are a named exception.** "No public pull" is a statement
   about what the *cluster runs*. The host-side tools that bring a cluster into existence before there is a
-  registry to pull from — the kind node image that Phase 24 boots, and the buildx/buildkit builder that
+  registry to pull from — the kind node image that Phase 29 boots, and the buildx/buildkit builder that
   produces the image in the first place — are build and bootstrap infrastructure, not workloads. They are
   named here so the exception is bounded and visible rather than discovered later in a Dockerfile.
 - **The in-cluster registry is `distribution`, not Harbor.** The registry every workload pulls from is the
@@ -217,7 +217,7 @@ time on the missing arch, not at publish time. So amoebius treats a multi-arch i
   inherits prodbox's retry-then-fail-loud publication posture (`local_registry_pipeline.md` [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)); for its
   multi-arch images the unit of success is the complete manifest list.
 
-> **Validated boundary.** Phase 25 exercised a proxy-induced partial-blob fault, observed the immutable tag
+> **Validated boundary.** Phase 30 exercised a proxy-induced partial-blob fault, observed the immutable tag
 > absent and its manifest GET at 404, retained the partial residue in storage accounting, then published the
 > exact audited two-architecture index with one final raw-index advertisement. A second run made zero
 > mutating registry requests. This tests the amoebius fail-closed publication mechanism for that Register-3
@@ -232,7 +232,7 @@ time on the missing arch, not at publish time. So amoebius treats a multi-arch i
 
 This is an explicitly open design question: whether to implement a versioned tagging system or just use
 `:latest`. It is flagged here as a
-[DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 25); this section records the **trade and the recommended default**, not a frozen mechanism.
+[DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 30); this section records the **trade and the recommended default**, not a frozen mechanism.
 
 amoebius's core properties are fungibility and reproducibility — a cluster that was destroyed must rebind to
 *byte-identical* shape when rebuilt, and a spawned child must run the *same* bytes
@@ -371,7 +371,7 @@ build, on-host MSL compilation, not the container image.)
   in which host worker nodes exist precisely for substrate-specific hardware
   ([substrate_doctrine.md](./substrate_doctrine.md)).
 - **Why in-pod is the eventual target, not the v1 default.** An in-pod builder removes the host build
-  dependency for cloud-managed substrates that have no operator host (the Phase 45 stateless in-cluster
+  dependency for cloud-managed substrates that have no operator host (the Phase 49 stateless in-cluster
   daemon). The cost is a builder pod that needs privileged build access and its own multi-arch story —
   deferred, not adopted by default.
 - **The build location does not change the output contract.** Wherever it runs, the builder emits the [§3](#3-multi-architecture-images--one-natively-built-child-per-architecture)
@@ -434,12 +434,12 @@ toolchain is not sitting in the image. The one
 ### The runtime image: one recipe, a family of trusted-adapter variants
 
 The amoebius Haskell binary ships as its own runtime image, built with the run's dynamically resolved
-compatible compiler. Its **in-cluster pod role** is
-selected as control-plane singleton, dedicated `amoebius-capacity` scheduler, or worker — adapting prodbox's
-union-image pattern (`local_registry_pipeline.md`
-[§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)). The
-CLI and sudo host daemon are contexts of the same executable outside that pod-role list; a CLI is not a
-pod-level runtime role. The generic worker roles include UI server and UI projection responsibilities.
+compatible compiler. Its **in-cluster pod role** is a decoded `InClusterRole`, whose arms are owned by
+[`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) —
+adapting prodbox's union-image pattern (`local_registry_pipeline.md`
+[§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)).
+**The image never encodes which role runs**: `ContainerProcess`'s `AmoebiusRole` arm carries a role and no
+path, so one image serves every role and the choice is a value, not an entrypoint.
 infernix and jitML are linked in as extension libraries, not separate images. An optional trusted app
 adapter may also be linked when the existing handler catalog cannot satisfy a UI port; the app's `UiSource`
 and client plan never are. That boundary is owned by
@@ -474,10 +474,10 @@ What the base image *does* bake for the ML layer is the **jit-build resolver and
 Linux source-build inputs (`nvcc`, `g++`, the pinned compilers) the resolver needs to build an engine from
 source on a cache miss. The **Apple-Metal bridge is not among the baked inputs**: it is a macOS Mach-O
 **host-resident** dylib source-built headless *on the Apple host* with `/usr/bin/clang` in the
-apple-substrate phase (Phase 54 —
+apple-substrate phase (Phase 68 —
 [apple_metal_headless_builds.md §1](./apple_metal_headless_builds.md#1-the-commitment-headless-on-host-no-vm),
 [§3.1](./apple_metal_headless_builds.md#31-fixed-host-metal-bridge)) and **cannot run in a Linux container or a Linux VM**, so it is **never baked into the multi-arch `linux/amd64`+`arm64` base image** — the base
-image bakes only the Linux resolver toolchain, and the Metal bridge is a Phase-54 on-host build. The engine
+image bakes only the Linux resolver toolchain, and the Metal bridge is a Phase-68 on-host build. The engine
 *payloads* themselves (`llama.cpp`, `whisper.cpp`, the ONNX runtime, Audiveris, the adapters) are **named catalog identities** the shared `jit-build` resolver **downloads-or-builds on first miss into the `CacheBudget`-bounded content-addressed cache** — none is baked into the image, and none is authored by URL.
 Because infernix and jitML link as extension libraries (bullet above), the *library* is present the moment
 the pod is; the *engine payload* it drives is cache-resident after the first resolve. This explicitly
@@ -557,9 +557,13 @@ It discovers tools lazily through the substrate's package manager and invokes th
 which forces a concrete divergence from prodbox's mechanics:
 
 - **The Docker/buildx binary is full-path-invoked, lazily ensured.** amoebius does not rely on a `docker`
-  on `PATH`; it ensures the engine via the substrate package manager and calls the resolved absolute path.
-  The lazy-ensure contract is owned by [substrate_doctrine.md](./substrate_doctrine.md); this doc owns only
-  that the build step obeys it.
+  on `PATH`; it ensures the engine and calls the resolved absolute path. The engine is ensured **inside the
+  Linux frame** the substrate supplies — natively on Linux, in the Lima VM on Apple, in the WSL2 distro on
+  Windows ([`substrate_doctrine.md` §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)) —
+  so no host outside that frame needs a container runtime installed before amoebius runs. The lazy-ensure
+  contract and the floor it presupposes are owned by
+  [`substrate_doctrine.md` §3.1](./substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply);
+  this doc owns only that the build step obeys them.
 - **The engine is project-contained.** amoebius never uses the host-global daemon for project-owned state.
   Production selects the project daemon beneath `.data/docker/**`; a gate creates its daemon beneath its
   unique `.test_data/runs/<run-id>/docker/**`. A daemon that reports any data-root, runtime directory, context,
@@ -593,10 +597,10 @@ which forces a concrete divergence from prodbox's mechanics:
 prodbox had a real chicken-and-egg: it could not publish into a Harbor that was not yet up, and Harbor could
 not come up if its own prerequisite images could only be pulled from a Harbor that did not yet exist.
 **Baking plus one typed action dissolves this.** The registry is the single-binary `distribution`, baked into
-the base image, so there is no pre-registry public pull and no third-party image mirror. But Phase 25 still
+the base image, so there is no pre-registry public pull and no third-party image mirror. But Phase 30 still
 precedes the full scheduler/reconciler deployment and therefore cannot pretend a standalone service is a
 whole `ProvisionedSpec`. It constructs an explicit resource-complete `ProvisionedBootstrapRegistry`, validates
-it against a fresh Phase-24 snapshot, and mints a single-use `BootstrapRegistryAction` that side-loads the
+it against a fresh Phase-29 snapshot, and mints a single-use `BootstrapRegistryAction` that side-loads the
 image and initializes only the exact registry/proxy object domain. The action uses the same package-private
 source serializer as `renderAll`; it exposes no public per-service renderer. Enactment CAS-consumes its
 snapshot-indexed token and returns a receipt on both applied and ambiguous outcomes; an ambiguous response
@@ -609,7 +613,7 @@ move to MinIO's S3 driver after MinIO is serving
 ([platform_services_doctrine.md §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering)) —
 is a separate ordinary migration, not this bootstrap cycle. This doc records the build-side consequence:
 
-- **The base image is built and side-loaded before registry object initialization.** Phase 24's empty cluster
+- **The base image is built and side-loaded before registry object initialization.** Phase 29's empty cluster
   already exists. The only upstream contact is the base-image *build* (apt/binary/source downloads on the
   builder, [§2](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)); once that image is admitted and side-loaded, the registry/proxy
   run from it with no public pull. The cluster-bring-up readiness edge
@@ -633,7 +637,7 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 
 ## 10. Honesty and planning ownership
 
-> **Validated Phase-25 boundary — sealed 2026-08-14.** One `python3 tools/base_image_registry_gate.py --execute` run
+> **Validated Phase-30 boundary — sealed 2026-08-14.** One `python3 tools/base_image_registry_gate.py --execute` run
 > live-validated the typed acquisition ladder, the generated Dockerfile against its committed golden, the
 > bounded host build, one `linux/amd64` + `linux/arm64` OCI index, execution of all 22
 > baked binaries by absolute path — natively for the host's own architecture and, for the other,
@@ -647,9 +651,9 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 > unenforced kindnet policy. These are Register-3 *tested* results, never proofs. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): inherited prodbox proof is evidence from a
-> sibling system, not proof in amoebius. Phase 25 resolved the immutable-reference and host-builder decisions
+> sibling system, not proof in amoebius. Phase 30 resolved the immutable-reference and host-builder decisions
 > for the validated v1 boundary; broader mechanisms remain governed by their later phase gates. The
-> reconciler-owned rendering correspondence (Phase 27) and the MinIO-backed storage rehome (Phase 31) are
+> reconciler-owned rendering correspondence (Phase 31) and the MinIO-backed storage rehome (Phase 35) are
 > **UNVERIFIED**: both phases are open under the reopened numeric sequence, and their pre-amendment records do
 > not carry forward.
 
@@ -657,13 +661,13 @@ The validated `linux-cpu` image and registry lane is always available on every h
 image or registry gate requires a pristine Linux host, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
 on Windows.
 
-Phase 45's provider plan pins a CPU-only node class and immutable SKU/catalog identity, but no EKS launch
+Phase 49's provider plan pins a CPU-only node class and immutable SKU/catalog identity, but no EKS launch
 template was materialized because AWS authentication failed. Consequently, preload of the pinned amoebius
 base/scheduler OCI content into a managed node's CRI store, public-pull absence during provider bootstrap, and
 import-workspace release are still UNVERIFIED. The two scoped executor Jobs did use the already side-loaded
-Phase-25 immutable base digest with `imagePullPolicy: Never`; that is parent-placement evidence only.
+Phase-30 immutable base digest with `imagePullPolicy: Never`; that is parent-placement evidence only.
 
-Phase 46's provider-child contract rejects public and mutable image references, and its retained-Kubernetes
+Phase 50's provider-child contract rejects public and mutable image references, and its retained-Kubernetes
 drill read back only the pinned private digest with `imagePullPolicy: Never`; the committed public-pull mutant
 turns the independent contract red. No managed-node CRI preload, provider convergence argv trace, containerd
 network observer, or EKS public-pull absence was available, so those layers remain UNVERIFIED. This scoped
@@ -671,13 +675,13 @@ result must not be described as a provider image-supply-chain pass. The `linux-c
 every hardware substrate, with pristine Linux supplied by Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
 on Windows.
 
-Phase 47 pins five AWS-EBS-CSI controller/node/sidecar binary identities, absolute paths, versions, and both
+Phase 51 pins five AWS-EBS-CSI controller/node/sidecar binary identities, absolute paths, versions, and both
 base architectures. Its static install model has no external-provisioner, Helm, public-image, or dynamic
 StorageClass arm, and the corresponding mutant turns red. The binaries were not added to or executed from a
 rebuilt provider base image in this scoped run, so both architecture probes and actual EBS CSI readiness remain
 UNVERIFIED; the fixture is an inventory contract, not a supply-chain result.
 
-Phase 49 resolves a pinned 41-byte executable engine fixture through absolute build/download recipes, verifies
+Phase 53 resolves a pinned 41-byte executable engine fixture through absolute build/download recipes, verifies
 its digest, size, and version, stores it under the private content key, and observes a registry-backed warm HIT
 without a public egress event. This is custody and resolver evidence for the Tier-1 mechanism; it is not a
 production llama.cpp payload, model-inference image, cross-architecture binary, or CUDA/Metal supply-chain

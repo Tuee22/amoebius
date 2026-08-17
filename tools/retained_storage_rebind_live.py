@@ -42,7 +42,7 @@ KUBECONFIG = Path(os.environ.get("AMOEBIUS_KUBECONFIG", ROOT / ".build/tmp/retai
 KIND_CONFIG_TEMPLATE = ROOT / "test/fixture/retained_storage/kind.yaml"
 KIND_CONFIG = Path()
 IMAGE_ARCHIVE = Path()
-# The digest Phase 25 published and the export it published from, both caller-supplied:
+# The digest Phase 30 published and the export it published from, both caller-supplied:
 # a constant named a build that no longer exists, and the recreated cluster imports the
 # archive directly because the in-cluster registry does not survive its own node.
 IMAGE_DIGEST = ""
@@ -62,7 +62,7 @@ POSTGRES_BIN_DIR = ""
 POSTGRES_MAJOR = ""
 RUN_ROOT = Path()
 # Later phases may reuse this proven harness against an isolated cluster while
-# pinning their own committed marker bytes.  Phase 28 leaves both unset and
+# pinning their own committed marker bytes.  Phase 32 leaves both unset and
 # therefore retains its original per-run unique marker behavior.
 MARKER_TEXT: str | None = None
 MARKER_OBJECT_BYTES: bytes | None = None
@@ -137,7 +137,7 @@ def prepare_volumes(rows: dict[str, dict[str, str]]) -> dict[str, dict[str, Any]
 
 
 def postgres_inventory() -> dict[str, str]:
-    """Read the PostgreSQL executable path from Phase 25's independent inventory."""
+    """Read the PostgreSQL executable path from Phase 30's independent inventory."""
     text = POSTGRES_INVENTORY.read_text(encoding="utf-8")
     match = re.search(
         r'catalogName\s*=\s*"postgres"(?P<row>.*?)(?=\n\s*}\s*(?:,|\]))',
@@ -603,7 +603,7 @@ def execute(*, prepared_cluster: bool = False) -> dict[str, Any]:
         "artifactSource": {"run1": source_run1, "run2": source_run2, "containerImageIds": image_ids, "phase25BakedBinaryDigest": IMAGE_DIGEST, "publicRegistryPulls": 0},
         "observer": {"auditExecObserved": audit_exec_observed, "postRecreateWriteTokens": post_recreate_write_tokens, "readOperations": ["Postgres SELECT", "S3 GET"]},
         "noNormalDelete": {"staticCheck": "tools/no_retained_delete_check.sh", "postCycleBackingPresent": backing_present},
-        "controlPlaneNoPvc": "UNVERIFIED (Phase 33 subject absent)",
+        "controlPlaneNoPvc": "UNVERIFIED (Phase 37 subject absent)",
         "universalLinuxCpu": {"availableOnEveryHardwareSubstrate": True, "pristineLinuxHost": {"linux": "Incus", "linux-cuda": "Incus", "apple": "Lima", "windows": "WSL2"}},
     }
 
@@ -611,7 +611,7 @@ def execute(*, prepared_cluster: bool = False) -> dict[str, Any]:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="this run's observation")
-    parser.add_argument("--artifact", type=Path, required=True, help="the Phase-25 OCI export to import")
+    parser.add_argument("--artifact", type=Path, required=True, help="the Phase-30 OCI export to import")
     parser.add_argument("--image-digest", required=True, help="the index digest that export advertises")
     parser.add_argument(
         "--prepare-cluster-only", action="store_true",
@@ -642,7 +642,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         arguments.output.parent.mkdir(parents=True, exist_ok=True)
         arguments.output.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         if arguments.prepare_cluster_only:
-            print("retained-storage-rebind-live: PASS (predecessor cluster ready with imported Phase-25 image)")
+            print("retained-storage-rebind-live: PASS (predecessor cluster ready with imported Phase-30 image)")
         else:
             print("retained-storage-rebind-live: PASS (Postgres row + MinIO object survived real cluster delete/recreate)")
         return 0

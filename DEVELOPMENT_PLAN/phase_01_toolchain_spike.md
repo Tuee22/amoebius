@@ -14,7 +14,7 @@ Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_34_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -31,6 +31,7 @@ Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
 - [Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅](#sprint-14-jit-build-resolver-deps--purescript-bridge--consolidated-probe-gate-)
 - [Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe ✅](#sprint-15-supernova-fork--proto-lens-codegen-build-probe-)
 - [Sprint 1.6: Dynamic resolution and generated-output migration ✅](#sprint-16-dynamic-resolution-and-generated-output-migration-)
+- [Sprint 1.7: Discover, then ensure — the resolver acquires what it needs 📋](#sprint-17-discover-then-ensure--the-resolver-acquires-what-it-needs-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,16 +42,17 @@ Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
 🔄 Active — **reopened 2026-08-16 by the natural-architecture amendment**, and open for work since Phase 0
 resealed on 2026-08-17.
 
-**Blocked on its declared environment precondition — 2026-08-17.** The gate now adopts clause 15: it records
-the substrate, the lane, and the architecture it executes on, refuses a translated process, and enumerates
-that observation as a check of its own. On the current host the architecture side passes — `darwin/arm64`,
-natural `arm64`, untranslated — and resolution then stops at the `host-toolchain` precondition this phase
-declares under **Requires**: no `dhall` satisfying `>=1.42 <2` and no `chromium` satisfying `>=120` is on the
-host. That is an environment fact no phase builds
-([development_plan_standards.md §F](development_plan_standards.md#f-the-sprint-block-format)), so the gate
-reports it and stops rather than skipping to green
-([README.md phase discipline](README.md#phase-discipline) rule 7). The rerun completes once the host supplies
-both binaries.
+**Amended 2026-08-17 by the host-ensure change.** The gate adopts clause 15 — it records the substrate, the
+lane, and the architecture it executes on, refuses a translated process, and enumerates that observation as a
+check of its own — and on the current host that side passes: `darwin/arm64`, natural `arm64`, untranslated.
+Resolution then stopped, because four tools were declared "expected on the developer host" and two of them
+were absent. That declaration was the defect, not the host: a tool with a supported install plan is ensured,
+never written down as a prerequisite
+([`substrate_doctrine.md` §3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)).
+[Sprint 1.7](#sprint-17-discover-then-ensure--the-resolver-acquires-what-it-needs-) replaces that source kind
+with acquisition, and narrows what the phase requires to the floor
+([`substrate_doctrine.md` §3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply)).
+
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
@@ -84,10 +86,10 @@ both seeded mutants, joins 29 surfaces to 48 run-time enumerated items, and leav
 unchanged. Twenty-two downstream gate scripts now consume run-local resolution.
 
 **Two corrections this closure made, both recorded rather than absorbed.** The gate's predecessor built `all`,
-which made a Phase-1 gate depend on packages phases 2–65 own — the forward dependency
+which made a Phase-1 gate depend on packages phases 3–64 own — the forward dependency
 [§E](development_plan_standards.md#e-one-canonical-phase-model) forbids. Narrowing it to the representative set
 exposed that `lib:dsl-core` does not compile, because the UI-server boundary ABI
-`src/Amoebius/Ui/Server/Main.hs` imports does not exist anywhere in the tree; that seam is Phase 22's and is
+`src/Amoebius/Ui/Server/Main.hs` imports does not exist anywhere in the tree; that seam is Phase 26's and is
 recorded in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md). Separately, the
 `source-closure` seeded negative had stopped firing because path normalization stripped the leading dot from
 its ignored root, so it proved nothing; it now seeds a non-dotted ignored root.
@@ -99,7 +101,7 @@ Done (invalidated). The consolidated clean-store gate passed on 2026-08-08 with
 `dynamically-resolved`. This is a tested buildability result,
 not a runtime or Gate-2-semantics result. This phase opened after the Phase 0 documentation lint passed and ran on **no substrate**
 (`none`): it stands up no host and no cluster, resolving and building only Hackage packages on the developer
-toolchain. It is a de-risking pre-flight for the whole pre-cluster band after this phase (Phases 2–16), whose
+toolchain. It is a de-risking pre-flight for the whole pre-cluster band after this phase (Phases 3–19), whose
 in-process integrity checks all rest on the dependencies probed here.
 
 ## Phase Summary
@@ -133,7 +135,7 @@ and `protoc`. The authored Dhall positive/negative pair, independent simulation 
 dependency-resolution mutant, and protocol round-trip fixture remain the oracle side.
 
 The gate builds that set and nothing later: the `probe` executables plus the Pulsar `proto` package, which
-between them link every member. It does not build the packages phases 2–65 own. A Phase-1 gate that built the
+between them link every member. It does not build the packages phases 3–64 own. A Phase-1 gate that built the
 whole tree would consume what a later phase delivers — the forward dependency
 [§E](development_plan_standards.md#e-one-canonical-phase-model) forbids — and would report a toolchain failure
 whenever a later phase's source stopped compiling, which is exactly what it did on 2026-08-12
@@ -179,7 +181,7 @@ flowchart LR
   dependency, while the version-stable JVM TLC half stays unaffected by the GHC pin.
 - [`formal_model_doctrine.md §7 — Prototype validation`](../documents/engineering/formal_model_doctrine.md#7-prototype-validation):
   the reifiable-`Model` mechanism — one value rendering both `interpret` (runtime) and `emitTLA` (a generated,
-  never-committed `.tla`) — was prototyped in a throwaway spike; that is **sibling evidence, not an amoebius result**, and its Haskell side must build on the pin before Phase 2 authors it.
+  never-committed `.tla`) — was prototyped in a throwaway spike; that is **sibling evidence, not an amoebius result**, and its Haskell side must build on the pin before Phase 3 authors it.
 - [`content_addressing_doctrine.md §4.5 — the ML-asset lifecycle`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
   ML engines/models/kernels are never baked or URL-fetched — the shared `jit-build` resolver materializes each
   **named catalog identity** on first miss into a `CacheBudget`-bounded content-addressed cache; the resolver's
@@ -200,11 +202,11 @@ flowchart LR
 **Status**: Done — the capability this sprint recorded is re-established by the redesigned 2026-08-12 gate; its pin, freeze, and repository-resident evidence mechanics are superseded
 **Implementation**: `cabal.project`, `cabal.project.freeze`, and `toolchain/pins.json` — the **pin
 manifest**: the resolved absolute paths of `ghc`/`cabal`/`dhall` (invoked by absolute path from
-[Phase 5](phase_05_gadt_decoder_gate2.md) on) and of `spago`/`purs` + Chromium (the browser toolchain the UI
-phases from [Phase 21](phase_21_ui_browser_interpreter.md) on drive) — implemented and version-checked by the gate.
+[Phase 6](phase_06_gadt_decoder_gate2.md) on) and of `spago`/`purs` + Chromium (the browser toolchain the UI
+phases from [Phase 25](phase_25_ui_browser_interpreter.md) on drive) — implemented and version-checked by the gate.
 **Blocked by**: reopened numeric predecessor gates.
-**Requires**: `host-toolchain` — the pinned binaries present on the developer host. This sprint records
-**where they resolve to**; it does not install them.
+**Requires**: `host-floor` — the package-manager root and the substrate's own build prerequisites. Every
+tool this sprint names is acquired rather than assumed.
 **Independent Validation**: `cabal build` of a trivial library succeeds
 on **GHC 9.12.4 / Cabal 3.16.1.0** from a clean store (`rm -rf dist-newstyle` first), with the retained
 transcript echoing `ghc --version` and `cabal --version` in-band and showing the shell-observed exit 0; the
@@ -245,8 +247,8 @@ evidentiary branch rule.
 ### Objective
 Adopt [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note) with
 its [§5 Gate 2](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract): prove
-the in-process `dhall` decoder — the structural Gate-2 leg that must precede Phase-10/11 bind/provision — is
-buildable on the pin before Phase 5 promises an executable decoder. `dhall` historically lags new GHC releases, so
+the in-process `dhall` decoder — the structural Gate-2 leg that must precede Phase-11/12 bind/provision — is
+buildable on the pin before Phase 6 promises an executable decoder. `dhall` historically lags new GHC releases, so
 `allow-newer` alone may be insufficient and a source patch or fork may be required.
 
 ### Deliverables
@@ -293,8 +295,8 @@ backlink), `DEVELOPMENT_PLAN/system_components.md`.
 ### Objective
 Adopt [`gateway_migration_model_doctrine.md §4 — Simulate and prove`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
 amoebius's one formal obligation drives the gateway-migration `Model` against `io-classes`/`IOSimPOR`'s
-deterministic, partial-order-reduced scheduler. Prove that toolchain builds on the pin before Phase 3 authors
-the simulation. TLC (`tla2tools.jar`) is pure JVM and version-stable, so the Phase-2/3 TLC path is **not** gated
+deterministic, partial-order-reduced scheduler. Prove that toolchain builds on the pin before Phase 4 authors
+the simulation. TLC (`tla2tools.jar`) is pure JVM and version-stable, so the Phase-3/4 TLC path is **not** gated
 by this probe.
 
 ### Deliverables
@@ -355,7 +357,7 @@ dependency universe — the phase gate.
 - The retained `cabal.project` + freeze file, all `cabal build`/`cabal run` transcripts, the external
   `probe/oracle/check-sim-terminal` harness with its `probe/fixtures/sim-terminal.expected` oracle, and **both**
   seeded mutants `probe/mutants/drop-allow-newer` and `probe/mutants/perturb-sim-schedule`, under
-  `DEVELOPMENT_PLAN/evidence/phase_01/` (or CI-archived and linked), kept until Phase 5 supersedes them.
+  `DEVELOPMENT_PLAN/evidence/phase_01/` (or CI-archived and linked), kept until Phase 6 supersedes them.
 - A first-class proven/tested/assumed ledger artifact ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) — naming **Register 1**, recording the green build +
   executed-fixture results as *tested*, and marking every runtime, cluster, and Gate-2-semantics layer
   **UNVERIFIED** — retained even though the probe package itself is deleted after resolution.
@@ -478,6 +480,54 @@ is gone, split into authored `tools/toolchain_requirements.json` and run-local `
 resolves twice to the same graph, resolves it again from non-ignored source alone, and publishes a verified
 repository-local attestation. Cabal metadata, its package store, build roots, npm dependencies, tool downloads,
 and all temp/cache homes are confined to `.build/**`; the host inventory is unchanged.
+
+## Sprint 1.7: Discover, then ensure — the resolver acquires what it needs 📋
+
+**Status**: Planned
+**Implementation**: `tools/toolchain_requirements.json`, `tools/toolchain.py`,
+`tools/toolchain_spike_gate.py`, `tools/toolchain_spike_negative_corpus.py`,
+`test/oracle/toolchain_spike_surfaces.tsv`, `pb/pb/bootstrap_toolchain.py`
+**Blocked by**: Sprint 1.6
+**Requires**: `host-floor` — the package-manager root and the substrate's own build prerequisites
+**Independent Validation**: a run on a host carrying none of the acquirable tools resolves every requirement
+and completes; a second run is a verified no-op; a requirement whose publisher offers no asset for the host's
+architecture refuses rather than selecting another's.
+**Docs to update**: `documents/engineering/substrate_doctrine.md`,
+`documents/engineering/repository_layout_doctrine.md`, `DEVELOPMENT_PLAN/README.md`,
+`DEVELOPMENT_PLAN/system_components.md`
+
+### Objective
+
+Adopt [`substrate_doctrine.md` §3 — the no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)
+in the pre-binary resolver: an absent tool with a supported install plan is installed, and the only things the
+host must already supply are the floor of
+[§3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply).
+
+### Deliverables
+
+- The `host` source kind retired, so no requirement can mean "expected on the developer host".
+- A `managed` source kind — a tool installed by another resolved tool, which is asked what it can supply —
+  generalizing the `ghcup-managed` kind the authored vocabulary already names but the resolver never
+  implemented.
+- The floor expressed as authored data and checked before resolution, with each failure carrying its remedy.
+- One canonical `<os>-<arch>` platform token, replacing the three divergent normalizers and the inconsistent
+  authored keys they compensate for.
+- `node`, `npm`, and `git` declared, having been invoked bare and undeclared.
+- A seeded-negative corpus for resolution behaviour, which today has none: absent tool, out-of-range version,
+  and no asset for the host's architecture.
+
+### Validation
+
+1. Run the phase command on a host missing every acquirable tool and confirm it completes without an operator
+   install, with the outside-host inventory unchanged.
+2. Confirm each seeded resolution negative reddens its own check and no other.
+3. Confirm the architecture refusal fires when the publisher offers no asset for the host's architecture,
+   rather than a foreign asset being selected.
+4. Confirm the surface join stays total after the newly declared tools are added.
+
+### Remaining Work
+
+The whole sprint.
 
 ## Documentation Requirements
 

@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-9 test-surface join.
+# Authored expectation for the Phase-10 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
 # independently authored expectation.
@@ -14,10 +14,10 @@
 #
 # **Five contract surfaces carry no id, and that is a finding, not an oversight.**
 # `accelerator-interconnect`, `build-execution-envelope`, `engine-system-reserve`,
-# `monitoring-work-budget`, and `pulumi-execution-envelope` are named in the Phase-9
+# `monitoring-work-budget`, and `pulumi-execution-envelope` are named in the Phase-10
 # contract, but the battery records no distinct observation for any of them: they have no
 # oracle case, no mutant, and no metric of their own. The ledger therefore carries them
-# UNVERIFIED, and the gap is recorded against Phase 9 in legacy_tracking_for_deletion.md.
+# UNVERIFIED, and the gap is recorded against Phase 10 in legacy_tracking_for_deletion.md.
 # Pointing them at a shared acceptance token would have made the ledger claim five results
 # the run did not produce.
 #

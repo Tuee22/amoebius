@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-4 gate — the Dhall Gate-1 schema and its smart-constructor prelude.
+"""The Phase-5 gate — the Dhall Gate-1 schema and its smart-constructor prelude.
 
 The capability claim is unchanged: every positive cluster/app/deployment fixture typechecks,
 every catalog, image/process, and import-policy negative fails at its own specific `dhall`
@@ -35,7 +35,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 GATE1 = ROOT / ".build" / "dhall" / "gate1"
 RESULTS = GATE1 / "phase-results.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md"
 GATE_COMMAND = "python3 tools/dhall_gate1_schema_gate.py"
 EXPECTATIONS = "test/oracle/dhall_gate1_schema_surfaces.tsv"
 
@@ -47,10 +47,10 @@ CHECKS = {
 
 SIDES = ("toolchain", "battery", "oracle", "artifact")
 
-# The authored oracle, read off the Phase-4 contract.
+# The authored oracle, read off the Phase-5 contract.
 EXPECTED_RESULTS = {
     # Amended 2026-08-12 from intent, not from a failing run. The count moved 14 -> 17
-    # because Phase 16 added SanctionedApi, Phase 60 added UiOffline, and Phase 25 added
+    # because Phase 19 added SanctionedApi, Phase 24 added UiOffline, and Phase 30 added
     # BakeCatalog. A count is not the oracle; the reviewed inventory beside it is, and a
     # module added without review breaks the inventory rather than sliding past a number.
     # Amended again 2026-08-13 by the secrets amendment: 17 -> 18 for the shared

@@ -13,7 +13,7 @@ owned by [resource_capacity_folds.md](./resource_capacity_folds.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_29_retained_storage.md, DEVELOPMENT_PLAN/phase_31_platform_backbone.md, DEVELOPMENT_PLAN/phase_38_content_store_workflow.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_types.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_33_retained_storage.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_42_content_store_workflow.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_types.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -772,9 +772,9 @@ ProviderWorkerScalingPolicy account nodeClasses quota = -- opaque refinement
     ranges over agents; the fold re-runs
     ([§4](./resource_capacity_folds.md#4-the-total-fold-fits-carve-place-and-the-nesting), below) against
     the grown *agent* set only.
-  - The pure policy/reserve fold is Phase 7, but live rke2-agent acquisition, snapshot admission, join, and
+  - The pure policy/reserve fold is Phase 8, but live rke2-agent acquisition, snapshot admission, join, and
     enforcement remain an explicitly unassigned Phase-N gate.
-  - Phase 48 enacts only the distinct managed-provider-worker arm; it does not silently provide rke2.
+  - Phase 52 enacts only the distinct managed-provider-worker arm; it does not silently provide rke2.
   - The closed-union quorum shape is type-foreclosed and owned by cluster topology, not claimed here.
 - **The fold re-runs after growth ([§4](./resource_capacity_folds.md#4-the-total-fold-fits-carve-place-and-the-nesting)).** A `Growable` budget the provision seal checked is re-checked
   against the grown capacity when the policy fires — so "unbounded" MinIO/Pulsar is representable **only**

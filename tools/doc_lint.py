@@ -25,7 +25,9 @@ from __future__ import annotations
 
 import argparse
 import os
+import pathlib
 import re
+import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -48,6 +50,9 @@ CHECKS = {
     "f": "gate integrity: gate names fixtures, a mutant, and an independent oracle",
     "f2": "gate integrity: gate names a backticked re-runnable acceptance command",
     "f3": "gate integrity: a gate never requires a later phase as a pass condition",
+    "f4": "dependency graph: every declared edge points at a phase at or below its own",
+    "u3": "slug integrity: a phase_NN_<slug> reference names the ordinal that slug carries",
+    "f5": "ordinal integrity: a phase ordinal named in the plan resolves and is not stale",
     "t": "commit independence: no document makes committing a gate precondition",
     "s1": "substrate discipline: one catalog member, at most one specialized",
     "s2": "requires: every Requires token is in the closed section-F vocabulary",
@@ -823,7 +828,7 @@ def check_g_catalog(docs, docs_by_rel, v):
 
 
 def check_g5_registry(root, v):
-    """Phase-6 enrichment, conditional so the Phase-0 miniature corpus stays self-contained."""
+    """Phase-7 enrichment, conditional so the Phase-0 miniature corpus stays self-contained."""
     registry = os.path.join(root, "dhall", "examples", "locus_registry.tsv")
     if not os.path.exists(registry):
         return
@@ -1006,8 +1011,11 @@ DECL_RE = re.compile(r"^\s*(?:data|newtype|type)\s+([A-Z]\w*)")
 # name at most one specialized member. `windows` is a catalog member no phase gates.
 SPECIALIZED = {"apple", "linux-cuda", "windows"}
 CATALOG = SPECIALIZED | {"linux-cpu", "none"}
-# Section F: the closed environment-precondition vocabulary.
-REQUIRES_VOCAB = {"accelerator-device-plugin", "cloud-account", "host-toolchain"}
+# Section F: the closed environment-precondition vocabulary. It is *parsed* from the
+# rulebook's own table rather than restated here, because a second copy of a closed set
+# is how the set and the document that defines it come to disagree — which is exactly
+# what happened to the `Declared by` column while four phases declared one token.
+REQUIRES_ROW = re.compile(r"^\|\s*`([a-z][a-z-]*)`\s*\|(.+?)\|\s*Phases?\s+([0-9,\sand–-]+?)\s*\|", re.M)
 SUBSTRATE_RE = re.compile(r"^\*\*Substrate:\*\*\s*(.+?)(?=\n\*\*|\n##|\n\n)", re.M | re.S)
 LANE_RE = re.compile(r"^\*\*Lane:\*\*\s*(.+?)(?=\n\*\*|\n##|\n\n)", re.M | re.S)
 REQUIRES_RE = re.compile(r"^\*\*Requires\*\*:\s*`([^`]+)`", re.M)
@@ -1137,6 +1145,22 @@ def check_s3_lane(docs, docs_by_rel, v):
                                    f"lane {lane} but {source} row {ph} says {_lane_token(cell)}"))
 
 
+def requires_vocabulary(docs_by_rel):
+    """The section-F table as {token: {phase numbers its row declares}}.
+
+    The rulebook is the single source: the token set is its first column and the
+    declaring phases are its third, so neither can drift from the other without the
+    join below reporting it.
+    """
+    rulebook = docs_by_rel.get("DEVELOPMENT_PLAN/development_plan_standards.md")
+    if rulebook is None:
+        return {}
+    vocabulary = {}
+    for token, _what, phases in REQUIRES_ROW.findall(rulebook.text):
+        vocabulary[token] = {int(n) for n in re.findall(r"\d+", phases)}
+    return vocabulary
+
+
 def check_s_substrate(docs, docs_by_rel, v):
     """Section L: baseline + at most one specialized, and the map agrees."""
     smap = {}
@@ -1175,11 +1199,34 @@ def check_s_substrate(docs, docs_by_rel, v):
                 v.append(Violation("s1", doc.rel, line_no,
                                    f"substrate {declared} but substrates.md row {ph} says {smap[ph]}"))
 
+    vocabulary = requires_vocabulary(docs_by_rel)
+    declared: dict[str, set[int]] = {token: set() for token in vocabulary}
     for doc in docs:
         for m in REQUIRES_RE.finditer(doc.text):
-            if m.group(1) not in REQUIRES_VOCAB:
-                v.append(Violation("s2", doc.rel, doc.text.count("\n", 0, m.start()) + 1,
-                                   f"Requires names {m.group(1)}, not in the section-F vocabulary"))
+            token = m.group(1)
+            line_no = doc.text.count("\n", 0, m.start()) + 1
+            if token not in vocabulary:
+                v.append(Violation("s2", doc.rel, line_no,
+                                   f"Requires names {token}, not in the section-F vocabulary"))
+                continue
+            phase = _phase_no(doc.rel)
+            if phase is None:
+                continue
+            declared[token].add(phase)
+            if phase not in vocabulary[token]:
+                v.append(Violation("s2", doc.rel, line_no,
+                                   f"phase {phase} declares {token}, but its section-F row does not list it"))
+
+    # The other direction: a token the table declares for a phase that does not declare
+    # it back is a stale row, and a token no phase declares at all is a dead entry.
+    rulebook = docs_by_rel.get("DEVELOPMENT_PLAN/development_plan_standards.md")
+    if rulebook is not None and vocabulary:
+        for token, phases in sorted(vocabulary.items()):
+            for phase in sorted(phases - declared[token]):
+                v.append(Violation("s2", rulebook.rel, 1,
+                                   f"section-F lists phase {phase} for {token}, which that phase does not declare"))
+            if not phases:
+                v.append(Violation("s2", rulebook.rel, 1, f"section-F token {token} names no phase"))
 
 
 def check_f3_forward_gate(docs, v):
@@ -1201,6 +1248,219 @@ def check_f3_forward_gate(docs, v):
                 v.append(Violation("f3", doc.rel, line_no,
                                    f"gate requires later phase(s) {sorted(later)} as a pass condition"))
                 break
+
+
+# A declared dependency cell, resolved against a CLOSED grammar. The point of the closed
+# grammar is clause (d) below: a cell matching none of these forms is a lint failure, which
+# is what turns 164 boilerplate fields into declared edges instead of unreadable prose.
+DEP_NONE = re.compile(
+    r"^(?:none|none\.|none within the phase\.?|nothing[^.]*\.?"
+    r"|none; sprint [\d.]+ is sealed\.?|n/a)$", re.I)
+DEP_PRED = re.compile(r"^reopened numeric predecessor gates\.?$", re.I)
+DEP_SPRINT = re.compile(r"\bsprint[- ](\d{1,2})\.(\d+)", re.I)
+DEP_PHASE = re.compile(r"\bphases?[- ](\d{1,2})\b", re.I)
+# `Phases 37, 35, and 36` -- a plural head followed by a bare comma list. Only the
+# list itself is read; the prose after the dash re-names each phase to say what it
+# supplies, and counting those would double every edge.
+DEP_LIST = re.compile(r"\bphases[- ]\d{1,2}((?:\s*,\s*(?:and\s+)?\d{1,2})+)", re.I)
+
+
+def _tracked_text_files(root):
+    """Every tracked text file, so a check can reach outside `documents/` when its rule does."""
+    out = subprocess.run(["git", "ls-files"], cwd=str(root), capture_output=True, text=True)
+    files = out.stdout.split("\n") if out.returncode == 0 else []
+    if not any(f.strip() for f in files):
+        # the seeded-negative corpus is materialized outside git; walk it instead
+        base = pathlib.Path(root)
+        files = [str(q.relative_to(base)) for q in base.rglob("*") if q.is_file()]
+    return [f for f in files if f.endswith((".md", ".py", ".tsv", ".json"))]
+
+
+# `phase_NN_<slug>.md`: the slug is the injective key and the ordinal is a derived view
+# of it. A re-baseline that maps the ordinal without consulting the slug turns a stale
+# reference into a confidently wrong one -- which is how five gate contracts came to name
+# documents that do not exist, one of them pointing at an unrelated phase entirely.
+SLUG_REF_RE = re.compile(r"phase_(\d{2})_([a-z0-9_]+)\.md")
+
+
+def check_u3_slug_integrity(docs, root, v):
+    """Every phase_NN_<slug> reference names the ordinal that slug actually carries."""
+    base = pathlib.Path(root)
+    real = {}
+    for path in sorted((base / "DEVELOPMENT_PLAN").glob("phase_*.md")):
+        m = re.match(r"phase_(\d+)_(.*)\.md", path.name)
+        if m:
+            real[m.group(2)] = int(m.group(1))
+    if not real:
+        return
+    for rel in _tracked_text_files(root):
+        try:
+            lines = (base / rel).read_text(encoding="utf-8").split("\n")
+        except (OSError, UnicodeDecodeError):
+            continue
+        historical = rel.endswith("legacy_tracking_for_deletion.md")
+        for i, line in enumerate(lines, 1):
+            # an audit map records retired filenames on purpose; that is its whole job
+            if historical and (re.match(r"^\| \d{1,2} \| \[?`", line) or " — phase_" in line):
+                continue
+            for m in SLUG_REF_RE.finditer(line):
+                n, slug = int(m.group(1)), m.group(2)
+                if slug in real and real[slug] != n:
+                    v.append(Violation("u3", rel, i,
+                                       f"{m.group(0)} names Phase {n}, but that slug is "
+                                       f"Phase {real[slug]}"))
+
+
+def check_f4_dependency_graph(docs, v):
+    """standards section F: a gate may consume only what a phase at or below it delivers.
+
+    The rulebook calls numeric-order developability *decidable*, and until this check
+    existed nothing decided it: no tool read `Blocked by` as an edge at all. The direction
+    rule held by convention, which is exactly how it held for the phase text while failing
+    completely for the artifact layer one level down.
+    """
+    for doc in docs:
+        own = _phase_no(doc.rel)
+        if own is None:
+            continue
+        sprint = None
+        for i, line in enumerate(doc.lines, 1):
+            m = re.match(r"^## Sprint (\d{1,2})\.(\d+)", line)
+            if m:
+                sprint = int(m.group(2))
+                continue
+            m = re.match(r"^\*\*(Blocked by|Depends on):?\*\*:?\s*(.+?)\s*$", line)
+            if not m:
+                continue
+            field, cell = m.group(1), m.group(2)
+            body = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", cell)
+            if DEP_NONE.match(body.strip()):
+                continue
+            if DEP_PRED.match(body.strip()):
+                continue  # resolves to own - 1, which is by construction backward
+            edges = {int(x) for x, _ in DEP_SPRINT.findall(body)}
+            edges |= {int(x) for x in DEP_PHASE.findall(body)}
+            for tail in DEP_LIST.findall(body):
+                edges |= {int(x) for x in re.findall(r"\d{1,2}", tail)}
+            if not edges:
+                v.append(Violation("f4", doc.rel, i,
+                                   f"{field} cell matches no declared form: {cell[:60]!r}"))
+                continue
+            ahead = {n for n in edges if n > own}
+            if ahead:
+                v.append(Violation("f4", doc.rel, i,
+                                   f"{field} names later phase(s) {sorted(ahead)} "
+                                   f"from phase {own}"))
+            for n, y in DEP_SPRINT.findall(body):
+                if int(n) == own and sprint is not None and int(y) >= sprint:
+                    v.append(Violation("f4", doc.rel, i,
+                                       f"Blocked by names Sprint {n}.{y}, not earlier than "
+                                       f"this sprint ({own}.{sprint})"))
+
+
+# A *deferral* phrase: prose that hands work to a LATER phase. An ordinal equal to the
+# containing document's own, in one of these, is always stale -- a phase cannot defer to
+# itself. Ownership phrases ("owned by", "belongs to") are deliberately excluded: a phase
+# may legitimately name its own ordinal to contrast with a neighbour's, and a denial
+# ("none is owned by Phase 0") reads the same way to a regex.
+CROSSREF_RE = re.compile(
+    r"\b(?:until|deferred to|defers to|deferred until|handed to|left to|postponed to)\s+"
+    r"(?:the\s+)?[Pp]hase[ -](\d{1,2})\b")
+
+# Every phase-ordinal mention, however spelled: `Phase 8`, `Phase-8`, `phase_08_...`.
+ORDINAL_RE = re.compile(r"[Pp]hase[ _-](\d{1,2})(?!\d)")
+# `Phases 5 and 5` / `Phase-8/8` -- one ordinal written twice in one expression.
+PROVISIONAL_RE = re.compile(r"provisional Phase (\d{1,2})")
+SELF_EQUAL_RE = re.compile(r"[Pp]hases?[ -](\d{1,2})(?:/| and )(\d{1,2})(?!\d)")
+
+
+def check_f5_ordinal_integrity(docs, docs_by_rel, v):
+    """Every phase ordinal a plan document names must resolve, and must not be stale.
+
+    Check f3 reads one prose span with an English-phrase regex, so a wrong ordinal in a
+    Summary, a Deliverable, or a table cell is invisible to it. The 2026-08-16 re-baseline
+    renamed the files and shifted the prose only where a link happened to carry the number,
+    and nothing reported the difference. This check reads the whole document, which is the
+    only span in which that class of defect lives.
+    """
+    phases = sorted(x for x in (_phase_no(d.rel) for d in docs) if x is not None)
+    if not phases:
+        return
+    top = max(phases)
+
+    for doc in docs:
+        if not doc.rel.startswith("DEVELOPMENT_PLAN/"):
+            continue
+        own = _phase_no(doc.rel)
+
+        # later_phases.md exists to name the unscheduled tail beyond the last numbered
+        # phase, so an ordinal past `top` is its subject matter rather than a defect.
+        names_tail = doc.rel.endswith("later_phases.md")
+        for m in ORDINAL_RE.finditer(doc.stripped):
+            n = int(m.group(1))
+            # later_phases.md names the unscheduled tail, so an ordinal past `top` is its
+            # subject rather than a defect. It still cites real phases freely; only the
+            # ids it CLAIMS are bounded, and those are checked separately below.
+            if names_tail or n <= top:
+                continue
+            line = doc.text.count("\n", 0, m.start()) + 1
+            v.append(Violation("f5", doc.rel, line,
+                               f"names Phase {n}, past the last phase ({top})"))
+
+        # a claimed provisional id must not collide with a phase that already exists
+        if names_tail:
+            for m in PROVISIONAL_RE.finditer(doc.stripped):
+                n = int(m.group(1))
+                if n <= top:
+                    line = doc.stripped.count("\n", 0, m.start()) + 1
+                    v.append(Violation("f5", doc.rel, line,
+                                       f"claims provisional Phase {n}, which is a real "
+                                       f"phase; the unscheduled tail starts at {top + 1}"))
+
+        for m in SELF_EQUAL_RE.finditer(doc.stripped):
+            if m.group(1) == m.group(2):
+                line = doc.stripped.count("\n", 0, m.start()) + 1
+                v.append(Violation("f5", doc.rel, line,
+                                   f"names Phase {m.group(1)} twice in one pair: "
+                                   f"{m.group(0)!r}"))
+
+        if own is not None:
+            for m in CROSSREF_RE.finditer(doc.stripped):
+                if int(m.group(1)) != own:
+                    continue
+                line = doc.text.count("\n", 0, m.start()) + 1
+                v.append(Violation("f5", doc.rel, line,
+                                   f"cross-references Phase {own}, its own ordinal"))
+
+        # A link whose label names one ordinal and whose target file carries another.
+        for m in LINK_RE.finditer(doc.text):
+            label, target = m.group(1), m.group(2)
+            tm = re.search(r"phase_(\d{2})_", target)
+            lm = ORDINAL_RE.search(label)
+            if not tm or not lm or int(tm.group(1)) == int(lm.group(1)):
+                continue
+            line = doc.text.count("\n", 0, m.start()) + 1
+            v.append(Violation("f5", doc.rel, line,
+                               f"link label names Phase {int(lm.group(1))} but targets "
+                               f"phase_{tm.group(1)}"))
+
+        # One dependency cell naming the same phase twice says nothing twice.
+        # Sprint fields spell the colon outside the bold (`**Blocked by**:`) and phase
+        # fields inside it (`**Dependency:**`); accept either.
+        for m in re.finditer(
+                r"^\*\*(?:Depends on|Dependency|Blocked by):?\*\*:?\s*(.+)$", doc.text, re.M):
+            # Only the list itself, not the prose after it: a cell legitimately
+            # re-names each phase to say what it supplies.
+            # A link contributes its ordinal twice -- once in the label, once in the
+            # target filename -- so reduce each link to its label first.
+            cell = LINK_RE.sub(r"\1", m.group(1))
+            cell = re.split(r"\.\s", cell)[0]
+            seen = [int(x) for x in ORDINAL_RE.findall(cell)]
+            dupe = {x for x in seen if seen.count(x) > 1}
+            if dupe:
+                line = doc.text.count("\n", 0, m.start()) + 1
+                v.append(Violation("f5", doc.rel, line,
+                                   f"dependency cell repeats Phase {sorted(dupe)}"))
 
 
 def _budget_words(s):
@@ -1644,6 +1904,9 @@ def run(root, only=None):
     check_s_substrate(docs, docs_by_rel, v)
     check_s3_lane(docs, docs_by_rel, v)
     check_f3_forward_gate(docs, v)
+    check_f4_dependency_graph(docs, v)
+    check_u3_slug_integrity(docs, root, v)
+    check_f5_ordinal_integrity(docs, docs_by_rel, v)
 
     if only:
         v = [x for x in v if x.check in only or x.check.rstrip("12345") in only]

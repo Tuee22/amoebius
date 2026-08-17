@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the Phase-4 Dhall schema, inventories, and two-sided corpus."""
+"""Validate the Phase-5 Dhall schema, inventories, and two-sided corpus."""
 
 from __future__ import annotations
 
@@ -450,7 +450,7 @@ def main() -> int:
             return 0
         # The partial-foreclosure statement used to live in a generated Markdown ledger in
         # the plan tree, and this battery read it back to confirm its own honesty caveat.
-        # That reasoning is authored prose and now lives where it belongs: in the Phase-4
+        # That reasoning is authored prose and now lives where it belongs: in the Phase-5
         # contract itself. The machine-checkable half of the same claim is the
         # `gate2-residue` metric below, which records UNVERIFIED because binding- and
         # index-shaped foreclosures get their real teeth at Gate 2.

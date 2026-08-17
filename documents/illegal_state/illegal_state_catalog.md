@@ -19,7 +19,7 @@ different file than its target.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_33_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_36_pulsar_client.md, DEVELOPMENT_PLAN/phase_40_release_lifecycle.md, DEVELOPMENT_PLAN/phase_46_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_12_provision_seal.md, DEVELOPMENT_PLAN/phase_13_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_37_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_40_pulsar_client.md, DEVELOPMENT_PLAN/phase_44_release_lifecycle.md, DEVELOPMENT_PLAN/phase_50_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -53,22 +53,22 @@ entry uninhabitable.
 - The *normative rule* behind each catalog entry lives in that entry's owning doctrine
   (storage, gateway/ingress, secrets, …). The catalog names the owner and never restates its content.
 
-Phase 4 validates the Gate-1 subset in-process: its eight canonical no-arm/required-field negatives and
+Phase 5 validates the Gate-1 subset in-process: its eight canonical no-arm/required-field negatives and
 three image/process negatives fail against the authored closed Dhall schema, with independent shape oracles
-and mutants. Phase 5 validates the focused Gate-2 subset: distinct schema/domain/unspellable refinement
+and mutants. Phase 6 validates the focused Gate-2 subset: distinct schema/domain/unspellable refinement
 classes, tenant/state/owner compile indices, full positive-tree retention, and fail-closed import/exception
-handling (ledger `external-run-reference`). Phase 6 validates the exhaustive catalog projection: all 88
+handling (ledger `external-run-reference`). Phase 7 validates the exhaustive catalog projection: all 88
 entries and 104 named subcases reconcile, the 33 reached Gate-1/Gate-2 subcases discharge, and the remaining
-71 subcases retain exact later owners (ledger `external-run-reference`). The
-[Phase 7 gate](../../DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md) then supplies exact-locus evidence for
-all 11 Phase-7-owned subcases: three Gate-1 foreclosures, seven compile-time index pairs, and the direct
+73 subcases retain exact later owners (ledger `external-run-reference`). The
+[Phase 8 gate](../../DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md) then supplies exact-locus evidence for
+all 11 Phase-8-owned subcases: three Gate-1 foreclosures, seven compile-time index pairs, and the direct
 base capacity/topology provision-seal fixtures, with 15 negative/twin pairs, two positives, four sampled
 properties, and 19 red mutants (ledger `external-run-reference`). The
-[Phase 8 gate](../../DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md) supplies exact-locus evidence for all
-five Phase-8-owned subcases: two Gate-1 bounded-training barriers and 27 storage-geometry variant/twin rows
+[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md) supplies exact-locus evidence for all
+five Phase-9-owned subcases: two Gate-1 bounded-training barriers and 27 storage-geometry variant/twin rows
 cover logical/physical fit, backup-medium fit, disjoint capacity pools, and restore-target fit; six sampled
 properties pass and 31 mutants are red (ledger `external-run-reference`). The
-[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md) supplies the two owned
+[Phase 10 gate](../../DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md) supplies the two owned
 accelerator loci plus 32 exact execution/runtime-storage/accelerator/provider-root negative/twin variants,
 two composed positives, seven sampled properties, and 45 red mutants (ledger
 `dynamically-resolved`). These are checked rejections at the pure `provision-seal` fold boundary.
@@ -110,7 +110,7 @@ to the pre-cluster gates, while the cluster-enforcement claim is **Register 3** 
 real-resource phases). This is the same split that
 [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
 draws in tier vocabulary: **Register 1/2** here is its **Tier-1** (design-time / in-process) band, and **Register 3** is its
-**Tier-2** runtime-enforcement residue (Phase 34).
+**Tier-2** runtime-enforcement residue (Phase 38).
 
 Diagram vocabulary: [diagram_conventions.md](../engineering/diagram_conventions.md).
 
@@ -239,13 +239,13 @@ the SSoT for the axis. Most entries name a primary locus plus a live-effect resi
 
 ### Capability & messaging — [`illegal_state_capability_messaging.md`](./illegal_state_capability_messaging.md)
 
-- [§3.12](./illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability) — An app that names a product instead of a capability. Phase 10 validates the `Minio` constructor is absent at Gate 1; live provider behavior is unverified.
+- [§3.12](./illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability) — An app that names a product instead of a capability. Phase 11 validates the `Minio` constructor is absent at Gate 1; live provider behavior is unverified.
 - [§3.23](./illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload) — A non-CBOR Pulsar payload
 - [§3.82](./illegal_state_capability_messaging.md#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary) — A browser effect or provider call escaping the server-mediated capability boundary
 
 ### ML assets & training — [`illegal_state_ml_asset.md`](./illegal_state_ml_asset.md)
 
-- [§3.25](./illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) — An ML asset named by arbitrary URL (or an unready / unlanded model). Phase 10 validates the URL arm is absent at Gate 1; readiness, landing, and resolution remain deferred.
+- [§3.25](./illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) — An ML asset named by arbitrary URL (or an unready / unlanded model). Phase 11 validates the URL arm is absent at Gate 1; readiness, landing, and resolution remain deferred.
 - [§3.32](./illegal_state_ml_asset.md#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention) — A continuous training run with no checkpoint cadence, or a feed with no bounded retention
 - [§3.33](./illegal_state_ml_asset.md#333-a-multi-partition-training-feed-with-no-defined-merge-order) — A multi-partition training feed with no defined merge order
 - [§3.34](./illegal_state_ml_asset.md#334-an-app-serving-or-continuing-another-apps-model-without-a-grant) — An app serving or continuing another app's model without a grant
@@ -277,6 +277,8 @@ the SSoT for the axis. Most entries name a primary locus plus a live-effect resi
 - [§3.46](./illegal_state_lifecycle.md#346-a-chaos-fault-targeting-a-component-the-spec-never-declared) — A chaos fault targeting a component the spec never declared
 - [§3.74](./illegal_state_lifecycle.md#374-a-container-image-amoebius-did-not-generate) — A container image amoebius did not generate
 - [§3.75](./illegal_state_lifecycle.md#375-a-container-whose-process-is-unnamed) — A container whose process is unnamed
+- [§3.89](./illegal_state_lifecycle.md#389-a-one-shot-command-run-holding-a-daemon-role) — A one-shot command run holding a daemon role
+- [§3.90](./illegal_state_lifecycle.md#390-a-role-whose-cardinality-contradicts-it) — A role whose cardinality contradicts it
 - [§3.76](./illegal_state_lifecycle.md#376-a-build-stage-whose-content-is-unmodeled) — A build stage whose content is unmodeled
 - [§3.77](./illegal_state_lifecycle.md#377-a-worker-naming-an-extension-its-own-binary-does-not-link) — A worker naming an extension its own binary does not link
 - [§3.78](./illegal_state_lifecycle.md#378-extension-source-that-reaches-outside-the-sanctioned-api) — Extension source that reaches outside the sanctioned API

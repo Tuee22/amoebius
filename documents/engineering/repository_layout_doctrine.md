@@ -15,7 +15,7 @@ rule in [`generated_artifacts_doctrine.md`](./generated_artifacts_doctrine.md) i
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_26_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -79,8 +79,9 @@ amoebius/
 ├── DEVELOPMENT_PLAN/**                   authored plan suite: rulebook, tracker, one contract per phase
 ├── documents/**                          authored doctrine suite and illegal-state catalog
 ├── src/**                                authored Haskell library source; one module tree, read by GHC
-├── app/<executable>/**                   authored executable main modules; one directory per executable
+├── app/amoebius/**                       the one executable's main module and its entry-point-only helpers
 ├── dhall/**                              authored schemas, examples, and catalogs; read by the Dhall interpreter
+│   └── amoebius/Role.dhall               the closed process/role vocabulary every other module imports
 ├── proto/**                              authored protobuf schemas; bindings render to .build/proto/
 ├── ui/**                                 authored PureScript source and its one spago project
 ├── pb/**                                 authored Python distribution whose console script is `pb`
@@ -110,11 +111,14 @@ test/
 └── harness/**                            fakes, argv shims, OS-boundary observers, gate scripts
 
 app/
-├── amoebius/Main.hs                      the operator and control-plane binary
-├── amoebius-singleton/Main.hs            the in-cluster singleton binary
-├── amoebius-ui-server/Main.hs            the UI server binary
-└── infernix-driver/Main.hs               the native inference driver
+└── amoebius/Main.hs                      the one entry point: argv dispatch, nothing else
 ```
+
+`app/`'s second level has exactly one name, because there is exactly one executable and the role it runs is a
+decoded value rather than a filename
+([daemon_topology_doctrine.md §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)). Below
+that name sits `Amoebius/Ui/Server/Main.hs`, an entry-point-only module kept out of `src/` so it links against
+dsl-core; it is a linkage seam, not a second binary.
 
 Every `test/` second-level name is a **singular** role noun. A plural sibling, a case variant, or an eighth
 role is non-conforming on sight; module hierarchy lives *below* `test/spec/`, never at `test/`'s second level,
@@ -138,6 +142,15 @@ sub-libraries), a different `hs-source-dirs` or warning set (per-component), a d
 sub-library graph cannot cycle at the package level, so a package split introduced to break a cycle creates
 the cycle it breaks. A `build-type: Custom` `Setup.hs` is likewise not a ground — it is a generator, and
 [§3.1](#31-canonical-build-tree) already declares its output's home.
+
+**When a unit warrants its own executable.** It does not, if it is a runtime role. A role is a value the one
+binary decodes ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)),
+so giving it a `Main.hs` moves role selection out of the type system and into the filesystem, where no gate
+reads it — and buys a second dependency closure, a second argv parser, and a second copy of every shared
+module for the privilege. The admitted grounds are the three above, applied to a program rather than a
+package: foreign provenance, foreign resolution, or a foreign consumer. `probe/` is the only instance today.
+A program a third-party engine executes is not an exception but an application of the reader rule below: it
+lives in that reader's root, and the Haskell deciding what to ask it lives in `src/`.
 
 The same reasoning names the roots by their reader rather than their owner: `dhall/` is read by the Dhall
 interpreter, `proto/` by protoc, `pb/` by CPython, `ui/` by purs, `pulumi/` by the Pulumi engine, and
@@ -166,6 +179,8 @@ closure condition; none may receive new content.
 | `test/goldens/**`, `test/fixtures/**`, `test/negatives/**`, `test/Ui/**` | their singular-role siblings |
 | `toolchain/bin/**`, `toolchain/runtime/**`, `toolchain/downloads/**`, `toolchain/cache/**` | `.build/toolchain/**`; the authored requirements file moves beside its only consumer under `tools/**` |
 | `docker/**` | **migrated.** The root is gone; the typed bake catalog under `dhall/**` is the authored half and `.build/docker/**/Dockerfile` the rendered one |
+| `app/singleton/**` | a decoded `InClusterRole` arm and an `amoebius singleton` verb on the one binary; its entry-point-only parts to `src/**` |
+| `infernix/app/**` | a `Worker(MlBatchCoordinator)` role or a test-suite stanza; a gate driver is not an executable |
 | `ui-runtime/**` | `ui/**`, under the one spago project |
 | the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots | stanzas in `amoebius.cabal`; their source to `src/**`, `test/**`, `proto/**`, and `dhall/**` |
 | out-of-tree `hs-source-dirs` reaching a sibling checkout | a `source-repository-package` in `cabal.project`, so the input is resolvable from the source snapshot |
@@ -384,6 +399,17 @@ Transport authentication and upstream signatures are verified when an ecosystem 
 computed after resolution detects corruption within that run; it is not promoted into a permanent package
 pin. This policy deliberately trades repository-embedded frozen resolution for continuously refreshed
 compatibility evidence.
+
+**Resolution acquires; it does not require.** A requirement whose tool is absent is satisfied by installing
+it, not by reporting a manual prerequisite — the four-step ensure contract of
+[`substrate_doctrine.md` §3](./substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract).
+There is therefore no requirement kind meaning "expected on the developer host", and the only things a host
+must already supply are the per-substrate floor of
+[§3.1](./substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply). An acquired
+tool lands beneath `.build/toolchain/**`, taken from its publisher's own release and verified against that
+publisher's own checksum fetched in the same run; the package manager is used for the floor's root and for
+what only it can supply, because a package-manager install is its own trust root and cannot be checked
+against a publisher digest.
 
 No tracked file may contain an absolute path beneath a developer home directory. Gates resolve logical tool
 names through the run-local toolchain record. Standard guest paths may be contractual only when the guest

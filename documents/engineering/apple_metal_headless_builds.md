@@ -15,7 +15,7 @@ resulting daemon uses, owned by [host_cluster_comms_doctrine.md](./host_cluster_
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_54_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -68,7 +68,7 @@ flowchart TD
 > **Honesty.** This shape is **proven in the sibling jitML project**, whose implemented headless Apple path
 > is the authoritative reference (`~/jitML/documents/engineering/apple_silicon_metal_headless_builds.md` —
 > closed 2026-06-12 on Apple Silicon with no Tart/SwiftPM/offline-`metal`/Xcode/keychain step on the core
-> path). Phase 54 now implements and tests amoebius's fixed-MSL numerical contract, bridge/build plan,
+> path). Phase 68 now implements and tests amoebius's fixed-MSL numerical contract, bridge/build plan,
 > fast-math-off rule, and no-VM/no-SwiftPM/no-keychain exclusions. Its executing host was Linux `x86_64`, so
 > actual `/usr/bin/clang` framework linking, `MTLDevice`/`MTLLibrary`, and Metal GPU dispatch remain
 > **UNVERIFIED**; the sibling result is still the only physical Apple evidence. Status
@@ -148,6 +148,7 @@ The headless Apple substrate has these typed prerequisites:
 
 | Prerequisite | Required for | Ensure / verify |
 |--------------|--------------|-----------------|
+| `apple.command-line-tools` | **Core** execution, via the bridge build | `/usr/bin/clang` and the `Foundation`/`Metal` framework headers it links come from the Xcode Command Line Tools, which a clean macOS install does not carry. Verify `xcode-select -p`. This is a floor item the operator supplies ([`substrate_doctrine.md` §3.1](./substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply)), and it is the small thing the no-full-Xcode commitment of [§1](#1-the-commitment-headless-on-host-no-vm) still needs. |
 | `apple.metal-runtime` | **Core** execution | Probe `MTLCreateSystemDefaultDevice` and a tiny runtime `makeLibrary(source:)` dispatch. |
 | `apple.metal-bridge` | **Core** execution | Build or verify the fixed bridge (`/usr/bin/clang`, absolute path), then `dlopen` + call its probe symbol. |
 | `apple.swiftc` | *Optional* non-core Swift lane ([§5](#5-optional-swift-lane-non-core)) | Prefer Homebrew `swift`; verify `swiftc --version` and a Swift + Metal probe compiled with an explicit SDK. |
@@ -221,8 +222,8 @@ GPU, and it compiles for the *actual* device that will execute the kernel.
 
 This document is normative Apple-build/run doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the
-headless fixed-Metal-bridge build + the native Apple-Metal host worker land in **Phase 54** (`apple`), whose
-gate ([phase_54_apple_metal_host_daemon.md](../../DEVELOPMENT_PLAN/phase_54_apple_metal_host_daemon.md)) brings up
+headless fixed-Metal-bridge build + the native Apple-Metal host worker land in **Phase 68** (`apple`), whose
+gate ([phase_68_apple_metal_host_daemon.md](../../DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md)) brings up
 the Apple cluster on Lima, builds the worker **headless on-host via the fixed bridge**, and dispatches a
 Metal inference job over Pulsar. This doc never maintains a competing status ledger; it states the target
 shape and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
@@ -236,7 +237,7 @@ shape and links back for status, per [documentation_standards.md §6](../documen
 - [Image Build Doctrine](./image_build_doctrine.md)
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md)
 - [Content Addressing Doctrine](./content_addressing_doctrine.md)
-- [Phase 54 — Apple-Metal host daemon](../../DEVELOPMENT_PLAN/phase_54_apple_metal_host_daemon.md)
+- [Phase 68 — Apple-Metal host daemon](../../DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 - External sibling provenance: `~/jitML/documents/engineering/apple_silicon_metal_headless_builds.md` (the

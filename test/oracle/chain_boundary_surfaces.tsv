@@ -1,7 +1,7 @@
-# Authored expectation for the Phase-14 test-surface join.
+# Authored expectation for the Phase-15 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
-# independently authored expectation. Phase 14 is the one phase spanning two registers, so
+# independently authored expectation. Phase 15 is the one phase spanning two registers, so
 # its enumeration mixes Register-1 chain/Step evidence with Register-2 boundary evidence.
 #
 # owner is the registry the ids are enumerated from at run time:
@@ -16,7 +16,7 @@
 #
 # **13 contract surfaces carry no id**, so the ledger carries them UNVERIFIED
 # rather than asserting results the run did not produce. The gap is recorded against
-# Phase 14 in legacy_tracking_for_deletion.md.
+# Phase 15 in legacy_tracking_for_deletion.md.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 

@@ -28,7 +28,7 @@ LOCUS = ROOT / "test/oracle/render_manifest/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/render-manifest/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/render-manifest/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/render-manifest"
-CONTRACT = "DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md"
 GATE_COMMAND = "python3 tools/render_manifest_gate.py"
 EXPECTATIONS = "test/oracle/render_manifest_surfaces.tsv"
 
@@ -80,9 +80,9 @@ def verify_oracles() -> list[dict[str, str]]:
     mutants = read_tsv(MUTANTS)
     locus = read_tsv(LOCUS)
     if len(corpus) != 18 or len({row["deployment"] for row in corpus}) != 18:
-        raise GateFailure("Phase-13 corpus must enumerate eighteen unique deployments")
+        raise GateFailure("Phase-14 corpus must enumerate eighteen unique deployments")
     if {row["deployment"].rsplit("_", 1)[-1] for row in corpus} != {"singlenode", "distributed"}:
-        raise GateFailure("Phase-13 corpus must cover both shapes")
+        raise GateFailure("Phase-14 corpus must cover both shapes")
     for row in corpus:
         golden = ROOT / row["golden"]
         try:
@@ -94,7 +94,7 @@ def verify_oracles() -> list[dict[str, str]]:
         if not golden.read_bytes().endswith(b"\n"):
             raise GateFailure(f"render golden lacks its canonical trailing LF: {golden.relative_to(ROOT)}")
     if len(mutants) != 12 or len({row["mutant"] for row in mutants}) != 12:
-        raise GateFailure("Phase-13 mutant manifest must contain twelve unique mutants")
+        raise GateFailure("Phase-14 mutant manifest must contain twelve unique mutants")
     expected_locus = {
         *(row["deployment"] for row in corpus),
         "unsafe_workload",
@@ -103,7 +103,7 @@ def verify_oracles() -> list[dict[str, str]]:
         *(row["mutant"] for row in mutants),
     }
     if len(locus) != len(expected_locus) or {row["entry"] for row in locus} != expected_locus:
-        raise GateFailure("Phase-13 validation-locus ledger has incomplete or duplicate coverage")
+        raise GateFailure("Phase-14 validation-locus ledger has incomplete or duplicate coverage")
     for row in mutants:
         descriptor = ROOT / f"test/mutant/render_manifest/{row['mutant']}/mutant.txt"
         if not descriptor.is_file() or not descriptor.read_text(encoding="utf-8").strip():
@@ -145,7 +145,7 @@ def run_green_suite(cabal: Path) -> str:
     result = run([str(cabal), "test", "render-golden", "--test-show-details=direct"])
     token = "render-golden: PASS (18 byte-locked deployment goldens, 9 object variants, 3 non-vacuous safety predicates, 12 mutants, 1 covered property)"
     if token not in result.stdout or "each >=4%" not in result.stdout:
-        raise GateFailure(f"Phase-13 acceptance or property token is absent:\n{result.stdout}")
+        raise GateFailure(f"Phase-14 acceptance or property token is absent:\n{result.stdout}")
     return result.stdout
 
 
@@ -309,7 +309,7 @@ def main() -> int:
         },
         dependencies={"battery": "cabal test"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-13 mutants", "status": "unrun"}],
+        or [{"name": "phase-14 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

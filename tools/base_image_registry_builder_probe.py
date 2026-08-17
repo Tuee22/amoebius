@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the live Phase-25 BuildKit process and finite backing boundaries."""
+"""Verify the live Phase-30 BuildKit process and finite backing boundaries."""
 
 from __future__ import annotations
 

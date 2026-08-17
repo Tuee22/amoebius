@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-8 test-surface join.
+# Authored expectation for the Phase-9 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
 # independently authored expectation.
@@ -18,7 +18,7 @@
 # reconciled: `complete-failure-scenarios` -> `object-count-quota`,
 # `backing-allocation-rounding` -> `root-ebs-quota`, and `pulsar-hot-tier-ceiling` ->
 # `incluster-cache-emptydir`. Every other pair matches by name. The gap is recorded in
-# legacy_tracking_for_deletion.md against Phase 8.
+# legacy_tracking_for_deletion.md against Phase 9.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 

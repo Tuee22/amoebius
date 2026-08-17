@@ -47,7 +47,7 @@ RESULTS = ROOT / ".build/dsl/ui-plan-compiler/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-plan-compiler/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-plan-compiler"
 TEMP_ROOT = ROOT / ".build/tmp/ui-plan-compiler"
-CONTRACT = "DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_23_ui_plan_compiler.md"
 GATE_COMMAND = "python3 tools/ui_plan_compiler_gate.py"
 EXPECTATIONS = "test/oracle/ui_plan_compiler_surfaces.tsv"
 
@@ -72,7 +72,7 @@ OPAQUE_TYPES = (
 
 CHECKS = {
     **{check: f"the {name} constructor is not exported" for name, _file, check in OPAQUE_TYPES},
-    "compiler-input-signature": "the compiler accepts only the Phase-19 sealed bound program",
+    "compiler-input-signature": "the compiler accepts only the Phase-22 sealed bound program",
     "module-inventory-exact": "the paired-compiler module inventory is exactly the four authored modules",
     "reference-oracle-independent": "the reference oracle imports no production projection or digest code",
     "compile-partial-token-scan": "no partial or unsafe token survives in the compiler modules",
@@ -212,13 +212,13 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
             raise GateFailure(f"derived-digest-table-untracked: {relative} tracks a reproducible digest")
     mutants = read_tsv(MUTANTS)
     if len(mutants) != 6 or {row["mutant"] for row in mutants} != set(MUTANT_LOCI):
-        raise GateFailure("Phase-20 mutant manifest must contain exactly the six contract mutants")
+        raise GateFailure("Phase-23 mutant manifest must contain exactly the six contract mutants")
     locus = read_tsv(LOCUS)
     if len(locus) != 35 or len({row["entry"] for row in locus}) != 35:
-        raise GateFailure("Phase-20 validation locus must contain thirty-five unique rows")
+        raise GateFailure("Phase-23 validation locus must contain thirty-five unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
     if len([row for row in phase0_rows if row["# phase"] == "20"]) != 11:
-        raise GateFailure("Phase-0 manifest must pin eleven Phase-20 artifacts")
+        raise GateFailure("Phase-0 manifest must pin eleven Phase-23 artifacts")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 1 only; interpreters/release/edge runtime UNVERIFIED\n"
@@ -249,7 +249,7 @@ def verify_source_boundaries() -> None:
         if re.search(rf"\b{type_name}\s*\(\s*\.\.", header):
             raise GateFailure(f"{check}: private compiler constructor exported: {type_name}")
     if "compileUiPlans :: BoundUiProgram -> Either UiPlanError CompiledUiPlans" not in sources["Manifest.hs"]:
-        raise GateFailure("compiler-input-signature: the compiler no longer accepts only the Phase-19 sealed value")
+        raise GateFailure("compiler-input-signature: the compiler no longer accepts only the Phase-22 sealed value")
     prohibited = re.compile(r"\b(error|undefined|fromJust|head|tail|unsafePerformIO|unsafeCoerce)\b|!!")
     for name, source in sources.items():
         stripped = re.sub(r'"(?:\\.|[^"\\])*"', '""', re.sub(r"--[^\n]*", "", source))
@@ -296,7 +296,7 @@ def run_green(cabal: Path) -> tuple[str, str]:
         "(4 projections, 4 canonical artifacts, 4 digests, 6 demand cells, 2 fresh processes, 6 mutants)"
     )
     if token not in suite.stdout or token not in isolated:
-        raise GateFailure("Phase-20 acceptance token is absent from normal or isolated execution")
+        raise GateFailure("Phase-23 acceptance token is absent from normal or isolated execution")
     return suite.stdout + isolated, observer
 
 
@@ -473,7 +473,7 @@ def main() -> int:
         },
         dependencies={"ui-plan-compiler-spec": "cabal test"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-20 mutants", "status": "unrun"}],
+        or [{"name": "phase-23 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

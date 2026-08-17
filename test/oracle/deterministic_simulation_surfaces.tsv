@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-15 test-surface join.
+# Authored expectation for the Phase-16 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
 # independently authored expectation. This is a Register-2 phase: the evidence is a modeled,
@@ -16,7 +16,7 @@
 # ten-module simulation scope.
 #
 # **2 contract surfaces carry no id** and are carried UNVERIFIED; the gap is
-# recorded against Phase 15 in legacy_tracking_for_deletion.md.
+# recorded against Phase 16 in legacy_tracking_for_deletion.md.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 

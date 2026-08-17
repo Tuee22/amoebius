@@ -44,7 +44,7 @@ ENTRY_POINT = ROOT / "app/amoebius/Amoebius/Ui/Server/Main.hs"
 RETIRED_ENTRY_POINT = ROOT / "src/Amoebius/Ui/Server/Main.hs"
 RESULTS = ROOT / ".build/dsl/ui-server-boundary/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-server-boundary/validation-locus-ledger.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_26_ui_server_boundary.md"
 GATE_COMMAND = "python3 tools/ui_server_boundary_gate.py"
 EXPECTATIONS = ROOT / "test/oracle/ui_server_boundary_surfaces.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-server-boundary"
@@ -241,17 +241,17 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         raise GateFailure("production security-header contract drifted")
     mutants = read_tsv(MUTANTS)
     if len(mutants) != 9 or len({row["mutant"] for row in mutants}) != 9:
-        raise GateFailure("Phase-22 mutant manifest must contain nine unique rows")
+        raise GateFailure("Phase-26 mutant manifest must contain nine unique rows")
     for row in mutants:
         fixture = ROOT / row["fixture"]
         if not fixture.is_file() or "operator=" not in fixture.read_text(encoding="utf-8"):
             raise GateFailure(f"mutant fixture is absent or malformed: {fixture}")
     locus = read_tsv(LOCUS)
     if len(locus) != 54 or len({row["entry"] for row in locus}) != 54:
-        raise GateFailure("Phase-22 validation locus must contain fifty-four unique rows")
+        raise GateFailure("Phase-26 validation locus must contain fifty-four unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
     if len([row for row in phase0_rows if row["# phase"] == "22"]) != 19:
-        raise GateFailure("Phase-0 manifest must pin nineteen Phase-22 artifacts")
+        raise GateFailure("Phase-0 manifest must pin nineteen Phase-26 artifacts")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 2 with local signed authority/handler fakes; live layers UNVERIFIED\n"
@@ -325,7 +325,7 @@ def build_binaries(cabal: Path) -> tuple[Path, Path, str]:
     executable = Path(run([str(cabal), "list-bin", "exe:amoebius"]).stdout.strip())
     suite = Path(run([str(cabal), "list-bin", "test:ui-server-boundary-spec"]).stdout.strip())
     if not executable.is_file() or not suite.is_file():
-        raise GateFailure("Phase-22 executable or suite binary is absent")
+        raise GateFailure("Phase-26 executable or suite binary is absent")
     return executable, suite, build.stdout
 
 
@@ -335,7 +335,7 @@ def run_green(cabal: Path, executable: Path) -> str:
         extra_env={"AMOEBIUS_BIN": str(executable)},
     )
     if ACCEPTANCE_TOKEN not in result.stdout:
-        raise GateFailure("Phase-22 acceptance token is absent")
+        raise GateFailure("Phase-26 acceptance token is absent")
     return result.stdout
 
 
@@ -368,7 +368,7 @@ def observed_binary(executable: Path, suite: Path) -> tuple[str, str, int]:
         if len(loopback) < 3:
             raise GateFailure("OS observer did not see server/authority/handler boundary traffic")
     if "ui-server-boundary-spec: PASS" not in result.stdout:
-        raise GateFailure("observed Phase-22 binary missed its acceptance token")
+        raise GateFailure("observed Phase-26 binary missed its acceptance token")
     return result.stdout, "loopback-only", len(loopback)
 
 
@@ -556,7 +556,7 @@ def main() -> int:
         },
         dependencies={"ui-server-boundary-spec": "cabal test", "amoebius": "cabal build exe"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-22 mutants", "status": "unrun"}],
+        or [{"name": "phase-26 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

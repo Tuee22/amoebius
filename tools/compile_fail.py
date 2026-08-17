@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pinned GHC expect-fail harness for Phase 6."""
+"""Pinned GHC expect-fail harness for Phase 7."""
 
 from __future__ import annotations
 

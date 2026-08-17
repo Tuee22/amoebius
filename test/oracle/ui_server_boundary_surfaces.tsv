@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-22 test-surface join.
+# Authored expectation for the Phase-26 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
 # independently authored expectation. This file replaces the retired committed enumeration,
@@ -25,7 +25,7 @@
 # than an omission. `admitServerPlan` ignores linked handlers the plan never references —
 # that is what keeps one binary able to serve more than one plan — but the startup matrix
 # varies only the count of the *referenced* identity, so nothing this run observed exercises
-# an unreferenced one. The gap is recorded against Phase 22 in the legacy register.
+# an unreferenced one. The gap is recorded against Phase 26 in the legacy register.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 

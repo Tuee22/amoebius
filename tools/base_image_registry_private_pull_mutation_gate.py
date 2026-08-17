@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Join the live kindnet survivor with the committed Phase-25.4 CPP mutant."""
+"""Join the live kindnet survivor with the committed Phase-30.4 CPP mutant."""
 
 from __future__ import annotations
 

@@ -1,7 +1,7 @@
-# Authored expectation for the Phase-25 test-surface join.
+# Authored expectation for the Phase-30 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
-# independently authored expectation. Phase 25 had no committed enumeration at all — the
+# independently authored expectation. Phase 30 had no committed enumeration at all — the
 # retired gate read a surface list out of an ignored generated root — so this file is the
 # first authored opinion its gate is checked against.
 #

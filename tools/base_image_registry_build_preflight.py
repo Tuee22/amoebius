@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Observe and fingerprint the no-builder Phase-25 host boundary."""
+"""Observe and fingerprint the no-builder Phase-30 host boundary."""
 
 from __future__ import annotations
 

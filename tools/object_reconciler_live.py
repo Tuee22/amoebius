@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the complete live Phase-26 representative reconcile corpus."""
+"""Run the complete live Phase-67 representative reconcile corpus."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ CRD = "capacityreservations.amoebius.io"
 PV = "amoebius-phase26-reservation-child"
 OWNER = "phase26-corpus"
 GENERATION = "phase26-generation-1"
-# The corpus pulls this from the in-cluster registry, so it is the digest Phase 25
+# The corpus pulls this from the in-cluster registry, so it is the digest Phase 30
 # published on the run that stood that registry up, supplied by the caller. A constant
 # here pinned an image from a build that no longer exists: the corpus would have failed
 # `ImagePull` on every host but the one that built it, and a rebuilt base would have been
@@ -377,7 +377,7 @@ def execute() -> dict[str, Any]:
         private_image_id = str(private_pods[0]["status"]["containerStatuses"][0]["imageID"])
         # The running pod has to carry the digest this run was told to reconcile, not a
         # digest typed in beside the assertion: the retired constant named a build that no
-        # longer exists, so the one check that ties the corpus to Phase 25's published
+        # longer exists, so the one check that ties the corpus to Phase 30's published
         # artifact could only ever have passed on the host that produced it.
         if IMAGE.rsplit("@", 1)[-1] not in private_image_id:
             raise LiveFailure(f"private-image-id:{private_image_id}!={IMAGE}")
@@ -417,7 +417,7 @@ def main() -> int:
     # The digest-pinned in-cluster reference the corpus pulls. Required, and deliberately
     # without a default: a default names one build, and the corpus's whole point is that a
     # running pod exercises the registry dependency of the run in progress.
-    parser.add_argument("--image", required=True, help="the Phase-25 published digest reference")
+    parser.add_argument("--image", required=True, help="the Phase-30 published digest reference")
     arguments = parser.parse_args()
     globals()["IMAGE"] = arguments.image
     # The Sprint-26.3 module builds the corpus StatefulSet and Job, so it needs the same

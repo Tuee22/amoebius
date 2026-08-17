@@ -1,7 +1,7 @@
-# Authored expectation for the Phase-27 test-surface join.
+# Authored expectation for the Phase-31 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
-# independently authored expectation. Phase 27 had no authored expectation at all — the
+# independently authored expectation. Phase 31 had no authored expectation at all — the
 # retired gate read a surface list out of a committed enumeration file and compared a
 # committed ledger against a derived one, so the list described whatever the gate last
 # emitted. This file is the first authored opinion its gate is checked against.
@@ -15,7 +15,7 @@
 #
 # The four id-less surfaces are the ones this register cannot decide: modeled-apiserver
 # fidelity is the Register-2.5 assumption, the completion and rollback ledgers are the
-# content-store phase's, and the in-cluster singleton that owns the scheduler is Phase 33's.
+# content-store phase's, and the in-cluster singleton that owns the scheduler is Phase 37's.
 # They stay UNVERIFIED in the ledger, which is a statement, not an omission.
 five-sprint-seal	metrics	sprint-receipts
 register-partition	metrics	sprint-registers

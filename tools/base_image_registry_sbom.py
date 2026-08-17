@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Phase-25 SPDX file SBOM from independently probed image bytes."""
+"""Build the Phase-30 SPDX file SBOM from independently probed image bytes."""
 
 from __future__ import annotations
 

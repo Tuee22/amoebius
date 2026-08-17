@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-7 gate — the base capacity fold and the topology relation.
+"""The Phase-8 gate — the base capacity fold and the topology relation.
 
 The capability claim and every check behind it are unchanged: the fold, compile-fail,
 Gate-1, compatibility, and mutant oracles all carry their authored shapes, the three
@@ -44,7 +44,7 @@ MUTANTS = ROOT / "test/mutant/capacity_topology/mutants.tsv"
 RESULTS = ROOT / ".build/dsl/capacity-topology/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/capacity-topology/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/capacity-topology"
-CONTRACT = "DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md"
 GATE_COMMAND = "python3 tools/capacity_topology_gate.py"
 EXPECTATIONS = "test/oracle/capacity_topology_surfaces.tsv"
 
@@ -119,7 +119,7 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
     if len(compile_rows) != 7 or len({row["case"] for row in compile_rows}) != 7:
         raise GateFailure("compile oracle must contain seven unique cases")
     if len(gate1_rows) != 3 or len({row["entry"] for row in gate1_rows}) != 3:
-        raise GateFailure("Phase-7 Gate-1 oracle must contain three unique entries")
+        raise GateFailure("Phase-8 Gate-1 oracle must contain three unique entries")
     if len(compatibility) != 9 or {row["accepted"] for row in compatibility} != {"true", "false"}:
         raise GateFailure("compatibility oracle must exhaust the 3x3 matrix in both directions")
     if len(mutants) != 19 or len({row["mutant"] for row in mutants}) != 19:
@@ -142,7 +142,7 @@ def verify_registry_coverage(
     gate1_rows: list[dict[str, str]],
 ) -> None:
     registry = read_tsv(ROOT / "dhall/examples/locus_registry.tsv")
-    owned = {(row["entry"], row["subcase"]) for row in registry if row["owner_phase"] == "Phase-7"}
+    owned = {(row["entry"], row["subcase"]) for row in registry if row["owner_phase"] == "Phase-8"}
     evidence_entries = {
         *(row["catalog"].split(":", 1)[0] for row in folds),
         *(row["entry"] for row in compile_rows),
@@ -150,11 +150,11 @@ def verify_registry_coverage(
     }
     covered = {(entry, subcase) for entry, subcase in owned if entry in evidence_entries}
     if len(owned) != 11 or covered != owned:
-        raise GateFailure(f"Phase-7 registry coverage drifted: covered={sorted(covered)}, owned={sorted(owned)}")
+        raise GateFailure(f"Phase-8 registry coverage drifted: covered={sorted(covered)}, owned={sorted(owned)}")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# Register-1 only; runtime correspondence UNVERIFIED\n", "entry\tsubcase\tlocus\tstatus\n"]
     for row in registry:
-        if row["owner_phase"] == "Phase-7":
+        if row["owner_phase"] == "Phase-8":
             lines.append(f"{row['entry']}\t{row['subcase']}\t{row['validation_locus']}\tdischarged\n")
     GENERATED_LEDGER.write_text("".join(lines), encoding="utf-8")
 
@@ -193,7 +193,7 @@ def run_green_suite(cabal: Path) -> str:
     )
     token = "capacity-topology-spec: PASS (3 Gate-1, 15 fold negatives, 15 twins, 2 positives, 7 compile pairs, 4 properties)"
     if token not in result.stdout:
-        raise GateFailure(f"Phase-7 acceptance token is absent:\n{result.stdout}")
+        raise GateFailure(f"Phase-8 acceptance token is absent:\n{result.stdout}")
     if ">=30% accept/reject coverage" not in result.stdout:
         raise GateFailure("QuickCheck coverage token is absent")
     return result.stdout
@@ -230,7 +230,7 @@ def write_results(folds: list[dict[str, str]], mutants: list[dict[str, str]]) ->
         "compatibility-matrix": "9/9-equivalent",
         "quickcheck-properties": "4/4-green-checkCoverage-30-percent-both-directions",
         "mutants": f"{len(mutants)}/{len(mutants)}-red",
-        "registry-subcases": "11/11-Phase-7-owned-discharged",
+        "registry-subcases": "11/11-Phase-8-owned-discharged",
         "base-fold-totality": "compile-exhaustive-and-sampled-no-crash",
         "acceptance-token": "spec-composition-proven-base-capacity-topology",
         "storage-geometry": "UNVERIFIED",
@@ -270,7 +270,7 @@ EXPECTED_RESULTS = {
     "compatibility-matrix": "9/9-equivalent",
     "quickcheck-properties": "4/4-green-checkCoverage-30-percent-both-directions",
     "mutants": "19/19-red",
-    "registry-subcases": "11/11-Phase-7-owned-discharged",
+    "registry-subcases": "11/11-Phase-8-owned-discharged",
     "base-fold-totality": "compile-exhaustive-and-sampled-no-crash",
     "acceptance-token": "spec-composition-proven-base-capacity-topology",
     "storage-geometry": "UNVERIFIED",
@@ -388,7 +388,7 @@ def main() -> int:
             if name != "platform"
         },
         dependencies={"dsl-spec": "cabal test", "capacity-topology-spec": "cabal test"},
-        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-7 mutants", "status": "unrun"}],
+        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-8 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

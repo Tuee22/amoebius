@@ -85,10 +85,31 @@ MUTATIONS = [
          "`cabal test example-spec` is green — the committed golden corpus",
          "the committed golden corpus")]),
     # -- section L / section F: substrate and environment-precondition discipline --
-    ("f3_forward_gate_unmarked", "f3", set(), [
+    ("f4_blocked_by_later_sprint", "f4", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "Bound shapes are owned by",
+         "**Blocked by**: Sprint 1.1\nBound shapes are owned by")]),
+    ("f5_self_equal_pair", "f5", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "The seam is recorded tested against a modeled environment.",
+         "The seam is recorded tested against a modeled environment. Phases 1 and 1 own it.")]),
+    ("u3_slug_ordinal_mismatch", "u3", {"b1"}, [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "Bound shapes are owned by",
+         "See [the example](phase_00_example.md).\nBound shapes are owned by")]),
+    ("f4_blocked_by_later_phase", "f4", {"f5"}, [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "Bound shapes are owned by",
+         "**Blocked by**: Phase 9 gate.\nBound shapes are owned by")]),
+    ("f5_self_referential_ordinal", "f5", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "The seam is recorded tested against a modeled environment.",
+         "The seam is recorded tested against a modeled environment. "
+         "Server replay is deferred to Phase 1.")]),
+    ("f3_forward_gate_unmarked", "f3", {"f5"}, [
         ("DEVELOPMENT_PLAN/phase_01_example.md",
          "(Gate; 1.2 V1).",
-         "(Gate; 1.2 V1). The Phase 9 reconciler must be Ready before this gate runs.")]),
+         "(Gate; 1.2 V1). The Phase 10 reconciler must be Ready before this gate runs.")]),
     # a substrate the lane cannot belong to is also a lane its substrate cannot run:
     # the two names disagree in one direction or the other whichever is read first
     ("s1_two_specialized_substrates", "s1", {"s3"}, [
@@ -96,7 +117,13 @@ MUTATIONS = [
          "**Substrate:** none", "**Substrate:** apple and linux-cuda")]),
     ("s2_requires_unknown_token", "s2", set(), [
         ("DEVELOPMENT_PLAN/phase_01_example.md",
-         "**Register:** 1", "**Register:** 1\n**Requires**: `a-precondition-nobody-declared`")]),
+         "**Requires**: `host-floor`", "**Requires**: `a-precondition-nobody-declared`")]),
+    # section F: the table and the declarations join both ways, so a row that stops
+    # naming its declaring phase is as much a defect as an undeclared token
+    ("s2_requires_row_omits_declarer", "s2", set(), [
+        ("DEVELOPMENT_PLAN/development_plan_standards.md",
+         "| `host-floor` | The per-substrate floor the operator supplies | Phases 1 |",
+         "| `host-floor` | The per-substrate floor the operator supplies | Phases 8 |")]),
     # section S clause 15: a substrate-none gate claiming an architecture-bearing lane
     ("s3_lane_off_its_substrate", "s3", set(), [
         ("DEVELOPMENT_PLAN/phase_01_example.md",
@@ -162,7 +189,7 @@ MUTATIONS = [
 
     # -- (j) a sprint reference naming another phase -------------------------
     ("j_stale_sprint_reference", "j", set(), [
-        ("DEVELOPMENT_PLAN/phase_01_example.md", "(Gate; 1.2 V1)", "(Gate; 7.2 V1)")]),
+        ("DEVELOPMENT_PLAN/phase_01_example.md", "(Gate; 1.2 V1)", "(Gate; 8.2 V1)")]),
 
     # -- (k) the product name capitalised in body prose ----------------------
     ("k_capitalised_product_name", "k", set(), [

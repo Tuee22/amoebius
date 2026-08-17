@@ -18,7 +18,7 @@ be observed as having happened. The numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_40_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_44_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -70,7 +70,7 @@ It owns nothing of the catalog's framing.
 - The **seven typing techniques**, the **coverage matrix**, the **three foreclosure layers**, and the new
   **validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `Gate-3-astcheck` / `provision-seal` /
   `rendered-output-golden` / `live-effect`, orthogonal to the foreclosure layer; `provision-seal` is post-bind
-  Phase-11 provision returning a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
+  Phase-12 provision returning a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced, not restated.
 - The *normative rule* behind each entry lives in that entry's owning doctrine (readiness/ordering, release
   lifecycle, monitoring, …). This doc names the owner and never restates its content.
@@ -92,7 +92,7 @@ adds one new **Validation-locus** line naming where the illegal state is caught 
 
 ### 3.41 A duration-gated / hand-ordered bring-up sequence (a readiness race)
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-15`
 
 **Case-family:** `lifecycle`
 
@@ -122,7 +122,7 @@ and the derived-edge handle; `decode-foreclosed` for the acyclic/complete DAG fo
 that the observed condition actually resolves (owned by [`readiness_ordering_doctrine.md` §6](../engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps), [`cluster_lifecycle_doctrine.md` §9](../engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine), and [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md)). *(Honesty: the `type-foreclosed` claim scopes to the sanctioned `Readiness`-typed surface, not the whole `IO` monad — a raw `threadDelay` is caught one layer out by the [`daemon_topology_doctrine.md` §6](../engineering/daemon_topology_doctrine.md#6-the-shared-daemon-spine) ban, a `runtime-checked` discipline.)*
 
 **Validation-locus:** `Gate-2-decoder` (the closed `Readiness` union with no `AfterDuration` arm is a Haskell
-`data` type on the Phase-14 surface, and bring-up order is *derived*, never Dhall-authored — so no `dhall
+`data` type on the Phase-15 surface, and bring-up order is *derived*, never Dhall-authored — so no `dhall
 type` fixture can exercise it and "wait N then assume ready" is a GHC compile-fail golden, not an editor-time
 `dhall type` failure, per the Gate-1-vs-Gate-2 caveat of [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force); a
 start-handle likewise exists only once its dependency's `Ready` edge does, and the total `mkBringUpOrder` fold
@@ -133,7 +133,7 @@ foreclosure layer above.
 
 ### 3.26 An unverified environment promotion (promote → prod without the required evidence)
 
-**Delivery-owner:** `Phase-40`
+**Delivery-owner:** `Phase-44`
 
 **Case-family:** `lifecycle`
 
@@ -156,14 +156,14 @@ actually ran and that prod actually converged on the promoted `Release`, owned b
 doctrines). Per the validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md),
 orthogonal to the foreclosure layer above.
 
-**Validated instance:** Phase 40 compiled the closed `Environment`/opaque `EvidenceWitness` boundary and
+**Validated instance:** Phase 44 compiled the closed `Environment`/opaque `EvidenceWitness` boundary and
 exercised it live. Runtime- and Protocol-missing fixtures returned their specific refusal tags and produced no
 pointer mutation; the tested Runtime witness produced the only Prod advance. The live wiring is tested, never
-proven; Phase 55 later automates topology derivation rather than owning this illegal-state boundary.
+proven; Phase 56 later automates topology derivation rather than owning this illegal-state boundary.
 
 ### 3.43 An unmonitored workflow or extension (or an unauthenticated monitoring surface)
 
-**Delivery-owner:** `Phase-11`
+**Delivery-owner:** `Phase-12`
 
 **Case-family:** `capacity`
 
@@ -201,7 +201,7 @@ a `SubjectScoped` filter actually excludes another subject's data). Per the vali
 
 ### 3.46 A chaos fault targeting a component the spec never declared
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-15`
 
 **Case-family:** `lifecycle`
 
@@ -234,7 +234,7 @@ component as the drill assumes). Per the validation-locus axis of
 
 ### 3.74 A container image amoebius did not generate
 
-**Delivery-owner:** `Phase-25`
+**Delivery-owner:** `Phase-30`
 
 **Case-family:** `image`
 
@@ -259,7 +259,7 @@ fails `dhall type` before any binary runs, exactly as an engine named by URL doe
 
 ### 3.75 A container whose process is unnamed
 
-**Delivery-owner:** `Phase-25`
+**Delivery-owner:** `Phase-30`
 
 **Case-family:** `image`
 
@@ -268,7 +268,10 @@ the container *executes*. No `command`, no `args`, no `entrypoint` field existed
 so the running process was whatever the image's `ENTRYPOINT` happened to be: a fact about bytes, invisible
 to every fold that reasons about the deployment. A required `process : ContainerProcess` closes it, and the
 union has exactly two arms because exactly two things legitimately run in an amoebius pod — the linked
-binary in a closed `InClusterRole`, or a binary some `BakeStep` installed, named by `BakedBinaryId`. Two
+binary in a closed `InClusterRole`, or a binary some `BakeStep` installed, named by `BakedBinaryId`. The role
+arm carries its parameters too: `Worker` takes a `WorkerKind`, so a pod cannot say it is a worker without
+saying which kind, and `InClusterRole` has no host-daemon arm, so a *container* cannot claim a context that by
+definition runs outside one. Two
 relations make the pairing coherent rather than merely present: an `AmoebiusRole` container must run an
 image whose identity is the `Runtime` arm, and a `BakedService`'s binary must be installed by a `BakeStep`
 in that identity's own build content — so a container cannot name an executable no stage put in its image.
@@ -285,7 +288,7 @@ land at the decoder, per the validation-locus axis of
 
 ### 3.76 A build stage whose content is unmodeled
 
-**Delivery-owner:** `Phase-25`
+**Delivery-owner:** `Phase-30`
 
 **Case-family:** `image`
 
@@ -311,7 +314,7 @@ authored shell fragment fails `dhall type` with no binary involved.
 
 ### 3.77 A worker naming an extension its own binary does not link
 
-**Delivery-owner:** `Phase-25`
+**Delivery-owner:** `Phase-30`
 
 **Case-family:** `image`
 
@@ -337,7 +340,7 @@ resolved by the total decoder, which returns `Left` when it is not.
 
 ### 3.78 Extension source that reaches outside the sanctioned API
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-15`
 
 **Case-family:** `lifecycle`
 
@@ -366,7 +369,7 @@ time over extension source before link, per the validation-locus axis of
 
 ### 3.87 An execution unit with no monitoring obligation
 
-**Delivery-owner:** `Phase-11`
+**Delivery-owner:** `Phase-12`
 
 **Case-family:** `capacity`
 
@@ -400,6 +403,61 @@ validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniq
 foreclosure layer above.
 
 ---
+
+### 3.89 A one-shot command run holding a daemon role
+
+**Delivery-owner:** `Phase-29`
+
+**Case-family:** `topology`
+
+Context and role are orthogonal axes
+([`daemon_topology_doctrine.md` §2](../engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)),
+but not every pairing exists: a CLI run is not a daemon, and a host daemon is not a container process. Held as
+two independent fields, those empty cells are writable — a `FrameConfig` could say "command mode" and
+"control-plane singleton" at once, and nothing in the type layer would object, so the binary would be left to
+notice at run time that its own configuration described something that cannot exist. amoebius closes it by
+making the *legal cell* the constructor rather than the pair: `Process` has a `HostCommand` arm carrying no
+role, a `HostDaemon` arm carrying a `HostRole`, and an `InCluster` arm carrying an `InClusterRole`. The
+CLI row's blanks then have no inhabitant to write down. Each arm answers the same question — what this
+process *is* — so the supervised host-level worker has a home rather than being squeezed out by a payload
+describing its supervisor's children.
+**Layer:** `type-foreclosed` for the CLI row — a one-shot run has no role field to fill, so the empty cells
+have no constructor. The host-daemon and in-cluster rows are foreclosed by their own arms carrying a
+`HostRole` and an `InClusterRole` respectively; no runtime-checked residue remains.
+**Owner:** [`daemon_topology_doctrine.md` §1](../engineering/daemon_topology_doctrine.md#1-one-runtime-binary-three-contexts)
+(the contexts) + [§2](../engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) (the grid
+and the closed unions).
+**Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(the legal pairing indexed into the constructor, rather than two independent fields whose product is larger
+than the set of real cells).
+
+**Validation-locus:** `Gate-1-editor` — a value naming a role its context cannot hold has no constructor, so
+it does not type-check.
+
+### 3.90 A role whose cardinality contradicts it
+
+**Delivery-owner:** `Phase-29`
+
+**Case-family:** `topology`
+
+"Exactly one writer" is the whole content of the control-plane singleton
+([`daemon_topology_doctrine.md` §3](../engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)),
+and a replica count stated *beside* the role can contradict it: a Deployment naming
+`ControlPlaneSingleton` with `replicas = 3` is writable, and the contradiction is caught — if at all — by a
+validation function rather than by the type. The same holds for the capacity scheduler, which is also exactly
+one. amoebius closes it by indexing cardinality on the role: the arms that are exactly-one carry no replica
+field at all, and only `Worker` — the arm that is *N*, unelected — admits a count. A singleton with three
+replicas is then not rejected but unsayable.
+**Owner:** [`daemon_topology_doctrine.md` §3](../engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)
+(the exactly-one property and its delegation to k8s/etcd) +
+[§4](../engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected) (the unelected *N*).
+**Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(the field's availability indexed by the arm, so the contradictory pairing has no shape).
+
+**Layer:** `type-foreclosed` — the replica field exists only on the arm that admits *N*, so the
+contradictory pairing has no shape to be written in; no runtime-checked residue remains.
+**Validation-locus:** `Gate-1-editor` — the schema gives `ControlPlaneSingleton` and `CapacityScheduler` no
+replica field, so a count beside either is a type error in the editor, not a rejection at decode.
 
 ## Related Documents
 - [The Illegal-State Catalog](./illegal_state_catalog.md) — the catalog index and the load-bearing honesty

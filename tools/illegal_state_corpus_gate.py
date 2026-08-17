@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-6 gate — the illegal-state corpus and its validation-locus ledger.
+"""The Phase-7 gate — the illegal-state corpus and its validation-locus ledger.
 
 The capability claim is unchanged: every catalog entry reconciles to an owner and family,
 the Gate-1 and Gate-2 negative corpora each fail at their own locus with a green twin that
@@ -9,7 +9,7 @@ exhausted, and five seeded mutants — registry reconciliation, union-arm additi
 normalization, GADT-index weakening, and the broken-decision mutant — each turn the battery
 red at their intended locus.
 
-As in Phase 5, the results table used to restate the gate's intentions as string literals.
+As in Phase 6, the results table used to restate the gate's intentions as string literals.
 Every row that the run can observe is now measured: the catalog and registry counts come
 from the registry reader, the corpus counts and locus-ledger tallies from the suite's own
 acceptance token, the decision-mutant row from the set of properties that actually went
@@ -44,7 +44,7 @@ RESULTS = GENERATED / "phase-results.tsv"
 LOCUS_LEDGER = GENERATED / "validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build" / "dist-newstyle" / "illegal-state-corpus"
 BUILD_TMP = ROOT / ".build" / "tmp" / "illegal-state-corpus"
-CONTRACT = "DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md"
 GATE_COMMAND = "python3 tools/illegal_state_corpus_gate.py"
 EXPECTATIONS = "test/oracle/illegal_state_corpus_surfaces.tsv"
 
@@ -198,7 +198,7 @@ def registry_mutants() -> int:
 
     def owner_drift(root: Path) -> None:
         path = root / "dhall/examples/locus_registry.tsv"
-        path.write_text(path.read_text(encoding="utf-8").replace("Phase-28", "Phase-6", 1), encoding="utf-8")
+        path.write_text(path.read_text(encoding="utf-8").replace("Phase-32", "Phase-7", 1), encoding="utf-8")
 
     def family_drift(root: Path) -> None:
         path = root / "dhall/examples/locus_registry.tsv"
@@ -292,7 +292,7 @@ def suite_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str,
         return False, {}
     match = ACCEPTANCE.search(result.stdout)
     if match is None:
-        print("  FAIL  the Phase-6 acceptance token is absent, so its counts cannot be measured")
+        print("  FAIL  the Phase-7 acceptance token is absent, so its counts cannot be measured")
         return False, {}
     gate1, gate2, positives, discharged, deferred = (int(v) for v in match.groups())
     print(f"  ok    corpus green: {gate1} Gate-1, {gate2} Gate-2, {positives} positives")

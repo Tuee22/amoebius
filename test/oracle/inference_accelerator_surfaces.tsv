@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-12 test-surface join.
+# Authored expectation for the Phase-13 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
 # independently authored expectation.
@@ -13,7 +13,7 @@
 #
 # **2 contract surfaces carry no id**: `opaque-provisioned-engine-accelerator`, `phase12-validation-locus-ledger`.
 # Neither has an oracle case, a mutant, or a metric of its own, so the ledger carries them
-# UNVERIFIED. The gap is recorded against Phase 12 in legacy_tracking_for_deletion.md.
+# UNVERIFIED. The gap is recorded against Phase 13 in legacy_tracking_for_deletion.md.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 

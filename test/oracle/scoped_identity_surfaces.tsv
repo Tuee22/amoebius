@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-17 test-surface join.
+# Authored expectation for the Phase-20 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
 # independently authored expectation. This file replaces the retired committed enumeration,
@@ -21,7 +21,7 @@
 # decide audience widening, integrity elevation, and one transitive leak. Nothing this run
 # observed stands behind tenant-flow-preservation, cycle-diagnostic, or
 # missing-member-diagnostic, so the ledger reports them UNVERIFIED and the gap is recorded
-# against Phase 17 in the legacy register.
+# against Phase 20 in the legacy register.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 

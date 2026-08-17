@@ -21,6 +21,8 @@ documentation.bidirectional_references	doc_lint	c
 documentation.normative_uniqueness	doc_lint	d,m
 documentation.status_consistency	doc_lint	e
 documentation.gate_integrity	doc_lint	f,f2,f3
+documentation.numeric_order	doc_lint	f4,f5
+documentation.slug_integrity	doc_lint	u3
 documentation.illegal_state_catalog	doc_lint	g1,g2,g3,g4,g5
 documentation.plan_backlinks	doc_lint	h
 documentation.terminology_and_honesty	doc_lint	j,k,l

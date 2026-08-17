@@ -34,7 +34,7 @@ STATEFULSET = "pg-witness"
 STORAGE_CLASS = "amoebius-retained"
 NODE = "amoebius-bootstrap-coordinator-control-plane"
 NODE_PATH = "/amoebius-retained/pg-witness"
-# The digest Phase 25 published, supplied by the caller: a constant here named a build
+# The digest Phase 30 published, supplied by the caller: a constant here named a build
 # that no longer exists, so the retained-volume Pod would have failed `ImagePull`.
 PRIVATE_IMAGE = ""
 MINIO_USER = "test-" + secrets.token_hex(8)
@@ -281,7 +281,7 @@ def execute() -> dict[str, Any]:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="this run's observation")
-    parser.add_argument("--image", required=True, help="the Phase-25 published digest reference")
+    parser.add_argument("--image", required=True, help="the Phase-30 published digest reference")
     arguments = parser.parse_args(argv)
     globals()["PRIVATE_IMAGE"] = arguments.image
     try:

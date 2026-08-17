@@ -30,7 +30,7 @@ RESULTS = ROOT / ".build/dsl/chain-boundary/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/chain-boundary/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/chain-boundary"
 TEMP_ROOT = ROOT / ".build/tmp/chain-boundary"
-CONTRACT = "DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md"
 GATE_COMMAND = "python3 tools/chain_boundary_gate.py"
 EXPECTATIONS = "test/oracle/chain_boundary_surfaces.tsv"
 
@@ -105,17 +105,17 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     plans = sorted((ROOT / "test/kernel/fixtures/plan").glob("*.plan.golden"))
     descents = sorted((ROOT / "test/kernel/fixtures/descent").glob("*.descent.golden"))
     if len(cfgs) != 2 or len(plans) != 2 or len(descents) != 2:
-        raise GateFailure("Phase-14 Part-A corpus must contain two cfg, plan, and descent fixtures")
+        raise GateFailure("Phase-15 Part-A corpus must contain two cfg, plan, and descent fixtures")
     expected_steps = json.loads((ROOT / "test/kernel/fixtures/plan/expected_steps.json").read_text(encoding="utf-8"))
     if set(expected_steps) != {"minimal", "multi"} or any(not labels for labels in expected_steps.values()):
-        raise GateFailure("Phase-14 independent step-set oracle is incomplete")
+        raise GateFailure("Phase-15 independent step-set oracle is incomplete")
     reasons = {row["reason"] for row in ast_rows}
     if len(ast_rows) != 6 or reasons != {"UnsanctionedImport", "RawIO", "ForeignCall", "UnsafeOperation", "TemplateHaskell", "OrphanInstance"}:
         raise GateFailure("Gate-3 oracle must enumerate all six violation reasons exactly once")
     if len(mutants) != 7 or len({row["mutant"] for row in mutants}) != 7:
-        raise GateFailure("Phase-14 mutant manifest must contain seven unique mutants")
+        raise GateFailure("Phase-15 mutant manifest must contain seven unique mutants")
     if len(locus) != 20 or len({row["entry"] for row in locus}) != 20:
-        raise GateFailure("Phase-14 validation-locus ledger must contain twenty unique rows")
+        raise GateFailure("Phase-15 validation-locus ledger must contain twenty unique rows")
     for path in [*cfgs, *plans, *descents, ROOT / "test/kernel/fixtures/plan/expected_steps.json"]:
         if not path.is_file() or not path.read_bytes():
             raise GateFailure(f"empty oracle fixture: {path.relative_to(ROOT)}")
@@ -170,14 +170,14 @@ def verify_source_boundaries() -> None:
             primitive_hits.append(path)
     # The declared subprocess sites. This is a whole-tree invariant, so the list has to
     # name every module in `src/` that legitimately reaches the primitive — not only the
-    # ones Phase 14 itself wrote.
+    # ones Phase 15 itself wrote.
     #
-    # Phase 24 tightened the original boundary behind the opaque AbsExe tool ensure;
-    # Exec.Tool remains the Phase-14 compatibility facade and only Host.Ensure reaches the
-    # primitive on that path. Amended 2026-08-12 for the three Phase-25 image modules: an
+    # Phase 29 tightened the original boundary behind the opaque AbsExe tool ensure;
+    # Exec.Tool remains the Phase-15 compatibility facade and only Host.Ensure reaches the
+    # primitive on that path. Amended 2026-08-12 for the three Phase-30 image modules: an
     # image build, its runtime, and its publish step invoke a builder by construction, and
-    # a whole-tree list that omitted them would report a Phase-25 design decision as a
-    # Phase-14 defect. The check stays exact — any site not named here still fails —
+    # a whole-tree list that omitted them would report a Phase-30 design decision as a
+    # Phase-15 defect. The check stays exact — any site not named here still fails —
     # which is the property this phase actually claims
     # (development_plan_standards.md section M clause 1, amendment).
     expected = sorted(
@@ -252,7 +252,7 @@ def run_green_suites(cabal: Path) -> tuple[str, str]:
     combined = chain.stdout + isolated + boundary.stdout + astcheck.stdout
     for token in tokens:
         if token not in combined:
-            raise GateFailure(f"Phase-14 acceptance token is absent: {token}")
+            raise GateFailure(f"Phase-15 acceptance token is absent: {token}")
     return combined, observer
 
 
@@ -460,7 +460,7 @@ def main() -> int:
             if name != "platform"
         },
         dependencies={"chain-spec": "cabal test", "boundary-spec": "cabal test", "astcheck-spec": "cabal test"},
-        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-14 mutants", "status": "unrun"}],
+        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-15 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

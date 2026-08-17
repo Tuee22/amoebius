@@ -41,7 +41,7 @@ RESULTS = ROOT / ".build/dsl/ui-effect-binding/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-effect-binding/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-effect-binding"
 TEMP_ROOT = ROOT / ".build/tmp/ui-effect-binding"
-CONTRACT = "DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_22_ui_effect_binding.md"
 GATE_COMMAND = "python3 tools/ui_effect_binding_gate.py"
 EXPECTATIONS = "test/oracle/ui_effect_binding_surfaces.tsv"
 
@@ -94,7 +94,7 @@ CHECKS = {
     "reference-relation-independent": "the reference relation imports neither production binder",
     "bind-partial-token-scan": "no partial or unsafe token survives in the binder or link catalog",
     "capability-key-set-exact": "the capability oracle's handler keys equal the handler oracle's, both ways",
-    "phase18-registry-consumed": "the binder consumes the Phase-18 sealed registry rather than a local copy",
+    "phase18-registry-consumed": "the binder consumes the Phase-21 sealed registry rather than a local copy",
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
     "toolchain-satisfies-requirements": "the resolved cabal and ghc satisfy the authored ranges",
     "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
@@ -214,13 +214,13 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         raise GateFailure("bind error oracle drifted")
     mutants = read_tsv(MUTANTS)
     if len(mutants) != 7 or len({row["mutant"] for row in mutants}) != 7:
-        raise GateFailure("Phase-19 mutant manifest must contain seven unique rows")
+        raise GateFailure("Phase-22 mutant manifest must contain seven unique rows")
     locus = read_tsv(LOCUS)
     if len(locus) != 48 or len({row["entry"] for row in locus}) != 48:
-        raise GateFailure("Phase-19 validation locus must contain forty-eight unique rows")
+        raise GateFailure("Phase-22 validation locus must contain forty-eight unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
     if len([row for row in phase0_rows if row["# phase"] == "19"]) != 14:
-        raise GateFailure("Phase-0 manifest must pin fourteen Phase-19 artifacts")
+        raise GateFailure("Phase-0 manifest must pin fourteen Phase-22 artifacts")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 1 only; browser/handler/provider/live isolation UNVERIFIED\n"
@@ -284,7 +284,7 @@ def verify_source_boundaries() -> None:
         if token not in bind:
             raise GateFailure(f"refusal-arms-present: binding refusal arm disappeared: {token}")
     if not re.search(r"import\s+Amoebius\.Ui\.Security\.Authorization\s*\(([^)]*)\)", bind):
-        raise GateFailure("phase18-registry-consumed: the binder no longer imports the Phase-18 registry")
+        raise GateFailure("phase18-registry-consumed: the binder no longer imports the Phase-21 registry")
     imported = re.search(r"import\s+Amoebius\.Ui\.Security\.Authorization\s*\(([^)]*)\)", bind).group(1)
     for name in ("BoundActionRegistry", "authorizationDigestSource"):
         if name not in imported:
@@ -326,7 +326,7 @@ def run_green(cabal: Path) -> tuple[str, str]:
     isolated, observer = isolated_green(cabal)
     token = "ui-effect-binding-spec: PASS (7 ports, 2 links, 8 errors, 13 coverage classes, 7 mutants)"
     if token not in suite.stdout or token not in isolated:
-        raise GateFailure("Phase-19 acceptance token is absent from normal or isolated execution")
+        raise GateFailure("Phase-22 acceptance token is absent from normal or isolated execution")
     return suite.stdout + isolated, observer
 
 
@@ -432,7 +432,7 @@ def main() -> int:
             print(f"  ok    {check}")
         print("  ok    port-requirement-no-raw-coordinate no raw text, URL, or link entered PortRequirement")
         print("  ok    refusal-arms-present               every named refusal arm is still declared")
-        print("  ok    phase18-registry-consumed          the binder consumes the Phase-18 sealed registry")
+        print("  ok    phase18-registry-consumed          the binder consumes the Phase-21 sealed registry")
         print("  ok    reference-relation-independent     the reference imports neither production binder")
         print("  ok    bind-partial-token-scan            no partial or unsafe token in the binder modules")
         results["source"] = True
@@ -499,7 +499,7 @@ def main() -> int:
         },
         dependencies={"ui-effect-binding-spec": "cabal test"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-19 mutants", "status": "unrun"}],
+        or [{"name": "phase-22 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

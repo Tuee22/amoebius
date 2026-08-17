@@ -124,9 +124,9 @@ def validate_live(live: Path) -> dict[str, Any]:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--evidence", type=Path, required=True, help="this run's bundle directory")
-    # The corpus Deployment pulls the Phase-25 published digest from the in-cluster
+    # The corpus Deployment pulls the Phase-30 published digest from the in-cluster
     # registry, which is what makes item (i) of the corpus exercise that dependency.
-    parser.add_argument("--image", required=True, help="the Phase-25 published digest reference")
+    parser.add_argument("--image", required=True, help="the Phase-30 published digest reference")
     arguments = parser.parse_args(argv)
     evidence = arguments.evidence
     evidence.mkdir(parents=True, exist_ok=True)

@@ -18,6 +18,14 @@ Header mechanics belong to [the standards](../documents/documentation_standards.
 
 </details>
 
+## F. The sprint block format
+
+The closed environment-precondition vocabulary, joined to the phases that declare it:
+
+| `Requires` precondition | What it is | Declared by |
+|---|---|---|
+| `host-floor` | The per-substrate floor the operator supplies | Phases 1 |
+
 ## K. Honesty
 
 A gate reaches one register.

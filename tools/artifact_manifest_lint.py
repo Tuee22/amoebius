@@ -16,12 +16,15 @@ MANIFEST = ROOT / "test" / "oracle" / "preimplementation_artifacts.tsv"
 # The one enumerable surface this module owns, declared so the run-time enumeration can
 # discover it rather than the expectation file asserting it unilaterally.
 CHECKS = {"manifest": "every pre-implementation oracle and mutant resolves and is owned"}
-PHASES = {2, *range(16, 24), *range(37, 66)}
-# The natural-architecture re-baseline moved every phase at or above old 26 up by one.
-# A phase document therefore cites a pin at its **post**-amendment ordinal while the
-# file keeps the **pre**-amendment one until its owning phase renames it for the
-# capability. The translation is authored in the legacy register's audit map, not
-# invented here: without that row this reader refuses to translate anything.
+PHASES = {3, *range(19, 29), *range(41, 67), 68}
+# `PHASES` carries **current** (2026-08-17 re-baseline) ordinals; the +1 translation below
+# is the **2026-08-16** natural-architecture amendment's, and it is still the right one.
+# A phase document cites a pin at its 2026-08-16 ordinal while the file keeps the
+# pre-2026-08-16 one, because the tree keeps its names until Phase 2 de-phases it — the
+# 2026-08-17 re-baseline moved documents, not paths, so it did not change this offset.
+# The translation is authored in the legacy register's audit map, not invented here:
+# without that row this reader refuses to translate anything. When Phase 2 strips the
+# ordinals from the tree, this whole translation retires with them.
 REBASELINE_FLOOR = 27
 REBASELINE_ANCHOR = "pre-amendment"
 LEGACY_REGISTER = ROOT / "DEVELOPMENT_PLAN" / "legacy_tracking_for_deletion.md"
@@ -331,8 +334,8 @@ def main() -> int:
     # Phase 0 governs authored pre-implementation inputs, not later executable
     # test implementations. Keep auditing the fixture/oracle/mutant namespaces
     # while allowing phase suites (for example RoundTripSpec.hs) to appear as
-    # their owning phase is completed. Phase-2 byte goldens are the one explicit
-    # deferred exception named by the Phase-2.3 plan.
+    # their owning phase is completed. Phase-3 byte goldens are the one explicit
+    # deferred exception named by the Phase-3.3 plan.
     artifact_namespaces = {"oracle", "mutants", "fixtures", "golden", "dhall"}
     # An ignored path is generated output, so it is never a Phase-0 authored artifact.
     # Filtering by ignore status rather than by filename keeps this agreeing with
@@ -374,8 +377,8 @@ def main() -> int:
     for path in sorted(actual - set(rows)):
         errors.append(f"unmanifested Phase-0 artifact: {path}")
     # Concrete paths delegated to Phase 0 by their owning gate must resolve and be
-    # listed.  Brace/glob forms, directories, and Phase-2 byte goldens are excluded:
-    # Phase 2.3 deliberately pins those only after fixing the rendering convention.
+    # listed.  Brace/glob forms, directories, and Phase-3 byte goldens are excluded:
+    # Phase 3.3 deliberately pins those only after fixing the rendering convention.
     explicit_re = re.compile(r"`(test/(?:fixtures|golden|mutants|dhall)/[^` ]+)`")
     translatable = rebaseline_authorized()
     translated: list[str] = []

@@ -29,7 +29,7 @@ LOCUS = ROOT / "test/oracle/deterministic_simulation/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/deterministic-simulation/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/deterministic-simulation/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/deterministic-simulation"
-CONTRACT = "DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md"
 GATE_COMMAND = "python3 tools/deterministic_simulation_gate.py"
 EXPECTATIONS = "test/oracle/deterministic_simulation_surfaces.tsv"
 
@@ -113,10 +113,10 @@ def verify_oracles() -> None:
         raise GateFailure("reference schedule outcomes must be independently pinned as upheld")
     mutants = read_tsv(MUTANTS)
     if len(mutants) != 1 or mutants[0]["id"] != "m1-dropped-partition-handling":
-        raise GateFailure("Phase-15 mutant manifest must name the dropped-partition mutant exactly once")
+        raise GateFailure("Phase-16 mutant manifest must name the dropped-partition mutant exactly once")
     locus = read_tsv(LOCUS)
     if len(locus) != 20 or len({row["entry"] for row in locus}) != 20:
-        raise GateFailure("Phase-15 validation locus must contain twenty unique entries")
+        raise GateFailure("Phase-16 validation locus must contain twenty unique entries")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 2 modeled environment; real-substrate fidelity ASSUMED; live runtime UNVERIFIED\n"
@@ -154,7 +154,7 @@ def run_green(cabal: Path) -> str:
     suite = run([str(cabal), "test", "sim-spec", "--test-show-details=direct"])
     token = "sim-spec: PASS (2 interpreters, 6 fake contracts, 4 schedules, same-seed bytes, sensitivity, IOSimPOR, 1 mutant)"
     if token not in suite.stdout:
-        raise GateFailure(f"Phase-15 acceptance token is absent:\n{suite.stdout}")
+        raise GateFailure(f"Phase-16 acceptance token is absent:\n{suite.stdout}")
     return build.stdout + suite.stdout
 
 

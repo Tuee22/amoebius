@@ -15,7 +15,7 @@ constructed, from scalar quantities outward to whole-deployment budgets, and eve
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md
+**Referenced by**: documents/engineering/daemon_topology_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md
 **Generated sections**: none
 
 </details>
@@ -116,7 +116,7 @@ PositiveHeadroomAxisWitness =
 ContainerLifecycle =
   < App | Sidecar | Init | RestartableInit >
 
-ContainerProcess =
+ContainerProcess =                                            -- InClusterRole: daemon_topology §2
   < AmoebiusRole : InClusterRole                              -- the linked binary, in a closed role
   | BakedService : { binary : BakedBinaryId, args : List Text }  -- a binary some BakeStep installed
   >
@@ -1799,7 +1799,7 @@ enactBootstrapRegistry
 -- transport outcome returns a receipt; OutcomeUnknown exposes only re-observation, never the old action.
 
 -- This explicit cycle-break exists before the scheduler image can be pulled. It provisions and initializes
--- only the registry/proxy objects through a typed action using the same private source serializer as Phase 13;
+-- only the registry/proxy objects through a typed action using the same private source serializer as Phase 14;
 -- it does not expose per-service render/apply. A later whole-deployment ProvisionedSpec may adopt those exact
 -- identities only after observing equal source/field digests and transfers ownership once.
 
@@ -4226,7 +4226,7 @@ HostReservationLedgerDemand =
 
 CapacitySchedulerSystemDemand =
   { execution : BootstrapScheduledExecution
-  , implementation : SameAmoebiusHaskellBinarySchedulerRole
+  , implementation : InClusterRole  -- pinned to the CapacityScheduler arm at decode
   , bootstrapApiObjects :
       NonEmptyMap KubernetesObjectId KubernetesApiObjectSource
   , ledger    : SchedulerReservationLedgerDemand
@@ -4338,7 +4338,7 @@ BootstrapAddonSchedulerCutoverProjection =
   }
 
 ProvisionedCapacitySchedulerSystem = -- private whole-deployment ProvisionedSpec member
-  { implementation  : SameAmoebiusHaskellBinarySchedulerRole
+  { implementation  : InClusterRole  -- pinned to the CapacityScheduler arm at decode
   , controller      : ProvisionedBootstrapSchedulerController
   , image           : ProvisionedImageArtifact
   , guardConfig     : ProvisionedSchedulerGuardConfig

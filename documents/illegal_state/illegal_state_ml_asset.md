@@ -16,7 +16,7 @@ it, so these entries bound what that exception may do. Their numbering is held b
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_49_determinism_jitcache.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_13_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -31,7 +31,7 @@ ML-asset and training illegal states ([§3.25](#325-an-ml-asset-named-by-arbitra
 It is **not** the index of the catalog. The full catalog index, the SSoT split, and the load-bearing honesty
 limit (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
 [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure** model ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` /
-`live-effect` axis added on top of the foreclosure layer; `provision-seal` means post-bind Phase-11 provision
+`live-effect` axis added on top of the foreclosure layer; `provision-seal` means post-bind Phase-12 provision
 returns a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
 [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice **references** those — it does not
 restate them. Each entry below preserves its original number and heading verbatim (inbound links depend on the
@@ -48,7 +48,7 @@ every "unrepresentable" as *design intent for the type discipline*, never as a t
 
 ### 3.25 An ML asset named by arbitrary URL (or an unready / unlanded model)
 
-**Delivery-owner:** `Phase-12`
+**Delivery-owner:** `Phase-13`
 
 **Case-family:** `ml-asset`
 
@@ -93,7 +93,7 @@ bytes loading on the substrate, and an imported model's pin/tag being truthful).
 
 ### 3.32 A continuous training run with no checkpoint cadence, or a feed with no bounded retention
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-9`
 
 **Case-family:** `storage`
 
@@ -121,7 +121,7 @@ mandatory `checkpointCadence` / bounded-retention `StorageBudget` fields, fail `
 
 ### 3.33 A multi-partition training feed with no defined merge order
 
-**Delivery-owner:** `Phase-36`
+**Delivery-owner:** `Phase-40`
 
 **Case-family:** `messaging`
 
@@ -137,7 +137,7 @@ function is a decode-checked total order, the total decoder returns `Left` on a 
 
 ### 3.34 An app serving or continuing another app's model without a grant
 
-**Delivery-owner:** `Phase-38`
+**Delivery-owner:** `Phase-42`
 
 **Case-family:** `ml-asset`
 
@@ -160,7 +160,7 @@ serve path honoring the per-app namespace).
 
 ### 3.84 A model output used as an authority-bearing command or identity
 
-**Delivery-owner:** `Phase-18`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `ui`
 

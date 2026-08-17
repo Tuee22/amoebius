@@ -16,7 +16,7 @@ owned by [platform_services_doctrine.md](./platform_services_doctrine.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_35_app_tenancy.md, DEVELOPMENT_PLAN/phase_37_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_39_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_50_infernix_lift.md, DEVELOPMENT_PLAN/phase_51_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_53_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_56_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_63_offline_blobs_isolation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_20_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_39_app_tenancy.md, DEVELOPMENT_PLAN/phase_41_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_43_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_54_infernix_lift.md, DEVELOPMENT_PLAN/phase_55_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_66_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_57_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_58_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -130,7 +130,7 @@ witness from a signed issuer claim and pass the same isolation gate. Application
 author a tenant selector. The UI request context and tenant-switch invalidation contract are owned by
 [low_code_ui_runtime_doctrine.md §10](./low_code_ui_runtime_doctrine.md#10-single-tenant-and-multi-tenant-applications).
 
-**Live projection residue.** [Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_projection_runtime.md) carries this
+**Live projection residue.** [Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_projection_runtime.md) carries this
 typed relation through owner-scoped UI storage and delivery. Projection rows, stream watermarks, opaque handles,
 and Pulsar subscriptions retain `(AppId, TenantId, Owner, ProjectionId)`; receipts retain
 `(AppId, TenantId, Owner, CommandId)`. Equal local entity ids for Alice, Bob, and Carol cannot collapse either
@@ -216,10 +216,10 @@ equality; equal bytes or a provider version alone never establish content equali
 old, new, failed-action, rollback, and execution capacity until action readback and old-target cleanup succeed.
 No caller-authored prior `Provisioned*` value is transition input.
 
-Phase 35 now implements and gates provider **administrative** apply/readback for all six arms over two
+Phase 39 now implements and gates provider **administrative** apply/readback for all six arms over two
 equal-shaped tenants. Six separated observers recover a post-ready challenge, paired illegal graphs have zero
 provider effects, and cleanup inventories return to preflight. For Pulsar this means tenant/namespace/ACL state
-only. The authenticated native-client produce/consume round trip belongs to Phase 36; Phase 35 records that
+only. The authenticated native-client produce/consume round trip belongs to Phase 40; Phase 39 records that
 data-path check as UNVERIFIED rather than inferring it from administrative convergence. Ledger
 `dynamically-resolved`.
 
@@ -286,13 +286,13 @@ policy, and server reauthorization. A deployment may instantiate one runtime sli
 pooling several tenant authorities in one process requires a separately admitted isolation shape and does not
 follow from sharing the generic binary.
 
-**Phase-37 runtime evidence.** Three real Keycloak subject credentials spanning two tenants are authenticated
+**Phase-41 runtime evidence.** Three real Keycloak subject credentials spanning two tenants are authenticated
 and introspected before a private Haskell request-context adapter evaluates the pinned own/foreign matrix.
 Postgres RLS, derived tenant/subject MinIO keys, derived Pulsar namespaces through the native Haskell client,
 and enforcing NetworkPolicy admit the sanctioned path and leave zero foreign provider or cursor effects.
 Independent readback, exact teardown, and the `drop_user_predicate` and `accept_body_tenant` mutants pass.
-Browser scope switching remains Phase 57; cross-cluster isolation and complete provider-audit-log
-correspondence remain `UNVERIFIED`. See [Phase 37](../../DEVELOPMENT_PLAN/phase_37_user_tenant_isolation_live.md).
+Browser scope switching remains Phase 58; cross-cluster isolation and complete provider-audit-log
+correspondence remain `UNVERIFIED`. See [Phase 41](../../DEVELOPMENT_PLAN/phase_41_user_tenant_isolation_live.md).
 
 In the default shared-service model, tenants
 share one Vault, one broker set, one MinIO, and one Kubernetes control plane, so isolation rests on per-tenant
@@ -348,22 +348,22 @@ scoped-mutation surface. It defers, and cross-references rather than restates:
 - the `InForceSpec` projection it mirrors → [dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract);
 - the append-only migration diff that realizes a capability edge or a tenant promotion without representing destruction → [inforcespec_migration_doctrine.md](./inforcespec_migration_doctrine.md), [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply), [storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation).
 
-The Phase-50 scoped infernix instance hides tenant scope and ready-artifact constructors, rejects a foreign-
+The Phase-54 scoped infernix instance hides tenant scope and ready-artifact constructors, rejects a foreign-
 scope reference before contract effects, and observes a real tenant B Vault denial against tenant A's path
 with unchanged external work counts. It is one scope pair and a pinned micro-decoder, not proof of general
 noninterference or the full production inference chain. Every hardware substrate can always run `linux-cpu`;
 when a pristine Linux host is required, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-The Phase-51 scoped UI slice derives app, tenant, owner, port, and command coordinates from trusted request context rather than the browser's artifact claim.
+The Phase-55 scoped UI slice derives app, tenant, owner, port, and command coordinates from trusted request context rather than the browser's artifact claim.
 Its pure cases reject same-tenant foreign-owner, foreign-tenant, stale-scope, and changed-input attempts before adapter effects; the live pair adds active Keycloak sessions and no new provider effect after tenant B reuses tenant A's exact handle/input.
 That pair uses loopback UI origins and a fixed reference worker, so provider-level owner separation, edge enforcement, direct service policy, the full inference chain, and general noninterference remain UNVERIFIED.
 `linux-cpu` is available on every hardware class, including through a clean guest: Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 53 adds a narrower jitML UI instance. The pure adapter refuses a copied Ready handle for both a same-tenant non-owner and a foreign tenant before dispatch, checkpoint read, or result write; its browser slice repeats those denials with scoped identity fixtures and observes zero effect change. Because fresh Keycloak sessions, provider enforcement, Envoy, Kubernetes replicas, and direct-worker policy were not stable in the retained environment, they remain UNVERIFIED, as do broad noninterference and the full serving chain. All substrates continue to admit `linux-cpu`. A pristine Linux environment uses Incus for Linux/Linux-CUDA, Lima for Apple, or WSL2 for Windows.
+Phase 66 adds a narrower jitML UI instance. The pure adapter refuses a copied Ready handle for both a same-tenant non-owner and a foreign tenant before dispatch, checkpoint read, or result write; its browser slice repeats those denials with scoped identity fixtures and observes zero effect change. Because fresh Keycloak sessions, provider enforcement, Envoy, Kubernetes replicas, and direct-worker policy were not stable in the retained environment, they remain UNVERIFIED, as do broad noninterference and the full serving chain. All substrates continue to admit `linux-cpu`. A pristine Linux environment uses Incus for Linux/Linux-CUDA, Lima for Apple, or WSL2 for Windows.
 
 ## 9. Planning ownership
 
-This document is normative tenancy doctrine only. Phase 34 delivers the root-operator `dhall update` admin boundary, Phase 35 delivers the derived six-provider administrative projection, and Phase 37 validates the real-Keycloak scoped application request path through Postgres, MinIO, Pulsar, and NetworkPolicy. Tenant-admin scope-narrowed `dhall update`, browser tenant switching, cross-cluster isolation, and complete provider audit correspondence remain later work. Delivery sequencing, completion status, validation gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and by the tenancy phase it schedules; this doc never maintains a competing status ledger and links back for status.
+This document is normative tenancy doctrine only. Phase 38 delivers the root-operator `dhall update` admin boundary, Phase 39 delivers the derived six-provider administrative projection, and Phase 41 validates the real-Keycloak scoped application request path through Postgres, MinIO, Pulsar, and NetworkPolicy. Tenant-admin scope-narrowed `dhall update`, browser tenant switching, cross-cluster isolation, and complete provider audit correspondence remain later work. Delivery sequencing, completion status, validation gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and by the tenancy phase it schedules; this doc never maintains a competing status ledger and links back for status.
 
 Several choices are open and owned by the plan, not fixed here: whether a Vault-namespace-per-tenant (an
 Enterprise feature) or a per-tenant policy-and-prefix on OSS Vault backs the tenant's secret boundary
@@ -373,7 +373,7 @@ which tenant/owner invariants are type-foreclosed in the decoded Haskell IR vers
 value-level fold, stated honestly because Dhall lacks dependent types
 ([§7](#7-two-isolation-layers-and-the-honest-limit)).
 
-Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), only the explicitly named Phase-17/18/35/37 and scoped Phase-50/51/53 slices are validated amoebius results. The service-native tenancy shapes this doctrine composes are the identity realm, the per-tenant secret-store
+Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), only the explicitly named Phase-20/21/39/41 and scoped Phase-54/55/66 slices are validated amoebius results. The service-native tenancy shapes this doctrine composes are the identity realm, the per-tenant secret-store
 policy, the message-bus tenant namespace, the object-store bucket policy, Kubernetes access control and
 network policy, and SQL roles and grants. Untested shapes have sibling precedents but are not upgraded into an
 amoebius result; the named phase evidence alone determines what is built and tested.
@@ -382,7 +382,7 @@ amoebius result; the named phase evidence alone determines what is built and tes
 
 ## Related Documents
 
-Phase 63's scoped blob trace derives distinct tenant/subject partitions and binds each opaque upload handle to its issuing scope. Same-tenant non-owner and foreign-tenant uses fail before upload or dependent effect, while the owner's independently verified content releases exactly one effect. Real Keycloak, MinIO audit, Gateway, Kubernetes, and CNI enforcement remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 62's scoped blob trace derives distinct tenant/subject partitions and binds each opaque upload handle to its issuing scope. Same-tenant non-owner and foreign-tenant uses fail before upload or dependent effect, while the owner's independently verified content releases exactly one effect. Real Keycloak, MinIO audit, Gateway, Kubernetes, and CNI enforcement remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 - [Engineering Doctrine Index](./README.md)
 - [DSL Doctrine](./dsl_doctrine.md) — the `InForceSpec` projection and the two illegal-state-unrepresentable gates the tenant surface rides

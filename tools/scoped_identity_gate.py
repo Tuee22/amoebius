@@ -38,7 +38,7 @@ RESULTS = ROOT / ".build/dsl/scoped-identity/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/scoped-identity/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/scoped-identity"
 TEMP_ROOT = ROOT / ".build/tmp/scoped-identity"
-CONTRACT = "DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_20_scoped_identity_kernel.md"
 GATE_COMMAND = "python3 tools/scoped_identity_gate.py"
 EXPECTATIONS = "test/oracle/scoped_identity_surfaces.tsv"
 
@@ -95,7 +95,7 @@ CLASS_METRIC = {
     "compile-fail": "compile-fail",
     "property": "generated-coverage",
     "mutant": "mutants",
-    # The Phase-16 seal is consumed before the owner battery runs in the same process; the
+    # The Phase-19 seal is consumed before the owner battery runs in the same process; the
     # owner metric is written only if that consumption succeeded first.
     "dependency": "owner-joins",
 }
@@ -183,15 +183,15 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         raise GateFailure("compile-fail error oracle drifted")
     mutants = read_tsv(MUTANTS)
     if len(mutants) != 1:
-        raise GateFailure("Phase-17 mutant manifest must contain exactly one row")
+        raise GateFailure("Phase-20 mutant manifest must contain exactly one row")
     if not MUTANT_FIXTURE.is_file():
         raise GateFailure("the committed owner-equality mutant fixture is absent")
     locus = read_tsv(LOCUS)
     if len(locus) != 23 or len({row["entry"] for row in locus}) != 23:
-        raise GateFailure("Phase-17 validation locus must contain twenty-three unique rows")
+        raise GateFailure("Phase-20 validation locus must contain twenty-three unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
     if len([row for row in phase0_rows if row["# phase"] == "17"]) != 8:
-        raise GateFailure("Phase-0 manifest must pin eight Phase-17 artifacts")
+        raise GateFailure("Phase-0 manifest must pin eight Phase-20 artifacts")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 1 only; identity-provider/provider/runtime enforcement UNVERIFIED\n"
@@ -283,7 +283,7 @@ def run_green(cabal: Path) -> tuple[str, str]:
     isolated, observer = isolated_green(cabal)
     token = "ui-scope-spec: PASS (6 owner rows, 2 swap errors, 4 flow rows, 3 compile loci, 6 coverage classes, 1 mutant)"
     if token not in suite.stdout or token not in isolated:
-        raise GateFailure("Phase-17 acceptance token is absent from normal or isolated execution")
+        raise GateFailure("Phase-20 acceptance token is absent from normal or isolated execution")
     return suite.stdout + isolated, observer
 
 

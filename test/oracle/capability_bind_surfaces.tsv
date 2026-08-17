@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-10 test-surface join.
+# Authored expectation for the Phase-11 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
 # independently authored expectation.
@@ -16,7 +16,7 @@
 # `unresolved-transition-references`, `registry-storage-bound-intent`, `extension-totality`,
 # and `phase10-validation-locus-ledger` have no case, mutant, or metric of their own, so
 # the ledger carries them UNVERIFIED rather than asserting a result the run did not
-# produce. The gap is recorded against Phase 10 in legacy_tracking_for_deletion.md.
+# produce. The gap is recorded against Phase 11 in legacy_tracking_for_deletion.md.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 

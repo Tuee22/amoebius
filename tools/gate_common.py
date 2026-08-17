@@ -23,7 +23,7 @@ What this module owns:
 
 Typical use:
 
-    gate = PhaseGate(phase=2, contract="DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md",
+    gate = PhaseGate(phase=2, contract="DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md",
                      command="python3 tools/formal_model_kernel_gate.py",
                      expectations="test/oracle/formal_model_kernel_surfaces.tsv",
                      register="1", substrate="none",

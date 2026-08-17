@@ -17,7 +17,7 @@ entries and their loci are owned here; the numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -43,7 +43,7 @@ The material this slice deliberately does **not** restate lives with its owners:
   the **three-layer foreclosure** model (type-foreclosed / decode-foreclosed / runtime-checked, [§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
   and the **validation-locus axis** itself are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md).
   The five loci referenced below — `Gate-1-editor` (fails `dhall type` at authoring time), `Gate-2-decoder`
-  (the total decoder returns `Left`), `provision-seal` (post-bind Phase-11 provision returns a `ProvisionError`
+  (the total decoder returns `Left`), `provision-seal` (post-bind Phase-12 provision returns a `ProvisionError`
   before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by a golden test on the *rendered*
   manifest), and `live-effect` (only at reconcile / runtime) — are defined there; this slice only names, per
   entry, where each illegal state is caught.
@@ -77,7 +77,7 @@ flowchart LR
 
 ### 3.5 Undeployable pods (taints, tolerations & affinity)
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-8`
 
 **Case-family:** `topology`
 
@@ -109,7 +109,7 @@ witnessed node).
 
 ### 3.17 An over-committed deploy or workload (host / VM / cluster capacity exceeded)
 
-**Delivery-owner:** `Phase-6`
+**Delivery-owner:** `Phase-7`
 
 **Case-family:** `capacity`
 
@@ -184,7 +184,7 @@ finite-limit/physical-peak relation; the name does not assert synchronous epheme
 
 ### 3.22 A hand-authored (un-derived) toleration
 
-**Delivery-owner:** `Phase-13`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `topology`
 
@@ -209,7 +209,7 @@ NetworkPolicy, [§3.6](./illegal_state_security.md#36-blocking-networkpolicy-ser
 
 ### 3.27 A deployment that fits in aggregate but has no resource-capable placement
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-8`
 
 **Case-family:** `capacity`
 
@@ -251,7 +251,7 @@ the elastic set).
 
 ### 3.28 Two accelerator owners on one node, or a fractional accelerator claim
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase-10`
 
 **Case-family:** `accelerator`
 
@@ -284,7 +284,7 @@ runtime actually grant those devices only to the owner).
 
 ### 3.29 A host worker whose Demand overflows its physical host
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-8`
 
 **Case-family:** `capacity`
 
@@ -316,7 +316,7 @@ declares no physical-host `Capacity`) + `live-effect` (residue — that the host
 
 ### 3.30 An accelerator memory envelope that cannot fit the selected devices or unified-memory pool
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase-10`
 
 **Case-family:** `accelerator`
 
@@ -374,7 +374,7 @@ actually fits under real batch/context).
 
 ### 3.72 A compute headroom pad that reserves past its own limit
 
-**Delivery-owner:** `Phase-6`
+**Delivery-owner:** `Phase-7`
 
 **Case-family:** `capacity`
 
@@ -415,7 +415,7 @@ reason is required rather than defaultable, so an authored reservation has nowhe
 
 ### 3.73 A padded reservation that overcommits allocatable
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-8`
 
 **Case-family:** `capacity`
 

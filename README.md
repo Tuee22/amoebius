@@ -71,10 +71,10 @@ host-bootstrap exception are owned by the
 [image-build doctrine](./documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster).
 
 **Observed implementation — refreshed 2026-08-16.** The natural-architecture amendment reopened every phase:
-Phase 0 is Active and Phases 1–65 are Blocked, each returning to work in numeric order. No prior seal records
+Phase 0 is Active and Phases 1–68 are Blocked, each returning to work in numeric order. No prior seal records
 the architecture it proved, and the one that claimed two reached the second under emulation, so every earlier
-result is an observed footprint rather than a current pass. The amendment also split the image phase — Phase 25
-builds and publishes its own architecture's child, and a new Phase 26 adds the complementary child on its own
+result is an observed footprint rather than a current pass. The amendment also split the image phase — Phase 30
+builds and publishes its own architecture's child, and a new Phase 67 adds the complementary child on its own
 hardware and joins both into one attested index — which shifted the phases above it by one.
 Earlier capability results remain historical evidence until their owner phase reruns; later tools still contain
 legacy repository-root, system-temp, user-home, and host-global container-engine assumptions. The exact
@@ -143,6 +143,12 @@ and reattaches retained backing
 Python `pb` is the pre-binary bootstrap coordinator and post-handoff operator client. Compilers, package tools,
 libraries, and browser dependencies resolve dynamically from authored compatibility requirements. Resolved
 versions, paths, dependency graphs, and integrity observations are generated per run and never committed.
+
+A tool that is absent is **installed, not reported as a prerequisite**, beneath the ignored build root. What a
+host must already supply is short and per-substrate: the package manager amoebius installs through — Homebrew,
+the system package manager, or winget — plus the Xcode Command Line Tools on Apple, and firmware
+virtualization enabled on Windows. The complete floor, and what is ensured rather than required, live in the
+[substrate doctrine](./documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply).
 
 ## Working agreement
 

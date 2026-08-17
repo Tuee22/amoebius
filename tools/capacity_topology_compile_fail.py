@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pinned GHC expect-fail harness for the Phase-7 topology indices."""
+"""Pinned GHC expect-fail harness for the Phase-8 topology indices."""
 
 from __future__ import annotations
 

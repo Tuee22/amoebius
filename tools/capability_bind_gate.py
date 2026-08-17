@@ -30,7 +30,7 @@ LOCUS = ROOT / "test/oracle/capability_bind/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/capability-bind/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/capability-bind/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/capability-bind"
-CONTRACT = "DEVELOPMENT_PLAN/phase_10_capability_bind.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_11_capability_bind.md"
 GATE_COMMAND = "python3 tools/capability_bind_gate.py"
 EXPECTATIONS = "test/oracle/capability_bind_surfaces.tsv"
 
@@ -103,16 +103,16 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         "InferenceEngine",
     }
     if len(arms) != 9 or {row["arm"] for row in arms} != required_arms:
-        raise GateFailure("Phase-10 arm oracle must enumerate the exact closed nine-arm union")
+        raise GateFailure("Phase-11 arm oracle must enumerate the exact closed nine-arm union")
     if len({row["slug"] for row in arms}) != 9 or len({row["resource"] for row in arms}) != 9:
-        raise GateFailure("Phase-10 arm oracle slugs and resource names must be unique")
+        raise GateFailure("Phase-11 arm oracle slugs and resource names must be unique")
     if len(gate1) != 3 or {row["case"] for row in gate1} != {"product-in-app", "engine-by-url", "shape-in-app"}:
-        raise GateFailure("Phase-10 Gate-1 oracle must contain the three required negatives")
+        raise GateFailure("Phase-11 Gate-1 oracle must contain the three required negatives")
     expected_gate2 = {"UnbuiltProviderArm", "UnboundCapability", "CyclicExtension", "ShadowingExtension"}
     if len(gate2) != 4 or {row["expected"] for row in gate2} != expected_gate2:
-        raise GateFailure("Phase-10 Gate-2 oracle must preserve all four specific error tags")
+        raise GateFailure("Phase-11 Gate-2 oracle must preserve all four specific error tags")
     if len(mutants) != 4 or len({row["mutant"] for row in mutants}) != 4:
-        raise GateFailure("Phase-10 mutant manifest must contain four unique mutants")
+        raise GateFailure("Phase-11 mutant manifest must contain four unique mutants")
     positive_names = {
         f"legal_{row['slug']}_{shape}"
         for row in arms
@@ -129,7 +129,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         *(row["mutant"] for row in mutants),
     }
     if {row["entry"] for row in locus} != expected_locus or len(locus) != len(expected_locus):
-        raise GateFailure("Phase-10 validation-locus ledger has incomplete or duplicate coverage")
+        raise GateFailure("Phase-11 validation-locus ledger has incomplete or duplicate coverage")
     for row in arms:
         for shape in ("singlenode", "distributed"):
             fixture = ROOT / f"dhall/examples/legal_{row['slug']}_{shape}.dhall"
@@ -188,9 +188,9 @@ def run_green_suite(cabal: Path) -> str:
     )
     token = "capability-bind-spec: PASS (9 arms, 18 shape goldens, 3 Gate-1, 4 Gate-2, 4 mutants, 1 covered property)"
     if token not in result.stdout:
-        raise GateFailure(f"Phase-10 acceptance token is absent:\n{result.stdout}")
+        raise GateFailure(f"Phase-11 acceptance token is absent:\n{result.stdout}")
     if "each of nine constructors >=8%" not in result.stdout:
-        raise GateFailure("Phase-10 property coverage token is absent")
+        raise GateFailure("Phase-11 property coverage token is absent")
     return result.stdout
 
 
@@ -368,7 +368,7 @@ def main() -> int:
         },
         dependencies={"battery": "cabal test"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-10 mutants", "status": "unrun"}],
+        or [{"name": "phase-11 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

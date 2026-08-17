@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only admission for the Phase-25.2 selected-image/registry transition."""
+"""Read-only admission for the Phase-30.2 selected-image/registry transition."""
 
 from __future__ import annotations
 
@@ -262,7 +262,7 @@ def observe(
         "ephemeralBytes": registry["peakBytes"] + 1024**3 + 128 * 1024**2,
     }
     request_residual = {key: node_supply[key] - current_requests[key] for key in node_supply}
-    # Kubernetes permits CPU/memory limit overcommit.  Phase 25 deliberately
+    # Kubernetes permits CPU/memory limit overcommit.  Phase 30 deliberately
     # uses the finite node-cgroup ceiling and current request debit instead.
     docker_limit = run(("/usr/bin/docker", "inspect", NODE, "--format", "{{.HostConfig.NanoCpus}} {{.HostConfig.Memory}}")).strip().split()
     if len(docker_limit) != 2:
