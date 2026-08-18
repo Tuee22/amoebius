@@ -1256,7 +1256,7 @@ reads live objects and allocations without mutation, and derives a transition en
 explicitly includes the state-indexed PodUID/host-process execution map, scheduler and host reservation
 ledgers, managed-node authority/readiness, observed runtime roots/components, and the resident-artifact
 baseline. Map key, embedded identity, reservation owner/state/vector, controller-child discriminator, and
-no-orphan checks run before capacity subtraction. The singleton scheduler root contains all mutable entries
+no-orphan checks run before capacity subtraction. The control-plane daemon scheduler root contains all mutable entries
 plus retained resident debits; its resourceVersion/CAS version and every observation fingerprint participate
 in the inventory token. `place` is rerun
 against `observed allocatable − surviving commitments`, not against the raw allocatable total: preserved
@@ -1296,7 +1296,7 @@ source of scoped capabilities for every mutation path. Generic SSA occurs only i
 action; scheduler-root fields are excluded from SSA and ApplySet prune. Serial OnDelete
 apply/delete/resume/advance, host stop/start, Job completion/cleanup, PVC/PV/image/backing allocation, and
 provider-indexed tenant commands consume their own fresh observation-bound arms. A fingerprint change
-immediately before enactment discards the plan and restarts the read-only prefix. The mandatory singleton
+immediately before enactment discards the plan and restarts the read-only prefix. The mandatory control-plane daemon
 Lease serializes amoebius reconcilers; managed-node taints, admission, Binding-only RBAC, exact scheduler
 config, and sole-writer readback exclude every other capacity-consuming Pod writer. Unknown authority is
 refusal, not unmodelled runtime debt.

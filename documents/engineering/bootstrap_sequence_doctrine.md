@@ -1,8 +1,8 @@
 # The Bootstrap Sequence & the Admin Control Plane
 
 > **Purpose**: Single Source of Truth for the ordered path from a bare host to a reconciling cluster — the
-> host-daemon→singleton handoff — and for the **admin control plane** that takes over at handoff: after
-> bootstrap the operator CLI drives the cluster **exclusively through the amoebius NodePort REST service on > the in-cluster singleton** (`vault init/unseal`, `dhall update`), never by touching kube-apiserver again.
+> host-daemon→control-plane daemon handoff — and for the **admin control plane** that takes over at handoff: after
+> bootstrap the operator CLI drives the cluster **exclusively through the amoebius NodePort REST service on > the in-cluster control-plane daemon** (`vault init/unseal`, `dhall update`), never by touching kube-apiserver again.
 > **Read this if**: a cluster has to come up from nothing, or the moment authority transfers has to be pinned down.
 
 This document owns the ordered bring-up from a bare host to a serving control plane, and the single instant
@@ -15,7 +15,7 @@ by [platform_services_doctrine.md](./platform_services_doctrine.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_29_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_29_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -24,10 +24,10 @@ by [platform_services_doctrine.md](./platform_services_doctrine.md).
 
 ## Contents
 - [1. Why this doctrine exists](#1-why-this-doctrine-exists)
-- [2. Two régimes: host-driven bootstrap, then singleton-driven steady state](#2-two-régimes-host-driven-bootstrap-then-singleton-driven-steady-state)
+- [2. Two régimes: host-driven bootstrap, then control-plane-daemon-driven steady state](#2-two-régimes-host-driven-bootstrap-then-control-plane-daemon-driven-steady-state)
 - [3. The ordered bootstrap sequence](#3-the-ordered-bootstrap-sequence)
-- [4. The host-daemon → singleton handoff](#4-the-host-daemon--singleton-handoff)
-- [5. The admin control plane: the CLI ↔ the singleton REST API](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)
+- [4. The host-daemon → control-plane-daemon handoff](#4-the-host-daemon--control-plane-daemon-handoff)
+- [5. The admin control plane: the CLI ↔ the control-plane daemon REST API](#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)
 - [6. What this forecloses, and the honest limits](#6-what-this-forecloses-and-the-honest-limits)
 - [7. Planning ownership](#7-planning-ownership)
 - [Related Documents](#related-documents)
@@ -49,12 +49,12 @@ Vault init/unseal ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-
 and the handoff *trigger* ([`readiness_ordering_doctrine.md` §5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers))
 — but the **ordered sequence** was derivable-across-five-docs, never written, and the **admin control plane**
 the handoff hands *to* did not exist in doctrine at all. This doc owns both: the sequence ([§3](#3-the-ordered-bootstrap-sequence)),
-the handoff mechanics ([§4](#4-the-host-daemon--singleton-handoff)), and the admin REST surface ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
+the handoff mechanics ([§4](#4-the-host-daemon--control-plane-daemon-handoff)), and the admin REST surface ([§5](#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)).
 It resolves three questions from the pre-plan design log, since routed into this suite.
 
 ---
 
-## 2. Two régimes: host-driven bootstrap, then singleton-driven steady state
+## 2. Two régimes: host-driven bootstrap, then control-plane-daemon-driven steady state
 
 A cluster's life has **two régimes with a single, one-way handoff between them**, and *who may touch the cluster's control surface* differs across them:
 
@@ -62,19 +62,19 @@ A cluster's life has **two régimes with a single, one-way handoff between them*
   the only actor that can stand the cluster up. It talks to `kube-apiserver` directly over the distro's
   default mTLS — **channel 1** of [`host_cluster_comms_doctrine.md` §4](./host_cluster_comms_doctrine.md#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls)
   — to install the distro, acquire the mandatory reconciler Lease under its bootstrap-holder identity, apply
-  the capacity-scheduler cutover and platform manifests, and bring up the in-cluster singleton. It is the
-  *bootstrap coordinator*, acting on behalf of the future singleton ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)).
-- **Steady-state régime — the singleton drives.** Once the platform services **and** the
-  control-plane singleton are up, the bootstrap holder has been observed released, and the singleton is the
+  the capacity-scheduler cutover and platform manifests, and bring up the in-cluster control-plane daemon. It is the
+  *bootstrap coordinator*, acting on behalf of the future control-plane daemon ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)).
+- **Steady-state régime — the control-plane daemon drives.** Once the platform services **and** the
+  control-plane daemon are up, the bootstrap holder has been observed released, and the control-plane daemon is the
   observed holder of that same mandatory Lease, the host binary **defers**. From that instant — *even before
   Vault is initialised* — every operator interaction flows through the **admin control plane**
-  ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)): the operator CLI → the amoebius NodePort
-  REST service → the singleton. **Channel 1 is bootstrap-only**; the host binary does not resume direct
+  ([§5](#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)): the operator CLI → the amoebius NodePort
+  REST service → the control-plane daemon. **Channel 1 is bootstrap-only**; the host binary does not resume direct
   kube-apiserver control after handoff.
 
 This is the shape the vision specified: *"the host binary only directly interacts with the cluster and
 k8s control plane during initial bootstrap … once all services are up (even before vault init) all further
-interactions occur through the [amoebius] NodePort."* The one-way handoff is [§4](#4-the-host-daemon--singleton-handoff).
+interactions occur through the [amoebius] NodePort."* The one-way handoff is [§4](#4-the-host-daemon--control-plane-daemon-handoff).
 
 ```mermaid
 flowchart TD
@@ -86,15 +86,15 @@ flowchart TD
   sched --> addons[Patch bootstrap add-ons; old UIDs absent, replacements reservation-joined]
   addons --> managed[ManagedCapacityReady: taint, admission, exclusive Binding authority]
   managed --> svc[Platform services up in readiness-DAG order]
-  svc --> singleton[Singleton Pod prerequisites complete; not Serving while host holds Lease]
-  singleton --> release[Host drains, releases Lease, and observes holder absence]
-  release --> acquire[Authenticated singleton Pod UID acquires the same Lease]
+  svc --> daemon[Control-plane daemon Pod prerequisites complete; not Serving while host holds Lease]
+  control-plane daemon --> release[Host drains, releases Lease, and observes holder absence]
+  release --> acquire[Authenticated control-plane daemon Pod UID acquires the same Lease]
   acquire -->|exposes /readyz| rest[amoebius NodePort REST admin API]
   rest -->|HANDOFF: Lease holder plus Serving edge observed| hb
   cli[Operator CLI] -->|vault init/unseal, then dhall update| rest
-  rest --> reconcile[Singleton reconciles the cluster toward its InForceSpec]
+  rest --> reconcile[Control-plane daemon reconciles the cluster toward its InForceSpec]
 ```
-*Orientation. Design intent; the ordered steps are owned by [§3](#3-the-ordered-bootstrap-sequence) and the authority handoff by [§4](#4-the-host-daemon--singleton-handoff). Every edge is an observed readiness condition, never an elapsed interval.*
+*Orientation. Design intent; the ordered steps are owned by [§3](#3-the-ordered-bootstrap-sequence) and the authority handoff by [§4](#4-the-host-daemon--control-plane-daemon-handoff). Every edge is an observed readiness condition, never an elapsed interval.*
 
 ---
 
@@ -113,7 +113,7 @@ The ordered steps, each gated on the prior step's readiness:
    derived control-plane Namespace and deployment-global mandatory Kubernetes `Lease`, then acquire that
    Lease under the exact bootstrap-host identity. No scheduler, platform, or workload mutation capability
    exists until the held identity/resourceVersion is read back. Namespace/Lease creation,
-   bounded renewals, release, and the later singleton acquisition are all included in the provisioned
+   bounded renewals, release, and the later control-plane daemon acquisition are all included in the provisioned
    API/etcd/churn demand; failure or ambiguous ownership refuses mutation.
 4. **The capacity scheduler reaches bootstrap readiness.** A scheduler-system-only capability creates the
    derived `amoebius-capacity-scheduler` namespace, its exact `ResourceQuota pods=1`, scheduler
@@ -136,18 +136,18 @@ The ordered steps, each gated on the prior step's readiness:
    Vault-sealed for now ([`platform_services_doctrine.md` §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering)),
    applied by the tier-(c) SSA reconciler only from `ManagedCapacityReady`
    ([`manifest_generation_doctrine.md` §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)).
-8. **The control-plane singleton Pod completes prerequisites while the host still holds the Lease**
-   ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)). It may not
+8. **The control-plane daemon Pod completes prerequisites while the host still holds the Lease**
+   ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon)). It may not
    mutate cluster state or report `/readyz` Serving yet. The host then quiesces its effect loop, proves no
    in-flight action capability remains, releases the Lease, and freshly observes its holder absent/released.
-   Only then may the authenticated singleton Pod UID acquire that same Lease. Its held-Lease readback plus
-   `/readyz` Serving edge is the **handoff point** ([§4](#4-the-host-daemon--singleton-handoff)) and exposes the
-   admin REST service ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
+   Only then may the authenticated control-plane daemon Pod UID acquire that same Lease. Its held-Lease readback plus
+   `/readyz` Serving edge is the **handoff point** ([§4](#4-the-host-daemon--control-plane-daemon-handoff)) and exposes the
+   admin REST service ([§5](#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)).
 9. **The operator initialises/unseals Vault through the admin REST** — `vault init/unseal`, authenticated by
    the operator password; init-once / unseal-on-rebuild ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init), [§5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)). No secret consumer ran before this — Vault fails closed until unsealed.
 10. **The operator delivers the `InForceSpec`** — `dhall update` (requires an **unsealed Vault + root token**,
-    [§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)) — the spec delivery of
-    [`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init). The singleton decrypts it in-process and reconciles the cluster toward it.
+    [§5](#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)) — the spec delivery of
+    [`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init). The control-plane daemon decrypts it in-process and reconciles the cluster toward it.
 
 This is the **root** bootstrap; a *child* cluster is spawned by a parent (the Pulumi handoff,
 [`cluster_lifecycle_doctrine.md` §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)),
@@ -157,29 +157,29 @@ update`, and the transient bootstrap config is the binary-sibling `amoebius.dhal
 
 ---
 
-## 4. The host-daemon → singleton handoff
+## 4. The host-daemon → control-plane-daemon handoff
 
 The handoff is **one-way, observed-gated, and transfers control-surface authority only**:
 
 - **The trigger is a Lease-holder transition plus a Serving edge, never a delay.** The host initially owns the
   deployment-global mandatory reconciler `Lease` as the authenticated bootstrap holder. It may create the
-  singleton Deployment while holding it, but the Pod cannot mutate or report ready. Handoff requires this
+  control-plane daemon Deployment while holding it, but the Pod cannot mutate or report ready. Handoff requires this
   exact sequence: stop minting new host action capabilities; drain every in-flight action; release the Lease;
   freshly observe the bootstrap holder absent/released at a new resourceVersion; observe the authenticated
-  singleton Pod UID acquire that same Lease; then observe singleton **`/readyz` (`Serving`)**. These are the
+  control-plane daemon Pod UID acquire that same Lease; then observe control-plane daemon **`/readyz` (`Serving`)**. These are the
   gates owned by [`readiness_ordering_doctrine.md` §5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers).
   Never "sleep, then assume the pod is up." Kubernetes/etcd supplies Lease exclusion; there is no amoebius
   election commit or second coordination protocol.
 - **No overlap, no ownership gap disguised as success.** Audit/watch history must show at most one holder at
-  every observed resourceVersion, zero cluster mutations by the waiting singleton, and zero host mutations
+  every observed resourceVersion, zero cluster mutations by the waiting control-plane daemon, and zero host mutations
   after release. A timeout, watch gap, unknown holder, stale Pod UID, reacquisition by the bootstrap identity,
   or concurrent renewal leaves handoff incomplete and `/readyz` false. Lease object bytes, creation,
-  renewals, release, singleton acquisition, retries, and replacement-Pod churn are part of the provisioned
+  renewals, release, control-plane daemon acquisition, retries, and replacement-Pod churn are part of the provisioned
   API/etcd capacity rather than an uncharged control-plane side effect.
 - **What transfers: the cluster control surface.** After handoff, amoebius-level control (Vault
-  init/unseal, spec delivery, reconcile triggers) is the **singleton's** sole authority
-  ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)),
-  reached only through the admin REST ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
+  init/unseal, spec delivery, reconcile triggers) is the **control-plane daemon's** sole authority
+  ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon)),
+  reached only through the admin REST ([§5](#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)).
   Channel 1 (host binary ↔ kube-apiserver) is **retired** — a bootstrap-only privilege.
 - **What does *not* transfer: host-worker supervision.** The sudo host daemon keeps supervising host-level
   worker subprocesses (Apple-Metal / Windows-CUDA inference), which remain Pulsar/MinIO peers on **channel 2** ([`host_cluster_comms_doctrine.md` §3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)).
@@ -187,16 +187,16 @@ The handoff is **one-way, observed-gated, and transfers control-surface authorit
 - **Re-running is a no-op.** Because bring-up is a reconcile
   ([`cluster_lifecycle_doctrine.md` §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)),
   a crash before release re-enters as the bootstrap holder and re-observes its exact state; a crash after
-  singleton acquisition sees the in-cluster holder and cannot reacquire. A handoff already done is observed
+  control-plane daemon acquisition sees the in-cluster holder and cannot reacquire. A handoff already done is observed
   and skipped. Race tests must cover simultaneous acquire, stale resourceVersion, lost release response,
-  bootstrap crash before/after release, singleton crash before/after acquire, and replacement-Pod UID churn.
+  bootstrap crash before/after release, control-plane daemon crash before/after acquire, and replacement-Pod UID churn.
 
 ---
 
-## 5. The admin control plane: the CLI ↔ the singleton REST API
+## 5. The admin control plane: the CLI ↔ the control-plane daemon REST API
 
 After handoff, the operator drives the cluster through **one surface**: the operator CLI (`pb`) → the
-**amoebius NodePort service** → a **REST API on the in-cluster singleton**. This is the vision's *"thin cli
+**amoebius NodePort service** → a **REST API on the in-cluster control-plane daemon**. This is the vision's *"thin cli
 tool [that] interact[s] with the amoebius daemon api"* — and the answer is a thin Python frontend over the typed REST control plane, not a second runtime daemon or control plane.
 
 ### The endpoints
@@ -205,15 +205,15 @@ The load-bearing ones:
 - **`vault init/unseal`** — authenticated by the **operator password** (Argon2id→AEAD unlock material,
   [`vault_pki_doctrine.md` §5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal));
   this is the concrete channel that fills the *pluggable pre-Vault unseal seam* that doctrine explicitly
-  left open. The operator password crosses CLI → NodePort → singleton and is never persisted.
-- **`dhall update`** — deliver a new `InForceSpec` to a running cluster. It **requires an unsealed Vault and a root token**; the singleton decrypts/stores the envelope in-process
+  left open. The operator password crosses CLI → NodePort → control-plane daemon and is never persisted.
+- **`dhall update`** — deliver a new `InForceSpec` to a running cluster. It **requires an unsealed Vault and a root token**; the control-plane daemon decrypts/stores the envelope in-process
   ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init))
   and reconciles toward it. This is how a new desired-state Dhall value reaches an already-running root — the operator flow
   the reconcile mechanics only hinted at ([`daemon_topology_doctrine.md` §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine), hot-reload).
 - **`kv put/get/list/delete` — secret KV-CRUD.** The operator CRUDs Vault KV secrets **by name** over the same
   admin REST (requires an unsealed Vault and the root token). This is how a production `InForceSpec`'s named
   `SecretRef`s come to *exist in Vault before the `.dhall` is uploaded*: secret material crosses
-  CLI → NodePort → singleton **by value here** and is stored enveloped, while the `.dhall` itself never carries
+  CLI → NodePort → control-plane daemon **by value here** and is stored enveloped, while the `.dhall` itself never carries
   a value, only the name ([`dsl_doctrine.md` §6](./dsl_doctrine.md#6-secrets-are-names-never-values), [`vault_pki_doctrine.md` §3](./vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)). `dhall
   update` then **actively proves each named secret before admitting the upload, and rejects fail-fast otherwise**: the secret must exist in Vault, and its *capability* must hold against what the spec demands —
   an SSH key must connect to each static host the spec names and that host's declared CPU, memory,
@@ -286,10 +286,10 @@ The admin plane is a place to make illegal control actions **unrepresentable**, 
 - **A `dhall update` without an unsealed Vault + root token has no constructor** — the mutation is
   `type-foreclosed`: its handle is built only *from* a `RootToken` capability and an `Unsealed` witness
   ([`illegal_state_catalog.md` §3.42](../illegal_state/illegal_state_security.md#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness), the same capability + `.ready`-style edge discipline as the `PromotionGate` and the `Readiness` edge).
-- **An admin action bypassing the singleton is unrepresentable** by construction: post-handoff there is no
+- **An admin action bypassing the control-plane daemon is unrepresentable** by construction: post-handoff there is no
   exported channel-1 verb; the only control-surface constructor is an admin-REST call.
 - **The honest limit** ([`illegal_state_catalog.md` §2](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)):
-  the type forecloses the *shape* of the control surface; that the singleton *actually* holds sole authority
+  the type forecloses the *shape* of the control surface; that the control-plane daemon *actually* holds sole authority
   at runtime (single-writer, no split-brain admin) is `runtime-checked`, owned by the election safety of
   [`daemon_topology_doctrine.md` §5](./daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
   and [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md).
@@ -306,9 +306,9 @@ This document is normative bootstrap-sequence + admin-control-plane doctrine onl
 status, and gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never
 restated here. For orientation only (the plan is authoritative): the **chain/Step kernel** the ordered sequence
 is enacted through rides **Phase 15**, and the **bootstrap coordinator + single-node kind bring-up** rides **Phase 29**; the
-**host→singleton handoff** itself is delivered by **Phase 38** (the control-plane singleton). The **whole admin REST surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — is delivered by **Phase 38 Sprint 38.4**,
+**host→control-plane daemon handoff** itself is delivered by **Phase 38** (the control-plane daemon). The **whole admin REST surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — is delivered by **Phase 38 Sprint 38.4**,
 because [§3](#3-the-ordered-bootstrap-sequence) step 8 exposes the surface *at* the handoff point: there is no
-singleton to host an endpoint before it. **Phase 34** (root Vault/PKI) delivers the Vault, the
+control-plane daemon to host an endpoint before it. **Phase 34** (root Vault/PKI) delivers the Vault, the
 password-sealed unlock-material envelope, and the built-in client that the `vault init/unseal` endpoint fronts —
 unsealing there is driven under the Phase-31 bootstrap-host authority, the only authority that exists that
 early. This doc states the target shape and links back for status.
@@ -318,7 +318,7 @@ early. This doc states the target shape and links back for status.
 > divergence repairs, hard storage and transition boundaries, complete runtime inventory, exact process
 > envelopes, six red mutants, and leak-free teardown. The authoritative Phase-29 gate is complete. Every
 > hardware substrate always supplies the `linux-cpu` lane: Linux runs it natively or in Incus, Apple in Lima,
-> and Windows in WSL2 when a pristine Linux host is required. Phase 38 now delivers the typed host→singleton
+> and Windows in WSL2 when a pristine Linux host is required. Phase 38 now delivers the typed host→control-plane daemon
 > Lease handoff, the four endpoint families, and the `pb` admin-REST client mode; its Register-3 ledger is
 > `dynamically-resolved`. Claims beyond those delivered
 > boundaries remain design intent or inherited sibling evidence
@@ -329,7 +329,7 @@ early. This doc states the target shape and links back for status.
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — [§2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap) the bring-up this sequences (its open question retired here), [§9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) the reconciler that enacts each edge
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) bootstrap-coordinator-then-defers, [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) the singleton that exposes the admin REST
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) bootstrap-coordinator-then-defers, [§3](./daemon_topology_doctrine.md#3-the-control-plane-daemon) the control-plane daemon that exposes the admin REST
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — [§4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) init-follows-readiness, [§5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal) the operator-password unseal the admin endpoint carries, [§10](./vault_pki_doctrine.md#10-the-chicken-and-egg-floor-what-stays-outside-vault) the pre-Vault trust floor
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — [§3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio) the workload-plane rule this admin plane is distinct from; [§4](./host_cluster_comms_doctrine.md#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls) channel 1 (bootstrap-only)
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers) the handoff trigger (`/readyz` Serving + the `Committed` readiness edge; single-instance is delegated to k8s/etcd, so there is no election commit to await)

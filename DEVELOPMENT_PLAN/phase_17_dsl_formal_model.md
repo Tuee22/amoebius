@@ -35,7 +35,7 @@ Register 1: TLC model-checking over emitted specifications, in-process, no clust
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-16 revalidation — created 2026-08-17 by the ordering re-baseline recorded in
+🔄 Active — opened 2026-08-17 when Phase 16 resealed — created 2026-08-17 by the ordering re-baseline recorded in
 [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
 
 ## Phase Summary

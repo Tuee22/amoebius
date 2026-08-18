@@ -1,0 +1,12 @@
+{
+  "schema": "amoebius.phase33.expected-enact.v1",
+  "objects": [
+    "ConfigMap/edge-system/keycloak-ingress-envoy",
+    "Deployment/edge-system/envoy",
+    "Deployment/observability/prometheus-query-proxy",
+    "Deployment/edge-system/live-dsl-deploy-trivial",
+    "HTTPRoute/edge-system/live-dsl-deploy-trivial",
+    "Service/observability/prometheus-query-proxy",
+    "Service/edge-system/live-dsl-deploy-trivial"
+  ]
+}

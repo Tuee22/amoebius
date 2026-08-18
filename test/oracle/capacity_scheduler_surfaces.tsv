@@ -15,7 +15,7 @@
 #
 # The four id-less surfaces are the ones this register cannot decide: modeled-apiserver
 # fidelity is the Register-2.5 assumption, the completion and rollback ledgers are the
-# content-store phase's, and the in-cluster singleton that owns the scheduler is Phase 37's.
+# content-store phase's, and the in-cluster control-plane daemon that owns the scheduler is Phase 37's.
 # They stay UNVERIFIED in the ledger, which is a statement, not an omission.
 five-sprint-seal	metrics	sprint-receipts
 register-partition	metrics	sprint-registers
@@ -49,4 +49,4 @@ recorded-metrics-match-oracle	checks	recorded-results-match-oracle,emitted-resul
 modeled-apiserver-fidelity	metrics
 completion-release-ledger	metrics
 rollback-ledger	metrics
-in-cluster-singleton-ownership	metrics
+in-cluster-control-plane-ownership	metrics

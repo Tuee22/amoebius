@@ -18,7 +18,7 @@ data PlannedHandoverError
   deriving stock (Eq, Show)
 
 verifyCaughtUp :: WatermarkSnapshot -> Bool
-#ifdef PHASE43_VERIFY_CAUGHT_UP_STUB_MUTANT
+#ifdef GATEWAY_MIGRATION_DRILLS_VERIFY_CAUGHT_UP_STUB_MUTANT
 verifyCaughtUp _ = True
 #else
 verifyCaughtUp snapshot = targetWatermark snapshot == sourceWatermark snapshot

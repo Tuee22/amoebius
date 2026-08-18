@@ -1,0 +1,53 @@
+# Authored expectation for the repository-conformance test-surface join.
+#
+# `development_plan_standards.md` section S clause 2 requires the run to enumerate its test
+# surfaces and join them **completely** to an independently authored expectation. This file
+# is that expectation. Nothing in it is generated: the check ids are read off the Phase-2
+# contract's Gate integrity section, the mutant ids off the committed records under
+# `test/mutant/repository_conformance/`, and the role nouns off
+# `repository_layout_doctrine.md` section 2 — and each is joined at run time against what
+# the gate actually decided, which mutant actually reddened, and what the tree actually
+# holds.
+#
+# The join is two-way and total. A check the gate implements that no surface claims fails
+# the gate, and a surface claiming something the run did not produce fails it too. That is
+# what stops a deleted check or a quietly dropped mutant from shrinking the gate.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   checks   the check ids tools/repository_conformance_gate.py decides
+#   mutants  the committed records under test/mutant/repository_conformance/
+#   roles    the second-level names the tree actually carries beneath test/
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+layout.case_collision	checks	collision-free-tree
+layout.no_empty_directory	checks	no-empty-authored-directory
+layout.map_parses	checks	map-parses
+layout.map_destination	checks	map-destination-admitted
+layout.map_license	checks	map-license-cited
+layout.relocation_complete	checks	relocation-complete
+layout.no_dangling_reference	checks	no-dangling-reference
+package.source_dirs_resolve	checks	source-dirs-resolve
+package.one_declaration	checks	one-package-declaration
+mutant_registry.bodies	checks	registry-covers-bodies
+mutant_registry.flags	checks	registry-covers-flags
+mutant_registry.reachable	checks	registry-no-unreachable
+partition.target_tree	checks	target-tree-clean
+partition.de_phased_naming	checks	de-phased-naming
+partition.allowlist_shrunk	checks	allowlist-shrunk
+
+mutant.m1-plural-sibling	mutants	m1-plural-sibling
+mutant.m2-phase-ordinal-tool	mutants	m2-phase-ordinal-tool
+mutant.m3-lying-map-row	mutants	m3-lying-map-row
+mutant.m4-dangling-reference	mutants	m4-dangling-reference
+mutant.m5-stale-source-dir	mutants	m5-stale-source-dir
+mutant.m6-case-collision	mutants	m6-case-collision
+mutant.m7-empty-directory	mutants	m7-empty-directory
+
+role.suites_and_references	roles	spec
+role.positive_inputs	roles	fixture
+role.expected_outputs	roles	golden
+role.rejected_inputs	roles	negative
+role.reference_predicates	roles	oracle
+role.seeded_mutants	roles	mutant
+role.boundary_shims	roles	harness

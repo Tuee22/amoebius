@@ -87,38 +87,23 @@ LAYOUT_DOCTRINE = ROOT / "documents" / "engineering" / "repository_layout_doctri
 
 # Roots whose contents are authored inputs. A gate may not write beneath one.
 #
-# The list is authored rather than derived, because it must cover the present-day
-# migration roots of doctrine section 2.2 as well as the target roots of section 2 — a
-# root on its way out is still authored while it exists, and the write guard would
-# otherwise stop covering a tree exactly while it is being moved. `audit_authored_roots`
-# keeps the two honest: a name here that is not a directory is a finding, so a rename
-# cannot silently shrink the guard.
+# The list is authored rather than derived, and `audit_authored_roots` keeps it honest: a
+# name here that is not a directory is a finding, so a rename cannot silently shrink the
+# guard. It once carried the present-day migration roots of doctrine section 2.2 as well
+# as the target roots of section 2, because a root on its way out is still authored while
+# it exists. Phase 2 moved every one of them, so the two lists are now the same list.
 AUTHORED_ROOTS = (
     "DEVELOPMENT_PLAN",
     "documents",
     "app",
     "src",
     "dhall",
+    "proto",
     "pb",
     "ui",
-    "ui-live",
-    "ui-runtime",
-    "offline-runtime",
-    "apple-host",
-    "amoebius-pulsar",
-    "amoebius-pulumi",
-    "amoebius-release",
-    "amoebius-runtime",
-    "amoebius-store",
-    "infernix",
-    "infernix-ui",
-    "jitml",
-    "jitml-ui",
     "probe",
     "pulumi",
-    "test-topology",
     "test",
-    "mutants",
     "tools",
     "vendor",
     "patches",
@@ -136,9 +121,9 @@ GENERATED_PATH_GLOBS = (
     "dist-newstyle/*",
     ".cabal-sandbox/*",
     "node_modules/*",
-    "ui-runtime/.spago/*",
-    "ui-runtime/output/*",
-    "ui-runtime/dist/*",
+    "ui/.spago/*",
+    "ui/output/*",
+    "ui/dist/*",
     "toolchain/bin/*",
     "toolchain/runtime/*",
     "toolchain/downloads/*",

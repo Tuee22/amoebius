@@ -93,7 +93,7 @@ representativeForestDemand =
         , executorPluginCacheBytes = 33554432
         , executorWorkspaceBytes = 67108864
         }
-#ifdef PHASE42_DROP_PARALLEL_EXECUTOR_MUTANT
+#ifdef MULTICLUSTER_SPAWN_GEOREPL_DROP_PARALLEL_EXECUTOR_MUTANT
       parallelLimit = 1
 #else
       parallelLimit = 2

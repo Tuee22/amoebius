@@ -23,7 +23,7 @@ data DecodeError
 queueableOperation :: Operation -> Bool
 queueableOperation InfernixStart = True
 queueableOperation JitmlTrainingStart = True
-#ifdef PHASE59_QUEUE_MODEL_INVOCATION_MUTANT
+#ifdef OFFLINE_LANGUAGE_PLAN_QUEUE_MODEL_INVOCATION_MUTANT
 queueableOperation ModelInvocation = True
 #endif
 queueableOperation _ = False
@@ -33,7 +33,7 @@ decodeQueueContract queued@(QueuedPort operation contract)
   | not (queueableOperation operation) = Left (OnlineOnlyOperation operation)
   | maxCount contract <= 0 = Left MissingCountBound
   | maxBytes contract <= 0 = Left MissingByteBound
-#ifndef PHASE59_DROP_QUEUE_BOUND_MUTANT
+#ifndef OFFLINE_LANGUAGE_PLAN_DROP_QUEUE_BOUND_MUTANT
   | maxAgeSeconds contract <= 0 = Left MissingAgeBound
 #endif
   | null (idempotencyRule contract) = Left MissingIdempotency

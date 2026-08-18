@@ -7,13 +7,13 @@ import path from "node:path";
 const root = process.cwd();
 const require = createRequire(path.join(root, ".build/node_modules/loader.js"));
 const { chromium } = require("playwright-core");
-const fixtureRoot = path.join(root, "test/fixtures/ui_browser");
+const fixtureRoot = path.join(root, "test/fixture/ui_browser");
 const bundlePath = path.join(root, ".build/ui/browser-interpreter/ui.js");
 const chromePath = process.env.AMOEBIUS_CHROMIUM;
 if (!chromePath) throw new Error("AMOEBIUS_CHROMIUM is required");
 
 const headers = Object.fromEntries(
-  fs.readFileSync(path.join(root, "test/fixtures/ui_security/production_headers.tsv"), "utf8")
+  fs.readFileSync(path.join(root, "test/fixture/ui_security/production_headers.tsv"), "utf8")
     .trim().split("\n").slice(1).map(line => line.split("\t"))
 );
 

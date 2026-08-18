@@ -18,13 +18,15 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
 STORAGE_ORACLE = ROOT / "test/oracle/storage_geometry/storage_cases.tsv"
 GATE1_ORACLE = ROOT / "test/oracle/storage_geometry/gate1_cases.tsv"
-MUTANTS = ROOT / "test/mutant/storage_geometry/mutants.tsv"
+MUTANT_CAPABILITY = "storage_geometry"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 RESULTS = ROOT / ".build/dsl/storage-geometry/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/storage-geometry/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/storage-geometry"
@@ -86,7 +88,7 @@ def verify_pins() -> tuple[Path, Path, str]:
 def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     storage = read_tsv(STORAGE_ORACLE)
     gate1 = read_tsv(GATE1_ORACLE)
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(storage) != 27 or len({row["variant"] for row in storage}) != 27:
         raise GateFailure("storage oracle must contain 27 unique variant rows")
     if len({row["twin"] for row in storage}) != 27:
@@ -253,11 +255,17 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=8, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
-        register="1", substrate="none", sides=SIDES
+        phase=9, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        register="1", substrate="none", lane="none", sides=SIDES
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+
+    # Clause 15 first: a run that cannot name the architecture it executed on, or
+    # that is executing under translation, has nothing worth proving.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []

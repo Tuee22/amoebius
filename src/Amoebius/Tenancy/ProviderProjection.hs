@@ -116,7 +116,7 @@ derivationActions :: TenantPolicyDerivation -> [ProjectionAction]
 derivationActions (TenantPolicyDerivation actions) = actions
 
 actionQualifiedKey :: ProjectionAction -> Text
-#ifdef PHASE34_COLLAPSE_TENANT_KEY_MUTANT
+#ifdef APP_TENANCY_COLLAPSE_TENANT_KEY_MUTANT
 actionQualifiedKey action = actionLocalId action
 #else
 actionQualifiedKey action =
@@ -126,7 +126,7 @@ actionQualifiedKey action =
 deriveTenantPolicy :: CheckedTenantGraph -> Either ProjectionError TenantPolicyDerivation
 deriveTenantPolicy (CheckedTenantGraph raw) = do
   let derived = concatMap (tenantActions (appId raw)) (tenants raw)
-#ifdef PHASE34_DROP_PROVIDER_ARM_MUTANT
+#ifdef APP_TENANCY_DROP_PROVIDER_ARM_MUTANT
       actions = filter ((/= Pulsar) . actionProvider) derived
 #else
       actions = derived

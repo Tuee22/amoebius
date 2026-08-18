@@ -14,7 +14,7 @@ document each invariant cites. It presumes nothing.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_04_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_12_provision_seal.md, DEVELOPMENT_PLAN/phase_13_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_29_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_31_object_reconciler.md, DEVELOPMENT_PLAN/phase_32_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_33_retained_storage.md, DEVELOPMENT_PLAN/phase_34_vault_pki.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_37_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_40_pulsar_client.md, DEVELOPMENT_PLAN/phase_42_content_store_workflow.md, DEVELOPMENT_PLAN/phase_44_release_lifecycle.md, DEVELOPMENT_PLAN/phase_46_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_47_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_48_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_50_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_51_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_52_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_56_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_04_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_12_provision_seal.md, DEVELOPMENT_PLAN/phase_13_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_29_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_31_object_reconciler.md, DEVELOPMENT_PLAN/phase_32_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_33_retained_storage.md, DEVELOPMENT_PLAN/phase_34_vault_pki.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_37_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_40_pulsar_client.md, DEVELOPMENT_PLAN/phase_42_content_store_workflow.md, DEVELOPMENT_PLAN/phase_44_release_lifecycle.md, DEVELOPMENT_PLAN/phase_46_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_47_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_48_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_50_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_51_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_52_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_56_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -44,8 +44,8 @@ amoebius has one Haskell runtime binary that runs in three contexts from the sam
 1. a one-shot **Haskell command mode** on the operator's host, normally entered by `pb` during bootstrap,
 2. a **sudo-capable host daemon** that owns substrate detection, lazy tool-ensure, and host-level worker
    subprocesses, and
-3. an **in-cluster pod/process context** in which the executable runs as the control-plane singleton, the
-   capacity scheduler, or an unelected worker. The singleton is one Kubernetes Deployment `replicas=1` with
+3. an **in-cluster pod/process context** in which the executable runs as the control-plane daemon, the
+   capacity scheduler, or an unelected worker. The control-plane daemon is one Kubernetes Deployment `replicas=1` with
    cluster/secret authority and a mandatory Kubernetes `Lease`; UI webservers and projection workers are
    separate horizontally scalable worker Deployments.
 
@@ -56,12 +56,12 @@ sniffing, and never from the environment. This is the doctrine of
 [`daemon_topology_doctrine.md` §1 — one runtime binary, three contexts](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts).
 The cluster authority is one Deployment-`replicas=1` pod, reconciled with the common HA-capable topology rule
 (one replica has restart semantics, not replica redundancy), per
-[`daemon_topology_doctrine.md` §3 — The control-plane singleton](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton):
+[`daemon_topology_doctrine.md` §3 — The control-plane daemon](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon):
 "one desired pod" is a Deployment property, while the mandatory k8s/etcd `Lease` supplies at-most-one-writer
 authority across termination/replacement overlap; this is **not** an amoebius election. The pod is stateless —
 no PVC; its durable state is the Vault-enveloped MinIO bucket. A distinct `amoebius-capacity` scheduler
 Deployment runs the same Haskell binary in its scheduler role, consumes only its named Pending Pods, performs
-the sealed placement/root-ledger CAS/Binding protocol, and holds no singleton or secret authority.
+the sealed placement/root-ledger CAS/Binding protocol, and holds no control-plane daemon or secret authority.
 The low-code UI server is another closed **worker responsibility** of that executable, paired with a generic
 PureScript browser interpreter and an owner-scoped projection worker; it is not another privileged binary or
 application-specific server build. Browser interaction uses authenticated same-origin WebSockets; the
@@ -75,11 +75,11 @@ flowchart TD
   src[One Haskell binary] --> cli[CLI context: operator host]
   src --> host[Sudo host daemon: substrate detect, lazy tool-ensure, host workers]
   src --> pod[In-cluster pod context]
-  pod --> singleton[Singleton role: Deployment replicas 1, single-instance from k8s and etcd]
+  pod --> daemon[Control-plane daemon role: Deployment replicas 1, single-instance from k8s and etcd]
   pod --> sched[Capacity scheduler role: same binary, dedicated Deployment]
   pod --> ui[UI server and projection worker roles: same binary, replicated and least authority]
   host --> kube[kube-apiserver via distro mTLS, localhost only]
-  singleton --> recon[Typed reconciler: observe, bind/provision, renderAll, enact typed actions]
+  control-plane daemon --> recon[Typed reconciler: observe, bind/provision, renderAll, enact typed actions]
   sched --> bind[Sealed placement, aggregate CAS ledger, Kubernetes Binding]
   ui --> redis[Redis: ephemeral cross-pod WebSocket routing]
 ```
@@ -233,7 +233,7 @@ runtime fidelity UNVERIFIED until that phase discharges them
 - **Phase 35 — Platform backbone (MetalLB + MinIO + Pulsar HA)** → [phase_35](phase_35_platform_backbone.md).
 - **Phase 36 — Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG)** → [phase_36](phase_36_platform_services_2.md).
 - **Phase 37 — Keycloak-owned ingress** → [phase_37](phase_37_keycloak_ingress.md).
-- **Phase 38 — Live DSL deploy via the replicas=1 singleton** → [phase_38](phase_38_live_dsl_singleton.md).
+- **Phase 38 — Live DSL deploy via the replicas=1 control-plane daemon** → [phase_38](phase_38_live_dsl_deploy.md).
 - **Phase 39 — Tenant/provider provisioning** (`linux-cpu`, ✅ six-provider projection/readback validated;
   application request isolation remains Phase 41) → [phase_39](phase_39_app_tenancy.md).
 - **Phase 40 — Native Pulsar client (CBOR)** (`linux-cpu`, ✅ native TCP, typed CBOR-only API, derived topics,

@@ -18,7 +18,7 @@ newtype Ciphertext = Ciphertext String
   deriving stock (Eq, Show)
 
 sealRecord :: Secret -> String -> Ciphertext
-#if defined(PHASE60_STORE_PLAINTEXT_MUTANT) || defined(PHASE62_STORE_PLAINTEXT_MUTANT)
+#if defined(ENCRYPTED_BROWSER_RUNTIME_STORE_PLAINTEXT_MUTANT) || defined(OFFLINE_BLOBS_ISOLATION_STORE_PLAINTEXT_MUTANT)
 sealRecord _ plaintext = Ciphertext plaintext
 #else
 sealRecord (Secret secret) plaintext = Ciphertext (show encoded)
@@ -27,7 +27,7 @@ sealRecord (Secret secret) plaintext = Ciphertext (show encoded)
 #endif
 
 openRecord :: Secret -> Ciphertext -> Maybe String
-#if defined(PHASE60_STORE_PLAINTEXT_MUTANT) || defined(PHASE62_STORE_PLAINTEXT_MUTANT)
+#if defined(ENCRYPTED_BROWSER_RUNTIME_STORE_PLAINTEXT_MUTANT) || defined(OFFLINE_BLOBS_ISOLATION_STORE_PLAINTEXT_MUTANT)
 openRecord _ (Ciphertext plaintext) = Just plaintext
 #else
 openRecord (Secret secret) (Ciphertext encoded) = do

@@ -19,14 +19,16 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
-CASES = ROOT / "test/fixtures/ui_program_schema/cases.tsv"
-GRAPH = ROOT / "test/fixtures/ui_program_schema/graph_reference.tsv"
-WIRE = ROOT / "test/fixtures/ui_program_schema/normalized_wire.golden"
-MUTANTS = ROOT / "test/mutant/ui_program_schema/mutants.tsv"
+CASES = ROOT / "test/fixture/ui_program_schema/cases.tsv"
+GRAPH = ROOT / "test/fixture/ui_program_schema/graph_reference.tsv"
+WIRE = ROOT / "test/fixture/ui_program_schema/normalized_wire.golden"
+MUTANT_CAPABILITY = "ui_program_schema"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/ui_program_schema/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/ui-program-schema/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-program-schema/validation-locus-ledger.tsv"
@@ -122,7 +124,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         raise GateFailure("independent graph oracle must contain one row per positive")
     if len(WIRE.read_text(encoding="utf-8").splitlines()) != 3:
         raise GateFailure("normalized wire golden must contain three non-empty rows")
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 6 or len({row["mutant"] for row in mutants}) != 6:
         raise GateFailure("mutant oracle must contain six unique mutants")
     locus = read_tsv(LOCUS)
@@ -168,8 +170,8 @@ def verify_source_boundaries() -> None:
 def compile_seal(cabal: Path) -> str:
     run([str(cabal), "build", "lib:amoebius"])
     common = [str(cabal), "exec", "ghc", "--", "-fno-code", "-XGHC2024", "-isrc"]
-    legal = run(common + ["test/fixtures/ui_program_schema/compilefail/checked_ui_legal.hs"])
-    illegal = run(common + ["test/fixtures/ui_program_schema/compilefail/checked_ui_illegal.hs"], require_success=False)
+    legal = run(common + ["test/fixture/ui_program_schema/compilefail/checked_ui_legal.hs"])
+    illegal = run(common + ["test/fixture/ui_program_schema/compilefail/checked_ui_illegal.hs"], require_success=False)
     expected = "Illegal term-level use of the type constructor ‘CheckedUiProgram’"
     if illegal.returncode == 0 or expected not in illegal.stdout:
         raise GateFailure(f"CheckedUiProgram compile-fail seal drifted:\n{illegal.stdout}")
@@ -286,10 +288,13 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
 
 def enumerated_items() -> set[str]:
     names: set[str] = set()
-    for relative in ("test/oracle/ui_program_schema/validation_locus.tsv", "test/mutant/ui_program_schema/mutants.tsv"):
+    for relative in ("test/oracle/ui_program_schema/validation_locus.tsv",):
         for line in (ROOT / relative).read_text(encoding="utf-8").splitlines()[1:]:
             if line.strip():
                 names.add(line.split("\t")[0].strip())
+    # The one registry leads with the capability and carries every phase's rows, so
+    # this phase's items are the mutant ids in its own rows, not every first column.
+    names.update(row["mutant"] for row in mutant_registry.capability(MUTANT_CAPABILITY))
     return names
 
 

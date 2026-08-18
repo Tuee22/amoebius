@@ -188,7 +188,7 @@ ready*. The order is a theorem of the dependency graph, and every edge in it is 
 This is the section the vision's *"particularly in the initial cluster bootstrap"* demands. The in-cluster
 readiness machinery — the SSA reconciler's wait-for-ready, Pulsar Failover subscriptions — does not exist yet
 during first bring-up: the host daemon is standing the cluster *up*
-([`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap), [`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)).
+([`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap), [`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon)).
 A `sleep` is most likely to be reached for here, precisely because no readiness signal is yet available to
 observe. The rule holds anyway, using the two primitives the host tier *does* have:
 
@@ -205,16 +205,16 @@ observe. The rule holds anyway, using the two primitives the host tier *does* ha
   command on a *locally checkable* condition (a required unix socket exists), so a witness-gated bootstrap
   step **refuses fast** when its socket witness is absent — no cluster touched, no timer burned.
 
-The **host-daemon → in-cluster-singleton handoff** — the open bootstrap-sequencing question the vision pairs
+The **host-daemon → in-cluster-control-plane handoff** — the open bootstrap-sequencing question the vision pairs
 with this one — is gated the same way, but `/readyz` is the final edge rather than the whole proof. The host
-first applies the singleton while it still holds the mandatory reconciler Lease; the Pod may finish local
+first applies the control-plane daemon while it still holds the mandatory reconciler Lease; the Pod may finish local
 prerequisites but cannot mutate or report ready. The host drains its mutation loop, releases the Lease, and a
 fresh apiserver observation must yield `ReconcilerLeaseReleased` for that exact holder/resourceVersion before
-the singleton may acquire it. Only `ReconcilerLeaseHeld` for the authenticated singleton Pod UID can mint its
+the control-plane daemon may acquire it. Only `ReconcilerLeaseHeld` for the authenticated control-plane daemon Pod UID can mint its
 `Serving /readyz` edge and retire the host's direct-apiserver channel. This is **never** a fixed delay after
 launching the pod (and never an
-"election" edge — the singleton runs no election; its single-instance is delegated to k8s/etcd,
-[`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)). Vault init is the canonical worked example:
+"election" edge — the control-plane daemon runs no election; its single-instance is delegated to k8s/etcd,
+[`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon)). Vault init is the canonical worked example:
 **no secret consumer runs before Vault reports reachable, initialized, and unsealed; a consumer that reaches a sealed Vault fails closed rather than racing it**
 ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)) —
 `Unsealed` is a condition, and fail-closed is the event-driven resolution of the race, not a wait around it.
@@ -272,7 +272,7 @@ discipline once; each site keeps its own SSoT and is cited, never restated:
 |---|---|---|---|
 | Derived bring-up DAG | platform-service bring-up order | `decode-foreclosed` (order) + `type-foreclosed` (edge shape) | [platform_services §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) |
 | `BootstrapCapacitySchedulerReady` → add-on cutover → `ManagedCapacityReady` | any general Pod vs an unready scheduler or competing default-scheduler writers | `runtime-checked` readback on a typed, staged continuation | [resource_capacity_doctrine](./resource_capacity_doctrine.md), [bootstrap_sequence_doctrine §3](./bootstrap_sequence_doctrine.md#3-the-ordered-bootstrap-sequence) |
-| bootstrap-holder release → singleton-holder acquire | two reconciler writers during handoff | `runtime-checked` Kubernetes Lease/resourceVersion edges; no bespoke election | [bootstrap_sequence_doctrine §4](./bootstrap_sequence_doctrine.md#4-the-host-daemon--singleton-handoff) |
+| bootstrap-holder release → control-plane-holder acquire | two reconciler writers during handoff | `runtime-checked` Kubernetes Lease/resourceVersion edges; no bespoke election | [bootstrap_sequence_doctrine §4](./bootstrap_sequence_doctrine.md#4-the-host-daemon--control-plane-daemon-handoff) |
 | Vault ready-before-consumer / fail-closed | a secret consumer vs a sealed Vault | `runtime-checked` (fail-closed); the `Unsealed` edge is [§3](#3-readiness-is-a-condition-never-a-duration) | [vault_pki §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) |
 | Redis primary + replica/Sentinel quorum + TLS/ACL readiness → UI WebSocket ready | accepting a socket before cross-pod routing can resolve its owner | `runtime-checked` service readback on a derived edge; failure stays not-ready | [platform_services §6.1](./platform_services_doctrine.md#61-redis-and-sentinel--ephemeral-ui-realtime-coordination), [ui_realtime_coordination §5](./ui_realtime_coordination_doctrine.md#5-redis-is-ephemeral-platform-internal-coordination) |
 | `FabricMember c` reachability | a workload bound to a store it cannot reach | `type-foreclosed` (static reach is a *type*, not a probe) | [single_logical_data_plane §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe) |
@@ -311,9 +311,9 @@ This document is normative readiness-ordering doctrine only. Delivery sequencing
 validation gates, and remaining work are owned by
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the **bootstrap-tier** rule — `discover`/`RuntimeWitness` gates, no timers,
-the two-stage scheduler cutover, and the bootstrap-holder→singleton-holder Lease handoff — is exercised by
+the two-stage scheduler cutover, and the bootstrap-holder→control-plane-holder Lease handoff — is exercised by
 **Phases 29, 31, and 34**; the **typed `Readiness` gate** and the [§3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)
-catalog foreclosure land in **Phase 38** with the orchestration DSL and the control-plane singleton. This doc
+catalog foreclosure land in **Phase 38** with the orchestration DSL and the control-plane daemon. This doc
 states the target shape and links back for status.
 
 > **Honesty.** Phase 31, sealed 2026-08-14, provides tested amoebius evidence for the reconciler's
@@ -332,7 +332,7 @@ states the target shape and links back for status.
 - [Engineering Doctrine Index](./README.md)
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race) the readiness race as a foreclosed illegal state; [§2](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)/[§6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the load-bearing limit and the three layers
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — [§2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap) init-follows-readiness, [§9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) the reconciler that enacts every edge
-- [Bootstrap Sequence Doctrine](./bootstrap_sequence_doctrine.md) — [§4](./bootstrap_sequence_doctrine.md#4-the-host-daemon--singleton-handoff) consumes the [§5](#5-the-bootstrap-tier-local-observed-witnesses-never-timers) handoff trigger (`/readyz` + singleton-ready) as the host-daemon→singleton gate
+- [Bootstrap Sequence Doctrine](./bootstrap_sequence_doctrine.md) — [§4](./bootstrap_sequence_doctrine.md#4-the-host-daemon--control-plane-daemon-handoff) consumes the [§5](#5-the-bootstrap-tier-local-observed-witnesses-never-timers) handoff trigger (`/readyz` + control-plane-ready) as the host-daemon→control-plane daemon gate
 - [Platform Services Doctrine](./platform_services_doctrine.md) — [§11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) the derived bring-up DAG
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — [§4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) ready-before-consumer / fail-closed
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) the daemon spine forbids `threadDelay`/`sd_notify`/marker probes

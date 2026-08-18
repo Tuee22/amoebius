@@ -83,7 +83,7 @@ rebuild per mutant, and a rebuild is a different binary from the one the gate ob
 listing `src` in the `amoebius` executable made GHC recompile every module `app/amoebius/Main.hs` imports into that
 component against its own much shorter `build-depends` — which is why the build failed on
 `Amoebius.Vault.SecretRef`, a module the executable never mentions, and would have put two separately compiled
-copies of the shared core in one program. The entry point moved to `app/amoebius/Amoebius/Ui/Server/Main.hs`,
+copies of the shared core in one program. The entry point moved to `app/amoebius/Amoebius/Entry/ServeUi.hs`,
 beneath the one executable's directory, and a gate check holds both properties. The search-path half of that
 check is a **transitional** guard: once `app/`'s second level is the single name
 [repository_layout_doctrine.md §2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure)
@@ -162,8 +162,8 @@ observations; and every seeded mutant below turning its own oracle row red.
 - **Representative set:** public `ClientPlan` fetch, authenticated route read, scoped data read/mutation, workflow
   start/observe, bounded upload, subscription resume, ready-artifact use, sign-out, idempotent replay, and
   stale-plan reload span single-tenant and multi-tenant programs.
-- **Pinned oracles:** `test/fixtures/ui_server/requests.tsv`, `access_matrix.tsv`, `expected_http.tsv`,
-  `test/fixtures/ui_security/production_headers.tsv`, `expected_effects.tsv`, and `expected_audit.tsv` own
+- **Pinned oracles:** `test/fixture/ui_server/requests.tsv`, `access_matrix.tsv`, `expected_http.tsv`,
+  `test/fixture/ui_security/production_headers.tsv`, `expected_effects.tsv`, and `expected_audit.tsv` own
   inputs/outcomes; `startup_plan_matrix.tsv` owns ABI and handler-registry admission; and
   `public_asset_allowlist.tsv` plus `forbidden_server_manifest_paths.tsv` own the exact browser-visible set and
   server-plan path probes. Every allow pairs with a denial differing only in subject, tenant, permission, grant
@@ -228,8 +228,8 @@ edge exclusivity, provider policy, storage isolation, and behavior after replica
 
 **Status**: Done — the boundary ABI is implemented and the migrated gate passes; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**:
-`app/amoebius/Amoebius/Ui/Server/Main.hs`, `src/Amoebius/Ui/Server/{Dispatch,RequestContext,SecurityHeaders,WebSocket}.hs`,
-`src/Amoebius/Ui/Realtime/{Class,Envelope}.hs`, `test/ui/UiServerBoundarySpec.hs`,
+`app/amoebius/Amoebius/Entry/ServeUi.hs`, `src/Amoebius/Ui/Server/{Dispatch,RequestContext,SecurityHeaders,WebSocket}.hs`,
+`src/Amoebius/Ui/Realtime/{Class,Envelope}.hs`, `test/spec/ui/UiServerBoundarySpec.hs`,
 `test/harness/ui_server/server_boundary.mjs`, and `tools/ui_server_boundary_gate.py`
 **Blocked by**: None.
 **Independent Validation**: `python3 tools/ui_server_boundary_gate.py` starts the

@@ -47,7 +47,7 @@ canonicalFields :: [(Text, Text)] -> ByteString
 canonicalFields fields =
   Char8.pack "{" <> mconcat (intersperse (Char8.pack ",") (map render ordered)) <> Char8.pack "}"
  where
-#ifdef PHASE48_CONTENT_ORDER_LEAK_MUTANT
+#ifdef DETERMINISM_JITCACHE_CONTENT_ORDER_LEAK_MUTANT
   ordered = fields
 #else
   ordered = sortOn fst fields

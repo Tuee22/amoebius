@@ -40,11 +40,11 @@ it ([chaos_failover_doctrine.md](./chaos_failover_doctrine.md)):
 
 - **Intra-cluster replicated state** — object storage, the message log, the SQL primary — is delegated to
   **MinIO**, **Pulsar/BookKeeper**, and **Percona/Patroni Postgres**.
-- **Single-writer authority of the control-plane singleton** is delegated to **k8s/etcd**: the singleton is a
+- **Single-writer authority of the control-plane daemon** is delegated to **k8s/etcd**: the control-plane daemon is a
   Deployment `replicas=1` protected by the mandatory reconciler `Lease`
-  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)). There is
+  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon)). There is
   **no bespoke leader election** — amoebius does not duplicate etcd, and there is no First-Axis
-  singleton-election model to prove.
+  control-plane-election model to prove.
 
 What is left — the single place a per-system proof obligation concentrates on amoebius itself — is the
 **asynchronous cross-cluster gateway migration**: moving the wild-ingress gateway between clusters and
@@ -283,7 +283,7 @@ child brokers remain UNVERIFIED. Phase order, status, and gates live only in
 - [Formal Model Doctrine](./formal_model_doctrine.md) — the `Model`→{interpret, emitTLA} pattern this is an instance of
 - [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration` taxonomy and the state machine this models
 - [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — the Extract→Model→Inject methodology and the concentration principle
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the singleton is a Deployment, single-instance delegated to k8s/etcd (no election)
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane daemon is a Deployment, single-instance delegated to k8s/etcd (no election)
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — a session that cannot rebind on migration is unrepresentable
 - [Conformance Harness Doctrine](./conformance_harness_doctrine.md) — the Register-1 explorer + io-sim, no cluster
 - [Deterministic Simulation Doctrine](./deterministic_simulation_doctrine.md) — the Register-2.5 io-sim environment where the runtime-fidelity trace-validation runs before the Register-3 forest

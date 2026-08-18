@@ -26,15 +26,17 @@ from typing import Any, Mapping
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
-FIXTURES = ROOT / "test/fixtures/ui_authorization"
-MUTANTS = ROOT / "test/mutant/ui_authorization/mutants.tsv"
+FIXTURES = ROOT / "test/fixture/ui_authorization"
+MUTANT_CAPABILITY = "ui_authorization"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/ui_authorization/validation_locus.tsv"
 MODULE = ROOT / "src/Amoebius/Ui/Security/Authorization.hs"
-REFERENCE = ROOT / "test/ui/AuthorizationReference.hs"
+REFERENCE = ROOT / "test/spec/ui/AuthorizationReference.hs"
 RESULTS = ROOT / ".build/dsl/ui-authorization/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-authorization/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-authorization"
@@ -192,7 +194,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         "StalePolicyEpoch", "StaleMembershipEpoch", "StaleGrantEpoch", "StaleScopeEpoch",
     ]:
         raise GateFailure("authority epoch errors drifted")
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 2 or {row["mutant"] for row in mutants} != set(MUTANT_TOKENS):
         raise GateFailure("Phase-21 mutant manifest must contain exactly the two contract mutants")
     locus = read_tsv(LOCUS)
@@ -218,7 +220,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
 
 def item_classes() -> dict[str, str]:
     classes = {row["entry"].strip(): row["class"].strip() for row in read_tsv(LOCUS)}
-    for row in read_tsv(MUTANTS):
+    for row in mutant_registry.capability(MUTANT_CAPABILITY):
         classes[row["mutant"].strip()] = "mutant"
     return classes
 

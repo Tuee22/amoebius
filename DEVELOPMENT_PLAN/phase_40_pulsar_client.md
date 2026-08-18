@@ -8,7 +8,7 @@
 
 Phase 40 delivers the native Pulsar client (CBOR); its design is owned by [pulsar_client_doctrine.md](../documents/engineering/pulsar_client_doctrine.md), [substrate_doctrine.md](../documents/engineering/substrate_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-10 with `python3 tools/phase35_gate.py --reuse-fresh-live`;
+Validated 2026-08-10 with `python3 tools/pulsar_client_gate.py --reuse-fresh-live`;
 ledger `external-run-reference`.
 
 
@@ -149,7 +149,7 @@ The gate passes only when every clause below holds; each is checked against an *
 authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from the client.
 
 - **Committed oracle corpus (representative set, §M.7, §M.1).** The gate's representative set is named
-  explicitly and committed under `amoebius-pulsar/test/golden/` in Phase 0: (a) spec-derived byte goldens for
+  explicitly and committed under `test/golden/pulsar_client/` in Phase 0: (a) spec-derived byte goldens for
   the `BaseCommand` frame set `{CONNECT, CONNECTED, LOOKUP_TOPIC, PRODUCER, PRODUCER_SUCCESS, SEND,
   SEND_RECEIPT, SUBSCRIBE, FLOW, MESSAGE, ACK, ACK_RESPONSE, SEEK}` derived by hand from the Pulsar protocol
   spec (never from `proto-lens` output of this fork); (b) a CBOR command vector and event vector with their
@@ -276,8 +276,8 @@ provision.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 the live native socket exchange are validated.
-**Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Frame.hs`,
-`amoebius-pulsar/src/Amoebius/Pulsar/Connection.hs`, and `amoebius-pulsar/proto/PulsarApi.proto` — the
+**Implementation**: `src/Amoebius/Pulsar/Frame.hs`,
+`src/Amoebius/Pulsar/Connection.hs`, and `proto/PulsarApi.proto` — the
 authored source; `Proto/PulsarApi.hs` is `proto-lens`-generated at build from that `.proto`, never hand-written
 (delivered and validated).
 **Blocked by**: reopened numeric predecessor gates.
@@ -331,9 +331,9 @@ None.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 golden, and raw-payload compile refusal are validated.
-**Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Producer.hs`,
-`amoebius-pulsar/src/Amoebius/Pulsar/Consumer.hs`, `amoebius-pulsar/src/Amoebius/Pulsar/Subscription.hs`,
-`amoebius-pulsar/src/Amoebius/Pulsar/Seek.hs`, `amoebius-pulsar/src/Amoebius/Pulsar/Cbor.hs` (the typed CBOR
+**Implementation**: `src/Amoebius/Pulsar/Producer.hs`,
+`src/Amoebius/Pulsar/Consumer.hs`, `src/Amoebius/Pulsar/Subscription.hs`,
+`src/Amoebius/Pulsar/Seek.hs`, `src/Amoebius/Pulsar/Cbor.hs` (the typed CBOR
 payload codec on `serialise`/`cborg`) — delivered and validated.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: run against the **live single-node `kind`-cluster broker (Register 3)** — the same
@@ -394,7 +394,7 @@ None.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 violations are validated, including the deleted-clause mutant.
-**Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Topology.hs` — delivered and validated.
+**Implementation**: `src/Amoebius/Pulsar/Topology.hs` — delivered and validated.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: property tests that `topicFor` derives
 `persistent://<tenant>/<namespace>/<workflow>.<phase>.<substrate>` from a typed `RouteEntry`, checked against
@@ -456,10 +456,10 @@ None.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 duplicate collapse, redelivery, seek replay, independent state readback, and leak-free cleanup.
-**Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Dedup.hs`,
-`amoebius-pulsar/src/Amoebius/Pulsar/Namespace.hs` (the namespace dedup-policy reconcile),
-`amoebius-pulsar/src/Amoebius/Pulsar/Provision.hs`, `amoebius-pulsar/test/PulsarClientLiveSpec.hs`, and
-`tools/phase35_pulsar_live.py` — delivered and validated.
+**Implementation**: `src/Amoebius/Pulsar/Dedup.hs`,
+`src/Amoebius/Pulsar/Namespace.hs` (the namespace dedup-policy reconcile),
+`src/Amoebius/Pulsar/Provision.hs`, `test/spec/pulsar/PulsarClientLiveSpec.hs`, and
+`tools/pulsar_client_live.py` — delivered and validated.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: with namespace deduplication enabled the broker rejects a retried
 `(producer_name, sequence_id)` at ingest and redelivers the un-acked message after a consumer crash, and
@@ -534,8 +534,8 @@ explicitly UNVERIFIED under their owning later phases.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 and the unstable-key twin replays red.
-**Implementation**: `amoebius-pulsar/test/PulsarDedupSimSpec.hs`, driving the production
-`amoebius-pulsar/src/Amoebius/Pulsar/Dedup.hs` fold — delivered and validated.
+**Implementation**: `test/spec/pulsar/PulsarDedupSimSpec.hs`, driving the production
+`src/Amoebius/Pulsar/Dedup.hs` fold — delivered and validated.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the real dedup fold, keyed by a replication-surviving work-id, upholds the
 **exactly-once effect** invariant (R3) on every schedule the simulation explores. Deterministically

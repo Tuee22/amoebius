@@ -56,7 +56,7 @@ data DispatchTrace = DispatchTrace
   deriving stock (Eq, Show)
 
 dispatchAuthorized :: RequestContext -> Either SecurityError DispatchTrace
-#ifdef PHASE55_DISPATCH_BEFORE_AUTH_MUTANT
+#ifdef UI_SINGLE_TENANT_LIVE_DISPATCH_BEFORE_AUTH_MUTANT
 dispatchAuthorized _ = Right (DispatchTrace 1 1 1)
 #else
 dispatchAuthorized request = do

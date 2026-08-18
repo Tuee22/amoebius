@@ -1,1 +1,0 @@
-PHASE31_DAG_DROP_EDGE_MUTANT removes PerconaOperator from GrafanaPostgres dependencies; the independent edge oracle must reject it.

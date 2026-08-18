@@ -44,7 +44,20 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-11 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/provision_seal_gate.py` passes all
+eleven sides on substrate `none`, lane `none`, natural `arm64`, untranslated: every authored oracle holds its
+declared shape, the suite is green, all ten mutants redden at their own loci, every recorded result is derived
+from an observation, and 34 surfaces join completely to 42 enumerated items.
+Attestation `sha256:d4740038bcbfce9974fafafbd8af989b0b7e74eeb3a9d6fae0d8f5ae8690facb`.
+
+**The rerun corrected a second consequence of Phase 2's registry merge.** This gate enumerates its run-time
+items from a list of authored sources and read each one's first column. That column was the mutant id while
+each capability had its own `mutants.tsv`; in the one registry it is the capability, so the gate enumerated
+every phase's rows and the comment block with them. It now asks the registry for its own capability's mutants,
+which is what the first column used to mean. The same correction lands in the inference-accelerator and
+render-manifest gates, which share the enumerator.
+
+**Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from

@@ -1,0 +1,5 @@
+--- a/src/Amoebius/Pulumi/Ebs.hs
++++ b/src/Amoebius/Pulumi/Ebs.hs
+@@ seeded mutant: credit the old volume before privileged deletion observation
+-  migrationDurableBytes = oldBytes + replacementBytes
++  migrationDurableBytes = replacementBytes

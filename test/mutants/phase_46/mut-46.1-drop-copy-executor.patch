@@ -1,5 +1,0 @@
---- a/amoebius-pulumi/src/Amoebius/Pulumi/Ebs.hs
-+++ b/amoebius-pulumi/src/Amoebius/Pulumi/Ebs.hs
-@@ seeded mutant: omit the copy/verify executor from migration admission
--  migrationCopyExecution = Just copyExecution
-+  migrationCopyExecution = Nothing

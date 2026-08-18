@@ -18,7 +18,7 @@ data SingleTenantResult = SingleTenantResult String DispatchTrace CoordinationRe
   deriving stock (Eq, Show)
 
 runSingleTenant :: String -> RequestContext -> CoordinationResult -> Either SecurityError SingleTenantResult
-#ifdef PHASE55_CANNED_RESPONSE_MUTANT
+#ifdef UI_SINGLE_TENANT_LIVE_CANNED_RESPONSE_MUTANT
 runSingleTenant _ request coordinated = SingleTenantResult "canned" <$> dispatchAuthorized request <*> pure coordinated
 #else
 runSingleTenant nonce request coordinated = SingleTenantResult nonce <$> dispatchAuthorized request <*> pure coordinated
@@ -27,12 +27,12 @@ runSingleTenant nonce request coordinated = SingleTenantResult nonce <$> dispatc
 networkEdgeAllowed :: NetworkEdge -> Bool
 networkEdgeAllowed edge = case edge of
   BrowserEnvoy -> True
-#ifdef PHASE55_DROP_NETWORKPOLICY_MUTANT
+#ifdef UI_SINGLE_TENANT_LIVE_DROP_NETWORKPOLICY_MUTANT
   BrowserUiDirect -> True
   BrowserProvider -> True
   UiBoundProvider -> True
   ForeignPodProvider -> True
-#elif defined(PHASE55_OPEN_PROVIDER_EDGE_MUTANT)
+#elif defined(UI_SINGLE_TENANT_LIVE_OPEN_PROVIDER_EDGE_MUTANT)
   BrowserUiDirect -> False
   BrowserProvider -> True
   UiBoundProvider -> True

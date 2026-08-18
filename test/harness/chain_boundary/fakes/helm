@@ -9,5 +9,17 @@ printf '%s\n' "$count" > "$counter_path"
 argv_path="$AMOEBIUS_TRANSCRIPT_DIR/$tool.$count.argv"
 stdin_path="$AMOEBIUS_TRANSCRIPT_DIR/$tool.$count.stdin"
 printf '%s\n' "$0" "$@" > "$argv_path"
-/usr/bin/dd of="$stdin_path" status=none
+# The stdin capture is resolved rather than pinned: `/usr/bin/dd` exists on Linux and not
+# on Darwin, and `status=none` is a GNU flag BSD dd does not take, so the pinned form made
+# this fixture Linux-only. `cat` is POSIX and takes no flags here; the shim still invokes
+# it by absolute path, which is the contract this fixture exists to observe.
+capture=""
+for candidate in /bin/cat /usr/bin/cat; do
+  if [ -x "$candidate" ]; then capture="$candidate"; break; fi
+done
+if [ -z "$capture" ]; then
+  printf '%s\n' "fake-tool: no absolute cat on this host" >&2
+  exit 127
+fi
+"$capture" > "$stdin_path"
 printf '%s\n' 'fake-tool: unexpected helm invocation'

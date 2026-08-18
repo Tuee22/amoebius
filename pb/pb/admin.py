@@ -1,4 +1,4 @@
-"""Typed client for the singleton's privileged admin REST surface."""
+"""Typed client for the control-plane daemon's privileged admin REST surface."""
 
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ def _loopback(hostname: str) -> bool:
 
 
 class AdminClient:
-    """One control path: CLI request to the singleton, with no credential persistence."""
+    """One control path: CLI request to the control-plane daemon, with no credential persistence."""
 
     def __init__(
         self,

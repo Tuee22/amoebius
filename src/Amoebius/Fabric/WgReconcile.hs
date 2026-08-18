@@ -208,7 +208,7 @@ fitRow capacity demand row
 
 authorizeEnactment :: Text -> Maybe EnactmentState -> Either ProvisionError EnactmentState
 authorizeEnactment currentFingerprint maybeState =
-#ifdef PHASE41_DROP_RESOURCE_ENVELOPE_MUTANT
+#ifdef NETWORK_FABRIC_WIREGUARD_DROP_RESOURCE_ENVELOPE_MUTANT
   case maybeState of
     Nothing -> Right Consumed
     Just _ -> Right Consumed
@@ -234,7 +234,7 @@ reconcileActions desired observed =
 
 replacementActions :: Bool -> [FabricAction]
 replacementActions oldProcessPresent =
-#ifdef PHASE41_EARLY_LISTENER_REPLACEMENT_MUTANT
+#ifdef NETWORK_FABRIC_WIREGUARD_EARLY_LISTENER_REPLACEMENT_MUTANT
   if oldProcessPresent then [StartReplacementListener] else [StartReplacementListener]
 #else
   if oldProcessPresent then [ObserveOldListenerExit] else [StartReplacementListener]

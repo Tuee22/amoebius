@@ -75,9 +75,9 @@ resolveEngine arm runtime state =
 
 materialize :: EngineRuntime -> ByteString
 materialize runtime =
-#ifdef PHASE48_FIXED_MARKER_MUTANT
+#ifdef DETERMINISM_JITCACHE_FIXED_MARKER_MUTANT
   "fixed-16-marker!"
-#elif defined(PHASE48_ONE_BYTE_SHORT_MUTANT)
+#elif defined(DETERMINISM_JITCACHE_ONE_BYTE_SHORT_MUTANT)
   ByteString.init (catalogPayload runtime)
 #else
   catalogPayload runtime

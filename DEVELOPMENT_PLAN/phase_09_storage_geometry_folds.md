@@ -45,7 +45,15 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-8 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/storage_geometry_gate.py` passes all
+eleven sides on substrate `none`, lane `none`, natural `arm64`, untranslated: every authored oracle holds its
+declared shape, the suite is green, all thirty-one mutants redden at their own loci, every recorded result is
+derived from an observation, and 39 surfaces join completely to 44 enumerated items. Attestation
+`sha256:845732a8a5460be0cc61d4b48d3266fca295922c177be3db0affac0ad0aece4e`. The rerun differs from the
+2026-08-15 seal by naming the lane and the architecture the run actually used, and by reading its mutant
+manifest from the one registry.
+
+**Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from

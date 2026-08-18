@@ -62,22 +62,46 @@ loadCompileCoverage = do
       ]
     _ -> []
 
+-- The last phase whose rows this suite can discharge: the illegal-state corpus completes
+-- the Gate-1/Gate-2 rejection set, so a row owned at or before it is reached here and a
+-- later one is deferred to its owner. This threshold read 6 while the registry said
+-- Phase-7, so twenty-six rows the corpus already rejected were read as deferred and the
+-- coverage comparison diverged from its own registry.
+corpusPhase :: Int
+corpusPhase = 7
+
 isReached :: RegistryRow -> Bool
-isReached row = ownerNumber (owner row) <= 6 && locus row `elem` ["Gate-1-editor", "Gate-2-decoder"]
+isReached row =
+  ownerNumber (owner row) <= corpusPhase && locus row `elem` ["Gate-1-editor", "Gate-2-decoder"]
 
 ownerNumber :: Text -> Int
 ownerNumber ownerValue = case reads (Text.unpack (Text.drop (Text.length "Phase-") ownerValue)) of
   [(number, "")] -> number
   _ -> 999
 
+-- The phase each remaining validation locus belongs to. Every one of these was a
+-- pre-amendment ordinal: the ordering re-baseline renumbered the phases and updated the
+-- registry's `owner_phase` column, but not the thresholds that read it, so the two
+-- disagreed about which phase owns a locus while both looked internally consistent.
+firstFoldPhase, renderPhase, astCheckPhase :: Int
+firstFoldPhase = 8   -- the capacity core fold, the earliest phase a provision row may be owned by
+renderPhase = 14     -- pure renderAll and the rendered-output goldens
+astCheckPhase = 15   -- the chain/Step kernel and the Gate-3 AST checker
+
 validateDeferred :: [RegistryRow] -> IO ()
 validateDeferred rows = do
   forEach [row | row <- rows, locus row == "rendered-output-golden"] $ \row ->
-    assert (ownerNumber (owner row) >= 13) ("rendered row is owned before Phase 13: " <> show row)
+    assert
+      (ownerNumber (owner row) >= renderPhase)
+      ("rendered row is owned before Phase " <> show renderPhase <> ": " <> show row)
   forEach [row | row <- rows, locus row == "Gate-3-astcheck"] $ \row ->
-    assert (owner row == "Phase-14") ("Gate-3 row is not owned by Phase 14: " <> show row)
+    assert
+      (ownerNumber (owner row) == astCheckPhase)
+      ("Gate-3 row is not owned by Phase " <> show astCheckPhase <> ": " <> show row)
   forEach [row | row <- rows, locus row == "provision-seal"] $ \row ->
-    assert (ownerNumber (owner row) >= 7) ("provision row is owned before the folds: " <> show row)
+    assert
+      (ownerNumber (owner row) >= firstFoldPhase)
+      ("provision row is owned before the folds: " <> show row)
  where
   forEach = flip mapM_
 

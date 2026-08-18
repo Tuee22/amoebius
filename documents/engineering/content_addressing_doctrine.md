@@ -606,7 +606,7 @@ The three asset kinds, **one cache shape** (`resolve = {download | build}` on fi
   Phase 30.1, sealed 2026-08-14, has live-tested only the base image's resolver/toolchain presence and byte
   identity on both Linux architectures; first-miss materialization into `CacheBudget` remains a Phase 53 gate.
 - **Tier 2 — `ModelArtifact` = eager STAGE-THEN-SERVE, and *staging by name IS a provenance-carrying import*.**
-  The parent-minted nested `infernix.dhall` names the model *set*; the in-cluster singleton stages each
+  The parent-minted nested `infernix.dhall` names the model *set*; the in-cluster control-plane daemon stages each
   model into the shared bounded cache, and the `.ready` sentinel is written **last** so the `model` pointer ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)) commits only a complete
   artifact. This round **closes the unwitnessed hole** the bare stage-by-name path left open: **naming a model in `infernix.dhall` is an explicit content-addressed import (arm b above)** that carries a **pinned expected content-address (or detached signature)**; staging **verifies the pulled bytes against the pin and fails closed before `.ready`** (Fork A) — there is no constructor that stages bytes without a pin. Staging **re-keys** the
   model off `infernix`'s name-addressed `infernix-models/<modelId>/…` layout onto the content-addressed
@@ -663,7 +663,7 @@ and prefix addresses are folded **into `resolved-dhall`** ([§3](#3-experimentha
 (parent + prefix pinned) is **type-foreclosed**; **actual byte-replay** is **decode-foreclosed / tested** per [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) (SL / on-policy / AlphaZero-per-game tested-in-sibling; off-policy RL only the prefix); **cross-substrate is not asserted** (a cross-substrate `Continue` is a **new** run in a **new** `experimentHash` namespace with no reproducibility relation back to the base's substrate — the base is a pinned immutable input, not an anchor).
 
 **The continuous trainer reuses existing machinery (Fork C — no new election).** It is **not** a new elected
-worker kind and does **not** fold through the control-plane singleton; it is the existing
+worker kind and does **not** fold through the control-plane daemon; it is the existing
 jitML / infernix training-coordinator worker ([`daemon_topology_doctrine.md` §4](./daemon_topology_doctrine.md#4-worker-daemons--n-unelected)) parameterized with a `Feed` data
 source. Single-writer is **delegated, not re-proved**: liveness (at most one active trainer per feed) is a Pulsar
 **Failover subscription** on the feed topic; safety (race-free `latest`) is the content-store

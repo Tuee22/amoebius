@@ -35,9 +35,9 @@ import toolchain  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CORPUS = ROOT / "test/live/fixtures/reconcile-corpus/corpus.json"
-EXPECTED_ACTIONS = ROOT / "test/live/fixtures/reconcile-corpus/expected-actions.json"
-NEVER_READY = ROOT / "test/live/fixtures/reconcile-corpus-never-ready"
+CORPUS = ROOT / "test/fixture/live/reconcile-corpus/corpus.json"
+EXPECTED_ACTIONS = ROOT / "test/fixture/live/reconcile-corpus/expected-actions.json"
+NEVER_READY = ROOT / "test/fixture/live/reconcile-corpus-never-ready"
 RESULTS = ROOT / ".build/dsl/object-reconciler/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/object_reconciler_surfaces.tsv"
 CONTRACT = "DEVELOPMENT_PLAN/phase_31_object_reconciler.md"

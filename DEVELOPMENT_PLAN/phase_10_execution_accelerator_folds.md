@@ -45,7 +45,15 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-9 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/execution_accelerator_gate.py` passes
+all eleven sides on substrate `none`, lane `none`, natural `arm64`, untranslated: every authored oracle holds
+its declared shape, the suite is green, all forty-five mutants redden at their own loci, every recorded result
+is derived from an observation, and 56 surfaces join completely to 94 enumerated items. Attestation
+`sha256:42369748d2225285354a4e039c2a65a79f8bada077021905ddce52fd5e7aa7fc`. The rerun differs from the
+2026-08-15 seal by naming the lane and the architecture the run actually used, and by reading its mutant
+manifest from the one registry.
+
+**Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
@@ -422,7 +430,7 @@ source into identity-keyed steady, rollout, and live epochs and exercises the re
 the numbered Validation list below carries the cases, the controls, and the mutants it must redden.
 **Docs to update**:
 `documents/engineering/resource_capacity_doctrine.md` (Phase-10 status backlink),
-`documents/engineering/daemon_topology_doctrine.md` (§3 control-plane singleton reservation read-side),
+`documents/engineering/daemon_topology_doctrine.md` (§3 control-plane daemon reservation read-side),
 `documents/illegal_state/illegal_state_catalog.md` (§3.17 execution/scheduler layer reconciliation),
 `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -947,7 +955,7 @@ None.
   implemented `Amoebius.Capacity.*` execution/accelerator/provider-root modules; confirm every
   capacity/accelerator sum stayed a checked pre-effect rejection at the post-bind `provision-seal` and
   sound-not-complete for the composed compute bin-pack.
-- `documents/engineering/daemon_topology_doctrine.md` — reconcile §3's control-plane singleton reservation /
+- `documents/engineering/daemon_topology_doctrine.md` — reconcile §3's control-plane daemon reservation /
   five-kind control-plane-state producer read-side with the as-built scheduler-reservation and
   `EtcdLogicalDemand` folds; keep the live scheduler role residue deferred to
   [phase_32_capacity_scheduler.md](phase_32_capacity_scheduler.md).

@@ -1,0 +1,1 @@
+PLATFORM_SERVICES_2_REDIS_PVC_MUTANT adds persistence to the ephemeral coordination service; provision must reject it.

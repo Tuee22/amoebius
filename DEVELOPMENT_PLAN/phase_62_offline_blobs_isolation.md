@@ -123,10 +123,10 @@ storm. Browser quota remains runtime-observed and cannot masquerade as cluster c
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `ui/src/Amoebius/Ui/Offline/BlobStore.purs`,
-`src/Amoebius/Ui/Offline/BlobUpload.hs`, `test/live/OfflineBlobSpec.hs`,
-`tools/phase62_blob_live.py`, and `tools/phase62_gate.py`
+`src/Amoebius/Ui/Offline/BlobUpload.hs`, `test/spec/live/OfflineBlobSpec.hs`,
+`tools/offline_blobs_isolation_live.py`, and `tools/offline_blobs_isolation_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/phase62_gate.py` with model tests, two
+**Independent Validation**: `python3 tools/offline_blobs_isolation_gate.py` with model tests, two
 Chrome processes, raw storage, resumable local upload, independent content readback, six mutants, docs, ledger
 **Docs to update**:
 `documents/engineering/browser_offline_runtime_doctrine.md`, `documents/engineering/tenancy_doctrine.md`,
@@ -145,7 +145,7 @@ Move one offline blob to durable content storage without plaintext leakage, cros
 
 ### Validation
 
-1. Run `python3 tools/phase62_gate.py`; require the scoped canonical model and live
+1. Run `python3 tools/offline_blobs_isolation_gate.py`; require the scoped canonical model and live
    trace green and all six mutants red.
 
 ### Remaining Work

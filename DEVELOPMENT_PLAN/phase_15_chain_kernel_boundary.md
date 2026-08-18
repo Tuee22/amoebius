@@ -46,7 +46,27 @@ The composite Register-1/2 gate passed on 2026-08-09. Live tools, apiserver appl
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-14 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/chain_boundary_gate.py` passes all
+thirteen sides on registers 1/2, substrate `none`, lane `none`, natural `arm64`, untranslated: the Part-A
+kernel and Part-B boundary suites are green, the Gate-3 AST checker holds its compile-fail seal, every seeded
+mutant reddens at its own locus, and 40 surfaces join completely to 40 enumerated items.
+Attestation `sha256:e6f6a3769d617195ede51736d91a8026b7bf397c42ea60b1b174ef5161a8bdc7`.
+
+**A third sanctioned network observer, because two of them were the same substrate's.** The render path's
+no-network claim was proven by `unshare -n` or, failing that, by `strace` socket injection — both Linux kernel
+facilities, so a gate declaring substrate `none` had no observer at all on Apple and died on a missing
+executable before it could say so. Darwin's `sandbox-exec` with `(deny network*)` is the kernel-level
+counterpart and is now the third member of the sanctioned set. It is not taken on trust: the gate first runs a
+control that must be denied a socket, because a sandbox that is not actually denying would certify a render
+that reached the network. Each candidate is probed for existence before it is run, which is what the old
+`unshare` probe did not do.
+
+**And the fake boundary tools were Linux-only.** All four captured stdin with `/usr/bin/dd … status=none` — a
+path that does not exist on Darwin and a GNU flag BSD `dd` does not take. Each now resolves `cat` between the
+two absolute paths it can occupy and fails loudly if it finds neither, which keeps the invoke-by-absolute-path
+contract this fixture exists to observe while making it decidable everywhere.
+
+**Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
@@ -112,7 +132,7 @@ without running a single action, and the `renderChainPlan` / `--dry-run` rendere
 live apply would execute. The load-bearing claim is
 [conformance_harness_doctrine §3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)'s
 invariant: **rendering a plan never touches live infrastructure** — the render path is a pure function of
-committed source and completes with no apiserver, no credentials, no broker, no Vault. Because `[Step]` is a pure value, the `--dry-run` preview is byte-for-byte what a live apply would submit; both consume the same rendered value. `renderAll` contributes the complete desired object set, while Step construction retains each source's `RenderActivation`; the dry-run therefore shows later-stage objects and their readiness-gated action stage without implying they are eligible for the first generic apply. The effectful `runChainFromFrame` seam is *declared* here but its live invocation is out of scope — there is **no election, no standby, and no singleton runtime** in this phase.
+committed source and completes with no apiserver, no credentials, no broker, no Vault. Because `[Step]` is a pure value, the `--dry-run` preview is byte-for-byte what a live apply would submit; both consume the same rendered value. `renderAll` contributes the complete desired object set, while Step construction retains each source's `RenderActivation`; the dry-run therefore shows later-stage objects and their readiness-gated action stage without implying they are eligible for the first generic apply. The effectful `runChainFromFrame` seam is *declared* here but its live invocation is out of scope — there is **no election, no standby, and no control-plane daemon runtime** in this phase.
 
 **Part B (Register 2) — the boundary that executes the plan against fakes.** It delivers the single, thin IO seam
 through which the amoebius binary invokes every external tool (`src/Amoebius/Exec/Tool.hs`, the boundary
@@ -128,7 +148,7 @@ host's `PATH` — with the `helm` fake present only as a **negative control that
 What is *not* here: the effectful interpreter's *invocation* against a **real** cluster with **real** tools — the
 live SSA reconciler that replaces the fakes ([phase_31_object_reconciler.md](phase_31_object_reconciler.md)), and
 the runtime-enforcement claim that a cluster admits what the fakes accepted, exercised against the live
-Deployment-`replicas=1` singleton ([phase_38_live_dsl_singleton.md](phase_38_live_dsl_singleton.md)) — the
+Deployment-`replicas=1` control-plane daemon ([phase_38_live_dsl_deploy.md](phase_38_live_dsl_deploy.md)) — the
 Tier-2 residue this two-register gate leaves UNVERIFIED by construction. The deterministic-simulation activity
 that this boundary harness unblocks lives in [phase_16_deterministic_sim_substrate.md](phase_16_deterministic_sim_substrate.md).
 
@@ -152,7 +172,7 @@ and live-runtime residue.
 This section fixes the one shared interpretation of the gate's representative corpora, oracle pins, and seeded
 mutants, so two engineers implement the same gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clauses 1–8); it strengthens, never weakens, the Gate and sprint Validations above. Because this phase **merges**
 two former phases, it keeps **both** sources' committed fixtures, mutants, and oracles, **partitioned** into the
-two parts along the register seam: Part A owns the pure plan-render corpus under `test/kernel/`, Part B owns the
+two parts along the register seam: Part A owns the pure plan-render corpus under `test/spec/kernel/`, Part B owns the
 boundary corpus under `test/spec/boundary/`. All artifacts named here are authored and committed in this phase's oracle-pinning sprint before
 `Amoebius.Kernel.*` and `Amoebius.Exec.*` exist (the one exception is the executor-argv transcript of Part B,
 pinned at the start of Phase 15 before the executor — the §M.1 named exception).
@@ -182,19 +202,19 @@ flowchart LR
 ```
 *Orientation. The seams phase 15 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
 
-### Part A (Register 1) — the pure plan-render corpus (`test/kernel/`)
+### Part A (Register 1) — the pure plan-render corpus (`test/spec/kernel/`)
 
 - **Representative set (§M.7, concrete corpus).** Exactly two oracle-pinned raw cfg fixtures at
-  `test/kernel/fixtures/cfg/`, each passed through the real
+  `test/fixture/chain_boundary/cfg/`, each passed through the real
   decode→bind/expand→plan/resolve-infrastructure→provision path before `chain`: `multi.cfg.json` (≥ 2 frames,
   ≥ 3 declared services, with one service whose step is **out-of-frame** so its `stepRun` must never be reached)
   and `minimal.cfg.json` (one frame, one service). "Fixture chain" everywhere in this phase means `chain` applied
   to the resulting checked config containing its opaque `ProvisionedSpec` — the builder exercised end-to-end —
   never a hand-authored opaque witness or `[Step]` literal. A provision failure produces no plan. - **Oracle-pinning (§M.1).** The `--dry-run` plan goldens
-  (`test/kernel/fixtures/plan/{multi,minimal}.plan.golden`) and the descent goldens
-  (`test/kernel/fixtures/descent/{multi,minimal}.descent.golden`) are hand-authored and **committed in this phase's oracle-pinning sprint before `renderChainPlan` exists**; a golden regenerated from the renderer is not a test.
+  (`test/fixture/chain_boundary/plan/{multi,minimal}.plan.golden`) and the descent goldens
+  (`test/fixture/chain_boundary/descent/{multi,minimal}.descent.golden`) are hand-authored and **committed in this phase's oracle-pinning sprint before `renderChainPlan` exists**; a golden regenerated from the renderer is not a test.
 - **Independent step-set reference (§M.3).** The step-set reference is a hand-authored table
-  `test/kernel/fixtures/plan/expected_steps.json` (one entry per declared service/frame per cfg), authored from
+  `test/fixture/chain_boundary/plan/expected_steps.json` (one entry per declared service/frame per cfg), authored from
   the cfg by hand — **not** from `chain`'s output; the plan is asserted to contain exactly that step set
   structurally against the table, never read back off the plan golden.
 - **Cross-golden render identity (§M.3, independent oracle).** `chain` produces a pure `[Step]` value whose
@@ -204,7 +224,7 @@ flowchart LR
   golden-locked, so a corresponding whole-deployment `renderAll` golden exists for each fixture's
   `ProvisionedSpec`. The reference side is Phase 14's independently committed output, not the kernel's own.
 - **Committed mutants (§M.2), re-run every gate run.** `cabal test chain-spec` turns **red** on each of two
-  committed seeded mutants under `test/kernel/mutants/`: **m1** (`m1_cfg_drop_service`, cfg mutant removing one
+  committed seeded mutants under `test/mutant/chain_boundary/`: **m1** (`m1_cfg_drop_service`, cfg mutant removing one
   service from `multi.cfg.json` — plan and descent goldens must diverge) and **m2** (`m2_descent_inframe`,
   descent mutant weakening `nextFrameAfter` so the out-of-frame step is placed in-frame — the
   `descent/multi.descent.golden` byte-diverges; the zero-`stepRun` counter is invariant under m2, since no
@@ -299,7 +319,7 @@ flowchart LR
   the composite gate emits a per-run proven/tested/assumed ledger led by a Tier-2-UNVERIFIED banner, marking
   model↔runtime correspondence and runtime fidelity UNVERIFIED (owned by
   [phase_31_object_reconciler.md](phase_31_object_reconciler.md) and
-  [phase_38_live_dsl_singleton.md](phase_38_live_dsl_singleton.md)); fail-fast, no skips — a missing fake or a
+  [phase_38_live_dsl_deploy.md](phase_38_live_dsl_deploy.md)); fail-fast, no skips — a missing fake or a
   missing golden fails with an actionable error, never a pass-with-a-skip.
 
 ## Sprints
@@ -375,7 +395,7 @@ the chain into the lift/plan structure) — and only *declares* the effectful se
 Part B (Register 2) and Register 3.
 
 ### Deliverables
-- Pure `nextFrameAfter :: Frame -> [Step] -> Maybe Frame` and `foldLift :: cfg -> [Step] -> Plan`, neither carrying `IO`, computing the frame/step assignment and the fold-derived plan with no action run. - The effectful `runChainFromFrame` **declared** as the single IO seam, with an in-file honesty note that its *invocation* is out of scope in Part A — Part B exercises it against fake tools (Sprints 14.5–14.7) and Register 3 against the live Deployment-`replicas=1` singleton ([phase_38_live_dsl_singleton.md](phase_38_live_dsl_singleton.md)); there is no election or standby anywhere in
+- Pure `nextFrameAfter :: Frame -> [Step] -> Maybe Frame` and `foldLift :: cfg -> [Step] -> Plan`, neither carrying `IO`, computing the frame/step assignment and the fold-derived plan with no action run. - The effectful `runChainFromFrame` **declared** as the single IO seam, with an in-file honesty note that its *invocation* is out of scope in Part A — Part B exercises it against fake tools (Sprints 14.5–14.7) and Register 3 against the live Deployment-`replicas=1` control-plane daemon ([phase_38_live_dsl_deploy.md](phase_38_live_dsl_deploy.md)); there is no election or standby anywhere in
   the kernel.
 
 ### Validation
@@ -440,11 +460,11 @@ Done. Live execution remains UNVERIFIED.
 ## Sprint 15.4: The plan-render golden battery (`chain-spec`) — the Part-A gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/kernel/PlanSpec.hs`, the oracle-pinned fixtures under
-`test/kernel/fixtures/cfg/` (`multi.cfg.json`, `minimal.cfg.json`),
-`test/kernel/fixtures/plan/{multi,minimal}.plan.golden`,
-`test/kernel/fixtures/descent/{multi,minimal}.descent.golden`, the hand-authored step-set table
-`test/kernel/fixtures/plan/expected_steps.json`, and the committed mutants under `test/kernel/mutants/`
+**Implementation**: `test/spec/kernel/PlanSpec.hs`, the oracle-pinned fixtures under
+`test/fixture/chain_boundary/cfg/` (`multi.cfg.json`, `minimal.cfg.json`),
+`test/fixture/chain_boundary/plan/{multi,minimal}.plan.golden`,
+`test/fixture/chain_boundary/descent/{multi,minimal}.descent.golden`, the hand-authored step-set table
+`test/fixture/chain_boundary/plan/expected_steps.json`, and the committed mutants under `test/mutant/chain_boundary/`
 (`m1_cfg_drop_service`, `m2_descent_inframe`) — built and validated against the independently authored
 goldens and tables.
 **Blocked by**: None.
@@ -463,11 +483,11 @@ proves no action runs during render, emitting a Register-1 proven/tested/assumed
 correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Register 3).
 
 ### Deliverables
-- The oracle-pinned corpus: `test/kernel/fixtures/cfg/{multi,minimal}.cfg.json` (the representative set —
+- The oracle-pinned corpus: `test/fixture/chain_boundary/cfg/{multi,minimal}.cfg.json` (the representative set —
   `multi` has ≥ 2 frames, ≥ 3 services, one out-of-frame step; `minimal` has one frame/one service), the plan
   goldens, the descent goldens, and the hand-authored `expected_steps.json` step-set table — all authored and
   committed **before** the renderer exists (a golden regenerated from the implementation is not a test).
-- `test/kernel/PlanSpec.hs` asserting, for each fixture cfg: the `--dry-run` render of `chain cfg` equals its
+- `test/spec/kernel/PlanSpec.hs` asserting, for each fixture cfg: the `--dry-run` render of `chain cfg` equals its
   committed plan golden byte-for-byte; the manifest-bearing steps are identity-disjoint projections of one
   `renderAll` call and their union is byte-identical to the **Phase-14 committed whole-deployment golden** for the
   fixture `ProvisionedSpec` (independent cross-golden oracle); the `[Step]` step set equals `expected_steps.json`
@@ -478,8 +498,8 @@ correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Regis
   asserts the counter reads nonzero (proving the counter can detect an invocation and the zero-assertion is
   falsifiable). "Zero `stepRun` invocations" means the IO action is never executed — forcing/`deepseq`-ing the
   plan value (with `stepRun` excluded from `NFData`) is permitted and does not increment the counter.
-- The two committed seeded mutants: `test/kernel/mutants/m1_cfg_drop_service` (removes a service from
-  `multi.cfg.json` — plan and descent goldens must diverge) and `test/kernel/mutants/m2_descent_inframe` (weakens
+- The two committed seeded mutants: `test/mutant/chain_boundary/m1_cfg_drop_service` (removes a service from
+  `multi.cfg.json` — plan and descent goldens must diverge) and `test/mutant/chain_boundary/m2_descent_inframe` (weakens
   `nextFrameAfter` so the out-of-frame step is placed in-frame — the descent golden must byte-diverge; the
   zero-`stepRun` counter is invariant under m2, since no `stepRun` runs during render). The gate re-runs both;
   each MUST turn the suite red.
@@ -488,7 +508,7 @@ correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Regis
   `--dry-run` path reach no network/process/credential module.
 - A Register-1 ledger led by a Tier-2-UNVERIFIED banner: the plan is proven pure and exact in-process, but no
   runtime-enforcement or effectful-fidelity claim is made — that residue is Part B (fake-tool, Sprints 14.5–14.7)
-  and [phase_38_live_dsl_singleton.md](phase_38_live_dsl_singleton.md) (live singleton).
+  and [phase_38_live_dsl_deploy.md](phase_38_live_dsl_deploy.md) (live control-plane daemon).
 
 ### Validation
 1. `cabal test chain-spec`, run with credentials scrubbed and socket calls blocked and observed, is green. For each
@@ -602,7 +622,7 @@ Adopt [`testing_doctrine.md §2 — Register 2`](../documents/engineering/testin
 commands and applied bytes, and prove at the boundary that every tool was invoked by absolute path (the
 cross-cutting no-`PATH` invariant, [README.md](README.md)) — then emit the composite Register-1/2
 proven/tested/assumed ledger led by a Tier-2-UNVERIFIED banner (no cluster admitted anything; runtime enforcement
-is owned by [phase_38_live_dsl_singleton.md](phase_38_live_dsl_singleton.md) and the live apply by
+is owned by [phase_38_live_dsl_deploy.md](phase_38_live_dsl_deploy.md) and the live apply by
 [phase_31_object_reconciler.md](phase_31_object_reconciler.md)).
 
 ### Deliverables
@@ -757,5 +777,5 @@ Done. Checked-source runtime behavior remains UNVERIFIED.
 - [phase_19](phase_19_ui_program_schema.md) — the bounded UI source/checker phase that consumes the same
   pre-cluster Gate-1/Gate-2 discipline without adding a second boundary-runtime claim
 - [phase_31](phase_31_object_reconciler.md) — the live SSA reconciler that replaces the fakes with real tools
-- [phase_38](phase_38_live_dsl_singleton.md) — Register 3 runs the chain via the Deployment-`replicas=1` singleton
+- [phase_38](phase_38_live_dsl_deploy.md) — Register 3 runs the chain via the Deployment-`replicas=1` control-plane daemon
   (no election); the Tier-2 runtime-enforcement half this two-register gate leaves UNVERIFIED

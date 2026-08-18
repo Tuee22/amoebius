@@ -30,7 +30,7 @@ derivePolicyEdges graph
     | (consumer, providers) <- Map.toList graph
     , provider <- Set.toList providers
     ]
-#ifdef PHASE32_NETPOL_SWAP_MUTANT
+#ifdef KEYCLOAK_INGRESS_NETPOL_SWAP_MUTANT
   effectiveEdges rows = Set.insert (PolicyEdge "undeclared" "vault") (Set.delete (PolicyEdge "envoy" "keycloak") rows)
 #else
   effectiveEdges = id

@@ -16,7 +16,7 @@ newtype Registrations = Registrations (Set ProgramEpoch) deriving stock (Eq, Sho
 registrations :: [ProgramEpoch] -> Registrations
 registrations = Registrations . Set.fromList
 drainEpoch :: ProgramEpoch -> Registrations -> Registrations
-#ifdef PHASE57_STALE_REGISTRATION_MUTANT
+#ifdef UI_ROLLOUT_RECONNECT_STALE_REGISTRATION_MUTANT
 drainEpoch _ values = values
 #else
 drainEpoch epoch (Registrations values) = Registrations (Set.delete epoch values)

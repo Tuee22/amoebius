@@ -1,11 +1,11 @@
 # Phase 46: WireGuard network fabric
 
-> **Purpose**: Stand up the raw-kernel WireGuard fabric configured directly by amoebius — Vault-KV Curve25519 peer keys named by `SecretRef`, per-peer config *rendered* from the node inventory and reconciled by the singleton, a hub bound to the gateway *role* — so every cluster (root included) draws a VPN IP from the root-deployed gateway and the hub is reachable across the fabric.
+> **Purpose**: Stand up the raw-kernel WireGuard fabric configured directly by amoebius — Vault-KV Curve25519 peer keys named by `SecretRef`, per-peer config *rendered* from the node inventory and reconciled by the control-plane daemon, a hub bound to the gateway *role* — so every cluster (root included) draws a VPN IP from the root-deployed gateway and the hub is reachable across the fabric.
 > **Read this if**: phase 46 is next in the queue, or a later phase depends on what its gate establishes.
 
 Phase 46 delivers the WireGuard network fabric; its design is owned by [network_fabric_doctrine.md](../documents/engineering/network_fabric_doctrine.md), [vault_pki_doctrine.md](../documents/engineering/vault_pki_doctrine.md), [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-11 with `python3 tools/phase41_gate.py --reuse-fresh-live`;
+Validated 2026-08-11 with `python3 tools/network_fabric_wireguard_gate.py --reuse-fresh-live`;
 ledger `external-run-reference`.
 Every hardware substrate always supplies this `linux-cpu` lane. When a pristine Linux host is needed, use
 Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
@@ -87,7 +87,7 @@ Its three obligations map onto machinery amoebius already owns:
 - (2) **peer config** is `render(nodeInventory) -> [WireGuardPeerConfig]`, the pure-`render()` discipline
   lifted to `wg` config, so a keyless peer is type-foreclosed (unrepresentable) and overlapping VPN IPs / an
   `AllowedIPs` outside the fabric CIDR are decode-foreclosed (a total fold returning `Left`)
-- (3) **distribution** is the singleton's ordinary `discover (wg show) → diff against render(inventory) →
+- (3) **distribution** is the control-plane daemon's ordinary `discover (wg show) → diff against render(inventory) →
   enact (wg set)` reconcile — no Netmaker agent, no second control server, no MQTT push channel, no second
   state store.
 
@@ -100,7 +100,7 @@ The design half of the render obligation is discharged in the pre-cluster band (
 `none`): the typed decoder (Phase 6), the illegal-state corpus (Phase 7), and the pure `renderAll` manifest goldens
 (Phase 14) already establish, in-process, that a keyless peer will not construct and an overlapping-IP peer set
 will not decode. Phase 46 adds the **runtime residue**: a real `wg0` interface on each node, brought up by the
-singleton reconcile, over which a spoke actually reaches the hub at its VPN IP. VPN-IP allocation is by disjoint
+control-plane daemon reconcile, over which a spoke actually reaches the hub at its VPN IP. VPN-IP allocation is by disjoint
 per-cluster sub-ranges of the fabric CIDR — the same disjoint-namespace allocation the failover doctrine uses,
 so two clusters can never mint the same VPN IP (confluent by construction). The cross-cluster **broker↔broker**
 geo-replication wire is *not* delivered here — its per-peer `render()` obligation is deferred to Phase 47; the
@@ -118,7 +118,7 @@ network namespace on that host. No apple, linux-cuda, or windows substrate is ex
 the model in the pre-cluster band; the runtime layer (the tunnel coming up and carrying traffic) and live
 resource-control/readback layer are **tested** on linux-cpu, never *proven*.
 
-**Gate:** on the linux-cpu host the singleton renders each peer config from Vault-KV keys named by
+**Gate:** on the linux-cpu host the control-plane daemon renders each peer config from Vault-KV keys named by
 `SecretRef` only and reconciles raw-kernel WireGuard until an external observer sees the spoke reach the
 gateway-role hub at its VPN IP. [Gate integrity](#gate-integrity) itemises the apparatus.
 
@@ -130,7 +130,7 @@ when every clause below holds. Its single acceptance condition unfolds into five
 topology-expanded fabric-system demand fits the current node residual and yields a snapshot-bound single-use
 enactment token before any `ip`/`wg`/traffic-control/listener change. A **committed golden** pins the
 rendered peer config. The **hub-role attach is asserted by an external-observer reachability probe over the
-VPN IP**, an OS-level connect plus underlay packet capture rather than a singleton self-report. **≥2
+VPN IP**, an OS-level connect plus underlay packet capture rather than a control-plane daemon self-report. **≥2
 committed seeded mutants** — a missing/rotated peer key, or a hub-role config that omits its `Endpoint` —
 MUST turn the gate red. And **secrets-in-Dhall is foreclosed**, an inline key literal being rejected because
 peer keys are `SecretRef` names.
@@ -169,23 +169,23 @@ flowchart LR
   subtracts each result once as the named `InfrastructureReserve.NetworkFabric` before pod placement and
   proves it fits the enclosing kind-node runtime; it is neither an invented pod nor added again to the host
   engine reserve. A validated result mints one `ValidatedFabricEnactment` bound to the complete topology,
-  resource, nodefs, kernel-interface, queue, and listener fingerprint. The singleton re-observes that
+  resource, nodefs, kernel-interface, queue, and listener fingerprint. The control-plane daemon re-observes that
   fingerprint immediately before the first `ip`/`wg`/traffic-control/listener mutation; mismatch or overdraw
   discards the plan with zero such effects.
 - **oracle-pinned oracle (§M.1).** The positive fixture `dhall/examples/wireguard_fabric.dhall`, the committed
-  rendered-config golden `test/fixtures/phase41/expected-peer-config.golden` (key fields carried as `SecretRef`
+  rendered-config golden `test/fixture/network_fabric_wireguard/expected-peer-config.golden` (key fields carried as `SecretRef`
   names, *not* key material — with the AllowedIPs, per-peer VPN-IP, and hub `Endpoint` pinned), the expected
-  topology/resource expansion `test/fixtures/phase41/expected-fabric-demand.json`, the reachability matrix
-  `test/fixtures/phase41/reachability-expected.json`, and the negative corpus's expected
-  foreclosure-tag table `test/fixtures/phase41/negative-expected-tags.tsv` (hand-authored, independent of the
+  topology/resource expansion `test/fixture/network_fabric_wireguard/expected-fabric-demand.json`, the reachability matrix
+  `test/fixture/network_fabric_wireguard/reachability-expected.json`, and the negative corpus's expected
+  foreclosure-tag table `test/fixture/network_fabric_wireguard/negative-expected-tags.tsv` (hand-authored, independent of the
   renderer's own output — §M.3) are all **committed in this phase's oracle-pinning sprint before** `Fabric.hs`/`WgRender.hs`/`WgReconcile.hs`
   exist; none is regenerated from implementation output.
 - **External-observer reachability, not a self-report (§M.5).** The hub-attach claim is read from an observer at
   the OS boundary: (a) the spoke netns issues a real transport probe (an ICMP echo *and* a TCP connect) to the
   hub's VPN-IP and the connect succeeds; (b) a `tcpdump` capture on the **underlay** interface shows the traffic
   as WireGuard UDP (encrypted), never cleartext application bytes; (c) the effective interface state is read
-  from the kernel via `wg show` (the OS boundary), never from a status line the singleton emits about itself. A
-  run in which reachability is asserted only by a singleton log/metric fails.
+  from the kernel via `wg show` (the OS boundary), never from a status line the control-plane daemon emits about itself. A
+  run in which reachability is asserted only by a control-plane daemon log/metric fails.
 - **External-observer resource enforcement.** The same OS-boundary artifact reads the listener cgroup's
   CPU/memory reservation and hard ceilings, effective `tc` packet-rate and queue-byte controls, rotated-log
   maximum/count/age and nodefs high-water mark, and the effective interface/peer state. Rate/queue enforcement
@@ -193,9 +193,9 @@ flowchart LR
   assumed. Every value must equal the provisioned per-node operands, and a stress pass must remain within the
   admitted high-water marks.
 - **Committed seeded mutants (§M.2).** The gate names **≥2 committed seeded mutants** that MUST turn it red: a
-  **missing/rotated peer key** mutant `test/fixtures/phase41/mutants/missing-peer-key.patch` (the spoke's
+  **missing/rotated peer key** mutant `test/fixture/network_fabric_wireguard/mutants/missing-peer-key.patch` (the spoke's
   `SecretRef` resolves to no live Vault-KV entry — reconcile cannot bring `wg0` up and the reachability probe
-  fails), and a **dropped-field** mutant `test/fixtures/phase41/mutants/hub-no-endpoint.patch` (the hub-role
+  fails), and a **dropped-field** mutant `test/fixture/network_fabric_wireguard/mutants/hub-no-endpoint.patch` (the hub-role
   peer config omits its `Endpoint`, so the spoke has no address to reach and the probe fails). Both are committed
   and re-run each gate. The same Phase-0 bundle pins `drop-resource-envelope.patch` and
   `early-listener-replacement.patch`; they must fail resource projection/readback even when reachability would
@@ -215,11 +215,11 @@ demand over the exact peer graph. For each node it retains the content digest an
 host listener executable (there is no OCI image for this host process), Linux-cgroup-v2 CPU/memory
 reservation and ceiling, queue memory, bounded temporary/writable state, active-plus-rotated log bytes and
 their nodefs backing, packet/queue concurrency, and the interface/listener identity. The small amount of
-fabric-render/diff work performed by the already-existing Phase-38 singleton is added to that singleton's
+fabric-render/diff work performed by the already-existing Phase-38 control-plane daemon is added to that control-plane daemon's
 existing container CPU/memory/ephemeral/log/mapped-file envelope; it does **not** create a fabric controller
 pod or a second pod/IP/CSI debit. The Vault server is a surviving service whose full envelope/storage is
 already in the same live snapshot; key mint/read request buffers and CPU are charged to Vault and the
-singleton client, not to a fictitious key-agent Pod. The phase introduces no durable volume, cache,
+control-plane daemon client, not to a fictitious key-agent Pod. The phase introduces no durable volume, cache,
 accelerator, or VRAM demand.
 
 The v1 transition is in-place for peer/config changes: one interface and one listener remain live. A listener
@@ -240,13 +240,13 @@ logical quota and backend/WAL/snapshot state must equal the witness. One-byte lo
 before kernel mutation.
 
 Only the opaque whole-deployment provision result may project the listener cgroup, executable path, `tc`
-settings, log policy, and singleton resource delta. Immediately before enactment, and again after it, the
-gate reads the live process/cgroup, executable digest, nodefs high-water, interface/socket, and singleton Pod
+settings, log policy, and control-plane daemon resource delta. Immediately before enactment, and again after it, the
+gate reads the live process/cgroup, executable digest, nodefs high-water, interface/socket, and control-plane daemon Pod
 resources and compares them exactly with that projection. Independent one-unit-short CPU reservation,
 CPU ceiling, memory reservation, memory ceiling, queue, writable/log/nodefs, host-process-slot, and harness
 capture-space fixtures return their tagged `Left` with zero fabric effects. A committed dropped-envelope
 mutant that starts the listener or probe without its resource row
-(`test/fixtures/phase41/mutants/drop-resource-envelope.patch`), and a replacement-overlap mutant that starts
+(`test/fixture/network_fabric_wireguard/mutants/drop-resource-envelope.patch`), and a replacement-overlap mutant that starts
 the new listener before the old PID is observed absent (`early-listener-replacement.patch`), must both turn
 the gate red.
 
@@ -260,7 +260,7 @@ the gate red.
   peer keys are a **Vault-KV Curve25519 secret class** under the secrets-by-name + parent-injection model (not
   PKI certs, never gating an unseal); peer config is the pure `render(nodeInventory) -> [WireGuardPeerConfig]`
   (keyless peer type-foreclosed, overlapping IP / out-of-CIDR `AllowedIPs` decode-foreclosed); distribution is
-  the singleton's `wg show → diff → wg set` reconcile, not an agent.
+  the control-plane daemon's `wg show → diff → wg set` reconcile, not an agent.
 - [`network_fabric_doctrine.md §4` — Topology: the hub is the gateway role](../documents/engineering/network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it):
   the hub is bound to the gateway *role* at a stable VPN-IP + `Endpoint`, VPN-IP allocation is by disjoint
   per-cluster ranges (confluent by construction), and for the attach topology the home cluster is the hub. This
@@ -276,7 +276,7 @@ the gate red.
   WireGuard peer keys are custodied as a **Vault-KV Curve25519 secret class** named by `SecretRef` — Vault mints
   and parent-injects each keypair; they are never X.509 PKI certs and never gate an unseal.
 - [`manifest_generation_doctrine.md §2` — The typed manifest model: `renderAll` is the sole public pure function to objects](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects):
-  the peer config is a pure-`render()` product reconciled by the singleton like any other manifest, with keyless
+  the peer config is a pure-`render()` product reconciled by the control-plane daemon like any other manifest, with keyless
   and overlapping-IP peers foreclosed.
 - [`resource_capacity_doctrine.md` §3–§4 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
   the raw `NetworkFabricSystemDemand` is an input to provisioning, not a free fixed subtraction; its private
@@ -325,7 +325,7 @@ rendered config (Sprint 46.2) stands on.
 1. A minted peer keypair is readable from Vault-KV by `SecretRef` name through the Phase-34 client, and no key
    bytes appear in any committed `.dhall` — the schema field is a `SecretRef` name. The inline-key-literal
    negative fixture fails at Gate 1/Gate 2 with the exact tag committed in
-   `test/fixtures/phase41/negative-expected-tags.tsv`, and its matched positive (same peer, key by `SecretRef`
+   `test/fixture/network_fabric_wireguard/negative-expected-tags.tsv`, and its matched positive (same peer, key by `SecretRef`
    name) decodes.
 2. A `SecretRef` naming an absent/rotated KV entry yields a specific-reason resolution error (never an empty or
    default key), so the missing-key mutant of the gate (Sprint 46.3) has a defined failure to trip on.
@@ -338,7 +338,7 @@ None for this sprint.
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Fabric/WgRender.hs` (`render(nodeInventory) ->
 [WireGuardPeerConfig]`, the pure total render lifted from the Phase-14 goldens);
-`src/Amoebius/Fabric/WgReconcile.hs` (the singleton's `discover (wg show) → diff → enact (wg set)` reconcile
+`src/Amoebius/Fabric/WgReconcile.hs` (the control-plane daemon's `discover (wg show) → diff → enact (wg set)` reconcile
 of `wg0`) — built and validated.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `render(wireguard_fabric.dhall)` is **byte-identical to the committed golden**,
@@ -353,7 +353,7 @@ fabric demand is admitted. The numbered Validation list below states each check.
 Adopt [`network_fabric_doctrine.md §3`](../documents/engineering/network_fabric_doctrine.md#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)
 and [`§4`](../documents/engineering/network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it):
 render each peer config purely and totally from the node inventory (VPN IPs drawn from disjoint per-cluster
-ranges, the hub keyed by the gateway role), and distribute it as the singleton's ordinary `wg show → diff →
+ranges, the hub keyed by the gateway role), and distribute it as the control-plane daemon's ordinary `wg show → diff →
 wg set` reconcile — no Netmaker agent, no side channel.
 
 ### Deliverables
@@ -363,7 +363,7 @@ wg set` reconcile — no Netmaker agent, no side channel.
   `Endpoint`; VPN-IP allocation is disjoint-per-cluster (confluent by construction).
 - The committed golden `expected-peer-config.golden` pinning the rendered config (secrets as `SecretRef` names,
   not key bytes) — the render is asserted byte-identical to it.
-- The singleton's `wg` reconcile: `discover` reads live interface state via `wg show`, `diff` against
+- The control-plane daemon's `wg` reconcile: `discover` reads live interface state via `wg show`, `diff` against
   `render(inventory)`, `enact` via `wg set` — idempotent, driven only by observed kernel state, with `wg0`-bound
   listeners never bound to `0.0.0.0`/LAN/WAN ([`§5`](../documents/engineering/network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric)).
 - The exact capacity boundary:
@@ -412,12 +412,12 @@ None for this sprint.
 ## Sprint 46.3: Phase gate harness — live fabric + external-observer reachability over the VPN IP ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/integration/NetworkFabricGate.hs` plus `tools/phase41_{wireguard_live,gate}.py` (linux-cpu two-peer fabric spin-up
+**Implementation**: `test/spec/integration/NetworkFabricGate.hs` plus `tools/phase41_{wireguard_live,gate}.py` (linux-cpu two-peer fabric spin-up
 / reconcile / reachability probe / teardown); the reused negative corpus under
 `dhall/examples/illegal_wg_*.dhall` — built and validated.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the harness stands the two-peer fabric up, reconciles `wg0` on each node, and
-proves the spoke reaches the hub at its VPN IP by external observation rather than a singleton self-report;
+proves the spoke reaches the hub at its VPN IP by external observation rather than a control-plane daemon self-report;
 the fabric reserve is admitted against a fresh fingerprint before any mutation, and teardown leaks nothing.
 The numbered Validation list below states each check.
 **Docs to update**: `DEVELOPMENT_PLAN/substrates.md`,
@@ -426,7 +426,7 @@ gate passes).
 
 ### Objective
 Adopt [`network_fabric_doctrine.md §2`](../documents/engineering/network_fabric_doctrine.md#2-raw-wireguard-not-netmaker)–[`§5`](../documents/engineering/network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric):
-assemble the phase's single live acceptance gate — the singleton renders each peer config from Vault-KV
+assemble the phase's single live acceptance gate — the control-plane daemon renders each peer config from Vault-KV
 Curve25519 keys (secrets by name) and reconciles raw-kernel WireGuard so every peer draws its VPN IP from the
 gateway-role hub and the hub is reachable across the fabric — and prove that reach with an external-observer
 probe over the VPN IP, not a self-report.
@@ -440,17 +440,17 @@ probe over the VPN IP, not a self-report.
 - The negative regression guard: the inline-key-literal (secrets-in-Dhall), overlapping-VPN-IP, and
   out-of-CIDR-`AllowedIPs` fixtures re-run against the same render entry point, each failing at Gate 1/Gate 2
   with its foreclosure tag equal to the oracle-pinned hand-authored oracle
-  `test/fixtures/phase41/negative-expected-tags.tsv` (§M.3/§M.8), each paired with a positive differing only in
+  `test/fixture/network_fabric_wireguard/negative-expected-tags.tsv` (§M.3/§M.8), each paired with a positive differing only in
   the foreclosed dimension.
-- **Committed seeded mutants (§M.2):** `test/fixtures/phase41/mutants/missing-peer-key.patch` (the spoke's
+- **Committed seeded mutants (§M.2):** `test/fixture/network_fabric_wireguard/mutants/missing-peer-key.patch` (the spoke's
   `SecretRef` resolves to no live Vault-KV entry — `wg0` never comes up, the probe fails red) and
-  `test/fixtures/phase41/mutants/hub-no-endpoint.patch` (the hub-role config omits its `Endpoint` — the spoke
+  `test/fixture/network_fabric_wireguard/mutants/hub-no-endpoint.patch` (the hub-role config omits its `Endpoint` — the spoke
   has no hub address, the probe fails red) — both committed and re-run each gate, each asserted to turn the gate
   red.
 - The **oracle-pinned oracle bundle** committed before any implementation exists:
   `dhall/examples/wireguard_fabric.dhall`, `expected-peer-config.golden`,
   `expected-fabric-demand.json`, `reachability-expected.json`, and `negative-expected-tags.tsv` (under
-  `test/fixtures/phase41/`).
+  `test/fixture/network_fabric_wireguard/`).
 - The pre-effect negative bundle: CPU reservation/ceiling, memory reservation/ceiling, queue-state memory, and
   rotated nodefs demand each exceed the current residual by exactly one unit; an expansion omits one rendered
   peer; and a validated fingerprint changes before enactment. Each must return its committed specific reason
@@ -466,14 +466,14 @@ probe over the VPN IP, not a self-report.
 
 ### Validation
 1. The harness stands the two-peer fabric — the gateway-role hub and one spoke, each in its own Linux network
-   namespace on the linux-cpu host — up from `dhall/examples/wireguard_fabric.dhall`. The singleton renders
+   namespace on the linux-cpu host — up from `dhall/examples/wireguard_fabric.dhall`. The control-plane daemon renders
    config byte-identical to `expected-peer-config.golden` and
    expands capacity byte-identically to `expected-fabric-demand.json`; the provisioned node/peer rows exactly
    cover the topology; and the current-residual fingerprint yields one `ValidatedFabricEnactment`. It reconciles
    `wg0` on both peers; the spoke's external-observer probe reaches the hub at its VPN-IP matching
-   `test/fixtures/phase41/reachability-expected.json` (an OS-level ICMP echo and TCP connect from the spoke
+   `test/fixture/network_fabric_wireguard/reachability-expected.json` (an OS-level ICMP echo and TCP connect from the spoke
    netns succeed, an underlay `tcpdump` capture shows WireGuard UDP and never cleartext application bytes, and
-   effective peer state is read from `wg show` — the kernel, never a singleton self-report — §M.5). Read back
+   effective peer state is read from `wg show` — the kernel, never a control-plane daemon self-report — §M.5). Read back
    CPU/memory cgroup controls, packet-rate/queue bounds, rotated-log policy
    and nodefs high-water, listener bind, and peer graph exactly; the `missing-peer-key` and `hub-no-endpoint`
    mutants each turn this red.
@@ -504,7 +504,7 @@ None for this sprint. The Phase-47/48 and stretched-control-plane surfaces named
 - `documents/engineering/vault_pki_doctrine.md` — record that WireGuard peer keys landed as a Vault-KV
   Curve25519 secret class named by `SecretRef` (not PKI certs, not an unseal gate), minted and parent-injected.
 - `documents/engineering/manifest_generation_doctrine.md` — record that the peer config is a pure-`render()`
-  product reconciled by the singleton like any other manifest, with keyless / overlapping-IP peers foreclosed.
+  product reconciled by the control-plane daemon like any other manifest, with keyless / overlapping-IP peers foreclosed.
 - `documents/engineering/testing_doctrine.md` — record the Register-3 ledger variant this gate emits (runtime
   tunnel and resource-control/readback *tested*; broker↔broker geo-replication and gateway-migration repoint
   UNVERIFIED).
@@ -533,6 +533,6 @@ None for this sprint. The Phase-47/48 and stretched-control-plane surfaces named
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — the pure fabric-system
   demand, topology expansion, one-time named reserve debit, and pre-effect admission contract
 - [phase_34](phase_34_vault_pki.md) — the root Vault + `SecretRef`-by-name client custodying the peer keys
-- [phase_38](phase_38_live_dsl_singleton.md) — the control-plane singleton whose reconcile enacts the fabric
+- [phase_38](phase_38_live_dsl_deploy.md) — the control-plane daemon whose reconcile enacts the fabric
 - [phase_47](phase_47_multicluster_spawn_georepl.md) — multi-cluster spawn + geo-replication (the deferred broker↔broker per-peer render obligation)
 - [phase_48](phase_48_gateway_migration_drills.md) — the gateway migration that later repoints the WireGuard hub

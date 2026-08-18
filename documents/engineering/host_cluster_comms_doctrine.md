@@ -17,7 +17,7 @@ Reading it presumes the context and role grid of
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_37_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_37_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -66,7 +66,7 @@ what actually requires privilege — opening a TCP connection to `127.0.0.1:<nod
 the daemon's channel-2 credentials (the sudo host-daemon's kubeconfig / injected secrets) is root-gated — **not**
 on any assumption that a loopback NodePort is unreachable by an unprivileged local process.
 
-These two channels and the "coordination *is* Pulsar + MinIO" rule ([§3](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)) govern the **workload plane** only; the operator admin control plane (Vault init/unseal, delivering a new `.dhall`) rides a distinct privileged REST channel owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
+These two channels and the "coordination *is* Pulsar + MinIO" rule ([§3](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)) govern the **workload plane** only; the operator admin control plane (Vault init/unseal, delivering a new `.dhall`) rides a distinct privileged REST channel owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api).
 
 Channel 2's "localhost-only" is the *steady-state, single-host* form of a more general boundary. When remote
 elastic compute must reach the home cluster's one Pulsar/MinIO across an untrusted network, the same channel
@@ -133,7 +133,7 @@ Concretely:
   (see [platform_services_doctrine.md §4](./platform_services_doctrine.md#4-minio--the-object-substrate) and [§6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)).
 - **The host daemon and an in-cluster worker are the same kind of thing.** A daemon is a worker role that
   happens to run on the host for hardware reasons; its *coordination* is identical to a worker Pod's. The
-  daemon roles, the control-plane singleton's authority, and its single-instance delegation are owned by
+  daemon roles, the control-plane daemon's authority, and its single-instance delegation are owned by
   [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) — this doc does not restate them; it only
   fixes *the wire they ride on*.
 - **The line-74 sub-question is answered the same way.** "Should host↔service access pass back through
@@ -155,7 +155,7 @@ WebSocket terminated by replicated UI servers; that path never reaches a host wo
 **This is a workload-plane rule, not an admin-plane one** — [§1](#1-the-host-origin-surface-two-channels-both-localhost-only) draws that split up front. The operator admin control plane it excludes — administering the cluster's own configuration
 (Vault init/unseal, delivering a new `.dhall`), a *control* concern rather than worker coordination — rides the
 distinct privileged REST channel (the operator CLI → the amoebius NodePort service → the control-plane
-singleton), owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
+control-plane daemon), owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api).
 That channel is privileged, not wild (so it is not a Keycloak bypass, [§1](#1-the-host-origin-surface-two-channels-both-localhost-only)),
 and channel 1 ([§4](#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls)) is retired to
 bootstrap-only once it takes over. The "no bespoke channel" verdict here is about the *bulk worker wire*, which
@@ -173,10 +173,10 @@ identity; it consumes the distro's kubeconfig and talks to the apiserver like an
 - **This is the *control* path, not a data path.** It applies manifests, reads cluster state, and drives
   reconciliation. Bulk artifact/event traffic never rides the apiserver — that is channel 2's job.
 - **It is the binary's distinguishing privilege.** The host binary (in its sudo host-daemon context) is the
-  bootstrap and total-authority root; the in-cluster control-plane singleton's authority is owned
+  bootstrap and total-authority root; the in-cluster control-plane daemon's authority is owned
   by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md). This doc only records that channel 1's
   transport is "whatever mTLS the distro already created," not an amoebius-bespoke scheme.
-- **Provider-managed clusters have no channel 1.** On EKS there is no host and no host binary; the in-cluster stateless singleton reaches its own control plane instead. The
+- **Provider-managed clusters have no channel 1.** On EKS there is no host and no host binary; the in-cluster stateless control-plane daemon reaches its own control plane instead. The
   per-distro split is owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md); this doc's
   host-channel rules apply only where a host binary exists.
 
@@ -237,7 +237,7 @@ The three normative points of the generalization — the `wg0`-binding, the stil
 - **`wg0`-binding.** Channel 2's listener binds `wg0`, reachable only by a Vault-keyed peer; this doc owns
   only that channel 2 *may ride* the fabric. **Host-comms carve-out:** the operator **admin** plane's reach —
   node-local for seal-critical operations, only *optionally* the fabric post-unseal — is owned by
-  [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api), **not** here; do not read this channel-2 generalization as the owner of the admin NodePort's reach.
+  [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api), **not** here; do not read this channel-2 generalization as the owner of the admin NodePort's reach.
 - **mTLS stays rejected over the WAN.** WireGuard's peer auth + tunnel encryption supply the "attacker cannot
   reach the wire" property localhost gave, so the Pulsar/MinIO wire stays **mTLS-free** and the
   [§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) high-bandwidth-bulk economics survive — the boundary moved, the per-byte crypto tax did not return.
@@ -348,7 +348,7 @@ secrets-by-name, never the method.
 | The two host-origin channels and that both are localhost-only | — |
 | The resolution of the line-27 / line-74 open question (host-only NodePort, no mTLS) and its rationale | — |
 | Why no mTLS is safe (network-restriction threat model) and why no crypto/socket (bandwidth) | — |
-| "No bespoke control channel; coordination is Pulsar/MinIO" as the host-comms wire rule | Daemon roles, control-plane singleton, single-instance delegation → [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
+| "No bespoke control channel; coordination is Pulsar/MinIO" as the host-comms wire rule | Daemon roles, control-plane daemon, single-instance delegation → [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | The host-only network-restriction requirement each substrate must meet | The substrate catalog, virtualized substrates, no-env/PATH contract → [substrate_doctrine.md](./substrate_doctrine.md) |
 | That channel-2 transport is plain Pulsar/MinIO peering | The native-protocol client, no-WebSockets, topology algebra → [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | Naming the one carve-out from Keycloak-owns-all-ingress | The wild-ingress rule itself → [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) |

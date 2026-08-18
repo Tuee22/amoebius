@@ -61,7 +61,7 @@ resumeOffset = length . receivedChunks
 verifyContent :: BlobId -> UploadState -> Either BlobError UploadState
 verifyContent _callerClaim state
   | length (receivedChunks state) /= expectedChunks state = Left IncompleteUpload
-#ifdef PHASE62_TRUST_CALLER_DIGEST_MUTANT
+#ifdef OFFLINE_BLOBS_ISOLATION_TRUST_CALLER_DIGEST_MUTANT
   | _callerClaim == expectedBlob state = Right state {contentVerified = True}
 #else
   | blobId content == expectedBlob state = Right state {contentVerified = True}
@@ -71,7 +71,7 @@ verifyContent _callerClaim state
     content = concatMap snd (sortOn fst (receivedChunks state))
 
 releaseDependent :: UploadState -> Bool
-#ifdef PHASE62_REPLAY_BEFORE_VERIFICATION_MUTANT
+#ifdef OFFLINE_BLOBS_ISOLATION_REPLAY_BEFORE_VERIFICATION_MUTANT
 releaseDependent _ = True
 #else
 releaseDependent = contentVerified
@@ -80,13 +80,13 @@ releaseDependent = contentVerified
 blobQuota :: Int -> Int -> Int -> Bool -> BlobQuotaOutcome
 blobQuota budget used requested _depended
   | used + requested <= budget = BlobStored
-#ifdef PHASE62_SILENT_BLOB_EVICTION_MUTANT
+#ifdef OFFLINE_BLOBS_ISOLATION_SILENT_BLOB_EVICTION_MUTANT
   | _depended = BlobDependencyEvicted
 #endif
   | otherwise = BlobQuotaRefused
 
 publicLocalHandles :: [String]
-#ifdef PHASE62_EXPOSE_OPFS_HANDLE_MUTANT
+#ifdef OFFLINE_BLOBS_ISOLATION_EXPOSE_OPFS_HANDLE_MUTANT
 publicLocalHandles = ["opfs://raw-local-handle"]
 #else
 publicLocalHandles = []

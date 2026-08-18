@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "_comment": [
     "Authored toolchain compatibility requirements. This file states what amoebius needs;",
     "it never states what a particular host resolved. No entry may carry an executable path,",
@@ -7,8 +7,16 @@
     "observations written to .build/toolchain/ by tools/toolchain.py and attached to the local run",
     "evidence (repository_layout_doctrine.md section 4).",
     "",
+    "There is no 'expected on the developer host' source kind. A tool with a supported install",
+    "plan is ensured -- probed, installed when absent, resolved to an absolute path, and invoked",
+    "by it (substrate_doctrine.md section 3). What the operator must already supply is the floor",
+    "below, and nothing else (substrate_doctrine.md section 3.1).",
+    "",
     "source kinds:",
-    "  host           the tool is expected on the developer host; resolution finds it on PATH",
+    "  managed        the tool is supplied by another resolved provider, which is asked what it",
+    "                 can supply, told to supply it when it has not, and then asked where it put",
+    "                 it. `provider` names the provider; the closed set is ghcup, playwright, and",
+    "                 package-manager (the floor's own package-manager root)",
     "  node-package   the tool ships inside a package.json dependency; resolution finds it in",
     "                 the installed node_modules tree",
     "  github-release the tool is published as a release asset; resolution asks the project for",
@@ -16,68 +24,215 @@
     "  hackage        the tool is a Haskell package installed by the resolved cabal",
     "  kubernetes-release  the tool is published on dl.k8s.io behind a release channel; resolution",
     "                 reads the channel, then fetches the binary and the publisher's own checksum",
-    "  ghcup-managed  the tool is installed by the resolved ghcup; resolution asks ghcup which",
-    "                 versions it can supply and takes the newest that satisfies the requirement",
+    "",
+    "Every platform key in this file is the one canonical <os>-<arch> token of",
+    "tools/host_platform.py: the system's own lowercase name joined to the closed lane",
+    "architecture vocabulary (amd64 | arm64). No entry spells an architecture any other way.",
     "",
     "The Bootstrap Coordinator acquires ghcup, kubectl, and kind on a pristine host before any",
     "amoebius binary exists, so it reads these same authored requirements and writes its own",
     "run-local resolution to .build/toolchain/. Every checksum it uses is the publisher's, fetched",
     "in the same run; none is retained here."
   ],
+  "floor": {
+    "_comment": [
+      "The per-substrate floor of substrate_doctrine.md section 3.1: what only the operator can",
+      "supply, because it cannot be installed through a resolved tool. Three classes belong here",
+      "and no others -- the package-manager root, a hardware or firmware fact, and a credentialed",
+      "account. Each entry carries the remedy that clears it, so a failure is a value rather than",
+      "a crash, and the whole floor stays decidable for a substrate the running host is not.",
+      "",
+      "probe kinds:",
+      "  executable  the first of `paths` that is a file the invoking user can execute",
+      "  present     the first of `paths` that exists; for a node that is read, never run",
+      "  command     `argv` runs and exits zero",
+      "  architecture  the host architecture equals `expect`",
+      "  writable    the first of `paths` that exists and is writable by the invoking user",
+      "  manual      nothing on this host can decide it; it is declared so it is named, not assumed"
+    ],
+    "apple": [
+      {
+        "id": "apple.package-manager-root",
+        "required_for": "every ensured tool, and the Lima frame",
+        "probe": {"kind": "executable", "paths": ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"]},
+        "remedy": "install Homebrew from https://brew.sh; amoebius verifies the root and never installs it"
+      },
+      {
+        "id": "apple.command-line-tools",
+        "required_for": "the fixed Metal bridge, git, and every on-host source build",
+        "probe": {"kind": "command", "argv": ["/usr/bin/xcode-select", "-p"]},
+        "remedy": "run xcode-select --install; full Xcode is deliberately not required"
+      },
+      {
+        "id": "apple.silicon",
+        "required_for": "the substrate itself",
+        "probe": {"kind": "architecture", "expect": "arm64"},
+        "remedy": "amoebius supports macOS on Apple silicon only; no other Mac architecture is offered"
+      }
+    ],
+    "linux-cpu": [
+      {
+        "id": "linux.package-manager-root",
+        "required_for": "the C libraries the compiler links, and the container engine",
+        "probe": {"kind": "executable", "paths": ["/usr/bin/apt-get", "/usr/bin/dnf", "/usr/bin/zypper", "/usr/bin/pacman"]},
+        "remedy": "install the distribution's package manager; amoebius verifies the root and never installs it"
+      },
+      {
+        "id": "linux.privilege",
+        "required_for": "package installation and provider initialisation",
+        "probe": {"kind": "command", "argv": ["/usr/bin/sudo", "-n", "true"]},
+        "remedy": "grant the invoking user passwordless sudo; amoebius never prompts for a password"
+      },
+      {
+        "id": "linux.virtualization",
+        "required_for": "the pristine-guest provider",
+        "probe": {"kind": "writable", "paths": ["/dev/kvm"]},
+        "remedy": "enable virtualization in firmware, load the kvm module, and grant the invoking user write access to /dev/kvm"
+      }
+    ],
+    "linux-cuda": [
+      {
+        "id": "linux.package-manager-root",
+        "required_for": "the C libraries the compiler links, and the container engine",
+        "probe": {"kind": "executable", "paths": ["/usr/bin/apt-get", "/usr/bin/dnf", "/usr/bin/zypper", "/usr/bin/pacman"]},
+        "remedy": "install the distribution's package manager; amoebius verifies the root and never installs it"
+      },
+      {
+        "id": "linux.privilege",
+        "required_for": "package installation and provider initialisation",
+        "probe": {"kind": "command", "argv": ["/usr/bin/sudo", "-n", "true"]},
+        "remedy": "grant the invoking user passwordless sudo; amoebius never prompts for a password"
+      },
+      {
+        "id": "linux.virtualization",
+        "required_for": "the pristine-guest provider",
+        "probe": {"kind": "writable", "paths": ["/dev/kvm"]},
+        "remedy": "enable virtualization in firmware, load the kvm module, and grant the invoking user write access to /dev/kvm"
+      },
+      {
+        "id": "linux-cuda.accelerator",
+        "required_for": "the CUDA lane only",
+        "probe": {"kind": "present", "paths": ["/proc/driver/nvidia/version"]},
+        "remedy": "install the NVIDIA kernel driver; without it the host classifies as linux-cpu and the lane is never offered"
+      }
+    ],
+    "windows": [
+      {
+        "id": "windows.package-manager-root",
+        "required_for": "every ensured tool",
+        "probe": {"kind": "executable", "paths": ["C:/Windows/System32/winget.exe"]},
+        "remedy": "install App Installer from the Microsoft Store, which supplies winget"
+      },
+      {
+        "id": "windows.shell",
+        "required_for": "the pre-binary bootstrap and every host-boundary invocation",
+        "probe": {"kind": "executable", "paths": ["C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"]},
+        "remedy": "repair the Windows installation; PowerShell ships with the operating system"
+      },
+      {
+        "id": "windows.firmware-virtualization",
+        "required_for": "WSL2, and therefore the whole Linux lane",
+        "probe": {"kind": "manual", "fact": "VirtualizationFirmwareEnabled and HyperVisorPresent"},
+        "remedy": "enable virtualization in BIOS/UEFI; no software can enable it"
+      },
+      {
+        "id": "windows.elevation",
+        "required_for": "the WSL2 feature install and the hypervisor launch setting",
+        "probe": {"kind": "manual", "fact": "Administrator rights"},
+        "remedy": "re-run from an elevated shell"
+      }
+    ]
+  },
   "tools": {
-    "ghc": {
-      "source": "host",
-      "commands": [
-        "ghc"
-      ],
-      "version_argv": [
-        "--numeric-version"
-      ],
-      "requirement": ">=9.12 <9.13",
-      "reason": "the pre-cluster band compiles GHC2024 with quantified superclass checking"
+    "git": {
+      "source": "managed",
+      "provider": "package-manager",
+      "supplies": "git",
+      "package_map": {
+        "apple": "git",
+        "linux-cpu": "git",
+        "linux-cuda": "git",
+        "windows": "Git.Git"
+      },
+      "relative_path": "bin/git",
+      "floor_supplies": true,
+      "version_argv": ["--version"],
+      "requirement": ">=2.30",
+      "reason": "cabal materializes the supernova source-repository-package through it"
     },
-    "cabal": {
-      "source": "host",
-      "commands": [
-        "cabal"
-      ],
-      "version_argv": [
-        "--numeric-version"
-      ],
-      "requirement": ">=3.16 <4",
-      "reason": "multi-package projects with per-run --builddir and --store-dir isolation"
+    "node": {
+      "source": "managed",
+      "provider": "package-manager",
+      "supplies": "node",
+      "package_map": {
+        "apple": "node",
+        "linux-cpu": "nodejs",
+        "linux-cuda": "nodejs",
+        "windows": "OpenJS.NodeJS"
+      },
+      "relative_path": "bin/node",
+      "version_argv": ["--version"],
+      "requirement": ">=20 <26",
+      "reason": "the interpreter the Spago and Playwright entry points run under"
+    },
+    "npm": {
+      "source": "managed",
+      "provider": "package-manager",
+      "supplies": "npm",
+      "package_map": {
+        "apple": "node",
+        "linux-cpu": "nodejs",
+        "linux-cuda": "nodejs",
+        "windows": "OpenJS.NodeJS"
+      },
+      "relative_path": "bin/npm",
+      "version_argv": ["--version"],
+      "requirement": ">=10 <13",
+      "reason": "it materializes package.json's authored development graph into the ignored build root"
     },
     "ghcup": {
       "source": "github-release",
       "project": "haskell/ghcup-hs",
       "asset_pattern": "^{platform}-ghcup-[0-9.]+$",
       "platform_map": {
-        "linux-x86_64": "x86_64-linux",
-        "linux-aarch64": "aarch64-linux",
+        "linux-amd64": "x86_64-linux",
+        "linux-arm64": "aarch64-linux",
         "darwin-arm64": "aarch64-apple-darwin"
       },
       "checksum_asset": "SHA256SUMS",
       "install_name": "ghcup",
-      "version_argv": [
-        "--numeric-version"
-      ],
+      "version_argv": ["--numeric-version"],
       "requirement": ">=0.1.50 <1",
-      "reason": "the Bootstrap Coordinator installs ghc and cabal through it on a pristine host"
+      "reason": "the provider that supplies ghc and cabal, here and on a pristine host"
+    },
+    "ghc": {
+      "source": "managed",
+      "provider": "ghcup",
+      "supplies": "ghc",
+      "version_argv": ["--numeric-version"],
+      "requirement": ">=9.12 <9.13",
+      "reason": "the pre-cluster band compiles GHC2024 with quantified superclass checking"
+    },
+    "cabal": {
+      "source": "managed",
+      "provider": "ghcup",
+      "supplies": "cabal",
+      "version_argv": ["--numeric-version"],
+      "requirement": ">=3.16 <4",
+      "reason": "multi-package projects with per-run --builddir and --store-dir isolation"
     },
     "kind": {
       "source": "github-release",
       "project": "kubernetes-sigs/kind",
       "asset_pattern": "^kind-{platform}$",
       "platform_map": {
-        "linux-x86_64": "linux-amd64",
-        "linux-aarch64": "linux-arm64",
+        "linux-amd64": "linux-amd64",
+        "linux-arm64": "linux-arm64",
         "darwin-arm64": "darwin-arm64"
       },
       "checksum_asset": "{asset}.sha256sum",
       "install_name": "kind",
-      "version_argv": [
-        "version"
-      ],
+      "version_argv": ["version"],
       "requirement": ">=0.30 <1",
       "reason": "the single-node bootstrap cluster of the pre-cluster band"
     },
@@ -86,96 +241,75 @@
       "channel": "stable-1",
       "binary_path": "bin/{platform}/kubectl",
       "platform_map": {
-        "linux-x86_64": "linux/amd64",
-        "linux-aarch64": "linux/arm64",
+        "linux-amd64": "linux/amd64",
+        "linux-arm64": "linux/arm64",
         "darwin-arm64": "darwin/arm64"
       },
       "install_name": "kubectl",
-      "version_argv": [
-        "version",
-        "--client=true",
-        "--output=yaml"
-      ],
+      "version_argv": ["version", "--client=true", "--output=yaml"],
       "requirement": ">=1.33 <2",
       "reason": "the Kubernetes client every live band drives the cluster through"
     },
     "dhall": {
-      "source": "host",
-      "commands": [
-        "dhall"
-      ],
-      "version_argv": [
-        "--version"
-      ],
+      "source": "github-release",
+      "project": "dhall-lang/dhall-haskell",
+      "asset_pattern": "^dhall-[0-9.]+-{platform}\\.tar\\.bz2$",
+      "platform_map": {
+        "linux-amd64": "x86_64-linux",
+        "darwin-arm64": "aarch64-darwin"
+      },
+      "archive_member": "bin/dhall",
+      "install_dir": "dhall",
+      "version_argv": ["--version"],
       "requirement": ">=1.42 <2",
-      "reason": "Gate-1 typechecking of the authored schema corpus"
+      "reason": "Gate-1 typechecking of the authored schema corpus. The publisher offers no linux-arm64 asset, so that host refuses rather than running another architecture's binary"
     },
     "purs": {
       "source": "node-package",
       "package": "purescript",
-      "relative_paths": [
-        "purs.bin",
-        "purs"
-      ],
-      "version_argv": [
-        "--version"
-      ],
+      "relative_paths": ["purs.bin", "purs"],
+      "version_argv": ["--version"],
       "requirement": ">=0.15 <0.16",
-      "reason": "the browser interpreter bundle from Phase 21 on"
+      "reason": "the browser interpreter bundle from Phase 25 on"
     },
     "spago": {
       "source": "node-package",
       "package": "spago",
-      "relative_paths": [
-        "bin/bundle.js"
-      ],
+      "relative_paths": ["bin/bundle.js"],
       "interpreter": "node",
-      "version_argv": [
-        "--version"
-      ],
+      "version_argv": ["--version"],
       "requirement": ">=1.0 <2",
       "reason": "PureScript build orchestration for the browser bundle"
-    },
-    "chromium": {
-      "source": "host",
-      "commands": [
-        "google-chrome",
-        "chromium",
-        "chromium-browser"
-      ],
-      "version_argv": [
-        "--version"
-      ],
-      "requirement": ">=120",
-      "reason": "the headless browser the Register-2 UI gates drive"
     },
     "playwright": {
       "source": "node-package",
       "package": "playwright-core",
-      "relative_paths": [
-        "cli.js"
-      ],
+      "relative_paths": ["cli.js"],
       "interpreter": "node",
-      "version_argv": [
-        "--version"
-      ],
+      "version_argv": ["--version"],
       "requirement": ">=1.55 <2",
-      "reason": "the browser-driver library the Register-2 UI gates automate Chrome through"
+      "reason": "the browser-driver library the Register-2 UI gates automate Chrome through, and the provider that supplies the browser itself"
+    },
+    "chromium": {
+      "source": "managed",
+      "provider": "playwright",
+      "supplies": "chromium",
+      "version_argv": ["--version"],
+      "requirement": ">=120",
+      "reason": "the headless browser the Register-2 UI gates drive, supplied by the resolved driver rather than expected on the host"
     },
     "protoc": {
       "source": "github-release",
       "project": "protocolbuffers/protobuf",
       "asset_pattern": "^protoc-[0-9.]+-{platform}\\.zip$",
       "platform_map": {
-        "linux-x86_64": "linux-x86_64",
-        "linux-aarch64": "linux-aarch_64",
+        "linux-amd64": "linux-x86_64",
+        "linux-arm64": "linux-aarch_64",
         "darwin-arm64": "osx-aarch_64"
       },
       "archive_member": "bin/protoc",
       "install_name": "protoc",
-      "version_argv": [
-        "--version"
-      ],
+      "version_argv": ["--version"],
       "requirement": ">=29",
       "reason": "protocol code generation for the native Pulsar client"
     },
@@ -191,17 +325,18 @@
       "project": "adoptium/temurin21-binaries",
       "asset_pattern": "^OpenJDK21U-jre_{platform}_hotspot_[0-9._+]+\\.tar\\.gz$",
       "platform_map": {
-        "linux-x86_64": "x64_linux",
-        "linux-aarch64": "aarch64_linux",
+        "linux-amd64": "x64_linux",
+        "linux-arm64": "aarch64_linux",
         "darwin-arm64": "aarch64_mac"
       },
       "archive_member": "bin/java",
+      "archive_member_map": {
+        "darwin-arm64": "Contents/Home/bin/java"
+      },
       "install_dir": "java",
-      "version_argv": [
-        "-version"
-      ],
+      "version_argv": ["-version"],
       "requirement": ">=17",
-      "reason": "the JVM that runs TLC for the Phase-2/3 model checks"
+      "reason": "the JVM that runs TLC for the Phase-3/4 model checks"
     },
     "tla2tools": {
       "source": "github-release",

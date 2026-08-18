@@ -186,7 +186,7 @@ seeded mutants named in [Gate integrity](#gate-integrity):
   **M-credit-before-cleanup**, **M-fake-verify**) and passes only if every one of them
   turns the gate red; a green mutant fails the gate.
 - **Honest ledger.** The gate emits its proven/tested/assumed ledger; the aggregate durable-backing fold and
-  image-backed host hard cap are live-tested here. The Phase-38 control-plane singleton's no-PVC property
+  image-backed host hard cap are live-tested here. The Phase-38 control-plane daemon's no-PVC property
   (which has no realized subject at Phase 33) stays marked **UNVERIFIED**, not asserted as passing.
 
 ## Gate integrity
@@ -286,7 +286,7 @@ different PostgreSQL major than the sealed image.
   the migration mutants must break; every migration negative is paired with this positive on its one foreclosed
   step.
 
-**Committed seeded mutants (must go red).** Each is committed under `test/live/mutants/` and re-run by the gate;
+**Committed seeded mutants (must go red).** Each takes a row in `test/mutant/registry.tsv` and is re-run by the gate;
 a green mutant fails the gate.
 - **M-soft-delete** (dropped-effect operator) — a `cluster delete` that deletes only the witness
   StatefulSets/PVCs and leaves the kind node container + apiserver alive. Must go red on the "cluster genuinely
@@ -371,7 +371,7 @@ section it implements; individual sprints cite the same sections where they adop
   — *deleting durable data is forbidden under normal operation* / *the control plane holds no PVC*: the
   cluster delete in the gate discards the cluster-local API objects and never reclaims backing volumes; the
   sole automated actor that may destroy the test-flagged witness bytes is the elevated harness; MinIO sits on
-  a retained PV while the stateless control-plane singleton keeps its durable state in the Vault-enveloped
+  a retained PV while the stateless control-plane daemon keeps its durable state in the Vault-enveloped
   MinIO bucket, holding no volume of its own.
 - [`cluster_lifecycle_doctrine.md §7`](../documents/engineering/cluster_lifecycle_doctrine.md#7-ephemeral-spin-updown-with-deterministic-rebind)
   (cross-reference, not adopted here) — the ephemeral spin-up/down whose teardown removes ephemeral
@@ -639,7 +639,7 @@ durable backing and no normal-operation path can.
    non-harness module in `src/` issues a backing-store reclaim/destruction call (grep-level, committed as
    `tools/no_retained_delete_check.sh`; scoped PVC/PV binding-object deletion and whole-cluster deletion are
    allowed because neither deletes the external backing), and (b) post-cycle the fresh PV objects exist and
-   host bytes are present. The control-plane singleton is a Phase-38 subject with **no realized instance at Phase 33**, so its "mounts
+   host bytes are present. The control-plane daemon is a Phase-38 subject with **no realized instance at Phase 33**, so its "mounts
    no PVC" property is **not asserted as passing here** — it is recorded **UNVERIFIED** in the honesty ledger,
    not treated as a vacuously-true pass.
 

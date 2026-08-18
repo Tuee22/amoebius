@@ -133,7 +133,7 @@ artifact is content-addressed source metadata — the rendered MSL plus launch/d
 compiled dylib. The daemon carries no cluster-control authority: state-changing coordination flows through the
 same Pulsar/gateway-backed-content-store nervous system every in-cluster worker uses, and the durable side of
 that store lives in the
-Vault-enveloped MinIO bucket that is the stateless Deployment-`replicas=1` control-plane singleton's only
+Vault-enveloped MinIO bucket that is the stateless Deployment-`replicas=1` control-plane daemon's only
 durable state (single-instance delegated to k8s/etcd, **no election**). The windows-CUDA host worker is the
 structurally identical case on a different substrate and is named throughout as target shape, but it is **not**
 part of this phase's single-substrate gate. This phase consumes earlier phases rather than re-implementing
@@ -173,13 +173,13 @@ the [§M gate-integrity standard](development_plan_standards.md#m-gate-integrity
 and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation](#gate-integrity).
 
 - **Input-dependent output oracle (§M.1/§M.3).** The artifact retrieved from MinIO must equal a fresh output
-  from the independent NumPy reference at `test/golden/phase_54/metal_job_ref.py`. The reviewed A/B inputs
-  remain under `test/golden/phase_54/`; their expected bytes and content identities are generated under
+  from the independent NumPy reference at `test/golden/apple_metal_host_daemon/metal_job_ref.py`. The reviewed A/B inputs
+  remain under `test/golden/apple_metal_host_daemon/`; their expected bytes and content identities are generated under
   `.build/runs/phase_68/`. A nonce-derived challenge input C is also generated per run. A, B, and C must produce
   distinct expected results where specified, and the worker must match each without a committed expected file.
   Numerical equality is necessary but insufficient: an external Metal observer must recover the real
   `MTLDevice`, compiled `MTLLibrary`, pipeline reflection, and the `MTLBuffer` written by the dispatch.
-- **Committed seeded mutant (§M.2).** The committed mutant set `test/mutants/phase_53/` includes at minimum
+- **Committed seeded mutant (§M.2).** The committed mutant set `test/mutant/apple_metal_host_daemon/` includes at minimum
   `const_output.patch` (worker writes a fixed constant regardless of job payload — an effect-swap operator),
   `cpu_reference_bypass.patch` (worker computes the correct bytes on CPU without a Metal dispatch), and
   `lb_nodeport.patch` (the host-comms spec re-typed `LoadBalancer` — a union-arm
@@ -236,27 +236,27 @@ Under [§M.1 oracle provenance](development_plan_standards.md#m-gate-integrity-a
 same-commit fixtures remain regression fixtures until independently reviewed or replaced. The reference side
 contains source and expectations, never copied program output:
 
-- `test/golden/phase_54/metal_job_ref.py` — the independently reviewed CPU/NumPy reference for the kernel.
+- `test/golden/apple_metal_host_daemon/metal_job_ref.py` — the independently reviewed CPU/NumPy reference for the kernel.
   It generates A/B/C expected bytes and identities only at gate-run time beneath `.build/runs/phase_68/`.
-- `test/golden/phase_54/job_A.input`, `job_B.input` — the two reviewed job inputs, differing only in their
+- `test/golden/apple_metal_host_daemon/job_A.input`, `job_B.input` — the two reviewed job inputs, differing only in their
   tensor payload.
-- `test/golden/phase_54/resource_fold.json` — the independently authored physical-host inventory and exact
+- `test/golden/apple_metal_host_daemon/resource_fold.json` — the independently authored physical-host inventory and exact
   Lima-VM, Kubernetes-node, host-worker, Apple-unified-memory, cache, and durable/local-storage demands. For
   the VM it pins guest-system/unique-layout usable carves, `FilesystemPresentation`, backing minimum/quantum, the
   expected private `requiredUsableBytes`/40-GiB `provisionedBytes` result, and the single physical-disk
   high-water debit; it fixes the disjoint pool ownership and expected headroom witness before the provision
   fold exists.
-- `test/golden/phase_54/vm_disk_boundaries.csv` — independently computed minimum/quantum boundary pairs,
+- `test/golden/apple_metal_host_daemon/vm_disk_boundaries.csv` — independently computed minimum/quantum boundary pairs,
   including an accepted exact-boundary operand, a one-byte-higher operand that rounds to the next quantum and
   exhausts its parent, and the expected one-byte-short-live-disk/fs-type failure reasons.
-- `test/dhall/phase_54_illegal/` — the four wild-exposure negatives (see Sprint 68.5), each a one-field
+- `test/fixture/dhall/phase_54_illegal/` — the four wild-exposure negatives (see Sprint 68.5), each a one-field
   mutation of the committed green host-comms spec, each carrying its validation-locus tag and its expected
   `dhall type` error string, registered in the Phase-7 illegal-state corpus.
-- `test/mutants/phase_53/const_output.patch`, `cpu_reference_bypass.patch`, `lb_nodeport.patch`, `omit_metal_work_item.patch`,
+- `test/mutant/apple_metal_host_daemon/const_output.patch`, `cpu_reference_bypass.patch`, `lb_nodeport.patch`, `omit_metal_work_item.patch`,
   `favorable_metal_epoch.patch`, `drop_metal_overlap_debit.patch` — the committed seeded mutants the gate must
   turn red. The CPU-reference bypass returns numerically correct bytes but is caught by the independent Metal
   dispatch observer.
-- `test/mutants/phase_53/resources/` — one-short provider/compiler/worker/harness cases and dropped-envelope/
+- `test/mutant/apple_metal_host_daemon/resources/` — one-short provider/compiler/worker/harness cases and dropped-envelope/
   premature-replacement mutants, paired with the complete `resource_fold.json` positive.
 
 ## Resource provision — the host worker and its transitions
@@ -284,13 +284,13 @@ collector/verification Job retain complete Pod/image/CPU/memory/ephemeral/mapped
 envelopes, finite admission concurrency, exact output/upload/failure extents and rollout overlap before the
 host may write. Reads still resolve the content-addressed object through that gateway-backed MinIO store.
 
-The content gateway/collector, MinIO backend, Pulsar, Vault and Phase-38 singleton instances are inherited
+The content gateway/collector, MinIO backend, Pulsar, Vault and Phase-38 control-plane daemon instances are inherited
 service definitions, but they are not
 free prerequisites: whether newly materialized with the apple cluster or already live in the current snapshot,
 their exact Pods remain in the whole-deployment fold with complete images, resources, local/durable storage,
 pod/IP and CSI attachment slots. A NodePort `Service`, firewall rule and pure client library do not create
-additional Pods. Any incremental singleton reconciliation/API-client work for the two Services is charged to
-the singleton's existing container envelope. The host worker is the only new compute *role*; the gate still
+additional Pods. Any incremental control-plane daemon reconciliation/API-client work for the two Services is charged to
+the control-plane daemon's existing container envelope. The host worker is the only new compute *role*; the gate still
 spends the exact inherited service-Pod slots and cannot call that count zero.
 
 The host worker is structurally paired only with
@@ -331,7 +331,7 @@ CPU/memory,
 process slots, logs/writable/scratch/cache, client buffers, Pulsar topic/backlog/offload, output-object overlap,
 content-gateway/collector execution, and every surviving pod/IP/
 CSI/image/storage commitment. Dropped-envelope mutants that launch clang, the worker, or the host probe with
-no row live under `test/mutants/phase_53/resources/`; `early_worker_replacement.dhall` replaces before observed
+no row live under `test/mutant/apple_metal_host_daemon/resources/`; `early_worker_replacement.dhall` replaces before observed
 release and `drop_pulsar_topic_demand.dhall` omits the work-topic row. Each must turn the gate red before any
 lasting effect. `drop_content_gateway_collector.dhall` and `direct_minio_backend_put.dhall` must likewise fail
 before any output mutation.
@@ -468,7 +468,7 @@ and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-f
    the VM; with it present, the same call is a verified no-op (idempotent).
 2. A unit test exercises the pure install plan for apple without invoking brew.
 3. Cross-check the live physical-host and VM/node inventory against
-   `test/golden/phase_54/resource_fold.json`; observed supply below any declared CPU, memory/unified-memory, or
+   `test/golden/apple_metal_host_daemon/resource_fold.json`; observed supply below any declared CPU, memory/unified-memory, or
    storage value fails. Before creation, rederive the current fixture's
    `requiredUsableBytes` from the guest system plus unique kubelet-layout carves, apply its
    `FilesystemPresentation` overhead and backing minimum/quantum, and assert the private result is the pinned
@@ -623,12 +623,12 @@ this sprint realizes it in amoebius for the first time.
    fitting build, an OS/config observer proves the compiler stays within CPU/RSS and named backing ceilings;
    deliberate overrun is throttled/terminated/`ENOSPC`, never spilled elsewhere.
 2. Compile generated MSL at runtime and dispatch A, B, and nonce-derived C. Generate all three expected outputs
-   with `test/golden/phase_54/metal_job_ref.py` under `.build/runs/phase_68/`; require exact equality, distinct
+   with `test/golden/apple_metal_host_daemon/metal_job_ref.py` under `.build/runs/phase_68/`; require exact equality, distinct
    A/B output, and a real `MTLLibrary`/pipeline-reflection/`MTLBuffer` observation. Assert bit-stable output
    under the fast-math-off determinism contract by recomputing `job_A` on a **cache-bypassed** run in a distinct
    content-addressed namespace and asserting the compute path (MSL compile + GPU dispatch) actually executed and
    produced a bit-identical result — a store hit does not satisfy this. The committed mutants
-   `test/mutants/phase_53/const_output.patch` and `cpu_reference_bypass.patch` must each turn this validation
+   `test/mutant/apple_metal_host_daemon/const_output.patch` and `cpu_reference_bypass.patch` must each turn this validation
    red at the numeric or Metal-observer locus respectively.
    The OS-boundary memory/cache observer also confirms the worker stays within its declared runtime +
    Metal-unified-memory ceiling and the host cache stays inside its one carved backing; crossing either ceiling
@@ -704,7 +704,7 @@ The lifecycle and finite policy are tested; macOS process/Metal observers and cr
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/HostWorker/Peer.hs`,
-`src/Amoebius/HostWorker/Auth.hs`, `src/Amoebius/HostComms/Illegal.hs`, `test/live/AppleMetalPeerSpec.hs`
+`src/Amoebius/HostWorker/Auth.hs`, `src/Amoebius/HostComms/Illegal.hs`, `test/spec/live/AppleMetalPeerSpec.hs`
 (the authored harness and scoped evidence reader)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the worker consumes its work topic over the native Pulsar protocol and writes
@@ -735,10 +735,10 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
   as `LoadBalancer`-typed, Envoy-routed, or wild-listening, and a host compute daemon cannot publish its own
   wild ingress — its only inbound coordination is Pulsar plus the provisioned content endpoint. Raw MinIO
   mutation authority is unrepresentable; an optional raw-GET Service is a distinct read-only arm.
-- The gate `.dhall` (`test/dhall/phase_54_apple_metal_peer.dhall`) is a **generated artifact emitted from Haskell at gate-run time and never committed** — its byte-authority is the authored Haskell emitter in
+- The gate `.dhall` (`test/fixture/dhall/phase_54_apple_metal_peer.dhall`) is a **generated artifact emitted from Haskell at gate-run time and never committed** — its byte-authority is the authored Haskell emitter in
   `src/Amoebius/HostWorker/Peer.hs` / `HostComms/Illegal.hs`, per development_plan_standards [§B](development_plan_standards.md#b-canonical-file-layout-snake_case) (Implementation names authored source, never a generated artifact). The committed byte-authority for the type-check negatives is
   instead the green host-comms spec and the four one-field-mutant illegal fixtures under
-  `test/dhall/phase_54_illegal/` (authored, committed in this phase's oracle-pinning sprint). The gate `.dhall`, once emitted, drives:
+  `test/fixture/dhall/phase_54_illegal/` (authored, committed in this phase's oracle-pinning sprint). The gate `.dhall`, once emitted, drives:
   derive and verify the complete physical-host → Lima-VM/node + host-worker + cache provision witness —
   including the private presentation/allocation-rounded `ProvisionedVmDiskCarve` and its once-charged sparse
   high-water; bring up the apple cluster on Lima; expose the content-mutation gateway and Pulsar on the
@@ -755,12 +755,12 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
   contract. Native clients are charged to the worker and the NodePort introduces no imaginary Pod.
 
 ### Validation
-1. Each of the four committed wild-exposure negatives in `test/dhall/phase_54_illegal/` (NodePort as
+1. Each of the four committed wild-exposure negatives in `test/fixture/dhall/phase_54_illegal/` (NodePort as
    `LoadBalancer`; Envoy/HTTPRoute route on the port; wild listener on the port; daemon wild ingress) — each a
    one-field mutation of the committed green host-comms spec, differing only in the foreclosed field — fails
    `dhall type` with the pinned structured error naming its specific violated exclusion (asserted against the
    corpus-registered expected error string at its validation-locus tag), while the green spec type-checks; the
-   committed mutant `test/mutants/phase_53/lb_nodeport.patch` (which re-types the NodePort `LoadBalancer` in the
+   committed mutant `test/mutant/apple_metal_host_daemon/lb_nodeport.patch` (which re-types the NodePort `LoadBalancer` in the
    *gate* spec) must turn this validation red.
 2. The gate `.dhall` runs the full Apple-Metal peer workflow: the worker consumes the job over native Pulsar
    (no WebSocket frames, no TLS handshake, only `127.0.0.1:<nodeport>`), and the output landed through the
@@ -825,7 +825,7 @@ illegal-state boundaries are tested; the physical Apple Pulsar/gateway/MinIO/Vau
 ## Related Documents
 - [README.md](README.md) — the live tracker; the Phase 68 row is the authoritative one-line gate and status
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the Register-3 honesty token: a passed gate is a live-substrate result, never a compile claim)
-- [overview.md](overview.md) — the target architecture and cross-cutting invariants (the host-only NodePort carve-out, host worker nodes, the stateless `replicas=1` singleton, and jit-resolved engine payloads)
+- [overview.md](overview.md) — the target architecture and cross-cutting invariants (the host-only NodePort carve-out, host worker nodes, the stateless `replicas=1` control-plane daemon, and jit-resolved engine payloads)
 - [system_components.md](system_components.md) — the target component inventory for the module paths above
 - [Host ↔ Cluster Comms Doctrine](../documents/engineering/host_cluster_comms_doctrine.md) — the host-only
   NodePort, no-mTLS channel-2 peer design this phase implements

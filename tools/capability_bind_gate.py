@@ -18,6 +18,7 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
@@ -25,7 +26,8 @@ ROOT = Path(__file__).resolve().parent.parent
 ARM_ORACLE = ROOT / "test/oracle/capability_bind/arm_cases.tsv"
 GATE1 = ROOT / "test/oracle/capability_bind/gate1_cases.tsv"
 GATE2 = ROOT / "test/oracle/capability_bind/gate2_cases.tsv"
-MUTANTS = ROOT / "test/mutant/capability_bind/mutants.tsv"
+MUTANT_CAPABILITY = "capability_bind"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/capability_bind/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/capability-bind/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/capability-bind/validation-locus-ledger.tsv"
@@ -89,7 +91,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     arms = read_tsv(ARM_ORACLE)
     gate1 = read_tsv(GATE1)
     gate2 = read_tsv(GATE2)
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     locus = read_tsv(LOCUS)
     required_arms = {
         "ObjectStore",
@@ -282,11 +284,17 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=10, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=11, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+
+    # Clause 15 first: a run that cannot name the architecture it executed on, or
+    # that is executing under translation, has nothing worth proving.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []

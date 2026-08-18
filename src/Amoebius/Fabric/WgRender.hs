@@ -108,7 +108,7 @@ renderNode inventory local = do
  where
   renderRemote remote = do
     let normalEndpoint = if peerRole remote == Gateway then peerEndpoint remote else Nothing
-#ifdef PHASE41_HUB_NO_ENDPOINT_MUTANT
+#ifdef NETWORK_FABRIC_WIREGUARD_HUB_NO_ENDPOINT_MUTANT
         endpoint = (Nothing :: Maybe Text)
 #else
         endpoint = normalEndpoint

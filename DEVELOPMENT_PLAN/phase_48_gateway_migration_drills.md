@@ -8,7 +8,7 @@
 
 Phase 48 delivers the gateway-migration drills + model-correspondence; its design is owned by [consistency_pacelc_doctrine.md](../documents/engineering/consistency_pacelc_doctrine.md), [gateway_migration_model_doctrine.md](../documents/engineering/gateway_migration_model_doctrine.md), [gateway_migration_doctrine.md](../documents/engineering/gateway_migration_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-11 with `python3 tools/phase43_gate.py --reuse-fresh-live`;
+Validated 2026-08-11 with `python3 tools/gateway_migration_drills_gate.py --reuse-fresh-live`;
 ledger `external-run-reference`.
 The CPU-only Linux fallback is always selectable, regardless of detected hardware. Fresh guest isolation maps
 the two Linux classes to Incus, Apple to Lima, and Windows to WSL2.
@@ -73,7 +73,7 @@ a parent and two child clusters, records 24 source-acked writes per branch outsi
 be unreplicated at each cut, proves Planned RPO=0 by set equality, performs a fenced Failover in 0.214 seconds
 against the pinned 60-second RTO, moves an actual raw-kernel WireGuard hub role, reconciles the tail, and removes
 all test clusters, network namespaces, journal files, and DNS authority state. Both committed mutants turn red.
-There is **no** First-Axis / singleton-election work here: the sole per-system
+There is **no** First-Axis / control-plane-election work here: the sole per-system
 obligation amoebius owns is the cross-cluster gateway migration, both branches, and this phase discharges its
 live residue.
 
@@ -134,7 +134,7 @@ takeover each satisfy every oracle, committed budget, named invariant, observer,
 This gate is anchored by the committed artifacts below; substituting evidence produced by the harness under
 test or after the run cannot satisfy it:
 - **Write-journal oracle (independent of the SUT).** The drill client writes every source-acked write ID to
-  `test/inject/journal/` (a store outside the forest, never the SUT's own replication log). "Committed write"
+  `test/fixture/inject/journal/` (a store outside the forest, never the SUT's own replication log). "Committed write"
   means *source-acked*, not *already-replicated*; under a **non-idle** workload the harness asserts **≥ 8** such
   IDs are
   acked-but-not-yet-replicated at the quiesce/kill instant (a positive observed lag), then asserts set-equality
@@ -145,7 +145,7 @@ test or after the run cannot satisfy it:
   mid-workflow — again with ≥ 8 acked-but-un-replicated IDs in flight — drives a `Failover` that promotes the
   surviving sibling only through its fail-closed freshness gate, repoints the authoritative local DNS record and
   the WireGuard hub, and rebinds within the committed numeric `DataLossBudget`.
-- **Committed numeric budget fixture.** `test/dhall/phase_44_gateway_migration.dhall` fixes `lagBound = 5 s`,
+- **Committed numeric budget fixture.** `test/fixture/dhall/phase_44_gateway_migration.dhall` fixes `lagBound = 5 s`,
   `RTO = 60 s`, scaled to the single-host kind forest; authored and committed in this phase's oracle-pinning sprint; its hash is pinned in the gate record and re-checked at gate
   time so a budget edited after measuring the drill fails the hash check. The drill reports declared-vs-measured
   for **both** dimensions, so a post-hoc-tuned or absurd budget is visible red.
@@ -162,7 +162,7 @@ test or after the run cannot satisfy it:
   `Planned` `verify-caught-up` edge is weakened to `const True` (dropped-guard); the journal oracle must catch
   the lost un-replicated suffix red. (b) `promote-before-fence` — the `Failover` `PromotionGate` guard is negated
   so it promotes without a proven watermark/fence (guard-negation); `NoWriteAfterStaleFailover` must go red. Both
-  mutants are committed under `test/inject/mutants/` and re-run every gate, not hand-run once.
+  mutants are committed under `test/mutant/gateway_migration_drills/` and re-run every gate, not hand-run once.
 - **External-observer teardown check.** Phase 48 claims only its pre-Phase-56 teardown scope; the later
   flagged-credential and comprehensive postflight sweep are not implied. After teardown, an **OS-boundary observer** — `kind get clusters`, `ip netns list`, exact temporary-root inventory, and termination of the queried local DNS authority —
   reports zero surviving migration DNS records and zero surviving child clusters, while the retained
@@ -206,7 +206,7 @@ and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-f
 `GatewayMigrationTransitionDemand` is only a phase-local source composite: binding must exhaustively flatten it
 to the canonical identity-keyed execution set and storage/system demands before either migration arm may run.
 
-The runtime executes inside the Phase-38 singleton, whose complete pod envelope is expanded for migration-plan
+The runtime executes inside the Phase-38 control-plane daemon, whose complete pod envelope is expanded for migration-plan
 evaluation, replication-watermark watches, DNS/fabric mutation serialization, source-proxy control, and
 readiness/drain buffers; it is not a free second controller. Every transition epoch also retains both
 clusters' Phase-37 edge controllers, operator-derived data-plane children, admission webhooks/gateways, and
@@ -360,7 +360,7 @@ it.
    self-defined "committed = already replicated"), and a session that never loses its endpoint; a `Failover`
    after killing the lead (again with ≥ 8 acked-but-un-replicated IDs in flight) resumes through one authority
    with **measured loss ≤ the committed `lagBound` and authority transfer within the committed `RTO`**, where
-   those budgets are the oracle-pinned numeric values in `test/dhall/phase_44_gateway_migration.dhall`
+   those budgets are the oracle-pinned numeric values in `test/fixture/dhall/phase_44_gateway_migration.dhall`
    (`lagBound = 5 s`, `RTO = 60 s`) whose hash is pinned before the drill runs — the drill **reports declared-vs-measured for both dimensions**, so a generous or post-hoc-tuned budget is visible; driving lag
    past the committed bound makes the freshness gate refuse to promote and the lag monitor alarm before a breach;
    and the committed `promote-before-fence` mutant ([Gate integrity](#gate-integrity)) — the `PromotionGate` guard negated — must go red.
@@ -476,9 +476,9 @@ None for Register 2.5; real WAN physics remain outside the live single-host resu
 ## Sprint 48.4: Register-3 correspondence — Inject drills against the running forest + live gate `.dhall` + ledger ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/dhall/phase_44_gateway_migration.dhall` (the live gate
-topology) and `test/inject/GatewayMigrationForest.hs` (the Register-3 Inject harness re-using the Phase-4
-named invariants against the built runtime), plus `tools/phase43_gateway_migration_live.py` — delivered. The Phase-4 `GatewayMigration`
+**Implementation**: `test/fixture/dhall/phase_44_gateway_migration.dhall` (the live gate
+topology) and `test/spec/inject/GatewayMigrationForest.hs` (the Register-3 Inject harness re-using the Phase-4
+named invariants against the built runtime), plus `tools/gateway_migration_drills_live.py` — delivered. The Phase-4 `GatewayMigration`
 `Model`, its `emitTLA` proof, and its io-sim agreement were authored and discharged in Phase 4; this sprint
 consumes them, it does not re-author them.
 **Blocked by**: reopened numeric predecessor gates.
@@ -506,13 +506,13 @@ and [`§19`](../documents/engineering/chaos_failover_second_axis.md#19-the-cross
   This is the concrete confirmation that the built runtime, which *is* the model's
   `interpret`, upholds under real physics what the model proves in logical time (never a re-authored TLA+ spec,
   never a paper variable→module table, which is what the superseded framing had reversed).
-- `test/dhall/phase_44_gateway_migration.dhall`: spin two children up, geo-replicate, run a `Planned` handover
+- `test/fixture/dhall/phase_44_gateway_migration.dhall`: spin two children up, geo-replicate, run a `Planned` handover
   asserting RPO=0 via the write-journal oracle, kill the lead to force `Failover` asserting rebind within the
   oracle-pinned numeric budget (`lagBound = 5 s`, `RTO = 60 s`, hash-pinned), reconcile divergent
   histories, and always tear down leak-free (verified by the OS-boundary kind/network-namespace/journal/DNS observer) —
-  emitting the machine-derived per-run ledger artifact. The gate topology `.dhall`, `test/inject/journal/` (the
+  emitting the machine-derived per-run ledger artifact. The gate topology `.dhall`, `test/fixture/inject/journal/` (the
   out-of-forest write-ID journal schema), and the authored run-ledger schema validator are **committed in this
-  phase's oracle-pinning sprint before the runtime exists**; generated ledgers remain under `.build/runs/`. The runtime-dependent `test/inject/mutants/` seeded mutants (the `verify-caught-up`-stub
+  phase's oracle-pinning sprint before the runtime exists**; generated ledgers remain under `.build/runs/`. The runtime-dependent `test/mutant/gateway_migration_drills/` seeded mutants (the `verify-caught-up`-stub
   and `promote-before-fence` mutants that must go red) mutate the Sprint-43.1 implementation, so they are
   **committed at the start of Phase 48, before that implementation is trusted** (the §M.1
   start-of-owning-phase form for oracles that depend on later code).

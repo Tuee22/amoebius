@@ -8,7 +8,7 @@
 
 Phase 42 delivers the content store + workflow runtime (Pulsar-Failover single-writer); its design is owned by [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), [resource_capacity_storage.md](../documents/engineering/resource_capacity_storage.md), [daemon_topology_doctrine.md](../documents/engineering/daemon_topology_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate. Validated 2026-08-11 with
-`python3 tools/phase37_gate.py --reuse-fresh-live`; ledger
+`python3 tools/content_store_workflow_gate.py --reuse-fresh-live`; ledger
 `dynamically-resolved`.
 
 
@@ -114,7 +114,7 @@ name-ordered standby, with the Phase-40 at-least-once contract redelivering the 
 ETag-CAS single atomic commit point plus the typed `AdvancePredicate` keep the mutable pointer race-free, and
 content-addressed confluence makes the standby's re-fetch of the artifact by manifest SHA safe without any
 distributed lock. There is no bespoke ranked-failover election, no signed-commit-log kernel, and no
-warm-standby singleton: the workflow itself is deployed by the Deployment-`replicas=1` control-plane singleton
+warm-standby control-plane daemon: the workflow itself is deployed by the Deployment-`replicas=1` control-plane daemon
 whose single-instance is a k8s/etcd property, and the workers are unelected. The scope deliberately consumes
 the `experiment-hash` namespace as an opaque pinned string; `deriveExperimentHash`, the `ContentAddress`
 typeclass, and SplitMix seed derivation are the Phase 53 determinism kernel, not this phase.
@@ -293,7 +293,7 @@ them.
   (race-free `latest`) is the store's ETag-CAS commit point plus the typed `AdvancePredicate`.
 - [`daemon_topology_doctrine.md §3.1`](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
   — *exactly one pod is a k8s/etcd property*: the workflow is deployed by the Deployment-`replicas=1`
-  control-plane singleton (Phase 38), whose single-instance is delegated to k8s/etcd, so nothing in this phase
+  control-plane daemon (Phase 38), whose single-instance is delegated to k8s/etcd, so nothing in this phase
   runs an election of any kind.
 - [`pulsar_client_doctrine.md §5`](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek)
   and [`§7`](../documents/engineering/pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)
@@ -325,10 +325,10 @@ them.
 ## Sprint 42.1: Three-tier content-addressed MinIO store ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-store/src/Amoebius/Store/ContentAddress.hs`,
-`amoebius-store/src/Amoebius/Store/Manifest.hs`, `amoebius-store/src/Amoebius/Store/Pointer.hs`,
-`amoebius-store/src/Amoebius/Store/ControlPlaneState.hs`, and
-`amoebius-runtime/src/Amoebius/Execution/JobTerminalLive.hs` (built and validated)
+**Implementation**: `src/Amoebius/Store/ContentAddress.hs`,
+`src/Amoebius/Store/Manifest.hs`, `src/Amoebius/Store/Pointer.hs`,
+`src/Amoebius/Store/ControlPlaneState.hs`, and
+`src/Amoebius/Execution/JobTerminalLive.hs` (built and validated)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: at Register 3 against the cluster's live MinIO, the write-once blob and canonical
 manifest protocols, the single `pointers/latest` CAS commit point, the failed-commit capacity drill, and the
@@ -381,7 +381,7 @@ store is a single one-object atomic pointer flip.
   component-ordering offset and a different key. Committed seeded mutant:
   `mutant/insertion-order-encoder` — an encoder that emits map/component bytes in insertion order rather than
   sorted order; the gate MUST turn this mutant **red** against the golden vector. The independently authored
-  `amoebius-store/test/golden/write_budget_boundaries.csv` pins committed/concurrent/failed/horizon inputs and
+  `test/golden/content_store/write_budget_boundaries.csv` pins committed/concurrent/failed/horizon inputs and
   expected logical peaks, including one-byte-under/over and a pre-horizon resident orphan. The committed
   mutants `mutant/orphan-free-on-pointer-conflict` (credits failed PUTs immediately) and
   `mutant/orphan-budget-omitted` (drops the full-horizon failure term) MUST turn that corpus red.
@@ -437,10 +437,10 @@ the run, and rerun the Phase-42 gate.
 ## Sprint 42.2: Orchestrator/worker workflow runtime + store/fetch by manifest SHA ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-runtime/src/Amoebius/Workflow/Runtime.hs`,
-`amoebius-runtime/src/Amoebius/Workflow/Orchestrator.hs`,
-`amoebius-runtime/src/Amoebius/Workflow/Worker.hs`, and
-`amoebius-runtime/src/Amoebius/Workflow/Resources.hs` (kind-indexed runnable sources and structural
+**Implementation**: `src/Amoebius/Workflow/Runtime.hs`,
+`src/Amoebius/Workflow/Orchestrator.hs`,
+`src/Amoebius/Workflow/Worker.hs`, and
+`src/Amoebius/Workflow/Resources.hs` (kind-indexed runnable sources and structural
 runtime-metadata sources consumed by the shared capacity provisioner) (built and validated)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the orchestrator's `command` → artifact → `event` round trip returns the artifact
@@ -465,8 +465,8 @@ artifact reference a content address.
   by its manifest SHA reference and never inline.
 - The orchestrator's fetch-by-manifest-SHA read path over the store, exercising [§5](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely) confluence: re-fetching the
   same immutable manifest/blob is a no-op, which is exactly what the at-least-once contract needs.
-- The runtime is scheduled under the Deployment-`replicas=1` singleton (Phase 38); no orchestrator/worker role
-  runs a bespoke election, and the singleton's single-instance stays a k8s/etcd property.
+- The runtime is scheduled under the Deployment-`replicas=1` control-plane daemon (Phase 38); no orchestrator/worker role
+  runs a bespoke election, and the control-plane daemon's single-instance stays a k8s/etcd property.
 - A `WorkflowRuntimeDemand` whose one orchestrator and three worker sources lower to identity-keyed symbolic
   Deployment-indexed `BoundExecutionUnit`s with complete envelopes, `ReplicaCardinality`,
   `DeploymentRolloutPolicy`, client buffers and artifact workspace, Pod slots, and bounded failover overlap.
@@ -498,9 +498,9 @@ None. Delivered and validated by the Phase-42 gate.
 ## Sprint 42.3: Pulsar Failover standby takeover + leak-free teardown (gate) ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-runtime/dhall/test/round_trip_failover.dhall`,
-`amoebius-runtime/test/live/FailoverSpec.hs`, `amoebius-runtime/src/Amoebius/Workflow/Resources.hs`, and
-`tools/phase37_workflow_live.py` (built and validated)
+**Implementation**: `dhall/test/round_trip_failover.dhall`,
+`test/spec/runtime/FailoverSpec.hs`, `src/Amoebius/Workflow/Resources.hs`, and
+`tools/content_store_workflow_live.py` (built and validated)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the gate `InForceSpec` stores and fetches by manifest SHA, the critical-window
 kill promotes the specific name-ordered standby read from the Pulsar admin API, the resulting HEAD matches a
@@ -536,8 +536,8 @@ bespoke amoebius election — and assemble the phase gate.
   explicitly named retained set — not a blanket class exemption.)
 - **Reference and mutant apparatus:** execute the independent no-fault path during the run and retain its
   `pointers/latest` HEAD only beneath `.build/runs/phase_42/`; remove
-  `amoebius-runtime/test/golden/head_nofault.bin`. Retain the promoted-consumer name table
-  `amoebius-runtime/test/golden/failover_rank.txt` only after independent review. Committed seeded
+  `test/golden/workflow_runtime/head_nofault.bin`. Retain the promoted-consumer name table
+  `test/golden/workflow_runtime/failover_rank.txt` only after independent review. Committed seeded
   mutants the gate MUST turn **red** — `mutant/ack-before-store-write` (operator: effect reorder — worker acks
   the `event` before the store write completes, so a mid-window kill loses the command) and
   `mutant/sweep-skips-pulsar` (operator: invariant-clause delete — the sweep omits the Pulsar topic/subscription
@@ -597,8 +597,8 @@ the failover-rank table, and rerun under universal artifact hygiene.
 ## Sprint 42.4: Register-2.5 workflow failover takeover under simulated fault ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-runtime/test/sim/WorkflowFailoverSimSpec.hs` (the
-`IOSimPOR` property harness), `amoebius-runtime/test/sim/WorkflowSimScenario.hs` (the injected
+**Implementation**: `test/spec/sim/WorkflowFailoverSimSpec.hs` (the
+`IOSimPOR` property harness), `test/spec/sim/WorkflowSimScenario.hs` (the injected
 kill/redelivery/partition schedule), and the same `Amoebius.Workflow.Runtime` state transitions exercised by
 the live suite (built and validated).
 **Blocked by**: reopened numeric predecessor gates.

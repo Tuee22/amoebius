@@ -16,13 +16,13 @@ data QuotaOutcome = Stored | RejectedQuota | EvictedDependency
 admitBytes :: Int -> Int -> Int -> Bool -> QuotaOutcome
 admitBytes budget used requested _dependedOn
   | used + requested <= budget = Stored
-#ifdef PHASE60_SILENT_DEPENDENCY_EVICTION_MUTANT
+#ifdef ENCRYPTED_BROWSER_RUNTIME_SILENT_DEPENDENCY_EVICTION_MUTANT
   | _dependedOn = EvictedDependency
 #endif
   | otherwise = RejectedQuota
 
 prohibitedPersistenceFields :: [String]
-#ifdef PHASE60_RETAIN_CREDENTIALS_MUTANT
+#ifdef ENCRYPTED_BROWSER_RUNTIME_RETAIN_CREDENTIALS_MUTANT
 prohibitedPersistenceFields = ["credential", "refresh-token", "private-plan"]
 #else
 prohibitedPersistenceFields = []

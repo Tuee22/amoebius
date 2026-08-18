@@ -25,7 +25,7 @@ deriveSplitMixSeed (SplitMixSeed master) streamIndex = SplitMixSeed (mix64 (mast
 
 deriveSplitMixSeedForWorker :: SplitMixSeed -> Word64 -> Word64 -> SplitMixSeed
 deriveSplitMixSeedForWorker master streamIndex workerId =
-#ifdef PHASE48_RNG_WORKERID_MUTANT
+#ifdef DETERMINISM_JITCACHE_RNG_WORKERID_MUTANT
   deriveSplitMixSeed master (streamIndex + workerId)
 #else
   let _ = workerId in deriveSplitMixSeed master streamIndex

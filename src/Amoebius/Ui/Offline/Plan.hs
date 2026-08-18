@@ -45,12 +45,12 @@ compileOffline source = do
       if clientKeys client == replayKeys replay then Right (client, replay) else Left PlanKeyMismatch
   where
     validate = either (Left . QueueDecodeError) Right . decodeQueueContract
-#ifdef PHASE59_OMIT_SERVER_HANDLER_MUTANT
+#ifdef OFFLINE_LANGUAGE_PLAN_OMIT_SERVER_HANDLER_MUTANT
     serverKeys = drop 1 (map (operationPort . operationOf) (queuedPorts source))
 #else
     serverKeys = sort (map (operationPort . operationOf) (queuedPorts source))
 #endif
-#ifdef PHASE59_PERSIST_PRIVATE_FIELD_MUTANT
+#ifdef OFFLINE_LANGUAGE_PLAN_PERSIST_PRIVATE_FIELD_MUTANT
     privateLeak = ["authority-policy"]
 #else
     privateLeak = []
@@ -64,7 +64,7 @@ generatedArtifactCommands :: [String]
 generatedArtifactCommands = ["emit-client-offline-plan", "emit-server-replay-plan"]
 
 mechanismConstructors :: [String]
-#ifdef PHASE59_BROWSER_REDIS_CONSTRUCTOR_MUTANT
+#ifdef OFFLINE_LANGUAGE_PLAN_BROWSER_REDIS_CONSTRUCTOR_MUTANT
 mechanismConstructors = ["IndexedDB", "Redis"]
 #else
 mechanismConstructors = []

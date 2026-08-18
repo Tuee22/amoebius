@@ -1,5 +1,0 @@
---- a/amoebius-runtime/src/Amoebius/Cluster/NodeProvisioner.hs
-+++ b/amoebius-runtime/src/Amoebius/Cluster/NodeProvisioner.hs
-@@ seeded mutant: use only the declared attach limit
--  attachLimit = min declaredAttachLimit liveCsiNodeLimit
-+  attachLimit = declaredAttachLimit

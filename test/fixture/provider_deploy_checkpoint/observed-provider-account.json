@@ -1,0 +1,19 @@
+{
+  "accountFingerprint": "sha256:provider-deploy-checkpoint-independent-fixture-not-live-account",
+  "allocations": {
+    "ebsBytes": 107374182400,
+    "managedNodeGroups": 1,
+    "regionalVcpus": 8
+  },
+  "completeInventory": true,
+  "limits": {
+    "ebsBytes": 1099511627776,
+    "managedNodeGroups": 20,
+    "regionalVcpus": 64
+  },
+  "paginationComplete": true,
+  "permissionsComplete": true,
+  "provider": "AwsEc2",
+  "region": "ca-central-1",
+  "skuCatalogVersion": "aws-ec2-2026-08-01"
+}

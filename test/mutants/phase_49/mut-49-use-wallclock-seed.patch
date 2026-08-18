@@ -1,5 +1,0 @@
---- a/infernix/src/Infernix/Inference/Deterministic.hs
-+++ b/infernix/src/Infernix/Inference/Deterministic.hs
-@@
--  let seed = deriveSplitMixSeed masterSeed stream
-+  seed <- splitMixSeed <$> getPOSIXTime

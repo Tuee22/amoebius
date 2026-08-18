@@ -1,18 +1,9 @@
+-- One authored package, plus the two units doctrine section 2.1 admits apart:
+-- probe/ solves against a deliberately perturbed project file (foreign resolution) and
+-- vendor/dual is not authored here (foreign provenance). Every other root that once
+-- carried a package declaration is a stanza in amoebius.cabal.
 packages:
   ./amoebius.cabal
-  ./amoebius-pulsar/amoebius-pulsar.cabal
-  ./amoebius-store/amoebius-store.cabal
-  ./amoebius-runtime/amoebius-runtime.cabal
-  ./amoebius-release/amoebius-release.cabal
-  ./amoebius-pulumi/amoebius-pulumi.cabal
-  ./infernix/infernix-lift.cabal
-  ./infernix-ui/infernix-ui-lift.cabal
-  ./jitml/jitml-lift.cabal
-  ./jitml-ui/jitml-ui-lift.cabal
-  ./apple-host/apple-host-lift.cabal
-  ./test-topology/test-topology.cabal
-  ./ui-live/ui-live.cabal
-  ./offline-runtime/offline-runtime.cabal
   ./probe/probe.cabal
   ./vendor/dual/dual.cabal
 
@@ -46,3 +37,18 @@ source-repository-package
   tag: master
   subdir: lib proto
   post-checkout-command: apply_supernova_patch patches/supernova_ghc_9_12.patch
+
+-- The infernix and jitML cores are foreign provenance: their source is not authored here.
+-- lib:infernix and lib:jitml previously reached them with `hs-source-dirs: ../../infernix/src`
+-- and `../../jitML/src`, which resolves against the developer's home layout rather than the
+-- source snapshot. Both are release channels, not pinned revisions, on the same terms as
+-- supernova above (repository_layout_doctrine.md section 2.2, out-of-tree hs-source-dirs).
+source-repository-package
+  type: git
+  location: https://github.com/Tuee22/infernix.git
+  tag: master
+
+source-repository-package
+  type: git
+  location: https://github.com/Tuee22/jitML.git
+  tag: master

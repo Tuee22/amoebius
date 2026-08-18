@@ -58,13 +58,13 @@ def negative_r2_provenance() -> policy.Report:
     )
     report.findings.extend(
         policy.classify_tracked(
-            "test/fixtures/run.json",
+            "test/fixture/run.json",
             '{"phase":1,"gate_command":"x","register":"1","substrate":"none","date":"2026-01-01",'
             '"layers":[],"coverage":[],"ledger_hash":"sha256:0"}',
         )
     )
     report.findings.extend(
-        policy.classify_tracked("test/fixtures/copy.dhall", "let x = 1", twin=".build/dhall/copy.dhall")
+        policy.classify_tracked("test/fixture/copy.dhall", "let x = 1", twin=".build/dhall/copy.dhall")
     )
     return report
 
@@ -134,7 +134,7 @@ def negative_r6_resolution() -> policy.Report:
             '{"url": "https://example.invalid/x.tar.gz", "sha256": "' + "a" * 64 + '"}',
         )
     )
-    report.findings.extend(policy.scan_resolution("test/fixtures/expected_hashes.tsv", "name\tvalue\n"))
+    report.findings.extend(policy.scan_resolution("test/fixture/expected_hashes.tsv", "name\tvalue\n"))
     return report
 
 
@@ -278,7 +278,7 @@ def negative_r13_target_tree() -> policy.Report:
             ".build/runs/documentation_suite/ledger.json",
             "scratch/notes.md",
             "LICENCE.txt",
-            "test/fixtures/spec.dhall",
+            "test/fixture/spec.dhall",
             "test/golden/rendered.yaml",
         ],
         synthetic_tree(),

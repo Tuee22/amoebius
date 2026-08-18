@@ -32,6 +32,7 @@ structural-substitution-mutants	metrics	structural-substitution-families
 legalized-negative-polarity-mutant	metrics	legalized-negative-mutant
 non-partiality-scan	metrics	non-partiality-scan
 absolute-tool-argv-observer	metrics	absolute-tool-argv
+argv-observer-mutants	metrics	argv-observer-mutants
 gate2-spec-decode	metrics	acceptance-token
 capacity-feasibility	metrics	capacity-feasibility
 binding-feasibility	metrics	binding-feasibility

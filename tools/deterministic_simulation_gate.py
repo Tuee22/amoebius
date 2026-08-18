@@ -18,13 +18,15 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
 SCHEDULES = ROOT / "test/fixture/deterministic_simulation/schedules"
 EXPECTED_OUTCOMES = ROOT / "test/oracle/deterministic_simulation/expected_outcomes.tsv"
-MUTANTS = ROOT / "test/mutant/deterministic_simulation/mutants.tsv"
+MUTANT_CAPABILITY = "deterministic_simulation"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/deterministic_simulation/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/deterministic-simulation/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/deterministic-simulation/validation-locus-ledger.tsv"
@@ -111,7 +113,7 @@ def verify_oracles() -> None:
         raise GateFailure("the independent expected-outcome table does not cover the schedule corpus")
     if any(row[1:] != ["upheld", "-"] for row in outcomes):
         raise GateFailure("reference schedule outcomes must be independently pinned as upheld")
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 1 or mutants[0]["id"] != "m1-dropped-partition-handling":
         raise GateFailure("Phase-16 mutant manifest must name the dropped-partition mutant exactly once")
     locus = read_tsv(LOCUS)
@@ -232,20 +234,29 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
 
 def enumerated_items() -> set[str]:
     names: set[str] = set()
-    for relative in ("test/oracle/deterministic_simulation/validation_locus.tsv", "test/mutant/deterministic_simulation/mutants.tsv"):
+    for relative in ("test/oracle/deterministic_simulation/validation_locus.tsv",):
         for line in (ROOT / relative).read_text(encoding="utf-8").splitlines()[1:]:
             if line.strip():
                 names.add(line.split("\t")[0].strip())
+    # The one registry leads with the capability and carries every phase's rows, so
+    # this phase's items are the mutant ids in its own rows, not every first column.
+    names.update(row["mutant"] for row in mutant_registry.capability(MUTANT_CAPABILITY))
     return names
 
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=15, contract=CONTRACT, command=GATE_COMMAND, register="2", substrate="none", sides=SIDES,
+        phase=16, contract=CONTRACT, command=GATE_COMMAND, register="2", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+
+    # Clause 15 first: a run that cannot name the architecture it executed on, or
+    # that is executing under translation, has nothing worth proving.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     item_names: set[str] = set()

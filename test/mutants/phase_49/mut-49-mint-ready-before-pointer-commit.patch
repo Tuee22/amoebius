@@ -1,5 +1,0 @@
---- a/infernix/src/Infernix/Adapter/Store.hs
-+++ b/infernix/src/Infernix/Adapter/Store.hs
-@@
--  | not pointerCommitted = Left ArtifactNotReady
-+  | not pointerCommitted = Right (unsafeReady staged)

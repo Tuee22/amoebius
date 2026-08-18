@@ -223,11 +223,17 @@ def artifact_side(run_dir: Path) -> bool:
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=2, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
-        register="1", substrate="none", sides=SIDES
+        phase=3, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        register="1", substrate="none", lane="none", sides=SIDES
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+
+    # Clause 15 first: a run that cannot name the architecture it executed on, or that is
+    # executing under translation, has nothing worth model-checking.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
 
     results["toolchain"], resolved = toolchain_side()
     rows: dict[str, str] = {}
@@ -239,7 +245,7 @@ def main() -> int:
 
     implemented = {
         "metrics": set(rows),
-        "mutants": {p.name for p in (ROOT / "test" / "formal" / "mutants").iterdir() if p.is_file()},
+        "mutants": {p.name for p in (ROOT / "test" / "mutant" / "formal").iterdir() if p.is_file()},
         "checks": set(CHECKS),
     }
     results["surface"], surfaces = gate.surface_join(implemented)

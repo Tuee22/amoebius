@@ -120,9 +120,9 @@ neither calls the runtime under test.
 **Implementation**:
 `ui/src/Amoebius/Ui/Offline/{Store,Crypto,Partition,Leader,ServiceWorker}.purs`,
 `src/Amoebius/Ui/Offline/Browser/{Store,Crypto,Partition,Leader,ServiceWorker}.hs`,
-`test/browser/OfflineRuntimeSpec.hs`, `tools/phase60_browser_live.py`, and `tools/phase60_gate.py`
+`test/spec/browser/OfflineRuntimeSpec.hs`, `tools/encrypted_browser_runtime_live.py`, and `tools/encrypted_browser_runtime_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/phase60_gate.py` with a two-process
+**Independent Validation**: `python3 tools/encrypted_browser_runtime_gate.py` with a two-process
 Chrome profile, raw browser-storage/cache inspection, model contracts, and six compile-time mutants
 **Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`,
 `documents/engineering/testing_doctrine.md`, `documents/engineering/generated_artifacts_doctrine.md`
@@ -140,7 +140,7 @@ Persist and recover bounded offline state without disclosing protected records o
 
 ### Validation
 
-1. Run `python3 tools/phase60_gate.py`; require the canonical model and real Chrome
+1. Run `python3 tools/encrypted_browser_runtime_gate.py`; require the canonical model and real Chrome
    traces green and every mutant red.
 
 ### Remaining Work

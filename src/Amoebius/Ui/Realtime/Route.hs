@@ -13,7 +13,7 @@ data Route = Local ReplicaId | RedisFanout ReplicaId ReplicaId
   deriving stock (Eq, Show)
 
 routeAcrossReplicas :: ReplicaId -> ReplicaId -> Maybe Route
-#ifdef PHASE55_LOCAL_SOCKET_MAP_MUTANT
+#ifdef UI_SINGLE_TENANT_LIVE_LOCAL_SOCKET_MAP_MUTANT
 routeAcrossReplicas socketOwner eventOrigin
   | socketOwner == eventOrigin = Just (Local socketOwner)
   | otherwise = Nothing

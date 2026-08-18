@@ -49,22 +49,22 @@ provisionRedis demand = do
               then Left "redis-public-image-forbidden"
               else Right (ProvisionedRedis demand)
  where
-#ifdef PHASE31_REDIS_PVC_MUTANT
+#ifdef PLATFORM_SERVICES_2_REDIS_PVC_MUTANT
   effectivePersistence _ = True
 #else
   effectivePersistence = redisPersistenceRequested
 #endif
-#ifdef PHASE31_REDIS_UNBOUNDED_BUFFER_MUTANT
+#ifdef PLATFORM_SERVICES_2_REDIS_UNBOUNDED_BUFFER_MUTANT
   effectiveBuffer _ = 0
 #else
   effectiveBuffer = redisOutputBufferBytes
 #endif
-#ifdef PHASE31_REDIS_RECEIPT_AUTHORITY_MUTANT
+#ifdef PLATFORM_SERVICES_2_REDIS_RECEIPT_AUTHORITY_MUTANT
   effectiveReceiptAuthority _ = True
 #else
   effectiveReceiptAuthority = redisReceiptAuthorityRequested
 #endif
-#ifdef PHASE31_REDIS_PUBLIC_IMAGE_MUTANT
+#ifdef PLATFORM_SERVICES_2_REDIS_PUBLIC_IMAGE_MUTANT
   effectiveImage _ = "docker.io/library/redis:latest"
 #else
   effectiveImage = redisImage

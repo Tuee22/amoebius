@@ -7,7 +7,7 @@
 
 Phase 37 delivers the Keycloak-owned ingress; its design is owned by [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [pulumi_iac_doctrine.md](../documents/engineering/pulumi_iac_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-10 with `python3 tools/phase32_gate.py`; ledger
+Validated 2026-08-10 with `python3 tools/keycloak_ingress_gate.py`; ledger
 `dynamically-resolved`.
 
 
@@ -20,7 +20,7 @@ Validated 2026-08-10 with `python3 tools/phase32_gate.py`; ledger
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -63,7 +63,7 @@ postcondition. This phase returns to numeric order only after Phase 0 closes, th
 gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
 **Observed artifact migration — 2026-08-11:** the live gate reads
-`test/fixtures/phase32/expected-base-digest.txt`, a copy of the Phase-30 image observation. The file must be
+`test/fixture/keycloak_ingress/expected-base-digest.txt`, a copy of the Phase-30 image observation. The file must be
 removed; image provenance is checked against Phase 30's verified attestation and the current registry catalog.
 
 **Invalidated historical record:**
@@ -109,7 +109,7 @@ The same authenticated route machinery explicitly admits the UI server's HTTP up
 must traverse Keycloak/Envoy, exact-match Origin and the versioned subprotocol, and bind the secure session plus
 single-use nonce before Envoy forwards it. There is no unauthenticated, direct-Service, or alternate SSE route.
 
-The scope stops at *the ingress door and its guarantees*. The DSL deploy through the `replicas=1` singleton,
+The scope stops at *the ingress door and its guarantees*. The DSL deploy through the `replicas=1` control-plane daemon,
 app tenancy, and the Pulsar/workflow runtime are Phase 38+ concerns; this phase exercises the edge from the
 host binary against the fixed standard service set that Phases 35–36 stood up. The one genuinely new-vs-prodbox
 piece — the Envoy + Gateway API data plane replacing a hand-configured proxy — is the least evidence-backed
@@ -126,7 +126,7 @@ Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 delete + recreate; a Register-1/2 in-process check cannot discharge it (though the *render-time*
 impossibility of a self-published ingress was already golden-locked pre-cluster in Phase 14).
 
-**Gate:** `python3 tools/phase32_gate.py` is green on the live `linux-cpu` stack: the only wild path to any
+**Gate:** `python3 tools/keycloak_ingress_gate.py` is green on the live `linux-cpu` stack: the only wild path to any
 surface is `LoadBalancer → Envoy/Gateway API → Keycloak`, and every fixture, origin probe, oracle, observer,
 and committed mutant in [Gate integrity](#gate-integrity) holds.
 
@@ -138,13 +138,13 @@ cluster came up (see [Gate integrity](#gate-integrity)).
 ### Representative set (concrete corpus, §M.7)
 
 The gate's "every wild route / every surface" quantifies over an explicitly enumerated route-inventory
-candidate, `test/fixtures/phase32/route-inventory.golden`, after independent review. It lists every browser surface on the
+candidate, `test/fixture/keycloak_ingress/route-inventory.golden`, after independent review. It lists every browser surface on the
 Phase-35/36 standard service stack that the edge fronts: **Grafana, the Keycloak admin console, the Vault UI, the MinIO console, the platform API surface, and a platform-owned authenticated-WebSocket upgrade probe** (the exact set is the golden; if the stack's surface set changes,
 the golden is re-authored and re-committed, never regenerated from the running edge). The three origin classes
 — WAN, LAN, localhost-browser — are each probed from a **distinct Linux network namespace / sidecar container**
 attached to a separate veth with a non-loopback source address for WAN/LAN and the host loopback for
 localhost-browser; a single host-side `curl` of the MetalLB address is **not** an acceptable stand-in for all
-three. The `phase32-tester` realm/user fixture (`test/fixtures/phase32/realm.json`) is also a regression
+three. The `phase32-tester` realm/user fixture (`test/fixture/keycloak_ingress/realm.json`) is also a regression
 fixture until independently reviewed or replaced.
 
 ## Gate integrity
@@ -295,7 +295,7 @@ before the first effect, while their exact-fit twins render and reconcile.
 runners, two-replica Envoy data plane, dedicated strict-sync Keycloak Patroni cluster, OIDC route matrix, and
 WebSocket guard corpus all pass.
 **Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Keycloak.hs`
-(built), `tools/phase32_keycloak_ingress_live.py`, and `test/live/KeycloakIngressLiveSpec.hs`.
+(built), `tools/keycloak_ingress_live.py`, and `test/spec/live/KeycloakIngressLiveSpec.hs`.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: positive OIDC enforcement, not a vacuous deny-all — every committed surface is
 served only after traversing Keycloak, the wild path is confirmed per origin class, and the readiness edges are
@@ -359,7 +359,7 @@ Independently review or replace the same-commit route inventory and realm fixtur
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 pair, Vault EAB provenance shim, bounded ACME staging stand-in, and Dhall literal scan pass live.
 **Implementation**: `src/Amoebius/Platform/Edge.hs`, `src/Amoebius/Platform/Tls.hs`
-(built), `test/fixtures/phase32/backdoor-seed.yaml`, and `tools/phase32_keycloak_ingress_live.py`.
+(built), `test/fixture/keycloak_ingress/backdoor-seed.yaml`, and `tools/keycloak_ingress_live.py`.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the scanner is itself validated: a committed raw-`kubectl` bypass seed must turn it
 red and its removal green, so a scan that greps a label the renderer never emits cannot pass vacuously. Off-host
@@ -389,7 +389,7 @@ one carve-out really is a *different type* of endpoint, not a wild one.
 - An ACME execution demand with a complete issuer-Job `PodResourceEnvelope`, bounded challenge/order/retry and
   key/CSR workspace, certificate/key revision retention, and the resulting Vault Raft/audit high-water; this
   demand is provisioned before the ACME client or Vault mutation can run.
-- The committed scanner-validation seed (`test/fixtures/phase32/backdoor-seed.yaml`, a raw-`kubectl`
+- The committed scanner-validation seed (`test/fixture/keycloak_ingress/backdoor-seed.yaml`, a raw-`kubectl`
   NodePort/`Ingress` bypass authored in this phase's oracle-pinning sprint) and the argv/env-recording ACME shim used to observe EAB
   provenance from the OS boundary.
 
@@ -419,7 +419,7 @@ None.
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 matches it, and a distinct scratch Pod observes deny→allow→deny as its declared graph edge is added/removed.
 **Implementation**: `src/Amoebius/Manifest/NetworkPolicy.hs`,
-`src/Amoebius/Platform/Edge.hs` (built), `test/fixtures/phase32/netpol-expected.golden`, and the live harness.
+`src/Amoebius/Platform/Edge.hs` (built), `test/fixture/keycloak_ingress/netpol-expected.golden`, and the live harness.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: "derived" is oracled two ways that a hardcoded static allow-list cannot satisfy —
 graph variation, which adds and removes a declared edge and watches both the applied policy set and live
@@ -441,7 +441,7 @@ and every other is denied.
 - The live posture: a service that does not declare consuming `B` cannot reach `B`, and a declared edge is not
   severed — the two shapes [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)
   makes unrepresentable at authoring time, now confirmed on the running cluster.
-- The expected-policy candidate `test/fixtures/phase32/netpol-expected.golden`, retained only after independent
+- The expected-policy candidate `test/fixture/keycloak_ingress/netpol-expected.golden`, retained only after independent
   review or replacement; an independent graph-walker that recomputes the expected allow-set from the declared
   dependency edges, and committed mutant (b) — a `derive` variant that drops one allow-edge and adds one
   undeclared allow-edge, which the set-equality check must show going red.
@@ -467,8 +467,8 @@ Independently review or replace the same-commit expected-policy fixture before r
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 the latter proves exact committed relational/object marker bytes across fresh cluster identities without
 destroying the retained platform stack.
-**Implementation**: `src/Amoebius/Platform/Edge.hs`, `tools/phase32_rebind_regression.py`,
-`tools/phase32_gate.py`, and `test/live/KeycloakIngressLiveSpec.hs` (built).
+**Implementation**: `src/Amoebius/Platform/Edge.hs`, `tools/keycloak_ingress_rebind_regression.py`,
+`tools/keycloak_ingress_gate.py`, and `test/spec/live/KeycloakIngressLiveSpec.hs` (built).
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the harness proves both halves in one run and cannot fake either: the single-door
 invariant end-to-end, and the committed marker bytes surviving a **witnessed** cluster delete and recreate. A run
@@ -487,7 +487,7 @@ deterministic storage rebind.
 - The phase-gate harness: assert an unauthenticated request to any platform surface is rejected at the edge and
   there is no non-Keycloak wild path (no exposed backdoor NodePort).
 - Run-local image provenance that consumes the verified Phase-30 identity and current registry catalog; remove
-  `test/fixtures/phase32/expected-base-digest.txt` and never replace it with another copied digest.
+  `test/fixture/keycloak_ingress/expected-base-digest.txt` and never replace it with another copied digest.
 - The storage-rebind regression: write the committed marker row (`marker-row.sql`) into the Keycloak Patroni DB
   and the committed marker object (`marker-object.bin`) into a MinIO bucket. Perform the Phase-33 intermediate
   observation while the old apiserver is still running, quiescing the witnesses and stopping each through its

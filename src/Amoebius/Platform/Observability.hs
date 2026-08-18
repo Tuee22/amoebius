@@ -64,7 +64,7 @@ provisionObservability demand = do
       _ <- either (Left . Text.pack . show) Right (fitBacking (observabilityBacking demand) raw)
       Right (ProvisionedObservability demand work usable raw)
  where
-#ifdef PHASE31_FIXED_PROMETHEUS_MUTANT
+#ifdef PLATFORM_SERVICES_2_FIXED_PROMETHEUS_MUTANT
   effectiveMonitoringBudget row = (observabilityMonitoringBudget row) {monitoringTsdbTemporaryBytes = 0}
 #else
   effectiveMonitoringBudget = observabilityMonitoringBudget
@@ -93,7 +93,7 @@ renderObservability provision =
       ] (observabilityPrometheusResources demand)
   , object "Deployment" "prometheus-query-proxy" 1
       [ "/usr/bin/python3"
-      , "/phase31-query-proxy/query_proxy.py"
+      , "/platform-services-2-query-proxy/query_proxy.py"
       , "--max-concurrent=" <> natural (queryMaximumConcurrent query)
       , "--max-series=" <> natural (queryMaximumSeries query)
       , "--max-samples=" <> natural (queryMaximumSamples query)

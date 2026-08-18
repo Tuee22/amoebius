@@ -127,7 +127,7 @@ plan output is likewise generated and uncommitted.
 - **Representative set:** the same minimal single-tenant, multi-tenant, data/form, workflow/subscription, and
   ready-artifact programs exercise every client instruction, public value type, route guard, effect class,
   server dispatch arm, fixed named-link navigation, and manifest entry.
-- **Oracle candidates:** after independent review, `test/fixtures/ui_plan_compiler/projection_rows.tsv` owns
+- **Oracle candidates:** after independent review, `test/fixture/ui_plan_compiler/projection_rows.tsv` owns
   the logical client/server/route/contract/audit/handler-identity tuples. The four existing plan goldens must
   be reviewed or replaced before serving as canonical-encoding oracles. `expected_digests.tsv` is removed;
   concrete authority, client, server, and contract digests are generated at run time from separately authored
@@ -175,7 +175,7 @@ interpreter, release publication, transport security, or runtime freshness enfor
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Ui/Compile/{ClientPlan,ServerPlan,Manifest,Demand}.hs`
-and `test/ui/{UiPlanCompilerSpec,PlanCompilerReference}.hs`, plus `tools/ui_plan_compiler_gate.py`
+and `test/spec/ui/{UiPlanCompilerSpec,PlanCompilerReference}.hs`, plus `tools/ui_plan_compiler_gate.py`
 **Blocked by**: None.
 **Independent Validation**: `cabal test ui-plan-compiler-spec` compares fresh compiler output with the
 Phase-0 tables/goldens and requires every named projection/determinism mutant to fail. The full hermetic gate

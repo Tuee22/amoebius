@@ -2379,7 +2379,7 @@ ResidentResourceDebitSet =
   , backingTotals      : Map ProvisionedRuntimeOrStorageBackingRef (Quantity Bytes)
   , observation        : InventoryFingerprint
   , equality           : ObservedResidentDebitProjectionWitness
-  } -- copied into the singleton ledger root; removal requires fresh observed-absence/GC evidence and CAS
+  } -- copied into the control-plane daemon ledger root; removal requires fresh observed-absence/GC evidence and CAS
 
 ValidatedSchedulerLedgerRoot =
   { identity       : SchedulerLedgerRootId
@@ -2391,7 +2391,7 @@ ValidatedSchedulerLedgerRoot =
   , foldDigest     : ReservationSetFoldDigest
   , rootResourceVersion : ResourceVersion
   , rootCasVersion   : SchedulerLedgerCasVersion
-  , singleton      : SchedulerLedgerSingletonAuthorityWitness
+  , control-plane daemon      : SchedulerLedgerControlPlaneDaemonAuthorityWitness
   }
 
 ReservationFoldInput =
@@ -2437,7 +2437,7 @@ foldReservationSet
 -- physical allocation domain and only when bytes/backing/model agree. Image workspace is the policy-bounded
 -- top-n of observed missing/pulling work items after same-node/digest coalescing; Resident contributes zero
 -- workspace and FailedPartial remains until its observed deadline. A CUDA device may occur for one PodUid
--- owner only (same-UID retries are idempotent). Every CAS re-folds the singleton root plus static, foreign,
+-- owner only (same-UID retries are idempotent). Every CAS re-folds the control-plane daemon root plus static, foreign,
 -- resident, and candidate state under the same capacity/inventory fingerprint.
 
 CompleteResourceReservationSchema owner =
@@ -2986,7 +2986,7 @@ ObservedHostReservationLedger =
   , residentStorage: ObservedHostResidentResourceBaseline
   , resourceVersion: ResourceVersion
   , casVersion     : HostReservationCasVersion
-  , singletonPerHost: HostReservationAuthorityWitness
+  , controlPlanePerHost: HostReservationAuthorityWitness
   }
 
 ObservedHostResidentResourceBaseline =
@@ -3040,7 +3040,7 @@ foldHostReservationSet
   :: Topology
   -> HostReservationFoldInput
   -> Either ProvisionError HostReservationSetFold
--- re-folds the per-host singleton ledger plus retained residents; active rows carry full runtime/device axes,
+-- re-folds the per-host control-plane daemon ledger plus retained residents; active rows carry full runtime/device axes,
 -- RetainedArtifacts rows carry zero runtime/device axes, and every key/owner/process/host join is exact
 
 RetainedHostResourceReservation =
@@ -4585,7 +4585,7 @@ MandatoryReconcilerLeaseDemand =
   , mutationByteModel    : CanonicalKubernetesLeaseMutationSerializerModel
   , sourceEquality : ReconcilerLeaseSourceWitness
   }
--- maximumMutationBytes is derived from the finite provisioned bootstrap/singleton holder identities and every
+-- maximumMutationBytes is derived from the finite provisioned bootstrap/control-plane daemon holder identities and every
 -- reachable acquire/renew/release/handoff payload under mutationByteModel; it is not an independently authored
 -- estimate. apiObject.serializedBytes remains the exact initial object source.
 
@@ -4606,7 +4606,7 @@ ReconcilerLeaseTimingRefinement retryPeriod renewDeadline leaseDuration
 -- windowStart + k*retryPeriod have cardinality ceil(renewalWindow/retryPeriod), including when the ratio is
 -- integral. The old product inequality rounded in the wrong direction and could under-budget a partial period.
 
-ReconcilerExecutionUnitId = -- opaque refinement of the singleton execution identity
+ReconcilerExecutionUnitId = -- opaque refinement of the control-plane daemon execution identity
   { unit          : ExecutionUnitId
   , body          : Pod Ordinary Deployment
   , cardinality   : Once
@@ -4643,9 +4643,9 @@ InClusterReconcilerMutationActionSet =
 StageScopedLeaseExclusiveWriterProjection =
   { lease           : KubernetesObjectId
   , bootstrapHolder : KubernetesLeaseHolderIdentity
-  , singletonHolder : KubernetesLeaseHolderIdentity
+  , controlPlaneHolder : KubernetesLeaseHolderIdentity
   , bootstrapActions: BootstrapMutationActionSubset
-  , singletonActions: InClusterReconcilerMutationActionSet
+  , controlPlaneActions: InClusterReconcilerMutationActionSet
   , overlap         : Forbidden
   , sourceEquality  : LeaseHolderStageActionRbacEqualityWitness
   }
@@ -4675,40 +4675,40 @@ BootstrapReconcilerLeaseHolder =
 InClusterReconcilerLeaseHolder =
   { execution      : ReconcilerExecutionUnitId
   , holderIdentity : KubernetesLeaseHolderIdentity
-  , stage          : InClusterSingleton
-  , sourceEquality : SingletonLeaseHolderSourceWitness
+  , stage          : InClusterControlPlane
+  , sourceEquality : ControlPlaneDaemonLeaseHolderSourceWitness
   }
 
 ReconcilerLeaseHolder =
   < BootstrapAuthority : BootstrapReconcilerLeaseHolder
-  | InClusterSingleton : InClusterReconcilerLeaseHolder
+  | InClusterControlPlane : InClusterReconcilerLeaseHolder
   >
 
 ReconcilerLeaseHandoffPolicy =
   { order :
-      BootstrapAcquireThenReleaseThenObserveSameLeaseUnheldThenSingletonAcquire
+      BootstrapAcquireThenReleaseThenObserveSameLeaseUnheldThenControlPlaneDaemonAcquire
   , sameLeaseIdentity : Required
   , overlap           : Forbidden
   , bootstrapAuthority: BootstrapMutationActionSubset
-  , singletonAuthority: InClusterReconcilerMutationActionSet
+  , controlPlaneAuthority: InClusterReconcilerMutationActionSet
   , churn             : LeaseAcquireRenewReleaseHandoffChurnWitness
   }
 
 ReconcilerLeaseAuthorityStage =
-  < BootstrapAuthorityStage | SingletonAuthorityStage >
+  < BootstrapAuthorityStage | ControlPlaneAuthorityStage >
 
 ReconcilerLeaseReleasePurpose =
-  < BootstrapForHandoff | SingletonForReplacement >
+  < BootstrapForHandoff | ControlPlaneForReplacement >
 
 LeaseReleaseSourceState BootstrapForHandoff     = BootstrapHeld
-LeaseReleaseSourceState SingletonForReplacement = SingletonHeld
+LeaseReleaseSourceState ControlPlaneForReplacement = ControlPlaneHeld
 
 MandatoryReconcilerLeaseState =
   < Absent
   | Expired      : ReconcilerLeaseAuthorityStage
   | BootstrapHeld
   | Released     : ReconcilerLeaseReleasePurpose
-  | SingletonHeld
+  | ControlPlaneHeld
   >
 
 LeaseHolderAbsent =
@@ -4718,8 +4718,8 @@ LeaseHolderAbsent =
 
 ReconcilerLeaseTarget BootstrapHeld =
   < BootstrapHolder : BootstrapReconcilerLeaseHolder >
-ReconcilerLeaseTarget SingletonHeld =
-  < SingletonHolder : InClusterReconcilerLeaseHolder >
+ReconcilerLeaseTarget ControlPlaneHeld =
+  < ControlPlaneHolder : InClusterReconcilerLeaseHolder >
 ReconcilerLeaseTarget (Released purpose) =
   < HolderAbsent : LeaseHolderAbsent >
 
@@ -4785,7 +4785,7 @@ ProvisionedMandatoryReconcilerLease = -- private whole-deployment render member
   { demand         : MandatoryReconcilerLeaseDemand
   , etcd           : ProvisionedEtcdLogicalDemand
   , bootstrapHolder: BootstrapReconcilerLeaseHolder
-  , singletonHolder: InClusterReconcilerLeaseHolder
+  , controlPlaneHolder: InClusterReconcilerLeaseHolder
   , handoff        : ReconcilerLeaseHandoffPolicy
   , rbac           : StageScopedLeaseExclusiveWriterProjection
   , churnProjection:
@@ -4845,8 +4845,8 @@ ReconcilerLeaseCasPrecondition BootstrapHeld =
   PresentReconcilerLeaseCasPrecondition BootstrapHeld
 ReconcilerLeaseCasPrecondition (Released purpose) =
   PresentReconcilerLeaseCasPrecondition (Released purpose)
-ReconcilerLeaseCasPrecondition SingletonHeld =
-  PresentReconcilerLeaseCasPrecondition SingletonHeld
+ReconcilerLeaseCasPrecondition ControlPlaneHeld =
+  PresentReconcilerLeaseCasPrecondition ControlPlaneHeld
 -- Every transition from a present state carries the exact observed object UID and resourceVersion and is sent
 -- as a compare-and-swap update. Kubernetes cannot supply a
 -- ResourceVersion for an absent object, so initial acquisition uses create-if-absent rather than a fictional
@@ -4905,7 +4905,7 @@ ObservedReleasedReconcilerLease purpose =
   , sourceEquality    : ReleaseReceiptLeaseUidRvHolderSnapshotEqualityWitness
   }
 
-ObservedSingletonHeldReconcilerLease =
+ObservedControlPlaneDaemonHeldReconcilerLease =
   { lease           : ObservedKubernetesLease
   , bootstrapGone   : ObservedBootstrapHolderAbsentWitness
   , handoff         : ReconcilerLeaseHandoffEqualityWitness
@@ -4913,7 +4913,7 @@ ObservedSingletonHeldReconcilerLease =
   , expiryDerived   : LeaseExpiryDerivedFromAcquireOrRenewTimeAndDurationWitness
   , unexpired       : lease.observedAt < expiry
   , expiryBoundary  : HeldStrictlyBeforeExpiryBoundaryWitness
-  , sourceEquality  : SingletonHolderLeaseUidRvTimingHandoffSnapshotEqualityWitness
+  , sourceEquality  : ControlPlaneHolderLeaseUidRvTimingHandoffSnapshotEqualityWitness
   }
 
 ObservedMandatoryReconcilerLeaseState Absent =
@@ -4921,36 +4921,36 @@ ObservedMandatoryReconcilerLeaseState Absent =
 ObservedMandatoryReconcilerLeaseState (Expired BootstrapAuthorityStage) =
   < ExpiredBootstrapState :
       ObservedExpiredReconcilerLease BootstrapAuthorityStage >
-ObservedMandatoryReconcilerLeaseState (Expired SingletonAuthorityStage) =
-  < ExpiredSingletonState :
-      ObservedExpiredReconcilerLease SingletonAuthorityStage >
+ObservedMandatoryReconcilerLeaseState (Expired ControlPlaneAuthorityStage) =
+  < ExpiredControlPlaneDaemonState :
+      ObservedExpiredReconcilerLease ControlPlaneAuthorityStage >
 ObservedMandatoryReconcilerLeaseState BootstrapHeld =
   < BootstrapHeldState : ObservedBootstrapHeldReconcilerLease >
 ObservedMandatoryReconcilerLeaseState (Released BootstrapForHandoff) =
   < ReleasedForHandoffState :
       ObservedReleasedReconcilerLease BootstrapForHandoff >
-ObservedMandatoryReconcilerLeaseState (Released SingletonForReplacement) =
+ObservedMandatoryReconcilerLeaseState (Released ControlPlaneForReplacement) =
   < ReleasedForReplacementState :
-      ObservedReleasedReconcilerLease SingletonForReplacement >
-ObservedMandatoryReconcilerLeaseState SingletonHeld =
-  < SingletonHeldState : ObservedSingletonHeldReconcilerLease >
+      ObservedReleasedReconcilerLease ControlPlaneForReplacement >
+ObservedMandatoryReconcilerLeaseState ControlPlaneHeld =
+  < ControlPlaneHeldState : ObservedControlPlaneDaemonHeldReconcilerLease >
 
 ObservedMandatoryReconcilerLease =
   < Absent                 : ObservedMandatoryReconcilerLeaseState Absent
   | ExpiredBootstrap       :
       ObservedMandatoryReconcilerLeaseState (Expired BootstrapAuthorityStage)
-  | ExpiredSingleton       :
-      ObservedMandatoryReconcilerLeaseState (Expired SingletonAuthorityStage)
+  | ExpiredControlPlaneDaemon       :
+      ObservedMandatoryReconcilerLeaseState (Expired ControlPlaneAuthorityStage)
   | BootstrapHeld          : ObservedMandatoryReconcilerLeaseState BootstrapHeld
   | ReleasedForHandoff     :
       ObservedMandatoryReconcilerLeaseState (Released BootstrapForHandoff)
   | ReleasedForReplacement :
-      ObservedMandatoryReconcilerLeaseState (Released SingletonForReplacement)
-  | SingletonHeld          : ObservedMandatoryReconcilerLeaseState SingletonHeld
+      ObservedMandatoryReconcilerLeaseState (Released ControlPlaneForReplacement)
+  | ControlPlaneHeld          : ObservedMandatoryReconcilerLeaseState ControlPlaneHeld
   >
 -- These private refinements are exhaustive only over recognized mandatory-Lease states. A present object with
 -- an unknown/anonymous holder, missing expiry operands, conflicting UID, or invalid timing has no constructor.
--- BootstrapHeld/SingletonHeld end strictly before expiresAt; Expired begins at expiresAt. Released requires a
+-- BootstrapHeld/ControlPlaneHeld end strictly before expiresAt; Expired begins at expiresAt. Released requires a
 -- confirmed typed Release result on the same still-present object, not merely holder=None discovered in an
 -- unrelated snapshot. No sibling holder, UID, or resourceVersion field can drift from the observed source.
 
@@ -4994,25 +4994,25 @@ ReconcilerLeaseAction from to =
   | ReleaseBootstrapForHandoff :
       PreparedReconcilerLeaseMutation Release BootstrapHeld
         (Released BootstrapForHandoff)
-  | HandoffAcquireSingleton :
+  | HandoffAcquireControlPlaneDaemon :
       PreparedReconcilerLeaseMutation HandoffAcquire
-        (Released BootstrapForHandoff) SingletonHeld
-  | AcquireSingletonFromExpired :
+        (Released BootstrapForHandoff) ControlPlaneHeld
+  | AcquireControlPlaneDaemonFromExpired :
       PreparedReconcilerLeaseMutation Acquire
-        (Expired SingletonAuthorityStage) SingletonHeld
-  | AcquireSingletonAfterRelease :
+        (Expired ControlPlaneAuthorityStage) ControlPlaneHeld
+  | AcquireControlPlaneDaemonAfterRelease :
       PreparedReconcilerLeaseMutation Acquire
-        (Released SingletonForReplacement) SingletonHeld
-  | RenewSingleton :
-      PreparedReconcilerLeaseMutation Renew SingletonHeld SingletonHeld
-  | ReleaseSingletonForReplacement :
-      PreparedReconcilerLeaseMutation Release SingletonHeld
-        (Released SingletonForReplacement)
+        (Released ControlPlaneForReplacement) ControlPlaneHeld
+  | RenewControlPlaneDaemon :
+      PreparedReconcilerLeaseMutation Renew ControlPlaneHeld ControlPlaneHeld
+  | ReleaseControlPlaneDaemonForReplacement :
+      PreparedReconcilerLeaseMutation Release ControlPlaneHeld
+        (Released ControlPlaneForReplacement)
   >
 -- Renew fixes target to the exact observed holder. Bootstrap release fixes it to HolderAbsent. Handoff fixes it
--- to the authenticated singleton Pod UID and is the only BootstrapForHandoff -> SingletonHeld transition.
--- An expired bootstrap holder cannot be acquired by a singleton, and bootstrap authority has no constructor
--- from a singleton-stage state.
+-- to the authenticated control-plane daemon Pod UID and is the only BootstrapForHandoff -> ControlPlaneHeld transition.
+-- An expired bootstrap holder cannot be acquired by a control-plane daemon, and bootstrap authority has no constructor
+-- from a control-plane-stage state.
 
 ReconcilerLeaseTransportOutcome =
   < Acknowledged | RejectedConflict | TimeoutOrCancelled | LostOrAmbiguousResponse >
@@ -5097,15 +5097,15 @@ ValidatedMandatoryReconcilerLease =
   < BootstrapAuthority :
       { observed    : ObservedMandatoryReconcilerLeaseState BootstrapHeld
       , capability  : BootstrapMutationActionSubsetCapability
-      , singleHolder: MandatoryLeaseSingletonWriterWitness
+      , singleHolder: MandatoryLeaseControlPlaneDaemonWriterWitness
       , equality    : BootstrapLeaseObservedCapabilityIdentityRvSnapshotEqualityWitness
       }
-  | SingletonAuthority :
-      { observed    : ObservedMandatoryReconcilerLeaseState SingletonHeld
+  | ControlPlaneAuthority :
+      { observed    : ObservedMandatoryReconcilerLeaseState ControlPlaneHeld
       , capability  : InClusterReconcilerMutationCapability
-      , handoff     : BootstrapReleaseSameLeaseUnheldSingletonAcquireWitness
-      , singleHolder: MandatoryLeaseSingletonWriterWitness
-      , equality    : SingletonLeaseObservedCapabilityIdentityRvHandoffSnapshotEqualityWitness
+      , handoff     : BootstrapReleaseSameLeaseUnheldControlPlaneDaemonAcquireWitness
+      , singleHolder: MandatoryLeaseControlPlaneDaemonWriterWitness
+      , equality    : ControlPlaneDaemonLeaseObservedCapabilityIdentityRvHandoffSnapshotEqualityWitness
       }
   >
 ```

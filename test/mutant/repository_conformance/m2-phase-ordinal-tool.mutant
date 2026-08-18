@@ -1,0 +1,6 @@
+check=de-phased-naming
+operator=name-reintroduction
+mutation=create | tools/phase31_gate.py | # seeded
+statement=Reintroduce a `tools/phaseNN_gate.py`-shaped authored name. Section U clause 3 forbids a
+statement=phase ordinal in any authored name outside the plan suite, so rule r15 must report it;
+statement=`tools/` has no fixed second level, so r13 must stay silent.

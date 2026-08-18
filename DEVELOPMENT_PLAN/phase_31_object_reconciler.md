@@ -24,7 +24,7 @@ Sprints 27.1–27.5 and the complete phase gate have passed.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_67_second_arch_attested_index.md, DEVELOPMENT_PLAN/phase_32_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_33_retained_storage.md, DEVELOPMENT_PLAN/phase_34_vault_pki.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_51_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_52_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_67_second_arch_attested_index.md, DEVELOPMENT_PLAN/phase_32_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_33_retained_storage.md, DEVELOPMENT_PLAN/phase_34_vault_pki.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_51_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_52_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -117,7 +117,7 @@ up the pure private per-source `renderSourcePrivate` plus the deployment-global 
 golden-locked them in Register 1; this phase wires that exact value through the
 `observe → diff → scoped-SSA → staged-enact → delete → wait-for-ready` reconciler onto the single-node `kind`
 cluster from Phase 29. The reconciler is exercised here **from the host binary against a scratch namespace**,
-against the pinned Phase-14 corpus — the in-cluster **control-plane singleton** that eventually owns it
+against the pinned Phase-14 corpus — the in-cluster **control-plane daemon** that eventually owns it
 (a Deployment `replicas=1` whose single-instance guarantee is delegated to k8s/etcd with **no bespoke election**) arrives in Phase 37. The `amoebius-capacity` scheduler — its CAS `Reserved`→`BindingInFlight`→
 `Bound` reservation ledger, two-stage bootstrap cutover, and execution-identity admission — is **Phase 32, layered on this reconciler**; in this phase the corpus Pods are bound by the **default Kubernetes scheduler**,
 and the typed-action engine, scoped SSA, staged enactors, authenticated deletion, and unified observed-readiness
@@ -331,7 +331,7 @@ flowchart LR
 *Orientation. The seams phase 31 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
 
 **The representative reconcile corpus (oracle-pinned, §M.7 concrete corpus).** The gate's applied service set
-is the committed fixture `test/live/fixtures/reconcile-corpus/` — a subset of the Phase-14 byte-for-byte
+is the committed fixture `test/fixture/live/reconcile-corpus/` — a subset of the Phase-14 byte-for-byte
 golden corpus (`test/golden/render/` service specs, referenced by their golden IDs, never a freshly
 hand-picked spec) — and it MUST span, with each kind exercising a *live readiness transition that is not
 instantaneous*:
@@ -365,7 +365,7 @@ Pod without typed authorization — must fail Sprint 31.3; and (e) a **healthy-C
 amoebius controller reports its **own in-phase capacity/reservation CR** healthy while its actual child exceeds the
 provisioned resource/PVC/rollout envelope — must prevent convergence after child enumeration in Sprint 31.4. (The
 source's **bind-before-reservation-CAS** mutant (d) audits the scheduler ledger and is partitioned to Phase 31.)
-A committed **never-ready red-path fixture** `test/live/fixtures/reconcile-corpus-never-ready/` (one Deployment
+A committed **never-ready red-path fixture** `test/fixture/live/reconcile-corpus-never-ready/` (one Deployment
 whose probe never passes) MUST turn the convergence suite red on the *honest* engine too (convergence is never
 declared), foreclosing an immediate-return `Wait.hs`.
 
@@ -378,7 +378,7 @@ Independent readers also assert the same bootstrap-host `Lease` holder/resourceV
 object/version exists in this pre-gateway phase, the retained terminal UID, and no host-process/device mutation.
 
 **Independent reference predicate (§M.3).** The reference side of every equivalence check is the committed
-hand-authored `test/live/fixtures/reconcile-corpus/expected-actions.json` — the full object-action and
+hand-authored `test/fixture/live/reconcile-corpus/expected-actions.json` — the full object-action and
 `ValidatedExecutionTransitionAction` domain, authored **before** the planner — and the external apiserver reader
 above; neither reuses the reconciler's own diff/fold or `action→effect` function. Each one-field negative
 (§M.8) is paired with a positive that differs only in the foreclosed dimension and asserts *why* it fails (its
@@ -409,11 +409,11 @@ every mutation surface.
   — **the runtime enactor: the reconciler observes, never sleeps.** The wait-for-ready this phase builds is the
   runtime enactor of a readiness edge — the live condition is read from the object, never assumed by a fixed
   sleep.
-- [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)
-  — **the control-plane singleton.** The reconciler is, at steady state, run by the in-cluster singleton — a
+- [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon)
+  — **the control-plane daemon.** The reconciler is, at steady state, run by the in-cluster control-plane daemon — a
   Deployment `replicas=1`, stateless (no PVC), single-writer authority delegated to k8s/etcd through its mandatory
   `Lease`, **no bespoke election**. This phase drives the reconciler from the host binary as a precursor; standing
-  it up *inside* the singleton is Phase 37.
+  it up *inside* the control-plane daemon is Phase 37.
 - [`conformance_harness_doctrine.md §3`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
   — **rendering never touches live infrastructure.** The boundary this phase honors from the other side: the
   `renderAll`/plan/`--dry-run` path stayed cluster-free through Phase 15, and **apply is the first live step** —
@@ -451,7 +451,7 @@ independently authored action table, and the read-only preflight boundary all he
 `src/Amoebius/Scheduler/Ledger.hs` reservation-ledger normalization is partitioned to Phase 31.)
 **Blocked by**: the Phase-30 gate.
 **Independent Validation**: a fresh snapshot produces exactly the committed
-`test/live/fixtures/reconcile-corpus/expected-actions.json`, authored before the planner. It includes the
+`test/fixture/live/reconcile-corpus/expected-actions.json`, authored before the planner. It includes the
 full object-action and `ValidatedExecutionTransitionAction` domains, not merely add/update/prune names. All
 one-field negatives fail before any apiserver, host, provider, or object-store write.
 **Docs to update**:
@@ -556,7 +556,7 @@ reuse a token after a lost response. No non-SSA effect flows through the SSA mod
 Adopt [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
 — the apply/reconcile engine. Build the bootstrap `Lease` authority and the generic typed-action dispatcher.
 Scoped ordinary-object actions may use SSA; all other effects must consume their dedicated capability. The host
-precursor must hold the same provisioned mandatory `Lease` that the Phase-38 singleton later receives by an
+precursor must hold the same provisioned mandatory `Lease` that the Phase-38 control-plane daemon later receives by an
 observed handoff. The scheduler's CAS reservation/Binding path and its two-stage bootstrap are Phase 31.
 
 ### Deliverables
@@ -688,9 +688,9 @@ None. Sprint 31.4 composes these actions into the full convergence/no-op corpus.
 and re-ran byte-stable with zero mutations, with all four red controls red, and `sprint-26.4-receipt.json`
 records fingerprint `sha256:ef271e8922c15f89ea77931620810130df2ad59ba9c63ada158a7f9301202a7d`.
 **Implementation**: `src/Amoebius/Manifest/Wait.hs`,
-`test/live/ReconcileConvergeSpec.hs`, `test/live/SerialOnDeleteSpec.hs`,
-`test/live/JobTerminalRetentionSpec.hs`, and `tools/object_reconciler_live.py` — built and validated. (The
-`test/live/SchedulerReservationSpec.hs` live scheduler suite is Phase 31.)
+`test/spec/live/ReconcileConvergeSpec.hs`, `test/spec/live/SerialOnDeleteSpec.hs`,
+`test/spec/live/JobTerminalRetentionSpec.hs`, and `tools/object_reconciler_live.py` — built and validated. (The
+`test/spec/live/SchedulerReservationSpec.hs` live scheduler suite is Phase 31.)
 **Blocked by**: none; Sprint 31.3 is sealed.
 **Independent Validation**: the representative corpus reconciles a non-instantaneous
 Deployment, a serial replacement Bound+Ready between deletions, CR health plus child conformance on
@@ -823,7 +823,7 @@ Register-3 half supplies the live boundary evidence that bounds it.
 - `documents/engineering/readiness_ordering_doctrine.md` — the §6 runtime-enactor claim (observe, never sleep) gains
   its first amoebius proof.
 - `documents/engineering/daemon_topology_doctrine.md` — record that Phase 31 drives the reconciler from the host
-  binary; the §3 singleton that *owns* it (Deployment `replicas=1`, delegated single-instance, no election) is stood
+  binary; the §3 control-plane daemon that *owns* it (Deployment `replicas=1`, delegated single-instance, no election) is stood
   up in Phase 38.
 - `documents/engineering/generated_artifacts_doctrine.md` — note that the applied `[K8sObject]` set is generated at apply time and never committed. - `documents/engineering/resource_capacity_doctrine.md` — record the read-only pre-mutation live inventory cross-check and its zero-write failure path. - `documents/engineering/deterministic_simulation_doctrine.md` — add the Phase-31 Register-2.5 status backlink for the Sprint-26.5 reconciler/execution fault battery.
 
@@ -847,8 +847,8 @@ Register-3 half supplies the live boundary evidence that bounds it.
   (observe, never sleep) the wait-for-ready realizes
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — [§8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime) the pre-mutation live
   inventory cross-check
-- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — [§3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton) the Deployment-`replicas=1`
-  singleton (delegated single-instance, no election) that will own this reconciler in Phase 38
+- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — [§3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon) the Deployment-`replicas=1`
+  control-plane daemon (delegated single-instance, no election) that will own this reconciler in Phase 38
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — [§3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure) the invariant that
   rendering never touches live infrastructure; apply is the first live step
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — why the applied object
@@ -870,7 +870,7 @@ Register-3 half supplies the live boundary evidence that bounds it.
   bootstrap cutover, and execution-identity admission layered on this reconciler
 - [phase_33_retained_storage.md](phase_33_retained_storage.md) — the retained-carve and verified-migration
   storage-scaling enactors this phase's dispatch boundary calls into
-- [phase_38_live_dsl_singleton.md](phase_38_live_dsl_singleton.md) — the Deployment-`replicas=1` singleton that stands
+- [phase_38_live_dsl_deploy.md](phase_38_live_dsl_deploy.md) — the Deployment-`replicas=1` control-plane daemon that stands
   the reconciler up in-cluster and receives the `Lease` by observed handoff
 - [phase_42_content_store_workflow.md](phase_42_content_store_workflow.md) — the first live gateway write → readback →
   deadline → terminal cleanup trace for the Job terminal protocol modeled here

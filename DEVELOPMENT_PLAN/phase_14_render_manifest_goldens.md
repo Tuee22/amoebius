@@ -40,7 +40,15 @@ The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-13 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/render_manifest_gate.py` passes all
+eleven sides on substrate `none`, lane `none`, natural `arm64`, untranslated: every authored oracle holds its
+declared shape, the rendered-output goldens match byte for byte, every seeded mutant reddens at its own locus,
+each recorded result is derived from an observation, and 31 surfaces join completely to 46
+enumerated items. Attestation `sha256:3df8758b265a5d6f680661facbe3bfb508f14be5237581a6a1043c89752d7ddd`. The rerun differs from its predecessor by naming the lane and the
+architecture the run actually used, and by reading its mutant manifest and item enumeration from the one
+registry.
+
+**Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
@@ -329,7 +337,7 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
   planner can select only the identities active at a given readiness witness.
 - An in-file honesty note: this is the render half only — the SSA/ApplySet apply, prune, wait-for-ready, and
   release ledger are the live-band [Phase 31](phase_31_object_reconciler.md) reconciler, run by the
-  Deployment-`replicas=1` singleton under its mandatory Lease (no bespoke election).
+  Deployment-`replicas=1` control-plane daemon under its mandatory Lease (no bespoke election).
 
 ### Validation
 1. The `-Werror=incomplete-patterns`/`-Werror=incomplete-uni-patterns` compile passes. The boundary check
@@ -454,7 +462,7 @@ Live enforcement remains UNVERIFIED.
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/manifest_generation_doctrine.md` — backlink §2/§3 to the Phase-14 pure renderer and
   rendered-output goldens; keep §5's snapshot-bound typed action reconciler explicitly as the live-band
-  [Phase 31](phase_31_object_reconciler.md) residue, run by the Deployment-`replicas=1` singleton under its
+  [Phase 31](phase_31_object_reconciler.md) residue, run by the Deployment-`replicas=1` control-plane daemon under its
   mandatory Lease.
 - `documents/engineering/conformance_harness_doctrine.md` — record the rendered-output-golden validation
   locus this phase realizes as the **`renderAll`** step of the pre-cluster spine, in Register 1.

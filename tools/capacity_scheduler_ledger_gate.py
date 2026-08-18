@@ -61,7 +61,7 @@ def validate_fixture() -> dict[str, str]:
         raise GateFailure(f"absent-state-domain:{states}")
     if len(negatives) != 9 or len(set(negatives)) != 9:
         raise GateFailure(f"negative-domain:{negatives}")
-    actions = json.loads((ROOT / "test/live/fixtures/reconcile-corpus/expected-actions.json").read_text(encoding="utf-8"))["schedulerActions"]
+    actions = json.loads((ROOT / "test/fixture/live/reconcile-corpus/expected-actions.json").read_text(encoding="utf-8"))["schedulerActions"]
     if len(actions) != 9:
         raise GateFailure("scheduler-action-oracle-domain")
     return {"name": "pinned-ledger-oracle", "command": "internal independent fixture read", "output": "5 absent states; 9 negative classes; 9 scheduler actions", "result": "PASS"}

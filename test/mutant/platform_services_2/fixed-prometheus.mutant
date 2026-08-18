@@ -1,0 +1,1 @@
+PLATFORM_SERVICES_2_FIXED_PROMETHEUS_MUTANT drops compaction/query temporary storage; the independently recomputed boundary must reject it.

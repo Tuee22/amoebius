@@ -18,12 +18,14 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
 CORPUS = ROOT / "test/oracle/render_manifest/corpus.tsv"
-MUTANTS = ROOT / "test/mutant/render_manifest/mutants.tsv"
+MUTANT_CAPABILITY = "render_manifest"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/render_manifest/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/render-manifest/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/render-manifest/validation-locus-ledger.tsv"
@@ -77,7 +79,7 @@ def verify_pins() -> tuple[Path, str]:
 
 def verify_oracles() -> list[dict[str, str]]:
     corpus = read_tsv(CORPUS)
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     locus = read_tsv(LOCUS)
     if len(corpus) != 18 or len({row["deployment"] for row in corpus}) != 18:
         raise GateFailure("Phase-14 corpus must enumerate eighteen unique deployments")
@@ -189,7 +191,7 @@ COMPILER = ""
 # Where the run reads its enumerable items from. Nothing here is a list this gate carries;
 # each is a file the run opens, so deleting a case or a mutant shrinks the enumeration and
 # breaks the authored join.
-ITEM_SOURCES = ['test/oracle/render_manifest/corpus.tsv', 'test/mutant/render_manifest/mutants.tsv']
+ITEM_SOURCES = ['test/oracle/render_manifest/corpus.tsv', 'test/mutant/registry.tsv']
 
 CHECKS = {
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
@@ -218,6 +220,11 @@ def enumerated_items() -> set[str]:
         path = ROOT / relative
         if not path.is_file():
             continue
+        if relative == "test/mutant/registry.tsv":
+            # The one registry leads with the capability and carries every phase's rows, so
+            # this phase's items are the mutant ids in its own rows, not every first column.
+            names.update(row["mutant"] for row in mutant_registry.capability(MUTANT_CAPABILITY))
+            continue
         for line in path.read_text(encoding="utf-8").splitlines()[1:]:
             if line.strip():
                 names.add(line.split("\t")[0].strip())
@@ -226,11 +233,17 @@ def enumerated_items() -> set[str]:
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=13, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=14, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+
+    # Clause 15 first: a run that cannot name the architecture it executed on, or
+    # that is executing under translation, has nothing worth proving.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []

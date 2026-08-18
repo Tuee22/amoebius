@@ -1,6 +1,0 @@
-mutant	locus	fixture
-M-drop-handle-tenant	copied-handle-scope	test/mutant/local_ui_composition/M-drop-handle-tenant.mutant
-M-direct-workflow-fetch	browser-backend-edge	test/mutant/local_ui_composition/M-direct-workflow-fetch.mutant
-M-mix-client-server-plan	plan-pair-digest	test/mutant/local_ui_composition/M-mix-client-server-plan.mutant
-M-ready-before-receipt	ready-order	test/mutant/local_ui_composition/M-ready-before-receipt.mutant
-owner_key_swap	owner-key-dom	test/mutant/local_ui_composition/owner_key_swap.mutant

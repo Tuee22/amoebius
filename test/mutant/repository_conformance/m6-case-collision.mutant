@@ -1,0 +1,8 @@
+check=collision-free-tree
+operator=case-variant-addition
+mutation=enumerate | test/spec/Live/ObjectReconcilerSpec.hs
+statement=Restore a pair of enumerated paths that differ only by case. Two of the four substrates
+statement=reach the tree case-insensitively, so the pair is one path there and one side silently
+statement=overwrites the other. The mutation is on the enumeration rather than on disk because a
+statement=case-insensitive filesystem cannot hold the pair to begin with — which is the defect,
+statement=not an obstacle to seeding it.

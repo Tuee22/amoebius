@@ -1,0 +1,5 @@
+--- a/src/Amoebius/Cluster/NodeProvisioner.hs
++++ b/src/Amoebius/Cluster/NodeProvisioner.hs
+@@ seeded mutant: collapse Unreachable into Absent during scale-down
+-  Unreachable -> Left RefuseOnUnreachable
++  Unreachable -> Right RemoveNode

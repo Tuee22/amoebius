@@ -1,0 +1,17 @@
+{
+  "managedEks": {
+    "capacitySchedulerRoles": 1,
+    "expectedTag": "NoHostSubstrateOnManagedEks",
+    "hostDaemonRoles": 0,
+    "hostNodePortPeers": 0,
+    "hostWitness": null,
+    "controlPlaneRoles": 1
+  },
+  "selfManaged": {
+    "capacitySchedulerRoles": 1,
+    "hostDaemonRoles": 1,
+    "hostNodePortPeers": 1,
+    "hostWitness": "linux-cpu",
+    "controlPlaneRoles": 1
+  }
+}

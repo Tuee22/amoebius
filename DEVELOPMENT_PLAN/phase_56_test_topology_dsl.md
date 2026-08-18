@@ -122,12 +122,12 @@ layers each run actually reached and at what strength.
 
 The failover simulation these topologies schedule is deliberately a **delegated** failover, not a bespoke
 election: the chaos schedule kills the active worker and observes a name-ordered standby take over the
-Pulsar `Exclusive`/`Failover` subscription of Phase 42, while the control-plane singleton it deploys under is
+Pulsar `Exclusive`/`Failover` subscription of Phase 42, while the control-plane daemon it deploys under is
 a Deployment `replicas=1` whose single-writer authority is a k8s/etcd property enforced by the mandatory
-reconciler `Lease`. There is no elected singleton, no ranked-failover election, and no standby control-plane pod
+reconciler `Lease`. There is no elected control-plane daemon, no ranked-failover election, and no standby control-plane pod
 anywhere in this phase — the harness only *schedules* the intra-cluster failover the earlier phases already
 delegate, and tears the result down. This phase consumes and does not re-implement the live DSL deploy via
-the `replicas=1` singleton (Phase 38), the native Pulsar client and Pulsar-`Failover` worker takeover
+the `replicas=1` control-plane daemon (Phase 38), the native Pulsar client and Pulsar-`Failover` worker takeover
 (Phases 40–42), the retained `no-provisioner` PV model (Phase 33), substrate detection (Phase 29),
 Vault secret-by-name injection (Phase 34), and the leak-free provider teardown (Phase 52).
 
@@ -188,24 +188,24 @@ The gate is checked against these committed, oracle-pinned criteria (see
    substrate; that run's ledger therefore records the **AWS/cloud leak leg UNVERIFIED** (never green), and the
    cloud red-test is carried instead by a provider-substrate generated test — the sanctioned
    parent-drives-provider form over Phase 52's leak-free provider teardown, still one substrate per generated
-   test ([§L](development_plan_standards.md#l-one-substrate-discipline)) — via the committed mutant `test/mutants/phase_54_cloud_leak_untyped.dhall`, an untagged AWS
+   test ([§L](development_plan_standards.md#l-one-substrate-discipline)) — via the committed mutant `test/mutant/test_topology_dsl/cloud_leak_untyped.dhall`, an untagged AWS
    resource allocated outside the typed path that MUST surface through that same service-native
    `List*`/`Describe*` inventory plus Resource Explorer `tag:none` cross-check.
 2. **Committed seeded mutant that must go red (Cheat-1 operator: dropped effect).** The committed mutant
-   `test/mutants/phase_54_leak_untyped.dhall` creates one resource (a `ConfigMap` and a backing PVC)
+   `test/mutant/test_topology_dsl/leak_untyped.dhall` creates one resource (a `ConfigMap` and a backing PVC)
    *outside* the typed allocation call — hence never test-owned-tagged — and the gate run over that mutant
    MUST fail on the inventory diff (the untagged resource surfaces as a leak), proving the sweep is not the
    circular tag-query of Cheat 1. The committed
-   `test/mutants/phase_54_leak_host_backing.dhall` removes its PVC/PV API bindings but deliberately leaves the
+   `test/mutant/test_topology_dsl/leak_host_backing.dhall` removes its PVC/PV API bindings but deliberately leaves the
    newly allocated marker-bearing host backing under `${RETAINED_ROOT}`; it MUST fail the host-allocation
    inventory diff, proving API-object cleanup cannot hide leaked durable bytes. A third committed mutant
-   `test/mutants/phase_54_ledger_all_tested.dhall` (invariant-clause delete: an emitter hardcoding every
+   `test/mutant/test_topology_dsl/ledger_all_tested.dhall` (invariant-clause delete: an emitter hardcoding every
    applicable move as tested) MUST fail the authored expected-move match of criterion 4.
 3. **suggest-test provenance is falsifiable, not narrative.** The per-run record captures the raw
    `suggest-test` emitted `.dhall` (pre-review), the reviewed `.dhall`, and their textual diff; the pre-review
    emitted output MUST itself type-check as a `TestTopology` and carry the delegated-failover chaos schedule.
    "Reviewed" means the diff is empty or confined to a committed allowlist of review-editable fields
-   (`test/dhall/phase_55_review_allowlist.json`); a review edit outside that set fails the gate.
+   (`test/fixture/dhall/phase_55_review_allowlist.json`); a review edit outside that set fails the gate.
 4. **Ledger applicability is derived and oracle-pinned, not self-declared.** The set of applicable moves is
    computed from the topology's `ChaosSchedule`/`FaultTarget` projections and the
    [`chaos_failover_doctrine.md §11.1`](../documents/engineering/chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget)
@@ -238,13 +238,13 @@ The gate is checked against these committed, oracle-pinned criteria (see
    itself concedes is "not a proof certificate": after the kill, the Pulsar broker's own subscription/consumer
    statistics (`pulsar-admin topics stats`/`topics partitioned-stats` on the inherited Phase-42 command topic)
    MUST show the name-ordered standby as the *active consumer* on that same subscription, equal to the
-   externally hand-authored `test/golden/phase_55_failover_takeover.json` predicate — mirroring how leak-freedom
+   externally hand-authored `test/golden/test_topology_dsl/failover_takeover.json` predicate — mirroring how leak-freedom
    is pinned to `kubectl`/`${RETAINED_ROOT}`/cloud enumerations rather than to a self-report. The committed
-   seeded mutant `test/mutants/phase_54_failover_standby_wrong_subscription.dhall` (structural-takeover-defeat
+   seeded mutant `test/mutant/test_topology_dsl/failover_standby_wrong_subscription.dhall` (structural-takeover-defeat
    operator: the name-ordered standby is bound under a distinct subscription name / non-`Failover` type and can
    never inherit the active's `Exclusive`/`Failover` subscription) MUST turn the gate red on this broker-stats
    predicate — the broker reports no name-ordered standby promoted on the original subscription even where the
-   operator-authored witness would pass — paired with the canonical `test/dhall/phase_55_failover.dhall`
+   operator-authored witness would pass — paired with the canonical `test/fixture/dhall/phase_55_failover.dhall`
    positive (the standby sharing that one `Failover` subscription) that the broker reports promoted.
 
 ## Gate integrity
@@ -279,7 +279,7 @@ these does not satisfy the gate. The exact node supply (including its pinned kub
 request/limit envelopes, per-planned-slot and observed-Pod-UID runtime-metadata witnesses, node aggregate
 scope/domain/ownership/grouping, PV/backing sizes, cache budget,
 explicit `accelerator = None`, and any credential/provider quota are pinned in
-`test/golden/phase_55_resource_shape.json`; the summed/effective pod demands must fit with a concrete placement
+`test/golden/test_topology_dsl/resource_shape.json`; the summed/effective pod demands must fit with a concrete placement
 witness, durable demand must fit durable backing, and bounded cache demand must be charged exactly once to its
 declared Pod-ephemeral or host-cache supply. Each metadata component must have one
 `KubeletNodefs | CriRuntimeRoot` role, resolve through the selected layout, and be grouped with image components
@@ -310,55 +310,55 @@ flowchart LR
   oracle of Gate criterion 4; it is test input, not a generated ledger;
   authored independently of `src/Amoebius/Test/Ledger.hs`, it fixes the derived applicable-move set and the
   UNVERIFIED entry for the topology's declared-but-unfaulted invariant.
-- `test/golden/phase_55_cloud_inventory.json` — the hand-authored cloud resource-type/API inventory for the
+- `test/golden/test_topology_dsl/cloud_inventory.json` — the hand-authored cloud resource-type/API inventory for the
   representative set (the required service-native `List*`/`Describe*` calls, including regional and global
   resources, plus the Resource Explorer view/query requirements for `tag:none`); it is independent of the
   allocator and prevents the leak observer from silently omitting an untagged resource class.
-- `test/golden/phase_55_resource_shape.json` — the independently authored exact capacity/capability supply and
+- `test/golden/test_topology_dsl/resource_shape.json` — the independently authored exact capacity/capability supply and
   expected placement/image/storage/quota witnesses for the canonical topology, including explicit absence of
   an accelerator on linux-cpu.
-- `test/golden/phase_55_optional_resource_shapes.json` — independently authored exact positive witnesses for
+- `test/golden/test_topology_dsl/optional_resource_shapes.json` — independently authored exact positive witnesses for
   the three closed `suggest-test` branches: registry publication (OCI objects, upload/partial peak, backend and
   proxy), Pulumi execution (executor Jobs, plugins, workspace, checkpoint objects and admission), and storage
   migration (old+new+workspace, provider overlap and copy/verify Job), plus the three explicit negative arms.
-- `test/golden/phase_55_failover_takeover.json` — the externally hand-authored takeover predicate of Gate
+- `test/golden/test_topology_dsl/failover_takeover.json` — the externally hand-authored takeover predicate of Gate
   criterion 7: the name-ordered standby is the *active consumer* on the killed active's Pulsar
   `Exclusive`/`Failover` subscription, read from the Pulsar broker's own subscription/consumer statistics and
   independent of both the operator-authored `ExpectationWitness` and `src/Amoebius/Test/Runner.hs`; it stops the
   headline takeover outcome from resting on the operator-authored witness alone.
-- `test/mutants/phase_54_resource_overcommit_*.dhall` and
-  `test/mutants/phase_54_missing_capability.dhall` — one-field variants covering
+- `test/mutant/phase_54_resource_overcommit_*.dhall` and
+  `test/mutant/test_topology_dsl/missing_capability.dhall` — one-field variants covering
   CPU/memory/logical-ephemeral/filesystem-content-snapshot/presented-durable/native-host-cache/quota overcommit, invalid in-cluster-cache
   nesting, unknown image platform/layer bytes, a kubelet-metadata one-byte shortage/model mismatch, an absent
   accelerator offering, unequal accelerator source/workload keys, a missing or extra coexistence-policy class,
   an invalid shard inventory, and a dropped co-resident accelerator debit; each must reject before any
   allocation and leave the external mutating-effects trace empty.
-- `test/mutants/phase_54/resources/` — the host generator/harness, active/standby/replacement, pod/IP/CSI and
+- `test/mutant/test_topology_dsl/resources/` — the host generator/harness, active/standby/replacement, pod/IP/CSI and
   transition-credit one-short/dropped-envelope variants paired with the same exact resource-shape oracle. It
   also contains one-unit/one-byte-short variants for every registry object/upload/proxy/backing axis, Pulumi
   executor/plugin/workspace/checkpoint/gateway axis, and migration old/new/workspace/provider/copy-Job axis,
   plus `drop_registry_publication_envelope.dhall`, `drop_pulumi_executor_envelope.dhall`,
   `drop_pulumi_checkpoint_demand.dhall`, `drop_migration_copy_envelope.dhall`, and
   `drop_migration_old_new_workspace.dhall`; each action-bearing omission must be rejected before effects.
-- `test/mutants/phase_54_leak_untyped.dhall` — the Cheat-1 seeded mutant (dropped-effect operator: a resource
+- `test/mutant/test_topology_dsl/leak_untyped.dhall` — the Cheat-1 seeded mutant (dropped-effect operator: a resource
   allocated outside the typed path) that MUST turn the inventory-diff red.
-- `test/mutants/phase_54_leak_host_backing.dhall` — a backing-leak mutant that removes the PVC/PV API objects
+- `test/mutant/test_topology_dsl/leak_host_backing.dhall` — a backing-leak mutant that removes the PVC/PV API objects
   but leaves a marker-bearing retained allocation under `${RETAINED_ROOT}`; the host-allocation inventory diff
   MUST turn red.
-- `test/mutants/phase_54_ledger_all_tested.dhall` — the Cheat-2 seeded mutant (invariant-clause-delete
+- `test/mutant/test_topology_dsl/ledger_all_tested.dhall` — the Cheat-2 seeded mutant (invariant-clause-delete
   operator: an emitter marking every applicable move tested) that MUST fail the expected-move-oracle match.
-- `test/mutants/phase_54_failover_standby_wrong_subscription.dhall` — the Gate-criterion-7 seeded takeover
+- `test/mutant/test_topology_dsl/failover_standby_wrong_subscription.dhall` — the Gate-criterion-7 seeded takeover
   mutant (structural-takeover-defeat operator: the name-ordered standby is bound under a distinct subscription
   name / non-`Failover` type and can never inherit the active's `Exclusive`/`Failover` subscription); the
   external Pulsar broker subscription/consumer-stats predicate MUST turn red, paired with the canonical
-  `test/dhall/phase_55_failover.dhall` positive the broker reports promoted.
-- `test/mutants/phase_54_cloud_leak_untyped.dhall` — the provider-substrate cloud-leak mutant (Cheat-1
+  `test/fixture/dhall/phase_55_failover.dhall` positive the broker reports promoted.
+- `test/mutant/test_topology_dsl/cloud_leak_untyped.dhall` — the provider-substrate cloud-leak mutant (Cheat-1
   dropped-effect operator on the AWS leg: an untagged AWS resource allocated outside the typed path on the
   sanctioned parent-drives-provider generated test); it MUST surface through the criterion-1 service-native
   `List*`/`Describe*` inventory plus Resource Explorer `tag:none` cross-check — carrying the cloud red-test the
   canonical `linux-cpu` gate ledger records UNVERIFIED — paired with the clean parent-drives-provider run whose
   pre-/post-run AWS enumeration diff is empty.
-- `test/dhall/phase_55_review_allowlist.json` — the committed allowlist bounding which fields operator review
+- `test/fixture/dhall/phase_55_review_allowlist.json` — the committed allowlist bounding which fields operator review
   may edit, making emitted→reviewed provenance falsifiable.
 
 **Register binding for all sprint validations.** Every Sprint 56.1–47.5 Independent Validation and Validation
@@ -520,7 +520,7 @@ gateway resources; and migration old/new/workspace/provider-overlap/copy-Job res
 dropped-envelope mutants omit the harness, standby, replacement, registry-publication, Pulumi-executor,
 Pulumi-checkpoint, migration-copy or migration-old+new+workspace row, and a premature-credit mutant launches
 run 2 while a run-1 survivor still exists; these are pinned under
-`test/mutants/phase_54/resources/` as `drop_harness_envelope.dhall`, `drop_standby_envelope.dhall`,
+`test/mutant/test_topology_dsl/resources/` as `drop_harness_envelope.dhall`, `drop_standby_envelope.dhall`,
 `drop_replacement_envelope.dhall`, `drop_pulsar_topic_demand.dhall`,
 `drop_registry_publication_envelope.dhall`, `drop_pulumi_executor_envelope.dhall`,
 `drop_pulumi_checkpoint_demand.dhall`, `drop_migration_copy_envelope.dhall`,
@@ -570,7 +570,7 @@ object-store, provider and backing mutation trace empty.
 - [`daemon_topology_doctrine.md §3.1`](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
   and [`§5`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
   — *exactly one pod is a k8s/etcd property* / *single-instance and coordination, delegated not elected*: the
-  failover the topologies inject is the Pulsar `Exclusive`/`Failover` subscription takeover, and the singleton
+  failover the topologies inject is the Pulsar `Exclusive`/`Failover` subscription takeover, and the control-plane daemon
   they deploy under is a `replicas=1` Deployment; nothing in this phase runs an election of any kind.
 - [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
   — *no skips, fail fast, and the per-run ledger artifact*: Sprint 56.5 emits the per-run
@@ -786,7 +786,7 @@ the emitted chaos schedule injects a *delegated* failover.
    `drop_migration_old_new_workspace.dhall` mutants each leave their corresponding action present and must
    turn this validation red before any registry, checkpoint, provider or backing mutation.
 4. The emitted value is immediately passed through `provision`; the canonical generated
-   placement/storage/capability/quota witness matches `test/golden/phase_55_resource_shape.json`, while every
+   placement/storage/capability/quota witness matches `test/golden/test_topology_dsl/resource_shape.json`, while every
    perturbed output independently satisfies the same fold. The overcommit/missing-capability mutants fail with
    zero effects.
 5. No emitted output contains credential material; every credential is a name, and the chaos schedule names a
@@ -882,8 +882,8 @@ untagged and backing-only leaks are visible.
   in the record) while correctly *not* flagging a retained, by-design resource present in both enumerations.
   The Resource Groups Tagging API is metadata-only here because it does not return untagged resources. The
   committed seeded mutants
-  `test/mutants/phase_54_leak_untyped.dhall` (an API resource allocated outside the typed path) and
-  `test/mutants/phase_54_leak_host_backing.dhall` (API bindings removed, host backing left behind) are the
+  `test/mutant/test_topology_dsl/leak_untyped.dhall` (an API resource allocated outside the typed path) and
+  `test/mutant/test_topology_dsl/leak_host_backing.dhall` (API bindings removed, host backing left behind) are the
   standing red-tests proving this is neither the circular tag query nor an API-object-only check.
 - An explicit scope boundary: this harness reclaims **test-owned** backing only. Production
   `create-new → verified-migrate → retire-old` emits `ReclaimEligible` and leaves physical deletion to an
@@ -904,13 +904,13 @@ untagged and backing-only leaks are visible.
    differs only in credential identity; host and EBS pairs are evaluated separately rather than treating a PV
    API delete as equivalent to deleting backing bytes.
 3. Leak detection uses the Gate-criterion-1 inventory diff, not a test-owned tag query: the committed seeded
-   mutant `test/mutants/phase_54_leak_untyped.dhall` — a resource allocated *outside* the typed path, hence
+   mutant `test/mutant/test_topology_dsl/leak_untyped.dhall` — a resource allocated *outside* the typed path, hence
    never tagged — MUST fail the run as a leak (proving the sweep is not circular), while a clean run's pre-/
    post-run enumeration diff is empty. The committed
-   `test/mutants/phase_54_leak_host_backing.dhall`, which removes API bindings but leaves the new host backing,
+   `test/mutant/test_topology_dsl/leak_host_backing.dhall`, which removes API bindings but leaves the new host backing,
    MUST also fail on the `${RETAINED_ROOT}` allocation diff. On this `linux-cpu` gate the AWS/cloud leg
    allocates nothing and is recorded UNVERIFIED in the ledger (never green); its committed red-test — the
-   untagged-AWS-resource mutant `test/mutants/phase_54_cloud_leak_untyped.dhall` that MUST surface via
+   untagged-AWS-resource mutant `test/mutant/test_topology_dsl/cloud_leak_untyped.dhall` that MUST surface via
    `List*`/`Describe*` + Resource Explorer `tag:none`, paired with a clean run whose AWS enumeration diff is
    empty — is carried by a provider-substrate generated test in the sanctioned parent-drives-provider form
    (Phase 49), keeping this single-substrate `linux-cpu` run's own scope intact ([§L](development_plan_standards.md#l-one-substrate-discipline)).
@@ -924,8 +924,8 @@ Portable contracts are implemented; the full Kubernetes/Pulsar/provider Register
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Test/Ledger.hs` (the proven/tested/assumed artifact
-emitter), `test/dhall/phase_55_failover.dhall` (the gate topology), `test/live/FailoverGateSpec.hs`, and
-`test/live/FailoverRuntimeStorageSpec.hs` (planned-slot→observed-Pod-UID equality, node
+emitter), `test/fixture/dhall/phase_55_failover.dhall` (the gate topology), `test/spec/live/FailoverGateSpec.hs`, and
+`test/spec/live/FailoverRuntimeStorageSpec.hs` (planned-slot→observed-Pod-UID equality, node
 scope/domain/ownership/grouping, reservation/observed no-double-debit, both SplitRuntime backings, and
 Unified/SplitImage alias controls) (target paths; not yet built)
 **Blocked by**: reopened numeric predecessor gates.
@@ -958,12 +958,12 @@ injects is delegated to Pulsar (Phase 42), never a bespoke amoebius election.
   the oracle against which the emitted ledger's applicability/strength projection is matched.
 - A fail-fast prerequisite check: a missing substrate input, credential, or tool fails the run with a message
   naming what is missing — never a pass-with-skip.
-- The gate topology `test/dhall/phase_55_failover.dhall` — the **committed reviewed** proposal (authored
+- The gate topology `test/fixture/dhall/phase_55_failover.dhall` — the **committed reviewed** proposal (authored
   source: it is the operator-reviewed output, checked in as a fixture, not a per-run-regenerated artifact). Its
   provenance is falsifiable, not narrative: the Phase-0 record commits the raw `suggest-test` emitted `.dhall`
   and the emitted→reviewed diff, and the gate run re-executes `amoebius suggest-test` on the gate host and
   asserts the fresh emit type-checks as a `TestTopology`, carries the delegated-failover schedule, and differs
-  from the committed reviewed file only within the allowlist `test/dhall/phase_55_review_allowlist.json`. The
+  from the committed reviewed file only within the allowlist `test/fixture/dhall/phase_55_review_allowlist.json`. The
   topology must also reproduce the pinned complete resource shape and pass `provision` before allocation. It
   then injects an intra-cluster Pulsar-delegated failover on one named substrate, tears down leak-free (Sprint
   47.4), and emits the ledger marking the Runtime-layer move tested-on-that-substrate.
@@ -978,11 +978,11 @@ injects is delegated to Pulsar (Phase 42), never a bespoke amoebius election.
 1. The gate topology — captured as the raw `suggest-test` emitted `.dhall` (pre-review), the reviewed `.dhall`,
    and their diff in the per-run record — runs the failover simulation, the name-ordered standby takes over the
    Pulsar subscription — confirmed by the external broker subscription/consumer-stats observer of Gate
-   criterion 7 against `test/golden/phase_55_failover_takeover.json`, not the operator-authored
+   criterion 7 against `test/golden/test_topology_dsl/failover_takeover.json`, not the operator-authored
    `ExpectationWitness` — and teardown leaves an empty inventory-diff sweep (Gate criterion 1). The pre-review
    emitted output MUST type-check as a `TestTopology` and carry the delegated-failover chaos schedule, and the
    emitted→reviewed diff MUST be empty or confined to the committed allowlist
-   `test/dhall/phase_55_review_allowlist.json`. The simulation kills the active worker and observes the
+   `test/fixture/dhall/phase_55_review_allowlist.json`. The simulation kills the active worker and observes the
    name-ordered standby take over with no bespoke election.
    Before spin-up, both values' CPU, memory, logical Pod-local ephemeral storage, layout-routed
    content/snapshot storage, runtime-metadata component/role/backing maps plus node scope/domain/ownership/grouping, presented durable, cache,
@@ -994,7 +994,7 @@ injects is delegated to Pulsar (Phase 42), never a bespoke amoebius election.
    the run-local ledger records the Runtime-layer move *tested on that substrate*, and the fixture's
    declared-but-unfaulted invariant — an applicable move the run omits — is recorded UNVERIFIED, never green;
    the cardinal rule "never report tested or assumed as proven" holds. The committed seeded mutant
-   `test/mutants/phase_54_ledger_all_tested.dhall` (an emitter marking every applicable move tested) MUST fail
+   `test/mutant/test_topology_dsl/ledger_all_tested.dhall` (an emitter marking every applicable move tested) MUST fail
    this field-for-field match.
 3. A run with a deliberately-absent prerequisite fails fast with a naming error, with no silent skip.
 4. The committed overcommit and missing-capability fixtures fail with an empty external mutating-effects trace;

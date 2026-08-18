@@ -1,0 +1,5 @@
+--- a/src/Amoebius/ControlPlane/Daemon.hs
++++ b/src/Amoebius/ControlPlane/Daemon.hs
+@@
+-controlPlaneFieldManager = "amoebius-live-dsl-deploy"
++controlPlaneFieldManager = "live-dsl-deploy-harness"

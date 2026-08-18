@@ -25,6 +25,6 @@ live-private-backbone	checks	live-private-backbone
 independent-live-reader	checks	external-live-reader
 recorded-results-are-generated	checks	recorded-results-match-oracle,emitted-results-untracked
 keycloak-edge	metrics
-phase31-postgres-observability	metrics
-singleton-owned-reconcile	metrics
+platform-services-2-postgres-observability	metrics
+control-plane-owned-reconcile	metrics
 amoebius-pulsar-full-native-client	metrics

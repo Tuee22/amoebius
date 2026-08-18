@@ -1,2 +1,0 @@
-mutant	target	expected
-drop_owner_equality	owner_tenant_swaps.tsv	OwnerMismatch+TenantMismatch

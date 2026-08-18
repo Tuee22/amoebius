@@ -21,7 +21,7 @@ The complete gate passed on 2026-08-10.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_33_retained_storage.md, DEVELOPMENT_PLAN/phase_34_vault_pki.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_40_pulsar_client.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/migration_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_33_retained_storage.md, DEVELOPMENT_PLAN/phase_34_vault_pki.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_40_pulsar_client.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/migration_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -65,7 +65,7 @@ Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the 
 postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
 gate against its source snapshot and publish repository-local evidence without changing an authored path.
 
-**Observed artifact migration — 2026-08-11:** `test/fixtures/phase30/expected-base-digest.txt` duplicates the
+**Observed artifact migration — 2026-08-11:** `test/fixture/phase30/expected-base-digest.txt` duplicates the
 Phase-30 image observation. It must be removed. Image identity remains a live provenance check against the
 verified Phase-30 attestation and current in-cluster registry catalog, not a committed digest file.
 
@@ -121,9 +121,9 @@ registry rehoming, and the offload bound*. The Percona-operator-managed per-cons
 clusters, pgAdmin, Prometheus/Grafana, and the **full derived readiness-DAG bring-up of the whole standard stack** are [Phase 36](phase_36_platform_services_2.md). The **Keycloak-owned ingress edge** — Envoy/Gateway
 API terminating TLS and Keycloak owning all wild ingress so no workload publishes its own path — is
 [Phase 37](phase_37_keycloak_ingress.md); this phase brings the backbone up behind no public edge. The
-Deployment-`replicas=1` control-plane singleton that will eventually *own* this reconcile loop is
-[Phase 38](phase_38_live_dsl_singleton.md); here the reconciler is driven from the operator/host path against a
-fixed, hand-assembled service set so the backbone exists before the DSL and the singleton that will describe
+Deployment-`replicas=1` control-plane daemon that will eventually *own* this reconcile loop is
+[Phase 38](phase_38_live_dsl_deploy.md); here the reconciler is driven from the operator/host path against a
+fixed, hand-assembled service set so the backbone exists before the DSL and the control-plane daemon that will describe
 it.
 
 **Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no
@@ -249,7 +249,7 @@ merely avoids a bare Pod.
 ### Registry rehoming (§M.3 independent oracle, §M.5 external observer, §M.2 committed mutant)
 
 The registry's storage backend is asserted to be the MinIO S3 driver against the committed independent
-oracle `test/fixtures/phase30/registry-storage-driver.golden` (the expected `distribution` storage stanza —
+oracle `test/fixture/platform_backbone/registry-storage-driver.golden` (the expected `distribution` storage stanza —
 S3 driver, MinIO endpoint, bucket — authored by hand, not read from the running config), and the rehoming is
 observed externally: every digest in a Phase-30 preexisting artifact is copied to its exact target object,
 independently verified, and remains pullable by the same digest after cutover; a newly pushed blob
@@ -270,7 +270,7 @@ cutover. The failure keeps the source route and all old/partial-new commitments.
 ### Pulsar offload bound (§M.5 external observer, §M.2 committed mutant, §M.7 concrete drill)
 
 The size-triggered offload is exercised, not merely configured: a named drill topic carries the hot-tier
-size cap committed in `test/fixtures/phase30/hot-tier-cap.golden`; sustained ingest past that cap MUST cause
+size cap committed in `test/fixture/platform_backbone/hot-tier-cap.golden`; sustained ingest past that cap MUST cause
 offloaded ledger objects to appear in MinIO (external observer on the object substrate) while
 BookKeeper/broker hot-tier occupancy (external observer on broker metrics, not an amoebius self-report)
 never exceeds the cap. The committed seeded mutant **`mutant/offload-time-only`** — a time-only offload
@@ -329,7 +329,7 @@ Phase 30) is present as a rehoming consumer of MinIO, not re-delivered here.
 - [`testing_doctrine.md §2 — the registers of amoebius testing`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing):
   this phase's gate is a Register-3 live bring-up on linux-cpu, emitting the honesty ledger that
   names Register 3, marks the runtime layer *tested* (not a proof claim), and marks the not-yet-built
-  Keycloak-edge and singleton-owned reconcile layers UNVERIFIED.
+  Keycloak-edge and control-plane-owned reconcile layers UNVERIFIED.
 
 ## Sprints
 
@@ -379,7 +379,7 @@ MinIO S3 driver — closing the Phase-30 deferred gap.
   per drive; and the uniform `volumeClaimTemplate` plan
   (`max rounded provisionedBytes × ordinal count`) that debits the retained backing.
 - The `distribution` registry's blob store rehomed onto the MinIO S3 driver — the registry holds no PV of its
-  own, its bytes live in MinIO — asserted against the committed `test/fixtures/phase30/registry-storage-driver.golden`
+  own, its bytes live in MinIO — asserted against the committed `test/fixture/platform_backbone/registry-storage-driver.golden`
   storage-stanza oracle, with the committed `mutant/registry-fs-driver` seeded mutant (registry left on the
   interim filesystem driver) named as the mutant this rehoming assertion MUST turn red. The logical tenant
   extent supplied to MinIO is a private `ProvisionedRegistryStorageDemand` whose logical
@@ -500,7 +500,7 @@ drill that the mandatory size-triggered MinIO offload actually bounds the BookKe
   member resource/volume fits and the ensemble is Ready. BookKeeper/offload bytes cannot fund this provision.
 - Bounded per-topic retention with a **size-triggered MinIO offload** (no unbounded storage, no time-only
   trigger), wired to the Sprint-30.1 MinIO substrate; the drill topic's hot-tier size cap committed in
-  `test/fixtures/phase30/hot-tier-cap.golden`, with the committed `mutant/offload-time-only` seeded mutant
+  `test/fixture/platform_backbone/hot-tier-cap.golden`, with the committed `mutant/offload-time-only` seeded mutant
   named as the mutant the offload drill MUST turn red.
 - A produce/consume round-trip demonstrating at-least-once delivery with broker-side dedup.
 
@@ -542,8 +542,8 @@ None.
 ## Sprint 35.3: The backbone HA bring-up gate ⏸️
 
 **Status**: Blocked by Sprint 35.2; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Platform/Backbone.hs`, `test/platform/BackboneSpec.hs`,
-`test/platform/BackboneLive.hs`, `tools/phase30_gate.py`
+**Implementation**: `src/Amoebius/Platform/Backbone.hs`, `test/spec/platform/BackboneSpec.hs`,
+`test/spec/platform/BackboneLive.hs`, `tools/phase30_gate.py`
 **Blocked by**: Sprint 35.2.
 **Independent Validation**: the numbered Validation list below, run on a fresh single-node linux-cpu `kind`
 cluster: the whole set up, HA-shaped, and reachable in-cluster; both data planes round-tripping; the registry
@@ -569,18 +569,18 @@ and close the phase with the backbone HA gate on a fresh cluster.
 - The phase-gate harness: bring the whole backbone up on a fresh single-node linux-cpu `kind` cluster and
   assert the set is up, HA-shaped, from generated (never-committed) manifests and baked binaries, with a
   proven/tested/assumed Register-3 ledger that marks the runtime layer *tested* and the Keycloak-edge,
-  Postgres/observability (Phase 36), and singleton-owned reconcile layers UNVERIFIED; the independent
+  Postgres/observability (Phase 36), and control-plane-owned reconcile layers UNVERIFIED; the independent
   resource-projection checker compares every applied execution unit/volume exactly to its
   `ProvisionedServiceSpec`. Only the two thin MinIO→registry and Vault-unsealed→Pulsar edges are enacted here;
   the *full* derived readiness-DAG bring-up of the whole standard stack, with the
   [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering) hard edges
   and the `mutant/dag-drop-edge` mutant, is [Phase 36](phase_36_platform_services_2.md)'s.
 - The reviewed gate oracles reused here: the registry storage-stanza oracle
-  `test/fixtures/phase30/registry-storage-driver.golden` and the drill-topic hot-tier cap
-  `test/fixtures/phase30/hot-tier-cap.golden`, plus the independently computed
-  `test/fixtures/phase30/storage-geometry-boundaries.csv` covering BookKeeper/MinIO exact-fit, one-byte-over,
+  `test/fixture/platform_backbone/registry-storage-driver.golden` and the drill-topic hot-tier cap
+  `test/fixture/platform_backbone/hot-tier-cap.golden`, plus the independently computed
+  `test/fixture/platform_backbone/storage-geometry-boundaries.csv` covering BookKeeper/MinIO exact-fit, one-byte-over,
   recovery/healing, orphan horizon, and uniform-ordinal rounding. The gate also reuses
-  `test/fixtures/phase25/registry_storage_demand.dhall` unchanged and pins the expected mapping from its private
+  `test/fixture/phase25/registry_storage_demand.dhall` unchanged and pins the expected mapping from its private
   registry logical witness into the MinIO physical geometry. The committed seeded mutants
   `mutant/registry-fs-driver`, `mutant/offload-time-only`, `mutant/storage-logical-as-physical`,
   `mutant/storage-drop-required-fault-scenario`, `mutant/storage-sum-unequal-ordinals`, and
@@ -620,11 +620,11 @@ and close the phase with the backbone HA gate on a fresh cluster.
    `ProvisionedServiceSpec`; recompute each effective pod envelope including ordinary and restartable-init
    sidecar semantics plus overhead; and
    require exact equality, not field presence. Emit the Register-3 ledger, runtime
-   layer *tested* not *proven*, with the Keycloak edge, Phase-36 Postgres/observability, and singleton-owned
+   layer *tested* not *proven*, with the Keycloak edge, Phase-36 Postgres/observability, and control-plane-owned
    reconcile marked UNVERIFIED.
 
 ### Remaining Work
-Remove `test/fixtures/phase30/expected-base-digest.txt`, pass the verified Phase-30 digest into the run without
+Remove `test/fixture/phase30/expected-base-digest.txt`, pass the verified Phase-30 digest into the run without
 copying it into Git, and rerun the gate under universal artifact hygiene.
 
 ## Documentation Requirements

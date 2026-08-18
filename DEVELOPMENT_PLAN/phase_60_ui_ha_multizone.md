@@ -107,9 +107,9 @@ Kubernetes and provider APIs before traffic begins.
 Redis has one primary, at least two replicas, and three Sentinel voters spread across the zones with no
 persistent volume. Its loss may close sockets but cannot change durable effects or cursor repair.
 
-**Pinned oracle and budgets.** Phase 0 commits `test/golden/phase_59_ha_timeline.tbl`,
-`test/golden/phase_59_placement.tbl`, `test/golden/phase_59_access_matrix.tbl`, and
-`test/golden/phase_59_post_fault_authority.tbl`. They independently fix the failure trigger, complete
+**Pinned oracle and budgets.** Phase 0 commits `test/golden/ui_ha_multizone/ha_timeline.tbl`,
+`test/golden/ui_ha_multizone/placement.tbl`, `test/golden/ui_ha_multizone/access_matrix.tbl`, and
+`test/golden/ui_ha_multizone/post_fault_authority.tbl`. They independently fix the failure trigger, complete
 selected-zone member set, maximum login/reconnect window, post-fault OIDC and membership/epoch outcome,
 read/mutation/workflow/subscription outcomes, accepted-action rule, minimum zone distribution, and paired
 same-owner/same-tenant-non-owner/foreign-tenant outcomes. The implementation cannot widen those budgets after
@@ -140,19 +140,19 @@ UNVERIFIED green.
 **Bypass probes and mutants.** During the isolated-zone interval, a named caller Pod using each real user
 session probes UI-server Pod IPs, the projector Service, SQL, MinIO, Pulsar, Vault, and inference endpoints.
 CNI flow logs plus provider authentication/audit must show that only the public Keycloak/Envoy origin is usable;
-an HTTP denial alone is insufficient. The gate must turn red for `test/mutants/phase_58_replicas_one.dhall`,
-`test/mutants/phase_58_sticky_session_required.dhall`,
-`test/mutants/phase_58_drop_pdb.dhall`, and
-`test/mutants/phase_58_drop_topology_spread.dhall`, plus
-`test/mutants/phase_58_fault_one_node_only.patch` and
-`test/mutants/phase_58_drop_tenant_cursor_key.patch`, plus
-`test/mutants/phase_58_drop_keycloak_zone_spread.dhall`. Placement/provider observation catches structural or
+an HTTP denial alone is insufficient. The gate must turn red for `test/mutant/ui_ha_multizone/replicas_one.dhall`,
+`test/mutant/ui_ha_multizone/sticky_session_required.dhall`,
+`test/mutant/ui_ha_multizone/drop_pdb.dhall`, and
+`test/mutant/ui_ha_multizone/drop_topology_spread.dhall`, plus
+`test/mutant/ui_ha_multizone/fault_one_node_only.patch` and
+`test/mutant/ui_ha_multizone/drop_tenant_cursor_key.patch`, plus
+`test/mutant/ui_ha_multizone/drop_keycloak_zone_spread.dhall`. Placement/provider observation catches structural or
 under-scoped faults; the external login/operation/reconnect trace catches identity unavailability and
 sticky-state dependence; and the cross-tenant broker/access oracle catches scope collapse. A Deployment status
 claiming three replicas is not placement or availability evidence.
-The gate also turns red for `test/mutants/phase_58_redis_one_node.dhall`,
-`test/mutants/phase_58_redis_persistent_receipt.patch`, and
-`test/mutants/phase_58_skip_cursor_repair.patch`.
+The gate also turns red for `test/mutant/ui_ha_multizone/redis_one_node.dhall`,
+`test/mutant/ui_ha_multizone/redis_persistent_receipt.patch`, and
+`test/mutant/ui_ha_multizone/skip_cursor_repair.patch`.
 
 ## Resource provision — multi-zone UI fault envelope
 
@@ -186,11 +186,11 @@ buffer refuses before the first provider or Kubernetes mutation.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Ha/MultiZone.hs`,
-`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/UiHaSpec.hs`,
-`tools/phase58_ui_ha_live.py`, and `tools/phase58_gate.py`
+`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/spec/live/UiHaSpec.hs`,
+`tools/ui_ha_multizone_live.py`, and `tools/ui_ha_multizone_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
 **Requires**: `cloud-account` — the credentialed account whose zones this HA gate spreads across.
-**Independent Validation**: `python3 tools/phase58_gate.py`; the scoped topology,
+**Independent Validation**: `python3 tools/ui_ha_multizone_gate.py`; the scoped topology,
 fault, authority, repair, host-process, and mutant predicates are tested. Provider-confirmed zone isolation
 and off-cluster observations remain `UNVERIFIED`.
 **Docs to update**:
@@ -215,7 +215,7 @@ Deliver one externally observed provider-zone failure result for the complete UI
 
 ### Validation
 
-1. Run `python3 tools/phase58_gate.py`; require the scoped canonical run green and
+1. Run `python3 tools/ui_ha_multizone_gate.py`; require the scoped canonical run green and
    every named mutant red. The ledger must not promote unavailable provider observations above `UNVERIFIED`.
 
 ### Remaining Work

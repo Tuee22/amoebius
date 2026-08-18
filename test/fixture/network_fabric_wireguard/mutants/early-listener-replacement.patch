@@ -1,0 +1,4 @@
+mutant=network-fabric-wireguard-early-listener-replacement
+flag=network-fabric-wireguard-early-listener-replacement-mutant
+locus=src/Amoebius/Fabric/WgReconcile.hs:replacementActions
+expected=the replacement listener cannot start until observed old-process exit

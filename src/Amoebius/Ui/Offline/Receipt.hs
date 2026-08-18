@@ -47,7 +47,7 @@ emptyDurableReceipts = DurableReceipts Map.empty
 
 idempotencyKey :: Scope -> CommandId -> String
 idempotencyKey scope (CommandId command) =
-#ifdef PHASE61_REMOVE_SCOPE_IDEMPOTENCY_MUTANT
+#ifdef OFFLINE_REPLAY_RECEIPTS_REMOVE_SCOPE_IDEMPOTENCY_MUTANT
   command
 #else
   tenantId scope <> "|" <> ownerId scope <> "|" <> programId scope <> "|" <> show (scopeEpoch scope) <> "|" <> command
@@ -66,10 +66,10 @@ durableLookup scope command (DurableReceipts receipts) =
   Map.lookup (idempotencyKey scope command) receipts
 
 recoverOutcome :: Scope -> CommandId -> Maybe Receipt -> DurableReceipts -> ReplayOutcome Receipt
-#ifdef PHASE61_ACK_REDIS_PUBLISH_MUTANT
+#ifdef OFFLINE_REPLAY_RECEIPTS_ACK_REDIS_PUBLISH_MUTANT
 recoverOutcome _ _ (Just routed) _ = Accepted routed
 #endif
-#ifdef PHASE61_OMIT_DURABLE_LOOKUP_MUTANT
+#ifdef OFFLINE_REPLAY_RECEIPTS_OMIT_DURABLE_LOOKUP_MUTANT
 recoverOutcome _ _ _ _ = Pending
 #else
 recoverOutcome scope command _ durable = maybe Pending Accepted (durableLookup scope command durable)

@@ -6,26 +6,16 @@
 -- result is attributable to that single edit and to nothing else
 -- (`development_plan_standards.md` section M clauses 2 and 8).
 --
--- An earlier revision listed only three packages. That made the solver fail at an unknown
--- sibling package before it ever reached the intended `proto`/`base` conflict, which is a
--- mutant that turns the gate red for the wrong reason — indistinguishable, from the gate's
--- side, from one that works.
+-- An earlier revision listed a package set that had drifted from `cabal.project`. That made
+-- the solver fail at an unknown sibling package before it ever reached the intended
+-- `proto`/`base` conflict, which is a mutant that turns the gate red for the wrong reason —
+-- indistinguishable, from the gate's side, from one that works. Everything below therefore
+-- tracks `cabal.project` exactly: the same three packages and the same three
+-- source-repository-packages, because `amoebius.cabal` depends on the infernix and jitML
+-- cores and a solver that cannot find them never reaches the seeded conflict at all.
 
 packages:
   ./amoebius.cabal
-  ./amoebius-pulsar/amoebius-pulsar.cabal
-  ./amoebius-store/amoebius-store.cabal
-  ./amoebius-runtime/amoebius-runtime.cabal
-  ./amoebius-release/amoebius-release.cabal
-  ./amoebius-pulumi/amoebius-pulumi.cabal
-  ./infernix/infernix-lift.cabal
-  ./infernix-ui/infernix-ui-lift.cabal
-  ./jitml/jitml-lift.cabal
-  ./jitml-ui/jitml-ui-lift.cabal
-  ./apple-host/apple-host-lift.cabal
-  ./test-topology/test-topology.cabal
-  ./ui-live/ui-live.cabal
-  ./offline-runtime/offline-runtime.cabal
   ./probe/probe.cabal
   ./vendor/dual/dual.cabal
 
@@ -38,3 +28,13 @@ source-repository-package
   tag: master
   subdir: lib proto
   post-checkout-command: apply_supernova_patch patches/supernova_ghc_9_12.patch
+
+source-repository-package
+  type: git
+  location: https://github.com/Tuee22/infernix.git
+  tag: master
+
+source-repository-package
+  type: git
+  location: https://github.com/Tuee22/jitML.git
+  tag: master

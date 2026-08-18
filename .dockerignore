@@ -22,7 +22,6 @@ DEVELOPMENT_PLAN/evidence/**
 test/enumeration
 test/enumeration/**
 test/golden/phase_*_ledger.json
-test/golden/phase_55_expected_run_ledger.json
 
 # Dependency resolution is refreshed dynamically.
 **/*.lock
@@ -32,6 +31,20 @@ test/golden/phase_55_expected_run_ledger.json
 **/pnpm-lock.yaml
 **/go.sum
 
+# Cabal and GHC build roots. Redirection beneath `.build/` is a per-invocation
+# `--builddir` argument, not a repository property, so a bare `cabal build` leaves a root
+# in the context. `**/`-prefixed on purpose: a class anywhere, never a new context root.
+**/dist-newstyle
+**/dist-newstyle/**
+**/.cabal-sandbox
+**/.cabal-sandbox/**
+**/.ghc.environment.*
+
+# Package-manager dependency trees. Installed beneath `.build/` with `--prefix`, but
+# `package.json` sits at the context root, so a bare `npm install` lands here.
+**/node_modules
+**/node_modules/**
+
 # Haskell, JavaScript, and PureScript build products.
 **/*.o
 **/*.hi
@@ -40,12 +53,12 @@ test/golden/phase_55_expected_run_ledger.json
 **/*.hie
 **/*.tla
 **/*.cfg
-ui-runtime/.spago
-ui-runtime/.spago/**
-ui-runtime/output
-ui-runtime/output/**
-ui-runtime/dist
-ui-runtime/dist/**
+ui/.spago
+ui/.spago/**
+ui/output
+ui/output/**
+ui/dist
+ui/dist/**
 
 # Source-adjacent Python interpreter caches are local accelerators, never image
 # build inputs.
@@ -54,6 +67,20 @@ ui-runtime/dist/**
 **/*.pyc
 **/*.pyo
 **/*.pyd
+
+# Python test and coverage state, written beside the run that produced it.
+**/.pytest_cache
+**/.pytest_cache/**
+**/.coverage
+**/.coverage.*
+**/htmlcov
+**/htmlcov/**
+
+# Browser-harness reports. Playwright writes both to the working directory by default.
+**/playwright-report
+**/playwright-report/**
+**/test-results
+**/test-results/**
 
 # Runtime output written beside a run.
 **/*.log

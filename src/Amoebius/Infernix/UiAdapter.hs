@@ -250,7 +250,7 @@ invokeReadyArtifact context claim scope handle input state
  where
   owner = readyArtifactOwner handle
   command = readyArtifactCommandId handle
-#ifdef PHASE50_TRUST_CLIENT_ARTIFACT_SCOPE_MUTANT
+#ifdef INFERNIX_UI_LIFT_TRUST_CLIENT_ARTIFACT_SCOPE_MUTANT
   authorizationTenant = claimedTenant claim
   authorizationSubject = claimedSubject claim
 #else
@@ -324,7 +324,7 @@ hex = Text.pack . concatMap twoHex . ByteString.unpack
     digits -> digits
 
 terminalCommandId :: Text -> Text
-#ifdef PHASE50_DROP_COMMAND_ID_FROM_TERMINAL_MUTANT
+#ifdef INFERNIX_UI_LIFT_DROP_COMMAND_ID_FROM_TERMINAL_MUTANT
 terminalCommandId _ = "unrelated-command"
 #else
 terminalCommandId = id

@@ -1,0 +1,1 @@
+PLATFORM_SERVICES_2_DAG_INJECT_CYCLE_MUTANT adds Grafana as a PerconaOperator dependency; readiness-cycle must reject it.

@@ -40,7 +40,24 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-15 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/deterministic_simulation_gate.py`
+passes all thirteen sides on substrate `none`, lane `none`, natural `arm64`, untranslated: the real and
+io-sim interpreters agree from one reference reconciler, every fake-contract fault — partition heal,
+redelivery dedup, reorder, duplicate, `If-None-Match` 412, resource-version conflict, watch gap, crash-once,
+and stale propagation — holds its authored outcome, the dropped-partition mutant reddens at
+`Violated:NoActOnStaleRead`, and 26 surfaces join completely to 36 enumerated items.
+Attestation `sha256:d063135dfcbd14ad2f483e425961be8eda95ef3dca28ff7b2531db9d0b48ef3d`.
+
+**The rerun forced Phase 2's mutant registry to stop flattening.** The eighteen `mutants.tsv` files it folded
+carried eight different schemas — the second column was `operator`, `variant`, `target`, `locus`, or `surface`
+by capability, and the third `expected_locus`, `expected_red_locus`, `expected`, `fixture`, or `token` — and
+the first build collapsed all of them into two columns, so five capabilities' records now claimed something
+they did not say. This phase's own record was worse than renamed: its single mutation had become three rows,
+one per file in its directory. The registry's fixed columns are now the four facts every mutation shares, each
+capability's own fields travel beside them as named detail, and a directory carrying a prose record is one
+mutation whose body is every file in it.
+
+**Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from

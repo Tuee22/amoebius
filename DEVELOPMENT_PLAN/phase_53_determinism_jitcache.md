@@ -13,7 +13,7 @@ Register 3, live, on the `linux-cpu` substrate.
 The gate is implemented across pure contracts and a retained-Kubernetes/MinIO/registry live run. Cross-
 substrate byte equality, cross-node reuse, and the Phase-54/65 model/kernel tiers remain UNVERIFIED by design.
 
-Seal: `python3 tools/phase48_gate.py --reuse-fresh-live` passed 23 checks on
+Seal: `python3 tools/determinism_jitcache_gate.py --reuse-fresh-live` passed 23 checks on
 2026-08-11; ledger `external-run-reference`,
 receipt `external-run-reference`.
 
@@ -147,7 +147,7 @@ a request-carried derived seed — deliberately **not** an infernix inference ru
 **not** a jit-resolved ML engine (this phase resolves the engine, but the infernix inference that rides it is
 Phase 54; the CUDA/jitML kernel tier is Phase 65). The `ModelArtifact` staging tier (Tier 2) and the JIT kernel
 tier (Tier 3) are named as the same cache shape but are not exercised here. The cache is **ephemeral and node-scoped** — re-materializable on first miss, deliberately *not* the durable state of the stateless
-`replicas=1` control-plane singleton (whose only durable state is the Vault-enveloped MinIO bucket); evicting
+`replicas=1` control-plane daemon (whose only durable state is the Vault-enveloped MinIO bucket); evicting
 the cache costs a re-resolve, never data loss. The engine lane exercised here is `linux-cpu` only; the
 Apple-Metal and `Cuda` lanes are out of contract for this gate.
 
@@ -214,7 +214,7 @@ retained prefix until its pure stage writes. The two retained output blobs are b
 `masterSeed`, `streamIndex`, or pinned input yields **different** output bytes; and a changed resolved `.dhall`
 or substituted substrate fingerprint yields a **different** `experimentHash` and namespace. **(b) Cache owner** —
 the one named identity `EngineRuntime.LlamaCppCpu@<pinned-ver>` resolves on **first miss** into the
-`CacheBudget`-bounded content-addressed cache, with bytes sha256-matching the `test/oracle/phase_49_oracle.dhall`
+`CacheBudget`-bounded content-addressed cache, with bytes sha256-matching the `test/oracle/determinism_jitcache/oracle.dhall`
 pin, the named arm attested to have actually run, the handle live at the pinned `--version`, and zero
 public-registry pull by live egress/CNI capture. A **second client pod** on the same node reuses the
 cache-resident handle with no re-materialization (unchanged resident inode/mtime, zero new pull). The owner's
@@ -247,23 +247,23 @@ flowchart LR
 *Validated orientation. The seams Phase 53 built in order; [Gate integrity](#gate-integrity) owns the apparatus.*
 
 **Part (a) — the determinism corpus (§M.1, §M.6).** The representative set is the positive
-`test/dhall/phase_49_determinism_repro.dhall` (one pinned content-addressed input blob, one pure seeded stage,
+`test/fixture/dhall/phase_49_determinism_repro.dhall` (one pinned content-addressed input blob, one pure seeded stage,
 one `masterSeed`) and its three committed negative siblings differing in exactly one dimension each —
 `..._flipped_metric.dhall` (a resolved-`.dhall` change), `..._alt_seed.dhall` (a changed `masterSeed`), and
 `..._alt_input.dhall` (a changed pinned input), each a specific-reason negative (§M.8). Supporting oracles: the
-hand-authored fingerprint schema `test/golden/phase_49_substrate_fingerprint.schema.json` pinning the minimum
-witness set (substrate lane `linux-cpu` + GHC / RTS / ISA / libc-ABI witnesses, **each with its absolute probe path**, §M.3); the hand-computed SplitMix golden `test/golden/phase_49_splitmix_seeds.json` (streams `0`, `1`,
+hand-authored fingerprint schema `test/golden/determinism_jitcache/substrate_fingerprint.schema.json` pinning the minimum
+witness set (substrate lane `linux-cpu` + GHC / RTS / ISA / libc-ABI witnesses, **each with its absolute probe path**, §M.3); the hand-computed SplitMix golden `test/golden/determinism_jitcache/splitmix_seeds.json` (streams `0`, `1`,
 `37` worked by hand under gamma `0x9E3779B97F4A7C15`, never regenerated from `Rng.hs`); the committed compile-fail
-fixture `test/compile-fail/phase_49_forge_blobsha.hs` (constructing `BlobSha "deadbeef"` from a `Text` literal,
+fixture `test/negative/compile_fail/phase_49_forge_blobsha.hs` (constructing `BlobSha "deadbeef"` from a `Text` literal,
 which MUST fail at the "`BlobSha` constructor not in scope / not exported" locus, §M.8); the committed fake probe
-`test/fake/phase_49_fake_ghc` (emits a different version, used by the fingerprint sensitivity check); and the
-resource witness `test/golden/phase_49_resource_shape.json`. The committed seeded mutants this part must turn red
-(§M.2): `test/mutants/Determinism_const_output.hs` (the pure stage rewritten to return a constant byte string
+`test/harness/fake/phase_49_fake_ghc` (emits a different version, used by the fingerprint sensitivity check); and the
+resource witness `test/golden/determinism_jitcache/resource_shape.json`. The committed seeded mutants this part must turn red
+(§M.2): `test/mutant/determinism_jitcache/const_output.hs` (the pure stage rewritten to return a constant byte string
 ignoring seed and input; **operator: dropped-effect**) turns the seed-sensitivity and input-sensitivity legs red;
-`test/mutants/ContentAddress_field_order_leak.hs` (a canonical-encoder preserving field order rather than sorting;
-dropped-effect) turns the canonical-encoding property red; `test/mutants/ExperimentHash_const_fingerprint.hs`
+`test/mutant/determinism_jitcache/content_order_leak.hs` (a canonical-encoder preserving field order rather than sorting;
+dropped-effect) turns the canonical-encoding property red; `test/mutant/determinism_jitcache/const_fingerprint.hs`
 (fingerprint hardcoded to `"linux-cpu"`; dropped-effect) turns the schema and sensitivity checks red;
-`test/mutants/Rng_workerid_mixed.hs` (seed folds in a worker id in addition to `streamIndex`; effect-swap) turns
+`test/mutant/determinism_jitcache/rng_workerid.hs` (seed folds in a worker id in addition to `streamIndex`; effect-swap) turns
 the worker-count-independence property red. The independent reference predicates are the harness's **out-of-band byte compare** of two fetched blobs (§M.6, never a `412` on a second PUT), the hand-authored logical-equivalence
 oracle for `ContentAddress` (permuted map order, reordered fields, equivalent integer encodings — defined
 independently of the canonical bytes under test, §M.3, with a `cover` obligation forcing ≥30% distinct byte
@@ -274,19 +274,19 @@ identity: `EngineRuntime.LlamaCppCpu@<pinned-ver>` (a linux-cpu `llama.cpp` engi
 resolve arms — `build` (from the pinned source recipe compiled by the baked toolchain, attested by an
 `strace`/argv-shim record of the absolute-path `g++` invocation, §M.5) and `download` (the same bytes served by
 the in-cluster `distribution` registry, attested by its access log). Its oracle is the hand-authored
-`test/oracle/phase_49_oracle.dhall` (independent of the SUT, never regenerated from the resolver's output, §M.3),
+`test/oracle/determinism_jitcache/oracle.dhall` (independent of the SUT, never regenerated from the resolver's output, §M.3),
 carrying per identity the expected `ContentAddress` (`sha256` of the materialized bytes), the catalog-owned
 final-resident and peak-temporary byte `Quantity` operands for both arms, and the expected `--version` string
 the live binary reports; raw deployment input selects that identity but cannot override those
 `AssetMaterializationDemand` operands. The committed negative fixtures (specific-reason, §M.8):
-`test/negative/phase_49_cache_over_budget.dhall`, `test/negative/phase_49_cache_digest_size_conflict.dhall`,
-`test/negative/phase_49_cache_deletion_credit.dhall`, `test/negative/phase_49_cache_concurrency_overflow.dhall`,
-`test/negative/phase_49_ephemeral_under_reserved.dhall`, plus the compile-fail negatives
-`test/negative/phase_49_freestring_key.hs` (cache key from a free `String`/`Text`/`Url`) and
-`test/negative/phase_49_url_arm.hs` (a free-`Url` resolver arm), each failing *at its constructor locus* with
+`test/negative/determinism_jitcache/cache_over_budget.dhall`, `test/negative/determinism_jitcache/cache_digest_size_conflict.dhall`,
+`test/negative/determinism_jitcache/cache_deletion_credit.dhall`, `test/negative/determinism_jitcache/cache_concurrency_overflow.dhall`,
+`test/negative/determinism_jitcache/ephemeral_under_reserved.dhall`, plus the compile-fail negatives
+`test/negative/determinism_jitcache/freestring_key.hs` (cache key from a free `String`/`Text`/`Url`) and
+`test/negative/determinism_jitcache/url_arm.hs` (a free-`Url` resolver arm), each failing *at its constructor locus* with
 its named error and paired with a positive that differs only in the foreclosed dimension. The independent
-owner+two-client image/resource/slot/transition witness is `test/oracle/phase_49_resource_shape.json`; the pinned
-source recipe is committed alongside. The committed seeded mutants under `test/mutants/phase_48_cache/` this part must
+owner+two-client image/resource/slot/transition witness is `test/oracle/determinism_jitcache/resource_shape.json`; the pinned
+source recipe is committed alongside. The committed seeded mutants under `test/mutant/determinism_jitcache/cache/` this part must
 turn red (§M.2), drawn from the operator set: **(a)** `resolve _ = <fixed 16-byte marker>` (**effect swap** — the
 resolver does no real work; turns the stored-`ContentAddress`/sha256/version/arm-executed assertions red);
 **(b)** `prune = pure ()` (**dropped effect** — pruning is dead code; the pin-eviction assertion and postflight
@@ -298,9 +298,9 @@ already-closed catalog solely to exercise distinct-digest `BoundedParallel n` ar
 claimed as live-resolved evidence.
 
 **Shared resource-envelope mutants.** The live recompute/cache workloads are one workload proof, not only the
-byte/cache proofs above; the resource-shape witnesses (`test/golden/phase_49_resource_shape.json`,
-`test/oracle/phase_49_resource_shape.json`) and the mutants under `test/mutants/phase_48_determinism/` and
-`test/mutants/phase_48_cache/` are enumerated in [Resource provision](#resource-provision--the-recompute-runs-the-cache-owner-and-its-clients).
+byte/cache proofs above; the resource-shape witnesses (`test/golden/determinism_jitcache/resource_shape.json`,
+`test/oracle/determinism_jitcache/resource_shape.json`) and the mutants under `test/mutant/determinism_jitcache/determinism/` and
+`test/mutant/determinism_jitcache/cache/` are enumerated in [Resource provision](#resource-provision--the-recompute-runs-the-cache-owner-and-its-clients).
 
 ## Resource provision — the recompute runs, the cache owner, and its clients
 
@@ -366,11 +366,11 @@ probe concurrency, no cache or accelerator); the absolute-path substrate-fingerp
 egress/CNI capture execute within that envelope, never in sidecar Pods or as resource-free subprocesses.
 
 **The committed resource mutants (must reject before any effect, §M.2).** For the determinism runs,
-`test/mutants/phase_48_determinism/drop_run_resource_envelope.dhall` (omits one run's Pod row),
+`test/mutant/determinism_jitcache/determinism/drop_run_resource_envelope.dhall` (omits one run's Pod row),
 `drop_host_harness_envelope.dhall` (omits the probe/harness host row), `early_fresh_run.dhall` (launches the
 successor before the predecessor is observed gone), and `drop_workflow_gateway_collector.dhall` (omits one
 Phase-42 runtime/mutation unit) must each turn the resource gate red even if the output bytes match. For the
-cache workload, `test/mutants/phase_48_cache/drop_client_envelope.dhall`, `drop_owner_envelope.dhall`,
+cache workload, `test/mutant/determinism_jitcache/cache/drop_client_envelope.dhall`, `drop_owner_envelope.dhall`,
 `drop_owner_image.dhall` (erases the owner image demand), `early_owner_replacement.dhall` (starts a replacement
 owner before old-cache absence is observed), and `drop_host_observer_envelope.dhall` must turn the gate red
 before materialization. The Phase-0 negative bundle additionally lowers CPU, memory, logical ephemeral, each
@@ -480,12 +480,12 @@ lift Phase 42's concrete blob/manifest key renderers into a kernel-level `Conten
 - Newtyped `BlobSha` / `ManifestSha` carriers with no public constructor from a free `Text`.
 - Adapters binding the typeclass to Phase 42's `blobs/<sha256>` and `manifests/<sha256>` writers — the
   `If-None-Match: *`, `412 = success` protocol stays owned by the store.
-- The oracle-pinned compile-fail fixture `test/compile-fail/phase_49_forge_blobsha.hs` (with its expected
+- The oracle-pinned compile-fail fixture `test/negative/compile_fail/phase_49_forge_blobsha.hs` (with its expected
   locus), the hand-authored logical-equivalence oracle for the canonical-encoding property, and the mutant
-  `test/mutants/ContentAddress_field_order_leak.hs` — authored before `ContentAddress.hs` exists (§M.1–M.3).
+  `test/mutant/determinism_jitcache/content_order_leak.hs` — authored before `ContentAddress.hs` exists (§M.1–M.3).
 
 ### Validation
-1. Type-level, verified by the committed compile-fail fixture `test/compile-fail/phase_49_forge_blobsha.hs`
+1. Type-level, verified by the committed compile-fail fixture `test/negative/compile_fail/phase_49_forge_blobsha.hs`
    (§M.8): its attempt at `BlobSha "deadbeef"` — constructing a `BlobSha`/`ManifestSha` carrier from a free
    `Text` literal — MUST fail to compile with "`BlobSha` constructor not
    in scope / not exported" at the named locus, while the paired positive `contentAddress bytes` compiles. The
@@ -494,7 +494,7 @@ lift Phase 42's concrete blob/manifest key renderers into a kernel-level `Conten
    the generator emits distinct byte pre-images of equal content (permuted map order, reordered fields,
    equivalent integer encodings) and a `cover` obligation (§M.4) requires ≥30% of cases to carry such a distinct
    pre-image; those cases must collapse to the identical key. The committed mutant
-   `test/mutants/ContentAddress_field_order_leak.hs` (a canonical-encoder that preserves field order rather than
+   `test/mutant/determinism_jitcache/content_order_leak.hs` (a canonical-encoder that preserves field order rather than
    sorting; operator: dropped-effect) MUST turn this property red (§M.2).
 
 ### Remaining Work
@@ -525,8 +525,8 @@ no-env/no-`PATH` contract.
   never from environment or `PATH`.
 - The store namespace key `<experimentHash>/…` wired so two genuinely different runs — including a flipped metric
   direction (part of the resolved `.dhall`) or a different substrate fingerprint — cannot collide.
-- The oracle-pinned fingerprint schema `test/golden/phase_49_substrate_fingerprint.schema.json` (minimum
-  witness set + each witness's absolute probe path) and the committed fake probe `test/fake/phase_49_fake_ghc`
+- The oracle-pinned fingerprint schema `test/golden/determinism_jitcache/substrate_fingerprint.schema.json` (minimum
+  witness set + each witness's absolute probe path) and the committed fake probe `test/harness/fake/phase_49_fake_ghc`
   used by the sensitivity check — both authored before `ExperimentHash.hs` exists (§M.1, §M.3).
 
 ### Validation
@@ -534,16 +534,16 @@ no-env/no-`PATH` contract.
    resolved `.dhall` (the committed `..._flipped_metric.dhall` sibling, differing only in metric direction) or the
    substrate fingerprint changes, and re-derives identically across re-evaluation of the same inputs. Asserted
    against the oracle-pinned fixtures, not values regenerated from the SUT.
-2. The fingerprint carries every witness required by `test/golden/phase_49_substrate_fingerprint.schema.json`
+2. The fingerprint carries every witness required by `test/golden/determinism_jitcache/substrate_fingerprint.schema.json`
    (substrate lane `linux-cpu` + the named GHC-version, RTS/runtime-version, ISA, and libc/ABI witnesses, each
    with its absolute probe path); a fingerprint missing a required witness FAILS, and a hardcoded constant such
    as `"linux-cpu"` FAILS the schema check. The linux-cpu fingerprint is gathered only by absolute-path probes —
    verified from the argv-recording exec shim or `strace -f -e execve` OS-boundary observer (§M.5), whose log
    shows every probe invoked by absolute path and no `getenv`/`PATH` lookup on the fingerprint path, never a
    self-report; two probes of the same host fold to the same digest. The **sensitivity check**, substituting one
-   named probe's binary with the committed fake `test/fake/phase_49_fake_ghc` (which emits a different version),
+   named probe's binary with the committed fake `test/harness/fake/phase_49_fake_ghc` (which emits a different version),
    MUST change the folded digest (§M.3). The committed mutant
-   `test/mutants/ExperimentHash_const_fingerprint.hs` (fingerprint hardcoded to `"linux-cpu"`; operator:
+   `test/mutant/determinism_jitcache/const_fingerprint.hs` (fingerprint hardcoded to `"linux-cpu"`; operator:
    dropped-effect) MUST turn the schema and sensitivity checks red (§M.2).
 
 ### Remaining Work
@@ -578,10 +578,10 @@ per-stream seed reachable only through one total function.
    generator carries a `cover` obligation (§M.4) forcing ≥25% of cases into the high-worker-count/shuffled-order
    branch, so the property is not satisfied by a near-constant single-worker generator. Expected seed values for
    streams `0`, `1`, `37` are checked against a **committed hand-computed golden**
-   `test/golden/phase_49_splitmix_seeds.json` (§M.1, SplitMix64 with gamma `0x9E3779B97F4A7C15` worked by hand,
+   `test/golden/determinism_jitcache/splitmix_seeds.json` (§M.1, SplitMix64 with gamma `0x9E3779B97F4A7C15` worked by hand,
    not regenerated from `Rng.hs`).
 2. No seed reads wall-clock, a worker id, or `/dev/urandom`; the derivation is a pure function of
-   `(masterSeed, streamIndex)` alone. The committed mutant `test/mutants/Rng_workerid_mixed.hs` (seed folds in a
+   `(masterSeed, streamIndex)` alone. The committed mutant `test/mutant/determinism_jitcache/rng_workerid.hs` (seed folds in a
    worker id in addition to `streamIndex`; operator: effect-swap) MUST turn validation 1 red (§M.2).
 
 ### Remaining Work
@@ -591,8 +591,8 @@ None in this sprint.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Kernel/Determinism.hs`,
-`test/dhall/phase_49_determinism_repro.dhall`, `tools/phase48_determinism_jitcache_live.py`, and
-`test/live/DeterminismLiveSpec.hs`
+`test/fixture/dhall/phase_49_determinism_repro.dhall`, `tools/determinism_jitcache_live.py`, and
+`test/spec/live/DeterminismLiveSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: run 2 is an **independent fresh recomputation**, not a store hit (§M.6): the harness
 fetches both retained blobs itself and compares bytes out of band, while an OS-boundary observer (§M.5)
@@ -616,16 +616,16 @@ cross-substrate equality.
 ### Deliverables
 - A pure seeded compute stage (`Determinism.hs`) taking a content-addressed input, a request, and a derived
   SplitMix seed, with all I/O at the interpreter boundary.
-- The gate `.dhall` (`test/dhall/phase_49_determinism_repro.dhall`) that spins up the Phase-42 workflow, runs the
+- The gate `.dhall` (`test/fixture/dhall/phase_49_determinism_repro.dhall`) that spins up the Phase-42 workflow, runs the
   stage twice, stores each output as a content-addressed blob under its `experimentHash` namespace, tears down,
   and compares outputs.
 - A ledger artifact recording: identity/seed totality as **proven-in-types**, same-substrate reproduction as
   **tested on linux-cpu**, and cross-substrate bit-equality as **explicitly not asserted** (UNVERIFIED), matching
   the doctrine's proven/tested/assumed table.
 - The oracle-pinned representative oracle set (authored before any kernel module exists, §M.1): the positive
-  `test/dhall/phase_49_determinism_repro.dhall` and its one-dimension-differing negative siblings
+  `test/fixture/dhall/phase_49_determinism_repro.dhall` and its one-dimension-differing negative siblings
   `..._flipped_metric.dhall`, `..._alt_seed.dhall`, `..._alt_input.dhall` (§M.7, §M.8); the committed mutant
-  `test/mutants/Determinism_const_output.hs` (§M.2); and the harness's OS-boundary observer on the compute Pod
+  `test/mutant/determinism_jitcache/const_output.hs` (§M.2); and the harness's OS-boundary observer on the compute Pod
   (an argv/exec shim or `strace`) that witnesses run 2's fresh compute and the fresh-pod output-key absence
   (§M.5, §M.6).
 
@@ -641,10 +641,10 @@ cross-substrate equality.
 3. Changing the resolved `.dhall` (the `..._flipped_metric.dhall` sibling, differing only in metric direction) or
    substituting the substrate fingerprint produces a different `experimentHash` and a distinct store namespace;
    the run is allowed to differ. Because a single linux-cpu host cannot genuinely re-fingerprint, the fingerprint
-   leg is exercised by an **in-process substitution using the committed fake probe** (`test/fake/phase_49_fake_ghc`),
+   leg is exercised by an **in-process substitution using the committed fake probe** (`test/harness/fake/phase_49_fake_ghc`),
    and the ledger records this leg as **UNVERIFIED for a real distinct substrate** (synthetic mutation only),
    never green.
-4. The committed mutant `test/mutants/Determinism_const_output.hs` (constant-output stage) is re-run and MUST turn
+4. The committed mutant `test/mutant/determinism_jitcache/const_output.hs` (constant-output stage) is re-run and MUST turn
    validation 2 red (§M.2).
 5. The ledger artifact is emitted and marks no cross-substrate claim green: same-substrate reproduction
    *tested on linux-cpu*, identity/seed totality *proven-in-types*, cross-substrate bit-equality UNVERIFIED.
@@ -693,13 +693,13 @@ over-budget derived peak before the resolver ever materializes an asset.
   ≤ ownerPod.ephemeralStorage.limit`, delegating to `Amoebius.Capacity.Fold`. These proofs describe one physical
   debit from node ephemeral storage and are never summed again as a separate host-cache consumer; an over-budget
   or under-reserved spec returns the tagged `Left`, not a runtime disk-full.
-- An in-file honesty note: the cache is **ephemeral and node-scoped**, not the singleton's durable state; the
+- An in-file honesty note: the cache is **ephemeral and node-scoped**, not the control-plane daemon's durable state; the
   cache/volume/request nesting is checked at `provision-seal`, while *actual* on-disk residency under concurrent
   resolves is the runtime residue deferred to the live gate.
 
 ### Validation
 1. There is no exported path to a cache key from a free string; the only path to a resident entry is content
-   addressing — asserted by the committed compile-fail negative `test/negative/phase_49_freestring_key.hs`
+   addressing — asserted by the committed compile-fail negative `test/negative/determinism_jitcache/freestring_key.hs`
    (registered in the Phase-7 negative corpus, authored in this phase's oracle-pinning sprint) failing to
    typecheck *at the attempt to construct a cache key from a `String`/`Text`/`Url`* with the specific
    "no instance / no exported constructor" error, paired with a positive that differs only in keying from
@@ -766,12 +766,12 @@ path.
 
 ### Validation
 1. The suite drives the resolver against an oracle-pinned backend fixture whose served or compiled bytes
-   **sha256-match the `test/oracle/phase_49_oracle.dhall` pin** — not an arbitrary "fake" blob, so a backend
+   **sha256-match the `test/oracle/determinism_jitcache/oracle.dhall` pin** — not an arbitrary "fake" blob, so a backend
    returning unpinned bytes must fail the suite. A cold cache triggers exactly one `resolve`
    (download-or-build) and stores the result, **and the stored `ContentAddress` equals that committed pin**; a
    warm cache returns a handle with no resolve, proven by the argv-recording shim / `strace` observer at the OS
    boundary (§M.5) capturing zero toolchain-or-backend subprocess on the warm path; there is no path that accepts
-   a URL or free string, asserted by the committed compile-fail negative `test/negative/phase_49_url_arm.hs`
+   a URL or free string, asserted by the committed compile-fail negative `test/negative/determinism_jitcache/url_arm.hs`
    (Phase-7 corpus, independently authored) failing at the constructor locus with "no `Url`/free-string
    constructor", paired with the closed-catalog positive that compiles.
    The committed seeded mutant `resolve _ = <fixed-marker>` ([Gate integrity](#gate-integrity) part (b) mutant (a))
@@ -787,7 +787,7 @@ Production model inference through the resolved engine is Phase 54, not a hidden
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Jit/CacheOwner.hs` (the typed per-node cache owner,
 bounded ephemeral volume, client-handle protocol, and concurrency discipline that makes a second client
-pod's lookup a HIT against the owner's resolved copy), plus `tools/phase48_determinism_jitcache_live.py`
+pod's lookup a HIT against the owner's resolved copy), plus `tools/determinism_jitcache_live.py`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: live on the single-node `kind` cluster. Reuse is proven by an **OS-boundary
 observer**, never by a resolver counter, and the concurrent-first-miss race is **operationalized** so both
@@ -817,7 +817,7 @@ that later names it, without a shared writable host mount.
 ### Validation
 1. One cache-owner pod and two client pods scheduled to the same node name the same `EngineRuntime` identity.
    Client A's first `resolve` is a MISS that the owner materializes into its bounded disk-backed `emptyDir`, to
-   bytes sha256-matching the `test/oracle/phase_49_oracle.dhall` pin; Client B on the same node HITs the resident
+   bytes sha256-matching the `test/oracle/determinism_jitcache/oracle.dhall` pin; Client B on the same node HITs the resident
    handle with no re-materialization, proven by the OS-boundary observer — unchanged resident inode/mtime, and
    the in-cluster `distribution` registry access log plus an egress capture recording zero new pull or build
    subprocess for Client B — never by a resolver-emitted counter. The owner's rendered manifest carries exact
@@ -839,8 +839,8 @@ Cross-node reuse remains out of contract; a different node legitimately starts c
 ## Sprint 53.8: The live first-miss / reuse / resource-admission gate + Register-3 ledger ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/dhall/phase_49_engine_cache.dhall` (the gate workflow naming a
-linux-cpu engine identity), `tools/phase48_gate.py`, and `test/live/DeterminismLiveSpec.hs`
+**Implementation**: `test/fixture/dhall/phase_49_engine_cache.dhall` (the gate workflow naming a
+linux-cpu engine identity), `tools/determinism_jitcache_gate.py`, and `test/spec/live/DeterminismLiveSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: live on the single-node `kind` cluster. Every behavioural claim — arm executed,
 handle live, zero public-registry pull, cross-pod reuse, on-disk peak and eviction — is read from an OS-boundary
@@ -863,9 +863,9 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
   ([Gate integrity](#gate-integrity) concrete corpus), driving one cache-owner pod, two client pods on the same
   node, and the oracle-pinned resident-plus-temp over-budget, digest-size-conflict, deletion-credit,
   bounded-parallel-overflow, and ephemeral-under-reserved fixtures.
-- The oracle-pinned oracle `test/oracle/phase_49_oracle.dhall` (expected `ContentAddress`, catalog-owned
+- The oracle-pinned oracle `test/oracle/determinism_jitcache/oracle.dhall` (expected `ContentAddress`, catalog-owned
   final-resident/temporary byte `Quantity`, `--version`) and the committed seeded mutants under
-  `test/mutants/phase_48_cache/` (`resolve _ = <marker>`, `prune = pure ()`, one-byte-short store), authored before
+  `test/mutant/determinism_jitcache/cache/` (`resolve _ = <marker>`, `prune = pure ()`, one-byte-short store), authored before
   `src/Amoebius/Jit/*` exists.
 - The gate harness asserting: (i) first-miss materialization whose stored bytes sha256-match the committed pin,
   the named arm actually ran (OS-boundary argv-shim/`strace` or registry audit log), the handle is live (reports
@@ -886,7 +886,7 @@ second-client reuse, and the provision-rejected over-budget peak — without ove
 ### Validation
 1. On the live linux-cpu `kind` cluster, the first client resolves `EngineRuntime.LlamaCppCpu@<pinned-ver>`
    through the cache owner on first miss into its `CacheBudget`-bounded `emptyDir`, the stored bytes sha256-match
-   the committed `test/oracle/phase_49_oracle.dhall` pin, the named arm actually ran (attested by the OS-boundary
+   the committed `test/oracle/determinism_jitcache/oracle.dhall` pin, the named arm actually ran (attested by the OS-boundary
    argv-shim/`strace` recording the absolute-path `g++` compile on `build`, or the `distribution` registry audit
    log recording the in-cluster serve on `download`), and the handle is live (reports the pinned `--version`).
    "Zero public-registry pull authored by URL" is discharged by live network observation — a CNI/egress capture
@@ -932,8 +932,8 @@ The Tier-2 model and Tier-3 CUDA kernel reuse remain assigned to Phases 54 and 6
   as the provision-derived peak `≤ CacheBudget` bound, keeping "more cached than fits" a checked `provision-seal`
   rejection, and that the canonical provision matrix and sealed whole-deployment provision boundary are
   instantiated by the live recompute runs and the cache owner/clients (gate-validated by the Phase-0 resource
-  witnesses `test/golden/phase_49_resource_shape.json` and `test/oracle/phase_49_resource_shape.json` and the
-  resource mutants `test/mutants/phase_48_determinism/*`, `test/mutants/phase_48_cache/*`); record that linux-cpu datapoint here in
+  witnesses `test/golden/determinism_jitcache/resource_shape.json` and `test/oracle/determinism_jitcache/resource_shape.json` and the
+  resource mutants `test/mutant/determinism_jitcache/determinism/*`, `test/mutant/determinism_jitcache/cache/*`); record that linux-cpu datapoint here in
   the plan, never as doctrine status.
 - `documents/engineering/substrate_doctrine.md` — record that the linux-cpu substrate fingerprint consumed by
   `experimentHash`, and every subprocess the resolver spawns, are first exercised here, gathered/invoked by
@@ -952,9 +952,9 @@ The Tier-2 model and Tier-3 CUDA kernel reuse remain assigned to Phases 54 and 6
   `src/Amoebius/Kernel/ExperimentHash.hs`, `src/Amoebius/Kernel/Rng.hs`, `src/Amoebius/Kernel/Determinism.hs`,
   `src/Amoebius/Jit/Cache.hs`, `src/Amoebius/Jit/CacheBudget.hs`, `src/Amoebius/Jit/Resolver.hs`,
   `src/Amoebius/Jit/CacheOwner.hs`, the `DeterminismReproSpec` and `EngineCacheGate` live suites, and the
-  oracle-pinned oracle/negative/mutant artifacts (`test/dhall/phase_49_determinism_repro.dhall` and siblings,
-  `test/oracle/phase_49_oracle.dhall`, `test/negative/phase_49_freestring_key.hs`,
-  `test/negative/phase_49_url_arm.hs`, `test/mutants/phase_48_determinism/`, `test/mutants/phase_48_cache/`) as Phase-53
+  oracle-pinned oracle/negative/mutant artifacts (`test/fixture/dhall/phase_49_determinism_repro.dhall` and siblings,
+  `test/oracle/determinism_jitcache/oracle.dhall`, `test/negative/determinism_jitcache/freestring_key.hs`,
+  `test/negative/determinism_jitcache/url_arm.hs`, `test/mutant/determinism_jitcache/determinism/`, `test/mutant/determinism_jitcache/cache/`) as Phase-53
   design-first rows.
 
 ## Related Documents

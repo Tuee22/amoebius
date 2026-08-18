@@ -67,7 +67,7 @@ authorizeProviderRequest
 authorizeProviderRequest credential hostile audience grant operation =
   hostile `seq`
   let trusted = serverRequestContext credential
-#ifdef PHASE36_ACCEPT_BODY_TENANT_MUTANT
+#ifdef USER_TENANT_ISOLATION_ACCEPT_BODY_TENANT_MUTANT
       requestTenant = callerTenant hostile
 #else
       requestTenant = contextTenant trusted
@@ -86,7 +86,7 @@ authorizeProviderRequest credential hostile audience grant operation =
           | otherwise -> Left ScopedDenial
         SubjectAudience tenant owner resource
           | requestTenant /= tenant -> Left ScopedDenial
-#ifdef PHASE36_DROP_USER_PREDICATE_MUTANT
+#ifdef USER_TENANT_ISOLATION_DROP_USER_PREDICATE_MUTANT
           | otherwise -> authorize tenant requestSubject resource
 #else
           | requestSubject == owner -> authorize tenant requestSubject resource

@@ -1,0 +1,9 @@
+{
+  "schema": "amoebius.phase34.tenant-graph.v1",
+  "appId": "app-tenancy-app",
+  "tenants": [
+    {"outerTenantId": "tenant-a", "tenantId": "tenant-a", "subjects": ["issuer-a/alice", "issuer-a/operator"], "roles": ["read"]},
+    {"outerTenantId": "tenant-b", "tenantId": "tenant-b", "subjects": ["issuer-b/alice", "issuer-b/operator"], "roles": ["read"]}
+  ],
+  "providerNativeGrants": []
+}

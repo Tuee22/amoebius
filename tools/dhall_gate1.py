@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # battery that silently runs against whatever `dhall` happens to be on PATH is not the
 # battery the requirement describes.
 DHALL = Path(os.environ["AMOEBIUS_DHALL"]) if os.environ.get("AMOEBIUS_DHALL") else None
-ORACLE = ROOT / "tests" / "oracle" / "gate1"
+ORACLE = ROOT / "test" / "oracle" / "dhall_gate1_schema"
 RESULTS = ROOT / ".build" / "dhall" / "gate1" / "phase-results.tsv"
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 
@@ -207,7 +207,7 @@ def check_forbidden_schema_vocabulary() -> None:
 
 
 def check_resource_mutants() -> tuple[int, int, int]:
-    manifest = (ROOT / "mutants/gate1_resource_mutations.tsv").read_text(encoding="utf-8").splitlines()
+    manifest = (ROOT / "test/mutant/dhall_gate1_schema/gate1_resource_mutations.tsv").read_text(encoding="utf-8").splitlines()
     expected_manifest = [
         "family\toracle\toperator\texpected",
         "resource-field-deletion\ttest/oracle/dhall_gate1_schema/resource_fields.csv\tdelete-each-field\tresource-inventory-red",
@@ -237,16 +237,16 @@ def check_resource_mutants() -> tuple[int, int, int]:
             if requirements_match(mutant, row):
                 raise GateFailure(f"type-substitution mutant escaped: {row['module']}.{row['type']} {token}")
 
-    prior = ROOT / "mutants/gate1_prior_ref_provisioned.dhall"
+    prior = ROOT / "test/mutant/dhall_gate1_schema/gate1_prior_ref_provisioned.dhall"
     if "Provisioned" not in prior.read_text(encoding="utf-8"):
         raise GateFailure("prior-ref Provisioned substitution mutant is malformed")
-    duplicate = ROOT / "mutants/gate1_duplicate_event_authority.dhall"
+    duplicate = ROOT / "test/mutant/dhall_gate1_schema/gate1_duplicate_event_authority.dhall"
     if "events" not in record_fields(duplicate, "ControlPlaneStorageDemand"):
         raise GateFailure("duplicate Event-authority mutant is malformed")
-    optional = ROOT / "mutants/gate1_optional_transition.dhall"
+    optional = ROOT / "test/mutant/dhall_gate1_schema/gate1_optional_transition.dhall"
     if "Optional PriorProvisionRefSource" not in optional.read_text(encoding="utf-8"):
         raise GateFailure("optional-transition mutant is malformed")
-    latest = ROOT / "mutants/gate1_implicit_latest_transition.dhall"
+    latest = ROOT / "test/mutant/dhall_gate1_schema/gate1_implicit_latest_transition.dhall"
     if union_arms(latest, "ExecutionTransitionIntent") == ["FirstDeployment", "UpdateFrom"]:
         raise GateFailure("implicit-latest transition mutant escaped")
     return deletion_count, substitution_count, 4
@@ -370,7 +370,7 @@ def check_mutant() -> None:
         for row in read_csv(ORACLE / "arm_inventory.csv")
         if row["module"] == "Capability" and row["type"] == "Capability"
     )
-    mutant = "|".join(union_arms(ROOT / "mutants/gate1_capability_custom_arm.dhall", "Capability"))
+    mutant = "|".join(union_arms(ROOT / "test/mutant/dhall_gate1_schema/gate1_capability_custom_arm.dhall", "Capability"))
     if mutant == expected or "Custom" not in mutant:
         raise GateFailure("capability Custom-arm mutant survived the independent inventory oracle")
 

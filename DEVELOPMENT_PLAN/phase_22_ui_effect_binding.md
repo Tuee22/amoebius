@@ -123,7 +123,7 @@ test.
   `UploadBounded`, and `UseReadyArtifact` ports span read, mutation, workflow, stream, upload, and artifact
   effects in single-tenant and multi-tenant programs. Two named-link requirements resolve against a separately
   authored trusted catalog without becoming effect destinations.
-- **Pinned oracles:** `test/fixtures/ui_effect_binding/ports.tsv`, `handlers.tsv`, and `capabilities.tsv` own
+- **Pinned oracles:** `test/fixture/ui_effect_binding/ports.tsv`, `handlers.tsv`, and `capabilities.tsv` own
   the inputs; `expected_bindings.tsv` owns the exact handler/codec/capability/scope/audit/idempotency tuple for
   each port; `external_link_catalog.tsv` and `expected_external_links.tsv` own fixed canonical link joins; and
   `bind_errors.tsv` owns every rejection tag and offending key.
@@ -171,7 +171,7 @@ prove a handler's implementation, current provider state, live authorization, or
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`,
-`test/ui/UiEffectBindingSpec.hs`, `test/ui/EffectBindingReference.hs`, and `tools/ui_effect_binding_gate.py`
+`test/spec/ui/UiEffectBindingSpec.hs`, `test/spec/ui/EffectBindingReference.hs`, and `tools/ui_effect_binding_gate.py`
 **Blocked by**: None.
 **Independent Validation**: `cabal test ui-effect-binding-spec`
 compares the private binder's serialized result with the Phase-0 finite relation, verifies empty failure

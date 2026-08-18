@@ -18,6 +18,7 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
@@ -26,7 +27,8 @@ ARM_ORACLE = ROOT / "test/oracle/capability_bind/arm_cases.tsv"
 CASES = ROOT / "test/oracle/provision_seal/provision_cases.tsv"
 PLANNER = ROOT / "test/oracle/provision_seal/planner_cases.tsv"
 ACTIVATION = ROOT / "test/oracle/provision_seal/activation.tsv"
-MUTANTS = ROOT / "test/mutant/provision_seal/mutants.tsv"
+MUTANT_CAPABILITY = "provision_seal"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/provision_seal/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/provision-seal/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/provision-seal/validation-locus-ledger.tsv"
@@ -91,7 +93,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     cases = read_tsv(CASES)
     planner = read_tsv(PLANNER)
     activation = read_tsv(ACTIVATION)
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     locus = read_tsv(LOCUS)
     expected_tags = {
         "PostBindExpansionOvercommit",
@@ -235,7 +237,7 @@ COMPILER = ""
 # Where the run reads its enumerable items from. Nothing here is a list this gate carries;
 # each is a file the run opens, so deleting a case or a mutant shrinks the enumeration and
 # breaks the authored join.
-ITEM_SOURCES = ['test/oracle/provision_seal/activation.tsv', 'test/oracle/provision_seal/planner_cases.tsv', 'test/oracle/provision_seal/provision_cases.tsv', 'test/mutant/provision_seal/mutants.tsv']
+ITEM_SOURCES = ['test/oracle/provision_seal/activation.tsv', 'test/oracle/provision_seal/planner_cases.tsv', 'test/oracle/provision_seal/provision_cases.tsv', 'test/mutant/registry.tsv']
 
 CHECKS = {
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
@@ -262,6 +264,11 @@ def enumerated_items() -> set[str]:
         path = ROOT / relative
         if not path.is_file():
             continue
+        if relative == "test/mutant/registry.tsv":
+            # The one registry leads with the capability and carries every phase's rows, so
+            # this phase's items are the mutant ids in its own rows, not every first column.
+            names.update(row["mutant"] for row in mutant_registry.capability(MUTANT_CAPABILITY))
+            continue
         for line in path.read_text(encoding="utf-8").splitlines()[1:]:
             if line.strip():
                 names.add(line.split("\t")[0].strip())
@@ -270,11 +277,17 @@ def enumerated_items() -> set[str]:
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=11, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=12, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+
+    # Clause 15 first: a run that cannot name the architecture it executed on, or
+    # that is executing under translation, has nothing worth proving.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []

@@ -102,9 +102,9 @@ Keycloak/Envoy origin. No fake provider or direct in-cluster browser route parti
 The UI-server Deployment has at least two replicas. A harness-controlled backend selection proves the socket
 owner and event/receipt origin are different pods; a one-replica or local-only connection-map mutant fails.
 
-**Pinned oracles.** Phase 0 commits `test/golden/phase_56_single_tenant_access.tbl`,
-`test/golden/phase_56_effect_observations.json`, `test/golden/phase_56_origin_csrf.tbl`, and
-`test/golden/phase_56_network_edges.tbl` before the UI runtime implementation. They independently state the
+**Pinned oracles.** Phase 0 commits `test/golden/ui_single_tenant_live/single_tenant_access.tbl`,
+`test/golden/ui_single_tenant_live/effect_observations.json`, `test/golden/ui_single_tenant_live/origin_csrf.tbl`, and
+`test/golden/ui_single_tenant_live/network_edges.tbl` before the UI runtime implementation. They independently state the
 subject/action matrix, required cross-system nonce and artifact dispatch/read observations, valid-session
 origin/CSRF outcomes, and intended plus forbidden network edges; the test never regenerates them from a bound
 plan.
@@ -128,13 +128,13 @@ and browser attempts to reach SQL, MinIO, Pulsar, Vault, or inference endpoints 
 must fail. Hiding a control is not authorization evidence.
 
 **Committed mutants.** The same gate must turn red for
-`test/mutants/phase_55_canned_ui_response.dhall`,
-`test/mutants/phase_55_open_provider_edge.dhall`, and
-`test/mutants/phase_55_drop_ui_networkpolicy.dhall`, plus
-`test/mutants/phase_55_disable_csrf_check.patch` and
-`test/mutants/phase_55_dispatch_artifact_before_auth.patch`, plus
-`test/mutants/phase_55_local_socket_map_only.patch` and
-`test/mutants/phase_55_redis_receipt_authority.patch`. The first cannot echo the post-start nonce from
+`test/mutant/ui_single_tenant_live/canned_ui_response.dhall`,
+`test/mutant/ui_single_tenant_live/open_provider_edge.dhall`, and
+`test/mutant/ui_single_tenant_live/drop_ui_networkpolicy.dhall`, plus
+`test/mutant/ui_single_tenant_live/disable_csrf_check.patch` and
+`test/mutant/ui_single_tenant_live/dispatch_artifact_before_auth.patch`, plus
+`test/mutant/ui_single_tenant_live/local_socket_map_only.patch` and
+`test/mutant/ui_single_tenant_live/redis_receipt_authority.patch`. The first cannot echo the post-start nonce from
 all provider observations; the edge mutants fail the independently observed forbidden-edge table; and the
 CSRF/dispatch mutants create forbidden handler or audit bytes even if the public denial is forged.
 
@@ -160,7 +160,7 @@ CSRF/dispatch mutants create forbidden handler or audit bytes even if the public
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Live/SingleTenant.hs`,
-`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/UiSingleTenantSpec.hs` (planned; not
+`src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/spec/live/UiSingleTenantSpec.hs` (planned; not
 built)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: `cabal test

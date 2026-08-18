@@ -1,0 +1,4 @@
+mutant=network-fabric-wireguard-drop-resource-envelope
+flag=network-fabric-wireguard-drop-resource-envelope-mutant
+locus=src/Amoebius/Fabric/WgReconcile.hs:authorizeEnactment
+expected=no interface, queue, cgroup, log, or listener action exists without a fresh capacity token

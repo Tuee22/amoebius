@@ -731,7 +731,7 @@ def execute() -> dict[str, Any]:
                 "aggregate-residual-race", "byte-stable-rerun", "live-ready-after-bind",
             ],
             "tested": ["single-node-kind", "private-digest-image", "resourcequota-pods-1", "managed-node-taint", "exclusive-binding-rbac"],
-            "assumed": ["modeled-apiserver-fidelity", "completion-release-ledger", "rollback-ledger", "in-cluster-singleton-ownership"],
+            "assumed": ["modeled-apiserver-fidelity", "completion-release-ledger", "rollback-ledger", "in-cluster-control-plane-ownership"],
         }
     finally:
         postflight = cleanup(node_name)

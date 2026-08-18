@@ -45,7 +45,7 @@ projectionMessageKey key entityId =
   joinKey
     [ ownerAppId owner
     , ownerTenantId owner
-#ifndef PHASE38_DROP_OWNER_KEY_MUTANT
+#ifndef UI_PROJECTION_RUNTIME_DROP_OWNER_KEY_MUTANT
     , ownerSubject owner
 #endif
     , projectionId key
@@ -60,7 +60,7 @@ receiptMessageKey key =
     [ ownerAppId owner
     , ownerTenantId owner
     , ownerSubject owner
-#ifdef PHASE38_DROP_RECEIPT_COMMAND_ID_MUTANT
+#ifdef UI_PROJECTION_RUNTIME_DROP_RECEIPT_COMMAND_ID_MUTANT
     , "receipt"
 #else
     , receiptCommandId key
@@ -74,7 +74,7 @@ ownerStreamKey key =
   joinKey
     [ ownerAppId owner
     , ownerTenantId owner
-#ifndef PHASE38_DROP_OWNER_SUBSCRIPTION_MUTANT
+#ifndef UI_PROJECTION_RUNTIME_DROP_OWNER_SUBSCRIPTION_MUTANT
     , ownerSubject owner
 #endif
     , projectionId key

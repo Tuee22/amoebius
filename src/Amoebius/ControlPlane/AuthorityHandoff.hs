@@ -1,17 +1,17 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
--- | The typed, observed bootstrap-host to singleton Lease handoff.
+-- | The typed, observed bootstrap-host to control-plane daemon Lease handoff.
 module Amoebius.ControlPlane.AuthorityHandoff
   ( LeaseSnapshot (..)
   , BootstrapLease
   , ReleasedLease
-  , SingletonLease
+  , ControlPlaneDaemonLease
   , HandoffError (..)
   , observeBootstrap
   , releaseForHandoff
-  , acquireSingleton
-  , singletonLeaseSnapshot
+  , acquireControlPlaneDaemon
+  , controlPlaneLeaseSnapshot
   ) where
 
 import Control.DeepSeq (NFData)
@@ -36,7 +36,7 @@ newtype ReleasedLease = ReleasedLease LeaseSnapshot
   deriving stock (Eq, Generic, Show)
   deriving anyclass (NFData)
 
-newtype SingletonLease = SingletonLease LeaseSnapshot
+newtype ControlPlaneDaemonLease = ControlPlaneDaemonLease LeaseSnapshot
   deriving stock (Eq, Generic, Show)
   deriving anyclass (NFData)
 
@@ -47,7 +47,7 @@ data HandoffError
   | HandoffResourceVersionStale Text
   | HandoffReleaseNotObserved (Maybe Text)
   | HandoffReleasedLeaseRequired
-  | HandoffSingletonHolderMismatch Text (Maybe Text)
+  | HandoffControlPlaneHolderMismatch Text (Maybe Text)
   deriving stock (Eq, Generic, Show)
   deriving anyclass (NFData)
 
@@ -66,17 +66,17 @@ releaseForHandoff (BootstrapLease prior) successor = do
     Nothing -> Right (ReleasedLease successor)
     holder -> Left (HandoffReleaseNotObserved holder)
 
-acquireSingleton :: Text -> ReleasedLease -> LeaseSnapshot -> Either HandoffError SingletonLease
-acquireSingleton podUid (ReleasedLease prior) successor
+acquireControlPlaneDaemon :: Text -> ReleasedLease -> LeaseSnapshot -> Either HandoffError ControlPlaneDaemonLease
+acquireControlPlaneDaemon podUid (ReleasedLease prior) successor
   | handoffHolderIdentity prior /= Nothing = Left HandoffReleasedLeaseRequired
   | otherwise = do
       validateSuccessor prior successor
       if handoffHolderIdentity successor == Just podUid
-        then Right (SingletonLease successor)
-        else Left (HandoffSingletonHolderMismatch podUid (handoffHolderIdentity successor))
+        then Right (ControlPlaneDaemonLease successor)
+        else Left (HandoffControlPlaneHolderMismatch podUid (handoffHolderIdentity successor))
 
-singletonLeaseSnapshot :: SingletonLease -> LeaseSnapshot
-singletonLeaseSnapshot (SingletonLease snapshot) = snapshot
+controlPlaneLeaseSnapshot :: ControlPlaneDaemonLease -> LeaseSnapshot
+controlPlaneLeaseSnapshot (ControlPlaneDaemonLease snapshot) = snapshot
 
 validateSuccessor :: LeaseSnapshot -> LeaseSnapshot -> Either HandoffError ()
 validateSuccessor prior successor

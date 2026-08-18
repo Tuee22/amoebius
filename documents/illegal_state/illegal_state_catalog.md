@@ -75,7 +75,7 @@ two composed positives, seven sampled properties, and 45 red mutants (ledger
 Capability binding, whole-deployment post-bind sealing, Gate 3, rendered output, and live-effect entries remain
 unverified at their later loci.
 Runtime enforcement remains a **live-cluster** concern (Register 3 — the orchestration DSL + the
-`replicas=1` control-plane singleton that renders and reconciles a live cluster). Status and gates live only in
+`replicas=1` control-plane daemon that renders and reconciles a live cluster). Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md); per
 [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) this doc states the target shape and links
 back for status.

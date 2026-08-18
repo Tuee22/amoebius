@@ -96,7 +96,7 @@ and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-
 | Secrets-by-name / `SecretRef` / Vault k8s auth — a manifest never carries a plaintext secret | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | Retained `no-provisioner` PV mechanics for StatefulSet storage | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 | The build pipeline, the baked base container, and registry refs | [image_build_doctrine.md](./image_build_doctrine.md) |
-| The control-plane singleton that *runs* this reconciler | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
+| The control-plane daemon that *runs* this reconciler | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | The cluster-level `discover → diff → enact` reconciler shape this specializes | [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) |
 
 ---
@@ -390,14 +390,14 @@ desired object set and *make the cluster match it, idempotently*. amoebius's eng
 `discover → diff → enact → re-observe` reconciler of
 [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine),
 specialized from "any resource the forest can create" down to "Kubernetes objects in this cluster." It is
-**run by the control-plane singleton** — the in-cluster role with total cluster authority owned by
-[daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) —
+**run by the control-plane daemon** — the in-cluster role with total cluster authority owned by
+[daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon) —
 never by a CLI invocation racing another writer.
 
 Phase 38 delivers that role and this loop on linux-cpu. Its live gate records the exact seven-object
-first-pass SSA set under field manager `amoebius-phase33-singleton`, a second pass that re-runs discovery and
+first-pass SSA set under field manager `amoebius-live-dsl-deploy`, a second pass that re-runs discovery and
 emits zero mutating audit records, Lease-gated authority across replacement, and leak-free restoration of the
-retained stack. The singleton itself is a generated `Deployment replicas=1`, `Recreate`, with no PVC or
+retained stack. The control-plane daemon itself is a generated `Deployment replicas=1`, `Recreate`, with no PVC or
 amoebius election.
 
 Before any mutation, the engine runs `renderAll`, takes one read-only snapshot of live objects and resource
@@ -575,7 +575,7 @@ live readiness gate; this doctrine consumes those fields without redeclaring the
   cloud IaC) and tier (b) (checkpoint-free tag-discovery host) live in
   [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). A `RolloutPlan` introduces **no new reconciler** and no
   orchestration daemon — the plan is a `renderAll(ProvisionedSpec)`-derived value folded by the engine already run by the
-  control-plane singleton ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)).
+  control-plane daemon ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon)).
 - **Where the plan is owned.** The typed `RolloutPlan` / `RolloutPhase`, the `Environment` promotion pointer,
   and the `Release` a rollout advances are owned by [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
   (and [release_lifecycle_doctrine.md §2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash) for the ledger it advances); **this doc owns only their *enactment* on the tier-(c) reconciler.**
@@ -862,7 +862,7 @@ lands in Phase 44 on the tier-(c) reconciler. This doc states the target shape a
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — the Gateway-API `HTTPRoute` weight shift ([§6](./network_fabric_doctrine.md#6-the-service-mesh-verdict-no-linkerd-for-v1)) that is the canary `RolloutPhase` ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c))
 - [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, baked base container, and registry refs
 - [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md) — the Redis/Sentinel and authenticated WebSocket object shapes rendered here
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane singleton that runs the reconciler
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane daemon that runs the reconciler
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — the `discover → diff → enact` reconciler shape this specializes
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — replica counts and topology are deployment rules, not app logic
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
@@ -872,7 +872,7 @@ lands in Phase 44 on the tier-(c) reconciler. This doc states the target shape a
 > longer wholly prospective: Phase 11 delivered the capability abstraction, Phase 14 the typed whole-set
 > renderer, Phase 31 the server-side-apply/staged-action reconciler, Phase 32 the scheduler seam, Phase 33
 > the retained StorageClass/PV/rebind application slice, Phases 34–37 the retained platform/edge stack, and
-> Phase 38 the Lease-held singleton's exact live reconcile/no-op loop. Later provider, rollout, and release-ledger subjects
+> Phase 38 the Lease-held control-plane daemon's exact live reconcile/no-op loop. Later provider, rollout, and release-ledger subjects
 > remain unbuilt and must not inherit those results. The approach was **generalized from the prodbox sibling**, which already renders a slice
 > of its object set from typed Haskell to Aeson and applies it with `kubectl`, stamps every object with an
 > owner label, and orchestrates a pure deployment planner — but prodbox still ships its workloads as Helm

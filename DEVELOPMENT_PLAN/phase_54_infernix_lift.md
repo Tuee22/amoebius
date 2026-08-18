@@ -6,7 +6,7 @@
 
 Phase 54 delivers the infernix core artifact lift; its design is owned by [lift_and_compose_doctrine.md](../documents/engineering/lift_and_compose_doctrine.md), [app_vs_deployment_doctrine.md](../documents/engineering/app_vs_deployment_doctrine.md), [content_addressing_doctrine.md](../documents/engineering/content_addressing_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-Scoped seal: `python3 tools/phase49_gate.py --reuse-fresh-live` passed 19 checks
+Scoped seal: `python3 tools/infernix_lift_gate.py --reuse-fresh-live` passed 19 checks
 on 2026-08-11; ledger `external-run-reference`,
 receipt `external-run-reference`. `linux-cpu`
 remains a valid choice on Linux, Linux-CUDA, Apple, and Windows hardware. Clean Linux execution is
@@ -109,7 +109,7 @@ platform capability, or creates a server/UI runtime.
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/phase49_gate.py --reuse-fresh-live` passes every fixture, observer, oracle, paired
+**Gate:** `python3 tools/infernix_lift_gate.py --reuse-fresh-live` passes every fixture, observer, oracle, paired
 case, and mutant of [Gate integrity](#gate-integrity). `cabal test infernix-core-artifact-lift-live-gate` is an
 independent evidence reader, never the acceptance command.
 
@@ -120,11 +120,11 @@ independent evidence reader, never the acceptance command.
   cleanup, an independent Haskell evidence reader, all four compiled mutants, baseline restoration,
   documentation, and the ledger. Every one of those rests on a clause below.
 - **Representative-set candidates.** After Phase-0 and owning-phase provenance review, the gate may retain
-  `test/dhall/phase_50/infernix_core_artifact_lift.dhall`,
-  `test/dhall/phase_50/cpu_budget_one_short.dhall`,
-  `test/fixtures/phase_50/request.cbor`,
-  `test/fixtures/phase_50/command_identity_matrix.tsv`,
-  `test/fixtures/phase_50/artifact_scope_readiness_matrix.tsv`. Existing same-commit candidates remain
+  `test/fixture/dhall/infernix_ui_lift/infernix_core_artifact_lift.dhall`,
+  `test/fixture/dhall/infernix_ui_lift/cpu_budget_one_short.dhall`,
+  `test/fixture/infernix_ui_lift/request.cbor`,
+  `test/fixture/infernix_ui_lift/command_identity_matrix.tsv`,
+  `test/fixture/infernix_ui_lift/artifact_scope_readiness_matrix.tsv`. Existing same-commit candidates remain
   regression fixtures until independently reviewed or replaced. The fixed request uses the closed catalog identity
   `catalog/tinyllama-1.1b-cpu@<sha256>` and seed `0x0000000000000001`.
 - **Fresh authenticated challenge.** After Pulsar, MinIO, Vault, the cache owner, and workflow workers are
@@ -155,10 +155,10 @@ independent evidence reader, never the acceptance command.
   audit, cache-owner inventory, and the worker's containerd/cgroup plus argv/syscall execution witness. Adapter
   logs and self-reported traces are not evidence; absent, unauthenticated, or nonce-mismatched evidence fails.
 - **Committed mutants.** Phase 0 commits
-  `test/mutants/phase_49/mut-49-drop-artifact-scope.patch`,
-  `test/mutants/phase_49/mut-49-mint-ready-before-pointer-commit.patch`, and
-  `test/mutants/phase_49/mut-49-use-wallclock-seed.patch`, plus
-  `test/mutants/phase_49/mut-49-regenerate-command-id.patch`. The unchanged gate must turn red on the exact
+  `test/mutant/infernix_lift/mut-49-drop-artifact-scope.patch`,
+  `test/mutant/infernix_lift/mut-49-mint-ready-before-pointer-commit.patch`, and
+  `test/mutant/infernix_lift/mut-49-use-wallclock-seed.patch`, plus
+  `test/mutant/infernix_lift/mut-49-regenerate-command-id.patch`. The unchanged gate must turn red on the exact
   scope, readiness, cold-recompute, and command-redelivery rows respectively.
 - **Independent oracle and reversibility.** The sibling expected behavior is recomputed by the independently
   built sibling reference during the run; its output stays under `.build/runs/phase_54/`. The reviewed
@@ -209,14 +209,14 @@ independent evidence reader, never the acceptance command.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**:
-`infernix/src/Infernix/Adapter/{Core,Store,Pulsar,Secrets,Engine}.hs`,
-`infernix/src/Infernix/Inference/Deterministic.hs`, `infernix/dhall/infernix.dhall`, and
-`infernix/app/NativeDriver.hs` — a **gate driver, not a runtime role**, and therefore not a second amoebius
+`src/Infernix/Adapter/{Core,Store,Pulsar,Secrets,Engine}.hs`,
+`src/Infernix/Inference/Deterministic.hs`, `dhall/infernix/infernix.dhall`, and
+`test/spec/infernix/NativeDriver.hs` — a **gate driver, not a runtime role**, and therefore not a second amoebius
 executable; its `executable phase49-native-driver` stanza in `infernix/infernix-lift.cabal` names a phase
 ordinal and retires here
 ([legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md#one-binary-many-roles--2026-08-17)) —
-`tools/phase49_infernix_artifact_live.py`, and
-`test/live/InfernixArtifactLift.hs`
+`tools/infernix_lift_live.py`, and
+`test/spec/live/InfernixArtifactLift.hs`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the one live gate compares two
 externally observed cold computations with a fresh sibling reference and reviewed identity/scope/readiness
@@ -245,7 +245,7 @@ already-closed store, transport, secret, engine, workflow, determinism, and reso
 
 ### Validation
 
-1. Run `python3 tools/phase49_gate.py --reuse-fresh-live` on linux-cpu with
+1. Run `python3 tools/infernix_lift_gate.py --reuse-fresh-live` on linux-cpu with
    networking limited to the declared live dependencies and harness observers.
 2. Require ready-last staging, two independently executed cold results, byte equality with each other and the
    run-local sibling reference, and warm reuse of the named engine.

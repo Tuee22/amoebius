@@ -18,8 +18,8 @@ Python 3 standard library only: this runs before any dependency is installed.
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
-import platform
 import re
 import subprocess
 import tempfile
@@ -29,15 +29,16 @@ from pathlib import Path
 from typing import Any
 
 REQUIREMENTS = "tools/toolchain_requirements.json"
+CANONICAL_PLATFORM = "tools/host_platform.py"
 RESOLUTION = ".build/toolchain/bootstrap.json"
 NETWORK_TIMEOUT = 120
 VERSION_TOKEN = re.compile(r"(\d+(?:\.\d+)+)")
 CHANNEL_URL = "https://dl.k8s.io/release/{channel}.txt"
 RELEASE_URL = "https://dl.k8s.io/release/{version}/{path}"
 
-# The tools the coordinator acquires itself, and the tools it installs through ghcup.
+# The tools the coordinator acquires itself. Everything else it needs is `managed`: it is
+# installed by one of these, which is asked what it can supply.
 ACQUIRED = ("ghcup", "kubectl", "kind")
-GHCUP_MANAGED = ("ghc", "cabal")
 
 
 class ResolutionError(RuntimeError):
@@ -77,16 +78,29 @@ def satisfies(version: tuple[int, ...], requirement: str) -> bool:
     return True
 
 
-def host_platform() -> str:
-    machine = platform.machine().lower()
-    machine = {"amd64": "x86_64", "arm64": "aarch64"}.get(machine, machine)
-    return f"{platform.system().lower()}-{machine}"
+def canonical_platform(root: Path) -> str:
+    """The repository's own `<os>-<arch>` token, loaded rather than re-derived.
+
+    This module used to derive the token itself, with a normalizer that disagreed with the
+    resolver's on exactly one host: Apple silicon came out `darwin-aarch64` here and
+    `darwin-arm64` there, so the coordinator asked the authored requirements for a key no
+    requirement has. `tools/host_platform.py` is the one normalizer, and it is standard
+    library only for precisely this reason — the coordinator can read it on a host where
+    nothing is installed yet.
+    """
+    source = root / CANONICAL_PLATFORM
+    specification = importlib.util.spec_from_file_location("amoebius_host_platform", source)
+    if specification is None or specification.loader is None:
+        raise ResolutionError(f"could not load the canonical platform vocabulary from {source}")
+    module = importlib.util.module_from_spec(specification)
+    specification.loader.exec_module(module)
+    return module.platform_token()
 
 
-def platform_token(name: str, spec: dict[str, Any]) -> str:
-    token = spec.get("platform_map", {}).get(host_platform())
+def platform_token(name: str, spec: dict[str, Any], host: str) -> str:
+    token = spec.get("platform_map", {}).get(host)
     if token is None:
-        raise ResolutionError(f"{name}: no platform mapping for {host_platform()}")
+        raise ResolutionError(f"{name}: no platform mapping for {host}")
     return token
 
 
@@ -114,14 +128,14 @@ def github_releases(project: str) -> list[dict[str, Any]]:
     return releases
 
 
-def select_release(name: str, spec: dict[str, Any]) -> tuple[tuple[int, ...], dict[str, Any], dict[str, Any]]:
+def select_release(name: str, spec: dict[str, Any], host: str) -> tuple[tuple[int, ...], dict[str, Any], dict[str, Any]]:
     """The newest release satisfying the requirement, with its platform asset.
 
     The feed is not ordered by version, so every admissible release is collected and the
     newest wins; taking the first match would let a back-published maintenance release
     silently downgrade the tool.
     """
-    pattern = re.compile(spec["asset_pattern"].replace("{platform}", platform_token(name, spec)))
+    pattern = re.compile(spec["asset_pattern"].replace("{platform}", platform_token(name, spec, host)))
     admissible: list[tuple[tuple[int, ...], dict[str, Any], dict[str, Any]]] = []
     for release in github_releases(spec["project"]):
         try:
@@ -137,7 +151,7 @@ def select_release(name: str, spec: dict[str, Any]) -> tuple[tuple[int, ...], di
     if not admissible:
         raise ResolutionError(
             f"{name}: no {spec['project']} release satisfies {spec['requirement']} "
-            f"with an asset matching {spec['asset_pattern']} on {host_platform()}"
+            f"with an asset matching {spec['asset_pattern']} on {host}"
         )
     return max(admissible, key=lambda entry: entry[0])
 
@@ -180,8 +194,8 @@ def download_verified(url: str, expected: str, target: Path) -> str:
     return observed
 
 
-def resolve_github_release(name: str, spec: dict[str, Any]) -> dict[str, Any]:
-    version, release, asset = select_release(name, spec)
+def resolve_github_release(name: str, spec: dict[str, Any], host: str) -> dict[str, Any]:
+    version, release, asset = select_release(name, spec, host)
     return {
         "source": "github-release",
         "project": spec["project"],
@@ -194,14 +208,14 @@ def resolve_github_release(name: str, spec: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def resolve_kubernetes_release(name: str, spec: dict[str, Any]) -> dict[str, Any]:
+def resolve_kubernetes_release(name: str, spec: dict[str, Any], host: str) -> dict[str, Any]:
     channel = fetch(CHANNEL_URL.format(channel=spec["channel"])).decode("utf-8", "replace").strip()
     version = parse_version(channel)
     if not satisfies(version, spec["requirement"]):
         raise ResolutionError(
             f"{name}: channel {spec['channel']} offers {channel}, which does not satisfy {spec['requirement']}"
         )
-    path = spec["binary_path"].replace("{platform}", platform_token(name, spec))
+    path = spec["binary_path"].replace("{platform}", platform_token(name, spec, host))
     url = RELEASE_URL.format(version=channel, path=path)
     digest = extract_digest(fetch(url + ".sha256").decode("utf-8", "replace"), spec["install_name"])
     return {
@@ -219,15 +233,16 @@ def resolve_kubernetes_release(name: str, spec: dict[str, Any]) -> dict[str, Any
 def resolve_acquired(root: Path) -> dict[str, dict[str, Any]]:
     """Resolve every tool the coordinator downloads itself, from authored requirements."""
     specs = load_requirements(root)
+    host = canonical_platform(root)
     resolved: dict[str, dict[str, Any]] = {}
     for name in ACQUIRED:
         spec = specs.get(name)
         if spec is None:
             raise ResolutionError(f"{name}: no authored requirement in {REQUIREMENTS}")
         if spec["source"] == "github-release":
-            resolved[name] = resolve_github_release(name, spec)
+            resolved[name] = resolve_github_release(name, spec, host)
         elif spec["source"] == "kubernetes-release":
-            resolved[name] = resolve_kubernetes_release(name, spec)
+            resolved[name] = resolve_kubernetes_release(name, spec, host)
         else:
             raise ResolutionError(f"{name}: source {spec['source']!r} is not acquirable pre-binary")
     return resolved
@@ -250,11 +265,26 @@ def ghcup_versions(ghcup: Path, tool: str, home: Path) -> list[str]:
     return versions
 
 
+def ghcup_managed(root: Path) -> list[str]:
+    """The requirements ghcup supplies, read off the manifest rather than hard-coded.
+
+    A hard-coded pair was a second place the authored manifest had to be kept in sync with,
+    and the two disagreed the moment a `managed` requirement was added. The manifest is the
+    only statement of who supplies what.
+    """
+    specs = load_requirements(root)
+    return sorted(
+        name
+        for name, spec in specs.items()
+        if spec.get("source") == "managed" and spec.get("provider") == "ghcup"
+    )
+
+
 def resolve_ghcup_managed(root: Path, ghcup: Path, home: Path) -> dict[str, dict[str, Any]]:
     """Ask the installed ghcup which ghc/cabal it can supply, and take the newest admissible."""
     specs = load_requirements(root)
     resolved: dict[str, dict[str, Any]] = {}
-    for name in GHCUP_MANAGED:
+    for name in ghcup_managed(root):
         requirement = specs[name]["requirement"]
         admissible = [
             (parse_version(candidate), candidate)
@@ -265,7 +295,8 @@ def resolve_ghcup_managed(root: Path, ghcup: Path, home: Path) -> dict[str, dict
             raise ResolutionError(f"{name}: ghcup offers nothing satisfying {requirement}")
         _, selected = max(admissible)
         resolved[name] = {
-            "source": "ghcup-managed",
+            "source": "managed",
+            "provider": "ghcup",
             "version": selected,
             "requirement": requirement,
         }

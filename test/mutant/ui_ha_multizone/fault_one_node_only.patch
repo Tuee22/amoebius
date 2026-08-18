@@ -1,0 +1,5 @@
+--- a/test/spec/live/UiHaSpec.hs
++++ b/test/spec/live/UiHaSpec.hs
+@@ fault
+- isolateCompleteZone selectedZone
++ stopOnePod selectedZone

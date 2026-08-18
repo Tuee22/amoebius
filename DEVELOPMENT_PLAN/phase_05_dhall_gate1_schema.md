@@ -41,7 +41,22 @@ The complete Gate-1 gate passed on 2026-08-09; Gate-2 semantics and runtime fide
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-4 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/dhall_gate1_schema_gate.py` passes all
+ten sides on substrate `none`, lane `none`, natural `arm64`, untranslated: the whole Gate-1 battery is green,
+all 18 authored metrics equal their expected values after canonical Dhall normalization, every
+field-deletion, type-substitution, special-resource, and custom-arm mutant reddens, generated results stay
+beneath `.build/**`, and 18 surfaces join completely to 21 enumerated items. The run left no authored path
+created, changed, or removed, and published attestation
+`sha256:33e2d6750c7ad3d71c8c1902480e2f736253de8892f3c3acac94e2ff89564ed5`.
+
+**The rerun found a defect the previous seal could not have caught.** `tools/dhall_gate1.py` read its oracle
+from `tests/oracle/gate1/` — a directory this repository has never had under that name. Every oracle-backed
+check therefore died at the first `FileNotFoundError` rather than comparing anything, and the battery's exit
+status was the only thing standing between that and a green board. The root is now
+`test/oracle/dhall_gate1_schema/`, which is where the eighteen authored oracle files actually live, and the
+eighteen metrics are compared rather than skipped.
+
+**Opened 2026-08-17** when the preceding phase resealed; **reopened 2026-08-16 by the natural-architecture amendment.**
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
@@ -405,7 +420,7 @@ scalar/map, or supplied by a schema default instead of being required.
 ### Committed seeded mutant (§M.2)
 
 At least one committed seeded mutant MUST turn the harness red and is
-re-run every gate: `mutants/gate1_capability_custom_arm.dhall` adds a `Custom : Text` arm to `Capability`
+re-run every gate: `test/mutant/dhall_gate1_schema/gate1_capability_custom_arm.dhall` adds a `Custom : Text` arm to `Capability`
 (union-arm-addition operator). The gate is invalid if that mutant type-checks the product-named negative or
 passes the arm-inventory oracle.
 
@@ -852,7 +867,7 @@ at Gate 2.
   outside this representative set and lands in Phase 7's exhaustive registry-driven corpus.
 - A committed per-negative golden `dhall type` error transcript (`test/oracle/dhall_gate1_schema/<entry>.err`, authored
   in Phase 0) pinning each failure's targeted union/arm/field.
-- The committed seeded mutant `mutants/gate1_capability_custom_arm.dhall` (union-arm-addition operator) that
+- The committed seeded mutant `test/mutant/dhall_gate1_schema/gate1_capability_custom_arm.dhall` (union-arm-addition operator) that
   the harness re-runs and MUST report red.
 - The **partial-foreclosure ledger** is the [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) proven/tested/assumed artifact this phase emits under `.build/runs/`,
   with schema and external retention per `testing_doctrine.md`. It names Register 1,
@@ -868,7 +883,7 @@ at Gate 2.
    reverted) type-checks (§M.8/§M.3), AND the observed `dhall type` stderr matches the committed per-entry
    `<entry>.err` golden naming the targeted type/arm/field (§M.8); red if either the paired positive fails or
    the error text diverges from its golden.
-3. The harness re-runs the committed seeded mutant `mutants/gate1_capability_custom_arm.dhall` and is red
+3. The harness re-runs the committed seeded mutant `test/mutant/dhall_gate1_schema/gate1_capability_custom_arm.dhall` and is red
    unless the mutant is caught — i.e. the arm-inventory oracle goes red on the extra `Custom : Text` arm. If
    instead the mutant passes the arm-inventory oracle or lets the product-named negative type-check, the
    mutant has escaped and the seeded-mutant gate is invalid (§M.2).

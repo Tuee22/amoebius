@@ -39,10 +39,27 @@ The gate passed on 2026-08-09; Phase-4 code correspondence and runtime fidelity 
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-2 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/formal_model_kernel_gate.py` passes all
+ten sides on substrate `none`, lane `none`, natural `arm64`, untranslated: the JVM and TLC resolve from
+authored requirements and TLC identifies itself from a live banner probe, `formal-model-spec` is green, all 31
+authored metrics equal their expected values, every model-safety, spec-weakening, renderer-golden, and
+renderer-differential mutant is caught, 608 emitted `.tla`/`.cfg` files stay beneath `.build/**` and outside
+the 1,965-file source snapshot, and 14 surfaces join completely to 39 enumerated items. The run left no
+authored path created, changed, or removed, and published attestation
+`sha256:936cc5a28f225c3ca57a1d460095bd3e3d7c9feee5ad3a30f2a3a11512561c33` against source snapshot
+`sha256:08b948bef7c03db5…`.
+
+**What the rerun changed, and what it did not.** The capability result is unchanged: the same 31 metrics, the
+same mutants caught, the same TLC verdicts. What the amendment added is the answer to a question the previous
+seal could not answer — *which architecture proved it*. The gate now declares its lane, refuses a translated
+process, and records `arm64` in the ledger and the attestation, so the seal is a claim about a host rather
+than about nothing in particular. It also names Phase 3 rather than Phase 2 in its run bundle, which the
+previous revision had wrong, and reads its renderer mutants from `test/mutant/formal/` where Phase 2 put them.
+
+**Opened 2026-08-17** when Phase 2 sealed the target tree; **reopened 2026-08-16 by the natural-architecture amendment.**
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
-the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
-architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
+the natural architecture it proved and to execute no artifact of another. This phase's previous gate recorded no
+architecture, so that seal is invalidated as a current result and stands only as history; the rerun differs from
 it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
 [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
 

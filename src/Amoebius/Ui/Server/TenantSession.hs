@@ -39,7 +39,7 @@ membership = Membership . Set.fromList
 
 issueChoice :: Membership -> SubjectId -> TenantId -> Either TenantSessionError TenantChoiceHandle
 issueChoice members subject tenant
-#ifdef PHASE56_ACCEPT_UNLISTED_CHOICE_MUTANT
+#ifdef UI_MULTI_TENANT_LIVE_ACCEPT_UNLISTED_CHOICE_MUTANT
   = Right (TenantChoiceHandle subject tenant)
 #else
   | contains members subject tenant = Right (TenantChoiceHandle subject tenant)
@@ -49,7 +49,7 @@ issueChoice members subject tenant
 selectChoice :: Membership -> Maybe TenantSession -> SubjectId -> TenantChoiceHandle -> Either TenantSessionError TenantSession
 selectChoice members previous authenticated (TenantChoiceHandle owner tenant)
   | authenticated /= owner = Left HandleSubjectMismatch
-#ifndef PHASE56_ACCEPT_UNLISTED_CHOICE_MUTANT
+#ifndef UI_MULTI_TENANT_LIVE_ACCEPT_UNLISTED_CHOICE_MUTANT
   | not (contains members authenticated tenant) = Left NotCurrentMember
 #endif
   | otherwise = Right TenantSession
@@ -62,9 +62,9 @@ selectChoice members previous authenticated (TenantChoiceHandle owner tenant)
 
 scopedLookupKey :: TenantSession -> String -> (String, String, String)
 scopedLookupKey session coordinate =
-#ifdef PHASE56_DROP_TENANT_KEY_MUTANT
+#ifdef UI_MULTI_TENANT_LIVE_DROP_TENANT_KEY_MUTANT
   ("", subjectValue (sessionSubject session), coordinate)
-#elif defined(PHASE56_DROP_USER_KEY_MUTANT)
+#elif defined(UI_MULTI_TENANT_LIVE_DROP_USER_KEY_MUTANT)
   (tenantValue (sessionTenant session), "", coordinate)
 #else
   (tenantValue (sessionTenant session), subjectValue (sessionSubject session), coordinate)
@@ -72,7 +72,7 @@ scopedLookupKey session coordinate =
 
 realtimeRouteKey :: TenantSession -> (String, String, Int)
 realtimeRouteKey session =
-#ifdef PHASE56_DROP_SCOPE_EPOCH_MUTANT
+#ifdef UI_MULTI_TENANT_LIVE_DROP_SCOPE_EPOCH_MUTANT
   (tenantValue (sessionTenant session), subjectValue (sessionSubject session), 0)
 #else
   (tenantValue (sessionTenant session), subjectValue (sessionSubject session), epochValue (sessionEpoch session))

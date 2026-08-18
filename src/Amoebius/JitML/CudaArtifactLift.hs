@@ -161,7 +161,7 @@ provisionCudaTraining
 provisionCudaTraining request capacity = do
   case trainingTarget request of
     CudaTarget -> Right ()
-#ifdef PHASE51_SILENT_CPU_FALLBACK_MUTANT
+#ifdef JITML_LIFT_CUDA_SILENT_CPU_FALLBACK_MUTANT
     CpuTarget -> Right ()
 #else
     CpuTarget -> Left CudaRequired
@@ -181,7 +181,7 @@ provisionCudaTraining request capacity = do
   Right (ProvisionedCudaTraining request capacity)
 
 capacityForAdmission :: CudaCapacity -> Word64
-#ifdef PHASE51_SPEND_RAW_VRAM_MUTANT
+#ifdef JITML_LIFT_CUDA_SPEND_RAW_VRAM_MUTANT
 capacityForAdmission = cudaTotalVramBytes
 #else
 capacityForAdmission = cudaNetAllocatableBytes
@@ -223,7 +223,7 @@ commitStagedArtifact
   -> StagedJitMLArtifact
   -> Either LiftError CommittedJitMLArtifact
 commitStagedArtifact result staged = case result of
-#ifdef PHASE51_MINT_ARTIFACT_BEFORE_CAS_MUTANT
+#ifdef JITML_LIFT_CUDA_MINT_ARTIFACT_BEFORE_CAS_MUTANT
   _ -> Right (mintArtifact (PointerRevision "uncommitted") staged)
 #else
   PointerCasSucceeded revision -> Right (mintArtifact revision staged)
@@ -244,7 +244,7 @@ mintArtifact revision staged =
         }
 
 workIdentity :: ScopedTrainingRequest -> TrainingCommandId
-#ifdef PHASE51_REGENERATE_COMMAND_ID_MUTANT
+#ifdef JITML_LIFT_CUDA_REGENERATE_COMMAND_ID_MUTANT
 workIdentity _ = TrainingCommandId "regenerated-command"
 #else
 workIdentity request = trainingCommandId request

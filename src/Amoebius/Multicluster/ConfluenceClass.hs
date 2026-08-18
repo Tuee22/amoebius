@@ -58,7 +58,7 @@ classifyInvariant invariant = case invariant of
   GatewayAuthority -> NonConfluent
   LatestPointer -> NonConfluent
   ClusterVpnIpAllocation -> NonConfluent
-#ifdef PHASE42_CLASSIFIER_DEFAULT_CONFLUENT_MUTANT
+#ifdef MULTICLUSTER_SPAWN_GEOREPL_CLASSIFIER_DEFAULT_CONFLUENT_MUTANT
   Unclassified _ -> Confluent
 #else
   Unclassified _ -> NonConfluent

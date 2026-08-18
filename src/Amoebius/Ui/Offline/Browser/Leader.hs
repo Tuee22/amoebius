@@ -32,14 +32,14 @@ emptyLeaderState = LeaderState [] (Generation 0)
 claimLeader :: PartitionKey -> TabId -> LeaderState -> Either LeaderError LeaderState
 claimLeader partition tab (LeaderState owners generation)
   | any ((== partition) . fst) owners =
-#ifdef PHASE60_TWO_REPLAY_LEADERS_MUTANT
+#ifdef ENCRYPTED_BROWSER_RUNTIME_TWO_REPLAY_LEADERS_MUTANT
       Right (LeaderState ((partition, tab) : owners) (advance generation))
 #else
       Left ConcurrentTabRefused
 #endif
   | otherwise = Right (LeaderState ((partition, tab) : owners) (advance generation))
   where
-#ifdef PHASE60_OMIT_FENCING_MUTANT
+#ifdef ENCRYPTED_BROWSER_RUNTIME_OMIT_FENCING_MUTANT
     advance value = value
 #else
     advance (Generation value) = Generation (value + 1)

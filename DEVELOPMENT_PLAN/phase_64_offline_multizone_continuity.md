@@ -84,7 +84,7 @@ needed, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 **Register:** 3 — live infrastructure.
 
-**Gate:** `python3 tools/phase64_gate.py` runs the contract, scoped live campaign,
+**Gate:** `python3 tools/offline_multizone_continuity_gate.py` runs the contract, scoped live campaign,
 eight mutants, docs, and evidence ledger. Its infernix row preserves command/work identity in the durable
 receipt; offline jitML/CUDA remains unclaimed.
 
@@ -129,10 +129,10 @@ unbounded replay/fanout/upload demand refuses the campaign.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Offline/Ha/MultiZone.hs`,
-`test/live/OfflineMultiZoneSpec.hs`, `tools/phase64_continuity_live.py`, and `tools/phase64_gate.py`
+`test/spec/live/OfflineMultiZoneSpec.hs`, `tools/offline_multizone_continuity_live.py`, and `tools/offline_multizone_continuity_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
 **Requires**: `cloud-account` — the credentialed account whose zones this continuity gate partitions and heals.
-**Independent Validation**: `python3 tools/phase64_gate.py` against pinned
+**Independent Validation**: `python3 tools/offline_multizone_continuity_gate.py` against pinned
 artifacts, contract tests, real Chrome, stopped endpoint, SQLite/filesystem observers, and eight mutants
 **Docs to update**:
 `documents/engineering/browser_offline_runtime_doctrine.md`,

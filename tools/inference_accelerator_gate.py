@@ -18,6 +18,7 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
@@ -26,7 +27,8 @@ CASES = ROOT / "test/oracle/inference_accelerator/provision_cases.tsv"
 OFFERINGS = ROOT / "test/oracle/inference_accelerator/offering_lane.tsv"
 FAMILIES = ROOT / "test/oracle/inference_accelerator/family_lane.tsv"
 COEXISTENCE = ROOT / "test/oracle/inference_accelerator/coexistence.tsv"
-MUTANTS = ROOT / "test/mutant/inference_accelerator/mutants.tsv"
+MUTANT_CAPABILITY = "inference_accelerator"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/inference_accelerator/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/inference-accelerator/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/inference-accelerator/validation-locus-ledger.tsv"
@@ -81,7 +83,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     offerings = read_tsv(OFFERINGS)
     families = read_tsv(FAMILIES)
     coexistence = read_tsv(COEXISTENCE)
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     locus = read_tsv(LOCUS)
     if len(cases) != 9 or len({row["case"] for row in cases}) != 9:
         raise GateFailure("Phase-13 provision oracle must enumerate nine unique negatives")
@@ -202,7 +204,7 @@ COMPILER = ""
 # Where the run reads its enumerable items from. Nothing here is a list this gate carries;
 # each is a file the run opens, so deleting a case or a mutant shrinks the enumeration and
 # breaks the authored join.
-ITEM_SOURCES = ['test/oracle/inference_accelerator/coexistence.tsv', 'test/oracle/inference_accelerator/family_lane.tsv', 'test/oracle/inference_accelerator/offering_lane.tsv', 'test/oracle/inference_accelerator/provision_cases.tsv', 'test/mutant/inference_accelerator/mutants.tsv']
+ITEM_SOURCES = ['test/oracle/inference_accelerator/coexistence.tsv', 'test/oracle/inference_accelerator/family_lane.tsv', 'test/oracle/inference_accelerator/offering_lane.tsv', 'test/oracle/inference_accelerator/provision_cases.tsv', 'test/mutant/registry.tsv']
 
 CHECKS = {
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
@@ -229,6 +231,11 @@ def enumerated_items() -> set[str]:
         path = ROOT / relative
         if not path.is_file():
             continue
+        if relative == "test/mutant/registry.tsv":
+            # The one registry leads with the capability and carries every phase's rows, so
+            # this phase's items are the mutant ids in its own rows, not every first column.
+            names.update(row["mutant"] for row in mutant_registry.capability(MUTANT_CAPABILITY))
+            continue
         for line in path.read_text(encoding="utf-8").splitlines()[1:]:
             if line.strip():
                 names.add(line.split("\t")[0].strip())
@@ -237,11 +244,17 @@ def enumerated_items() -> set[str]:
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=12, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=13, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+
+    # Clause 15 first: a run that cannot name the architecture it executed on, or
+    # that is executing under translation, has nothing worth proving.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []

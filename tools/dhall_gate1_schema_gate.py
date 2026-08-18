@@ -133,11 +133,17 @@ def battery_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[st
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=4, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
-        register="1", substrate="none", sides=SIDES
+        phase=5, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        register="1", substrate="none", lane="none", sides=SIDES
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+
+    # Clause 15 first: a run that cannot name the architecture it executed on, or
+    # that is executing under translation, has nothing worth proving.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
 
     results["toolchain"], resolved = toolchain_side()
     rows: dict[str, str] = {}

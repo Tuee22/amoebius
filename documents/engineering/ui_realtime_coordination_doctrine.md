@@ -259,7 +259,7 @@ resume, and stale scope epochs fail closed. Redis and WebSocket delivery are del
 `UiRuntimeServer` is an unelected horizontally scalable worker. At least two ready replicas are required by the
 first live cross-pod routing gate; Phase 60's multi-zone HA claim requires at least three admitted UI-server
 replicas across at least three zones. Neither condition makes the control-plane admin REST service replicated;
-that service remains on the `replicas=1` singleton.
+that service remains on the `replicas=1` control-plane daemon.
 
 There is no sticky-session correctness dependency. A connection-owning pod registers presence only after its
 plan/ABI/handler admission and WebSocket authentication complete. During drain it stops accepting new

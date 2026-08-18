@@ -156,7 +156,7 @@ CPU, memory, logical/physical ephemeral, runtime-metadata, image/snapshot/worksp
 accelerator/VRAM, backing-route, and model operands derived by `provision`. It watches only that scheduler
 name, sees the created Pod's stable UID, authenticates the template digest and owner chain, instantiates the
 UID-qualified reservation after an attested elastic-target→NodeId binding, and runs canonical placement.
-One singleton ledger-root object is the aggregate CAS boundary. It CASes a candidate to `Reserved`, CASes
+One control-plane daemon ledger-root object is the aggregate CAS boundary. It CASes a candidate to `Reserved`, CASes
 that record to `BindingInFlight`, then submits Kubernetes Binding.
 The transaction does not blindly add numeric Pod vectors: it re-folds static bootstrap/system reservations,
 normalized foreign commitments, retained observed runtime artifacts, the complete root ledger, and the
@@ -193,7 +193,7 @@ selected node, or capacity fingerprint changes. A lingering terminator therefore
 of becoming unbudgeted demand. The scheduler itself is not free: the standard platform inventory includes
 `CapacitySchedulerSystemDemand`, then seals one `ProvisionedCapacitySchedulerSystem` with the scheduler-role
 image, CPU/memory/storage, controller, config, RBAC/admission/taints, readiness requirement, API objects, and
-singleton root ledger's bounded bytes/churn and unique deployment-global render ownership.
+control-plane daemon root ledger's bounded bytes/churn and unique deployment-global render ownership.
 Managed-capacity nodes carry an admission-owned taint: every Pod allowed to tolerate it must use this
 scheduler, except the one bootstrap scheduler Pod. That exception is pinned to one uniquely eligible node,
 uses `Recreate` plus an exact namespace `ResourceQuota pods=1`, and is debited as a perpetual static
@@ -202,7 +202,7 @@ workload layers; compute/slots remain additive. Thus a default-scheduler write c
 All other system/addon Pods use the custom scheduler, and there are no other default-scheduler/foreign writers
 to managed-node capacity. Workload controllers remain paused until `ManagedCapacityReady`; missing,
 conflicting, or one-short scheduler/config/ledger/bootstrap/add-on-conversion capacity rejects.
-The HostProcess arm uses its own per-host singleton CAS ledger:
+The HostProcess arm uses its own per-host control-plane daemon CAS ledger:
 Reserved→LaunchInFlight→Running/Draining, with ambiguous launch outcomes kept charged until process
 readback. It partitions release only after observed process exit plus any CUDA device-hold or Metal
 drain/allocation/cache predicate, while host cache/log/local artifacts remain in the observed resident

@@ -104,7 +104,7 @@ controls, but it is never the authority oracle and cannot satisfy a denial row b
   Equal-shaped routes, subject-owned records, tenant-wide records, and mutations exist in every admitted cell.
   Alice's `t-b` membership is revoked mid-run. The same action ids and labels are reused deliberately to expose
   alias/keying mistakes.
-- **Pinned matrices:** `test/fixtures/ui_multi_tenant/visibility_matrix.tsv` owns expected controls/routes;
+- **Pinned matrices:** `test/fixture/ui_multi_tenant/visibility_matrix.tsv` owns expected controls/routes;
   `authorization_matrix.tsv` independently owns server allow/deny; `scope_transition_trace.tsv` owns epoch,
   cancellation, state-clear, and handle-validity outcomes; `tenant_choice_matrix.tsv` owns which opaque choices
   may be issued and selected before/after revocation; `expected_network_origins.tsv` owns the allowed immutable-
@@ -172,7 +172,7 @@ inventory equal to preflight. Phase 60, not this phase, owns whole-zone HA fault
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Server/TenantSession.hs`,
-`ui-runtime/src/Amoebius/Ui/TenantSwitch.purs`, `test/live/UiMultiTenantSpec.hs` (target authored
+`ui/src/Amoebius/Ui/TenantSwitch.purs`, `test/spec/live/UiMultiTenantSpec.hs` (target authored
 sources; not yet built)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the one gate command

@@ -451,8 +451,8 @@ Each `Runtime` arm is indexed by its `linkedAdapters` set, so the *recipe* is on
 bounded by trusted code, not by the number of declarative apps. A program-only app change mints a new
 `ProgramDigest` and `Release`, but reuses the exact runtime image digest. Two consequences are load-bearing.
 First, the control-plane and generic UI runtime **cannot be perturbed by a program-data change** — there is
-no app relink, so the singleton's `strategy: Recreate` pod
-([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton))
+no app relink, so the control-plane daemon's `strategy: Recreate` pod
+([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon))
 is untouched. Second, when a trusted adapter really is added, the link-time merge obligations of
 [capability_extension_doctrine.md §6](./capability_extension_doctrine.md#6-the-merge-total-acyclic-anti-shadow)
 are discharged **per variant** over a small reviewed set, not globally over every UI program at once.

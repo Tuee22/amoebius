@@ -99,7 +99,7 @@ That test sorts every crossing invariant into one of two buckets:
   invariant *proven* confluent — may cross and be applied active-active on both clusters, bounded only by
   replication lag, healing by a deterministic total merge (R7).
 - **(ii) Non-confluent — held by bounded authority** — may cross only under R7's conditional forms, never as
-  an absolute and never by a fabricated per-record merge: *singleton ownership* via R7's claim/yield
+  an absolute and never by a fabricated per-record merge: *control-plane daemon ownership* via R7's claim/yield
   pattern; an *aggregate-numeric budget* via **escrow/reservation**; a *uniqueness namespace* via
   **disjoint-namespace allocation**; a coordinating *single writer / consensus / lock*; *downgrade* to a
   weaker confluent invariant; or *restructure* into a confluent representation (after which it re-classifies
@@ -112,7 +112,7 @@ flowchart LR
   Q -->|"closed under merge?"| CONF["(i) Confluent"]
   Q -->|"not closed under merge"| NON["(ii) Non-confluent: bounded authority"]
   CONF --> M["deterministic total merge (R7)"]
-  NON --> S1["singleton: claim/yield (R7)"]
+  NON --> S1["control-plane daemon: claim/yield (R7)"]
   NON --> S2["numeric budget: escrow/reservation"]
   NON --> S3["uniqueness: disjoint-namespace allocation"]
   NON --> S4["single writer / consensus / lock"]
@@ -135,7 +135,7 @@ cross-cluster data is bucket (i) by construction:
   parent injects the bytes directly into the child's Vault ([vault_pki_doctrine.md](./vault_pki_doctrine.md)).
   Secret material is therefore out of the confluence question entirely.
 
-What is left in bucket (ii) is small and specific: the **gateway / region authority** (a singleton), any
+What is left in bucket (ii) is small and specific: the **gateway / region authority** (a control-plane daemon), any
 **CAS "latest" pointer**, and **mutable relational state** geo-replicated active-active (Appendix C). Two
 sub-forms have enough structure to name precisely:
 

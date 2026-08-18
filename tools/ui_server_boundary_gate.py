@@ -2,7 +2,7 @@
 """Run and seal the authenticated UI-server boundary checks.
 
 This is the first run of this gate that could ever have passed. The boundary ABI
-`app/amoebius/Amoebius/Ui/Server/Main.hs` consumes — the request/response types, plan admission, and
+`app/amoebius/Amoebius/Entry/ServeUi.hs` consumes — the request/response types, plan admission, and
 the authorize-then-dispatch entry point — was declared by its import list and defined
 nowhere, so `exe:amoebius` did not build. `Amoebius.Ui.Server.Dispatch` now implements it,
 and the executable's own packaging defect is fixed alongside: listing `src` in its
@@ -33,14 +33,16 @@ from typing import Any, Mapping
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
-FIXTURES = ROOT / "test/fixtures/ui_server"
-MUTANTS = ROOT / "test/mutant/ui_server_boundary/mutants.tsv"
+FIXTURES = ROOT / "test/fixture/ui_server"
+MUTANT_CAPABILITY = "ui_server_boundary"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/ui_server_boundary/validation_locus.tsv"
-ENTRY_POINT = ROOT / "app/amoebius/Amoebius/Ui/Server/Main.hs"
+ENTRY_POINT = ROOT / "app/amoebius/Amoebius/Entry/ServeUi.hs"
 RETIRED_ENTRY_POINT = ROOT / "src/Amoebius/Ui/Server/Main.hs"
 RESULTS = ROOT / ".build/dsl/ui-server-boundary/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-server-boundary/validation-locus-ledger.tsv"
@@ -233,13 +235,13 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         if actual != expected:
             raise GateFailure(f"{name} must retain {expected} rows, got {actual}")
         counts[name] = actual
-    headers = read_tsv(ROOT / "test/fixtures/ui_security/production_headers.tsv")
+    headers = read_tsv(ROOT / "test/fixture/ui_security/production_headers.tsv")
     if len(headers) != 5 or {row["header"] for row in headers} != {
         "Content-Security-Policy", "Cross-Origin-Opener-Policy", "Cross-Origin-Resource-Policy",
         "Referrer-Policy", "X-Content-Type-Options",
     }:
         raise GateFailure("production security-header contract drifted")
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 9 or len({row["mutant"] for row in mutants}) != 9:
         raise GateFailure("Phase-26 mutant manifest must contain nine unique rows")
     for row in mutants:
@@ -262,7 +264,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
 
 def item_classes() -> dict[str, str]:
     classes = {row["entry"].strip(): row["locus"].strip() for row in read_tsv(LOCUS)}
-    for row in read_tsv(MUTANTS):
+    for row in mutant_registry.capability(MUTANT_CAPABILITY):
         classes[row["mutant"].strip()] = "mutant"
     return classes
 

@@ -1,0 +1,4 @@
+mutant=network-fabric-wireguard-hub-no-endpoint
+flag=network-fabric-wireguard-hub-no-endpoint-mutant
+locus=src/Amoebius/Fabric/WgRender.hs:renderNode
+expected=a spoke configuration without the gateway-role Endpoint must be rejected

@@ -1,5 +1,5 @@
 {
-  "resolvedDeploymentDhall": "{ app = \"phase39-trivial\", replicas = 1, schema = \"v2\" }",
+  "resolvedDeploymentDhall": "{ app = \"release-lifecycle-trivial\", replicas = 1, schema = \"v2\" }",
   "imageDigests": [
     "sha256:1111111111111111111111111111111111111111111111111111111111111111",
     "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"

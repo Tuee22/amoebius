@@ -65,12 +65,12 @@ projectUiProgram runtime source = do
     , ("revision", string (revisionText revision))
     ])
   contracts = object
-    [ ("request", string "phase40-action-v1")
-    , ("response", string "phase40-receipt-v1")
+    [ ("request", string "ui-program-release-action-v1")
+    , ("response", string "ui-program-release-receipt-v1")
     ]
   authority = digestArtifact (Aeson.encode (sourcePolicyEpoch source))
   selectedRuntime =
-#ifdef PHASE40_REBUILD_RUNTIME_PER_PROGRAM_MUTANT
+#ifdef UI_PROGRAM_RELEASE_REBUILD_RUNTIME_PER_PROGRAM_MUTANT
     RuntimeImageDigest (runtimeImageDigestText runtime <> "-program-" <> revisionText revision)
 #else
     runtime

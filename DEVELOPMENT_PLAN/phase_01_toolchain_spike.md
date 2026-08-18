@@ -14,7 +14,7 @@ Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -31,7 +31,7 @@ Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
 - [Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅](#sprint-14-jit-build-resolver-deps--purescript-bridge--consolidated-probe-gate-)
 - [Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe ✅](#sprint-15-supernova-fork--proto-lens-codegen-build-probe-)
 - [Sprint 1.6: Dynamic resolution and generated-output migration ✅](#sprint-16-dynamic-resolution-and-generated-output-migration-)
-- [Sprint 1.7: Discover, then ensure — the resolver acquires what it needs 📋](#sprint-17-discover-then-ensure--the-resolver-acquires-what-it-needs-)
+- [Sprint 1.7: Discover, then ensure — the resolver acquires what it needs ✅](#sprint-17-discover-then-ensure--the-resolver-acquires-what-it-needs-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -39,8 +39,27 @@ Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
 
 ## Phase Status
 
-🔄 Active — **reopened 2026-08-16 by the natural-architecture amendment**, and open for work since Phase 0
-resealed on 2026-08-17.
+✅ Done — **resealed a second time on 2026-08-17**, against the tree Phase 2 moved. The one authored package
+now depends on the infernix and jitML cores as `source-repository-package` entries, so the seeded
+`drop-allow-newer` mutant had to gain them too: without them the solver died at an unknown package before it
+reached the intended `proto`/`base` conflict, which is a mutant turning the gate red for the wrong reason —
+indistinguishable, from the gate's side, from one that works. The mutant project now tracks `cabal.project`
+in every dimension but the one it perturbs. All twelve sides pass, two independent resolutions admit the same
+260 packages, and attestation `sha256:284dd6643d5175319f2b3973b62073d53cc2a2654d7ba18be60a5b48dffc94f6` binds
+source snapshot `sha256:bafc948bad016548…`.
+
+**The first 2026-08-17 seal, on the amended contract.** `python3 tools/toolchain_spike_gate.py` passes all
+twelve sides on substrate `none`, lane `none`, natural `arm64`, untranslated: 17 authored requirements resolve
+with none expected on the host, both resolutions admit the same 225 packages, the same graph resolves from the
+1989-file source snapshot alone, the representative set builds from an empty package store, every probe matches
+its independently authored expectation, both committed mutants redden, all eight seeded negatives redden their
+own check and no other, 40 surfaces join completely to 62 enumerated items, and the outside-host inventory is
+unchanged. The run left no authored path created, changed, or removed, and published attestation
+`sha256:836c137384ac75a75dc76349bc4bb9d088667a9a35c231c7d32af47056b62528` against source snapshot
+`sha256:9ba00b2d7a4ba69a…`.
+
+**Reopened 2026-08-16 by the natural-architecture amendment**, and open for work since Phase 0 resealed on
+2026-08-17.
 
 **Amended 2026-08-17 by the host-ensure change.** The gate adopts clause 15 — it records the substrate, the
 lane, and the architecture it executes on, refuses a translated process, and enumerates that observation as a
@@ -53,10 +72,20 @@ never written down as a prerequisite
 with acquisition, and narrows what the phase requires to the floor
 ([`substrate_doctrine.md` §3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply)).
 
+**Sprint 1.7 closed that gap on the same host that exposed it, which is the point.** The two tools the previous
+run declared missing are acquired rather than expected: `dhall` from its publisher's own release into
+`.build/toolchain/runtime/`, `chromium` from the resolved Playwright driver, which is asked where it put it.
+`ghc` and `cabal` come from `ghcup` into a contained `HOME`, so the run leaves no compiler outside the
+checkout. `git`, `node`, and `npm` — invoked bare and undeclared before — are declared, version-checked, and
+resolved through the floor's own package-manager query. The floor itself is authored data, evaluated before
+resolution and decidable for substrates this host is not, so an unsupportable host is named along with its
+remedy rather than discovered as a symptom four requirements deep.
+
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
-the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
-architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
-it by naming the lane and architecture the run actually used. A sprint marker below records what that sprint achieved before the amendment; under
+the natural architecture it proved and to execute no artifact of another. Every gate before 2026-08-17 recorded
+no architecture, so each of those seals is invalidated as a current result and stands only as history; this run
+differs from them by naming the lane and architecture it actually used. A sprint marker below records what that
+sprint achieved before the amendment; under
 [§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase) it is a diagnostic, not surviving closure.
 
 **Pre-natural-architecture status record (invalidated where it claims completion):**
@@ -481,11 +510,12 @@ resolves twice to the same graph, resolves it again from non-ignored source alon
 repository-local attestation. Cabal metadata, its package store, build roots, npm dependencies, tool downloads,
 and all temp/cache homes are confined to `.build/**`; the host inventory is unchanged.
 
-## Sprint 1.7: Discover, then ensure — the resolver acquires what it needs 📋
+## Sprint 1.7: Discover, then ensure — the resolver acquires what it needs ✅
 
-**Status**: Planned
+**Status**: Done — implemented and sealed by the 2026-08-17 gate run
 **Implementation**: `tools/toolchain_requirements.json`, `tools/toolchain.py`,
-`tools/toolchain_spike_gate.py`, `tools/toolchain_spike_negative_corpus.py`,
+`tools/host_platform.py`, `tools/gate_common.py`, `tools/toolchain_spike_gate.py`,
+`tools/toolchain_spike_negative_corpus.py`,
 `test/oracle/toolchain_spike_surfaces.tsv`, `pb/pb/bootstrap_toolchain.py`
 **Blocked by**: Sprint 1.6
 **Requires**: `host-floor` — the package-manager root and the substrate's own build prerequisites
@@ -527,11 +557,32 @@ host must already supply are the floor of
 
 ### Remaining Work
 
-The whole sprint.
+The gate run that seals the phase. What is built:
+
+| Deliverable | Where it landed |
+|---|---|
+| `host` retired | Three providers replace it — `ghc`/`cabal` from `ghcup`, `chromium` from the resolved Playwright driver, `dhall` from its publisher's release. The `no-host-source` check refuses a manifest that reintroduces the kind |
+| `managed` kind | `provider` names one of `ghcup`, `playwright`, `package-manager`; each adapter probes, installs when absent, and asks the provider where it put the tool. `managed-idempotent` requires a second pass to install nothing |
+| Floor as authored data | A `floor` section per substrate, each entry a probe and the remedy that clears it. `floor-decidable` runs every substrate's floor — including ones this host is not — and `floor-satisfied` runs this host's |
+| One platform token | `tools/host_platform.py` owns the architecture vocabulary, the system vocabulary, and their join; the gate module, the resolver, and the pre-binary coordinator all read it, and every authored `platform_map` key is spelled in it |
+| `node`, `npm`, `git` declared | All three are `managed` by the floor's package-manager root, version-checked, resolved to an absolute path, and joined at `toolchain.floor_supplied` |
+| Resolution negatives | `choose_release` and `choose_offer` are pure and refuse in three distinguishable classes; the corpus drives both selectors with two positive controls and three negatives |
+
+Two defects the sprint found and fixed on the way. The Temurin JRE is an application bundle on macOS, so one
+authored `archive_member` resolved a path that exists on exactly one of the three platforms — the member is now
+per-platform, keyed by the same canonical token. And the release-tarball unpacker stripped the first member's
+first path segment unconditionally, which is right for an archive that unpacks into one versioned directory and
+throws away `bin/` for one that does not.
 
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+- `documents/engineering/substrate_doctrine.md` — **done 2026-08-17.** §3.1 records that the floor tables are
+  authored data evaluated before resolution, and that every substrate's floor is decided on every run,
+  including the ones the running host is not.
+- `documents/engineering/repository_layout_doctrine.md` — **done 2026-08-17.** §4 records the one `<os>-<arch>`
+  platform vocabulary, the single normalizer that produces it, and the rule that a publisher with no asset for
+  the host's token is a refusal rather than a fallback.
 - `documents/engineering/repository_layout_doctrine.md` — **done 2026-08-12.** The migration table records
   `toolchain/pins.json` as split into authored `tools/toolchain_requirements.json` and run-local
   `.build/toolchain/resolved.json`; the tree drops `cabal.project.freeze` and names the requirements manifest.

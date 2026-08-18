@@ -15,12 +15,20 @@ convenience:
     string literals emitted after the checks that would have raised. That makes the table a
     restatement of the gate's intentions; if a check were ever weakened, the table would go
     on reporting the same values. Every row that can be observed is now parsed out of the
-    suite's own acceptance token, the strace trace, or the mutant's failure locus, and a
+    suite's own acceptance token, the boundary argv observation, or the mutant's failure
+    locus, and a
     `results-are-measured` check asserts the derivation actually ran.
   * `test/spec/dsl/DecodeSpec.hs` hard-coded one developer's `ghc` and `dhall` paths. The suite
     still invokes both by absolute path — that is what the argv observer checks — but the
     absolute path is now a run-local resolution supplied by this gate, and the suite fails
     closed when it is missing.
+  * The observer was `strace -e trace=execve`, which exists on one of the four declared
+    substrates. A Register-1 gate declaring substrate `none` must be decidable on all four,
+    and this one died at `FileNotFoundError` before its first check on two of them. It now
+    observes the two routes a tool can be reached by — a declared absolute path through a
+    recording interposer, and an ambient `PATH` lookup through a refusing shim — using only
+    the process model every substrate shares. `tools/argv_observer.py` owns the mechanism
+    and states its boundary.
 
     python3 tools/gadt_decoder_gate2_gate.py
 
@@ -39,6 +47,7 @@ from typing import Any
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import argv_observer  # noqa: E402
 import artifact_policy  # noqa: E402
 import gate_common  # noqa: E402
 import toolchain  # noqa: E402
@@ -46,15 +55,16 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 GENERATED = ROOT / ".build" / "dsl" / "gate2"
 RESULTS = GENERATED / "phase-results.tsv"
-TRACE = GENERATED / "execve.log"
+OBSERVER_TAG = "gadt_decoder_gate2"
 BUILD_ROOT = ROOT / ".build" / "dist-newstyle" / "gadt-decoder-gate2"
 CONTRACT = "DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md"
 GATE_COMMAND = "python3 tools/gadt_decoder_gate2_gate.py"
 EXPECTATIONS = "test/oracle/gadt_decoder_gate2_surfaces.tsv"
 
-POSITIVE_ORACLE = ROOT / "tests" / "oracle" / "gate2" / "positive_trees.tsv"
-COMPILE_PAIR_ORACLE = ROOT / "tests" / "oracle" / "gate2" / "compile_pairs.tsv"
-DECODE_ORACLE = ROOT / "tests" / "oracle" / "gate2" / "decode_cases.tsv"
+ORACLE = ROOT / "test" / "oracle" / "gadt_decoder_gate2"
+POSITIVE_ORACLE = ORACLE / "positive_trees.tsv"
+COMPILE_PAIR_ORACLE = ORACLE / "compile_pairs.tsv"
+DECODE_ORACLE = ORACLE / "decode_cases.tsv"
 
 CHECKS = {
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
@@ -70,7 +80,6 @@ SIDES = ("toolchain", "suite", "mutant", "source", "oracle", "artifact")
 ACCEPTANCE = re.compile(
     r"dsl-spec: PASS \((\d+) positives, (\d+) tagged negatives, (\d+) compile-fail pairs\)"
 )
-EXEC_LINE = re.compile(r'execve\("([^"]+)"')
 
 EXPECTED_RESULTS = {
     "dsl-core-build": "green",
@@ -97,6 +106,7 @@ EXPECTED_RESULTS = {
     "non-partiality-scan": "green",
     # The families are reported in sorted order so the value is stable across runs.
     "absolute-tool-argv": "cabal+dhall+ghc-absolute",
+    "argv-observer-mutants": "2/2-red",
     "acceptance-token": "spec-composition-proven-gate2",
     "capacity-feasibility": "UNVERIFIED",
     "binding-feasibility": "UNVERIFIED",
@@ -124,6 +134,7 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
         "legalized-negative-polarity-mutant": "legalized-negative-mutant",
         "non-partiality-scan": "non-partiality-scan",
         "absolute-tool-argv-observer": "absolute-tool-argv",
+        "argv-observer-mutants": "argv-observer-mutants",
         "gate2-spec-decode": "acceptance-token",
     }.items()
 }
@@ -147,11 +158,32 @@ class GateFailure(RuntimeError):
     pass
 
 
-def suite_env(resolved: dict[str, Any]) -> dict[str, str]:
-    env = toolchain.contained_env()
-    env["PATH"] = os.pathsep.join([str(ROOT / "tools"), env.get("PATH", "")])
-    env["AMOEBIUS_GHC"] = resolved["ghc"]["path"]
-    env["AMOEBIUS_DHALL"] = resolved["dhall"]["path"]
+def build_observer(resolved: dict[str, Any]) -> argv_observer.ArgvObserver:
+    """The boundary observer this run reaches its three families through.
+
+    The versioned spellings are refused alongside the bare ones: a resolver that hands out
+    `ghc-9.12.4` leaves the ambient route open under a second name, and an observer that
+    only refused `ghc` would not see it.
+    """
+    families = {name: resolved[name]["path"] for name in ("cabal", "ghc", "dhall")}
+    ambient = {name: name for name in families}
+    for name in families:
+        version = resolved[name].get("version")
+        if version:
+            ambient[f"{name}-{version}"] = name
+    observer = argv_observer.ArgvObserver(tag=OBSERVER_TAG, families=families)
+    observer.begin(ambient_names=ambient)
+    return observer
+
+
+def suite_env(resolved: dict[str, Any], observer: argv_observer.ArgvObserver) -> dict[str, str]:
+    base = toolchain.contained_env()
+    base["PATH"] = os.pathsep.join([str(ROOT / "tools"), base.get("PATH", "")])
+    env = observer.env(base)
+    # The suite invokes both as leaves, so both go through the declared route and are
+    # recorded at the boundary rather than by their caller.
+    env["AMOEBIUS_GHC"] = observer.tool("ghc")
+    env["AMOEBIUS_DHALL"] = observer.tool("dhall")
     return env
 
 
@@ -168,20 +200,26 @@ def toolchain_side() -> tuple[bool, dict[str, Any]]:
     return True, resolved
 
 
-def suite_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str, Any]]:
-    """Run dsl-spec under an OS-boundary argv observer and measure what came back."""
-    print("\nsuite side — dsl-spec under an execve observer\n")
+def suite_side(
+    resolved: dict[str, Any], observer: argv_observer.ArgvObserver, run_dir: Path
+) -> tuple[bool, dict[str, Any]]:
+    """Run dsl-spec through the boundary argv observer and measure what came back."""
+    print("\nsuite side — dsl-spec through the boundary argv observer\n")
     GENERATED.mkdir(parents=True, exist_ok=True)
     if BUILD_ROOT.exists():
         shutil.rmtree(BUILD_ROOT)
+    # `--with-compiler` takes the real compiler rather than the interposer: cabal derives
+    # `ghc-pkg` and its other companions from the path it is handed, and an interposer
+    # standing where a compiler should be would break that derivation for no observation —
+    # a companion is not one of the families this phase makes a claim about. The compiler
+    # cabal drives is still covered, by the refusing shims: an ambient `ghc` lookup fails.
     command = [
-        "/usr/bin/strace", "-f", "-e", "trace=execve", "-o", str(TRACE),
-        resolved["cabal"]["path"], f"--with-compiler={resolved['ghc']['path']}",
+        observer.tool("cabal"), f"--with-compiler={resolved['ghc']['path']}",
         f"--builddir={BUILD_ROOT}", f"--store-dir={ROOT / '.build' / 'cabal-store'}",
         "test", "dsl-spec", "--test-show-details=direct",
     ]
     result = subprocess.run(
-        command, cwd=ROOT, env=suite_env(resolved), text=True,
+        command, cwd=ROOT, env=suite_env(resolved, observer), text=True,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
     )
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -197,46 +235,76 @@ def suite_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str,
     positives, negatives, pairs = (int(value) for value in match.groups())
     print(f"  ok    dsl-spec green: {positives} positives, {negatives} tagged negatives, {pairs} compile-fail pairs")
 
-    families = observed_tool_families()
+    try:
+        families, ambient = observer.observations()
+    except argv_observer.ObserverError as error:
+        print(f"  FAIL  absolute-tool-argv {error}")
+        return False, {}
+    for record in ambient:
+        print(f"  FAIL  absolute-tool-argv ambient PATH lookup observed: {record.render()}")
     missing = {"cabal", "ghc", "dhall"} - families
     if missing:
-        print(f"  FAIL  absolute-tool-argv observer missed tool families: {sorted(missing)}")
+        print(f"  FAIL  absolute-tool-argv observer recorded no {sorted(missing)} invocation")
+    if ambient or missing:
         return False, {}
-    print(f"  ok    absolute-tool-argv every {'/'.join(sorted(families))} invocation used an absolute path")
+    print(f"  ok    absolute-tool-argv every {'/'.join(sorted(families))} invocation took the "
+          "declared absolute route, and no name resolved through PATH")
     return True, {"positives": positives, "negatives": negatives, "pairs": pairs, "families": families}
 
 
-def observed_tool_families() -> set[str]:
-    """Read the tool families out of the strace trace, refusing any relative invocation.
+def observer_mutants(resolved: dict[str, Any]) -> tuple[bool, str]:
+    """Prove the boundary observer can fail, at each of the two things it claims.
 
-    A relative program name means the kernel resolved it through PATH, which is exactly the
-    ambient lookup this phase forbids — so it raises rather than being quietly skipped.
+    An instrument that cannot be shown to fail is not an instrument
+    (`development_plan_standards.md` section M clause 2). Both mutants are committed under
+    `test/mutant/gadt_decoder_gate2/` and neither needs the suite rebuilt: each exercises
+    exactly the mechanism under test and nothing else.
     """
-    observed: set[str] = set()
-    for line in TRACE.read_text(encoding="utf-8", errors="replace").splitlines():
-        found = EXEC_LINE.search(line)
-        if found is None:
-            continue
-        program = found.group(1)
-        base = Path(program).name
-        family = next(
-            (name for name in ("cabal", "ghc", "dhall") if base == name or base.startswith(name + "-")),
-            None,
-        )
-        if family is None:
-            continue
-        if not Path(program).is_absolute():
-            raise GateFailure(f"ambient PATH tool invocation observed: {line}")
-        observed.add(family)
-    return observed
+    print("\nobserver mutants — the boundary observer must redden at each claim\n")
+    caught = 0
+
+    # m: an ambient PATH lookup. The refusing shim must record it and the process must die,
+    # rather than the lookup succeeding quietly against whatever PATH happened to hold.
+    probe = argv_observer.ArgvObserver(
+        tag=OBSERVER_TAG + "-ambient",
+        families={name: resolved[name]["path"] for name in ("cabal", "ghc", "dhall")},
+    )
+    probe.begin(ambient_names={"dhall": "dhall"})
+    result = subprocess.run(
+        ["/bin/sh", "-c", "dhall --version"], cwd=ROOT,
+        env=probe.env(toolchain.contained_env()), text=True,
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
+    )
+    _families, ambient = probe.observations()
+    if result.returncode != 0 and any(record.family == "dhall" for record in ambient):
+        caught += 1
+        print("  ok    ambient-path-lookup   refused and recorded, exit "
+              f"{result.returncode}")
+    else:
+        print(f"  FAIL  ambient-path-lookup   survived: exit {result.returncode}, "
+              f"{len(ambient)} ambient record(s)")
+
+    # m: a family the run never invoked. The observation must report it missing rather than
+    # inferring it from the suite having passed.
+    probe.log.write_text("", encoding="utf-8")
+    families, _ambient = probe.observations()
+    if not families:
+        caught += 1
+        print("  ok    unobserved-family     an empty observation reports no family")
+    else:
+        print(f"  FAIL  unobserved-family     an empty observation reported {sorted(families)}")
+
+    return caught == 2, f"{caught}/2-red"
 
 
-def mutant_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, str]:
+def mutant_side(
+    resolved: dict[str, Any], observer: argv_observer.ArgvObserver, run_dir: Path
+) -> tuple[bool, str]:
     print("\nmutant side — the legalized schema negative must turn the suite red\n")
-    env = suite_env(resolved)
+    env = suite_env(resolved, observer)
     env["AMOEBIUS_GATE2_SCHEMA_FIXTURE"] = "test/mutant/gadt_decoder_gate2/legalized_schema.dhall"
     result = subprocess.run(
-        [resolved["cabal"]["path"], f"--with-compiler={resolved['ghc']['path']}",
+        [observer.tool("cabal"), f"--with-compiler={resolved['ghc']['path']}",
          f"--builddir={BUILD_ROOT}", f"--store-dir={ROOT / '.build' / 'cabal-store'}",
          "test", "dsl-spec", "--test-show-details=direct"],
         cwd=ROOT, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
@@ -305,6 +373,7 @@ def measure(observed: dict[str, Any], mutant: str, scan: str) -> tuple[dict[str,
         "fail-closed-wrapper": "live",
         "non-partiality-scan": scan,
         "absolute-tool-argv": "+".join(sorted(observed["families"])) + "-absolute",
+        "argv-observer-mutants": observed["observer_mutants"],
         "acceptance-token": "spec-composition-proven-gate2",
         "capacity-feasibility": "UNVERIFIED",
         "binding-feasibility": "UNVERIFIED",
@@ -327,23 +396,33 @@ def measure(observed: dict[str, Any], mutant: str, scan: str) -> tuple[dict[str,
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=5, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
-        register="1", substrate="none", sides=SIDES
+        phase=6, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        register="1", substrate="none", lane="none", sides=SIDES
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
 
+    # Clause 15 first: a run that cannot name the architecture it executed on, or
+    # that is executing under translation, has nothing worth proving.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
+
     results["toolchain"], resolved = toolchain_side()
     observed: dict[str, Any] = {}
+    observer: argv_observer.ArgvObserver | None = None
     mutant_value, scan_value = "unrun", "unrun"
     if results["toolchain"]:
         try:
-            results["suite"], observed = suite_side(resolved, gate.run_dir)
-        except GateFailure as error:
+            observer = build_observer(resolved)
+            results["suite"], observed = suite_side(resolved, observer, gate.run_dir)
+        except (GateFailure, argv_observer.ObserverError) as error:
             print(f"  FAIL  absolute-tool-argv {error}")
             results["suite"] = False
-    if results["suite"]:
-        results["mutant"], mutant_value = mutant_side(resolved, gate.run_dir)
+    if results["suite"] and observer is not None:
+        observer_ok, observed["observer_mutants"] = observer_mutants(resolved)
+        results["mutant"], mutant_value = mutant_side(resolved, observer, gate.run_dir)
+        results["mutant"] = results["mutant"] and observer_ok
         results["source"], scan_value = source_side()
 
     rows: dict[str, str] = {}
@@ -377,14 +456,15 @@ def main() -> int:
         checks=results,
         mutants=[
             {"name": "legalized schema negative", "status": mutant_value},
+            {"name": "argv observer", "status": observed.get("observer_mutants", "unrun")},
             {"name": "structural deletion", "status": rows.get("structural-deletion-mutants", "unrun")},
             {"name": "structural substitution", "status": rows.get("structural-substitution-families", "unrun")},
         ],
         observations={
             "results": "sha256:" + artifact_policy.digest(str(RESULTS)),
-            "execve_trace": "sha256:" + artifact_policy.digest(str(TRACE)),
+            "argv_observation": "sha256:" + artifact_policy.digest(str(observer.log)),
         }
-        if RESULTS.is_file() and TRACE.is_file()
+        if RESULTS.is_file() and observer is not None and observer.log.is_file()
         else {},
     )
     results["containment"] = gate.containment_side()

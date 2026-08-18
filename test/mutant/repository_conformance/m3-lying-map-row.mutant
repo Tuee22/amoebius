@@ -1,0 +1,6 @@
+check=map-destination-admitted
+operator=fixture-weakening
+mutation=append | tools/layout_relocation_map.tsv | test/inject/	no_such_root/	seven-noun-rule
+statement=Add a relocation-map row whose destination the section 2 target tree does not admit. The
+statement=map is the gate's authored plan, so a map that lies is caught before the tree is touched
+statement=rather than after.

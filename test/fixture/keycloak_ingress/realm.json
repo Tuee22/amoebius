@@ -1,0 +1,27 @@
+{
+  "realm": "amoebius",
+  "enabled": true,
+  "sslRequired": "none",
+  "clients": [
+    {
+      "clientId": "keycloak-ingress-probe",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": ["https://phase32.amoebius.internal/*"]
+    }
+  ],
+  "users": [
+    {
+      "username": "keycloak-ingress-tester",
+      "enabled": true,
+      "firstName": "Phase32",
+      "lastName": "Tester",
+      "email": "keycloak-ingress-tester@amoebius.invalid",
+      "emailVerified": true,
+      "requiredActions": [],
+      "credentials": [{"type": "password", "value": "keycloak-ingress-test-password", "temporary": false}]
+    }
+  ]
+}

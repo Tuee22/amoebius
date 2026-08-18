@@ -1440,7 +1440,7 @@ def execute() -> dict[str, Any]:
         "pulsar": pulsar,
         "loadBalancer": load_balancer,
         "provenance": provenance,
-        "deferred": {"keycloak": "UNVERIFIED", "phase31Services": "UNVERIFIED", "singletonOwnedReconcile": "UNVERIFIED"},
+        "deferred": {"keycloak": "UNVERIFIED", "phase31Services": "UNVERIFIED", "controlPlaneOwnedReconcile": "UNVERIFIED"},
         "universalLinuxCpu": {"availableOnEveryHardwareSubstrate": True, "pristineLinuxHost": {"linux": "Incus", "linux-cuda": "Incus", "apple": "Lima", "windows": "WSL2"}},
     }
     EVIDENCE.parent.mkdir(parents=True, exist_ok=True)

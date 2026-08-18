@@ -1,8 +1,0 @@
-{
-  "substrate": "linux-cpu",
-  "supply": {"cpuMillis": 8000, "memoryBytes": 17179869184, "ephemeralBytes": 68719476736, "durableBytes": 4294967296, "cacheBytes": 1073741824, "podSlots": 32, "ipSlots": 32, "csiSlots": 0, "providerQuota": 0},
-  "demand": {"cpuMillis": 3000, "memoryBytes": 3221225472, "ephemeralBytes": 8589934592, "durableBytes": 1073741824, "cacheBytes": 536870912, "podSlots": 4, "ipSlots": 4, "csiSlots": 0, "providerQuota": 0},
-  "accelerator": null,
-  "workers": ["controller", "worker-a", "worker-b", "worker-replacement"],
-  "subscription": {"name": "phase54-failover", "type": "Failover", "active": "worker-a", "standby": "worker-b"}
-}

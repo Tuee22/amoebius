@@ -17,8 +17,18 @@ executable paths, exact versions, download URLs, and archive checksums. It is wi
 A gate that used to read `pins["ghc"]["path"]` now calls `resolve()` and reads the same
 key out of a run-local record, so the call sites did not have to change shape.
 
+**Discover, then ensure.** The predecessor of *this* revision had a `host` source kind
+meaning "expected on the developer host", and four requirements declared it. That is the
+one thing `substrate_doctrine.md` §3 forbids: a tool with a supported install plan is
+probed, installed when absent, resolved to an absolute path, and invoked by it. The kind is
+retired. What an operator must supply is the **floor** of §3.1 — a package-manager root, a
+hardware or firmware fact, a credentialed account — which is authored data in the same
+requirements manifest and is checked *before* resolution, so a host that cannot support the
+run says so with a remedy instead of failing four requirements deep.
+
     python3 tools/toolchain.py                    resolve every requirement
-    python3 tools/toolchain.py ghc cabal dhall    resolve a subset
+    python3 tools/toolchain.py ghc cabal dhall    resolve a subset (and what they need)
+    python3 tools/toolchain.py --floor            check the host floor and stop
     python3 tools/toolchain.py --self-test        exercise the pure comparison logic
 """
 
@@ -28,7 +38,6 @@ import argparse
 import hashlib
 import json
 import os
-import platform
 import re
 import shutil
 import subprocess
@@ -42,6 +51,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 import containment
+import host_platform
 
 ROOT = Path(__file__).resolve().parent.parent
 REQUIREMENTS = ROOT / "tools" / "toolchain_requirements.json"
@@ -69,8 +79,44 @@ class ResolutionError(RuntimeError):
     """A requirement could not be satisfied on this host."""
 
 
+class FloorError(ResolutionError):
+    """A per-substrate floor prerequisite is absent. Carries the remedy that clears it."""
+
+
+class NoCandidate(ResolutionError):
+    """The supplier offers nothing at all for this requirement."""
+
+
+class OutOfRange(ResolutionError):
+    """The supplier offers versions, and none satisfies the authored requirement."""
+
+
+class NoPlatformAsset(ResolutionError):
+    """A satisfying version exists, and the publisher builds none for this architecture."""
+
+
+# A refusal reason is a check id, so a seeded negative can be attributed to exactly one
+# check ([`development_plan_standards.md` §M](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 8).
+REFUSAL_CHECKS = {
+    NoCandidate: "resolution-absent",
+    OutOfRange: "resolution-out-of-range",
+    NoPlatformAsset: "resolution-architecture",
+}
+
+
+def refusal_check(error: BaseException) -> str:
+    return REFUSAL_CHECKS.get(type(error), "")
+
+
 def contained_env() -> dict[str, str]:
-    """Subprocess state roots; executable discovery still uses the caller's PATH."""
+    """Subprocess state roots, all beneath the ignored build root.
+
+    The caller's `PATH` is passed through for the *subprocesses* a provider spawns, and no
+    requirement is discovered from it any more: every tool is either acquired from its
+    publisher, supplied by a provider that says where it put it, or supplied by the floor
+    and resolved through the floor's own query. Discovery by search path is what the retired
+    `host` source kind was.
+    """
     environment = dict(os.environ)
     home = TOOL_RUNTIME / "home"
     temporary = containment.state_path("build", "tmp", "toolchain", actor="production")
@@ -151,13 +197,157 @@ def satisfies(version: tuple[int, ...], requirement: str) -> bool:
     return True
 
 
-def host_platform() -> str:
-    machine = platform.machine().lower()
-    machine = {"amd64": "x86_64", "arm64": "aarch64"}.get(machine, machine)
-    system = platform.system().lower()
-    if system == "darwin" and machine == "aarch64":
-        return "darwin-arm64"
-    return f"{system}-{machine}"
+def canonical_platform() -> str:
+    """The one `<os>-<arch>` token every authored platform key is spelled in.
+
+    This used to be three functions in three modules that disagreed about how to spell an
+    Apple silicon host, and the authored tables carried both spellings to compensate.
+    `tools/host_platform.py` is now the only normalizer.
+    """
+    return host_platform.platform_token()
+
+
+# --------------------------------------------------------------------------
+# the floor — substrate_doctrine.md §3.1, authored data, checked before resolution
+# --------------------------------------------------------------------------
+
+
+def load_floor() -> dict[str, Any]:
+    document = json.loads(REQUIREMENTS.read_text(encoding="utf-8"))
+    floor = document.get("floor")
+    if not isinstance(floor, dict):
+        raise ResolutionError(f"{REQUIREMENTS.name} declares no floor")
+    return {key: value for key, value in floor.items() if not key.startswith("_")}
+
+
+def floor_wellformed() -> list[str]:
+    """Every authored floor entry is decidable and carries a remedy, on every substrate.
+
+    A floor that can only be read on the host it describes is not a floor: §3.1 requires an
+    apple host to be able to check that its plan for windows is well formed. This is the
+    check that makes that true, and it runs no host probe at all.
+    """
+    problems: list[str] = []
+    floor = load_floor()
+    for substrate in host_platform.SUBSTRATES:
+        entries = floor.get(substrate)
+        if not entries:
+            problems.append(f"floor: substrate {substrate} declares no prerequisite")
+            continue
+        for index, entry in enumerate(entries):
+            where = f"floor.{substrate}[{index}]"
+            for field in ("id", "required_for", "probe", "remedy"):
+                if not entry.get(field):
+                    problems.append(f"{where}: no {field}")
+            kind = (entry.get("probe") or {}).get("kind")
+            if kind not in PROBES:
+                problems.append(f"{where}: probe kind {kind!r} is not one of {sorted(PROBES)}")
+    return problems
+
+
+def _probe_executable(probe: dict[str, Any]) -> tuple[bool, str]:
+    for candidate in probe.get("paths", []):
+        path = Path(candidate)
+        if path.is_file() and os.access(path, os.X_OK):
+            return True, str(path)
+    return False, "none of " + ", ".join(probe.get("paths", [])) + " is an executable file"
+
+
+def _probe_present(probe: dict[str, Any]) -> tuple[bool, str]:
+    """A file the kernel publishes, which is read rather than run — a driver's version node.
+
+    Kept distinct from `executable` on purpose: folding the two would have made the
+    package-manager-root probe pass on a package manager that is present and not runnable.
+    """
+    for candidate in probe.get("paths", []):
+        path = Path(candidate)
+        if path.exists():
+            return True, str(path)
+    return False, "none of " + ", ".join(probe.get("paths", [])) + " is present"
+
+
+def _probe_command(probe: dict[str, Any]) -> tuple[bool, str]:
+    argv = probe.get("argv", [])
+    if not argv or not Path(argv[0]).exists():
+        return False, f"{argv[0] if argv else '<no argv>'} does not exist"
+    result = subprocess.run(argv, capture_output=True, text=True, check=False)
+    detail = (result.stdout or result.stderr or "").strip().splitlines()
+    return result.returncode == 0, (detail[0] if detail else f"exit {result.returncode}")
+
+
+def _probe_architecture(probe: dict[str, Any]) -> tuple[bool, str]:
+    observed = host_platform.host_architecture()
+    return observed == probe.get("expect"), observed
+
+
+def _probe_writable(probe: dict[str, Any]) -> tuple[bool, str]:
+    for candidate in probe.get("paths", []):
+        path = Path(candidate)
+        if path.exists() and os.access(path, os.W_OK):
+            return True, str(path)
+    return False, "none of " + ", ".join(probe.get("paths", [])) + " is present and writable"
+
+
+def _probe_manual(probe: dict[str, Any]) -> tuple[bool, str]:
+    """A fact no read on this host settles. Declared so it is named, never assumed true."""
+    return False, f"{probe.get('fact', 'unstated fact')} is not decidable from this host"
+
+
+PROBES = {
+    "executable": _probe_executable,
+    "present": _probe_present,
+    "command": _probe_command,
+    "architecture": _probe_architecture,
+    "writable": _probe_writable,
+    "manual": _probe_manual,
+}
+
+
+def floor_results(substrate: str | None = None) -> list[dict[str, Any]]:
+    """Run the floor probes for one substrate. A failure is a value carrying its remedy."""
+    substrate = substrate or host_platform.host_substrate()
+    entries = load_floor().get(substrate)
+    if entries is None:
+        raise ResolutionError(f"floor: no authored prerequisites for substrate {substrate}")
+    results: list[dict[str, Any]] = []
+    for entry in entries:
+        satisfied, detail = PROBES[entry["probe"]["kind"]](entry["probe"])
+        results.append(
+            {
+                "id": entry["id"],
+                "substrate": substrate,
+                "required_for": entry["required_for"],
+                "satisfied": satisfied,
+                "observation": detail,
+                "remedy": entry["remedy"],
+            }
+        )
+    return results
+
+
+def require_floor(substrate: str | None = None) -> list[dict[str, Any]]:
+    """The gate's precondition: refuse before resolving, naming the remedy."""
+    results = floor_results(substrate)
+    unsatisfied = [result for result in results if not result["satisfied"]]
+    if unsatisfied:
+        first = unsatisfied[0]
+        raise FloorError(
+            f"{first['id']} is not satisfied ({first['observation']}); "
+            f"required for {first['required_for']}. Remedy: {first['remedy']}"
+        )
+    return results
+
+
+def package_manager_root() -> Path:
+    """The floor's own package-manager root, resolved from the authored floor entry."""
+    substrate = host_platform.host_substrate()
+    for entry in load_floor()[substrate]:
+        if entry["id"].endswith("package-manager-root"):
+            satisfied, detail = _probe_executable(entry["probe"])
+            if not satisfied:
+                raise FloorError(f"{entry['id']} is absent ({detail}). Remedy: {entry['remedy']}")
+            return Path(detail)
+    raise FloorError(f"floor: substrate {substrate} declares no package-manager root")
 
 
 # --------------------------------------------------------------------------
@@ -207,77 +397,263 @@ def github_releases(project: str) -> list[dict[str, Any]]:
 
 
 # --------------------------------------------------------------------------
-# one resolver per source kind
+# one resolver per source kind, starting with `managed`
 # --------------------------------------------------------------------------
+#
+# The four-step ensure contract of `substrate_doctrine.md` §3 is: probe the provider,
+# install if absent, resolve the absolute path *from the provider itself*, invoke by that
+# path. A provider adapter below implements exactly those steps for one provider, and
+# nothing else in this module knows how any of them work.
 
 
-def host_candidates(command: str) -> list[str]:
-    """Every executable on PATH named `command` or `command-<version>`.
+def tool_directory(record: dict[str, Any]) -> str:
+    return str(Path(record["path"]).parent)
 
-    Multi-version installers (ghcup, distribution alternatives) put the unversioned name on
-    the newest release and keep versioned siblings beside it. Resolving only the
-    unversioned name would make the host's *default* compiler the requirement, which is how
-    a host outside the compatibility range silently becomes a hard failure. Enumerating the
-    siblings keeps resolution dynamic and still honours the authored range.
+
+def provider_env(resolved: dict[str, Any], *names: str) -> dict[str, str]:
+    """A contained environment with the named resolved tools' directories in front.
+
+    A provider is invoked by absolute path, but the *provider* may run its own helpers by
+    bare name — `npm` execs `node`, `ghcup` execs the compiler it just laid down. Putting
+    exactly the resolved directories in front is how those bare names resolve to what this
+    run chose rather than to whatever the host happens to carry.
     """
-    pattern = re.compile(rf"^{re.escape(command)}(-\d+(?:\.\d+)*)?$")
-    found: list[str] = []
-    seen: set[str] = set()
-    for entry in os.environ.get("PATH", "").split(os.pathsep):
-        directory = Path(entry) if entry else Path.cwd()
-        if not directory.is_dir():
-            continue
-        try:
-            children = sorted(directory.iterdir())
-        except OSError:
-            continue
-        for child in children:
-            if not pattern.match(child.name) or not os.access(child, os.X_OK) or child.is_dir():
-                continue
-            resolved_path = str(child)
-            if resolved_path not in seen:
-                seen.add(resolved_path)
-                found.append(resolved_path)
-    return found
+    environment = contained_env()
+    directories = [tool_directory(resolved[name]) for name in names if name in resolved]
+    environment["PATH"] = os.pathsep.join(
+        list(dict.fromkeys(directories)) + [environment.get("PATH", "")]
+    )
+    return environment
 
 
-def resolve_host(name: str, spec: dict[str, Any]) -> dict[str, Any]:
-    requirement = spec["requirement"]
-    rejected: list[str] = []
-    admissible: list[tuple[tuple[int, ...], str, str, str]] = []
-    for command in spec["commands"]:
-        for found in host_candidates(command):
-            try:
-                reported = run_version([found, *spec["version_argv"]])
-                version = parse_version(reported)
-            except ResolutionError as error:
-                rejected.append(f"{found}: {error}")
-                continue
-            if not satisfies(version, requirement):
-                rejected.append(f"{found} reported {reported.splitlines()[0]}")
-                continue
-            admissible.append((version, found, reported.splitlines()[0], command))
+def _run(argv: list[str], *, env: dict[str, str] | None = None, cwd: Path = ROOT) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        argv, cwd=cwd, env=env or contained_env(), text=True, capture_output=True, check=False
+    )
+
+
+def ghcup_offers(ghcup: str, tool: str, env: dict[str, str]) -> list[str]:
+    """Ask ghcup what it can supply — step 1, and the only source of candidate versions."""
+    result = _run([ghcup, "list", "-t", tool, "-r"], env=env)
+    if result.returncode != 0:
+        raise ResolutionError(f"ghcup could not list {tool}: {(result.stderr or result.stdout).strip()[-500:]}")
+    offers = [
+        fields[1]
+        for fields in (line.split() for line in result.stdout.splitlines())
+        if len(fields) >= 2 and fields[0] == tool
+    ]
+    return offers
+
+
+def choose_offer(name: str, offers: list[str], requirement: str) -> str:
+    """The newest offered version satisfying `requirement`. Pure; the negatives drive it."""
+    if not offers:
+        raise NoCandidate(f"{name}: the provider offers no version at all")
+    admissible = [
+        (parse_version(offer), offer) for offer in offers if _satisfies_text(offer, requirement)
+    ]
     if not admissible:
-        detail = "; ".join(rejected) if rejected else "not found on PATH"
-        raise ResolutionError(f"{name}: no host command satisfies {requirement} ({detail})")
-    # The newest admissible release wins: within the authored range, resolution moves
-    # forward with the host rather than freezing on whichever candidate PATH lists first.
-    version, found, reported, command = max(admissible)
-    record = {
-        "source": "host",
-        "command": command,
-        "path": found,
+        raise OutOfRange(
+            f"{name}: the provider offers {', '.join(offers[:6])} and none satisfies {requirement}"
+        )
+    return max(admissible)[1]
+
+
+def ghcup_whereis(ghcup: str, tool: str, version: str, env: dict[str, str]) -> str | None:
+    """Ask ghcup where it put the tool — step 3. `None` means it has not installed it."""
+    result = _run([ghcup, "whereis", tool, version], env=env)
+    candidate = result.stdout.strip()
+    if result.returncode != 0 or not candidate or not Path(candidate).is_file():
+        return None
+    return candidate
+
+
+def provide_ghcup(name: str, spec: dict[str, Any], resolved: dict[str, Any]) -> dict[str, Any]:
+    ghcup = resolved["ghcup"]["path"]
+    tool = spec["supplies"]
+    environment = provider_env(resolved, "ghcup")
+    selected = choose_offer(name, ghcup_offers(ghcup, tool, environment), spec["requirement"])
+    path = ghcup_whereis(ghcup, tool, selected, environment)
+    installed = False
+    if path is None:
+        install = _run([ghcup, "install", tool, selected], env=environment)
+        if install.returncode != 0:
+            raise ResolutionError(
+                f"{name}: ghcup install {tool} {selected} failed: "
+                f"{(install.stderr or install.stdout)[-2000:]}"
+            )
+        installed = True
+        path = ghcup_whereis(ghcup, tool, selected, environment)
+    if path is None:
+        raise ResolutionError(f"{name}: ghcup installed {tool} {selected} but cannot say where")
+    return _managed_record(name, spec, "ghcup", path, installed, offered=selected)
+
+
+def playwright_executable(resolved: dict[str, Any], browser: str, env: dict[str, str]) -> str | None:
+    """Ask playwright-core itself where the browser is — the provider is the only oracle."""
+    module = str(NODE_ROOT / "playwright-core")
+    script = (
+        f"const driver = require({json.dumps(module)});"
+        f"try {{ console.log(driver[{json.dumps(browser)}].executablePath()); }} catch (error) {{ }}"
+    )
+    result = _run([resolved["node"]["path"], "-e", script], env=env)
+    candidate = result.stdout.strip()
+    if result.returncode != 0 or not candidate or not Path(candidate).exists():
+        return None
+    return candidate
+
+
+def provide_playwright(name: str, spec: dict[str, Any], resolved: dict[str, Any]) -> dict[str, Any]:
+    browser = spec["supplies"]
+    environment = provider_env(resolved, "node")
+    path = playwright_executable(resolved, browser, environment)
+    installed = False
+    if path is None:
+        install = _run(
+            [resolved["node"]["path"], resolved["playwright"]["path"], "install", browser],
+            env=environment,
+        )
+        if install.returncode != 0:
+            raise ResolutionError(
+                f"{name}: playwright install {browser} failed: "
+                f"{(install.stderr or install.stdout)[-2000:]}"
+            )
+        installed = True
+        path = playwright_executable(resolved, browser, environment)
+    if path is None:
+        raise ResolutionError(f"{name}: playwright installed {browser} but reports no executable")
+    return _managed_record(name, spec, "playwright", path, installed)
+
+
+# One entry per package-manager root the floor admits. `prefix` answers "where would you
+# put this formula", `install` supplies it. A manager with no prefix query lays its files
+# down at a fixed root, which is the same answer expressed as a constant. `privileged`
+# marks the managers that write to a system root, and the escalation they need is the
+# `linux.privilege` floor entry — declared there, so it is verified before it is used.
+SUDO = "/usr/bin/sudo"
+PACKAGE_MANAGERS: dict[str, dict[str, Any]] = {
+    "brew": {"prefix": ["--prefix", "{package}"], "install": ["install", "{package}"]},
+    "apt-get": {"root": "/usr", "install": ["install", "-y", "{package}"], "privileged": True},
+    "dnf": {"root": "/usr", "install": ["install", "-y", "{package}"], "privileged": True},
+    "zypper": {"root": "/usr", "install": ["--non-interactive", "install", "{package}"], "privileged": True},
+    "pacman": {"root": "/usr", "install": ["-S", "--noconfirm", "{package}"], "privileged": True},
+}
+
+
+def package_manager_prefix(root: Path, adapter: dict[str, Any], package: str) -> Path | None:
+    if "root" in adapter:
+        return Path(adapter["root"])
+    argv = [str(root)] + [token.replace("{package}", package) for token in adapter["prefix"]]
+    result = _run(argv)
+    prefix = result.stdout.strip()
+    return Path(prefix) if result.returncode == 0 and prefix else None
+
+
+def floor_supplied(command: str) -> str | None:
+    """The floor's own toolchain, asked canonically rather than through the host's PATH.
+
+    On apple the command-line-tools floor entry is a real supplier — `git` is one of the
+    things it lays down — and `xcrun --find` is that toolchain's own resolution query. On
+    linux the package-manager root's install prefix already covers the same ground.
+    """
+    if host_platform.host_system() != "darwin":
+        return None
+    result = _run(["/usr/bin/xcrun", "--find", command])
+    candidate = result.stdout.strip()
+    return candidate if result.returncode == 0 and candidate and Path(candidate).is_file() else None
+
+
+def provide_package_manager(name: str, spec: dict[str, Any], resolved: dict[str, Any]) -> dict[str, Any]:
+    root = package_manager_root()
+    adapter = PACKAGE_MANAGERS.get(root.name)
+    if adapter is None:
+        raise FloorError(
+            f"{name}: the floor's package-manager root {root} is not one this resolver drives "
+            f"({', '.join(sorted(PACKAGE_MANAGERS))})"
+        )
+    substrate = host_platform.host_substrate()
+    package = spec["package_map"].get(substrate)
+    if package is None:
+        raise ResolutionError(f"{name}: no package named for substrate {substrate}")
+
+    def candidate() -> str | None:
+        prefix = package_manager_prefix(root, adapter, package)
+        found = prefix / spec["relative_path"] if prefix else None
+        return str(found) if found and found.is_file() else None
+
+    path, installed = candidate(), False
+    if path is None and spec.get("floor_supplies"):
+        path = floor_supplied(spec["supplies"])
+    if path is None:
+        escalation = [SUDO, "-n"] if adapter.get("privileged") else []
+        argv = escalation + [str(root)] + [
+            token.replace("{package}", package) for token in adapter["install"]
+        ]
+        install = _run(argv)
+        if install.returncode != 0:
+            raise ResolutionError(
+                f"{name}: {root.name} install {package} failed: "
+                f"{(install.stderr or install.stdout)[-2000:]}"
+            )
+        installed = True
+        path = candidate()
+    if path is None:
+        raise ResolutionError(f"{name}: {root.name} supplies no {spec['relative_path']} for {package}")
+    return _managed_record(name, spec, f"package-manager:{root.name}", path, installed, package=package)
+
+
+PROVIDERS = {
+    "ghcup": provide_ghcup,
+    "playwright": provide_playwright,
+    "package-manager": provide_package_manager,
+}
+
+
+def _satisfies_text(text: str, requirement: str) -> bool:
+    try:
+        return satisfies(parse_version(text), requirement)
+    except ResolutionError:
+        return False
+
+
+def _managed_record(
+    name: str,
+    spec: dict[str, Any],
+    provider: str,
+    path: str,
+    installed: bool,
+    **extra: Any,
+) -> dict[str, Any]:
+    reported = run_version([path, *spec["version_argv"]])
+    version = parse_version(reported)
+    if not satisfies(version, spec["requirement"]):
+        raise ResolutionError(
+            f"{name}: {provider} supplied {reported.splitlines()[0]!r}, "
+            f"which does not satisfy {spec['requirement']}"
+        )
+    return {
+        "source": "managed",
+        "provider": provider,
+        "supplies": spec["supplies"],
+        "path": path,
         "version": ".".join(str(part) for part in version),
-        "reported": reported,
-        "requirement": requirement,
-        "candidates": len(admissible),
+        "reported": reported.splitlines()[0],
+        "requirement": spec["requirement"],
+        # A resolution that had to install is a different observation from one that did
+        # not, and the sprint's "a second run is a verified no-op" reads this field.
+        "installed": installed,
+        **extra,
     }
-    if name == "chromium":
-        record["product"] = reported
-    return record
 
 
-def ensure_node_package_graph() -> None:
+def resolve_managed(name: str, spec: dict[str, Any], resolved: dict[str, Any]) -> dict[str, Any]:
+    provider = PROVIDERS.get(spec["provider"])
+    if provider is None:
+        raise ResolutionError(f"{name}: no adapter for provider {spec['provider']!r}")
+    return provider(name, spec, resolved)
+
+
+def ensure_node_package_graph(resolved: dict[str, Any]) -> None:
     """Materialize package.json's authored development graph as one contained install.
 
     Installing one `--no-save` package at a time lets npm prune earlier packages as
@@ -291,7 +667,7 @@ def ensure_node_package_graph() -> None:
     node_packages = [f"{package}@{requirement}" for package, requirement in sorted(packages.items())]
     install = subprocess.run(
         [
-            "npm",
+            resolved["npm"]["path"],
             "install",
             "--no-audit",
             "--no-fund",
@@ -301,7 +677,7 @@ def ensure_node_package_graph() -> None:
             *node_packages,
         ],
         cwd=ROOT,
-        env=contained_env(),
+        env=provider_env(resolved, "node"),
         text=True,
         capture_output=True,
         check=False,
@@ -310,8 +686,8 @@ def ensure_node_package_graph() -> None:
         raise ResolutionError(f"node tool graph: npm install failed: {install.stderr[-2000:]}")
 
 
-def resolve_node_package(name: str, spec: dict[str, Any]) -> dict[str, Any]:
-    ensure_node_package_graph()
+def resolve_node_package(name: str, spec: dict[str, Any], resolved: dict[str, Any]) -> dict[str, Any]:
+    ensure_node_package_graph(resolved)
     package_root = NODE_ROOT / spec["package"]
     if not package_root.is_dir():
         raise ResolutionError(f"{name}: authored Node graph did not install {spec['package']}")
@@ -321,7 +697,9 @@ def resolve_node_package(name: str, spec: dict[str, Any]) -> dict[str, Any]:
             continue
         argv = [str(candidate), *spec["version_argv"]]
         if spec.get("interpreter"):
-            argv = [spec["interpreter"], *argv]
+            # The interpreter is a resolved requirement of its own, so it is invoked by the
+            # absolute path this run chose rather than by the bare name the host would find.
+            argv = [resolved[spec["interpreter"]]["path"], *argv]
         reported = run_version(argv)
         version = parse_version(reported)
         if not satisfies(version, spec["requirement"]):
@@ -341,33 +719,56 @@ def resolve_node_package(name: str, spec: dict[str, Any]) -> dict[str, Any]:
     raise ResolutionError(f"{name}: {spec['package']} is installed but carries no known entry point")
 
 
-def select_release(name: str, spec: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
-    pattern_platform = spec.get("platform_map", {}).get(host_platform())
-    if "{platform}" in spec["asset_pattern"] and pattern_platform is None:
-        raise ResolutionError(f"{name}: no asset mapping for platform {host_platform()}")
-    pattern = re.compile(spec["asset_pattern"].replace("{platform}", pattern_platform or ""))
+def choose_release(
+    name: str, spec: dict[str, Any], releases: list[dict[str, Any]], token: str
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Pick a release and its asset from a feed. Pure, so the seeded negatives drive it.
+
+    The three ways this can refuse are three *different* facts about the publisher, and
+    collapsing them into one message is how "not available" hides "available, for another
+    machine". Each raises its own class, and a negative in the corpus reddens exactly one.
+    """
+    mapped = spec.get("platform_map", {}).get(token)
+    if "{platform}" in spec["asset_pattern"] and mapped is None:
+        raise NoPlatformAsset(
+            f"{name}: {spec.get('project', 'the publisher')} offers no asset for {token}; "
+            f"resolution refuses rather than selecting another architecture's binary"
+        )
+    pattern = re.compile(spec["asset_pattern"].replace("{platform}", mapped or ""))
+    if not releases:
+        raise NoCandidate(f"{name}: {spec.get('project', 'the publisher')} publishes no release at all")
     # The feed is not reliably ordered by version, so admissibility is collected and the
     # newest satisfying release wins. Taking the first match would let a back-published
     # maintenance release quietly downgrade the resolved tool.
-    admissible: list[tuple[tuple[int, ...], dict[str, Any], dict[str, Any]]] = []
-    for release in github_releases(spec["project"]):
+    in_range: list[tuple[tuple[int, ...], dict[str, Any]]] = []
+    for release in releases:
         try:
             version = parse_version(release.get("tag_name", "") or release.get("name", ""))
         except ResolutionError:
             continue
-        if not satisfies(version, spec["requirement"]):
-            continue
+        if satisfies(version, spec["requirement"]):
+            in_range.append((version, release))
+    if not in_range:
+        raise OutOfRange(
+            f"{name}: no {spec.get('project', 'published')} release satisfies {spec['requirement']}"
+        )
+    admissible: list[tuple[tuple[int, ...], dict[str, Any], dict[str, Any]]] = []
+    for version, release in in_range:
         for asset in release.get("assets", []):
             if pattern.fullmatch(asset.get("name", "")):
                 admissible.append((version, release, asset))
                 break
-    if admissible:
-        best = max(admissible, key=lambda entry: entry[0])
-        return best[1], best[2]
-    raise ResolutionError(
-        f"{name}: no {spec['project']} release satisfies {spec['requirement']} "
-        f"with an asset matching {spec['asset_pattern']} on {host_platform()}"
-    )
+    if not admissible:
+        raise NoPlatformAsset(
+            f"{name}: a release satisfies {spec['requirement']} but publishes no asset "
+            f"matching {spec['asset_pattern']} on {token}"
+        )
+    best = max(admissible, key=lambda entry: entry[0])
+    return best[1], best[2]
+
+
+def select_release(name: str, spec: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    return choose_release(name, spec, github_releases(spec["project"]), canonical_platform())
 
 
 def materialize(url: str, destination: Path) -> Path:
@@ -380,10 +781,48 @@ def materialize(url: str, destination: Path) -> Path:
     return destination
 
 
+def extractall(tarred: tarfile.TarFile, destination: Path) -> None:
+    """Extract with the data filter where the interpreter has one.
+
+    `filter=` landed in 3.12 and is the safe default from 3.14 on. The gate's declared
+    command is `python3`, which on a stock macOS host is still 3.9, so asking for the
+    filter unconditionally turned a resolvable tool into a `TypeError`. Ask for it when it
+    exists and take the interpreter's own default when it does not.
+    """
+    try:
+        tarred.extractall(destination, filter="data")
+    except TypeError:
+        tarred.extractall(destination)
+
+
+def archive_member(spec: dict[str, Any]) -> str | None:
+    """The member to extract, which some publishers lay out per platform.
+
+    Temurin's macOS JRE is an application bundle — the launcher is at
+    `Contents/Home/bin/java`, not at `bin/java` — so a single authored member name resolves
+    a path that is not there on exactly one platform. The override map is keyed by the same
+    canonical token as every other platform table in the manifest.
+    """
+    override = spec.get("archive_member_map", {}).get(canonical_platform())
+    return override or spec.get("archive_member")
+
+
+def unpack_prefix(names: list[str]) -> str:
+    """The single top-level directory every member shares, or `""` when there is none.
+
+    A release tarball that unpacks into one versioned directory has to have that directory
+    stripped, or the resolved path carries a version this run has no business hard-coding.
+    A tarball that unpacks straight into `bin/` and `share/` has no such directory, and
+    taking the first member's first segment would have stripped `bin` and lost the binary.
+    """
+    tops = {name.split("/")[0] for name in names if name not in (".", "./")}
+    return next(iter(tops)) if len(tops) == 1 else ""
+
+
 def resolve_github_release(name: str, spec: dict[str, Any]) -> dict[str, Any]:
     release, asset = select_release(name, spec)
     archive = materialize(asset["browser_download_url"], DOWNLOADS / asset["name"])
-    member = spec.get("archive_member")
+    member = archive_member(spec)
 
     if member is None:
         target_dir = TOOL_RUNTIME / spec["install_dir"] if spec.get("install_dir") else TOOL_BIN
@@ -407,15 +846,16 @@ def resolve_github_release(name: str, spec: dict[str, Any]) -> dict[str, Any]:
         if target_dir.exists():
             shutil.rmtree(target_dir)
         target_dir.mkdir(parents=True, exist_ok=True)
+        unpack_root = target_dir.parent / f".{spec['install_dir']}-unpack"
+        shutil.rmtree(unpack_root, ignore_errors=True)
         with tarfile.open(archive) as tarred:
-            names = tarred.getnames()
-            prefix = names[0].split("/")[0] if names else ""
-            tarred.extractall(target_dir.parent / f".{spec['install_dir']}-unpack", filter="data")
-            unpacked = target_dir.parent / f".{spec['install_dir']}-unpack" / prefix
-            if target_dir.exists():
-                shutil.rmtree(target_dir)
-            shutil.move(str(unpacked), str(target_dir))
-            shutil.rmtree(target_dir.parent / f".{spec['install_dir']}-unpack", ignore_errors=True)
+            prefix = unpack_prefix(tarred.getnames())
+            extractall(tarred, unpack_root)
+        unpacked = unpack_root / prefix if prefix else unpack_root
+        if target_dir.exists():
+            shutil.rmtree(target_dir)
+        shutil.move(str(unpacked), str(target_dir))
+        shutil.rmtree(unpack_root, ignore_errors=True)
         target = target_dir / member
 
     record: dict[str, Any] = {
@@ -449,9 +889,9 @@ def resolve_kubernetes_release(name: str, spec: dict[str, Any]) -> dict[str, Any
             f"{name}: channel {spec['channel']} offers {release}, "
             f"which does not satisfy {spec['requirement']}"
         )
-    platform_token = spec.get("platform_map", {}).get(host_platform())
+    platform_token = spec.get("platform_map", {}).get(canonical_platform())
     if platform_token is None:
-        raise ResolutionError(f"{name}: no binary mapping for platform {host_platform()}")
+        raise ResolutionError(f"{name}: no binary mapping for platform {canonical_platform()}")
     binary_path = spec["binary_path"].replace("{platform}", platform_token)
     url = f"https://dl.k8s.io/release/{release}/{binary_path}"
     checksum_text = fetch(url + ".sha256").decode("utf-8", errors="replace").strip()
@@ -569,16 +1009,65 @@ def resolve_hackage(name: str, spec: dict[str, Any], resolved: dict[str, Any]) -
 
 
 RESOLVERS = {
-    "host": lambda name, spec, resolved: resolve_host(name, spec),
-    "node-package": lambda name, spec, resolved: resolve_node_package(name, spec),
+    "managed": resolve_managed,
+    "node-package": resolve_node_package,
     "github-release": lambda name, spec, resolved: resolve_github_release(name, spec),
     "kubernetes-release": lambda name, spec, resolved: resolve_kubernetes_release(name, spec),
     "hackage": resolve_hackage,
 }
 
-# `hackage` tools are built by the resolved cabal, so cabal is resolved first regardless of
-# the order the caller asked in.
-ORDER_FIRST = ("ghc", "cabal")
+
+# What each provider must have resolved before it can supply anything. `package-manager`
+# names nothing, because it is the floor's own root: verified before resolution begins,
+# never resolved by it.
+PROVIDER_NEEDS = {
+    "ghcup": ("ghcup",),
+    "playwright": ("node", "playwright"),
+    "package-manager": (),
+}
+
+
+def needs(spec: dict[str, Any]) -> tuple[str, ...]:
+    """The requirements this one cannot be resolved without.
+
+    Order used to be a hand-written pair of names that happened to cover the one case there
+    was. With a `managed` kind every requirement names a supplier, so the order is read off
+    the manifest instead: ask for `chromium` and the run resolves the driver that supplies
+    it and the interpreter that driver runs under, in that order, without the caller
+    listing either of them.
+    """
+    source = spec["source"]
+    if source == "managed":
+        return PROVIDER_NEEDS.get(spec["provider"], ())
+    if source == "node-package":
+        interpreter = (spec["interpreter"],) if spec.get("interpreter") else ()
+        return ("node", "npm") + interpreter
+    if source == "hackage":
+        return ("cabal",)
+    return ()
+
+
+def resolution_order(wanted: Iterable[str], requirements: dict[str, Any]) -> list[str]:
+    """`wanted` closed under `needs`, in an order where a supplier precedes what it supplies."""
+    ordered: list[str] = []
+    visiting: set[str] = set()
+
+    def visit(name: str, trail: tuple[str, ...]) -> None:
+        if name in ordered:
+            return
+        if name in visiting:
+            raise ResolutionError(f"requirement cycle: {' -> '.join(trail + (name,))}")
+        if name not in requirements:
+            raise ResolutionError(f"no authored requirement for: {name}")
+        visiting.add(name)
+        for dependency in needs(requirements[name]):
+            visit(dependency, trail + (name,))
+        visiting.discard(name)
+        ordered.append(name)
+
+    for name in wanted:
+        visit(name, ())
+    return ordered
 
 
 # --------------------------------------------------------------------------
@@ -630,18 +1119,51 @@ def resolve(names: Iterable[str] | None = None, *, refresh: bool = False) -> dic
     if unknown:
         raise ResolutionError(f"no authored requirement for: {', '.join(sorted(unknown))}")
 
-    resolved = {} if refresh else load_resolved()
-    ordered = [name for name in ORDER_FIRST if name in wanted]
-    ordered += [name for name in wanted if name not in ordered]
+    # The floor is checked once, before anything is resolved. A host that cannot support
+    # the run should say which prerequisite is missing and how to clear it, not fail four
+    # requirements deep on a symptom (`substrate_doctrine.md` §3.1).
+    require_floor()
 
-    for name in ordered:
+    # `refresh` re-resolves what was asked for; it does not discard what a sibling gate in
+    # the same checkout already resolved. Dropping those would make one gate's refresh the
+    # next gate's cache miss, and re-acquire a tool nobody asked about.
+    resolved = load_resolved()
+    for name in resolution_order(wanted, requirements):
         spec = requirements[name]
         if not refresh and name in resolved and usable(name, resolved[name], spec):
             continue
         resolved[name] = RESOLVERS[spec["source"]](name, spec, resolved)
-    resolved["platform"] = host_platform()
+    resolved["platform"] = canonical_platform()
     store_resolved(resolved)
     return resolved
+
+
+def manifest_problems() -> list[str]:
+    """Everything wrong with the authored manifest that no host is needed to see.
+
+    Three properties, all pure: the retired `host` source kind is gone, the floor is
+    decidable and remedied on every substrate — including the one this host is not — and
+    every authored platform key is spelled in the one canonical `<os>-<arch>` vocabulary.
+    The third is what makes a `darwin-aarch64` key a failure on a Linux host.
+    """
+    requirements = load_requirements()
+    admitted = set(host_platform.all_platform_tokens())
+    problems = [
+        f"{name} declares the retired `host` source kind"
+        for name, spec in sorted(requirements.items())
+        if spec["source"] == "host"
+    ]
+    problems += [
+        f"{name} declares source {spec['source']!r}, which no resolver implements"
+        for name, spec in sorted(requirements.items())
+        if spec["source"] not in RESOLVERS
+    ]
+    problems += floor_wellformed()
+    for name, spec in sorted(requirements.items()):
+        stray = sorted((set(spec.get("platform_map", {})) | set(spec.get("archive_member_map", {}))) - admitted)
+        if stray:
+            problems.append(f"{name} names non-canonical platform key(s) {', '.join(stray)}")
+    return problems
 
 
 def self_test() -> int:
@@ -678,7 +1200,30 @@ def self_test() -> int:
         if actual != expected:
             failures += 1
         print(f"  {status} parse {text!r} -> {actual}")
+
+    for problem in manifest_problems():
+        print(f"  FAIL {problem}")
+        failures += 1
+    if not manifest_problems():
+        print(f"  ok   no `host` source kind; floor well formed for all "
+              f"{len(host_platform.SUBSTRATES)} substrates; every platform key canonical")
+
     print("toolchain self-test:", "PASS" if failures == 0 else f"FAIL ({failures})")
+    return 1 if failures else 0
+
+
+def floor_report(substrate: str | None = None) -> int:
+    substrate = substrate or host_platform.host_substrate()
+    print(f"floor — {substrate} on {canonical_platform()}\n")
+    failures = 0
+    for result in floor_results(substrate):
+        if result["satisfied"]:
+            print(f"  ok    {result['id']:<32} {result['observation']}")
+        else:
+            failures += 1
+            print(f"  FAIL  {result['id']:<32} {result['observation']}")
+            print(f"        required for {result['required_for']}")
+            print(f"        remedy: {result['remedy']}")
     return 1 if failures else 0
 
 
@@ -687,9 +1232,12 @@ def main(argv: list[str]) -> int:
     parser.add_argument("names", nargs="*", help="requirement names; default is every requirement")
     parser.add_argument("--refresh", action="store_true", help="ignore any cached resolution")
     parser.add_argument("--self-test", action="store_true", help="exercise the pure version algebra")
+    parser.add_argument("--floor", nargs="?", const="", help="check a substrate's floor and stop")
     options = parser.parse_args(argv)
     if options.self_test:
         return self_test()
+    if options.floor is not None:
+        return floor_report(options.floor or None)
     try:
         resolved = resolve(options.names or None, refresh=options.refresh)
     except ResolutionError as error:

@@ -75,14 +75,14 @@ canonicalWitness = CompatibilityWitness 90000 paths
   where
     paths =
       [ (OutboxRecord, TotalMigration SchemaA SchemaB)
-#ifndef PHASE63_OMIT_OLD_DECODER_MUTANT
+#ifndef OFFLINE_RELEASE_EVOLUTION_OMIT_OLD_DECODER_MUTANT
       , (BlobDependencyRecord, RetainedDecoderHandler 1)
 #endif
       , (CachedProjectionRecord, TotalMigration SchemaA SchemaB)
       ]
 
 admitPromotion :: Int -> CompatibilityWitness -> Either PromotionError CompatibilityWitness
-#ifdef PHASE63_BYPASS_PROMOTION_CHECK_MUTANT
+#ifdef OFFLINE_RELEASE_EVOLUTION_BYPASS_PROMOTION_CHECK_MUTANT
 admitPromotion _ witness = Right witness
 #else
 admitPromotion required witness
@@ -110,7 +110,7 @@ resumeMigration :: Int -> MigrationState -> Either MigrationError MigrationState
 resumeMigration generation (MigrationStaged _ target _ staged ownerGeneration)
   | generation /= ownerGeneration = Left WrongLeader
   | otherwise = Right (MigrationCommitted target staged 1)
-#ifdef PHASE63_TWO_MIGRATIONS_MUTANT
+#ifdef OFFLINE_RELEASE_EVOLUTION_TWO_MIGRATIONS_MUTANT
 resumeMigration _ (MigrationCommitted target records runs) =
   Right (MigrationCommitted target (migrateRecords target records) (runs + 1))
 #else
@@ -120,7 +120,7 @@ resumeMigration _ state@(MigrationCommitted _ _ _) =
 resumeMigration _ (MigrationNotStarted _ _ _) = Left NoStagedMigration
 
 migrateRecords :: Schema -> [PersistedRecord] -> [PersistedRecord]
-#ifdef PHASE63_PARTIAL_MIGRATION_MUTANT
+#ifdef OFFLINE_RELEASE_EVOLUTION_PARTIAL_MIGRATION_MUTANT
 migrateRecords target records = case records of
   [] -> []
   first : rest -> first {recordSchema = target} : rest
@@ -137,7 +137,7 @@ migrationRuns (MigrationCommitted _ _ runs) = runs
 migrationRuns _ = 0
 
 reloadRequired :: PersistedState -> PersistedState
-#ifdef PHASE63_CLEAR_STATE_RELOAD_MUTANT
+#ifdef OFFLINE_RELEASE_EVOLUTION_CLEAR_STATE_RELOAD_MUTANT
 reloadRequired _ = PersistedState []
 #else
 reloadRequired = id
@@ -145,7 +145,7 @@ reloadRequired = id
 
 replayRetained :: Bool -> Bool -> ReplayDecision
 replayRetained _currentAuthority _storedAuthority =
-#ifdef PHASE63_PRESERVE_OLD_AUTHORIZATION_MUTANT
+#ifdef OFFLINE_RELEASE_EVOLUTION_PRESERVE_OLD_AUTHORIZATION_MUTANT
   if _storedAuthority then ReplayAccepted else ReplayDeniedCurrentAuthority
 #else
   if _currentAuthority then ReplayAccepted else ReplayDeniedCurrentAuthority

@@ -1,0 +1,4 @@
+mutant=network-fabric-wireguard-missing-peer-key
+flag=network-fabric-wireguard-missing-peer-key-mutant
+locus=src/Amoebius/Fabric/Keys.hs:resolvePeerKeyPair
+expected=missing SecretRef resolution must fail before any kernel or listener effect

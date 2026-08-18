@@ -42,7 +42,19 @@ The gate passed on 2026-08-09; live daemon/forest correspondence remains UNVERIF
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-3 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/gateway_migration_model_gate.py` passes
+all ten sides on substrate `none`, lane `none`, natural `arm64`, untranslated: all 12 authored metrics equal
+their expected values, every per-invariant, mechanical-safety, fairness-drop, cutoff-clause-delete, and
+scope-3 shared-resource mutant reddens, 34 emitted `.tla`/`.cfg` files stay beneath `.build/**` and outside
+the 1,965-file source snapshot, and 15 surfaces join completely to 17 enumerated items. The run left no
+authored path created, changed, or removed, and published attestation
+`sha256:1f860509da226b8b171dbd336f3fc02b9bb1e617113e7cb45cc8a4378a590163`.
+
+**The rerun changed the apparatus, not the result.** The same twelve metrics, the same mutants, the same TLC
+verdicts — with the architecture the run proved now recorded, a translated process refused, and the gate
+naming Phase 4 in its own run bundle rather than Phase 3.
+
+**Opened 2026-08-17** when Phase 3 resealed; **reopened 2026-08-16 by the natural-architecture amendment.**
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
@@ -95,11 +107,11 @@ daemon/forest correspondence remains **UNVERIFIED**, and the decomposition lemma
 This phase writes the *one* protocol amoebius proves about itself and checks it every way the design band
 allows, before a single real resource exists. amoebius delegates almost every consensus problem to a system
 that already discharges it — intra-cluster replicated state to MinIO / Pulsar-BookKeeper / Percona-Patroni,
-and single-instance of the control-plane singleton to k8s/etcd (the singleton is a Deployment `replicas=1`
-with **no bespoke election**, [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)).
+and single-instance of the control-plane daemon to k8s/etcd (the control-plane daemon is a Deployment `replicas=1`
+with **no bespoke election**, [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon)).
 The single residue that no delegated system can cover — because it spans clusters — is the **asynchronous cross-cluster gateway migration**: moving the wild-ingress gateway between clusters and repointing DNS across
 geo-replication lag without stranding a live session or admitting two owners. There is **no** First-Axis /
-singleton-election obligation; this is the only boundary amoebius model-checks.
+control-plane-election obligation; this is the only boundary amoebius model-checks.
 
 Both branches are in scope. The `Planned` coordinated handover (target RPO = 0) and the `Failover`
 availability-first emergency takeover (bounded rebind, named-and-capped divergence) are authored as **one**
@@ -218,8 +230,8 @@ flowchart LR
 
 - [`gateway_migration_model_doctrine.md §1`](../documents/engineering/gateway_migration_model_doctrine.md#1-the-one-obligation)
   — *the one obligation*: the cross-cluster gateway migration is the single place a per-system proof
-  concentrates on amoebius itself; every intra-cluster consensus and the singleton's single-instance are
-  delegated and **not** re-proven, and there is no singleton-election model.
+  concentrates on amoebius itself; every intra-cluster consensus and the control-plane daemon's single-instance are
+  delegated and **not** re-proven, and there is no control-plane-election model.
 - [`gateway_migration_model_doctrine.md §2` and §3](../documents/engineering/gateway_migration_model_doctrine.md#3-the-model)
   — *the two branches* and *the `Model`*: `GatewayMigration = <Planned | Failover>` is one reifiable value
   whose state variables, guarded transitions, and five named invariants (`UniqueGatewayOwner`,
@@ -286,7 +298,7 @@ five named invariants — the fifth, `NoTakeWithoutProvenFreshness`, generalizes
 precondition into a `FreshnessWitness` guard on the promote / gateway-take transition that a cold secondary
 seeded from backup within its `freshnessBound` also discharges
 ([`gateway_migration_model_doctrine.md §3`](../documents/engineering/gateway_migration_model_doctrine.md#3-the-model), [`backup_recovery_doctrine.md §8`](../documents/engineering/backup_recovery_doctrine.md#8-the-gateway-dovetail-seed-from-backup-under-consistency-over-availability))
-— with **no** singleton-election variable anywhere.
+— with **no** control-plane-election variable anywhere.
 
 ### Deliverables
 - The `GatewayMigration` `Model` value in the Phase-3 first-order fragment, both branches expressed as guarded
@@ -558,7 +570,7 @@ cutoff is argued/tested rather than claimed proven.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-4 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Formal/GatewayMigration.hs`, the
   `test/spec/formal/*` TLC + io-sim harnesses, and `src/Amoebius/Multicluster/StructuralFit.hs` as one
-  `GatewayMigration` `Model` row; retire any stale separate `CrossClusterFailover`/`SingletonElection` spec
+  `GatewayMigration` `Model` row; retire any stale separate `CrossClusterFailover`/`ControlPlaneElection` spec
   rows (there is one obligation, both branches, and no election model).
 - `DEVELOPMENT_PLAN/phase_47_multicluster_spawn_georepl.md` — backlink: this design-model is the artifact
   whose Register-3 correspondence against the built `Multicluster/*` forest is discharged there, never here.
@@ -577,5 +589,5 @@ cutoff is argued/tested rather than claimed proven.
   in-process explorer + io-sim, no cluster
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — why the emitted
   `.tla`/`.cfg` are never committed
-- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)
-  — the singleton is a Deployment `replicas=1`, single-instance delegated to k8s/etcd, no election
+- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon)
+  — the control-plane daemon is a Deployment `replicas=1`, single-instance delegated to k8s/etcd, no election

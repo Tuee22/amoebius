@@ -1,0 +1,1 @@
+PLATFORM_SERVICES_2_REDIS_RECEIPT_AUTHORITY_MUTANT makes Redis authoritative durable receipt state; provision must reject it.

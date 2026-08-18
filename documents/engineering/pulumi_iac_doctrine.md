@@ -67,16 +67,16 @@ the thesis.
 *in-cluster*, collapsing this engine into the server-side-apply manifest reconciler and removing the external
 checkpoint — is **declined** for a provability-first system. Crossplane requires parent/management clusters to
 run its provider controllers **continuously** (a standing footprint on even the laptop root, *and* an
-autonomous substrate authority acting on its own reconcile loop beside the control-plane singleton — a categorically
+autonomous substrate authority acting on its own reconcile loop beside the control-plane daemon — a categorically
 larger delegation than the in-cluster operators the manifest doctrine blesses
 ([manifest_generation_doctrine.md §4](./manifest_generation_doctrine.md#4-no-third-party-charts--no-third-party-software-operators-are-generated))); it stores state in **k8s Secrets, at odds with the Vault-centric secrets model** the whole forest trust tree rests on
-([vault_pki_doctrine.md](./vault_pki_doctrine.md)); and its continuous autonomous reconcile is **harder to formally prove** than Pulumi's batch invocation under the singleton plus amoebius's own typed reconciler. This
+([vault_pki_doctrine.md](./vault_pki_doctrine.md)); and its continuous autonomous reconcile is **harder to formally prove** than Pulumi's batch invocation under the control-plane daemon plus amoebius's own typed reconciler. This
 closes the open pre-plan design-log question *"do we actually need pulumi? can our state be the dhall just as it was
 with helm?"*: **yes — Pulumi stays for v1, Crossplane is out.**
 
 **The same "surface a provider capability, do not build a second control plane" line governs stretched full nodes.** The Crossplane rejection above generalizes into a discipline this round leans on elsewhere: where a
 *provider-managed* control plane would otherwise force amoebius to stand up an autonomous continuous fabric
-beside the control-plane singleton, amoebius declines to build it and instead surfaces the provider's own capability
+beside the control-plane daemon, amoebius declines to build it and instead surfaces the provider's own capability
 if one exists. The concrete case is a **stretched full k8s member node** (a kubelet whose declared
 network-locality differs from its control plane's): on a self-managed rke2 control plane it is representable
 over amoebius's own WireGuard fabric + distro-mTLS, but on a **`Managed Eks`** control plane it is
@@ -84,7 +84,7 @@ representable **only** if the provider natively supports it — **EKS Hybrid Nod
 provider capability the `Managed Eks` arm would *surface* (provisioned via the cloud API,
 [§4](#4-what-pulumi-provisions-the-resource-catalog)), **never** an amoebius-built continuous second
 control-plane fabric — which would be exactly the "autonomous substrate authority acting on its own reconcile
-loop beside the control-plane singleton" Crossplane shape rejected here. Absent that provider-native arm, a stretched
+loop beside the control-plane daemon" Crossplane shape rejected here. Absent that provider-native arm, a stretched
 full node on a managed control plane simply has **no constructor** — type-foreclosed uninhabitable, the closed-union
 "no arm = not supported" idiom owned by [cluster_topology_doctrine.md §2, §4.1](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm);
 the surface-a-provider-capability-vs-build-a-fabric axis it rests on is
@@ -118,9 +118,9 @@ an existing amoebius cluster, using MinIO as the backend and vault envelope encr
 
 Concretely:
 
-### The Pulumi engine runs under the in-cluster control-plane singleton
+### The Pulumi engine runs under the in-cluster control-plane daemon
 
-The engine never runs on a bare host. The singleton is the total cluster + secret authority; its
+The engine never runs on a bare host. The control-plane daemon is the total cluster + secret authority; its
 single-instance delegation and worker-role model are owned by
 [daemon_topology_doctrine.md](./daemon_topology_doctrine.md). A deploy is therefore something the cluster
 *does*, gated by the same authority that owns every other mutation — not something an operator's shell does
@@ -237,9 +237,9 @@ opaque ciphertext.
 ```mermaid
 flowchart TD
 %% register: orientation
-  singleton[Control-plane singleton runs the Pulumi engine in-cluster] -->|deploy and destroy actions| target[Cloud or SSH API: provider cluster, EBS, route53, child nodes]
-  singleton -->|read and write admitted checkpoint identities| minio[MinIO object set: opaque enveloped Pulumi state]
-  singleton -->|wrap and unwrap the state data key| vault[Vault Transit mount]
+  control-plane daemon[Control-plane daemon runs the Pulumi engine in-cluster] -->|deploy and destroy actions| target[Cloud or SSH API: provider cluster, EBS, route53, child nodes]
+  control-plane daemon -->|read and write admitted checkpoint identities| minio[MinIO object set: opaque enveloped Pulumi state]
+  control-plane daemon -->|wrap and unwrap the state data key| vault[Vault Transit mount]
   vault -->|envelope-encrypts the checkpoint| minio
 ```
 *Orientation. Design intent; the backend rule is owned by [§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) and the in-cluster restriction by [§1](#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster). The checkpoint is an opaque enveloped object set, and the data key is never written out unwrapped.*
@@ -303,7 +303,7 @@ duplicates it.
 
 | Resource | What Pulumi does here | Owned by |
 |---|---|---|
-| **Provider-managed clusters** (EKS — prodbox's reality) | Provision the managed control plane and worker pools via cloud keys from inside a parent for the authored `Managed Eks.account : CloudAccountId`, using only named `ProviderNodeClass { name, sku, allocatable, quotaVcpu, zones, price, baseCount, maxCount }` values. `allocatable` is the complete `ProviderNodeCapacityTemplate { allocatableCpu, allocatableMemory, podSlots, cniSlots, attachableVolumes, localDisks, cpuOvercommit, localStorage, accelerator }`. Each `localDisks` recipe declares raw `InstanceStore.provisionedRawBytes` or an `EphemeralRootEbs` policy separately from usable `ProviderUsableDiskCarveTemplate.requiredUsableBytes` system/layout carves; private provisioning derives mounted usable capacity and proves their nested fit. Land the stateless in-cluster singleton and capacity-scheduler roles, then admit each joined Node through the managed taint/admission/Binding authority before workload use | Topology/worker-supply shape: [cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm), [§1](./cluster_topology_doctrine.md#1-two-axes-the-substrate-is-detected-the-engine-is-declared), and [§3](./cluster_topology_doctrine.md#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable); lifecycle meaning: [cluster_lifecycle_doctrine.md §1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape) |
+| **Provider-managed clusters** (EKS — prodbox's reality) | Provision the managed control plane and worker pools via cloud keys from inside a parent for the authored `Managed Eks.account : CloudAccountId`, using only named `ProviderNodeClass { name, sku, allocatable, quotaVcpu, zones, price, baseCount, maxCount }` values. `allocatable` is the complete `ProviderNodeCapacityTemplate { allocatableCpu, allocatableMemory, podSlots, cniSlots, attachableVolumes, localDisks, cpuOvercommit, localStorage, accelerator }`. Each `localDisks` recipe declares raw `InstanceStore.provisionedRawBytes` or an `EphemeralRootEbs` policy separately from usable `ProviderUsableDiskCarveTemplate.requiredUsableBytes` system/layout carves; private provisioning derives mounted usable capacity and proves their nested fit. Land the stateless in-cluster control-plane daemon and capacity-scheduler roles, then admit each joined Node through the managed taint/admission/Binding authority before workload use | Topology/worker-supply shape: [cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm), [§1](./cluster_topology_doctrine.md#1-two-axes-the-substrate-is-detected-the-engine-is-declared), and [§3](./cluster_topology_doctrine.md#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable); lifecycle meaning: [cluster_lifecycle_doctrine.md §1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape) |
 | **Spawned self-managed children** (`kind` / `rke2`) | Provision nodes via one or more SSH keys, then bring up the standard service set | Spawn lifecycle: [cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest) |
 | **Dynamic node provisioning** | Add/drain a compatible named node class driven by load / spot cost / workflow completion, only after the full pending envelope and worst-case instance count fit that class and quota | Elastic-shape policy: [cluster_lifecycle_doctrine.md §8](./cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning); the `ScalingPolicy` type + capacity fold: [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm) |
 | **Cloud resource quota** | Observe authoritative regional limits and complete current allocations; spend only `min(declared carve, observed limit − usage)` separately for instance/vCPU/accelerator, ephemeral node-root EBS bytes/count, durable retained bytes/count, and each provider-object quota's selected Logical/Billed bytes plus object count; unknown/incomplete usage refuses and one ledger/unit cannot pay another | Backing union: [storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union); the fold: [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) |
@@ -634,7 +634,7 @@ flowchart TD
   `Step`s — independent Pulumi deploys among them — are composed applicatively so the interpreter may fan
   them out; dependent `Step`s remain a sequence. This doc owns the *Pulumi-deploy application* of that
   algebra; the algebra itself is owned by [dsl_doctrine.md](./dsl_doctrine.md).
-- **Parallelism never weakens the safety rules.** Concurrent deploys still each run under [§1](#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster) (inside the cluster, under the singleton, no env vars), [§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) (enveloped MinIO state), and [§3](#3-state-lifetime-matches-resource-lifetime-per-class) (lifetime/credential class). Two deploys writing the *same* logical checkpoint namespace would be a data dependency and therefore are
+- **Parallelism never weakens the safety rules.** Concurrent deploys still each run under [§1](#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster) (inside the cluster, under the control-plane daemon, no env vars), [§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) (enveloped MinIO state), and [§3](#3-state-lifetime-matches-resource-lifetime-per-class) (lifetime/credential class). Two deploys writing the *same* logical checkpoint namespace would be a data dependency and therefore are
   **not** independent — they would compose monadically, not applicatively — so applicative fan-out cannot
   produce a write-write race on one checkpoint by construction.
 - **Fan-out is finite and its physical peak is admitted first.** The applicative graph becomes the exact
@@ -712,8 +712,8 @@ one-unit shortfall or a renderer/live value that differs from the witness refuse
 repaired by silently recomputing a smaller demand.
 
 Module ownership is explicit: `src/Amoebius/Capacity/RuntimeStorage.hs` owns the shared structural
-component-role/layout and node-aggregate fold; `amoebius-pulumi/src/Amoebius/Pulumi/Observed.hs` owns Pulumi
-executor/Job readback normalization; and `amoebius-pulumi/test/RuntimeStorageSpec.hs` owns the planned-slot→observed-Pod-UID,
+component-role/layout and node-aggregate fold; `src/Amoebius/Pulumi/Observed.hs` owns Pulumi
+executor/Job readback normalization; and `test/spec/provider/RuntimeStorageSpec.hs` owns the planned-slot→observed-Pod-UID,
 SplitRuntime backing, scope/domain/ownership, reservation/observed no-double-debit, and alias-control
 conformance cases.
 
@@ -755,7 +755,7 @@ To keep SSoT boundaries crisp:
 | Wild-ingress routing (LB → Gateway API → Keycloak) that DNS/TLS front; the in-cluster standard services Pulumi does *not* deploy | [platform_services_doctrine.md](./platform_services_doctrine.md) |
 | The `chain`/`Step` algebra and the applicative/monadic composition primitives themselves | [dsl_doctrine.md](./dsl_doctrine.md) |
 | Making "DNS bound to the wrong IP", "a PVC that can't bind", "open ingress" unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
-| Which daemon context runs the Pulumi engine (the control-plane singleton) | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
+| Which daemon context runs the Pulumi engine (the control-plane daemon) | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | The no-env / no-`PATH` lazy-tool-ensure contract for the `pulumi` binary and plugins | [substrate_doctrine.md](./substrate_doctrine.md) |
 | The canonical `PulumiCheckpointObjectDemand`, `PulumiExecutionDemand`, pod/CNI/CSI-slot, provider-quota, and storage-migration capacity types and pure fold | [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) |
 
@@ -801,13 +801,13 @@ authentication, so the Route53 API/Pulumi mutation remains UNVERIFIED and is not
 result.
 
 Phase 49 builds the provider plan and receipt boundary in `Amoebius.Pulumi.Provider.Eks`, extends
-`Amoebius.Pulumi.Engine` with exact bounded executor provisioning and the singleton/absolute-path/empty-child-
+`Amoebius.Pulumi.Engine` with exact bounded executor provisioning and the control-plane daemon/absolute-path/empty-child-
 environment contract, and implements the exact checkpoint fold in
 `Amoebius.Pulumi.Backend.EncryptedMinio`. The scoped Register-3 run observed two concurrent resource-bounded
 Jobs, a zero-environment absolute Pulumi `version` `execve`, HTTP-503 sealed-Vault refusal before MinIO
 mutation, six Transit-enveloped MinIO objects, direct Transit decrypt, three red mutants, and exact cleanup.
 The configured AWS identity returned `InvalidClientTokenId`; therefore provider-account observation, actual
-singleton `pulumi up`, EKS, the managed node group, CloudTrail, AWS-plugin `execve`, pod-filesystem inspection,
+control-plane daemon `pulumi up`, EKS, the managed node group, CloudTrail, AWS-plugin `execve`, pod-filesystem inspection,
 and direct-S3 denial remain UNVERIFIED. Every hardware substrate can always run the `linux-cpu` parent lane;
 for pristine Linux use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 

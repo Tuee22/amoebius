@@ -320,9 +320,9 @@ The operator sees monitoring two ways, both on pre-existing surfaces:
   ([platform_services_doctrine.md §7](./platform_services_doctrine.md#7-prometheus--grafana--observability-is-not-an-add-on)). This adds panels, not a new browser surface.
 - **The `workflow-health` read-model (typed).** A compacted `workflow-health` Pulsar topic is projected
   through the existing compaction + TableView machinery ([pulsar_client_doctrine.md §5.1](./pulsar_client_doctrine.md#51-two-derived-capabilities-read-model-and-two-deliberately-absent-ones), [daemon_topology_doctrine.md §5.2](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership)) as `WorkflowName -> SLOStatus`, the first
-  operator-facing TableView beside the internal leader-election one. The singleton produces the projection
+  operator-facing TableView beside the internal leader-election one. The control-plane daemon produces the projection
   inside its existing reconcile loop — no new container — and the operator reads it via a `pb workflow health`
-  verb on the singleton admin REST ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)).
+  verb on the control-plane daemon admin REST ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)).
 
 ```text
 SLOStatus = Fresh | Degraded BudgetRemaining | Breached BreachReason | NotYetObserved

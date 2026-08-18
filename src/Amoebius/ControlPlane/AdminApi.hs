@@ -40,14 +40,14 @@ data PasswordDisposition = TransportOnly | PersistToFilesystem
   deriving anyclass (NFData)
 
 passwordDisposition :: PasswordDisposition
-#ifdef PHASE33_PERSIST_PASSWORD_MUTANT
+#ifdef LIVE_DSL_DEPLOY_PERSIST_PASSWORD_MUTANT
 passwordDisposition = PersistToFilesystem
 #else
 passwordDisposition = TransportOnly
 #endif
 
 authorizeReach :: EndpointFamily -> ReachClass -> AdminDecision
-#ifdef PHASE33_REACH_ANY_MUTANT
+#ifdef LIVE_DSL_DEPLOY_REACH_ANY_MUTANT
 authorizeReach _ _ = Admit
 #else
 authorizeReach endpoint reach = case (endpoint, reach) of
@@ -106,7 +106,7 @@ proveSecretCapability probe
   | otherwise = Right probe
 
 admitDhallUpdate :: [SecretCapabilityProbe] -> Either AdmissionError [SecretCapabilityProbe]
-#ifdef PHASE33_ADMIT_UNPROVEN_SECRET_MUTANT
+#ifdef LIVE_DSL_DEPLOY_ADMIT_UNPROVEN_SECRET_MUTANT
 admitDhallUpdate = Right
 #else
 admitDhallUpdate = traverse proveSecretCapability

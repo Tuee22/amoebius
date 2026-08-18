@@ -54,6 +54,7 @@ import artifact_policy  # noqa: E402
 import attestation  # noqa: E402
 import ledger_lint  # noqa: E402
 import containment  # noqa: E402
+import host_platform  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -66,15 +67,11 @@ UNIVERSAL_SIDES = ("architecture", "surface", "ledger", "attestation", "containm
 # Section S clause 15 — the architecture a run actually executed on
 # ---------------------------------------------------------------------------
 #
-# The catalogue is the lane vocabulary's own, so a lane name and an observation are
-# comparable without translation. The aliases are what the two kernels report.
-ARCHITECTURES = ("amd64", "arm64")
-ARCHITECTURE_ALIASES = {
-    "x86_64": "amd64",
-    "amd64": "amd64",
-    "aarch64": "arm64",
-    "arm64": "arm64",
-}
+# The catalogue and its aliases belong to `tools/host_platform.py`, which is the one
+# canonical normalizer the resolver and the pre-binary coordinator read too. They are
+# re-exported here because sixty-odd gates already name them through this module.
+ARCHITECTURES = host_platform.ARCHITECTURES
+ARCHITECTURE_ALIASES = host_platform.ARCHITECTURE_ALIASES
 # An emulator maps its own image into the process, and on Darwin the kernel answers
 # outright. Both are the platform's own signal about the process, not a guess from the
 # artifact's filename.
@@ -87,10 +84,10 @@ def rel(path: Path | str) -> str:
 
 def normalize_architecture(name: str) -> str:
     """Map a kernel's machine name onto the closed lane vocabulary."""
-    resolved = ARCHITECTURE_ALIASES.get(name.strip().lower())
-    if resolved is None:
-        raise GateError(f"unknown machine architecture {name!r}; clause 15 admits {ARCHITECTURES}")
-    return resolved
+    try:
+        return host_platform.normalize_architecture(name)
+    except host_platform.PlatformError as error:
+        raise GateError(f"{error}; clause 15 admits {ARCHITECTURES}") from error
 
 
 def _proc_translated() -> bool:

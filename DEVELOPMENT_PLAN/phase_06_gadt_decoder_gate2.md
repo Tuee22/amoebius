@@ -43,7 +43,43 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-5 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/gadt_decoder_gate2_gate.py` passes all
+thirteen sides on substrate `none`, lane `none`, natural `arm64`, untranslated: `dsl-spec` is green with 5
+positives, 4 tagged negatives and 3 compile-fail pairs, every recorded metric is derived from an observation,
+the legalized-schema mutant reddens at its authored locus, the decoder carries no partial function, and 24
+surfaces join completely to 27 enumerated items. Attestation
+`sha256:9cd8bb1f864cfad9e41ce5a40a6857f373f429166845ac6dcc7bb2cb21d7275c`.
+
+**The OS-boundary observer is now decidable on every substrate.** It was `strace -e trace=execve`, which
+exists on one of the four, so a gate declaring substrate `none` died at `FileNotFoundError` before its first
+check on two of them — a seal that had never been decidable off Linux.
+[`tools/argv_observer.py`](../tools/argv_observer.py) replaces it by making both routes to a tool observable
+with nothing but the process model: the **declared** route hands out an absolute path that is a recording
+interposer, which logs its own argv and then `exec`s the real tool; the **ambient** route is a directory of
+refusing shims placed first on `PATH`, one per name each family can be spelled as, which record the attempt
+and exit non-zero. There is no third route in this repository, and that boundary is stated rather than
+implied — a narrower observation that holds everywhere beats a total one that holds in one place.
+[`testing_doctrine.md` §8](../documents/engineering/testing_doctrine.md#8-one-substrate-per-validation) now
+owns the rule; a kernel tracer stays right where a gate declares the substrate that has one.
+
+**Two committed mutants prove the observer can fail**, one per claim it makes:
+`ambient-path-lookup` reaches `dhall` by bare name and must be refused and recorded (exit 127), and
+`unobserved-family` presents an empty observation and must report the family missing rather than inferring it
+from the suite having passed. Neither needs the suite rebuilt.
+
+**What it caught on its first run.** Three call sites —
+`test/spec/capability/ProvisionSealGate.hs` and two in `test/spec/capability/EngineAcceleratorGate.hs` —
+invoked `dhall` by bare name while every other call site resolved it. The `strace` observer had been running
+past them for as long as the suite has existed, because on Linux the ambient lookup succeeded. Each now reads
+`AMOEBIUS_DHALL` through the same resolver its neighbours use, and fails closed when it is unset.
+
+**And four thresholds that had drifted from their own registry.** `test/spec/dsl/ValidationLocusLedger.hs`
+compared `dhall/examples/locus_registry.tsv`'s `owner_phase` column against **pre-amendment** ordinals: the
+corpus phase read 6 where the registry said 7, so twenty-six rows the corpus already rejected were read as
+deferred; the Gate-3 locus was pinned to Phase 14 where the registry said 15. Each is now a named constant
+carrying the phase it means.
+
+**Reopened 2026-08-16 by the natural-architecture amendment.**
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
@@ -107,7 +143,7 @@ a weakened check would have gone on reporting the same values. Every observable 
 suite's acceptance token, the `execve` trace, or the mutant's failure locus. Second,
 `test/spec/dsl/DecodeSpec.hs` hard-coded one developer's `ghc` and `dhall` paths; the suite still invokes both by
 absolute path — that is what the argv observer checks — but the path is now a run-local resolution and the
-suite fails closed without it. Third, `Amoebius.Ui.Server.Main` — the `serve-ui` entry point, reached only
+suite fails closed without it. Third, `Amoebius.Entry.ServeUi` — the `serve-ui` entry point, reached only
 through the executable's subcommand table — was an exposed module of `lib:dsl-core`, so every phase linking the
 shared decision core depended on the Phase-26 UI-server boundary. While that boundary's ABI is unimplemented
 this made the core itself fail to compile and blocked this phase outright. The entry point now belongs to the
@@ -165,7 +201,7 @@ The pure decode code carries no `error`/`undefined`/partial head (checked non-pa
 `Dhall.inputFile auto` alone throws (`DhallErrors`, IO exceptions) rather than returning `Left`, the
 exception-catch wrapper catches those and maps them to a structured `Left DecodeError` (fail-closed) so no
 throw escapes into a half-applied effect. What is *not* here: the chain
-/ reconcile / singleton runtime (Phase 38), the pure capacity/topology fold implementation and properties
+/ reconcile / control-plane daemon runtime (Phase 38), the pure capacity/topology fold implementation and properties
 (Phase 8) consumed by the conditional infrastructure-planning/post-materialization provision seal (Phase 12),
 the capability→provider binder (Phase 11), and
 the exhaustive illegal-state corpus with its per-entry validation-locus
@@ -323,7 +359,7 @@ below carries the resolution rule and the argv observer that decide the second h
 ### Objective
 Adopt the pinned toolchain from the Phase 1 spike and stand up the real `amoebius` cabal package with a
 `dsl-spec` test-suite target, so every later sprint has a buildable in-process surface — the minimal skeleton
-Gate 2 needs, with **no** chain/reconcile/singleton kernel.
+Gate 2 needs, with **no** chain/reconcile/control-plane daemon kernel.
 
 ### Deliverables
 - `amoebius.cabal` + `cabal.project` pinned to GHC 9.12.4 / Cabal 3.16.1.0 with the Phase-1 `allow-newer`
@@ -381,7 +417,7 @@ refined execution retains its exact resource subtree; no provisioned total is sy
   decoded total from Phase 5's `dhall/amoebius/Role.dhall`. An arm outside the union is an `OutOfDomainArm`
   rejection like any other; a `Worker` with no kind and a one-shot command run holding a daemon role have no
   value to decode at all, so the negatives here are closedness negatives, not field checks. Doctrine assigns
-  the foreclosure to this gate ([§3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton),
+  the foreclosure to this gate ([§3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon),
   *decode-foreclosed (Gate 2)*), and the union is written three times in the tree today with no two agreeing
   ([legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md#one-binary-many-roles--2026-08-17)).
   Cardinality is decoded **indexed on the role**: only the `Worker` arm admits a replica count, so catalog
@@ -975,4 +1011,4 @@ one is Phase 34's too.
 - [phase_08](phase_08_capacity_core_folds.md) — the pure capacity/topology fold implementation and
   properties deferred from here; Phase 12 invokes them after bind/expansion while deriving the conditional
   infrastructure plan and again at the post-materialization provision seal
-- [phase_38](phase_38_live_dsl_singleton.md) — the Tier-2 runtime-enforcement half of the DSL
+- [phase_38](phase_38_live_dsl_deploy.md) — the Tier-2 runtime-enforcement half of the DSL

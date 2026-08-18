@@ -2,8 +2,9 @@ module Main (main) where
 
 import Amoebius.Cli.Formal (runFormalCommand)
 import Amoebius.Cluster.Bootstrap (runBootstrap)
+import Amoebius.Entry.ServeUi (runServeUi)
+import Amoebius.Entry.ControlPlane (runControlPlaneDaemon)
 import Amoebius.Exec.Boundary (mkBoundaryTools, runBoundaryCorpus)
-import Amoebius.Ui.Server.Main (runServeUi)
 import Amoebius.Image.Resolver (runResolverCommand)
 import Amoebius.Image.Build (runAdmittedBuildxOci, runBakeInventory, runRenderBakeDockerfile)
 import Amoebius.Vault.Client (runVaultPromptWriteCommand, runVaultReadCommand, runVaultTransitCommand)
@@ -18,6 +19,7 @@ main = do
   arguments <- getArgs
   case arguments of
     "bootstrap" : options -> runBootstrap options
+    "control-plane" : options -> runControlPlaneDaemon options
     "serve-ui" : options -> runServeUi options
     "jit-build-resolver" : options -> runResolverCommand options
     "render-bake-dockerfile" : options -> runRenderBakeDockerfile options

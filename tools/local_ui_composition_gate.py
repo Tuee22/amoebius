@@ -28,14 +28,16 @@ from typing import Any, Mapping
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
-FIXTURES = ROOT / "test/fixtures/ui_local_composition"
-MUTANTS = ROOT / "test/mutant/local_ui_composition/mutants.tsv"
+FIXTURES = ROOT / "test/fixture/ui_local_composition"
+MUTANT_CAPABILITY = "local_ui_composition"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/local_ui_composition/validation_locus.tsv"
-ENTRY_POINT = ROOT / "app/amoebius/Amoebius/Ui/Server/Main.hs"
+ENTRY_POINT = ROOT / "app/amoebius/Amoebius/Entry/ServeUi.hs"
 HARNESS = ROOT / "test/harness/local_ui_composition/composition.mjs"
 RESULTS = ROOT / ".build/dsl/local-ui-composition/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/local-ui-composition/validation-locus-ledger.tsv"
@@ -209,7 +211,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     for name in ("single_tenant_workflow.dhall", "multi_tenant_workflow.dhall"):
         if not (FIXTURES / name).is_file():
             raise GateFailure(f"authored application source is absent: {name}")
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 5 or len({row["mutant"] for row in mutants}) != 5:
         raise GateFailure("Phase-27 mutant manifest must contain five unique rows")
     for row in mutants:
@@ -232,14 +234,14 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
 
 def item_classes() -> dict[str, str]:
     classes = {row["entry"].strip(): row["locus"].strip() for row in read_tsv(LOCUS)}
-    for row in read_tsv(MUTANTS):
+    for row in mutant_registry.capability(MUTANT_CAPABILITY):
         classes[row["mutant"].strip()] = "mutant"
     return classes
 
 
 def verify_source_boundaries() -> None:
-    interpreter = (ROOT / "ui-runtime/src/Amoebius/Ui/Interpreter.purs").read_text(encoding="utf-8")
-    browser = (ROOT / "ui-runtime/src/Main.js").read_text(encoding="utf-8")
+    interpreter = (ROOT / "ui/src/Amoebius/Ui/Interpreter.purs").read_text(encoding="utf-8")
+    browser = (ROOT / "ui/src/Main.js").read_text(encoding="utf-8")
     server = ENTRY_POINT.read_text(encoding="utf-8")
     dispatch = (ROOT / "src/Amoebius/Ui/Server/Dispatch.hs").read_text(encoding="utf-8")
     harness = HARNESS.read_text(encoding="utf-8")

@@ -6,7 +6,7 @@
 
 Phase 41 delivers the live subject/tenant isolation; its design is owned by [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md), [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-10 with `python3 tools/phase36_gate.py
+Validated 2026-08-10 with `python3 tools/user_tenant_isolation_gate.py
 --reuse-fresh-live`; ledger `external-run-reference`.
 
 
@@ -99,7 +99,7 @@ epochs, and evidence hashes.
   `t-b`; equal-shaped subject-owned rows/objects/messages; one tenant-wide resource; and one revocable grant.
   Each own-scope success is paired with same-tenant/foreign-subject and foreign-tenant attempts differing only
   in the authenticated subject/scope or supplied opaque handle.
-- **Pinned matrix:** `test/fixtures/live_isolation/user_tenant_access_matrix.tsv` fixes operation, authority,
+- **Pinned matrix:** `test/fixture/live_isolation/user_tenant_access_matrix.tsv` fixes operation, authority,
   resource audience, expected public result, and expected provider delta. `public_errors.tsv` fixes the
   indistinguishable denial shape; `expected_audit.tsv` fixes required audit classes. None is emitted by the SUT.
 - **Real authority:** the gate creates a dedicated Keycloak test realm and asks Keycloak to mint least-privilege
@@ -164,8 +164,8 @@ fails the phase.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Server/ScopedAuthority.hs`,
-`test/live/UserTenantIsolationSpec.hs`, `tools/phase36_isolation_live.py`, `tools/phase36_gate.py`,
-`test/fixtures/live_isolation/{user_tenant_access_matrix,public_errors,expected_audit}.tsv` (built and validated)
+`test/spec/live/UserTenantIsolationSpec.hs`, `tools/user_tenant_isolation_live.py`, `tools/user_tenant_isolation_gate.py`,
+`test/fixture/live_isolation/{user_tenant_access_matrix,public_errors,expected_audit}.tsv` (built and validated)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the one gate command executes every pinned matrix row using
 Keycloak-minted credentials and checks fresh nonces plus read/access attempts through independent

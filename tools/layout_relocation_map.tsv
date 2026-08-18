@@ -1,0 +1,113 @@
+# The Phase-2 relocation map — one row per moved prefix, authored before the move.
+#
+# `DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md` requires this file to
+# exist *before* any relocation runs, so `tools/repository_conformance_gate.py` compares
+# the tree against a plan rather than against itself. A gate that read the tree and then
+# declared it conforming would pass on any tree at all.
+#
+# Three columns:
+#
+#   old_prefix   the present-day path, exactly as the tree carried it before the move.
+#                A trailing slash means a directory prefix; no trailing slash means one
+#                file. Rows are applied longest-prefix-first, so a nested row
+#                (`test/live/fixtures/`) wins over its parent (`test/live/`).
+#   new_prefix   the destination. The gate refuses a destination
+#                `repository_layout_doctrine.md` section 2 does not admit, which is what
+#                mutant m3 seeds: a map that lies is caught before the tree is touched.
+#   license      why the move is licensed. Either the verbatim first-column cell of a
+#                `repository_layout_doctrine.md` section 2.2 row — the roots whose
+#                destination needed deciding — or `seven-noun-rule` for a `test/`
+#                second level that is simply an eighth role, which section 2 calls
+#                non-conforming on sight. A row citing neither is a defect.
+#
+# The map covers relocation only. A *deletion* stays with its last consumer, which is
+# why no row here names `DEVELOPMENT_PLAN/evidence/**` or `test/enumeration/**`: a root
+# cannot be deleted while a phase still builds from it, but a rename plus its reference
+# update is one edit with no last consumer to wait for.
+#
+# old_prefix<TAB>new_prefix<TAB>license
+
+# --- Sprint 2.1: test/'s second level collapses to the seven role nouns --------------
+#
+# The singular/plural pairs come first because a case-insensitive filesystem cannot hold
+# `test/ui/` and `test/Ui/` apart at all: on APFS they are one directory that git's index
+# remembers as two, so a bulk move of one silently carries the other.
+
+test/Ui/	test/spec/ui/	test/goldens/**, test/fixtures/**, test/negatives/**, test/Ui/**
+test/fixtures/	test/fixture/	test/goldens/**, test/fixtures/**, test/negatives/**, test/Ui/**
+test/goldens/	test/golden/	test/goldens/**, test/fixtures/**, test/negatives/**, test/Ui/**
+test/negatives/	test/negative/	test/goldens/**, test/fixtures/**, test/negatives/**, test/Ui/**
+test/mutants/	test/mutant/	seven-noun-rule
+
+# Module hierarchy belongs below test/spec/, never at test/'s second level.
+test/ui/live/	test/harness/ui_live/	seven-noun-rule
+test/ui/	test/spec/ui/	seven-noun-rule
+test/live/fixtures/	test/fixture/live/	seven-noun-rule
+test/live/platform_backbone/	test/harness/platform_backbone/	seven-noun-rule
+test/live/	test/spec/live/	seven-noun-rule
+test/kernel/fixtures/	test/fixture/chain_boundary/	seven-noun-rule
+test/kernel/mutants/	test/mutant/chain_boundary/	seven-noun-rule
+test/kernel/	test/spec/kernel/	seven-noun-rule
+test/integration/	test/spec/integration/	seven-noun-rule
+test/platform/	test/spec/platform/	seven-noun-rule
+test/topology/	test/spec/topology/	seven-noun-rule
+test/Amoebius/Platform/	test/spec/platform/	seven-noun-rule
+test/browser/golden/	test/golden/browser/	seven-noun-rule
+test/browser/	test/spec/browser/	seven-noun-rule
+test/host/	test/spec/host/	seven-noun-rule
+test/inject/confluence/	test/fixture/inject/confluence/	seven-noun-rule
+test/inject/journal/	test/fixture/inject/journal/	seven-noun-rule
+test/inject/mutants/	test/mutant/gateway_migration_drills/	seven-noun-rule
+test/inject/	test/spec/inject/	seven-noun-rule
+
+# Positive inputs, rejected inputs, and boundary shims, each to its role noun.
+test/dhall/	test/fixture/dhall/	seven-noun-rule
+test/accept/	test/fixture/accept/	seven-noun-rule
+test/compile-fail/	test/negative/compile_fail/	seven-noun-rule
+test/reject/	test/negative/reject/	seven-noun-rule
+test/fake/	test/harness/fake/	seven-noun-rule
+
+# --- Sprint 2.2: one mutant root ----------------------------------------------------
+
+mutants/phase31/	test/mutant/platform_services_2/	mutants/**, test/live/mutants/**, test/host/mutants/**
+mutants/	test/mutant/dhall_gate1_schema/	mutants/**, test/live/mutants/**, test/host/mutants/**
+
+# --- Sprint 2.3: the package-only roots become cabal stanzas ------------------------
+#
+# Section 2.1's criterion is *separately resolvable, never merely separately configured*.
+# None of these roots meets it: each is one `hs-source-dirs` and a component list, which
+# cabal answers inside the one authored package. The sources move to the root their
+# reader owns — GHC's `src/`, protoc's `proto/`, the Dhall interpreter's `dhall/`, and
+# the seven test role nouns — and the `.cabal` file itself is not relocated at all: it
+# becomes a stanza, so Sprint 2.3 removes it rather than moving it.
+
+amoebius-pulsar/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-pulsar/proto/	proto/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-pulsar/test/compile_fail/	test/negative/pulsar_client/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-pulsar/test/golden/	test/golden/pulsar_client/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-pulsar/test/	test/spec/pulsar/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-pulumi/src/Amoebius/Pulumi/Backend/EncryptedMinio.hs	src/Amoebius/Pulumi/Backend/CheckpointEnvelope.hs	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-pulumi/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-pulumi/test/	test/spec/provider/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-release/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-release/dhall/test/	dhall/test/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-release/test/live/	test/spec/release/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-runtime/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-runtime/dhall/test/	dhall/test/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-runtime/test/golden/	test/golden/workflow_runtime/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-runtime/test/live/	test/spec/runtime/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-runtime/test/provider/	test/spec/provider/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-runtime/test/sim/	test/spec/sim/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-store/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-store/test/golden/	test/golden/content_store/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+infernix/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+infernix/dhall/	dhall/infernix/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+infernix/app/	test/spec/infernix/	infernix/app/**
+infernix-ui/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+jitml/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+jitml-ui/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+app/singleton/Main.hs	app/amoebius/Amoebius/Entry/ControlPlane.hs	app/singleton/**
+
+# --- Sprint 2.4: ui-runtime/ merges into ui/ ----------------------------------------
+
+ui-runtime/	ui/	ui-runtime/**

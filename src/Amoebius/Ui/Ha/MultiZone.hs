@@ -84,37 +84,37 @@ canonicalTopology =
     , redisIsReceiptAuthority = redisReceiptAuthority
     }
   where
-#ifdef PHASE58_REPLICAS_ONE_MUTANT
+#ifdef UI_HA_MULTIZONE_REPLICAS_ONE_MUTANT
     uiServers = [ZoneA]
 #else
     uiServers = [ZoneA, ZoneB, ZoneC]
 #endif
-#ifdef PHASE58_DROP_TOPOLOGY_SPREAD_MUTANT
+#ifdef UI_HA_MULTIZONE_DROP_TOPOLOGY_SPREAD_MUTANT
     uiProjectors = [ZoneA, ZoneA, ZoneC]
 #else
     uiProjectors = [ZoneA, ZoneB, ZoneC]
 #endif
-#ifdef PHASE58_REDIS_ONE_NODE_MUTANT
+#ifdef UI_HA_MULTIZONE_REDIS_ONE_NODE_MUTANT
     redisMembers = [ZoneA]
 #else
     redisMembers = [ZoneA, ZoneB, ZoneC]
 #endif
-#ifdef PHASE58_DROP_KEYCLOAK_ZONE_SPREAD_MUTANT
+#ifdef UI_HA_MULTIZONE_DROP_KEYCLOAK_ZONE_SPREAD_MUTANT
     keycloakMembers = [ZoneA, ZoneA, ZoneC]
 #else
     keycloakMembers = [ZoneA, ZoneB, ZoneC]
 #endif
-#ifdef PHASE58_DROP_PDB_MUTANT
+#ifdef UI_HA_MULTIZONE_DROP_PDB_MUTANT
     pdbMinimum = 0
 #else
     pdbMinimum = 2
 #endif
-#ifdef PHASE58_STICKY_SESSION_REQUIRED_MUTANT
+#ifdef UI_HA_MULTIZONE_STICKY_SESSION_REQUIRED_MUTANT
     stickyRequired = True
 #else
     stickyRequired = False
 #endif
-#ifdef PHASE58_REDIS_PERSISTENT_RECEIPT_MUTANT
+#ifdef UI_HA_MULTIZONE_REDIS_PERSISTENT_RECEIPT_MUTANT
     redisReceiptAuthority = True
 #else
     redisReceiptAuthority = False
@@ -141,7 +141,7 @@ admitTopology topology =
         | otherwise -> Right topology
 
 plannedFault :: Fault
-#ifdef PHASE58_FAULT_ONE_NODE_ONLY_MUTANT
+#ifdef UI_HA_MULTIZONE_FAULT_ONE_NODE_ONLY_MUTANT
 plannedFault = OneNode ZoneB
 #else
 plannedFault = WholeZone ZoneB
@@ -163,7 +163,7 @@ authorizeAfterFault authority =
   cookieEmptyLogin authority && currentMembership authority && currentScopeEpoch authority
 
 repairAfterCoordinationLoss :: DurableState -> Maybe DurableState
-#ifdef PHASE58_SKIP_CURSOR_REPAIR_MUTANT
+#ifdef UI_HA_MULTIZONE_SKIP_CURSOR_REPAIR_MUTANT
 repairAfterCoordinationLoss _ = Nothing
 #else
 repairAfterCoordinationLoss durable = Just durable

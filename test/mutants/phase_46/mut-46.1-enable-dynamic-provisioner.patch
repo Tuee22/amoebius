@@ -1,5 +1,0 @@
---- a/amoebius-pulumi/src/Amoebius/Storage/EbsCsi.hs
-+++ b/amoebius-pulumi/src/Amoebius/Storage/EbsCsi.hs
-@@ seeded mutant: add a dynamic provisioner and provisioning StorageClass
--  externalProvisionerContainers = 0
-+  externalProvisionerContainers = 1

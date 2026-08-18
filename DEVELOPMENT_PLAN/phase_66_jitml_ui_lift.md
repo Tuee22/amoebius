@@ -107,7 +107,7 @@ constructor, introduces another runtime image, or needs a second acceptance comm
 **Lane:** cuda ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/phase52_gate.py --reuse-fresh-live` passes on linux-cuda: a browser reaches an owned,
+**Gate:** `python3 tools/jitml_ui_lift_gate.py --reuse-fresh-live` passes on linux-cuda: a browser reaches an owned,
 committed, Ready jitML model and recovers its terminal training receipt across replica, Redis, and socket
 loss. Its denial matrix, fixtures, observers, oracle, and mutants are delegated to
 [Gate integrity](#gate-integrity).
@@ -115,11 +115,11 @@ loss. Its denial matrix, fixtures, observers, oracle, and mutants are delegated 
 ## Gate integrity
 
 - **Phase-0 representative set.** Before implementation, Phase 0 commits
-  `test/dhall/phase_53/jitml_ui.dhall`,
-  `test/fixtures/phase_53/readiness_owner_scope_matrix.tsv`,
-  `test/fixtures/phase_53/public_contract.golden`,
-  `test/fixtures/phase_53/expected_interaction.tsv`,
-  `test/fixtures/phase_53/cross_pod_receipt_timeline.tsv`, and fixed bounded training/model-input fixtures. The
+  `test/fixture/dhall/apple_metal_host_daemon/jitml_ui.dhall`,
+  `test/fixture/jitml_ui_lift/readiness_owner_scope_matrix.tsv`,
+  `test/fixture/jitml_ui_lift/public_contract.golden`,
+  `test/fixture/jitml_ui_lift/expected_interaction.tsv`,
+  `test/fixture/jitml_ui_lift/cross_pod_receipt_timeline.tsv`, and fixed bounded training/model-input fixtures. The
   UI uses trusted `WorkflowProgress`, `ArtifactProvenance`, and `ModelInteractor` components.
 - **Fresh authority and challenge.** After Keycloak/Envoy, at least two UI-server replicas, Redis, and the
   Phase-65 jitML workers are Ready, the harness obtains least-privilege sessions for tenant A's artifact owner,
@@ -145,11 +145,11 @@ loss. Its denial matrix, fixtures, observers, oracle, and mutants are delegated 
   observer establishes route loss only; adapter/UI-server/Redis self-report cannot establish the receipt or
   accepted effect.
 - **Committed mutants.** Phase 0 commits
-  `test/mutants/phase_52/mut-52-mint-ready-from-checkpoint-path.patch` (guard weakening) and
-  `test/mutants/phase_52/mut-52-ignore-artifact-scope.patch`, plus
-  `test/mutants/phase_52/mut-52-ignore-artifact-owner.patch`,
-  `test/mutants/phase_52/mut-52-local-only-websocket-route.patch`, and
-  `test/mutants/phase_52/mut-52-redis-as-receipt.patch`. Each must turn its readiness, tenant-scope,
+  `test/mutant/jitml_ui_lift/mut-52-mint-ready-from-checkpoint-path.patch` (guard weakening) and
+  `test/mutant/jitml_ui_lift/mut-52-ignore-artifact-scope.patch`, plus
+  `test/mutant/jitml_ui_lift/mut-52-ignore-artifact-owner.patch`,
+  `test/mutant/jitml_ui_lift/mut-52-local-only-websocket-route.patch`, and
+  `test/mutant/jitml_ui_lift/mut-52-redis-as-receipt.patch`. Each must turn its readiness, tenant-scope,
   same-tenant-owner, cross-pod route, or durable-repair row red.
 - **Independent oracle.** The readiness/owner/scope matrix and public result are hand-authored from the public model
   contract and an off-adapter reference computation. They do not call the adapter, UI renderer, checkpoint
@@ -199,8 +199,8 @@ unbounded Redis/output-buffer, or one-short post-fault lookup shape refuses befo
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/JitML/UiAdapter.hs`, `jitml-ui/jitml-ui-lift.cabal`,
-`dhall/ui/jitml.dhall`, `test/ui/JitMLUiContractSpec.hs`,
-`test/live/JitMLUiLift.hs`, and `tools/phase52_{jitml_ui_live,gate}.py`
+`dhall/ui/jitml.dhall`, `test/spec/ui/JitMLUiContractSpec.hs`,
+`test/spec/live/JitMLUiLift.hs`, and `tools/phase52_{jitml_ui_live,gate}.py`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the live harness checks the
 ready/failed/in-flight/non-owner/foreign matrix against Keycloak, Envoy, Pulsar, MinIO, checkpoint, GPU,
@@ -226,7 +226,7 @@ reimplementing training, or turning a checkpoint identifier into browser authori
 
 ### Validation
 
-1. Run `python3 tools/phase52_gate.py --reuse-fresh-live` on linux-cuda.
+1. Run `python3 tools/jitml_ui_lift_gate.py --reuse-fresh-live` on linux-cuda.
 2. Drive training to a committed successful checkpoint, verify Ready-handle issuance, invoke it, and compare
    the UI result and external GPU execution with the independent oracle; require the durable receipt to retain
    the exact original command/workflow identities.

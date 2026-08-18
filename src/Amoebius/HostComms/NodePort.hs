@@ -42,7 +42,7 @@ data HostCommsError
   deriving stock (Eq, Show)
 
 renderServiceType :: Text
-#ifdef PHASE53_LB_NODEPORT_MUTANT
+#ifdef APPLE_METAL_HOST_DAEMON_LB_NODEPORT_MUTANT
 renderServiceType = "LoadBalancer"
 #else
 renderServiceType = "NodePort"

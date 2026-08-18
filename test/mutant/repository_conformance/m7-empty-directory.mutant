@@ -1,0 +1,8 @@
+check=no-empty-authored-directory
+operator=retired-root-resurrection
+mutation=mkdir | jitml-ui/src/Amoebius/JitML
+statement=Leave behind the directory skeleton of a root the phase retired. Git cannot track
+statement=an empty directory, so it is invisible to every rule that enumerates files — which
+statement=is how six of them survived this gate passing on fourteen sides. It cannot reach a
+statement=clone, but it misleads a reader about what roots the tree has, and a later move
+statement=into one silently resurrects a root the target tree retired.

@@ -63,8 +63,8 @@ main = do
 
 verifyExpectedActions :: IO ()
 verifyExpectedActions = do
-  corpus <- decode "test/live/fixtures/reconcile-corpus/corpus.json"
-  expected <- decode "test/live/fixtures/reconcile-corpus/expected-actions.json"
+  corpus <- decode "test/fixture/live/reconcile-corpus/corpus.json"
+  expected <- decode "test/fixture/live/reconcile-corpus/expected-actions.json"
   let actual = fmap (renderAction . planInitialIdentity . K8sObjectIdentity . identity) (objects corpus)
   assertEqual "independent initial action domain" (actions expected) actual
 

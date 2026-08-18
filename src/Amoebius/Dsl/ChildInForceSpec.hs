@@ -54,7 +54,7 @@ projectSubtree wanted (ParentForest root) = case descend wanted root of
       { childClusterId = nodeClusterId selected
       , childPath = nodeClusterId root : wanted
       , childOwnPayload = nodePayload selected
-#ifdef PHASE42_PROJECT_IDENTITY_MUTANT
+#ifdef MULTICLUSTER_SPAWN_GEOREPL_PROJECT_IDENTITY_MUTANT
       , childVisibleClusters = flatten root
 #else
       , childVisibleClusters = flatten selected

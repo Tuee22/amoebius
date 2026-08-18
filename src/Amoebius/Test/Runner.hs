@@ -18,7 +18,7 @@ data RunnerActions = RunnerActions
 
 runTestTopology :: ProvisionedTestTopology -> RunnerActions -> IO ()
 runTestTopology _ actions =
-#ifdef PHASE54_SKIP_TEARDOWN_MUTANT
+#ifdef TEST_TOPOLOGY_DSL_SKIP_TEARDOWN_MUTANT
   runBody actions
 #else
   runBody actions `finally` topologyTeardown actions

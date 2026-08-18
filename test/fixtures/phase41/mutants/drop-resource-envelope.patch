@@ -1,4 +1,0 @@
-mutant=phase41-drop-resource-envelope
-flag=phase41-drop-resource-envelope-mutant
-locus=src/Amoebius/Fabric/WgReconcile.hs:authorizeEnactment
-expected=no interface, queue, cgroup, log, or listener action exists without a fresh capacity token

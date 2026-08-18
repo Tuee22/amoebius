@@ -14,7 +14,7 @@ The amended gate passed 2026-08-16.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_33_retained_storage.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_46_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_33_retained_storage.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_46_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -407,7 +407,7 @@ None.
 **Status**: Done
 **Implementation**: `src/Amoebius/Vault/Client.hs`, `src/Amoebius/Vault/SecretRef.hs`,
 `src/Amoebius/Vault/Error.hs`, `app/amoebius/Main.hs`, `tools/vault_pki_gate.py`,
-`tools/vault_secret_boundary.py`, `test/spec/vault/VaultPkiSpec.hs`, `test/live/VaultPkiSpec.hs`,
+`tools/vault_secret_boundary.py`, `test/spec/vault/VaultPkiSpec.hs`, `test/spec/live/VaultPkiSpec.hs`,
 `test/oracle/vault_pki_surfaces.tsv`, and `test/mutant/vault_pki/**` — built and validated.
 **Blocked by**: Sprint 34.2.
 **Independent Validation**: an in-cluster consumer authenticates to Vault with its Kubernetes service-account

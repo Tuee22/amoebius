@@ -1,7 +1,7 @@
 # The Network Fabric (WireGuard) & the Service-Mesh Verdict
 
 > **Purpose**: Single Source of Truth for amoebius's inter-node / inter-cluster network fabric — **raw kernel > WireGuard configured directly by amoebius (never Netmaker)**, with peer keys custodied in Vault, peer config
-> *rendered* from the node inventory and reconciled by the singleton, a hub bound to the gateway *role* so the
+> *rendered* from the node inventory and reconciled by the control-plane daemon, a hub bound to the gateway *role* so the
 > fabric moves with the gateway on failover — and for the verdict that a service mesh (Linkerd) is **not > adopted for v1**, and for the generalization of the host-comms security boundary from "localhost-only" to
 > "reachable only over the authenticated fabric."
 > **Read this if**: nodes have to reach each other across an untrusted network.
@@ -74,7 +74,7 @@ Harbor/Helm of networking: the duplicated-control-plane pattern amoebius rejects
 
 | Netmaker brings | amoebius already owns |
 |---|---|
-| Its own control server | The control-plane singleton ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) |
+| Its own control server | The control-plane daemon ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) |
 | Its own DB (a desired-state store) | Pure `bind/expand → plan/resolve infrastructure → provision → renderAll` from `InForceSpec` plus authenticated materialization — **no external desired-state store** ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)) |
 | Its own MQTT broker to push peer changes | Pulsar — the one coordination plane ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) |
 | Its own PKI / mTLS | The Vault forest CA + secrets model ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) |
@@ -101,7 +101,7 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
   fabric they configure is strictly a **post-unseal overlay**: it is stretch-gated (a co-located node draws no
   peer, below) and is **never** the transport by which a cluster reaches its own unseal authority — that reach
   is the Vault-independent floor `ParentReachChannel`
-  ([vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes), [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)), so no fabric key ever gates an unseal.
+  ([vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes), [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)), so no fabric key ever gates an unseal.
 - **Peer config is rendered, not managed.** `render(nodeInventory) -> [WireGuardPeerConfig]` — the pure
   `render()` discipline of [manifest_generation_doctrine.md §2](./manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) lifted to
   `wg` config. Illegal peer configurations are foreclosed before runtime, at the honest layer for each: a
@@ -118,7 +118,7 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
   Its private result reserves per-node kernel/listener CPU and memory and layout-routed nodefs bytes once before
   pod placement. An unlimited queue/rate, omitted peer, or node without residual capacity returns `Left`
   before `wg set`; live enactment is snapshot-bound and reads back rate/queue/log enforcement.
-- **Distribution is a reconcile, not an agent.** The singleton reconciles the interface the same way it
+- **Distribution is a reconcile, not an agent.** The control-plane daemon reconciles the interface the same way it
   reconciles everything else ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)):
   `discover` (`wg show`) → diff against `render(inventory)` → enact (`wg set`). No Netmaker agent, no side
   channel; peer-set changes propagate as reconciles rolled out from the root.
@@ -129,7 +129,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 flowchart TD
 %% register: algebra
   inv["Typed node inventory in the InForceSpec"]:::intent -->|render, pure| cfg["WireGuard peer configs"]:::intent
-  cfg -->|singleton reconcile: wg show, diff, wg set| iface[/"wg0 interface on each node"/]:::effect
+  cfg -->|control-plane daemon reconcile: wg show, diff, wg set| iface[/"wg0 interface on each node"/]:::effect
   vault["Vault KV: Curve25519 peer keypairs"]:::intent -->|secrets-by-name, parent-injected| iface
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
@@ -304,7 +304,7 @@ ingress); the Linkerd half collapses to the written verdict in [§6](#6-the-serv
 - [Platform Services Doctrine](./platform_services_doctrine.md) — [§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) the single wild-ingress path + Gateway-API weights
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the gateway role the hub tracks; the forced-failover proof
 - [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy the hub role moves with (planned handover and forced failover)
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the singleton that reconciles the fabric
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane daemon that reconciles the fabric
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — the `render()` discipline the peer config reuses
 - [Substrate Doctrine](./substrate_doctrine.md) — the node inventory the peer config is rendered from
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

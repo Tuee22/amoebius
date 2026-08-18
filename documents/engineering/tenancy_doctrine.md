@@ -136,7 +136,7 @@ and Pulsar subscriptions retain `(AppId, TenantId, Owner, ProjectionId)`; receip
 `(AppId, TenantId, Owner, CommandId)`. Equal local entity ids for Alice, Bob, and Carol cannot collapse either
 owner or tenant, and the two owner-erasure mutants turn the external oracle red.
 
-Secrets stay names, never values, throughout: `credential` and `transitKey` are `SecretRef`s resolved by the parent/singleton into Vault ([vault_pki_doctrine.md §3](./vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)).
+Secrets stay names, never values, throughout: `credential` and `transitKey` are `SecretRef`s resolved by the parent/control-plane daemon into Vault ([vault_pki_doctrine.md §3](./vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)).
 
 ## 5. RBAC is derived, never authored
 
@@ -240,14 +240,14 @@ Sharing is instead an **explicit capability grant** — the capability-as-a-held
 A tenant administrator creates tenants, subjects, memberships, and role bindings through typed administrative
 ports — never through raw SQL, raw provider grants, or a generic browser-held `dhall update`. Each operation
 constructs a checked `TenantSpec`, `SubjectSpec`, `Membership`, or `RoleBinding` fragment server-side and
-submits the corresponding scope-narrowed mutation to the singleton admin boundary
-([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
+submits the corresponding scope-narrowed mutation to the control-plane daemon admin boundary
+([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)).
 The fragment faces both structural gates of
 [dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract), then the whole-deployment
 tenant plan is rebound and reprovisioned before any effect. A capacity- or target-incompatible update returns
 `Left` and cannot construct the opaque `ProvisionedSpec`; secrets remain names throughout.
 
-The scoping is the same projection type that bounds a child cluster: a tenant-admin's action is typed `TenantSpec t` and can only append to or modify `project(spec, t)`. Because `Ref t1 a → Ref t2 a` has no constructor, a tenant-admin's mutation **structurally cannot touch another tenant's or the cluster's subtree**. This is the multi-tenant generalization of the single-operator rule that the cluster is driven only through the singleton admin REST: the root operator's `dhall update` mutates the forest; a tenant-admin's scope-narrowed `dhall update` mutates only its own `TenantSpec t`.
+The scoping is the same projection type that bounds a child cluster: a tenant-admin's action is typed `TenantSpec t` and can only append to or modify `project(spec, t)`. Because `Ref t1 a → Ref t2 a` has no constructor, a tenant-admin's mutation **structurally cannot touch another tenant's or the cluster's subtree**. This is the multi-tenant generalization of the single-operator rule that the cluster is driven only through the control-plane daemon admin REST: the root operator's `dhall update` mutates the forest; a tenant-admin's scope-narrowed `dhall update` mutates only its own `TenantSpec t`.
 
 A browser front end for tenancy administration is a low-code program governed by
 [Low-Code UI Runtime](./low_code_ui_runtime_doctrine.md), using the same typed port, subject, ownership, and
@@ -255,8 +255,8 @@ server-authorization boundary as workload UIs. Its administrative ports differ i
 does not receive the operator's private channel or a generic `dhall update` capability.
 
 **Reach, though, is not the operator's private channel.** The operator's admin NodePort is node-local and never wild
-([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api), the admin-plane reach class). A tenant-admin using the generic UI runtime is a *remote* principal, so it
-reaches this surface as an **authenticated, Keycloak-fronted client of the wild edge** ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), whose scope-narrowed `dhall update` is mediated to the singleton by an in-cluster tenant-admin service — **never** by exposing the operator's node-local admin NodePort to the wild. "The *same* admin control plane" therefore means the same typed `dhall update` semantics and the same two DSL gates, **not** the same transport: the operator's reach is private/node-local, the tenant-admin's is Keycloak-authenticated wild ingress narrowed to `project(spec, t)`.
+([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api), the admin-plane reach class). A tenant-admin using the generic UI runtime is a *remote* principal, so it
+reaches this surface as an **authenticated, Keycloak-fronted client of the wild edge** ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), whose scope-narrowed `dhall update` is mediated to the control-plane daemon by an in-cluster tenant-admin service — **never** by exposing the operator's node-local admin NodePort to the wild. "The *same* admin control plane" therefore means the same typed `dhall update` semantics and the same two DSL gates, **not** the same transport: the operator's reach is private/node-local, the tenant-admin's is Keycloak-authenticated wild ingress narrowed to `project(spec, t)`.
 
 ## 7. Two isolation layers, and the honest limit
 
@@ -344,7 +344,7 @@ scoped-mutation surface. It defers, and cross-references rather than restates:
 - the per-app namespace / `<app>/<bucket>` binding it extends → [service_capability_doctrine.md §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding);
 - the encrypted offline partition, finite lease, and current-authority replay protocol → [browser_offline_runtime_doctrine.md](./browser_offline_runtime_doctrine.md);
 - per-child Transit isolation and the `SecretRef` contract → [vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes), [§3](./vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value);
-- the `dhall update` admin endpoint the tenant-admin surface targets → [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api);
+- the `dhall update` admin endpoint the tenant-admin surface targets → [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api);
 - the `InForceSpec` projection it mirrors → [dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract);
 - the append-only migration diff that realizes a capability edge or a tenant promotion without representing destruction → [inforcespec_migration_doctrine.md](./inforcespec_migration_doctrine.md), [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply), [storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation).
 
@@ -393,7 +393,7 @@ Phase 62's scoped blob trace derives distinct tenant/subject partitions and bind
 - [Platform Services Doctrine](./platform_services_doctrine.md) — Keycloak realms, the single wild-ingress ext-authz edge, and the per-consumer Postgres database
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — the tenant-namespace topology algebra
 - [Browser Offline Runtime](./browser_offline_runtime_doctrine.md) — offline partitions preserve this tenant/subject axis but never substitute for current authority
-- [Bootstrap Sequence Doctrine](./bootstrap_sequence_doctrine.md) — the singleton admin REST the scope-narrowed `dhall update` targets, and the admin-plane reach class
+- [Bootstrap Sequence Doctrine](./bootstrap_sequence_doctrine.md) — the control-plane daemon admin REST the scope-narrowed `dhall update` targets, and the admin-plane reach class
 - [InForceSpec Migration Doctrine](./inforcespec_migration_doctrine.md) — cross-tenant sharing as an append-only revocable capability edge, and the diff that realizes a tenant promotion without representing destruction
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — the `RolloutPlan`/`RolloutPhase` apply that realizes a tenant promotion under the same `TenantId`
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — tenant identity is application logic; isolation shape is a deployment rule

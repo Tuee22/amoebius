@@ -14,13 +14,13 @@ module Amoebius.ControlPlane.Deploy
   ) where
 
 import Amoebius.ControlPlane.Reconcile (ObjectIdentity (..))
-import Amoebius.ControlPlane.Singleton (ControlPlaneStateKind)
+import Amoebius.ControlPlane.Daemon (ControlPlaneStateKind)
 import Control.DeepSeq (NFData)
 import Data.Set (Set)
 import Data.Set qualified as Set
 import GHC.Generics (Generic)
 
-data DeploymentEnvelope = SingletonEnvelope | TrivialAppEnvelope | AdmissionGatewayEnvelope
+data DeploymentEnvelope = ControlPlaneDaemonEnvelope | TrivialAppEnvelope | AdmissionGatewayEnvelope
   deriving stock (Bounded, Enum, Eq, Generic, Ord, Show)
   deriving anyclass (NFData)
 

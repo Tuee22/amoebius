@@ -43,7 +43,14 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-12 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/inference_accelerator_gate.py` passes
+all eleven sides on substrate `none`, lane `none`, natural `arm64`, untranslated: every authored oracle holds
+its declared shape, the suite is green, every seeded mutant reddens at its own locus, each recorded result is
+derived from an observation, and 28 surfaces join completely to 39 enumerated items.
+Attestation `sha256:d66d1dff3fcd123a58c2a4f333c81c6fd9b806ba1a9f27ee8e28354dba1a9b0a`. The rerun differs from its predecessor by naming the lane and the architecture the run
+actually used, and by reading its mutant manifest and its item enumeration from the one registry.
+
+**Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from

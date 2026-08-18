@@ -17,7 +17,7 @@ into, owned by [manifest_generation_doctrine.md](./manifest_generation_doctrine.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_13_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_17_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_ui_program_schema.md, DEVELOPMENT_PLAN/phase_29_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_13_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_17_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_ui_program_schema.md, DEVELOPMENT_PLAN/phase_29_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -158,9 +158,9 @@ flowchart LR
 amoebius has **two Dhall authority surfaces**, and their names are intentionally different:
 
 - **`InForceSpec`** — the dynamic, scope-relative desired-state value. The operator authors Dhall locally
-  and uploads it through the singleton's `dhall update` admin endpoint; after acceptance it is not a flat
+  and uploads it through the control-plane daemon's `dhall update` admin endpoint; after acceptance it is not a flat
   file named `in-force.dhall`. Its home is the Vault-Transit-enveloped MinIO object/ref owned by the
-  in-cluster singleton. A root `InForceSpec` describes the full forest. A child `InForceSpec` is the
+  in-cluster control-plane daemon. A root `InForceSpec` describes the full forest. A child `InForceSpec` is the
   parent-minted subtree rooted at that child: the child itself plus descendants, never siblings or
   ancestor-only authority.
 - **`amoebius.dhall` / `FrameConfig`** — the static local sibling config for this running copy of the
@@ -491,7 +491,7 @@ and live runtime enforcement remain **UNVERIFIED** here.
 
 A well-typed Dhall value still has to become a Haskell value before the chain ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)) can use it. The
 local `amoebius.dhall` `FrameConfig` is decoded from the sibling file; the uploaded `InForceSpec` is
-decoded from the singleton's decrypted in-memory payload. Both use the native `dhall` library in-process —
+decoded from the control-plane daemon's decrypted in-memory payload. Both use the native `dhall` library in-process —
 `Dhall.inputFile auto` for file-backed values, and the corresponding in-memory decode for uploaded values
 (the exact file-backed call hostbootstrap uses is `decodeContextFile = inputFile auto`,
 `Context.hs`; the same pattern the sibling prodbox project documents in its `config_doctrine.md` §4). Two
@@ -644,7 +644,7 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Delivered boundary. Phases 5–15 validate the Tier-1 Dhall/decode/bind/provision/render path in amoebius; Phase 38 validates its Tier-2 live apply/readback through the singleton. Provider and cross-cluster arms remain owned by their later phases.*
+*Delivered boundary. Phases 5–15 validate the Tier-1 Dhall/decode/bind/provision/render path in amoebius; Phase 38 validates its Tier-2 live apply/readback through the control-plane daemon. Provider and cross-cluster arms remain owned by their later phases.*
 
 **Where the contract shape is discharged: front-loaded to Phases 5–14 (Tier 1).** Gate 1 is
 `dhall type` at authoring time; Gate 2 is the in-process `Dhall.inputFile auto` decode and its focused
@@ -818,13 +818,13 @@ planning/materialization fixtures, and the opaque provision seal (Tier 1: Dhall 
 QuickCheck + whole-deployment plan/provision + `renderAll` goldens) — is **front-loaded to Phases 5–14**,
 while live enaction/readback of a required initial-infrastructure batch belongs to the later live
 infrastructure phase that owns that substrate. The DSL's
-**runtime-enforcement** half (the live deploy + singleton reconcile that makes the running cluster
+**runtime-enforcement** half (the live deploy + control-plane daemon reconcile that makes the running cluster
 enforce what the spec composed, Tier 2) is delivered by **Phase 38**, atop the Phase 15 `dsl-step`/`chain` kernel
 seeded from hostbootstrap. This doc never maintains a competing status ledger; it states the target shape and
 links back for status.
 
 > **Honesty.** amoebius has built and validated the Phase 5–15 Tier-1 DSL path and the Phase-38 Tier-2 live
-> singleton runtime-enforcement slice. Full tenant projection, provider materialization, recursive children,
+> control-plane daemon runtime-enforcement slice. Full tenant projection, provider materialization, recursive children,
 > and cross-cluster correspondence remain owned and UNVERIFIED in later phases. Behaviour borrowed from
 > prodbox or hostbootstrap remains sibling-system evidence, not proof in amoebius. Read prescriptive statements
 > outside the explicitly validated slices as the contract amoebius

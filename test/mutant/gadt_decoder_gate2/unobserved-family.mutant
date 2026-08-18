@@ -1,0 +1,4 @@
+surface=absolute-tool-argv
+operator=dropped-observation
+mutation=present the observer with a log that records no invocation of one family
+expected_oracle=the family is reported missing rather than assumed to have run

@@ -446,7 +446,7 @@ content-addressed cache, [content_addressing_doctrine.md §4.5](./content_addres
 > **Honesty.** `InferenceEngine` is Phase-N design intent — the ML-serving capability, specified before
 > implementation like the rest of this doctrine. The sibling **infernix** project is *evidence* that the
 > select-don't-fetch engine binding is real code — **sibling evidence, not an amoebius result**:
-> `infernix/src/Infernix/Runtime/Worker.hs` (sibling source)
+> `src/Infernix/Runtime/Worker.hs` (sibling source)
 > selects the engine by `adapterType` (`case engineBindingAdapterType engineBinding of …`) and **never fetches > it** — precisely the Tier-1 discipline above. But infernix also shows the exact divergences amoebius fixes:
 > its `infernix/docker/Dockerfile` **curl-tars native payloads and > installs per-engine Poetry venvs at image build**, and its
 > `infernix/python/adapters/model_cache.py` carries a

@@ -23,7 +23,7 @@ the Lima and WSL2 command plans remain portability equivalents for their corresp
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_31_object_reconciler.md, DEVELOPMENT_PLAN/phase_32_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_52_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_sources.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_31_object_reconciler.md, DEVELOPMENT_PLAN/phase_32_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_52_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_sources.md
 **Generated sections**: none
 
 </details>
@@ -176,7 +176,7 @@ substrate detection that learns what the machine *is*; the no-environment / no-`
 resolves `ghcup`/`cabal`/`kubectl`/`kind` — and pointedly **not** Helm — through the substrate's package manager
 and invokes each by absolute path; and an idempotent single-node kind bring-up driven as a reconcile. The
 cluster it produces is deliberately **empty**: no platform services, no retained storage, no Vault, no
-control-plane singleton — those land in Phase 30 onward. Before `kind create`, bootstrap observes physical-host
+control-plane daemon — those land in Phase 30 onward. Before `kind create`, bootstrap observes physical-host
 residual CPU, memory, and named disk pools and proves the declared kind engine/node-container demand fits,
 including every ordinal's node capacity + in-node reserve inside its container and the separate host-only
 engine reserve, logical pod-ephemeral budget, and layout-routed image demand. Each container is charged once. A
@@ -203,8 +203,8 @@ cannot satisfy the pure declaration.
 The bootstrap coordinator is a **Python `pb` CLI, not a shell script**. amoebius owns no shell script; the earlier
 `bootstrap.sh` igniter is retired ([legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md)). `pb`
 is one CLI with two modes — **bootstrap coordinator** (bare host → toolchain → build → `exec` the binary, this phase) and
-**admin-REST client** (the operator CLI that drives the singleton after handoff, delivered by
-[phase_38](phase_38_live_dsl_singleton.md) Sprint 38.4) — so the
+**admin-REST client** (the operator CLI that drives the daemon once handoff completes, delivered by
+[phase_38](phase_38_live_dsl_deploy.md) Sprint 38.4) — so the
 per-substrate pre-binary surface is exactly the package-manager-root bootstrap and nothing else.
 
 **Substrate:** linux-cpu (the universal baseline execution lane; tracked in [substrates.md](substrates.md), per
@@ -324,7 +324,7 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
   `cabal build`s, and `exec`s `amoebius bootstrap --distro=…`. It is Python because it runs on a bare host
   before any Haskell toolchain exists and because it is unified with the operator CLI — one `pb` with two modes,
   the second being the admin-REST client in
-  [`bootstrap_sequence_doctrine.md` §5 — the admin control plane](../documents/engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
+  [`bootstrap_sequence_doctrine.md` §5 — the admin control plane](../documents/engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api).
 - **Substrate doctrine [§2](../documents/engineering/substrate_doctrine.md#2-detection-a-pure-classification-over-three-reads) — detection as a pure classification over three reads.** This phase adopts
   [`substrate_doctrine.md` §2 — detection: a pure classification over three reads](../documents/engineering/substrate_doctrine.md#2-detection-a-pure-classification-over-three-reads):
   a total `classify` over three runtime reads (OS, normalized architecture, NVIDIA-GPU presence), with the two
@@ -496,7 +496,7 @@ bootstrap coordinator run reads `cpu.max=350000 100000` and `memory.max=75161927
 CPU/RSS cgroup and disk boundary, and `exec`-handed off; the identical rerun performed no install/build mutation.
 **Implementation**: `pb/pyproject.toml`, `pb/pb/cli.py`, `pb/pb/bootstrap_coordinator.py` (the
 **bootstrap coordinator** mode delivered here; the two-mode CLI was completed by the delivered admin-REST client
-`pb/pb/admin.py` in [phase_38](phase_38_live_dsl_singleton.md) Sprint 38.4). No shell script: amoebius owns
+`pb/pb/admin.py` in [phase_38](phase_38_live_dsl_deploy.md) Sprint 38.4). No shell script: amoebius owns
 none.
 **Blocked by**: None.
 **Independent Validation**: on a pristine `linux-cpu` guest proved clean by a ledger-recorded preflight probe,
@@ -512,7 +512,7 @@ and hands off:
 the bootstrap coordinator exists because the no-`PATH` / no-env discipline cannot start until there is a Haskell binary to
 enforce it, so a thin Python driver ensures the package-manager root pre-binary, then hands off. It is unified
 with the operator CLI as `pb`'s bootstrap coordinator mode, the second mode being the admin-REST client of
-[`bootstrap_sequence_doctrine.md` §5](../documents/engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
+[`bootstrap_sequence_doctrine.md` §5](../documents/engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api).
 
 ### Deliverables
 - A Python `pb` CLI (bootstrap coordinator mode) that, on `linux-cpu`, ensures the `apt` package-manager root pre-binary,
@@ -829,7 +829,7 @@ schema-checked bundle is externally attested; no evidence or ledger file beneath
   Python `pb` bootstrap coordinator land, flip the §9 planning-ownership orientation note for this phase from intent to a
   delivered-status pointer (status stays in the plan) and reconcile any seed-vs-target discovery caveats in §3.
 - `documents/engineering/bootstrap_sequence_doctrine.md` — record that `pb`'s **bootstrap coordinator** mode is delivered here
-  and that its **admin-REST client** mode (§5) is delivered by [phase_38](phase_38_live_dsl_singleton.md)
+  and that its **admin-REST client** mode (§5) is delivered by [phase_38](phase_38_live_dsl_deploy.md)
   Phase 38 Sprint 38.4, not left to an unassigned "later phase".
 - `documents/engineering/cluster_lifecycle_doctrine.md` — confirm the §2/§9 "bring-up is itself a reconcile"
   no-op shape is exercised by this phase's gate.
@@ -859,6 +859,6 @@ schema-checked bundle is externally attested; no evidence or ledger file beneath
 - [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — two cluster kinds and
   bring-up-as-reconcile.
 - [Bootstrap Sequence Doctrine](../documents/engineering/bootstrap_sequence_doctrine.md) — the unified `pb` CLI's
-  two modes (bootstrap coordinator here; admin-REST client in [phase_38](phase_38_live_dsl_singleton.md) Sprint 38.4).
+  two modes (bootstrap coordinator here; admin-REST client in [phase_38](phase_38_live_dsl_deploy.md) Sprint 38.4).
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the parameters/context/witness orchestration surface
   the `bootstrap` command carries.

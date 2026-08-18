@@ -1,5 +1,0 @@
---- a/amoebius-pulumi/src/Amoebius/Storage/ProviderScaling.hs
-+++ b/amoebius-pulumi/src/Amoebius/Storage/ProviderScaling.hs
-@@ seeded mutant: enact directly from the policy instead of consuming the batch token
--  requireFreshValidatedBatch action observation
-+  pure ProviderCreateVolume

@@ -33,7 +33,7 @@ authorizeMutation request
   | requestCallerTenantHeader request /= Nothing = Left CallerAuthoredScopeForbidden
   | requestAuthority request `elem` [Foreign, Revoked, Unauthenticated] = Left Unavailable
   | requestOrigin request /= expectedOrigin request = Left Forbidden
-#ifdef PHASE55_DISABLE_CSRF_MUTANT
+#ifdef UI_SINGLE_TENANT_LIVE_DISABLE_CSRF_MUTANT
   | otherwise = Right ()
 #else
   | requestCsrf request /= expectedCsrf request = Left Forbidden

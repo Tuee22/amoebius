@@ -25,7 +25,7 @@ main = do
 
 verifyPinnedOracle :: IO ()
 verifyPinnedOracle = do
-  decoded <- eitherDecodeFileStrict' "test/live/fixtures/reconcile-corpus/expected-actions.json"
+  decoded <- eitherDecodeFileStrict' "test/fixture/live/reconcile-corpus/expected-actions.json"
   expected <- either die pure decoded
   case schedulerActions expected of
     actions@[first, _, _, _, _, _, _, _, final] -> do

@@ -27,16 +27,18 @@ from typing import Any, Mapping
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
-FIXTURES = ROOT / "test/fixtures/ui_effect_binding"
-MUTANTS = ROOT / "test/mutant/ui_effect_binding/mutants.tsv"
+FIXTURES = ROOT / "test/fixture/ui_effect_binding"
+MUTANT_CAPABILITY = "ui_effect_binding"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/ui_effect_binding/validation_locus.tsv"
 BIND = ROOT / "src/Amoebius/Ui/Bind.hs"
 LINKS = ROOT / "src/Amoebius/Ui/ExternalLinkCatalog.hs"
-REFERENCE = ROOT / "test/ui/EffectBindingReference.hs"
+REFERENCE = ROOT / "test/spec/ui/EffectBindingReference.hs"
 RESULTS = ROOT / ".build/dsl/ui-effect-binding/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-effect-binding/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-effect-binding"
@@ -212,7 +214,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         raise GateFailure("external-link oracle must contain two fixed HTTPS joins")
     if [row["error"] for row in errors] != PINNED_ERRORS:
         raise GateFailure("bind error oracle drifted")
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 7 or len({row["mutant"] for row in mutants}) != 7:
         raise GateFailure("Phase-22 mutant manifest must contain seven unique rows")
     locus = read_tsv(LOCUS)
@@ -232,7 +234,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
 
 def item_classes() -> dict[str, str]:
     classes = {row["entry"].strip(): row["class"].strip() for row in read_tsv(LOCUS)}
-    for row in read_tsv(MUTANTS):
+    for row in mutant_registry.capability(MUTANT_CAPABILITY):
         classes[row["mutant"].strip()] = "mutant"
     return classes
 

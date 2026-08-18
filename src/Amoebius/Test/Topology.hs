@@ -119,10 +119,10 @@ provisionTestTopology topology = do
       | expected == observed -> Right ()
       | otherwise -> Left AcceleratorCapabilityMismatch
   let validFault (KillWorker _ subscription) =
-#ifdef PHASE54_WRONG_SUBSCRIPTION_MUTANT
+#ifdef TEST_TOPOLOGY_DSL_WRONG_SUBSCRIPTION_MUTANT
         subscription == "wrong-subscription"
 #else
-        subscription == "phase54-failover"
+        subscription == "test-topology-dsl-failover"
 #endif
   if not (null (topologyFaults topology)) && all validFault (topologyFaults topology)
     then Right (ProvisionedTestTopology topology)

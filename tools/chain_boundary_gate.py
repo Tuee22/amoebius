@@ -19,11 +19,13 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
-MUTANTS = ROOT / "test/mutant/chain_boundary/mutants.tsv"
+MUTANT_CAPABILITY = "chain_boundary"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/chain_boundary/validation_locus.tsv"
 AST_ORACLE = ROOT / "test/fixture/chain_boundary/astcheck/astcheck_negatives.expected"
 RESULTS = ROOT / ".build/dsl/chain-boundary/phase-results.tsv"
@@ -98,15 +100,15 @@ def verify_pins() -> tuple[Path, Path, str]:
 
 
 def verify_oracles(dhall: Path) -> list[dict[str, str]]:
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     locus = read_tsv(LOCUS)
     ast_rows = read_tsv(AST_ORACLE)
-    cfgs = sorted((ROOT / "test/kernel/fixtures/cfg").glob("*.cfg.json"))
-    plans = sorted((ROOT / "test/kernel/fixtures/plan").glob("*.plan.golden"))
-    descents = sorted((ROOT / "test/kernel/fixtures/descent").glob("*.descent.golden"))
+    cfgs = sorted((ROOT / "test/fixture/chain_boundary/cfg").glob("*.cfg.json"))
+    plans = sorted((ROOT / "test/fixture/chain_boundary/plan").glob("*.plan.golden"))
+    descents = sorted((ROOT / "test/fixture/chain_boundary/descent").glob("*.descent.golden"))
     if len(cfgs) != 2 or len(plans) != 2 or len(descents) != 2:
         raise GateFailure("Phase-15 Part-A corpus must contain two cfg, plan, and descent fixtures")
-    expected_steps = json.loads((ROOT / "test/kernel/fixtures/plan/expected_steps.json").read_text(encoding="utf-8"))
+    expected_steps = json.loads((ROOT / "test/fixture/chain_boundary/plan/expected_steps.json").read_text(encoding="utf-8"))
     if set(expected_steps) != {"minimal", "multi"} or any(not labels for labels in expected_steps.values()):
         raise GateFailure("Phase-15 independent step-set oracle is incomplete")
     reasons = {row["reason"] for row in ast_rows}
@@ -116,7 +118,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         raise GateFailure("Phase-15 mutant manifest must contain seven unique mutants")
     if len(locus) != 20 or len({row["entry"] for row in locus}) != 20:
         raise GateFailure("Phase-15 validation-locus ledger must contain twenty unique rows")
-    for path in [*cfgs, *plans, *descents, ROOT / "test/kernel/fixtures/plan/expected_steps.json"]:
+    for path in [*cfgs, *plans, *descents, ROOT / "test/fixture/chain_boundary/plan/expected_steps.json"]:
         if not path.is_file() or not path.read_bytes():
             raise GateFailure(f"empty oracle fixture: {path.relative_to(ROOT)}")
     for tool in ("kubectl", "docker", "helm", "pulumi"):
@@ -218,17 +220,45 @@ def network_isolated_chain(cabal: Path) -> tuple[str, str]:
     TEMP_ROOT.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="network-", dir=TEMP_ROOT) as directory:
         trace = Path(directory) / "network.trace"
-        unshare_probe = run(["unshare", "-n", "true"], require_success=False)
-        if unshare_probe.returncode == 0:
+        # Each candidate is probed for existence before it is run: a missing executable
+        # raises before any return code exists to inspect, which is how this gate used to
+        # die on a host that simply has no `unshare` rather than moving to the next one.
+        if shutil.which("unshare") and run(["unshare", "-n", "true"], require_success=False).returncode == 0:
             isolated = run(["unshare", "-n", str(binary)])
             observer = "unshare-network-namespace"
-        else:
-            if shutil.which("strace") is None:
-                raise GateFailure("neither unshare network isolation nor strace socket injection is available")
+        elif shutil.which("sandbox-exec"):
+            # Darwin's kernel-level counterpart to a network namespace. `(allow default)`
+            # keeps the render's file and process access exactly as it is outside the
+            # sandbox, so the one dimension that changes is the one under test.
+            profile = Path(directory) / "deny-network.sb"
+            profile.write_text("(version 1)\n(allow default)\n(deny network*)\n", encoding="utf-8")
+            control = run(
+                ["sandbox-exec", "-f", str(profile), sys.executable, "-c",
+                 "import socket,sys;\n"
+                 "try:\n socket.create_connection(('127.0.0.1', 9), timeout=1).close()\n"
+                 "except PermissionError:\n sys.exit(0)\n"
+                 "except OSError:\n sys.exit(3)\n"
+                 "sys.exit(4)\n"],
+                require_success=False,
+            )
+            # A sandbox that is not actually denying is worse than no sandbox: it would
+            # certify a render that reached the network. The control proves the denial.
+            if control.returncode != 0:
+                raise GateFailure(
+                    f"sandbox-exec did not deny a socket (control exit {control.returncode}); "
+                    "the isolation this observer claims is not in force"
+                )
+            isolated = run(["sandbox-exec", "-f", str(profile), str(binary)])
+            observer = "darwin-sandbox-deny-network"
+        elif shutil.which("strace"):
             isolated = run(["strace", "-f", "-qq", "-e", "trace=%network", "-e", "inject=socket:error=EPERM", "-o", str(trace), str(binary)])
             if trace.read_text(encoding="utf-8").strip():
                 raise GateFailure("chain render attempted a network syscall:\n" + trace.read_text(encoding="utf-8"))
             observer = "strace-socket-EPERM"
+        else:
+            raise GateFailure(
+                "no sanctioned network observer is available: none of unshare, sandbox-exec, or strace"
+            )
     token = "chain-spec: PASS (2 cfg fixtures, 2 plan goldens, 2 descent goldens, 0 render actions, 1 canary, 2 mutants)"
     if token not in isolated.stdout:
         raise GateFailure(f"isolated chain acceptance token is absent:\n{isolated.stdout}")
@@ -301,10 +331,16 @@ def write_results(mutants: list[dict[str, str]], observer: str) -> None:
 
 COMPILER = ""
 
-# The two observers this contract sanctions for proving the render path touched no network.
+# The three observers this contract sanctions for proving the render path touched no
+# network. Two are Linux kernel facilities and one is Darwin's; between them every declared
+# substrate has one, which is what a gate declaring substrate `none` needs.
 # Which one a host supports is a property of the host, not of amoebius, so the gate asserts
 # membership and records the normalized result rather than pinning one of them.
-SANCTIONED_OBSERVERS = ("unshare-network-namespace", "strace-socket-EPERM")
+SANCTIONED_OBSERVERS = (
+    "unshare-network-namespace",
+    "darwin-sandbox-deny-network",
+    "strace-socket-EPERM",
+)
 
 CHECKS = {
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
@@ -344,20 +380,30 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
 
 def enumerated_items() -> set[str]:
     names: set[str] = set()
-    for relative in ("test/oracle/chain_boundary/validation_locus.tsv", "test/mutant/chain_boundary/mutants.tsv"):
-        for line in (ROOT / relative).read_text(encoding="utf-8").splitlines()[1:]:
-            if line.strip():
-                names.add(line.split("\t")[0].strip())
+    for line in (ROOT / "test/oracle/chain_boundary/validation_locus.tsv").read_text(
+        encoding="utf-8"
+    ).splitlines()[1:]:
+        if line.strip():
+            names.add(line.split("\t")[0].strip())
+    # The one registry leads with the capability and carries every phase's rows, so this
+    # phase's items are the mutant ids in its own rows, not every first column.
+    names.update(row["mutant"] for row in mutant_registry.capability(MUTANT_CAPABILITY))
     return names
 
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=14, contract=CONTRACT, command=GATE_COMMAND, register="1/2", substrate="none", sides=SIDES,
+        phase=15, contract=CONTRACT, command=GATE_COMMAND, register="1/2", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+
+    # Clause 15 first: a run that cannot name the architecture it executed on, or
+    # that is executing under translation, has nothing worth proving.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []

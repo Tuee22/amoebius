@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: live-dsl-deploy-harness
+  namespace: live-dsl-deploy-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: live-dsl-deploy-harness-bootstrap
+  namespace: live-dsl-deploy-system
+rules:
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    resourceNames: ["amoebius-control-plane"]
+    verbs: ["get", "delete"]
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["create"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["amoebius-control-plane"]
+    verbs: ["get", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["rolebindings"]
+    resourceNames: ["amoebius-control-plane"]
+    verbs: ["get", "delete"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["rolebindings"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: live-dsl-deploy-harness-observer
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: live-dsl-deploy-harness-bootstrap
+  namespace: live-dsl-deploy-system
+subjects:
+  - kind: ServiceAccount
+    name: live-dsl-deploy-harness
+    namespace: live-dsl-deploy-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: live-dsl-deploy-harness-bootstrap
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: live-dsl-deploy-harness-observer
+subjects:
+  - kind: ServiceAccount
+    name: live-dsl-deploy-harness
+    namespace: live-dsl-deploy-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: live-dsl-deploy-harness-observer

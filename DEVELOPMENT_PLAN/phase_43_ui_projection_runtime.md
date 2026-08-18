@@ -116,7 +116,7 @@ three red mutants agreed on the exact owner-qualified projection and original co
   update/tombstone/recreate/terminal sequence, exact-command redelivery, conflicting-payload reuse, and
   disconnect/resume from a non-final watermark. Equal shapes force the command, tenant, and owner dimensions
   to carry the isolation.
-- **Pinned oracle:** Phase 0 commits `test/fixtures/phase_39/projection_matrix.tsv`,
+- **Pinned oracle:** Phase 0 commits `test/fixture/ui_projection_runtime/projection_matrix.tsv`,
   `expected_latest_values.tsv`, `expected_receipts.tsv`, and `expected_watermarks.tsv`. The tables are
   hand-authored from the published projection/receipt folds and scope relation; the worker, handler, Pulsar
   client, and renderer do not generate them.
@@ -191,8 +191,8 @@ mutant results.
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**:
 `src/Amoebius/Ui/Projection/{Worker,OwnerKey,Watermark,StreamCursor,ReceiptFold}.hs`,
-`test/live/UiProjectionRuntimeSpec.hs`, `tools/phase38_projection_live.py`, and
-`tools/phase38_gate.py` (built and validated)
+`test/spec/live/UiProjectionRuntimeSpec.hs`, `tools/ui_projection_runtime_live.py`, and
+`tools/ui_projection_runtime_gate.py` (built and validated)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: one command recovers fresh per-owner challenges and
 durable receipts through a scoped server query and separately authenticated Pulsar/broker/edge observers,

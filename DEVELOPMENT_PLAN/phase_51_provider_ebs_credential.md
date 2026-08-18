@@ -11,7 +11,7 @@ Phase 51 delivers the Per-PV EBS decoupling + create-vs-delete credential; its d
 Register 3, live, on the `linux-cpu → provider` substrate.
 The scoped gate is implemented at the available pure/retained-storage/checkpoint boundary; actual AWS EBS and
 IAM behavior remains UNVERIFIED because Phase 49 could not authenticate to AWS.
-Scoped seal: `python3 tools/phase46_gate.py --reuse-fresh-live` passed 16 checks
+Scoped seal: `python3 tools/provider_ebs_credential_gate.py --reuse-fresh-live` passed 16 checks
 on 2026-08-11; ledger `external-run-reference`,
 receipt `external-run-reference`.
 
@@ -129,7 +129,7 @@ not a spec or reconciler capability. The distinct CSI runtime identity is attach
 Third, a **static-only AWS EBS CSI path** (`Amoebius.Storage.EbsCsi`): the upstream AWS EBS CSI controller/node
 binaries and required sidecars are **baked into the amoebius base image** and installed from typed manifests
 (no Helm, no public image pull), version-pinned by the Phase-0 fixture
-`test/fixtures/phase46/ebs_csi_bake_expected.dhall`. No external-provisioner container is installed; each fresh
+`test/fixture/provider_ebs_credential/ebs_csi_bake_expected.dhall`. No external-provisioner container is installed; each fresh
 PV names `spec.csi.driver: ebs.csi.aws.com`, the Pulumi-created EBS ID as `volumeHandle`, and node affinity for
 the volume's Availability Zone. Pulumi creates the durable EBS volume; it does **not** delegate provisioning to
 Kubernetes, so the cluster's sole StorageClass remains `kubernetes.io/no-provisioner`. Placement consumes one
@@ -152,7 +152,7 @@ arms.
 
 What is **not** here: the provider-cluster Pulumi deploy, the Vault-Transit-enveloped MinIO checkpoint backend,
 the executor/plugin/workspace `PulumiExecutionDemand`, and `observeProviderAccount`
-([Phase 49](phase_49_provider_deploy_checkpoint.md)); the hostless in-cluster singleton, the capacity-scheduler
+([Phase 49](phase_49_provider_deploy_checkpoint.md)); the hostless in-cluster control-plane daemon, the capacity-scheduler
 roles, full platform-service convergence, and the parent→child Lease handoff
 ([Phase 50](phase_50_provider_child_bringup.md)); dynamic node provisioning by signal, the ephemeral
 node-root EBS class, and the leak-free tag-sweep teardown gate ([Phase 52](phase_52_provider_dynamic_nodes.md));
@@ -189,7 +189,7 @@ reattaches it and reads its marker unchanged. Its apparatus is [Gate integrity](
 
 ## Gate integrity
 
-> **Provider corpus split (by design).** `test/dhall/phase_47_provider_provision.dhall` and the
+> **Provider corpus split (by design).** `test/fixture/dhall/provider_dynamic_nodes/provider_provision.dhall` and the
 > `mut-36.*` mutant family are this sub-phase's own Phase-0 corpus. The four provider sub-phases
 > (Phases 49–52; see [Phase 49](phase_49_provider_deploy_checkpoint.md)) share one provider topology
 > *shape* while each commits and gates its own slice — not accidental double-ownership.
@@ -197,13 +197,13 @@ This section carries this sub-phase's **slice** of the provider gate apparatus, 
 along the **durable-EBS / credential / static-CSI / storage-scaling** seam (per
 [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
 The provider-deploy/checkpoint/`observeProviderAccount` apparatus (the engine execve golden
-`test/goldens/engine_execve.txt`, the checkpoint-envelope golden `test/goldens/checkpoint_envelope.json`, the
+`test/golden/engine_execve.txt`, the checkpoint-envelope golden `test/golden/checkpoint_envelope.json`, the
 `mut-44.1-*` mutants, and the host-shell/sealed-Vault negatives) stays in
 [Phase 49](phase_49_provider_deploy_checkpoint.md); the bring-up/scheduler-cutover/Lease-handoff apparatus
 (`mut-45.1-public-pull` and the `Managed Eks` no-`LinuxHost` foreclosure) stays in
 [Phase 50](phase_50_provider_child_bringup.md); the dynamic-node, over-quota, forest-supply, and leak-free
 tag-sweep apparatus (`mut-47.1-ignore-signal`, `mut-47.1-apply-over-quota`, `mut-47.1-unreachable-as-gone`,
-`mut-47.2-skip-sweep`, and `test/dhall/phase_48_provider_over_quota.dhall`) stays in
+`mut-47.2-skip-sweep`, and `test/fixture/dhall/phase_48_provider_over_quota.dhall`) stays in
 [Phase 52](phase_52_provider_dynamic_nodes.md). This phase inherits only the durable-EBS slice below.
 
 **Oracle-pinning (§M.1).** Every fixture, golden, and expected tag this gate checks against is authored and
@@ -211,7 +211,7 @@ tag-sweep apparatus (`mut-47.1-ignore-signal`, `mut-47.1-apply-over-quota`, `mut
 exist — no oracle is regenerated from the implementation's own output:
 
 - **Representative topology slice** — the durable-EBS portion of the committed gate topology
-  `test/dhall/phase_47_provider_provision.dhall`: one per-PV EBS volume (durable class) in one declared
+  `test/fixture/dhall/provider_dynamic_nodes/provider_provision.dhall`: one per-PV EBS volume (durable class) in one declared
   Availability Zone, attached to a single-replica StatefulSet claim `<ns>/sts0/pv_0` through a static
   `ebs.csi.aws.com` PV whose `volumeHandle` is that Pulumi-created volume ID, its durable-bytes and durable-count
   provider quota ledgers, its own durable-class checkpoint `PulumiCheckpointObjectDemand`/`StorageBudgetId`, the
@@ -219,12 +219,12 @@ exist — no oracle is regenerated from the implementation's own output:
   plane, base node group, and the observed account this slice attaches to are stood up by
   [Phase 49](phase_49_provider_deploy_checkpoint.md); this phase consumes them, it does not re-author their
   corpus.)
-- **The credential matrix oracle** — `test/goldens/ebs_credential_matrix.txt`, the hand-authored
+- **The credential matrix oracle** — `test/golden/ebs_credential_matrix.txt`, the hand-authored
   action → allow/deny reference table (operational credential: `ec2:CreateVolume` allow, `ec2:DeleteVolume` deny
   on durable retained volumes, per-run cluster create/delete allow; CSI runtime identity:
   `Describe*`/`AttachVolume`/`DetachVolume` allow, `CreateVolume`/`DeleteVolume` deny), authored **independently**
   of the generated `Amoebius.Pulumi.Credential` policy JSON (§M.1/§M.3).
-- **The baked-binary oracle** — `test/fixtures/phase46/ebs_csi_bake_expected.dhall`, the oracle-pinned
+- **The baked-binary oracle** — `test/fixture/provider_ebs_credential/ebs_csi_bake_expected.dhall`, the oracle-pinned
   provider-driver binary/version inventory (controller, node, and required sidecars) the `BakeInventory`
   extension is checked against, authored independently of the base-image build.
 
@@ -254,7 +254,7 @@ committed and re-run (not run once); the gate MUST turn each red when substitute
    `AccessDenied`/`UnauthorizedOperation` response from AWS with the volume surviving — explicitly **NOT** the IAM
    policy simulator and **NOT** an in-process evaluation of the generated policy JSON (which prove nothing at the
    cloud API). It is paired with the positive `ec2:CreateVolume` succeeding under the same credential (§M.8), and
-   the expected action → allow/deny reference is the committed hand table `test/goldens/ebs_credential_matrix.txt`.
+   the expected action → allow/deny reference is the committed hand table `test/golden/ebs_credential_matrix.txt`.
 2. **Distinct checkpoint namespace by external read.** The durable volume's state is a distinct logical
    checkpoint namespace from the ephemeral cluster stack's checkpoint, asserted by **distinct MinIO object keys read from the store** (an independent `LIST`/`HEAD` against MinIO), not from the program that wrote them.
 3. **Pre-create witness and byte geometry.** The pre-create backing witness is asserted to contain the
@@ -265,7 +265,7 @@ committed and re-run (not run once); the gate MUST turn each red when substitute
    allocation minimum/quantum, zone, type, presentation, or account-usage change before create invalidates the
    `ValidatedCloudProviderAction` with **zero** `CreateVolume` calls.
 4. **Baked-inventory equivalence.** The provider-driver extension to `BakeInventory` is checked against
-   `test/fixtures/phase46/ebs_csi_bake_expected.dhall`, and each pinned controller/node/sidecar binary executes
+   `test/fixture/provider_ebs_credential/ebs_csi_bake_expected.dhall`, and each pinned controller/node/sidecar binary executes
    **by absolute path** with its expected version on both base-image architectures.
 5. **Byte-for-byte reattach identity.** The second bring-up's static PV `volumeHandle` is asserted equal to the
    recorded first-cycle EBS ID, the node group is constrained to the recorded Availability Zone, and the
@@ -276,7 +276,7 @@ committed and re-run (not run once); the gate MUST turn each red when substitute
    checkpoint, which cannot tell a retained volume from a deleted one.
 
 **Concrete corpus (§M.7).** The "representative set" is the durable-EBS slice of
-`test/dhall/phase_47_provider_provision.dhall` named above, plus the rounding fixture (logical bytes that are not
+`test/fixture/dhall/provider_dynamic_nodes/provider_provision.dhall` named above, plus the rounding fixture (logical bytes that are not
 an integral GiB, proving rounding is performed once), the raw-equals-usable-insufficient fixture (filesystem
 metadata that forces upward rounding or rejection), the migration replacement/shrink fixture with its paired
 one-short variants (durable EBS bytes, durable volume count, workspace backing, executor
@@ -355,7 +355,7 @@ provider control plane, node group, and executor peaks are provisioned by
 ## Sprint 51.1: Per-PV durable EBS in its own state + node-vs-storage decoupling ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-pulumi/src/Amoebius/Pulumi/Ebs.hs` (per-PV durable EBS
+**Implementation**: `src/Amoebius/Pulumi/Ebs.hs` (per-PV durable EBS
 program, own state, `protect`/`Retain`, `ProvisionedVolumeDemand` → `ProviderVolumeRequest` geometry,
 `ProviderVolumeSlotId` promised/materialized witness) — built on the `amoebius-pulumi` engine seam and the
 Vault-Transit-enveloped MinIO backend **first delivered by [Phase 49](phase_49_provider_deploy_checkpoint.md) and reused here, not rebuilt** (BUILT/SCOPED-VALIDATED)
@@ -429,7 +429,7 @@ reattach. The pure geometry, class separation, Transit/MinIO, and retained-stora
 ## Sprint 51.2: The create-vs-delete credential model (cloud-API delete-deny) ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-pulumi/src/Amoebius/Pulumi/Credential.hs` (operational
+**Implementation**: `src/Amoebius/Pulumi/Credential.hs` (operational
 create-only vs elevated delete IAM policy split; the attach-only CSI runtime identity) (BUILT/SCOPED-VALIDATED)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the numbered Validation list below, which is a cloud-API test rather than a policy
@@ -470,7 +470,7 @@ delete authority is the elevated test credential ([Phase 56](phase_56_test_topol
    the same operational credential *can* `ec2:CreateVolume` (a real create succeeds), so the deny is specific to
    the delete dimension (§M.8).
 2. The reference policy expectation (which action → allow/deny) is the committed Phase-0 hand table
-   `test/goldens/ebs_credential_matrix.txt`, authored independently of the generated `Amoebius.Pulumi.Credential`
+   `test/golden/ebs_credential_matrix.txt`, authored independently of the generated `Amoebius.Pulumi.Credential`
    policy (§M.1/§M.3); assert the generated operational and CSI-runtime policies match it action-for-action, and
    that the CSI runtime identity is denied both create and delete.
 3. The committed seeded mutant `mut-46.1-allow-delete` (the operational policy with the `ec2:DeleteVolume` `Deny`
@@ -488,9 +488,9 @@ cloud audit once valid AWS authority is available.
 ## Sprint 51.3: Static-only baked AWS EBS CSI + static PV over volumeHandle ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-pulumi/src/Amoebius/Storage/EbsCsi.hs` (typed static-only EBS CSI
+**Implementation**: `src/Amoebius/Storage/EbsCsi.hs` (typed static-only EBS CSI
 controller/node + PV renderer; no external provisioner), `docker/base/Dockerfile`,
-`src/Amoebius/Image/BakeInventory.hs`, `test/fixtures/phase46/ebs_csi_bake_expected.dhall` (the
+`src/Amoebius/Image/BakeInventory.hs`, `test/fixture/provider_ebs_credential/ebs_csi_bake_expected.dhall` (the
 oracle-pinned provider-driver binary/version oracle) (BUILT at the model/object boundary; binary bake execution UNVERIFIED)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the numbered Validation list below — the baked CSI reaching Ready and binding a
@@ -513,7 +513,7 @@ than building an amoebius attach controller or enabling dynamic provisioning.
 
 - A static-only `Amoebius.Storage.EbsCsi` path: the upstream AWS EBS CSI controller/node binaries and required
   sidecars are baked into the amoebius base image and installed from typed manifests (no Helm/public image
-  pull), version-pinned by the Phase-0 fixture `test/fixtures/phase46/ebs_csi_bake_expected.dhall`; **no**
+  pull), version-pinned by the Phase-0 fixture `test/fixture/provider_ebs_credential/ebs_csi_bake_expected.dhall`; **no**
   external-provisioner container is installed; each fresh PV names `spec.csi.driver: ebs.csi.aws.com`, the
   Pulumi-created EBS ID as `volumeHandle`, and node affinity for the volume's Availability Zone.
 - Placement consumes one `ebs.csi.aws.com` attach slot per unique mounted PVC, using the lesser of the declared
@@ -533,7 +533,7 @@ than building an amoebius attach controller or enabling dynamic provisioning.
    contains no external-provisioner; and an independent cloud audit records no `CreateVolume` call under the CSI
    runtime identity.
 3. The provider-driver extension to `BakeInventory` is checked against the independently authored
-   `test/fixtures/phase46/ebs_csi_bake_expected.dhall`, and each pinned controller/node/sidecar binary executes
+   `test/fixture/provider_ebs_credential/ebs_csi_bake_expected.dhall`, and each pinned controller/node/sidecar binary executes
    by absolute path with its expected version on both base-image architectures.
 4. The committed seeded mutant `mut-46.1-enable-dynamic-provisioner` (adds the external-provisioner plus an
    `ebs.csi.aws.com` provisioning StorageClass) MUST go **red** on the object-set and cloud-audit assertions.
@@ -550,9 +550,9 @@ provider-created handle. The no-dynamic-provisioner model and Kubernetes object 
 ## Sprint 51.4: Provider-volume migration + the `CreateProviderCapacity` storage-scaling arm ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-pulumi/src/Amoebius/Storage/ProviderScaling.hs` (`CreateProviderCapacity`
+**Implementation**: `src/Amoebius/Storage/ProviderScaling.hs` (`CreateProviderCapacity`
 validation/enactment), and the `StorageMigrationDemand`/`ProvisionedStorageMigration` witness in
-`amoebius-pulumi/src/Amoebius/Pulumi/Ebs.hs` (BUILT/SCOPED-VALIDATED)
+`src/Amoebius/Pulumi/Ebs.hs` (BUILT/SCOPED-VALIDATED)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the numbered Validation list below — a replacement that charges old and new
 simultaneously before creating anything, injected copy, verification, and cleanup failures that leave both
@@ -628,9 +628,9 @@ readback. All eight one-short refusals, stale/replay refusal, and overlap accoun
 ## Sprint 51.5: Phase gate — durable EBS retained across teardown + cloud-API delete-deny + static-CSI reattach ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/dhall/phase_47_provider_provision.dhall` (the durable-EBS
-slice of the gate topology), `amoebius-pulumi/test/ContractSpec.hs`,
-`test/integration/ProviderEbsSpec.hs`, and `tools/phase46_{provider_ebs_live,gate}.py`
+**Implementation**: `test/fixture/dhall/provider_dynamic_nodes/provider_provision.dhall` (the durable-EBS
+slice of the gate topology), `test/spec/provider/ContractSpec.hs`,
+`test/spec/integration/ProviderEbsSpec.hs`, and `tools/phase46_{provider_ebs_live,gate}.py`
 (BUILT/SCOPED-VALIDATED)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the numbered Validation list below, run end to end from a `linux-cpu` parent as
@@ -652,7 +652,7 @@ same volume through a freshly rendered static CSI PV and reads its data back unc
 
 ### Deliverables
 
-- The gate over the durable-EBS slice of `test/dhall/phase_47_provider_provision.dhall`: spin up the provider
+- The gate over the durable-EBS slice of `test/fixture/dhall/provider_dynamic_nodes/provider_provision.dhall`: spin up the provider
   cluster ([Phase 49](phase_49_provider_deploy_checkpoint.md)); create the per-PV durable EBS (Sprint 51.1);
   render and observe Ready the baked static-only CSI (Sprint 51.3); bind the Pulumi-created EBS through the static
   CSI PV and write a run-unique marker through the retained-EBS claim; record EBS identity + AZ; `pulumi destroy`
@@ -668,7 +668,7 @@ same volume through a freshly rendered static CSI PV and reads its data back unc
 
 ### Validation
 
-1. Run the gate end-to-end over the committed durable-EBS slice of `test/dhall/phase_47_provider_provision.dhall`:
+1. Run the gate end-to-end over the committed durable-EBS slice of `test/fixture/dhall/provider_dynamic_nodes/provider_provision.dhall`:
    assert the per-PV EBS is created in separate durable state, the static PV uses `driver: ebs.csi.aws.com`,
    `volumeHandle: <that EBS volume ID>`, and matching zone affinity, the EBS CSI components are Ready before the
    bind without an external provisioner, and the sole StorageClass is `kubernetes.io/no-provisioner`. Write a
@@ -679,7 +679,7 @@ same volume through a freshly rendered static CSI PV and reads its data back unc
 3. Issue a **real `ec2:DeleteVolume`** under the operational credential against the live retained/test-flagged
    volume and assert an `AccessDenied`/`UnauthorizedOperation` response with the volume surviving; assert the
    paired positive `ec2:CreateVolume` succeeds under the same credential; check both against
-   `test/goldens/ebs_credential_matrix.txt`. The committed mutant `mut-46.1-allow-delete` MUST go **red**.
+   `test/golden/ebs_credential_matrix.txt`. The committed mutant `mut-46.1-allow-delete` MUST go **red**.
 4. From the cluster-absent state left by Validation 2, with the durable EBS retained, run a second full
    bring-up → bind → read → teardown cycle. Constrain the recreated node group to the recorded EBS Availability
    Zone, re-render the static PV with the same EBS volume ID as its CSI `volumeHandle`, reattach it, and read the

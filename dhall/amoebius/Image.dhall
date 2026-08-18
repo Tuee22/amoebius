@@ -41,7 +41,7 @@ let ImageArtifact =
       }
 
 let ContainerProcess =
-      < AmoebiusRole : < Singleton | Scheduler | Worker | HostDaemon >
+      < AmoebiusRole : < ControlPlaneDaemon | Scheduler | Worker | HostDaemon >
       | BakedService : { binary : Text, args : List Text }
       >
 

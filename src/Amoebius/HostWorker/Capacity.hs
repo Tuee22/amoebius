@@ -90,7 +90,7 @@ provisionAppleHost supply demand = do
   let metal = demandMetalOwner demand
   if supplyMetalProfile supply == metalProfile metal then Right () else Left MetalProfileMismatch
   let sourceKeys = Map.keysSet (metalSourceBytes metal)
-#ifdef PHASE53_OMIT_METAL_WORK_ITEM_MUTANT
+#ifdef APPLE_METAL_HOST_DAEMON_OMIT_METAL_WORK_ITEM_MUTANT
       workloadKeys = Set.delete "jit" (Map.keysSet (metalWorkloadBytes metal))
 #else
       workloadKeys = Map.keysSet (metalWorkloadBytes metal)
@@ -118,7 +118,7 @@ metalEpochPeak demand = do
   values <- traverse epochBytes (metalCoexistenceEpochs demand)
   case values of
     [] -> Left MetalEpochDomainMismatch
-#ifdef PHASE53_FAVORABLE_METAL_EPOCH_MUTANT
+#ifdef APPLE_METAL_HOST_DAEMON_FAVORABLE_METAL_EPOCH_MUTANT
     _ -> Right (minimum values)
 #else
     _ -> Right (maximum values)
@@ -135,7 +135,7 @@ metalEpochPeak demand = do
 
 hostMemoryDebit :: AppleHostDemand -> Word64 -> Either AppleProvisionError Word64
 hostMemoryDebit demand epochPeak = checkedSum
-#ifdef PHASE53_DROP_METAL_OVERLAP_DEBIT_MUTANT
+#ifdef APPLE_METAL_HOST_DAEMON_DROP_METAL_OVERLAP_DEBIT_MUTANT
   [demandVmMemoryBytes demand, demandSystemHeadroomBytes demand, demandWorkerRuntimeBytes demand]
 #else
   [demandVmMemoryBytes demand, demandSystemHeadroomBytes demand, demandWorkerRuntimeBytes demand, epochPeak]

@@ -111,7 +111,7 @@ functions under test.
 - **Representative set:** `ReadData`, `MutateData`, `StartWorkflow`, `ObserveWorkflow`, and `EndSession` ports,
   with tenant-wide, role-shared, subject-owned, and grant-mediated policies. Each allow has a same-action denial
   differing only in subject, tenant, role, grant, or authority epoch.
-- **Pinned oracles:** `test/fixtures/ui_authorization/action_registry.tsv` owns the exact normalized action
+- **Pinned oracles:** `test/fixture/ui_authorization/action_registry.tsv` owns the exact normalized action
   tuples; `authorization_matrix.tsv` owns `CanRead`/`CanInvoke` allow/deny decisions, including explicit
   hidden-but-invocable and default-deny rows; `stale_decision_cases.tsv` owns policy/membership/grant/scope
   epoch outcomes; and `decode_errors.tsv` pins failures.
@@ -154,7 +154,7 @@ HTTP routing, handler implementation correctness, or provider-side isolation.
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `src/Amoebius/Ui/Security/Authorization.hs`,
-`test/ui/AuthorizationSpec.hs`, `test/ui/AuthorizationReference.hs`, and `tools/ui_authorization_gate.py`
+`test/spec/ui/AuthorizationSpec.hs`, `test/spec/ui/AuthorizationReference.hs`, and `tools/ui_authorization_gate.py`
 **Blocked by**: None.
 **Independent Validation**: `cabal test ui-authorization-spec` compares
 production results with Phase-0 pins and the separate reference evaluator, verifies empty denied traces, and

@@ -21,8 +21,8 @@ import toolchain  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CORPUS = ROOT / "test/live/fixtures/reconcile-corpus/corpus.json"
-EXPECTED = ROOT / "test/live/fixtures/reconcile-corpus/expected-actions.json"
+CORPUS = ROOT / "test/fixture/live/reconcile-corpus/corpus.json"
+EXPECTED = ROOT / "test/fixture/live/reconcile-corpus/expected-actions.json"
 READ_ONLY_MODULES = (
     "src/Amoebius/Manifest/Preflight.hs",
     "src/Amoebius/Manifest/Diff.hs",

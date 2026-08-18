@@ -469,7 +469,7 @@ attachments against the base `BoundExecutionSet`, and groups every tenant's comp
 resolved `ExecutionUnitId`. The delta algebra covers every Pod or host `ResourceEnvelope` axis; keyed shared
 extents union only on equal model/backing, numeric axes add, arm mismatches reject, and merge is proven
 associative with an explicit empty identity. A shared target's deltas are summed and its base
-singleton/controller is replaced exactly once; a dedicated target supplies one complete seed before its
+control-plane daemon/controller is replaced exactly once; a dedicated target supplies one complete seed before its
 delta is applied. Observed executor commitments live in one deployment-global target map with tenant
 memberships, never copied under every tenant. `ProvisionedTenantPolicyPersistence` stores private
 `ProvisionedTenantPolicyExecutionRef`s plus provider-indexed sealed output/action maps, exact old/new targets,

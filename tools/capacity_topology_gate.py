@@ -32,6 +32,7 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
@@ -40,7 +41,8 @@ FOLD_ORACLE = ROOT / "test/oracle/capacity_topology/fold_cases.tsv"
 COMPILE_ORACLE = ROOT / "test/oracle/capacity_topology/compile_fail.tsv"
 GATE1_ORACLE = ROOT / "test/oracle/capacity_topology/gate1_cases.tsv"
 COMPATIBILITY_ORACLE = ROOT / "test/oracle/capacity_topology/compatibility.tsv"
-MUTANTS = ROOT / "test/mutant/capacity_topology/mutants.tsv"
+MUTANT_CAPABILITY = "capacity_topology"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 RESULTS = ROOT / ".build/dsl/capacity-topology/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/capacity-topology/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/capacity-topology"
@@ -111,7 +113,7 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
     compile_rows = read_tsv(COMPILE_ORACLE)
     gate1_rows = read_tsv(GATE1_ORACLE)
     compatibility = read_tsv(COMPATIBILITY_ORACLE)
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(folds) != 15 or len({row["case"] for row in folds}) != 15:
         raise GateFailure("fold oracle must contain fifteen unique cases")
     if len({row["twin"] for row in folds}) != 15:
@@ -310,11 +312,17 @@ PROVEN_SURFACES = {"base-fold-compile-totality"}
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=7, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
-        register="1", substrate="none", sides=SIDES
+        phase=8, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        register="1", substrate="none", lane="none", sides=SIDES
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+
+    # Clause 15 first: a run that cannot name the architecture it executed on, or
+    # that is executing under translation, has nothing worth proving.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []

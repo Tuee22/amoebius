@@ -51,8 +51,8 @@ elsewhere. There is nothing to install, nothing to poll, and nothing to reconcil
 - **One binary, two enactment frames.** The single amoebius binary composes the whole pipeline. The **build**
   half — producing multi-arch images and pushing them to the in-cluster `distribution` registry — is enacted
   by the **sudo host daemon** ([image_build_doctrine.md](./image_build_doctrine.md)). The
-  **test / promote / rollout** half is enacted by the **in-cluster singleton**
-  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)). No third process arbitrates between them.
+  **test / promote / rollout** half is enacted by the **in-cluster control-plane daemon**
+  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon)). No third process arbitrates between them.
 - **Auditability comes from an immutable ledger, not a controller's opinion.** What a conventional platform
   gets from "the state Argo believes is desired," amoebius gets from the immutable `Release` ledger ([§2](#2-release-and-the-immutable-release-ledger-releasehash)) plus
   the ETag-CAS pointer history ([§3](#3-environment-and-the-etag-cas-promotion-pointer)): a content-addressed, append-only record of every generation ever built
@@ -92,7 +92,7 @@ delegates their storage, reconciliation, evidence, and provider mechanisms as fo
 | That env differences are **deployment rules**, and app bytes are byte-identical across environments | [app_vs_deployment_doctrine.md §3](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs) / [§4](./app_vs_deployment_doctrine.md#4-the-dividing-line--a-litmus-test) |
 | `create-new → verified-migrate → retire-old` for the schema-migration phase | [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) |
 | Gateway-API `HTTPRoute` `backendRefs` weights the canary shifts | [network_fabric_doctrine.md](./network_fabric_doctrine.md) |
-| The control-plane singleton that runs the promote/rollout half | [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) |
+| The control-plane daemon that runs the promote/rollout half | [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon) |
 | The bounded UI language, plan envelope, browser/server ABI, and compatibility witness | [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
 
 > **Validated instance.** Phase 44 built all four delivery values in `amoebius-release` and validated their
@@ -418,7 +418,7 @@ elsewhere:
 | Gateway-API `HTTPRoute` weights the canary shifts, and the no-mesh verdict | [network_fabric_doctrine.md](./network_fabric_doctrine.md) |
 | Pulsar subscription / consumer-group cutover mechanics | [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | The build half of the pipeline (multi-arch images, the `distribution` registry) | [image_build_doctrine.md](./image_build_doctrine.md) |
-| The sudo host daemon and the in-cluster singleton that enact the two halves | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
+| The sudo host daemon and the in-cluster control-plane daemon that enact the two halves | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | The UI program digest, client/server plan envelope, stale-plan behavior, and UI compatibility witness | [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
 | The offline storage/replay horizon, migration table, retained old codecs/handlers, and outbox-preservation rule | [browser_offline_runtime_doctrine.md §11](./browser_offline_runtime_doctrine.md#11-release-schema-and-compatibility-horizon) |
 | The catalogued unrepresentability of an unverified promotion | [illegal_state_catalog.md §3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) |
@@ -447,7 +447,7 @@ third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) promote-unverified→prod is type-foreclosed unrepresentable
 - [Browser Offline Runtime](./browser_offline_runtime_doctrine.md) — [§11](./browser_offline_runtime_doctrine.md#11-release-schema-and-compatibility-horizon) the offline compatibility witness consumed by promotion and rollout
 - [Image Build Doctrine](./image_build_doctrine.md) — the build half (multi-arch images, the `distribution` registry)
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) the control-plane singleton that runs promote/rollout; the host daemon that builds
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§3](./daemon_topology_doctrine.md#3-the-control-plane-daemon) the control-plane daemon that runs promote/rollout; the host daemon that builds
 - [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) pins a coherent UI program and client/server ABI into each release
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — reconciler tiers (a) cloud-IaC and (b) the tag-discovery host reconciler, distinct from tier (c)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

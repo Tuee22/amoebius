@@ -1,5 +1,0 @@
---- a/amoebius-runtime/src/Amoebius/Cluster/NodeProvisioner.hs
-+++ b/amoebius-runtime/src/Amoebius/Cluster/NodeProvisioner.hs
-@@ seeded mutant: derive the target from the base count without consuming the signal
--  targetCount = if signalActive then baseCount + 1 else baseCount
-+  targetCount = baseCount

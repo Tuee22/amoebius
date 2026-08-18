@@ -27,7 +27,7 @@ newtype InventoryDiff = InventoryDiff (Set InventoryEntry)
 
 diffInventory :: Inventory -> Inventory -> InventoryDiff
 diffInventory (Inventory before) (Inventory after) = InventoryDiff
-#ifdef PHASE54_TAG_QUERY_MUTANT
+#ifdef TEST_TOPOLOGY_DSL_TAG_QUERY_MUTANT
   (Set.filter inventoryTestOwned after `Set.difference` before)
 #else
   (after `Set.difference` before)

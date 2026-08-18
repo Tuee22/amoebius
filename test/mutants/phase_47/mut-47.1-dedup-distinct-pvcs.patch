@@ -1,5 +1,0 @@
---- a/amoebius-runtime/src/Amoebius/Cluster/NodeProvisioner.hs
-+++ b/amoebius-runtime/src/Amoebius/Cluster/NodeProvisioner.hs
-@@ seeded mutant: count every old/replacement pair as one attachment
--  requiredAttachments = size (fromList pvcIdentities)
-+  requiredAttachments = if null pvcIdentities then 0 else 1

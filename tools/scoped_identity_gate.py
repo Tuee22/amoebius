@@ -26,12 +26,14 @@ from typing import Any, Mapping
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
-FIXTURES = ROOT / "test/fixtures/ui_scope"
-MUTANTS = ROOT / "test/mutant/scoped_identity/mutants.tsv"
+FIXTURES = ROOT / "test/fixture/ui_scope"
+MUTANT_CAPABILITY = "scoped_identity"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/scoped_identity/validation_locus.tsv"
 MUTANT_FIXTURE = ROOT / "test/mutant/scoped_identity/drop_owner_equality.mutant"
 RESULTS = ROOT / ".build/dsl/scoped-identity/phase-results.tsv"
@@ -181,7 +183,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         "UntrustedResourceId", "ScopeRetagForbidden", "DeclassificationForbidden",
     }:
         raise GateFailure("compile-fail error oracle drifted")
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 1:
         raise GateFailure("Phase-20 mutant manifest must contain exactly one row")
     if not MUTANT_FIXTURE.is_file():
@@ -205,7 +207,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
 def item_classes() -> dict[str, str]:
     """Enumerate what the run actually read, with the class that decides each entry."""
     classes = {row["entry"].strip(): row["class"].strip() for row in read_tsv(LOCUS)}
-    for row in read_tsv(MUTANTS):
+    for row in mutant_registry.capability(MUTANT_CAPABILITY):
         classes[row["mutant"].strip()] = "mutant"
     return classes
 

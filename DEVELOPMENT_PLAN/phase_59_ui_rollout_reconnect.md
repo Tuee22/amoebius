@@ -97,8 +97,8 @@ cursor, and action identities. The owners maintain live projected streams while 
 weights. The transition includes B catch-up, 0→100 traffic shift, an old-client request, same-owner cursor
 resume, same-tenant and cross-tenant cursor replays, and CAS rollback to A.
 
-**Pinned independent oracle.** Phase 0 commits `test/golden/phase_58_rollout_timeline.tbl`,
-`test/golden/phase_58_cursor_expectations.json`, and `test/golden/phase_58_access_matrix.tbl`. The timeline
+**Pinned independent oracle.** Phase 0 commits `test/golden/ui_rollout_reconnect/rollout_timeline.tbl`,
+`test/golden/ui_rollout_reconnect/cursor_expectations.json`, and `test/golden/ui_ha_multizone/access_matrix.tbl`. The timeline
 requires `B watermark reached < first B traffic < old drain`; the cursor table fixes accepted sequence ids
 without consulting the projector implementation; the access matrix pairs owner success with same-tenant
 non-owner and equal-shaped foreign-tenant denials.
@@ -128,12 +128,12 @@ named caller Pod using each real user session must be denied direct UI-server Po
 MinIO, and SQL paths. CNI flow records and provider authentication/audit—not client error text—decide the
 result.
 
-**Committed mutants.** `test/mutants/phase_57_shift_before_watermark.dhall` must fail the external timeline,
-and `test/mutants/phase_57_discard_resume_cursor.dhall` must fail the independent broker/browser sequence
-predicate. `test/mutants/phase_57_drop_tenant_cursor_key.patch` must leak or advance the equal-shaped
+**Committed mutants.** `test/mutant/ui_rollout_reconnect/shift_before_watermark.dhall` must fail the external timeline,
+and `test/mutant/ui_rollout_reconnect/discard_resume_cursor.dhall` must fail the independent broker/browser sequence
+predicate. `test/mutant/ui_rollout_reconnect/drop_tenant_cursor_key.patch` must leak or advance the equal-shaped
 foreign-tenant cursor and fail the access/broker oracle. A hardcoded success page cannot reproduce the
 post-start nonce across the API, broker, gateway, and browser observers.
-`test/mutants/phase_57_stale_redis_registration.patch` keeps an A registration routable after drain and must
+`test/mutant/ui_rollout_reconnect/stale_redis_registration.patch` keeps an A registration routable after drain and must
 fail the backend/Redis/cursor timeline.
 
 ## Doctrine adopted
@@ -159,9 +159,9 @@ fail the backend/Redis/cursor timeline.
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/ReleaseTransition.hs`,
 `src/Amoebius/Ui/Projection/Cursor.hs`, `src/Amoebius/Ui/Realtime/Drain.hs`,
-`test/live/UiRolloutSpec.hs`, `tools/phase57_ui_rollout_live.py`, and `tools/phase57_gate.py`
+`test/spec/live/UiRolloutSpec.hs`, `tools/ui_rollout_reconnect_live.py`, and `tools/ui_rollout_reconnect_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/phase57_gate.py`; scoped transition,
+**Independent Validation**: `python3 tools/ui_rollout_reconnect_gate.py`; scoped transition,
 cursor, registration, fresh-journal, durable reconnect, and mutant observations are tested. Real Keycloak,
 Gateway/Pulsar/browser/API/CNI observations remain `UNVERIFIED`.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
@@ -183,7 +183,7 @@ Deliver one coherent, reversible UI release transition with scope-preserving rec
 
 ### Validation
 
-1. Run `python3 tools/phase57_gate.py` on `linux-cpu`; the scoped canonical
+1. Run `python3 tools/ui_rollout_reconnect_gate.py` on `linux-cpu`; the scoped canonical
    transition must match the pinned custody and local timeline/cursor/scope predicates, all four mutants must
    fail at their pinned loci, and unsupported provider observations must remain `UNVERIFIED`.
 

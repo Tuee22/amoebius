@@ -1,5 +1,0 @@
---- a/test/live/Phase58UiHaSpec.hs
-+++ b/test/live/Phase58UiHaSpec.hs
-@@ fault
-- isolateCompleteZone selectedZone
-+ stopOnePod selectedZone

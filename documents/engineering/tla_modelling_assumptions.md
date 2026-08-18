@@ -35,9 +35,9 @@ completed later. That framing is retired for two reasons converged during the DS
 2. **The obligation covers both migration branches.** The sole amoebius simulation/proof obligation is now
    **gateway migration — both the `Planned` and `Failover` branches** of `GatewayMigration` (this document
    previously scoped the model to `Failover` only and treated `Planned` RPO=0 as merely assumed). The
-   First-Axis singleton-election obligation is **removed**: the control-plane singleton is a Kubernetes
+   First-Axis control-plane-election obligation is **removed**: the control-plane daemon is a Kubernetes
    Deployment `replicas=1` whose single-instance is delegated to k8s/etcd, with no bespoke election
-   ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)).
+   ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon)).
 
 ## Where its content went
 

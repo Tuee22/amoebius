@@ -76,7 +76,7 @@ runtime-checked.
 ## 2. A migration is a typed diff, not a new operation
 
 An "`InForceSpec` migration" introduces no new machinery. It is the typed diff between the in-force
-`RootInForceSpec` and a newly-uploaded one, submitted through the singleton's `dhall update` endpoint and
+`RootInForceSpec` and a newly-uploaded one, submitted through the control-plane daemon's `dhall update` endpoint and
 realized by the **ordinary reconcile** — desired is the object set produced by pure
 `bind/expand → plan/resolve infrastructure → provision → renderAll` against authenticated materialization,
 observed is cluster state, and the diff is

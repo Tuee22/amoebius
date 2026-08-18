@@ -84,7 +84,7 @@ This is the spine: how an authored file becomes a running cluster.
 - [`manifest_generation_doctrine.md` §1](./engineering/manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not) — why manifests are rendered from types rather than templated.
 - [`manifest_generation_doctrine.md` §2](./engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) — the sealed value and the single public function that consumes it.
 - [`cluster_lifecycle_doctrine.md` §9](./engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) — the reconcile loop, and why it is deliberately not a state machine.
-- [`bootstrap_sequence_doctrine.md` §4](./engineering/bootstrap_sequence_doctrine.md#4-the-host-daemon--singleton-handoff) — the one moment authority moves from the host to the cluster.
+- [`bootstrap_sequence_doctrine.md` §4](./engineering/bootstrap_sequence_doctrine.md#4-the-host-daemon--control-plane-daemon-handoff) — the one moment authority moves from the host to the cluster.
 
 ## Stop 5. What the gates establish, and what they do not
 

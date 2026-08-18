@@ -111,14 +111,22 @@ test/
 └── harness/**                            fakes, argv shims, OS-boundary observers, gate scripts
 
 app/
-└── amoebius/Main.hs                      the one entry point: argv dispatch, nothing else
+├── amoebius/Main.hs                      the one entry point: argv dispatch, nothing else
+└── amoebius/Amoebius/Entry/**            one entry-point-only seam per argv verb, never a second binary
 ```
 
 `app/`'s second level has exactly one name, because there is exactly one executable and the role it runs is a
 decoded value rather than a filename
 ([daemon_topology_doctrine.md §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)). Below
-that name sits `Amoebius/Ui/Server/Main.hs`, an entry-point-only module kept out of `src/` so it links against
-dsl-core; it is a linkage seam, not a second binary.
+that name sits `Amoebius/Entry/**`: **one module per argv verb, each an entry-point-only seam kept out of
+`src/` so it links against dsl-core rather than recompiling it.** A seam is not a second binary.
+
+**The namespace is the enumeration, and that is why it is a namespace.** This paragraph once named a single
+file, `Amoebius/Ui/Server/Main.hs`, and when a second seam arrived it went unmentioned — a tree block listing
+one file cannot say how many there are. `Amoebius.Entry.*` is checkable: every module in it is a seam, every
+seam is in it, and adding one cannot silently escape the count. It also removes a trap the old names set — a
+module called `...Main` that defines no `main` reads as an executable, so `app/` appeared to hold three
+binaries where it holds one.
 
 Every `test/` second-level name is a **singular** role noun. A plural sibling, a case variant, or an eighth
 role is non-conforming on sight; module hierarchy lives *below* `test/spec/`, never at `test/`'s second level,
@@ -175,15 +183,15 @@ closure condition; none may receive new content.
 | `DEVELOPMENT_PLAN/ledgers/**` | authored reasoning retained in a phase doc; generated ledger views to `.build/docs/**` |
 | `test/enumeration/**` | `.build/test-surfaces/**` |
 | `test/golden/phase_*_ledger.json` | `.build/runs/<phase>/<run-id>/ledger.json` |
-| `mutants/**`, `test/live/mutants/**`, `test/host/mutants/**` | `test/mutant/**`, one record format |
-| `test/goldens/**`, `test/fixtures/**`, `test/negatives/**`, `test/Ui/**` | their singular-role siblings |
+| `mutants/**`, `test/live/mutants/**`, `test/host/mutants/**` | **migrated.** One `test/mutant/**` under one registry, `test/mutant/registry.tsv`; the roots that actually existed were `mutants/`, `test/mutants/`, `test/kernel/mutants/`, and `test/inject/mutants/` |
+| `test/goldens/**`, `test/fixtures/**`, `test/negatives/**`, `test/Ui/**` | **migrated.** Each is its singular-role sibling; `test/Ui/**` and `test/ui/**` are one `test/spec/ui/**` |
 | `toolchain/bin/**`, `toolchain/runtime/**`, `toolchain/downloads/**`, `toolchain/cache/**` | `.build/toolchain/**`; the authored requirements file moves beside its only consumer under `tools/**` |
 | `docker/**` | **migrated.** The root is gone; the typed bake catalog under `dhall/**` is the authored half and `.build/docker/**/Dockerfile` the rendered one |
-| `app/singleton/**` | a decoded `InClusterRole` arm and an `amoebius singleton` verb on the one binary; its entry-point-only parts to `src/**` |
-| `infernix/app/**` | a `Worker(MlBatchCoordinator)` role or a test-suite stanza; a gate driver is not an executable |
-| `ui-runtime/**` | `ui/**`, under the one spago project |
-| the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots | stanzas in `amoebius.cabal`; their source to `src/**`, `test/**`, `proto/**`, and `dhall/**` |
-| out-of-tree `hs-source-dirs` reaching a sibling checkout | a `source-repository-package` in `cabal.project`, so the input is resolvable from the source snapshot |
+| `app/singleton/**` | **relocated.** An `amoebius control-plane` verb over `app/amoebius/Amoebius/Entry/ControlPlane.hs`, beside the other seam and for the same reason: `hs-source-dirs` is a search path, not a module filter, so an entry point in `src/**` recompiles the shared core into the executable instead of linking it. The decoded `InClusterRole` arm stays with the phase that owns the role |
+| `infernix/app/**` | **migrated.** `test/spec/infernix/NativeDriver.hs` under a test-suite stanza; a gate driver is not an executable |
+| `ui-runtime/**` | **migrated.** `ui/**`, under the one spago project at `ui/spago.yaml` |
+| the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots | **migrated.** All fourteen are stanzas in `amoebius.cabal`, their source under `src/**`, `test/**`, `proto/**`, and `dhall/**` |
+| out-of-tree `hs-source-dirs` reaching a sibling checkout | **migrated.** The infernix and jitML cores are `source-repository-package` entries in `cabal.project`, so the input is resolvable from the source snapshot |
 | root dependency lock/freeze files | `.build/locks/**` |
 | `toolchain/pins.json` | **migrated.** The authored half is the compatibility requirements — ranges, release channels, asset patterns, no paths; the resolved half is `.build/toolchain/resolved.json`, written per run |
 | `tools/doc_lint_corpus/**/negative_*` and `negative_multi_*` | keep authored positive seeds and mutation recipes; materialize negative copies under `.build/test-corpora/**` |
@@ -312,9 +320,9 @@ patterns in §3.2. A generator requiring a new output class must amend this inve
 | `dist-newstyle/**`, `.cabal-sandbox/**`, `.ghc.environment.*` | Cabal/GHC plans, builds, indexes, objects, interfaces |
 | `**/*.{o,hi,dyn_o,dyn_hi,hie}` | Haskell compiler output |
 | `node_modules/**` | npm-installed dependency trees and their nested lock metadata |
-| `ui-runtime/.spago/**`, `ui-runtime/output/**`, `ui-runtime/dist/**` | Spago and PureScript build state |
+| `ui/.spago/**`, `ui/output/**`, `ui/dist/**` | Spago and PureScript build state |
 | `**/__pycache__/**`, `**/*.{pyc,pyo,pyd}` | Source-adjacent Python interpreter caches; permitted locally only because both ignore contracts exclude them |
-| `.pytest_cache/**`, `.coverage*`, `htmlcov/**`, `coverage/**` | Python and general coverage state |
+| `.pytest_cache/**`, `.coverage`, `.coverage.*`, `htmlcov/**`, `coverage/**` | Python and general coverage state |
 | `toolchain/bin/**`, `toolchain/runtime/**`, `toolchain/downloads/**`, `toolchain/cache/**` | acquired tools and archives |
 | `.phase*-build/**`, `phase*-build/**`, `build/**`, `_build/**`, `out/**`, `output/**`, `dist/**` | phase and language build roots |
 | `.cache/**`, `tmp/**`, `temp/**` | local caches and temporary files |
@@ -356,8 +364,8 @@ follows:
 | `DEVELOPMENT_PLAN/evidence/**/*.tsv` | Generated run evidence; relocate to `.build/runs/<phase>/<run-id>/**`, attest in `.build/evidence-store/**`, and remove from the plan tree |
 | `.build/**/*.tsv` | Canonical local generated output; ignored and never version-controlled |
 | `phase-results.tsv`, `validation-locus-ledger.tsv`, `live-*.tsv`, `sprint-*.tsv`, `*-red-before-correction.tsv` in any root | Generated observation or report; canonicalize beneath the owning run bundle |
-| `dhall/examples/locus_registry.tsv`, `test/fixtures/**/*.tsv`, `test/oracle/formal/**/*.tsv`, non-ledger `test/golden/**/*.tsv`, `test/oracle/**/*.tsv` | Candidate authored fixture/oracle; version-control only with independent authorship or review provenance |
-| `mutants/**/*.tsv`, `test/mutants/**/*.tsv`, `tools/ledger_lint_corpus/**/*.tsv` | Candidate authored negative corpus; version-control only when rows are intentionally authored and not emitted by the system under test |
+| `dhall/examples/locus_registry.tsv`, `test/fixture/**/*.tsv`, `test/oracle/formal/**/*.tsv`, non-ledger `test/golden/**/*.tsv`, `test/oracle/**/*.tsv` | Candidate authored fixture/oracle; version-control only with independent authorship or review provenance |
+| `mutants/**/*.tsv`, `test/mutant/**/*.tsv`, `tools/ledger_lint_corpus/**/*.tsv` | Candidate authored negative corpus; version-control only when rows are intentionally authored and not emitted by the system under test |
 | Any `expected_hashes.tsv`, `expected_digests.tsv`, `reference_traces.tsv`, expected-output table, or copied inventory | Ambiguous migration input; the owning phase must establish independent authorship or regenerate it under `.build/**` |
 
 Renaming a run ledger to “golden” or an emitted table to “oracle” does not make it source. Phase 0 records the
@@ -411,6 +419,17 @@ publisher's own checksum fetched in the same run; the package manager is used fo
 what only it can supply, because a package-manager install is its own trust root and cannot be checked
 against a publisher digest.
 
+**One platform vocabulary.** An authored requirement that names a platform names it as `<os>-<arch>`, where
+the architecture half is the closed lane vocabulary of
+[`substrate_doctrine.md` §1.1](./substrate_doctrine.md#11-the-natural-architecture-rule) — `amd64` or `arm64`,
+never a kernel's own spelling of either. One normalizer produces that token and every reader of an authored
+platform table consumes it, because a second normalizer is a second answer: two of them once disagreed about
+Apple silicon, and the authored tables carried both spellings to paper over it. A requirement whose publisher
+offers no asset for the host's token is a refusal naming the token, never a fallback to another one — an
+artifact of another architecture is exactly what
+[`development_plan_standards.md` §S](../../DEVELOPMENT_PLAN/development_plan_standards.md#s-universal-artifact-hygiene-gate)
+clause 15 forbids a run to execute.
+
 No tracked file may contain an absolute path beneath a developer home directory. Gates resolve logical tool
 names through the run-local toolchain record. Standard guest paths may be contractual only when the guest
 image itself owns them.
@@ -448,17 +467,17 @@ each retires with the root it covers, owned by the phase that relocates it.
 # intends is how a second home for a generated class survives review. The rules covering
 # section 2.2 migration surfaces are temporary and retire with the root they cover.
 
-# Canonical contained-state roots.
+# Canonical contained-state roots. Production and test state are both local but have
+# different teardown authority; neither is a source or container-context input.
 /.build/
 /.data/
 /.test_data/
 
-# Pre-containment migration surfaces.
+# Pre-containment migration surfaces; remove these rules with their legacy paths.
 /gen/
 /DEVELOPMENT_PLAN/evidence/
 /test/enumeration/
 /test/golden/phase_*_ledger.json
-/test/golden/phase_55_expected_run_ledger.json
 
 # Dependency resolution is refreshed dynamically and never committed.
 *.lock
@@ -468,8 +487,15 @@ npm-shrinkwrap.json
 pnpm-lock.yaml
 go.sum
 
-# Haskell and formal-model build output. Cabal roots and discovery scratch are
-# redirected beneath `.build/**`; only source-adjacent compiler products need classes.
+# Haskell and formal-model build output. Cabal roots are redirected beneath `.build/**`
+# by a `--builddir` argument, which is a convention each invocation must carry rather
+# than a property of the repository: cabal rejects `builddir` in project and config
+# files and ignores `CABAL_BUILDDIR`, so a bare `cabal build` writes a root here. These
+# class rules are unanchored on purpose — they name generated content wherever it lands,
+# and never claim a second top-level root the section 2 tree does not have.
+dist-newstyle/
+.cabal-sandbox/
+.ghc.environment.*
 *.o
 *.hi
 *.dyn_o
@@ -478,15 +504,31 @@ go.sum
 *.tla
 *.cfg
 
-# JavaScript and PureScript legacy build output below the authored UI root.
-/ui-runtime/.spago/
-/ui-runtime/output/
-/ui-runtime/dist/
+# JavaScript and PureScript build output. `node_modules/` is unanchored for the same
+# reason as the Cabal roots: the toolchain installs it beneath `.build/` with `--prefix`,
+# but `package.json` sits at the repository root, so a bare `npm install` lands here.
+node_modules/
+
+# Legacy PureScript build output below the authored UI root.
+/ui/.spago/
+/ui/output/
+/ui/dist/
 
 # Python may keep source-adjacent interpreter caches. They are always generated
 # and must never become repository inputs.
 __pycache__/
 *.py[cod]
+
+# Python test and coverage state, written beside the run that produced it.
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Browser-harness reports. Playwright writes both to the working directory by default,
+# so neither reaches `.build/runs/**` on its own.
+playwright-report/
+test-results/
 
 # Runtime output written beside a run.
 *.log
@@ -533,7 +575,6 @@ DEVELOPMENT_PLAN/evidence/**
 test/enumeration
 test/enumeration/**
 test/golden/phase_*_ledger.json
-test/golden/phase_55_expected_run_ledger.json
 
 # Dependency resolution is refreshed dynamically.
 **/*.lock
@@ -543,6 +584,20 @@ test/golden/phase_55_expected_run_ledger.json
 **/pnpm-lock.yaml
 **/go.sum
 
+# Cabal and GHC build roots. Redirection beneath `.build/` is a per-invocation
+# `--builddir` argument, not a repository property, so a bare `cabal build` leaves a root
+# in the context. `**/`-prefixed on purpose: a class anywhere, never a new context root.
+**/dist-newstyle
+**/dist-newstyle/**
+**/.cabal-sandbox
+**/.cabal-sandbox/**
+**/.ghc.environment.*
+
+# Package-manager dependency trees. Installed beneath `.build/` with `--prefix`, but
+# `package.json` sits at the context root, so a bare `npm install` lands here.
+**/node_modules
+**/node_modules/**
+
 # Haskell, JavaScript, and PureScript build products.
 **/*.o
 **/*.hi
@@ -551,12 +606,12 @@ test/golden/phase_55_expected_run_ledger.json
 **/*.hie
 **/*.tla
 **/*.cfg
-ui-runtime/.spago
-ui-runtime/.spago/**
-ui-runtime/output
-ui-runtime/output/**
-ui-runtime/dist
-ui-runtime/dist/**
+ui/.spago
+ui/.spago/**
+ui/output
+ui/output/**
+ui/dist
+ui/dist/**
 
 # Source-adjacent Python interpreter caches are local accelerators, never image
 # build inputs.
@@ -565,6 +620,20 @@ ui-runtime/dist/**
 **/*.pyc
 **/*.pyo
 **/*.pyd
+
+# Python test and coverage state, written beside the run that produced it.
+**/.pytest_cache
+**/.pytest_cache/**
+**/.coverage
+**/.coverage.*
+**/htmlcov
+**/htmlcov/**
+
+# Browser-harness reports. Playwright writes both to the working directory by default.
+**/playwright-report
+**/playwright-report/**
+**/test-results
+**/test-results/**
 
 # Runtime output written beside a run.
 **/*.log

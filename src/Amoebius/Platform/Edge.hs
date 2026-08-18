@@ -68,22 +68,22 @@ provisionEdge demand = do
                   then Left "public-edge-image-forbidden"
                   else Right (ProvisionedEdge demand routes)
  where
-#ifdef PHASE32_DROP_OIDC_MUTANT
+#ifdef KEYCLOAK_INGRESS_DROP_OIDC_MUTANT
   effectiveOidc _ = False
 #else
   effectiveOidc = edgeOidcGuard
 #endif
-#ifdef PHASE32_DROP_ORIGIN_MUTANT
+#ifdef KEYCLOAK_INGRESS_DROP_ORIGIN_MUTANT
   effectiveOrigin _ = False
 #else
   effectiveOrigin = edgeExactOrigin
 #endif
-#ifdef PHASE32_NONCE_REPLAY_MUTANT
+#ifdef KEYCLOAK_INGRESS_NONCE_REPLAY_MUTANT
   effectiveNonce _ = False
 #else
   effectiveNonce = edgeSingleUseNonce
 #endif
-#ifdef PHASE32_DIRECT_BACKEND_MUTANT
+#ifdef KEYCLOAK_INGRESS_DIRECT_BACKEND_MUTANT
   effectiveDirect _ = True
 #else
   effectiveDirect = edgeDirectBackendPublished
@@ -115,7 +115,7 @@ validateRecreateWitness witness
   | not (recreateMarkerByteIdentical witness) = Left "cluster-recreate-marker-drift"
   | otherwise = Right witness
  where
-#ifdef PHASE32_DELETE_NOOP_MUTANT
+#ifdef KEYCLOAK_INGRESS_DELETE_NOOP_MUTANT
   effectiveNew = recreateOldClusterIdentity
 #else
   effectiveNew = recreateNewClusterIdentity

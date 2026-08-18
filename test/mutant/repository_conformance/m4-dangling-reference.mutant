@@ -1,0 +1,6 @@
+check=no-dangling-reference
+operator=dropped-reference-update
+mutation=replace | tools/pulsar_client_gate.py | test/negative/pulsar_client/{fixture} | amoebius-pulsar/test/compile_fail/{fixture}
+statement=Leave one tracked consumer naming a path the relocation moved away from. A relocation is
+statement=a rename plus its reference update performed as one edit; half of it is the defect this
+statement=check exists to refuse.

@@ -22,6 +22,7 @@ Exit status: 0 when every side passes, 1 otherwise.
 
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 import shutil
@@ -74,11 +75,16 @@ PROPERTIES = {
 }
 
 EXPECTED_RESULTS = {
-    # 88 is the number of catalog entries carrying a Delivery-owner across
+    # 90 is the number of catalog entries carrying a Delivery-owner across
     # documents/illegal_state/*.md — independently checkable with a grep, and the same
-    # count the registry reader reconciles against.
-    "catalog-entries": "88/88-mapped",
-    "registry-subcases": "104/104-reconciled",
+    # count the registry reader reconciles against. It was 88 until the one-binary
+    # amendment added `3.89 context-role-cell` and `3.90 role-indexed-cardinality`, the
+    # context/role grid's two Gate-1 entries, without updating these pins in the same
+    # change. The three counts reconcile with each other and with `discharged-subcases`,
+    # which is what makes the update a judgement rather than a fit to whatever ran:
+    # 106 subcases = 33 discharged here + 73 deferred to a later owner.
+    "catalog-entries": "90/90-mapped",
+    "registry-subcases": "106/106-reconciled",
     "registry-mutants": "4/4-red",
     "gate1-corpus": "14/14-red-exact-with-green-twins",
     "gate2-corpus": "13/13-red-tagged-with-green-twins",
@@ -87,7 +93,7 @@ EXPECTED_RESULTS = {
     "quickcheck-properties": "4/4-green-checkCoverage",
     "rke2-arms": "3/3-exhausted-PROVEN",
     "discharged-subcases": "33/33",
-    "deferred-subcases": "71/71-owner-pinned",
+    "deferred-subcases": "73/73-owner-pinned",
     "union-arm-mutant": "red",
     "normalization-mutant": "red",
     "gadt-index-mutant": "red",
@@ -180,6 +186,16 @@ def registry_side() -> tuple[bool, int, int, int]:
 def registry_mutants() -> int:
     """Each mutator perturbs one reconciliation dimension; a survivor means no teeth."""
 
+    def snapshot(root: Path) -> list[tuple[str, str]]:
+        # Content, not size: `storage` -> `unknown` and `Gate-1-editor` -> `unknown-locus`
+        # are both length-preserving, so a size comparison would call a real mutation a
+        # no-op and a no-op indistinguishable from either.
+        return sorted(
+            (str(path.relative_to(root)), hashlib.sha256(path.read_bytes()).hexdigest())
+            for path in root.rglob("*")
+            if path.is_file()
+        )
+
     def check(mutator: Callable[[Path], None]) -> bool:
         BUILD_TMP.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix="registry-", dir=BUILD_TMP) as directory:
@@ -187,7 +203,15 @@ def registry_mutants() -> int:
             shutil.copytree(ROOT / "documents/illegal_state", root / "documents/illegal_state")
             (root / "dhall/examples").mkdir(parents=True)
             shutil.copyfile(ROOT / "dhall/examples/locus_registry.tsv", root / "dhall/examples/locus_registry.tsv")
+            before = snapshot(root)
             mutator(root)
+            if snapshot(root) == before:
+                # `owner_drift` named `Phase-32`, which the ordering re-baseline renumbered
+                # away, so it edited nothing and was counted as an applied mutant that the
+                # check happened to survive. A mutator that changes no byte is a defect in
+                # the instrument, and it says so rather than reporting a survivor.
+                print(f"  FAIL  {mutator.__name__} mutated nothing; it no longer names anything in the tree")
+                return False
             return bool(registry_violations(root))
 
     def missing_owner(root: Path) -> None:
@@ -197,8 +221,20 @@ def registry_mutants() -> int:
         path.write_text(text.replace(line, "", 1), encoding="utf-8")
 
     def owner_drift(root: Path) -> None:
+        """Reassign one row's owner to a phase that does not own it.
+
+        The victim is read out of the registry rather than pinned to an ordinal: a literal
+        phase number here is one renumber away from naming nobody, which is exactly how
+        this mutator stopped mutating.
+        """
         path = root / "dhall/examples/locus_registry.tsv"
-        path.write_text(path.read_text(encoding="utf-8").replace("Phase-32", "Phase-7", 1), encoding="utf-8")
+        text = path.read_text(encoding="utf-8")
+        victim = next(
+            row.split("\t")[3]
+            for row in text.splitlines()[1:]
+            if row.strip() and row.split("\t")[3] != "Phase-7"
+        )
+        path.write_text(text.replace(victim, "Phase-7", 1), encoding="utf-8")
 
     def family_drift(root: Path) -> None:
         path = root / "dhall/examples/locus_registry.tsv"
@@ -338,11 +374,17 @@ def measure(entries: int, subcases: int, killed: int, counts: dict[str, int], mu
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=6, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
-        register="1", substrate="none", sides=SIDES
+        phase=7, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        register="1", substrate="none", lane="none", sides=SIDES
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+
+    # Clause 15 first: a run that cannot name the architecture it executed on, or
+    # that is executing under translation, has nothing worth proving.
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
 
     results["toolchain"], resolved = toolchain_side()
     entries = subcases = killed = 0

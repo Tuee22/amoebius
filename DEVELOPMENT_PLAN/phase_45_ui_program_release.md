@@ -7,7 +7,7 @@
 
 Phase 45 delivers the atomic UI program release; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md), [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-11 with `python3 tools/phase40_gate.py --reuse-fresh-live`;
+Validated 2026-08-11 with `python3 tools/ui_program_release_gate.py --reuse-fresh-live`;
 ledger `external-run-reference`.
 Every hardware substrate always supplies this `linux-cpu` lane. When the gate needs a pristine Linux host,
 use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
@@ -103,11 +103,11 @@ client/server identities return `ReloadRequired` with zero action effect. Appara
 ## Gate integrity
 
 - **Phase-0 representative set.** Phase 0 commits
-  `test/dhall/phase_41/ui_program_release.dhall`,
-  `test/fixtures/phase_41/release_content_manifest.golden`,
-  `test/fixtures/phase_41/plan_pair_matrix.tsv`,
-  `test/fixtures/phase_41/source_key_set.txt`, and
-  `test/fixtures/phase_41/stale_digest_matrix.tsv` before implementation. The two source revisions differ in
+  `test/fixture/dhall/phase_41/ui_program_release.dhall`,
+  `test/fixture/network_fabric_wireguard/release_content_manifest.golden`,
+  `test/fixture/network_fabric_wireguard/plan_pair_matrix.tsv`,
+  `test/fixture/network_fabric_wireguard/source_key_set.txt`, and
+  `test/fixture/network_fabric_wireguard/stale_digest_matrix.tsv` before implementation. The two source revisions differ in
   one visible label and one authority-policy epoch while retaining the same runtime ABI/catalog identity.
 - **Fresh authorized challenge.** After the live UI server and edge are Ready, the harness obtains a
   least-privilege Keycloak session and generates an unpredictable canary. The current plan submits it through
@@ -133,9 +133,9 @@ client/server identities return `ReloadRequired` with zero action effect. Appara
   bundle as a baked asset; a UI release is release *data*, never an image build. Per-app plans/contracts
   are immutable release/content objects.
 - **Committed mutants.** Phase 0 commits
-  `test/mutants/phase_40/mut-40-accept-stale-authority-digest.patch` (guard weakening) and
-  `test/mutants/phase_40/mut-40-publish-mixed-plan-pair.patch` (effect swap), plus
-  `test/mutants/phase_40/mut-40-rebuild-runtime-per-program.patch` (effect swap). Each must turn its
+  `test/mutant/ui_program_release/mut-40-accept-stale-authority-digest.patch` (guard weakening) and
+  `test/mutant/ui_program_release/mut-40-publish-mixed-plan-pair.patch` (effect swap), plus
+  `test/mutant/ui_program_release/mut-40-rebuild-runtime-per-program.patch` (effect swap). Each must turn its
   corresponding assertion red.
 - **Independent oracle.** The source-key set, release manifest, expected two-release pointer history, stale
   response matrix, exact client/server pair matrix, and expected one-image set are hand-authored and never
@@ -170,7 +170,7 @@ client/server identities return `ReloadRequired` with zero action effect. Appara
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**:
 `src/Amoebius/Ui/Release/{Projection,PlanPair,Compatibility,ArtifactManifest}.hs` and
-`test/live/UiProgramRelease.hs` (built and validated)
+`test/spec/live/UiProgramRelease.hs` (built and validated)
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the live gate compares both plan objects, release-ledger,
 action-journal, and containerd observations with Phase-0 hand-authored manifests; all three committed

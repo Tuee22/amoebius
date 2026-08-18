@@ -117,7 +117,7 @@ must parse the pins independently; it may not call the kernel under test to manu
 - **Representative set:** two tenants (`t-a`, `t-b`), two subjects in `t-a`, one subject in `t-b`, and
   equal-shaped subject-owned, tenant-wide, role-shared, and explicitly granted resources. Every allowed row has
   a paired denial differing only in subject, tenant, audience, integrity, or grant state.
-- **Pinned oracles:** `test/fixtures/ui_scope/owner_join_table.tsv` owns the independent
+- **Pinned oracles:** `test/fixture/ui_scope/owner_join_table.tsv` owns the independent
   `Tenant`/`Subject`/`Membership`/`Owner` join; `owner_tenant_swaps.tsv` owns paired rejection cases;
   `flow_matrix.tsv` owns direct and transitive source-to-sink decisions; `decode_errors.tsv` owns exact error
   tags; and `compile_fail/` proves that raw `ResourceId`, scope retagging, and general declassification do not
@@ -159,8 +159,8 @@ does not prove Keycloak truth, provider row policy, network isolation, or nonint
 ## Sprint 20.1: Scope-indexed handles and total flow checking ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `src/Amoebius/Ui/Security/{Scope,Flow}.hs`, `test/ui/ScopeSpec.hs`,
-and `test/fixtures/ui_scope/compile_fail/` — built and validated.
+**Implementation**: `src/Amoebius/Ui/Security/{Scope,Flow}.hs`, `test/spec/ui/ScopeSpec.hs`,
+and `test/fixture/ui_scope/compile_fail/` — built and validated.
 **Blocked by**: None.
 **Independent Validation**: `ui-scope-spec` matches all owner/swap and flow rows, and six generated reject
 classes meet their floors. Three external construction attempts fail to compile; the committed mutant fails.

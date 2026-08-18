@@ -1,0 +1,4 @@
+Mutant id: app-tenancy-drop-provider-arm
+Build flag: -fphase34-drop-provider-arm-mutant
+Mutation: remove every Pulsar action after total tenant-policy derivation.
+Required red marker: provider-arm-incomplete:Pulsar

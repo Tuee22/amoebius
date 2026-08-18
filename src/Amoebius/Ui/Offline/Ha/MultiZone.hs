@@ -67,42 +67,42 @@ canonicalCampaign =
     , blobDependentEffectCount = blobEffects
     }
   where
-#ifdef PHASE64_FAULT_ONE_POD_MUTANT
+#ifdef OFFLINE_MULTIZONE_CONTINUITY_FAULT_ONE_POD_MUTANT
     fault = OnePod "ui-b"
 #else
     fault = CompleteZone "zone-b"
 #endif
-#ifdef PHASE64_STICKY_ROUTING_MUTANT
+#ifdef OFFLINE_MULTIZONE_CONTINUITY_STICKY_ROUTING_MUTANT
     sticky = True
 #else
     sticky = False
 #endif
-#ifdef PHASE64_REDIS_RECEIPT_MUTANT
+#ifdef OFFLINE_MULTIZONE_CONTINUITY_REDIS_RECEIPT_MUTANT
     redisAuthority = True
 #else
     redisAuthority = False
 #endif
-#ifdef PHASE64_SKIP_CURSOR_REPAIR_MUTANT
+#ifdef OFFLINE_MULTIZONE_CONTINUITY_SKIP_CURSOR_REPAIR_MUTANT
     cursorRepair = False
 #else
     cursorRepair = True
 #endif
-#ifdef PHASE64_PREFAULT_AUTHORITY_MUTANT
+#ifdef OFFLINE_MULTIZONE_CONTINUITY_PREFAULT_AUTHORITY_MUTANT
     authority = PreFaultAuthority
 #else
     authority = PostFaultCurrentAuthority
 #endif
-#ifdef PHASE64_DROP_OUTBOX_SCOPE_MUTANT
+#ifdef OFFLINE_MULTIZONE_CONTINUITY_DROP_OUTBOX_SCOPE_MUTANT
     scopedOutbox = False
 #else
     scopedOutbox = True
 #endif
-#ifdef PHASE64_CLEAR_STATE_RELEASE_MUTANT
+#ifdef OFFLINE_MULTIZONE_CONTINUITY_CLEAR_STATE_RELEASE_MUTANT
     preservesIntent = False
 #else
     preservesIntent = True
 #endif
-#ifdef PHASE64_DUPLICATE_BLOB_DEPENDENCY_MUTANT
+#ifdef OFFLINE_MULTIZONE_CONTINUITY_DUPLICATE_BLOB_DEPENDENCY_MUTANT
     blobEffects = 2
 #else
     blobEffects = 1

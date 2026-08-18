@@ -44,7 +44,21 @@ Gate passed on 2026-08-09 with seal
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-7 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/capacity_topology_gate.py` passes all
+eleven sides on substrate `none`, lane `none`, natural `arm64`, untranslated: every authored oracle holds its
+declared shape, the suite is green, all nineteen mutants redden at their own loci, every recorded result is
+derived from an observation, and 25 surfaces join completely to 25 enumerated items. Attestation
+`sha256:ead83f157bb7a69b8d039a29a92179073e03f87d8b24eb9c3d53c46a3596819b`.
+
+**The rerun found Phase 2's mutant registry had dropped this phase's nineteen rows**, and ninety-nine more
+across five other capabilities. The first registry build carried a mutation only when a committed body file or
+a build flag held it, and these are carried by neither: the gate materializes each from its own code, sweeping
+an authored inventory. The registry now records that third carrier explicitly as `gate:<path>`, so a mutation
+nothing can reach is still refused while one the gate applies itself is not mistaken for one. The build had
+also normalized every mutant id to lowercase-underscore, which broke the lookup a gate does by the id it
+authored; the registry carries the authored id and normalizes only to join.
+
+**Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from

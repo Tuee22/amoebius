@@ -1,0 +1,6 @@
+1 parent-bootstrap holder observed on lease uid-constant
+2 child control-plane daemon applied non-serving while parent holds
+3 parent-bootstrap drained and release CAS consumed
+4 same lease uid-constant freshly observed holder absent
+5 authenticated child-control-plane-pod-uid acquires by fresh resourceVersion
+6 child ready and parent mutation count after release is zero

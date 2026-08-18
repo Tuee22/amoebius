@@ -41,7 +41,29 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-6 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/illegal_state_corpus_gate.py` passes all
+twelve sides on substrate `none`, lane `none`, natural `arm64`, untranslated: 90 catalog entries reconcile to
+106 registry subcases, all four registry-reconciliation mutants turn the check red, the corpus is green with
+14 Gate-1 and 13 Gate-2 negatives against 12 positives, every one of the four seeded defects reddens at its
+own locus, and 24 surfaces join completely to 27 enumerated items. Attestation
+`sha256:10fd07860d415ff7b315ed39ae7cc9e3768400d6196ae5a862e324ab155fb9e8`.
+
+**Three of the four registry mutators had stopped mutating, and the gate could not tell.** `owner_drift`
+rewrote `Phase-32`, an ordinal the ordering re-baseline renumbered away, so it edited no byte and was counted
+as an applied mutant the check happened to survive. The mutator now reads its victim out of the registry
+rather than pinning an ordinal — a literal phase number in a mutator is one renumber away from naming nobody,
+which is exactly how this one died. And every mutator is now required to change something: a run compares the
+scratch tree's **content digests** before and after, because `storage` → `unknown` and `Gate-1-editor` →
+`unknown-locus` are both length-preserving and a size comparison called two live mutations no-ops.
+
+**The catalog pins were two entries stale.** The one-binary amendment added
+`3.89 context-role-cell` and `3.90 role-indexed-cardinality` — the context/role grid's two Gate-1 entries —
+without updating this gate's authored counts in the same change. They are now 90 entries, 106 subcases, and 73
+deferred, and the three reconcile with each other and with the unchanged `discharged-subcases` pin:
+106 = 33 discharged here + 73 deferred to a later owner. That arithmetic is what makes the update a judgement
+rather than a fit to whatever happened to run.
+
+**Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
@@ -584,4 +606,4 @@ all repository-resident generated inputs, and pass the current externally attest
 - [phase_11](phase_11_capability_bind.md) — the post-bind provisioning/capability negatives selected from the
   registry as deferred from here
 - [phase_14](phase_14_render_manifest_goldens.md) — the `rendered-output-golden` locus this ledger points at
-- [phase_38](phase_38_live_dsl_singleton.md) — the live band where the `live-effect` locus is discharged
+- [phase_38](phase_38_live_dsl_deploy.md) — the live band where the `live-effect` locus is discharged

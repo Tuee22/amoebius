@@ -1,8 +1,0 @@
-mutant	operator	expected_locus
-m1_cfg_drop_service	dropped-input	plan-golden
-m2_descent_inframe	guard-weakening	descent-golden
-mB1_argv	field-alteration	argv-transcript
-mB2_byte	field-alteration	applied-bytes
-mB3_path_resolve	boundary-weakening	hostile-path
-astcheck-allow-rawio	guard-delete	RawIO
-astcheck-export-ctor	export-widening	compile-fail-link-seal

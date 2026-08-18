@@ -68,7 +68,7 @@ provisionPostgresService demand = do
               storage <- either (Left . Text.pack . show) Right (provisionPatroniSql (postgresStorageDemand demand))
               Right (ProvisionedPostgresService demand storage configuration)
  where
-#ifdef PHASE31_PATRONI_ASYNC_DEFAULT_MUTANT
+#ifdef PLATFORM_SERVICES_2_PATRONI_ASYNC_DEFAULT_MUTANT
   effectiveConfiguration row = (postgresPatroniConfiguration row) {patroniSynchronousModeStrict = False}
 #else
   effectiveConfiguration = postgresPatroniConfiguration

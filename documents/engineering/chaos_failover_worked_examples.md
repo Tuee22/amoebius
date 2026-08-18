@@ -28,10 +28,10 @@ rule disagree, the rule is correct and the example is the defect. Nothing here h
 
 ## Appendix A — retired (control-plane single-instance is delegated to k8s/etcd)
 
-> The former **First-Axis** worked example — a control-plane singleton *elected over a replicated log* — is
-> **retired**. Single-writer authority of the control-plane singleton is delegated to Kubernetes/etcd (a
+> The former **First-Axis** worked example — a control-plane daemon *elected over a replicated log* — is
+> **retired**. Single-writer authority of the control-plane daemon is delegated to Kubernetes/etcd (a
 > Deployment `replicas=1` plus the mandatory reconciler `Lease`), so amoebius runs **no > election** and this axis carries **no election proof obligation**
-> ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton),
+> ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon),
 > [§6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives)). One honest residue remains, and it is a
 > **named assumed premise**, not an election: a `Lease` gives mutual exclusion, **not output fencing**, so a
 > paused-then-resumed old pod can briefly issue a stale *external* side effect (a route53 or Vault write) that
@@ -62,7 +62,7 @@ the cross-cluster meta-election the gateway migration models, Appendix B). The i
 later reconciled, no effect is double-applied; at most one cluster holds gateway authority once views
 converge; acknowledged-but-un-replicated work is bounded by the R9 data-loss budget.* Per [§17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier)'s classifier,
 the content-addressed blobs and the Pulsar log are confluent and cross safely; the CAS pointer and the
-gateway authority are non-confluent singletons that cross only in R7's conditional form with reconciliation.
+gateway authority are non-confluent control-plane daemons that cross only in R7's conditional form with reconciliation.
 
 **The defect ([§3](./chaos_failover_doctrine.md#3-the-defect-class--one-shape-two-disguises) made concrete), and the literal open cross-cluster failover question.** On chaos-failover (the lead
 cluster *vanishes* mid geo-sync — no drain, no flush; contrast the **graceful, lossless-by-construction**
@@ -108,7 +108,7 @@ flowchart TD
 *Orientation. Design intent. Two clusters under async replication, where the lag is the data-loss window and the gateway DNS owner is itself conditional. This is a topology, not a proof; the obligation it creates is discharged in [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md).*
 
 **Reconciliation, the staleness premise, and PACELC (R7, R8, R9).** Over an async boundary admitting
-inter-cluster partition, **no strongly-consistent cross-cluster singleton exists** (FLP/CAP at cluster
+inter-cluster partition, **no strongly-consistent cross-cluster control-plane daemon exists** (FLP/CAP at cluster
 scale). amoebius chooses **availability-first**: both clusters serve and **reconcile on failback**, so
 divergence is the *normal* case. Two sources of lost/divergent state stay separate: (1) the **irrecoverable data-loss window** — the un-replicated tail gone at the instant of failover (R8/R9); and (2) the
 **deposed-cluster window** — a cluster that loses gateway authority keeps acting for up to the replication
@@ -130,7 +130,7 @@ splits cleanly along the classifier. **Configuration** state — realms, clients
 stored-as-truth to be merged: it is a **deterministic projection of the authoritative `InForceSpec`** (RBAC is
 derived, not stored; the spec lives in the immutable `Release` ledger and geo-replicated Transit-enveloped
 MinIO), so on promotion the survivor **re-derives** it from that single authority — confluent by restructuring,
-bucket (i), no divergence-merge. **Runtime session** state is the non-confluent singleton: held
+bucket (i), no divergence-merge. **Runtime session** state is the non-confluent control-plane daemon: held
 **survivor-wins** under R7, the survivor's timeline is authoritative, and sessions on the lost fork past the
 divergence point re-authenticate (acceptable for an emergency failover) and are audited. Recovery rolls the
 former active back to the divergence point, attaches it to the promoted primary as a replica, and places its
@@ -172,12 +172,12 @@ place the per-system proof concentrates.**
 
 | Claim / mechanism | Doctrine home it instantiates |
 |---|---|
-| Strong within a cluster, async across; blobs/log confluent, CAS pointer + gateway authority singletons | [§17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier) classifier; R1; [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
+| Strong within a cluster, async across; blobs/log confluent, CAS pointer + gateway authority control-plane daemons | [§17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier) classifier; R1; [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
 | Chaos-failover (vanish) vs lossless graceful teardown | [cluster_lifecycle_doctrine.md §5](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction); [§11](./chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose) |
 | Topology-scale timeout-coerces-unknown; partitioned ≠ dead | [§16](./chaos_failover_second_axis.md#16-the-second-axis--when-one-cluster-becomes-a-forest) |
 | Pure dedup + pointer-merge fold over convergent log + content-addressed artifacts | [§8](./chaos_failover_doctrine.md#8-move-i--extract-make-the-decision-a-value); R3 (replication-surviving key) |
 | Coercion licensed for liveness, forbidden for a durability safety claim | [§8](./chaos_failover_doctrine.md#8-move-i--extract-make-the-decision-a-value) typed-unknown scoping |
-| No strong cross-cluster singleton; availability-first | R7 |
+| No strong cross-cluster control-plane daemon; availability-first | R7 |
 | Blobs merge trivially; CAS pointer via timestamp-free deterministic total merge | [§17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier) bucket (i) for state; R7 |
 | Keycloak config re-derived from `InForceSpec` (confluent); session survivor-wins; old-active rewind + audited RPO-gap | [§17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier) buckets (i)/(ii); R7; R9; [gateway_migration_doctrine.md](./gateway_migration_doctrine.md) |
 | Deposed cluster keeps acting up to the lag = bounded self-healing violation | [§9](./chaos_failover_doctrine.md#9-move-ii--model-prove-the-protocol-not-the-program) note + R7 |
@@ -217,7 +217,7 @@ enforce alone (a global balance floor; a global uniqueness constraint).
   global budget); a **uniqueness constraint** (at most one row per natural key, forest-wide) →
   **disjoint-namespace allocation** (each cluster leased a disjoint key/ID block — *not* escrow); **"sum of line amounts = parent total"** and the **unmodeled deletion of a referenced row** → **restructure** to a
   confluent shape (lines insert-only, total a *derived fold*) **or** co-locate under a **single-writer**
-  scope; **which cluster is the promotion authority** at failover → the R7-conditional **singleton claim/yield** pattern (reused from Appendices A/B). Naming the sub-form **is** the design decision.
+  scope; **which cluster is the promotion authority** at failover → the R7-conditional **control-plane daemon claim/yield** pattern (reused from Appendices A/B). Naming the sub-form **is** the design decision.
 
 **The defect ([§3](./chaos_failover_doctrine.md#3-the-defect-class--one-shape-two-disguises) made concrete).** Both clusters hold `balance = 1`; each debits the last unit; **each commit is locally valid and locally floor-respecting**; replication carries both debits across. A merge that
 replays both yields `balance = -1`; a last-writer-wins merge hides one committed debit and violates

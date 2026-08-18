@@ -414,7 +414,7 @@ Context and role are orthogonal axes
 ([`daemon_topology_doctrine.md` §2](../engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)),
 but not every pairing exists: a CLI run is not a daemon, and a host daemon is not a container process. Held as
 two independent fields, those empty cells are writable — a `FrameConfig` could say "command mode" and
-"control-plane singleton" at once, and nothing in the type layer would object, so the binary would be left to
+"control-plane daemon" at once, and nothing in the type layer would object, so the binary would be left to
 notice at run time that its own configuration described something that cannot exist. amoebius closes it by
 making the *legal cell* the constructor rather than the pair: `Process` has a `HostCommand` arm carrying no
 role, a `HostDaemon` arm carrying a `HostRole`, and an `InCluster` arm carrying an `InClusterRole`. The
@@ -440,15 +440,15 @@ it does not type-check.
 
 **Case-family:** `topology`
 
-"Exactly one writer" is the whole content of the control-plane singleton
-([`daemon_topology_doctrine.md` §3](../engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)),
+"Exactly one writer" is the whole content of the control-plane daemon
+([`daemon_topology_doctrine.md` §3](../engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon)),
 and a replica count stated *beside* the role can contradict it: a Deployment naming
-`ControlPlaneSingleton` with `replicas = 3` is writable, and the contradiction is caught — if at all — by a
+`ControlPlaneDaemon` with `replicas = 3` is writable, and the contradiction is caught — if at all — by a
 validation function rather than by the type. The same holds for the capacity scheduler, which is also exactly
 one. amoebius closes it by indexing cardinality on the role: the arms that are exactly-one carry no replica
-field at all, and only `Worker` — the arm that is *N*, unelected — admits a count. A singleton with three
+field at all, and only `Worker` — the arm that is *N*, unelected — admits a count. A control-plane daemon with three
 replicas is then not rejected but unsayable.
-**Owner:** [`daemon_topology_doctrine.md` §3](../engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)
+**Owner:** [`daemon_topology_doctrine.md` §3](../engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon)
 (the exactly-one property and its delegation to k8s/etcd) +
 [§4](../engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected) (the unelected *N*).
 **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
@@ -456,7 +456,7 @@ replicas is then not rejected but unsayable.
 
 **Layer:** `type-foreclosed` — the replica field exists only on the arm that admits *N*, so the
 contradictory pairing has no shape to be written in; no runtime-checked residue remains.
-**Validation-locus:** `Gate-1-editor` — the schema gives `ControlPlaneSingleton` and `CapacityScheduler` no
+**Validation-locus:** `Gate-1-editor` — the schema gives `ControlPlaneDaemon` and `CapacityScheduler` no
 replica field, so a count beside either is a type error in the editor, not a rejection at decode.
 
 ## Related Documents

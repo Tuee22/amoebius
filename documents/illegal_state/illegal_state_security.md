@@ -190,7 +190,7 @@ the child's Vault at runtime).
 
 The `InForceSpec` is sensitive even when it holds no secret *values* — it is the cluster's whole topology.
 So the spec has **no plaintext-at-rest representation**: a cluster never holds its own spec as a plaintext
-value, only the means to fetch and decrypt it; at runtime the control-plane singleton decrypts the
+value, only the means to fetch and decrypt it; at runtime the control-plane daemon decrypts the
 Vault-Transit MinIO envelope **in-process** and never writes it to a plaintext ConfigMap or to etcd. A spec
 materialized to a cluster-legible store is therefore not something a workload's typed inputs can even name
 (a workload reads only the unencrypted-basics floor plus the Vault objects its policy allows). **Owner:**
@@ -201,7 +201,7 @@ materialized to a cluster-legible store is therefore not something a workload's 
 **Layer:** type-foreclosed at the Haskell IR — a workload's typed inputs can name only an envelope or handle; runtime-checked residue — that the bytes at rest are in fact enveloped.
 **Validation-locus:** `Gate-2-decoder` (a workload's typed inputs can only name an envelope/handle, never a
 plaintext-spec value — the plaintext-at-rest input has no inhabitant) + `live-effect` residue (that the
-control-plane singleton decrypts the Vault-Transit MinIO envelope in-process and never writes plaintext to a
+control-plane daemon decrypts the Vault-Transit MinIO envelope in-process and never writes plaintext to a
 ConfigMap or etcd — this row's enforcement is explicitly the runtime half).
 
 ### 3.10 A child spec that reaches beyond its own subtree
@@ -291,30 +291,30 @@ runtime).
 **Case-family:** `security`
 
 Raw k8s hands anyone with a kubeconfig a mutating control surface — a new manifest, a config change — with no
-proof of authority beyond the cert, and no ordering against secret readiness. amoebius routes **all post-bootstrap admin through the singleton's REST API** (the singleton being a Deployment `replicas=1` with no
-leader election) ([`bootstrap_sequence_doctrine.md` §5](../engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)),
+proof of authority beyond the cert, and no ordering against secret readiness. amoebius routes **all post-bootstrap admin through the control-plane daemon's REST API** (the control-plane daemon being a Deployment `replicas=1` with no
+leader election) ([`bootstrap_sequence_doctrine.md` §5](../engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)),
 and the mutating endpoint (`dhall update`) is constructed **only** from a `RootToken` capability **and** an
 `Unsealed`-Vault witness — so "push a new spec to an unsealed-less or unauthenticated cluster" has no
 constructor, the same capability + edge-gated-handle discipline as the `PromotionGate`
 ([§3.26](./illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)) and the
 `Readiness` edge ([§3.41](./illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)). Its sibling
-— an admin action **bypassing** the singleton — is foreclosed too: channel 1 (host binary ↔ kube-apiserver) is
-a **bootstrap-only** privilege with no exported control verb after the host-daemon→singleton handoff, so the
+— an admin action **bypassing** the control-plane daemon — is foreclosed too: channel 1 (host binary ↔ kube-apiserver) is
+a **bootstrap-only** privilege with no exported control verb after the host-daemon→control-plane daemon handoff, so the
 only control-surface constructor is an admin-REST call — and retiring channel 1 does **not** make that surface
-*remotely* reachable: the admin-REST call still traverses the singleton's **node-local/private admin channel**
-([`bootstrap_sequence_doctrine.md` §5](../engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api) admin-plane reach class), never the wild edge. **Owner:**
+*remotely* reachable: the admin-REST call still traverses the control-plane daemon's **node-local/private admin channel**
+([`bootstrap_sequence_doctrine.md` §5](../engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api) admin-plane reach class), never the wild edge. **Owner:**
 [`bootstrap_sequence_doctrine.md`](../engineering/bootstrap_sequence_doctrine.md) (the admin control plane) +
 [`vault_pki_doctrine.md` §4](../engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) (the unsealed-Vault precondition). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (the `RootToken` capability — an admin verb has no inhabitant without it) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (a `dhall update` handle exists only once its `Unsealed`-Vault edge does; channel-1 verbs do not survive the
 handoff transition). **Layer:** `type-foreclosed` for the cap-and-witness-gated mutation and the retired
-channel-1 verb; `runtime-checked` residue — that the singleton (a Deployment `replicas=1`, no election) actually holds *sole* authority
+channel-1 verb; `runtime-checked` residue — that the control-plane daemon (a Deployment `replicas=1`, no election) actually holds *sole* authority
 (no split-brain admin), owned by [`daemon_topology_doctrine.md` §5](../engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
 and [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md).
 
 **Validation-locus:** `Gate-2-decoder` (the `RootToken` capability plus the `Unsealed`-Vault edge-gated `dhall
 update` handle — an unauthenticated or unsealed-less mutation has no inhabitant, and channel-1 control verbs do
-not survive the host-daemon→singleton handoff) + `live-effect` residue (that the singleton — a Deployment
+not survive the host-daemon→control-plane daemon handoff) + `live-effect` residue (that the control-plane daemon — a Deployment
 `replicas=1` with no election — actually holds *sole* admin authority, no split-brain).
 
 ### 3.45 A cross-tenant or hand-authored RBAC binding
@@ -615,7 +615,7 @@ Owning doctrines cited by the entries in this slice:
 - [`network_fabric_doctrine.md`](../engineering/network_fabric_doctrine.md) — the endpoint indices, including
   `SecureGatewayReach` ([§3.40](#340-a-secure-gateway-reach-collapsing-into-wild-ingress)).
 - [`bootstrap_sequence_doctrine.md`](../engineering/bootstrap_sequence_doctrine.md) — the admin control plane and the
-  singleton REST API ([§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness)).
+  control-plane daemon REST API ([§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness)).
 - [`daemon_topology_doctrine.md`](../engineering/daemon_topology_doctrine.md) and
   [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) — the runtime-checked residue that the
-  singleton holds sole admin authority ([§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness)).
+  control-plane daemon holds sole admin authority ([§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness)).

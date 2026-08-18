@@ -14,10 +14,10 @@
 # stops a deleted probe or a silently dropped dependency from shrinking the gate.
 #
 # owner is the registry the ids are enumerated from at run time:
-#   toolchain     the names in gen/toolchain/resolved.json, resolved from
+#   toolchain     the names in .build/toolchain/resolved.json, resolved from
 #                 tools/toolchain_requirements.json against this host
 #   dependencies  the direct dependencies the solver planned for probe:probe, read out of
-#                 the run-local plan the resolver wrote under gen/locks/phase_01/
+#                 the run-local plan the resolver wrote under .build/locks/phase_01/
 #   probes        the executable stanzas discovered in probe/probe.cabal
 #   mutants       the mutant descriptors discovered under probe/mutants/
 #   checks        the check ids tools/toolchain_spike_gate.py implements
@@ -25,8 +25,10 @@
 # surface<TAB>owner<TAB>ids (comma-separated)
 
 toolchain.compiler	toolchain	ghc,cabal
+toolchain.compiler_provider	toolchain	ghcup
+toolchain.floor_supplied	toolchain	git,node,npm
 toolchain.schema_language	toolchain	dhall
-toolchain.browser	toolchain	purs,spago,chromium
+toolchain.browser	toolchain	purs,spago,playwright,chromium
 toolchain.protocol_codegen	toolchain	protoc,proto_lens_protoc
 toolchain.model_checker	toolchain	java,tla2tools
 
@@ -49,6 +51,14 @@ provenance.integrity_pin	checks	integrity-pin
 provenance.fixed_commit	checks	fixed-commit
 provenance.source_closure	checks	source-closure
 provenance.patch_is_authored	checks	patch-under-authored-root
+floor.decidable_everywhere	checks	floor-decidable
+floor.satisfied_here	checks	floor-satisfied
+floor.no_host_expectation	checks	no-host-source
+acquisition.contained	checks	acquired-contained
+acquisition.idempotent	checks	managed-idempotent
+resolution.absent_refuses	checks	resolution-absent
+resolution.out_of_range_refuses	checks	resolution-out-of-range
+resolution.foreign_architecture_refuses	checks	resolution-architecture
 resolution.twice_equivalent	checks	twice-resolved
 resolution.snapshot_closure	checks	snapshot-resolves
 build.clean_store	checks	clean-store-build

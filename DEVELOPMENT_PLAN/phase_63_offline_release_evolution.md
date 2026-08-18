@@ -122,10 +122,10 @@ horizon with no finite server or storage demand is rejected.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Release/OfflineCompatibility.hs`,
-`ui/src/Amoebius/Ui/Offline/Migration.purs`, `test/live/OfflineReleaseSpec.hs`,
-`tools/phase63_release_live.py`, and `tools/phase63_gate.py`
+`ui/src/Amoebius/Ui/Offline/Migration.purs`, `test/spec/live/OfflineReleaseSpec.hs`,
+`tools/offline_release_evolution_live.py`, and `tools/offline_release_evolution_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/phase63_gate.py` against pinned A/B
+**Independent Validation**: `python3 tools/offline_release_evolution_gate.py` against pinned A/B
 artifacts, contract tests, separate Chrome processes at crash points, local release/effect observers, mutants
 **Docs to update**:
 `documents/engineering/browser_offline_runtime_doctrine.md`,
@@ -146,7 +146,7 @@ Roll forward and back without losing or silently invalidating queued offline int
 
 ### Validation
 
-1. Run `python3 tools/phase63_gate.py`; require the scoped canonical trace green
+1. Run `python3 tools/offline_release_evolution_gate.py`; require the scoped canonical trace green
    and every compatibility mutant red.
 
 ### Remaining Work

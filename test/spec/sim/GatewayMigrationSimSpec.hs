@@ -27,13 +27,13 @@ main = do
 
 verifyTraces :: IO ()
 verifyTraces = do
-  plannedGolden <- readPinnedTrace "test/fixtures/phase43/planned-trace.golden.json"
-  failoverGolden <- readPinnedTrace "test/fixtures/phase43/failover-trace.golden.json"
+  plannedGolden <- readPinnedTrace "test/fixture/gateway_migration_drills/planned-trace.golden.json"
+  failoverGolden <- readPinnedTrace "test/fixture/gateway_migration_drills/failover-trace.golden.json"
   planned <- either die pure (runModelTrace (pinnedActions plannedGolden))
   failover <- either die pure (runModelTrace (pinnedActions failoverGolden))
   either die pure (validatePinnedTrace plannedGolden planned)
   either die pure (validatePinnedTrace failoverGolden failover)
-  expected <- decodeStrings "test/fixtures/phase43/safety-invariants.json"
+  expected <- decodeStrings "test/fixture/gateway_migration_drills/safety-invariants.json"
   forM_ [planned, failover] $ \trace -> do
     verdicts <- either die pure (traceSatisfiesNamedInvariants trace)
     require (all snd verdicts) "a Phase-3 safety invariant failed under the runtime trace"
@@ -44,10 +44,10 @@ verifyWatermarkAndPromotion = do
   require (verifyCaughtUp (WatermarkSnapshot 24 24)) "caught-up snapshot refused"
   require
     (not (verifyCaughtUp (WatermarkSnapshot 24 16)))
-    "phase43-verify-caught-up: lagging target was admitted"
+    "gateway-migration-drills-verify-caught-up: lagging target was admitted"
   require
     (authorizePromotion (PromotionEvidence False False 1 5) == Left PromotionFreshnessUnproven)
-    "phase43-promote-before-fence: survivor promoted without freshness or fence"
+    "gateway-migration-drills-promote-before-fence: survivor promoted without freshness or fence"
   require
     (authorizePromotion (PromotionEvidence True False 6 5) == Left (PromotionLagBoundExceeded 6 5))
     "over-bound lag promoted"
@@ -57,7 +57,7 @@ verifyWatermarkAndPromotion = do
 
 verifyDemand :: IO ()
 verifyDemand = do
-  oracle <- decodeValue "test/fixtures/phase43/expected-migration-demand.json"
+  oracle <- decodeValue "test/fixture/gateway_migration_drills/expected-migration-demand.json"
   require (demandJson representativeMigrationDemand == oracle) "migration demand differs from independent golden"
   require (validateMigrationDemand representativeMigrationDemand representativeMigrationDemand == Right ()) "exact migration demand refused"
   let demand = representativeMigrationDemand

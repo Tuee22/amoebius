@@ -1,4 +1,0 @@
-mutant=phase41-hub-no-endpoint
-flag=phase41-hub-no-endpoint-mutant
-locus=src/Amoebius/Fabric/WgRender.hs:renderNode
-expected=a spoke configuration without the gateway-role Endpoint must be rejected

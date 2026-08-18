@@ -44,7 +44,7 @@ There are exactly **two** kinds of cluster amoebius drives, and they share **one
 |---|---|---|
 | Host binary present? | **Yes** — the binary lives on the host and owns bring-up | **No** — there is no direct host access |
 | How it comes up | the bootstrap coordinator CLI on the host → `bootstrap --distro={kind,rke2}` ([§2](#2-bring-up-and-bootstrap)) | Provisioned **via cloud keys over the API, from inside an existing amoebius cluster** (Pulumi) |
-| Host-level worker daemons | Supported (e.g. Apple-Metal inference) | **Not** supported — no host or Apple substrate; the child still runs distinct in-cluster singleton and capacity-scheduler roles |
+| Host-level worker daemons | Supported (e.g. Apple-Metal inference) | **Not** supported — no host or Apple substrate; the child still runs distinct in-cluster control-plane daemon and capacity-scheduler roles |
 | Typical role | Any tier, including the **root** (an admin's laptop kind, or a single-node rke2) | A **child** spawned by a parent; never the root |
 
 The shared shape is what lets the rest of this document treat "a cluster" uniformly: a child spawned on
@@ -113,7 +113,7 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   non-recreating repair, exact process/storage enforcement, complete inventory, six red mutants, and leak-free
   teardown; its complete gate passed. The `linux-cpu` lane is always available on all hardware, natively or
   via Incus on Linux and through Lima on Apple or WSL2 on Windows when a pristine Linux host is required. The
-  Phase-31 SSA reconciler, driven from the `.dhall` by the Phase-38 singleton, owns in-cluster convergence.
+  Phase-31 SSA reconciler, driven from the `.dhall` by the Phase-38 control-plane daemon, owns in-cluster convergence.
 - **A stretched rke2 agent joins only once it is reachable.** Growing a cluster with a **stretched** agent —
   a full member node whose declared network-locality `Site` differs from the control-plane servers' `Site`
   ([substrate_doctrine.md §8.3](./substrate_doctrine.md#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts)) —
@@ -129,7 +129,7 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
 > **Resolved — the bootstrap sequence.** The shape of the root bootstrap config + first-manifest delivery is
 > owned by [bootstrap_sequence_doctrine.md §3](./bootstrap_sequence_doctrine.md#3-the-ordered-bootstrap-sequence):
 > the initial in-force manifest is supplied **separately**, via the admin control plane's `dhall update`
-> **after** the singleton is up (never embedded in the igniter config), and the transient root config is the
+> **after** the control-plane daemon is up (never embedded in the igniter config), and the transient root config is the
 > binary-sibling `.dhall` the bootstrap coordinator establishes. Every deeper **child-frame** config is delivered by
 > in-place `stdin` streaming rather than a persistent file, per
 > [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness). (Whether the > root may ever be **multi-node** remains the one open sub-question, [§2](#2-bring-up-and-bootstrap) above.)
@@ -173,7 +173,7 @@ child's own `vault init/unseal` — reaches the child's **admin REST** over the 
 **`ParentReachChannel`** (projected from the child's `ComputeEngine`: SSH for self-managed, cloud-API for
 managed), hitting the child's **node-local** admin NodePort independent of the child's gateway/vpn/mesh state,
 and **never** the child's public gateway. That channel and its "no unreachable child" foreclosure are owned by
-[bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api); a mode-(b) child's unseal-authority reach rides this same floor channel
+[bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api); a mode-(b) child's unseal-authority reach rides this same floor channel
 ([vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes)), never the data-plane fabric.
 
 Two encapsulation rules make the forest safe to reason about:
@@ -251,7 +251,7 @@ There are two completely different ways a cluster can stop being the lead — on
 | Who proves correctness | The reconciler's idempotent cleanup ordering ([§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)) | A **separate proof obligation** — the async cross-cluster "Second Axis" |
 
 **Graceful teardown, concretely.** A graceful teardown is a controlled handoff. Before any compute is
-released, the cluster (driven by its control-plane singleton, [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)):
+released, the cluster (driven by its control-plane daemon, [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)):
 
 1. **Drains workloads** and quiesces in-flight work.
 2. **Flushes / checkpoints synchronization** — lets Pulsar topics drain and acknowledge and MinIO / Postgres
@@ -504,8 +504,8 @@ flowchart TD
   model goes stale the moment an eventually-consistent API answers, and crash recovery forces a re-discover
   anyway. "Data in, data out" — each `discover` queries the right authority *at the moment of use* — adds
   safety without the coupling a state machine would impose.
-- **Driven by the control-plane singleton.** The reconcile loop is run by the in-cluster
-  control-plane singleton (total cluster + secret authority), whose single-instance delegation and worker-role model
+- **Driven by the control-plane daemon.** The reconcile loop is run by the in-cluster
+  control-plane daemon (total cluster + secret authority), whose single-instance delegation and worker-role model
   are owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md).
 
 > **Honesty.** This reconciler model is *proven in prodbox* for AWS teardown; that is **evidence from a > sibling system, not proof in amoebius**, which has not built Phases 3–4/14–15. Read every prescriptive
@@ -574,7 +574,7 @@ unassigned Phase-N gate. Phase 47's acceptance forest uses child `kind` clusters
 - **Two enactors, one reconciler tier — tier (b).** The rke2 host rollout is the **checkpoint-free tag-discovery HOST reconciler** — tier **(b)** of the reconciler taxonomy (create→tag→join-fabric→drain-by-tag),
   whose home is the spot-fleet reconciler in [pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision). It has
   **two enactors**: the **sudo host daemon** installs the *root* server on the host; the
-  Deployment-`replicas=1` **in-cluster singleton** rolls out *child* servers and agents **over SSH** (the singleton's total cluster + secret
+  Deployment-`replicas=1` **in-cluster control-plane daemon** rolls out *child* servers and agents **over SSH** (the control-plane daemon's total cluster + secret
   authority is owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md)). It is **not** the
   tier-(a) Pulumi-checkpointed cloud reconciler and **not** the tier-(c) SSA reconciler.
 - **The SSA reconciler only fills the cluster *after* kube-apiserver is up.** The tier-(c) in-cluster
@@ -593,7 +593,7 @@ unassigned Phase-N gate. Phase 47's acceptance forest uses child `kind` clusters
   independent of the **DETECTED** substrate and of the decoded runtime role — orthogonal typed axes
   ([daemon_topology_doctrine.md §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid), which
   owns the closed role union), never fused: an rke2 server can run on any
-  substrate, and the singleton's single-instance is delegated to k8s/etcd independently of a node's server/agent role.
+  substrate, and the control-plane daemon's single-instance is delegated to k8s/etcd independently of a node's server/agent role.
 
 > **Honesty (sibling evidence, not an amoebius result).** prodbox proves the **single-node base only**:
 > `~/prodbox/src/Prodbox/CLI/Rke2.hs` installs `rke2-server.service`, writes
@@ -609,7 +609,7 @@ Phase 49 adds a scoped cloud-keyed spawn boundary without claiming a provider ch
 parent's live `replicas=1` Deployment and two concurrently placed provider-executor Jobs were read back; the
 provider plan, CPU-only SKU/account checks, fingerprint-CAS, checkpoint envelope, and receipt-only
 materialization constructor are built. Six checkpoint objects round-tripped through Vault Transit and MinIO,
-and a sealed Vault refused before PUT. The configured AWS identity is invalid, so the actual singleton
+and a sealed Vault refused before PUT. The configured AWS identity is invalid, so the actual control-plane daemon
 `pulumi up`, EKS control plane, managed node, and cloud lifecycle remain UNVERIFIED. Every hardware substrate
 can always supply the `linux-cpu` parent lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple,
 or WSL2 on Windows.
@@ -650,7 +650,7 @@ use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions), the in-cluster SSA/ApplySet reconciler, tier (c), that fills the cluster after the apiserver is up ([§11](#11-rke2-rollout-as-a-reconcile))
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), an even/zero-server rke2 control plane as type-foreclosed unrepresentable ([§11](#11-rke2-rollout-as-a-reconcile))
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the sudo host daemon and in-cluster singleton enactors of the rke2 rollout ([§11](#11-rke2-rollout-as-a-reconcile))
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the sudo host daemon and in-cluster control-plane daemon enactors of the rke2 rollout ([§11](#11-rke2-rollout-as-a-reconcile))
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
 - [Testing Doctrine](./testing_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

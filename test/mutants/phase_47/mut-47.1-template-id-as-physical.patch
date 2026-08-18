@@ -1,5 +1,0 @@
---- a/amoebius-runtime/src/Amoebius/Cluster/NodeProvisioner.hs
-+++ b/amoebius-runtime/src/Amoebius/Cluster/NodeProvisioner.hs
-@@ seeded mutant: omit the provider-instance ordinal from physical identities
--  physicalId = account / cluster / class / ordinal / templatePath
-+  physicalId = account / cluster / class / templatePath

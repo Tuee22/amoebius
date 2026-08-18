@@ -8,7 +8,7 @@
 
 Phase 47 delivers the multi-cluster spawn + geo-replication; its design is owned by [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), [pulumi_iac_doctrine.md](../documents/engineering/pulumi_iac_doctrine.md), [vault_pki_doctrine.md](../documents/engineering/vault_pki_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-11 with `python3 tools/phase42_gate.py --reuse-fresh-live`;
+Validated 2026-08-11 with `python3 tools/multicluster_spawn_georepl_gate.py --reuse-fresh-live`;
 ledger `external-run-reference`.
 Every hardware substrate can always run `linux-cpu`. When a pristine Linux host is required, use Incus on
 Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
@@ -69,7 +69,7 @@ running inside the parent. It validated opaque subtree projection, grandchild co
 keys, named-secret injection, exact forest/checkpoint demand, a zero-mutation second pass, the independent
 invariant-confluence table, native Pulsar/MinIO/Patroni workflow readback, and exact stack/cluster cleanup.
 All three committed mutants went red at their pinned loci. There is **no**
-First-Axis / singleton-election work here: single-instance of the control-plane singleton is a Deployment
+First-Axis / control-plane-election work here: single-instance of the control-plane daemon is a Deployment
 `replicas=1` delegated to k8s/etcd. The cross-cluster gateway-migration obligation amoebius owns is discharged
 in [Phase 48](phase_48_gateway_migration_drills.md); this phase stands up the geo-replicated forest that
 obligation runs over.
@@ -126,7 +126,7 @@ checkpoint, or executor mutation.
 
 This phase consumes earlier phases and does not re-implement them: Phase 29's `pb` bootstrap of a `kind`
 cluster, Phase 34's root Vault/PKI trust anchor, Phases 35–36's platform services (MinIO, Pulsar, Patroni Postgres),
-Phase 38's live DSL deploy via the `replicas=1` singleton, Phase 40's native Pulsar client, and Phase 42's
+Phase 38's live DSL deploy via the `replicas=1` control-plane daemon, Phase 40's native Pulsar client, and Phase 42's
 content-addressed store + workflow runtime. A **stretched cluster is not geo-replication**: one etcd, one
 boundary, one `Topology` whose nodes merely span network `Site`s owes no R9 budget and no Second-Axis obligation
 and is out of scope here.
@@ -160,7 +160,7 @@ capacity proof, oracles, observers, and mutants of [Gate integrity](#gate-integr
 
 Concretely:
 - each child's delivered value is `project(subtree)` — discharged as a **committed compile-fail corpus**
-  ([Gate integrity](#gate-integrity): `test/compile-fail/ChildInForceSpec/`, ≥ 2 negatives asserting a specific compile-fail locus + a paired positive) plus a runtime subtree-inspection assertion that the
+  ([Gate integrity](#gate-integrity): `test/negative/compile_fail/ChildInForceSpec/`, ≥ 2 negatives asserting a specific compile-fail locus + a paired positive) plus a runtime subtree-inspection assertion that the
   delivered `ChildInForceSpec` carries no sibling branch
 - each child unseals in **both** sanctioned modes and child A's subtree ciphertext fails to decrypt under
   child B's Transit key even with the parent unsealed
@@ -186,13 +186,13 @@ the following named, committed artifacts so no self-authored harness or post-hoc
   checkpoint budget creates neither child. The private provisioned execution and checkpoint witnesses live
   under the one `ProvisionedInfrastructurePlan.batch` before the first Pulumi, SSH, or object-write effect,
   and the exact rendered Job resources and live MinIO revision objects must read back to that same witness.
-- **Compile-fail corpus (independent of the SUT).** `test/compile-fail/ChildInForceSpec/` holds **≥ 2** negative
+- **Compile-fail corpus (independent of the SUT).** `test/negative/compile_fail/ChildInForceSpec/` holds **≥ 2** negative
   fixtures that each attempt to construct a `ChildInForceSpec` carrying a sibling or ancestor-only branch and
   **must fail to typecheck**, each asserting its **specific expected compile-fail locus/message** (the type
   error naming the absent constructor/field), paired with a positive fixture that differs only in projecting the
   child's own subtree and **must** compile — authored and committed in this phase's oracle-pinning sprint before `ChildInForceSpec.hs`
   exists. A grandchild path proves the projection composes to arbitrary depth.
-- **Confluence-classification oracle (independent of the SUT).** `test/inject/confluence/expected_classes.dhall`
+- **Confluence-classification oracle (independent of the SUT).** `test/fixture/inject/confluence/expected_classes.dhall`
   — a committed, hand-authored table classifying every crossing mutable invariant of the gate workflow as
   *confluent* or *non-confluent*, authored in this phase's oracle-pinning sprint. The classifier's output is checked against this table,
   never against its own re-derivation; an invariant absent from the table (unclassified) **must default to non-confluent** and be refused active-active wiring.
@@ -204,10 +204,10 @@ the following named, committed artifacts so no self-authored harness or post-hoc
   committed unclassified fixture is then wrongly admitted for active-active wiring and the classification oracle
   must go red. (b) `project-identity` — the `project(subtree)` projection weakened toward identity so a child's
   delivered `ChildInForceSpec` carries a sibling branch (dropped-guard); the runtime subtree-inspection
-  assertion must go red. (c) `mut-42.1-drop-parallel-executor` — the capacity peak drops one of two
+  assertion must go red. (c) `drop-parallel-executor` — the capacity peak drops one of two
   simultaneously runnable Pulumi executor Jobs (or admits parallel demand and serializes it afterward); a
   parent that fits one executor but not both is wrongly admitted, and the pre-effect provision oracle must go
-  red. All mutants are committed under `test/inject/mutants/` and re-run every gate, not hand-run once.
+  red. All mutants are committed under `test/mutant/gateway_migration_drills/` and re-run every gate, not hand-run once.
 - **External-observer teardown check.** "Tears down leak-free" is scoped for Phase 47 (the flagged-credential +
   postflight tag-sweep machinery of testing_doctrine [§6](../documents/engineering/testing_doctrine.md#6-flagged-test-credentials)–[§7](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles) is Phase 56) to: after teardown, an **OS-boundary observer** — `pulumi stack ls` and kubeconfig-context enumeration, read outside the forest — reports zero
   surviving child stacks and zero surviving child clusters, while the retained backing stores the gate
@@ -292,7 +292,7 @@ flowchart LR
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Multicluster/Spawn.hs`,
-`src/Amoebius/Dsl/ChildInForceSpec.hs`, `amoebius-pulumi/src/Amoebius/Pulumi/Engine.hs`,
+`src/Amoebius/Dsl/ChildInForceSpec.hs`, `src/Amoebius/Pulumi/Engine.hs`,
 `src/Amoebius/Pulumi/Backend/EncryptedMinio.hs`, `pulumi/child-cluster/Pulumi.yaml`,
 `src/Amoebius/Multicluster/ChildUnseal.hs`, `src/Amoebius/Vault/TransitChildKey.hs`,
 `src/Amoebius/Multicluster/SecretInjection.hs` — delivered and gate-covered.
@@ -614,14 +614,14 @@ managed-resource registry entry so teardown is a reconcile, not a state machine.
    match the exact stack/revision object identities and extents. Injecting a failed checkpoint CAS retains the
    bounded partial/orphan object until the declared GC horizon and keeps it charged. A direct checkpoint PUT
    outside the gateway is denied.
-3. The committed `mut-42.1-drop-parallel-executor` mutant charges only one of the two simultaneously runnable
+3. The committed `drop-parallel-executor` mutant charges only one of the two simultaneously runnable
    executor Jobs (or serializes after admitting the parallel declaration) and MUST go red against a parent
    fixture that fits either Job alone but not both. This proves applicative parallelism is represented in the
    resource peak, not merely exercised opportunistically after admission.
 4. A parent brings up two empty child `kind` clusters on linux-cpu; re-running the spawn is a no-op (observed at
    the OS boundary via `pulumi stack ls`); the "no total function producing a `ChildInForceSpec` containing a
    sibling's branch" claim is discharged as a **committed compile-fail corpus** (not a
-   code-review/parametricity argument): `test/compile-fail/ChildInForceSpec/` ([Gate integrity](#gate-integrity)) holds ≥ 2 negative fixtures
+   code-review/parametricity argument): `test/negative/compile_fail/ChildInForceSpec/` ([Gate integrity](#gate-integrity)) holds ≥ 2 negative fixtures
    that each attempt to construct a `ChildInForceSpec` carrying a sibling or ancestor-only branch and **must fail to typecheck**, each asserting its **specific expected compile-fail locus/message** (the type error
    naming the absent constructor/field), paired with a positive fixture that differs only in projecting the
    child's own subtree and **must** compile — authored and committed in this phase's oracle-pinning sprint before `ChildInForceSpec.hs`
@@ -673,7 +673,7 @@ Pulsar log cross freely, while the gateway authority and any CAS "latest" pointe
 - Content-addressed write-once MinIO blob replication (idempotent duplicate cross-cluster write) and Patroni
   Postgres replication for relational state.
 - A `ConfluenceClass` value per crossing invariant — confluent (deterministic total merge) vs non-confluent
-  (singleton claim/yield, escrow/reservation, or disjoint-namespace allocation) — with the unclassified default
+  (control-plane daemon claim/yield, escrow/reservation, or disjoint-namespace allocation) — with the unclassified default
   = non-confluent, rejecting an "active-active on a non-confluent invariant" wiring.
 
 ### Validation

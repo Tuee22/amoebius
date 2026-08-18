@@ -1,0 +1,27 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: /var/run/docker.sock
+        containerPath: /phase42/host/docker.sock
+      - hostPath: /home/matthewnowak/.local/bin/kind
+        containerPath: /phase42/bin/kind
+        readOnly: true
+      - hostPath: /usr/bin/docker
+        containerPath: /phase42/bin/docker
+        readOnly: true
+      - hostPath: /home/matthewnowak/.pulumi/bin
+        containerPath: /phase42/pulumi-bin
+        readOnly: true
+      - hostPath: /home/matthewnowak/.pulumi/plugins
+        containerPath: /phase42/pulumi-plugins
+        readOnly: true
+      - hostPath: /home/matthewnowak/amoebius/pulumi/child-cluster
+        containerPath: /phase42/project
+        readOnly: true
+      - hostPath: /home/matthewnowak/amoebius/test/fixture/multicluster_spawn_georepl
+        containerPath: /phase42/config
+        readOnly: true
+      - hostPath: /var/tmp/amoebius-multicluster-spawn-georepl-live
+        containerPath: /phase42/state

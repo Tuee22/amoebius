@@ -154,7 +154,7 @@ if the provider natively supports it (**EKS Hybrid Nodes**). Absent that provide
 2/0-server quorum ([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), a `Ha7` arm,
 and `StorageBacking`'s missing unbounded case ([§3.18](./illegal_state_storage.md#318-unbounded-storage-anywhere)). amoebius must **not**
 build a second WireGuard + distro-mTLS control-plane fabric to fake it — that is the "autonomous substrate
-authority beside the control-plane singleton" shape the doctrine rejects; when/if EKS Hybrid Nodes lands it enters as a
+authority beside the control-plane daemon" shape the doctrine rejects; when/if EKS Hybrid Nodes lands it enters as a
 **new provider-native arm the `Managed` arm surfaces** (provisioned over the cloud API), never amoebius-built
 machinery. A stretched **host worker** on EKS needs no such arm — it is control-plane-free
 ([§3.35](./illegal_state_multicluster.md#335-a-stretched-host-worker-with-no-declared-networking-capability)). **Owner:**

@@ -1,0 +1,551 @@
+# The one mutant registry — every seeded mutation in this repository, in one record format.
+#
+# Before Phase 2 the tree carried mutants under five roots in three record shapes: a
+# per-capability `mutants.tsv` for eighteen capabilities, a bare body file for the rest,
+# and — for a hundred and six mutations — nothing at all but a cabal flag. A mutation
+# reachable only by a build flag is invisible to every reader who is not already holding
+# the package description, which is how a gate quietly stops running one.
+#
+# **One record format is not one schema.** Those eighteen files carried eight different
+# shapes: the second column was `operator`, `variant`, `target`, `locus`, or `surface`
+# depending on the capability, and the third was `expected_locus`, `expected_red_locus`,
+# `expected`, `fixture`, or `token`. Flattening them into two columns would have made this
+# file lie about five of them — a `locus` read as an `operator` is not the same claim. So
+# the fixed columns are the four facts every mutation genuinely shares, and each phase's
+# own vocabulary travels intact beside them.
+#
+# Five tab-separated fields, one row per mutation:
+#
+#   capability   the owning phase's slug; the directory beneath `test/mutant/` when the
+#                mutation has a committed body
+#   mutant       the mutation's id, exactly as its owning phase authored it
+#   body         where the mutation lives: a committed body path, comma-separated when a
+#                mutation needs several files; `gate:<path>` for one the owning gate
+#                materializes from its own code, which is how a field-deletion sweep over
+#                an authored inventory is carried; or `—` when the build flag is the whole
+#                mutation
+#   flag         the `amoebius.cabal` flag that switches it on, or `—`
+#   detail       that capability's own fields as `key=value` pairs separated by `;`, or
+#                `—`. `tools/mutant_registry.py` merges them into the row, so a gate reads
+#                the field names its own table used
+#
+# A row whose body and flag are both `—` is a mutation nothing can reach, and
+# `tools/repository_conformance_gate.py` refuses it — which is what caught the hundred and
+# one rows the first registry build dropped, each a `mutants.tsv` row whose mutation its
+# gate applies in code rather than from a file.
+#
+# capability<TAB>mutant<TAB>body<TAB>flag<TAB>detail
+
+app_tenancy	collapse-tenant-key	—	app-tenancy-collapse-tenant-key-mutant	—
+app_tenancy	drop-provider-arm	—	app-tenancy-drop-provider-arm-mutant	—
+apple_metal_host_daemon	const_output	test/mutant/apple_metal_host_daemon/const_output.patch	apple-metal-host-daemon-const-output-mutant	—
+apple_metal_host_daemon	drop_metal_overlap_debit	test/mutant/apple_metal_host_daemon/drop_metal_overlap_debit.patch	apple-metal-host-daemon-drop-metal-overlap-debit-mutant	—
+apple_metal_host_daemon	echo_golden	test/mutant/apple_metal_host_daemon/echo_golden.patch	apple-metal-host-daemon-echo-golden-mutant	—
+apple_metal_host_daemon	favorable_metal_epoch	test/mutant/apple_metal_host_daemon/favorable_metal_epoch.patch	apple-metal-host-daemon-favorable-metal-epoch-mutant	—
+apple_metal_host_daemon	lb_nodeport	test/mutant/apple_metal_host_daemon/lb_nodeport.patch	apple-metal-host-daemon-lb-nodeport-mutant	—
+apple_metal_host_daemon	omit_metal_work_item	test/mutant/apple_metal_host_daemon/omit_metal_work_item.patch	apple-metal-host-daemon-omit-metal-work-item-mutant	—
+apple_metal_host_daemon	one_short_cases	test/mutant/apple_metal_host_daemon/resources/one_short_cases.tsv	—	—
+base_image_registry	bootstrap-domain-expansion	test/mutant/base_image_registry/bootstrap-domain-expansion.mutant	base-image-registry-bootstrap-domain-expansion-mutant	—
+base_image_registry	dockerfile-handedit	test/mutant/base_image_registry/dockerfile-handedit.mutant	—	—
+base_image_registry	drop-build-scratch-accounting	test/mutant/base_image_registry/drop-build-scratch-accounting.mutant	—	—
+base_image_registry	gxx-version-skew	test/mutant/base_image_registry/gxx-version-skew.mutant	—	—
+base_image_registry	handoff-without-equality	test/mutant/base_image_registry/handoff-without-equality.mutant	base-image-registry-handoff-without-equality-mutant	—
+base_image_registry	noop-egress-policy	test/mutant/base_image_registry/noop-egress-policy.mutant	base-image-registry-noop-egress-policy-mutant	—
+base_image_registry	omit-pulsar-offloaders	test/mutant/base_image_registry/omit-pulsar-offloaders.mutant	—	—
+base_image_registry	omit-redis	test/mutant/base_image_registry/omit-redis.mutant	—	—
+base_image_registry	public-redis-image	test/mutant/base_image_registry/public-redis-image.mutant	—	—
+base_image_registry	record-before-push	test/mutant/base_image_registry/record-before-push.mutant	base-image-registry-record-before-push-mutant	—
+base_image_registry	redis-version-skew	test/mutant/base_image_registry/redis-version-skew.mutant	—	—
+base_image_registry	scavenge-available-apt-rung	test/mutant/base_image_registry/scavenge-available-apt-rung.mutant	—	—
+base_image_registry	stub-arm64-binary	test/mutant/base_image_registry/stub-arm64-binary.mutant	—	—
+base_image_registry	unbounded-buildkit-worker	test/mutant/base_image_registry/unbounded-buildkit-worker.mutant	—	—
+base_image_registry	wrong-arch-layer	test/mutant/base_image_registry/wrong-arch-layer.mutant	—	—
+bootstrap_coordinator	M-bare-name-tool	test/mutant/bootstrap_coordinator/M-bare-name-tool.mutant	—	—
+bootstrap_coordinator	M-create-before-admission	test/mutant/bootstrap_coordinator/M-create-before-admission.mutant	—	—
+bootstrap_coordinator	M-negate-gpu-promotion	test/mutant/bootstrap_coordinator/M-negate-gpu-promotion.mutant	—	—
+bootstrap_coordinator	M-one-shot-kind-guard	test/mutant/bootstrap_coordinator/M-one-shot-kind-guard.mutant	—	—
+bootstrap_coordinator	M-steady-etcd-peak	test/mutant/bootstrap_coordinator/M-steady-etcd-peak.mutant	—	—
+bootstrap_coordinator	M-swap-runtime-roots	test/mutant/bootstrap_coordinator/M-swap-runtime-roots.mutant	—	—
+bootstrap_coordinator	one-shot-kind-guard	—	bootstrap-coordinator-one-shot-kind-guard-mutant	—
+capability_bind	mutant_catchall_arm	test/mutant/capability_bind/mutant_catchall_arm/mutant.txt	—	operator=union-arm-addition;expected_locus=arm-golden-exhaustiveness
+capability_bind	mutant_copy_shape_tag	test/mutant/capability_bind/mutant_copy_shape_tag/mutant.txt	—	operator=effect-swap;expected_locus=object-node-multiset-oracle
+capability_bind	mutant_provisioned_value_in_bound_deployment	test/mutant/capability_bind/mutant_provisioned_value_in_bound_deployment/mutant.txt	—	operator=effect-swap;expected_locus=bound-structural-inventory
+capability_bind	mutant_shared_app_import	test/mutant/capability_bind/mutant_shared_app_import/mutant.txt	—	operator=dropped-distinctness;expected_locus=distinct-composed-file-check
+capacity_scheduler	bind-before-reservation-cas	—	capacity-scheduler-bind-before-reservation-cas-mutant	—
+capacity_scheduler	bound-deleted-restart	—	capacity-scheduler-bound-deleted-restart-mutant	—
+capacity_scheduler	collapsed-readiness	—	capacity-scheduler-collapsed-readiness-mutant	—
+capacity_scheduler	default-scheduler-bypass	—	capacity-scheduler-default-scheduler-bypass-mutant	—
+capacity_scheduler	numeric-add	—	capacity-scheduler-numeric-add-mutant	—
+capacity_scheduler	same-uid-double-debit	—	capacity-scheduler-same-uid-double-debit-mutant	—
+capacity_scheduler	stage-drop	—	capacity-scheduler-stage-drop-mutant	—
+capacity_topology	carve-skip-subtraction	gate:tools/capacity_topology_gate.py	—	operator=guard-deletion;expected_red_locus=carve exact-fit second debit
+capacity_topology	compatibility-admit-all	gate:tools/capacity_topology_gate.py	—	operator=guard-weakening;expected_red_locus=compatibility oracle
+capacity_topology	cpu-policy-ignore	gate:tools/capacity_topology_gate.py	—	operator=guard-deletion;expected_red_locus=CPU limit fixture
+capacity_topology	elastic-drop-per-node	gate:tools/capacity_topology_gate.py	—	operator=axis-deletion;expected_red_locus=per-node overhead fixture
+capacity_topology	elastic-ignore-class-max	gate:tools/capacity_topology_gate.py	—	operator=guard-deletion;expected_red_locus=class maximum fixture
+capacity_topology	elastic-place-unconditional-right	gate:tools/capacity_topology_gate.py	—	operator=guard-weakening;expected_red_locus=independent elastic witness validator
+capacity_topology	fits-drop-memory	gate:tools/capacity_topology_gate.py	—	operator=axis-deletion;expected_red_locus=fits equivalence
+capacity_topology	fixed-place-admit-overcommit	gate:tools/capacity_topology_gate.py	—	operator=guard-weakening;expected_red_locus=independent fixed witness validator
+capacity_topology	headroom-pad-drop	gate:tools/capacity_topology_gate.py	—	operator=axis-deletion;expected_red_locus=padded reservation fixture
+capacity_topology	memory-backed-drop	gate:tools/capacity_topology_gate.py	—	operator=axis-deletion;expected_red_locus=memory-backed fixture
+capacity_topology	pod-drop-ephemeral	gate:tools/capacity_topology_gate.py	—	operator=axis-deletion;expected_red_locus=pod ephemeral fixture
+capacity_topology	rke2-allow-duplicate-host	gate:tools/capacity_topology_gate.py	—	operator=guard-weakening;expected_red_locus=distinct-host fixture
+capacity_topology	taint-ignore	gate:tools/capacity_topology_gate.py	—	operator=guard-deletion;expected_red_locus=eligibility fixture
+capacity_topology	tmpfs-persistence-drop	gate:tools/capacity_topology_gate.py	—	operator=transition-deletion;expected_red_locus=init persistence fixture
+capacity_topology	validator-drop-cpu	gate:tools/capacity_topology_gate.py	—	operator=oracle-axis-deletion;expected_red_locus=independent witness validator
+capacity_topology	validator-drop-csi-dedup	gate:tools/capacity_topology_gate.py	—	operator=oracle-axis-deletion;expected_red_locus=independent witness validator
+capacity_topology	validator-drop-ephemeral	gate:tools/capacity_topology_gate.py	—	operator=oracle-axis-deletion;expected_red_locus=independent witness validator
+capacity_topology	validator-drop-memory	gate:tools/capacity_topology_gate.py	—	operator=oracle-axis-deletion;expected_red_locus=independent witness validator
+capacity_topology	validator-drop-slots	gate:tools/capacity_topology_gate.py	—	operator=oracle-axis-deletion;expected_red_locus=independent witness validator
+chain_boundary	astcheck-allow-rawio	gate:tools/chain_boundary_gate.py	—	operator=guard-delete;expected_locus=RawIO
+chain_boundary	astcheck-export-ctor	gate:tools/chain_boundary_gate.py	—	operator=export-widening;expected_locus=compile-fail-link-seal
+chain_boundary	m1_cfg_drop_service	test/mutant/chain_boundary/m1_cfg_drop_service/mutant.txt	—	operator=dropped-input;expected_locus=plan-golden
+chain_boundary	m2_descent_inframe	test/mutant/chain_boundary/m2_descent_inframe/mutant.txt	—	operator=guard-weakening;expected_locus=descent-golden
+chain_boundary	mB1_argv	test/mutant/chain_boundary/boundary/mB1_argv/mutant.txt	—	operator=field-alteration;expected_locus=argv-transcript
+chain_boundary	mB2_byte	test/mutant/chain_boundary/boundary/mB2_byte/mutant.txt	—	operator=field-alteration;expected_locus=applied-bytes
+chain_boundary	mB3_path_resolve	test/mutant/chain_boundary/boundary/mB3_path_resolve/mutant.txt	—	operator=boundary-weakening;expected_locus=hostile-path
+content_store_workflow	ack_before_store_write	test/mutant/content_store_workflow/ack_before_store_write.mutant	content-store-workflow-ack-before-store-write-mutant	—
+content_store_workflow	cleanup_on_job_status	test/mutant/content_store_workflow/cleanup_on_job_status.mutant	content-store-workflow-cleanup-on-job-status-mutant	—
+content_store_workflow	double_apply_on_redelivery	test/mutant/content_store_workflow/double_apply_on_redelivery.mutant	content-store-workflow-double-apply-on-redelivery-mutant	—
+content_store_workflow	insertion_order_encoder	test/mutant/content_store_workflow/insertion_order_encoder.mutant	content-store-workflow-insertion-order-encoder-mutant	—
+content_store_workflow	lease_election	test/mutant/content_store_workflow/lease_election.mutant	content-store-workflow-lease-election-mutant	—
+content_store_workflow	orphan_budget_omitted	test/mutant/content_store_workflow/orphan_budget_omitted.mutant	content-store-workflow-orphan-budget-omitted-mutant	—
+content_store_workflow	orphan_consumer_on_promotion	test/mutant/content_store_workflow/orphan_consumer_on_promotion.mutant	content-store-workflow-orphan-consumer-on-promotion-mutant	—
+content_store_workflow	orphan_free_on_pointer_conflict	test/mutant/content_store_workflow/orphan_free_on_pointer_conflict.mutant	content-store-workflow-orphan-free-on-pointer-conflict-mutant	—
+content_store_workflow	sweep_skips_pulsar	test/mutant/content_store_workflow/sweep_skips_pulsar.mutant	content-store-workflow-sweep-skips-pulsar-mutant	—
+content_store_workflow	trust_gateway_ack	test/mutant/content_store_workflow/trust_gateway_ack.mutant	content-store-workflow-trust-gateway-ack-mutant	—
+determinism_jitcache	const_fingerprint	test/mutant/determinism_jitcache/const_fingerprint.hs	determinism-jitcache-const-fingerprint-mutant	—
+determinism_jitcache	const_output	test/mutant/determinism_jitcache/const_output.hs	determinism-jitcache-const-output-mutant	—
+determinism_jitcache	content_order_leak	test/mutant/determinism_jitcache/content_order_leak.hs	determinism-jitcache-content-order-leak-mutant	—
+determinism_jitcache	drop_api_object_demand	test/mutant/determinism_jitcache/determinism/drop_api_object_demand.dhall	—	—
+determinism_jitcache	drop_client_envelope	test/mutant/determinism_jitcache/cache/drop_client_envelope.dhall	—	—
+determinism_jitcache	drop_etcd_churn	test/mutant/determinism_jitcache/determinism/drop_etcd_churn.dhall	—	—
+determinism_jitcache	drop_etcd_model	test/mutant/determinism_jitcache/determinism/drop_etcd_model.dhall	—	—
+determinism_jitcache	drop_host_harness_envelope	test/mutant/determinism_jitcache/determinism/drop_host_harness_envelope.dhall	—	—
+determinism_jitcache	drop_host_observer_envelope	test/mutant/determinism_jitcache/cache/drop_host_observer_envelope.dhall	—	—
+determinism_jitcache	drop_owner_envelope	test/mutant/determinism_jitcache/cache/drop_owner_envelope.dhall	—	—
+determinism_jitcache	drop_owner_image	test/mutant/determinism_jitcache/cache/drop_owner_image.dhall	—	—
+determinism_jitcache	drop_run_resource_envelope	test/mutant/determinism_jitcache/determinism/drop_run_resource_envelope.dhall	—	—
+determinism_jitcache	drop_workflow_gateway_collector	test/mutant/determinism_jitcache/determinism/drop_workflow_gateway_collector.dhall	—	—
+determinism_jitcache	early_fresh_run	test/mutant/determinism_jitcache/determinism/early_fresh_run.dhall	—	—
+determinism_jitcache	early_owner_replacement	test/mutant/determinism_jitcache/cache/early_owner_replacement.dhall	—	—
+determinism_jitcache	fixed-marker	—	determinism-jitcache-fixed-marker-mutant	—
+determinism_jitcache	one-byte-short	—	determinism-jitcache-one-byte-short-mutant	—
+determinism_jitcache	prune_noop	test/mutant/determinism_jitcache/cache/prune_noop.hs	determinism-jitcache-prune-noop-mutant	—
+determinism_jitcache	resolve_fixed_marker	test/mutant/determinism_jitcache/cache/resolve_fixed_marker.hs	—	—
+determinism_jitcache	rng_workerid	test/mutant/determinism_jitcache/rng_workerid.hs	determinism-jitcache-rng-workerid-mutant	—
+determinism_jitcache	store_one_byte_short	test/mutant/determinism_jitcache/cache/store_one_byte_short.hs	—	—
+deterministic_simulation	m1-dropped-partition-handling	test/mutant/deterministic_simulation/dropped_partition_handling/DroppedPartitionMutant.hs,test/mutant/deterministic_simulation/dropped_partition_handling/README.md	—	surface=test/mutant/deterministic_simulation/dropped_partition_handling/DroppedPartitionMutant.hs;expected=Violated:NoActOnStaleRead
+dhall_gate1_schema	gate1_capability_custom_arm	test/mutant/dhall_gate1_schema/gate1_capability_custom_arm.dhall	—	—
+dhall_gate1_schema	gate1_duplicate_event_authority	test/mutant/dhall_gate1_schema/gate1_duplicate_event_authority.dhall	—	—
+dhall_gate1_schema	gate1_implicit_latest_transition	test/mutant/dhall_gate1_schema/gate1_implicit_latest_transition.dhall	—	—
+dhall_gate1_schema	gate1_optional_transition	test/mutant/dhall_gate1_schema/gate1_optional_transition.dhall	—	—
+dhall_gate1_schema	gate1_prior_ref_provisioned	test/mutant/dhall_gate1_schema/gate1_prior_ref_provisioned.dhall	—	—
+dhall_gate1_schema	gate1_resource_mutations	test/mutant/dhall_gate1_schema/gate1_resource_mutations.tsv	—	—
+encrypted_browser_runtime	omit_fencing	test/mutant/encrypted_browser_runtime/omit_fencing.patch	encrypted-browser-runtime-omit-fencing-mutant	—
+encrypted_browser_runtime	retain_credentials	test/mutant/encrypted_browser_runtime/retain_credentials.patch	encrypted-browser-runtime-retain-credentials-mutant	—
+encrypted_browser_runtime	reuse_partition_key	test/mutant/encrypted_browser_runtime/reuse_partition_key.patch	encrypted-browser-runtime-reuse-partition-key-mutant	—
+encrypted_browser_runtime	silent_dependency_eviction	test/mutant/encrypted_browser_runtime/silent_dependency_eviction.patch	encrypted-browser-runtime-silent-dependency-eviction-mutant	—
+encrypted_browser_runtime	store_plaintext	test/mutant/encrypted_browser_runtime/store_plaintext.patch	encrypted-browser-runtime-store-plaintext-mutant	—
+encrypted_browser_runtime	two_replay_leaders	test/mutant/encrypted_browser_runtime/two_replay_leaders.patch	encrypted-browser-runtime-two-replay-leaders-mutant	—
+execution_accelerator	accelerator-drop-device-count	gate:tools/execution_accelerator_gate.py	—	variant=cuda-device-count;expected_red_locus=whole-device cardinality
+execution_accelerator	accelerator-drop-source-domain	gate:tools/execution_accelerator_gate.py	—	variant=cuda-unsharded-fragmentation;expected_red_locus=source inventory equality
+execution_accelerator	accelerator-favorable-epoch	gate:tools/execution_accelerator_gate.py	—	variant=cuda-unsharded-fragmentation;expected_red_locus=all permitted coexistence epochs
+execution_accelerator	accelerator-ignore-metal-profile	gate:tools/execution_accelerator_gate.py	—	variant=metal-profile;expected_red_locus=Metal offering profile
+execution_accelerator	accelerator-ignore-shard-sum	gate:tools/execution_accelerator_gate.py	—	variant=cuda-shard-byte-sum;expected_red_locus=shard byte equality
+execution_accelerator	accelerator-share-device	gate:tools/execution_accelerator_gate.py	—	variant=accelerator-shared-owner;expected_red_locus=physical device owner uniqueness
+execution_accelerator	accelerator-spend-raw-vram	gate:tools/execution_accelerator_gate.py	—	variant=cuda-vram-reserve;expected_red_locus=raw/reserve/allocatable boundary
+execution_accelerator	accelerator-split-unsharded	gate:tools/execution_accelerator_gate.py	—	variant=cuda-unsharded-fragmentation;expected_red_locus=unsharded per-device fit
+execution_accelerator	accelerator-treat-none-as-cuda	gate:tools/execution_accelerator_gate.py	—	variant=cuda-family-absent;expected_red_locus=accelerator family
+execution_accelerator	copy-new-execution-as-old	gate:tools/execution_accelerator_gate.py	—	variant=execution-prior-old-revision;expected_red_locus=prior and desired revision peak
+execution_accelerator	drop-execution-old-revision	gate:tools/execution_accelerator_gate.py	—	variant=execution-prior-old-revision;expected_red_locus=old revision epoch
+execution_accelerator	drop-execution-replica	gate:tools/execution_accelerator_gate.py	—	variant=execution-replica-peak;expected_red_locus=desired replica expansion
+execution_accelerator	drop-execution-surge	gate:tools/execution_accelerator_gate.py	—	variant=execution-rollout-surge;expected_red_locus=rolling surge epoch
+execution_accelerator	drop-removed-execution	gate:tools/execution_accelerator_gate.py	—	variant=execution-prior-old-revision;expected_red_locus=prior-only execution retention
+execution_accelerator	etcd-drop-defrag	gate:tools/execution_accelerator_gate.py	—	variant=etcd-transition-physical;expected_red_locus=serialized old/new defrag peak
+execution_accelerator	etcd-drop-preallocated-next	gate:tools/execution_accelerator_gate.py	—	variant=etcd-transition-physical;expected_red_locus=preallocated next WAL
+execution_accelerator	etcd-drop-snapshot-save	gate:tools/execution_accelerator_gate.py	—	variant=etcd-transition-physical;expected_red_locus=snapshot-save temporary
+execution_accelerator	etcd-drop-wal	gate:tools/execution_accelerator_gate.py	—	variant=etcd-transition-physical;expected_red_locus=WAL files and overshoot
+execution_accelerator	image-drop-index	gate:tools/execution_accelerator_gate.py	—	variant=image-content-join;expected_red_locus=OCI index join
+execution_accelerator	image-drop-manifest	gate:tools/execution_accelerator_gate.py	—	variant=image-manifest-join;expected_red_locus=platform manifest join
+execution_accelerator	image-drop-snapshot	gate:tools/execution_accelerator_gate.py	—	variant=image-snapshot-join;expected_red_locus=snapshot-chain join
+execution_accelerator	image-drop-workspace	gate:tools/execution_accelerator_gate.py	—	variant=node-image-workspace;expected_red_locus=concurrent pull workspace
+execution_accelerator	image-ignore-model	gate:tools/execution_accelerator_gate.py	—	variant=image-storage-model;expected_red_locus=pinned image-storage model
+execution_accelerator	invent-first-deploy-old	gate:tools/execution_accelerator_gate.py	—	variant=execution-replica-peak;expected_red_locus=exact empty FirstDeployment prior
+execution_accelerator	layout-allow-alias	gate:tools/execution_accelerator_gate.py	—	variant=filesystem-layout-alias;expected_red_locus=split backing distinctness
+execution_accelerator	layout-enable-v1-split-image	gate:tools/execution_accelerator_gate.py	—	variant=split-image-containerd-v1;expected_red_locus=containerd support witness
+execution_accelerator	layout-ignore-observation	gate:tools/execution_accelerator_gate.py	—	variant=filesystem-layout-swapped;expected_red_locus=observed role equality
+execution_accelerator	partition-double-debit-child	gate:tools/execution_accelerator_gate.py	—	variant=partition-carve-alias;expected_red_locus=unique child identity
+execution_accelerator	partition-drop-system-reserve	gate:tools/execution_accelerator_gate.py	—	variant=partition-parent;expected_red_locus=system reserve raw debit
+execution_accelerator	partition-mix-vm-usable	gate:tools/execution_accelerator_gate.py	—	variant=partition-unit-mismatch;expected_red_locus=parent unit separation
+execution_accelerator	partition-use-vm-usable-as-raw	gate:tools/execution_accelerator_gate.py	—	variant=partition-parent;expected_red_locus=VM provisioned high-water
+execution_accelerator	provider-debit-durable	gate:tools/execution_accelerator_gate.py	—	variant=root-ebs-volume-quota;expected_red_locus=distinct nodeRootStorage quota
+execution_accelerator	provider-reuse-template-id	gate:tools/execution_accelerator_gate.py	—	variant=root-ebs-volume-quota;expected_red_locus=cover-slot-qualified identities
+execution_accelerator	provider-skip-allocation-rounding	gate:tools/execution_accelerator_gate.py	—	variant=root-ebs-bytes-quota;expected_red_locus=root allocation quantum
+execution_accelerator	provider-skip-presentation	gate:tools/execution_accelerator_gate.py	—	variant=root-ebs-bytes-quota;expected_red_locus=filesystem presentation
+execution_accelerator	provider-under-size-instance-store	gate:tools/execution_accelerator_gate.py	—	variant=instance-store-root;expected_red_locus=fixed instance-store bytes
+execution_accelerator	resolve-latest-execution	gate:tools/execution_accelerator_gate.py	—	variant=execution-prior-old-revision;expected_red_locus=exact prior reference
+execution_accelerator	runtime-drop-largest-metadata	gate:tools/execution_accelerator_gate.py	—	variant=runtime-nodefs;expected_red_locus=complete planned epoch metadata
+execution_accelerator	runtime-missing-model	gate:tools/execution_accelerator_gate.py	—	variant=runtime-model;expected_red_locus=pinned metadata model
+execution_accelerator	runtime-scope-confusion	gate:tools/execution_accelerator_gate.py	—	variant=runtime-scope-domain;expected_red_locus=planned and observed identity domain
+execution_accelerator	runtime-swap-role	gate:tools/execution_accelerator_gate.py	—	variant=runtime-imagefs;expected_red_locus=CRI role routing
+execution_accelerator	scheduler-binding-crash-release	gate:tools/execution_accelerator_gate.py	—	variant=scheduler-aggregate-root;expected_red_locus=BindingInFlight debit retention
+execution_accelerator	scheduler-drop-pad	gate:tools/execution_accelerator_gate.py	—	variant=scheduler-projection;expected_red_locus=reservation projection witness
+execution_accelerator	scheduler-per-record-cas	gate:tools/execution_accelerator_gate.py	—	variant=scheduler-snapshot-cas;expected_red_locus=aggregate root fingerprint
+execution_accelerator	scheduler-timeout-release	gate:tools/execution_accelerator_gate.py	—	variant=scheduler-aggregate-root;expected_red_locus=Reserved debit retention
+formal	emitTLA-mut-01	test/mutant/formal/emitTLA-mut-01	—	—
+formal	emitTLA-mut-02	test/mutant/formal/emitTLA-mut-02	—	—
+formal	emitTLA-mut-03	test/mutant/formal/emitTLA-mut-03	—	—
+formal	emitTLA-mut-04	test/mutant/formal/emitTLA-mut-04	—	—
+gadt_decoder_gate2	ambient-path-lookup	test/mutant/gadt_decoder_gate2/ambient-path-lookup.mutant	—	—
+gadt_decoder_gate2	legalized_schema	test/mutant/gadt_decoder_gate2/legalized_schema.dhall	—	—
+gadt_decoder_gate2	resource_mutations	test/mutant/gadt_decoder_gate2/resource_mutations.tsv	—	—
+gadt_decoder_gate2	unobserved-family	test/mutant/gadt_decoder_gate2/unobserved-family.mutant	—	—
+gateway_migration_drills	promote-before-fence	test/mutant/gateway_migration_drills/promote-before-fence.patch	gateway-migration-drills-promote-before-fence-mutant	—
+gateway_migration_drills	verify-caught-up-stub	test/mutant/gateway_migration_drills/verify-caught-up-stub.patch	gateway-migration-drills-verify-caught-up-stub-mutant	—
+illegal_state_corpus	broken-decision-functions	gate:tools/illegal_state_corpus_gate.py	—	operator=smart-constructor-and-fold-weakening;expected_red_locus=all four QuickCheck properties
+illegal_state_corpus	capability-product-arm	test/mutant/illegal_state_corpus/capability_product_arm.dhall	—	operator=union-arm-addition;expected_red_locus=Gate-1 product-named capability admitted
+illegal_state_corpus	dropped-resource-normalization	gate:tools/illegal_state_corpus_gate.py	—	operator=guard-deletion;expected_red_locus=positive execution resource traversal
+illegal_state_corpus	normalization	—	resource-normalization-mutant	—
+illegal_state_corpus	state	—	illegal-state-mutant	—
+illegal_state_corpus	weakened-volume-index	gate:tools/illegal_state_corpus_gate.py	—	operator=GADT-index-weakening;expected_red_locus=PVC/PV illegal pair compiles
+inference_accelerator	mutant_accept_accelerator_domain_mismatch	test/mutant/inference_accelerator/mutant_accept_accelerator_domain_mismatch/mutant.txt	—	operator=guard-weakening;expected_locus=policy-class-domain
+inference_accelerator	mutant_drop_accelerator_overlap_debit	test/mutant/inference_accelerator/mutant_drop_accelerator_overlap_debit/mutant.txt	—	operator=dropped-effect;expected_locus=per-device-aggregation
+inference_accelerator	mutant_drop_accelerator_work_item	test/mutant/inference_accelerator/mutant_drop_accelerator_work_item/mutant.txt	—	operator=dropped-effect;expected_locus=source-workload-domain
+inference_accelerator	mutant_select_favorable_accelerator_epoch	test/mutant/inference_accelerator/mutant_select_favorable_accelerator_epoch/mutant.txt	—	operator=guard-weakening;expected_locus=all-coexistence-epochs
+inference_accelerator	mutant_skip_accelerator_shard_validation	test/mutant/inference_accelerator/mutant_skip_accelerator_shard_validation/mutant.txt	—	operator=invariant-delete;expected_locus=residency-placement
+infernix_lift	drop-artifact-scope	—	infernix-lift-drop-artifact-scope-mutant	—
+infernix_lift	mint-ready-before-pointer-commit	—	infernix-lift-mint-ready-before-pointer-commit-mutant	—
+infernix_lift	mut-49-drop-artifact-scope	test/mutant/infernix_lift/mut-49-drop-artifact-scope.patch	—	—
+infernix_lift	mut-49-mint-ready-before-pointer-commit	test/mutant/infernix_lift/mut-49-mint-ready-before-pointer-commit.patch	—	—
+infernix_lift	mut-49-regenerate-command-id	test/mutant/infernix_lift/mut-49-regenerate-command-id.patch	—	—
+infernix_lift	mut-49-use-wallclock-seed	test/mutant/infernix_lift/mut-49-use-wallclock-seed.patch	—	—
+infernix_lift	regenerate-command-id	—	infernix-lift-regenerate-command-id-mutant	—
+infernix_lift	use-wallclock-seed	—	infernix-lift-use-wallclock-seed-mutant	—
+infernix_ui_lift	drop-command-id-from-terminal	—	infernix-ui-lift-drop-command-id-from-terminal-mutant	—
+infernix_ui_lift	mut-50-drop-command-id-from-terminal	test/mutant/infernix_ui_lift/mut-50-drop-command-id-from-terminal.patch	—	—
+infernix_ui_lift	mut-50-trust-client-artifact-scope	test/mutant/infernix_ui_lift/mut-50-trust-client-artifact-scope.patch	—	—
+infernix_ui_lift	trust-client-artifact-scope	—	infernix-ui-lift-trust-client-artifact-scope-mutant	—
+jitml_lift_cuda	mint-artifact-before-cas	—	jitml-lift-cuda-mint-artifact-before-cas-mutant	—
+jitml_lift_cuda	mut-51-mint-artifact-before-cas	test/mutant/jitml_lift_cuda/mut-51-mint-artifact-before-cas.patch	—	—
+jitml_lift_cuda	mut-51-regenerate-command-id	test/mutant/jitml_lift_cuda/mut-51-regenerate-command-id.patch	—	—
+jitml_lift_cuda	mut-51-silent-cpu-fallback	test/mutant/jitml_lift_cuda/mut-51-silent-cpu-fallback.patch	—	—
+jitml_lift_cuda	mut-51-spend-raw-vram	test/mutant/jitml_lift_cuda/mut-51-spend-raw-vram.patch	—	—
+jitml_lift_cuda	regenerate-command-id	—	jitml-lift-cuda-regenerate-command-id-mutant	—
+jitml_lift_cuda	silent-cpu-fallback	—	jitml-lift-cuda-silent-cpu-fallback-mutant	—
+jitml_lift_cuda	spend-raw-vram	—	jitml-lift-cuda-spend-raw-vram-mutant	—
+jitml_ui_lift	ignore-artifact-owner	—	jitml-ui-lift-ignore-artifact-owner-mutant	—
+jitml_ui_lift	ignore-artifact-scope	—	jitml-ui-lift-ignore-artifact-scope-mutant	—
+jitml_ui_lift	local-only-websocket-route	—	jitml-ui-lift-local-only-websocket-route-mutant	—
+jitml_ui_lift	mint-ready-from-checkpoint-path	—	jitml-ui-lift-mint-ready-from-checkpoint-path-mutant	—
+jitml_ui_lift	mut-52-ignore-artifact-owner	test/mutant/jitml_ui_lift/mut-52-ignore-artifact-owner.patch	—	—
+jitml_ui_lift	mut-52-ignore-artifact-scope	test/mutant/jitml_ui_lift/mut-52-ignore-artifact-scope.patch	—	—
+jitml_ui_lift	mut-52-local-only-websocket-route	test/mutant/jitml_ui_lift/mut-52-local-only-websocket-route.patch	—	—
+jitml_ui_lift	mut-52-mint-ready-from-checkpoint-path	test/mutant/jitml_ui_lift/mut-52-mint-ready-from-checkpoint-path.patch	—	—
+jitml_ui_lift	mut-52-redis-as-receipt	test/mutant/jitml_ui_lift/mut-52-redis-as-receipt.patch	—	—
+jitml_ui_lift	redis-as-receipt	—	jitml-ui-lift-redis-as-receipt-mutant	—
+keycloak_ingress	delete-noop	—	keycloak-ingress-delete-noop-mutant	—
+keycloak_ingress	direct-backend	—	keycloak-ingress-direct-backend-mutant	—
+keycloak_ingress	drop-oidc	—	keycloak-ingress-drop-oidc-mutant	—
+keycloak_ingress	drop-origin	—	keycloak-ingress-drop-origin-mutant	—
+keycloak_ingress	netpol-swap	—	keycloak-ingress-netpol-swap-mutant	—
+keycloak_ingress	nonce-replay	—	keycloak-ingress-nonce-replay-mutant	—
+live_dsl_deploy	admit-unproven-secret	—	live-dsl-deploy-admit-unproven-secret-mutant	—
+live_dsl_deploy	effect-swap	—	live-dsl-deploy-effect-swap-mutant	—
+live_dsl_deploy	enact-noop	—	live-dsl-deploy-enact-noop-mutant	—
+live_dsl_deploy	persist-password	—	live-dsl-deploy-persist-password-mutant	—
+live_dsl_deploy	reach-any	—	live-dsl-deploy-reach-any-mutant	—
+local_ui_composition	M-direct-workflow-fetch	test/mutant/local_ui_composition/M-direct-workflow-fetch.mutant	—	locus=browser-backend-edge;fixture=test/mutant/local_ui_composition/M-direct-workflow-fetch.mutant
+local_ui_composition	M-drop-handle-tenant	test/mutant/local_ui_composition/M-drop-handle-tenant.mutant	—	locus=copied-handle-scope;fixture=test/mutant/local_ui_composition/M-drop-handle-tenant.mutant
+local_ui_composition	M-mix-client-server-plan	test/mutant/local_ui_composition/M-mix-client-server-plan.mutant	—	locus=plan-pair-digest;fixture=test/mutant/local_ui_composition/M-mix-client-server-plan.mutant
+local_ui_composition	M-ready-before-receipt	test/mutant/local_ui_composition/M-ready-before-receipt.mutant	—	locus=ready-order;fixture=test/mutant/local_ui_composition/M-ready-before-receipt.mutant
+local_ui_composition	owner_key_swap	test/mutant/local_ui_composition/owner_key_swap.mutant	—	locus=owner-key-dom;fixture=test/mutant/local_ui_composition/owner_key_swap.mutant
+multicluster_spawn_georepl	classifier-default-confluent	test/mutant/multicluster_spawn_georepl/classifier-default-confluent.patch	multicluster-spawn-georepl-classifier-default-confluent-mutant	—
+multicluster_spawn_georepl	drop-parallel-executor	test/mutant/multicluster_spawn_georepl/drop-parallel-executor.patch	multicluster-spawn-georepl-drop-parallel-executor-mutant	—
+multicluster_spawn_georepl	project-identity	test/mutant/multicluster_spawn_georepl/project-identity.patch	multicluster-spawn-georepl-project-identity-mutant	—
+network_fabric_wireguard	drop-resource-envelope	—	network-fabric-wireguard-drop-resource-envelope-mutant	—
+network_fabric_wireguard	early-listener-replacement	—	network-fabric-wireguard-early-listener-replacement-mutant	—
+network_fabric_wireguard	hub-no-endpoint	—	network-fabric-wireguard-hub-no-endpoint-mutant	—
+network_fabric_wireguard	missing-peer-key	—	network-fabric-wireguard-missing-peer-key-mutant	—
+object_reconciler	delete-from-owner-label-alone	test/mutant/object_reconciler/delete-from-owner-label-alone.mutant	—	—
+object_reconciler	generation-after-diff	—	object-reconciler-generation-after-diff-mutant	—
+object_reconciler	generation-stamped-after-diff	test/mutant/object_reconciler/generation-stamped-after-diff.mutant	—	—
+object_reconciler	healthy-cr-over-bound-child	test/mutant/object_reconciler/healthy-cr-over-bound-child.mutant	—	—
+object_reconciler	healthy-overbound-child	—	object-reconciler-healthy-overbound-child-mutant	—
+object_reconciler	label-only-delete	—	object-reconciler-label-only-delete-mutant	—
+object_reconciler	wait-for-ready-pure	test/mutant/object_reconciler/wait-for-ready-pure.mutant	object-reconciler-wait-for-ready-pure-mutant	—
+offline_blobs_isolation	expose_opfs_handle	test/mutant/offline_blobs_isolation/expose_opfs_handle.patch	offline-blobs-isolation-expose-opfs-handle-mutant	—
+offline_blobs_isolation	omit_partition_scope	test/mutant/offline_blobs_isolation/omit_partition_scope.patch	offline-blobs-isolation-omit-partition-scope-mutant	—
+offline_blobs_isolation	replay_before_verification	test/mutant/offline_blobs_isolation/replay_before_verification.patch	offline-blobs-isolation-replay-before-verification-mutant	—
+offline_blobs_isolation	silent_blob_eviction	test/mutant/offline_blobs_isolation/silent_blob_eviction.patch	offline-blobs-isolation-silent-blob-eviction-mutant	—
+offline_blobs_isolation	store_plaintext	test/mutant/offline_blobs_isolation/store_plaintext.patch	offline-blobs-isolation-store-plaintext-mutant	—
+offline_blobs_isolation	trust_caller_digest	test/mutant/offline_blobs_isolation/trust_caller_digest.patch	offline-blobs-isolation-trust-caller-digest-mutant	—
+offline_language_plan	browser_redis_constructor	test/mutant/offline_language_plan/browser_redis_constructor.patch	offline-language-plan-browser-redis-constructor-mutant	—
+offline_language_plan	drop_queue_bound	test/mutant/offline_language_plan/drop_queue_bound.patch	offline-language-plan-drop-queue-bound-mutant	—
+offline_language_plan	omit_server_handler	test/mutant/offline_language_plan/omit_server_handler.patch	offline-language-plan-omit-server-handler-mutant	—
+offline_language_plan	persist_private_field	test/mutant/offline_language_plan/persist_private_field.patch	offline-language-plan-persist-private-field-mutant	—
+offline_language_plan	queue_model_invocation	test/mutant/offline_language_plan/queue_model_invocation.patch	offline-language-plan-queue-model-invocation-mutant	—
+offline_multizone_continuity	clear_state_release	test/mutant/offline_multizone_continuity/clear_state_release.patch	offline-multizone-continuity-clear-state-release-mutant	—
+offline_multizone_continuity	drop_outbox_scope	test/mutant/offline_multizone_continuity/drop_outbox_scope.patch	offline-multizone-continuity-drop-outbox-scope-mutant	—
+offline_multizone_continuity	duplicate_blob_dependency	test/mutant/offline_multizone_continuity/duplicate_blob_dependency.patch	offline-multizone-continuity-duplicate-blob-dependency-mutant	—
+offline_multizone_continuity	fault_one_pod	test/mutant/offline_multizone_continuity/fault_one_pod.patch	offline-multizone-continuity-fault-one-pod-mutant	—
+offline_multizone_continuity	prefault_authority	test/mutant/offline_multizone_continuity/prefault_authority.patch	offline-multizone-continuity-prefault-authority-mutant	—
+offline_multizone_continuity	redis_receipt	test/mutant/offline_multizone_continuity/redis_receipt.patch	offline-multizone-continuity-redis-receipt-mutant	—
+offline_multizone_continuity	skip_cursor_repair	test/mutant/offline_multizone_continuity/skip_cursor_repair.patch	offline-multizone-continuity-skip-cursor-repair-mutant	—
+offline_multizone_continuity	sticky_routing	test/mutant/offline_multizone_continuity/sticky_routing.patch	offline-multizone-continuity-sticky-routing-mutant	—
+offline_release_evolution	bypass_promotion_check	test/mutant/offline_release_evolution/bypass_promotion_check.patch	offline-release-evolution-bypass-promotion-check-mutant	—
+offline_release_evolution	clear_state_reload	test/mutant/offline_release_evolution/clear_state_reload.patch	offline-release-evolution-clear-state-reload-mutant	—
+offline_release_evolution	omit_old_decoder	test/mutant/offline_release_evolution/omit_old_decoder.patch	offline-release-evolution-omit-old-decoder-mutant	—
+offline_release_evolution	partial_migration	test/mutant/offline_release_evolution/partial_migration.patch	offline-release-evolution-partial-migration-mutant	—
+offline_release_evolution	preserve_old_authorization	test/mutant/offline_release_evolution/preserve_old_authorization.patch	offline-release-evolution-preserve-old-authorization-mutant	—
+offline_release_evolution	two_migrations	test/mutant/offline_release_evolution/two_migrations.patch	offline-release-evolution-two-migrations-mutant	—
+offline_replay_receipts	ack_redis_publish	test/mutant/offline_replay_receipts/ack_redis_publish.patch	offline-replay-receipts-ack-redis-publish-mutant	—
+offline_replay_receipts	discard_pending_disconnect	test/mutant/offline_replay_receipts/discard_pending_disconnect.patch	offline-replay-receipts-discard-pending-disconnect-mutant	—
+offline_replay_receipts	drop_membership_validation	test/mutant/offline_replay_receipts/drop_membership_validation.patch	offline-replay-receipts-drop-membership-validation-mutant	—
+offline_replay_receipts	omit_durable_lookup	test/mutant/offline_replay_receipts/omit_durable_lookup.patch	offline-replay-receipts-omit-durable-lookup-mutant	—
+offline_replay_receipts	remove_scope_idempotency	test/mutant/offline_replay_receipts/remove_scope_idempotency.patch	offline-replay-receipts-remove-scope-idempotency-mutant	—
+offline_replay_receipts	two_tab_replay	test/mutant/offline_replay_receipts/two_tab_replay.patch	offline-replay-receipts-two-tab-replay-mutant	—
+platform_backbone	content-immediate-gc	—	platform-backbone-content-immediate-gc-mutant	—
+platform_backbone	content-store-immediate-gc	test/mutant/platform_backbone/content-store-immediate-gc.mutant	—	—
+platform_backbone	drop-fault-scenario	—	platform-backbone-drop-fault-scenario-mutant	—
+platform_backbone	drop-required-fault-scenario	test/mutant/platform_backbone/drop-required-fault-scenario.mutant	—	—
+platform_backbone	logical-as-physical	—	platform-backbone-logical-as-physical-mutant	—
+platform_backbone	offload-time-only	test/mutant/platform_backbone/offload-time-only.mutant	platform-backbone-offload-time-only-mutant	—
+platform_backbone	registry-fs-driver	test/mutant/platform_backbone/registry-fs-driver.mutant	platform-backbone-registry-fs-driver-mutant	—
+platform_backbone	storage-logical-as-physical	test/mutant/platform_backbone/storage-logical-as-physical.mutant	—	—
+platform_backbone	storage-sum-unequal-ordinals	test/mutant/platform_backbone/storage-sum-unequal-ordinals.mutant	—	—
+platform_backbone	sum-ordinals	—	platform-backbone-sum-ordinals-mutant	—
+platform_services_2	dag-drop-edge	test/mutant/platform_services_2/dag-drop-edge.mutant	platform-services-2-dag-drop-edge-mutant	—
+platform_services_2	dag-inject-cycle	test/mutant/platform_services_2/dag-inject-cycle.mutant	platform-services-2-dag-inject-cycle-mutant	—
+platform_services_2	fixed-prometheus	test/mutant/platform_services_2/fixed-prometheus.mutant	platform-services-2-fixed-prometheus-mutant	—
+platform_services_2	patroni-async-default	test/mutant/platform_services_2/patroni-async-default.mutant	platform-services-2-patroni-async-default-mutant	—
+platform_services_2	redis-public-image	test/mutant/platform_services_2/redis-public-image.mutant	platform-services-2-redis-public-image-mutant	—
+platform_services_2	redis-pvc	test/mutant/platform_services_2/redis-pvc.mutant	platform-services-2-redis-pvc-mutant	—
+platform_services_2	redis-receipt-authority	test/mutant/platform_services_2/redis-receipt-authority.mutant	platform-services-2-redis-receipt-authority-mutant	—
+platform_services_2	redis-unbounded-buffer	test/mutant/platform_services_2/redis-unbounded-buffer.mutant	platform-services-2-redis-unbounded-buffer-mutant	—
+provider_child_bringup	mut-45.1-public-pull	test/mutant/provider_child_bringup/mut-45.1-public-pull.patch	—	—
+provider_child_bringup	public-pull	—	provider-child-bringup-public-pull-mutant	—
+provider_deploy_checkpoint	drop-parallel-executor	—	provider-deploy-checkpoint-drop-parallel-executor-mutant	—
+provider_deploy_checkpoint	leak-path	—	provider-deploy-checkpoint-leak-path-mutant	—
+provider_deploy_checkpoint	mut-44.1-drop-parallel-executor	test/mutant/provider_deploy_checkpoint/mut-44.1-drop-parallel-executor.patch	—	—
+provider_deploy_checkpoint	mut-44.1-leak-path	test/mutant/provider_deploy_checkpoint/mut-44.1-leak-path.patch	—	—
+provider_deploy_checkpoint	mut-44.1-static-key	test/mutant/provider_deploy_checkpoint/mut-44.1-static-key.patch	—	—
+provider_deploy_checkpoint	static-key	—	provider-deploy-checkpoint-static-key-mutant	—
+provider_dynamic_nodes	apply-over-quota	—	provider-dynamic-nodes-apply-over-quota-mutant	—
+provider_dynamic_nodes	dedup-distinct-pvcs	—	provider-dynamic-nodes-dedup-distinct-pvcs-mutant	—
+provider_dynamic_nodes	ignore-live-csinode	—	provider-dynamic-nodes-ignore-live-csinode-mutant	—
+provider_dynamic_nodes	ignore-signal	—	provider-dynamic-nodes-ignore-signal-mutant	—
+provider_dynamic_nodes	mut-47-untagged-orphan	test/mutant/provider_dynamic_nodes/mut-47-untagged-orphan.patch	—	—
+provider_dynamic_nodes	mut-47.1-apply-over-quota	test/mutant/provider_dynamic_nodes/mut-47.1-apply-over-quota.patch	—	—
+provider_dynamic_nodes	mut-47.1-dedup-distinct-pvcs	test/mutant/provider_dynamic_nodes/mut-47.1-dedup-distinct-pvcs.patch	—	—
+provider_dynamic_nodes	mut-47.1-ignore-live-csinode	test/mutant/provider_dynamic_nodes/mut-47.1-ignore-live-csinode.patch	—	—
+provider_dynamic_nodes	mut-47.1-ignore-signal	test/mutant/provider_dynamic_nodes/mut-47.1-ignore-signal.patch	—	—
+provider_dynamic_nodes	mut-47.1-template-id-as-physical	test/mutant/provider_dynamic_nodes/mut-47.1-template-id-as-physical.patch	—	—
+provider_dynamic_nodes	mut-47.1-unreachable-as-gone	test/mutant/provider_dynamic_nodes/mut-47.1-unreachable-as-gone.patch	—	—
+provider_dynamic_nodes	mut-47.2-skip-sweep	test/mutant/provider_dynamic_nodes/mut-47.2-skip-sweep.patch	—	—
+provider_dynamic_nodes	skip-sweep	—	provider-dynamic-nodes-skip-sweep-mutant	—
+provider_dynamic_nodes	template-id-as-physical	—	provider-dynamic-nodes-template-id-as-physical-mutant	—
+provider_dynamic_nodes	unreachable-as-gone	—	provider-dynamic-nodes-unreachable-as-gone-mutant	—
+provider_dynamic_nodes	untagged-orphan	—	provider-dynamic-nodes-untagged-orphan-mutant	—
+provider_ebs_credential	allow-delete	—	provider-ebs-credential-allow-delete-mutant	—
+provider_ebs_credential	bypass-validated-batch	—	provider-ebs-credential-bypass-validated-batch-mutant	—
+provider_ebs_credential	credit-old	—	provider-ebs-credential-credit-old-mutant	—
+provider_ebs_credential	drop-copy-executor	—	provider-ebs-credential-drop-copy-executor-mutant	—
+provider_ebs_credential	dynamic-provisioner	—	provider-ebs-credential-dynamic-provisioner-mutant	—
+provider_ebs_credential	mut-46.1-allow-delete	test/mutant/provider_ebs_credential/mut-46.1-allow-delete.patch	—	—
+provider_ebs_credential	mut-46.1-bypass-validated-batch	test/mutant/provider_ebs_credential/mut-46.1-bypass-validated-batch.patch	—	—
+provider_ebs_credential	mut-46.1-credit-old-before-observed-delete	test/mutant/provider_ebs_credential/mut-46.1-credit-old-before-observed-delete.patch	—	—
+provider_ebs_credential	mut-46.1-drop-copy-executor	test/mutant/provider_ebs_credential/mut-46.1-drop-copy-executor.patch	—	—
+provider_ebs_credential	mut-46.1-enable-dynamic-provisioner	test/mutant/provider_ebs_credential/mut-46.1-enable-dynamic-provisioner.patch	—	—
+provision_seal	mutant_double_debit_controller_child	test/mutant/provision_seal/mutant_double_debit_controller_child/mutant.txt	—	operator=duplication;expected_locus=infrastructure-demand-fold
+provision_seal	mutant_drop_execution_replica	test/mutant/provision_seal/mutant_drop_execution_replica/mutant.txt	—	operator=deletion;expected_locus=desired-instance-count-oracle
+provision_seal	mutant_drop_largest_kubelet_metadata	test/mutant/provision_seal/mutant_drop_largest_kubelet_metadata/mutant.txt	—	operator=deletion;expected_locus=runtime-metadata-component-oracle
+provision_seal	mutant_drop_surge	test/mutant/provision_seal/mutant_drop_surge/mutant.txt	—	operator=deletion;expected_locus=transition-epoch-peak-oracle
+provision_seal	mutant_fixed_prometheus	test/mutant/provision_seal/mutant_fixed_prometheus/mutant.txt	—	operator=constant-substitution;expected_locus=monitoring-optionality-oracle
+provision_seal	mutant_missing_metadata_model	test/mutant/provision_seal/mutant_missing_metadata_model/mutant.txt	—	operator=dropped-lookup;expected_locus=metadata-model-resolution
+provision_seal	mutant_old_revision	test/mutant/provision_seal/mutant_old_revision/mutant.txt	—	operator=stale-substitution;expected_locus=revision-correspondence
+provision_seal	mutant_provisioned_in_bound	test/mutant/provision_seal/mutant_provisioned_in_bound/mutant.txt	—	operator=effect-swap;expected_locus=bound-structural-inventory
+provision_seal	mutant_unchecked_prior	test/mutant/provision_seal/mutant_unchecked_prior/mutant.txt	—	operator=dropped-validation;expected_locus=prior-reference-resolution
+provision_seal	mutant_wrong_revision_join	test/mutant/provision_seal/mutant_wrong_revision_join/mutant.txt	—	operator=key-substitution;expected_locus=revision-source-join
+pulsar_client	drop-one-sided	—	pulsar-client-drop-one-sided-mutant	—
+pulsar_client	produce-raw	—	pulsar-client-produce-raw-mutant	—
+pulsar_client	topic-literal	—	pulsar-client-topic-literal-mutant	—
+release_lifecycle	blind_put	test/mutant/release_lifecycle/blind_put.mutant	release-lifecycle-blind-put-mutant	—
+release_lifecycle	drop_old_schema_on_failure	test/mutant/release_lifecycle/drop_old_schema_on_failure.mutant	release-lifecycle-drop-old-schema-on-failure-mutant	—
+release_lifecycle	drop_verification_wal	test/mutant/release_lifecycle/drop_verification_wal.mutant	release-lifecycle-drop-verification-wal-mutant	—
+release_lifecycle	gate_admits_unverified	test/mutant/release_lifecycle/gate_admits_unverified.mutant	release-lifecycle-gate-admits-unverified-mutant	—
+release_lifecycle	hash_omits_substrate	test/mutant/release_lifecycle/hash_omits_substrate.mutant	release-lifecycle-hash-omits-substrate-mutant	—
+release_lifecycle	phase_gate_selfreport	test/mutant/release_lifecycle/phase_gate_selfreport.mutant	release-lifecycle-phase-gate-selfreport-mutant	—
+release_lifecycle	rollout_reorders_retire	test/mutant/release_lifecycle/rollout_reorders_retire.mutant	release-lifecycle-rollout-reorders-retire-mutant	—
+release_lifecycle	scalar_migration_peak	test/mutant/release_lifecycle/scalar_migration_peak.mutant	release-lifecycle-scalar-migration-peak-mutant	—
+render_manifest	mutant_accelerator_projection	test/mutant/render_manifest/mutant_accelerator_projection/mutant.txt	—	operator=invariant-delete;expected_locus=accelerator-claim
+render_manifest	mutant_controller_projection	test/mutant/render_manifest/mutant_controller_projection/mutant.txt	—	operator=union-arm-alteration;expected_locus=kind-projection
+render_manifest	mutant_durable_size	test/mutant/render_manifest/mutant_durable_size/mutant.txt	—	operator=field-alteration;expected_locus=source-annotation
+render_manifest	mutant_ephemeral_rootfs	test/mutant/render_manifest/mutant_ephemeral_rootfs/mutant.txt	—	operator=field-alteration;expected_locus=security-context
+render_manifest	mutant_image_platform	test/mutant/render_manifest/mutant_image_platform/mutant.txt	—	operator=field-alteration;expected_locus=image-digest
+render_manifest	mutant_memory_volume_lifecycle	test/mutant/render_manifest/mutant_memory_volume_lifecycle/mutant.txt	—	operator=field-alteration;expected_locus=resource-projection
+render_manifest	mutant_monitoring_projection	test/mutant/render_manifest/mutant_monitoring_projection/mutant.txt	—	operator=field-alteration;expected_locus=resource-projection
+render_manifest	mutant_resource_projection	test/mutant/render_manifest/mutant_resource_projection/mutant.txt	—	operator=field-alteration;expected_locus=resource-projection
+render_manifest	mutant_unbounded_scratch	test/mutant/render_manifest/mutant_unbounded_scratch/mutant.txt	—	operator=invariant-delete;expected_locus=bounded-volumes
+render_manifest	mutant_undeclared_allow_edge	test/mutant/render_manifest/mutant_undeclared_allow_edge/mutant.txt	—	operator=union-arm-addition;expected_locus=network-policy-edge-set
+render_manifest	mutant_unhardened_pod	test/mutant/render_manifest/mutant_unhardened_pod/mutant.txt	—	operator=guard-weakening;expected_locus=security-context
+render_manifest	mutant_wild_ingress	test/mutant/render_manifest/mutant_wild_ingress/mutant.txt	—	operator=guard-weakening;expected_locus=service-exposure
+repository_conformance	m1-plural-sibling	test/mutant/repository_conformance/m1-plural-sibling.mutant	—	—
+repository_conformance	m2-phase-ordinal-tool	test/mutant/repository_conformance/m2-phase-ordinal-tool.mutant	—	—
+repository_conformance	m3-lying-map-row	test/mutant/repository_conformance/m3-lying-map-row.mutant	—	—
+repository_conformance	m4-dangling-reference	test/mutant/repository_conformance/m4-dangling-reference.mutant	—	—
+repository_conformance	m5-stale-source-dir	test/mutant/repository_conformance/m5-stale-source-dir.mutant	—	—
+repository_conformance	m6-case-collision	test/mutant/repository_conformance/m6-case-collision.mutant	—	—
+repository_conformance	m7-empty-directory	test/mutant/repository_conformance/m7-empty-directory.mutant	—	operator=retired-root-resurrection;expected_locus=no-empty-authored-directory
+retained_storage	collapse-backing-debits	—	retained-storage-collapse-backing-debits-mutant	—
+retained_storage	credit-before-cleanup	—	retained-storage-credit-before-cleanup-mutant	—
+retained_storage	cutover-before-verify	—	retained-storage-cutover-before-verify-mutant	—
+retained_storage	fake-verify	—	retained-storage-fake-verify-mutant	—
+retained_storage	no-rebind	—	retained-storage-no-rebind-mutant	—
+retained_storage	raw-host-directory	—	retained-storage-raw-host-directory-mutant	—
+retained_storage	reclaim-delete	—	retained-storage-reclaim-delete-mutant	—
+retained_storage	seed-marker	—	retained-storage-seed-marker-mutant	—
+retained_storage	skip-durable-aggregate	—	retained-storage-skip-durable-aggregate-mutant	—
+retained_storage	soft-delete	—	retained-storage-soft-delete-mutant	—
+retained_storage	sum-unequal-ordinals	—	retained-storage-sum-unequal-ordinals-mutant	—
+retained_storage	uniform-before-allocation	—	retained-storage-uniform-before-allocation-mutant	—
+scoped_identity	drop_owner_equality	test/mutant/scoped_identity/drop_owner_equality.mutant	—	target=owner_tenant_swaps.tsv;expected=OwnerMismatch+TenantMismatch
+storage_geometry	allocation-drop-quantum	gate:tools/storage_geometry_gate.py	—	variant=filesystem-overhead-rounding;expected_red_locus=backing allocation rounding
+storage_geometry	backing-accept-over	gate:tools/storage_geometry_gate.py	—	variant=direct-backing;expected_red_locus=single-owner backing comparison
+storage_geometry	backup-drop-retention	gate:tools/storage_geometry_gate.py	—	variant=backup-medium-fit;expected_red_locus=retained backup generations
+storage_geometry	bookkeeper-drop-quorum	gate:tools/storage_geometry_gate.py	—	variant=bookkeeper-recovery;expected_red_locus=BookKeeper write-quorum bytes
+storage_geometry	bookkeeper-drop-recovery	gate:tools/storage_geometry_gate.py	—	variant=bookkeeper-recovery;expected_red_locus=BookKeeper failure scenario
+storage_geometry	control-plane-drop-transition	gate:tools/storage_geometry_gate.py	—	variant=control-plane-transition;expected_red_locus=etcd transition high-water
+storage_geometry	filesystem-drop-overhead	gate:tools/storage_geometry_gate.py	—	variant=filesystem-overhead-rounding;expected_red_locus=filesystem presentation
+storage_geometry	incluster-cache-drop-nesting	gate:tools/storage_geometry_gate.py	—	variant=incluster-cache-budget;expected_red_locus=cache budget nesting
+storage_geometry	migration-drop-old	gate:tools/storage_geometry_gate.py	—	variant=storage-migration-highwater;expected_red_locus=migration old+new high-water
+storage_geometry	minio-drop-healing	gate:tools/storage_geometry_gate.py	—	variant=minio-parity-healing-orphan;expected_red_locus=MinIO healing workspace
+storage_geometry	minio-drop-orphan	gate:tools/storage_geometry_gate.py	—	variant=minio-parity-healing-orphan;expected_red_locus=failed-write orphan horizon
+storage_geometry	minio-drop-parity	gate:tools/storage_geometry_gate.py	—	variant=minio-parity-healing-orphan;expected_red_locus=MinIO parity bytes
+storage_geometry	native-cache-double-spend	gate:tools/storage_geometry_gate.py	—	variant=native-cache-pool;expected_red_locus=named cache backing
+storage_geometry	object-accept-conflict	gate:tools/storage_geometry_gate.py	—	variant=object-identity-conflict;expected_red_locus=physical identity/size conflict
+storage_geometry	object-drop-count	gate:tools/storage_geometry_gate.py	—	variant=object-count-quota;expected_red_locus=object-count geometry
+storage_geometry	object-drop-producer-arm	gate:tools/storage_geometry_gate.py	—	variant=object-producer-inventory;expected_red_locus=six-arm inventory equality
+storage_geometry	patroni-drop-wal	gate:tools/storage_geometry_gate.py	—	variant=patroni-wal-failover;expected_red_locus=Patroni WAL/failover peak
+storage_geometry	pool-allow-alias	gate:tools/storage_geometry_gate.py	—	variant=disjoint-capacity-pool;expected_red_locus=disjoint capacity ownership
+storage_geometry	provider-root-debit-durable	gate:tools/storage_geometry_gate.py	—	variant=root-ebs-quota;expected_red_locus=nodeRootStorage quota
+storage_geometry	provider-root-under-size	gate:tools/storage_geometry_gate.py	—	variant=instance-store-root;expected_red_locus=instance-store root
+storage_geometry	pulsar-drop-durable	gate:tools/storage_geometry_gate.py	—	variant=pulsar-durable-total;expected_red_locus=durable-total ceiling
+storage_geometry	pulsar-drop-hot	gate:tools/storage_geometry_gate.py	—	variant=bookkeeper-recovery;expected_red_locus=physical hot-tier ceiling
+storage_geometry	registry-drop-partials	gate:tools/storage_geometry_gate.py	—	variant=registry-upload-partials;expected_red_locus=registry failed partials
+storage_geometry	registry-migration-drop-workspace	gate:tools/storage_geometry_gate.py	—	variant=registry-backend-migration;expected_red_locus=registry migration workspace
+storage_geometry	restore-drop-workspace	gate:tools/storage_geometry_gate.py	—	variant=restore-target-fit;expected_red_locus=restore target workspace
+storage_geometry	scaling-drop-highwater	gate:tools/storage_geometry_gate.py	—	variant=scaling-shrink-highwater;expected_red_locus=shrink migration witness
+storage_geometry	scaling-ignore-fingerprint	gate:tools/storage_geometry_gate.py	—	variant=scaling-fingerprint;expected_red_locus=observed snapshot fingerprint
+storage_geometry	schema-drop-wal	gate:tools/storage_geometry_gate.py	—	variant=schema-migration-highwater;expected_red_locus=schema migration WAL
+storage_geometry	uniform-use-aggregate	gate:tools/storage_geometry_gate.py	—	variant=uniform-claim-per-backing;expected_red_locus=per-backing uniform claim
+storage_geometry	vault-drop-audit	gate:tools/storage_geometry_gate.py	—	variant=vault-raft-audit;expected_red_locus=Vault audit rotation
+storage_geometry	zookeeper-drop-recovery	gate:tools/storage_geometry_gate.py	—	variant=zookeeper-recovery;expected_red_locus=ZooKeeper recovery overlap
+test_topology_dsl	all-tested	—	test-topology-dsl-all-tested-mutant	—
+test_topology_dsl	cloud_leak_untyped	test/mutant/test_topology_dsl/cloud_leak_untyped.dhall	—	—
+test_topology_dsl	failover_standby_wrong_subscription	test/mutant/test_topology_dsl/failover_standby_wrong_subscription.dhall	—	—
+test_topology_dsl	leak_host_backing	test/mutant/test_topology_dsl/leak_host_backing.dhall	—	—
+test_topology_dsl	leak_untyped	test/mutant/test_topology_dsl/leak_untyped.dhall	—	—
+test_topology_dsl	ledger_all_tested	test/mutant/test_topology_dsl/ledger_all_tested.dhall	—	—
+test_topology_dsl	missing_capability	test/mutant/test_topology_dsl/missing_capability.dhall	—	—
+test_topology_dsl	resource_overcommit_cpu	test/mutant/test_topology_dsl/resource_overcommit_cpu.dhall	—	—
+test_topology_dsl	skip_teardown	test/mutant/test_topology_dsl/skip_teardown.patch	test-topology-dsl-skip-teardown-mutant	—
+test_topology_dsl	tag-query	—	test-topology-dsl-tag-query-mutant	—
+test_topology_dsl	wrong-subscription	—	test-topology-dsl-wrong-subscription-mutant	—
+ui_authorization	default_allow	test/mutant/ui_authorization/default_allow.mutant	—	target=authorization_matrix.tsv;expected=default-deny
+ui_authorization	visibility_is_authorization	test/mutant/ui_authorization/visibility_is_authorization.mutant	—	target=authorization_matrix.tsv;expected=hidden-invocable+stale
+ui_browser_interpreter	M-accept-stale-plan	test/mutant/ui_browser_interpreter/M-accept-stale-plan.mutant	—	target=plans/minimal_single_tenant.json;expected=ReloadRequired
+ui_browser_interpreter	M-break-focus-return	test/mutant/ui_browser_interpreter/M-break-focus-return.mutant	—	target=expected_keyboard_focus.tsv:modal-3;expected=modal-opener
+ui_browser_interpreter	M-direct-provider-fetch	test/mutant/ui_browser_interpreter/M-direct-provider-fetch.mutant	—	target=expected_transport.tsv:provider-fetch;expected=zero-provider-connection
+ui_browser_interpreter	M-drop-event-effect	test/mutant/ui_browser_interpreter/M-drop-event-effect.mutant	—	target=reference-trace:single-submit-2;expected=submit-effect
+ui_browser_interpreter	M-hardcoded-response	test/mutant/ui_browser_interpreter/M-hardcoded-response.mutant	—	target=expected_transport.tsv:single-submit;expected=fresh-nonce
+ui_browser_interpreter	M-raw-html-sink	test/mutant/ui_browser_interpreter/M-raw-html-sink.mutant	—	target=expected_dom/single-submit.txt;expected=hostile-text-dom
+ui_browser_interpreter	M-sequential-state-writes	test/mutant/ui_browser_interpreter/M-sequential-state-writes.mutant	—	target=reference-trace:single-submit;expected=atomic-trace
+ui_browser_interpreter	M-swap-route-target	test/mutant/ui_browser_interpreter/M-swap-route-target.mutant	—	target=expected_keyboard_focus.tsv:route;expected=route-focus
+ui_browser_interpreter	M-unsafe-inline-build	test/mutant/ui_browser_interpreter/M-unsafe-inline-build.mutant	—	target=production_headers.tsv;expected=csp-canary
+ui_effect_binding	M-drop-capability	test/mutant/ui_effect_binding/M-drop-capability.mutant	—	target=bind_errors.tsv:missing-capability;expected=MissingCapability
+ui_effect_binding	M-erase-handler-scope	test/mutant/ui_effect_binding/M-erase-handler-scope.mutant	—	target=bind_errors.tsv:scope-mismatch;expected=ScopeMismatch
+ui_effect_binding	M-first-handler-wins	test/mutant/ui_effect_binding/M-first-handler-wins.mutant	—	target=bind_errors.tsv:duplicate-handler;expected=DuplicateHandler
+ui_effect_binding	M-link-id-as-url	test/mutant/ui_effect_binding/M-link-id-as-url.mutant	—	target=bind_errors.tsv:link-as-url;expected=ExternalLinkNotAnEffect
+ui_effect_binding	M-retry-without-idempotency	test/mutant/ui_effect_binding/M-retry-without-idempotency.mutant	—	target=bind_errors.tsv:unsafe-retry;expected=IdempotencyRequired
+ui_effect_binding	M-swap-response-codec	test/mutant/ui_effect_binding/M-swap-response-codec.mutant	—	target=bind_errors.tsv:codec-mismatch;expected=ContractMismatch
+ui_effect_binding	export_raw_topic	test/mutant/ui_effect_binding/export_raw_topic.mutant	—	target=bind_errors.tsv:raw-topic;expected=ProviderCoordinateForbidden
+ui_ha_multizone	drop_keycloak_zone_spread	test/mutant/ui_ha_multizone/drop_keycloak_zone_spread.dhall	ui-ha-multizone-drop-keycloak-zone-spread-mutant	—
+ui_ha_multizone	drop_pdb	test/mutant/ui_ha_multizone/drop_pdb.dhall	ui-ha-multizone-drop-pdb-mutant	—
+ui_ha_multizone	drop_tenant_cursor_key	test/mutant/ui_ha_multizone/drop_tenant_cursor_key.patch	ui-ha-multizone-drop-tenant-cursor-key-mutant	—
+ui_ha_multizone	drop_topology_spread	test/mutant/ui_ha_multizone/drop_topology_spread.dhall	ui-ha-multizone-drop-topology-spread-mutant	—
+ui_ha_multizone	fault_one_node_only	test/mutant/ui_ha_multizone/fault_one_node_only.patch	ui-ha-multizone-fault-one-node-only-mutant	—
+ui_ha_multizone	redis_one_node	test/mutant/ui_ha_multizone/redis_one_node.dhall	ui-ha-multizone-redis-one-node-mutant	—
+ui_ha_multizone	redis_persistent_receipt	test/mutant/ui_ha_multizone/redis_persistent_receipt.patch	ui-ha-multizone-redis-persistent-receipt-mutant	—
+ui_ha_multizone	replicas_one	test/mutant/ui_ha_multizone/replicas_one.dhall	ui-ha-multizone-replicas-one-mutant	—
+ui_ha_multizone	skip_cursor_repair	test/mutant/ui_ha_multizone/skip_cursor_repair.patch	ui-ha-multizone-skip-cursor-repair-mutant	—
+ui_ha_multizone	sticky_session_required	test/mutant/ui_ha_multizone/sticky_session_required.dhall	ui-ha-multizone-sticky-session-required-mutant	—
+ui_multi_tenant_live	accept-unlisted-choice	—	ui-multi-tenant-live-accept-unlisted-choice-mutant	—
+ui_multi_tenant_live	accept_unlisted_tenant_choice	test/mutant/ui_multi_tenant_live/accept_unlisted_tenant_choice.mutant	—	—
+ui_multi_tenant_live	drop-scope-epoch	—	ui-multi-tenant-live-drop-scope-epoch-mutant	—
+ui_multi_tenant_live	drop_scope_epoch_from_realtime_route	test/mutant/ui_multi_tenant_live/drop_scope_epoch_from_realtime_route.mutant	—	—
+ui_multi_tenant_live	drop_tenant_key	test/mutant/ui_multi_tenant_live/drop_tenant_key.mutant	ui-multi-tenant-live-drop-tenant-key-mutant	—
+ui_multi_tenant_live	drop_user_key	test/mutant/ui_multi_tenant_live/drop_user_key.mutant	ui-multi-tenant-live-drop-user-key-mutant	—
+ui_plan_compiler	M-client-only-authority-digest	test/mutant/ui_plan_compiler/M-client-only-authority-digest.mutant	—	target=derived-digests:authority;expected=digest-mismatch
+ui_plan_compiler	M-drop-server-action	test/mutant/ui_plan_compiler/M-drop-server-action.mutant	—	target=projection_rows.tsv:workflow.start;expected=server-action-mismatch
+ui_plan_compiler	M-emit-private-field	test/mutant/ui_plan_compiler/M-emit-private-field.mutant	—	target=client_plan.golden.json;expected=PrivateFieldForbidden
+ui_plan_compiler	M-link-navigation-as-fetch	test/mutant/ui_plan_compiler/M-link-navigation-as-fetch.mutant	—	target=projection_rows.tsv:docs.link;expected=LinkNavigationAsEffect
+ui_plan_compiler	M-preserve-map-insertion-order	test/mutant/ui_plan_compiler/M-preserve-map-insertion-order.mutant	—	target=client_plan.golden.json;expected=fresh-process-byte-mismatch
+ui_plan_compiler	M-swap-action-targets	test/mutant/ui_plan_compiler/M-swap-action-targets.mutant	—	target=ui_server_plan.golden.json;expected=handler-projection-mismatch
+ui_program_release	accept-stale-authority-digest	—	ui-program-release-accept-stale-authority-digest-mutant	—
+ui_program_release	mut-40-accept-stale-authority-digest	test/mutant/ui_program_release/mut-40-accept-stale-authority-digest.patch	—	—
+ui_program_release	mut-40-publish-mixed-plan-pair	test/mutant/ui_program_release/mut-40-publish-mixed-plan-pair.patch	—	—
+ui_program_release	mut-40-rebuild-runtime-per-program	test/mutant/ui_program_release/mut-40-rebuild-runtime-per-program.patch	—	—
+ui_program_release	publish-mixed-plan-pair	—	ui-program-release-publish-mixed-plan-pair-mutant	—
+ui_program_release	rebuild-runtime-per-program	—	ui-program-release-rebuild-runtime-per-program-mutant	—
+ui_program_schema	M-drop-bound-check	test/mutant/ui_program_schema/M-drop-bound-check.mutant	—	target=unbounded_collection.dhall;token=UnboundedCollection
+ui_program_schema	M-first-id-wins	test/mutant/ui_program_schema/M-first-id-wins.mutant	—	target=duplicate_qualified_id.dhall;token=DuplicateQualifiedId
+ui_program_schema	M-skip-exhaustiveness	test/mutant/ui_program_schema/M-skip-exhaustiveness.mutant	—	target=non_exhaustive_event.dhall;token=NonExhaustiveEvent
+ui_program_schema	M-swap-port-contract	test/mutant/ui_program_schema/M-swap-port-contract.mutant	—	target=port_type_mismatch.dhall;token=PortTypeMismatch
+ui_program_schema	add_raw_js_arm	test/mutant/ui_program_schema/add_raw_js_arm.mutant	—	target=raw_browser_escape.dhall;token=RawBrowserEscape
+ui_program_schema	add_raw_url_arm	test/mutant/ui_program_schema/add_raw_url_arm.mutant	—	target=raw_external_link_url.dhall;token=RawExternalLinkUrl
+ui_projection_runtime	drop_owner_key	test/mutant/ui_projection_runtime/drop_owner_key.mutant	ui-projection-runtime-drop-owner-key-mutant	—
+ui_projection_runtime	drop_owner_subscription	test/mutant/ui_projection_runtime/drop_owner_subscription.mutant	ui-projection-runtime-drop-owner-subscription-mutant	—
+ui_projection_runtime	drop_receipt_command_id	test/mutant/ui_projection_runtime/drop_receipt_command_id.mutant	ui-projection-runtime-drop-receipt-command-id-mutant	—
+ui_rollout_reconnect	discard-cursor	—	ui-rollout-reconnect-discard-cursor-mutant	—
+ui_rollout_reconnect	discard_resume_cursor	test/mutant/ui_rollout_reconnect/discard_resume_cursor.dhall	—	—
+ui_rollout_reconnect	drop_tenant_cursor_key	test/mutant/ui_rollout_reconnect/drop_tenant_cursor_key.patch	ui-rollout-reconnect-drop-tenant-cursor-key-mutant	—
+ui_rollout_reconnect	shift_before_watermark	test/mutant/ui_rollout_reconnect/shift_before_watermark.dhall	ui-rollout-reconnect-shift-before-watermark-mutant	—
+ui_rollout_reconnect	stale-registration	—	ui-rollout-reconnect-stale-registration-mutant	—
+ui_rollout_reconnect	stale_redis_registration	test/mutant/ui_rollout_reconnect/stale_redis_registration.patch	—	—
+ui_server_boundary	M-disable-origin-check	test/mutant/ui_server_boundary/M-disable-origin-check.mutant	—	locus=origin-denial;fixture=test/mutant/ui_server_boundary/M-disable-origin-check.mutant
+ui_server_boundary	M-dispatch-before-authorize	test/mutant/ui_server_boundary/M-dispatch-before-authorize.mutant	—	locus=zero-denied-handler-bytes;fixture=test/mutant/ui_server_boundary/M-dispatch-before-authorize.mutant
+ui_server_boundary	M-drop-csp-header	test/mutant/ui_server_boundary/M-drop-csp-header.mutant	—	locus=security-header;fixture=test/mutant/ui_server_boundary/M-drop-csp-header.mutant
+ui_server_boundary	M-new-idempotency-key-on-retry	test/mutant/ui_server_boundary/M-new-idempotency-key-on-retry.mutant	—	locus=idempotent-replay;fixture=test/mutant/ui_server_boundary/M-new-idempotency-key-on-retry.mutant
+ui_server_boundary	M-ready-with-unresolved-handler	test/mutant/ui_server_boundary/M-ready-with-unresolved-handler.mutant	—	locus=missing-handler-readiness;fixture=test/mutant/ui_server_boundary/M-ready-with-unresolved-handler.mutant
+ui_server_boundary	M-serve-server-plan-as-client-asset	test/mutant/ui_server_boundary/M-serve-server-plan-as-client-asset.mutant	—	locus=private-plan-probe;fixture=test/mutant/ui_server_boundary/M-serve-server-plan-as-client-asset.mutant
+ui_server_boundary	M-server-first-handler-wins	test/mutant/ui_server_boundary/M-server-first-handler-wins.mutant	—	locus=duplicate-handler-readiness;fixture=test/mutant/ui_server_boundary/M-server-first-handler-wins.mutant
+ui_server_boundary	M-skip-current-epoch	test/mutant/ui_server_boundary/M-skip-current-epoch.mutant	—	locus=stale-epoch;fixture=test/mutant/ui_server_boundary/M-skip-current-epoch.mutant
+ui_server_boundary	M-trust-tenant-header	test/mutant/ui_server_boundary/M-trust-tenant-header.mutant	—	locus=foreign-token-spoof;fixture=test/mutant/ui_server_boundary/M-trust-tenant-header.mutant
+ui_single_tenant_live	canned-response	—	ui-single-tenant-live-canned-response-mutant	—
+ui_single_tenant_live	canned_ui_response	test/mutant/ui_single_tenant_live/canned_ui_response.dhall	—	—
+ui_single_tenant_live	disable-csrf	—	ui-single-tenant-live-disable-csrf-mutant	—
+ui_single_tenant_live	disable_csrf_check	test/mutant/ui_single_tenant_live/disable_csrf_check.patch	—	—
+ui_single_tenant_live	dispatch-before-auth	—	ui-single-tenant-live-dispatch-before-auth-mutant	—
+ui_single_tenant_live	dispatch_artifact_before_auth	test/mutant/ui_single_tenant_live/dispatch_artifact_before_auth.patch	—	—
+ui_single_tenant_live	drop-networkpolicy	—	ui-single-tenant-live-drop-networkpolicy-mutant	—
+ui_single_tenant_live	drop_ui_networkpolicy	test/mutant/ui_single_tenant_live/drop_ui_networkpolicy.dhall	—	—
+ui_single_tenant_live	local-socket-map	—	ui-single-tenant-live-local-socket-map-mutant	—
+ui_single_tenant_live	local_socket_map_only	test/mutant/ui_single_tenant_live/local_socket_map_only.patch	—	—
+ui_single_tenant_live	open_provider_edge	test/mutant/ui_single_tenant_live/open_provider_edge.dhall	ui-single-tenant-live-open-provider-edge-mutant	—
+ui_single_tenant_live	redis_receipt_authority	test/mutant/ui_single_tenant_live/redis_receipt_authority.patch	ui-single-tenant-live-redis-receipt-authority-mutant	—
+user_tenant_isolation	accept_body_tenant	test/mutant/user_tenant_isolation/accept_body_tenant.mutant	user-tenant-isolation-accept-body-tenant-mutant	—
+user_tenant_isolation	drop_user_predicate	test/mutant/user_tenant_isolation/drop_user_predicate.mutant	user-tenant-isolation-drop-user-predicate-mutant	—
+vault_pki	copy-secret	test/mutant/vault_pki/copy-secret.mutant	—	—
+vault_pki	delete-storage-term	test/mutant/vault_pki/delete-storage-term.mutant	vault-pki-delete-storage-term-mutant	—
+vault_pki	error-collapse	test/mutant/vault_pki/error-collapse.mutant	vault-pki-error-collapse-mutant	—
+vault_pki	first-missing	test/mutant/vault_pki/first-missing.mutant	vault-pki-first-missing-mutant	—
+vault_pki	preminted-token	test/mutant/vault_pki/preminted-token.mutant	vault-pki-preminted-token-mutant	—
+vault_pki	production-secret-read	test/mutant/vault_pki/production-secret-read.mutant	—	—
+vault_pki	raw-sha256-seal	test/mutant/vault_pki/raw-sha256-seal.mutant	vault-pki-raw-sha256-seal-mutant	—
+vault_pki	reinit-existing	test/mutant/vault_pki/reinit-existing.mutant	vault-pki-reinit-existing-mutant	—
+vault_pki	sealed-issuance	test/mutant/vault_pki/sealed-issuance.mutant	vault-pki-sealed-issuance-mutant	—
+vault_pki	stale-read	test/mutant/vault_pki/stale-read.mutant	vault-pki-stale-read-mutant	—
+vault_pki	unbounded-audit	test/mutant/vault_pki/unbounded-audit.mutant	vault-pki-unbounded-audit-mutant	—
+vault_pki	unrelated-leaf	—	vault-pki-unrelated-leaf-mutant	—
+vault_pki	unrelated-leaf-key	test/mutant/vault_pki/unrelated-leaf-key.mutant	—	—

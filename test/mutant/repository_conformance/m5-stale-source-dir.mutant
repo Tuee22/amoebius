@@ -1,0 +1,6 @@
+check=source-dirs-resolve
+operator=resolution-weakening
+mutation=replace | amoebius.cabal |   hs-source-dirs: test/spec/provider\n |   hs-source-dirs: test/spec/provider_pulumi\n
+statement=Rename a cabal stanza's home without moving its source directory. The check is
+statement=resolution, not text: a stanza whose `hs-source-dirs` names a directory the tree does not
+statement=have still reads plausibly and cannot build.

@@ -144,9 +144,9 @@ or renderer output.
   variant values; forms and validation; bounded lists/tables; modal/error/progress states; nested routes;
   every event instruction; cancellation; one fixed named external-link navigation; and one request for each
   public effect class.
-- **Pinned oracles:** `test/fixtures/ui_browser/plans/`, `interactions.tsv`, `expected_dom/`,
+- **Pinned oracles:** `test/fixture/ui_browser/plans/`, `interactions.tsv`, `expected_dom/`,
   `expected_accessibility.tsv`, `expected_keyboard_focus.tsv`,
-  `expected_transport.tsv`, `test/fixtures/ui_security/production_headers.tsv`, and
+  `expected_transport.tsv`, `test/fixture/ui_security/production_headers.tsv`, and
   `artifact_allowlist.tsv` own the inputs and
   outcomes. Every generated event/route/link/port identity must join one authored interaction and expectation;
   an unmatched identity emits UNVERIFIED and fails the gate.
@@ -207,8 +207,8 @@ authority-paired own/foreign enforcement is owned by the UI-server boundary and 
 ## Sprint 25.1: Generic `ClientPlan` interpreter and browser boundary gate ✅
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `ui-runtime/src/Amoebius/Ui/{Interpreter,Components}.purs`, `ui-runtime/src/Main.{purs,js}`,
-`test/ui/{UiBrowserInterpreterSpec,ReferenceClientPlan}.hs`,
+**Implementation**: `ui/src/Amoebius/Ui/{Interpreter,Components}.purs`, `ui/src/Main.{purs,js}`,
+`test/spec/ui/{UiBrowserInterpreterSpec,ReferenceClientPlan}.hs`,
 `test/harness/ui_browser/browser.mjs`, `test/harness/ui_browser/scan_artifact.py`, and `tools/ui_browser_interpreter_gate.py`
 **Blocked by**: None.
 **Independent Validation**: `python3 tools/ui_browser_interpreter_gate.py` builds via `spago`, drives Chromium with authored

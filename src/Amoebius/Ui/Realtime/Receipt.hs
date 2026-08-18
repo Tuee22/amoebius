@@ -23,7 +23,7 @@ data ReceiptSources = ReceiptSources
   deriving stock (Eq, Show)
 
 authoritativeReceipt :: ReceiptSources -> CommandId -> Maybe Receipt
-#ifdef PHASE55_REDIS_RECEIPT_AUTHORITY_MUTANT
+#ifdef UI_SINGLE_TENANT_LIVE_REDIS_RECEIPT_AUTHORITY_MUTANT
 authoritativeReceipt sources command = Map.lookup command (redisAcks sources)
 #else
 authoritativeReceipt sources command = Map.lookup command (durableReceipts sources)

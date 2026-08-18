@@ -126,10 +126,10 @@ repair, and the declared reconnect storm. No unbounded outbox, output buffer, or
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Ui/Offline/{Replay,Receipt,Outcome}.hs`,
-`ui/src/Amoebius/Ui/Offline/Replay.purs`, `test/live/OfflineReplaySpec.hs`,
-`tools/phase61_replay_live.py`, and `tools/phase61_gate.py`
+`ui/src/Amoebius/Ui/Offline/Replay.purs`, `test/spec/live/OfflineReplaySpec.hs`,
+`tools/offline_replay_receipts_live.py`, and `tools/offline_replay_receipts_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/phase61_gate.py` with the contract,
+**Independent Validation**: `python3 tools/offline_replay_receipts_gate.py` with the contract,
 two local endpoints, a durable SQLite observer, real response loss, six mutants, documentation, and ledger
 **Docs to update**:
 `documents/engineering/browser_offline_runtime_doctrine.md`,
@@ -151,7 +151,7 @@ Prove that every accepted replay has one recoverable durable receipt and current
 
 ### Validation
 
-1. Run `python3 tools/phase61_gate.py`; require the scoped canonical trace green,
+1. Run `python3 tools/offline_replay_receipts_gate.py`; require the scoped canonical trace green,
    the dropped response repaired from the durable owner, and all six mutants red.
 
 ### Remaining Work

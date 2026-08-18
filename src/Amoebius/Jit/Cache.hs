@@ -68,7 +68,7 @@ cacheBytes = sum . map residentSizeBytes . cacheResidents
 pruneFor :: Natural -> Natural -> CacheState -> Either Text ([CacheKey], CacheState)
 pruneFor budget incoming state
   | incoming > budget = Left "CachePeakExceedsBudget"
-#ifdef PHASE48_PRUNE_NOOP_MUTANT
+#ifdef DETERMINISM_JITCACHE_PRUNE_NOOP_MUTANT
   | otherwise = Right ([], state)
 #else
   | cacheBytes state + incoming <= budget = Right ([], state)

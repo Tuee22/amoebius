@@ -27,7 +27,7 @@ tested results.
 ---
 
 amoebius has one Haskell **runtime binary** with closed responsibilities for its bootstrap/host command mode,
-**sudo-capable host daemon**, **in-cluster control-plane singleton**, **capacity scheduler**, and **unelected
+**sudo-capable host daemon**, **in-cluster control-plane daemon**, **capacity scheduler**, and **unelected
 workers**. A separate thin Python `pb` program is the pre-binary bootstrap coordinator and post-handoff admin-REST client; it
 is an operator frontend, not another runtime role or control plane. The worker set
 includes the generic UI server and owner-scoped UI projector as well as linked workflow and ML roles; an

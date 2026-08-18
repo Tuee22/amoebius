@@ -50,6 +50,8 @@ import EngineAcceleratorFixtures
 import EngineAcceleratorMutants (engineAcceleratorMutants)
 import EngineAcceleratorProps (runEngineAcceleratorProps)
 import ProvisionFixtures (provisionFixture)
+import System.IO.Unsafe (unsafePerformIO)
+import System.Environment (lookupEnv)
 import System.Exit (ExitCode (ExitSuccess))
 import System.Process (proc, readCreateProcessWithExitCode)
 
@@ -145,7 +147,7 @@ checkNegativeCorpus = do
 
 checkGate1Url :: IO ()
 checkGate1Url = do
-  (exitCode, stdoutText, stderrText) <- readCreateProcessWithExitCode (proc "dhall" ["type", "--file", "dhall/examples/illegal_engine_by_url.dhall", "--quiet"]) ""
+  (exitCode, stdoutText, stderrText) <- readCreateProcessWithExitCode (proc unsafeResolvedDhall ["type", "--file", "dhall/examples/illegal_engine_by_url.dhall", "--quiet"]) ""
   let output = Text.pack (stdoutText <> stderrText)
   assert (exitCode /= ExitSuccess && "Url" `Text.isInfixOf` output) "engine-by-URL did not fail Gate 1 at the Url alternative"
 
@@ -176,7 +178,7 @@ checkValidationLocus = do
 
 checkDhallGreen :: FilePath -> IO ()
 checkDhallGreen path = do
-  (exitCode, stdoutText, stderrText) <- readCreateProcessWithExitCode (proc "dhall" ["type", "--file", path, "--quiet"]) ""
+  (exitCode, stdoutText, stderrText) <- readCreateProcessWithExitCode (proc unsafeResolvedDhall ["type", "--file", path, "--quiet"]) ""
   assert (exitCode == ExitSuccess) (path <> " is not well typed:\n" <> stdoutText <> stderrText)
 
 rowsOf :: FilePath -> IO [[Text]]
@@ -189,3 +191,14 @@ assertRight outcome message = case outcome of
   Right _ -> pure ()
 
 assert condition message = unless condition (fail message)
+
+-- Resolved per run rather than reached by name: a bare `dhall` is an ambient PATH lookup,
+-- which the boundary argv observer of `tools/argv_observer.py` refuses. Unset means fail,
+-- never guess.
+{-# NOINLINE unsafeResolvedDhall #-}
+unsafeResolvedDhall :: FilePath
+unsafeResolvedDhall = unsafePerformIO $ do
+  value <- lookupEnv "AMOEBIUS_DHALL"
+  case value of
+    Just path | not (null path) -> pure path
+    _ -> fail "AMOEBIUS_DHALL is unset: run this suite through its phase gate"

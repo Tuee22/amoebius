@@ -1,0 +1,3 @@
+# Existing Phase 31 objects deliberately removed before the control-plane daemon's first pass.
+Deployment/observability/prometheus-query-proxy
+Service/observability/prometheus-query-proxy

@@ -1,0 +1,4 @@
+operator=invariant-clause-delete
+target=content-store-workflow-postflight-sweep
+change=omit-pulsar-resource-class
+expected=sweep-domain-incomplete

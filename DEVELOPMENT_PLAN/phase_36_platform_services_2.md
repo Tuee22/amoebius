@@ -6,7 +6,7 @@
 
 Phase 36 delivers the platform services-2 (Redis/Sentinel + Percona/Patroni + observability + readiness-DAG); its design is owned by [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [platform_services_doctrine.md](../documents/engineering/platform_services_doctrine.md), [chaos_failover_doctrine.md](../documents/engineering/chaos_failover_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-10 with `python3 tools/phase31_gate.py`; ledger
+Validated 2026-08-10 with `python3 tools/platform_services_2_gate.py`; ledger
 `dynamically-resolved`.
 
 
@@ -132,8 +132,8 @@ The scope stops at *standing these services up HA, bringing the whole stack up i
 proving the mandated Patroni configuration and DAG derivation*. The **Keycloak-owned ingress edge** — the
 browser surface Grafana and pgAdmin reach a user through — is [Phase 37](phase_37_keycloak_ingress.md); this
 phase brings the observability surfaces up behind no public edge, and they reach a user only once that edge
-exists. The Deployment-`replicas=1` control-plane singleton does not assume ownership until
-[Phase 38](phase_38_live_dsl_singleton.md). Until then, a host-side operator drives this phase's fixed service
+exists. The Deployment-`replicas=1` control-plane daemon does not assume ownership until
+[Phase 38](phase_38_live_dsl_deploy.md). Until then, a host-side operator drives this phase's fixed service
 set.
 
 **Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host. This
@@ -145,7 +145,7 @@ created with Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 **Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)); a real bring-up on a real cluster, emitting the honesty ledger
 that names Register 3 and marks the runtime layer *tested*, not proved.
 
-**Gate:** `python3 tools/phase31_gate.py` brings the whole standard stack up on the Phase-35 backbone cluster
+**Gate:** `python3 tools/platform_services_2_gate.py` brings the whole standard stack up on the Phase-35 backbone cluster
 in the [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
 derived readiness-DAG order, every service in its HA-capable topology. The apparatus is
 [Gate integrity](#gate-integrity).
@@ -200,7 +200,7 @@ finite memory/client/output-buffer limits, and failover-ready observation match 
 - **Derived-DAG order (§M.2 committed mutant, §M.3 independent oracle, §M.4 coverage floor, §M.5 external-observer trace).** The
   bring-up order is asserted a pure function of the *declared* dependency edges by a Register-1 property
   (Sprint 36.3), checked against a committed hand-authored edge→order reference table
-  `test/fixtures/phase31/dag-edges.golden` independent of the `BringUp` fold; and the *live* order is read from
+  `test/fixture/platform_services_2/dag-edges.golden` independent of the `BringUp` fold; and the *live* order is read from
   an external-observer bring-up trace (the apiserver watch / pod-readiness event stream at the OS boundary, not
   a compliance trace amoebius emits about itself). The gate names a committed seeded mutant —
   **`mutant/dag-drop-edge`**, deleting the `perconaOperator → PerconaPGCluster` edge — that MUST turn the order
@@ -213,7 +213,7 @@ finite memory/client/output-buffer limits, and failover-ready observation match 
   change ⇒ order change / injected cycle rejected" property.
 - **Mandated Patroni config (§M.3 independent oracle, §M.2 committed mutant, §M.8 specific-reason negative).**
   Each rendered `PerconaPGCluster`'s Patroni configuration is asserted byte-equal to the committed
-  hand-authored oracle `test/fixtures/phase31/patroni-sync-config.golden` (`synchronous_mode: on`,
+  hand-authored oracle `test/fixture/platform_services_2/patroni-sync-config.golden` (`synchronous_mode: on`,
   `synchronous_mode_strict: on`, bounded `maximum_lag_on_failover`), authored independently of the renderer.
   The committed seeded mutant **`mutant/patroni-async-default`** — a Patroni config left at the async default
   (`synchronous_mode` off, or non-strict so it silently degrades to async) — MUST fail the synchronous-mode
@@ -323,7 +323,7 @@ Prometheus + Grafana, and Redis primary/replicas/Sentinel — no more, no fewer.
   before the Register-3 live gate.
 - [`testing_doctrine.md §2 — the registers of amoebius testing`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing):
   this phase's gate is a Register-3 live bring-up on linux-cpu, emitting a ledger that names Register 3, marks
-  the runtime layer *tested* (never *proven*), and marks the not-yet-built Keycloak-edge and singleton-owned
+  the runtime layer *tested* (never *proven*), and marks the not-yet-built Keycloak-edge and control-plane-owned
   reconcile layers UNVERIFIED.
 
 ## Sprints
@@ -340,8 +340,8 @@ Prometheus + Grafana, and Redis primary/replicas/Sentinel — no more, no fewer.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Platform/Postgres.hs`,
-`src/Amoebius/Platform/Observability.hs`, `tools/phase31_services_live.py`,
-`test/live/ServicesLiveSpec.hs`
+`src/Amoebius/Platform/Observability.hs`, `tools/platform_services_2_live.py`,
+`test/spec/live/ServicesLiveSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the in-scope database-consumer set is exactly `{Grafana}`, on an external
 Patroni-via-Percona datastore for its config/dashboard store. The numbered validation list below discharges
@@ -373,7 +373,7 @@ dashboards.
   `synchronous_mode_strict: on` (the decided strict stance — no synchronous standby ⇒ the primary refuses new
   writes; the degrade-to-async alternative is rejected), and a bytes-bounded `maximum_lag_on_failover` (a
   replica lagging past the bound is promotion-ineligible). The existing
-  `test/fixtures/phase31/patroni-sync-config.golden` is a regression fixture until independently reviewed or
+  `test/fixture/platform_services_2/patroni-sync-config.golden` is a regression fixture until independently reviewed or
   replaced, with the committed seeded mutant
   `mutant/patroni-async-default` named as the mutant this invariant MUST turn red (on the specific reason that
   `synchronous_mode_strict` is not `on`).
@@ -471,14 +471,14 @@ dashboards.
 ### Remaining Work
 Remove `postgres-share-package.sha256`, route package acquisition through Phase 1's dynamic resolver, and
 retain its integrity observation only in run evidence. Independently review or replace the same-commit Patroni
-and monitoring expectations. The Keycloak browser edge remains Phase 37 and singleton-owned continuous
+and monitoring expectations. The Keycloak browser edge remains Phase 37 and control-plane-owned continuous
 reconciliation remains Phase 38, both explicitly UNVERIFIED.
 
 ## Sprint 36.2: Ephemeral Redis/Sentinel realtime coordination ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Platform/Redis.hs`, `tools/phase31_services_live.py`,
-`test/live/ServicesLiveSpec.hs`
+**Implementation**: `src/Amoebius/Platform/Redis.hs`, `tools/platform_services_2_live.py`,
+`test/spec/live/ServicesLiveSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: generated manifests stand up one Redis primary, at least two replicas, and three
 Sentinel voters from the Phase-30 image, and an independent TLS/ACL client observes replication and a forced
@@ -522,7 +522,7 @@ has sealed the platform Redis/Sentinel boundary.
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Platform/Services.hs`,
-`src/Amoebius/Platform/BringUp.hs`, `tools/phase31_gate.py`
+`src/Amoebius/Platform/BringUp.hs`, `tools/platform_services_2_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the full standard stack (Phase-35 backbone + the
 Sprint-31.1 and Sprint-31.2 services) is assembled as one acyclic derived readiness DAG whose edges are the
@@ -531,7 +531,7 @@ edges; the reconciler brings the set up strictly in that order, each dependent s
 observed-ready condition (never a `threadDelay`); the live bring-up order is read from an
 **external-observer trace** (the apiserver watch / pod-readiness event stream at the OS boundary), the
 derived order asserted a pure function of the declared edges against the committed
-`test/fixtures/phase31/dag-edges.golden` table (independent of the `BringUp` fold), the committed
+`test/fixture/platform_services_2/dag-edges.golden` table (independent of the `BringUp` fold), the committed
 `mutant/dag-drop-edge` (deleting the `perconaOperator → PerconaPGCluster` edge) turning both the order
 property and the live precondition red; no image request leaves the cluster for a public registry; the whole
 set is up, HA-shaped, and reachable in-cluster.
@@ -554,7 +554,7 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
   [`vault_pki_doctrine.md §4`](../documents/engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init).
 - Live enactment by the Phase-31 reconciler's wait-for-ready — each dependent constructed to start on its
   dependency's observed-ready edge (a `runtime-checked` observation from the live object), never a duration;
-  the singleton that will later own this loop is [Phase 38](phase_38_live_dsl_singleton.md) (Deployment `replicas=1`, no election).
+  the control-plane daemon that will later own this loop is [Phase 38](phase_38_live_dsl_deploy.md) (Deployment `replicas=1`, no election).
 - The phase-gate harness brings the standard stack onto Phase 35's live backbone and observes every required
   service in its HA-capable shape. It also verifies generated-manifest and baked-binary provenance, exact
   execution-unit/volume projection from `ProvisionedServiceSpec`, and a Register-3 ledger that labels only the
@@ -565,7 +565,7 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
   rejected) under a §M.4 cover/classify floor forcing a stated minimum fraction of cases through the
   declared-edge mutation and injected-cycle branches so neither passes vacuously, checked against the committed
   hand-authored edge→order reference table
-  `test/fixtures/phase31/dag-edges.golden` — an oracle **independent of** the `BringUp` fold (§M.3); and the
+  `test/fixture/platform_services_2/dag-edges.golden` — an oracle **independent of** the `BringUp` fold (§M.3); and the
   committed
   seeded mutants **`mutant/dag-drop-edge`** (deletes the `perconaOperator → PerconaPGCluster` declared edge)
   and **`mutant/dag-inject-cycle`** (adds a back-edge making the declared graph cyclic)
@@ -576,7 +576,7 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
    before its Patroni consumers, Vault-unsealed before secret-dependent startup — with each edge an observed
    condition and no timer standing in for a condition, and the **live order read from an external-observer bring-up trace** (apiserver watch / pod-readiness event stream at the OS boundary), never a compliance trace
    amoebius emits about itself. Beyond the observed order, assert **derivation**: the Register-1 property
-   `prop_bringUpOrderDerivedFromEdges` (checked against the committed `test/fixtures/phase31/dag-edges.golden`
+   `prop_bringUpOrderDerivedFromEdges` (checked against the committed `test/fixture/platform_services_2/dag-edges.golden`
    reference table, independent of the `BringUp` fold) holds — the order is a pure function of the declared
    edges, adding/removing a declared edge changes it, an introduced cycle is rejected — under a §M.4
    cover/classify floor keeping the edge-mutation and injected-cycle branches above a stated minimum fraction
@@ -595,7 +595,7 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
    fail. Finally, exact-match every applied resource field to `ProvisionedServiceSpec`, including app/init/sidecar
    envelopes, bounded `emptyDir`, PVC/PV capacity, the two init-container lifecycle modes, overhead, and the
    cache-`None`/accelerator-`None` arms. Emit the Register-3
-   ledger, runtime layer *tested* not *proven* (Keycloak edge + singleton-owned reconcile marked UNVERIFIED).
+   ledger, runtime layer *tested* not *proven* (Keycloak edge + control-plane-owned reconcile marked UNVERIFIED).
 
 ### Remaining Work
 Remove `expected-base-digest.txt`, consume the verified Phase-30 identity as run input, and rerun the warm
@@ -605,7 +605,7 @@ failure ordering claim.
 ## Sprint 36.4: Register-2.5 readiness-DAG bring-up under simulated partial failure ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `test/Amoebius/Platform/BringUpSim.hs` (the `IOSimPOR` harness
+**Implementation**: `test/spec/platform/BringUpSim.hs` (the `IOSimPOR` harness
 driving the unmodified Sprint-31.3 `src/Amoebius/Platform/BringUp.hs` orchestration through a typed fault
 observer)
 **Blocked by**: reopened numeric predecessor gates.

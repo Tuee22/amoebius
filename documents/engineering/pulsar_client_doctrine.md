@@ -269,7 +269,7 @@ Each verb maps to a protocol exchange and to a daemon role
 
   | Type | Shape | Typical amoebius use |
   |------|-------|----------------------|
-  | **Exclusive** | one consumer per subscription | a singleton reader (e.g. control-plane projection) |
+  | **Exclusive** | one consumer per subscription | a control-plane daemon reader (e.g. control-plane projection) |
   | **Failover** | primary + standbys, ordered by consumer name | HA workflow coordinators — one active, others hot |
   | **Shared** | round-robin across many consumers | horizontally-scaled stateless workers |
   | **Key_Shared** | same key → same consumer | per-key ordering across a worker pool |
@@ -289,7 +289,7 @@ choice so the omissions are auditable, not silent.
 - **Exposed (derived): topic compaction + TableView.** *Compaction* is a namespace/topic policy the
   coordinator reconciles like retention and dedup ([§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows), [§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default));
   a *TableView* is a client-side `key → latest-value` materialization over a compacted `consume`. Together
-  they give the control-plane its current-state **read-model** and resolved-singleton dissemination — adopted,
+  they give the control-plane its current-state **read-model** and resolved-control-plane dissemination — adopted,
   and owned, by [daemon_topology_doctrine.md §5.2](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership).
   The operator-facing `workflow-health` projection (`WorkflowName → SLOStatus`) is a second application of the
   same primitive, owned by [monitoring_doctrine.md](./monitoring_doctrine.md).

@@ -123,7 +123,7 @@ checker under test.
   `port_type_mismatch.dhall`, `non_exhaustive_event.dhall`, and `private_value_projection.dhall` each differ
   from a positive twin only in the named illegal dimension and assert a committed Gate-1 or `UiCheckError`
   tag plus source span.
-- **Pinned oracles:** `test/fixtures/ui_program_schema/cases.tsv` owns accept/reject and diagnostic outcomes;
+- **Pinned oracles:** `test/fixture/ui_program_schema/cases.tsv` owns accept/reject and diagnostic outcomes;
   `normalized_wire.golden` owns the canonical decoded wire shape; and `graph_reference.tsv` explicitly lists
   the expected qualified nodes, edges, types, and exhaustive event coverage for the three positives.
 - **Independent predicates:** the reference reader performs a finite table/graph comparison without importing
@@ -164,7 +164,7 @@ noninterference.
 
 **Status**: Done — the capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
 **Implementation**: `dhall/amoebius/ui/`, `src/Amoebius/Ui/{Source,Check}.hs`, and
-`test/ui/UiProgramSchemaSpec.hs` — built and validated.
+`test/spec/ui/UiProgramSchemaSpec.hs` — built and validated.
 **Blocked by**: None.
 **Independent Validation**: the suite reads the Phase-0 decisions and independent graph/wire tables. Three
 positives and ten exact negatives pass, eight generated classes meet their floors, and all six mutants fail.

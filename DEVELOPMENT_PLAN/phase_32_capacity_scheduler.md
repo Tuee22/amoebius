@@ -93,9 +93,9 @@ rather than asserted. The Register-2.5 half replayed 1,792 deterministic schedul
 with byte-identical same-seed replay. All **14** committed mutants went red — seven pure ones re-run against
 the live cutover and seven attacking the same invariants through `IOSim` — 11 recorded metrics equal their
 authored values, and 33 surfaces join to 30 enumerated items. `modeled-apiserver-fidelity`,
-`completion-release-ledger`, `rollback-ledger`, and `in-cluster-singleton-ownership` stay **UNVERIFIED**: the
+`completion-release-ledger`, `rollback-ledger`, and `in-cluster-control-plane-ownership` stay **UNVERIFIED**: the
 first is the Register-2.5 assumption this run's own live half bounds, the middle two belong to the
-content-store phase, and the singleton that will own the scheduler is [Phase 38](phase_38_live_dsl_singleton.md)'s.
+content-store phase, and the control-plane daemon that will own the scheduler is [Phase 38](phase_38_live_dsl_deploy.md)'s.
 
 *The gate was unrunnable in the same four ways Phase 31's was.* It read five receipts, four mutant batteries,
 a simulation record, and the live observation out of `DEVELOPMENT_PLAN/evidence/phase_28` — a directory that
@@ -230,7 +230,7 @@ This phase does **not** rebuild the reconciler's generic SSA, staged execution (
 accelerator transitions), Job terminal protocol, authenticated deletion, or the object convergence gate —
 those are Phase 31's and are consumed here as the substrate the scheduler runs on. It owns only the scheduling
 authority. The scheduler is driven from the **host binary** against the same scratch namespace as Phase 31; the
-Deployment-`replicas=1` in-cluster singleton that eventually *owns* both the reconciler and its scheduling role
+Deployment-`replicas=1` in-cluster control-plane daemon that eventually *owns* both the reconciler and its scheduling role
 arrives in Phase 37.
 
 **Substrate:** `linux-cpu` — this gate selects the universal Linux CPU lane, which is always available on
@@ -300,7 +300,7 @@ inherits exactly these members:
   rollout-complete cannot be true at Bind time and the registry dependency is exercised by a running pod) — the
   Pending guarded Pod the scheduler must reserve and bind exclusively through CAS `Reserved` → CAS
   `BindingInFlight` → submit/confirm Kubernetes Binding → CAS `Bound`;
-- `test/live/fixtures/reconcile-corpus/expected-actions.json` — the **scheduler-action slice** only: the
+- `test/fixture/live/reconcile-corpus/expected-actions.json` — the **scheduler-action slice** only: the
   `CapacitySchedulerSystemDemand` static debit, the `BootstrapSchedulerStage` namespace/quota/CRD/config/root/
   cutover-RBAC actions, the `AfterBootstrapAddonCutover` managed-taint/admission/full-Binding install, and the
   `Reserved`/`BindingInFlight`/`Bound` reservation transitions for the guarded Pod;
@@ -387,10 +387,10 @@ planner — not regenerated from the scheduler's own output.
   — **the runtime enactor: observe, never sleep.** `BootstrapCapacitySchedulerReady`, the bootstrap-controller
   cutover, `ManagedCapacityReady`, and reservation `Bound`+Ready are read from live sources; no `threadDelay`
   substitutes for a scheduler-readiness witness.
-- [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)
-  — **the control-plane singleton.** The scheduler is a dedicated role of the same amoebius binary/image, not
+- [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon)
+  — **the control-plane daemon.** The scheduler is a dedicated role of the same amoebius binary/image, not
   a second implementation; this phase drives it from the **host binary** as a precursor, and the Deployment-
-  `replicas=1` singleton that *owns* it (single-writer authority delegated to k8s/etcd through the mandatory
+  `replicas=1` control-plane daemon that *owns* it (single-writer authority delegated to k8s/etcd through the mandatory
   `Lease`, no bespoke election) is stood up in Phase 37.
 - [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
   — **Register 3** (live infrastructure): the register this phase's gate reaches; and
@@ -418,7 +418,7 @@ snapshot with the scheduler dimension; built and validated.
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: a fresh snapshot over the pinned corpus normalizes each reservation state exactly once and
 produces the independently authored expected scheduler-state slice of
-`test/live/fixtures/reconcile-corpus/expected-actions.json`, authored before this module. Every ledger
+`test/fixture/live/reconcile-corpus/expected-actions.json`, authored before this module. Every ledger
 negative (orphan, missing, wrong-state, double debit) fails to construct a `ValidatedLiveTarget` and before
 any apiserver, ledger, or Binding write.
 **Docs to update**:
@@ -645,8 +645,8 @@ None. The receipt and mutation results are written into this run's bundle under 
 **Status**: Done — sealed 2026-08-14 inside `python3 tools/capacity_scheduler_gate.py --execute`; the six cutover
 events were observed in order and the re-run issued zero new Binding requests, and
 `sprint-27.4-receipt.json` in that run's bundle records it.
-**Implementation**: `test/live/SchedulerReservationSpec.hs` and
-`test/live/SchedulerBootstrapCutoverSpec.hs`, driving the Sprint 32.1–28.3 `Scheduler/*` and
+**Implementation**: `test/spec/live/SchedulerReservationSpec.hs` and
+`test/spec/live/SchedulerBootstrapCutoverSpec.hs`, driving the Sprint 32.1–28.3 `Scheduler/*` and
 `Admission/ExecutionIdentity` modules against the live Phase-29 `kind` cluster and the converged Phase-31
 reconciler through `tools/capacity_scheduler_live.py`, sealed by `tools/capacity_scheduler_cutover_gate.py`.
 **Blocked by**: reopened numeric predecessor gates.
@@ -693,7 +693,7 @@ namespace down leak-free.
   `collapsed-readiness`, and `stage-drop-generic-SSA-before-cutover` MUST turn the suite red; the
   premature-guarded-workload negative fixture MUST be rejected at admission.
 - A Register-3 proven/tested/assumed ledger recording the live scheduling authority, marking the
-  release-ledger/rollback residue and the in-cluster-singleton ownership (Phase 38) UNVERIFIED (deferred).
+  release-ledger/rollback residue and the in-cluster-control-plane ownership (Phase 38) UNVERIFIED (deferred).
 
 ### Validation
 
@@ -782,7 +782,7 @@ this run's bundle under `.build/runs/`.
   gains its scheduler-readiness proof (`BootstrapCapacitySchedulerReady`/`ManagedCapacityReady` observed, not
   slept).
 - `documents/engineering/daemon_topology_doctrine.md` — record that Phase 32 drives the scheduler role from the
-  host binary; the §3 singleton that *owns* both the reconciler and its scheduling role (Deployment
+  host binary; the §3 control-plane daemon that *owns* both the reconciler and its scheduling role (Deployment
   `replicas=1`, delegated single-instance, no election) is stood up in Phase 37.
 - `documents/engineering/deterministic_simulation_doctrine.md` — record the Phase-32 scheduler slice of the
   Register-2.5 io-sim battery (Sprint 32.5), with modeled-apiserver fidelity marked assumed.
@@ -812,7 +812,7 @@ this run's bundle under `.build/runs/`.
   cluster this phase's scheduler binds on
 - [phase_30_base_image_registry.md](phase_30_base_image_registry.md) — the in-cluster registry and the
   preloaded/side-loaded amoebius image the bootstrap scheduler Pod uses
-- [phase_38_live_dsl_singleton.md](phase_38_live_dsl_singleton.md) — the Deployment-`replicas=1` singleton that
+- [phase_38_live_dsl_deploy.md](phase_38_live_dsl_deploy.md) — the Deployment-`replicas=1` control-plane daemon that
   stands the reconciler and its scheduling role up in-cluster
 - [phase_15_chain_kernel_boundary.md](phase_15_chain_kernel_boundary.md) — the `io-classes` seams / modeled
   apiserver the Register-2.5 scheduler sim (Sprint 32.5) drives the real modules on
@@ -825,8 +825,8 @@ this run's bundle under `.build/runs/`.
   cross-checked at runtime (the scheduler's pre-reservation re-fold)
 - [Readiness Ordering Doctrine](../documents/engineering/readiness_ordering_doctrine.md) — [§6](../documents/engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps) the runtime
   enactor (observe, never sleep) the scheduler-readiness witnesses realize
-- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — [§3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton) the Deployment-
-  `replicas=1` singleton that will own this scheduling role in Phase 38
+- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — [§3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon) the Deployment-
+  `replicas=1` control-plane daemon that will own this scheduling role in Phase 38
 - [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the
   Register-2.5 io-sim environment the scheduler is validated against in Sprint 32.5, before the Register-3 gate
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 3 (live), [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger

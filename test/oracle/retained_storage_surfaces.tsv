@@ -14,7 +14,7 @@
 #   checks   a gate side that either ran or did not
 #
 # The id-less surface is the one this register cannot decide: whether the Phase-37
-# control-plane singleton carries no PVC is that phase's claim, not this one's.
+# control-plane daemon carries no PVC is that phase's claim, not this one's.
 inert-single-storage-class	metrics	inert-storage-class
 sprint-seals-complete	metrics	sprint-receipts
 explicit-claimref-bind	metrics	explicit-claimref-bind
@@ -44,4 +44,4 @@ no-retained-delete-path	checks	no-retained-delete-in-source
 pure-retained-storage-algebra	checks	pure-retained-storage-algebra
 toolchain-from-authored-requirements	checks	toolchain-satisfies-requirements
 recorded-metrics-match-oracle	checks	recorded-results-match-oracle,emitted-results-untracked
-phase33-control-plane-no-pvc	metrics
+live-dsl-deploy-control-plane-no-pvc	metrics

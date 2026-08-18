@@ -12,7 +12,7 @@ import StorageGeometryFixtures (StorageFixture (..), storageFixtures)
 
 runStorageMutant :: Text -> IO Bool
 runStorageMutant mutant = do
-  manifest <- Text.readFile "test/mutant/storage_geometry/mutants.tsv"
+  manifest <- Text.readFile "test/mutant/registry.tsv"
   case findVariant mutant (Text.lines manifest) of
     Nothing -> pure False
     Just variant -> case Map.lookup variant fixtureMap of
@@ -25,11 +25,23 @@ runStorageMutant mutant = do
  where
   fixtureMap = Map.fromList [(storageFixtureVariant fixture, fixture) | fixture <- storageFixtures]
 
+-- The one mutant registry carries four fixed columns and each capability's own fields as
+-- `key=value` pairs in the fifth, because the eighteen tables it replaced used eight
+-- different schemas and flattening them would have made five of them say something else.
+-- This capability's second column was `variant`, so that is the key read back.
 findVariant :: Text -> [Text] -> Maybe Text
 findVariant mutant rows = case rows of
   [] -> Nothing
   row : remaining -> case Text.splitOn "\t" row of
-    [name, variant, _]
-      | name == mutant -> Just variant
+    [capability, name, _body, _flag, detail]
+      | capability == "storage_geometry" && name == mutant -> detailField "variant" detail
       | otherwise -> findVariant mutant remaining
     _ -> findVariant mutant remaining
+
+detailField :: Text -> Text -> Maybe Text
+detailField key detail =
+  case [value | pair <- Text.splitOn ";" detail
+              , (name, value) <- [Text.breakOn "=" pair]
+              , Text.strip name == key] of
+    found : _ -> Just (Text.strip (Text.drop 1 found))
+    [] -> Nothing

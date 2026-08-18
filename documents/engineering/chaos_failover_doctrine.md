@@ -65,7 +65,7 @@ Two illustrations fix the shape.
 
 **Intra-cluster.** Two control-plane candidate pods each read the commit log, each observe no claim fresher than
 their own, and each conclude they may reconcile the cluster and mint its secrets. If both act on that
-observation, two daemons hold singleton authority at once — a split-brain the individual reads never revealed.
+observation, two daemons hold control-plane daemon authority at once — a split-brain the individual reads never revealed.
 (amoebius forecloses this specific case by delegating single-instance to k8s/etcd,
 [§6](#6-the-concentration-principle--where-the-obligation-lives); the shape is retained here because it recurs.)
 
@@ -99,7 +99,7 @@ This discipline earns its cost only when **all three** of these hold:
    only through a log, a broker, an object store, or a database. In amoebius that substrate is the
    **coordination plane: Pulsar + MinIO + the signed, hash-chained commit log**
    ([daemon_topology_doctrine.md §5.2](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership)).
-3. **A safety invariant no single actor can enforce alone** — *exactly one control-plane singleton*,
+3. **A safety invariant no single actor can enforce alone** — *exactly one control-plane daemon*,
    *exactly-once effect under redelivery*, *no split-brain gateway across clusters* — belongs to a
    protocol spanning several actors plus the substrate, not to any one process.
 
@@ -138,7 +138,7 @@ barest form:
 ```
 
 Between `t0` and `t1`, another actor can quietly invalidate the premise: a peer emits a fresher claim, a
-geo-replicated write lands, the elected owner yields. The branch is then taken on a **self-contradictory input** — a premise from one instant fused with evidence from another. The two singleton candidates of
+geo-replicated write lands, the elected owner yields. The branch is then taken on a **self-contradictory input** — a premise from one instant fused with evidence from another. The two control-plane daemon candidates of
 [§1](#1-the-defect-this-doctrine-targets) are exactly this; so are the two clusters, with **replication lag** now playing the role of the
 gap between `t0` and `t1`.
 
@@ -265,9 +265,9 @@ contracts; amoebius introduces no coordinator election
 ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)). Redis is deliberately outside this durability
 claim: its primary/replica/Sentinel topology improves
 availability of ephemeral WebSocket routing, while lost fanout repairs from durable cursors/receipts
-([ui_realtime_coordination_doctrine.md](./ui_realtime_coordination_doctrine.md)). **Crucially, the control-plane singleton's single-writer authority is likewise delegated — to Kubernetes/etcd.** The singleton is a Deployment
+([ui_realtime_coordination_doctrine.md](./ui_realtime_coordination_doctrine.md)). **Crucially, the control-plane daemon's single-writer authority is likewise delegated — to Kubernetes/etcd.** The control-plane daemon is a Deployment
 `replicas=1` protected by the mandatory reconciler `Lease`, never a bespoke amoebius election
-([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)); amoebius does
+([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon)); amoebius does
 not duplicate the consensus etcd already provides. The governing rule is stated directly: *amoebius wants TLA+
 only for distributed problems that aren't already handled by systems that do their own consensus and
 georeplication (minio, pulsar, postgres, k8s/etcd).*
@@ -309,7 +309,7 @@ flowchart TD
 per Fact one, so amoebius runs no election and there is no in-cluster proof obligation. Only the cross-cluster
 gateway migration remains.)
 
-Everything intra-cluster and synchronous — **including the control-plane singleton's single-instance** — is a
+Everything intra-cluster and synchronous — **including the control-plane daemon's single-instance** — is a
 solved problem owned by another system; amoebius spends its formal-verification budget on the **one** invariant
 that is uniquely its own, and on nothing else. (Shorthand: delegate the easy proofs, concentrate the hard one.)
 A proof obligation that appears anywhere *other* than this one boundary **indicates a modelling error** —
@@ -417,14 +417,14 @@ thread [§16](#16-the-second-axis--when-one-cluster-becomes-a-forest) picks up.
 and **actor crash** — explored to exhaustion within a bounded scope. (TLA+/TLC and Alloy are the usual
 tools; the technique, not the tool, is the rule.)
 
-**Why it works.** The *catastrophic* failure — two daemons both believing they are the singleton, or two
+**Why it works.** The *catastrophic* failure — two daemons both believing they are the control-plane daemon, or two
 clusters both believing they hold the gateway — lives in the Protocol layer, which Extract cannot reach. A
 flaw there is wrong *regardless of how perfectly the code is written*, so no test of the implementation can
 reveal it; only checking the algorithm can. The DynamoDB 35-step trace ([§4](#4-two-traditions-and-the-quiet-third)) is the canonical proof that
 "astronomically lucky" is not a plan.
 
 **How to know the move is complete.** There is a model of the protocol; it encodes crash and reordering, not
-just the happy path; it states the safety invariant (e.g. *at most one active singleton*) and at least one
+just the happy path; it states the safety invariant (e.g. *at most one active control-plane daemon*) and at least one
 liveness property (*a cluster with a live candidate eventually has exactly one*); and a checker explores it
 to exhaustion at a scope that **matches the real actor count**. The model's vocabulary — the snapshot and
 observation *types* — should be the very ones Extract named. In amoebius the liveness property is a
@@ -439,7 +439,7 @@ actor observes its own current, unsuperseded claim in the replicated log — so 
 belief the rest of the cluster has already overwritten.
 
 Where the invariant is **impossibility-bounded** (R7), state it *conditionally* — e.g. *at most one
-singleton once views converge* — model it with that condition explicit, and verify two things: that the
+control-plane daemon once views converge* — model it with that condition explicit, and verify two things: that the
 invariant holds inside the condition, and that any violation outside it (under partition) is **bounded and self-healing** rather than permanent.
 
 **SSoT — who owns the spec.** This doctrine owns the *requirement* to model the two concentrated invariants
@@ -452,7 +452,7 @@ still requiring renderer-faithfulness tests),
 while the residual **runtime-fidelity** check — that the built forest's real physics hold — is the **Tier-2**
 obligation confirmed by **Register-3 chaos injection** in **Phase 48**. The sibling prodbox spec
 (`prodbox/documents/engineering/tla/gateway_orders_rule.tla`, six invariants explored to
-~4.4M states at scope 3, `prodbox dev tla-check`) is **evidence from a sibling system, not an amoebius proof** — its invariants `UniqueOwner` / `NoTugOfWar` / `SingletonTakeover` are exactly the shape amoebius
+~4.4M states at scope 3, `prodbox dev tla-check`) is **evidence from a sibling system, not an amoebius proof** — its invariants `UniqueOwner` / `NoTugOfWar` / `ControlPlaneTakeover` are exactly the shape amoebius
 must re-establish for its own model.
 
 **What this move cannot see — the honest limit.** Model checks the **design, not the code.** A green model
@@ -496,7 +496,7 @@ interleaving returns as a *minimal, replayable counterexample*. io-sim was harde
 deterministic "Flow" and its descendants Antithesis and TigerBeetle.
 
 **Why it would close amoebius's real gap.** Model's honest limit ([§9](#9-move-ii--model-prove-the-protocol-not-the-program)) is that a green TLA+ model does not
-prove the *code* refines it. Lifting the singleton daemon onto io-classes would let the **real loops** run
+prove the *code* refines it. Lifting the control-plane daemon daemon onto io-classes would let the **real loops** run
 under `IOSimPOR`, exercising interleavings neither the TLA+ model nor a pure decision test can reach, and
 turning the model↔code correspondence from prose into something a test executes. amoebius starts from a
 good place: the shared daemon spine already forbids `forkIO` and mandates structured `withAsync` /
@@ -538,7 +538,7 @@ keeps real-substrate fidelity assumed and live behavior unverified.
 > Extract the decision · Model the protocol · **Inject** the faults.
 
 **The move.** Subject the live forest to **fault injection that asserts the exact invariants Extract and Model established** — and make the injection *adversarial*, not merely benign: not asserting survival of a
-reboot, but asserting that the singleton invariant holds when the owner is killed mid-claim under load, and
+reboot, but asserting that the control-plane daemon invariant holds when the owner is killed mid-claim under load, and
 that the forest stays well-defined when a cluster is killed *mid geo-sync* and the gateway is failed over to
 it.
 
@@ -558,7 +558,7 @@ Model newly assert. A parallel harness is waste.
 - *Benign* (where most suites stop): one fault at a time, the system quiesced between faults — node
   restart, isolated failover, single dependency bounce. This proves *recovery from outages*.
 - *Adversarial* (what this move demands): a fault injected **during** a critical operation, **under load**,
-  with **concurrent** actors — kill the singleton mid-claim while writes are in flight; two candidates
+  with **concurrent** actors — kill the control-plane daemon mid-claim while writes are in flight; two candidates
   racing; partition, latency, packet loss; message reordering against the at-least-once guarantee; **kill a cluster mid geo-sync and fail the gateway over to it**; cascading faults with no recovery between. This
   proves the *correctness core holds under stress.* (Netflix's Monkey → Gorilla → Kong ladder is exactly
   this escalation; for amoebius, Kong is the cross-cluster gateway failover.)
@@ -692,7 +692,7 @@ validation emits a proven/tested/assumed ledger artifact, and skipping an applic
 correctness layer UNVERIFIED, never green.* The gateway-migration design model is now TLC-checked at Register 1;
 when the multi-cluster runtime is built and its live model↔code correspondence is closed (Phase 48, deferred
 Tier-2), its runtime ledger can turn green. Until then, claiming the
-singleton is "hardened" because prodbox proved a sibling invariant is exactly what this section forbids.
+control-plane daemon is "hardened" because prodbox proved a sibling invariant is exactly what this section forbids.
 
 The rule, stated once and meant absolutely: **never report a tested, assumed, or merely argued result as proven.** Type-checking, decision purity, and finite-and-exhausted decision properties can be *proven* at
 the code layer; everything else is *evidence*. The ledger is the deliverable: not an assertion of safety
@@ -926,7 +926,7 @@ arms. It is carried by
 
 ## 20. Epilogue — the honest system
 
-The two singleton candidates each decided, correctly, that they held sole authority; the two clusters each
+The two control-plane daemon candidates each decided, correctly, that they held sole authority; the two clusters each
 decided, correctly, that the other was gone. Both decisions were wrong for the world they acted in. This
 document answers that microsecond and that replication gap with a discipline that is plural because the
 failure surface is layered, and three moves that are each partial *by design*.
@@ -960,7 +960,7 @@ silently violates under partition. Build the first kind, and record which kind w
 - [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the concrete formal spec and
   invariant catalog, authored design-first in Phase 4 and covering both branches. Correspondence between
   model and code is differentially checked; runtime fidelity is the deferred Tier-2 obligation (Phase 48, via Register-3 chaos) this doctrine's Model move requires.
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane singleton (a Deployment `replicas=1`, single-instance delegated to k8s/etcd, no election).
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane daemon (a Deployment `replicas=1`, single-instance delegated to k8s/etcd, no election).
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — graceful teardown (lossless) versus chaos-failover (bounded loss), and push-back on an unsatisfiable root `InForceSpec`.
 - [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy; the `Failover` branch is this doctrine's Second-Axis obligation, and its reconciliation-on-return is worked in Appendix B.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the standard services whose intra-cluster consensus is delegated, concentrating the proof obligation.

@@ -1,0 +1,6 @@
+check=target-tree-clean
+operator=path-reintroduction
+mutation=create | test/fixtures/seed.json | {}
+statement=Reintroduce a tracked path under the plural sibling `test/fixtures/`. Section 2's fixed
+statement=second level for `test/` admits seven singular role nouns, so the path is outside the
+statement=target tree and rule r13 must name the prefix.

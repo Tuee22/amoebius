@@ -57,7 +57,7 @@ experimentHashText (ExperimentHash value) = value
 
 deriveExperimentHash :: ResolvedDhall -> SubstrateFingerprint -> ExperimentHash
 deriveExperimentHash (ResolvedDhall program) fingerprint =
-#ifdef PHASE48_CONST_FINGERPRINT_MUTANT
+#ifdef DETERMINISM_JITCACHE_CONST_FINGERPRINT_MUTANT
   ExperimentHash (blobShaText (contentAddress (program <> Char8.pack "\0linux-cpu")))
 #else
   ExperimentHash (blobShaText (contentAddress (program <> Char8.pack "\0" <> substrateFingerprintBytes fingerprint)))

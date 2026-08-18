@@ -1,0 +1,5 @@
+--- a/src/Amoebius/Pulumi/Credential.hs
++++ b/src/Amoebius/Pulumi/Credential.hs
+@@ seeded mutant: delete the explicit operational ec2:DeleteVolume deny
+-  Operational, DeleteVolume -> Deny DurableRetained
++  Operational, DeleteVolume -> Allow AccountWide

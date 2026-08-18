@@ -53,10 +53,10 @@ data GeoReplicationError
 
 representativeBatch :: [ReplicatedRecord]
 representativeBatch =
-  [ record Command "phase42-command"
+  [ record Command "multicluster-spawn-georepl-command"
   , record (Event 1) "transform:alpha"
   , record (Event 2) "transform:beta"
-  , record Result "phase42-result:alpha+beta"
+  , record Result "multicluster-spawn-georepl-result:alpha+beta"
   ]
  where
   record stage payload = ReplicatedRecord "work-42-canary" stage payload

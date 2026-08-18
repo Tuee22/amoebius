@@ -133,18 +133,18 @@ live evidence reader, and one aggregate command; no Phase-66 presentation work i
 **Lane:** cuda ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/phase51_gate.py --reuse-fresh-live` checks Phase-0
+**Gate:** `python3 tools/jitml_lift_cuda_gate.py --reuse-fresh-live` checks Phase-0
 custody, package/Dhall contracts, physical-CUDA and retained-MinIO evidence, cleanup, the independent reader,
 four compiled mutants, documentation, and the ledger. Details are delegated to [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
 - **Phase-0 representative set.** Before implementation, Phase 0 commits
-  `test/dhall/phase_52/jitml_cuda_artifact.dhall`,
-  `test/fixtures/phase_52/cuda_capacity_matrix.tsv`,
-  `test/fixtures/phase_52/committed_artifact_contract.tsv`, and
-  `test/fixtures/phase_52/command_identity_matrix.tsv`, plus
-  `test/fixtures/phase_52/resource_shape.json`. The one positive workload is a pinned supervised training job
+  `test/fixture/dhall/jitml_ui_lift/jitml_cuda_artifact.dhall`,
+  `test/fixture/jitml_ui_lift/cuda_capacity_matrix.tsv`,
+  `test/fixture/jitml_ui_lift/committed_artifact_contract.tsv`, and
+  `test/fixture/jitml_ui_lift/command_identity_matrix.tsv`, plus
+  `test/fixture/jitml_ui_lift/resource_shape.json`. The one positive workload is a pinned supervised training job
   with at least 200 optimizer steps and a multi-layer model of at least 10 million parameters; falling below
   either floor fails rather than substituting a token workload.
 - **Fresh challenge.** The harness creates an unpredictable command id and 24-byte challenge-bearing batch.
@@ -167,10 +167,10 @@ four compiled mutants, documentation, and the ledger. Details are delegated to [
   checkpoint comparison, and retained MinIO readback are the evidence. Kubernetes audit, cache, broker, and
   Vault observers remain UNVERIFIED.
 - **Committed mutants.** Phase 0 commits
-  `test/mutants/phase_51/mut-51-silent-cpu-fallback.patch` (effect swap),
-  `test/mutants/phase_51/mut-51-spend-raw-vram.patch` (guard weakening), and
-  `test/mutants/phase_51/mut-51-mint-artifact-before-cas.patch` (guard weakening), plus
-  `test/mutants/phase_51/mut-51-regenerate-command-id.patch` (idempotency weakening). The unchanged gate
+  `test/mutant/jitml_lift_cuda/mut-51-silent-cpu-fallback.patch` (effect swap),
+  `test/mutant/jitml_lift_cuda/mut-51-spend-raw-vram.patch` (guard weakening), and
+  `test/mutant/jitml_lift_cuda/mut-51-mint-artifact-before-cas.patch` (guard weakening), plus
+  `test/mutant/jitml_lift_cuda/mut-51-regenerate-command-id.patch` (idempotency weakening). The unchanged gate
   command must turn the CUDA witness, reserve negative, uncommitted-artifact, and redelivery rows red
   respectively; any surviving mutant fails the gate.
 - **Independent oracle and honesty.** Capacity arithmetic, expected Kubernetes allocation, artifact scope,
@@ -211,8 +211,8 @@ four compiled mutants, documentation, and the ledger. Details are delegated to [
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/JitML/CudaArtifactLift.hs`, `jitml/jitml-lift.cabal`,
-`dhall/jitml/package.dhall`, `test/kernel/JitMLCudaArtifactContractSpec.hs`,
-`test/live/JitMLCudaArtifactLift.hs`, and `tools/phase51_jitml_cuda_live.py`
+`dhall/jitml/package.dhall`, `test/spec/kernel/JitMLCudaArtifactContractSpec.hs`,
+`test/spec/live/JitMLCudaArtifactLift.hs`, and `tools/jitml_lift_cuda_live.py`
 **Blocked by**: reopened numeric predecessor gates.
 **Requires**: `host-floor` — the NVIDIA kernel driver, whose presence is what classifies the host
 `linux-cuda` at all. The device plugin advertising `nvidia.com/gpu` is **not** required: it is a DaemonSet
@@ -249,7 +249,7 @@ artifact carrying its trusted scope and provenance.
 
 ### Validation
 
-1. Run `python3 tools/phase51_gate.py --reuse-fresh-live` on `linux-cuda`.
+1. Run `python3 tools/jitml_lift_cuda_gate.py --reuse-fresh-live` on `linux-cuda`.
 2. Require pure CPU/floor/capacity/identity/idempotency/commit checks and all four mutants to pass or turn red
    at their exact loci.
 3. Require physical CUDA device/process inventory, 10-million-parameter/200-step execution, complete

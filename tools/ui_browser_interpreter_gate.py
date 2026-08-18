@@ -31,16 +31,18 @@ from typing import Any, Mapping
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import gate_common
+import mutant_registry  # noqa: E402
 import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
-FIXTURES = ROOT / "test/fixtures/ui_browser"
-MUTANTS = ROOT / "test/mutant/ui_browser_interpreter/mutants.tsv"
+FIXTURES = ROOT / "test/fixture/ui_browser"
+MUTANT_CAPABILITY = "ui_browser_interpreter"
+MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/ui_browser_interpreter/validation_locus.tsv"
-RUNTIME = ROOT / "ui-runtime/src/Amoebius/Ui"
+RUNTIME = ROOT / "ui/src/Amoebius/Ui"
 HARNESS = ROOT / "test/harness/ui_browser/browser.mjs"
-REFERENCE = ROOT / "test/ui/ReferenceClientPlan.hs"
+REFERENCE = ROOT / "test/spec/ui/ReferenceClientPlan.hs"
 RESULTS = ROOT / ".build/dsl/ui-browser-interpreter/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-browser-interpreter/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-browser-interpreter"
@@ -235,7 +237,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     authored_events = {row["event"] for row in interactions}
     if generated_events != authored_events:
         raise GateFailure(f"generated/authored event join is incomplete: {generated_events ^ authored_events}")
-    if len(read_tsv(ROOT / "test/fixtures/ui_security/production_headers.tsv")) != 5:
+    if len(read_tsv(ROOT / "test/fixture/ui_security/production_headers.tsv")) != 5:
         raise GateFailure("production browser header set must contain five rows")
     # The reference trace table is a reproducible observation of the interactions, so it can
     # never be an authored expectation. The check is on the corpus, not on one retired
@@ -248,7 +250,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         header = path.read_text(encoding="utf-8").splitlines()[:1]
         if header and {"visible_state", "effect", "route"} <= set(header[0].split("\t")):
             raise GateFailure(f"derived-trace-table-untracked: {relative} tracks a reproducible trace table")
-    mutants = read_tsv(MUTANTS)
+    mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 9 or {row["mutant"] for row in mutants} != set(MUTANT_LOCI):
         raise GateFailure("Phase-25 mutant manifest must contain exactly the nine contract mutants")
     locus = read_tsv(LOCUS)
@@ -274,7 +276,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
 
 def item_classes() -> dict[str, str]:
     classes = {row["entry"].strip(): row["class"].strip() for row in read_tsv(LOCUS)}
-    for row in read_tsv(MUTANTS):
+    for row in mutant_registry.capability(MUTANT_CAPABILITY):
         classes[row["mutant"].strip()] = "mutant"
     return classes
 
@@ -282,7 +284,7 @@ def item_classes() -> dict[str, str]:
 def verify_source_boundaries() -> None:
     interpreter = (RUNTIME / "Interpreter.purs").read_text(encoding="utf-8")
     components = (RUNTIME / "Components.purs").read_text(encoding="utf-8")
-    ffi = (ROOT / "ui-runtime/src/Main.js").read_text(encoding="utf-8")
+    ffi = (ROOT / "ui/src/Main.js").read_text(encoding="utf-8")
     bundle = interpreter + components + ffi
     for token in CLOSED_EVENTS:
         if f'"{token}"' not in interpreter:

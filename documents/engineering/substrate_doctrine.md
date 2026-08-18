@@ -280,6 +280,15 @@ not an operator obligation.
 names and the remedy that clears it, so the whole floor is decidable for a substrate the running
 host is not — which is what lets an apple host check that its plan for windows is well-formed.
 
+**The tables above are authored data, not a description of it.** Each row — the prerequisite id,
+what needs it, the probe that decides it, and the remedy — is declared beside the toolchain
+requirements the same resolver reads, and the floor is evaluated *before* any requirement is
+resolved. A host that cannot support the run is told which prerequisite is missing and what clears
+it, rather than being walked into a resolution failure several requirements deep on a symptom.
+The decidability claim is a check of its own: every substrate's floor is evaluated on every run,
+including the ones the running host is not, so a plan that has stopped being well-formed for
+windows fails on an apple host that will never execute it.
+
 **How an ensured tool is acquired, and why the package manager is not the default.** A
 package-manager install cannot be verified against a publisher digest, because the package manager
 is its own trust root. So the package manager is used for the floor's root and for what only it
@@ -354,11 +363,12 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 > that is type-enforced now; package-manager-canonical *discovery* is the part still to land. Do not read
 > the current discovery seam as the finished contract.
 
-**Phase-40 code generation.** `amoebius-pulsar/Setup.hs` resolves the repository-pinned `protoc` and
-`proto-lens-protoc` files by absolute path, verifies both exist, and gives `proto-lens-setup` a closed scoped
-search domain with that pinned directory first and only Cabal's fixed compiler directories afterward. It never
-inherits or consults the ambient host `PATH`, so an unrelated executable cannot shadow code generation. The
-generated modules stay build artifacts.
+**Phase-40 code generation.** The retired `amoebius-pulsar/Setup.hs` resolved `protoc` and
+`proto-lens-protoc` by absolute path and gave `proto-lens-setup` a closed search domain — never the ambient
+host `PATH`, so no unrelated executable could shadow code generation. It went with the package split, because
+[§2.1](./repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package) admits no ground for a
+package that exists only to carry a `Setup.hs`. Phase 40 re-establishes the same invariant against
+`.build/proto/**`; the generated modules stay build artifacts either way.
 
 ---
 
@@ -542,14 +552,14 @@ because the no-`PATH` / no-env, lazy-tool-ensure discipline ([§3](#3-the-no-env
 cannot start until there is a Haskell binary to enforce it. It is Python for two reasons: it must run on a
 **bare host before any Haskell toolchain exists**, and it is **unified with the operator CLI** — one Python
 CLI (`pb`) with two modes, **bootstrap coordinator** (bare host → build → `exec` the Haskell binary, this section) and
-**admin-REST client** (the operator CLI that drives the singleton after handoff,
-[bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
+**admin-REST client** (the operator CLI that drives the control-plane daemon after handoff,
+[bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)).
 amoebius owns **no shell script**; the earlier `bootstrap.sh` is retired
 ([../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md)).
 
 Phase 29 delivered the bootstrap coordinator mode; Phase 38 Sprint 38.4 now delivers the second mode in
 `pb/pb/admin.py` and `pb/pb/cli.py`, live-validating node-local Vault init/unseal plus Dhall update and KV CRUD
-against the singleton. This does not change the universal baseline: every hardware substrate can always run
+against the control-plane daemon. This does not change the universal baseline: every hardware substrate can always run
 `linux-cpu` at its own natural architecture ([§1.1](#11-the-natural-architecture-rule)), and a pristine Linux
 host uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 

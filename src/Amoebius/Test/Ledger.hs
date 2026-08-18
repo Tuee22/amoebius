@@ -27,10 +27,10 @@ deriveRunLedger provisioned = RunLedger (fmap classify (topologyExpectations top
   topology = provisionedTopology provisioned
   faulted = Set.fromList
     [ "StandbyTakesOver"
-    | KillWorker _ "phase54-failover" <- topologyFaults topology
+    | KillWorker _ "test-topology-dsl-failover" <- topologyFaults topology
     ]
   classify expectation
-#ifdef PHASE54_ALL_TESTED_MUTANT
+#ifdef TEST_TOPOLOGY_DSL_ALL_TESTED_MUTANT
     = CoverageRow (expectationInvariant expectation) Tested
 #else
     | expectationInvariant expectation `Set.member` faulted && expectationWitness expectation /= Nothing =

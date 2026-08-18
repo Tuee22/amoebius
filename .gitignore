@@ -15,7 +15,6 @@
 /DEVELOPMENT_PLAN/evidence/
 /test/enumeration/
 /test/golden/phase_*_ledger.json
-/test/golden/phase_55_expected_run_ledger.json
 
 # Dependency resolution is refreshed dynamically and never committed.
 *.lock
@@ -25,8 +24,15 @@ npm-shrinkwrap.json
 pnpm-lock.yaml
 go.sum
 
-# Haskell and formal-model build output. Cabal roots and discovery scratch are
-# redirected beneath `.build/**`; only source-adjacent compiler products need classes.
+# Haskell and formal-model build output. Cabal roots are redirected beneath `.build/**`
+# by a `--builddir` argument, which is a convention each invocation must carry rather
+# than a property of the repository: cabal rejects `builddir` in project and config
+# files and ignores `CABAL_BUILDDIR`, so a bare `cabal build` writes a root here. These
+# class rules are unanchored on purpose — they name generated content wherever it lands,
+# and never claim a second top-level root the section 2 tree does not have.
+dist-newstyle/
+.cabal-sandbox/
+.ghc.environment.*
 *.o
 *.hi
 *.dyn_o
@@ -35,15 +41,31 @@ go.sum
 *.tla
 *.cfg
 
-# JavaScript and PureScript legacy build output below the authored UI root.
-/ui-runtime/.spago/
-/ui-runtime/output/
-/ui-runtime/dist/
+# JavaScript and PureScript build output. `node_modules/` is unanchored for the same
+# reason as the Cabal roots: the toolchain installs it beneath `.build/` with `--prefix`,
+# but `package.json` sits at the repository root, so a bare `npm install` lands here.
+node_modules/
+
+# Legacy PureScript build output below the authored UI root.
+/ui/.spago/
+/ui/output/
+/ui/dist/
 
 # Python may keep source-adjacent interpreter caches. They are always generated
 # and must never become repository inputs.
 __pycache__/
 *.py[cod]
+
+# Python test and coverage state, written beside the run that produced it.
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Browser-harness reports. Playwright writes both to the working directory by default,
+# so neither reaches `.build/runs/**` on its own.
+playwright-report/
+test-results/
 
 # Runtime output written beside a run.
 *.log

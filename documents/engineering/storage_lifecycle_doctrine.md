@@ -132,7 +132,7 @@ claim, retain state of its own, or run without the old+new+workspace capacity wi
   construction; the migration Job exception only receives a capability to two already-accounted claims for
   the finite verified transition and never becomes their owner. Shared
   state for such workloads lives in a platform service (MinIO, Postgres, Pulsar), never in an ad-hoc PV. The
-  **control-plane singleton** is the canonical stateless case: it is a Deployment `replicas=1` with no PVC,
+  **control-plane daemon** is the canonical stateless case: it is a Deployment `replicas=1` with no PVC,
   and its durable state is the MinIO bucket ([§7.2](#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc), [daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)).
 - **The DSL is the gate.** The amoebius Dhall DSL does not expose a "make me a loose PVC" primitive at all;
   durable storage is requested through the app/StatefulSet surface and nowhere else. The illegal-state
@@ -585,10 +585,10 @@ The retained-PV model of this doctrine governs the **platform services and the w
 bytes — MinIO's own backing disks, Pulsar/BookKeeper, Postgres/Patroni, and any app StatefulSet. It does
 **not** describe amoebius's *own* control-plane state, which follows a different, stricter rule:
 
-- **The amoebius control plane holds no PVC.** The control-plane singleton is a stateless Deployment
+- **The amoebius control plane holds no PVC.** The control-plane daemon is a stateless Deployment
   `replicas=1` ([daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election));
   it mounts no durable volume and keeps nothing on local disk.
-- **Its durable state is exclusively the capacity-admitted Vault-enveloped MinIO bucket.** The singleton
+- **Its durable state is exclusively the capacity-admitted Vault-enveloped MinIO bucket.** The control-plane daemon
   constructs the closed `ControlPlaneStateObjectDemand` set—`InForceSpecSnapshot`,
   `ManagedResourceRegistry`, `ReconcileJournal`, `ValidationLedger`, and `JobCompletion`—while Pulumi constructs its distinct
   `PulumiCheckpointObjectDemand`. Every object carries a `StorageBudgetId`, exact canonical-size inputs,
@@ -599,7 +599,7 @@ bytes — MinIO's own backing disks, Pulsar/BookKeeper, Postgres/Patroni, and an
   ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md), the plaintext-spec-at-rest entry).
   “Every other byte” is deliberately not an open escape hatch: a new persistent state kind first extends the
   closed union, its budget/peak model, source↔producer equality check, gateway policy, and one-byte-short tests.
-- **Why the distinction matters.** It keeps the singleton disposable — k8s can reschedule it anywhere with
+- **Why the distinction matters.** It keeps the control-plane daemon disposable — k8s can reschedule it anywhere with
   no volume to re-attach and no data to lose ([§5.1](#51-storage-is-independent-of-the-node-lifecycle) applies to platform-service volumes, not to the control plane, because the control plane has none). MinIO itself is
   a platform service and *does* sit on retained PVs per this doctrine; the control plane is a *client* of
   that bucket, not a holder of its own volume.
@@ -754,7 +754,7 @@ or provider storage. Every hardware substrate can always run `linux-cpu`; for a 
 on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 Phase 37 re-exercised the delete/recreate mechanism after the authenticated edge landed. The destructive
-portion ran in the isolated `amoebius-phase32-rebind` kind cluster so the retained Phase 29–37 platform stack
+portion ran in the isolated `amoebius-keycloak-ingress-rebind` kind cluster so the retained Phase 29–37 platform stack
 remained available. The committed Keycloak-relational row payload and exact MinIO object survived old node/API
 absence and a run-two control plane with different CA, kube-system namespace UID, and node-container ID; no
 post-recreate writes preceded readback, and the scratch cluster was then removed while backing images remained.
@@ -776,6 +776,6 @@ Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows for a pristine Linu
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the aggregate `StorageBacking` fold and the `Growable` escape valve
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the stateless control-plane singleton whose state is the MinIO bucket ([§7.2](#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc))
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the stateless control-plane daemon whose state is the MinIO bucket ([§7.2](#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc))
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

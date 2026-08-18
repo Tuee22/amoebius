@@ -128,7 +128,7 @@ expected story is not generated from either plan or interpreter.
   read/mutation, workflow start/progress/cancel, ready-artifact appearance/use, retry, sign-out, and plan reload.
   One module uses the infernix-shaped fake and one uses the jitML-shaped fake. The multi-tenant case uses
   equal-shaped resources for tenant A and tenant B plus two subjects in tenant A.
-- **Pinned oracles:** `test/fixtures/ui_local_composition/interactions.tsv` and
+- **Pinned oracles:** `test/fixture/ui_local_composition/interactions.tsv` and
   `expected_visible_states.tsv` are application-authored; `access_matrix.tsv` owns own/foreign decisions;
   `expected_effect_sequence.tsv` owns the ordered typed port calls; and `expected_denials.tsv` owns exact
   sanitized responses. Every generated event/route/port must join one authored expectation or fail UNVERIFIED.
@@ -174,8 +174,8 @@ isolation, live ingress/identity, release rollout, replica failure, and HA remai
 ## Sprint 27.1: Single-/multi-tenant workflow-to-artifact composition gate ✅
 
 **Status**: Done — the composition runs end to end on the Phase-26 boundary; the sprint's committed-ledger, pinned-toolchain, and repository-resident evidence mechanics are superseded
-**Implementation**: `test/ui/LocalCompositionSpec.hs`,
-`test/harness/local_ui_composition/composition.mjs`, `test/fixtures/ui_local_composition/`, and
+**Implementation**: `test/spec/ui/LocalCompositionSpec.hs`,
+`test/harness/local_ui_composition/composition.mjs`, `test/fixture/ui_local_composition/`, and
 `tools/local_ui_composition_gate.py`
 **Blocked by**: None.
 **Independent Validation**: `python3 tools/local_ui_composition_gate.py` drives authored Playwright

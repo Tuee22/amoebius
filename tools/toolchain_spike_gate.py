@@ -52,10 +52,11 @@ import attestation  # noqa: E402
 import ledger_lint  # noqa: E402
 import containment  # noqa: E402
 import gate_common  # noqa: E402
+import host_platform  # noqa: E402
 import toolchain_spike_negative_corpus  # noqa: E402
 import toolchain  # noqa: E402
 
-from toolchain_spike_negative_corpus import NEGATIVES  # noqa: E402
+from toolchain_spike_negative_corpus import NEGATIVES, RESOLUTION_NEGATIVES  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -78,7 +79,14 @@ MUTANT_ROOT = ROOT / ".build" / "dist-newstyle" / "phase_01-mutant"
 SNAPSHOT_ROOT_NAME = ".build/dist-newstyle/phase_01-snapshot"
 STORE_PARENT = ROOT / ".build" / "cabal-store" / "phase_01"
 
-TOOLS_REQUIRED = ["ghc", "cabal", "dhall", "purs", "spago", "chromium", "protoc", "proto_lens_protoc", "java", "tla2tools"]
+# `git` is listed even though nothing depends on it through the manifest: Cabal shells out
+# to it for the supernova source-repository-package, and a tool a gate needs is declared
+# and resolved rather than invoked bare (`substrate_doctrine.md` §3). Everything else these
+# names need — ghcup, node, npm, playwright — is pulled in by the resolver's own closure.
+TOOLS_REQUIRED = [
+    "git", "ghc", "cabal", "dhall", "purs", "spago", "chromium",
+    "protoc", "proto_lens_protoc", "java", "tla2tools",
+]
 
 # The gate's own check registry. `surface_side` enumerates it live, so deleting a check
 # below breaks the authored join rather than quietly shrinking the gate.
@@ -88,6 +96,14 @@ CHECKS = {
     "fixed-commit": "no tracked build configuration names a fixed dependency revision",
     "source-closure": "no build configuration references an ignored worktree input",
     "patch-under-authored-root": "every referenced compatibility patch is tracked under an authored root",
+    "floor-decidable": "the floor is well formed and decidable for every substrate, not only this host's",
+    "floor-satisfied": "every floor prerequisite of this host's substrate is satisfied",
+    "no-host-source": "no requirement is declared as expected on the developer host",
+    "acquired-contained": "every acquired tool lives beneath the ignored build root",
+    "resolution-absent": "a provider offering nothing refuses instead of falling through",
+    "resolution-out-of-range": "a provider offering only excluded versions refuses",
+    "resolution-architecture": "a publisher with no asset for this architecture refuses rather than taking another's",
+    "managed-idempotent": "a second resolution of every managed tool installs nothing",
     "twice-resolved": "two independent resolutions produce the same admissible graph",
     "snapshot-resolves": "the graph resolves from non-ignored source alone",
     "clean-store-build": "the representative set builds from an empty package store",
@@ -99,12 +115,18 @@ CHECKS = {
     "natural-architecture": "the run executes untranslated on the architecture it records",
 }
 
+# The managed requirements a second pass must resolve without installing anything. This is
+# the "verified no-op" half of the probe-first ensure contract: the first run may install,
+# and a run that installs on every pass is not idempotent, it is just repeatedly lucky.
+IDEMPOTENT = ("git", "node", "npm", "ghc", "cabal", "chromium")
+
 # Section S clause 15: the lane this gate runs, declared by the gate rather than read
 # out of the tracker it is checked against.
 LANE = "none"
 
 SIDE_NAMES = (
     "architecture",
+    "floor",
     "provenance",
     "resolution",
     "build",
@@ -359,6 +381,150 @@ def provenance_side() -> bool:
 
 
 # --------------------------------------------------------------------------
+# floor — what only the operator supplies, checked before anything is resolved
+# --------------------------------------------------------------------------
+
+
+def floor_side() -> bool:
+    """The precondition half of `substrate_doctrine.md` §3.1.
+
+    Three claims, and the middle one is the reason this side exists at all. A gate that
+    checks only its own host's floor cannot tell a well-formed plan for another substrate
+    from a missing one, and the previous revision of this phase declared four tools as
+    "expected on the developer host" precisely because nothing was checking the difference.
+    """
+    print("\nfloor side — the per-substrate floor, before any requirement is resolved\n")
+    ok = True
+
+    problems = toolchain.floor_wellformed()
+    for substrate in host_platform.SUBSTRATES:
+        try:
+            toolchain.floor_results(substrate)
+        except toolchain.ResolutionError as error:
+            problems.append(f"floor.{substrate}: not decidable from this host: {error}")
+    if problems:
+        for problem in problems:
+            print(f"  FAIL  {'floor-decidable':<26} {problem}")
+        ok = False
+    else:
+        print(
+            f"  ok    {'floor-decidable':<26} all {len(host_platform.SUBSTRATES)} substrates "
+            f"decide, each entry carrying its remedy"
+        )
+
+    substrate = host_platform.host_substrate()
+    for result in toolchain.floor_results(substrate):
+        if result["satisfied"]:
+            print(f"  ok    {'floor-satisfied':<26} {result['id']}: {result['observation']}")
+        else:
+            print(f"  FAIL  {'floor-satisfied':<26} {result['id']}: {result['observation']}")
+            print(f"        remedy: {result['remedy']}")
+            ok = False
+
+    requirements = toolchain.load_requirements()
+    declared = sorted(name for name, spec in requirements.items() if spec["source"] == "host")
+    if declared:
+        print(f"  FAIL  {'no-host-source':<26} {', '.join(declared)} expect a tool on the developer host")
+        ok = False
+    else:
+        print(
+            f"  ok    {'no-host-source':<26} all {len(requirements)} requirements are acquired, "
+            f"managed, or supplied by the floor"
+        )
+    return ok
+
+
+def resolution_negatives() -> bool:
+    """Each seeded resolution negative reddens its own check and no other.
+
+    Both selectors are pure, so this runs with no host, no network and no download, and
+    reaches the refusal paths a passing run never takes.
+    """
+    print("\n  seeded resolution negatives — the pure selectors\n")
+    ok = True
+    for name in sorted(RESOLUTION_NEGATIVES):
+        selector, expected, fixture = RESOLUTION_NEGATIVES[name]
+        try:
+            if selector == "release":
+                _release, asset = toolchain.choose_release(
+                    name, fixture["spec"], fixture["releases"], fixture["token"]
+                )
+                outcome, detail = "", asset["name"]
+            else:
+                detail = toolchain.choose_offer(name, fixture["offers"], fixture["requirement"])
+                outcome = ""
+        except toolchain.ResolutionError as error:
+            outcome, detail = toolchain.refusal_check(error) or "resolution-unclassified", str(error)
+
+        if not expected:
+            if outcome:
+                print(f"  FAIL  {name:<26} positive control refused at {outcome}: {detail}")
+                ok = False
+            elif detail != fixture["expect"]:
+                print(f"  FAIL  {name:<26} chose {detail!r}, expected {fixture['expect']!r}")
+                ok = False
+            else:
+                print(f"  ok    {name:<26} positive control resolves to {detail}")
+            continue
+        if outcome != expected:
+            print(f"  FAIL  {name:<26} expected {expected}, got {outcome or 'no refusal'}")
+            ok = False
+        else:
+            print(f"  ok    {name:<26} turns {expected} red, and nothing else")
+    return ok
+
+
+def acquisition_contained(resolved: dict[str, Any]) -> bool:
+    """Every acquired tool is beneath `.build/`; only the floor's own supplies are not.
+
+    A `managed` tool whose provider is the package-manager root is the floor answering for
+    itself, and it lives where that manager puts it. Everything else this run acquired was
+    downloaded from a publisher, so it belongs in the ignored build root and nowhere else
+    ([`repository_layout_doctrine.md` §4](../documents/engineering/repository_layout_doctrine.md#4-dependency-and-toolchain-resolution)).
+    """
+    build_root = str(ROOT / ".build") + os.sep
+    ok = True
+    outside = 0
+    for name in sorted(name for name in resolved if name != "platform"):
+        record = resolved[name]
+        floor_supplied = str(record.get("provider", "")).startswith("package-manager")
+        if str(record["path"]).startswith(build_root):
+            continue
+        if floor_supplied:
+            outside += 1
+            continue
+        print(f"  FAIL  {'acquired-contained':<20} {name} resolved outside the build root: {record['path']}")
+        ok = False
+    if ok:
+        print(
+            f"  ok    {'acquired-contained':<20} every acquired tool is beneath .build/; "
+            f"{outside} supplied by the floor's package manager"
+        )
+    return ok
+
+
+def managed_idempotent(resolved: dict[str, Any]) -> bool:
+    """A second resolution of every managed tool is a verified no-op."""
+    try:
+        second = toolchain.resolve(IDEMPOTENT, refresh=True)
+    except toolchain.ResolutionError as error:
+        print(f"  FAIL  {'managed-idempotent':<20} second resolution failed: {error}")
+        return False
+    installed = sorted(name for name in IDEMPOTENT if second[name].get("installed"))
+    if installed:
+        print(f"  FAIL  {'managed-idempotent':<20} second pass installed {', '.join(installed)}")
+        return False
+    drift = sorted(
+        name for name in IDEMPOTENT if second[name]["path"] != resolved[name]["path"]
+    )
+    if drift:
+        print(f"  FAIL  {'managed-idempotent':<20} second pass moved {', '.join(drift)}")
+        return False
+    print(f"  ok    {'managed-idempotent':<20} {len(IDEMPOTENT)} managed tools re-probe to the same paths, uninstalled")
+    return True
+
+
+# --------------------------------------------------------------------------
 # resolution
 # --------------------------------------------------------------------------
 
@@ -397,7 +563,10 @@ def build_env(resolved: dict[str, Any], *, source_root: Path = ROOT) -> dict[str
     environment = source_env(source_root)
     directories = [
         str(Path(resolved[name]["path"]).parent)
-        for name in ("protoc", "proto_lens_protoc")
+        # `git` is here for the same reason as the codegen pair: Cabal materializes the
+        # `source-repository-package` by running it, and a resolved tool that is not put
+        # where its consumer looks is a resolution the run then declines to use.
+        for name in ("protoc", "proto_lens_protoc", "git")
         if name in resolved
     ]
     ordered = list(dict.fromkeys(directories))
@@ -498,6 +667,11 @@ def resolution_side(resolved: dict[str, Any], store: str) -> tuple[bool, dict[st
     for name in sorted(name for name in resolved if name != "platform"):
         record = resolved[name]
         print(f"  ok    {name:<20} {record['version']:<16} satisfies {record['requirement']}")
+
+    ok = acquisition_contained(resolved) and ok
+    ok = managed_idempotent(resolved) and ok
+    ok = resolution_negatives() and ok
+    print()
 
     plans = []
     for index, build_root in enumerate(PLAN_ROOTS):
@@ -928,6 +1102,13 @@ def main() -> int:
     # is executing under translation, has nothing worth resolving a toolchain for.
     results["architecture"], architecture = gate_common.architecture_side()
     if not results["architecture"]:
+        return 1
+
+    # The floor next, for the same reason: a host that cannot supply what only it can
+    # supply should be told which prerequisite and which remedy, not walked into a
+    # resolution failure four requirements deep.
+    results["floor"] = floor_side()
+    if not results["floor"]:
         return 1
 
     try:

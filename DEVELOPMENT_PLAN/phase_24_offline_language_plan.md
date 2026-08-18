@@ -120,10 +120,10 @@ any operation the classification holds online-only is a negative fixture, not an
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `dhall/amoebius/UiOffline.dhall`,
-`src/Amoebius/Ui/Offline/{Types,Decode,Plan}.hs`, `test/Ui/OfflinePlanSpec.hs`, and
-`tools/phase59_gate.py`
+`src/Amoebius/Ui/Offline/{Types,Decode,Plan}.hs`, `test/spec/ui/OfflinePlanSpec.hs`, and
+`tools/offline_language_plan_gate.py`
 **Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/phase59_gate.py` against authored
+**Independent Validation**: `python3 tools/offline_language_plan_gate.py` against authored
 fixtures, the independent key-set oracle, five compile-time mutants, documentation, and the coverage ledger
 **Docs to update**:
 `documents/engineering/browser_offline_runtime_doctrine.md`,
@@ -144,7 +144,7 @@ Compile one bounded authored offline contract into coherent public and private p
 
 ### Validation
 
-1. Run `python3 tools/phase59_gate.py`; require the canonical corpus green, each attempt to queue progress,
+1. Run `python3 tools/offline_language_plan_gate.py`; require the canonical corpus green, each attempt to queue progress,
    signal, cancellation, or invocation to fail at its pinned tag, and every named mutant to turn red.
 
 ### Remaining Work

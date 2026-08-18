@@ -105,18 +105,18 @@ generic UI constructor, Phase-54 compute change, or second client runtime was re
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/phase50_gate.py --reuse-fresh-live` checks custody,
+**Gate:** `python3 tools/infernix_ui_lift_gate.py --reuse-fresh-live` checks custody,
 package/program contracts, live evidence and cleanup, compiled mutants, documentation, and the ledger. The
 Haskell live suite independently reads evidence; it does not drive infrastructure.
 
 ## Gate integrity
 
 - **Phase-0 representative set.** Phase 0 commits
-  `test/dhall/phase_51/infernix_ui.dhall`,
-  `test/fixtures/phase_51/scope_matrix.tsv`,
-  `test/fixtures/phase_51/public_contract.golden`,
-  `test/fixtures/phase_51/expected_interaction.tsv`,
-  `test/fixtures/phase_51/terminal_receipt_identity.tsv`, and a fixed public model/input corpus. The program
+  `test/fixture/dhall/jitml_lift_cuda/infernix_ui.dhall`,
+  `test/fixture/jitml_lift_cuda/scope_matrix.tsv`,
+  `test/fixture/jitml_lift_cuda/public_contract.golden`,
+  `test/fixture/jitml_lift_cuda/expected_interaction.tsv`,
+  `test/fixture/jitml_lift_cuda/terminal_receipt_identity.tsv`, and a fixed public model/input corpus. The program
   uses `WorkflowProgress`, `ArtifactProvenance`, and `ModelInteractor` from the trusted catalog.
 - **Fresh authority and challenge.** The scoped driver creates a fresh Keycloak realm, active tenant-A and
   tenant-B sessions, unpredictable client request id, and nonce-bearing public input; a real browser exercises
@@ -137,8 +137,8 @@ Haskell live suite independently reads evidence; it does not drive infrastructur
   Envoy endpoint is token-probed, but browser-through-Envoy-to-UI-server and Kubernetes UI-server replicas are
   not claimed.
 - **Committed mutants.** Phase 0 commits
-  `test/mutants/phase_50/mut-50-trust-client-artifact-scope.patch` (guard weakening) and
-  `test/mutants/phase_50/mut-50-drop-command-id-from-terminal.patch` (receipt-correlation weakening). The first
+  `test/mutant/infernix_ui_lift/mut-50-trust-client-artifact-scope.patch` (guard weakening) and
+  `test/mutant/infernix_ui_lift/mut-50-drop-command-id-from-terminal.patch` (receipt-correlation weakening). The first
   accepts the foreign-scope handle and must turn the zero-effect/scope matrix red; the second cannot satisfy
   the independent terminal-event-to-receipt identity row.
 - **Independent oracle.** The public result and scope matrix are hand-authored from the fixed model contract
@@ -183,9 +183,9 @@ Haskell live suite independently reads evidence; it does not drive infrastructur
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
 **Implementation**: `src/Amoebius/Infernix/UiAdapter.hs`, `infernix-ui/infernix-ui-lift.cabal`,
-`dhall/ui/infernix.dhall`, `test/ui/InfernixUiContractSpec.hs`,
-`test/live/InfernixUiLift.hs`, `tools/phase50_infernix_ui_live.py`, and
-`test/ui/live/phase50_browser.mjs`
+`dhall/ui/infernix.dhall`, `test/spec/ui/InfernixUiContractSpec.hs`,
+`test/spec/live/InfernixUiLift.hs`, `tools/infernix_ui_lift_live.py`, and
+`test/harness/ui_live/infernix_ui_lift/browser.mjs`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: the live harness checks the own/foreign scope matrix
 against Keycloak, Envoy, Pulsar, MinIO, worker, durable-receipt, and browser observations and requires both
@@ -211,7 +211,7 @@ sibling SPA's code, transport, credentials, or authority assumptions.
 
 ### Validation
 
-1. Run `python3 tools/phase50_gate.py --reuse-fresh-live` on `linux-cpu`.
+1. Run `python3 tools/infernix_ui_lift_gate.py --reuse-fresh-live` on `linux-cpu`.
 2. Require the pure contract to cover opaque handles, trusted-scope command derivation, durable identity,
    exact resend, changed-input conflict, foreign-owner/tenant and stale-scope denial, and hostile output.
 3. Require the fresh live record to bind browser, tenant sessions, retained providers, reference worker,

@@ -1,6 +1,0 @@
-mutant	operator	expected_locus
-mutant_drop_accelerator_work_item	dropped-effect	source-workload-domain
-mutant_accept_accelerator_domain_mismatch	guard-weakening	policy-class-domain
-mutant_select_favorable_accelerator_epoch	guard-weakening	all-coexistence-epochs
-mutant_drop_accelerator_overlap_debit	dropped-effect	per-device-aggregation
-mutant_skip_accelerator_shard_validation	invariant-delete	residency-placement

@@ -8,7 +8,7 @@
 
 Phase 44 delivers the release lifecycle; its design is owned by [release_lifecycle_doctrine.md](../documents/engineering/release_lifecycle_doctrine.md), [inforcespec_migration_doctrine.md](../documents/engineering/inforcespec_migration_doctrine.md), [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), and the plan for reaching it is owned here.
 Register 3, live, on the `linux-cpu` substrate.
-Validated 2026-08-11 with `python3 tools/phase39_gate.py --reuse-fresh-live`;
+Validated 2026-08-11 with `python3 tools/release_lifecycle_gate.py --reuse-fresh-live`;
 ledger `external-run-reference`.
 
 
@@ -67,8 +67,8 @@ gate against its source snapshot and publish repository-local evidence without c
 
 Done (invalidated). All four sprints are implemented in `amoebius-release` and validated in **Register 3** on the
 **linux-cpu** lane — the single-node `kind` cluster assembled through Phases 29–38, with
-its standard platform-service stack already reconciled by the Phase-38 control-plane singleton onto the Phase-33 retained
-storage. It opens only after the Phase 38 gate (live DSL deploy via the Deployment-`replicas=1` singleton and
+its standard platform-service stack already reconciled by the Phase-38 control-plane daemon onto the Phase-33 retained
+storage. It opens only after the Phase 38 gate (live DSL deploy via the Deployment-`replicas=1` control-plane daemon and
 the SSA reconciler the `RolloutPlan` enacts on) and the Phase 42 gate (the three-tier content-addressed store
 the `releaseHash`-keyed ledger writes into) both close, because delivery here **composes** those primitives
 rather than reimplementing a reconciler or a store. Two distinct rounds validated the immutable ledger,
@@ -168,7 +168,7 @@ and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-f
 release and migration composites must flatten completely before any rollout effect.
 
 `amoebius-release` adds no hidden CI/CD controller. Its hashing, evidence lookup, CAS, and rollout planning run
-inside the Phase-38 singleton, so a pure `ReleaseExecutionDemand` expands the singleton's complete
+inside the Phase-38 control-plane daemon, so a pure `ReleaseExecutionDemand` expands the control-plane daemon's complete
 `PodResourceEnvelope` for release-Dhall/image/evidence reads, hashing and canonical-CBOR workspace, SSA object
 serialization, watch/readiness buffering, writable-root/log headroom, and CPU/memory/ephemeral requests and
 limits, with `cache = None` and `accelerator = None` on linux-cpu. Every app/controller object in every
@@ -180,7 +180,7 @@ and retained pointer history are exact full-key objects in a `ContentStoreLogica
 existing `Content` arm of the closed six-arm `ObjectStoreProducerDemand` union. That demand carries one
 `StorageBudgetId`, committed residents, exact future-retained objects, maximum concurrent writes, failed/CAS
 loser and multipart extents through a finite GC horizon, and `ObjectStoreMutationAdmission`. Promotion and
-release writes use the sole resource-bearing content gateway; neither the singleton nor a rollout Job receives
+release writes use the sole resource-bearing content gateway; neither the control-plane daemon nor a rollout Job receives
 direct S3 PUT authority. Same `releaseHash` deduplicates only when the full store/tenant/bucket/key identity and
 size agree; pointer history and an old pointer body remain charged through a failed race.
 
@@ -298,8 +298,8 @@ the section it adopts; individual sprints cite the same sections where they buil
 ## Sprint 44.1: The immutable `Release` ledger (`releaseHash`) ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-release/src/Amoebius/Release/Ledger.hs`,
-`amoebius-release/src/Amoebius/Release/ReleaseHash.hs`
+**Implementation**: `src/Amoebius/Release/Ledger.hs`,
+`src/Amoebius/Release/ReleaseHash.hs`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: at **Register 3** against the Phase-42 kind cluster's live MinIO store, a `Release`
 write emits the oracle-pinned `releaseHash` under an independent sha256, a repeat write of the same logical
@@ -322,7 +322,7 @@ after convergence.
   the registered `releaseHash` class of the Phase-42/Phase-53 hash/pointer master table, not re-owned here.
 - An exact `Content`-producer demand for both release fixtures and their resolved-Dhall/image/evidence objects,
   carrying full object identities, `StorageBudgetId`, structural concurrent/failure/orphan extents, and
-  mutation admission. The content gateway's complete envelope and the singleton's added hashing/canonicalizing
+  mutation admission. The content gateway's complete envelope and the control-plane daemon's added hashing/canonicalizing
   execution are provisioned before the first ledger PUT.
 - Immutability by construction: no field of a written `Release` is ever edited; the content-addressed write
   protocol rejects any bytes that do not hash to their key, so a half-written or edited-out-from-under entry is
@@ -346,9 +346,9 @@ after convergence.
    this validation **red** (two substrate-distinct fixtures collapse to one key).
 3. Attempt to edit a field of an existing `releaseHash` entry and assert the content-addressed write protocol
    **rejects** it — the ledger is append-only and immutable.
-4. Make the singleton release-execution CPU, memory, ephemeral/image/log/workspace or any ledger object,
+4. Make the control-plane daemon release-execution CPU, memory, ephemeral/image/log/workspace or any ledger object,
    count/size, failure-horizon, budget, admission, or gateway term one unit short. Every case refuses with zero
-   object mutation; exact-fit live full-key inventory and gateway/singleton envelopes equal the provisioned
+   object mutation; exact-fit live full-key inventory and gateway/control-plane daemon envelopes equal the provisioned
    projection.
 
 > **Honesty.** The immutability and self-naming are **runtime-checked residue** of the content-addressed write
@@ -362,8 +362,8 @@ None.
 ## Sprint 44.2: The `Environment` ETag-CAS promotion pointer ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-release/src/Amoebius/Release/Environment.hs`,
-`amoebius-release/src/Amoebius/Release/Promote.hs`
+**Implementation**: `src/Amoebius/Release/Environment.hs`,
+`src/Amoebius/Release/Promote.hs`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: this suite runs in **Register 3** against the live Phase-42 store, where
 `Environment` admits no fourth arm, promotion is an `If-Match` compare-and-swap that writes no new `Release`,
@@ -396,7 +396,7 @@ pointer over the fixed ledger, not a redeploy.
 - Exact Content-demand objects for all three pointer HEADs and their retained histories; concurrent CAS loser,
   failed write, multipart, and prior-body extents remain charged under the release `StorageBudgetId` and sole
   mutation admission until fresh inventory proves reclamation.
-- **oracle-pinned oracles:** a committed **compile-fail fixture** `test/reject/fourth_environment.hs` whose
+- **oracle-pinned oracles:** a committed **compile-fail fixture** `test/negative/reject/fourth_environment.hs` whose
   expected outcome is a **specific type error at the `Environment` constructor site** (no constructor for a
   fourth arm), paired with a positive that names an enumerated arm; and a golden pointer-history transcript
   `test/golden/promote_history.txt` (the expected ETag sequence for a fixed `Dev → Staging → Prod` promotion
@@ -427,8 +427,8 @@ None.
 ## Sprint 44.3: The `PromotionGate` — promote-unverified→prod type-foreclosed ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-release/src/Amoebius/Release/PromotionGate.hs`,
-`amoebius-release/src/Amoebius/Release/EvidenceWitness.hs`
+**Implementation**: `src/Amoebius/Release/PromotionGate.hs`,
+`src/Amoebius/Release/EvidenceWitness.hs`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: this suite runs in **Register 3**, where `advance` demands an `EvidenceWitness`
 read under a monotone environment→required-strength mapping, so a Runtime-UNVERIFIED `Release` yields no
@@ -502,10 +502,10 @@ None.
 ## Sprint 44.4: `RolloutPlan`/`RolloutPhase` readiness-gated apply + DB schema-migration phase (gate) ⏸️
 
 **Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `amoebius-release/src/Amoebius/Release/RolloutPlan.hs`,
-`amoebius-release/src/Amoebius/Release/SchemaMigration.hs`,
-`amoebius-release/dhall/test/release_lifecycle.dhall` (the gate topology),
-`amoebius-release/test/live/ReleaseLifecycleSpec.hs`
+**Implementation**: `src/Amoebius/Release/RolloutPlan.hs`,
+`src/Amoebius/Release/SchemaMigration.hs`,
+`dhall/test/release_lifecycle.dhall` (the gate topology),
+`test/spec/release/ReleaseLifecycleSpec.hs`
 **Blocked by**: reopened numeric predecessor gates.
 **Independent Validation**: this suite runs in **Register 3** on the live single-node kind cluster, where an
 ordered `[RolloutPhase]` applies each slice under the `amoebius` field manager, gates the next on a condition
@@ -588,7 +588,7 @@ values end-to-end.
    **cross-cluster/geo promotion and the Gateway-API canary weight-shift layers UNVERIFIED** (deferred to
    Phase 47 and a later phase, respectively); skipping an applicable move marks that layer UNVERIFIED, never
    green.
-6. Normalize the live singleton/phase Pod envelopes, controllers and rollout epoch, exact release/pointer
+6. Normalize the live control-plane daemon/phase Pod envelopes, controllers and rollout epoch, exact release/pointer
    Content objects, Postgres schemas/indexes/row bytes/WAL/workspace, and migration Job/claims to the opaque
    provisioned deployment. Any difference or `UnknownCommitment` fails even when every phase reports Ready.
 
@@ -661,7 +661,7 @@ None.
   env differences are deployment rules; app bytes byte-identical across environments
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — [§3.26](../documents/illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)
   promote-unverified→prod is type-foreclosed unrepresentable
-- [phase_38](phase_38_live_dsl_singleton.md) — the live DSL deploy via the `replicas=1` singleton and the SSA
+- [phase_38](phase_38_live_dsl_deploy.md) — the live DSL deploy via the `replicas=1` control-plane daemon and the SSA
   reconciler the `RolloutPlan` enacts on
 - [phase_42](phase_42_content_store_workflow.md) — the three-tier content-addressed store the `releaseHash`-keyed
   ledger writes into

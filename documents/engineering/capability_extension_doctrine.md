@@ -194,7 +194,7 @@ this doctrine records only its edges:
 
 ### 4.2 `coordination` — PROVIDES `Coordination`, REQUIRES `MessageBus`
 
-`coordination` is the single-writer / failover seam a Feed-sourced continuous trainer runs on. It is **not an election** and **not** the control-plane singleton: single-writer here is *delegated*, owned by
+`coordination` is the single-writer / failover seam a Feed-sourced continuous trainer runs on. It is **not an election** and **not** the control-plane daemon: single-writer here is *delegated*, owned by
 [daemon_topology_doctrine.md §4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated).
 This doctrine records only its edges:
 
@@ -205,7 +205,7 @@ This doctrine records only its edges:
 - **REQUIRES `MessageBus`** — the Failover subscription is a Pulsar primitive, so `coordination`
   consumes the core `MessageBus` capability ([service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set)).
 
-The distinction is load-bearing and never blurred: the control-plane singleton's single-instance is a k8s/etcd
+The distinction is load-bearing and never blurred: the control-plane daemon's single-instance is a k8s/etcd
 property with no bespoke election ([daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)),
 and `coordination` delegates *per-feed* single-writer to Pulsar and MinIO in the same spirit — neither is an
 amoebius-built consensus plane.
@@ -348,7 +348,7 @@ capabilities the two capability-extensions provide are exercised by their owning
 - [DSL Doctrine](./dsl_doctrine.md) — [§4](./dsl_doctrine.md#4-total-composability) the `ExtensionSpec` seam (linked-not-loaded), the anti-shadow `ProjectSpec` merge, and the closed vendored workload set `{infernix, jitML}` this graph extends
 - [Service Capability Doctrine](./service_capability_doctrine.md) — the capability surface a PROVIDE lands in ([§2](./service_capability_doctrine.md#2-the-capability-set)) and the `InferenceEngine` capability ([§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)) both workloads require
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the shared resolver + `CacheBudget`-bounded cache the `jit-build` capability-extension provides
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated) the delegated single-writer / failover primitives the `coordination` capability-extension provides; [§3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election) the singleton is k8s/etcd, not an election
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated) the delegated single-writer / failover primitives the `coordination` capability-extension provides; [§3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election) the control-plane daemon is k8s/etcd, not an election
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — the derived acyclic bring-up DAG (`mkBringUpOrder`) whose decode-foreclosed cycle rejection the acyclic merge reuses
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) the topology-relation-over-a-collection technique the total merge instantiates
 - [Image Build Doctrine](./image_build_doctrine.md) — the `Registry` inputs `jit-build` requires and the base container that carries the resolver

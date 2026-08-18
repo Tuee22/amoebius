@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The authored negative corpus for the Phase-1 provenance scan.
+"""The authored negative corpora for the Phase-1 provenance and resolution scans.
 
 Every entry below is a synthetic build configuration that carries exactly one seeded
 defect, plus a positive control that carries none. `tools/toolchain_spike_gate.py` materializes
@@ -82,5 +82,78 @@ NEGATIVES: dict[str, tuple[str, str, str]] = {
             indent=2,
         )
         + "\n",
+    ),
+}
+
+
+# --------------------------------------------------------------------------
+# resolution behaviour
+# --------------------------------------------------------------------------
+#
+# Resolution had no seeded negatives at all: every check was a positive, so a resolver that
+# silently accepted the wrong thing would have passed. These four drive the two *pure*
+# selectors — `toolchain.choose_release` over an authored release feed, and
+# `toolchain.choose_offer` over an authored provider listing — so no host, no network, and
+# no download is involved, and the outcome is the same on every machine.
+#
+# The architecture negative is the one that matters most. A publisher that ships only
+# `amd64` must produce a refusal, never the `amd64` asset: an emulated binary is exactly
+# what section S clause 15 exists to reject, and a resolver that picks one hands the gate a
+# translated tool while reporting success.
+
+_RELEASE_SPEC = {
+    "project": "example/tool",
+    "asset_pattern": r"^tool-[0-9.]+-{platform}\.tar\.gz$",
+    "platform_map": {"linux-amd64": "x86_64-linux", "darwin-arm64": "aarch64-darwin"},
+    "requirement": ">=2 <3",
+}
+
+
+def _release(tag: str, *assets: str) -> dict:
+    return {"tag_name": tag, "assets": [{"name": name, "browser_download_url": ""} for name in assets]}
+
+
+_FEED = [
+    _release("2.4.0", "tool-2.4.0-x86_64-linux.tar.gz", "tool-2.4.0-aarch64-darwin.tar.gz"),
+    _release("2.3.0", "tool-2.3.0-x86_64-linux.tar.gz", "tool-2.3.0-aarch64-darwin.tar.gz"),
+]
+
+# name -> (selector, the check it must turn red, fixture)
+#   selector "release"  drives toolchain.choose_release(name, spec, releases, token)
+#   selector "offer"    drives toolchain.choose_offer(name, offers, requirement)
+# An empty check id marks a positive control, which must resolve rather than refuse; its
+# `expect` field is what the selector has to return.
+RESOLUTION_NEGATIVES: dict[str, tuple[str, str, dict]] = {
+    "_positive-release": (
+        "release",
+        "",
+        {"spec": _RELEASE_SPEC, "releases": _FEED, "token": "darwin-arm64",
+         "expect": "tool-2.4.0-aarch64-darwin.tar.gz"},
+    ),
+    "_positive-offer": (
+        "offer",
+        "",
+        {"offers": ["9.10.1", "9.12.2", "9.12.4"], "requirement": ">=9.12 <9.13", "expect": "9.12.4"},
+    ),
+    # The provider is reachable and supplies nothing: an absent tool with no install plan
+    # behind it, which must refuse rather than fall through to a host lookup.
+    "resolution-absent": (
+        "offer",
+        "resolution-absent",
+        {"offers": [], "requirement": ">=9.12 <9.13"},
+    ),
+    # The provider supplies the tool, at versions the authored requirement excludes.
+    "resolution-out-of-range": (
+        "offer",
+        "resolution-out-of-range",
+        {"offers": ["9.6.7", "9.8.4", "9.10.1"], "requirement": ">=9.12 <9.13"},
+    ),
+    # The publisher builds the tool, and not for this machine. The feed deliberately still
+    # carries the complementary architecture's asset, so a resolver that reached for it
+    # would succeed here and be caught.
+    "resolution-architecture": (
+        "release",
+        "resolution-architecture",
+        {"spec": _RELEASE_SPEC, "releases": _FEED, "token": "linux-arm64"},
     ),
 }

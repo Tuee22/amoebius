@@ -12,7 +12,7 @@ module Amoebius.ControlPlane.Reconcile
   , converged
   ) where
 
-import Amoebius.ControlPlane.Singleton (singletonFieldManager)
+import Amoebius.ControlPlane.Daemon (controlPlaneFieldManager)
 import Control.DeepSeq (NFData)
 import Data.Set (Set)
 import Data.Set qualified as Set
@@ -35,7 +35,7 @@ data EnactRecord = EnactRecord
   deriving anyclass (NFData)
 
 enactPlan :: Set ObjectIdentity -> Set ObjectIdentity -> ReconcilePlan
-#ifdef PHASE33_ENACT_NOOP_MUTANT
+#ifdef LIVE_DSL_DEPLOY_ENACT_NOOP_MUTANT
 enactPlan _ _ = ReconcilePlan []
 #else
 enactPlan desired observed = ReconcilePlan (Set.toAscList (desired `Set.difference` observed))
@@ -44,7 +44,7 @@ enactPlan desired observed = ReconcilePlan (Set.toAscList (desired `Set.differen
 executePlan :: Set ObjectIdentity -> ReconcilePlan -> (Set ObjectIdentity, [EnactRecord])
 executePlan observed (ReconcilePlan actions) =
   ( observed `Set.union` Set.fromList actions
-  , fmap (`EnactRecord` singletonFieldManager) actions
+  , fmap (`EnactRecord` controlPlaneFieldManager) actions
   )
 
 converged :: Set ObjectIdentity -> Set ObjectIdentity -> Bool

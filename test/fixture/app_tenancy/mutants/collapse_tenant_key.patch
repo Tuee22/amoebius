@@ -1,0 +1,4 @@
+Mutant id: app-tenancy-collapse-tenant-key
+Build flag: -fphase34-collapse-tenant-key-mutant
+Mutation: key provider actions by the unqualified local object id rather than AppId/TenantId/provider.
+Required red marker: tenant-key-collapse

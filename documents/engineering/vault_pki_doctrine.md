@@ -13,7 +13,7 @@ child. It does not own the specification-side spelling of a secret reference bey
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_34_vault_pki.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_46_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_47_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_50_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_51_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_52_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_54_infernix_lift.md, DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_56_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_34_vault_pki.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_46_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_47_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_50_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_51_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_52_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_54_infernix_lift.md, DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_56_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -115,7 +115,7 @@ Every amoebius secret is one of **three Vault object shapes**:
 This *replaces*, rather than extends, any earlier "derive secrets from a seed" scheme: prodbox's
 master-seed HMAC-derivation model was retired in favour of exactly this Vault-object model
 (`secret_derivation_doctrine.md §1, §4`), and amoebius adopts the finished shape — there is no seed, no
-host-side cache, and no chart-template `lookup`+`randAlphaNum` path. A secret is **generated once and persisted on Vault's durable storage**, then fetched by each consumer ([§9](#9-in-cluster-consumers-authenticate-to-vault-directly)). Vault is a singleton HA
+host-side cache, and no chart-template `lookup`+`randAlphaNum` path. A secret is **generated once and persisted on Vault's durable storage**, then fetched by each consumer ([§9](#9-in-cluster-consumers-authenticate-to-vault-directly)). Vault is a control-plane daemon HA
 platform service on every cluster ([platform_services_doctrine.md §5](./platform_services_doctrine.md#5-vault--the-secrets-root-reference-only)),
 and its durable PV is owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
 
@@ -212,7 +212,7 @@ node-token is a *Vault-owned, rotatable KV secret*, whereas rke2's self-signed c
 Vault-KV custody like the rest of this family, but they are the *data-plane* fabric's transport **only** —
 never the wire by which a mode-(b) child reaches its unseal authority ([§6](#6-parentchild-unseal-two-sanctioned-modes), [network_fabric_doctrine.md §3](./network_fabric_doctrine.md#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)),
 since a Vault-KV key cannot be the transport that unseals the Vault holding it. That reach is the floor
-`ParentReachChannel` ([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
+`ParentReachChannel` ([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)).
 
 ```dhall
 -- The node-provisioning KV secret family — every member a `SecretRef.Vault { mount, path, field }`
@@ -235,13 +235,13 @@ distinct from custody — is flagged at [§9](#9-in-cluster-consumers-authentica
 
 ### 3.2 ML asset-staging credentials resolve from Vault by name — no second store
 
-The three-tier ML-asset lifecycle stages **Tier-2** model artifacts *eagerly*: the control-plane singleton pulls
+The three-tier ML-asset lifecycle stages **Tier-2** model artifacts *eagerly*: the control-plane daemon pulls
 the parent-named model set from upstream and re-keys it onto the content-addressed store, writing `.ready`
 last ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 That staging step needs **two** credentials, and **both resolve from Vault by name** as ordinary
 `SecretRef`s ([§3](#3-the-secretref-contract-a-name-never-a-value)):
 
-- the **object-store** credential the singleton uses to write the MinIO content store, and
+- the **object-store** credential the control-plane daemon uses to write the MinIO content store, and
 - the **upstream** credential it uses to pull weights from the model source.
 
 Neither is a second secret store and neither has a hardcoded fallback. This is a deliberate, load-bearing
@@ -347,7 +347,7 @@ stand up a provider quickly "just to test". That ordering is the point rather th
 spec cannot be admitted until its names resolve, **Vault necessarily precedes every live provider
 deployment**, and no phase ordering has to be remembered for that to hold. The root Vault this check reaches
 is built by [`phase_34`](../../DEVELOPMENT_PLAN/phase_34_vault_pki.md); the check itself is first enforced on
-a live apply path by [`phase_38`](../../DEVELOPMENT_PLAN/phase_38_live_dsl_singleton.md).
+a live apply path by [`phase_38`](../../DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md).
 
 
 ---
@@ -435,15 +435,15 @@ proven in prodbox (`vault_doctrine.md §6`–`§6.1`); amoebius keeps that backe
 (a sealed object in durable MinIO, a host-side `.age` file, a cloud KMS, a TPM/YubiKey identity) behind
 one interface, because the load-bearing property is only that the unseal material is **password-AEAD- sealed and never plaintext at rest**, not which vault holds the ciphertext. The *channel* by which the
 operator supplies the password at bring-up (and on every reboot) is the admin control plane's
-**`vault init/unseal` endpoint** — the operator CLI → the amoebius NodePort service → the control-plane singleton —
-owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api);
+**`vault init/unseal` endpoint** — the operator CLI → the amoebius NodePort service → the control-plane daemon —
+owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api);
 this section owns the *sealed-material* model, that doc owns the *delivery channel*. Because a reboot
 re-enters the sealed régime, that reach is the **seal-critical, node-local** arm of that doc's admin-plane
 reach class — Vault-independent, never over the fabric — so a reboot's unseal never depends on the very Vault
 it is unsealing.
 
 > **Honesty.** Phase 34 implements and validates the password-encrypted root-unseal backend in amoebius;
-> Phase 38 implements and live-validates the node-local `vault init/unseal` singleton endpoint and `pb`
+> Phase 38 implements and live-validates the node-local `vault init/unseal` control-plane daemon endpoint and `pb`
 > transport with a zero-persistence observer. Parent/child unseal remains owned by later phases. Status lives
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -474,7 +474,7 @@ unsealed Vault.
 
 **A remote mode-(b) child reaches its unseal authority over the floor channel, not the data fabric.** When a
 mode-(b) child sits at a different network locality than its parent, its unlock request crosses the WAN — and
-it rides the **`ParentReachChannel` floor path** ([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api), the same SSH/cloud-API path the parent provisioned the child over), **not** the data-plane WireGuard fabric. This is forced, not stylistic: the
+it rides the **`ParentReachChannel` floor path** ([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api), the same SSH/cloud-API path the parent provisioned the child over), **not** the data-plane WireGuard fabric. This is forced, not stylistic: the
 fabric's own peer key is a Vault-KV secret ([§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)) in the child's *sealed* Vault, so a fabric-carried unseal would be circular
 (wg0 needs a key that only the Vault it is unsealing can serve). The child's bootstrap reference and unseal
 credential — **including the transport** to reach the authority — are therefore floor material provisioned by
@@ -654,7 +654,7 @@ prodbox `vault_doctrine.md §12`); the inventory table there is the evidence, no
   stores a secret value, and there is no seed to derive from.
 - **A built-in Haskell Vault client, no Agent sidecar.** Vault is reached through a **built-in Haskell client library linked into the one amoebius binary** — never a Vault Agent sidecar, a CSI secrets-store driver, or a
   `vault` CLI subprocess. One client, one auth path, one dependency closure
-  ([daemon_topology_doctrine.md §1](./daemon_topology_doctrine.md#1-one-binary-three-contexts)): the singleton
+  ([daemon_topology_doctrine.md §1](./daemon_topology_doctrine.md#1-one-binary-three-contexts)): the control-plane daemon
   operates Vault, and every worker reads only its own paths through the same in-process client. A sidecar would
   add a second process, a second failure mode, and a file-mounted secret surface this contract forbids; a
   built-in client keeps the read in-process (the `InForceSpec` and every envelope are decrypted in-process and
@@ -685,7 +685,7 @@ generalization of prodbox's `vault_doctrine.md §17`. The **only** data that may
    self-signed cluster CA. Vault runs *inside* this cluster's PKI, so it cannot be the thing that mints
    it ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor) plane 3). This CA is also what issues any **in-cluster serving cert needed before the Vault PKI anchor exists** — e.g. Vault's own bootstrap `:8200` listener — since the sealed Vault cannot mint the
    cert that fronts it; the admin-REST NodePort's own pre-PKI transport, and the host-comms hops, are instead
-   secured by **network restriction, not a certificate** ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor) last bullet; [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api) the admin-plane reach class), so there is no separate admin-transport
+   secured by **network restriction, not a certificate** ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor) last bullet; [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api) the admin-plane reach class), so there is no separate admin-transport
    cert for this list to enumerate. The rke2 *node-join token*, by contrast, is **not** floor material: it is a
    Vault-owned, rotatable KV `SecretRef` ([§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)).
 2. **The retained Vault backing and its deterministic PV binding** — owned by
@@ -695,7 +695,7 @@ generalization of prodbox's `vault_doctrine.md §17`. The **only** data that may
    *unseals* Vault, and its body is password-sealed regardless of where the ciphertext rests.
 4. **Child cluster only:** the bootstrap reference and unseal credential the child uses to reach its
    unseal authority — **including the transport** to reach that authority (the `ParentReachChannel` floor path,
-   [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)), so the reach never depends on the child's own sealed Vault or on
+   [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-control-plane-daemon-rest-api)), so the reach never depends on the child's own sealed Vault or on
    the Vault-KV data-plane fabric ([§6](#6-parentchild-unseal-two-sanctioned-modes)). In mode (b) it is provisioned and owned by the parent
    ([§6](#6-parentchild-unseal-two-sanctioned-modes)); in mode (a) it is the local Kubernetes secret holding the child's own unseal key.
 

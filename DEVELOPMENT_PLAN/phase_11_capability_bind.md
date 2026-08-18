@@ -44,7 +44,15 @@ Phase-11 capability-bind ledger.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-10 revalidation — **reopened 2026-08-16 by the natural-architecture amendment.**
+✅ Done — resealed 2026-08-17 on the amended contract. `python3 tools/capability_bind_gate.py` passes all
+eleven sides on substrate `none`, lane `none`, natural `arm64`, untranslated: every authored oracle holds its
+declared shape, the suite is green, every seeded mutant reddens at its own locus, each recorded result is
+derived from an observation, and 29 surfaces join completely to 36 enumerated items. Attestation
+`sha256:dde36776da998475241825343eac9a7e32fde32aa73596f799a2dada5e0e2a6a`. The rerun differs from its
+predecessor by naming the lane and the architecture the run actually used, and by reading its mutant manifest
+from the one registry.
+
+**Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
 the natural architecture it proved and to execute no artifact of another. This phase's last gate recorded no
 architecture, so its seal is invalidated as a current result and stands only as history; the rerun differs from
