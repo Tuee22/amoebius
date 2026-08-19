@@ -1,0 +1,25 @@
+# What each reconciler does when driven on each substrate, and what it says about it.
+#
+# AUTHORED. The applicability column is the single statement of the set a reconciler
+# admits; the outcome and the diagnostic are both projections of it. A row that says
+# `refused` for a substrate its own column admits, or `admitted` for one it excludes,
+# is the two halves disagreeing -- and a diagnostic naming any other set is the third.
+#
+# reconciler<TAB>substrate<TAB>outcome<TAB>detail<TAB>diagnostic
+
+package-manager-root	linux-cpu	admitted	1	package-manager-root applies to linux-cpu, linux-cuda, apple, windows; it was driven on linux-cpu
+package-manager-root	linux-cuda	admitted	1	package-manager-root applies to linux-cpu, linux-cuda, apple, windows; it was driven on linux-cuda
+package-manager-root	apple	admitted	1	package-manager-root applies to linux-cpu, linux-cuda, apple, windows; it was driven on apple
+package-manager-root	windows	admitted	1	package-manager-root applies to linux-cpu, linux-cuda, apple, windows; it was driven on windows
+haskell-toolchain	linux-cpu	admitted	2	haskell-toolchain applies to linux-cpu, linux-cuda, apple, windows; it was driven on linux-cpu
+haskell-toolchain	linux-cuda	admitted	2	haskell-toolchain applies to linux-cpu, linux-cuda, apple, windows; it was driven on linux-cuda
+haskell-toolchain	apple	admitted	2	haskell-toolchain applies to linux-cpu, linux-cuda, apple, windows; it was driven on apple
+haskell-toolchain	windows	admitted	2	haskell-toolchain applies to linux-cpu, linux-cuda, apple, windows; it was driven on windows
+container-engine	linux-cpu	admitted	1	container-engine applies to linux-cpu, linux-cuda; it was driven on linux-cpu
+container-engine	linux-cuda	admitted	1	container-engine applies to linux-cpu, linux-cuda; it was driven on linux-cuda
+container-engine	apple	refused	not-applicable:container-engine:apple	container-engine applies to linux-cpu, linux-cuda; it was driven on apple
+container-engine	windows	refused	not-applicable:container-engine:windows	container-engine applies to linux-cpu, linux-cuda; it was driven on windows
+cluster-tools	linux-cpu	admitted	2	cluster-tools applies to linux-cpu, linux-cuda, apple, windows; it was driven on linux-cpu
+cluster-tools	linux-cuda	admitted	2	cluster-tools applies to linux-cpu, linux-cuda, apple, windows; it was driven on linux-cuda
+cluster-tools	apple	admitted	2	cluster-tools applies to linux-cpu, linux-cuda, apple, windows; it was driven on apple
+cluster-tools	windows	admitted	2	cluster-tools applies to linux-cpu, linux-cuda, apple, windows; it was driven on windows

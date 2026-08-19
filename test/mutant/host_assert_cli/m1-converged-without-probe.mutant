@@ -1,0 +1,9 @@
+check=probe-decides-convergence
+operator=dropped-postcondition
+target=pb/pb/prereqs.py
+mutation=replace | pb/pb/prereqs.py | found = first_executable(candidates[name])\n        final[name] = found\n        if ledger is not None:\n            ledger.note(Kind.PROBE, "post-condition", name, "present" if found else "absent") | found = candidates[name][0]\n        final[name] = found
+statement=Report converged from the install having returned zero, instead of re-probing.
+statement=substrate_doctrine.md section 3 makes the probe the post-condition, so a driver
+statement=that verifies nothing has reported a convergence it never reached. The absent ->
+statement=present -> present replay then carries no probe on any pass, which is exactly what
+statement=distinguishes "converged" as an observation from "converged" as a claim.

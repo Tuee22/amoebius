@@ -1,12 +1,178 @@
 [build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.9.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "amoebius-pb"
 version = "0.1.0"
-requires-python = ">=3.11"
-dependencies = []
+description = "The amoebius pre-binary host-assertion CLI: assert the floor, build the binary, hand off"
+readme = "README.md"
+requires-python = ">=3.11,<4.0"
+dependencies = ["click (>=8.1,<9.0)"]
 
 [project.scripts]
 pb = "pb.cli:main"
+
+[tool.poetry]
+packages = [{ include = "pb" }]
+
+[tool.poetry.group.dev.dependencies]
+ruff = ">=0.5,<1.0"
+black = ">=24.0,<26.0"
+mypy = ">=1.10,<2.0"
+pytest = ">=8.0,<9.0"
+coverage = ">=7.5,<8.0"
+
+# ---------------------------------------------------------------------------
+# One line length for both tools, so a formatter run and a linter run cannot
+# disagree about the same line. `stubs/` is linted and formatted but never
+# type-checked: it exists to be resolved through `mypy_path`, and mypy errors on
+# a directory holding no module.
+#
+# Every cache below is redirected beneath `.build/`. `pb/` is an authored root,
+# and section S clause 4 admits exactly one thing written beneath one — Python's
+# own bytecode cache. A tool that dropped `.mypy_cache/` or `.ruff_cache/` beside
+# the source would fail the write guard of every gate that ran it.
+# ---------------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["pb", "stubs"]
+cache-dir = "../.build/pb/ruff-cache"
+
+[tool.ruff.lint]
+select = [
+    "F",   # pyflakes
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "I",   # import order
+    "B",   # bugbear
+    "UP",  # pyupgrade
+    "S",   # bandit: this program runs installers on a bare host
+    "A",   # builtin shadowing
+    "C4",  # comprehensions
+    "PT",  # pytest style
+    "RET", # return style
+    "SIM", # simplify
+    "TID", # tidy imports
+    "TC",  # type-checking blocks
+    "ARG", # unused arguments
+    "PL",  # pylint
+    "PERF",
+    "RUF",
+]
+ignore = [
+    "E501",    # line length is black's; two owners of one rule is one too many
+    "PLR0913", # an argv builder legitimately takes many arguments
+    "PLR2004", # a magic value inside a tightly scoped helper is clearer than a name
+    # A first-party or stdlib import moved behind `if TYPE_CHECKING:` buys an import
+    # this program never pays for -- it runs once on a bare host -- at the cost of a
+    # name that exists in one of the two passes over the file. TC002 stays on, because
+    # a *third-party* typing-only import is a real dependency claim.
+    "TC001",
+    "TC003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# The suite asserts, and a fixture argument that exists only to be injected is not
+# an unused argument. Neither exemption is available to the distribution itself.
+# A suite asserts; a fixture argument exists to be injected; and a test credential
+# is a literal by definition. None of these exemptions is available to the
+# distribution itself.
+"../test/spec/pb/*" = ["S101", "S105", "S106", "ARG001", "ARG002", "PLR2004"]
+# `process.py` is the choke point the `subprocess` ban points at, so it is the one
+# module that may import it. S603 is the rule that asks for `shell=True` review; this
+# module exists precisely to guarantee the opposite, and refuses a non-absolute
+# executable before it reaches the kernel.
+"pb/process.py" = ["S404", "S603", "TID251"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"subprocess".msg = "Every child process goes through pb.process, which is the one choke point that refuses a non-absolute executable and never uses a shell."
+"os.system".msg = "A shell is not a supported invocation route; use pb.process.run."
+"os.popen".msg = "A shell is not a supported invocation route; use pb.process.run."
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+# ---------------------------------------------------------------------------
+# The union of the two sibling projects' settings, taking the stricter of each.
+# `disallow_any_explicit` is the clause that does the work: it forces a JSON
+# boundary to be typed as `object` and narrowed explicitly rather than typed as
+# `dict[str, Any]` and trusted. The rest are restated rather than left implied by
+# `strict`, because a future `strict` that stopped implying one would otherwise
+# weaken this file with no diff to review.
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = "stubs"
+files = ["pb"]
+cache_dir = "../.build/pb/mypy-cache"
+
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+warn_return_any = true
+
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+
+disallow_any_explicit = true
+disallow_any_generics = true
+disallow_any_unimported = true
+disallow_subclassing_any = true
+
+ignore_missing_imports = false
+follow_imports = "normal"
+strict_optional = true
+no_implicit_optional = true
+strict_equality = true
+implicit_reexport = false
+no_implicit_reexport = true
+disallow_redefinition = true
+
+show_error_codes = true
+show_column_numbers = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra --strict-markers --strict-config"
+testpaths = ["../test/spec/pb"]
+python_files = "test_*.py"
+cache_dir = "../.build/pb/pytest-cache"
+
+# Branch coverage, not statement coverage: a floor counting statements is met by a
+# suite that never takes the refusal arm of a probe, and the refusal arm is the one
+# every assertion here exists to have.
+[tool.coverage.run]
+branch = true
+source = ["pb"]
+data_file = "../.build/pb/coverage/data"
+# Exactly two files, both for the same structural reason: `python -m pb.test_all`
+# imports the package and the runner *before* the runner can start measuring, so
+# neither can ever be recorded as executed and measuring them would report a hole
+# no test could close. `tools/host_assert_cli_gate.py` asserts this list is exactly
+# these two, so it cannot quietly grow into a way of meeting the floor.
+omit = ["pb/__init__.py", "pb/test_all.py"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_covered = false
+# Three forms that are not behaviour: a `pragma`, a typing-only import block, a
+# Protocol method's elided body, and the `__main__` guard -- which exists so the
+# module can be run as a script and is exercised by doing exactly that, not by a test.
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "^\\s*\\.\\.\\.$",
+    ": \\.\\.\\.$",
+    "if __name__ == .__main__.:",
+]

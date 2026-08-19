@@ -527,6 +527,19 @@ node_modules/
 __pycache__/
 *.py[cod]
 
+# The Poetry distribution's virtualenv. Unanchored for the same reason as `node_modules/`:
+# `pb/poetry.toml` pins it in-project so an environment check is a question about this
+# checkout, and a resolved dependency tree is never an authored input wherever it lands.
+.venv/
+
+# Cabal's per-worktree configure output. It sits beside the authored `cabal.project` and
+# carries resolved compiler and flag choices, which are run-local observations.
+cabal.project.local
+
+# Finder metadata. The apple substrate writes it into any directory a person opens, so it
+# reaches an authored root without any command in this repository running.
+.DS_Store
+
 # Python test and coverage state, written beside the run that produced it.
 .pytest_cache/
 .coverage
@@ -628,6 +641,10 @@ ui/dist/**
 **/*.pyc
 **/*.pyo
 **/*.pyd
+**/.venv
+**/.venv/**
+**/cabal.project.local
+**/.DS_Store
 
 # Python test and coverage state, written beside the run that produced it.
 **/.pytest_cache

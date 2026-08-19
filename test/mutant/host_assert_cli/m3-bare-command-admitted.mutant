@@ -1,0 +1,10 @@
+check=invocation-absolute-path-only
+operator=guard-deletion
+target=pb/pb/process.py
+mutation=replace | pb/pb/process.py | if not executable.is_absolute():\n        return f"non-absolute-executable:{executable}"\n    if not executable.is_file(): | if not executable.is_file():
+statement=Delete the refusal that keeps a bare command name out of the one choke point.
+statement=Every call site in the authored tree already passes an absolute path, so the
+statement=replay is unchanged and no other check moves -- which is the point: the guard is
+statement=load-bearing for calls nobody has written yet, and only a direct probe of the
+statement=guard can tell that it is gone. substrate_doctrine.md section 3 forbids resolving
+statement=a host tool against the ambient PATH.

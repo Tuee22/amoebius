@@ -7,7 +7,8 @@ module Amoebius.Cluster.Bootstrap
 import Amoebius.Cluster.Inventory
 import Amoebius.Cluster.Kind
 import Amoebius.Host.Context
-import Amoebius.Host.Substrate (Substrate (..), renderSubstrate)
+import Amoebius.Host.Frame (Frame (..), frameFor, frameProvider, renderFrame)
+import Amoebius.Host.Substrate (renderPristineLinuxProvider, renderSubstrate)
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString.Lazy qualified as ByteString
 import Data.List (stripPrefix)
@@ -19,10 +20,14 @@ runBootstrap :: [String] -> IO ()
 runBootstrap arguments = do
   (distro, replicas, layout) <- either die pure (parseArguments arguments)
   context <- mkBinaryContext distro replicas >>= either die pure
-  case contextSubstrate context of
-    LinuxCpu -> pure ()
-    LinuxCuda -> pure ()
-    substrate -> die ("bootstrap-coordinator-linux-cpu-lane-requires-linux-guest;detected=" <> renderSubstrate substrate)
+  -- Every catalogue member reaches a Linux frame; the wildcard arm that refused
+  -- `apple` and `windows` outright is replaced by entry into the frame their rows
+  -- name. The arms are exhaustive and wildcard-free, so a new frame is a compile
+  -- error here rather than a substrate silently taking the native path.
+  case frameFor (contextSubstrate context) of
+    NativeLinux -> pure ()
+    LimaGuest -> enterFrame context LimaGuest
+    Wsl2Guest -> enterFrame context Wsl2Guest
   before <- discoverCluster context
   token <- if clusterRegistered before
     then pure Nothing
@@ -70,3 +75,20 @@ printReport report = do
   if reconcileBefore report == reconcileAfter report
     then putStrLn "bootstrap-reconcile: already-converged"
     else putStrLn "bootstrap-reconcile: converged"
+
+-- | Enter the Linux frame a non-native substrate reaches its workload through.
+--
+-- The frame is created and driven by the phase that owns its provider -- Colima and
+-- Lima on Apple, WSL2 on Windows -- so this is the handoff point rather than the
+-- implementation. It names the provider the row selected instead of refusing the
+-- substrate, which is the whole difference the frame table makes.
+enterFrame :: BinaryContext -> Frame -> IO ()
+enterFrame context frame =
+  die $
+    "bootstrap-enters-frame;substrate="
+      <> renderSubstrate (contextSubstrate context)
+      <> ";frame="
+      <> renderFrame frame
+      <> ";provider="
+      <> renderPristineLinuxProvider (frameProvider frame)
+      <> ";owner=the phase that materializes this frame"

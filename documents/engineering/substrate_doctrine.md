@@ -362,6 +362,15 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 > `mkAbsExe`; the amoebius target is package-manager-canonical discovery (`brew --prefix` and equivalents). The end-state invariant — invocation is always by absolute path — is the part
 > that is type-enforced now; package-manager-canonical *discovery* is the part still to land. Do not read
 > the current discovery seam as the finished contract.
+>
+> **Delivered by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_host_ensure_kernel.md) on 2026-08-19**, for the
+> parts that are amoebius's: an install step is a typed `Performer` plus an argument vector in which a
+> version is a requirement reference rather than a literal, so a pin has one home; `HostTool` carries the
+> container engine, so it is ensured through the one closed enum instead of resolved beside it; a
+> reconciler is a row whose applicability column is the single statement of its set, with the diagnostic
+> rendered from that column; and the driver re-resolves after every step and verifies with the predicate
+> it probed with. Discovery is still `findExecutable`-shaped, and remains UNVERIFIED against the
+> package-manager-canonical target.
 
 **Phase-46 code generation.** The retired `amoebius-pulsar/Setup.hs` resolved `protoc` and
 `proto-lens-protoc` by absolute path and gave `proto-lens-setup` a closed search domain — never the ambient
@@ -578,9 +587,20 @@ that reinstalls the distribution from its source of truth. It is not a third mod
 tool rather than on a host or a cluster, and it is explicit because an installer that silently updates itself
 mid-run makes the run's own provenance unanswerable. Nothing else consults or mutates the installation.
 
-Phase 35 delivered the bootstrap coordinator mode; Phase 44 Sprint 44.4 now delivers the second mode in
-`pb/pb/admin.py` and `pb/pb/cli.py`, live-validating node-local Vault init/unseal plus Dhall update and KV CRUD
-against the control-plane daemon. This does not change the universal baseline: every hardware substrate can always run
+**Delivered by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_host_assert_cli.md) on 2026-08-19.** The
+distribution is Poetry-built with an in-project virtualenv; the command surface is a Click group registered
+at import, so it is enumerable rather than discovered, and an unknown verb resolves to no command instead of
+being guessed at. A maintainer surface exists beside the consumer one and resolves to nothing outside a
+development checkout, re-checking that in its own body rather than relying on being hidden. One
+subprocess choke point owns every route to a child process — argv only, never a shell, an absolute
+executable refused before the kernel sees it, an environment overlaid rather than replaced, and output
+mirrored live and captured at once — and it owns `exec` too, because a choke point with a second door is
+not one. Every invocation is classified as a probe or a mutation and recorded, which is what makes the
+idempotence claim an observation: a converged second pass carries probes and no mutation at all.
+
+Phase 3 delivers the pre-binary mode and the closed surface both modes share; Phase 44 Sprint 44.4 owns the
+second mode's live validation in `pb/pb/admin.py` — node-local Vault init/unseal plus Dhall update and KV
+CRUD against the control-plane daemon — which remains UNVERIFIED until that phase runs. This does not change the universal baseline: every hardware substrate can always run
 `linux-cpu` at its own natural architecture ([§1.1](#11-the-natural-architecture-rule)), and a pristine Linux
 host uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 

@@ -1,0 +1,48 @@
+# The ensure plan every catalogue member renders.
+#
+# AUTHORED, NOT DUMPED. Every row is derived from three doctrine statements and from
+# nothing the implementation printed:
+#
+#   substrate_doctrine.md section 3.1 fixes the package-manager root per substrate --
+#   Homebrew on apple, the system package manager on linux, winget on windows -- and
+#   makes it the one member that is *verified, never installed*, because it cannot be
+#   installed through a resolved tool.
+#
+#   substrate_doctrine.md section 6 fixes the order: ensure the root, ensure ghcup
+#   through it, resolve and install the compatible Cabal through ghcup, then the
+#   cluster tools.
+#
+#   substrate_doctrine.md section 4 fixes who supplies the container engine. Only the
+#   native Linux frame installs one; Colima publishes a Docker endpoint as part of
+#   creating the Apple guest, and the WSL2 distribution receives the engine the Linux
+#   plan installs inside it. So `docker` appears on the two linux rows and on neither
+#   of the others -- exactly once per substrate that installs it.
+#
+# A version is `$(tool)`, never a number: the pin lives in the authored requirements
+# and is substituted at execution, so this file is stable across a bump and can be
+# compared at all. A plan that spelled the number here would have two homes.
+#
+# substrate<TAB>ordinal<TAB>provides<TAB>performer<TAB>arguments
+
+linux-cpu	1	package-manager-root	verified-only	apt-get
+linux-cpu	2	ghcup	package-manager-root	install -y ghcup
+linux-cpu	3	cabal	ghcup	install cabal $(cabal) --set
+linux-cpu	4	docker	package-manager-root	install -y docker.io
+linux-cpu	5	kubectl	package-manager-root	install -y kubectl
+linux-cpu	6	kind	package-manager-root	install -y kind
+linux-cuda	1	package-manager-root	verified-only	apt-get
+linux-cuda	2	ghcup	package-manager-root	install -y ghcup
+linux-cuda	3	cabal	ghcup	install cabal $(cabal) --set
+linux-cuda	4	docker	package-manager-root	install -y docker.io
+linux-cuda	5	kubectl	package-manager-root	install -y kubectl
+linux-cuda	6	kind	package-manager-root	install -y kind
+apple	1	package-manager-root	verified-only	brew
+apple	2	ghcup	package-manager-root	install ghcup
+apple	3	cabal	ghcup	install cabal $(cabal) --set
+apple	4	kubectl	package-manager-root	install kubernetes-cli
+apple	5	kind	package-manager-root	install kind
+windows	1	package-manager-root	verified-only	winget
+windows	2	ghcup	package-manager-root	install --exact ghcup
+windows	3	cabal	ghcup	install cabal $(cabal) --set
+windows	4	kubectl	package-manager-root	install --exact Kubernetes.kubectl
+windows	5	kind	package-manager-root	install --exact kind

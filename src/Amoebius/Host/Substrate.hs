@@ -7,7 +7,6 @@ module Amoebius.Host.Substrate
   , classify
   , classifyMutantDropGpuPromotion
   , detect
-  , supportsLinuxCpu
   , pristineLinuxProvider
   , renderPristineLinuxProvider
   , renderClassification
@@ -68,12 +67,6 @@ detect = do
   device <- doesPathExist "/dev/nvidiactl"
   let gpu = if device then GpuPresent else GpuAbsent
   pure (classify (OsName Info.os) (RawArch Info.arch) gpu)
-
--- | Every detected hardware substrate derives the CPU-only Linux lane.
--- Apple and Windows realize it through their canonical Linux guest provider;
--- accelerator-bearing hardware retains it alongside any specialized lane.
-supportsLinuxCpu :: Substrate -> Bool
-supportsLinuxCpu _ = True
 
 pristineLinuxProvider :: Substrate -> PristineLinuxProvider
 pristineLinuxProvider substrate = case substrate of

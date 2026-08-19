@@ -18,7 +18,7 @@ fixes and this phase only consumes.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/phase_03_host_assert_cli.md, DEVELOPMENT_PLAN/phase_05_amoebius_image_recipe.md, DEVELOPMENT_PLAN/phase_07_apple_engine_bringup.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/phase_03_host_assert_cli.md, DEVELOPMENT_PLAN/phase_05_amoebius_image_recipe.md, DEVELOPMENT_PLAN/phase_07_apple_engine_bringup.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -29,11 +29,11 @@ fixes and this phase only consumes.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 4.1: The closed substrate algebra 📋](#sprint-41-the-closed-substrate-algebra-)
-- [Sprint 4.2: Install steps as typed data 📋](#sprint-42-install-steps-as-typed-data-)
-- [Sprint 4.3: The reconciler table 📋](#sprint-43-the-reconciler-table-)
-- [Sprint 4.4: The probe-first ensure driver 📋](#sprint-44-the-probe-first-ensure-driver-)
-- [Sprint 4.5: The lift fold to argv 📋](#sprint-45-the-lift-fold-to-argv-)
+- [Sprint 4.1: The closed substrate algebra ✅](#sprint-41-the-closed-substrate-algebra-)
+- [Sprint 4.2: Install steps as typed data ✅](#sprint-42-install-steps-as-typed-data-)
+- [Sprint 4.3: The reconciler table ✅](#sprint-43-the-reconciler-table-)
+- [Sprint 4.4: The probe-first ensure driver ✅](#sprint-44-the-probe-first-ensure-driver-)
+- [Sprint 4.5: The lift fold to argv ✅](#sprint-45-the-lift-fold-to-argv-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,7 +41,28 @@ fixes and this phase only consumes.
 
 ## Phase Status
 
-📋 Planned. No sprint has run; this phase has no implementation footprint and claims none.
+✅ Done — sealed 2026-08-19. `python3 tools/host_ensure_kernel_gate.py` passes all twelve sides on
+substrate `none`, lane `none`, natural `arm64`, untranslated. The host modules build under
+`--ghc-options=-Werror`, and no `case` over `Substrate`, `Frame` or `HostTool` in them carries a default
+arm — a property the compiler cannot check, because a wildcard makes an exhaustive-looking match
+absorb the next constructor. All four catalogue members' plans join
+`test/oracle/host_ensure_plans.tsv` in both directions; the applicability column is the single
+statement of each reconciler's set, with the diagnostic rendered from it and compared exactly rather
+than by substring; the absent → present → present replay converges on pass one having issued exactly
+the five authored install argv, and passes two and three carry probes and no mutation at all; and one
+step list folds to fifteen argv across host, frame and container, differing only in the prefix, with
+every nested command a guest name. 23 surfaces join to 23 enumerated items and all five seeded
+mutants redden their own check and no other. Attestation
+`sha256:0c15e7073cd5baf6dfbdf02e9467c4425926989eeb95b9ea6f96ff5b211cb37e` binds source snapshot
+`sha256:cd14de88acd08838…` over 2,023 files.
+
+The run found three defects. `dsl-core` needed `Amoebius.Pulumi.Engine` at compile time and never
+declared it, so `-Werror=missing-home-modules` refused the build outright — the module is now
+declared. The first draft of the wildcard scan keyed on any constructor appearing in a `case` block,
+which read `classify`'s case over a `String` as a case over `Substrate` and refused its legitimate
+catch-all; it now keys on the arm patterns. And the first draft of the diagnostic check compared by
+substring, which passes for a diagnostic naming a *superset* of the set its row admits — exactly the
+drift the check exists to catch.
 
 ---
 
@@ -149,9 +170,9 @@ different check:
 
 ## Sprints
 
-## Sprint 4.1: The closed substrate algebra 📋
+## Sprint 4.1: The closed substrate algebra ✅
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: `src/Amoebius/Host/Frame.hs`, `src/Amoebius/Host/Substrate.hs`
 **Blocked by**: none within the phase
 **Requires**: `host-floor`
@@ -185,11 +206,11 @@ member.
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
-## Sprint 4.2: Install steps as typed data 📋
+## Sprint 4.2: Install steps as typed data ✅
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs`
 **Blocked by**: Sprint 4.1
 **Independent Validation**: no install step carries a free-form string, and every step renders to an argv whose head is a resolved `AbsExe`
@@ -220,12 +241,12 @@ make an install step a value the driver executes rather than a label a reader in
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
-## Sprint 4.3: The reconciler table 📋
+## Sprint 4.3: The reconciler table ✅
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Host/Reconciler.hs`
+**Status**: Done
+**Implementation**: `src/Amoebius/Host/Reconciler.hs`, `test/fixture/host_ensure_kernel/`
 **Blocked by**: Sprint 4.2
 **Independent Validation**: applicability, diagnostic, and install plan for every reconciler derive from one row, and a second declaration of any of the three is refused
 **Docs to update**: `documents/engineering/substrate_doctrine.md`
@@ -254,11 +275,11 @@ express a reconciler as a row so its three views cannot disagree with each other
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
-## Sprint 4.4: The probe-first ensure driver 📋
+## Sprint 4.4: The probe-first ensure driver ✅
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: `src/Amoebius/Host/Ensure.hs`, `src/Amoebius/Host/Context.hs`
 **Blocked by**: Sprint 4.3
 **Independent Validation**: the absent → present → present replay against the committed fake tool directory converges once and issues no install argv thereafter
@@ -288,12 +309,12 @@ pre-condition.
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
-## Sprint 4.5: The lift fold to argv 📋
+## Sprint 4.5: The lift fold to argv ✅
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Host/Lift.hs`
+**Status**: Done
+**Implementation**: `src/Amoebius/Host/Lift.hs`, `test/spec/host/HostEnsureKernelSpec.hs`
 **Blocked by**: Sprint 4.4
 **Independent Validation**: one fold produces host, VM, and container argv from a single step list, each compared against the authored oracle
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `documents/engineering/daemon_topology_doctrine.md`
@@ -320,7 +341,7 @@ without a second deployment path.
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
 ---
 

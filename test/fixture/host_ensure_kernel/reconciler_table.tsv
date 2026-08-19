@@ -1,0 +1,39 @@
+# The reconciler table, as a row change should be reviewed.
+#
+# AUTHORED. The applicability column is the single statement of which substrates a
+# reconciler admits, and every other view -- the diagnostic, the plan's domain, this
+# golden -- is a projection of it. The one non-uniform row is `container-engine`, and
+# it is derived rather than typed: `substrate_doctrine.md` section 4 gives Apple its
+# engine with the Colima guest and Windows its engine inside the WSL2 distribution, so
+# only the native Linux frame installs one. The row reads that from the frame table
+# rather than restating it, which is why adding a substrate cannot leave it stale.
+#
+# applies<TAB><reconciler><TAB><comma-separated substrates>
+# step<TAB><substrate><TAB><ordinal><TAB><provides><TAB><performer><TAB><arguments>
+
+applies	package-manager-root	linux-cpu,linux-cuda,apple,windows
+applies	haskell-toolchain	linux-cpu,linux-cuda,apple,windows
+applies	container-engine	linux-cpu,linux-cuda
+applies	cluster-tools	linux-cpu,linux-cuda,apple,windows
+step	linux-cpu	1	package-manager-root	verified-only	apt-get
+step	linux-cpu	2	ghcup	package-manager-root	install -y ghcup
+step	linux-cpu	3	cabal	ghcup	install cabal $(cabal) --set
+step	linux-cpu	4	docker	package-manager-root	install -y docker.io
+step	linux-cpu	5	kubectl	package-manager-root	install -y kubectl
+step	linux-cpu	6	kind	package-manager-root	install -y kind
+step	linux-cuda	1	package-manager-root	verified-only	apt-get
+step	linux-cuda	2	ghcup	package-manager-root	install -y ghcup
+step	linux-cuda	3	cabal	ghcup	install cabal $(cabal) --set
+step	linux-cuda	4	docker	package-manager-root	install -y docker.io
+step	linux-cuda	5	kubectl	package-manager-root	install -y kubectl
+step	linux-cuda	6	kind	package-manager-root	install -y kind
+step	apple	1	package-manager-root	verified-only	brew
+step	apple	2	ghcup	package-manager-root	install ghcup
+step	apple	3	cabal	ghcup	install cabal $(cabal) --set
+step	apple	4	kubectl	package-manager-root	install kubernetes-cli
+step	apple	5	kind	package-manager-root	install kind
+step	windows	1	package-manager-root	verified-only	winget
+step	windows	2	ghcup	package-manager-root	install --exact ghcup
+step	windows	3	cabal	ghcup	install cabal $(cabal) --set
+step	windows	4	kubectl	package-manager-root	install --exact Kubernetes.kubectl
+step	windows	5	kind	package-manager-root	install --exact kind

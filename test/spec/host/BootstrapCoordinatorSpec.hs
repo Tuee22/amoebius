@@ -2,8 +2,10 @@
 
 module Main (main) where
 
+import Amoebius.Host.Frame
 import Amoebius.Host.Substrate
 import Amoebius.Host.Ensure
+import Amoebius.Host.Reconciler
 import Amoebius.Host.HostTool
 import Amoebius.Host.Context
 import Amoebius.Cluster.Kind
@@ -48,7 +50,10 @@ verifyUniversalLinuxCpu = do
         , (Windows, "wsl2")
         ]
   forM_ expected $ \(substrate, provider) -> do
-    unless (supportsLinuxCpu substrate) (die (renderSubstrate substrate <> " lost the universal linux-cpu lane"))
+    -- `supportsLinuxCpu` returned True for every input and so stated nothing. The
+    -- lane claim it stood in for is that every substrate reaches a Linux frame.
+    unless (frameFor substrate `elem` [minBound .. maxBound])
+      (die (renderSubstrate substrate <> " reaches no Linux frame"))
     assertEqual
       (renderSubstrate substrate <> " pristine Linux provider")
       provider

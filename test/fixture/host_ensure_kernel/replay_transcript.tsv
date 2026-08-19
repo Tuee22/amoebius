@@ -1,0 +1,46 @@
+# The absent -> present -> present transcript the ensure driver must produce.
+#
+# AUTHORED from `substrate_doctrine.md` section 3: probe, install if absent, resolve
+# the absolute path, invoke by it -- with the probe serving as the post-condition.
+#
+# The property is not "pass one looks like this". It is that **pass two and pass three
+# carry probes and no mutation at all**. A driver that reported converged without
+# re-probing produces a pass with no probe row; a driver that mutates on a converged
+# host produces a pass with a mutation row. Both are seeded mutants, and each reddens
+# exactly one check.
+#
+# `package-manager-root` issues no argv of its own: it is `verified-only`, an assertion
+# that a floor member is present, which is not a command. It is therefore absent from
+# the mutation rows and present in neither -- it is never installed.
+#
+# Paths are relative to the run-local fixture root, so this file compares against a run
+# rather than against the temporary directory one run happened to use.
+#
+# A `converged` row records whether the pass reached the requested tool. It is
+# recorded rather than fatal, so a pass that fails is attributed to the check it
+# belongs to instead of taking every other replay check down with it.
+#
+# pass<TAB>kind<TAB>detail
+1	mutation	stubs/package-manager-root install -y ghcup
+1	mutation	stubs/ghcup install cabal 3.16.1.0 --set
+1	mutation	stubs/package-manager-root install -y docker.io
+1	mutation	stubs/package-manager-root install -y kubectl
+1	mutation	stubs/package-manager-root install -y kind
+1	converged	converged	
+1	probe	ghcup
+1	probe	cabal
+1	probe	docker
+1	probe	kubectl
+1	probe	kind
+2	converged	converged	
+2	probe	ghcup
+2	probe	cabal
+2	probe	docker
+2	probe	kubectl
+2	probe	kind
+3	converged	converged	
+3	probe	ghcup
+3	probe	cabal
+3	probe	docker
+3	probe	kubectl
+3	probe	kind

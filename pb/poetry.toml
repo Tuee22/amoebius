@@ -1,0 +1,5 @@
+# The virtualenv is in-project so an environment check is a question about this checkout
+# rather than about a shared cache under the operator's home. `pb/.venv/` is ignored by
+# both contracts; nothing in it is an authored input.
+[virtualenvs]
+in-project = true

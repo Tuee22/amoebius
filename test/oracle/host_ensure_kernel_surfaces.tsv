@@ -1,0 +1,46 @@
+# Authored expectation for the Phase-4 host-ensure surface join.
+#
+# `development_plan_gate_integrity.md` section S clause 2 requires the run to enumerate
+# its test surfaces and join them **completely** to an independently authored
+# expectation. This file is that expectation, and nothing in it is generated: the check
+# ids are read off the Phase-4 contract's Gate integrity section, the mutant ids off the
+# committed records under `test/mutant/host_ensure_kernel/`, the substrates off the
+# closed catalogue in `substrate_doctrine.md`, and the lift contexts off the exact
+# boundary of the no-PATH rule -- host, frame, container.
+#
+# The join is two-way and total. A check the gate decides that no surface claims fails
+# the gate, and a surface claiming something the run did not produce fails it too. That
+# is what stops a deleted check, a dropped substrate, or a quietly removed lift context
+# from shrinking the gate.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   checks      the check ids tools/host_ensure_kernel_gate.py decides
+#   mutants     the committed records under test/mutant/host_ensure_kernel/
+#   substrates  the substrates the rendered plan actually covers
+#   contexts    the lift contexts the fold actually emitted
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+check.build-total-under-werror	checks	build-total-under-werror
+check.no-wildcard-arm-in-host-modules	checks	no-wildcard-arm-in-host-modules
+check.plans-join-the-oracle	checks	plans-join-the-oracle
+check.table-applicability-matches-the-golden	checks	table-applicability-matches-the-golden
+check.diagnostic-derives-from-applicability	checks	diagnostic-derives-from-applicability
+check.reconciler-refuses-excluded-substrate	checks	reconciler-refuses-excluded-substrate
+check.first-pass-converges	checks	first-pass-converges
+check.first-pass-issues-the-authored-argv	checks	first-pass-issues-the-authored-argv
+check.second-pass-mutates-nothing	checks	second-pass-mutates-nothing
+check.lift-prefix-per-context	checks	lift-prefix-per-context
+check.lift-inner-command-is-a-guest-name	checks	lift-inner-command-is-a-guest-name
+mutant.m1-apple-gains-a-docker-step	mutants	m1-apple-gains-a-docker-step
+mutant.m2-authored-diagnostic	mutants	m2-authored-diagnostic
+mutant.m3-stale-snapshot	mutants	m3-stale-snapshot
+mutant.m4-converged-without-probing	mutants	m4-converged-without-probing
+mutant.m5-lift-drops-the-frame-prefix	mutants	m5-lift-drops-the-frame-prefix
+plan.linux-cpu	substrates	linux-cpu
+plan.linux-cuda	substrates	linux-cuda
+plan.apple	substrates	apple
+plan.windows	substrates	windows
+lift.on-host	contexts	on-host
+lift.in-frame:lima-guest	contexts	in-frame:lima-guest
+lift.in-container:amoebius-base	contexts	in-container:amoebius-base

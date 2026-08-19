@@ -2,6 +2,7 @@
 
 module Main (main) where
 
+import Amoebius.Host.Frame
 import Amoebius.Host.Substrate
 import Amoebius.HostComms.Illegal
 import Amoebius.HostComms.Loopback
@@ -60,8 +61,15 @@ verifyPhase0 = do
 
 verifyUniversalCpu :: IO ()
 verifyUniversalCpu = forM_
-  [ (LinuxCpu, Incus), (LinuxCuda, Incus), (Apple, Lima), (Windows, Wsl2) ] $ \(substrate, provider) -> do
-    assert (supportsLinuxCpu substrate) (renderSubstrate substrate <> " lost linux-cpu")
+  [ (LinuxCpu, Incus, NativeLinux)
+  , (LinuxCuda, Incus, NativeLinux)
+  , (Apple, Lima, LimaGuest)
+  , (Windows, Wsl2, Wsl2Guest)
+  ] $ \(substrate, provider, frame) -> do
+    -- The retired `supportsLinuxCpu` returned True for every input, so it stated
+    -- nothing its own type did not already state. The claim it was standing in for
+    -- is that every substrate *reaches* a Linux frame, which `frameFor` answers.
+    assertEqual "linux frame" frame (frameFor substrate)
     assertEqual "pristine Linux provider" provider (pristineLinuxProvider substrate)
 
 verifyDiskAndCapacity :: IO ()

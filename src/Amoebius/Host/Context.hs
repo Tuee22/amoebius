@@ -90,8 +90,12 @@ mkBinaryContext distro replicas
               let stateDirectory = checkout </> ".data" </> "bootstrap-coordinator"
                   socket = "/var/run/docker.sock"
               socketPresent <- doesPathExist socket
-              docker <- firstAbs ["/usr/bin/docker", "/usr/local/bin/docker"]
-              df <- firstAbs ["/usr/bin/df", "/bin/df"]
+              -- One resolver. `firstAbs` was an existence-only helper beside the
+              -- executable-bit resolver, and two predicates over one tool set answer
+              -- differently on the same host -- a file that exists but is not
+              -- executable was present to one and absent to the other.
+              docker <- resolveTool substrate Docker
+              df <- firstExecutableOf ["/usr/bin/df", "/bin/df"]
               case (lookupTool Kind tools, lookupTool Kubectl tools, docker, df, socketPresent) of
                 (Just kind, Just kubectl, Just dockerExe, Just dfExe, True) -> do
                   createDirectoryIfMissing True stateDirectory
@@ -113,10 +117,15 @@ mkBinaryContext distro replicas
                 (_, _, _, Nothing, _) -> pure (Left "disk-observer-absent")
                 (_, _, _, _, False) -> pure (Left "docker-socket-witness-absent")
  where
-  firstAbs [] = pure Nothing
-  firstAbs (path : rest) = do
+  -- `df` is a POSIX utility rather than a member of the closed `HostTool` enum, so
+  -- it is resolved by the same executable-bit predicate without joining the enum.
+  firstExecutableOf [] = pure Nothing
+  firstExecutableOf (path : rest) = do
     present <- doesFileExist path
-    if present then pure (either (const Nothing) Just (mkAbsExe path)) else firstAbs rest
+    runnable <- if present then executable <$> getPermissions path else pure False
+    if runnable
+      then pure (either (const Nothing) Just (mkAbsExe path))
+      else firstExecutableOf rest
 
 observePhysicalHost :: BinaryContext -> IO (Either HostAdmissionError HostObservation)
 observePhysicalHost context = do

@@ -1,0 +1,10 @@
+check=diagnostic-derives-from-applicability
+operator=derivation-severed
+target=src/Amoebius/Host/Reconciler.hs
+mutation=replace | src/Amoebius/Host/Reconciler.hs | intercalate ", " (map renderSubstrate (sortOn fromEnum (reconcilerApplies reconciler)))\n    <> "; it was driven on " | "linux-cpu, linux-cuda, apple, windows"\n    <> "; it was driven on "
+statement=Author the diagnostic beside the applicability column instead of rendering it from that
+statement=column. The two agree on the day it is written and nothing rechecks them, so the first
+statement=row whose set changes leaves a diagnostic naming substrates the reconciler no longer
+statement=admits. Nothing else moves: the plans, the table and the replay are all unchanged, which
+statement=is the point -- a drifted diagnostic is invisible to every check but the one that
+statement=compares it against the set it claims to describe.

@@ -1,0 +1,9 @@
+check=lift-prefix-per-context
+operator=dropped-effect
+target=src/Amoebius/Host/Lift.hs
+mutation=replace | src/Amoebius/Host/Lift.hs | InFrame _ entry -> Right (absExePath entry : "--" : toolCommandName tool : arguments) | InFrame _ _ -> Right (toolCommandName tool : arguments)
+statement=Drop the frame entry point from the lifted argv, so a step meant to run inside the guest
+statement=is emitted as a bare host command. The recorded argv then names the host tool at the
+statement=position the guest command occupies, and the three contexts stop differing only by
+statement=prefix -- the property that makes one step list runnable on the host, in a VM and in a
+statement=container without a second deployment path.

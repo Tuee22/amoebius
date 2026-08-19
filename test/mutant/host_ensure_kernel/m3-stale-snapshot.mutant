@@ -1,0 +1,10 @@
+check=first-pass-converges
+operator=dropped-effect
+target=src/Amoebius/Host/Ensure.hs
+mutation=replace | src/Amoebius/Host/Ensure.hs | observed <- reresolve (hostSubstrate current) | let observed = current
+statement=Drop the re-resolve between steps, so every step after the first reads the config
+statement=snapshot the run began with. A tool a step laid down is absent from that snapshot, so the
+statement=driver walks the whole plan and still reports the requested tool missing. The argv it
+statement=issues is unchanged -- every step still runs -- so the transcript's mutation rows stay
+statement=authored and only the convergence verdict moves, which is what separates this from a
+statement=driver that never probed at all.

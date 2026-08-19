@@ -76,7 +76,7 @@ ADMITTED_PACKAGES = ("amoebius.cabal", "probe/probe.cabal", "vendor/dual/dual.ca
 SEVEN_NOUN_LICENSE = "seven-noun-rule"
 
 PRUNE = {".git", ".build", ".data", ".test_data", "node_modules", "dist-newstyle",
-         ".cabal-sandbox", "__pycache__"}
+         ".cabal-sandbox", "__pycache__", ".venv"}
 
 BINARY_SUFFIXES = {".png", ".jpg", ".gif", ".bin", ".cbor", ".hex", ".pdf", ".zip",
                    ".gz", ".class", ".jar", ".ico", ".woff", ".woff2", ".sha256"}

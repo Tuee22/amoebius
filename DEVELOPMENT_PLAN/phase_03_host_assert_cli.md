@@ -15,7 +15,7 @@ fixes. Its one prerequisite is the target tree [Phase 2](phase_02_repository_lay
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/phase_04_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_06_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_08_windows_engine_bringup.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/phase_04_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_06_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_08_windows_engine_bringup.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -26,10 +26,10 @@ fixes. Its one prerequisite is the target tree [Phase 2](phase_02_repository_lay
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 3.1: The Poetry distribution and its quality gate 📋](#sprint-31-the-poetry-distribution-and-its-quality-gate-)
-- [Sprint 3.2: The closed command topology 📋](#sprint-32-the-closed-command-topology-)
-- [Sprint 3.3: The idempotent host assertions 📋](#sprint-33-the-idempotent-host-assertions-)
-- [Sprint 3.4: Build and hand off 📋](#sprint-34-build-and-hand-off-)
+- [Sprint 3.1: The Poetry distribution and its quality gate ✅](#sprint-31-the-poetry-distribution-and-its-quality-gate-)
+- [Sprint 3.2: The closed command topology ✅](#sprint-32-the-closed-command-topology-)
+- [Sprint 3.3: The idempotent host assertions ✅](#sprint-33-the-idempotent-host-assertions-)
+- [Sprint 3.4: Build and hand off ✅](#sprint-34-build-and-hand-off-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,7 +37,24 @@ fixes. Its one prerequisite is the target tree [Phase 2](phase_02_repository_lay
 
 ## Phase Status
 
-📋 Planned. No sprint has run; this phase has no implementation footprint and claims none.
+✅ Done — sealed 2026-08-19. `python3 tools/host_assert_cli_gate.py` passes all eleven sides on
+substrate `none`, lane `none`, natural `arm64`, untranslated. The quality floor is green as a
+precondition: `ruff`, `black --check` and `mypy` under `strict` with `disallow_any_explicit` pass over
+the distribution and its stubs, a token-aware scan finds no `Any`, `cast` or `type: ignore` anywhere
+in it, and 217 tests run at **100% branch coverage** over 1,039 statements and 290 branches. The
+absent → present → present replay converges once and then mutates nothing: pass one performs exactly
+the five authored acquisitions and installs, passes two and three carry post-condition probes and no
+mutation at all, and no tool is reached through an ambient search path — five refusing shims sat
+first on `PATH` for the whole run and recorded nothing. 36 surfaces join to 36 enumerated items, and
+all four seeded mutants redden their own check and no other. Attestation
+`sha256:cb6509951dee1242b594aee67b2bd74c3e0aff648fb9af7d96d4bc7b32bc78eb` binds source snapshot
+`sha256:f7f2dff68330fbe6…` over 2,007 files.
+
+The run found four defects in this phase's own work, each now fixed and covered: the escape-hatch scan
+decoded `.pyc` bytecode as UTF-8; it also reported prose that merely *named* a banned construct, which
+made the rule unstatable in the module that states it; `linux-cuda`'s floor was read as forking
+`linux-cpu`'s rather than extending it; and `available_memory` used `SC_AVPHYS_PAGES`, which Darwin
+does not define — so the capacity admission was Linux-only and undecidable on two catalogue members.
 
 ---
 
@@ -116,10 +133,10 @@ past a floor refusal.
 
 ## Sprints
 
-## Sprint 3.1: The Poetry distribution and its quality gate 📋
+## Sprint 3.1: The Poetry distribution and its quality gate ✅
 
-**Status**: Planned
-**Implementation**: `pb/pyproject.toml`, `pb/poetry.toml`, `pb/pb/check_code.py`, `pb/pb/test_all.py`, `pb/stubs/`
+**Status**: Done
+**Implementation**: `pb/pyproject.toml`, `pb/poetry.toml`, `pb/pb/check_code.py`, `pb/pb/test_all.py`, `pb/pb/narrow.py`, `pb/stubs/`, `test/spec/pb/`
 **Blocked by**: none within the phase
 **Requires**: `host-floor`
 **Independent Validation**: `poetry run python -m pb.check_code` exits 0 over `pb` and `stubs`; `poetry run python -m pb.test_all` reports 100% branch coverage
@@ -141,17 +158,19 @@ give `pb` a distribution a consumer installs rather than a directory a consumer 
 
 ### Validation
 
-1. Every `dict[str, Any]` at a JSON boundary is replaced by `object` plus an explicit narrowing helper, and
-   `disallow_any_explicit` passes with no suppression.
+1. Every `dict[str, Any]` at a JSON boundary is replaced by `object` plus an explicit narrowing helper
+   (`pb/pb/narrow.py`), and `disallow_any_explicit` passes with no suppression. `mypy` cannot see a
+   `cast` or a `# type: ignore`, so `check_code` scans the token stream for all three: the ban is
+   enforced rather than configured.
 2. Invoking `pytest` directly is refused; the runner is the only supported entry.
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
-## Sprint 3.2: The closed command topology 📋
+## Sprint 3.2: The closed command topology ✅
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: `pb/pb/cli.py`
 **Blocked by**: Sprint 3.1
 **Independent Validation**: the parser's introspection joins to `test/oracle/host_assert_cli_surfaces.tsv` in both directions
@@ -179,12 +198,12 @@ guess.
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
-## Sprint 3.3: The idempotent host assertions 📋
+## Sprint 3.3: The idempotent host assertions ✅
 
-**Status**: Planned
-**Implementation**: `pb/pb/prereqs.py`, `pb/pb/process.py`, `test/fixture/host_assert_cli/`
+**Status**: Done
+**Implementation**: `pb/pb/prereqs.py`, `pb/pb/process.py`, `test/fixture/host_assert_cli/`, `test/harness/host_assert_cli/`
 **Blocked by**: Sprint 3.2
 **Independent Validation**: the absent → present → present replay converges once and mutates nothing thereafter
 **Docs to update**: `documents/engineering/substrate_doctrine.md`
@@ -208,11 +227,11 @@ assert the floor and ensure the Haskell toolchain, and nothing beyond either.
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
-## Sprint 3.4: Build and hand off 📋
+## Sprint 3.4: Build and hand off ✅
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: `pb/pb/bootstrap.py`
 **Blocked by**: Sprint 3.3
 **Independent Validation**: the built binary lands at one stable path and the program does not return
@@ -236,7 +255,7 @@ closes at a single observable point.
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
 ---
 
@@ -245,10 +264,12 @@ The whole sprint.
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/substrate_doctrine.md` — §6 records the distribution, the `update` surface, and the
   closed topology once they exist.
+- `documents/engineering/repository_layout_doctrine.md` — §6 and §7 gain the ignore rule for the
+  distribution's in-project virtualenv, which is the artifact class this phase creates.
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md` — retire the row recording that `pb` is an `argparse`
-  CLI with no configured quality tooling.
+  CLI with no configured quality tooling, and record what the module split condemns.
 
 ---
 

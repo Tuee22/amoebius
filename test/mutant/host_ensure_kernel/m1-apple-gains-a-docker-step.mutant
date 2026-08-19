@@ -1,0 +1,10 @@
+check=plans-join-the-oracle
+operator=union-arm-addition
+target=src/Amoebius/Host/Reconciler.hs
+mutation=replace | src/Amoebius/Host/Reconciler.hs | [ InstallStep Kubectl (PerformedBy PackageManagerRoot) (rootInstall substrate (kubectlPackage substrate)) | [ InstallStep Docker (PerformedBy PackageManagerRoot) (rootInstall substrate "docker")\n          , InstallStep Kubectl (PerformedBy PackageManagerRoot) (rootInstall substrate (kubectlPackage substrate))
+statement=Install a container engine on every substrate, including the two whose frame already
+statement=supplies one. Colima publishes a Docker endpoint as part of creating the Apple guest and
+statement=WSL2 receives the engine the Linux plan installs inside it, so this lays a second engine
+statement=beside the one already answering. The oracle names `docker` exactly once per substrate
+statement=that installs it, so the join is where this shows up -- the applicability column is
+statement=untouched, which is why the table golden stays clean and the mutant stays attributable.

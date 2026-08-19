@@ -1,0 +1,84 @@
+# Authored expectation for the Phase-3 host-assertion surface join.
+#
+# `development_plan_gate_integrity.md` section S clause 2 requires the run to enumerate
+# its test surfaces and join them **completely** to an independently authored
+# expectation. This file is that expectation, and nothing in it is generated: the check
+# ids are read off the Phase-3 contract's Gate integrity section, the mutant ids off the
+# committed records under `test/mutant/host_assert_cli/`, and the command topology off
+# `substrate_doctrine.md` section 6 plus this phase's Sprint 3.2 deliverables.
+#
+# The join is two-way and total. A check the gate decides that no surface claims fails
+# the gate, and a surface claiming something the run did not produce fails it too. That
+# is what stops a deleted check or a quietly dropped command from shrinking the gate.
+#
+# The `# command` rows below are the second half of the same idea, and they are read by
+# `tools/host_assert_cli_gate.py` rather than by a human: each names one command path,
+# the options it carries, and whether it is consumer or maintainer surface. The gate
+# joins them against the parser's own introspection in both directions, so a command
+# gaining an option, losing one, or appearing at all is a failure until this file says
+# so. Authored from the contract -- an emitter that wrote its own expectation would
+# prove only that it is consistent with itself.
+#
+#   command <path> | <comma-separated options> | consumer|maintainer
+# command pb | --version | consumer
+# command pb admin | --endpoint,--password-stdin,--reach | consumer
+# command pb admin dhall |  | consumer
+# command pb admin dhall update | --probes | consumer
+# command pb admin kv |  | consumer
+# command pb admin kv delete |  | consumer
+# command pb admin kv get |  | consumer
+# command pb admin kv list |  | consumer
+# command pb admin kv put | --value-stdin | consumer
+# command pb admin vault |  | consumer
+# command pb admin vault init |  | consumer
+# command pb admin vault unseal |  | consumer
+# command pb amoebius |  | consumer
+# command pb bootstrap | --distro,--dry-run,--layout,--replicas | consumer
+# command pb floor | --substrate | consumer
+# command pb preflight |  | consumer
+# command pb surface |  | maintainer
+# command pb update | --dry-run | consumer
+
+# owner is the registry the ids are enumerated from at run time:
+#   checks    the check ids tools/host_assert_cli_gate.py decides
+#   mutants   the committed records under test/mutant/host_assert_cli/
+#   commands  the command paths the Click parser enumerates at run time
+
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+check.quality-floor-green	checks	quality-floor-green
+check.coverage-omit-list-exact	checks	coverage-omit-list-exact
+check.first-pass-converges	checks	first-pass-converges
+check.probe-decides-convergence	checks	probe-decides-convergence
+check.second-pass-mutates-nothing	checks	second-pass-mutates-nothing
+check.no-ambient-path-lookup	checks	no-ambient-path-lookup
+check.invocation-absolute-path-only	checks	invocation-absolute-path-only
+check.surface-joins-the-oracle	checks	surface-joins-the-oracle
+check.unknown-verb-refused	checks	unknown-verb-refused
+check.maintainer-surface-hidden	checks	maintainer-surface-hidden
+check.maintainer-authority-rechecked	checks	maintainer-authority-rechecked
+check.floor-decidable-for-every-substrate	checks	floor-decidable-for-every-substrate
+check.floor-remedy-present	checks	floor-remedy-present
+check.floor-refusal-halts-the-run	checks	floor-refusal-halts-the-run
+mutant.m1-converged-without-probe	mutants	m1-converged-without-probe
+mutant.m2-second-pass-mutates	mutants	m2-second-pass-mutates
+mutant.m3-bare-command-admitted	mutants	m3-bare-command-admitted
+mutant.m4-continue-past-floor-refusal	mutants	m4-continue-past-floor-refusal
+command.pb	commands	pb
+command.pb admin	commands	pb admin
+command.pb admin dhall	commands	pb admin dhall
+command.pb admin dhall update	commands	pb admin dhall update
+command.pb admin kv	commands	pb admin kv
+command.pb admin kv delete	commands	pb admin kv delete
+command.pb admin kv get	commands	pb admin kv get
+command.pb admin kv list	commands	pb admin kv list
+command.pb admin kv put	commands	pb admin kv put
+command.pb admin vault	commands	pb admin vault
+command.pb admin vault init	commands	pb admin vault init
+command.pb admin vault unseal	commands	pb admin vault unseal
+command.pb amoebius	commands	pb amoebius
+command.pb bootstrap	commands	pb bootstrap
+command.pb floor	commands	pb floor
+command.pb preflight	commands	pb preflight
+command.pb surface	commands	pb surface
+command.pb update	commands	pb update

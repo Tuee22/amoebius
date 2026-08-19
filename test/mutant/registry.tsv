@@ -203,6 +203,15 @@ gadt_decode_ir	resource_mutations	test/mutant/gadt_decode_ir/resource_mutations.
 gadt_decode_ir	unobserved-family	test/mutant/gadt_decode_ir/unobserved-family.mutant	—	—
 gateway_migration_drills	promote-before-fence	test/mutant/gateway_migration_drills/promote-before-fence.patch	gateway-migration-drills-promote-before-fence-mutant	—
 gateway_migration_drills	verify-caught-up-stub	test/mutant/gateway_migration_drills/verify-caught-up-stub.patch	gateway-migration-drills-verify-caught-up-stub-mutant	—
+host_assert_cli	m1-converged-without-probe	test/mutant/host_assert_cli/m1-converged-without-probe.mutant	—	operator=dropped-postcondition;check=probe-decides-convergence
+host_assert_cli	m2-second-pass-mutates	test/mutant/host_assert_cli/m2-second-pass-mutates.mutant	—	operator=guard-deletion;check=second-pass-mutates-nothing
+host_assert_cli	m3-bare-command-admitted	test/mutant/host_assert_cli/m3-bare-command-admitted.mutant	—	operator=guard-deletion;check=invocation-absolute-path-only
+host_assert_cli	m4-continue-past-floor-refusal	test/mutant/host_assert_cli/m4-continue-past-floor-refusal.mutant	—	operator=guard-negation;check=floor-refusal-halts-the-run
+host_ensure_kernel	m1-apple-gains-a-docker-step	test/mutant/host_ensure_kernel/m1-apple-gains-a-docker-step.mutant	host-ensure-apple-docker-step-mutant	operator=union-arm-addition;check=plans-join-the-oracle
+host_ensure_kernel	m2-authored-diagnostic	test/mutant/host_ensure_kernel/m2-authored-diagnostic.mutant	host-ensure-authored-diagnostic-mutant	operator=derivation-severed;check=diagnostic-derives-from-applicability
+host_ensure_kernel	m3-stale-snapshot	test/mutant/host_ensure_kernel/m3-stale-snapshot.mutant	host-ensure-stale-snapshot-mutant	operator=dropped-effect;check=first-pass-converges
+host_ensure_kernel	m4-converged-without-probing	test/mutant/host_ensure_kernel/m4-converged-without-probing.mutant	host-ensure-converged-without-probing-mutant	operator=guard-deletion;check=first-pass-issues-the-authored-argv
+host_ensure_kernel	m5-lift-drops-the-frame-prefix	test/mutant/host_ensure_kernel/m5-lift-drops-the-frame-prefix.mutant	host-ensure-lift-drops-frame-prefix-mutant	operator=dropped-effect;check=lift-prefix-per-context
 illegal_state_corpus	broken-decision-functions	gate:tools/illegal_state_corpus_gate.py	—	operator=smart-constructor-and-fold-weakening;expected_red_locus=all four QuickCheck properties
 illegal_state_corpus	capability-product-arm	test/mutant/illegal_state_corpus/capability_product_arm.dhall	—	operator=union-arm-addition;expected_red_locus=Gate-1 product-named capability admitted
 illegal_state_corpus	dropped-resource-normalization	gate:tools/illegal_state_corpus_gate.py	—	operator=guard-deletion;expected_red_locus=positive execution resource traversal

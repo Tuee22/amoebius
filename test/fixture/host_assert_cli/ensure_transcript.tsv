@@ -1,0 +1,45 @@
+# The absent -> present -> present transcript `pb`'s ensure driver must produce.
+#
+# AUTHORED, NOT CAPTURED. Every row below is derived from two doctrine sections and
+# from nothing the implementation printed:
+#
+#   substrate_doctrine.md section 6 fixes the order of the pre-binary steps -- ensure
+#   the package-manager root's tool (ghcup), then resolve and install the compatible
+#   GHC and Cabal through it, then the cluster tools.
+#
+#   substrate_doctrine.md section 3 fixes the shape of each step -- probe, install if
+#   absent, resolve the absolute path, invoke by it -- and makes the probe the
+#   post-condition, which is why every pass ends in five post-condition probes rather
+#   than in an install's exit code.
+#
+# The property this file exists to decide is not "pass one looks like this". It is
+# that **pass two and pass three carry probes and no mutation at all**. A driver that
+# reported converged without probing produces a pass with no probe rows; a driver
+# whose second run mutates produces a pass with a mutation row. Both are seeded
+# mutants, and each reddens exactly one check.
+#
+# `$HOME` is the run-local fake home. It is elided so this file compares against a
+# run rather than against the temporary directory one run happened to use.
+#
+# pass<TAB>kind<TAB>subject<TAB>detail
+
+1	mutation	acquire	ghcup $HOME/.ghcup/bin/ghcup
+1	mutation	$HOME/.ghcup/bin/ghcup	install ghc 9.12.4 --set
+1	mutation	$HOME/.ghcup/bin/ghcup	install cabal 3.16.1.0 --set
+1	mutation	acquire	kubectl $HOME/.local/bin/kubectl
+1	mutation	acquire	kind $HOME/.local/bin/kind
+1	probe	post-condition	ghcup present
+1	probe	post-condition	ghc present
+1	probe	post-condition	cabal present
+1	probe	post-condition	kubectl present
+1	probe	post-condition	kind present
+2	probe	post-condition	ghcup present
+2	probe	post-condition	ghc present
+2	probe	post-condition	cabal present
+2	probe	post-condition	kubectl present
+2	probe	post-condition	kind present
+3	probe	post-condition	ghcup present
+3	probe	post-condition	ghc present
+3	probe	post-condition	cabal present
+3	probe	post-condition	kubectl present
+3	probe	post-condition	kind present

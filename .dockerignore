@@ -67,6 +67,10 @@ ui/dist/**
 **/*.pyc
 **/*.pyo
 **/*.pyd
+**/.venv
+**/.venv/**
+**/cabal.project.local
+**/.DS_Store
 
 # Python test and coverage state, written beside the run that produced it.
 **/.pytest_cache

@@ -1,0 +1,9 @@
+check=first-pass-issues-the-authored-argv
+operator=guard-deletion
+target=src/Amoebius/Host/Ensure.hs
+mutation=replace | src/Amoebius/Host/Ensure.hs | installAndVerify reresolve installer plan config requested = case lookupTool requested config of\n  Just _ -> pure (Right config)\n  Nothing -> drive plan config | installAndVerify reresolve installer plan config requested = pure (Right config)
+statement=Report converged from the config the run was handed, without probing for the requested
+statement=tool at all. The driver returns success on a host where nothing is installed, and the
+statement=absent arm is never reached -- so the run issues no install argv whatsoever. It still
+statement="converges", which is exactly why convergence alone cannot be the check: the evidence is
+statement=the recorded argv set, not a return code.

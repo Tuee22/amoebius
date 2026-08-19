@@ -1,0 +1,9 @@
+check=floor-refusal-halts-the-run
+operator=guard-negation
+target=pb/pb/cli.py
+mutation=replace | pb/pb/cli.py | refusals = prereqs.evaluate(selected, prereqs.observe(selected))\n    if refusals: | refusals = prereqs.evaluate(selected, prereqs.observe(selected))\n    if not refusals:
+statement=Negate the guard that stops a run whose floor refused, so a host missing a
+statement=prerequisite is reported as satisfied and the run proceeds. A refusal is a value
+statement=carrying its remedy (substrate_doctrine.md section 3.1); continuing past one is
+statement=not a louder failure later, it is a host mutated without the operator ever being
+statement=told what was missing.

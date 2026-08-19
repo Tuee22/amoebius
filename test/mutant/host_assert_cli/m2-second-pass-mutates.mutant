@@ -1,0 +1,9 @@
+check=second-pass-mutates-nothing
+operator=guard-deletion
+target=pb/pb/prereqs.py
+mutation=replace | pb/pb/prereqs.py | for name in ("kubectl", "kind"):\n        if first_executable(candidates[name]) is not None:\n            continue\n        record = resolved(name) | for name in ("kubectl", "kind"):\n        record = resolved(name)
+statement=Delete the probe-first guard on the two acquired cluster tools, so every pass
+statement=re-acquires them whether or not they are already present. The run still converges
+statement=and still probes, so only the idempotence property breaks: the second pass now
+statement=carries a mutation, and an ensure that mutates on a converged host is the failure
+statement=the replay exists to refuse.

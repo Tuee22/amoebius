@@ -1,0 +1,28 @@
+# One step list, three contexts.
+#
+# AUTHORED from the exact boundary of the no-PATH rule in `substrate_doctrine.md`:
+# only the **outermost** tool is resolved to an absolute path, and a nested command is
+# left as the guest's own name against the guest's own environment. So every row
+# begins with an absolute path and every row's *inner* tool is a bare name -- and the
+# three contexts differ only in the prefix the fold emits, which is the property that
+# makes one step list runnable on the host, in a VM and in a container without a
+# second deployment path.
+#
+# `verified-only` steps issue no argv and so appear in none of the three.
+#
+# context<TAB>argv
+on-host	/opt/amoebius/bin/package-manager-root install -y ghcup
+on-host	/opt/amoebius/bin/ghcup install cabal 3.16.1.0 --set
+on-host	/opt/amoebius/bin/package-manager-root install -y docker.io
+on-host	/opt/amoebius/bin/package-manager-root install -y kubectl
+on-host	/opt/amoebius/bin/package-manager-root install -y kind
+in-frame:lima-guest	/opt/amoebius/bin/limactl -- package-manager-root install -y ghcup
+in-frame:lima-guest	/opt/amoebius/bin/limactl -- ghcup install cabal 3.16.1.0 --set
+in-frame:lima-guest	/opt/amoebius/bin/limactl -- package-manager-root install -y docker.io
+in-frame:lima-guest	/opt/amoebius/bin/limactl -- package-manager-root install -y kubectl
+in-frame:lima-guest	/opt/amoebius/bin/limactl -- package-manager-root install -y kind
+in-container:amoebius-base	/opt/amoebius/bin/docker run --rm amoebius-base package-manager-root install -y ghcup
+in-container:amoebius-base	/opt/amoebius/bin/docker run --rm amoebius-base ghcup install cabal 3.16.1.0 --set
+in-container:amoebius-base	/opt/amoebius/bin/docker run --rm amoebius-base package-manager-root install -y docker.io
+in-container:amoebius-base	/opt/amoebius/bin/docker run --rm amoebius-base package-manager-root install -y kubectl
+in-container:amoebius-base	/opt/amoebius/bin/docker run --rm amoebius-base package-manager-root install -y kind
