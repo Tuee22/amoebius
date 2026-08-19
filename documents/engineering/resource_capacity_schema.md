@@ -15,7 +15,7 @@ constructed, from scalar quantities outward to whole-deployment budgets, and eve
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/daemon_topology_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md
 **Generated sections**: none
 
 </details>
@@ -376,7 +376,7 @@ PerInstanceNodeLocalStorageTemplate =
   , kubeletMetadataModel    : KubeletRuntimeMetadataModelVersion
   }
 
-PerInstanceAcceleratorSlot = -- private checked constructor after Gate-1 decode
+PerInstanceAcceleratorSlot = -- private checked constructor after dhall-typecheck decode
   { id                   : AcceleratorSlotTemplateId
   , profile              : AcceleratorProfile
   , rawVram              : Quantity Bytes
@@ -625,7 +625,7 @@ ObjectStoreMutationAdmission =
   , costModel : ObjectStoreAdmissionCostModelVersion
   }
 
-ObjectStoreGatewayIntent = -- Gate-1/ClusterIR source; writers come from producer intents
+ObjectStoreGatewayIntent = -- dhall-typecheck/ClusterIR source; writers come from producer intents
   { gateway : ObjectStoreGatewayId
   , model   : ObjectStoreGatewayExecutionModelVersion
   }
@@ -764,7 +764,7 @@ ProvisionedPulumiExecutionDemand = -- private constructor
   , witness       : PulumiExecutionWitness
   }
 
-ObjectStoreProducerIntent = -- Gate-1/ClusterIR source union
+ObjectStoreProducerIntent = -- dhall-typecheck/ClusterIR source union
   < AppBucket       : ObjectStoreDemand
   | Content         : ContentStoreLogicalDemand
   | Registry        : RegistryStorageIntent
@@ -1352,7 +1352,7 @@ ProvisionedVolumeDemand = -- private constructor; renderer input
   , witness             : VolumeGeometryWitness
   }
 
-PriorProvisionRefSource = -- Gate-1 source, branded by Gate 2; never a prior output record
+PriorProvisionRefSource = -- dhall-typecheck source, branded by gadt-decode; never a prior output record
   { deployment : DeploymentId
   , generation : ProvisionGenerationDigest
   , resource   :
@@ -1373,7 +1373,7 @@ StorageMigrationPolicy =
   , copyChunkBytes   : Quantity Bytes
   }
 
-StorageMigrationIntent = -- Gate-1/ClusterIR source
+StorageMigrationIntent = -- dhall-typecheck/ClusterIR source
   { identity    : StorageMigrationId
   , old         : PriorProvisionRefSource -- must be the Volume arm
   , replacement : DeclaredVolumeDemand
@@ -1409,7 +1409,7 @@ SchemaMigrationPolicy =
   , workspaceBacking        : BackingId
   }
 
-SchemaMigrationIntent = -- Gate-1/ClusterIR source
+SchemaMigrationIntent = -- dhall-typecheck/ClusterIR source
   { identity    : SchemaMigrationId
   , database    : DatabaseId
   , dataBacking : BackingId
@@ -1435,7 +1435,7 @@ ProvisionedSchemaMigration = -- private constructor
 ## 12. Patroni SQL
 
 ```text
-PatroniLogicalStorageIntent = -- Gate-1/ClusterIR source
+PatroniLogicalStorageIntent = -- dhall-typecheck/ClusterIR source
   { objects               : NonEmpty SchemaObjectDemand
   , maxWalBytes           : Quantity Bytes
   , checkpointBytes       : Quantity Bytes
@@ -1446,7 +1446,7 @@ PatroniLogicalStorageIntent = -- Gate-1/ClusterIR source
 
 PatroniLogicalStorageDemand = normalized, unprovisioned expansion of PatroniLogicalStorageIntent
 
-SqlMutationIntent = -- Gate-1/ClusterIR source
+SqlMutationIntent = -- dhall-typecheck/ClusterIR source
   { writer                   : SqlWriterId
   , maxConnections           : PositiveNatural
   , maxConcurrentTransactions: PositiveNatural
@@ -1458,7 +1458,7 @@ SqlMutationIntent = -- Gate-1/ClusterIR source
 
 SqlMutationAdmission = normalized, unprovisioned expansion of SqlMutationIntent
 
-PatroniSqlIntent = -- Gate-1/ClusterIR source; contains no controller child envelope
+PatroniSqlIntent = -- dhall-typecheck/ClusterIR source; contains no controller child envelope
   { database : DatabaseId
   , budget   : StorageBudgetId
   , storage  : PatroniLogicalStorageIntent
@@ -1514,7 +1514,7 @@ RegistryMutationAdmission =
   , costModel  : RegistryAdmissionCostModelVersion
   }
 
-RegistryStorageIntent = -- Gate-1/ClusterIR source
+RegistryStorageIntent = -- dhall-typecheck/ClusterIR source
   { budget    : StorageBudgetId
   , artifacts : NonEmpty ImageDigest -- exact-joined by binding to selected ImageArtifact metadata
   , upload    :
@@ -1799,7 +1799,7 @@ enactBootstrapRegistry
 -- transport outcome returns a receipt; OutcomeUnknown exposes only re-observation, never the old action.
 
 -- This explicit cycle-break exists before the scheduler image can be pulled. It provisions and initializes
--- only the registry/proxy objects through a typed action using the same private source serializer as Phase 14;
+-- only the registry/proxy objects through a typed action using the same private source serializer as Phase 20;
 -- it does not expose per-service render/apply. A later whole-deployment ProvisionedSpec may adopt those exact
 -- identities only after observing equal source/field digests and transfers ownership once.
 
@@ -1809,7 +1809,7 @@ RegistryBackendMigrationPolicy =
   , copyConcurrency : PositiveNatural
   }
 
-RegistryBackendMigrationIntent = -- Gate-1/ClusterIR source
+RegistryBackendMigrationIntent = -- dhall-typecheck/ClusterIR source
   { identity    : RegistryBackendMigrationId
   , source      : PriorProvisionRefSource -- must be the Registry arm
   , replacement : RegistryStorageIntent
@@ -2498,25 +2498,25 @@ CompleteHostResourceReservationSchema owner =
   , foldRule    : RecomputeWholeHostLedgerSetBeforeCas
   }
 
-OrdinaryPodResourceEnvelope = -- opaque Gate-2 refinement
+OrdinaryPodResourceEnvelope = -- opaque gadt-decode refinement
   { base : PodResourceEnvelope, acceleratorIsNone : EqualityWitness }
 
-CudaPodResourceEnvelope = -- opaque Gate-2 refinement
+CudaPodResourceEnvelope = -- opaque gadt-decode refinement
   { base : PodResourceEnvelope
   , demand : CudaOwnerDemand
   , acceleratorEqualsCudaDemand : EqualityWitness
   }
 
-OrdinaryHostResourceEnvelope = -- opaque Gate-2 refinement
+OrdinaryHostResourceEnvelope = -- opaque gadt-decode refinement
   { base : HostResourceEnvelope, acceleratorIsNone : EqualityWitness }
 
-CudaHostResourceEnvelope = -- opaque Gate-2 refinement
+CudaHostResourceEnvelope = -- opaque gadt-decode refinement
   { base : HostResourceEnvelope
   , demand : CudaOwnerDemand
   , acceleratorEqualsCudaDemand : EqualityWitness
   }
 
-MetalHostResourceEnvelope = -- opaque Gate-2 refinement
+MetalHostResourceEnvelope = -- opaque gadt-decode refinement
   { base : HostResourceEnvelope
   , demand : MetalOwnerDemand
   , acceleratorEqualsMetalDemand : EqualityWitness
@@ -2538,7 +2538,7 @@ ReplicaCardinality =
   | Replicated : { desiredReplicas : PositiveNatural }
   >
 
-RawDeploymentRolloutPolicy = -- Gate-1/Dhall input; refined at Gate 2
+RawDeploymentRolloutPolicy = -- dhall-typecheck/Dhall input; refined at gadt-decode
   < Recreate
   | RollingUpdate :
       { maxSurge               : Natural
@@ -2546,7 +2546,7 @@ RawDeploymentRolloutPolicy = -- Gate-1/Dhall input; refined at Gate 2
       }
   >
 
-DeploymentRolloutPolicy = -- opaque Gate-2 value; constructors are not exported
+DeploymentRolloutPolicy = -- opaque gadt-decode value; constructors are not exported
   < Recreate
   | RollingUpdate :
       { maxSurge               : Natural
@@ -2702,7 +2702,7 @@ ExecutionUnitScope =
   | Host       : HostExecutionScopeId
   >
 
-BoundExecutionUnit = -- private Gate-2 constructor; body arms enforce controller/resource/scope compatibility
+BoundExecutionUnit = -- private gadt-decode constructor; body arms enforce controller/resource/scope compatibility
   { id              : ExecutionUnitId
   , owner           : ResourceOwnerId
   , scope           : ExecutionUnitScope
@@ -3228,7 +3228,7 @@ SchedulerResourceReleaseWitness =
 TerminalSchedulerReleasePolicy =
   { terminalOutcome      : RequireAuthenticatedJobTerminalOutcome
   , computeRelease       : ReleaseCpuMemoryAndLogicalEphemeral
-  , deviceRelease        : None -- Gate 2 permits CUDA Pods only in the serial DaemonSet owner arm
+  , deviceRelease        : None -- gadt-decode permits CUDA Pods only in the serial DaemonSet owner arm
   , slotRelease          : RequirePerPodCniCsiReleaseOrTerminalRetainedLedgerDebit
   , physicalRetention    :
       RequireExactRuntimeMetadataLogSnapshotAndPodLocalResidentPartition
@@ -5889,7 +5889,7 @@ applyTenantPolicyExecutionDelta
   -> TenantPolicyExecutionResourceDelta
   -> Either ProvisionError BoundExecutionUnit
 -- arm mismatch, conflicting identity/model, or an accelerator-family/owner conflict rejects. The complete
--- source-level replacement is re-run through Gate 2, which re-derives runtime metadata components, cache
+-- source-level replacement is re-run through gadt-decode, which re-derives runtime metadata components, cache
 -- peaks, physical storage, accelerator allocation/VRAM, and the ordinary/CUDA/Metal controller-resource
 -- refinement before the unit may enter BoundExecutionSet.
 

@@ -16,7 +16,7 @@ the specification.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_44_release_lifecycle.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_50_release_lifecycle.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -130,7 +130,7 @@ data StorageMutation
 ```
 
 - **"Destroy these bytes" has no inhabitant.** Because the union has no `Delete`/`Drop`/`Erase`/`Truncate`
-  constructor, a `.dhall` value cannot denote destruction of durable data. This fails Gate 1 (the Dhall
+  constructor, a `.dhall` value cannot denote destruction of durable data. This fails dhall-typecheck (the Dhall
   typechecker) before any binary runs — it is **type-foreclosed**, not a runtime guard. This is the migration
   surface's expression of the storage-side prohibition owned by
   [storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation)
@@ -162,13 +162,13 @@ denotes "discard these bytes."
 
 The typed diff must first become a resource-bearing transition. A volume/PV arm constructs
 `StorageMigrationIntent` from a raw `PriorProvisionRefSource` Volume arm, replacement logical demand, and
-structural chunk/concurrency/workspace policy. Gate 2 validates and brands that arm as an opaque
+structural chunk/concurrency/workspace policy. gadt-decode validates and brands that arm as an opaque
 `PriorVolumeProvisionRef`; binding expands it to `StorageMigrationDemand`. Only provisioning resolves the
 reference from the prior `ProvisionedSpec` context before deriving physical peaks. A DB arm constructs
 `SchemaMigrationIntent` from exact old/new
 table/index identities and its cost policy. Provisioning derives presentation-rounded replacement bytes,
 old+new+workspace/temp/WAL high-water, provider byte/count overlap, and complete copy/verify or schema
-executor `PodResourceEnvelope`s. The Phase-31 live snapshot must fit those backings, CPU/memory/ephemeral,
+executor `PodResourceEnvelope`s. The Phase-37 live snapshot must fit those backings, CPU/memory/ephemeral,
 pod/CNI/CSI slots, and image bytes before the expand phase receives a mutation continuation. A steady old or
 target shape fitting alone is insufficient
 ([resource_capacity_storage.md §5.1](./resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry)).
@@ -192,7 +192,7 @@ target shape fitting alone is insufficient
 
 The destructive production-reclaim credential is deliberately **outside the spec and every reconciler**.
 Its concrete create-vs-delete authority split is owned by
-[pulumi_iac_doctrine.md §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model): only a
+[pulumi_ebs_credential_model.md §6](./pulumi_ebs_credential_model.md#6-the-ebs-create-vs-delete-credential-model): only a
 human-operated, audited external break-glass action may reclaim the exact backing named by an immutable
 `ReclaimEligible` artifact.
 
@@ -211,7 +211,7 @@ old→new diff, the genuinely new mechanism this doctrine adds:
 - **Retention-floor rejection.** A diff that would shrink a retention span **below the currently-retained span** without an offload-first phase is likewise rejected — retention cannot contract past live data
   without first preserving it.
 - **This is decode-foreclosed, not type-foreclosed.** Because it compares two decoded generations rather than
-  living inside one type, it is Gate 2 (the decoder), catalogued honestly as a decode-time rejection, using
+  living inside one type, it is gadt-decode (the decoder), catalogued honestly as a decode-time rejection, using
   the ownership-index / relation-over-a-collection technique family owned by
   [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md). The part of the orphan check that must consult
   **live retained-state** (does a real coordinate still hold data?) is a hybrid decode+runtime gate, labelled
@@ -269,7 +269,7 @@ flowchart LR
 ## 7. Sanctioned sharing is an append-only, revocable capability edge
 
 Cross-tenant or cross-app sharing — for example, app B continuing app A's model
-([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) —
+([content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) —
 is expressed as a **grant**: an append-only, revocable **capability edge** from the owner to the grantee. It
 is never a **re-tag** that would move a datum's owning identity, because a re-tag is exactly what would let a
 spec name a foreign tenant's resource.
@@ -315,7 +315,7 @@ The no-destruction guarantee is honest about the layer it reaches, per
   [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)),
   and the `.ready`-gated artifact idiom in infernix; these are **sibling evidence, not amoebius results**. The
   closed `StorageMutation` union, the decode-time no-orphan fold, and the sharing-as-capability-edge remain
-  broader amoebius design intent. Phase 44 now validates the database-schema `RolloutPhase` instance: its
+  broader amoebius design intent. Phase 50 now validates the database-schema `RolloutPhase` instance: its
   verified copy preceded retirement, and retired old bytes remained externally readable.
 
 ---
@@ -325,12 +325,12 @@ The no-destruction guarantee is honest about the layer it reaches, per
 This document is normative `InForceSpec`-migration doctrine only. It states the **target shape**: a migration
 is a typed diff whose verb surface admits no destruction, whose `Shrink` is a verified pipeline, whose orphan
 check is decode-time, and whose sharing is an append-only revocable edge. Every statement here is **design intent**, not a built or tested amoebius capability. Delivery sequencing, completion status, and validation
-gates — including the DB schema-migration `RolloutPhase` (delivered in Phase 44 and
+gates — including the DB schema-migration `RolloutPhase` (delivered in Phase 50 and
 [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
 homes), the verified-shrink migration
 ([storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)),
 and the create-vs-delete credential model
-([pulumi_iac_doctrine.md §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model)) — live
+([pulumi_ebs_credential_model.md §6](./pulumi_ebs_credential_model.md#6-the-ebs-create-vs-delete-credential-model)) — live
 only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). This doc never maintains a
 competing status ledger; it links back for status.
 
@@ -343,8 +343,8 @@ competing status ledger; it links back for status.
 - [Tenancy Doctrine](./tenancy_doctrine.md) — [§3](./tenancy_doctrine.md#3-what-a-tenant-is) the immutable `TenantId` that travels with the bytes, [§5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored) derived-not-authored grants, [§7](./tenancy_doctrine.md#7-two-isolation-layers-and-the-honest-limit) the two isolation layers and the honest limit
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets) / [§3.10](../illegal_state/illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree) cross-tenant and cross-subtree references, [§4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) the phantom-tag / no-`Ref t1 → Ref t2` technique
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) the ordinary reconcile (desired is the deployment-level `renderAll` result from the opaque `ProvisionedSpec`; the diff is typed) a migration is realized by
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the `ModelArtifact` a cross-app grant may share
-- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) the normal-operation create-vs-delete boundary; production break-glass reclaim remains outside amoebius automation
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the `ModelArtifact` a cross-app grant may share
+- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§6](./pulumi_ebs_credential_model.md#6-the-ebs-create-vs-delete-credential-model) the normal-operation create-vs-delete boundary; production break-glass reclaim remains outside amoebius automation
 - [Testing Doctrine](./testing_doctrine.md) — the elevated harness deletes test-owned backing only; it never performs production retire-old reclaim
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

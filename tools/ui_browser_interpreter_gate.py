@@ -49,7 +49,7 @@ BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-browser-interpreter"
 TEMP_ROOT = ROOT / ".build/tmp/ui-browser-interpreter"
 BUNDLE_ROOT = ROOT / ".build/ui/browser-interpreter"
 WORKSPACE_ROOT = BUNDLE_ROOT / "workspace"
-CONTRACT = "DEVELOPMENT_PLAN/phase_25_ui_browser_interpreter.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_31_ui_browser_interpreter.md"
 GATE_COMMAND = "python3 tools/ui_browser_interpreter_gate.py"
 EXPECTATIONS = "test/oracle/ui_browser_interpreter_surfaces.tsv"
 

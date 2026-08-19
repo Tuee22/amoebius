@@ -17,6 +17,14 @@ MANIFEST = ROOT / "test" / "oracle" / "preimplementation_artifacts.tsv"
 # discover it rather than the expectation file asserting it unilaterally.
 CHECKS = {"manifest": "every pre-implementation oracle and mutant resolves and is owned"}
 PHASES = {3, *range(19, 29), *range(41, 67), 68}
+# Pin-owner ordinals as `MANIFEST` records them, which is the pre-2026-08-18 numbering.
+# The host-band re-baseline moved every phase *document* at or above 3 up by six and left
+# the manifest column alone, because a dozen gates select their own rows by literal
+# ordinal prefix and assert a custody count against them; shifting the column would zero
+# those silently. So the document is resolved by translating, on the same terms as the
+# 2026-08-16 translation below: the shift is authored in the legacy register's audit map,
+# and it retires when each owning phase renames its own artifacts.
+HOST_BAND_SHIFT = 6
 # `PHASES` carries **current** (2026-08-17 re-baseline) ordinals; the +1 translation below
 # is the **2026-08-16** natural-architecture amendment's, and it is still the right one.
 # A phase document cites a pin at its 2026-08-16 ordinal while the file keeps the
@@ -42,10 +50,25 @@ PHASE_LOCAL_ROOTS = (
 )
 PHASE_MARKER = re.compile(r"(?:^|[/_.-])phase[_-]?(\d{1,2})(?=[/_.-]|$)", re.IGNORECASE)
 LEDGER_PATH = re.compile(r"test/golden/phase_\d{2}_ledger\.json$")
-PLAN_DOCS = [
-    ROOT / "DEVELOPMENT_PLAN" / f"phase_{phase:02d}_"
-    for phase in sorted(PHASES)
-]
+def _phase_documents() -> dict[int, Path]:
+    """Every phase document on disk, keyed by the ordinal its filename carries."""
+    found: dict[int, Path] = {}
+    for path in (ROOT / "DEVELOPMENT_PLAN").glob("phase_*.md"):
+        match = re.match(r"phase_(\d{2})_", path.name)
+        if match is None:
+            continue
+        ordinal = int(match.group(1))
+        if ordinal in found:
+            raise ValueError(f"two phase documents carry ordinal {ordinal:02d}")
+        found[ordinal] = path
+    return found
+
+
+PHASE_DOCUMENTS = _phase_documents()
+_absent = sorted(p for p in PHASES if p + HOST_BAND_SHIFT not in PHASE_DOCUMENTS)
+if _absent:
+    raise ValueError(f"no phase document for pin-owner ordinal(s): {_absent}")
+PLAN_DOCS = [PHASE_DOCUMENTS[phase + HOST_BAND_SHIFT] for phase in sorted(PHASES)]
 GITIGNORE_BYTECODE_PATTERNS = {"__pycache__/", "*.py[cod]"}
 DOCKERIGNORE_BYTECODE_PATTERNS = {
     "**/__pycache__",
@@ -133,13 +156,6 @@ GENERATED_MIGRATION_PREFIXES = (
     "DEVELOPMENT_PLAN/evidence/",
     "DEVELOPMENT_PLAN/ledgers/",
 )
-
-
-def phase_doc(prefix: Path) -> Path:
-    matches = list(prefix.parent.glob(prefix.name + "*.md"))
-    if len(matches) != 1:
-        raise ValueError(f"expected one phase document for {prefix.name}, found {len(matches)}")
-    return matches[0]
 
 
 def belongs_to_pin_owner(path: Path) -> bool:
@@ -383,7 +399,7 @@ def main() -> int:
     translatable = rebaseline_authorized()
     translated: list[str] = []
     for prefix in PLAN_DOCS:
-        doc = phase_doc(prefix)
+        doc = prefix
         document = doc.read_text(encoding="utf-8")
         for match in explicit_re.finditer(document):
             path = match.group(1).rstrip(".,;:")

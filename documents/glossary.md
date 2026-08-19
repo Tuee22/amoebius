@@ -57,9 +57,9 @@ as the set its first-use rule ranges over.
 - [foreclosure layer](./illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) — the three-valued axis: type-foreclosed, decode-foreclosed, or runtime-checked.
 - [validation-locus](./illegal_state/illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer) — the six-valued axis naming where a state is actually caught; orthogonal to the layer.
 - [the typing techniques](./illegal_state/illegal_state_techniques.md#4-the-typing-techniques) — the seven construction patterns by which the catalog's entries are foreclosed.
-- [Gate 1](./engineering/dsl_doctrine.md#gate-1--the-dhall-typechecker) — the authoring-time Dhall typecheck, total and pure, before any effect.
-- [Gate 2](./engineering/dsl_doctrine.md#gate-2--the-haskell-typed-decoder) — the total Haskell decoder that rejects a well-typed but incoherent value.
-- [Gate 3](./engineering/dsl_doctrine.md#gate-3--the-extension-ast-checker) — the syntax-tree check over extension source, run at build time before link.
+- [dhall-typecheck](./engineering/dsl_doctrine.md#dhall-typecheck--the-dhall-typechecker) — the authoring-time Dhall typecheck, total and pure, before any effect.
+- [gadt-decode](./engineering/dsl_doctrine.md#gadt-decode--the-haskell-typed-decoder) — the total Haskell decoder that rejects a well-typed but incoherent value.
+- [extension-astcheck](./engineering/dsl_doctrine.md#extension-astcheck--the-extension-ast-checker) — the syntax-tree check over extension source, run at build time before link.
 
 ## 3. Evidence, testing, and the plan
 
@@ -67,7 +67,7 @@ as the set its first-use rule ranges over.
 - [validation register](./engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — the tiers of evidence: pure, boundary-with-fakes, deterministic simulation, and live.
 - [the per-run ledger](./engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) — the artifact a validation run emits recording what each layer actually established.
 - [derivation](./engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) — the rule that the spec generates the coverage enumeration and a human authors the expectation.
-- [spoof-resistant gate](./engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect) — a gate observing an unforgeable post-start effect rather than a self-report.
+- [spoof-resistant gate](./engineering/testing_spoof_resistance.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect) — a gate observing an unforgeable post-start effect rather than a self-report.
 - [mutant](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — a committed seeded defect; a gate is trusted only once the mutant turns it red.
 - [gate integrity](../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — the twelve clauses ensuring a gate cannot be passed by a stub.
 - [natural architecture](./engineering/substrate_doctrine.md#11-the-natural-architecture-rule) — the architecture a detected host executes without translation; the only one its lanes may be validated at.
@@ -85,6 +85,10 @@ as the set its first-use rule ranges over.
 - [the bootstrap coordinator](./engineering/substrate_doctrine.md#6-the-bootstrap-coordinator-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) — the pre-binary Python command that ensures a toolchain, builds the binary, and hands off.
 - [in-cluster role](./engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) — what job the one binary is doing in a pod: control-plane daemon, capacity scheduler, or a worker of some kind. Not the Kubernetes *node* role, and not an RBAC role; three unrelated senses share the word.
 - [worker kind](./engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected) — which worker a `Worker` role is, and the parameters that identify what it serves.
+- [validation frame](./engineering/validation_frame_doctrine.md#1-the-frame-one-environment-every-language) — the `amoebius-base` container every language-validation verb runs in, through `docker run --rm`. Unrelated to *frame config* below: two senses of "frame", one about where validation executes and one about what a running binary reads.
+- [`amoebius-base`](./engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster) — the published base image, four architecture-and-flavor-qualified tags, and the only image a consumer pulls rather than builds.
+- [the Playwright image](./engineering/testing_doctrine.md#13-end-to-end-tests-run-in-the-playwright-image-against-three-browsers) — the test-only image carrying Chromium, Firefox, and WebKit, built on demand by the host binary and never published.
+- [Colima](./engineering/substrate_doctrine.md#41-colima-and-lima-on-apple-the-provider-follows-the-workload) — the Apple-host container-engine provider: an ephemeral VM for `docker build` and `docker run --rm`, and the provider for kind clusters. Lima is its sibling, used where a full Linux distribution is required.
 - [frame config](./engineering/dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness) — the static local `amoebius.dhall` a running copy of the binary reads to learn which frame it inhabits and which role it holds; the second Dhall authority surface, and never the `InForceSpec`.
 - [ensure](./engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) — to probe for a tool, install it when absent, resolve its absolute path, and invoke it by that path.
 - [the floor](./engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply) — the per-substrate set of things only the operator can supply: the package-manager root, a hardware or firmware fact, and a credentialed account.

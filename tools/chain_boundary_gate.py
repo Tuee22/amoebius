@@ -32,7 +32,7 @@ RESULTS = ROOT / ".build/dsl/chain-boundary/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/chain-boundary/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/chain-boundary"
 TEMP_ROOT = ROOT / ".build/tmp/chain-boundary"
-CONTRACT = "DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md"
 GATE_COMMAND = "python3 tools/chain_boundary_gate.py"
 EXPECTATIONS = "test/oracle/chain_boundary_surfaces.tsv"
 

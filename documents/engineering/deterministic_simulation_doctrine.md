@@ -17,7 +17,7 @@ is an activity rather than a phase gate, and the registers that are gates are ow
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_18_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_31_object_reconciler.md, DEVELOPMENT_PLAN/phase_32_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_34_vault_pki.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_40_pulsar_client.md, DEVELOPMENT_PLAN/phase_42_content_store_workflow.md, DEVELOPMENT_PLAN/phase_48_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_22_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_24_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_37_object_reconciler.md, DEVELOPMENT_PLAN/phase_38_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_40_vault_pki.md, DEVELOPMENT_PLAN/phase_42_platform_services_2.md, DEVELOPMENT_PLAN/phase_46_pulsar_client.md, DEVELOPMENT_PLAN/phase_48_content_store_workflow.md, DEVELOPMENT_PLAN/phase_54_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -42,7 +42,7 @@ is an activity rather than a phase gate, and the registers that are gates are ow
 The concurrency-and-failover method ([chaos_failover_doctrine.md §10](./chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim))
 offers the io-sim lift as a **conditional** move — taken "where the in-process concurrency is intricate enough
 that Extract's purity boundary still leaves real schedule-dependent behaviour." The plan currently exercises
-it only for the *pure decision core* against hand-built peer stubs (Tier-1, Phase 4), which leaves the
+it only for the *pure decision core* against hand-built peer stubs (Tier-1, Phase 10), which leaves the
 **built daemon's** real concurrent schedule, and every interaction with the real environment (apiserver
 admission, Pulsar redelivery/partition, DNS propagation, clock skew), to Register-3 live chaos. This doctrine
 makes the move **standing rather than conditional**, and points it at the built daemon. Register-3 chaos is the strongest *empirical* instrument but the weakest *logical* one:
@@ -83,21 +83,21 @@ carried to completion: not only the decision, but the whole concurrent program.
 The standing cost is named honestly: making the concurrency-touching signatures polymorphic in `m` is a **tax on all future change**, not a one-time edit. It is paid deliberately, in exchange for [§5](#5-what-dst-establishes-and-the-one-premise-it-buys).
 
 The substrate instance is built and validated in
-[Phase 16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md): one reference reconciler runs under
+[Phase 22](../../DEVELOPMENT_PLAN/phase_22_deterministic_sim_substrate.md): one reference reconciler runs under
 the injected real-client interface and `IOSim`, while a source gate excludes bare `IO` signatures and raw
 concurrency primitives from the simulation surface. Later phases must run their own production reconcilers on
-this interface; Phase 16 does not claim those later programs have already been exercised.
+this interface; Phase 22 does not claim those later programs have already been exercised.
 
-[Phase 31](../../DEVELOPMENT_PLAN/phase_31_object_reconciler.md) is the first such production-code adoption:
+[Phase 37](../../DEVELOPMENT_PLAN/phase_37_object_reconciler.md) is the first such production-code adoption:
 its real Lease-token, scoped-SSA, serial, host/device-release, Job-terminal, authenticated-delete, and readiness
 modules passed eight fault classes × 256 schedules, bounded `IOSimPOR` exploration, same-seed byte replay, and
 seven red mutants, sealed 2026-08-14. That is a Register-2.5 tested result; modeled-apiserver fidelity remains
 assumed and is checked independently by the Register-3 live corpus in the same run.
 
-[Phase 32](../../DEVELOPMENT_PLAN/phase_32_capacity_scheduler.md) is the second production-code adoption. Its
+[Phase 38](../../DEVELOPMENT_PLAN/phase_38_capacity_scheduler.md) is the second production-code adoption. Its
 readiness, execution-admission, reservation, Binding-preparation, recovery, and modeled-apiserver paths passed
 seven scheduler fault classes × 256 schedules, bounded `IOSimPOR`, byte-identical replay, and seven red
-mutants. Modeled-apiserver fidelity remains assumed and is bounded independently by Phase 32's Register-3
+mutants. Modeled-apiserver fidelity remains assumed and is bounded independently by Phase 38's Register-3
 admission, custom-resource CAS, Binding, UID, resourceVersion, readiness, and cleanup observations. Sealed 2026-08-14: 1,792 deterministic schedules across seven fault classes,
 byte-identical same-seed replay, and seven red mutants, with modeled-apiserver fidelity assumed and
 bounded by the same run's Register-3 live cutover.
@@ -125,7 +125,7 @@ environment provides deterministic, in-`IOSim` fakes of:
 Each fake models an **interface contract**, not the vendor's internals; the faults are the ones the R1–R9 rules
 name as the hazards amoebius's code must survive.
 
-Phase 16 implements and tests the six model contracts: Pulsar partition/heal/redelivery/dedup/reorder,
+Phase 22 implements and tests the six model contracts: Pulsar partition/heal/redelivery/dedup/reorder,
 MinIO `If-None-Match` 412, apiserver version-conflict/watch-gap/crash, route53 stale propagation with no CAS,
 Vault sealed rejection, and simulated clock delay. Fidelity to the corresponding real systems remains the
 explicit assumed premise of [§5](#5-what-dst-establishes-and-the-one-premise-it-buys).
@@ -157,7 +157,7 @@ spine ([conformance_harness_doctrine.md §4](./conformance_harness_doctrine.md#4
   exercising **concurrent schedules and injected environment faults**, which Registers 1 and 2 structurally
   cannot reach, and which Register 3 reaches only by sampling. Deterministically replayable, no cluster.
 
-The no-cluster substrate serving this activity is built in Phase 16. Its own gate is Register 2 and exercises a
+The no-cluster substrate serving this activity is built in Phase 22. Its own gate is Register 2 and exercises a
 committed reference reconciler across four oracle-pinned schedules; this validates the substrate without
 pre-claiming later Register-2.5 production-code results.
 
@@ -189,7 +189,7 @@ a DST green is quoted as *"the code upholds the invariants under the modeled sch
 ## 6. One determinism substrate, two uses
 
 DST and reproducible ML share **one** determinism substrate. The seed derivation and the `MonadTime`/`MonadTimer`
-clock seams that make an ML run bit-reproducible ([content_addressing_doctrine.md](./content_addressing_doctrine.md), the determinism kernel [phase_53](../../DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md)) are the **same** seams
+clock seams that make an ML run bit-reproducible ([content_addressing_doctrine.md](./content_addressing_doctrine.md), the determinism kernel [phase_59](../../DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md)) are the **same** seams
 that make a simulation deterministically replayable. Injecting time and randomness through typed seams rather
 than reading wall-clock or ambient entropy (rule R2) is what makes both "deterministic by construction"; the
 kernel builds the seams once, and DST and ML reproducibility are two readings of them.
@@ -213,17 +213,17 @@ would find, exactly as a green Register-1 suite says nothing about Register 2.
 
 ---
 
-### Phase-34 fail-closed simulation result
+### Phase-40 fail-closed simulation result
 
-Phase 34 ran the real Vault init/unseal/client decision code against the modeled Vault over 2,000 seeded fault
+Phase 40 ran the real Vault init/unseal/client decision code against the modeled Vault over 2,000 seeded fault
 schedules (500 per named family), 21 combined sequences, and POR samples. No schedule admitted PKI issuance,
 DSL acceptance, or secret resolution while sealed or freshness-unproven; replay was deterministic and the
 dropped-freshness mutant produced the expected counterexample. This is Register 2.5 evidence: modeled-service
 fidelity remained assumed until the sibling Register-3 live Vault cycle passed on `linux-cpu`.
 
-### Phase-36 readiness-DAG simulation result
+### Phase-42 readiness-DAG simulation result
 
-Phase 36 ran the production `Amoebius.Platform.BringUp` orchestration unchanged under `IOSim`: 64 seeds across
+Phase 42 ran the production `Amoebius.Platform.BringUp` orchestration unchanged under `IOSim`: 64 seeds across
 healthy, partial-failure, restart-after-failure, and partition families produced 256 deterministic schedules.
 Every fault failed closed, every healthy replay was byte-identical and reached all Ready states, and the
 MinIO/Percona-operator intervals supplied an independent-chain concurrency witness. `IOSimPOR` separately
@@ -231,24 +231,24 @@ explored the healthy trace under a branching/schedule bound. The sibling Registe
 services Ready in dependency order on the universal `linux-cpu` lane; pristine Linux uses Incus on
 Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-### Phase-40 dedup-fold simulation result
+### Phase-46 dedup-fold simulation result
 
-Phase 40 drives the production `Amoebius.Pulsar.Dedup` fold through 720 deterministic reorder/duplicate
+Phase 46 drives the production `Amoebius.Pulsar.Dedup` fold through 720 deterministic reorder/duplicate
 schedules. Every stable work key applies exactly one effect and the unstable-key twin turns red; modeled broker
 fidelity remains bounded by the companion Register-3 native-client run. This validation used the universally
 available `linux-cpu` lane; pristine Linux is Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-### Phase-42 workflow-failover simulation result
+### Phase-48 workflow-failover simulation result
 
-Phase 42 runs the production `Amoebius.Workflow.Runtime` transitions through 256 deterministic schedules and a
+Phase 48 runs the production `Amoebius.Workflow.Runtime` transitions through 256 deterministic schedules and a
 bounded `IOSimPOR` exploration of store-commit/kill/redelivery/partition interleavings. Every baseline schedule
 keeps one applied effect, one promoted consumer handle, and the pinned pointer HEAD; the duplicate-apply and
 orphan-consumer mutants turn the simulation red. Modeled-substrate fidelity remains assumed and is discharged
 only by the companion Register-3 live Failover gate, whose lane is the `linux-cpu` baseline at the host's
 natural architecture ([substrate_doctrine.md §1.1](./substrate_doctrine.md#11-the-natural-architecture-rule)).
 
-Phase 48 adds a second Register-2.5 instance: `GatewayMigrationSimSpec` drives both real migration traces
-through the Phase-4 `interpret` function, validates every edge against the pinned action sequence, checks all
+Phase 54 adds a second Register-2.5 instance: `GatewayMigrationSimSpec` drives both real migration traces
+through the Phase-10 `interpret` function, validates every edge against the pinned action sequence, checks all
 five safety predicates, and explores 256 positive-lag schedules. The live companion covers all sixteen
 migration actions in real child clusters. Route53 and WAN fidelity remain named assumptions rather than being
 inferred from the simulated delay model.
@@ -256,10 +256,10 @@ inferred from the simulated delay model.
 ## 8. Planning ownership
 
 This document is normative doctrine. The io-classes environment substrate was built and validated in the
-pre-cluster deterministic-simulation phase ([phase_16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md)); each concurrency-bearing
+pre-cluster deterministic-simulation phase ([phase_22](../../DEVELOPMENT_PLAN/phase_22_deterministic_sim_substrate.md)); each concurrency-bearing
 live-band phase adds its Register-2.5 validation sprint before its Register-3 gate; the determinism seams are the
-[phase_53](../../DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md) kernel's. Phase order, status, and gates live
-only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Phases 31 and 32 have completed
+[phase_59](../../DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md) kernel's. Phase order, status, and gates live
+only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Phases 37 and 38 have completed
 production-code adoptions for the generic reconciler and capacity scheduler respectively; prescriptive claims
 for other later programs remain design intent until their own gates pass.
 

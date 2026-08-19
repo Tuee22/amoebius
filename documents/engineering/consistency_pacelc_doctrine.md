@@ -17,7 +17,7 @@ in [chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentra
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_48_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_54_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -136,7 +136,7 @@ let GatewayFailover =
 let Distribution = < SingleCluster | GeoReplicated >
 ```
 
-### 3.3 The IR and its decode-foreclosures (Haskell, Gate 2)
+### 3.3 The IR and its decode-foreclosures (Haskell, gadt-decode)
 
 ```haskell
 -- Ownership index (a phantom parent-scope tag): a child cannot author the pairing — the same
@@ -190,10 +190,10 @@ One relation on this surface **is** statically checkable and is therefore a genu
 runtime push-back: the failover `rto` must exceed the client-rebind floor — `dnsTtl` plus a
 failure-detection budget plus a DNS-propagation budget. A spec whose `rto < dnsTtl` (or whose `rto` is below
 that sum) is statically unsatisfiable — a survivor cannot be rebindable within the RTO if clients cannot even
-re-resolve within it — and the decoder rejects it at Gate 2, the same shape as the capacity fold, before any
+re-resolve within it — and the decoder rejects it at gadt-decode, the same shape as the capacity fold, before any
 live signal is consulted (the illegal state is [illegal_state_multicluster.md](../illegal_state/illegal_state_multicluster.md)).
 It shares the capacity fold's *total checked-rejection* technique, not its locus: this local scalar relation is
-Gate 2, whereas whole-deployment capacity is post-bind `provision-seal`.
+gadt-decode, whereas whole-deployment capacity is post-bind `provision-seal`.
 This complements the `lagBound` feasibility push-back above, which needs a monitored signal; the
 `rto ≥ dnsTtl + headroom` relation needs none. The premise that clients and resolvers actually **honor the record TTL** — JVM/OS resolver caches, clamping resolvers, and pinned connections can all exceed it — is a
 named **R8 assumed** premise, monitored, never proven by the fold.
@@ -244,7 +244,7 @@ let RecoverySource =
   edge when a `ColdSeedFromBackup` standby must come up, never a `mode` field on desired state — the same
   rule as [§3.4](#34-the-mode-is-world-triggered-not-authored).
 - **`freshnessBound ≥ cadence` is a decode fold.** A `freshnessBound` below the backup `cadence` is statically
-  unsatisfiable — a seed can never be fresher than the newest generation — and is rejected at Gate 2, the same
+  unsatisfiable — a seed can never be fresher than the newest generation — and is rejected at gadt-decode, the same
   total checked-rejection shape as the [§3.5](#35-the-upload-time-feasibility-push-back) `rto ≥ dnsTtl + headroom`
   relation, before any live signal is consulted.
 
@@ -270,8 +270,8 @@ Per the proven/tested/assumed discipline
 - **The async cross-cluster posture is the recorded price**, not a defect: synchronous cross-cluster
   replication would pay cross-cluster RTT per publish
   ([`chaos_failover_worked_examples.md` Appendix B](./chaos_failover_worked_examples.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)).
-- Everything here is **design intent** (Phase 0). The Dhall types land at Gate 1 (`dhall type`) and the
-  GADT-indexed decoder + folds at Gate 2; the upload-time feasibility push-back and the availability-first
+- Everything here is **design intent** (Phase 0). The Dhall types land at dhall-typecheck (`dhall type`) and the
+  GADT-indexed decoder + folds at gadt-decode; the upload-time feasibility push-back and the availability-first
   failover are the one cross-cluster proof obligation. Phase order and status live only in
   [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 

@@ -1,7 +1,8 @@
 # TLA+ Modelling Assumptions (superseded)
 
 > **Purpose**: This document is **superseded**, its subject — the formal model of the cross-cluster failover boundary — now owned by [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md), authored against the model-as-data approach of [formal_model_doctrine.md](./formal_model_doctrine.md).
-> **Read this if**: a model-checking assumption has to be checked before a result is relied on.
+> **Read this if**: an existing link brought you here. This document is **deprecated** and states no current
+> assumption; the sections below name where each one moved.
 
 This document records the assumptions the model checker runs under, so that a green result can be read for
 what it actually covers. It owns no model — the model is owned by

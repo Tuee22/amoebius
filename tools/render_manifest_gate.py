@@ -30,7 +30,7 @@ LOCUS = ROOT / "test/oracle/render_manifest/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/render-manifest/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/render-manifest/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/render-manifest"
-CONTRACT = "DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_20_render_manifest_goldens.md"
 GATE_COMMAND = "python3 tools/render_manifest_gate.py"
 EXPECTATIONS = "test/oracle/render_manifest_surfaces.tsv"
 

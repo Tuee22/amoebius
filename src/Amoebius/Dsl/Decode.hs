@@ -211,7 +211,7 @@ inputStructuralTable digest surfaceValue structural =
 withTemporaryDhall :: Text -> (FilePath -> IO result) -> IO result
 withTemporaryDhall contents action = do
   temporaryDirectory <- getTemporaryDirectory
-  bracket (openTempFile temporaryDirectory "amoebius-gate2.dhall") closeAndRemove use
+  bracket (openTempFile temporaryDirectory "amoebius-gadt_decode.dhall") closeAndRemove use
  where
   closeAndRemove (pathName, handle) = do
     _ <- try (hClose handle) :: IO (Either SomeException ())

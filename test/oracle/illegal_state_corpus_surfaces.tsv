@@ -16,8 +16,8 @@
 # surface<TAB>owner<TAB>ids (comma-separated)
 
 catalog-owner-family-registry	metrics	catalog-entries,registry-subcases
-gate1-exhaustive-corpus	metrics	gate1-corpus
-gate2-controller-resource-headroom-corpus	metrics	gate2-corpus
+dhall-typecheck-exhaustive-corpus	metrics	dhall-typecheck-corpus
+gadt-decode-controller-resource-headroom-corpus	metrics	gadt-decode-corpus
 cbor-produce-consume-boundary	metrics	positive-corpus
 gadt-index-compile-fail-corpus	metrics	compile-fail-pairs
 quickcheck-smart-constructor-closure	checks	property-smart-constructor-closure

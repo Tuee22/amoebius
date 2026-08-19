@@ -15,7 +15,7 @@ pairing simply has no constructor, so nothing needs to reject it. The numbering 
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -33,8 +33,8 @@ It owns nothing but the faithful reproduction of these entries. The catalog **in
 **honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are
 owned by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques**, the
 **coverage matrix**, the **three foreclosure layers**, and the **validation-locus axis** (the orthogonal
-axis — `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect` — added
-on each entry below; `provision-seal` is post-bind Phase-12 provision returning a `ProvisionError` before any
+axis — `dhall-typecheck` / `gadt-decode` / `provision-seal` / `rendered-output-golden` / `live-effect` — added
+on each entry below; `provision-seal` is post-bind Phase-18 provision returning a `ProvisionError` before any
 `ProvisionedSpec`) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice references
 them and does not restate them.
 
@@ -51,7 +51,7 @@ the running deployment enforces it. Each `**Layer:**` tag records where the fore
 
 ### 3.13 A compute engine incompatible with its substrates (managed providers first-class)
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `topology`
 
@@ -65,11 +65,11 @@ relation permits has a constructor, checked **elementwise** so heterogeneous **m
 (closed union, EKS arm present) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the node inventory the compatibility reads). **Layer:** decode-foreclosed for the
 elementwise compatibility fold; type-foreclosed sub-part (EKS is a union arm; a product/unknown engine is
 uninhabitable).
-**Validation-locus:** `Gate-1-editor` (the closed `ComputeEngine` union — the EKS `Managed` arm is present, a product/unknown engine is uninhabitable) + `Gate-2-decoder` (the elementwise engine↔substrate compatibility fold over the node inventory returns `Left` on an incompatible pairing).
+**Validation-locus:** `dhall-typecheck` (the closed `ComputeEngine` union — the EKS `Managed` arm is present, a product/unknown engine is uninhabitable) + `gadt-decode` (the elementwise engine↔substrate compatibility fold over the node inventory returns `Left` on an incompatible pairing).
 
 ### 3.14 rke2/kind on a host with no Linux node (apple/windows without an interposed Linux VM)
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-13`
 
 **Case-family:** `topology`
 
@@ -80,12 +80,12 @@ virtualization provider (`limaHost` on apple, `wsl2Host` on windows), so "rke2/k
 [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) (+ substrate [§4](../engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux) for the synthesis).
 **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a distro GADT indexed by a required `LinuxHost` witness). **Layer:** type-foreclosed uninhabitable;
 runtime-checked residue — that the Lima/WSL2 VM actually boots.
-**Validation-locus:** `Gate-1-editor` (the closed substrate union has no bare Apple/Windows rke2 or kind arm) +
-`Gate-2-decoder` (the distro GADT indexed by the required `LinuxHost` witness — a bare-host distro has no inhabitant once decoded) + `live-effect` (that the interposed Lima/WSL2 VM actually boots).
+**Validation-locus:** `dhall-typecheck` (the closed substrate union has no bare Apple/Windows rke2 or kind arm) +
+`gadt-decode` (the distro GADT indexed by the required `LinuxHost` witness — a bare-host distro has no inhabitant once decoded) + `live-effect` (that the interposed Lima/WSL2 VM actually boots).
 
 ### 3.15 A multi-node kind cluster not on a single Linux host
 
-**Delivery-owner:** `Phase-5`
+**Delivery-owner:** `Phase-11`
 
 **Case-family:** `topology`
 
@@ -93,11 +93,11 @@ kind runs every node as a container on one Docker host, so a multi-node kind clu
 category error. amoebius's `Kind` arm carries **exactly one** `LinuxHost` field; multi-node is `replicas` on
 that one host, and a second host has no field to bind. **Owner:**
 [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (required-field: one `host`; `replicas` never adds a host). **Layer:** type-foreclosed uninhabitable.
-**Validation-locus:** `Gate-1-editor` (the `Kind` arm's single required `host` field — a second host has no field to bind, so `dhall type` rejects it at authoring time).
+**Validation-locus:** `dhall-typecheck` (the `Kind` arm's single required `host` field — a second host has no field to bind, so `dhall type` rejects it at authoring time).
 
 ### 3.16 A multi-node rke2 cluster with fewer Linux hosts than nodes (or a host reused)
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-13`
 
 **Case-family:** `topology`
 
@@ -108,21 +108,21 @@ fixes the server count structurally (`Single`/`Ha3`/`Ha5`,
 [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), and every fixed/floor agent
 binds one `LinuxHost`; future agents are represented by the policy's non-empty candidate classes and finite
 quota, not by fictitious host values. **Distinctness** ("no declared host reused") is the one part Dhall cannot
-express as a type (no Set-distinctness), so it degrades to the total Gate-2 decode fold `mkRke2`, which rejects a
+express as a type (no Set-distinctness), so it degrades to the total gadt-decode decode fold `mkRke2`, which rejects a
 duplicate `HostId` **over `servers ∪ agentFloor`** — a server host reused as an agent, or two declared agents on
 one machine, is caught alongside two servers on one machine. This **generalizes** the original "the node list
 *is* the host list" cardinality to the split fixed/elastic server-agent inventory (the quorum shape itself is
 [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). **Owner:**
 [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (`node == host` cardinality) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (distinctness fold over `servers ∪ agentFloor`). **Layer:** decode-foreclosed — assigned to its weaker
 distinctness floor; the cardinality sub-part is type-foreclosed.
-**Validation-locus:** `Gate-2-decoder` (the total decode fold `mkRke2` returns `Left` on a reused `HostId`
-over `servers ∪ agentFloor`, before any `ProvisionedSpec` exists) + `Gate-1-editor` (the fixed-node cardinality
+**Validation-locus:** `gadt-decode` (the total decode fold `mkRke2` returns `Left` on a reused `HostId`
+over `servers ∪ agentFloor`, before any `ProvisionedSpec` exists) + `dhall-typecheck` (the fixed-node cardinality
 sub-part — one required `host` field per declared node; an elastic candidate is a capacity/substrate class, not
 a host).
 
 ### 3.24 An even/zero-server rke2 control plane (no etcd quorum / split-brain)
 
-**Delivery-owner:** `Phase-5`
+**Delivery-owner:** `Phase-11`
 
 **Case-family:** `topology`
 
@@ -140,11 +140,11 @@ The control-plane taint and its tolerations are **derived** from the server set,
 [§3.5](./illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity)/[§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration) derive-don't-author discipline). **Owner:**
 [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `Rke2Servers` union — the even/zero arm has no constructor). **Layer:** type-foreclosed uninhabitable; runtime-checked residue — that etcd
 actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md).
-**Validation-locus:** `Gate-1-editor` (the closed `Rke2Servers` union — the even/zero-server cardinality has no arm, so `dhall type` rejects it before any binary runs) + `live-effect` (that etcd actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md)).
+**Validation-locus:** `dhall-typecheck` (the closed `Rke2Servers` union — the even/zero-server cardinality has no arm, so `dhall type` rejects it before any binary runs) + `live-effect` (that etcd actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md)).
 
 ### 3.37 A full stretched node on a managed EKS control plane without a provider-native hybrid arm
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `topology`
 
@@ -163,9 +163,9 @@ surface-provider-vs-build discipline owned by [`cluster_lifecycle_doctrine.md`](
 [§1](../engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape) + [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md). **Technique:**
 [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed provider-arm union — the hybrid arm is absent, so the state has no inhabitant). **Layer:** type-foreclosed uninhabitable until a provider-native
 arm is surfaced; runtime-checked residue — that the provider's hybrid mechanism actually joins the node.
-**Validation-locus:** `Gate-1-editor` (the closed provider-arm union — the hybrid arm is absent, so a full member node on a hostless `Managed Eks` control plane has no constructor and fails `dhall type`) + `live-effect` (that the provider's hybrid mechanism actually joins the node, once a provider-native arm is surfaced).
+**Validation-locus:** `dhall-typecheck` (the closed provider-arm union — the hybrid arm is absent, so a full member node on a hostless `Managed Eks` control plane has no constructor and fails `dhall type`) + `live-effect` (that the provider's hybrid mechanism actually joins the node, once a provider-native arm is surfaced).
 
-The Phase-50 paired pure contract and retained-kind object inventory exercise the closed managed/self-managed
+The Phase-56 paired pure contract and retained-kind object inventory exercise the closed managed/self-managed
 shape and the `NoHostSubstrateOnManagedEks` refusal without claiming provider runtime proof. Actual Managed EKS
 host-foreclosure readback remains a `live-effect` obligation because AWS authority could not create the child.
 The parent always has a `linux-cpu` option on every hardware substrate, at that host's natural architecture; use Incus on Linux/Linux-CUDA, Lima on
@@ -173,7 +173,7 @@ Apple, or WSL2 on Windows when the observation requires a pristine Linux host.
 
 ### 3.39 A split-Site etcd quorum
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `topology`
 
@@ -186,7 +186,7 @@ Control-plane machinery (the co-located quorum, `mkStretchedAgent`) is full-node
 quorum. **Owner:** [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§4.1](../engineering/cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation) (the `Site`-indexed `Rke2Servers`); the `Site` axis owned by [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) [§8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints). **Technique:**
 [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a phantom `Site` index the server arms must unify on) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the servers/agents collection shape). **Layer:** type-foreclosed uninhabitable; runtime-checked residue — that the co-located members
 actually keep a low-latency majority.
-**Validation-locus:** `Gate-2-decoder` (the phantom `Site` index that every server arm must unify on — a split-`Site` server set has no inhabitant once decoded into the `Site`-indexed GADT) + `live-effect` (that the co-located members actually keep a low-latency majority).
+**Validation-locus:** `gadt-decode` (the phantom `Site` index that every server arm must unify on — a split-`Site` server set has no inhabitant once decoded into the `Site`-indexed GADT) + `live-effect` (that the co-located members actually keep a low-latency majority).
 
 ---
 

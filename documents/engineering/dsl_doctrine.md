@@ -17,7 +17,7 @@ into, owned by [manifest_generation_doctrine.md](./manifest_generation_doctrine.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_13_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_17_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_ui_program_schema.md, DEVELOPMENT_PLAN/phase_29_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_12_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_17_capability_bind.md, DEVELOPMENT_PLAN/phase_19_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_23_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_25_ui_program_schema.md, DEVELOPMENT_PLAN/phase_35_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_44_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -32,7 +32,7 @@ into, owned by [manifest_generation_doctrine.md](./manifest_generation_doctrine.
 - [5. The illegal-state-unrepresentable contract](#5-the-illegal-state-unrepresentable-contract)
 - [6. Secrets are names, never values](#6-secrets-are-names-never-values)
 - [7. The DSL compiles to one opinionated platform](#7-the-dsl-compiles-to-one-opinionated-platform)
-- [8. The Haskell extension DSL — the constrained surface Gate 3 admits](#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits)
+- [8. The Haskell extension DSL — the constrained surface extension-astcheck admits](#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits)
 - [9. Toolchain note](#9-toolchain-note)
 - [10. Planning ownership](#10-planning-ownership)
 - [Related Documents](#related-documents)
@@ -72,8 +72,8 @@ Phase order and status live only in [../../DEVELOPMENT_PLAN/README.md](../../DEV
 
 ## 2. Two languages, one system: Dhall carries params, Haskell carries logic
 
-> **Validated boundary (Phase 15, Registers 1/2).** The opaque counted `Step`, whole-deployment `chain`, pure
-> descent, canonical plan renderer, absolute-path tool seam, and Gate-3 checked-source seal pass under
+> **Validated boundary (Phase 21, Registers 1/2).** The opaque counted `Step`, whole-deployment `chain`, pure
+> descent, canonical plan renderer, absolute-path tool seam, and extension-astcheck checked-source seal pass under
 > `tools/chain_boundary_gate.py` (ledger `external-run-reference`). Live apply and checked-source runtime behavior
 > remain UNVERIFIED.
 
@@ -95,12 +95,12 @@ dhall"*. It gets there by a hard split between two languages:
   (`Step.hs`). The chain is the system; the Dhall only supplies the `cfg`.
 
 The UI surface is the bounded refinement of this rule. A normalized `UiSource` is a finite declarative program
-**description as data**: it contains no executable callback or effect implementation. Gate 2 checks that value
+**description as data**: it contains no executable callback or effect implementation. gadt-decode checks that value
 into `CheckedUiProgram`; Haskell binds its effects and owns server semantics; the generic PureScript runtime
 interprets the sealed client projection. The complete boundary is owned by
 [low_code_ui_runtime_doctrine.md §3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans).
 
-[Phase 19](../../DEVELOPMENT_PLAN/phase_19_ui_program_schema.md) builds this specialization: authored Dhall
+[Phase 25](../../DEVELOPMENT_PLAN/phase_25_ui_program_schema.md) builds this specialization: authored Dhall
 decodes into the closed UI wire, and the total Haskell checker alone can construct `CheckedUiProgram`. The gate
 does not claim browser, handler, authorization, or provider enforcement.
 
@@ -151,7 +151,7 @@ flowchart LR
   hs -->|"yields"| spec
   op -.->|"authors no logic in Dhall; that surface has no arm for it"| hs
 ```
-*Orientation. Design intent. Where the boundary between the two languages falls: an operator authors parameters in Dhall and no logic there. What that forecloses, and at which layer, is owned by [§5](#5-the-illegal-state-unrepresentable-contract); extension Haskell is admitted separately by [§8](#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits) under a build-time check.*
+*Orientation. Design intent. Where the boundary between the two languages falls: an operator authors parameters in Dhall and no logic there. What that forecloses, and at which layer, is owned by [§5](#5-the-illegal-state-unrepresentable-contract); extension Haskell is admitted separately by [§8](#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits) under a build-time check.*
 
 ## 3. The orchestration surface: parameters, context, witness
 
@@ -198,7 +198,7 @@ The point of separating these three is that the orchestration surface is **self-
 confirm the binary is actually standing where the context claims. All three are typed Dhall, none is a secret
 ([§6](#6-secrets-are-names-never-values)), and none is logic ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
 
-Phase 29 is the first amoebius implementation to carry the host-side slice of this shape: its `BinaryContext`
+Phase 35 is the first amoebius implementation to carry the host-side slice of this shape: its `BinaryContext`
 combines bootstrap parameters, the physical-host context, and locally observed file/socket/resource witnesses
 before kind creation. The Step/Chain kernel beneath it was delivered pre-cluster. The complete pristine-Incus
 `linux-cpu` gate exercises this context, exact process/storage enforcement, the observed-inventory
@@ -257,7 +257,7 @@ and without leakage*: a frozen import can never smuggle in an effect or a partia
 
 **Import policy: resolve-and-freeze before decode.** Dhall *import resolution* is itself effectful — an
 `env:VAR` import reads the process environment and a remote `http(s):` import fetches over the network, both
-at decode time — so an unrestricted uploaded `InForceSpec` would make Gate-2 decode
+at decode time — so an unrestricted uploaded `InForceSpec` would make gadt-decode decode
 ([§5](#5-the-illegal-state-unrepresentable-contract)) an effectful surface, colliding with the no-env-vars /
 no-`PATH` invariant ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic), owned by [substrate_doctrine.md](./substrate_doctrine.md)) and the no-arbitrary-URL invariant
 ([illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
@@ -265,7 +265,7 @@ amoebius therefore **forbids** `env:` and remote (`http(s):`) imports in any aut
 **resolves-and-freezes** every spec to a fully-local, semantic-integrity-hashed (Dhall `sha256:…`) expression
 at `dhall update` upload time, before decode. The effect-free/total claim of
 [§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) holds for this *resolved, frozen*
-expression — never for arbitrary unresolved Dhall — and the policy is enforced at the Phase-5/6 gate
+expression — never for arbitrary unresolved Dhall — and the policy is enforced at the Phase-11/12 gate
 ([§5](#5-the-illegal-state-unrepresentable-contract)).
 
 Total composability runs along four concrete axes, each owned in detail by a sibling doc:
@@ -304,8 +304,8 @@ obligation. The testing surface is owned by the testing doctrine; it is named he
 *testing* is expressed in the one composable DSL rather than a parallel harness language.
 
 **Low-code UI composition.** A multi-service app composes its normalized `UiSource` modules with typed
-infernix/jitML workflow and artifact ports before any client or server plan exists. The UI-specific Gate 1,
-Gate 2, bind, projection, and runtime boundaries are owned by
+infernix/jitML workflow and artifact ports before any client or server plan exists. The UI-specific dhall-typecheck,
+gadt-decode, bind, projection, and runtime boundaries are owned by
 [low_code_ui_runtime_doctrine.md §16](./low_code_ui_runtime_doctrine.md#16-admission-stages-and-illegal-state-foreclosure).
 The development plan owns when representational and live validation occur.
 
@@ -366,7 +366,7 @@ The `ExtensionSpec` seam is **Path 1**, and it is deliberately *not* open to the
 - **v1 — Path 1 (linked).** The closed set `{infernix, jitML}` is *vendored*: each links into
   the one binary through its `ExtensionSpec`. This is the only extension mechanism v1 ships.
 - **v2 — Path 2 (the Haskell extension DSL).** A non-vendored third party enters *only* through the future
-  **Haskell-as-DSL + custom AST checker + native JIT** — the forward pointer of [§8](#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits), scheduled as a
+  **Haskell-as-DSL + custom AST checker + native JIT** — the forward pointer of [§8](#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits), scheduled as a
   later-phases candidate
   ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-the-amoebius-native-jit-jitml-absorbed)).
   Path 2 is later-phases design intent, not built.
@@ -374,12 +374,12 @@ The `ExtensionSpec` seam is **Path 1**, and it is deliberately *not* open to the
 The boundary remains closed: **there is no arbitrary application container and no arbitrary browser-code extension**. An application can be composed without linking app-specific code by supplying bounded `UiSource`
 and binding its ports to the existing trusted handler catalog
 ([app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is)).
-If it requires a new server effect or workflow semantic, that implementation enters only as a Gate-3-admitted
-Haskell adapter. Gate 3 admits linked implementation; the UI-specific Gate 2 admits declarative interaction
+If it requires a new server effect or workflow semantic, that implementation enters only as a extension-astcheck-admitted
+Haskell adapter. extension-astcheck admits linked implementation; the UI-specific gadt-decode admits declarative interaction
 data. Neither route admits an unreviewed image, dynamic plugin, raw browser callback, or provider endpoint.
 
 A future ML family still enters via Path 1 once its math is absorbed into a vendored library, or via the
-constrained surface of [§8](#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits). A new low-code
+constrained surface of [§8](#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits). A new low-code
 application does not become a new ML extension merely by consuming its typed workflow or artifact ports.
 
 ### The ML-asset types an extension `.dhall` carries: `EngineRuntime` vs `ModelArtifact`
@@ -390,7 +390,7 @@ must hold apart — and, per [§1](#1-why-this-doctrine-exists), *carries but do
 - **`EngineRuntime`** — a **closed** union of substrate-tagged **named catalog identities**. It has **no `Url`/`Download`/`Fetch` arm**: an engine is *selected by substrate* and named, never fetched from an
   operator-supplied address. The **identity** is fixed the moment the spec type-checks; the **payload** is not
   baked into the image — it is jit-resolved on first miss into the `CacheBudget`-bounded per-node cache
-  ([`content_addressing_doctrine.md` §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
+  ([`content_addressing_determinism.md` §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
   which is the deliberate exception to the bake-every-third-party-binary rule
   ([`image_build_doctrine.md`](./image_build_doctrine.md)). What this surface forecloses is the *arbitrary
   address*, not the deferred materialization.
@@ -404,7 +404,7 @@ The relation between them is itself typed: **a `ModelArtifact` must be servable 
 model has no landing engine (a decode-foreclosed total relation over the serving lane's engine set, the same topology-relation-over-a-collection technique [§5](#5-the-illegal-state-unrepresentable-contract) defers to the catalog).
 The *detail* of all three — the no-`Url` closure, the `.ready`-plus-provenance-witness gate, and the model↔engine match — is owned by
 [illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) and
-[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss); this doc records only that the
+[content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss); this doc records only that the
 extension seam *carries* these typed fields and defers their unrepresentability there.
 
 The same extension seam carries jitML's **training-run** shape as three further *carried, not defined* typed
@@ -419,7 +419,7 @@ As with `EngineRuntime`/`ModelArtifact`, the DSL *carries* these fields on an ex
 makes an unbounded, un-checkpointed, or non-deterministically-ordered run **unrepresentable** — the closed
 union shapes, the no-bare-unbounded-`Continuous` foreclosure, and the fold that keeps a `Feed`'s consumed
 prefix content-addressed rather than cursor-keyed — is owned by
-[content_addressing_doctrine.md §4.6](./content_addressing_doctrine.md#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)
+[content_addressing_determinism.md §4.6](./content_addressing_determinism.md#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)
 and [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md), not defined here.
 
 ### The stretched-node reachability field the surface carries: `Networking`
@@ -449,7 +449,7 @@ representable for diagnostics, but it has no deployable representation because i
 `provision` returns `Left` and cannot construct the opaque `ProvisionedSpec`. The contract has a one-line form
 an operator can hold onto:
 
-> **Gate 1/2 and bind/expand produce only intent. `planInfrastructure` derives demand from that exact intent
+> **dhall-typecheck/2 and bind/expand produce only intent. `planInfrastructure` derives demand from that exact intent
 > and declared supply or forest budget: `NoInfrastructureRequired` witnesses the explicit
 > `ObservedInfrastructureMaterialization.AlreadyMaterialized` state arm, while its required arm can mutate
 > only after its one `ProvisionedProviderActionBatch` is snapshot-validated as the matching
@@ -457,7 +457,7 @@ an operator can hold onto:
 > provider/host readback constructs `ProvisionContext`; only
 > `provision` can then construct the opaque `ProvisionedSpec` accepted by deployment-level `renderAll`.**
 
-That guarantee is bought by **three typed gates plus one conditional post-bind plan/materialize/provision seal**. Gates 1 and 2 gate the *spec*; Gate 3 gates the *extension source* the
+That guarantee is bought by **three typed gates plus one conditional post-bind plan/materialize/provision seal**. Gates 1 and 2 gate the *spec*; extension-astcheck gates the *extension source* the
 spec's `extChain` resolves to ([§4](#4-total-composability)), because a spec whose types are impeccable still
 runs whatever code was linked beside it. Raw decoded or bound values authorize no effect; the only pre-spec
 effect authority is the validated initial-infrastructure plan and its single-use plan/action tokens, and it
@@ -470,7 +470,7 @@ GADT-indexed state machines, ownership indices, content-address totality, the ca
 topology relations over a collection) are owned in full by
 [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) — do not look for them restated here.
 
-### Gate 1 — the Dhall typechecker
+### dhall-typecheck — the Dhall typechecker
 
 Dhall is a *total*, strongly-normalizing, side-effect-free configuration language. An expression that does
 not match its declared schema simply **does not type-check**, and a non-terminating or effectful
@@ -479,15 +479,15 @@ authoring time, in the operator's editor, in `dhall type`, in CI. A union with n
 ingress" gives the author no syntax to request insecure ingress; a record that requires a PV reference for
 every PVC gives no way to omit it. The schema is the boundary, and the boundary is mechanical.
 
-**amoebius validation status.** Phase 5 supplies this Gate-1 boundary as fourteen authored Dhall modules,
+**amoebius validation status.** Phase 11 supplies this dhall-typecheck boundary as fourteen authored Dhall modules,
 four wired positive surfaces, eight catalog negatives, three image/process negatives, import-policy checks,
 and independent closed-union/required-field/nested-type oracles with seeded mutations. The Register-1 gate
-passed on 2026-08-09 with `python3 tools/dhall_gate1_schema_gate.py`; ledger
+passed on 2026-08-09 with `python3 tools/dhall_typecheck_schema_gate.py`; ledger
 `dynamically-resolved`. That result establishes only the
-recorded structural spec-composition claims. Gate 2 is separately validated below; bind/provision arithmetic
+recorded structural spec-composition claims. gadt-decode is separately validated below; bind/provision arithmetic
 and live runtime enforcement remain **UNVERIFIED** here.
 
-### Gate 2 — the Haskell typed decoder
+### gadt-decode — the Haskell typed decoder
 
 A well-typed Dhall value still has to become a Haskell value before the chain ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)) can use it. The
 local `amoebius.dhall` `FrameConfig` is decoded from the sibling file; the uploaded `InForceSpec` is
@@ -501,28 +501,28 @@ things happen here:
   structured error (`readContextFile` returns `Left (ContextDecodeFailed …)` rather than throwing into a
   half-applied effect; `Context.hs`). Nothing is reconciled against a config that did not fully decode.
 - **The ADTs make structurally illegal combinations un-spellable and refinements reject local value failures.** Sum types and type indices give closed illegal shapes no inhabitant; total smart constructors
-  can reject constructible values. Gate 2 produces only decoded, unprovisioned declarations. It does not
+  can reject constructible values. gadt-decode produces only decoded, unprovisioned declarations. It does not
   decide whole-deployment placement, storage peaks, live target compatibility, or inventory sufficiency.
 
-**amoebius validation status.** Phase 6 implements the `dsl-core` library and fail-closed decoder. Its
-Register-1 gate passed on 2026-08-09 with `python3 tools/gadt_decoder_gate2_gate.py`; ledger
+**amoebius validation status.** Phase 12 implements the `dsl-core` library and fail-closed decoder. Its
+Register-1 gate passed on 2026-08-09 with `python3 tools/gadt_decode_ir_gate.py`; ledger
 `dynamically-resolved`. Five independently semantic-hash-pinned
-positive surfaces retain 5,527 normalized structural rows, the three named Gate-2 classes reach distinct
-constructors after a Gate-1-green precondition, and tenant/state/owner compile pairs reject at their pinned
+positive surfaces retain 5,527 normalized structural rows, the three named gadt-decode classes reach distinct
+constructors after a dhall-typecheck-green precondition, and tenant/state/owner compile pairs reject at their pinned
 indices. The decoder rejects direct and nested environment/remote imports, catches thrown failures, and
-deeply forces the accepted IR. Phase 7 then exhausts the reached catalog seam: every entry and subcase
-reconciles, the Phase-5/6/7-owned subcases discharge through the Gate-1 and Gate-2 cases, five compile-fail
+deeply forces the accepted IR. Phase 13 then exhausts the reached catalog seam: every entry and subcase
+reconciles, the Phase-11/12/13-owned subcases discharge through the dhall-typecheck and gadt-decode cases, five compile-fail
 pairs, and four coverage-checked properties, while all three finite `Rke2Servers` arms are exhausted (ledger
 `dynamically-resolved`). The remaining 73 subcases are
-deferred to their exact owners. Arithmetic (Phases 8–10), binding/provisioning (Phases 11–12), rendered
+deferred to their exact owners. Arithmetic (Phases 14–16), binding/provisioning (Phases 17–18), rendered
 outputs, and runtime enforcement remain UNVERIFIED.
 
-### Gate 3 — the extension AST checker
+### extension-astcheck — the extension AST checker
 
 Gates 1 and 2 prove things about a *value*. Neither says anything about the Haskell linked beside it: an
 `ExtensionSpec`'s `extChain` carries a `stepRun :: cfg -> IO ()`, and `IO ()` is a type, not a bound. Before
 trusted app-specific workflow or effect adapters were admitted, that gap was covered by *vendoring* — the set
-was closed at two reviewed ML libraries ([§4](#4-total-composability)) — and review is not a mechanism. Gate 3
+was closed at two reviewed ML libraries ([§4](#4-total-composability)) — and review is not a mechanism. extension-astcheck
 replaces the review with a check.
 
 **Extension source is admitted by a custom AST checker against a closed sanctioned API.** The checker runs at
@@ -563,21 +563,21 @@ document — the same discipline that keeps `EngineRuntime` and `ImageIdentity` 
 ([service_capability_doctrine.md](./service_capability_doctrine.md), [image_build_doctrine.md](./image_build_doctrine.md)) rather than something an extension author can grant
 themselves.
 
-> **Layer.** Gate 3 is **link-time foreclosed**: unchecked source has no linkable representation. That
+> **Layer.** extension-astcheck is **link-time foreclosed**: unchecked source has no linkable representation. That
 > checked source *behaves* — terminates, respects its budgets, serves correctly — is **runtime residue** and
 > is claimed by no gate. The checker bounds what code may *reach*, never what it computes.
 
 ### Post-gate seal — bind/expand, conditionally materialize infrastructure, provision
 
-The pure Phase-11 binder expands the complete source inventory and produces an unprovisioned
+The pure Phase-17 binder expands the complete source inventory and produces an unprovisioned
 `BoundDeployment`. `planInfrastructure :: ProvisionTargetSupply -> BoundDeployment -> Either ProvisionError
 InfrastructurePlanningResult` derives the whole demand from that value and the declared standalone supply or
 opaque forest-member budget; it never accepts a second caller-authored demand vector. The result is a closed
 choice:
 
-The [Phase-11 gate](../../DEVELOPMENT_PLAN/phase_11_capability_bind.md) validates the first sentence: all nine
-closed needs pass the total binder under both shapes, the product/URL/shape authoring escapes fail Gate 1, and
-unbuilt/unbound/cyclic/shadowing values fail Gate 2. It does not validate the infrastructure or provision
+The [Phase-17 gate](../../DEVELOPMENT_PLAN/phase_17_capability_bind.md) validates the first sentence: all nine
+closed needs pass the total binder under both shapes, the product/URL/shape authoring escapes fail dhall-typecheck, and
+unbuilt/unbound/cyclic/shadowing values fail gadt-decode. It does not validate the infrastructure or provision
 steps described below.
 
 - `NoInfrastructureRequired` supplies the witness for an explicit
@@ -594,11 +594,11 @@ Either authenticated materialization arm constructs `ProvisionContext`. `provisi
 to the exact `BoundDeployment`, checks CPU, memory, storage, slots, accelerators, VRAM, quotas, controller
 multiplicity, materialized identities, and every other whole-deployment demand, and returns `Either
 ProvisionError ProvisionedSpec`. Its success arm is opaque and constructor-private. Only that
-`ProvisionedSpec` can cross the Phase-14 deployment-level `renderAll` boundary. Thus a capacity sum is a
+`ProvisionedSpec` can cross the Phase-20 deployment-level `renderAll` boundary. Thus a capacity sum is a
 checked rejection of constructible input, never a dependent-type inhabitance proof, and a promised
 infrastructure identity cannot be smuggled into a manifest before provider/host readback.
 
-The layers compose: Gate 1 rejects Dhall schema failures; Gate 2 rejects structural and local refinement
+The layers compose: dhall-typecheck rejects Dhall schema failures; gadt-decode rejects structural and local refinement
 failures; binding rejects unresolved or incoherent source composition; infrastructure planning rejects an
 unfit declared supply/budget or returns the explicit no-action arm / the sole validated action batch; and the
 post-materialization provision seal rejects mismatched readback or remaining incompatible demand. The final
@@ -609,9 +609,9 @@ claim.
 flowchart TD
 %% register: algebra
   author["Operator authors typed InForceSpec"]:::intent
-  g1{{"Gate 1: Dhall typecheck, total and pure"}}:::gate
+  g1{{"dhall-typecheck: Dhall typecheck, total and pure"}}:::gate
   typed["Well-typed Dhall value"]:::provenPB
-  g2{{"Gate 2: Haskell GADT decode, fail-fast"}}:::gate
+  g2{{"gadt-decode: Haskell GADT decode, fail-fast"}}:::gate
   bound["BoundDeployment: unprovisioned intent"]:::intent
   plan[["planInfrastructure: demand from intent and supply"]]:::intent
   prov[["provision: whole-deployment capacity join"]]:::intent
@@ -633,7 +633,7 @@ flowchart TD
   prov -->|"remaining incompatible demand"| rej3
   prov -->|"success"| sealed
   sealed --> render
-  render -->|"Phase 38 live apply/readback"| live
+  render -->|"Phase 44 live apply/readback"| live
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef provenPB fill:#dbeafe,stroke:#1e5fa8,color:#0b2f57,stroke-width:2px
   classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
@@ -644,15 +644,15 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Delivered boundary. Phases 5–15 validate the Tier-1 Dhall/decode/bind/provision/render path in amoebius; Phase 38 validates its Tier-2 live apply/readback through the control-plane daemon. Provider and cross-cluster arms remain owned by their later phases.*
+*Delivered boundary. Phases 11–21 validate the Tier-1 Dhall/decode/bind/provision/render path in amoebius; Phase 44 validates its Tier-2 live apply/readback through the control-plane daemon. Provider and cross-cluster arms remain owned by their later phases.*
 
-**Where the contract shape is discharged: front-loaded to Phases 5–14 (Tier 1).** Gate 1 is
-`dhall type` at authoring time; Gate 2 is the in-process `Dhall.inputFile auto` decode and its focused
-properties (Phases 5–10); Phase 11 owns binding, pure infrastructure-plan construction, modeled/fixture
-materialization validation, and the opaque provision seal; Phase 14 proves the sole public `renderAll`
+**Where the contract shape is discharged: front-loaded to Phases 11–20 (Tier 1).** dhall-typecheck is
+`dhall type` at authoring time; gadt-decode is the in-process `Dhall.inputFile auto` decode and its focused
+properties (Phases 11–16); Phase 17 owns binding, pure infrastructure-plan construction, modeled/fixture
+materialization validation, and the opaque provision seal; Phase 20 proves the sole public `renderAll`
 boundary and its goldens. These contract/golden checks are pure or in-process and need no cluster. Live CAS
 enaction and provider/host readback of an `InfrastructureRequired` plan are exercised only by the later live
-infrastructure phases; they are not silently claimed by the Phase-11 type gate. Phase 38 now discharges the
+infrastructure phases; they are not silently claimed by the Phase-17 type gate. Phase 44 now discharges the
 **Tier-2 runtime-enforcement residue** for its pinned linux-cpu platform-plus-trivial-app fixture: the running
 cluster enforces what the sealed spec composes, with exact audit-attributed enact and no-op evidence. A green
 typecheck or decode alone still proves neither target feasibility nor live enforcement for later provider,
@@ -693,9 +693,9 @@ its building phase, not yet built.
 > plus provision-seal mechanism; it does **not** claim every illegal state is excluded by type inhabitance —
 > each catalog entry states whether its foreclosure is type-, decode-, provision-, or runtime-checked. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), a typing argument is evidence, not a
-> tested or proven result: the pure contract is front-loaded to the pre-cluster gates, Phases 5–14 (Tier 1), while
+> tested or proven result: the pure contract is front-loaded to the pre-cluster gates, Phases 11–20 (Tier 1), while
 > runtime enforcement — that the running cluster enforces what the spec composed — stays the Tier-2 residue
-> deferred to Phase 37.
+> deferred to Phase 43.
 
 ---
 
@@ -711,14 +711,14 @@ So the DSL carries a typed **reference** to each secret — a *name/coordinate*,
 - **Parents inject; children resolve.** The actual value is materialized into the child's Vault by its
   parent. The DSL names *where* a secret will be; Vault holds *what* it is.
 - **The typechecker never sees a literal secret**, because there is no literal secret in the tree to see —
-  only a reference. This is what lets Gate 1 and Gate 2 ([§5](#5-the-illegal-state-unrepresentable-contract)) run over the full config tree without ever
+  only a reference. This is what lets dhall-typecheck and gadt-decode ([§5](#5-the-illegal-state-unrepresentable-contract)) run over the full config tree without ever
   touching sensitive material.
 
 **Presence is a live question, and Gates 1 and 2 do not answer it.** A reference is well-typed and decodes
 cleanly whether or not the secret exists, so *that* the named secret is actually in Vault is proven at
 admission — the live step before a spec may render — and never by the typechecker or the decoder. Keeping it
-out of both is what preserves the property this section rests on: Gate 1 runs in an editor with no cluster in
-reach, and Gate 2 runs over the whole config tree without a secrets client in the path. The admission check
+out of both is what preserves the property this section rests on: dhall-typecheck runs in an editor with no cluster in
+reach, and gadt-decode runs over the whole config tree without a secrets client in the path. The admission check
 ranges over the references a spec actually names, so a spec naming none needs no Vault at all
 ([vault_pki_doctrine.md §3.4](./vault_pki_doctrine.md#34-admission-proves-the-named-secret-exists-before-any-effect)).
 
@@ -754,7 +754,7 @@ decision viewed from two sides.
 
 ---
 
-## 8. The Haskell extension DSL — the constrained surface Gate 3 admits
+## 8. The Haskell extension DSL — the constrained surface extension-astcheck admits
 
 The vision names a second language: *"orchestration DSL lives in .dhall, extension DSL is Haskell that is
 (a) validated by a custom AST checker, and (b) has access to all amoebius libraries + jit features"*. It was
@@ -763,12 +763,12 @@ that clause no longer holds: an app has no image of its own
 ([app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is)),
 so the arbitrary-container fallback that made the checker deferrable is gone. The **checker half** of the
 vision's second language is therefore v1, and it is [§5](#5-the-illegal-state-unrepresentable-contract)'s
-Gate 3. What remains v2 is the **native JIT** and the absorption of jitML into it — a new capability, not a
+extension-astcheck. What remains v2 is the **native JIT** and the absorption of jitML into it — a new capability, not a
 discipline ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md)).
 
 This doc stays the SSoT for both halves of the two-language split
 ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)): Dhall carries the params,
-Haskell carries the logic, and Gate 3 bounds what that Haskell may reach. Concretely:
+Haskell carries the logic, and extension-astcheck bounds what that Haskell may reach. Concretely:
 
 - **The constrained surface is the `SanctionedApi` of [§5](#5-the-illegal-state-unrepresentable-contract).**
   Extension source may name the sanctioned modules and route effects through sanctioned constructors; raw
@@ -776,12 +776,12 @@ Haskell carries the logic, and Gate 3 bounds what that Haskell may reach. Concre
 - **Both extension paths run through it.** Path 1 (vendored: `{infernix, jitML}`) and an optional trusted
   `App` adapter
   ([capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app))
-  are admitted by the same checker. Generic `UiSource` view, state, and transition logic does not enter Gate 3;
-  it enters the UI-specific Gate 2. Vendoring is no longer load-bearing for Haskell-adapter safety — it scopes
+  are admitted by the same checker. Generic `UiSource` view, state, and transition logic does not enter extension-astcheck;
+  it enters the UI-specific gadt-decode. Vendoring is no longer load-bearing for Haskell-adapter safety — it scopes
   only which workload libraries amoebius ships.
 - **The boundary remains explicit.** The Dhall UI program describes bounded interaction semantics; linked
   Haskell implements trusted workflow, data, and effect adapters. A low-code app need not contribute Haskell.
-  Any new effect semantics outside the linked catalog require a Gate-3-admitted adapter and cannot be smuggled
+  Any new effect semantics outside the linked catalog require a extension-astcheck-admitted adapter and cannot be smuggled
   into `UiSource` as browser code or a raw network operation
   ([low_code_ui_runtime_doctrine.md §19](./low_code_ui_runtime_doctrine.md#19-extension-rule-and-permanently-absent-escape-hatches)).
 
@@ -794,8 +794,8 @@ project policy records required APIs and compatibility constraints, while the Ph
 selected compiler, packages, compatibility adjustments, and observed integrity data only in the generated
 run bundle. No permanent compiler pin, `allow-newer` resolution, lock/freeze file, or package SHA is copied
 into Git. The exact in-process decoder graph and positive/negative fixture pair are re-established by the
-[Phase 1 toolchain gate](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md); Phase 6 then validates the
-focused Gate-2 semantics recorded above. There is **no**
+[Phase 1 toolchain gate](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md); Phase 12 then validates the
+focused gadt-decode semantics recorded above. There is **no**
 intermediate JSON projection on the supported path: file-backed frame config is the typed `amoebius.dhall`
 expression, and uploaded desired state is the decrypted `InForceSpec` Dhall expression decoded in-process
 ([§5](#5-the-illegal-state-unrepresentable-contract)).
@@ -815,15 +815,15 @@ remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT
 orchestration Dhall DSL's **in-process contract validation** — the three typed gates of
 [§5](#5-the-illegal-state-unrepresentable-contract), followed by bind/expand, conditional infrastructure
 planning/materialization fixtures, and the opaque provision seal (Tier 1: Dhall typecheck + decoder +
-QuickCheck + whole-deployment plan/provision + `renderAll` goldens) — is **front-loaded to Phases 5–14**,
+QuickCheck + whole-deployment plan/provision + `renderAll` goldens) — is **front-loaded to Phases 11–20**,
 while live enaction/readback of a required initial-infrastructure batch belongs to the later live
 infrastructure phase that owns that substrate. The DSL's
 **runtime-enforcement** half (the live deploy + control-plane daemon reconcile that makes the running cluster
-enforce what the spec composed, Tier 2) is delivered by **Phase 38**, atop the Phase 15 `dsl-step`/`chain` kernel
+enforce what the spec composed, Tier 2) is delivered by **Phase 44**, atop the Phase 21 `dsl-step`/`chain` kernel
 seeded from hostbootstrap. This doc never maintains a competing status ledger; it states the target shape and
 links back for status.
 
-> **Honesty.** amoebius has built and validated the Phase 5–15 Tier-1 DSL path and the Phase-38 Tier-2 live
+> **Honesty.** amoebius has built and validated the Phase 11–21 Tier-1 DSL path and the Phase-44 Tier-2 live
 > control-plane daemon runtime-enforcement slice. Full tenant projection, provider materialization, recursive children,
 > and cross-cluster correspondence remain owned and UNVERIFIED in later phases. Behaviour borrowed from
 > prodbox or hostbootstrap remains sibling-system evidence, not proof in amoebius. Read prescriptive statements
@@ -838,7 +838,7 @@ links back for status.
 - [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) the UI-specific Dhall-data refinement and [§16](./low_code_ui_runtime_doctrine.md#16-admission-stages-and-illegal-state-foreclosure) its checked gates
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — [§8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic) an arbitrary container app is application logic, not an extension
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) an ML asset fetched/built at pod startup, and an unready/unlanded model, are unrepresentable
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the three-tier ML-asset lifecycle (`EngineRuntime` baked, `ModelArtifact` `.ready`-gated)
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the three-tier ML-asset lifecycle (`EngineRuntime` baked, `ModelArtifact` `.ready`-gated)
 - [Service Capability Doctrine](./service_capability_doctrine.md) — the capability surface an `ExtensionSpec` declares into
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
@@ -848,6 +848,6 @@ links back for status.
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the capacity/budget/scaling types the surface carries
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology types the surface carries
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — [§3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) runtime message payloads are CBOR, not Dhall
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — later-phases candidate Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits) Path 2 for third parties)
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — later-phases candidate Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits) Path 2 for third parties)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

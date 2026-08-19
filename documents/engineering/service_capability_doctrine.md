@@ -18,7 +18,7 @@ never names a product. It does not own how those providers are deployed, owned b
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_12_provision_seal.md, DEVELOPMENT_PLAN/phase_13_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_22_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_39_app_tenancy.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_17_capability_bind.md, DEVELOPMENT_PLAN/phase_18_provision_seal.md, DEVELOPMENT_PLAN/phase_19_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_28_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_45_app_tenancy.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -121,7 +121,7 @@ capability and reference a policy, but it cannot construct a permission, provide
 or resource handle. The UI-specific port and request-context contract is owned by
 [low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations).
 
-[Phase 22](../../DEVELOPMENT_PLAN/phase_22_ui_effect_binding.md) supplies Register-1 evidence for that consumer:
+[Phase 28](../../DEVELOPMENT_PLAN/phase_28_ui_effect_binding.md) supplies Register-1 evidence for that consumer:
 all seven fixture ports bind exactly once to closed semantic capabilities through independently checked
 handler/codec/scope tuples, while an absent capability and a raw provider coordinate fail at distinct loci.
 Actual handler behavior and provider state remain UNVERIFIED.
@@ -174,8 +174,8 @@ arm, `Sql` could admit a managed cloud Postgres — without any app spec changin
 the provider. But a union arm is not an adapter. amoebius **does not build a provider adapter it does not yet need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
 would be reporting a designed extension point as a built one.
 
-> **Validated representation.** [Phase 11](../../DEVELOPMENT_PLAN/phase_11_capability_bind.md) implements the
-> one-built-arm `CanonicalProvider` representation and rejects an unbuilt alternate with a distinct Gate-2
+> **Validated representation.** [Phase 17](../../DEVELOPMENT_PLAN/phase_17_capability_bind.md) implements the
+> one-built-arm `CanonicalProvider` representation and rejects an unbuilt alternate with a distinct gadt-decode
 > tag. Alternate arms remain deliberately unbuilt; this validation proves binding composition, not provider
 > realization.
 
@@ -183,7 +183,7 @@ would be reporting a designed extension point as a built one.
 
 ## 4. Capability → provider → shape: the binding
 
-[Phase 11](../../DEVELOPMENT_PLAN/phase_11_capability_bind.md) realizes this representational seam in
+[Phase 17](../../DEVELOPMENT_PLAN/phase_17_capability_bind.md) realizes this representational seam in
 `Amoebius.Capability.{Types,Binding}`. Its gate binds all nine arms under both shapes, checks 18 exact graph
 goldens, and proves normalized app bytes remain invariant while an independent object-node-multiset oracle
 observes structural graph differences. Provision and runtime provider health remain outside that result.
@@ -274,7 +274,7 @@ a **closed union over substrate lanes** (one arm per lane); the **engine family*
 field of the `InferenceBinding` (the two compose as a product — lane × family — not one fused index; see the
 Dhall below). Neither admits an arbitrary-`Url` / `Download` arm — the load-bearing rule — and each named
 identity is resolved on first miss into a `CacheBudget`-bounded content-addressed
-cache ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)):
+cache ([content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)):
 
 | Provider dimension | Arms (closed union) |
 |---|---|
@@ -284,7 +284,7 @@ cache ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#4
 The ML siblings **link as libraries** rather than run as fetched sidecars, so the library is present the moment
 the pod is; the engine *payload* the library drives is a named identity the shared **jit-build resolver**
 materializes on first miss into the `CacheBudget`-bounded cache
-([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
+([content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
 with the resolver's build inputs and the base image owned by
 [image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain).
 The unions are closed **here** because every arm is a **named catalog identity**: adding an engine family is a new
@@ -292,7 +292,7 @@ The unions are closed **here** because every arm is a **named catalog identity**
 table above map to the inference modalities the platform serves. The same move is made for container images
 by `ImageIdentity`
 ([image_build_doctrine.md §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)) —
-a closed union of named identities with no free-digest or `Url` arm, so "run a foreign image" fails Gate 1
+a closed union of named identities with no free-digest or `Url` arm, so "run a foreign image" fails dhall-typecheck
 exactly as "fetch an engine by URL" does. Where the pattern recurs, the rule recurs with it: a closed union
 of named catalog identities is amoebius's standard answer to an operator-supplied address. The deployment `.dhall` **selects** an
 arm through the target offering projected from the *detected* substrate (the substrate is DETECTED,
@@ -332,17 +332,17 @@ referenced here (this doctrine is scoped to the engine as a substrate-selected, 
 sibling-proven result.
 
 `InferenceEngine` is **Tier 1** of the ML-asset lifecycle
-([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)); the model and kernel tiers live
+([content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)); the model and kernel tiers live
 there, not here — and all three now share one bounded-cache, resolve-on-miss shape:
 
 - **Tier 1 — the engine (this capability)** is substrate-selected and jit-resolved into the bounded cache, as above.
 - **Tier 2 — `ModelArtifact`** is an eager stage-then-serve into the content-addressed store, its `ArtifactRef`
   obtainable **only** once a `.ready` sentinel **and a provenance witness** exist — the witnessed serve gate (a
   committed producing checkpoint or a pinned content-addressed import) is owned by content_addressing
-  [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss),
+  [§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss),
   referenced here, not restated.
 - **Tier 3 — the JIT kernel** is lazily materialized behind a content address on first cache miss, never a
-  startup build. Owned by content_addressing [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).
+  startup build. Owned by content_addressing [§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).
 
 **The engine↔model landing relation this doctrine co-owns.** A served `ModelArtifact` must be servable by an
 `EngineRuntime` whose **engine family** is available on the **serving** substrate lane — the accelerator the
@@ -358,7 +358,7 @@ topology/relation-over-collection technique,
 [illegal_state_catalog.md §4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)),
 never a runtime `Unschedulable`. The relation keys on an engine-**family** tag the model must carry; that tag is a
 `ModelArtifact`/manifest field owned by
-[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
+[content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
 (referenced, not restated). content_addressing owns the `ModelArtifact` side; this doctrine owns the
 engine-as-capability side — the family-availability-on-serving-substrate check — a model must match. A
 **runtime-checked** residue survives the provision-sealed check: a family-matched but substrate-specific-weight-layout model
@@ -393,12 +393,12 @@ shard count cannot exceed wholesale owner devices. That the declared footprint a
 [illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model):
 
 - **An engine named by arbitrary URL is type-foreclosed unrepresentable** — the `EngineRuntime` union is
-  closed with no arbitrary-`Url`/`Download` arm, so "name the engine by URL" has no syntax and fails Gate 1
+  closed with no arbitrary-`Url`/`Download` arm, so "name the engine by URL" has no syntax and fails dhall-typecheck
   (the Dhall typechecker) before any binary runs; the named identity is jit-resolved on first miss into the
   bounded cache. (A `ModelArtifact` with no completed `.ready` **and no provenance witness** is likewise type-foreclosed, owned with the content store in content_addressing
-  [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).)
+  [§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).)
 - **A model/job whose engine family or accelerator provision is unavailable on the selected target is checked before render.** Structural family×lane or malformed residency/policy shapes reject at their
-  Gate-2 locus. CUDA-on-CPU, too few devices, source/workload-domain mismatch after expansion, and any derived
+  gadt-decode locus. CUDA-on-CPU, too few devices, source/workload-domain mismatch after expansion, and any derived
   epoch whose co-resident per-device aggregate exceeds net allocatable memory return distinct post-bind
   `ProvisionError`s at `provision-seal`, never a runtime `Unschedulable`.
 
@@ -436,12 +436,12 @@ favorable epoch, dropping a co-resident per-device debit so overlap fits by one 
 than net allocatable VRAM is a distinct failed provision, not a runtime scheduling choice.
 
 The three-tier store, the `.ready` commit, the re-keying onto content addresses, and the Tier-3 JIT are owned
-by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss); the base image carrying the
+by [content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss); the base image carrying the
 jit-build resolver + toolchain that materializes every `EngineRuntime` arm is owned by [image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain); the lift
 of these mistakes into unrepresentable states is owned by
 [illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model). This doctrine owns only that the **engine is a capability whose provider is substrate-selected and jit-resolved** — the resolver + toolchain are baked into the
 base container, the engine *payload* is not (it is materialized on first miss into the `CacheBudget`-bounded
-content-addressed cache, [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
+content-addressed cache, [content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 
 > **Honesty.** `InferenceEngine` is Phase-N design intent — the ML-serving capability, specified before
 > implementation like the rest of this doctrine. The sibling **infernix** project is *evidence* that the
@@ -487,7 +487,7 @@ canonical provider deployed honestly at small scale, never a hand-special-cased 
 single-node `Sql` is a one-member Patroni cluster, never a bare `postgres` Pod. The dial got richer; it did
 not get bypassed.
 
-> **Honesty.** Per-cluster structural shapes are Phase 14 design intent. The sibling **prodbox** project is
+> **Honesty.** Per-cluster structural shapes are Phase 20 design intent. The sibling **prodbox** project is
 > evidence that typed records render the manifests a provider needs — its
 > `prodbox/src/Prodbox/Lib/Storage.hs` (sibling source)
 > renders `Namespace`/`PV`/`PVC`/`StorageClass` from a typed `ChartStorageSpec → ChartStorageBinding →
@@ -587,9 +587,9 @@ alternative is unrepresentable* is owned, as a typing claim, by
 it foreclosed:
 
 - **An app cannot name a product.** The app surface offers a capability union ([§2](#2-the-capability-set)) with no product arms, so
-  "deploy `minio` directly" has no syntax — it fails Gate 1 (the Dhall typechecker) before any binary runs.
+  "deploy `minio` directly" has no syntax — it fails dhall-typecheck (the Dhall typechecker) before any binary runs.
 - **A capability cannot bind to a provider with no inhabitant.** The provider union ([§3](#3-one-canonical-provider-the-type-admits-alternates)) admits only providers
-  amoebius has built; an unbuilt alternate has no arm, so a binding to it does not decode (Gate 2).
+  amoebius has built; an unbuilt alternate has no arm, so a binding to it does not decode (gadt-decode).
 - **A capability cannot be left unbound.** Every declared capability resource requires a binding; a capability
   need with no provider+shape is an undecodable record, not a runtime `Pending`.
 - **A bound capability cannot bypass resource provisioning.** The source-expanded but unprovisioned deployment
@@ -636,12 +636,12 @@ surface, never asserted here.
 
 This document is normative capability-model doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
-never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed reconciler that render and apply a chosen shape** land with platform services in **Phase 31**, and the
+never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed reconciler that render and apply a chosen shape** land with platform services in **Phase 37**, and the
 **capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster
-shapes** — was delivered by **Phase 11**. This doc states the normative shape; the plan owns the validation
+shapes** — was delivered by **Phase 17**. This doc states the normative shape; the plan owns the validation
 status and ledger.
 
-Phase 53 validates the CPU arm of the closed engine-runtime binding with a pinned executable resolver fixture:
+Phase 59 validates the CPU arm of the closed engine-runtime binding with a pinned executable resolver fixture:
 its build/download recipes converge on one content digest and version, and two real clients reuse one owner-
 managed cache entry. This is Tier-1 resolver and cache evidence, not production model inference; full llama.cpp,
 cross-substrate equality, the Tier-2 model cache, and Tier-3 CUDA kernels remain UNVERIFIED. `linux-cpu` is an
@@ -657,7 +657,7 @@ Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 - [DSL Doctrine](./dsl_doctrine.md) — the typed Dhall surface, total composability, and the typed spec gates a capability binding decodes through
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — rendering a chosen shape into typed manifests and the idempotent typed reconciler (no Helm)
 - [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, the `distribution` registry refs, the base container ([§7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) bakes the jit-build resolver + toolchain that materializes every `EngineRuntime` arm), and the Temurin JVM toolchain
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the ML-asset lifecycle ([§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) whose Tier-1 jit-resolved engine is the `InferenceEngine` provider; `ModelArtifact`/`.ready` and the JIT kernel
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the ML-asset lifecycle ([§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) whose Tier-1 jit-resolved engine is the `InferenceEngine` provider; `ModelArtifact`/`.ready` and the JIT kernel
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name, `SecretRef`, and Vault Kubernetes auth for provider credentials
 - [Substrate Doctrine](./substrate_doctrine.md) — the detected substrate catalog, substrate-indexed `EngineRuntime` offerings, and the engine/provider-derived LoadBalancer choice beneath Edge
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — best-practice-by-construction, which capability invariants are type-enforced, and the engine-fetch / unmatched-model states ([§3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model))
@@ -666,8 +666,8 @@ Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 
-> **Honesty.** The pure capability representation and binder are built and tested by Phase 11; manifest
-> generation and the typed reconciler remain Phase 31 work. The design is generalized from evidence in the
+> **Honesty.** The pure capability representation and binder are built and tested by Phase 17; manifest
+> generation and the typed reconciler remain Phase 37 work. The design is generalized from evidence in the
 > sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering, a chart-platform planner), and
 > prodbox itself names products and
 > enforces the very substrate-equivalence lint this doctrine reverses. Per

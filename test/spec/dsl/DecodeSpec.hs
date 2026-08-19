@@ -58,27 +58,27 @@ resolvedTool name = do
     _ ->
       fail
         ( name
-            <> " is unset: run dsl-spec through tools/gadt_decoder_gate2_gate.py, which resolves the "
+            <> " is unset: run dsl-spec through tools/gadt_decode_ir_gate.py, which resolves the "
             <> "toolchain from tools/toolchain_requirements.json"
         )
 
 main :: IO ()
 main = do
-  refresh <- lookupEnv "AMOEBIUS_PRINT_GATE2_ORACLE"
+  refresh <- lookupEnv "AMOEBIUS_PRINT_GADT_DECODE_ORACLE"
   case refresh of
     Just _ -> printGate2Oracle
     Nothing -> runSuite
 
 runSuite :: IO ()
 runSuite = do
-  positiveCases <- loadPositiveCases "test/oracle/gadt_decoder_gate2/positive_trees.tsv"
+  positiveCases <- loadPositiveCases "test/oracle/gadt_decode_ir/positive_trees.tsv"
   decoded <- forM positiveCases checkPositive
   checkStructuralCoverage decoded
-  negativeCases <- loadNegativeCases "test/oracle/gadt_decoder_gate2/decode_cases.tsv"
-  schemaOverride <- lookupEnv "AMOEBIUS_GATE2_SCHEMA_FIXTURE"
+  negativeCases <- loadNegativeCases "test/oracle/gadt_decode_ir/decode_cases.tsv"
+  schemaOverride <- lookupEnv "AMOEBIUS_GADT_DECODE_SCHEMA_FIXTURE"
   forM_ negativeCases (checkNegative schemaOverride)
   checkImportPolicy
-  checkCompilePairs "test/oracle/gadt_decoder_gate2/compile_pairs.tsv"
+  checkCompilePairs "test/oracle/gadt_decode_ir/compile_pairs.tsv"
   corpus <- runCorpusSpec
   checkPhase6CompileFail
   runDecisionPropSpec
@@ -99,9 +99,9 @@ runSuite = do
     )
   putStrLn
     ( "illegal-state-dsl-spec: PASS ("
-        <> show (gate1Count corpus)
+        <> show (dhallTypecheckCount corpus)
         <> " Gate-1, "
-        <> show (gate2Count corpus)
+        <> show (gadtDecodeCount corpus)
         <> " Gate-2, "
         <> show (positiveCount corpus)
         <> " positives, "
@@ -113,7 +113,7 @@ runSuite = do
 
 printGate2Oracle :: IO ()
 printGate2Oracle = do
-  rows <- loadPositiveCases "test/oracle/gadt_decoder_gate2/positive_trees.tsv"
+  rows <- loadPositiveCases "test/oracle/gadt_decode_ir/positive_trees.tsv"
   putStrLn "fixture\tsurface\tsemantic_hash\tnode_count\tstructural_fingerprint"
   forM_ rows $ \row -> do
     result <- decodeCluster (positiveFile row)
@@ -172,7 +172,7 @@ checkStructuralMutants fixture expectedFingerprint original = do
   forM_ (uniqueMutationTargets original) $ \target -> do
     let substituted =
           [ if index == target
-              then StructuralNode nodePath nodeKind (nodeValue <> "#gate2-mutant")
+              then StructuralNode nodePath nodeKind (nodeValue <> "#gadt-decode-mutant")
               else node
           | (index, node@(StructuralNode nodePath nodeKind nodeValue)) <- zip [0 :: Int ..] original
           ]
@@ -289,8 +289,8 @@ checkImportPolicy = do
   forM_
     [ "dhall/examples/illegal_import_env.dhall"
     , "dhall/examples/illegal_import_remote.dhall"
-    , "test/fixture/gadt_decoder_gate2/import/root_nested_env.dhall"
-    , "test/fixture/gadt_decoder_gate2/import/root_nested_remote.dhall"
+    , "test/fixture/gadt_decode_ir/import/root_nested_env.dhall"
+    , "test/fixture/gadt_decode_ir/import/root_nested_remote.dhall"
     ] $ \fixture -> do
     result <- decodeCluster fixture
     case result of

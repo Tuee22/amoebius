@@ -7,14 +7,14 @@
 
 Phase 1 delivers the toolchain spike; its design is owned by [conformance_harness_doctrine.md](../documents/engineering/conformance_harness_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
-Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
+Runtime, cluster, and gadt-decode semantic fidelity remain UNVERIFIED.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_44_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -26,7 +26,7 @@ Runtime, cluster, and Gate-2 semantic fidelity remain UNVERIFIED.
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
 - [Sprint 1.1: Historical shared-resolution spike ✅](#sprint-11-historical-shared-resolution-spike-)
-- [Sprint 1.2: `dhall` in-process decoder build probe (Gate-2 dependency) ✅](#sprint-12-dhall-in-process-decoder-build-probe-gate-2-dependency-)
+- [Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅](#sprint-12-dhall-in-process-decoder-build-probe-gadt-decode-dependency-)
 - [Sprint 1.3: `io-sim` + `io-classes` simulation build probe ✅](#sprint-13-io-sim--io-classes-simulation-build-probe-)
 - [Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅](#sprint-14-jit-build-resolver-deps--purescript-bridge--consolidated-probe-gate-)
 - [Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe ✅](#sprint-15-supernova-fork--proto-lens-codegen-build-probe-)
@@ -115,10 +115,10 @@ both seeded mutants, joins 29 surfaces to 48 run-time enumerated items, and leav
 unchanged. Twenty-two downstream gate scripts now consume run-local resolution.
 
 **Two corrections this closure made, both recorded rather than absorbed.** The gate's predecessor built `all`,
-which made a Phase-1 gate depend on packages phases 3–64 own — the forward dependency
+which made a Phase-1 gate depend on packages phases 9–70 own — the forward dependency
 [§E](development_plan_standards.md#e-one-canonical-phase-model) forbids. Narrowing it to the representative set
 exposed that `lib:dsl-core` does not compile, because the UI-server boundary ABI
-`src/Amoebius/Ui/Server/Main.hs` imports does not exist anywhere in the tree; that seam is Phase 26's and is
+`src/Amoebius/Ui/Server/Main.hs` imports does not exist anywhere in the tree; that seam is Phase 32's and is
 recorded in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md). Separately, the
 `source-closure` seeded negative had stopped firing because path normalization stripped the leading dot from
 its ignored root, so it proved nothing; it now seeds a non-dotted ignored root.
@@ -128,10 +128,10 @@ its ignored root, so it proved nothing; it now seeds a non-dotted ignored root.
 Done (invalidated). The consolidated clean-store gate passed on 2026-08-08 with
 `python3 tools/toolchain_spike_gate.py`, emitting ledger
 `dynamically-resolved`. This is a tested buildability result,
-not a runtime or Gate-2-semantics result. This phase opened after the Phase 0 documentation lint passed and ran on **no substrate**
+not a runtime or gadt-decode-semantics result. This phase opened after the Phase 0 documentation lint passed and ran on **no substrate**
 (`none`): it stands up no host and no cluster, resolving and building only Hackage packages on the developer
-toolchain. It is a de-risking pre-flight for the whole pre-cluster band after this phase (Phases 3–19), whose
-in-process integrity checks all rest on the dependencies probed here.
+toolchain. It is a de-risking pre-flight for the pre-cluster in-process band (Phases 9–25), whose
+integrity checks all rest on the dependencies probed here.
 
 ## Phase Summary
 
@@ -164,7 +164,7 @@ and `protoc`. The authored Dhall positive/negative pair, independent simulation 
 dependency-resolution mutant, and protocol round-trip fixture remain the oracle side.
 
 The gate builds that set and nothing later: the `probe` executables plus the Pulsar `proto` package, which
-between them link every member. It does not build the packages phases 3–64 own. A Phase-1 gate that built the
+between them link every member. It does not build the packages phases 9–70 own. A Phase-1 gate that built the
 whole tree would consume what a later phase delivers — the forward dependency
 [§E](development_plan_standards.md#e-one-canonical-phase-model) forbids — and would report a toolchain failure
 whenever a later phase's source stopped compiling, which is exactly what it did on 2026-08-12
@@ -199,19 +199,19 @@ flowchart LR
   Register-1 check ([register definitions](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)),
   building and running in-process with no cluster, no credentials, and no broker.
 - [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note), read
-  with [§5's Gate 2](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
-  the in-process `dhall` decoder — the Gate-2 structural leg of the later
+  with [§5's gadt-decode](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
+  the in-process `dhall` decoder — the gadt-decode structural leg of the later
   `decode → bind/expand → plan/resolve infrastructure → provision → ProvisionedSpec → renderAll` contract — needs `allow-newer` against the
   pinned GHC; this phase is where that exact set is proven or the blocker recorded, before any later phase
-  promises an executable Gate 2.
+  promises an executable gadt-decode.
 - [`gateway_migration_model_doctrine.md §4 — Simulate and prove`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
   amoebius's **one** formal obligation drives the gateway-migration `Model` (both `Planned` and `Failover`
   branches) against `io-classes`/`IOSimPOR`'s deterministic scheduler; this phase de-risks that build
   dependency, while the version-stable JVM TLC half stays unaffected by the GHC pin.
 - [`formal_model_doctrine.md §7 — Prototype validation`](../documents/engineering/formal_model_doctrine.md#7-prototype-validation):
   the reifiable-`Model` mechanism — one value rendering both `interpret` (runtime) and `emitTLA` (a generated,
-  never-committed `.tla`) — was prototyped in a throwaway spike; that is **sibling evidence, not an amoebius result**, and its Haskell side must build on the pin before Phase 3 authors it.
-- [`content_addressing_doctrine.md §4.5 — the ML-asset lifecycle`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
+  never-committed `.tla`) — was prototyped in a throwaway spike; that is **sibling evidence, not an amoebius result**, and its Haskell side must build on the pin before Phase 9 authors it.
+- [`content_addressing_determinism.md §4.5 — the ML-asset lifecycle`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
   ML engines/models/kernels are never baked or URL-fetched — the shared `jit-build` resolver materializes each
   **named catalog identity** on first miss into a `CacheBudget`-bounded content-addressed cache; the resolver's
   own Haskell dependencies are folded into this probe.
@@ -231,8 +231,8 @@ flowchart LR
 **Status**: Done — the capability this sprint recorded is re-established by the redesigned 2026-08-12 gate; its pin, freeze, and repository-resident evidence mechanics are superseded
 **Implementation**: `cabal.project`, `cabal.project.freeze`, and `toolchain/pins.json` — the **pin
 manifest**: the resolved absolute paths of `ghc`/`cabal`/`dhall` (invoked by absolute path from
-[Phase 6](phase_06_gadt_decoder_gate2.md) on) and of `spago`/`purs` + Chromium (the browser toolchain the UI
-phases from [Phase 25](phase_25_ui_browser_interpreter.md) on drive) — implemented and version-checked by the gate.
+[Phase 12](phase_12_gadt_decode_ir.md) on) and of `spago`/`purs` + Chromium (the browser toolchain the UI
+phases from [Phase 31](phase_31_ui_browser_interpreter.md) on drive) — implemented and version-checked by the gate.
 **Blocked by**: reopened numeric predecessor gates.
 **Requires**: `host-floor` — the package-manager root and the substrate's own build prerequisites. Every
 tool this sprint names is acquired rather than assumed.
@@ -260,7 +260,7 @@ this phase resolves against one dependency universe rather than a drifting one.
 ### Remaining Work
 None. Validated by the consolidated Phase-1 gate on 2026-08-08.
 
-## Sprint 1.2: `dhall` in-process decoder build probe (Gate-2 dependency) ✅
+## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅
 
 **Status**: Done — the capability this sprint recorded is re-established by the redesigned 2026-08-12 gate; its pin, freeze, and repository-resident evidence mechanics are superseded
 **Implementation**: `probe/probe.cabal` (a `dhall` build-depends), `probe/app/Decode.hs`
@@ -275,9 +275,9 @@ evidentiary branch rule.
 
 ### Objective
 Adopt [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note) with
-its [§5 Gate 2](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract): prove
-the in-process `dhall` decoder — the structural Gate-2 leg that must precede Phase-11/12 bind/provision — is
-buildable on the pin before Phase 6 promises an executable decoder. `dhall` historically lags new GHC releases, so
+its [§5 gadt-decode](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract): prove
+the in-process `dhall` decoder — the structural gadt-decode leg that must precede Phase-17/18 bind/provision — is
+buildable on the pin before Phase 12 promises an executable decoder. `dhall` historically lags new GHC releases, so
 `allow-newer` alone may be insufficient and a source patch or fork may be required.
 
 ### Deliverables
@@ -324,8 +324,8 @@ backlink), `DEVELOPMENT_PLAN/system_components.md`.
 ### Objective
 Adopt [`gateway_migration_model_doctrine.md §4 — Simulate and prove`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
 amoebius's one formal obligation drives the gateway-migration `Model` against `io-classes`/`IOSimPOR`'s
-deterministic, partial-order-reduced scheduler. Prove that toolchain builds on the pin before Phase 4 authors
-the simulation. TLC (`tla2tools.jar`) is pure JVM and version-stable, so the Phase-3/4 TLC path is **not** gated
+deterministic, partial-order-reduced scheduler. Prove that toolchain builds on the pin before Phase 10 authors
+the simulation. TLC (`tla2tools.jar`) is pure JVM and version-stable, so the Phase-9/10 TLC path is **not** gated
 by this probe.
 
 ### Deliverables
@@ -368,7 +368,7 @@ evidentiary-branch obligations.
 `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt [`content_addressing_doctrine.md §4.5 — the ML-asset lifecycle`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
+Adopt [`content_addressing_determinism.md §4.5 — the ML-asset lifecycle`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
 the shared `jit-build` resolver that materializes named catalog identities into the `CacheBudget`-bounded
 content-addressed cache carries its own Haskell dependencies. Fold them into one probe that also links `dhall`
 + `io-sim` + `io-classes`, so the whole pre-cluster in-process surface is proven buildable as **one**
@@ -386,9 +386,9 @@ dependency universe — the phase gate.
 - The retained `cabal.project` + freeze file, all `cabal build`/`cabal run` transcripts, the external
   `probe/oracle/check-sim-terminal` harness with its `probe/fixtures/sim-terminal.expected` oracle, and **both**
   seeded mutants `probe/mutants/drop-allow-newer` and `probe/mutants/perturb-sim-schedule`, under
-  `DEVELOPMENT_PLAN/evidence/phase_01/` (or CI-archived and linked), kept until Phase 6 supersedes them.
+  `DEVELOPMENT_PLAN/evidence/phase_01/` (or CI-archived and linked), kept until Phase 12 supersedes them.
 - A first-class proven/tested/assumed ledger artifact ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) — naming **Register 1**, recording the green build +
-  executed-fixture results as *tested*, and marking every runtime, cluster, and Gate-2-semantics layer
+  executed-fixture results as *tested*, and marking every runtime, cluster, and gadt-decode-semantics layer
   **UNVERIFIED** — retained even though the probe package itself is deleted after resolution.
 
 ### Validation
@@ -608,7 +608,7 @@ throws away `bin/` for one that does not.
 - [overview.md](overview.md) — target architecture and the dynamically resolved toolchain policy.
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — the Register-1
   pre-cluster spine and the rendering-never-touches-live-infrastructure invariant.
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the in-process `dhall` decoder (Gate 2) and the
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the in-process `dhall` decoder (gadt-decode) and the
   Toolchain note this probe de-risks.
 - [Gateway Migration Model Doctrine](../documents/engineering/gateway_migration_model_doctrine.md) — the one
   formal obligation whose io-sim simulation depends on this build.

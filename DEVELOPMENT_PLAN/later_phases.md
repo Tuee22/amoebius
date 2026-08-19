@@ -14,7 +14,7 @@ promoted into [README.md](README.md), which remains the sole tracker.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/dsl_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/dsl_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -35,8 +35,8 @@ promoted into [README.md](README.md), which remains the sole tracker.
 
 ---
 
-Phases 0–64 each own a dedicated `phase_NN_<slug>.md`. Everything past Phase 64 is *in scope* but not yet
-detailed: the README phase index lists it as the single row **`69+ — Later phases`**. This document is that
+Phases 0–74 each own a dedicated `phase_NN_<slug>.md`. Everything past Phase 74 is *in scope* but not yet
+detailed: the README phase index lists it as the single row **`75+ — Later phases`**. This document is that
 row, expanded into a candidate pool.
 
 Read it as a **backlog of confirmed-but-unscheduled work**, governed by the same disciplines as the rest of
@@ -48,12 +48,12 @@ the suite:
   prodbox or hostbootstrap projects, that is *sibling evidence*, not amoebius proof.
 - **Promotion means a contiguous number.** When a candidate is picked up, it is appended as the next
   `phase_NN_<slug>.md` with a full skeleton ([development_plan_standards.md §D](development_plan_standards.md#d-the-per-phase-document-skeleton)),
-  a concrete single-substrate gate ([§L](development_plan_standards.md#l-one-substrate-discipline)), and a contiguous id — Phase 66, 67,
+  a concrete single-substrate gate ([§L](development_plan_standards.md#l-one-substrate-discipline)), and a contiguous id — Phase 72, 73,
   … with no gaps or fractional ids ([§E](development_plan_standards.md#e-one-canonical-phase-model)). The provisional numbers below are
   *ordering hints only*; the real id is assigned at promotion.
-- **No forward dependencies.** A later phase consumes earlier phases; nothing in Phases 0–64 is allowed to
+- **No forward dependencies.** A later phase consumes earlier phases; nothing in Phases 0–74 is allowed to
   declare a `Blocked by` that points here ([§E](development_plan_standards.md#e-one-canonical-phase-model)). These candidates sit strictly
-  *after* the offline multi-zone continuity gate of Phase 63.
+  *after* the offline multi-zone continuity gate of Phase 69.
 - **One substrate per gate.** Each candidate names at most one provisional acceptance substrate; a candidate
   that would need more than one is split before promotion ([§L](development_plan_standards.md#l-one-substrate-discipline)).
 
@@ -62,7 +62,7 @@ provisional ids reflect a *likely* sequencing, not a dependency chain.
 
 ## Candidate phase: DB schema-migration automation + manifest-change correctness semantics
 
-**Status**: 📋 Planned (provisional Phase 69) **Provisional substrate**: linux-cpu **Scope** (one line): a
+**Status**: 📋 Planned (provisional Phase 75) **Provisional substrate**: linux-cpu **Scope** (one line): a
 typed, ordered, idempotent schema-migration engine for the Patroni-via-Percona Postgres clusters, unified
 with a precise account of what a *manifest change* means when the desired object already exists in etcd
 (patch vs. immutable-field recreate vs. forbidden destructive change). **Provisional gate**: an
@@ -75,8 +75,8 @@ The reconcile half of this is a hardening of the typed reconciler's state model:
 already frames the diff as a *typed* value; this candidate extends that diff to classify schema-affecting and
 immutable-field changes so a change that would otherwise drop rows cannot be applied as a silent replace. The
 database half adds the migration ordering and idempotence on top of the per-consumer Postgres model. It is a
-later phase because it presupposes a working app-with-Postgres deployment from Phase 39 and the storage-safety
-guarantees from Phase 51 (durable bytes are not destroyed under normal credentials) — a schema migration must
+later phase because it presupposes a working app-with-Postgres deployment from Phase 45 and the storage-safety
+guarantees from Phase 57 (durable bytes are not destroyed under normal credentials) — a schema migration must
 move data *without* representing destruction.
 
 **Folded into the release lifecycle (forward pointer).** The migration half of this candidate is now positioned
@@ -95,7 +95,7 @@ runs in a sibling, not an amoebius result.
 ```mermaid
 flowchart LR
   %% register: orientation
-  n["the numbered plan, phases 0 to 65"]
+  n["the numbered plan, phases 0 to 74"]
   cap["capability the numbered plan does not reach"]
   cand["a candidate phase recorded here"]
   num["a numbered phase, with a gate, a register, and a substrate"]
@@ -107,20 +107,20 @@ flowchart LR
 
 ## Candidate phase: The amoebius-native JIT (jitML absorbed)
 
-**Status**: 📋 Planned (provisional Phase 70) **Provisional substrate**: linux-cuda (the JIT path exercises
+**Status**: 📋 Planned (provisional Phase 76) **Provisional substrate**: linux-cuda (the JIT path exercises
 the GPU compute substrate) **Scope** (one line): the *native JIT* half of the vision's second language — an
 amoebius-owned JIT into which jitML is absorbed, consumed through the constrained extension surface that
-Gate 3 already admits. **Provisional gate**: a representative ML extension runs through the amoebius-native
+extension-astcheck already admits. **Provisional gate**: a representative ML extension runs through the amoebius-native
 JIT (replacing jitML) producing the bit-deterministic result its determinism contract requires.
 
 **This candidate was split; its trusted-adapter checker half is now v1.** It formerly read "Haskell extension
 DSL + custom AST checker + native JIT." A low-code app now needs neither an arbitrary container nor linked app
-code: it is checked `UiSource` interpreted by the generic runtime. Gate 3 remains necessary only for a reviewed
+code: it is checked `UiSource` interpreted by the generic runtime. extension-astcheck remains necessary only for a reviewed
 trusted Haskell adapter that the closed handler catalog cannot supply. The **constrained adapter surface and its custom AST checker** are specified in
 [`dsl_doctrine.md` §5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
-and [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits),
-and delivered by [Phase 15](phase_15_chain_kernel_boundary.md); the bounded UI schema and port binder in
-[Phase 19](phase_19_ui_program_schema.md) and [Phase 22](phase_22_ui_effect_binding.md) consume only admitted
+and [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits),
+and delivered by [Phase 21](phase_21_chain_kernel_boundary.md); the bounded UI schema and port binder in
+[Phase 25](phase_25_ui_program_schema.md) and [Phase 28](phase_28_ui_effect_binding.md) consume only admitted
 handler catalogs. These are separate from the native-JIT work remaining here.
 
 What remains here is the **JIT** — a new capability rather than a discipline, and still correctly a later
@@ -129,7 +129,7 @@ extension.
 
 ## Candidate phase: Native desktop + mobile application surfaces
 
-**Status**: 📋 Planned (provisional Phase 71) **Provisional substrate**: one client platform per eventual
+**Status**: 📋 Planned (provisional Phase 77) **Provisional substrate**: one client platform per eventual
 acceptance gate **Scope** (one line): extend the typed application-composition and generated-contract model
 beyond browser SPAs to native desktop applications on macOS, Windows, and Linux and native mobile
 applications on Apple and Android phones and tablets (iPhone/iPad and Android phone/tablet), using the
@@ -162,7 +162,7 @@ client invents a separate wire schema or silently substitutes an incompatible co
 
 ## Candidate phase: Additional cloud providers
 
-**Status**: 📋 Planned (provisional Phase 72) **Provisional substrate**: provider (one provider per eventual
+**Status**: 📋 Planned (provisional Phase 78) **Provisional substrate**: provider (one provider per eventual
 acceptance gate) **Scope** (one line): extend the provider-native provisioning, observation, quota,
 credential, managed-cluster, node-supply, storage, networking, and teardown surfaces beyond AWS to GCP,
 Azure, and subsequently admitted cloud providers without weakening the typed plan/validate/enact boundary.
@@ -183,7 +183,7 @@ remain provider-indexed and single-use.
 
 ## Candidate phase: Additional GPU families + vendor-neutral compute protocols
 
-**Status**: 📋 Planned (provisional Phase 73) **Provisional substrate**: varies by GPU family (one family and
+**Status**: 📋 Planned (provisional Phase 79) **Provisional substrate**: varies by GPU family (one family and
 one substrate per eventual acceptance gate) **Scope** (one line): extend the shared infernix/jitML engine
 and accelerator-owner model beyond NVIDIA CUDA to AMD and Intel GPUs and explicitly admitted
 open/vendor-neutral compute protocols, with observed family/profile/device/memory/runtime compatibility
@@ -207,7 +207,7 @@ neither library may silently fall back to another engine.
 
 ## Candidate phase: Neural processing units / neural engines
 
-**Status**: 📋 Planned (provisional Phase 74) **Provisional substrate**: varies by NPU/SoC family (one family
+**Status**: 📋 Planned (provisional Phase 80) **Provisional substrate**: varies by NPU/SoC family (one family
 and one substrate per eventual acceptance gate) **Scope** (one line): add neural-engine execution for
 infernix and jitML across explicitly supported Apple Silicon, Qualcomm Snapdragon, Google Tensor, MediaTek,
 Intel Core Ultra, AMD Ryzen AI, and NVIDIA SoC families, with family-specific runtime, operator, memory,
@@ -230,7 +230,7 @@ their engine catalog and the no-silent-fallback rule.
 
 ## Candidate phase: MoE teacher → student model-distillation framework
 
-**Status**: 📋 Planned (provisional Phase 75) **Provisional substrate**: one accelerator/engine family per
+**Status**: 📋 Planned (provisional Phase 81) **Provisional substrate**: one accelerator/engine family per
 eventual acceptance gate **Scope** (one line): use a large mixture-of-experts teacher model (for example, a
 DeepSeek-V3-class model) to generate a provenance-complete training corpus for fine-tuning a smaller student
 model, optimizing the offline generation run for aggregate token throughput rather than interactive
@@ -274,7 +274,7 @@ close over its examples cannot produce the opaque publishable dataset or fine-tu
 
 ## Candidate phase: Niche substrate — dual-boot same-cluster
 
-**Status**: 📋 Planned (provisional Phase 76) **Provisional substrate**: windows. **Scope** (one line): admit
+**Status**: 📋 Planned (provisional Phase 82) **Provisional substrate**: windows. **Scope** (one line): admit
 a *dual-boot, same-cluster* host into the substrate model. **Provisional gate**: a dual-boot host joins and
 rejoins the same cluster across an OS switch without violating the retained-PV rebind guarantees.
 
@@ -282,12 +282,12 @@ This is deferred because it probes the edge of one locked invariant. The substra
 model treats the substrate as a *fact about the host, not a knob*
 ([`substrate_doctrine.md` §1 — the substrate is a fact about the host, not a knob](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob));
 a dual-boot host is a host whose *fact* changes under it, which is exactly the case the detection model does
-not yet cover. WireGuard is already adopted in Phase 46 and the no-Linkerd service-mesh verdict is normative;
+not yet cover. WireGuard is already adopted in Phase 52 and the no-Linkerd service-mesh verdict is normative;
 neither belongs in this candidate's gate.
 
 ## Candidate phase: Surgical proof-assistant track (`emitTLA` faithfulness + fold-closure)
 
-**Status**: 📋 Planned (provisional Phase 77) **Provisional substrate**: none (a pure-proof track, validated
+**Status**: 📋 Planned (provisional Phase 83) **Provisional substrate**: none (a pure-proof track, validated
 by the proof checker + the existing suite) **Scope** (one line): discharge — machine-checked — the **two**
 load-bearing meta-properties the rest of the suite currently only *tests*: (a) the `emitTLA`/`interpret`
 **faithfulness meta-theorem** (each `Expr`/`Temporal` constructor's `interpret`-denotation equals the TLA+
@@ -303,7 +303,7 @@ faithfulness claim may move from **tested** to **proven**.
 
 This is a **surgical** track, not a broad proof-assistant layer — those two properties are the only places a
 proof assistant earns its keep, precisely because they are small, closed, and load-bearing, and are today only
-property-tested ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence); the confluence ledger's own rule that a closure claim "is proof only when its closure argument is shown"). It is explicitly deferred because it *hardens* claims the Phase-3/4/8
+property-tested ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence); the confluence ledger's own rule that a closure claim "is proof only when its closure argument is shown"). It is explicitly deferred because it *hardens* claims the Phase-9/10/14
 differential and closure property-tests already exercise; the property tests are the affordable first line, and
 this candidate upgrades them to proof only where the payoff is a genuine ledger promotion. A first sprint is an
 **evaluation**: **Liquid Haskell vs Lean** — Liquid Haskell checks refinement types on the *actual* Haskell and
@@ -312,13 +312,13 @@ while Lean/Agda offers a fuller metatheory; the verdict picks the tool the two p
 adoption is out of scope by design.
 
 The "one base container with everything" packaging question is sometimes mistaken for deferred work. It is
-**not**. It is **resolved and adopted in Phase 30**: every third-party service binary (the registry, MinIO,
+**not**. It is **resolved and adopted in Phase 36**: every third-party service binary (the registry, MinIO,
 Vault, Pulsar, Redis (`redis-server` and `redis-cli`), Postgres tooling, a Temurin JRE for the JVM services, …)
-is baked into the multi-architecture base
+is baked into the base
 container, and clusters pull images only from the in-cluster `distribution` registry — never from a public
 registry. That is the standing doctrine,
 [`image_build_doctrine.md` §2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster) — the single distribution rule (bake the binaries, build the amoebius image, pull only in-cluster),
-delivered by [phase_30_base_image_registry.md](phase_30_base_image_registry.md) and
+delivered by [phase_36_base_image_registry.md](phase_36_base_image_registry.md) and
 recorded as resolved in the README "Later phases" note. It is named here only to close the question: do not
 re-open it as a candidate phase.
 
@@ -326,7 +326,7 @@ re-open it as a candidate phase.
 
 ## Candidate phase: Live backup / restore / cold-DR seed
 
-**Status**: 📋 Planned (provisional Phase 78) **Provisional substrate**: linux-cpu → provider (the
+**Status**: 📋 Planned (provisional Phase 84) **Provisional substrate**: linux-cpu → provider (the
 write-but-never-delete cloud credential is enacted on the provider substrate, as with the durable-EBS
 create-vs-delete model) **Scope** (one line): the live enactment of the backup surface — the put-only backup
 credential, the copy/verify `Job` that emits a verified `BackupArtifact` to a remote / append-only-WORM /
@@ -339,14 +339,14 @@ from a `Manual` air-gap medium, and a delete-a-backup attempt each perform zero 
 
 The **representation** half of backup is **not** a later phase — like the capacity / bounded-storage discipline
 below, it is folded into the pure band: the closed `BackupPolicy` / `BackupMedium` / `WriteRegime` /
-`BackupRetention` shapes and the `freshnessBound ≥ cadence` fold land in **Phase 5/6**, the no-overcommit sizing
-fold in **Phase 8/11**, the illegal-state corpus (`illegal_state_storage.md` [§3.53](../documents/illegal_state/illegal_state_storage.md#353-a-backup-larger-than-its-bounded-medium)–[§3.68](../documents/illegal_state/illegal_state_storage.md#368-two-conflicting-backup-policies-on-one-coordinate) / `illegal_state_multicluster.md` [§3.69](../documents/illegal_state/illegal_state_multicluster.md#369-a-cold-seeded-secondary-taking-the-gateway-without-proven-freshness)–[§3.71](../documents/illegal_state/illegal_state_multicluster.md#371-a-freshness-watermark-asserted-rather-than-derived-from-captured-content)) in **Phase 7**, and the `FreshnessWitness` /
-`NoTakeWithoutProvenFreshness` guard extending the one formal obligation in **Phase 4**
+`BackupRetention` shapes and the `freshnessBound ≥ cadence` fold land in **Phase 11/12**, the no-overcommit sizing
+fold in **Phase 14/17**, the illegal-state corpus (`illegal_state_storage.md` [§3.53](../documents/illegal_state/illegal_state_storage.md#353-a-backup-larger-than-its-bounded-medium)–[§3.68](../documents/illegal_state/illegal_state_storage.md#368-two-conflicting-backup-policies-on-one-coordinate) / `illegal_state_multicluster.md` [§3.69](../documents/illegal_state/illegal_state_multicluster.md#369-a-cold-seeded-secondary-taking-the-gateway-without-proven-freshness)–[§3.71](../documents/illegal_state/illegal_state_multicluster.md#371-a-freshness-watermark-asserted-rather-than-derived-from-captured-content)) in **Phase 13**, and the `FreshnessWitness` /
+`NoTakeWithoutProvenFreshness` guard extending the one formal obligation in **Phase 10**
 ([`gateway_migration_model_doctrine.md`](../documents/engineering/gateway_migration_model_doctrine.md)). Only
 the **live** enactment is this candidate, and its runtime residues distribute to the phases that already own
-each substrate: the Vault-Transit envelope to Phase 34, the MinIO remote target to Phase 35, the cross-cluster
-cold-seed drill to Phases 47/48, the write-but-never-delete cloud credential to Phase 51, and the air-gap
-manual/automatic handling drill to the test-topology harness of Phase 68. The standing doctrine is
+each substrate: the Vault-Transit envelope to Phase 40, the MinIO remote target to Phase 41, the cross-cluster
+cold-seed drill to Phases 53/54, the write-but-never-delete cloud credential to Phase 57, and the air-gap
+manual/automatic handling drill to the test-topology harness of Phase 74. The standing doctrine is
 [`backup_recovery_doctrine.md`](../documents/engineering/backup_recovery_doctrine.md); the deletion of any
 backup remains out of band and outside amoebius automation, exactly as durable-backing reclaim is.
 
@@ -361,20 +361,20 @@ capacity growth — is **not** a new phase. Two honesty layers apply. Closed uni
 illegal constructor are type-foreclosed; quantitative capacity sums, placements, and inventory-dependent
 compatibility are total decode/provision checks, never dependent-type proofs. Raw incompatible values may
 exist, but `provision` returns `Left` and therefore cannot construct the opaque `ProvisionedSpec`, the sole
-deployable representation. The discipline is **folded into Phase 5** for source/schema shapes, **Phase 8** for
-the pure fold implementation and generated properties, **Phase 11** for full bind/expansion plus the opaque
-provision seal, and **Phase 14** for the closed `renderAll` consumer. None requires an external effect or a
+deployable representation. The discipline is **folded into Phase 11** for source/schema shapes, **Phase 14** for
+the pure fold implementation and generated properties, **Phase 17** for full bind/expansion plus the opaque
+provision seal, and **Phase 20** for the closed `renderAll` consumer. None requires an external effect or a
 forward live-phase dependency ([development_plan_standards.md §E](development_plan_standards.md#e-one-canonical-phase-model) one-canonical-phase). Its **runtime**
 residues distribute to the phases that already own each substrate: the Pulsar two-ceiling offload to Phase
-23, the Lima `LinuxHost` witness + host/VM capacity cross-check to Phase 68, live kind topology to Phases
-17/33, and the `Managed EKS` arm + `ScalingPolicy` enaction + cloud quota to Phases 49/51. So there is **zero phase renumber**:
+23, the Lima `LinuxHost` witness + host/VM capacity cross-check to Phase 74, live kind topology to Phases
+17/33, and the `Managed EKS` arm + `ScalingPolicy` enaction + cloud quota to Phases 55/57. So there is **zero phase renumber**:
 the discipline is owned by two new doctrines
 ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md), [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md)) and catalogued in
 [`illegal_state_catalog.md`](../documents/illegal_state/illegal_state_catalog.md) [§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](../documents/illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration) / [§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) / [§4.7](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection),
 delivered without inserting a phase. Named here only to close the question: do not re-open it as a candidate
 phase.
 
-Live multi-node rke2 remains **unassigned Phase-N work**: Phases 5–10 define/prove its server/agent topology,
+Live multi-node rke2 remains **unassigned Phase-N work**: Phases 11–16 define/prove its server/agent topology,
 role reserves, and elastic templates, but no current Register-3 gate may claim host admission, join, or
 enforcement. Promoting that gate is required before an rke2 mutation continuation exists.
 
@@ -388,9 +388,9 @@ enforcement. Promoting that gate is required before an rke2 mutation continuatio
 - [system_components.md](system_components.md) — target component inventory a promoted candidate adds to
 - [substrates.md](substrates.md) — substrate registry; each candidate's provisional substrate is recorded here
   at promotion
-- [phase_30_base_image_registry.md](phase_30_base_image_registry.md) — where the "one
+- [phase_36_base_image_registry.md](phase_36_base_image_registry.md) — where the "one
   base container with everything" question is resolved (not deferred)
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits) the extension-DSL forward pointer
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits) the extension-DSL forward pointer
 - [App vs Deployment Doctrine](../documents/engineering/app_vs_deployment_doctrine.md) — the application logic
   and deployment-rule split the native-client candidate preserves
 - [Lift and Compose Doctrine](../documents/engineering/lift_and_compose_doctrine.md) — the existing
@@ -400,11 +400,11 @@ enforcement. Promoting that gate is required before an rke2 mutation continuatio
 - [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§6](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) the typed
   reconcile state model the manifest-change correctness candidate extends
 - [Image Build Doctrine](../documents/engineering/image_build_doctrine.md) — [§2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster) the baked-binary base
-  container (Phase 30, resolved)
+  container (Phase 36, resolved)
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — [§1](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob) the substrate-is-a-fact model the
   niche-substrate candidate probes
 - [Release Lifecycle Doctrine](../documents/engineering/release_lifecycle_doctrine.md) — [§5](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply) `RolloutPlan` /
-  `RolloutPhase`, where this backlog candidate's DB schema-migration half is folded into Phase 44 as a
+  `RolloutPhase`, where this backlog candidate's DB schema-migration half is folded into Phase 50 as a
   readiness-gated phase (create-new→verified-migrate→retire-old)
-- [Network Fabric Doctrine](../documents/engineering/network_fabric_doctrine.md) — Phase 46 WireGuard and the
-  no-Linkerd verdict are resolved inputs, not Phase-68 work
+- [Network Fabric Doctrine](../documents/engineering/network_fabric_doctrine.md) — Phase 52 WireGuard and the
+  no-Linkerd verdict are resolved inputs, not Phase-74 work

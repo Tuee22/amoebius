@@ -14,7 +14,7 @@ model-as-data machinery it is expressed in, owned by
 
 **Status**: Authoritative source
 **Supersedes**: documents/engineering/tla_modelling_assumptions.md
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_04_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_17_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_48_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_09_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_10_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_23_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_54_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -149,7 +149,7 @@ Both instruments read the **same** `Model`:
 
 - **Simulate (io-sim).** The lifted pure decision core is driven by `io-classes`/`IOSimPOR`'s deterministic,
   partial-order-reduced scheduler against adversarial interleavings, asserting the same safety predicates the
-  invariants name. This is the design-schedule check for both branches. The Phase-4 gate exercised 13
+  invariants name. This is the design-schedule check for both branches. The Phase-10 gate exercised 13
   partial-order-reduced schedules within the committed schedule bound of 20 and caught every seeded safety
   mutant; this is tested-for-design, not the later Register-2.5 daemon simulation.
 - **Prove (TLC).** `emitTLA` renders the `Model` to a spec TLC model-checks exhaustively at a bounded scope,
@@ -162,7 +162,7 @@ Both are Register-1, in-process, needing no cluster ([conformance_harness_doctri
 A validated model is green in both, and both go red under a seeded mutation (a transition that drops the fence,
 or decommissions before drain-complete).
 
-**Validated instance.** The [Phase-4 gate](../../DEVELOPMENT_PLAN/phase_04_gateway_migration_model.md) passed
+**Validated instance.** The [Phase-10 gate](../../DEVELOPMENT_PLAN/phase_10_gateway_migration_model.md) passed
 on 2026-08-09: explorer and TLC agree on the exact 53-state set, the five safety invariants and three liveness
 properties are green, every fairness removal is red, and each named safety mutant violates exactly its expected
 invariant. Ledger: `external-run-reference`.
@@ -254,7 +254,7 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
 - **Single-source correspondence narrows drift; runtime fidelity is bridged, not only sampled.** Because
   `interpret` and `emitTLA` consume one `Model`, there is no separate variable→module correspondence table to
   complete later, but renderer faithfulness remains a differential-test obligation —
-  the inversion the superseded doc left "empty and UNVERIFIED until Phase 47" is dissolved. The residual
+  the inversion the superseded doc left "empty and UNVERIFIED until Phase 53" is dissolved. The residual
   **runtime-fidelity** obligation (that the effectful daemon only takes transitions the `Model` sanctions) is
   discharged in two stages, not one: **trace validation**
   ([formal_model_doctrine.md §8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge)) —
@@ -270,7 +270,7 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
 ## 7. Planning ownership
 
 This document is normative model doctrine only. The `Model`, io-sim harness, and `emitTLA` model-check were
-validated by Phase 4. Phase 48 adds the trace validator, full modeled-action coverage, and live Planned/Failover
+validated by Phase 10. Phase 54 adds the trace validator, full modeled-action coverage, and live Planned/Failover
 drills. Its external journal showed zero Planned loss under positive lag and a fenced Failover inside the
 declared RTO. The data-loss bound remains assumed-and-monitored; Route53, real WAN, and physically independent
 child brokers remain UNVERIFIED. Phase order, status, and gates live only in

@@ -150,7 +150,7 @@ MUTATIONS = [
     # -- (g) catalog integrity, one negative per sub-check -------------------
     ("g1_entry_without_locus", "g1", set(), [
         ("documents/illegal_state/illegal_state_storage.md",
-         "**Validation-locus:** `Gate-2-decoder`\n", "")]),
+         "**Validation-locus:** `gadt-decode`\n", "")]),
     # renumbering 3.2 to 3.4 moves its index bullet and matrix row with it, so the
     # only surviving defect is the gap in the sequence
     ("g2_numbering_gap", "g2", set(), [

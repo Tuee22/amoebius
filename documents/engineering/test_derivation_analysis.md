@@ -199,7 +199,7 @@ exists to forbid. The join has neither a populated right-hand side nor a key:
 The recommendation therefore splits. The **catalog-side integrity** half — every entry carries a locus,
 entry numbering is contiguous, index anchors resolve, every entry has a coverage-matrix row — is buildable
 now over Markdown alone and lands in Phase 0. The **fixture-coverage join** is the consumer side of the
-`locus_registry.tsv` that `phase_07_illegal_state_corpus.md` Sprint 7.1 already schedules, and lands there.
+`locus_registry.tsv` that `phase_13_illegal_state_corpus.md` Sprint 13.1 already schedules, and lands there.
 Building the consumer first would hardcode the ownership rules the registry is meant to own, which that
 phase explicitly warns against.
 
@@ -321,9 +321,9 @@ strength no applicable move can emit, so no `Release` could ever advance to `Pro
 **Resolved:** the testing doctrine is authoritative.
 [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable)
 now requires *tested* and states why that is the layer's highest achievable strength rather than a concession, so the
-wording cannot drift back. `DEVELOPMENT_PLAN/phase_44_release_lifecycle.md` propagated the same claim in
+wording cannot drift back. `DEVELOPMENT_PLAN/phase_50_release_lifecycle.md` propagated the same claim in
 four places; a first pass corrected only one (`:194`), and an audit found the other three surviving in the
-Sprint 44.3 validation, deliverable, and the committed `evidence_strength.txt` oracle it produces. All four
+Sprint 50.3 validation, deliverable, and the committed `evidence_strength.txt` oracle it produces. All four
 now read *tested*. The lesson is recorded in the verification discipline: an absence-check whose pattern
 could not span a newline reported the defect closed when three instances remained.
 
@@ -332,9 +332,9 @@ could not span a newline reported the defect closed when three instances remaine
 [gateway_migration_model_doctrine.md §5](./gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)
 defined independence on the label projection and **not** on the vertices, admitting a single survivor
 cluster as the standby of two edges and naming that the shared-survivor stress case.
-`DEVELOPMENT_PLAN/phase_04_gateway_migration_model.md` defined `independent` as graph-independence **and**
+`DEVELOPMENT_PLAN/phase_10_gateway_migration_model.md` defined `independent` as graph-independence **and**
 resource-independence, had the fold reject cluster-reuse across records, and claimed the two readings were
-thereby reconciled. They were not: the phase-4 fold would reject the doctrine's own stress case.
+thereby reconciled. They were not: the phase-10 fold would reject the doctrine's own stress case.
 
 **Resolved: the strict reading holds.** The fold rejects cluster-reuse-across-records. The rationale is that
 admitting a shared survivor would let the decoder accept specs the scope-2 proof does not cover on the
@@ -412,7 +412,7 @@ at this document can find the owner rather than treat it as a live proposal.
 | [§4.5](#45-application-authored-expectations-without-deployment-control) application-authored expectations without deployment control | [app_vs_deployment_doctrine.md §10](./app_vs_deployment_doctrine.md#10-application-authored-expectations-are-application-logic) |
 | [§4.3](#43-browser-testing-enumerate-the-surface-author-the-interaction) browser-surface enumeration with authored interactions | [testing_doctrine.md §9](./testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) and [low_code_ui_runtime_doctrine.md §17](./low_code_ui_runtime_doctrine.md#17-verification-obligations) |
 | [§4.2](#42-an-illegal-state-catalog--fixture-coverage-check) catalog integrity (catalog-side half) | Phase 0, as a documentation-lint check |
-| [§4.2](#42-an-illegal-state-catalog--fixture-coverage-check) the fixture-coverage join | Phase 7, as a consumer of `locus_registry.tsv` |
+| [§4.2](#42-an-illegal-state-catalog--fixture-coverage-check) the fixture-coverage join | Phase 13, as a consumer of `locus_registry.tsv` |
 | [§6](#6-defects-found-in-the-current-corpus) the four defects | repaired in their owning documents; see each subsection |
 
 One recommendation is **not** adopted and is recorded as open:

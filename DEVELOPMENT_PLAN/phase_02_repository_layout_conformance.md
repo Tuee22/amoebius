@@ -14,7 +14,7 @@ Register 1: a pure tree-and-resolution gate, no host and no cluster.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -57,7 +57,7 @@ none. They survived a run that passed on fourteen sides. The gate gains a `no-em
 and mutant **m7**, because a skeleton misleads a reader about what roots the tree has and a later move into
 one silently resurrects a root this phase retired.
 
-**Corrected twice more 2026-08-17, after the seal, by the phases downstream of it.** Phase 16's rerun showed
+**Corrected twice more 2026-08-17, after the seal, by the phases downstream of it.** Phase 22's rerun showed
 the registry had flattened eight schemas into two columns: the eighteen `mutants.tsv` files it folded used
 `operator`, `variant`, `target`, `locus`, or `surface` for their second column and `expected_locus`,
 `expected_red_locus`, `expected`, `fixture`, or `token` for their third, so five capabilities' records had come
@@ -67,13 +67,13 @@ every mutation genuinely shares — capability, id, body, flag — and each phas
 as named `detail` that `tools/mutant_registry.py` merges back into the row, so a gate reads the field names it
 authored. A directory carrying a prose record is one mutation whose body is every file in it. Six gates and
 two suites that enumerate items from the registry were reading its first column, which used to be the mutant
-id and is now the capability; each asks for its own capability's mutants instead. Phases 8 through 16 were
+id and is now the capability; each asks for its own capability's mutants instead. Phases 14 through 22 were
 re-run against the rebuilt registry and are green.
 
-**Corrected 2026-08-17, after the seal, by Phase 8's rerun.** The first mutant-registry build carried a
+**Corrected 2026-08-17, after the seal, by Phase 14's rerun.** The first mutant-registry build carried a
 mutation only when a committed body file or a build flag held it, and silently dropped 101 `mutants.tsv` rows
 across six capabilities whose mutation the owning gate materializes from its own code — a field-deletion sweep
-over an authored inventory has no file to point at. Phase 8's gate failed on its own missing manifest, which
+over an authored inventory has no file to point at. Phase 14's gate failed on its own missing manifest, which
 is the registry doing its job one phase later than it should have. The record format now names that third
 carrier explicitly (`gate:<path>`), so a mutation nothing can reach is still refused while one the gate
 applies itself is not mistaken for one. The build had also normalized every mutant id to lowercase-underscore,
@@ -145,7 +145,7 @@ deletions stay with their last consumer.
 
 **Three things the phase found that a positional move alone could not fix, and did not defer.** Two libraries
 exposed the same module name from two packages, which the package split had hidden and the merge turned into
-a collision; the module Phase 49's contract spec consumes is now
+a collision; the module Phase 55's contract spec consumes is now
 `Amoebius.Pulumi.Backend.CheckpointEnvelope`, which is what it was always about. Three files under the lift
 roots were CPP `#include` shims of a module that already lived in `src/` — a package-split artifact with no
 destination, so they were deleted rather than relocated. And `test/inject/mutants/` held two capabilities'
@@ -163,7 +163,7 @@ it when they rerun.
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on**: Phase 1
+**Depends on**: [Phase 1](phase_01_toolchain_spike.md)
 
 **Requires**: `host-floor`
 
@@ -328,7 +328,7 @@ module already lives and for the same reason — `hs-source-dirs` is a search pa
 `Setup.hs` generated the Pulsar protobuf bindings. A root `Setup.hs` is not in the section 2 tree and
 [§2.1](../documents/engineering/repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package)
 admits no ground for a package that exists only to carry one, so the generator retired with the split. The
-`.proto` schema is at `proto/**` where the target tree puts it, and Phase 40 re-establishes binding generation
+`.proto` schema is at `proto/**` where the target tree puts it, and Phase 46 re-establishes binding generation
 against `.build/proto/**` — which is where the same tree line already sends the rendered bindings. The row is
 in the register.
 
@@ -387,7 +387,7 @@ makes every future re-baseline documentation-only.
 ### Remaining Work
 None. **The ordinal a tree name carried was the *pre*-amendment one**, so the capability came from the same
 join `tools/migration_allowlist.tsv` already recorded between a `tools/phaseNN_*` glob and the phase that now
-owns it — `tools/phase31_gate.py` is `tools/platform_services_2_gate.py`, not Phase 31's anything. A data file
+owns it — `tools/phase31_gate.py` is `tools/platform_services_2_gate.py`, not Phase 37's anything. A data file
 grouped under its capability directory (`test/mutant/content_store_workflow/lease_election.mutant`), matching
 the already-conforming half of the tree; a Haskell suite main kept its descriptive half
 (a `PhaseNNServicesLiveSpec.hs` became `ServicesLiveSpec.hs`) except where that half was not distinctive on its

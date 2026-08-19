@@ -40,7 +40,7 @@ RESULTS = ROOT / ".build/dsl/scoped-identity/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/scoped-identity/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/scoped-identity"
 TEMP_ROOT = ROOT / ".build/tmp/scoped-identity"
-CONTRACT = "DEVELOPMENT_PLAN/phase_20_scoped_identity_kernel.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md"
 GATE_COMMAND = "python3 tools/scoped_identity_gate.py"
 EXPECTATIONS = "test/oracle/scoped_identity_surfaces.tsv"
 

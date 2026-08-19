@@ -31,7 +31,7 @@ LOCUS = ROOT / "test/oracle/deterministic_simulation/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/deterministic-simulation/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/deterministic-simulation/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/deterministic-simulation"
-CONTRACT = "DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_22_deterministic_sim_substrate.md"
 GATE_COMMAND = "python3 tools/deterministic_simulation_gate.py"
 EXPECTATIONS = "test/oracle/deterministic_simulation_surfaces.tsv"
 

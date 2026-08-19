@@ -18,7 +18,7 @@ owned by [platform_services_doctrine.md](../engineering/platform_services_doctri
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_20_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_21_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_23_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_26_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_37_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_39_app_tenancy.md, DEVELOPMENT_PLAN/phase_41_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_58_ui_multi_tenant_live.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_20_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_27_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_29_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_43_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_45_app_tenancy.md, DEVELOPMENT_PLAN/phase_47_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_64_ui_multi_tenant_live.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -39,7 +39,7 @@ drawn from [`illegal_state_catalog.md`](./illegal_state_catalog.md) and reorgani
 reproducing each entry body faithfully. What this slice **authoritatively owns** is the per-entry
 **Validation-locus** classification it adds to each entry below. The **catalog index** (which states are illegal, in full) and the **load-bearing honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned
 by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
-**coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three foreclosure layers** ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect` classification each entry below carries) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice
+**coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three foreclosure layers** ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal `dhall-typecheck` / `gadt-decode` / `provision-seal` / `rendered-output-golden` / `live-effect` classification each entry below carries) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice
 **references** those; it does not restate them.
 
 Everything below is **design intent**, not a tested amoebius result. Per the honesty limit ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
@@ -54,14 +54,14 @@ correct manifests, whether the apiserver admits them, or whether the running clu
 
 Each entry keeps its **original catalog number and heading** (inbound links depend on the slug). The
 **Validation-locus** line added to each entry places it on the orthogonal validation-locus axis defined in
-[`illegal_state_techniques.md`](./illegal_state_techniques.md): `Gate-1-editor` (fails `dhall type` at authoring time), `Gate-2-decoder` (the total decoder returns `Left`), `provision-seal` (post-bind Phase-12 provision returns a `ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by a golden test on the *rendered* manifest, not a live cluster), and `live-effect` (only observable at reconcile/runtime — the runtime-checked residue).
+[`illegal_state_techniques.md`](./illegal_state_techniques.md): `dhall-typecheck` (fails `dhall type` at authoring time), `gadt-decode` (the total decoder returns `Left`), `provision-seal` (post-bind Phase-18 provision returns a `ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by a golden test on the *rendered* manifest, not a live cluster), and `live-effect` (only observable at reconcile/runtime — the runtime-checked residue).
 
 ```mermaid
 flowchart LR
   %% register: orientation
-  g1["Gate-1-editor<br/>2 entries"]
-  g2["Gate-2-decoder<br/>10 entries"]
-  g3["Gate-3-astcheck<br/>none in this slice"]
+  g1["dhall-typecheck<br/>2 entries"]
+  g2["gadt-decode<br/>10 entries"]
+  g3["extension-astcheck<br/>none in this slice"]
   ps["provision-seal<br/>1 entry"]
   rg["rendered-output-golden<br/>2 entries"]
   le["live-effect<br/>none in this slice"]
@@ -75,7 +75,7 @@ flowchart LR
 
 ### 3.3 Misconfigured gateway
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-13`
 
 **Case-family:** `security`
 
@@ -87,7 +87,7 @@ with no matching service, cannot be written. **Owner:**
 + [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) totality (the cert/host name is a function of the declared identity, not a free string).
 
 **Layer:** type-foreclosed at the Haskell IR — a route to a non-existent backend has no constructor; runtime-checked residue — that the live gateway actually routes.
-**Validation-locus:** `Gate-2-decoder` (a route is constructed only *from* a live service handle, and the
+**Validation-locus:** `gadt-decode` (a route is constructed only *from* a live service handle, and the
 cert/host name is a total function of the declared identity — a route to a non-existent backend or a listener
 with no matching service has no inhabitant) + `rendered-output-golden` (the emitted Gateway/HTTPRoute
 listeners and backends match the declaring service) + `live-effect` residue (that the LoadBalancer comes up
@@ -95,7 +95,7 @@ and TLS actually terminates).
 
 ### 3.4 DNS that binds to the wrong IP
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-20`
 
 **Case-family:** `security`
 
@@ -106,14 +106,14 @@ representation. **Owner:** [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_
 [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). **Technique:** [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) (content-address totality, applied to the name→address map).
 
 **Layer:** type-foreclosed at the Haskell IR — a name binds only to an allocated address, so an unowned target has no constructor; runtime-checked residue — that DNS actually resolves to it.
-**Validation-locus:** `Gate-2-decoder` (the DNS binding is a total function of a service handle — there is no
+**Validation-locus:** `gadt-decode` (the DNS binding is a total function of a service handle — there is no
 free string in which to type an unowned target IP) + `rendered-output-golden` (the emitted DNS record targets
 the allocated LB address) + `live-effect` residue (the realized LoadBalancer address is what is actually bound
 at reconcile — the enforcement half the type cannot reach).
 
 ### 3.6 Blocking NetworkPolicy (services can't reach each other)
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-20`
 
 **Case-family:** `security`
 
@@ -127,16 +127,16 @@ human never writes the policy. **Owner:**
 
 **Layer:** type-foreclosed at the Haskell IR — NetworkPolicies are derived from the declared dependency graph and never hand-authored, so a severing policy has no constructor; runtime-checked residue — that the live CNI actually admits the traffic.
 **Validation-locus:** `rendered-output-golden` (the derived NetworkPolicy is checked in the emitted objects —
-a declared dependency is never a connection the policy blocks; Phase 14 validates exact edge-set equality
-against its independent test-side oracle) + `Gate-2-decoder` (the consumer handle exists
+a declared dependency is never a connection the policy blocks; Phase 20 validates exact edge-set equality
+against its independent test-side oracle) + `gadt-decode` (the consumer handle exists
 only once the dependency edge does; the ownership fold over the dependency graph) + `live-effect` residue
-(that the CNI actually admits the derived flow). Phase 37 discharged that residue on linux-cpu with an
+(that the CNI actually admits the derived flow). Phase 43 discharged that residue on linux-cpu with an
 independent scratch Pod: absent edge denied, adding `scratch→minio` admitted, and removing it denied again;
 the policy-swap mutant failed the independently pinned set oracle.
 
 ### 3.7 Accidental insecure / backdoor ingress
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-13`
 
 **Case-family:** `security`
 
@@ -151,19 +151,19 @@ host-local peer into a wild endpoint, and none that exposes a workload to the wi
 (capability: only the edge holds the "expose-to-wild" capability) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct indices that do not interconvert).
 
 **Layer:** type-foreclosed at the Haskell IR — only the Keycloak edge holds the expose-to-wild capability and endpoint kinds do not interconvert; runtime-checked residue — that the running cluster in fact exposes no unauthenticated path.
-**Validation-locus:** `Gate-1-editor` (the application schema exposes no authorable wild-ingress or raw
+**Validation-locus:** `dhall-typecheck` (the application schema exposes no authorable wild-ingress or raw
 NodePort arm) + `rendered-output-golden` (the no-backdoor-ingress golden on the emitted objects — no wild
-NodePort or Keycloak-skipping Ingress in the rendered manifest, validated by Phase 14 in Register 1) + `Gate-2-decoder` (only the edge holds
+NodePort or Keycloak-skipping Ingress in the rendered manifest, validated by Phase 20 in Register 1) + `gadt-decode` (only the edge holds
 the expose-to-wild capability, and endpoint kinds are distinct non-interconverting indices — a self-published
 wild endpoint has no constructor) + `live-effect` residue (that the running cluster in fact exposes no
-unauthenticated path). Phase 37 discharged that residue on linux-cpu: the sole LoadBalancer was the
+unauthenticated path). Phase 43 discharged that residue on linux-cpu: the sole LoadBalancer was the
 Keycloak/Envoy edge, a committed raw NodePort seed turned the scanner red and removal restored green, and the
 only allowed `HostLocalPeer` NodePort succeeded on node loopback while an actual WAN-Pod source was denied.
 Every hardware substrate can always supply this linux-cpu baseline at its own natural architecture; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ### 3.8 Cross-tenant references and literal secrets
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-13`
 
 **Case-family:** `security`
 
@@ -177,14 +177,14 @@ under *this* tenant's tag; a cross-tenant reference has no inhabitant. **Owner:*
 [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) (the `SecretRef`-by-name contract, parent→child injection, the trust tree). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant tags + capabilities).
 
 **Layer:** type-foreclosed at the Haskell IR — phantom tenant tags admit no re-tagging function and a literal secret value has no constructor; runtime-checked residue — that the parent actually injects the referenced material.
-**Validation-locus:** `Gate-2-decoder` (phantom tenant tags — a literal secret value and a cross-tenant
+**Validation-locus:** `gadt-decode` (phantom tenant tags — a literal secret value and a cross-tenant
 reference have no inhabitant; a `SecretRef` is only ever a name under *this* tenant's tag, and no function
 re-tags across tenants) + `live-effect` residue (that the parent actually injects the referenced material into
 the child's Vault at runtime).
 
 ### 3.9 A plaintext spec at rest
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-40`
 
 **Case-family:** `security`
 
@@ -199,14 +199,14 @@ materialized to a cluster-legible store is therefore not something a workload's 
 (an envelope/handle, not a plaintext value) — note this row's *enforcement* is partly runtime (per the [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) limit); the type only removes any plaintext-spec input.
 
 **Layer:** type-foreclosed at the Haskell IR — a workload's typed inputs can name only an envelope or handle; runtime-checked residue — that the bytes at rest are in fact enveloped.
-**Validation-locus:** `Gate-2-decoder` (a workload's typed inputs can only name an envelope/handle, never a
+**Validation-locus:** `gadt-decode` (a workload's typed inputs can only name an envelope/handle, never a
 plaintext-spec value — the plaintext-at-rest input has no inhabitant) + `live-effect` residue (that the
 control-plane daemon decrypts the Vault-Transit MinIO envelope in-process and never writes plaintext to a
 ConfigMap or etcd — this row's enforcement is explicitly the runtime half).
 
 ### 3.10 A child spec that reaches beyond its own subtree
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-13`
 
 **Case-family:** `security`
 
@@ -220,14 +220,14 @@ by per-child Transit keys (a child cannot even *decrypt* a sibling's subtree). *
 [`vault_pki_doctrine.md` §6](../engineering/vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes) (per-child keys). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant/subtree tags) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (ownership indices).
 
 **Layer:** type-foreclosed at the Haskell IR — a `ChildInForceSpec` has no field in which a sibling or ancestor-only branch can appear; runtime-checked residue — that the running child reaches no further.
-**Validation-locus:** `Gate-2-decoder` (phantom subtree tags + ownership indices — a `ChildInForceSpec` has no
+**Validation-locus:** `gadt-decode` (phantom subtree tags + ownership indices — a `ChildInForceSpec` has no
 field in which a sibling or ancestor-only branch can appear) + `live-effect` residue (per-child Transit keys —
 a child cannot even *decrypt* a sibling's subtree at runtime, the cryptographic reinforcement beyond the type
 shape).
 
 ### 3.11 An unsafe workload (no resource limits, no hardened securityContext)
 
-**Delivery-owner:** `Phase-5`
+**Delivery-owner:** `Phase-11`
 
 **Case-family:** `security`
 
@@ -252,18 +252,18 @@ the generation discipline that makes the unsafe shape unconstructible is owned b
 (required-field-by-construction — a record without the field has no inhabitant).
 
 **Layer:** split — the missing-envelope and un-hardened-`securityContext` shapes are type-foreclosed (required fields, closed arms), while the capacity half is decode-foreclosed at the provision seal; runtime-checked residue — that the kubelet actually enforces the rendered limits.
-**Validation-locus:** `Gate-1-editor` (a workload record missing its mandatory resource envelope fails
+**Validation-locus:** `dhall-typecheck` (a workload record missing its mandatory resource envelope fails
 `dhall type` at authoring) + `provision-seal` (the post-bind resource/capability fold must construct the opaque
 whole-deployment `ProvisionedSpec`, returning a `ProvisionError` before that seal when the selected target
 cannot supply any demand) +
 `rendered-output-golden` (the hardened non-root / no-privilege-escalation / dropped-capabilities /
 read-only-root `securityContext` and the exact checked resource projection are present in the emitted
-manifest, validated by Phase 14 across all nine capability arms and both shapes) + `live-effect` residue (the running pod actually enforces the hardened context and resource
+manifest, validated by Phase 20 across all nine capability arms and both shapes) + `live-effect` residue (the running pod actually enforces the hardened context and resource
 ceilings).
 
 ### 3.40 A secure-gateway reach collapsing into wild ingress
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-20`
 
 **Case-family:** `security`
 
@@ -278,7 +278,7 @@ The wild-ingress gateway (Keycloak/Envoy) stays wild-only. **Owner:**
 [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (only the wild edge holds the `ExposeToWild` capability — a `SecureGatewayReach` value cannot produce a wild endpoint) +
 [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct indices that do not interconvert). **Layer:** type-foreclosed uninhabitable. *(The K1 `Gateway`-arm authentication constructor itself is design intent this round names but defers — the witness type `FabricMember c` via `fabricMemberViaGateway` is named, the constructor not yet inhabited.)*
 
-**Validation-locus:** `Gate-2-decoder` (only the wild edge holds the `ExposeToWild` capability, and
+**Validation-locus:** `gadt-decode` (only the wild edge holds the `ExposeToWild` capability, and
 `SecureGatewayReach` is a distinct endpoint index with no constructor into `WildIngress` — the collapse has no
 inhabitant) + `rendered-output-golden` (the emitted objects carry no wild endpoint derived from the gateway
 reach) + `live-effect` residue (that the authenticated secure-gateway wire actually stays non-wild at
@@ -286,7 +286,7 @@ runtime).
 
 ### 3.42 An admin mutation without a root-token capability + an unsealed-Vault witness
 
-**Delivery-owner:** `Phase-34`
+**Delivery-owner:** `Phase-40`
 
 **Case-family:** `security`
 
@@ -312,14 +312,14 @@ channel-1 verb; `runtime-checked` residue — that the control-plane daemon (a D
 (no split-brain admin), owned by [`daemon_topology_doctrine.md` §5](../engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
 and [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md).
 
-**Validation-locus:** `Gate-2-decoder` (the `RootToken` capability plus the `Unsealed`-Vault edge-gated `dhall
+**Validation-locus:** `gadt-decode` (the `RootToken` capability plus the `Unsealed`-Vault edge-gated `dhall
 update` handle — an unauthenticated or unsealed-less mutation has no inhabitant, and channel-1 control verbs do
 not survive the host-daemon→control-plane daemon handoff) + `live-effect` residue (that the control-plane daemon — a Deployment
 `replicas=1` with no election — actually holds *sole* admin authority, no split-brain).
 
 ### 3.45 A cross-tenant or hand-authored RBAC binding
 
-**Delivery-owner:** `Phase-12`
+**Delivery-owner:** `Phase-18`
 
 **Case-family:** `capability-provision`
 
@@ -351,7 +351,7 @@ equality also makes an output/action whose persistence demand was dropped `decod
 provision ([resource_capacity_storage.md §5.1](../engineering/resource_capacity_storage.md#51-durable-demand-is-logical-first-physical-only-after-geometry)); only private `ProvisionedSpec` projections
 paired with the exact observation-bound `ValidatedLiveTarget` may render or act.
 
-**Validation-locus:** `Gate-2-decoder` (every provider policy is the image of one total derivation of the typed
+**Validation-locus:** `gadt-decode` (every provider policy is the image of one total derivation of the typed
 tenant→role graph, and grants are phantom-tenant-tagged — a hand-authored, un-derived, or cross-tenant binding
 has no inhabitant) + `provision-seal` (whole-deployment source equality requires exact policy outputs and their four-store plus
 API/etcd demands and executor actions share a source and exact nested identities; independent wrong-digest,
@@ -367,16 +367,16 @@ graph, with no grant crossing a tenant tag) + `live-effect` residue (provider-st
 normalized content digests, one coalesced target/base witness, store-global MinIO components, and the sealed
 transition high-water; the policies refuse a live cross-tenant read).
 
-**Phase-39 evidence.** The Register-3 gate derives 18 qualified actions for two equal-shaped tenants and reads
+**Phase-45 evidence.** The Register-3 gate derives 18 qualified actions for two equal-shaped tenants and reads
 the resulting Keycloak, Vault, Pulsar, MinIO, Kubernetes, and Postgres administrative objects through six
 separated observers. The hand-authored-grant and outer/inner-tenant-mismatch twins have zero provider effects;
 `drop_provider_arm` and `collapse_tenant_key` both turn the unchanged gate red, and complete target inventories
-return to preflight. The actual cross-subject/cross-tenant request refusal remains the Phase-41 live-effect
-residue, not a Phase-39 claim. Ledger `external-run-reference`.
+return to preflight. The actual cross-subject/cross-tenant request refusal remains the Phase-47 live-effect
+residue, not a Phase-45 claim. Ledger `external-run-reference`.
 
 ### 3.79 A UI action whose server authorization does not match its declaration
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-27`
 
 **Case-family:** `ui`
 
@@ -405,8 +405,8 @@ rather than allow. **Owner:**
 **Layer:** `type-foreclosed` for raw/optional-policy action shapes and for executing anything other than an
 authorized invocation; `decode-foreclosed` at the post-bind seal for the cross-projection exact-key fold;
 `runtime-checked` residue — that the running gateway and UI server enforce the sealed policy on every request.
-**Validation-locus:** `Gate-1-editor` (a raw endpoint or route/port without its non-optional `AuthPolicyRef` has
-no Dhall arm) + `Gate-2-decoder` (the referenced policy and public contracts resolve and type-check locally) +
+**Validation-locus:** `dhall-typecheck` (a raw endpoint or route/port without its non-optional `AuthPolicyRef` has
+no Dhall arm) + `gadt-decode` (the referenced policy and public contracts resolve and type-check locally) +
 `provision-seal` (the normalized `PortId`, public contracts, handler, effect class, `AuthPolicyRef`, and scope
 tuples must match across the expanded gateway, server-dispatch, authorization, and audit projections before any
 plan is sealed) +
@@ -422,22 +422,22 @@ unguarded, change a handler id without changing the policy, and serve the privat
 client asset; each must fail before effects or private disclosure. Black-box direct action and manifest
 requests are the live oracle, not a click-visibility test.
 
-**Phase-21 evidence.** The Register-1 gate matches five normalized registry tuples and byte-equal client/server
+**Phase-27 evidence.** The Register-1 gate matches five normalized registry tuples and byte-equal client/server
 projections against an independent extractor, matches six allow/deny rows and four exact stale-epoch failures,
 requires every denial to leave an empty pure effect trace, and kills both `default_allow` and
 `visibility_is_authorization`. Live gateway, UI-server, identity-provider, and provider-policy enforcement is
-still UNVERIFIED. See [Phase 21](../../DEVELOPMENT_PLAN/phase_21_ui_authorization_kernel.md).
+still UNVERIFIED. See [Phase 27](../../DEVELOPMENT_PLAN/phase_27_ui_authorization_kernel.md).
 
-**Phase-26 evidence.** The Register-2 `serve-ui` process derives tenant, subject, permission, grant, and epoch
+**Phase-32 evidence.** The Register-2 `serve-ui` process derives tenant, subject, permission, grant, and epoch
 from a signed credential minted by a separate authority process. Own-scope read/mutation reaches a separate
 capability-guarded handler, while foreign, forged-header, revoked, wrong-origin, and stale twins produce zero
 handler bytes; startup, private-plan, idempotency, and WebSocket pairs also pass, and nine mutants turn red.
 Live Keycloak, edge exclusivity, provider policy, cluster deployment, and HA remain UNVERIFIED. See
-[Phase 26](../../DEVELOPMENT_PLAN/phase_26_ui_server_boundary.md).
+[Phase 32](../../DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md).
 
 ### 3.80 A subject resolving or mutating another subject's resource without a grant
 
-**Delivery-owner:** `Phase-20`
+**Delivery-owner:** `Phase-26`
 
 **Case-family:** `ui`
 
@@ -463,7 +463,7 @@ topic namespaces, workflow references, and cache keys preserve the same scope as
 **Layer:** `type-foreclosed` in the Haskell server IR for a provider operation over an unscoped/global id;
 `decode-foreclosed` for a declared data binding whose owner/audience has no matching grant; `runtime-checked`
 residue — that the database, object store, message bus, caches, and live handler enforce the derived predicates.
-**Validation-locus:** `Gate-2-decoder` (the public data/form algebra cannot construct a trusted scope, owner,
+**Validation-locus:** `gadt-decode` (the public data/form algebra cannot construct a trusted scope, owner,
 grant, or opaque handle, and its declared scope kinds must agree) + `provision-seal` (ownership/grant resolution
 must succeed, and each bound data operation and provider policy must share the exact tenant, audience, resource,
 and action source) + `rendered-output-golden` (derived row policies/prefixes/namespaces carry the scoped
@@ -478,12 +478,12 @@ drop only the tenant predicate, trust a browser-supplied tenant, key a cache by 
 grant after revocation; every cross-scope result must be indistinguishable from an unavailable resource and no
 mutation may occur.
 
-**Phase-20 evidence.** The Register-1 scope gate matches six owner/grant joins and the exact same-tenant
+**Phase-26 evidence.** The Register-1 scope gate matches six owner/grant joins and the exact same-tenant
 `OwnerMismatch` and cross-tenant `TenantMismatch` swaps. Raw `ResourceId` construction and scope retagging fail
 to compile, and the committed owner-equality mutant makes both swaps red. Provider enforcement remains the live
-residue. See [Phase 20](../../DEVELOPMENT_PLAN/phase_20_scoped_identity_kernel.md).
+residue. See [Phase 26](../../DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md).
 
-**Phase-41 evidence.** The Register-3 gate authenticates and introspects three real Keycloak credentials across
+**Phase-47 evidence.** The Register-3 gate authenticates and introspects three real Keycloak credentials across
 two tenants, then drives a constructor-private Haskell request context through paired own/foreign Postgres RLS,
 derived MinIO-key, and derived Pulsar-namespace operations. Independent provider and CNI observations find no
 foreign state, message, cursor, or network effect; exact teardown passes. `drop_user_predicate` and
@@ -493,7 +493,7 @@ provider-audit-log correspondence remain `UNVERIFIED`. Ledger
 
 ### 3.81 A UI value flowing to an incompatible tenant, subject, or audience scope
 
-**Delivery-owner:** `Phase-20`
+**Delivery-owner:** `Phase-26`
 
 **Case-family:** `ui`
 
@@ -516,7 +516,7 @@ silently discard the label. **Owner:**
 
 **Layer:** `type-foreclosed` where a typed sink requires a compatible flow witness; `decode-foreclosed` where
 the complete graph's dynamic labels and release edges are checked; `runtime-checked` residue — that provider
-policies and the running renderer preserve the sealed scopes. **Validation-locus:** `Gate-2-decoder` (the total
+policies and the running renderer preserve the sealed scopes. **Validation-locus:** `gadt-decode` (the total
 information-flow fold returns every incompatible direct or transitive path) + `provision-seal` (late-bound data,
 workflow, model, messaging, storage, cache, and observability sinks must all be included before the flow graph is
 sealed) + `rendered-output-golden` (responses and provider policies contain no wider projection) + `live-effect`
@@ -529,14 +529,14 @@ formatter into a public response, log a labelled secret, key a cache without its
 topic, and feed untrusted model/browser text into an authority sink; each must identify the complete offending
 path before effects.
 
-**Phase-20 evidence.** The Register-1 flow gate matches four independently authored direct/transitive rows,
+**Phase-26 evidence.** The Register-1 flow gate matches four independently authored direct/transitive rows,
 meets six generated reject-class floors, and rejects general declassification at compile time. Cycle,
 missing-member, and transitive-leak diagnostics are total in the pure model; live sink behavior remains
-UNVERIFIED. See [Phase 20](../../DEVELOPMENT_PLAN/phase_20_scoped_identity_kernel.md).
+UNVERIFIED. See [Phase 26](../../DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md).
 
 ### 3.83 A UI plan executed after an authority-bearing source changed
 
-**Delivery-owner:** `Phase-23`
+**Delivery-owner:** `Phase-29`
 
 **Case-family:** `ui`
 
@@ -578,11 +578,11 @@ current registry, publish only one plan half, swap equal-shaped client/server ge
 browser's claimed generation. Every stale or mixed replay must fail closed; a cosmetic-only change outside the
 declared source set remains executable, preventing an oracle that merely rejects all old bundles.
 
-**Phase-23 evidence.** The Register-1 compiler matches four logical projections, four canonical JSON goldens,
+**Phase-29 evidence.** The Register-1 compiler matches four logical projections, four canonical JSON goldens,
 four concrete SHA-256 identities, and six finite-demand cells. An independently assembled authority-source
 list detects both change and omission, opposite insertion orders in fresh processes are byte-identical, and all
 six projection/digest mutants turn red. Request-time freshness and live release pairing remain UNVERIFIED. See
-[Phase 23](../../DEVELOPMENT_PLAN/phase_23_ui_plan_compiler.md).
+[Phase 29](../../DEVELOPMENT_PLAN/phase_29_ui_plan_compiler.md).
 
 ---
 

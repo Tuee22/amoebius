@@ -20,7 +20,7 @@
 # surface<TAB>owner<TAB>ids (comma-separated)
 
 base-capacity-types	checks	oracle-shape
-gate1-topology-foreclosures	metrics	gate1-topology-cases
+dhall-typecheck-topology-foreclosures	metrics	dhall-typecheck-topology-cases
 fits-equivalence	metrics	compatibility-matrix
 carve-zero-capable-subtraction	metrics	fold-negatives
 fixed-placement-witness	metrics	positive-topologies

@@ -14,7 +14,7 @@ provisioned. It does not carry the types themselves, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, documents/engineering/resource_capacity_types.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/resource_capacity_types.md
 **Generated sections**: none
 
 </details>
@@ -100,7 +100,7 @@ reconcile suppresses rerun even if the Job object later disappears, and does not
 constraints over engine role, provider class, site, accelerator profile, and inventory-owned taints; no
 free-text selector/toleration exists. Provision derives one planned slot per Once/replica/Job concurrency or
 eligible PerNode member; a missing constraint target or missing/extra/ineligible slot rejects.
-Gate 2 also refines resource ownership structurally: a CUDA Pod is a DaemonSet `OnDelete` owner with
+gadt-decode also refines resource ownership structurally: a CUDA Pod is a DaemonSet `OnDelete` owner with
 `CudaRecreateAfterDeviceRelease`; a CUDA host process has the analogous device-release policy; a Metal host
 process has `MetalDrainThenReplaceAfterObservedExit`; ordinary Pod/host arms cannot claim those policies,
 and Deployment/StatefulSet/Job cannot be paired with a host envelope. These private constructors return a
@@ -295,7 +295,7 @@ observed old/terminating instance must turn the independent epoch oracle red.
   model, finite concurrency, failure window, maximum failures, and GC horizon to include simultaneous upload
   workspace and retained partial uploads as a model-derived object-extent multiset. The same private
   `ProvisionedRegistryStorageDemand` retains the digest map, structured `objectStorePeak`, and scalar
-  `derivedPeak`: the scalar sizes only the interim bounded filesystem volume, while Phase 35 feeds the
+  `derivedPeak`: the scalar sizes only the interim bounded filesystem volume, while Phase 41 feeds the
   structured resident objects and transient extents through MinIO's per-object stripe/parity/metadata
   geometry. Equal-byte peaks with different object counts therefore need not have equal physical demand.
   Its private admission witness configures the only mutating registry path: a local proxy authenticates the
@@ -305,7 +305,7 @@ observed old/terminating instance must turn the independent epoch oracle red.
   before storage mutation, so foreign local uploads cannot invalidate the peak. A
   `RegistryBlobBudget`/`blobPeak` scalar has no constructor;
 - a registry backend change is a migration, not a configuration-only re-render.
-  Gate 1/`ClusterIR` carry `RegistryBackendMigrationIntent`; Gate 2 validates its raw source arm and brands it
+  dhall-typecheck/`ClusterIR` carry `RegistryBackendMigrationIntent`; gadt-decode validates its raw source arm and brands it
   as an opaque `PriorRegistryProvisionRef`, and binding constructs the unprovisioned
   `RegistryBackendMigrationDemand` plus its MinIO-bound replacement demand. `provision` alone resolves that
   ref from `ProvisionContext` to the still-live

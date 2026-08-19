@@ -16,7 +16,7 @@ nor the extensions themselves, owned by [lift_and_compose_doctrine.md](./lift_an
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_65_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/monitoring_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_capability_bind.md, DEVELOPMENT_PLAN/phase_71_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/monitoring_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -41,7 +41,7 @@ those shared concerns admits three classes of defect that surface only at link t
 **duplicated horizontal concern** — one copy of the resolver and one `CacheBudget`-bounded cache *per* library —
 so the same engine materializes twice and two in-cluster owners debit node-ephemeral capacity (or two native
 host-worker owners debit the named host-cache backing)
-([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
+([content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 Second, **silent shadowing** — two libraries define the same id or constructor and one wins with no diagnostic.
 Third, a **broken dependency** — a required capability with no provider, or a requirement cycle, that deadlocks
 the merge exactly when the binary is assembled.
@@ -78,7 +78,7 @@ set, amoebius distinguishes three kinds, and all are flat peers:
 |---|---|---|
 | **Workload extension** | `infernix`, `jitML` | A vendored ML library that presents a workload (LLM inference; training + JIT codegen). This is the closed v1 set. |
 | **Capability extension** | `jit-build`, `coordination` | A single-owner horizontal concern, factored out so its install/build/cache and coordinator logic is authored **once** and consumed by many workloads. |
-| **App extension** | open, optional | A trusted server-side data/workflow/effect adapter needed by one app when the linked catalog has no handler for a required UI port. It is Gate-3-admitted and **strictly weaker than the two kinds above**; it is not the app's `UiSource` or client runtime. |
+| **App extension** | open, optional | A trusted server-side data/workflow/effect adapter needed by one app when the linked catalog has no handler for a required UI port. It is extension-astcheck-admitted and **strictly weaker than the two kinds above**; it is not the app's `UiSource` or client runtime. |
 
 The **vendored workload set is closed at `{infernix, jitML}`** and this doctrine does not expand it — that
 closure is owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability). The closure is on the
@@ -126,10 +126,10 @@ wired by the same graph every other extension is wired by.
 
 ## 3. The PROVIDE and REQUIRE contract
 
-[Phase 11](../../DEVELOPMENT_PLAN/phase_11_capability_bind.md) implements the closed `{infernix, jitML}`
+[Phase 17](../../DEVELOPMENT_PLAN/phase_17_capability_bind.md) implements the closed `{infernix, jitML}`
 provide/require refinement in `Amoebius.Capability.Binding`: requirements must resolve, duplicate providers
 are rejected as anti-shadow violations, and provider edges must be acyclic. Its paired legal/cyclic/shadowing
-fixtures establish this only for the pure Gate-2 model; linked runtime behavior remains unverified.
+fixtures establish this only for the pure gadt-decode model; linked runtime behavior remains unverified.
 
 [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability) owns the `ExtensionSpec` seam itself — `extDhall`,
 `extChain :: cfg -> [Step]`, `extCapabilities`, and the mandatory `extMonitoring` — and the fact that specs are merged at compile/link time into one binary. This doctrine owns one addition to that contract: extending the capability declaration from **export-only** to **PROVIDE + REQUIRE**.
@@ -178,7 +178,7 @@ reimplement. Each is owned *in detail* by the doctrine that owns its mechanism; 
 `jit-build` is the shared resolver plus the `CacheBudget`-bounded, content-addressed, ephemeral cache that
 materializes the three ML-asset kinds — engines, models, kernels — on first miss, never baked and never
 URL-fetched. That mechanism is owned in full by
-[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss);
+[content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss);
 this doctrine records only its edges:
 
 - **PROVIDES `JitBuild`** — the `resolve = {download | build}`-on-first-miss capability, authored once and
@@ -311,7 +311,7 @@ rejections; amoebius reuses that algebra, discards hostbootstrap's packaging (no
 image, no `dlopen`, [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability)), and adds the total/acyclic
 graph checks specified here. The graph checks themselves are net-new amoebius design intent.
 
-Phase 65 supplies a scoped consumer instance, not a proof of the whole graph: `dhall/jitml/package.dhall`
+Phase 71 supplies a scoped consumer instance, not a proof of the whole graph: `dhall/jitml/package.dhall`
 names exactly `JitBuild`, `Coordination`, and `InferenceEngine`, exposes no infrastructure field, and forbids a
 CPU fallback, while the leaf package compiles one untouched sibling CUDA generator. Physical host CUDA and
 retained MinIO are tested; provider readiness for the three requirements, Kubernetes device ownership, the
@@ -329,9 +329,9 @@ validation gates, and remaining work are owned by
 only (the plan is authoritative): the `extRequires` field and the total/acyclic/anti-shadow merge land with the
 DSL type families and the extension seam of [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability); the
 capabilities the two capability-extensions provide are exercised by their owning doctrines
-([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) for `jit-build`, [daemon_topology_doctrine.md §4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated) for `coordination`). This doc states the target shape and links back for status.
+([content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) for `jit-build`, [daemon_topology_doctrine.md §4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated) for `coordination`). This doc states the target shape and links back for status.
 
-> **Honesty.** Except for the explicitly scoped Phase-65 consumer instance above, this doctrine is design
+> **Honesty.** Except for the explicitly scoped Phase-71 consumer instance above, this doctrine is design
 > intent specified before implementation. The
 > `ProjectSpec` stream algebra and the anti-shadow `validateProjectSpec` are proven in the hostbootstrap
 > sibling; that is **sibling evidence, not a tested amoebius result**, and the total/acyclic PROVIDE/REQUIRE
@@ -347,7 +347,7 @@ capabilities the two capability-extensions provide are exercised by their owning
 - [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§6](./low_code_ui_runtime_doctrine.md#6-modules-and-total-composition) keeps declarative UI modules out of the linked-extension set; [§8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations) binds required ports to trusted Haskell handlers
 - [DSL Doctrine](./dsl_doctrine.md) — [§4](./dsl_doctrine.md#4-total-composability) the `ExtensionSpec` seam (linked-not-loaded), the anti-shadow `ProjectSpec` merge, and the closed vendored workload set `{infernix, jitML}` this graph extends
 - [Service Capability Doctrine](./service_capability_doctrine.md) — the capability surface a PROVIDE lands in ([§2](./service_capability_doctrine.md#2-the-capability-set)) and the `InferenceEngine` capability ([§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)) both workloads require
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the shared resolver + `CacheBudget`-bounded cache the `jit-build` capability-extension provides
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the shared resolver + `CacheBudget`-bounded cache the `jit-build` capability-extension provides
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated) the delegated single-writer / failover primitives the `coordination` capability-extension provides; [§3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election) the control-plane daemon is k8s/etcd, not an election
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — the derived acyclic bring-up DAG (`mkBringUpOrder`) whose decode-foreclosed cycle rejection the acyclic merge reuses
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) the topology-relation-over-a-collection technique the total merge instantiates

@@ -12,7 +12,7 @@ amoebius result. It owns none of the lifted code, and the seams it names are own
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_54_infernix_lift.md, DEVELOPMENT_PLAN/phase_55_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_65_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_66_jitml_ui_lift.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_60_infernix_lift.md, DEVELOPMENT_PLAN/phase_61_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_71_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_72_jitml_ui_lift.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -90,7 +90,7 @@ amoebius application code. Their screens, state transitions, workflow controls, 
 re-expressed as bounded `UiSource` modules. Their Haskell workflow and artifact logic remains trusted linked
 behavior and is exposed through typed port handlers. A low-code app consumes those handlers without itself
 becoming an extension
-([low_code_ui_runtime_doctrine.md §12](./low_code_ui_runtime_doctrine.md#12-workflows-and-artifact-lifting-into-the-ux)).
+([low_code_ui_workflow_lifting.md §12](./low_code_ui_workflow_lifting.md#12-workflows-and-artifact-lifting-into-the-ux)).
 
 `purescript-bridge` remains useful as evidence and, where compatible with the selected implementation, as the
 mechanism for deriving public PureScript contract types from reified Haskell contracts. The authoritative
@@ -125,7 +125,7 @@ amoebius design is achievable; it is not an amoebius result until the amoebius p
 gate. The forward record of which sibling artifact each phase supersedes is
 [legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md).
 
-The Phase-54 scoped instance compiles the untouched sibling `Infernix.Topic.Metadata` module into the lifted
+The Phase-60 scoped instance compiles the untouched sibling `Infernix.Topic.Metadata` module into the lifted
 package and uses its compacted view behind a new typed artifact facade. amoebius owns the new ready-last store,
 native-CBOR command/event, Vault-name, named-engine-cache, finite-budget, and deterministic micro-decoder seams.
 Fresh retained-platform evidence covers scoped Vault challenge/denial, native Pulsar duplicate collapse, MinIO
@@ -135,7 +135,7 @@ command-to-worker causality, worker-direct credentialed MinIO access, general no
 cross-substrate bit equality. Every hardware substrate can always run `linux-cpu`; a pristine Linux host uses
 Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 55 composes that scoped handle type with the Phase-43 receipt fold in the separate
+Phase 61 composes that scoped handle type with the Phase-49 receipt fold in the separate
 `infernix-ui-lift` leaf package and projects it through `dhall/ui/infernix.dhall`; it does not import the sibling
 SPA. The pure adapter contract establishes server-derived scope, opaque handles, exact idempotency, escaped
 output, and two independently red compiled mutants. Its live slice uses Chrome, fresh Keycloak identities,
@@ -145,15 +145,15 @@ inference, native-CBOR UI transport, an edge-served or Kubernetes-replicated UI,
 Redis/WebSocket repair, or broad noninterference. All physical substrate choices retain a `linux-cpu` route;
 the clean-guest mapping is Incus for Linux-family hosts, Lima for Apple hardware, and WSL2 for Windows.
 
-The Phase-65 scoped lift compiles the sibling `JitML.Codegen.RuntimeOperationsCuda` source module unchanged
+The Phase-71 scoped lift compiles the sibling `JitML.Codegen.RuntimeOperationsCuda` source module unchanged
 inside `jitml-lift`, while the new adapter owns CPU refusal, capacity guards, opaque staged/committed artifacts,
-command/work idempotency, and Phase-42 content digests. A GTX 970 executed 200 PTX steps across ten million
+command/work idempotency, and Phase-48 content digests. A GTX 970 executed 200 PTX steps across ten million
 float parameters and retained MinIO preserved pointer-last publication and a 412 conflict. This is not the
 full sibling trainer, a multi-layer model, its checkpoint module, Kubernetes GPU ownership, native CBOR, or
 failover. The baseline `linux-cpu` route remains usable on all hardware; clean Linux comes from Incus on Linux/
 Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 66 links that committed-artifact boundary into `jitml-ui-lift` and interprets
+Phase 72 links that committed-artifact boundary into `jitml-ui-lift` and interprets
 `dhall/ui/jitml.dhall`; no sibling SPA source is imported. The scoped proof covers the opaque Ready-model
 adapter, five compiled mutants, Chrome, two local UI origins, a temporary durable receipt observer, and a
 physical host-CUDA computation. It does not cover fresh provider authority, retained coordination/storage,
@@ -175,7 +175,7 @@ design intent; only explicitly named phase instances are tested amoebius results
 
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)
-- [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) the checked client/server projection and [§12](./low_code_ui_runtime_doctrine.md#12-workflows-and-artifact-lifting-into-the-ux) workflow/artifact UX lifting
+- [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) the checked client/server projection and [§12](./low_code_ui_workflow_lifting.md#12-workflows-and-artifact-lifting-into-the-ux) workflow/artifact UX lifting
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — `UiSource` and typed workflow use are application logic; replica and placement choices are deployment rules
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — Helm → typed `renderAll`
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — WebSocket/protobuf/base64 → native CBOR

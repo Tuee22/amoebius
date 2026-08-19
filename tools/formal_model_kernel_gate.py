@@ -41,7 +41,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / ".build" / "tla" / "formal-model-spec" / "phase-results.tsv"
 EMITTED = ROOT / ".build" / "tla" / "formal-model-spec"
-CONTRACT = "DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_09_formal_model_kernel.md"
 GATE_COMMAND = "python3 tools/formal_model_kernel_gate.py"
 EXPECTATIONS = "test/oracle/formal_model_kernel_surfaces.tsv"
 

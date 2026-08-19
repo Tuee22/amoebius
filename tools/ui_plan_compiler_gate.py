@@ -49,7 +49,7 @@ RESULTS = ROOT / ".build/dsl/ui-plan-compiler/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-plan-compiler/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-plan-compiler"
 TEMP_ROOT = ROOT / ".build/tmp/ui-plan-compiler"
-CONTRACT = "DEVELOPMENT_PLAN/phase_23_ui_plan_compiler.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_29_ui_plan_compiler.md"
 GATE_COMMAND = "python3 tools/ui_plan_compiler_gate.py"
 EXPECTATIONS = "test/oracle/ui_plan_compiler_surfaces.tsv"
 

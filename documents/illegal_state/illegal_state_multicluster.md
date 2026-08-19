@@ -16,7 +16,7 @@ them appears in the single-cluster slices. Their numbering is held by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_04_gateway_migration_model.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_10_gateway_migration_model.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -31,9 +31,9 @@ them appears in the single-cluster slices. Their numbering is held by
 ```mermaid
 flowchart LR
   %% register: orientation
-  g1["Gate-1-editor<br/>5 entries"]
-  g2["Gate-2-decoder<br/>9 entries"]
-  g3["Gate-3-astcheck<br/>none in this slice"]
+  g1["dhall-typecheck<br/>5 entries"]
+  g2["gadt-decode<br/>9 entries"]
+  g3["extension-astcheck<br/>none in this slice"]
   ps["provision-seal<br/>none in this slice"]
   rg["rendered-output-golden<br/>none in this slice"]
   le["live-effect<br/>1 entry"]
@@ -56,8 +56,8 @@ The surrounding framing is owned elsewhere and is **referenced, not restated** h
 - The **catalog index** (which entries exist, the ordering of the enumeration) and the **honesty limit** (a
   type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md).
-- The **seven typing techniques** ([§4.1](illegal_state_techniques.md#41-pvcpv-binding-by-construction)–[§4.7](illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) of the catalog), the **coverage matrix**, the **three-layer foreclosure** model (`type-foreclosed` / `decode-foreclosed` / `runtime-checked`), and the **validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect`;
-  `provision-seal` is post-bind Phase-12 provision returning a `ProvisionError` before any `ProvisionedSpec`
+- The **seven typing techniques** ([§4.1](illegal_state_techniques.md#41-pvcpv-binding-by-construction)–[§4.7](illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) of the catalog), the **coverage matrix**, the **three-layer foreclosure** model (`type-foreclosed` / `decode-foreclosed` / `runtime-checked`), and the **validation-locus axis** (`dhall-typecheck` / `gadt-decode` / `provision-seal` / `rendered-output-golden` / `live-effect`;
+  `provision-seal` is post-bind Phase-18 provision returning a `ProvisionError` before any `ProvisionedSpec`
   exists) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md).
 
@@ -74,7 +74,7 @@ deployment enforces it (the load-bearing limit owned by [`illegal_state_catalog.
 
 ### 3.31 A capacity or workload fold spanning two clusters
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `topology`
 
@@ -83,7 +83,7 @@ Distributing one workload across clusters looks like "just fold capacity over bo
 therefore has **no constructor** — the same type-foreclosed "no arm" idiom that forecloses the worker pool as a fourth
 `ComputeEngine`. Distributing across clusters is **geo-replication** (N independent clusters, each its own
 `place`, related only by async Pulsar replication — outside the single-cluster `place` fold and enacted by
-Phase 47); it is **not** the stateless
+Phase 53); it is **not** the stateless
 attach pool, which is single-cluster and already **inside** `place`'s elastic branch
 ([`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) [§4](../engineering/single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology) re-runs the same `place` fold on the enlarged topology) — modeling the attach pool as cross-cluster machinery is the category error [§5](../engineering/single_logical_data_plane_doctrine.md#5-the-category-error-this-doctrine-forecloses) of
 that doctrine forecloses. A single **stretched** cluster ([§3.35](#335-a-stretched-host-worker-with-no-declared-networking-capability)–[§3.39](./illegal_state_topology.md#339-a-split-site-etcd-quorum))
@@ -93,16 +93,16 @@ folding its capacity as *two* `Topology`s is precisely this uninhabitable cross-
 [`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) for the *why* (a cluster is the consistency boundary). **Technique:** [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
 (the relation/collection is over one cluster's `NonEmpty Node`; a second `Topology` has no place in the fold's
 arity). **Layer:** type-foreclosed uninhabitable-by-arity; runtime-checked residue lives only in the deferred geo-replication
-enaction (Phase 47).
-**Validation-locus:** `Gate-2-decoder` (the arity is a property of the **Haskell** `place`, so a fold written
-over two `Topology`s is a compile-fail golden at the Gate-2 layer — **not** a `dhall type` failure: a root
+enaction (Phase 53).
+**Validation-locus:** `gadt-decode` (the arity is a property of the **Haskell** `place`, so a fold written
+over two `Topology`s is a compile-fail golden at the gadt-decode layer — **not** a `dhall type` failure: a root
 `InForceSpec` legitimately names many clusters, so nothing at the Dhall layer forbids naming a second one;
 what has no inhabitant is a single `place` call folding both); `live-effect` (the only residue is
-the deferred geo-replication enaction, Phase 47).
+the deferred geo-replication enaction, Phase 53).
 
 ### 3.35 A stretched host worker with no declared networking capability
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `topology`
 
@@ -121,14 +121,14 @@ representable on **any** `ComputeEngine`, including `Managed Eks`. **Owner:**
 [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (the mandatory `ewpNetworking` field — a carrier without it has no inhabitant) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the host-worker-inventory `Site` fold routing an off-localhost worker onto the attach path). **Layer:** type-foreclosed
 networking-field presence; decode-foreclosed the `Site` fold; runtime-checked residue — the physical link up and the declared `Site`
 matching reality (`discover = Unreachable → refuse`).
-**Validation-locus:** `Gate-1-editor` (the mandatory `ewpNetworking` field — a required-field carrier without it
-fails `dhall type`); `Gate-2-decoder` (the total host-worker-inventory `Site` fold that routes an off-localhost
+**Validation-locus:** `dhall-typecheck` (the mandatory `ewpNetworking` field — a required-field carrier without it
+fails `dhall type`); `gadt-decode` (the total host-worker-inventory `Site` fold that routes an off-localhost
 worker onto the demanding attach constructor); `live-effect` (the physical link actually being up and the
 declared `Site` matching reality, `discover = Unreachable → refuse`).
 
 ### 3.36 A declared-remote full agent with no control-plane witness
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `topology`
 
@@ -145,13 +145,13 @@ reading the witness minted by [`network_fabric_doctrine.md`](../engineering/netw
 (the `ReachesControlPlane c` witness gating). **Layer:** demand decode-foreclosed (the `Site` fold + `render()`); witness
 presence type-foreclosed (no off-networking constructor); runtime-checked residue — the kubelet session actually established
 over the WAN. This is the prior stretched-cluster witness, now scoped to the **full-node** kind.
-**Validation-locus:** `Gate-2-decoder` (the total `NonEmpty Node` `Site` fold routes the declared-remote agent to
+**Validation-locus:** `gadt-decode` (the total `NonEmpty Node` `Site` fold routes the declared-remote agent to
 `mkStretchedAgent`, whose `render()` must cover the apiserver VPN-IP and whose `ReachesControlPlane c` witness
 gate has no off-networking constructor); `live-effect` (the kubelet session actually established over the WAN).
 
 ### 3.38 A host worker granted a control-plane witness or treated as a member
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `topology`
 
@@ -164,12 +164,12 @@ host-worker arms, **only** `DataPlaneOnly (FabricMember c)`; the `Reach` sum has
 (the `Reach` sum's kind-indexed constructors do not interconvert — the host-worker → `ControlPlaneToo` transition
 has no constructor) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the
 per-kind `witness` dispatch). **Layer:** type-foreclosed uninhabitable.
-**Validation-locus:** `Gate-2-decoder` (the total per-kind `witness` fold and the kind-indexed `Reach` GADT whose
+**Validation-locus:** `gadt-decode` (the total per-kind `witness` fold and the kind-indexed `Reach` GADT whose
 `K1_HostWorker` arm has no `ControlPlaneToo` constructor — the crossing value never survives decode).
 
 ### 3.44 A session that cannot rebind on gateway migration
 
-**Delivery-owner:** `Phase-48`
+**Delivery-owner:** `Phase-54`
 
 **Case-family:** `multicluster`
 
@@ -189,13 +189,13 @@ recovery is promised: after an error, clients honor the low TTL, resolve again, 
 residue — that the `drain-complete` edge (old-gateway traffic ≈ 0) is truthfully observed, owned by
 [`gateway_migration_doctrine.md`](../engineering/gateway_migration_doctrine.md) and
 [`readiness_ordering_doctrine.md`](../engineering/readiness_ordering_doctrine.md).
-**Validation-locus:** `Gate-2-decoder` (the migration GADT — the `decommission` handle exists only from a
+**Validation-locus:** `gadt-decode` (the migration GADT — the `decommission` handle exists only from a
 `drain-complete` index, so no path that would strand a live session survives decode); `live-effect` (that the
 `drain-complete` edge, old-gateway traffic ≈ 0, is truthfully observed at reconcile time).
 
 ### 3.47 A failover data-loss budget authored below the replication-lag bound
 
-**Delivery-owner:** `Phase-47`
+**Delivery-owner:** `Phase-53`
 
 **Case-family:** `multicluster`
 
@@ -215,12 +215,12 @@ separately-derived quantity ([`chaos_failover_doctrine.md` §18](../engineering/
 **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (one `lagBound` emits both the monitored premise and the derived loss window; there is no separate RPO field to under-declare). **Layer:**
 `type-foreclosed` for the absent below-lag field; `runtime-checked` residue — the declared `lagBound` holding
 against monitored live lag (the feasibility push-back).
-**Validation-locus:** `Gate-1-editor` (there is no RPO field to set below the lag); `live-effect` (the
+**Validation-locus:** `dhall-typecheck` (there is no RPO field to set below the lag); `live-effect` (the
 upload-time push-back of the declared bound against monitored lag).
 
 ### 3.48 A geo-replication pair whose active and standby are the same cluster
 
-**Delivery-owner:** `Phase-47`
+**Delivery-owner:** `Phase-53`
 
 **Case-family:** `multicluster`
 
@@ -230,15 +230,15 @@ because there is no second cluster to promote. amoebius rejects `active == stand
 `GatewayFailover` relation with a total decode-time distinctness fold — the weaker floor `mkRke2` applies to
 reject a reused host across `servers ∪ agentFloor` (fixed agents, or the concrete floor of an autoscaled pool)
 ([`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md)). **Owner:**
-[`consistency_pacelc_doctrine.md` §3.3](../engineering/consistency_pacelc_doctrine.md#33-the-ir-and-its-decode-foreclosures-haskell-gate-2),
+[`consistency_pacelc_doctrine.md` §3.3](../engineering/consistency_pacelc_doctrine.md#33-the-ir-and-its-decode-foreclosures-haskell-gadt-decode),
 cross-referencing the parent-owned relation of [`gateway_migration_doctrine.md` §6](../engineering/gateway_migration_doctrine.md#6-honesty-and-layer-markers).
 **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the value-level distinctness fold, the same shape as the rke2 host-distinctness check of [§3.16](./illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)).
 **Layer:** `decode-foreclosed` (a total decode-time rejection of a constructible value).
-**Validation-locus:** `Gate-2-decoder` (the total `active ≠ standby` fold returns `Left`).
+**Validation-locus:** `gadt-decode` (the total `active ≠ standby` fold returns `Left`).
 
 ### 3.49 A child spec that authors its own gateway-failover pairing
 
-**Delivery-owner:** `Phase-47`
+**Delivery-owner:** `Phase-53`
 
 **Case-family:** `multicluster`
 
@@ -251,17 +251,17 @@ projected read-only into a `ChildInForceSpec` as a handle; a child has no constr
 derive-don't-author, relations-owned-by-the-enclosing-scope pattern the fabric peer graph uses. **Owner:**
 [`gateway_migration_doctrine.md` §6](../engineering/gateway_migration_doctrine.md#6-honesty-and-layer-markers)
 (the parent-owned relation), typed on the surface of
-[`consistency_pacelc_doctrine.md` §3.3](../engineering/consistency_pacelc_doctrine.md#33-the-ir-and-its-decode-foreclosures-haskell-gate-2).
+[`consistency_pacelc_doctrine.md` §3.3](../engineering/consistency_pacelc_doctrine.md#33-the-ir-and-its-decode-foreclosures-haskell-gadt-decode).
 **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (parent-scope ownership index) + [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (the phantom `Scope` tag). **Layer:** `type-foreclosed` uninhabitable (a child has no constructor for the
 parent-scoped relation).
-**Validation-locus:** `Gate-2-decoder` (the parent-scope-indexed handle has no child-authored inhabitant that
+**Validation-locus:** `gadt-decode` (the parent-scope-indexed handle has no child-authored inhabitant that
 survives decode).
 
 ### 3.50 A standing spec that authors an emergency `Failover` as desired state
 
-**Delivery-owner:** `Phase-47`
+**Delivery-owner:** `Phase-53`
 
 **Case-family:** `multicluster`
 
@@ -281,12 +281,12 @@ A standing spec that authors an emergency `Failover` has no field to write. **Ow
 [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (no authored `mode` field on the relation).
 **Layer:** `type-foreclosed` for the absent field; `runtime-checked` residue — the trigger edge (active
 reachable vs vanished) observed at reconcile time.
-**Validation-locus:** `Gate-1-editor` (there is no `mode` field to author); `live-effect` (the trigger edge
+**Validation-locus:** `dhall-typecheck` (there is no `mode` field to author); `live-effect` (the trigger edge
 observed at the gateway-change moment).
 
 ### 3.51 An operator-authored `Confluent` cross-boundary disposition
 
-**Delivery-owner:** `Phase-47`
+**Delivery-owner:** `Phase-53`
 
 **Case-family:** `multicluster`
 
@@ -304,12 +304,12 @@ realizing the I-confluence classifier of [`chaos_failover_doctrine.md` §17](../
 (a closed union whose vocabulary omits the `Confluent` arm — a false confluence claim has no word). **Layer:**
 `type-foreclosed` for the arm absence; the confluence classification itself is an `assumed` model obligation (the
 honest limit — a genuinely-confluent invariant's confluence is proven at design time, not decidable in the spec).
-**Validation-locus:** `Gate-1-editor` (no `Confluent` arm exists in the authorable union); `live-effect` residue
+**Validation-locus:** `dhall-typecheck` (no `Confluent` arm exists in the authorable union); `live-effect` residue
 — the model's confluence classification actually holding under merge.
 
 ### 3.52 A gateway-failover graph reusing one cluster across two DNS records
 
-**Delivery-owner:** `Phase-47`
+**Delivery-owner:** `Phase-53`
 
 **Case-family:** `multicluster`
 
@@ -324,19 +324,19 @@ topology is a named deferred obligation gated on the decomposition lemma, revisi
 discharged; until then the shape is unavailable, not unsound. **Owner:**
 [`gateway_migration_model_doctrine.md` §5](../engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)
 (the structural-fit fold and its independence predicate), realized on the authorable surface by
-[`consistency_pacelc_doctrine.md` §3.3](../engineering/consistency_pacelc_doctrine.md#33-the-ir-and-its-decode-foreclosures-haskell-gate-2)
+[`consistency_pacelc_doctrine.md` §3.3](../engineering/consistency_pacelc_doctrine.md#33-the-ir-and-its-decode-foreclosures-haskell-gadt-decode)
 (the third decode fold). **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (a distinctness fold over the cluster identities projected across the migration graph — the same fold family that
 rejects a reused host or an `active == standby` pair, lifted from one edge to the whole graph). **Layer:**
 `decode-foreclosed` — the constraint is a cross-record fold over the decoded graph, not a single-field type
 index, so a total decoder returns `Left` rather than the shape being uninhabitable. **Validation-locus:**
-`Gate-2-decoder` (the structural-fit fold returns `DecodeError` on a graph reusing a cluster across records,
+`gadt-decode` (the structural-fit fold returns `DecodeError` on a graph reusing a cluster across records,
 before any `ProvisionedSpec` exists); the over-scope stress run that *models* a shared survivor in is a
 `live-effect`/model residue, not an authorable shape.
 
 ### 3.69 A cold-seeded secondary taking the gateway without proven freshness
 
-**Delivery-owner:** `Phase-47`
+**Delivery-owner:** `Phase-53`
 
 **Case-family:** `multicluster`
 
@@ -359,23 +359,23 @@ model check.
 
 ### 3.70 A `ColdSeedFromBackup` whose freshness bound is below the backup cadence
 
-**Delivery-owner:** `Phase-47`
+**Delivery-owner:** `Phase-53`
 
 **Case-family:** `multicluster`
 
 A cold-seed recovery whose declared `freshnessBound` is shorter than the backup `cadence` is statically
 unsatisfiable: a seed can never be fresher than the newest generation, so no seed could ever satisfy the
-bound and the secondary could never be promoted. The decoder rejects `freshnessBound < cadence` at Gate 2,
+bound and the secondary could never be promoted. The decoder rejects `freshnessBound < cadence` at gadt-decode,
 the same total checked-rejection shape as the existing `rto ≥ dnsTtl + headroom` relation, before any live
 signal is consulted. **Owner:** [`backup_recovery_doctrine.md` §8](../engineering/backup_recovery_doctrine.md#8-the-gateway-dovetail-seed-from-backup-under-consistency-over-availability)
 (realized on the PACELC surface by [`consistency_pacelc_doctrine.md` §3.5](../engineering/consistency_pacelc_doctrine.md#35-the-upload-time-feasibility-push-back)).
 **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (binding-by-construction — the bound and cadence relation is checked at decode, not a separate authored field).
-**Layer:** `decode-foreclosed`. **Validation-locus:** `Gate-2-decoder`.
+**Layer:** `decode-foreclosed`. **Validation-locus:** `gadt-decode`.
 
 ### 3.71 A freshness watermark asserted rather than derived from captured content
 
-**Delivery-owner:** `Phase-47`
+**Delivery-owner:** `Phase-53`
 
 **Case-family:** `multicluster`
 
@@ -384,15 +384,15 @@ content, the consistency-over-availability guarantee would be spoofable: a stale
 it never captured and be promoted. A `BackupArtifact`'s `watermark` is a total function of its content-addressed
 digest, never an asserted field, so the freshness witness the gateway-take guard consumes cannot be forged.
 **Owner:** [`backup_recovery_doctrine.md` §6](../engineering/backup_recovery_doctrine.md#6-the-verified-content-addressed-backupartifact)
-(content addressing owned by [`content_addressing_doctrine.md` §4.5](../engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
+(content addressing owned by [`content_addressing_determinism.md` §4.5](../engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 **Technique:** [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
 (names are total functions of content). **Layer:** `decode-foreclosed` (the watermark is derived, not an
 authorable field) + `live-effect` residue (that the derived watermark reflects real lag). **Validation-locus:**
-`Gate-2-decoder` + `provision-seal`.
+`gadt-decode` + `provision-seal`.
 
 ### 3.88 A `Planned` gateway migration resting with no owner
 
-**Delivery-owner:** `Phase-48`
+**Delivery-owner:** `Phase-54`
 
 **Case-family:** `multicluster`
 
@@ -417,7 +417,7 @@ wearing the name of an abort.
 `runtime-checked` for the observed edges the transitions gate on; and the *termination* claim is
 **proven-for-the-model only, under the named fairness premise** — an adversarial scheduler that starves both
 the catch-up and the stand-down actions leaves the migration in progress, which no model rules out.
-**Validation-locus:** `Gate-1-editor` (the illegal post-`promote` abort transition is non-constructible) +
+**Validation-locus:** `dhall-typecheck` (the illegal post-`promote` abort transition is non-constructible) +
 `live-effect` (the drill that kills a lead mid-`Planned`-handover and requires a terminal state). Per the
 validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the
 foreclosure layer above.

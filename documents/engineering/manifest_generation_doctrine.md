@@ -19,7 +19,7 @@ owned by [namespace_layout_doctrine.md](./namespace_layout_doctrine.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_12_provision_seal.md, DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_18_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_31_object_reconciler.md, DEVELOPMENT_PLAN/phase_32_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_33_retained_storage.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_37_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_44_release_lifecycle.md, DEVELOPMENT_PLAN/phase_46_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_provision_seal.md, DEVELOPMENT_PLAN/phase_20_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_24_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_37_object_reconciler.md, DEVELOPMENT_PLAN/phase_38_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_39_retained_storage.md, DEVELOPMENT_PLAN/phase_41_platform_backbone.md, DEVELOPMENT_PLAN/phase_42_platform_services_2.md, DEVELOPMENT_PLAN/phase_43_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_50_release_lifecycle.md, DEVELOPMENT_PLAN/phase_52_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -103,11 +103,11 @@ and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-
 
 ## 2. The typed manifest model: `renderAll` is the sole public pure function to objects
 
-> **Validated boundary (Phase 14, Register 1).** The pure whole-deployment renderer, canonical Aeson
+> **Validated boundary (Phase 20, Register 1).** The pure whole-deployment renderer, canonical Aeson
 > encoding, eighteen capability/shape goldens, exact source-domain projection, and output-safety battery pass
 > under `tools/render_manifest_gate.py` (ledger `external-run-reference`). This establishes rendered values only;
 > the [§5 live reconciler](#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is independently
-> validated by Phase 31; scheduler CAS/Binding is independently validated by Phase 32, and later
+> validated by Phase 37; scheduler CAS/Binding is independently validated by Phase 38, and later
 > service-specific enforcement keeps its own phase boundary.
 
 The core is a per-projection renderer closed by one whole-deployment pure function:
@@ -117,14 +117,14 @@ type K8sObjectIdentity =
   (ApiGroup, ApiVersion, Kind, Maybe NamespaceId, KubernetesObjectName)
 type KubernetesObjectId = K8sObjectIdentity -- compatibility alias, not a second identity
 
--- Phase 12 seals one unique source per Kubernetes object identity.
+-- Phase 18 seals one unique source per Kubernetes object identity.
 renderSourcePrivate :: ProvisionedRenderSource identity -> K8sObject
 
 -- Whole-deployment closure. KubernetesObjectId is (group/version/kind, namespace, name).
 renderAll :: ProvisionedSpec -> [K8sObject]
 ```
 
-Phase 12 constructs `ProvisionedRenderSourceSet` without depending on this Phase-14 object/Aeson model. Its
+Phase 18 constructs `ProvisionedRenderSourceSet` without depending on this Phase-20 object/Aeson model. Its
 private `renderSourcePrivate` maps one already-owned source to one object and cannot independently apply a
 list. Deployment-level `renderAll` owns the **complete set of typed Kubernetes objects** — `Namespace` /
 `Node` /
@@ -138,7 +138,7 @@ exactly as prodbox already serializes its supporting objects ([§1](#1-why-this-
 and no `values.yaml`; the *record* is the manifest.
 
 `renderAll` is not an unchecked list concatenation. It traverses the unique
-`K8sObjectIdentity → ProvisionedRenderSource K8sObjectIdentity` map already sealed by Phase 12. Each key equals
+`K8sObjectIdentity → ProvisionedRenderSource K8sObjectIdentity` map already sealed by Phase 18. Each key equals
 the source's embedded identity and has exactly one
 structural source owner; duplicate candidates or an omitted source-domain member fail
 `provisionRenderSources` before `ProvisionedSpec`, without depending on this later renderer. A deliberately
@@ -218,7 +218,7 @@ Three properties make this the right shape:
   chain/Step algebra gives the lifecycle ([dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
 - **Unit-testable without a cluster.** Because `renderAll` is pure, a test asserts properties of the *emitted
   objects* — "every container has resource requests and limits," "no Service is type `LoadBalancer` outside
-  the edge," "the rendered RBAC grants exactly these verbs" — by inspecting the returned `[K8sObject]`. No kind cluster, no apiserver, no golden-YAML diffing of templated strings. This is the manifest-layer face of the project's pure-FP testing posture. - **Composable per the dependency graph.** `renderAll` maps every service/global render source in the Phase-12-sealed unique source inventory. Ordering and connectivity are derived from the declared dependency graph, not hand-authored ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)). One spec value renders the
+  the edge," "the rendered RBAC grants exactly these verbs" — by inspecting the returned `[K8sObject]`. No kind cluster, no apiserver, no golden-YAML diffing of templated strings. This is the manifest-layer face of the project's pure-FP testing posture. - **Composable per the dependency graph.** `renderAll` maps every service/global render source in the Phase-18-sealed unique source inventory. Ordering and connectivity are derived from the declared dependency graph, not hand-authored ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)). One spec value renders the
   whole cluster, and duplicate ownership cannot be hidden by list order.
 
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
@@ -337,7 +337,7 @@ cert-manager, and the Percona PostgreSQL operator. amoebius eliminates all five 
 eliminating the software. The distinction has three parts:
 
 - **The operator *binary* is baked, not pulled.** Every third-party service binary — including each
-  operator's controller — is baked into the multi-arch amoebius base container per the supply-chain rule;
+  operator's controller — is baked into the amoebius base container per the supply-chain rule;
   the build pipeline, the baked base container, and the resulting registry refs are owned by
   [image_build_doctrine.md](./image_build_doctrine.md). amoebius does not pull an upstream operator image
   from a public registry at steady state.
@@ -360,7 +360,7 @@ This is also where the registry itself changes shape. amoebius's image registry 
 `distribution` OCI registry (`registry:2`) — baked like MinIO and Vault — which **replaces Harbor**: no
 Trivy scanning, no UI, no robot RBAC, no replication, by design. *Which* provider backs the Registry
 capability is owned by [service_capability_doctrine.md](./service_capability_doctrine.md); the generation
-consequence has one explicit bootstrap edge. Phase 30 cannot fabricate a minimal `ProvisionedServiceSpec` or
+consequence has one explicit bootstrap edge. Phase 36 cannot fabricate a minimal `ProvisionedServiceSpec` or
 call a service renderer before the whole deployment and its scheduler exist. Instead,
 `provisionBootstrapRegistry` constructs a resource-complete `ProvisionedBootstrapRegistry`; a fresh snapshot
 may mint one `BootstrapRegistryAction` that side-loads its image and initializes only its equal-keyed
@@ -394,7 +394,7 @@ specialized from "any resource the forest can create" down to "Kubernetes object
 [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon) —
 never by a CLI invocation racing another writer.
 
-Phase 38 delivers that role and this loop on linux-cpu. Its live gate records the exact seven-object
+Phase 44 delivers that role and this loop on linux-cpu. Its live gate records the exact seven-object
 first-pass SSA set under field manager `amoebius-live-dsl-deploy`, a second pass that re-runs discovery and
 emits zero mutating audit records, Lease-gated authority across replacement, and leak-free restoration of the
 retained stack. The control-plane daemon itself is a generated `Deployment replicas=1`, `Recreate`, with no PVC or
@@ -538,19 +538,19 @@ flowchart TD
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
-*Phase-31/32/33 validation boundary. Phase 31 tested the generic reconciler. Phase 32 then tested the scheduler's five-state ledger, two readiness witnesses, whole-root reservation CAS, real Kubernetes Binding ordering, crash-gap recovery, execution-identity admission, and byte-stable live rerun. Phase 33 used that renderer/reconciler seam to apply the sole inert StorageClass and deterministic retained PVs, including fresh uid-less claimRefs after a real cluster recreate. Durable completion/rollback and the release ledger remain deferred.*
+*Phase-37/38/39 validation boundary. Phase 37 tested the generic reconciler. Phase 38 then tested the scheduler's five-state ledger, two readiness witnesses, whole-root reservation CAS, real Kubernetes Binding ordering, crash-gap recovery, execution-identity admission, and byte-stable live rerun. Phase 39 used that renderer/reconciler seam to apply the sole inert StorageClass and deterministic retained PVs, including fresh uid-less claimRefs after a real cluster recreate. Durable completion/rollback and the release ledger remain deferred.*
 
-> **Honesty.** Phase 31, sealed 2026-08-14, supplies amoebius evidence for the object-reconciler slice:
+> **Honesty.** Phase 37, sealed 2026-08-14, supplies amoebius evidence for the object-reconciler slice:
 > Register 3 observed the live Kubernetes mechanisms — convergence, a byte-stable zero-mutation re-run,
 > observed readiness, ordered `OnDelete` replacement, terminal-Job retention, child-envelope conformance, and
 > single admission under a one-Pod quota — and Register 2.5 exercised the same real action modules through
 > 2,048 deterministic schedules. The modeled-apiserver fidelity of Register 2.5 is assumed and bounded by that
 > separate live run, and the content-addressed release ledger and rollback stay deferred to the content-store
-> phase, carried UNVERIFIED. The scheduler CAS/Binding half (Phase 32) and the retained-storage arm (Phase 33)
+> phase, carried UNVERIFIED. The scheduler CAS/Binding half (Phase 38) and the retained-storage arm (Phase 39)
 > are **UNVERIFIED**: both phases are open under the reopened numeric sequence, and their pre-amendment records
 > do not carry forward.
 
-[Phase 46](../../DEVELOPMENT_PLAN/phase_46_network_fabric_wireguard.md) extends the same pure-render/reconcile boundary to host networking. Its committed two-peer inventory
+[Phase 52](../../DEVELOPMENT_PLAN/phase_52_network_fabric_wireguard.md) extends the same pure-render/reconcile boundary to host networking. Its committed two-peer inventory
 renders byte-for-byte to an independent WireGuard config golden containing only `SecretRef` names. Live
 enactment then reads effective state with `wg show`, and an unchanged second discover/diff pass emits zero
 mutations. Keyless peers are unconstructible; duplicate VPN addresses and out-of-fabric `AllowedIPs` return
@@ -601,14 +601,14 @@ flowchart TD
 %% register: algebra
   plan[RolloutPlan: ordered owner-closed phase projections]:::intent --> p1[/"Observe and enact phase 1 typed actions"/]:::effect
   p1 --> g1[/"Observe readiness"/]:::effect
-  g1 -->|ready| p2[/"Re-observe and enact phase 3 typed actions"/]:::effect
+  g1 -->|ready| p2[/"Re-observe and enact phase 9 typed actions"/]:::effect
   p2 --> g2[/"Wait for readiness"/]:::effect
   g2 -->|ready| pn[Final phase converged]:::intent
   g1 -->|failure| rb[/"Re-apply prior generation or CAS pointer back"/]:::effect
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
 ```
-*Design intent for Phase 43. The `RolloutPlan` is a Tier-1 typed value; each phase's enact/observe step and the rollback are effectful seams on the tier-(c) reconciler, and the readiness gating that orders them is runtime-checked, not proven here.*
+*Design intent for Phase 49. The `RolloutPlan` is a Tier-1 typed value; each phase's enact/observe step and the rollback are effectful seams on the tier-(c) reconciler, and the readiness gating that orders them is runtime-checked, not proven here.*
 
 > **Sibling evidence (the PATTERN, not Helm; not an amoebius result).** jitML's
 > `~/jitML/src/JitML/Cluster/Helm.hs` carries exactly this shape: a closed
@@ -621,9 +621,9 @@ flowchart TD
 > **no Helm**. This is
 > sibling evidence, not an amoebius result.
 
-> **Honesty.** The `RolloutPlan` is **Phase-44 design intent** — it rides the tier-(c) typed-action reconciler,
-> whose generic action engine Phase 31 delivered; the DB-schema-migration `RolloutPhase` itself is part of
-> that unbuilt Phase-44 shape, proven
+> **Honesty.** The `RolloutPlan` is **Phase-50 design intent** — it rides the tier-(c) typed-action reconciler,
+> whose generic action engine Phase 37 delivered; the DB-schema-migration `RolloutPhase` itself is part of
+> that unbuilt Phase-50 shape, proven
 > *only* as the Helm-driven pattern in the jitML sibling. Read as the contract amoebius intends, never as a
 > tested amoebius result.
 
@@ -778,8 +778,8 @@ replaying stored YAML.
 - **Still not a Helm release store.** Neither immutable record stores mutable rendered YAML. The environment
   pointer selects a `Release`; object derivation is recomputed; the application record is append-only evidence.
 
-> **Validated instance.** Phase 44 appends an immutable `AppliedGeneration` only after the final live
-> Deployment reports `Available`, distinct from the pre-promotion `Release`, and uses the Phase-31 tier-(c)
+> **Validated instance.** Phase 50 appends an immutable `AppliedGeneration` only after the final live
+> Deployment reports `Available`, distinct from the pre-promotion `Release`, and uses the Phase-37 tier-(c)
 > SSA/readiness engine for the ordered plan. The observed convergence and write are runtime-tested, not proven.
 
 ---
@@ -797,8 +797,8 @@ three-replica Patroni — a difference of *object structure*, not merely of a `v
 This is precisely what a values-only Helm chart handles badly and a typed renderer handles cleanly. A single
 chart parameterized by a `replicas` value cannot, without templating contortions, emit a *different set and
 shape* of objects for "single-node" vs. "distributed"; a typed
-Phase 12's private `ProvisionedServiceObjectSource` constructors pattern-match the shape and enter the unique
-whole-deployment source map; Phase 14's `renderSourcePrivate` total-maps those sources before `renderAll`
+Phase 18's private `ProvisionedServiceObjectSource` constructors pattern-match the shape and enter the unique
+whole-deployment source map; Phase 20's `renderSourcePrivate` total-maps those sources before `renderAll`
 returns the deployment set. Each shape remains independently type-checked. The
 capability abstraction — capabilities named by role (`ObjectStore`, `SecretStore`, `MessageBus`, `Sql`,
 `Identity`, `Observability`, `Registry`, `Edge`), one canonical provider each, the type *admitting* alternates
@@ -806,7 +806,7 @@ later, and the per-cluster shapes — is owned by [service_capability_doctrine.m
 **this doc owns only the rendering consequence**: generation, not templating, is what makes per-cluster
 structural shapes expressible while keeping each shape best-practice-by-construction ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)).
 
-> **Honesty.** Per-cluster structural shapes are design intent (the Phase 11 capability binder and Phase 14 per-cluster `renderAll` output), and the
+> **Honesty.** Per-cluster structural shapes are design intent (the Phase 17 capability binder and Phase 20 per-cluster `renderAll` output), and the
 > reversal of prodbox's substrate-equivalence lint is a deliberate amoebius decision, not an inherited-proven
 > behaviour. prodbox's equivalence lint is the *evidence* that structural divergence is the thing worth
 > controlling; amoebius chooses to control it by typing rather than by forbidding it.
@@ -835,11 +835,11 @@ This document is normative manifest-generation-and-reconcile doctrine only. Deli
 status, validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the **typed manifest renderer and the server-side-apply reconciler** land
-in **Phases 14 and 31**; the **capability abstraction and per-cluster shapes** ride the Phase-11 binder and
-Phase-14 renderer; the **content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional))** composes with the
-Phase-42 content store; and the **`RolloutPlan` / `RolloutPhase`** enactment, including its
+in **Phases 20 and 37**; the **capability abstraction and per-cluster shapes** ride the Phase-17 binder and
+Phase-20 renderer; the **content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional))** composes with the
+Phase-48 content store; and the **`RolloutPlan` / `RolloutPhase`** enactment, including its
 DB-schema-migration phase ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c)),
-lands in Phase 44 on the tier-(c) reconciler. This doc states the target shape and links back for status.
+lands in Phase 50 on the tier-(c) reconciler. This doc states the target shape and links back for status.
 
 ---
 
@@ -869,10 +869,10 @@ lands in Phase 44 on the tier-(c) reconciler. This doc states the target shape a
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** The complete end-state in this doctrine remains design intent, but its foundations are no
-> longer wholly prospective: Phase 11 delivered the capability abstraction, Phase 14 the typed whole-set
-> renderer, Phase 31 the server-side-apply/staged-action reconciler, Phase 32 the scheduler seam, Phase 33
-> the retained StorageClass/PV/rebind application slice, Phases 34–37 the retained platform/edge stack, and
-> Phase 38 the Lease-held control-plane daemon's exact live reconcile/no-op loop. Later provider, rollout, and release-ledger subjects
+> longer wholly prospective: Phase 17 delivered the capability abstraction, Phase 20 the typed whole-set
+> renderer, Phase 37 the server-side-apply/staged-action reconciler, Phase 38 the scheduler seam, Phase 39
+> the retained StorageClass/PV/rebind application slice, Phases 40–43 the retained platform/edge stack, and
+> Phase 44 the Lease-held control-plane daemon's exact live reconcile/no-op loop. Later provider, rollout, and release-ledger subjects
 > remain unbuilt and must not inherit those results. The approach was **generalized from the prodbox sibling**, which already renders a slice
 > of its object set from typed Haskell to Aeson and applies it with `kubectl`, stamps every object with an
 > owner label, and orchestrates a pure deployment planner — but prodbox still ships its workloads as Helm

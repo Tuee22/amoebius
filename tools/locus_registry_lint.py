@@ -14,12 +14,12 @@ from pathlib import Path
 ENTRY_RE = re.compile(r"^### (3\.\d+) .+$", re.MULTILINE)
 OWNER_RE = re.compile(r"^\*\*Delivery-owner:\*\*\s*`([^`]+)`\s*$", re.MULTILINE)
 FAMILY_RE = re.compile(r"^\*\*Case-family:\*\*\s*`([^`]+)`\s*$", re.MULTILINE)
-LOCUS_RE = re.compile(r"`(Gate-1-editor|Gate-2-decoder|Gate-3-astcheck|provision-seal|rendered-output-golden|live-effect)`")
+LOCUS_RE = re.compile(r"`(dhall-typecheck|gadt-decode|extension-astcheck|provision-seal|rendered-output-golden|live-effect)`")
 
 ALLOWED_LOCI = {
-    "Gate-1-editor",
-    "Gate-2-decoder",
-    "Gate-3-astcheck",
+    "dhall-typecheck",
+    "gadt-decode",
+    "extension-astcheck",
     "provision-seal",
     "rendered-output-golden",
     "live-effect",
@@ -101,7 +101,7 @@ def registry_violations(root: Path) -> list[tuple[str, int | None, str]]:
             errors.append(("dhall/examples/locus_registry.tsv", line, "subcase must be non-empty kebab-case"))
         if row["validation_locus"] not in ALLOWED_LOCI:
             errors.append(("dhall/examples/locus_registry.tsv", line, f"unknown locus {row['validation_locus']}"))
-        if not re.fullmatch(r"Phase-(?:[1-9]|[1-5][0-9]|6[0-4])", row["owner_phase"]):
+        if not re.fullmatch(r"Phase-(?:[1-9]|[1-6][0-9]|7[0-4])", row["owner_phase"]):
             errors.append(("dhall/examples/locus_registry.tsv", line, f"unknown owner {row['owner_phase']}"))
         if row["case_family"] not in ALLOWED_FAMILIES:
             errors.append(("dhall/examples/locus_registry.tsv", line, f"unknown family {row['case_family']}"))

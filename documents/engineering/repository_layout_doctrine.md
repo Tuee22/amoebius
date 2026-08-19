@@ -15,7 +15,7 @@ rule in [`generated_artifacts_doctrine.md`](./generated_artifacts_doctrine.md) i
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_26_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_36_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -255,6 +255,14 @@ containers, volumes, or build cache, cannot fall back to `/tmp`, `/var/tmp`, `/v
 home, and cannot run a test against `.data/**`. A tool that cannot redirect all project-owned state into the
 closed roots is not an admissible backend.
 
+**A published toolchain image is not project-owned state.** The one artifact the rule above would otherwise
+foreclose is the base image a consumer pulls rather than builds. It is admissible on the same terms as an
+operator-installed prerequisite executable, because it is a *resolved-toolchain artifact* rather than data:
+it holds no runtime, durable, or evidentiary bytes, its content is a pure function of the authored recipe and
+its parent, it is named by a digest nobody typed, and it is reclaimable by one declared command. Every
+*mutable* byte a run produces still lands in the closed roots. A run that leaves behind a container, volume,
+network, or daemon state surviving the run is a containment failure exactly as before.
+
 ## 3. Complete generated-output inventory
 
 Every generated file belongs to one of the paths below, including the explicitly source-adjacent Python cache
@@ -284,7 +292,7 @@ patterns in §3.2. A generator requiring a new output class must amend this inve
 ├── test-corpora/**                       materialized negatives derived from authored seeds/recipes
 ├── locks/**                              dependency solver output
 │   └── phase_*/resolution-*.json
-├── toolchain/**                          downloaded/resolved tool state
+├── toolchain/<os>-<arch>/**              downloaded/resolved tool state, partitioned by platform
 │   ├── resolved.json
 │   ├── downloads/**
 │   ├── bin/**

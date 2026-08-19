@@ -49,7 +49,7 @@ backup-medium-fit	cases	backup-medium-fit
 disjoint-capacity-pools	cases	disjoint-capacity-pool
 restore-target-fit	cases	restore-target-fit
 snapshot-bound-storage-scaling	cases	scaling-shrink-highwater
-bounded-training-gate1	metrics	gate1-training-cases
+bounded-training-dhall_typecheck	metrics	dhall-typecheck-training-cases
 independent-storage-envelope-properties	metrics	quickcheck-properties
 storage-fold-compile-totality	metrics	storage-fold-totality
 phase8-mutant-battery	metrics	mutants

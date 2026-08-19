@@ -37,7 +37,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 EMITTED = ROOT / ".build" / "tla" / "gateway-migration-model-spec"
 RESULTS = EMITTED / "phase-results.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_04_gateway_migration_model.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_10_gateway_migration_model.md"
 GATE_COMMAND = "python3 tools/gateway_migration_model_gate.py"
 EXPECTATIONS = "test/oracle/gateway_migration_model_surfaces.tsv"
 

@@ -64,14 +64,14 @@ verifyNegativeCorpus root inventory = do
   positive <- TextIO.readFile (root </> "dhall/examples/wireguard_fabric.dhall")
   inline <- TextIO.readFile (root </> "dhall/examples/illegal_wg_inline_key.dhall")
   require (rejectInlineKeyLiteral positive == Right ()) "positive SecretRef fixture was rejected"
-  require (tagOf (rejectInlineKeyLiteral inline) == "gate1-inline-key-literal") "inline-key negative wrong reason"
+  require (tagOf (rejectInlineKeyLiteral inline) == "dhall-typecheck-inline-key-literal") "inline-key negative wrong reason"
   let peers = fabricPeers inventory
       overlapping = inventory {fabricPeers = case peers of
         first : second : rest -> first : second {peerVpnIp = peerVpnIp first} : rest
         _ -> peers}
   require (tagOf (renderFabric overlapping) == "decode-vpn-ip-overlap") "overlap negative wrong reason"
   require (tagOf (validateAllowedCidr (fabricCidr inventory) "10.88.0.0/16") == "decode-allowed-ips-outside-fabric") "out-of-CIDR negative wrong reason"
-  forM_ ["gate1-inline-key-literal", "decode-vpn-ip-overlap", "decode-allowed-ips-outside-fabric"] $ \tag ->
+  forM_ ["dhall-typecheck-inline-key-literal", "decode-vpn-ip-overlap", "decode-allowed-ips-outside-fabric"] $ \tag ->
     require (tag `Text.isInfixOf` tags) ("negative oracle missing tag: " <> Text.unpack tag)
  where
   tagOf result = either fabricErrorTag (const "unexpected-success") result

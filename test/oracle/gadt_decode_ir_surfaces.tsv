@@ -1,0 +1,40 @@
+# Authored expectation for the Phase-6 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. The ids are the metric keys the Gate-2 battery is
+# obliged to record, read off this phase's contract.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   metrics   the metric keys in .build/dsl/gadt-decode/phase-results.tsv
+#   checks    the check ids tools/gadt_decode_ir_gate.py implements
+#
+# `capacity-feasibility`, `binding-feasibility`, and `runtime-fidelity` name metrics whose
+# recorded value is the literal `UNVERIFIED`: Gate 2 forecloses structure, and those three
+# are discharged by later phases. They are listed so the ledger carries them explicitly.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+dsl-core-build	metrics	dsl-core-build
+native-inputfile-auto	metrics	native-inputfile-auto
+fail-closed-exception-wrapper	metrics	fail-closed-wrapper
+deep-normal-form-force	metrics	deep-normal-form-force
+gadt-decode-positive-corpus	metrics	positive-fixtures
+gadt-decode-tagged-negative-corpus	metrics	tagged-negatives
+dhall-typecheck-green-negative-precondition	metrics	dhall-typecheck-preconditions
+import-policy	metrics	import-policy-negatives
+phantom-tenant-compile-pair	metrics	compile-fail-pairs
+gadt-transition-compile-pair	checks	compile-pair-oracle-rows
+ownership-index-compile-pair	checks	compile-pair-loci-distinct
+semantic-hash-oracle	metrics	semantic-hash-oracle
+structural-tree-inventory	metrics	structural-tree-rows
+structural-deletion-mutants	metrics	structural-deletion-mutants
+structural-substitution-mutants	metrics	structural-substitution-families
+legalized-negative-polarity-mutant	metrics	legalized-negative-mutant
+non-partiality-scan	metrics	non-partiality-scan
+absolute-tool-argv-observer	metrics	absolute-tool-argv
+argv-observer-mutants	metrics	argv-observer-mutants
+gadt-decode-spec-decode	metrics	acceptance-token
+capacity-feasibility	metrics	capacity-feasibility
+binding-feasibility	metrics	binding-feasibility
+runtime-fidelity	metrics	runtime
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle,results-are-measured

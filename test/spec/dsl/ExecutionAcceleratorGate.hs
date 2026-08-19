@@ -98,7 +98,7 @@ loadOracle path = do
 
 checkGate1 :: IO ()
 checkGate1 = do
-  contents <- Text.readFile "test/oracle/execution_accelerator/gate1_cases.tsv"
+  contents <- Text.readFile "test/oracle/execution_accelerator/dhall_typecheck_cases.tsv"
   case Text.lines contents of
     [] -> fail "Phase-9 Gate-1 oracle is empty"
     header : rows -> do

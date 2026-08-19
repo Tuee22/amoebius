@@ -170,7 +170,7 @@ rejectInlineKeyLiteral source
 
 fabricErrorTag :: FabricError -> Text
 fabricErrorTag failure = case failure of
-  InlineKeyLiteral -> "gate1-inline-key-literal"
+  InlineKeyLiteral -> "dhall-typecheck-inline-key-literal"
   VpnIpOverlap -> "decode-vpn-ip-overlap"
   AllowedIpsOutsideFabric -> "decode-allowed-ips-outside-fabric"
   InvalidFabricCidr -> "decode-invalid-fabric-cidr"

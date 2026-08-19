@@ -70,7 +70,7 @@ test/fake/	test/harness/fake/	seven-noun-rule
 # --- Sprint 2.2: one mutant root ----------------------------------------------------
 
 mutants/phase31/	test/mutant/platform_services_2/	mutants/**, test/live/mutants/**, test/host/mutants/**
-mutants/	test/mutant/dhall_gate1_schema/	mutants/**, test/live/mutants/**, test/host/mutants/**
+mutants/	test/mutant/dhall_typecheck_schema/	mutants/**, test/live/mutants/**, test/host/mutants/**
 
 # --- Sprint 2.3: the package-only roots become cabal stanzas ------------------------
 #

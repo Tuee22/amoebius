@@ -87,7 +87,7 @@ runCase :: FilePath -> CaseRow -> IO (CaseRow, Either (String, String) CheckedUi
 runCase root row = do
   decoded <- decodeUiSource (fixturePath root row)
   let actual = case decoded of
-        Left _ -> Left (gate1Tag row, rowSpan row)
+        Left _ -> Left (dhallTypecheckTag row, rowSpan row)
         Right source -> case checkUiSource source of
           Left problem -> Left (errorTag problem, errorSpan problem)
           Right checked -> Right checked
@@ -97,8 +97,8 @@ runCase root row = do
     _ -> die (rowFile row <> " outcome drifted: " <> either show (const "accepted") actual)
   pure (row, actual)
 
-gate1Tag :: CaseRow -> String
-gate1Tag row = case rowFile row of
+dhallTypecheckTag :: CaseRow -> String
+dhallTypecheckTag row = case rowFile row of
   "raw_browser_escape.dhall" -> "RawBrowserEscape"
   "raw_external_link_url.dhall" -> "RawExternalLinkUrl"
   _ -> "UnexpectedGate1Failure"

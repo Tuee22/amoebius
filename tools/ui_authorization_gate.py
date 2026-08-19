@@ -41,7 +41,7 @@ RESULTS = ROOT / ".build/dsl/ui-authorization/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-authorization/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-authorization"
 TEMP_ROOT = ROOT / ".build/tmp/ui-authorization"
-CONTRACT = "DEVELOPMENT_PLAN/phase_21_ui_authorization_kernel.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_27_ui_authorization_kernel.md"
 GATE_COMMAND = "python3 tools/ui_authorization_gate.py"
 EXPECTATIONS = "test/oracle/ui_authorization_surfaces.tsv"
 

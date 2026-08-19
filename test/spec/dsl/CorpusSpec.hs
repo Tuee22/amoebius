@@ -26,8 +26,8 @@ import System.Process (proc, readCreateProcessWithExitCode)
 type CoverageKey = (Text, Text, Text)
 
 data CorpusSummary = CorpusSummary
-  { gate1Count :: Int
-  , gate2Count :: Int
+  { dhallTypecheckCount :: Int
+  , gadtDecodeCount :: Int
   , positiveCount :: Int
   , coveredKeys :: Set CoverageKey
   }
@@ -45,19 +45,19 @@ resolvedDhall = do
 
 runCorpusSpec :: IO CorpusSummary
 runCorpusSpec = do
-  gate1Rows <- rowsOf "test/oracle/illegal_state_corpus/gate1_cases.tsv"
-  gate2Rows <- rowsOf "test/oracle/illegal_state_corpus/gate2_cases.tsv"
-  gate1Keys <- traverse checkGate1 gate1Rows
-  gate2Keys <- traverse checkGate2 gate2Rows
+  dhallTypecheckRows <- rowsOf "test/oracle/illegal_state_corpus/dhall_typecheck_cases.tsv"
+  gadtDecodeRows <- rowsOf "test/oracle/illegal_state_corpus/gadt_decode_cases.tsv"
+  dhallTypecheckKeys <- traverse checkGate1 dhallTypecheckRows
+  gadtDecodeKeys <- traverse checkGate2 gadtDecodeRows
   forM_ positiveFixtures requireDecoded
   checkMalformedCbor
-  let cborKey = ("3.23", "consume-codec", "Gate-2-decoder")
+  let cborKey = ("3.23", "consume-codec", "gadt-decode")
   pure
     CorpusSummary
-      { gate1Count = length gate1Rows
-      , gate2Count = length gate2Rows + 1
+      { dhallTypecheckCount = length dhallTypecheckRows
+      , gadtDecodeCount = length gadtDecodeRows + 1
       , positiveCount = length positiveFixtures
-      , coveredKeys = Set.fromList (gate1Keys <> gate2Keys <> [cborKey])
+      , coveredKeys = Set.fromList (dhallTypecheckKeys <> gadtDecodeKeys <> [cborKey])
       }
 
 checkGate1 :: [Text] -> IO CoverageKey
@@ -72,7 +72,7 @@ checkGate1 columns = case columns of
     expected <- Text.readFile (Text.unpack golden)
     let actual = normalizeDhallError cleaned
     assert (actual == expected) (Text.unpack negative <> " Gate-1 error diverged from " <> Text.unpack golden)
-    pure (entry, subcase, "Gate-1-editor")
+    pure (entry, subcase, "dhall-typecheck")
   _ -> failTest "malformed Gate-1 corpus row"
 
 checkGate2 :: [Text] -> IO CoverageKey
@@ -89,7 +89,7 @@ checkGate2 columns = case columns of
         assert
           (decodeErrorTag problem == expected)
           (Text.unpack negative <> " returned " <> Text.unpack (decodeErrorTag problem) <> ", expected " <> Text.unpack expected)
-    pure (entry, subcase, "Gate-2-decoder")
+    pure (entry, subcase, "gadt-decode")
   _ -> failTest "malformed Gate-2 corpus row"
 
 checkMalformedCbor :: IO ()

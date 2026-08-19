@@ -1,14 +1,14 @@
 # Image Build & Registry
 
-> **Purpose**: Define how amoebius bakes third-party service binaries into one multi-arch base container and
-> builds its own generic runtime image (buildx amd64+arm64), publishes them atomically into the in-cluster
+> **Purpose**: Define how amoebius bakes third-party service binaries into one base container per
+> architecture and builds its own generic runtime image from it, publishes them atomically into the in-cluster
 > `distribution` registry (which replaces Harbor), and where the build runs — so every cluster pulls only
 > from that registry and every byte is reproducible. Low-code UI programs are immutable release data, not
 > application-specific browser or server images.
 > **Read this if**: an image has to be built or published, or the question is what is baked versus resolved at runtime.
 
-This document owns the build side of image supply: the typed catalog, the generated build file, multi-arch
-publication as one atomic act, and the rule fixing what is baked in. It does not own the registry's existence
+This document owns the build side of image supply: the typed catalog, the generated build file, publication
+of each architecture as one atomic act, and the rule fixing what is baked in. It does not own the registry's existence
 as a platform service, owned by
 [platform_services_doctrine.md §3](./platform_services_doctrine.md#3-the-registry--the-single-image-source),
 nor the runtime asset cache that is the deliberate exception, owned by
@@ -19,7 +19,7 @@ nor the runtime asset cache that is the deliberate exception, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_67_second_arch_attested_index.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_50_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_51_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_amoebius_image_recipe.md, DEVELOPMENT_PLAN/phase_06_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_35_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_36_base_image_registry.md, DEVELOPMENT_PLAN/phase_41_platform_backbone.md, DEVELOPMENT_PLAN/phase_42_platform_services_2.md, DEVELOPMENT_PLAN/phase_55_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_56_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_57_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_73_complementary_arch_child.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -29,8 +29,8 @@ nor the runtime asset cache that is the deliberate exception, owned by
 ## Contents
 - [1. Scope — the build side, not the registry's existence](#1-scope--the-build-side-not-the-registrys-existence)
 - [2. The single distribution rule: bake the binaries, build the amoebius image, pull only in-cluster](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)
-- [3. Multi-architecture images — one natively built child per architecture](#3-multi-architecture-images--one-natively-built-child-per-architecture)
-- [4. Atomic publication — a partial multi-arch upload is a failed upload](#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload)
+- [3. One image per architecture — the tag carries the architecture, not an index](#3-multi-architecture-images--one-natively-built-child-per-architecture)
+- [4. Atomic publication — a partial upload is a failed upload](#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload)
 - [5. Versioning vs `:latest` — DEVELOPMENT_PLAN decision (recommended default: immutable, never `:latest`)](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)
 - [6. Host build vs in-pod build — DEVELOPMENT_PLAN decision (recommended default: host builder for v1)](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)
 - [7. What amoebius bakes vs builds — the base container is the supply chain](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)
@@ -51,11 +51,11 @@ the registry is; this doc says *how the pipeline feeds it*.
 
 This document is the SSoT for:
 
-1. The multi-arch build mechanism — one natively built `buildx` child per architecture, joined into one OCI
-   manifest list ([§3](#3-multi-architecture-images--one-natively-built-child-per-architecture)).
+1. The per-architecture build mechanism — one natively built image per architecture, published under its own
+   architecture-qualified tag and never joined ([§3](#3-multi-architecture-images--one-natively-built-child-per-architecture)).
 2. Atomic publication and the fail-on-partial-upload semantics ([§4](#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload)).
 3. The versioning policy — immutable digest-pinned tags vs `:latest` ([§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest), a flagged decision).
-4. Where the build runs — host buildx daemon vs in-pod builder ([§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1), a flagged decision).
+4. Where the build runs — host container engine vs in-pod builder ([§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1), a flagged decision).
 5. What amoebius **bakes** (third-party service binaries) versus what it **builds** (its own runtime image) —
    the adopted base-container packaging ([§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)).
 6. The no-environment-variable / no-`PATH` build mechanics and credential handling ([§8](#8-build-mechanics-under-the-no-env--no-path-contract)).
@@ -78,6 +78,21 @@ inherited from prodbox, that is *evidence from a sibling system*, not proof in a
 
 ---
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
+```mermaid
+flowchart LR
+%% register: orientation
+  cat[Bake catalog: one authored document] -->|pure projection| rec[Rendered recipe: one file, no authored digest]
+  rec -->|docker build, natively, per architecture| base[amoebius-base: four published tags, cpu and cuda by amd64 and arm64]
+  base -->|pulled, not rebuilt| runtime[Runtime image: the base plus the amoebius binary]
+  rec -->|built on demand, never published| pw[Playwright image: chromium, firefox, webkit]
+  runtime -->|only source a workload pulls from| reg[In-cluster distribution registry]
+```
+*Orientation. Design intent. One catalog and one recipe produce every image amoebius owns; the base is published so a consumer pulls a toolchain rather than rebuilding it, and the browser engines are the one dependency that does not join the image a cluster runs. The in-cluster registry every workload pulls from is owned by [platform_services_doctrine.md §3](./platform_services_doctrine.md#3-the-registry--the-single-image-source).*
+
+---
+
 ## 2. The single distribution rule: bake the binaries, build the amoebius image, pull only in-cluster
 
 Every byte the cluster runs is either **baked into the amoebius base image** (every third-party service
@@ -86,8 +101,18 @@ in-cluster registry. **No workload ever pulls from a public registry.** This is 
 the supply-chain guarantee: amoebius controls every byte, does not depend on upstream availability or
 rate limits, and a warm cluster is air-gapped by construction.
 
+**The published set is exactly four tags**, and this sentence is where that set is stated rather than drawn:
+`amoebius-base-cpu-amd64`, `amoebius-base-cpu-arm64`, `amoebius-base-cuda-amd64`, and
+`amoebius-base-cuda-arm64` — the cross product of two flavors, **cpu** and **cuda**, with two
+architectures, **amd64** and **arm64**. Two flavors because a CPU-only lane should not carry a CUDA toolchain it can never
+run; two architectures because nothing cross-builds and nothing joins the halves
+([§3](#3-multi-architecture-images--one-natively-built-child-per-architecture)). `amoebius-base` is the one
+image a consumer **pulls** rather than rebuilds; every other image in the system is built locally, and the
+Playwright test image is never published at all
+([validation_frame_doctrine.md §5](./validation_frame_doctrine.md#5-the-one-exception-browsers)).
+
 - **Third-party service binaries are baked, not mirrored.** amoebius does not pull or mirror public *images*
-  for the platform services. Each service's binary is installed into the multi-arch base image at build time
+  for the platform services. Each service's binary is installed into the base image at build time
   — preferring `apt`, then an official binary/tarball, then build-from-source ([§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)) — so the running workload
   is amoebius's own image carrying a trusted binary, not someone's public container. The only contact with
   upstream is the **base-image build** downloading those binaries/packages on the builder, never an
@@ -104,11 +129,19 @@ rate limits, and a warm cluster is air-gapped by construction.
   file. The build verifies and extracts it with the owning artifact. An independent OCI-file oracle requires
   the file on every platform, and an omission mutant must fail. Pulsar's tiered-storage bundle is the concrete
   case: its jcloud NAR belongs under `/pulsar/offloaders`, not in a later network fetch.
-- **The rule binds workloads, and the bootstrap tools are a named exception.** "No public pull" is a statement
-  about what the *cluster runs*. The host-side tools that bring a cluster into existence before there is a
-  registry to pull from — the kind node image that Phase 29 boots, and the buildx/buildkit builder that
-  produces the image in the first place — are build and bootstrap infrastructure, not workloads. They are
-  named here so the exception is bounded and visible rather than discovered later in a Dockerfile.
+- **The rule binds workloads, and the exception is enumerated rather than described.** "No public pull" is a
+  statement about what the *cluster runs*, and the identities below are build and bootstrap infrastructure
+  that no cluster runs. They are enumerated here so the exception is bounded and visible rather than
+  discovered later in a Dockerfile:
+  - the **kind node image**, pulled by the host container engine before any cluster exists;
+  - the **language builder images** that compile the rung-3 build products, each of which runs once on the
+    builder, emits one binary into the build context, and is discarded — a builder image that left bytes in
+    the final layer set would be the scavenge rung under another name;
+  - **`amoebius-base` itself**, which the operator publishes and a consumer pulls rather than rebuilds. It
+    is the one amoebius-built image that arrives from outside the cluster, and it arrives there because
+    rebuilding a toolchain on every host is the cost the publication exists to remove. The rule it does not
+    weaken is the one that matters: *no workload* pulls from a public registry, and every image a cluster
+    runs still comes from that cluster's own registry.
 - **The in-cluster registry is `distribution`, not Harbor.** The registry every workload pulls from is the
   single-binary `distribution` (`registry:2`) OCI registry — itself a baked binary ([§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)) — which **replaces Harbor**. It serves amoebius-built images — the base image and every `Runtime` variant
   ([§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)); it is *not* a
@@ -130,94 +163,97 @@ rate limits, and a warm cluster is air-gapped by construction.
 ---
 
 <a id="3-buildx-multi-arch--amd64-and-arm64-one-manifest-list"></a>
-## 3. Multi-architecture images — one natively built child per architecture
+<a id="3-multi-architecture-images--one-natively-built-child-per-architecture"></a>
+## 3. One image per architecture — the tag carries the architecture, not an index
 
 amoebius runs on both x86 substrates (linux-cpu / linux-cuda, typically `amd64`) and Apple-Silicon hosts
-(`arm64`). A single-arch image would mean "this image only runs where it was built" — fatal for a
-fungible, spawn-anywhere cluster. So **every amoebius-published image is multi-arch**, and every child of
-that index is built and executed on hardware whose natural architecture is that child's
-([substrate_doctrine.md §1.1 — the natural-architecture rule](./substrate_doctrine.md#11-the-natural-architecture-rule)).
+(`arm64`), so an image built for one architecture is useless on the other. amoebius answers that with **one
+natively built image per architecture, published under an architecture-qualified tag** — and with no index
+joining them.
 
 Concretely:
 
-- **One `docker buildx` invocation per architecture, on a host of that architecture**, with
-  `--platform linux/<that host's natural arch>`. Each invocation emits one platform child.
-- **The index is a join, not a build product.** The published **OCI manifest list** (a "fat manifest") is
-  assembled from children that already exist, so the node runtime still selects the matching arch at pull
-  time. Assembling an index moves manifests and blobs by digest; it executes no baked binary, so the join
-  itself is architecture-neutral and may run on either host.
-- **A child is admitted only with its own natural-architecture attestation.** The attestation is produced by
-  the gate that built the child, on that architecture's hardware, and records the per-binary execution and
-  ELF-machine observations for it. A child whose attestation is missing, foreign, or unverifiable is as
-  absent as a child that was never pushed ([§4](#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload)).
-- **No emulated build and no cross-toolchain.** A single-arch host does not cross-build the other arch. This
-  is the clause the natural-architecture rule replaced; what it bought — a two-architecture index from one
-  machine — was an index half of which nothing had ever run.
+- **One plain `docker build` per architecture, on a host of that architecture.** No `buildx`, no BuildKit
+  multi-platform invocation, no emulation, and no cross-toolchain: the requested architecture, the detected
+  host architecture, and the container engine's architecture are compared before any build starts, and a
+  mismatch refuses rather than emulating. A container shares the host kernel and therefore the host
+  instruction set, so an image for an architecture the host cannot execute is not something a build can
+  honestly produce.
+- **The architecture is in the reference, not in a manifest.** Each build publishes its own tag, and a
+  consumer names the architecture it wants. This is the same move the natural-architecture rule already made
+  everywhere else — an engine offering and a generated test topology both carry their architecture — applied
+  to images.
+- **There is no join, and that is the point.** An OCI manifest list would be an artifact **no single host
+  ever attested**: whichever machine assembled it would be advertising a child it could not execute, which is
+  exactly the half-proven index the 2026-08-16 natural-architecture amendment exists to remove. Removing the
+  join does not weaken that amendment; it finishes it, by moving the obligation out of a join step and into
+  the reference's own identity.
 - **Each architecture resolves its own toolchain graph, and the two must agree.** The compatible compiler and
   packages are resolved per run on each host; the attestations record both observations and reject
   per-architecture dependency drift by comparing them. No resolution file is committed.
 
-This is the principal generalization over prodbox, which published **native-host-architecture images only**
-(`local_registry_pipeline.md` [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1) step 4). amoebius lifts native-host-architecture-only builds to an index
-covering both arches, each half proven where it runs.
+What a caller loses is the convenience of one reference that resolves everywhere; what it gains is that every
+reference names bytes some machine actually ran. On a mixed-architecture cluster the per-node selection moves
+from the registry to the manifest that names the image, which is a deployment concern owned by
+[service_capability_doctrine.md](./service_capability_doctrine.md).
 
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
 %% register: algebra
-  src["amoebius source plus Dockerfile"]:::intent --> bxa[/"buildx on an amd64 host: platform linux amd64"/]:::effect
-  src --> bxb[/"buildx on an arm64 host: platform linux arm64"/]:::effect
-  bxa --> ata(("amd64 child plus its native attestation")):::seal
-  bxb --> atb(("arm64 child plus its native attestation")):::seal
-  ata --> ml((("joined OCI manifest list one tag"))):::seal
-  atb --> ml
-  ml -->|atomic push| reg["Registry project on this cluster: distribution"]:::runtime
-  reg -->|amd64 node selects amd64| amd["amd64 node pull"]:::runtime
-  reg -->|arm64 node selects arm64| arm["arm64 node pull"]:::runtime
+  src["amoebius source plus rendered recipe"]:::intent --> bxa[/"docker build on an amd64 host"/]:::effect
+  src --> bxb[/"docker build on an arm64 host"/]:::effect
+  bxa --> ata(("amd64 image plus its native attestation")):::seal
+  bxb --> atb(("arm64 image plus its native attestation")):::seal
+  ata -->|atomic push of one tag| reg["Registry project on this cluster: distribution"]:::runtime
+  atb -->|atomic push of one tag| reg
+  reg -->|amd64 node names the amd64 tag| amd["amd64 node pull"]:::runtime
+  reg -->|arm64 node names the arm64 tag| arm["arm64 node pull"]:::runtime
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
   classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Design intent. Each buildx build is an effectful seam on its own architecture's hardware, and each child is sealed by the attestation of the host that executed it; the join, the running registry, and the amd64/arm64 node pulls are runtime-checked, not proven here.*
+*Design intent. Each build is an effectful seam on its own architecture's hardware and each image is sealed by the attestation of the host that executed it; the running registry and the two node pulls are runtime-checked, not proven here.*
 
 ---
 
-## 4. Atomic publication — a partial multi-arch upload is a failed upload
+<a id="4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload"></a>
+## 4. Atomic publication — a partial upload is a failed upload
 
-An open design question asks directly whether a multi-arch publish should fail on both arches if only one
-upload fails. amoebius's doctrine answer is **yes — fail closed, atomically.**
+An open design question asks directly whether a publish should fail when only part of it lands. amoebius's
+doctrine answer is **yes — fail closed, atomically** — and with one image per architecture
+([§3](#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index)) the unit that must be
+whole is one tag rather than one index.
 
-A multi-arch tag that resolves on `amd64` but 404s on `arm64` breaks reproducibility on that arch: the
-cluster looks healthy until an `arm64` node tries to schedule the pod. A half-published tag fails at schedule
-time on the missing arch, not at publish time. So amoebius treats a multi-arch image as one indivisible artifact:
+A tag that resolves for some of its blobs and 404s for the rest breaks reproducibility: the cluster looks
+healthy until a node tries to schedule the pod. A half-published tag fails at schedule time, not at publish
+time. So amoebius treats each architecture's image as one indivisible artifact:
 
-- **The index is advertised under one push, or the publication fails.** amoebius does not advertise per-arch
-  tags separately and stitch a manifest afterward: the children are built independently
-  ([§3](#3-multi-architecture-images--one-natively-built-child-per-architecture)), but the *advertisement* is one act that
-  either lands the complete index or errors. There is no intermediate state where one arch is live under the
-  published tag and the other is missing.
-- **An unattested child is an absent child.** The index is publishable only when every target architecture
-  has both its content and the attestation produced on that architecture's own hardware. This is what keeps
-  the independent per-architecture builds from re-admitting the half-proven index that one emulated build
+- **A tag is advertised under one push, or the publication fails.** There is no intermediate state where a
+  tag is live and incomplete. The two architectures are published independently and neither waits on the
+  other, which is the practical gain of dropping the join: a machine that can build only one architecture can
+  still publish that one completely, instead of holding a half-index nobody can use.
+- **An unattested image is an absent image.** A tag is publishable only with the attestation produced on that
+  architecture's own hardware, recording the per-binary execution and ELF-machine observations for it. This
+  is what keeps an independently built image from re-admitting the half-proven artifact an emulated build
   used to produce.
-- **A failed publication leaves the tag un-advertised.** On partial/failed push, amoebius does not record
+- **A failed publication leaves the tag un-advertised.** On partial or failed push, amoebius does not record
   the tag as published; downstream reconcile treats the image as not-yet-available and will not deploy a
-  workload against it. (This mirrors prodbox's "push custom images only when the Harbor target for the
-  current architecture is missing," generalized to "the tag is published only when *every* target arch is
-  present.")
-- **Re-run is idempotent.** Because publication is all-or-nothing and the published-set is derived from
-  what the registry actually holds, re-running the build after a failure re-attempts the whole manifest list; a
-  fully-present tag is a no-op. This is the build-side reading of the project-wide idempotent-reconcile
-  posture.
+  workload against it.
+- **Re-run is idempotent.** Because publication is all-or-nothing and the published set is derived from what
+  the registry actually holds, re-running after a failure re-attempts the whole tag; a fully present tag is a
+  no-op. This is the build-side reading of the project-wide idempotent-reconcile posture.
 - **Transient registry unavailability is retried, then fails loud.** A flake during push is retried against
-  the same source; a persistent failure surfaces as an error, never as a silently-skipped arch. amoebius
-  inherits prodbox's retry-then-fail-loud publication posture (`local_registry_pipeline.md` [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)); for its
-  multi-arch images the unit of success is the complete manifest list.
+  the same source; a persistent failure surfaces as an error, never as a silently skipped image.
 
-> **Validated boundary.** Phase 30 exercised a proxy-induced partial-blob fault, observed the immutable tag
+**The architecture set is a property of the run, not of the artifact.** A cluster whose nodes are all one
+architecture is completely served by one published tag, and a mixed cluster is served by two independently
+published ones. Neither case has a partial state, because there is no artifact spanning both.
+
+> **Validated boundary.** Phase 36 exercised a proxy-induced partial-blob fault, observed the immutable tag
 > absent and its manifest GET at 404, retained the partial residue in storage accounting, then published the
 > exact audited two-architecture index with one final raw-index advertisement. A second run made zero
 > mutating registry requests. This tests the amoebius fail-closed publication mechanism for that Register-3
@@ -232,7 +268,7 @@ time on the missing arch, not at publish time. So amoebius treats a multi-arch i
 
 This is an explicitly open design question: whether to implement a versioned tagging system or just use
 `:latest`. It is flagged here as a
-[DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 30); this section records the **trade and the recommended default**, not a frozen mechanism.
+[DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 36); this section records the **trade and the recommended default**, not a frozen mechanism.
 
 amoebius's core properties are fungibility and reproducibility — a cluster that was destroyed must rebind to
 *byte-identical* shape when rebuilt, and a spawned child must run the *same* bytes
@@ -248,7 +284,7 @@ directly contradicts fungibility.
   ```text
   ImageIdentity =
     < KindNode                                  -- host-pulled, pre-cluster, outside the in-cluster boundary
-    | Base                                      -- the multi-arch third-party-binary base image (§7)
+    | Base : { flavor : Flavor, arch : Arch }   -- the third-party-binary base image, per lane and arch (§7)
     | Runtime : { linkedAdapters : Set ExtensionId }
         -- the generic executable plus exactly this trusted server/workload adapter set
     >   -- closed: no Foreign arm, no free digest, no Url; not authorable by an app .dhall
@@ -291,7 +327,7 @@ The second open design question: whether the amoebius pod itself eventually take
 that continues to be a host-daemon responsibility. Flagged as a
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision; recommended default below.
 
-A builder needs a Docker/buildx engine *somewhere*. Two homes are possible — a project-scoped host
+A build needs a container engine *somewhere*. Two homes are possible — a project-scoped host
 daemon whose data root, runtime directory, contexts, volumes, and build cache all live beneath `.data/**`
 for production or `.test_data/**` for a test (the hostbootstrap model), or an in-pod
 builder running inside the cluster. The vision states the argument for host directly: a host
@@ -357,11 +393,11 @@ build, on-host MSL compilation, not the container image.)
   resolves exactly once to a `HostCachePool`. If their carves share a physical disk, their peaks are debited
   together under that disk's single parent. A retained cache consumes its observed resident bytes until an
   observed GC removes them; the fold never assumes a cache hit, eviction, or reclaim.
-- **Build admission is snapshot-bound and precedes `buildx`.** Immediately before the first builder process,
+- **Build admission is snapshot-bound and precedes the build.** Immediately before the first builder process,
   amoebius observes host/engine-VM residual CPU, memory, backing allocations, current build-cache residents,
-  and other live build/VM/process commitments; derives the whole multi-arch transition peak; and mints a
+  and other live build/VM/process commitments; derives the whole build transition peak; and mints a
   single-use token bound to that fingerprint. Any mismatch, unknown commitment, or changed fingerprint
-  refuses with zero `buildx`/BuildKit execution and zero cache/scratch mutation. The runtime ceiling is
+  refuses with zero builder execution and zero cache/scratch mutation. The runtime ceiling is
   enforced on the BuildKit worker/cgroup or engine-VM boundary rather than treated as an estimate.
 - **Why host first.** amoebius already requires a sudo-capable host daemon and host build tooling for
   bootstrap; the host is where Apple-Silicon native `arm64` container images are built (against a Linux docker
@@ -371,11 +407,11 @@ build, on-host MSL compilation, not the container image.)
   in which host worker nodes exist precisely for substrate-specific hardware
   ([substrate_doctrine.md](./substrate_doctrine.md)).
 - **Why in-pod is the eventual target, not the v1 default.** An in-pod builder removes the host build
-  dependency for cloud-managed substrates that have no operator host (the Phase 49 stateless in-cluster
+  dependency for cloud-managed substrates that have no operator host (the Phase 55 stateless in-cluster
   daemon). The cost is a builder pod that needs privileged build access and its own multi-arch story —
   deferred, not adopted by default.
 - **The build location does not change the output contract.** Wherever it runs, the builder emits the [§3](#3-multi-architecture-images--one-natively-built-child-per-architecture)
-  manifest list and publishes under [§4](#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload) atomic semantics. A future host→pod migration is a builder-backend
+  architecture-qualified image and publishes under [§4](#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload) atomic semantics. A future host→pod migration is a builder-backend
   swap behind the same publish contract, not a re-architecture of distribution. The
   `BuildExecutionEnvelope` accounts for execution; the resulting platform-indexed `ImageArtifact` records OCI
   index/child-manifest/config/compressed-layer stored bytes, snapshot chain ids/unpacked bytes, and peak import
@@ -429,7 +465,15 @@ toolchain is not sitting in the image. The one
    new toolchain required is a **multi-arch Temurin JRE/JDK** for the JVM services (Keycloak,
    keycloak-config-cli, Pulsar+ZooKeeper+BookKeeper) — which are a tarball + a per-arch JRE, not source
    builds. Envoy's data plane is taken as an **official binary** (its from-source path is Bazel, which
-   amoebius does not adopt). Go/Rust/C/Node/Python toolchains are already present in the base image.
+   amoebius does not adopt). The rung-3 build products are compiled in throwaway builder containers
+rather than in the image, because a build product's *inputs* are not something the image should carry.
+
+**The language toolchains themselves are a different case, and they are in the base.** The base is the
+validation frame: every language-validation verb the host binary offers is a `docker run --rm` into it, so
+the compilers it carries are the compilers the plan's Register-1 and Register-2 results were produced with
+([`validation_frame_doctrine.md`](./validation_frame_doctrine.md)). Leaving them out would put the toolchain
+back on the developer's host, which is the fact the frame exists to remove from every claim. The price is
+real — a pod pulls compilers it will not run — and it is the price of one lineage rather than two.
 
 ### The runtime image: one recipe, a family of trusted-adapter variants
 
@@ -468,16 +512,43 @@ interaction changes; only a runtime/catalog ABI change rebuilds the image. Gener
 minimal entry artifacts remain non-committed release artifacts under
 [generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md).
 
+### The browser engines are a separate image, built on demand and never published
+
+The monocontainer carries no browser. amoebius drives a browser for exactly one purpose — an end-to-end gate
+deciding whether what the interpreter served matches what the release plan said — and that is a statement a
+gate makes about a release, not a workload the cluster runs. No `InClusterRole` opens a page, no `WorkerKind`
+names a browser, and no capability provider is one, so a browser in the monocontainer would charge every pod
+in every cluster for a renderer none of them reaches.
+
+It is the one service-shaped dependency that does not join the monocontainer, and it gets its own image
+rather than a host install:
+
+- **A dedicated Playwright image, from the same Ubuntu base**, carrying **chromium, firefox and webkit**.
+  The end-to-end policy is that every end-to-end test runs against all three engines, so all three are
+  present or the policy is unenforceable.
+- **Built on demand, idempotently, by the host binary** — not published. It is a test fixture whose inputs
+  are the authored recipe, so rebuilding it is cheap and re-deriving it is always available; publishing it
+  would add a fourth artefact to keep in step with the repository for no reader.
+- **Reached through `docker run --rm`.** Running tests is a host-binary responsibility like every other
+  lifecycle action, and the browser image is one more frame the binary lifts a step into rather than a
+  second way of running a test.
+
+This is why the base image's browser story is one *interpreter* and no *engine*: the payload it serves is
+[above](#the-browser-payload-is-one-generic-interpreter-not-one-bundle-per-app), and the engine that renders
+it lives outside the image the cluster runs.
+
 ### The infernix/jitML engine runtimes are jit-resolved, not baked
 
-What the base image *does* bake for the ML layer is the **jit-build resolver and its build toolchain** — the
-Linux source-build inputs (`nvcc`, `g++`, the pinned compilers) the resolver needs to build an engine from
-source on a cache miss. The **Apple-Metal bridge is not among the baked inputs**: it is a macOS Mach-O
+What the base image *does* bake for the ML layer is the **jit-build resolver and the host-side compiler**
+it needs to build an engine from source on a cache miss. The accelerator compiler is **not** among them:
+`nvcc` has no step in the catalog and is not meant to acquire one, because the accelerator toolchain
+arrives with the lane's parent image rather than as a bake step, and a CPU-only lane must not carry a
+compiler it can never run. The **Apple-Metal bridge is not among the baked inputs**: it is a macOS Mach-O
 **host-resident** dylib source-built headless *on the Apple host* with `/usr/bin/clang` in the
-apple-substrate phase (Phase 68 —
+apple-substrate phase (Phase 74 —
 [apple_metal_headless_builds.md §1](./apple_metal_headless_builds.md#1-the-commitment-headless-on-host-no-vm),
 [§3.1](./apple_metal_headless_builds.md#31-fixed-host-metal-bridge)) and **cannot run in a Linux container or a Linux VM**, so it is **never baked into the multi-arch `linux/amd64`+`arm64` base image** — the base
-image bakes only the Linux resolver toolchain, and the Metal bridge is a Phase-68 on-host build. The engine
+image bakes only the Linux resolver toolchain, and the Metal bridge is a Phase-74 on-host build. The engine
 *payloads* themselves (`llama.cpp`, `whisper.cpp`, the ONNX runtime, Audiveris, the adapters) are **named catalog identities** the shared `jit-build` resolver **downloads-or-builds on first miss into the `CacheBudget`-bounded content-addressed cache** — none is baked into the image, and none is authored by URL.
 Because infernix and jitML link as extension libraries (bullet above), the *library* is present the moment
 the pod is; the *engine payload* it drives is cache-resident after the first resolve. This explicitly
@@ -485,7 +556,7 @@ the pod is; the *engine payload* it drives is cache-resident after the first res
 resolve-on-miss path. The *type-level* guarantee — `EngineRuntime` is a closed, substrate-selected,
 named-identity union with **no arbitrary-`Url`/`Download` arm (type-foreclosed)**, resolved into a bounded
 cache — and the full one-cache-shape asset lifecycle are owned by
-[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
+[content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
 and
 [service_capability_doctrine.md §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding);
 this doc owns only the build-side fact that the **resolver and its toolchain** land in the base image.
@@ -570,10 +641,19 @@ which forces a concrete divergence from prodbox's mechanics:
   volume source, or build-cache path outside the physical checkout is rejected before the build starts.
 - **Public acquisition uses a cache, not credentials or a platform-image mirror.** Canonical Docker Hub
   builder/base identities remain the authored channels. The project-private Docker daemon and bounded
-  BuildKit worker use Google's `mirror.gcr.io` cache for those public build inputs; canonical metadata is
+  builder use Google's `mirror.gcr.io` cache for those public build inputs; canonical metadata is
   preferred, with cache metadata accepted only after a canonical 429 and recorded as `resolvedVia` beside
   the canonical digest. This cache is never configured on the host-global daemon, never used by a workload,
   and never changes the rule that only the amoebius-built image enters the in-cluster registry.
+- **A rendered image recipe carries no authored digest.** Every public identity the build touches enters as
+  an authored channel and leaves as a run-local observation: the recipe names a build argument, the run
+  resolves the channel to an immutable index digest, and that digest reaches the build as the argument's
+  value. No tracked file states which bytes a public identity had. This is the split the bake catalog
+  already applies to every downloaded artifact, whose integrity value is fetched from the publisher's own
+  manifest in the layer that verifies it — extended to the one place the catalog had exempted itself. An
+  authored digest is a resolution the repository performed once and then asserts forever; a channel plus its
+  recorded resolution is a resolution *this run* performed. It also stops the rendered recipe changing every
+  time an upstream base is republished, which is a diff nobody reads and everybody approves.
 - **No `DOCKER_CONFIG` environment variable — use `docker --config <dir>`.** prodbox isolated registry-push
   auth from public-pull auth with an **ephemeral `DOCKER_CONFIG`** (`local_registry_pipeline.md` §6.1).
   That mechanism is an environment variable, which amoebius forbids. amoebius instead points the build at an
@@ -597,10 +677,10 @@ which forces a concrete divergence from prodbox's mechanics:
 prodbox had a real chicken-and-egg: it could not publish into a Harbor that was not yet up, and Harbor could
 not come up if its own prerequisite images could only be pulled from a Harbor that did not yet exist.
 **Baking plus one typed action dissolves this.** The registry is the single-binary `distribution`, baked into
-the base image, so there is no pre-registry public pull and no third-party image mirror. But Phase 30 still
+the base image, so there is no pre-registry public pull and no third-party image mirror. But Phase 36 still
 precedes the full scheduler/reconciler deployment and therefore cannot pretend a standalone service is a
 whole `ProvisionedSpec`. It constructs an explicit resource-complete `ProvisionedBootstrapRegistry`, validates
-it against a fresh Phase-29 snapshot, and mints a single-use `BootstrapRegistryAction` that side-loads the
+it against a fresh Phase-35 snapshot, and mints a single-use `BootstrapRegistryAction` that side-loads the
 image and initializes only the exact registry/proxy object domain. The action uses the same package-private
 source serializer as `renderAll`; it exposes no public per-service renderer. Enactment CAS-consumes its
 snapshot-indexed token and returns a receipt on both applied and ambiguous outcomes; an ambiguous response
@@ -613,7 +693,7 @@ move to MinIO's S3 driver after MinIO is serving
 ([platform_services_doctrine.md §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering)) —
 is a separate ordinary migration, not this bootstrap cycle. This doc records the build-side consequence:
 
-- **The base image is built and side-loaded before registry object initialization.** Phase 29's empty cluster
+- **The base image is built and side-loaded before registry object initialization.** Phase 35's empty cluster
   already exists. The only upstream contact is the base-image *build* (apt/binary/source downloads on the
   builder, [§2](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)); once that image is admitted and side-loaded, the registry/proxy
   run from it with no public pull. The cluster-bring-up readiness edge
@@ -637,7 +717,7 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 
 ## 10. Honesty and planning ownership
 
-> **Validated Phase-30 boundary — sealed 2026-08-14.** One `python3 tools/base_image_registry_gate.py --execute` run
+> **Validated Phase-36 boundary — sealed 2026-08-14.** One `python3 tools/base_image_registry_gate.py --execute` run
 > live-validated the typed acquisition ladder, the generated Dockerfile against its committed golden, the
 > bounded host build, one `linux/amd64` + `linux/arm64` OCI index, execution of all 22
 > baked binaries by absolute path — natively for the host's own architecture and, for the other,
@@ -645,15 +725,15 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 > resource/storage-complete bootstrap action, and the exact six-object `distribution`/mutation-proxy standup
 > from the side-loaded digest — with the standup observer seeing zero public-registry connections. The same run
 > then validated a proxy-induced mid-upload failure leaving the tag unadvertised with residue retained, the
-> one-request byte-exact manifest-list commit, the immutable digest reference, a zero-mutation rerun, and an
+> one-request byte-exact manifest commit, the immutable digest reference, a zero-mutation rerun, and an
 > enforcing node firewall under which the public `PullAlways` canary failed at containerd with the expected
 > timeout while the exact private digest pull succeeded. All fourteen committed mutants went red, including the
 > unenforced kindnet policy. These are Register-3 *tested* results, never proofs. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): inherited prodbox proof is evidence from a
-> sibling system, not proof in amoebius. Phase 30 resolved the immutable-reference and host-builder decisions
+> sibling system, not proof in amoebius. Phase 36 resolved the immutable-reference and host-builder decisions
 > for the validated v1 boundary; broader mechanisms remain governed by their later phase gates. The
-> reconciler-owned rendering correspondence (Phase 31) and the MinIO-backed storage rehome (Phase 35) are
+> reconciler-owned rendering correspondence (Phase 37) and the MinIO-backed storage rehome (Phase 41) are
 > **UNVERIFIED**: both phases are open under the reopened numeric sequence, and their pre-amendment records do
 > not carry forward.
 
@@ -661,13 +741,13 @@ The validated `linux-cpu` image and registry lane is always available on every h
 image or registry gate requires a pristine Linux host, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
 on Windows.
 
-Phase 49's provider plan pins a CPU-only node class and immutable SKU/catalog identity, but no EKS launch
+Phase 55's provider plan pins a CPU-only node class and immutable SKU/catalog identity, but no EKS launch
 template was materialized because AWS authentication failed. Consequently, preload of the pinned amoebius
 base/scheduler OCI content into a managed node's CRI store, public-pull absence during provider bootstrap, and
 import-workspace release are still UNVERIFIED. The two scoped executor Jobs did use the already side-loaded
-Phase-30 immutable base digest with `imagePullPolicy: Never`; that is parent-placement evidence only.
+Phase-36 immutable base digest with `imagePullPolicy: Never`; that is parent-placement evidence only.
 
-Phase 50's provider-child contract rejects public and mutable image references, and its retained-Kubernetes
+Phase 56's provider-child contract rejects public and mutable image references, and its retained-Kubernetes
 drill read back only the pinned private digest with `imagePullPolicy: Never`; the committed public-pull mutant
 turns the independent contract red. No managed-node CRI preload, provider convergence argv trace, containerd
 network observer, or EKS public-pull absence was available, so those layers remain UNVERIFIED. This scoped
@@ -675,13 +755,13 @@ result must not be described as a provider image-supply-chain pass. The `linux-c
 every hardware substrate, with pristine Linux supplied by Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
 on Windows.
 
-Phase 51 pins five AWS-EBS-CSI controller/node/sidecar binary identities, absolute paths, versions, and both
+Phase 57 pins five AWS-EBS-CSI controller/node/sidecar binary identities, absolute paths, versions, and both
 base architectures. Its static install model has no external-provisioner, Helm, public-image, or dynamic
 StorageClass arm, and the corresponding mutant turns red. The binaries were not added to or executed from a
 rebuilt provider base image in this scoped run, so both architecture probes and actual EBS CSI readiness remain
 UNVERIFIED; the fixture is an inventory contract, not a supply-chain result.
 
-Phase 53 resolves a pinned 41-byte executable engine fixture through absolute build/download recipes, verifies
+Phase 59 resolves a pinned 41-byte executable engine fixture through absolute build/download recipes, verifies
 its digest, size, and version, stores it under the private content key, and observes a registry-backed warm HIT
 without a public egress event. This is custody and resolver evidence for the Tier-1 mechanism; it is not a
 production llama.cpp payload, model-inference image, cross-architecture binary, or CUDA/Metal supply-chain

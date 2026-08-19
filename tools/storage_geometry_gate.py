@@ -24,13 +24,13 @@ import toolchain
 
 ROOT = Path(__file__).resolve().parent.parent
 STORAGE_ORACLE = ROOT / "test/oracle/storage_geometry/storage_cases.tsv"
-GATE1_ORACLE = ROOT / "test/oracle/storage_geometry/gate1_cases.tsv"
+DHALL_TYPECHECK_ORACLE = ROOT / "test/oracle/storage_geometry/dhall_typecheck_cases.tsv"
 MUTANT_CAPABILITY = "storage_geometry"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 RESULTS = ROOT / ".build/dsl/storage-geometry/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/storage-geometry/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/storage-geometry"
-CONTRACT = "DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md"
 GATE_COMMAND = "python3 tools/storage_geometry_gate.py"
 EXPECTATIONS = "test/oracle/storage_geometry_surfaces.tsv"
 
@@ -87,7 +87,7 @@ def verify_pins() -> tuple[Path, Path, str]:
 
 def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     storage = read_tsv(STORAGE_ORACLE)
-    gate1 = read_tsv(GATE1_ORACLE)
+    dhall_typecheck = read_tsv(DHALL_TYPECHECK_ORACLE)
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(storage) != 27 or len({row["variant"] for row in storage}) != 27:
         raise GateFailure("storage oracle must contain 27 unique variant rows")
@@ -102,28 +102,28 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
     }
     if {row["family"] for row in storage} != required_families:
         raise GateFailure("storage oracle must preserve the exact five named negative families")
-    if len(gate1) != 2 or {row["entry"] for row in gate1} != {"3.32"}:
+    if len(dhall_typecheck) != 2 or {row["entry"] for row in dhall_typecheck} != {"3.32"}:
         raise GateFailure("Phase-9 Gate-1 oracle must cover both 3.32 barriers")
     if len(mutants) != 31 or len({row["mutant"] for row in mutants}) != 31:
         raise GateFailure("mutant manifest must contain 31 unique mutants")
     run([sys.executable, str(ROOT / "tools/locus_registry_lint.py")])
-    for row in gate1:
+    for row in dhall_typecheck:
         legal = run([str(dhall), "type", "--file", row["legal"], "--quiet"], require_success=False)
         if legal.returncode != 0:
             raise GateFailure(f"Gate-1 legal twin rejected: {row['legal']}\n{legal.stdout}")
         negative = run([str(dhall), "type", "--file", row["negative"], "--quiet"], require_success=False)
         if negative.returncode == 0 or row["required"] not in negative.stdout:
             raise GateFailure(f"Gate-1 negative missed exact locus: {row['negative']}\n{negative.stdout}")
-    verify_registry_coverage(storage, gate1)
+    verify_registry_coverage(storage, dhall_typecheck)
     return storage, mutants
 
 
-def verify_registry_coverage(storage: list[dict[str, str]], gate1: list[dict[str, str]]) -> None:
+def verify_registry_coverage(storage: list[dict[str, str]], dhall_typecheck: list[dict[str, str]]) -> None:
     registry = read_tsv(ROOT / "dhall/examples/locus_registry.tsv")
     owned = {(row["entry"], row["subcase"]) for row in registry if row["owner_phase"] == "Phase-9"}
     evidence_entries = {
         *(row["catalog"].split(":", 1)[0] for row in storage),
-        *(row["entry"] for row in gate1),
+        *(row["entry"] for row in dhall_typecheck),
     }
     covered = {(entry, subcase) for entry, subcase in owned if entry in evidence_entries}
     if len(owned) != 5 or covered != owned:
@@ -205,7 +205,7 @@ def write_results(storage: list[dict[str, str]], mutants: list[dict[str, str]]) 
         "variant-rows": f"{len(storage)}/{len(storage)}-specific-tag-red",
         "legal-twins": f"{len(storage)}/{len(storage)}-green",
         "positive-specs": "2/2-decode-and-storage-rows-fit",
-        "gate1-training-cases": "2/2-exact-red-with-green-twins",
+        "dhall-typecheck-training-cases": "2/2-exact-red-with-green-twins",
         "quickcheck-properties": "6/6-green-checkCoverage-30-percent-both-directions",
         "mutants": f"{len(mutants)}/{len(mutants)}-red",
         "registry-subcases": "5/5-Phase-9-owned-discharged",
@@ -237,7 +237,7 @@ CHECKS = {
 
 SIDES = ("toolchain", "oracle", "suite", "mutant", "results")
 
-EXPECTED_RESULTS = {'named-negatives': '5/5-specific-tag-red', 'variant-rows': '27/27-specific-tag-red', 'legal-twins': '27/27-green', 'positive-specs': '2/2-decode-and-storage-rows-fit', 'gate1-training-cases': '2/2-exact-red-with-green-twins', 'quickcheck-properties': '6/6-green-checkCoverage-30-percent-both-directions', 'mutants': '31/31-red', 'registry-subcases': '5/5-Phase-9-owned-discharged', 'storage-fold-totality': 'compile-exhaustive-and-sampled-no-crash', 'acceptance-token': 'spec-composition-proven-storage-geometry', 'live-storage-mutation': 'UNVERIFIED', 'execution-accelerator-provider-root-composition': 'UNVERIFIED', 'runtime': 'UNVERIFIED'}
+EXPECTED_RESULTS = {'named-negatives': '5/5-specific-tag-red', 'variant-rows': '27/27-specific-tag-red', 'legal-twins': '27/27-green', 'positive-specs': '2/2-decode-and-storage-rows-fit', 'dhall-typecheck-training-cases': '2/2-exact-red-with-green-twins', 'quickcheck-properties': '6/6-green-checkCoverage-30-percent-both-directions', 'mutants': '31/31-red', 'registry-subcases': '5/5-Phase-9-owned-discharged', 'storage-fold-totality': 'compile-exhaustive-and-sampled-no-crash', 'acceptance-token': 'spec-composition-proven-storage-geometry', 'live-storage-mutation': 'UNVERIFIED', 'execution-accelerator-provider-root-composition': 'UNVERIFIED', 'runtime': 'UNVERIFIED'}
 
 # Every storage-case surface is decided by the same recorded observation: the run read all
 # 27 variant rows and each one reddened at its specific tag beside a green twin. Pointing
@@ -245,7 +245,7 @@ EXPECTED_RESULTS = {'named-negatives': '5/5-specific-tag-red', 'variant-rows': '
 # per-surface metric that measures nothing extra.
 CASE_METRIC = "variant-rows"
 
-SURFACE_MAP = {'closed-storage-budget': 'direct-backing', 'bounded-growable-policy': 'scaling-fingerprint', 'bookkeeper-physical-geometry': 'bookkeeper-recovery', 'minio-physical-geometry': 'minio-parity-healing-orphan', 'complete-failure-scenarios': 'object-count-quota', 'filesystem-presentation': 'filesystem-overhead-rounding', 'backing-allocation-rounding': 'root-ebs-quota', 'uniform-statefulset-claims': 'uniform-claim-per-backing', 'six-arm-object-store-producers': 'object-producer-inventory', 'object-inventory-and-conflict': 'object-identity-conflict', 'registry-storage-peak': 'registry-upload-partials', 'zookeeper-recovery-peak': 'zookeeper-recovery', 'patroni-wal-failover-peak': 'patroni-wal-failover', 'vault-raft-compaction-audit-peak': 'vault-raft-audit', 'storage-migration-highwater': 'storage-migration-highwater', 'schema-migration-highwater': 'schema-migration-highwater', 'registry-backend-migration-highwater': 'registry-backend-migration', 'pulsar-hot-tier-ceiling': 'incluster-cache-emptydir', 'pulsar-durable-total-ceiling': 'pulsar-durable-total', 'native-cache-pool': 'native-cache-pool', 'incluster-cache-nesting': 'incluster-cache-budget', 'provider-node-root-geometry': 'instance-store-root', 'control-plane-storage-transition': 'control-plane-transition', 'backup-medium-fit': 'backup-medium-fit', 'disjoint-capacity-pools': 'disjoint-capacity-pool', 'restore-target-fit': 'restore-target-fit', 'snapshot-bound-storage-scaling': 'scaling-shrink-highwater', 'bounded-training-gate1': 'gate1-training-cases', 'independent-storage-envelope-properties': 'quickcheck-properties', 'storage-fold-compile-totality': 'storage-fold-totality', 'phase8-mutant-battery': 'mutants', 'phase8-validation-locus-ledger': 'registry-subcases', 'storage-geometry': 'acceptance-token,named-negatives,variant-rows,legal-twins,positive-specs', 'execution-accelerator-provider-root-fit': 'execution-accelerator-provider-root-composition', 'binding-feasibility': '', 'render-fidelity': 'live-storage-mutation', 'model-runtime-correspondence': '', 'runtime-fidelity': 'runtime'}
+SURFACE_MAP = {'closed-storage-budget': 'direct-backing', 'bounded-growable-policy': 'scaling-fingerprint', 'bookkeeper-physical-geometry': 'bookkeeper-recovery', 'minio-physical-geometry': 'minio-parity-healing-orphan', 'complete-failure-scenarios': 'object-count-quota', 'filesystem-presentation': 'filesystem-overhead-rounding', 'backing-allocation-rounding': 'root-ebs-quota', 'uniform-statefulset-claims': 'uniform-claim-per-backing', 'six-arm-object-store-producers': 'object-producer-inventory', 'object-inventory-and-conflict': 'object-identity-conflict', 'registry-storage-peak': 'registry-upload-partials', 'zookeeper-recovery-peak': 'zookeeper-recovery', 'patroni-wal-failover-peak': 'patroni-wal-failover', 'vault-raft-compaction-audit-peak': 'vault-raft-audit', 'storage-migration-highwater': 'storage-migration-highwater', 'schema-migration-highwater': 'schema-migration-highwater', 'registry-backend-migration-highwater': 'registry-backend-migration', 'pulsar-hot-tier-ceiling': 'incluster-cache-emptydir', 'pulsar-durable-total-ceiling': 'pulsar-durable-total', 'native-cache-pool': 'native-cache-pool', 'incluster-cache-nesting': 'incluster-cache-budget', 'provider-node-root-geometry': 'instance-store-root', 'control-plane-storage-transition': 'control-plane-transition', 'backup-medium-fit': 'backup-medium-fit', 'disjoint-capacity-pools': 'disjoint-capacity-pool', 'restore-target-fit': 'restore-target-fit', 'snapshot-bound-storage-scaling': 'scaling-shrink-highwater', 'bounded-training-dhall_typecheck': 'dhall-typecheck-training-cases', 'independent-storage-envelope-properties': 'quickcheck-properties', 'storage-fold-compile-totality': 'storage-fold-totality', 'phase8-mutant-battery': 'mutants', 'phase8-validation-locus-ledger': 'registry-subcases', 'storage-geometry': 'acceptance-token,named-negatives,variant-rows,legal-twins,positive-specs', 'execution-accelerator-provider-root-fit': 'execution-accelerator-provider-root-composition', 'binding-feasibility': '', 'render-fidelity': 'live-storage-mutation', 'model-runtime-correspondence': '', 'runtime-fidelity': 'runtime'}
 
 SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     surface: ((metric, EXPECTED_RESULTS[metric]) if metric and EXPECTED_RESULTS.get(metric) not in (None, "UNVERIFIED") else None)

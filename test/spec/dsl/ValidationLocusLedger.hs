@@ -55,7 +55,7 @@ loadCompileCoverage = do
  where
   keys columns = case columns of
     [_caseName, entries, _legal, _illegal, _expected] ->
-      [ (entryValue, subcaseValue, "Gate-2-decoder")
+      [ (entryValue, subcaseValue, "gadt-decode")
       | binding <- Text.splitOn "," entries
       , let pair = Text.splitOn ":" binding
       , [entryValue, subcaseValue] <- [pair]
@@ -72,7 +72,7 @@ corpusPhase = 7
 
 isReached :: RegistryRow -> Bool
 isReached row =
-  ownerNumber (owner row) <= corpusPhase && locus row `elem` ["Gate-1-editor", "Gate-2-decoder"]
+  ownerNumber (owner row) <= corpusPhase && locus row `elem` ["dhall-typecheck", "gadt-decode"]
 
 ownerNumber :: Text -> Int
 ownerNumber ownerValue = case reads (Text.unpack (Text.drop (Text.length "Phase-") ownerValue)) of
@@ -94,7 +94,7 @@ validateDeferred rows = do
     assert
       (ownerNumber (owner row) >= renderPhase)
       ("rendered row is owned before Phase " <> show renderPhase <> ": " <> show row)
-  forEach [row | row <- rows, locus row == "Gate-3-astcheck"] $ \row ->
+  forEach [row | row <- rows, locus row == "extension-astcheck"] $ \row ->
     assert
       (ownerNumber (owner row) == astCheckPhase)
       ("Gate-3 row is not owned by Phase " <> show astCheckPhase <> ": " <> show row)

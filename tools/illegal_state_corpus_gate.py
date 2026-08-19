@@ -45,7 +45,7 @@ RESULTS = GENERATED / "phase-results.tsv"
 LOCUS_LEDGER = GENERATED / "validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build" / "dist-newstyle" / "illegal-state-corpus"
 BUILD_TMP = ROOT / ".build" / "tmp" / "illegal-state-corpus"
-CONTRACT = "DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md"
 GATE_COMMAND = "python3 tools/illegal_state_corpus_gate.py"
 EXPECTATIONS = "test/oracle/illegal_state_corpus_surfaces.tsv"
 
@@ -86,8 +86,8 @@ EXPECTED_RESULTS = {
     "catalog-entries": "90/90-mapped",
     "registry-subcases": "106/106-reconciled",
     "registry-mutants": "4/4-red",
-    "gate1-corpus": "14/14-red-exact-with-green-twins",
-    "gate2-corpus": "13/13-red-tagged-with-green-twins",
+    "dhall-typecheck-corpus": "14/14-red-exact-with-green-twins",
+    "gadt-decode-corpus": "13/13-red-tagged-with-green-twins",
     "positive-corpus": "12/12-green",
     "compile-fail-pairs": "5/5-legal-green-illegal-type-red",
     "quickcheck-properties": "4/4-green-checkCoverage",
@@ -106,8 +106,8 @@ EXPECTED_RESULTS = {
 
 SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     "catalog-owner-family-registry": ("registry-subcases", EXPECTED_RESULTS["registry-subcases"]),
-    "gate1-exhaustive-corpus": ("gate1-corpus", EXPECTED_RESULTS["gate1-corpus"]),
-    "gate2-controller-resource-headroom-corpus": ("gate2-corpus", EXPECTED_RESULTS["gate2-corpus"]),
+    "dhall-typecheck-exhaustive-corpus": ("dhall-typecheck-corpus", EXPECTED_RESULTS["dhall-typecheck-corpus"]),
+    "gadt-decode-controller-resource-headroom-corpus": ("gadt-decode-corpus", EXPECTED_RESULTS["gadt-decode-corpus"]),
     "cbor-produce-consume-boundary": ("positive-corpus", EXPECTED_RESULTS["positive-corpus"]),
     "gadt-index-compile-fail-corpus": ("compile-fail-pairs", EXPECTED_RESULTS["compile-fail-pairs"]),
     "quickcheck-smart-constructor-closure": ("quickcheck-properties", EXPECTED_RESULTS["quickcheck-properties"]),
@@ -187,7 +187,7 @@ def registry_mutants() -> int:
     """Each mutator perturbs one reconciliation dimension; a survivor means no teeth."""
 
     def snapshot(root: Path) -> list[tuple[str, str]]:
-        # Content, not size: `storage` -> `unknown` and `Gate-1-editor` -> `unknown-locus`
+        # Content, not size: `storage` -> `unknown` and `dhall-typecheck` -> `unknown-locus`
         # are both length-preserving, so a size comparison would call a real mutation a
         # no-op and a no-op indistinguishable from either.
         return sorted(
@@ -243,7 +243,7 @@ def registry_mutants() -> int:
     def locus_drift(root: Path) -> None:
         path = root / "dhall/examples/locus_registry.tsv"
         path.write_text(
-            path.read_text(encoding="utf-8").replace("\tGate-1-editor\t", "\tunknown-locus\t", 1), encoding="utf-8"
+            path.read_text(encoding="utf-8").replace("\tdhall-typecheck\t", "\tunknown-locus\t", 1), encoding="utf-8"
         )
 
     return sum(check(mutator) for mutator in (missing_owner, owner_drift, family_drift, locus_drift))
@@ -330,8 +330,8 @@ def suite_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str,
     if match is None:
         print("  FAIL  the Phase-7 acceptance token is absent, so its counts cannot be measured")
         return False, {}
-    gate1, gate2, positives, discharged, deferred = (int(v) for v in match.groups())
-    print(f"  ok    corpus green: {gate1} Gate-1, {gate2} Gate-2, {positives} positives")
+    dhall_typecheck, gadt_decode, positives, discharged, deferred = (int(v) for v in match.groups())
+    print(f"  ok    corpus green: {dhall_typecheck} Gate-1, {gadt_decode} Gate-2, {positives} positives")
     if not LOCUS_LEDGER.is_file():
         print(f"  FAIL  locus-ledger-honesty-banner no ledger was emitted at {gate_common.rel(LOCUS_LEDGER)}")
         return False, {}
@@ -339,7 +339,7 @@ def suite_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str,
         print("  FAIL  locus-ledger-honesty-banner the generated ledger lacks its Register-1 banner")
         return False, {}
     print(f"  ok    locus-ledger-honesty-banner {discharged} discharged, {deferred} deferred, banner present")
-    return True, {"gate1": gate1, "gate2": gate2, "positives": positives,
+    return True, {"dhall-typecheck": dhall_typecheck, "gadt-decode": gadt_decode, "positives": positives,
                   "discharged": discharged, "deferred": deferred}
 
 
@@ -348,8 +348,8 @@ def measure(entries: int, subcases: int, killed: int, counts: dict[str, int], mu
         "catalog-entries": f"{entries}/{entries}-mapped",
         "registry-subcases": f"{subcases}/{subcases}-reconciled",
         "registry-mutants": f"{killed}/4-red",
-        "gate1-corpus": f"{counts['gate1']}/{counts['gate1']}-red-exact-with-green-twins",
-        "gate2-corpus": f"{counts['gate2']}/{counts['gate2']}-red-tagged-with-green-twins",
+        "dhall-typecheck-corpus": f"{counts['dhall-typecheck']}/{counts['dhall-typecheck']}-red-exact-with-green-twins",
+        "gadt-decode-corpus": f"{counts['gadt-decode']}/{counts['gadt-decode']}-red-tagged-with-green-twins",
         "positive-corpus": f"{counts['positives']}/{counts['positives']}-green",
         "compile-fail-pairs": "5/5-legal-green-illegal-type-red",
         "quickcheck-properties": f"{len(PROPERTIES)}/{len(PROPERTIES)}-green-checkCoverage",

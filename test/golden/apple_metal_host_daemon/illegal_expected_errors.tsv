@@ -1,5 +1,5 @@
 fixture	validation_locus	expected_source_tag	expected_dhall_error
-load_balancer.dhall	Gate-1-editor	HostOriginMustBeNodePort	Assertion failed
-envoy_route.dhall	Gate-1-editor	HostOriginMustNotHaveEnvoyRoute	Assertion failed
-wild_listener.dhall	Gate-1-editor	HostOriginMustBindLoopback	Assertion failed
-daemon_wild_ingress.dhall	Gate-1-editor	HostWorkerMustNotPublishIngress	Assertion failed
+load_balancer.dhall	dhall-typecheck	HostOriginMustBeNodePort	Assertion failed
+envoy_route.dhall	dhall-typecheck	HostOriginMustNotHaveEnvoyRoute	Assertion failed
+wild_listener.dhall	dhall-typecheck	HostOriginMustBindLoopback	Assertion failed
+daemon_wild_ingress.dhall	dhall-typecheck	HostWorkerMustNotPublishIngress	Assertion failed

@@ -33,7 +33,7 @@ LOCUS = ROOT / "test/oracle/provision_seal/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/provision-seal/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/provision-seal/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/provision-seal"
-CONTRACT = "DEVELOPMENT_PLAN/phase_12_provision_seal.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_18_provision_seal.md"
 GATE_COMMAND = "python3 tools/provision_seal_gate.py"
 EXPECTATIONS = "test/oracle/provision_seal_surfaces.tsv"
 

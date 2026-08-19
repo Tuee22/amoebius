@@ -1371,6 +1371,9 @@ CROSSREF_RE = re.compile(
 ORDINAL_RE = re.compile(r"[Pp]hase[ _-](\d{1,2})(?!\d)")
 # `Phases 5 and 5` / `Phase-8/8` -- one ordinal written twice in one expression.
 PROVISIONAL_RE = re.compile(r"provisional Phase (\d{1,2})")
+SUCCESSOR_RE = re.compile(r"Phase (\d{1,2}) does not open")
+CONTRACT_FIELD_RE = re.compile(
+    r"^\*\*(Depends on|Dependency|Blocked by):?\*\*:?\s*(.+)$", re.M)
 SELF_EQUAL_RE = re.compile(r"[Pp]hases?[ -](\d{1,2})(?:/| and )(\d{1,2})(?!\d)")
 
 
@@ -1461,6 +1464,37 @@ def check_f5_ordinal_integrity(docs, docs_by_rel, v):
                 line = doc.text.count("\n", 0, m.start()) + 1
                 v.append(Violation("f5", doc.rel, line,
                                    f"dependency cell repeats Phase {sorted(dupe)}"))
+
+        # A gate's successor clause names the phase the gate holds shut, which is
+        # always own + 1. Written as a bare ordinal it survives any re-baseline
+        # unchanged, and an insertion silently redirects it at a different phase --
+        # which is how phase_02 came to hold Phase 9 shut across a six-phase band.
+        if own is not None:
+            for m in SUCCESSOR_RE.finditer(doc.stripped):
+                n = int(m.group(1))
+                if n == own + 1:
+                    continue
+                line = doc.stripped.count("\n", 0, m.start()) + 1
+                v.append(Violation("f5", doc.rel, line,
+                                   f"successor clause names Phase {n}; the phase this "
+                                   f"gate holds shut is Phase {own + 1}"))
+
+        # A contract-bearing reference -- one a reader follows to find an obligation --
+        # must carry its slug, because the slug is the injective key and the ordinal is
+        # a derived view of it (u3). Linked, u3 validates the reference on every run;
+        # bare, nothing does. Narrative prose is deliberately out of scope.
+        for m in CONTRACT_FIELD_RE.finditer(doc.text):
+            cell = re.split(r"\.\s", m.group(2))[0]
+            linked = {int(x) for lm in LINK_RE.finditer(cell)
+                      for x in re.findall(r"phase_(\d{2})_", lm.group(2))}
+            bare = sorted({int(x) for x in ORDINAL_RE.findall(LINK_RE.sub("", cell))}
+                          - linked)
+            if not bare:
+                continue
+            line = doc.text.count("\n", 0, m.start()) + 1
+            v.append(Violation("f5", doc.rel, line,
+                               f"{m.group(1)} names Phase {bare} without a slug; a "
+                               f"contract-bearing reference must link its phase document"))
 
 
 def _budget_words(s):

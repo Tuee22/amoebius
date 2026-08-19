@@ -35,7 +35,7 @@ device-count-boundary	items	illegal_accelerator_policy_domain_mismatch
 per-device-coexistence-aggregation	items	all-classes,illegal_accelerator_coexistence_overcommit,mutant_drop_accelerator_work_item
 engine-accelerator-provision-seal	metrics	acceptance-token
 opaque-provisioned-engine-accelerator	checks	
-phase12-gate1-url-negative	metrics	gate1-url-negative
+phase12-dhall-typecheck-url-negative	metrics	dhall-typecheck-url-negative
 phase12-provision-negative-corpus	metrics	provision-negatives
 phase12-property-coverage	metrics	quickcheck-properties
 phase12-mutant-battery	metrics	mutants

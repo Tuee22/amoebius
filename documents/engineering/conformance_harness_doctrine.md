@@ -17,7 +17,7 @@ vocabulary the rows are phrased in, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_03_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_04_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_31_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_09_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_10_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_20_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_22_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_37_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -54,13 +54,13 @@ keeps them honest.
 Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing)):
 
 - **Register 1 — pure / golden (no cluster, no live infrastructure).** A **pinned, hermetic, deterministic checker over committed source is Register 1 even though it is a separate process** — TLC through the pinned
-  `tla2tools.jar` is the case in point. What distinguishes Register 2 is not process count but a **fake tool standing in for infrastructure**; TLC fakes nothing. DSL decode and every illegal-state foreclosure the
+  `tla2tools.jar` is the case in point, and a verb lifted into the validation frame — the same checker run through `docker run --rm` into `amoebius-base` — is Register 1 on the same grounds ([validation_frame_doctrine.md §3](./validation_frame_doctrine.md#3-why-a-frame-lifted-gate-is-still-substrate-none)). What distinguishes Register 2 is neither process nor container count but a **fake tool standing in for infrastructure**; TLC fakes nothing, and the frame carries real compilers. DSL decode and every illegal-state foreclosure the
   decoder enforces; whole-deployment `renderAll` and the correctness of the emitted objects (a hardened `securityContext`, a route
   from a live service handle, a derived NetworkPolicy — golden-tested on the *rendered* output); the `[Step]`
   plan and its `--dry-run`; the capability→provider→shape binder; the capacity/topology folds; the formal
   `Model` explorer + the emitted `.tla` checked by TLC ([formal_model_doctrine.md](./formal_model_doctrine.md));
-  the Phase-3 instance is built and validated over `ToyModel` with pinned TLC, 200 differential models, and no
-  live infrastructure; the Phase-4 instance is built and validated over both branches of `GatewayMigration`
+  the Phase-9 instance is built and validated over `ToyModel` with pinned TLC, 200 differential models, and no
+  live infrastructure; the Phase-10 instance is built and validated over both branches of `GatewayMigration`
   with exact explorer/TLC state-set agreement, bounded IOSimPOR safety schedules, mutation sensitivity, and a
   structural-cutoff property, also with no live infrastructure;
   the bounded `UiSource` algebra, scoped identity/authorization checks, binding, and deterministic
@@ -77,7 +77,7 @@ Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_d
   1 and 2 structurally cannot reach; owned by
   [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md) (register definition in [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing)).
   The substrate serving this activity is built and gated at Register 2 in
-  [Phase 16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md); later phases replay their own
+  [Phase 22](../../DEVELOPMENT_PLAN/phase_22_deterministic_sim_substrate.md); later phases replay their own
   production reconcilers on it.
 - **Register 3 — live infrastructure only.** The residue that cannot be settled by inspecting source or by
   simulation: the apiserver admitting and the scheduler placing pods, the LoadBalancer coming up, etcd forming
@@ -112,7 +112,7 @@ Two consequences follow directly:
 
 For every feature, the harness exercises the full pure pipeline and locks it:
 
-1. **Decode** — an authored `InForceSpec` fixture passes Gate 1 (`dhall type`) and Gate 2 (the total decoder),
+1. **Decode** — an authored `InForceSpec` fixture passes dhall-typecheck (`dhall type`) and gadt-decode (the total decoder),
    or a negative fixture is rejected at its tagged locus.
 2. **Bind and source-expand** — capability/provider/shape selection emits every app/init/sidecar, standard
    platform service, volume/cache owner, and accelerator need into one `BoundDeployment`. Each ordinary
@@ -150,12 +150,12 @@ substrates behave as modeled), not first exposure.
 
 ## 5. Honesty: what the harness does and does not establish
 
-Phase 14 realizes the `renderAll` step in Register 1: eighteen canonical deployment outputs are byte-locked,
+Phase 20 realizes the `renderAll` step in Register 1: eighteen canonical deployment outputs are byte-locked,
 and the hardened-resource, ingress, and independently rederived NetworkPolicy predicates are non-vacuous.
 Its twelve seeded mutants fail at those properties. This is rendered-output evidence, not evidence that a
 live apiserver, admission stack, kubelet, or CNI enforces the values.
 
-Phase 15 realizes the Plan and fake-apply steps. Register 1 byte-locks two chain/descent plans with zero
+Phase 21 realizes the Plan and fake-apply steps. Register 1 byte-locks two chain/descent plans with zero
 actions executed; Register 2 drives the real executable against absolute-path fake tools and pins argv and
 stdin bytes. This proves the emitted boundary protocol, not real-tool fidelity or cluster convergence.
 
@@ -180,12 +180,12 @@ and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md):
 
 ## 6. Planning ownership
 
-This document is normative. Its Phase-3 Register-1 explorer/TLC instance is built; the remaining harness is
+This document is normative. Its Phase-9 Register-1 explorer/TLC instance is built; the remaining harness is
 stood up across later pre-cluster phases, and each live phase adds its
 Register-3 gate. Phase order, status, and gates live only in
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); the requirement that every phase's ledger records
 which register it reached is owned by [development_plan_standards.md](../../DEVELOPMENT_PLAN/development_plan_standards.md).
-Only that Phase-3 instance is a tested amoebius result here; later register instances remain design intent.
+Only that Phase-9 instance is a tested amoebius result here; later register instances remain design intent.
 
 ---
 

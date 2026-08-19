@@ -20,12 +20,12 @@ Numbering belongs to [the catalog](./illegal_state_catalog.md).
 
 ### 3.1 A claim without a backing volume
 
-**Validation-locus:** `Gate-1-editor`
+**Validation-locus:** `dhall-typecheck`
 
 The claim field is mandatory.
 
 ### 3.2 A volume without a ceiling
 
-**Validation-locus:** `Gate-2-decoder`
+**Validation-locus:** `gadt-decode`
 
 The ceiling field is mandatory.

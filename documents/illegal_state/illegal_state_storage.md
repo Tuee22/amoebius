@@ -15,7 +15,7 @@ once in the type and again by a total check before any effect. The enumeration's
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -31,9 +31,9 @@ once in the type and again by a total check before any effect. The enumeration's
 ```mermaid
 flowchart LR
   %% register: orientation
-  g1["Gate-1-editor<br/>8 entries"]
-  g2["Gate-2-decoder<br/>11 entries"]
-  g3["Gate-3-astcheck<br/>none in this slice"]
+  g1["dhall-typecheck<br/>8 entries"]
+  g2["gadt-decode<br/>11 entries"]
+  g3["extension-astcheck<br/>none in this slice"]
   ps["provision-seal<br/>4 entries"]
   rg["rendered-output-golden<br/>1 entry"]
   le["live-effect<br/>none in this slice"]
@@ -54,7 +54,7 @@ stay stable. It is not self-contained framing — it owns only the deep treatmen
 - The **catalog index** (which states are illegal, the full [§3](#3-the-backup--recovery-illegal-states).x list) and the **honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced here, not restated.
 - The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure**
-  ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal question of *where* each state is caught — `Gate-1-editor`, `Gate-2-decoder`, `provision-seal` (post-bind Phase-12 provision returns a `ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden`, `live-effect`) are owned by
+  ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal question of *where* each state is caught — `dhall-typecheck`, `gadt-decode`, `provision-seal` (post-bind Phase-18 provision returns a `ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden`, `live-effect`) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced here, not restated.
 
 Everything below is **design intent** (per [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
@@ -70,7 +70,7 @@ foreclosure layer, from [`illegal_state_techniques.md`](./illegal_state_techniqu
 
 ### 3.1 Bad / illegal durable storage
 
-**Delivery-owner:** `Phase-33`
+**Delivery-owner:** `Phase-39`
 
 **Case-family:** `storage`
 
@@ -81,13 +81,13 @@ path, the unsized claim, and the un-selected default storage class are simply no
 **Owner:** [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (PVC↔PV binding by construction) + refined non-zero sizes.
 **Layer:** type-foreclosed — the dynamic-provisioner path, the unsized claim, and the un-selected default class have no constructor at the Dhall layer; runtime-checked residue — that the retained PV actually binds at reconcile.
-**Validation-locus:** `Gate-1-editor` (the dynamic-provisioner path, the unsized claim, and the un-selected
+**Validation-locus:** `dhall-typecheck` (the dynamic-provisioner path, the unsized claim, and the un-selected
 default class are non-constructible — required-field / no-arm shapes that fail `dhall type` at authoring) +
 `live-effect` residue (that the retained PV actually binds at reconcile, owned by the runtime-enforcement proof).
 
 ### 3.2 PVCs that don't bind PVs
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-13`
 
 **Case-family:** `storage`
 
@@ -96,16 +96,16 @@ objects that bind only if their sizes, access modes, and selectors happen to mat
 hangs in `Pending` forever. amoebius removes the independence: there is no way to declare a claim *without*
 its exactly-matching PV ([§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)). The mismatched pair has no inhabitant. **Owner:**
 [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction).
-**Layer:** type-foreclosed at the Haskell IR — a bare PVC or free-floating PV has no constructor once decoded — with its concrete rejection stage at Gate 2, since Dhall has no opaque types; runtime-checked residue — that the PVC actually binds its PV.
-**Validation-locus:** `Gate-2-decoder` (the exactly-matching-PV pairing is a Haskell smart-constructor / GADT
+**Layer:** type-foreclosed at the Haskell IR — a bare PVC or free-floating PV has no constructor once decoded — with its concrete rejection stage at gadt-decode, since Dhall has no opaque types; runtime-checked residue — that the PVC actually binds its PV.
+**Validation-locus:** `gadt-decode` (the exactly-matching-PV pairing is a Haskell smart-constructor / GADT
 discipline whose teeth Dhall cannot hold — Dhall has no opaque types to hide the raw claim and PV record
 constructors ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), so the mismatched pair is a compile-fail
-golden pinned at Phase 7, not a `dhall type` failure at authoring) + `live-effect` residue (that the running
+golden pinned at Phase 13, not a `dhall type` failure at authoring) + `live-effect` residue (that the running
 PVC actually binds its PV at reconcile, owned by the runtime-enforcement proof).
 
 ### 3.18 Unbounded storage anywhere
 
-**Delivery-owner:** `Phase-5`
+**Delivery-owner:** `Phase-11`
 
 **Case-family:** `storage`
 
@@ -120,13 +120,13 @@ logical-byte sum is not that plan. **Owner:**
 [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the aggregate). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (closed `StorageBacking` union — type-foreclosed) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) (aggregate backing fold — decode-foreclosed). **Layer:** decode-foreclosed aggregate;
 the union shape is type-foreclosed.
-**Validation-locus:** `Gate-1-editor` (the closed `StorageBacking` union with no unbounded arm fails
+**Validation-locus:** `dhall-typecheck` (the closed `StorageBacking` union with no unbounded arm fails
 `dhall type` at authoring) + `provision-seal` (the post-bind aggregate `Σ(sizes) ≤ backing` fold returns a
 `ProvisionError` before any `ProvisionedSpec` exists).
 
 ### 3.19 An application consuming more storage than its backing (MinIO and Pulsar)
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase-15`
 
 **Case-family:** `storage`
 
@@ -145,12 +145,12 @@ logical/billed quota instead of invented internal geometry. "Unbounded" is repre
 **Validation-locus:** `provision-seal` (logical-fit/usable-or-raw overflow, dropped recovery/healing scenario,
 orphan horizon, presentation/quantum, and uniform-claim-skew cases return a `ProvisionError` after binding and
 before any `ProvisionedSpec` exists) +
-`Gate-1-editor` (the `Growable` arm that gates
+`dhall-typecheck` (the `Growable` arm that gates
 unboundedness is a closed union checked at authoring).
 
 ### 3.20 A Pulsar topic without a bounded / tiered / retained lifecycle
 
-**Delivery-owner:** `Phase-5`
+**Delivery-owner:** `Phase-11`
 
 **Case-family:** `storage`
 
@@ -165,7 +165,7 @@ target (the durability fit). A mandatory backlog quota is the runtime fail-safe.
 **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (mandatory `RetentionPolicy` + mandatory size offload — no forever-local arm) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (retention-budget room-fit). **Layer:** type-foreclosed for the mandatory shape; decode-foreclosed for both room-fits; runtime-checked residue
 — the burst back-pressure actually holding.
-**Validation-locus:** `Gate-1-editor` (the mandatory `RetentionPolicy` with a mandatory size-triggered
+**Validation-locus:** `dhall-typecheck` (the mandatory `RetentionPolicy` with a mandatory size-triggered
 offload — no forever-local / time-only arm — fails `dhall type` at authoring) + `provision-seal` (both
 room-fit ceilings, the availability fit and the durability fit, are post-bind provision folds that return a
 `ProvisionError` before any `ProvisionedSpec` exists) + `live-effect`
@@ -173,7 +173,7 @@ residue (the burst back-pressure and backlog quota actually holding at runtime).
 
 ### 3.21 Capacity growth without an amoebius-owned scaling policy
 
-**Delivery-owner:** `Phase-5`
+**Delivery-owner:** `Phase-11`
 
 **Case-family:** `storage`
 
@@ -184,7 +184,7 @@ so "unbounded" storage/compute exists only behind a policy whose ceiling is a qu
 [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (with enaction owned by [`cluster_lifecycle_doctrine.md` §8](../engineering/cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning) and [`pulumi_iac_doctrine.md` §4](../engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)).
 **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `Growable` union, no unbounded arm). **Layer:** type-foreclosed representation; runtime-checked that
 the autoscaler actually grows capacity and the cloud honors the quota.
-**Validation-locus:** `Gate-1-editor` (the closed `Growable = Bounded | Autoscaled ScalingPolicy` union with
+**Validation-locus:** `dhall-typecheck` (the closed `Growable = Bounded | Autoscaled ScalingPolicy` union with
 no bare-unbounded arm fails `dhall type` at authoring) + `live-effect` residue (that the autoscaler actually
 grows capacity and the cloud honors the quota).
 
@@ -199,7 +199,7 @@ cold-seed entries live in the multi-cluster slice ([§3.69](./illegal_state_mult
 
 ### 3.53 A backup larger than its bounded medium
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase-15`
 
 **Case-family:** `storage`
 
@@ -217,7 +217,7 @@ medium physically caps bytes at runtime).
 
 ### 3.54 Deleting a backup in an append-only system
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -228,12 +228,12 @@ all — the closed-union / no-arm shape that gives the `StorageMutation` surface
 **Owner:** [`backup_recovery_doctrine.md` §4](../engineering/backup_recovery_doctrine.md#4-the-write-but-never-delete-credential-boundary).
 **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (closed union, no delete arm) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed).
-**Layer:** type-foreclosed representation + runtime-enforced object-lock. **Validation-locus:** `Gate-1-editor`
+**Layer:** type-foreclosed representation + runtime-enforced object-lock. **Validation-locus:** `dhall-typecheck`
 + `live-effect` residue (that the medium honors WORM).
 
 ### 3.55 amoebius holding a credential that can delete a backup
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -242,15 +242,15 @@ delete one. The write credential is a `CloudAccountMutationCapability` whose `al
 put-only record — there is no field into which a `DeleteObject`/`ExpireObject`/`PutBucketLifecycle` action
 could be placed — so a delete-capable backup credential is not constructible, mirroring the create-but-not-
 delete durable-storage boundary. **Owner:** [`backup_recovery_doctrine.md` §4](../engineering/backup_recovery_doctrine.md#4-the-write-but-never-delete-credential-boundary)
-(credential classes owned by [`pulumi_iac_doctrine.md` §6](../engineering/pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model)).
+(credential classes owned by [`pulumi_ebs_credential_model.md` §6](../engineering/pulumi_ebs_credential_model.md#6-the-ebs-create-vs-delete-credential-model)).
 **Technique:** [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (scoped mutation capability). **Layer:** decode-foreclosed credential shape + runtime-enforced at the cloud
-API. **Validation-locus:** `Gate-2-decoder` + `live-effect` residue (that the cloud account actually denies
+API. **Validation-locus:** `gadt-decode` + `live-effect` residue (that the cloud account actually denies
 delete).
 
 ### 3.56 Automatically recovering from a manual air-gapped medium
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -261,11 +261,11 @@ recorded human action mints; no constructor manufactures it automatically, so au
 air-gap medium has no inhabitant. **Owner:** [`backup_recovery_doctrine.md` §7](../engineering/backup_recovery_doctrine.md#7-recovery-restore-seeds-a-fresh-coordinate).
 **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (phantom `Handling` index) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
-(phase-gated restore). **Layer:** type-foreclosed transition. **Validation-locus:** `Gate-2-decoder`.
+(phase-gated restore). **Layer:** type-foreclosed transition. **Validation-locus:** `gadt-decode`.
 
 ### 3.57 A restore that overwrites live durable bytes
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -277,11 +277,11 @@ retained-rebind guarantee: rebind reattaches bytes that were never deleted; rest
 is empty because its backing was lost. **Owner:** [`backup_recovery_doctrine.md` §7](../engineering/backup_recovery_doctrine.md#7-recovery-restore-seeds-a-fresh-coordinate)
 (no-destruction verb union owned by [`inforcespec_migration_doctrine.md` §3](../engineering/inforcespec_migration_doctrine.md#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)).
 **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed).
-**Layer:** type-foreclosed. **Validation-locus:** `Gate-2-decoder`.
+**Layer:** type-foreclosed. **Validation-locus:** `gadt-decode`.
 
 ### 3.58 Unbounded backup history
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -290,11 +290,11 @@ closed `KeepN | KeepWindow | Growable` union with no keep-forever arm, so backup
 discipline the Pulsar retention surface uses; the only path past a fixed bound is a `Growable` whose ceiling is
 a quota. **Owner:** [`backup_recovery_doctrine.md` §2](../engineering/backup_recovery_doctrine.md#2-the-backup-surface--a-closed-backuppolicy-deployment-rule).
 **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
-(closed union, no unbounded arm). **Layer:** type-foreclosed. **Validation-locus:** `Gate-1-editor`.
+(closed union, no unbounded arm). **Layer:** type-foreclosed. **Validation-locus:** `dhall-typecheck`.
 
 ### 3.59 A backup in the same failure domain as its source
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -305,11 +305,11 @@ distinctness technique that rejects a cluster reused as active and standby in th
 **Owner:** [`backup_recovery_doctrine.md` §3](../engineering/backup_recovery_doctrine.md#3-the-three-strategies).
 **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (distinctness fold) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection).
-**Layer:** decode-foreclosed. **Validation-locus:** `Gate-2-decoder`.
+**Layer:** decode-foreclosed. **Validation-locus:** `gadt-decode`.
 
 ### 3.60 Backup bytes double-counted as live durable capacity
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase-15`
 
 **Case-family:** `storage`
 
@@ -323,7 +323,7 @@ backing and from node ephemeral/cache pools, so the capacity fold cannot spend o
 
 ### 3.61 A plaintext backup at rest
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-20`
 
 **Case-family:** `backup`
 
@@ -339,7 +339,7 @@ never inline; a constructor that emitted plaintext bytes to the medium has no in
 
 ### 3.62 A backup whose decryption key is escrowed only in the domain it protects
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -350,11 +350,11 @@ password-encrypted unseal path supplies it for the Vault-seed case. **Owner:** [
 (unseal owned by [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md)). **Technique:**
 [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (independence witness).
 **Layer:** decode-foreclosed structural half + `assumed` key-independence premise, stated honestly.
-**Validation-locus:** `Gate-2-decoder` + `live-effect` residue.
+**Validation-locus:** `gadt-decode` + `live-effect` residue.
 
 ### 3.63 A restore from an unverified backup artifact
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -364,12 +364,12 @@ artifact, fails loud, and is never a valid restore source — the same `.ready`-
 `ArtifactRef` and the verified-shrink `ReclaimEligible`. **Owner:** [`backup_recovery_doctrine.md` §6](../engineering/backup_recovery_doctrine.md#6-the-verified-content-addressed-backupartifact).
 **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (phase-indexed artifact). **Layer:** type-foreclosed (the unverified artifact has no restore constructor) +
-`live-effect` residue (that the verified bytes actually match). **Validation-locus:** `Gate-2-decoder` +
+`live-effect` residue (that the verified bytes actually match). **Validation-locus:** `gadt-decode` +
 `live-effect`.
 
 ### 3.64 A cross-tenant or re-tagged backup or restore
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -379,11 +379,11 @@ foreign tenant's data. A backup's `source` is a phantom-tagged `Ref tenant Durab
 append-only revocable capability edge, never a re-tag. **Owner:** [`backup_recovery_doctrine.md` §6](../engineering/backup_recovery_doctrine.md#6-the-verified-content-addressed-backupartifact)
 (tenant tag owned by [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md), sharing edge by [`inforcespec_migration_doctrine.md` §7](../engineering/inforcespec_migration_doctrine.md#7-sanctioned-sharing-is-an-append-only-revocable-capability-edge)).
 **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
-(phantom tenant tags). **Layer:** type-foreclosed. **Validation-locus:** `Gate-2-decoder`.
+(phantom tenant tags). **Layer:** type-foreclosed. **Validation-locus:** `gadt-decode`.
 
 ### 3.65 An air-gapped medium carrying a live network credential
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -392,11 +392,11 @@ The `AirGapMedia` arm carries no credential field; only `RemoteObjectStore` does
 air-gap medium has no inhabitant, and egress to and ingress from air-gap media is a witnessed handoff rather
 than a live credential. **Owner:** [`backup_recovery_doctrine.md` §3](../engineering/backup_recovery_doctrine.md#3-the-three-strategies).
 **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
-(closed union, arm without a credential field). **Layer:** type-foreclosed. **Validation-locus:** `Gate-1-editor`.
+(closed union, arm without a credential field). **Layer:** type-foreclosed. **Validation-locus:** `dhall-typecheck`.
 
 ### 3.66 Retention lowered below the currently-retained generations on an append-only medium
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -407,11 +407,11 @@ that rejects shrinking a topic's retention below its live data. **Owner:** [`bac
 (retention-floor fold owned by [`inforcespec_migration_doctrine.md` §5](../engineering/inforcespec_migration_doctrine.md#5-the-decode-time-no-orphan-fold)).
 **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (diff-over-a-collection fold). **Layer:** decode-foreclosed structural half + `live-effect` retained-state
-probe. **Validation-locus:** `Gate-2-decoder` + `live-effect`.
+probe. **Validation-locus:** `gadt-decode` + `live-effect`.
 
 ### 3.67 A restore into a target smaller than or presentation-incompatible with the backup extent
 
-**Delivery-owner:** `Phase-9`
+**Delivery-owner:** `Phase-15`
 
 **Case-family:** `storage`
 
@@ -426,7 +426,7 @@ under-sized or presentation-mismatched restore is rejected before render. **Owne
 
 ### 3.68 Two conflicting backup policies on one coordinate
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `backup`
 
@@ -435,11 +435,11 @@ give a single datum two owners of its backup regime, and the single-source-of-tr
 exactly one `BackupPolicy` owner under a total ownership-index fold; a double-claim is a decode-time rejection.
 **Owner:** [`backup_recovery_doctrine.md` §2](../engineering/backup_recovery_doctrine.md#2-the-backup-surface--a-closed-backuppolicy-deployment-rule).
 **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
-(single-owner ownership index). **Layer:** decode-foreclosed. **Validation-locus:** `Gate-2-decoder`.
+(single-owner ownership index). **Layer:** decode-foreclosed. **Validation-locus:** `gadt-decode`.
 
 ### 3.85 A spec verb that destroys durable bytes
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `storage`
 
@@ -461,14 +461,14 @@ outside every reconciler.
 **Layer:** type-foreclosed for the absent arm — no `.dhall` value denotes destruction; runtime-checked residue
 — that the verified copy's bytes match and that the retired backing is still intact are observations, not
 type facts.
-**Validation-locus:** `Gate-1-editor` (a `Delete`/`Truncate` constructor does not exist, so the value fails
+**Validation-locus:** `dhall-typecheck` (a `Delete`/`Truncate` constructor does not exist, so the value fails
 `dhall type` at authoring time) + `live-effect` residue (copy equivalence and the non-destructive retirement
 transition). Per the validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md),
 orthogonal to the foreclosure layer above.
 
 ### 3.86 A new generation that orphans a retained coordinate
 
-**Delivery-owner:** `Phase-44`
+**Delivery-owner:** `Phase-50`
 
 **Case-family:** `storage`
 
@@ -488,7 +488,7 @@ decode-foreclosed fold and is never type-foreclosed) + [§4.4](./illegal_state_t
 coordinate or returns `Left`; runtime-checked for the hybrid half — whether a dropped coordinate still holds
 live data may require consulting live retained state, and that half is never reported as a compile-time
 impossibility.
-**Validation-locus:** `Gate-2-decoder` (the old→new orphan and retention-floor folds return `Left` at decode)
+**Validation-locus:** `gadt-decode` (the old→new orphan and retention-floor folds return `Left` at decode)
 + `live-effect` residue (the retained-state consultation). Per the validation-locus axis of
 [`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the foreclosure layer above.
 

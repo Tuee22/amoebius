@@ -19,7 +19,7 @@ replica must meet before taking the gateway, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -187,7 +187,7 @@ The medium union and the write regime together express the three named strategie
 The load-bearing rule: **amoebius never holds a credential that can delete, expire, or lifecycle a backup.**
 Retention and deletion are out of band. This is the backup instance of the create-but-not-delete credential
 model owned by
-[`pulumi_iac_doctrine.md` §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) and the
+[`pulumi_ebs_credential_model.md` §6](./pulumi_ebs_credential_model.md#6-the-ebs-create-vs-delete-credential-model) and the
 "deleting durable data is forbidden under normal operation" posture of
 [`storage_lifecycle_doctrine.md` §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation).
 
@@ -280,10 +280,10 @@ medium's backing:
 ## 6. The verified, content-addressed `BackupArtifact`
 
 A completed backup is an immutable, content-addressed artifact carrying a provenance witness and the commit
-watermark it captured. It is branded opaque at Gate 2, materialized only at `provision-seal`, and **counts only once verified** — the same discipline as the `ReclaimEligible` artifact
+watermark it captured. It is branded opaque at gadt-decode, materialized only at `provision-seal`, and **counts only once verified** — the same discipline as the `ReclaimEligible` artifact
 ([`storage_lifecycle_doctrine.md` §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction))
 and the `.ready`-gated `ArtifactRef`
-([`content_addressing_doctrine.md` §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)):
+([`content_addressing_determinism.md` §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)):
 
 ```haskell
 data BackupArtifact (v :: Verified) where
@@ -366,7 +366,7 @@ owned there, not restated here.
 
 `ColdSeedFromBackup` is the cross-cluster **cold-DR seed** posture: the standby is not deployed until needed,
 and when it is, its backing is seeded from the latest `Verified` `BackupArtifact`. The `freshnessBound` — the
-maximum staleness a seed may carry and still be promotable — is checked against the backup `cadence` at Gate 2
+maximum staleness a seed may carry and still be promotable — is checked against the backup `cadence` at gadt-decode
 by that surface's fold, in the same total checked-rejection shape as its `rto ≥ dnsTtl + headroom` relation
 ([`consistency_pacelc_doctrine.md` §3.5](./consistency_pacelc_doctrine.md#35-the-upload-time-feasibility-push-back)).
 Like `Planned`/`Failover`, the `Seed` recovery is a **world-triggered event** classified at the recovery edge,
@@ -408,14 +408,14 @@ Per [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-t
   verified-shrink copy equivalence.
 - **The write-but-never-delete boundary is decode-foreclosed at the credential shape and runtime-enforced at the cloud API.** The `allowedActions` record has no delete field (a spec-layer guarantee); that the cloud
   account actually denies delete is the runtime backstop owned by
-  [`pulumi_iac_doctrine.md` §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model).
+  [`pulumi_ebs_credential_model.md` §6](./pulumi_ebs_credential_model.md#6-the-ebs-create-vs-delete-credential-model).
 - **The key-independence premise is assumed.** That the envelope key is recoverable independently of the
   protected coordinate is a named premise, monitored, never proven by the type.
 - **The cold-seed freshness guarantee is proven-for-the-model, tested by drill, and assumed at the physics.**
   `NoTakeWithoutProvenFreshness` is proven at the model scope; the RTO of an actual cold-seed recovery is
   validated by drill; that the observed watermark faithfully reflects real replication/backup lag is a
   monitored, assumed premise ([`consistency_pacelc_doctrine.md` §4](./consistency_pacelc_doctrine.md#4-honesty-proven--tested--assumed)).
-- **The model-scoped freshness claim is now evidence; the recovery runtime is not.** Phase 4 proved
+- **The model-scoped freshness claim is now evidence; the recovery runtime is not.** Phase 10 proved
   `NoTakeWithoutProvenFreshness` for the bounded gateway model and caught its dedicated witness-removal mutant.
   The backup representation, deploy/seed mechanics, observed-watermark fidelity, and live RTO remain design
   intent or assumed/runtime-checked residue. Phase order and gates live only in
@@ -428,7 +428,7 @@ Per [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-t
 | Owned here (SSoT) | Owned elsewhere (referenced) |
 |---|---|
 | The `BackupPolicy` / `BackupMedium` / `WriteRegime` / `BackupRetention` surface, the three strategies, and the verified `BackupArtifact` | The closed `StorageBacking` union and the delete-forbidden posture → [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md) |
-| That a backup is put-only for amoebius and deletion is out of band | The create-vs-delete credential classes and `CloudAccountMutationCapability` → [`pulumi_iac_doctrine.md` §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model), [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) |
+| That a backup is put-only for amoebius and deletion is out of band | The create-vs-delete credential classes and `CloudAccountMutationCapability` → [`pulumi_ebs_credential_model.md` §6](./pulumi_ebs_credential_model.md#6-the-ebs-create-vs-delete-credential-model), [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) |
 | The no-overcommit backup fold operands (working set + Job + retained generations) | The aggregate `Σ ≤ backing` fold and the `Growable` escape valve → [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) |
 | That restore seeds a fresh coordinate and that a manual air-gap medium has no automatic-restore path | The no-destruction verb union and the reconcile enactment → [`inforcespec_migration_doctrine.md`](./inforcespec_migration_doctrine.md), [`cluster_lifecycle_doctrine.md`](./cluster_lifecycle_doctrine.md) |
 | The `BackupPolicyRef` a cold seed names, the seed/verify enactment, and the `BackupArtifact` it consumes | The `RecoverySource` type and the consistency-over-availability posture, the PACELC posture surface, and the `FreshnessWitness`/`NoTakeWithoutProvenFreshness` proof → [`consistency_pacelc_doctrine.md`](./consistency_pacelc_doctrine.md), [`gateway_migration_model_doctrine.md`](./gateway_migration_model_doctrine.md) |
@@ -439,9 +439,9 @@ Per [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-t
 ## 11. Planning ownership
 
 This document is normative backup-and-recovery doctrine only. It states the target shape; except for the
-explicit Phase-4 model-scoped freshness result above, its statements are design intent, not a built or tested
+explicit Phase-10 model-scoped freshness result above, its statements are design intent, not a built or tested
 amoebius capability. Delivery sequencing, completion status, and
-validation gates — the pure representation folded into the Phase 5–13 gates, the `FreshnessWitness` proof
+validation gates — the pure representation folded into the Phase 11–19 gates, the `FreshnessWitness` proof
 extension in the formal-model phase, and the live backup/restore/cold-seed gates riding on the Vault, MinIO,
 provider-credential, multicluster, and test-topology phases — live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). This doc never maintains a competing

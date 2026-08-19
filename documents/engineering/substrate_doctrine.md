@@ -19,7 +19,7 @@ does not own the cluster engine that runs on it, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_29_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_67_second_arch_attested_index.md, DEVELOPMENT_PLAN/phase_40_pulsar_client.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_53_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_03_host_assert_cli.md, DEVELOPMENT_PLAN/phase_04_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_06_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_07_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_08_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_35_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_36_base_image_registry.md, DEVELOPMENT_PLAN/phase_46_pulsar_client.md, DEVELOPMENT_PLAN/phase_55_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_73_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_74_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -40,7 +40,7 @@ does not own the cluster engine that runs on it, owned by
 
 ---
 
-**Pure inventory read-side status.** The [Phase 10 gate](../../DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md)
+**Pure inventory read-side status.** The [Phase 16 gate](../../DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md)
 validates closed kubelet filesystem layouts, OCI/runtime metadata routing, provider-root template identities,
 accelerator family/profile ownership, and raw/reserved/allocatable VRAM arithmetic in Register 1. Detection,
 materialization, attachment, and observed readback remain unverified; ledger `external-run-reference`.
@@ -201,7 +201,7 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 > **Honesty.** The detector, universal-CPU/provider mapping, `AbsExe` tool boundary, and Python bootstrap coordinator are now
 > implemented. A pristine Incus VM on the physical `linux-cuda` parent exercised clean install, build, handoff,
 > idempotence, divergence repair, and teardown; evidence is retained under
-> `DEVELOPMENT_PLAN/evidence/phase_24`. This is not a complete Phase-29 pass because the full live enforcement
+> `DEVELOPMENT_PLAN/evidence/phase_24`. This is not a complete Phase-35 pass because the full live enforcement
 > inventory remains unfinished. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -363,11 +363,11 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 > that is type-enforced now; package-manager-canonical *discovery* is the part still to land. Do not read
 > the current discovery seam as the finished contract.
 
-**Phase-40 code generation.** The retired `amoebius-pulsar/Setup.hs` resolved `protoc` and
+**Phase-46 code generation.** The retired `amoebius-pulsar/Setup.hs` resolved `protoc` and
 `proto-lens-protoc` by absolute path and gave `proto-lens-setup` a closed search domain — never the ambient
 host `PATH`, so no unrelated executable could shadow code generation. It went with the package split, because
 [§2.1](./repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package) admits no ground for a
-package that exists only to carry a `Setup.hs`. Phase 40 re-establishes the same invariant against
+package that exists only to carry a `Setup.hs`. Phase 46 re-establishes the same invariant against
 `.build/proto/**`; the generated modules stay build artifacts either way.
 
 ---
@@ -384,7 +384,7 @@ synthesizes an operating system, never an instruction set.
 
 | Host substrate | VM provider | What it synthesizes | Seed module |
 |----------------|-------------|---------------------|-------------|
-| **apple** | **Lima** (`limactl`) | An Ubuntu-24.04 `linux-cpu/arm64` VM | `HostBootstrap.Ensure.Lima`, `HostBootstrap.Lima` |
+| **apple** | **Colima** (`colima`) or **Lima** (`limactl`), by workload ([§4.1](#41-colima-and-lima-on-apple-the-provider-follows-the-workload)) | An Ubuntu-24.04 `linux-cpu/arm64` VM, carrying a Docker endpoint under Colima | `HostBootstrap.Ensure.Colima`, `HostBootstrap.Ensure.Lima` |
 | **windows** | **WSL2** | An Ubuntu-24.04 `linux-cpu/amd64` distro | `HostBootstrap.Ensure.Wsl2`, `HostBootstrap.Wsl2` |
 | **linux-cpu** / **linux-cuda** | **Incus** | An Ubuntu-24.04 `linux-cpu` VM at the parent's natural architecture; CUDA devices are absent unless a different specialized gate explicitly requests passthrough | `HostBootstrap.Ensure.Incus`, `HostBootstrap.Incus` |
 
@@ -400,14 +400,29 @@ built in a VM (no Tart) — they build headless, directly on the macOS host; tha
 owned by [§4.4](#44-no-macos-build-vm-apple-builds-are-headless-on-host) and
 [apple_metal_headless_builds.md](./apple_metal_headless_builds.md).
 
-### 4.1 Lima on Apple
+### 4.1 Colima and Lima on Apple: the provider follows the workload
 
-`ensure lima` is `brew install lima` if `limactl` is absent, a verified no-op otherwise. The VM is started
-as a named, project-budget-sized Ubuntu-24.04 instance (`HostBootstrap.Lima.startVMArgs`), and the binary
-re-invokes its own subcommands inside it via `limactl shell <vm> -- <amoebius> <subcmd>` — the composition
-lift that makes a step "run locally" wherever it was placed. That lift mechanism is owned by
-[daemon_topology_doctrine.md](./daemon_topology_doctrine.md); this doc owns only *that Lima is the Apple
-Linux-VM provider and why.*
+Apple synthesizes its Linux frame two ways, and which one a run uses is decided by what the workload needs
+rather than by preference. Colima is Lima carrying a container runtime, so the two are one provider family
+with one extra capability rather than two competing answers.
+
+| Workload | Provider | Why |
+|----------|----------|-----|
+| an image build, a one-off `docker run --rm`, or a `kind` cluster | **Colima** | each is a container workload, and a `kind` node *is* a container; the frame has to publish a Docker endpoint, which is exactly what Colima adds |
+| an `rke2` cluster | **Lima** | `rke2` installs into a full Linux distribution rather than into a container, so a container endpoint is not enough and the frame has to be the distribution |
+
+The one-off case is **ephemeral by construction**: a `docker run --rm` invocation takes a Colima VM for the
+length of that invocation and nothing survives it. A `kind` cluster's VM persists for the cluster's life,
+because there the VM is backing something the run is keeping.
+
+**The logic that runs inside is the same logic in both.** A step is authored once and lifted into whichever
+frame the workload selected, so neither provider carries a deployment path the other does not. A second path
+is how two answers to one question begin to differ, and the lift exists so that there is only ever one. That
+lift mechanism is owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md); this document owns
+only *which provider a workload selects, and why*.
+
+The selection is therefore a function of the workload and the substrate together, not of the substrate
+alone — a provider selector keyed on the substrate by itself cannot express the row above.
 
 ### 4.2 WSL2 on Windows
 
@@ -454,7 +469,7 @@ a host worker*.
 > **Honesty.** Lima, WSL2, and Incus are implemented VM providers in the `hostbootstrap` seed. The headless,
 > on-host Apple build/run shape is **proven in the sibling jitML project** (its implemented fixed-Metal-bridge
 > path) and the sibling `infernix` library **removed** its own legacy Tart path in favour of it — that is
-> sibling evidence for physical Metal. Phase 68 now implements the Lima/brew plan, private disk/capacity fold,
+> sibling evidence for physical Metal. Phase 74 now implements the Lima/brew plan, private disk/capacity fold,
 > and headless bridge/build/lifecycle contracts, but its Linux `x86_64` scoped gate leaves live Apple/Lima/brew
 > and Metal **UNVERIFIED**. Under [§1.1](#11-the-natural-architecture-rule) that scoped gate cannot close them
 > later either: an `apple` claim is provable only on Apple Silicon, whose natural architecture is `arm64`.
@@ -557,13 +572,19 @@ CLI (`pb`) with two modes, **bootstrap coordinator** (bare host → build → `e
 amoebius owns **no shell script**; the earlier `bootstrap.sh` is retired
 ([../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md)).
 
-Phase 29 delivered the bootstrap coordinator mode; Phase 38 Sprint 38.4 now delivers the second mode in
+`pb` is a **distribution**, installed with `pipx` so its own dependencies live in their own environment and
+never enter a project's. That gives it one further surface, and exactly one: an explicit `update` command
+that reinstalls the distribution from its source of truth. It is not a third mode, because it acts on the
+tool rather than on a host or a cluster, and it is explicit because an installer that silently updates itself
+mid-run makes the run's own provenance unanswerable. Nothing else consults or mutates the installation.
+
+Phase 35 delivered the bootstrap coordinator mode; Phase 44 Sprint 44.4 now delivers the second mode in
 `pb/pb/admin.py` and `pb/pb/cli.py`, live-validating node-local Vault init/unseal plus Dhall update and KV CRUD
 against the control-plane daemon. This does not change the universal baseline: every hardware substrate can always run
 `linux-cpu` at its own natural architecture ([§1.1](#11-the-natural-architecture-rule)), and a pristine Linux
 host uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-The Phase-49 provider-parent instance follows the same rule. The actual Pulumi 3.228.0 binary was resolved by
+The Phase-55 provider-parent instance follows the same rule. The actual Pulumi 3.228.0 binary was resolved by
 absolute path and observed through `strace` with zero child-environment entries, while the pure engine boundary
 also requires an absolute AWS-plugin path and rejects `PATH`, `PULUMI_*`, and `AWS_*`. The provider `up` and
 AWS-plugin `execve` remain UNVERIFIED because the configured AWS identity is invalid. This does not alter the
@@ -641,216 +662,13 @@ to render a different service set (the structural-equivalence rule,
 
 ## 8. The node inventory: the single owner of hosts, capacity, and taints
 
-The substrate is a *fact about the host* ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)); the **node inventory** is the typed projection of those facts
-that the rest of amoebius reads. It is the **single owner** (an ownership index,
-[illegal_state_catalog.md §4.4](../illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)) of three things no other doc may re-declare:
-*which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
-consumers read it, and each is a foreclosure that depends on there being exactly one such list.
-
-**Phase 8 read-side status.** The [Phase 8 gate](../../DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md)
-validates the capacity/topology fold against authored in-process `NodeCapacity`, host, candidate-class, taint,
-and quota values (ledger `external-run-reference`).
-It performs no live inventory read. The required `declared allocatable ≤ observed allocatable` cross-check,
-filesystem/runtime metadata observation, VM boot, and node join therefore remain **UNVERIFIED** until their
-owning live phases.
-
-### Per-host/node `Capacity` (allocatable)
-
-Each inventory entry advertises declared CPU, memory, logical pod-local ephemeral storage, and a closed
-`KubeletFilesystemLayout` with named physical backing(s): `Unified` means `nodefs=imagefs=containerfs`;
-`SplitRuntime` means separate nodefs and `imagefs=containerfs`; `SplitImage` means separate imagefs and
-`containerfs=nodefs`. The inventory also pins `NodeImageStorageModelVersion`,
-`KubeletRuntimeMetadataModelVersion`, and finite `CpuOvercommitPolicy = NoCpuOvercommit |
-BoundedCpuOvercommit RatioAtLeastOne` used to bound summed rendered CPU limits. The runtime-metadata model
-is part of `NodeCapacity.localStorage`: it is the authoritative kubelet/CRI versioned supply-side model
-under which provisioning derives sandbox, pod-directory, runtime, CNI, volume, and mount components for each
-planned slot and distinct live Pod UID. The model assigns each component a closed kubelet-nodefs or
-CRI-runtime-root role; the layout resolves that role to its actual backing. It is not a pod-authored byte
-reserve or route. Every elastic `PerInstanceNodeLocalStorageTemplate` pins the same field, which becomes the
-materialized node's model and must match the live kubelet/CRI observation after that node joins. A
-Kubernetes node carries `None | CudaOffering { devices : NonEmpty AcceleratorDevice, links : List
-AcceleratorLink }`; a physical host additionally admits `AppleMetalOffering MetalProfile`. CUDA devices
-carry stable identity/profile plus per-device raw/reserved/net-allocatable VRAM plus the endpoint-validated
-peer/NVLink graph, while `currentFreeVram : Residual Bytes` (including `Zero`) is observed for live
-admission; the Apple offering carries no separate memory pool because its demand is charged to physical-host
-memory. The accelerator-memory shape is
-[§8.2](#82-accelerator-memory-vram-unified-on-apple-per-device-on-cudawindows); the physical-host total
-behind a host worker is
-[§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand). Kubernetes image
-bytes are not part of a pod's logical `ephemeral-storage` request, but they do consume the layout's physical
-filesystem. The platform-selected OCI index/manifest/config/compressed-layer objects are deduplicated by
-digest, snapshotter bytes by chain id, and pull/import workspace by the declared concurrency policy;
-writable layers are routed to imagefs for `SplitRuntime` and nodefs otherwise. Per-Pod CRI components follow
-the model-selected runtime role: on `SplitRuntime` the persistent CRI root resolves to
-`containerfs=imagefs`, while kubelet/CNI/pod-directory components resolve to nodefs. `Unified` and
-`SplitImage` resolve containerfs to nodefs. Distinct components whose roles alias are summed, then the one
-physical backing is checked once. A node-level ownership witness proves the Pod metadata model and image
-storage model partition runtime component ids exactly and disjointly. Each advertised quantity is the
-**allocatable** (schedulable) capacity — the raw hardware total with kube/system-reserved and the eviction
-threshold already netted out — **not** the raw figure, so the fold never trusts more than the scheduler can
-hand out. This is the number the capacity fold
-([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting))
-packs a workload/VM/engine `Demand` against, and the number the detection classifier
-([§2](#2-detection-a-pure-classification-over-three-reads)) cross-checks against reality at runtime —
-*allocatable against allocatable* (the declared value is a ceiling the fold trusts; a host whose real
-allocatable is smaller than its declaration refuses,
-[resource_capacity_doctrine.md §8](./resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)).
-Detection reads the *real* numbers; the inventory *declares* them; the fold trusts the declaration and the
-reconcile checks it. The CPU-overcommit arm is declared policy rather than a probed hardware fact, but its
-ratio is finite and enters the same pure fold.
-
-### The filesystem layout is an observed fact
-
-At bootstrap and every live preflight, the inventory records the kubelet/CRI-reported layout together with
-each role's mount id, device/filesystem id, project/quota id where used, allocatable bytes, containerd
-content root, snapshotter root, configured pull concurrency, the active
-`KubeletRuntimeMetadataModelVersion`, its component→role catalog, and the disjoint Pod-metadata/image-model
-ownership domains. Only the aliases required by the selected constructor are legal. An unexpected alias,
-swapped root, unknown capacity, untracked extra mount below `/var/lib/kubelet`, `/var/log`, or the runtime
-root, or a hard-cap probe that escapes its carve is `FilesystemLayoutMismatch`, never spare capacity.
-Current v1 containerd engines can witness only `Unified` or `SplitRuntime`; `SplitImage` requires a
-runtime/feature witness that containerd cannot provide.
-
-### A closed `NodeTaintKind` set
-
-Taints are not free strings — the set of taint kinds a node may carry is a
-**closed union** owned here, exactly as the substrate catalog and `HostTool` enum are closed ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob), [§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)). This
-is what lets a **`Toleration` be *derived*, never hand-authored**: the platform derives a workload's
-tolerations from the declared node taints ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)),
-so "a toleration for a taint no node declares" is unrepresentable and "a taint no workload tolerates" leaves
-the schedulability existence fold with no landable node
-([illegal_state_catalog.md §3.5, §3.22](../illegal_state/illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity)).
-
-```text
-NodeTaintKind =
-  < ControlPlane
-  | ManagedCapacity
-  >
-
-NodeTaint =
-  { kind   : NodeTaintKind
-  , key    : KubernetesTaintKey
-  , value  : KubernetesTaintValue
-  , effect : < NoSchedule >
-  }
-
-nodeTaint ControlPlane =
-  { kind = ControlPlane, key = platform control-plane key, value = "true", effect = NoSchedule }
-nodeTaint ManagedCapacity =
-  { kind = ManagedCapacity, key = "amoebius.dev/managed-capacity",
-    value = "reserved", effect = NoSchedule }
-```
-
-The constructors, keys, values, and effects are a single mapping. In particular, `ManagedCapacity` is not a
-second scheduler-local string: the capacity scheduler's taint projection, its derived toleration, admission
-rule, and live Node readback all carry this exact `NodeTaint` value.
-
-### The `LinuxHost` witnesses and substrate tags the topology relation reads
-
-The declared compute-engine axis ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)) pairs an
-engine with a node only when the relation permits it, and it reads *this* inventory for "what substrates
-exist" — so the compatibility fold (I2) and the `LinuxHost`-witness gating (I1) are checked against one
-authoritative list. On apple and windows the only `LinuxHost` constructor is the virtualization provider
-([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)), which is why an
-rke2/kind cluster on those hosts must interpose a Lima/WSL2 Linux VM. Linux hardware may construct the witness
-natively, but a pristine-host gate constructs it through Incus.
-
-This document owns the inventory *record*, the closed `NodeTaintKind` set, and the per-host `Capacity`
-*declaration* — including the **physical-host total and disjoint disk-pool partition** behind a host worker
-([§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)),
-the unified-vs-discrete accelerator-device/**`vram`** shape ([§8.2](#82-accelerator-memory-vram-unified-on-apple-per-device-on-cudawindows)),
-and the declared **`Site`** ([§8.3](#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts));
-it does **not** own the capacity arithmetic ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)),
-the compute-engine relation ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)), or the
-toleration-derivation rule ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)). It is the
-single list they all read.
-
-### 8.1 The physical-host total vs the VM's allocatable (the host-worker fold operand)
-
-The per-host `Capacity` above is the number the **in-cluster** bin-pack trusts, and on apple/windows the only
-`LinuxHost` it describes is the Lima/WSL2 **VM's** kube-allocatable ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)).
-A host that *also* runs a **host worker** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized))
-needs a second, larger declaration: the **physical-host total** — the whole bare machine's allocatable
-CPU, memory, and local storage — against which the host-tier fold packs *both* the VM's carve and the host
-worker's `Demand`. Local storage is partitioned by identity into disjoint top-level pools: system reserve, VM
-  disk backings, retained-PV backing, host-shared/build cache, purpose-tagged
-  `HostWorkerLocal`/`BuildScratch`/`ToolInstall` pools, and, on direct Linux, separate kubelet pod-ephemeral and
-  image storage **only when the selected layout actually separates their backing**. `Unified` has one nodefs
-  carve; `SplitRuntime`/`SplitImage` have distinct nodefs/imagefs carves, with containerfs an alias rather than
-  a third pool. Each typed logical backing id resolves to exactly one correctly tagged physical carve.
-  For Lima/WSL2, guest layout filesystem carves are sub-budgets of the VM disk
-  (`guest OS/system reserve + Σ unique layout usable parent debits ≤ VM requiredUsableBytes`); presentation
-  and allocation geometry then derive the VM's raw `provisionedBytes`, which is charged once to physical
-storage. `PhysicalDiskPartition.allocatableRawBytes` is the finite raw physical boundary after unmanaged-host
-reserve and before every amoebius child carve, including `systemReserve`. The top-level sum that packs those
-debits — systemReserve, the VM `provisionedBytes`, and the direct-node/retained/cache/host-storage raw parent
-debits — against `allocatableRawBytes` is owned by [resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting).
-A parent-indexed `NamedDiskCarve PhysicalRawExtent` contributes a
-private raw parent debit; a `NamedDiskCarve VmGuestUsableExtent` contributes only to the separate nested VM
-usable-byte proof and cannot enter the physical sum. No child may be deducted once to manufacture the
-boundary and again in that sum. The same physical byte cannot appear in two top-level pools, and every child
-carve must fit its correctly typed parent boundary. This
-inventory declares that physical-host total as a distinct per-host figure, and the host binary's **own**
-footprint is **netted into system-reserved** on it (exactly as kube/system-reserved is netted out of the VM's
-allocatable), so the physical-host fold stays two-claimant — VM carve + worker `Demand` ≤ physical-host
-allocatable — and the host binary is never a third un-owned claimant. This doc owns the **declaration** of the
-physical-host total and the system-reserved netting; the **fold arithmetic** (a checked `Left Overcommit` at
-the post-bind provision seal) is [resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)'s,
-and the host-worker `Demand` it consumes is declared by
-[platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope).
-
-<a id="82-accelerator-memory-vram-unified-on-apple-discrete-on-cudawindows"></a>
-
-### 8.2 Accelerator memory (`vram`): unified on apple, per-device on cuda/windows
-
-A worker that serves models needs an **accelerator-memory** figure, and the **shape** of that figure is
-substrate-specific — a fact this inventory declares so the capacity fold downstream stays branch-free:
-
-- **apple (Metal, unified memory).** GPU and CPU share **one** pool, so the per-host `Capacity` declares
-  an `AppleMetalOffering` with a compatible `MetalProfile` but **no separate `vram`**. Downstream
-  provisioning derives every allowed coexistence epoch of the identity-complete `MetalOwnerDemand`; each
-  epoch's co-resident components are debited from the same physical-host `mem` as the VM, the worker's
-  non-accelerator runtime memory, and system reserve
-  ([§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)). It is a distinct
-  demand field for explanation and validation, never a second supply pool.
-  An `apple` host declaring a separate `vram` Capacity is an **uninhabitable per-host `Capacity` shape — type-foreclosed** (there is no unified-pool `vram` field to fill; the constructor does not exist).
-- **linux-cuda / windows (CUDA, discrete memory).** The accelerator carries its own memory, not contended
-  with the WSL2/Lima VM, so the per-host `Capacity` declares host `mem` plus a **non-empty device vector**.
-  Every device entry carries a stable UUID/profile, `rawVram`, a non-optional
-  `driverRuntimeReserve`, and `allocatableVram`, with
-  `driverRuntimeReserve + allocatableVram ≤ rawVram`. The reserve covers driver/runtime/allocator and
-  profile-specific safety headroom; it cannot be zeroed by omitting the field. Only `allocatableVram` enters
-  the pure fold. Total allocatable VRAM is derived, never the only schedulability fact: two 24-GiB devices do
-  not satisfy one 40-GiB `Unsharded` residency. A `CudaOwnerDemand` spanning devices must carry structural
-  `ReplicatedPerDevice` or explicit `Sharded` placement whose complete epoch assignment fits each device and
-  the requested interconnect.
-
-This inventory is the **sole owner** of the per-host accelerator device vector/per-device `vram` **numbers**
-and of the unified-vs-discrete `Capacity` **shape**. It does **not** own the fold that spends `vram` or host
-memory: identity-complete `CudaOwnerDemand`/`MetalOwnerDemand` source and workload maps, structural
-residencies, exact policy-class domains, and every derived coexistence epoch are owned downstream
-([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)),
-**count** and **`vram`** are **cross-checked at runtime** against the [§2](#2-detection-a-pure-classification-over-three-reads)
-`nvidia-smi` probe: a host over-declaring device count/profile, raw VRAM, or allocatable VRAM after its
-mandatory reserve **refuses**
-(`discover = Mismatch → refuse`, [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)),
-keeping these axes declared-at-decode / cross-checked-at-runtime. The probe's `memory.free` is a separate,
-time-varying live-admission operand: desired demand must fit the declared residual and observed
-free-at-admission; unexplained use fails closed instead of being silently subtracted from the reserve.
-
-### 8.3 `Site`: the declared network-locality axis (cluster nodes and host-worker hosts)
-
-`Site` is a declared per-host inventory field — an opaque network-locality label answering *where the host
-sits on the network* — and it is **orthogonal to the detected substrate** ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)):
-a machine's `Site` is *where it is*, not *what it is*. It follows the same **declared-at-decode / cross-checked-at-runtime** discipline as the rest of the `Capacity` above: the inventory declares each host's
-`Site`, and a host declaring a `Site` its reachability contradicts (a remote host mis-declared local) surfaces
-at reconcile as the three-valued `discover = Unreachable → refuse`
-([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine))
-— so a declared-vs-real `Site` mismatch is runtime-checked residue, the ceiling every [§8](#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints) declared fact lives
-at. Crucially this inventory carries a `Site` for **both** kinds of host it lists: **in-cluster cluster `Node`s** *and* the **host-worker physical hosts** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized), whose per-host `Capacity` is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)'s operand). The fold that **classifies stretchedness** from these declared `Site`s — which node or host worker
-is remote, and what reachability witness that demands — runs over **both** inventories and is owned by
-[cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation);
-this doc owns only the declared `Site` **fact**, not the classification.
+The substrate is a fact about the host ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)); the
+**node inventory** is the typed projection of those facts. It is the single owner of which hosts and
+substrates exist, how much each advertises, and which taints each node carries. The declaration itself, its
+closed `NodeTaintKind` set, the physical-host total behind a host worker, the unified-versus-discrete
+accelerator-memory shape, and the declared `Site` are carried by
+[substrate_node_inventory.md](./substrate_node_inventory.md); this hub keeps the heading and the anchor
+every inbound link already names.
 
 ---
 
@@ -858,13 +676,13 @@ this doc owns only the declared `Site` **fact**, not the classification.
 
 This document is normative substrate doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): substrate detection
-and the `bootstrap` contract land in **Phase 29** (`linux-cpu`); host compute daemons, the Lima/WSL2
-providers, and the headless Apple-Metal fixed-bridge contracts land in **Phase 68** (`apple`; physical Apple
+and the `bootstrap` contract land in **Phase 35** (`linux-cpu`); host compute daemons, the Lima/WSL2
+providers, and the headless Apple-Metal fixed-bridge contracts land in **Phase 74** (`apple`; physical Apple
 surfaces remain UNVERIFIED after its scoped Linux-host gate); the in-cluster CUDA path is exercised in
-**Phase 65** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
+**Phase 71** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
 and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
-Phase 53 validates deterministic recomputation and Tier-1 executable-engine cache reuse on the retained
+Phase 59 validates deterministic recomputation and Tier-1 executable-engine cache reuse on the retained
 `linux-cpu` platform. It does not establish cross-substrate bit equality, cross-node reuse, production
 llama.cpp inference, or CUDA/Metal cache behavior; those surfaces remain UNVERIFIED. This scoped result does
 not narrow platform availability: every hardware substrate can always run `linux-cpu` at its own natural

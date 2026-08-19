@@ -14,7 +14,7 @@ unable to remove durable backing. It does not own the capacity checks that admit
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_37_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_40_pulsar_client.md, DEVELOPMENT_PLAN/phase_47_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_51_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_52_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_56_test_topology_dsl.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_43_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_46_pulsar_client.md, DEVELOPMENT_PLAN/phase_53_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_55_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_57_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_58_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -52,7 +52,7 @@ mean building or adopting an engine that otherwise does not exist. The work Pulu
 materially harder to replace than the work Helm did; the two removals are *not* symmetric.
 
 **The v1 decision: keep Pulumi.** It brings mature multi-cloud CRUD/diff/destroy and provider coverage, and
-its encrypted-MinIO-backend + Vault-Transit envelope shape ([§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio)) began as sibling prodbox evidence and now has the scoped amoebius Phase-47/49 validation recorded in [§10](#10-planning-ownership).
+its encrypted-MinIO-backend + Vault-Transit envelope shape ([§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio)) began as sibling prodbox evidence and now has the scoped amoebius Phase-53/55 validation recorded in [§10](#10-planning-ownership).
 Reimplementing that surface is a far larger and riskier undertaking than the Helm removal was, for no
 present gain.
 
@@ -246,8 +246,8 @@ flowchart TD
 
 > **Honesty.** This backend shape originated as evidence from the sibling prodbox project (`Prodbox.Pulumi.EncryptedBackend`:
 > a scratch backend hydrated from an opaque Model-B MinIO object, with a Transit/KV Vault gate on every
-> apply/destroy). amoebius has since built its backend layer: Phase 47 tested child checkpoint custody, and
-> Phase 49 tested the exact six-object peak, direct Transit decrypt, opaque MinIO readback, and sealed-Vault
+> apply/destroy). amoebius has since built its backend layer: Phase 53 tested child checkpoint custody, and
+> Phase 55 tested the exact six-object peak, direct Transit decrypt, opaque MinIO readback, and sealed-Vault
 > pre-PUT refusal. This does not validate an AWS provider checkpoint, direct-S3 denial, or the engine-pod
 > filesystem observer; those remain UNVERIFIED. Read broader statements here as design intent
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -474,122 +474,7 @@ trust. Both are external mutations, so both are Pulumi/IaC concerns, and **amoeb
 
 ## 6. The EBS create-vs-delete credential model
 
-This is the section the storage doctrine defers to
-([storage_lifecycle_doctrine.md §5](./storage_lifecycle_doctrine.md#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim) and [§7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation)) and
-the one the original vision flags as genuinely open: *"does this mean eg EBS drives are not in pulumi? or
-that the AWS keys only have authority to create, not delete, EBS resources? (and test cleanup should only be
-done with elevated permissions?) … does it make sense for pulumi to create with one set of credentials then
-destroy with another? or is the harness manually deleting these resources then destroying the pulumi backend
-(after a final resource sweep)?"* This doctrine takes a **design position** and resolves it.
-
-**The risk.** Durable storage must survive every ordinary teardown, or "ephemeral cluster,
-durable data" collapses. But a Pulumi stack that *creates* a volume can, by
-default, *destroy* it on `pulumi destroy`. If the ephemeral cluster stack owned its EBS volumes, tearing
-the cluster down would delete the data. So the EBS volumes must be **structurally** outside the ephemeral
-destroy set, and the authority to delete them must be **structurally** withheld from normal operation.
-
-**The resolution — five locked decisions.**
-
-1. **EBS volumes are in Pulumi, but in their own durable class — never in the ephemeral cluster stack.**
-   The cluster stack (VPC, EKS/EC2, node group) is per-run and freely destroyable; the per-PV EBS volumes
-   are a *durable* class ([§3](#3-state-lifetime-matches-resource-lifetime-per-class)) carried in separate state and flagged `Retain`/`protect` so a normal
-   `pulumi destroy` of the cluster never includes them. This is the IaC realization of
-   storage_lifecycle's node-vs-storage decoupling: a destroyed node's volume detaches and survives, and
-   the next bring-up re-attaches the same volume to the same claim
-   ([storage_lifecycle_doctrine.md §5.1](./storage_lifecycle_doctrine.md#51-storage-is-independent-of-the-node-lifecycle) and [§6](./storage_lifecycle_doctrine.md#6-the-lossless-teardown-guarantee-deterministic-rebind)).
-   Before create, the provision witness contains a deterministic `ProviderVolumeSlotId` derived from account,
-   cluster, StatefulSet claim slot, and the private allocation-rounded `ProviderVolumeRequest` (type, zone,
-   `requiredUsableBytes`, allocation minimum/quantum, `sizeGiB`, `provisionedBytes`, presentation, and
-   witness)—never a fabricated future EBS id. Its rounded raw
-   bytes/count debit the observed quota. `CreateVolume` moves the private backing from `Promised` to
-   `Materialized` only after the returned raw size and `ProviderVolumeId` are attached and cross-checked;
-   retained rebind preserves the slot. The 1:1 rule here is claim/PVC/PV/EBS identity and cardinality, not
-   equality between logical, usable, pre-rounding raw, and provider-rounded bytes.
-2. **Normal operational credentials can create EBS but cannot delete it.** The least-privilege operational
-   credential — the one a running cluster uses for ordinary deploys — is granted `ec2:CreateVolume` (and
-   the cluster-stack create/delete it needs) but **denied `ec2:DeleteVolume`** on durable, retained
-   volumes. "Accidentally delete durable storage" is therefore *unauthorized at the cloud API*, not merely
-   discouraged by policy (the requirement is set by
-   [storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation), the credential mechanics are owned
-   here).
-3. **The elevated test harness is the only automated EBS deleter, and only for test-flagged volumes.**
-   Leak-free test cycles *must* reclaim what they create. The elevated test credential — held in
-   memory for the run, never stored — carries the delete authority the normal credential lacks, and uses it
-   **only on volumes carrying the harness's test flag**. The flag-and-sweep
-   mechanism, the per-run leak ledger, and the always-tear-down test `.dhall` are owned by
-   [testing_doctrine.md](./testing_doctrine.md); this doc owns the credential split and the
-   create/delete authority boundary.
-4. **Pulumi creates the volume; a static-only AWS EBS CSI path attaches it.** Kubernetes does not dynamically
-   provision EBS. The upstream AWS EBS CSI controller/node components and required sidecars are baked into the
-   amoebius base image and installed from typed manifests — no Helm and no public image pull — with no
-   external-provisioner component. Each rebuilt cluster receives a fresh PV whose
-   `spec.csi.driver` is `ebs.csi.aws.com`, whose `volumeHandle` is the durable Pulumi EBS ID, and whose node
-   affinity names that volume's Availability Zone; the sole StorageClass remains
-   `kubernetes.io/no-provisioner`. The CSI runtime identity is distinct from the Pulumi operational identity:
-   it may describe/attach/detach, but is denied both `CreateVolume` and `DeleteVolume`. This consumes the
-   provider's upstream CSI implementation; amoebius does not build its own attach controller.
-5. **Replacement and shrink are explicit old+new migrations, never in-place edits or advance capacity credit.** A provider-volume transition starts from a `StorageMigrationIntent` naming a raw
-   `PriorProvisionRefSource` Volume arm. Gate 2 validates and brands that arm as an opaque
-   `PriorVolumeProvisionRef`; binding expands it to
-   `StorageMigrationDemand { identity, old, replacement, policy }`. Provisioning resolves `old` from the
-   prior `ProvisionedSpec` context and presentation-rounds the
-   replacement and privately returns `ProvisionedStorageMigration { old, replacement, workspaceBytes,
-   copyExecution, perBackingPeak, witness }`. Before `CreateVolume`, the fold fits the old raw allocation, new
-   raw allocation, copy/verification workspace, provider volume-count overlap, and the complete copy/verify
-   Job `PodResourceEnvelope` (image, CPU/memory, pod-ephemeral, logs, writable root, mapped inputs, exact
-   byte-free `PodRuntimeMetadataSource` network/mount identities, concurrency, rollout, and termination).
-   Cutover follows verified copy; failure or loss of observation retains both
-   volumes and the checkpoint evidence. Even after cutover, old bytes/count remain charged until a fresh
-   privileged external observation proves deletion, so a smaller desired volume is never capacity credit for
-   creating its replacement.
-
-Production break-glass reclaim is deliberately outside this automated model. No `.dhall`, reconciler, or
-test-harness credential can delete production EBS; after verified migration the old backing remains until a
-human operator performs an audited external reclaim against its exact `ReclaimEligible` record.
-
-**On "create with one credential, destroy with another."** For test cleanup, the vision worries whether Pulumi can create
-under one credential and destroy under another. amoebius's answer avoids the hazard by *separating the
-state*, not by swapping credentials inside one stack: the durable EBS lives in its own state, so the
-elevated harness destroys it through a *deletion of its own durable-class resources* — observe the
-test-flagged volume, delete it under elevated authority, then prune the now-orphaned durable-class
-checkpoint entry. This is exactly the vision's second option ("the harness manually deleting these
-resources then destroying the pulumi backend after a final resource sweep"), made principled: the sweep is
-the reconciler's `reconcileAbsent` over the durable test-flagged subset, and the final tag-sweep backstop
-is supplemented by the independent Kubernetes/host/cloud inventory backstop, which fails closed on any
-survivor — both owned by the reconciler and testing doctrines
-([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)) and the prodbox lifecycle pattern it
-generalizes.
-
-```mermaid
-flowchart TD
-%% register: orientation
-  normal[Normal operational credential] -->|create and delete| ephemeral[Ephemeral cluster stack: VPC, EKS or EC2, node group]
-  normal -->|create only, DeleteVolume denied| durable[Durable EBS, one per PV, Retain and protect, test-flag optional]
-  durable -->|volume ID becomes static CSI volumeHandle| staticpv[Fresh static PV in each rebuilt cluster]
-  attach[CSI runtime credential: describe, attach, detach only] --> staticpv
-  elevated[Elevated test credential, in-memory for the run] -->|delete test-flagged volumes only| durable
-  staticpv -->|reattaches retained volume| rebind[Same bytes on the next spin-up]
-```
-*Orientation. Design intent; the credential model is owned by [§6](#6-the-ebs-create-vs-delete-credential-model). The operational credential is denied volume deletion at the cloud API, so a cluster destroy cannot remove durable backing; whether the cloud honours that denial is runtime-checked.*
-
-> **Honesty.** This is a **design resolution of an explicitly open question**, not
-> a built or tested amoebius capability. The credential split, the `protect`/`Retain` separation, the
-> static-only CSI attachment, and the elevated test-flagged sweep are specification to be validated — the
-> credential-class split is *proven in prodbox* (operational vs ephemeral-elevated credentials per resource
-> class), but EBS-in-prodbox is
-> CSI-driver-created, not Pulumi-tracked, so amoebius's Pulumi-tracked durable-EBS model is **new design, > not inherited proof.** Delivery is tracked in
-> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
-
-The **backup write credential** is a sibling of this create-vs-delete split. A backup is written under a
-put-only credential whose `allowedActions` structurally excludes `DeleteObject`/`ExpireObject`/
-`PutBucketLifecycle`, so amoebius can write backups but never delete, expire, or lifecycle them; retention and
-deletion belong to a distinct lifetime class ([§3](#3-state-lifetime-matches-resource-lifetime-per-class))
-owned by the medium's object-lock policy, a separate external account, or an audited human break-glass. The
-put-only backup credential and its enforcement layer are owned by
-[`backup_recovery_doctrine.md` §4](./backup_recovery_doctrine.md#4-the-write-but-never-delete-credential-boundary);
-this doctrine owns only that its create-vs-delete boundary is the model the backup credential specializes.
-
----
+Owned by [pulumi_ebs_credential_model.md](./pulumi_ebs_credential_model.md), a slice of this document.
 
 ## 7. Applicative parallelism for independent deploys
 
@@ -766,18 +651,18 @@ To keep SSoT boundaries crisp:
 This document is normative Pulumi-IaC doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
-only (the plan is authoritative): root Vault/PKI lands in **Phase 34**; public-edge ZeroSSL/route53 integration
-lands in **Phase 37**; gateway-migration route53 repointing lands in **Phase 48**; amoebic spawning via SSH-key
-Pulumi with the MinIO backend + Vault-envelope encryption lands in **Phase 47**; provider-managed clusters
+only (the plan is authoritative): root Vault/PKI lands in **Phase 40**; public-edge ZeroSSL/route53 integration
+lands in **Phase 43**; gateway-migration route53 repointing lands in **Phase 54**; amoebic spawning via SSH-key
+Pulumi with the MinIO backend + Vault-envelope encryption lands in **Phase 53**; provider-managed clusters
 (EKS) and dynamic node
-provisioning land in **Phase 49**; the elevated-harness storage-deletion safety that makes the [§6](#6-the-ebs-create-vs-delete-credential-model)
-create-vs-delete model leak-free lands in **Phase 56**. Per
+provisioning land in **Phase 55**; the elevated-harness storage-deletion safety that makes the [§6](#6-the-ebs-create-vs-delete-credential-model)
+create-vs-delete model leak-free lands in **Phase 62**. Per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement here is a proven amoebius
-result except the narrow Phase-37 integration residue below: the model otherwise generalizes behaviour proven
+result except the narrow Phase-43 integration residue below: the model otherwise generalizes behaviour proven
 in prodbox into amoebius design intent, and the [§6](#6-the-ebs-create-vs-delete-credential-model) EBS
 credential model is an explicit *resolution of an open question*, not a tested capability.
 
-Phase 37 validated the narrow TLS credential-provenance seam on linux-cpu: a bounded in-cluster ACME recording
+Phase 43 validated the narrow TLS credential-provenance seam on linux-cpu: a bounded in-cluster ACME recording
 Job received only the Vault `SecretRef` path in argv, read EAB bytes from the Vault-derived Secret volume,
 recorded no values, and found no EAB literal in Dhall. The certificate chain was issued by the retained
 internal Vault PKI as the explicitly allowed staging stand-in. This is not evidence of live ZeroSSL issuance,
@@ -785,22 +670,22 @@ Route53 ownership, or Pulumi execution; those provider effects retain their late
 substrate always offers this linux-cpu baseline; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple,
 or WSL2 on Windows.
 
-Phase 47 realizes the first in-cluster Pulumi owner in `Amoebius.Pulumi.Engine`, the encrypted-checkpoint
+Phase 53 realizes the first in-cluster Pulumi owner in `Amoebius.Pulumi.Engine`, the encrypted-checkpoint
 contract in `Amoebius.Pulumi.Backend.EncryptedMinio`, and the command-provider program under
 `pulumi/child-cluster/`. Two resource-bounded Jobs ran Pulumi inside a parent `kind` cluster, created two child
 clusters concurrently, exported checkpoint state, observed an unchanged second pass, and destroyed both
 stacks. Vault Transit envelope ciphertext and the checkpoint object were read back from retained MinIO; direct
 checkpoint admission and one-byte-short storage are refused by the gate. Provider-managed programs remain
-Phase 48. Every hardware substrate can always run this `linux-cpu` lane; a pristine Linux host uses Incus on
+Phase 54. Every hardware substrate can always run this `linux-cpu` lane; a pristine Linux host uses Incus on
 Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 48 realizes the provider-neutral DNS decision and hub handoff in
+Phase 54 realizes the provider-neutral DNS decision and hub handoff in
 `Amoebius.Multicluster.DnsRepoint` and `GatewayMigration`. The live drill queried a dedicated authoritative DNS
 server from outside the migration runtime and moved a raw-kernel `wg0` role. The configured AWS token failed
 authentication, so the Route53 API/Pulumi mutation remains UNVERIFIED and is not certified by that local DNS
 result.
 
-Phase 49 builds the provider plan and receipt boundary in `Amoebius.Pulumi.Provider.Eks`, extends
+Phase 55 builds the provider plan and receipt boundary in `Amoebius.Pulumi.Provider.Eks`, extends
 `Amoebius.Pulumi.Engine` with exact bounded executor provisioning and the control-plane daemon/absolute-path/empty-child-
 environment contract, and implements the exact checkpoint fold in
 `Amoebius.Pulumi.Backend.EncryptedMinio`. The scoped Register-3 run observed two concurrent resource-bounded
@@ -811,7 +696,7 @@ control-plane daemon `pulumi up`, EKS, the managed node group, CloudTrail, AWS-p
 and direct-S3 denial remain UNVERIFIED. Every hardware substrate can always run the `linux-cpu` parent lane;
 for pristine Linux use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 51 implements the pure durable-EBS program in `Amoebius.Pulumi.Ebs` and the closed operational/CSI/
+Phase 57 implements the pure durable-EBS program in `Amoebius.Pulumi.Ebs` and the closed operational/CSI/
 elevated-test action matrix in `Amoebius.Pulumi.Credential`. It validates integral-GiB allocation, byte/count
 quota refusal, deterministic promised slots, receipt-only materialization, distinct durable checkpoint keys,
 protect/Retain metadata, old+new migration overlap, and all five seeded mutants. The scoped live observer used
@@ -819,7 +704,7 @@ real Vault Transit and MinIO for separate ephemeral/durable checkpoint namespace
 occurred, so create/delete authorization, volume retention, receipt-bound EBS state, and provider migration
 remain UNVERIFIED. The development-plan tracker owns the portable CPU/clean-guest routing rule.
 
-Phase 52 implements `Amoebius.Pulumi.NodeGroup` as receipt-only provider-node materialization and
+Phase 58 implements `Amoebius.Pulumi.NodeGroup` as receipt-only provider-node materialization and
 `Amoebius.Pulumi.Teardown` as fail-closed per-class teardown plus broadened run-owned enumeration. The pure
 contract requires the managed-capacity taint, complete supply/layout/device and fresh scheduler authority,
 rejects foreign-pod admission, retains durable resources, and discovers owned resources through run tag, VPC,

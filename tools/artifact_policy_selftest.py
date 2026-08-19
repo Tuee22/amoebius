@@ -310,7 +310,7 @@ def negative_r15_phase_ordinal() -> policy.Report:
     report = policy.Report()
     policy.audit_phase_ordinals(
         report,
-        ["tools/capacity_topology_gate.py", "DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md", "src/Kernel.hs"],
+        ["tools/capacity_topology_gate.py", "DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md", "src/Kernel.hs"],
         "flag phase7-fold-mutant\n  default: False\ntest-suite phase7-capacity-spec\nlibrary amoebius\n",
         [(".gitignore", "/.phase7-store/"), (".gitignore", "/.build/")],
     )

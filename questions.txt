@@ -1,5 +1,6 @@
 dist-newstyle/ isn't ignored. should it be ? any other built binaries tht aren't? comprehensively review .gitignore and .dockerignore and ensure it's aligned with the new repo layout
 
+Why so many Dockerfiles, and not all built from ubuntu ? I was expecting only one, with every service contained (vault, pulsar, mino, prometheus, grafana, redis, playwright, etc). this should be a generalized version of the Dockerfile doctrine in ~/hostbootstrap.
 
 src/Infernix exists but no /jitML why ? review ~/infernix and ~/jitML and propose combined structure. consider general shape for amoebius extensions, if that concept even makes sense, and how we want to represent these highly generalized ML workflows
 
@@ -12,7 +13,6 @@ pulumi/ -- why one random .yaml file ?
 what is the deal with the vendor/ folder ? why do we need dual ? why is this root level instead of somewhere in src/ ?
 
 
-Why so many Dockerfiles, and not all built from ubuntu ? I was expecting only one, with every service contained (vault, pulsar, mino, prometheus, grafana, redis, playwright, etc). this should be a generalized version of the Dockerfile doctrine in ~/hostbootstrap.
 
 ~/infernix and ~/jitML both have sophisticated ways of ensuring we can't represent using more resources (cpu/ram/storage/vram etc) than what is available and that each process has a known resource footprint that it doesn't exceed. are we doing something similar here ?
 

@@ -38,7 +38,7 @@ friends from the compiler path it is given, so an interposer standing where a re
 compiler should be would break that derivation for no observational gain: a companion is
 not one of the families a phase makes a claim about.
 
-    observer = ArgvObserver(tag="gate2", families={"cabal": ..., "ghc": ..., "dhall": ...})
+    observer = ArgvObserver(tag="gadt-decode", families={"cabal": ..., "ghc": ..., "dhall": ...})
     observer.begin()
     env = observer.env(base_env)                 # refusing shims first on PATH
     run([observer.tool("cabal"), ...], env=env)  # the declared, absolute route

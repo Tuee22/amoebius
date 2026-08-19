@@ -63,19 +63,25 @@ test-only seam that automates the prompt are owned by the
 Root `test-secrets.dhall` is the sole cleartext secret-at-rest exception. It is ignored, test-only, feeds the
 same prompt-to-Vault path, and every production command must reject it rather than reading or copying it.
 
-Every service the cluster runs ships in **one image amoebius builds** — a single Ubuntu-based container
-carrying every third-party service binary, installed by preference from `apt`, then an official artifact, then
-source. No workload pulls from a public registry, and there is one Dockerfile, rendered from a typed bake
-catalog rather than hand-maintained. The build/publish contract, the acquisition ladder, and the bounded
-host-bootstrap exception are owned by the
+Every service the cluster runs ships in **one image amoebius builds** — an Ubuntu-based container carrying
+every third-party service binary, installed by preference from `apt`, then an official artifact, then source.
+There is one Dockerfile, rendered from a typed bake catalog rather than hand-maintained, and it names no
+digest anybody typed: the parent is an authored channel and the digest is resolved per run. Each architecture
+is built natively and published under its own tag — no emulation, no cross-build, and no index joining two
+halves that no single machine ever ran. The base image is published so a consumer pulls a toolchain rather
+than rebuilding it; **no workload pulls from a public registry**, and every image a cluster runs comes from
+that cluster's own registry. The one dependency that does not join it is the browser: an end-to-end gate
+drives chromium, firefox and webkit from a separate image built on demand, because a renderer no pod reaches
+does not belong in the image every pod runs. The build/publish contract, the acquisition ladder, and the
+bounded host-bootstrap exception are owned by the
 [image-build doctrine](./documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster).
 
 **Observed implementation — refreshed 2026-08-16.** The natural-architecture amendment reopened every phase:
-Phase 0 is Active and Phases 1–68 are Blocked, each returning to work in numeric order. No prior seal records
+Phase 0 is Active and Phases 1–74 are Blocked, each returning to work in numeric order. No prior seal records
 the architecture it proved, and the one that claimed two reached the second under emulation, so every earlier
-result is an observed footprint rather than a current pass. The amendment also split the image phase — Phase 30
-builds and publishes its own architecture's child, and a new Phase 67 adds the complementary child on its own
-hardware and joins both into one attested index — which shifted the phases above it by one.
+result is an observed footprint rather than a current pass. The amendment also split the image phase — Phase 36
+builds and publishes its own architecture's child, and a new Phase 73 adds the complementary child on its own
+hardware and publishes it under its own architecture-qualified tag — which shifted the phases above it by one.
 Earlier capability results remain historical evidence until their owner phase reruns; later tools still contain
 legacy repository-root, system-temp, user-home, and host-global container-engine assumptions. The exact
 current and historical divergences, their owners, and their closure conditions are recorded in the

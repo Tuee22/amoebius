@@ -43,7 +43,7 @@ RESULTS = ROOT / ".build/dsl/ui-effect-binding/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-effect-binding/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-effect-binding"
 TEMP_ROOT = ROOT / ".build/tmp/ui-effect-binding"
-CONTRACT = "DEVELOPMENT_PLAN/phase_22_ui_effect_binding.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_28_ui_effect_binding.md"
 GATE_COMMAND = "python3 tools/ui_effect_binding_gate.py"
 EXPECTATIONS = "test/oracle/ui_effect_binding_surfaces.tsv"
 

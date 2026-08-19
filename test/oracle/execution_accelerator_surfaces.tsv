@@ -68,7 +68,7 @@ pulumi-execution-envelope	checks
 composed-full-resource-vector	metrics	acceptance-token
 independent-composed-validator	metrics	positive-specs
 phase9-negative-corpus	metrics	named-negatives,variant-rows,legal-twins
-phase9-gate1-accelerator-owner	metrics	gate1-accelerator-owner
+phase9-dhall-typecheck-accelerator-owner	metrics	dhall-typecheck-accelerator-owner
 phase9-property-battery	metrics	quickcheck-properties
 phase9-mutant-battery	metrics	mutants
 phase9-validation-locus-ledger	metrics	registry-subcases

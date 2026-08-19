@@ -17,7 +17,7 @@ Reading it presumes the context and role grid of
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_37_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_43_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_44_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_74_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -109,7 +109,7 @@ This takes option (c)'s security goal — *no malicious network traffic can use 
 achieves it by **network restriction** instead of by crypto or by a single bottlenecking socket, while
 keeping option (b)'s bandwidth headroom (a real socket per stream) without paying (b)'s mTLS tax.
 
-> **Honesty.** Phase 68 now tests the exact two-service `NodePort`/loopback type, all four wild-exposure
+> **Honesty.** Phase 74 now tests the exact two-service `NodePort`/loopback type, all four wild-exposure
 > exclusions, and two real loopback-bound Linux listeners whose routable-interface probes fail. The
 > Apple/Lima NodePorts, native Pulsar, gateway/MinIO flow, and second physical LAN-host probe remain
 > **UNVERIFIED**; this is a scoped amoebius result, not an Apple gate pass. The prodbox precedent remains
@@ -298,7 +298,7 @@ the comms-relevant requirement each substrate must satisfy:
 - **This generalizes a pattern proven in the sibling prodbox project**, where in-cluster Harbor is reached
   by host-origin clients at `127.0.0.1:30080` over a NodePort bound to loopback (prodbox CLAUDE.md,
   "Substrate Equivalence"). That is **evidence from another system, not proof in amoebius** — amoebius has
-  a sibling precedent. Phase 68's scoped Linux-host probe tests the same bind restriction locally, but
+  a sibling precedent. Phase 74's scoped Linux-host probe tests the same bind restriction locally, but
   Apple/Lima realization remains UNVERIFIED.
 - **The DSL never lets a substrate "fix" a missing piece by widening exposure.** If a substrate's node
   networking makes the loopback binding awkward, the resolution is to extend that substrate's installer to
@@ -360,7 +360,7 @@ secrets-by-name, never the method.
 
 This document is normative host↔cluster comms doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) — host
-compute-daemon contracts land in **Phase 68**; its scoped gate does not claim the physical Apple peer. The
+compute-daemon contracts land in **Phase 74**; its scoped gate does not claim the physical Apple peer. The
 implemented surfaces are `Amoebius.HostComms.{NodePort,Loopback,Illegal}` and
 `Amoebius.HostWorker.{Peer,Auth}`. This doc never
 maintains a competing status ledger; it states the target shape and links back for status.

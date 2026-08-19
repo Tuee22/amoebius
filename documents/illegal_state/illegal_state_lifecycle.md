@@ -18,7 +18,7 @@ be observed as having happened. The numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_15_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_30_base_image_registry.md, DEVELOPMENT_PLAN/phase_44_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_12_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_36_base_image_registry.md, DEVELOPMENT_PLAN/phase_50_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -35,9 +35,9 @@ be observed as having happened. The numbering belongs to
 ```mermaid
 flowchart LR
   %% register: orientation
-  g1["Gate-1-editor<br/>5 entries"]
-  g2["Gate-2-decoder<br/>4 entries"]
-  g3["Gate-3-astcheck<br/>1 entry"]
+  g1["dhall-typecheck<br/>5 entries"]
+  g2["gadt-decode<br/>4 entries"]
+  g3["extension-astcheck<br/>1 entry"]
   ps["provision-seal<br/>none in this slice"]
   rg["rendered-output-golden<br/>none in this slice"]
   le["live-effect<br/>none in this slice"]
@@ -68,9 +68,9 @@ It owns nothing of the catalog's framing.
   that the cluster enforces it) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced, not restated.
 - The **seven typing techniques**, the **coverage matrix**, the **three foreclosure layers**, and the new
-  **validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `Gate-3-astcheck` / `provision-seal` /
+  **validation-locus axis** (`dhall-typecheck` / `gadt-decode` / `extension-astcheck` / `provision-seal` /
   `rendered-output-golden` / `live-effect`, orthogonal to the foreclosure layer; `provision-seal` is post-bind
-  Phase-12 provision returning a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
+  Phase-18 provision returning a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced, not restated.
 - The *normative rule* behind each entry lives in that entry's owning doctrine (readiness/ordering, release
   lifecycle, monitoring, …). This doc names the owner and never restates its content.
@@ -92,7 +92,7 @@ adds one new **Validation-locus** line naming where the illegal state is caught 
 
 ### 3.41 A duration-gated / hand-ordered bring-up sequence (a readiness race)
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `lifecycle`
 
@@ -121,10 +121,10 @@ total fold (`mkBringUpOrder` acyclic/complete). **Layer:** `type-foreclosed` for
 and the derived-edge handle; `decode-foreclosed` for the acyclic/complete DAG fold; `runtime-checked` residue —
 that the observed condition actually resolves (owned by [`readiness_ordering_doctrine.md` §6](../engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps), [`cluster_lifecycle_doctrine.md` §9](../engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine), and [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md)). *(Honesty: the `type-foreclosed` claim scopes to the sanctioned `Readiness`-typed surface, not the whole `IO` monad — a raw `threadDelay` is caught one layer out by the [`daemon_topology_doctrine.md` §6](../engineering/daemon_topology_doctrine.md#6-the-shared-daemon-spine) ban, a `runtime-checked` discipline.)*
 
-**Validation-locus:** `Gate-2-decoder` (the closed `Readiness` union with no `AfterDuration` arm is a Haskell
-`data` type on the Phase-15 surface, and bring-up order is *derived*, never Dhall-authored — so no `dhall
+**Validation-locus:** `gadt-decode` (the closed `Readiness` union with no `AfterDuration` arm is a Haskell
+`data` type on the Phase-21 surface, and bring-up order is *derived*, never Dhall-authored — so no `dhall
 type` fixture can exercise it and "wait N then assume ready" is a GHC compile-fail golden, not an editor-time
-`dhall type` failure, per the Gate-1-vs-Gate-2 caveat of [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force); a
+`dhall type` failure, per the dhall-typecheck-vs-gadt-decode caveat of [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force); a
 start-handle likewise exists only once its dependency's `Ready` edge does, and the total `mkBringUpOrder` fold
 returns `Left` on a cycle or an undeclared dependency) + `live-effect` (that the observed condition actually
 resolves in bounded time — the port becomes responsive — owned by the reconciler and the chaos doctrine). Per
@@ -133,7 +133,7 @@ foreclosure layer above.
 
 ### 3.26 An unverified environment promotion (promote → prod without the required evidence)
 
-**Delivery-owner:** `Phase-44`
+**Delivery-owner:** `Phase-50`
 
 **Case-family:** `lifecycle`
 
@@ -149,21 +149,21 @@ strength (Prod requires the chaos layer). The advance constructor demands an **e
 on the promoted `Release`, owned by [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing
 doctrine.
 
-**Validation-locus:** `Gate-2-decoder` (the `PromotionGate` advance constructor demands an evidence witness; the
+**Validation-locus:** `gadt-decode` (the `PromotionGate` advance constructor demands an evidence witness; the
 total decoder returns `Left` when the `Release`'s test-topology ledger fails to meet the target environment's
 required evidence strength — a value-level ledger fold, not a Dhall type index) + `live-effect` (that the tests
 actually ran and that prod actually converged on the promoted `Release`, owned by the chaos and testing
 doctrines). Per the validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md),
 orthogonal to the foreclosure layer above.
 
-**Validated instance:** Phase 44 compiled the closed `Environment`/opaque `EvidenceWitness` boundary and
+**Validated instance:** Phase 50 compiled the closed `Environment`/opaque `EvidenceWitness` boundary and
 exercised it live. Runtime- and Protocol-missing fixtures returned their specific refusal tags and produced no
 pointer mutation; the tested Runtime witness produced the only Prod advance. The live wiring is tested, never
-proven; Phase 56 later automates topology derivation rather than owning this illegal-state boundary.
+proven; Phase 62 later automates topology derivation rather than owning this illegal-state boundary.
 
 ### 3.43 An unmonitored workflow or extension (or an unauthenticated monitoring surface)
 
-**Delivery-owner:** `Phase-12`
+**Delivery-owner:** `Phase-18`
 
 **Case-family:** `capacity`
 
@@ -187,9 +187,9 @@ fold. **Owner:**
 `Off`/`Public` arms, and the `NonEmpty` lists; `decode-foreclosed` for coverage, non-vacuousness, feasibility,
 and the `routes[].workflow`-vs-`name` reconciliation; `runtime-checked` residue — that the SLO is actually met, the alert fires, the named `/metrics` series exists, and a `SubjectScoped` filter actually excludes another subject's data — owned by [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the review tier.
 
-**Validation-locus:** `Gate-1-editor` (the mandatory `monitor` / `liveness` / `extMonitoring` fields, the
+**Validation-locus:** `dhall-typecheck` (the mandatory `monitor` / `liveness` / `extMonitoring` fields, the
 `NonEmpty` `extMonitoring` list, and the absent `Off`/`Public` arms fail `dhall type` at authoring time) +
-`Gate-2-decoder` (the coverage and non-vacuousness folds and the `routes[].workflow`-vs-`name` reconciliation return `Left` at decode) + `provision-seal` (the monitoring feasibility Σ fold returns a `ProvisionError`
+`gadt-decode` (the coverage and non-vacuousness folds and the `routes[].workflow`-vs-`name` reconciliation return `Left` at decode) + `provision-seal` (the monitoring feasibility Σ fold returns a `ProvisionError`
 after binding and before any `ProvisionedSpec` exists) + `rendered-output-golden` (that the emitted monitoring surface renders
 behind the Keycloak-owned edge with no `Public` listener — the no-backdoor-ingress analog of
 [§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress), caught by a golden test on the rendered manifest rather than a
@@ -201,7 +201,7 @@ a `SubjectScoped` filter actually excludes another subject's data). Per the vali
 
 ### 3.46 A chaos fault targeting a component the spec never declared
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `lifecycle`
 
@@ -224,7 +224,7 @@ to the invariant it stresses. **Owner:**
 inhabitant (a compile-fail golden, like the cross-tenant [§3.8](./illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)) —
 with a `runtime-checked` residue only that the injected fault *actually* perturbs the live component as modeled.
 
-**Validation-locus:** `Gate-2-decoder` — because Dhall has no opaque or dependent types (the caveat of
+**Validation-locus:** `gadt-decode` — because Dhall has no opaque or dependent types (the caveat of
 [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
 the cross-field "target ∈ declared components" constraint cannot be a Dhall type index; the total decoder
 resolving the `FaultTarget` against the declared component set returns `Left` on an undeclared target, and the
@@ -234,16 +234,16 @@ component as the drill assumes). Per the validation-locus axis of
 
 ### 3.74 A container image amoebius did not generate
 
-**Delivery-owner:** `Phase-30`
+**Delivery-owner:** `Phase-36`
 
 **Case-family:** `image`
 
 Every other byte the cluster runs is accounted for — a baked binary, a linked library, a content-addressed
 asset — but an image reference was, until now, a free digest. `ImageArtifact` constrained *bytes*
-exhaustively (manifest-list digest, per-platform child and config digests, per-layer blob digests) and
+exhaustively (image manifest digest, config digest, per-layer blob digests) and
 *identity* not at all, so any digest inhabited it and an app could name a container amoebius neither built
 nor inspected. Making `identity : ImageIdentity` a required field closes it: the union's three arms are
-named catalog identities — the host-pulled `KindNode` image, the multi-arch `Base` image, and a `Runtime`
+named catalog identities — the host-pulled `KindNode` image, the architecture-qualified `Base` image, and a `Runtime`
 variant keyed by the reviewed trusted-adapter set linked into it — with **no `Foreign`, free-digest, or `Url` arm**. An app therefore has no image to name; its checked UI program is immutable release data interpreted by
 that generic runtime. Only a new trusted Haskell adapter can mint another runtime variant. This is
 the same closure `EngineRuntime` already carries against an operator-supplied engine address, applied one
@@ -254,12 +254,12 @@ layer out. **Owner:** [`image_build_doctrine.md` §5](../engineering/image_build
 reference has no constructor, with a `rendered-output-golden` residue that the *deployed* image is the one
 named (and a live containerd inspection independently confirms the pulled digest).
 
-**Validation-locus:** `Gate-1-editor` — the union is closed in the Dhall schema, so naming a foreign image
+**Validation-locus:** `dhall-typecheck` — the union is closed in the Dhall schema, so naming a foreign image
 fails `dhall type` before any binary runs, exactly as an engine named by URL does.
 
 ### 3.75 A container whose process is unnamed
 
-**Delivery-owner:** `Phase-30`
+**Delivery-owner:** `Phase-36`
 
 **Case-family:** `image`
 
@@ -279,16 +279,16 @@ in that identity's own build content — so a container cannot name an executabl
 (the closed role union). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (required field) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
 (process↔image and binary↔bake-content relations over the enclosing build). **Layer:** `type-foreclosed` for
-the field's presence and the union's closedness; the two cross-references are `Gate-2-decoder` folds.
+the field's presence and the union's closedness; the two cross-references are `gadt-decode` folds.
 
-**Validation-locus:** `Gate-1-editor` — a `ContainerEnvelope` missing `process`, or naming a role outside
+**Validation-locus:** `dhall-typecheck` — a `ContainerEnvelope` missing `process`, or naming a role outside
 the closed union, does not type-check; the image↔process and binary↔content relations are cross-field and so
 land at the decoder, per the validation-locus axis of
 [`illegal_state_techniques.md`](./illegal_state_techniques.md).
 
 ### 3.76 A build stage whose content is unmodeled
 
-**Delivery-owner:** `Phase-30`
+**Delivery-owner:** `Phase-36`
 
 **Case-family:** `image`
 
@@ -309,12 +309,12 @@ generated projection of that data. **Owner:**
 (a pinned identity per step rather than a fetched address). **Layer:** `type-foreclosed` — an interpolated
 shell fragment has no constructor — with a `rendered-output-golden` residue pinning the emitted Dockerfile.
 
-**Validation-locus:** `Gate-1-editor` — the absent `RunShell`/`Url` arms are a Dhall-schema closure, so an
+**Validation-locus:** `dhall-typecheck` — the absent `RunShell`/`Url` arms are a Dhall-schema closure, so an
 authored shell fragment fails `dhall type` with no binary involved.
 
 ### 3.77 A worker naming an extension its own binary does not link
 
-**Delivery-owner:** `Phase-30`
+**Delivery-owner:** `Phase-36`
 
 **Case-family:** `image`
 
@@ -335,12 +335,12 @@ The membership check is therefore a real constraint rather than a tautology. **O
 decoder fold rather than a Dhall type index — with a `runtime-checked` residue that the linked handler
 actually serves.
 
-**Validation-locus:** `Gate-2-decoder` — Dhall carries no dependent types, so "this id is in that set" is
+**Validation-locus:** `gadt-decode` — Dhall carries no dependent types, so "this id is in that set" is
 resolved by the total decoder, which returns `Left` when it is not.
 
 ### 3.78 Extension source that reaches outside the sanctioned API
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-21`
 
 **Case-family:** `lifecycle`
 
@@ -349,12 +349,12 @@ Gates 1 and 2 prove things about a *value*; neither constrains the Haskell linke
 extension source could open a socket, shell out, `unsafeCoerce`, or read a file, in the same process as the
 role holding cluster-wide secret authority. While the linked set was closed at two vendored ML libraries
 this was covered by review, and review is not a mechanism; with the `App` tier open it is not covered at
-all. Gate 3 closes it: a custom AST checker admits source against a closed `SanctionedApi`, rejecting an
+all. extension-astcheck closes it: a custom AST checker admits source against a closed `SanctionedApi`, rejecting an
 unsanctioned import, raw `IO`, an FFI call, an `unsafe*` operation, Template Haskell, or an orphan instance
 with a located diagnostic. Its `Accepted` arm carries an opaque, constructor-private
 `CheckedExtensionSource` that only the checker produces and only the linker consumes, so "link unchecked
 source" has no more syntax than "render an unprovisioned spec". **Owner:**
-[`dsl_doctrine.md` §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) (the gate) + [`dsl_doctrine.md` §8](../engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits)
+[`dsl_doctrine.md` §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) (the gate) + [`dsl_doctrine.md` §8](../engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits)
 (the constrained surface). **Technique:**
 [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (an opaque checked value as the only linkable state) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
@@ -363,13 +363,13 @@ linkable representation — with the honest limit that the checker bounds what c
 computes: that checked source terminates, respects its budgets, or serves correctly is `runtime-checked`
 residue claimed by no gate.
 
-**Validation-locus:** `Gate-3-astcheck` — a new locus on the same axis as Gate-1/Gate-2, fired at build
+**Validation-locus:** `extension-astcheck` — a new locus on the same axis as dhall-typecheck/gadt-decode, fired at build
 time over extension source before link, per the validation-locus axis of
 [`illegal_state_techniques.md`](./illegal_state_techniques.md).
 
 ### 3.87 An execution unit with no monitoring obligation
 
-**Delivery-owner:** `Phase-12`
+**Delivery-owner:** `Phase-18`
 
 **Case-family:** `capacity`
 
@@ -395,8 +395,8 @@ non-vacuousness of each unit's bounds and for the execution-set coverage fold; `
 feasibility, since universal monitoring can exceed the observability workload's capacity where workflow-only
 monitoring did not; `runtime-checked` residue — that each unit's declared series actually exists on the
 endpoint it names.
-**Validation-locus:** `Gate-1-editor` (the mandatory `monitor` field and the absent `Exempt` arm fail
-`dhall type` at authoring) + `Gate-2-decoder` (non-vacuousness and coverage folds return `Left`) +
+**Validation-locus:** `dhall-typecheck` (the mandatory `monitor` field and the absent `Exempt` arm fail
+`dhall type` at authoring) + `gadt-decode` (non-vacuousness and coverage folds return `Left`) +
 `provision-seal` (the enlarged monitoring feasibility Σ returns a `ProvisionError` before any
 `ProvisionedSpec` exists) + `live-effect` residue (the named series exists and is scraped). Per the
 validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the
@@ -406,7 +406,7 @@ foreclosure layer above.
 
 ### 3.89 A one-shot command run holding a daemon role
 
-**Delivery-owner:** `Phase-29`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `topology`
 
@@ -431,12 +431,12 @@ and the closed unions).
 (the legal pairing indexed into the constructor, rather than two independent fields whose product is larger
 than the set of real cells).
 
-**Validation-locus:** `Gate-1-editor` — a value naming a role its context cannot hold has no constructor, so
+**Validation-locus:** `dhall-typecheck` — a value naming a role its context cannot hold has no constructor, so
 it does not type-check.
 
 ### 3.90 A role whose cardinality contradicts it
 
-**Delivery-owner:** `Phase-29`
+**Delivery-owner:** `Phase-35`
 
 **Case-family:** `topology`
 
@@ -456,7 +456,7 @@ replicas is then not rejected but unsayable.
 
 **Layer:** `type-foreclosed` — the replica field exists only on the arm that admits *N*, so the
 contradictory pairing has no shape to be written in; no runtime-checked residue remains.
-**Validation-locus:** `Gate-1-editor` — the schema gives `ControlPlaneDaemon` and `CapacityScheduler` no
+**Validation-locus:** `dhall-typecheck` — the schema gives `ControlPlaneDaemon` and `CapacityScheduler` no
 replica field, so a count beside either is a type error in the editor, not a rejection at decode.
 
 ## Related Documents

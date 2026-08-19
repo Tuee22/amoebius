@@ -14,7 +14,7 @@ replay. It does not own the online runtime it pairs with, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_24_offline_language_plan.md, DEVELOPMENT_PLAN/phase_28_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_30_offline_language_plan.md, DEVELOPMENT_PLAN/phase_34_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_67_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_68_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_69_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_70_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -135,7 +135,7 @@ Read-only ports and subscriptions are represented as cached projections with cur
 Uploads use the local-blob protocol in [§10](#10-offline-blobs). A port without authoritative validation,
 idempotency, conflict, ordering, dependency, count, byte, and age semantics cannot be marked queueable.
 The initial infernix/jitML operation classification is owned by
-[Low-Code UI Runtime §12](./low_code_ui_runtime_doctrine.md#12-workflows-and-artifact-lifting-into-the-ux):
+[Low-Code UI Runtime §12](./low_code_ui_workflow_lifting.md#12-workflows-and-artifact-lifting-into-the-ux):
 this doctrine supplies the queue machinery but cannot broaden an adapter's eligible port set.
 
 Local validation is advisory presentation. Reconnect always reruns server validation, authentication,
@@ -327,7 +327,7 @@ not equivalent to server-side Vault custody. Encryption at rest does not protect
 compromised same-origin runtime code, browser extensions, or a compromised device; CSP, dependency integrity,
 the bounded generated client, and local unlock reduce that exposure but do not remove it.
 
-The design is planned in Phases 24–63. Status and evidence remain solely in the
+The design is planned in Phases 30–69. Status and evidence remain solely in the
 [Development Plan](../../DEVELOPMENT_PLAN/README.md).
 
 The sibling `mattandjames` repository supplies implementation evidence for the motivating
@@ -343,21 +343,21 @@ the application DSL. This is sibling evidence, not an amoebius implementation cl
 
 ## Related Documents
 
-Phase 24 implements the closed `OnlineOnly | Offline` source choice, bounded queue contracts, initial ML
+Phase 30 implements the closed `OnlineOnly | Offline` source choice, bounded queue contracts, initial ML
 classification, and deterministic exact-key public/private plan projection. Independent tables and five
 compile-time mutants pass at Register 1; browser storage and live replay remain UNVERIFIED. Every hardware
 substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on
 Windows.
 
-Phase 28's scoped Register-2 result uses two real Chrome processes and one hermetic profile to test AES-GCM/PBKDF2, encrypted IndexedDB recovery, raw storage inspection, partition isolation, Web Locks fencing, BroadcastChannel handoff, immutable Service Worker caches, and explicit quota refusal. Six mutants turn red. The production PureScript bundle and server replay remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 34's scoped Register-2 result uses two real Chrome processes and one hermetic profile to test AES-GCM/PBKDF2, encrypted IndexedDB recovery, raw storage inspection, partition isolation, Web Locks fencing, BroadcastChannel handoff, immutable Service Worker caches, and explicit quota refusal. Six mutants turn red. The production PureScript bundle and server replay remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 61's scoped result revalidates membership/program compatibility, retains pending records, scopes idempotency, and treats only the durable effect owner as acceptance authority. Two loopback UI endpoints share an independently queried SQLite owner; a response is dropped after effect and recovered through the other endpoint with one effect. Real platform providers remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 67's scoped result revalidates membership/program compatibility, retains pending records, scopes idempotency, and treats only the durable effect owner as acceptance authority. Two loopback UI endpoints share an independently queried SQLite owner; a response is dropped after effect and recovered through the other endpoint with one effect. Real platform providers remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 62's scoped result encrypts a fresh blob in real Chrome, restarts and inspects raw storage, resumes a two-chunk upload, computes content identity server-side, reads the committed bytes independently, and releases one dependent effect only afterward. Captured handles deny non-owner and foreign scopes; six mutants turn red. Real MinIO/Gateway/Kubernetes/CNI and production PureScript remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 68's scoped result encrypts a fresh blob in real Chrome, restarts and inspects raw storage, resumes a two-chunk upload, computes content identity server-side, reads the committed bytes independently, and releases one dependent effect only afterward. Captured handles deny non-owner and foreign scopes; six mutants turn red. Real MinIO/Gateway/Kubernetes/CNI and production PureScript remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 63's scoped result requires a finite complete compatibility witness, preserves intent across reload, makes migration single-generation/atomic/resumable/idempotent, and reauthorizes retained handlers. Separate real Chrome processes exercise A→staged-B crash→B resume→A rollback without losing any record kind; six mutants turn red. Real platform rollout/provider observations remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 69's scoped result requires a finite complete compatibility witness, preserves intent across reload, makes migration single-generation/atomic/resumable/idempotent, and reauthorizes retained handlers. Separate real Chrome processes exercise A→staged-B crash→B resume→A rollback without losing any record kind; six mutants turn red. Real platform rollout/provider observations remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 64's scoped result composes the offline contract with a real Chrome A→B trace, encrypted blob recovery, a stopped host-local endpoint role, surviving-endpoint reconnect, SQLite cursor/effect/receipt recovery, filesystem content verification, route loss, and eight red mutants. It does not establish provider multi-zone continuity: provider whole-zone isolation, managed placement, real platform services, Kubernetes/CNI, production PureScript, and offline jitML/CUDA remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; when pristine Linux is required, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 70's scoped result composes the offline contract with a real Chrome A→B trace, encrypted blob recovery, a stopped host-local endpoint role, surviving-endpoint reconnect, SQLite cursor/effect/receipt recovery, filesystem content verification, route loss, and eight red mutants. It does not establish provider multi-zone continuity: provider whole-zone isolation, managed placement, real platform services, Kubernetes/CNI, production PureScript, and offline jitML/CUDA remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; when pristine Linux is required, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 - [Low-Code UI Runtime](./low_code_ui_runtime_doctrine.md)
 - [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md)

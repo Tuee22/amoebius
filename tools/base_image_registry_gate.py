@@ -47,7 +47,7 @@ RUNG_ORACLE = ROOT / "test/fixture/base_image_registry/acquisition_rungs.tsv"
 BUILDER_CHANNELS = ROOT / "test/fixture/base_image_registry/builder_channels.json"
 RESULTS = ROOT / ".build/dsl/base-image-registry/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/base_image_registry_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_30_base_image_registry.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_36_base_image_registry.md"
 GATE_COMMAND = "python3 tools/base_image_registry_gate.py --execute"
 
 RUNGS = ("AptPackage", "OfficialArtifact", "BuildProduct", "CopyOci")

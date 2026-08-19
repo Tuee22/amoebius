@@ -37,8 +37,8 @@ registry-storage-bound-intent	checks
 extension-totality	checks	
 extension-acyclicity	items	cyclic-extension
 extension-no-shadowing	items	shadowing-extension
-phase10-gate1-corpus	metrics	gate1-negatives
-phase10-gate2-corpus	metrics	gate2-negatives
+phase10-dhall-typecheck-corpus	metrics	dhall-typecheck-negatives
+phase10-gadt-decode-corpus	metrics	gadt-decode-negatives
 phase10-arm-exhaustiveness	metrics	capability-arms
 phase10-golden-corpus	metrics	shape-goldens
 phase10-property-coverage	metrics	quickcheck-properties

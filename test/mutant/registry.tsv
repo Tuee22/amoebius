@@ -136,12 +136,12 @@ determinism_jitcache	resolve_fixed_marker	test/mutant/determinism_jitcache/cache
 determinism_jitcache	rng_workerid	test/mutant/determinism_jitcache/rng_workerid.hs	determinism-jitcache-rng-workerid-mutant	—
 determinism_jitcache	store_one_byte_short	test/mutant/determinism_jitcache/cache/store_one_byte_short.hs	—	—
 deterministic_simulation	m1-dropped-partition-handling	test/mutant/deterministic_simulation/dropped_partition_handling/DroppedPartitionMutant.hs,test/mutant/deterministic_simulation/dropped_partition_handling/README.md	—	surface=test/mutant/deterministic_simulation/dropped_partition_handling/DroppedPartitionMutant.hs;expected=Violated:NoActOnStaleRead
-dhall_gate1_schema	gate1_capability_custom_arm	test/mutant/dhall_gate1_schema/gate1_capability_custom_arm.dhall	—	—
-dhall_gate1_schema	gate1_duplicate_event_authority	test/mutant/dhall_gate1_schema/gate1_duplicate_event_authority.dhall	—	—
-dhall_gate1_schema	gate1_implicit_latest_transition	test/mutant/dhall_gate1_schema/gate1_implicit_latest_transition.dhall	—	—
-dhall_gate1_schema	gate1_optional_transition	test/mutant/dhall_gate1_schema/gate1_optional_transition.dhall	—	—
-dhall_gate1_schema	gate1_prior_ref_provisioned	test/mutant/dhall_gate1_schema/gate1_prior_ref_provisioned.dhall	—	—
-dhall_gate1_schema	gate1_resource_mutations	test/mutant/dhall_gate1_schema/gate1_resource_mutations.tsv	—	—
+dhall_typecheck_schema	dhall_typecheck_capability_custom_arm	test/mutant/dhall_typecheck_schema/dhall_typecheck_capability_custom_arm.dhall	—	—
+dhall_typecheck_schema	dhall_typecheck_duplicate_event_authority	test/mutant/dhall_typecheck_schema/dhall_typecheck_duplicate_event_authority.dhall	—	—
+dhall_typecheck_schema	dhall_typecheck_implicit_latest_transition	test/mutant/dhall_typecheck_schema/dhall_typecheck_implicit_latest_transition.dhall	—	—
+dhall_typecheck_schema	dhall_typecheck_optional_transition	test/mutant/dhall_typecheck_schema/dhall_typecheck_optional_transition.dhall	—	—
+dhall_typecheck_schema	dhall_typecheck_prior_ref_provisioned	test/mutant/dhall_typecheck_schema/dhall_typecheck_prior_ref_provisioned.dhall	—	—
+dhall_typecheck_schema	dhall_typecheck_resource_mutations	test/mutant/dhall_typecheck_schema/dhall_typecheck_resource_mutations.tsv	—	—
 encrypted_browser_runtime	omit_fencing	test/mutant/encrypted_browser_runtime/omit_fencing.patch	encrypted-browser-runtime-omit-fencing-mutant	—
 encrypted_browser_runtime	retain_credentials	test/mutant/encrypted_browser_runtime/retain_credentials.patch	encrypted-browser-runtime-retain-credentials-mutant	—
 encrypted_browser_runtime	reuse_partition_key	test/mutant/encrypted_browser_runtime/reuse_partition_key.patch	encrypted-browser-runtime-reuse-partition-key-mutant	—
@@ -197,10 +197,10 @@ formal	emitTLA-mut-01	test/mutant/formal/emitTLA-mut-01	—	—
 formal	emitTLA-mut-02	test/mutant/formal/emitTLA-mut-02	—	—
 formal	emitTLA-mut-03	test/mutant/formal/emitTLA-mut-03	—	—
 formal	emitTLA-mut-04	test/mutant/formal/emitTLA-mut-04	—	—
-gadt_decoder_gate2	ambient-path-lookup	test/mutant/gadt_decoder_gate2/ambient-path-lookup.mutant	—	—
-gadt_decoder_gate2	legalized_schema	test/mutant/gadt_decoder_gate2/legalized_schema.dhall	—	—
-gadt_decoder_gate2	resource_mutations	test/mutant/gadt_decoder_gate2/resource_mutations.tsv	—	—
-gadt_decoder_gate2	unobserved-family	test/mutant/gadt_decoder_gate2/unobserved-family.mutant	—	—
+gadt_decode_ir	ambient-path-lookup	test/mutant/gadt_decode_ir/ambient-path-lookup.mutant	—	—
+gadt_decode_ir	legalized_schema	test/mutant/gadt_decode_ir/legalized_schema.dhall	—	—
+gadt_decode_ir	resource_mutations	test/mutant/gadt_decode_ir/resource_mutations.tsv	—	—
+gadt_decode_ir	unobserved-family	test/mutant/gadt_decode_ir/unobserved-family.mutant	—	—
 gateway_migration_drills	promote-before-fence	test/mutant/gateway_migration_drills/promote-before-fence.patch	gateway-migration-drills-promote-before-fence-mutant	—
 gateway_migration_drills	verify-caught-up-stub	test/mutant/gateway_migration_drills/verify-caught-up-stub.patch	gateway-migration-drills-verify-caught-up-stub-mutant	—
 illegal_state_corpus	broken-decision-functions	gate:tools/illegal_state_corpus_gate.py	—	operator=smart-constructor-and-fold-weakening;expected_red_locus=all four QuickCheck properties

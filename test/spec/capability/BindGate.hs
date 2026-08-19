@@ -154,7 +154,7 @@ checkGolden fixture shape service = do
 
 checkGate1 :: IO ()
 checkGate1 = do
-  rows <- rowsOf "test/oracle/capability_bind/gate1_cases.tsv"
+  rows <- rowsOf "test/oracle/capability_bind/dhall_typecheck_cases.tsv"
   assert (length rows == 3) "Phase-10 Gate-1 oracle must contain three negatives"
   forM_ rows $ \row -> case row of
     [_caseName, negative, legal, required] -> do
@@ -183,7 +183,7 @@ checkGate2 = do
   assertTag "ShadowingExtension" shadowNegative
   assertRight extensionPositive "legal infernix/jitML extension graph rejected"
 
-  oracle <- rowsOf "test/oracle/capability_bind/gate2_cases.tsv"
+  oracle <- rowsOf "test/oracle/capability_bind/gadt_decode_cases.tsv"
   assert (length oracle == 4) "Phase-10 Gate-2 oracle must contain four negatives"
   assert
     ( Set.fromList [expected | [_name, expected, _negative, _legal] <- oracle]

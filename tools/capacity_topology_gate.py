@@ -39,14 +39,14 @@ import toolchain
 ROOT = Path(__file__).resolve().parent.parent
 FOLD_ORACLE = ROOT / "test/oracle/capacity_topology/fold_cases.tsv"
 COMPILE_ORACLE = ROOT / "test/oracle/capacity_topology/compile_fail.tsv"
-GATE1_ORACLE = ROOT / "test/oracle/capacity_topology/gate1_cases.tsv"
+DHALL_TYPECHECK_ORACLE = ROOT / "test/oracle/capacity_topology/dhall_typecheck_cases.tsv"
 COMPATIBILITY_ORACLE = ROOT / "test/oracle/capacity_topology/compatibility.tsv"
 MUTANT_CAPABILITY = "capacity_topology"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 RESULTS = ROOT / ".build/dsl/capacity-topology/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/capacity-topology/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/capacity-topology"
-CONTRACT = "DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md"
 GATE_COMMAND = "python3 tools/capacity_topology_gate.py"
 EXPECTATIONS = "test/oracle/capacity_topology_surfaces.tsv"
 
@@ -111,7 +111,7 @@ def read_tsv(path: Path) -> list[dict[str, str]]:
 def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     folds = read_tsv(FOLD_ORACLE)
     compile_rows = read_tsv(COMPILE_ORACLE)
-    gate1_rows = read_tsv(GATE1_ORACLE)
+    dhall_typecheck_rows = read_tsv(DHALL_TYPECHECK_ORACLE)
     compatibility = read_tsv(COMPATIBILITY_ORACLE)
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(folds) != 15 or len({row["case"] for row in folds}) != 15:
@@ -120,35 +120,35 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
         raise GateFailure("every fold negative must name a distinct legal twin")
     if len(compile_rows) != 7 or len({row["case"] for row in compile_rows}) != 7:
         raise GateFailure("compile oracle must contain seven unique cases")
-    if len(gate1_rows) != 3 or len({row["entry"] for row in gate1_rows}) != 3:
+    if len(dhall_typecheck_rows) != 3 or len({row["entry"] for row in dhall_typecheck_rows}) != 3:
         raise GateFailure("Phase-8 Gate-1 oracle must contain three unique entries")
     if len(compatibility) != 9 or {row["accepted"] for row in compatibility} != {"true", "false"}:
         raise GateFailure("compatibility oracle must exhaust the 3x3 matrix in both directions")
     if len(mutants) != 19 or len({row["mutant"] for row in mutants}) != 19:
         raise GateFailure("mutant manifest must contain nineteen unique mutants")
     run([sys.executable, str(ROOT / "tools/locus_registry_lint.py")])
-    for row in gate1_rows:
+    for row in dhall_typecheck_rows:
         legal = run([str(dhall), "type", "--file", row["legal"], "--quiet"], require_success=False)
         if legal.returncode != 0:
             raise GateFailure(f"Gate-1 legal twin rejected: {row['legal']}\n{legal.stdout}")
         negative = run([str(dhall), "type", "--file", row["negative"], "--quiet"], require_success=False)
         if negative.returncode == 0 or row["required"] not in negative.stdout:
             raise GateFailure(f"Gate-1 negative missed exact locus: {row['negative']}\n{negative.stdout}")
-    verify_registry_coverage(folds, compile_rows, gate1_rows)
+    verify_registry_coverage(folds, compile_rows, dhall_typecheck_rows)
     return folds, mutants
 
 
 def verify_registry_coverage(
     folds: list[dict[str, str]],
     compile_rows: list[dict[str, str]],
-    gate1_rows: list[dict[str, str]],
+    dhall_typecheck_rows: list[dict[str, str]],
 ) -> None:
     registry = read_tsv(ROOT / "dhall/examples/locus_registry.tsv")
     owned = {(row["entry"], row["subcase"]) for row in registry if row["owner_phase"] == "Phase-8"}
     evidence_entries = {
         *(row["catalog"].split(":", 1)[0] for row in folds),
         *(row["entry"] for row in compile_rows),
-        *(row["entry"] for row in gate1_rows),
+        *(row["entry"] for row in dhall_typecheck_rows),
     }
     covered = {(entry, subcase) for entry, subcase in owned if entry in evidence_entries}
     if len(owned) != 11 or covered != owned:
@@ -227,7 +227,7 @@ def write_results(folds: list[dict[str, str]], mutants: list[dict[str, str]]) ->
         "fold-negatives": f"{len(folds)}/{len(folds)}-specific-tag-red",
         "legal-twins": f"{len(folds)}/{len(folds)}-green",
         "positive-topologies": "2/2-decode-and-place",
-        "gate1-topology-cases": "3/3-exact-red-with-green-twins",
+        "dhall-typecheck-topology-cases": "3/3-exact-red-with-green-twins",
         "compile-fail-pairs": "7/7-legal-green-illegal-type-red",
         "compatibility-matrix": "9/9-equivalent",
         "quickcheck-properties": "4/4-green-checkCoverage-30-percent-both-directions",
@@ -267,7 +267,7 @@ EXPECTED_RESULTS = {
     "fold-negatives": "15/15-specific-tag-red",
     "legal-twins": "15/15-green",
     "positive-topologies": "2/2-decode-and-place",
-    "gate1-topology-cases": "3/3-exact-red-with-green-twins",
+    "dhall-typecheck-topology-cases": "3/3-exact-red-with-green-twins",
     "compile-fail-pairs": "7/7-legal-green-illegal-type-red",
     "compatibility-matrix": "9/9-equivalent",
     "quickcheck-properties": "4/4-green-checkCoverage-30-percent-both-directions",
@@ -282,7 +282,7 @@ EXPECTED_RESULTS = {
 
 SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     "base-capacity-types": ("acceptance-token", EXPECTED_RESULTS["acceptance-token"]),
-    "gate1-topology-foreclosures": ("gate1-topology-cases", EXPECTED_RESULTS["gate1-topology-cases"]),
+    "dhall-typecheck-topology-foreclosures": ("dhall-typecheck-topology-cases", EXPECTED_RESULTS["dhall-typecheck-topology-cases"]),
     "fits-equivalence": ("compatibility-matrix", EXPECTED_RESULTS["compatibility-matrix"]),
     "carve-zero-capable-subtraction": ("fold-negatives", EXPECTED_RESULTS["fold-negatives"]),
     "fixed-placement-witness": ("positive-topologies", EXPECTED_RESULTS["positive-topologies"]),

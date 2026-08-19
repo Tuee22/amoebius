@@ -16,7 +16,7 @@ nor the reconciler that applies a generation, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_44_release_lifecycle.md, DEVELOPMENT_PLAN/phase_45_ui_program_release.md, DEVELOPMENT_PLAN/phase_59_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_63_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_50_release_lifecycle.md, DEVELOPMENT_PLAN/phase_51_ui_program_release.md, DEVELOPMENT_PLAN/phase_65_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_69_offline_release_evolution.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -49,7 +49,7 @@ separate system; it is a handful of typed values composed over primitives amoebi
 elsewhere. There is nothing to install, nothing to poll, and nothing to reconcile *the reconciler*:
 
 - **One binary, two enactment frames.** The single amoebius binary composes the whole pipeline. The **build**
-  half — producing multi-arch images and pushing them to the in-cluster `distribution` registry — is enacted
+  half — producing one image per architecture and pushing each to the in-cluster `distribution` registry — is enacted
   by the **sudo host daemon** ([image_build_doctrine.md](./image_build_doctrine.md)). The
   **test / promote / rollout** half is enacted by the **in-cluster control-plane daemon**
   ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon)). No third process arbitrates between them.
@@ -86,7 +86,7 @@ delegates their storage, reconciliation, evidence, and provider mechanisms as fo
 
 | Concern | Owned by |
 |---------|----------|
-| `releaseHash`, the hash/pointer master registry, the content-addressed store the ledger writes into | [content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) / [§4](./content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) |
+| `releaseHash`, the hash/pointer master registry, the content-addressed store the ledger writes into | [content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) / [§4](./content_addressing_determinism.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) |
 | The SSA/ApplySet reconciler that enacts a `RolloutPlan` and appends `AppliedGeneration` after convergence | [manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) / [§6.1](./manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional) |
 | The per-run proven/tested/assumed evidence ledger a `PromotionGate` reads | [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) |
 | That env differences are **deployment rules**, and app bytes are byte-identical across environments | [app_vs_deployment_doctrine.md §3](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs) / [§4](./app_vs_deployment_doctrine.md#4-the-dividing-line--a-litmus-test) |
@@ -95,12 +95,12 @@ delegates their storage, reconciliation, evidence, and provider mechanisms as fo
 | The control-plane daemon that runs the promote/rollout half | [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-daemon) |
 | The bounded UI language, plan envelope, browser/server ABI, and compatibility witness | [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
 
-> **Validated instance.** Phase 44 built all four delivery values in `amoebius-release` and validated their
+> **Validated instance.** Phase 50 built all four delivery values in `amoebius-release` and validated their
 > intra-cluster wiring at Register 3 on `linux-cpu`: immutable MinIO release entries, closed environment
 > pointers with ETag CAS, evidence-witness refusal/advance, and externally readiness-gated
 > base→schema-migration→finalize apply. The runtime layer is tested, never proven. Gateway-API canary shifting,
 > Pulsar consumer-group cutover, and cross-cluster/geo promotion remain **UNVERIFIED**. The sibling examples
-> below remain provenance for the original pattern, not evidence substituted for the Phase-44 result.
+> below remain provenance for the original pattern, not evidence substituted for the Phase-50 result.
 
 ---
 
@@ -142,7 +142,7 @@ data AppliedGeneration = AppliedGeneration
   retaining the same release identity. The generic client/server image may remain byte-identical while a program changes,
   but that change still mints a distinct `Release`. The authoritative field set and digest coverage are owned
   by [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts).
-- **The paired-plan rule is observed live.** [Phase 45](../../DEVELOPMENT_PLAN/phase_45_ui_program_release.md)
+- **The paired-plan rule is observed live.** [Phase 51](../../DEVELOPMENT_PLAN/phase_51_ui_program_release.md)
   publishes two distinct content-addressed UI releases and observes the environment pointer history advancing
   only A-pair then B-pair. No pointer effect names a missing or mixed half, and the unchanged generic runtime
   image demonstrates that program release data does not require an OCI rebuild.
@@ -275,7 +275,7 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   move, [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact))
   yields no witness for that layer — so a `Release` short of an environment's required strength has **no**
   `advance` value to hand the CAS.
-- **A Tier-1-only in-process ledger cannot advance the gate to prod.** The front-loaded pre-cluster (Phases 3–7)
+- **A Tier-1-only in-process ledger cannot advance the gate to prod.** The front-loaded pre-cluster (Phases 9–13)
   formal-validation track emits its evidence ledger from a purely **in-process** run — Dhall typecheck +
   decoder + QuickCheck + TLA+/TLC, **no live substrate** — a **Tier-1 (design-time) artifact** that
   establishes only that the spec composes and the protocol is sound in the abstract, with the Runtime/chaos
@@ -292,8 +292,8 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   [illegal_state_catalog.md §3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) (an unverified environment promotion), owned by this doctrine, technique "a handle exists only once its evidence
   edge does."
 - **Generalizes the already-planned `Multicluster/PromotionGate.hs`.** amoebius already scopes a
-  `PromotionGate` for the multicluster spawn path; Phase 44 **generalizes** that single-purpose gate into
-  the now-built uniform per-environment promotion precondition. Cross-cluster use remains Phase 47 work.
+  `PromotionGate` for the multicluster spawn path; Phase 50 **generalizes** that single-purpose gate into
+  the now-built uniform per-environment promotion precondition. Cross-cluster use remains Phase 53 work.
 
 > **Layer.** Promote-unverified→prod is **type-foreclosed** (uninhabitable — no `advance` term). The *strength
 > mapping* itself (which layer prod requires) is a policy value the gate enforces at construction time.
@@ -302,7 +302,7 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
 
 infernix gates a servable artifact behind a `.ready` sentinel written **last** (`model_bootstrap.py`,
 `model_cache.py`) — the "no handle without its completion edge" pattern the `PromotionGate` mirrors at the
-promotion layer. This remains sibling evidence for the *idiom*; Phase 44 now supplies amoebius's live-wiring
+promotion layer. This remains sibling evidence for the *idiom*; Phase 50 now supplies amoebius's live-wiring
 evidence for the `PromotionGate` itself.
 
 ---
@@ -342,7 +342,7 @@ data ProvisionedRolloutWork       -- private constructors only
   overlap—before a DDL statement. The migrate phase uses only the private `ProvisionedSchemaMigration`,
   migrates and **verifies** the copy, and only a later phase retires the old — with the
   retire step inheriting the durable-data-deletion prohibition. This is the delivery home of the schema-migration
-  half of **Phase 44** (release lifecycle); the remaining manifest-change-correctness hardening stays in
+  half of **Phase 50** (release lifecycle); the remaining manifest-change-correctness hardening stays in
   [DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md). The schema-migration engine is a
   `RolloutPhase`, and the manifest-change-correctness half hardens the typed diff of
   [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed).
@@ -384,7 +384,7 @@ data ProvisionedRolloutWork       -- private constructors only
 > so a `RolloutPhase` applies **rendered objects**, never a `helm install`. The pattern is borrowed; the Helm
 > is dropped.
 
-> **Layer / honesty.** Phase 44 validated the typed three-phase plan and its live SSA/readiness wiring for
+> **Layer / honesty.** Phase 50 validated the typed three-phase plan and its live SSA/readiness wiring for
 > base apply, verified PostgreSQL schema migration, and finalize. This is runtime-tested residue, never a
 > proof. Gateway-API canary weights, Pulsar subscription cutover, and cross-cluster rollout were not exercised
 > and remain **UNVERIFIED**.
@@ -396,7 +396,7 @@ jitML's `src/JitML/Cluster/Helm.hs` defines exactly this shape — a `HelmPhase`
 `helmPhasedRolloutPlan` that applies them in readiness-gated phase order — the **`RolloutPhase` pattern, demonstrated in a sibling** (but bound to Helm, which amoebius drops). jitML's `src/JitML/Bootstrap.hs` splits its
 rollout in two around the Postgres schema grant (`livePreGrantSubprocessesForPort → postgresSchemaGrantIO →
 livePostGrantSubprocessesForPort`), which is **the schema-migration-as-a-phase shape, LIVE in a sibling** and
-the concrete evidence behind the Phase-44 rollout shape. By contrast, hostbootstrap's only delivery gate
+the concrete evidence behind the Phase-50 rollout shape. By contrast, hostbootstrap's only delivery gate
 is the build-time `check-code`, with no rollout-phase or promotion concept at all. All sibling evidence, not
 amoebius results.
 
@@ -409,7 +409,7 @@ elsewhere:
 
 | Concern | Owned by |
 |---------|----------|
-| The `releaseHash` formula, the hash/pointer master registry, ETag-CAS pointer mechanics, the content-addressed store | [content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) / [§4](./content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) |
+| The `releaseHash` formula, the hash/pointer master registry, ETag-CAS pointer mechanics, the content-addressed store | [content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) / [§4](./content_addressing_determinism.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) |
 | The SSA/ApplySet reconciler, wait-for-ready, prune, and post-convergence `AppliedGeneration` append | [manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) / [§6.1](./manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional) |
 | The proven/tested/assumed evidence ledger the `PromotionGate` reads, and the no-skip / UNVERIFIED rule | [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) |
 | The Extract → Model → Inject chaos methodology and the layer-strength grammar | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
@@ -417,7 +417,7 @@ elsewhere:
 | `create-new → verified-migrate → retire-old` and the durable-data-deletion prohibition the schema phase inherits | [storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation) / [§8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) |
 | Gateway-API `HTTPRoute` weights the canary shifts, and the no-mesh verdict | [network_fabric_doctrine.md](./network_fabric_doctrine.md) |
 | Pulsar subscription / consumer-group cutover mechanics | [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
-| The build half of the pipeline (multi-arch images, the `distribution` registry) | [image_build_doctrine.md](./image_build_doctrine.md) |
+| The build half of the pipeline (one image per architecture, the `distribution` registry) | [image_build_doctrine.md](./image_build_doctrine.md) |
 | The sudo host daemon and the in-cluster control-plane daemon that enact the two halves | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | The UI program digest, client/server plan envelope, stale-plan behavior, and UI compatibility witness | [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
 | The offline storage/replay horizon, migration table, retained old codecs/handlers, and outbox-preservation rule | [browser_offline_runtime_doctrine.md §11](./browser_offline_runtime_doctrine.md#11-release-schema-and-compatibility-horizon) |
@@ -427,15 +427,15 @@ elsewhere:
 completion status, and validation gates are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the environment/promotion values compose with the SSA reconciler landing in
-**Phase 31** and the test-topology / evidence-ledger work in **Phase 56**; the DB-schema-migration
-`RolloutPhase` lands in **Phase 44**, while the remaining manifest-change-correctness hardening and the generic
+**Phase 37** and the test-topology / evidence-ledger work in **Phase 62**; the DB-schema-migration
+`RolloutPhase` lands in **Phase 50**, while the remaining manifest-change-correctness hardening and the generic
 third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md). This doc states the target shape and links back for status.
 
 ---
 
 ## Related Documents
 - [Engineering Doctrine Index](./README.md)
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) the hash/pointer master registry (`releaseHash`, the `environment` pointer kind), [§4](./content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) determinism; the store the ledger writes into
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) the hash/pointer master registry (`releaseHash`, the `environment` pointer kind), [§4](./content_addressing_determinism.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) determinism; the store the ledger writes into
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) the SSA/ApplySet reconciler `RolloutPlan` enacts, [§6.1](./manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional) the post-convergence `AppliedGeneration` append
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§3](./readiness_ordering_doctrine.md#3-readiness-is-a-condition-never-a-duration) the `ReadinessGate` on a `RolloutPhase` is the tier-(c) instance of the general `Readiness` edge (a condition, never a duration)
 - [Testing Doctrine](./testing_doctrine.md) — [§4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run proven/tested/assumed evidence ledger the `PromotionGate` consumes
@@ -446,27 +446,27 @@ third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — consumer-group / subscription cutover for Pulsar workloads
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) promote-unverified→prod is type-foreclosed unrepresentable
 - [Browser Offline Runtime](./browser_offline_runtime_doctrine.md) — [§11](./browser_offline_runtime_doctrine.md#11-release-schema-and-compatibility-horizon) the offline compatibility witness consumed by promotion and rollout
-- [Image Build Doctrine](./image_build_doctrine.md) — the build half (multi-arch images, the `distribution` registry)
+- [Image Build Doctrine](./image_build_doctrine.md) — the build half (one image per architecture, the `distribution` registry)
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§3](./daemon_topology_doctrine.md#3-the-control-plane-daemon) the control-plane daemon that runs promote/rollout; the host daemon that builds
 - [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) pins a coherent UI program and client/server ABI into each release
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — reconciler tiers (a) cloud-IaC and (b) the tag-discovery host reconciler, distinct from tier (c)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the remaining manifest-change-correctness hardening after Phase 44 homes the schema-migration rollout
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the remaining manifest-change-correctness hardening after Phase 50 homes the schema-migration rollout
 - [Documentation Standards](../documentation_standards.md)
 
-> **Honesty.** Phase 44 is the validated amoebius instance for the immutable `Release` ledger, closed
+> **Honesty.** Phase 50 is the validated amoebius instance for the immutable `Release` ledger, closed
 > `Environment` pointer, `PromotionGate`, and base→schema-migration→finalize `RolloutPlan`. The live wiring was
 > tested on `linux-cpu`, never proven. The sibling systems remain historical evidence for the borrowed shapes;
 > Gateway-API canary shifting, Pulsar consumer cutover, and cross-cluster/geo promotion remain **UNVERIFIED**.
 
-> **Phase 59 scoped evidence.** The immutable A→B→A state machine now gates both forward and rollback gateway
+> **Phase 65 scoped evidence.** The immutable A→B→A state machine now gates both forward and rollback gateway
 > decisions on the corresponding projector watermark; its stale-plan, scoped-cursor, registration-drain, and
 > four mutation checks pass with a fresh append-only host-local observer. Real Gateway API/Envoy, Keycloak,
 > Pulsar, browser, Kubernetes, CNI, and provider observations remain **UNVERIFIED**. Every hardware substrate
 > can always run `linux-cpu`; pristine Linux is supplied by Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2
 > on Windows.
 
-> **Phase 63 scoped evidence.** Promotion now requires a finite path for every admitted offline record kind.
+> **Phase 69 scoped evidence.** Promotion now requires a finite path for every admitted offline record kind.
 > Real Chrome processes stage B, terminate, resume B atomically, preserve intent through reload, and roll back
 > to A; an append-only local observer records A→B→A and incompatible C is refused. Real Gateway, Pulsar,
 > provider, Keycloak, Kubernetes, and CNI observations remain **UNVERIFIED**. Every hardware substrate can

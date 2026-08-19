@@ -10,22 +10,22 @@
 #
 # output_class<TAB>generator<TAB>owner
 cabal-store/**	tools/toolchain.py	phase-1
-docs/**	-	phase-56
-dhall/**/*.dhall	tools/dhall_gate1.py	phase-5
+docs/**	-	phase-62
+dhall/**/*.dhall	tools/dhall_typecheck.py	phase-11
 dist-newstyle/**	tools/toolchain_spike_gate.py	phase-1
-dsl/**	tools/gadt_decoder_gate2_gate.py	phase-6
-docker/**/Dockerfile	tools/base_image_registry_live_build.py	phase-30
+dsl/**	tools/gadt_decode_ir_gate.py	phase-12
+docker/**/Dockerfile	tools/base_image_registry_live_build.py	phase-36
 evidence-store/**	tools/attestation.py	phase-0
 locks/**	tools/toolchain_spike_gate.py	phase-1
-manifests/**/*.{yaml,yml,json}	-	phase-14
+manifests/**/*.{yaml,yml,json}	-	phase-20
 node_modules/**	tools/toolchain.py	phase-1
 proto/**/*.hs	tools/toolchain_spike_gate.py	phase-1
 proto/**/*.{hi,o,dyn_hi,dyn_o}	-	phase-1
 runs/<phase>/<run-id>/**	tools/doc_lint_verify.py	phase-0
 test-corpora/**	tools/doc_lint_corpus/_build.py	phase-0
 test-surfaces/phase_*.json	tools/doc_lint_verify.py	phase-0
-tla/**/*.cfg	src/Amoebius/Cli/Formal.hs	phase-3
-tla/**/*.tla	src/Amoebius/Cli/Formal.hs	phase-3
+tla/**/*.cfg	src/Amoebius/Cli/Formal.hs	phase-9
+tla/**/*.tla	src/Amoebius/Cli/Formal.hs	phase-9
 tmp/**	tools/doc_lint_verify.py	phase-0
-toolchain/**	tools/toolchain.py	phase-1
-ui/**	-	phase-23
+toolchain/<os>-<arch>/**	tools/toolchain.py	phase-1
+ui/**	-	phase-29

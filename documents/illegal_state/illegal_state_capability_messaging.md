@@ -17,7 +17,7 @@ or put an untyped payload on the wire. The numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_07_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_11_capability_bind.md, DEVELOPMENT_PLAN/phase_22_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_25_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_40_pulsar_client.md, DEVELOPMENT_PLAN/phase_58_ui_multi_tenant_live.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_17_capability_bind.md, DEVELOPMENT_PLAN/phase_28_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_31_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_46_pulsar_client.md, DEVELOPMENT_PLAN/phase_64_ui_multi_tenant_live.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -35,8 +35,8 @@ UI server to reach code or a provider outside the closed effect algebra
 The **catalog index** (the enumerated list of every illegal state) and the **honesty limit** (that a
 type-check proves the specification composes, never that the running cluster enforces it) are owned by
 [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced here, not restated. The **seven typing techniques**, the **coverage matrix**, the **three foreclosure layers**, and the orthogonal
-**validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` /
-`rendered-output-golden` / `live-effect`; `provision-seal` is post-bind Phase-12 provision returning a
+**validation-locus axis** (`dhall-typecheck` / `gadt-decode` / `provision-seal` /
+`rendered-output-golden` / `live-effect`; `provision-seal` is post-bind Phase-18 provision returning a
 `ProvisionError` before any `ProvisionedSpec` exists) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md) — likewise referenced, not
 restated. Each entry below names its owning doctrine, which remains the SSoT for the normative rule.
 
@@ -51,24 +51,24 @@ Runtime layers and their enforcement is deferred on purpose (see [`illegal_state
 
 ### 3.12 An app that names a product instead of a capability
 
-**Delivery-owner:** `Phase-5`
+**Delivery-owner:** `Phase-11`
 
 **Case-family:** `capability-provision`
 
 Application logic that writes `minio` or `vault` welds itself to one realization and loses portability across
 clusters that deploy the capability differently. amoebius's app surface offers a **capability** union —
 `ObjectStore`, `SecretStore`, `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge` — with no
-product arms, so "depend on `minio` directly" has no syntax: it fails Gate 1 (the Dhall typechecker) before
+product arms, so "depend on `minio` directly" has no syntax: it fails dhall-typecheck (the Dhall typechecker) before
 any binary runs. **Owner:** [`service_capability_doctrine.md`](../engineering/service_capability_doctrine.md) (the capability abstraction; one canonical provider, the type admitting alternates). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (capabilities as a closed union — a product name is uninhabitable).
 **Layer:** type-foreclosed — a closed-union capability with no product arm; the illegal spec has no inhabitant.
-**Validation-locus:** `Gate-1-editor` — a closed-union capability with no product arms; "depend on `minio`
+**Validation-locus:** `dhall-typecheck` — a closed-union capability with no product arms; "depend on `minio`
 directly" has no syntax and fails `dhall type` at authoring time, before any binary runs. No runtime
 residue: the illegal shape is unrepresentable, not merely rejected downstream.
 
 ### 3.23 A non-CBOR Pulsar payload
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-13`
 
 **Case-family:** `messaging`
 
@@ -83,22 +83,22 @@ different layer. **Owner:** [`pulsar_client_doctrine.md` §3.1](../engineering/p
 **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (a closed codec — only the CBOR constructor exists) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (constructor-gating; there is no non-CBOR payload handle) — **no new technique**. **Layer:** type-foreclosed uninhabitable on the *produce* side; the
 *consume* decode is a total fail-fast check — decode-foreclosed, exactly like the CRC32C frame check — never a
 runtime-checked claim that a received body is valid.
-**Validation-locus:** `Gate-2-decoder` on the *produce* side — the closed codec is a **Haskell** surface
-(`Serialise` / `CborPayload` / `encodeCbor`), so the foreclosure is a compile-fail golden at the Gate-2
-Haskell layer, **not** a `dhall type` failure: `dhall type` never sees the produce API **+** `Gate-2-decoder`
+**Validation-locus:** `gadt-decode` on the *produce* side — the closed codec is a **Haskell** surface
+(`Serialise` / `CborPayload` / `encodeCbor`), so the foreclosure is a compile-fail golden at the gadt-decode
+Haskell layer, **not** a `dhall type` failure: `dhall type` never sees the produce API **+** `gadt-decode`
 on the *consume* side (the total
 `Either DecodeError a` returns `Left` on a malformed body, exactly like the CRC32C frame check). Explicitly
 **not** a `live-effect` locus: there is no runtime-checked claim that a received body is valid — the decode
 either succeeds or fails fast.
 
-**Phase-40 evidence:** realized. The exported producer surface accepts only typed `Serialise` values, the
+**Phase-46 evidence:** realized. The exported producer surface accepts only typed `Serialise` values, the
 `CborPayload` constructor is private, and a fixture importing `produceRaw` fails for the pinned missing-export
 reason. A hand-authored API golden and the committed re-added-raw-arm mutant keep that foreclosure live; a
 malformed received body returns `Left`, while two live namespaces round-trip typed CBOR through the native wire.
 
 ### 3.82 A browser effect or provider call escaping the server-mediated capability boundary
 
-**Delivery-owner:** `Phase-22`
+**Delivery-owner:** `Phase-28`
 
 **Case-family:** `ui`
 
@@ -125,7 +125,7 @@ cannot be reused as fetch, media, form, or effect transport. **Owner:**
 **Layer:** `type-foreclosed` for raw-code/network/provider arms and for serializing a server-only capability;
 `decode-foreclosed` for a checked component or plan that contains an incompatible side/scope; `runtime-checked`
 residue — that the generated bundle, CSP, edge, NetworkPolicy, and browser actually expose no other path.
-**Validation-locus:** `Gate-1-editor` (forbidden arms have no Dhall constructor) + `Gate-2-decoder` (only the
+**Validation-locus:** `dhall-typecheck` (forbidden arms have no Dhall constructor) + `gadt-decode` (only the
 closed instruction/component/port sets can produce a checked program) + `provision-seal` (every effect must bind
 to one server handler/capability and no provider coordinate may enter `ClientPlan`) +
 `rendered-output-golden` (the bundle contract, CSP, routes, and NetworkPolicy expose only the same-origin UI
@@ -142,18 +142,18 @@ reuse a catalog link as fetch, add direct network access to a trusted component,
 HTML sink; compile/check, artifact scan, CSP, or the network oracle must turn red before the provider accepts an
 effect.
 
-**Phase-22 evidence.** The Register-1 binder matches seven port tuples and two canonical fixed-HTTPS link joins
+**Phase-28 evidence.** The Register-1 binder matches seven port tuples and two canonical fixed-HTTPS link joins
 against independent string relations. Eight pinned failures, eight link-catalog failures, and three bounded
 input failures occur before a bound program can emit its pure binding trace; all seven guard/escape mutants turn
 red. Browser traffic, handler behavior, provider authentication, and live isolation remain UNVERIFIED. See
-[Phase 22](../../DEVELOPMENT_PLAN/phase_22_ui_effect_binding.md).
+[Phase 28](../../DEVELOPMENT_PLAN/phase_28_ui_effect_binding.md).
 
-**Phase-25 evidence.** The Register-2 generic bundle renders untrusted values through `textContent`, accepts
+**Phase-31 evidence.** The Register-2 generic bundle renders untrusted values through `textContent`, accepts
 only its closed PureScript event arms, and emits same-origin HTTP/WebSocket requests in real Chrome. An
 independent bundle scanner, browser-enforced CSP canary, fresh request nonce, navigation-only link observation,
 and `strace` network observer all pass; raw-sink, direct-provider, stale-plan, sequential-write, focus, CSP, and
 canned-response mutants turn red. Server authorization, provider authentication, and live isolation remain
-UNVERIFIED. See [Phase 25](../../DEVELOPMENT_PLAN/phase_25_ui_browser_interpreter.md).
+UNVERIFIED. See [Phase 31](../../DEVELOPMENT_PLAN/phase_31_ui_browser_interpreter.md).
 
 ---
 

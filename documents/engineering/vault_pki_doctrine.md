@@ -13,7 +13,7 @@ child. It does not own the specification-side spelling of a secret reference bey
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_34_vault_pki.md, DEVELOPMENT_PLAN/phase_35_platform_backbone.md, DEVELOPMENT_PLAN/phase_36_platform_services_2.md, DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_46_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_47_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_50_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_51_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_52_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_54_infernix_lift.md, DEVELOPMENT_PLAN/phase_68_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_56_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_12_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_40_vault_pki.md, DEVELOPMENT_PLAN/phase_41_platform_backbone.md, DEVELOPMENT_PLAN/phase_42_platform_services_2.md, DEVELOPMENT_PLAN/phase_44_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_52_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_53_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_55_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_56_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_57_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_58_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_60_infernix_lift.md, DEVELOPMENT_PLAN/phase_62_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_74_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -157,9 +157,9 @@ test seam ([§3.3](#33-the-test-secrets-seam-the-operators-prompt-automated)) re
 write the operator's prompt performs, so tests exercise the production path instead of bypassing it.
 
 The contract is enforced by the same **typed spec gates** that guard every `InForceSpec`
-([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)): Gate 1 (the Dhall
+([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)): dhall-typecheck (the Dhall
 typechecker) admits only a well-typed `SecretRef`, so a `Text` in a sensitive field has no inhabitant; and
-Gate 2 (the in-process Haskell decoder under the dynamically resolved compatible compiler) rejects any
+gadt-decode (the in-process Haskell decoder under the dynamically resolved compatible compiler) rejects any
 literal secret value. A plaintext secret in a production config is therefore not "linted later" — it fails to
 decode, and an undecoded config is never reconciled. *If it decodes, it carries no secret.*
 
@@ -190,7 +190,7 @@ gives every named secret:
 - **Rotatable.** Because consumers resolve by name, rotating the value is a Vault write plus a reconcile —
   no `.dhall` edit and no re-roll from the root.
 
-[Phase 46](../../DEVELOPMENT_PLAN/phase_46_network_fabric_wireguard.md) validates the WireGuard member of this
+[Phase 52](../../DEVELOPMENT_PLAN/phase_52_network_fabric_wireguard.md) validates the WireGuard member of this
 family live. The gate writes fresh Curve25519 public/private fields to two temporary KV-v2 objects, names them
 only by mount/path/field `SecretRef`s, and resolves all four fields through the current-tree Haskell
 Kubernetes-auth client. An absent field returns the redacted `secret-missing` reason; raw key bytes enter no
@@ -237,7 +237,7 @@ distinct from custody — is flagged at [§9](#9-in-cluster-consumers-authentica
 
 The three-tier ML-asset lifecycle stages **Tier-2** model artifacts *eagerly*: the control-plane daemon pulls
 the parent-named model set from upstream and re-keys it onto the content-addressed store, writing `.ready`
-last ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
+last ([content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 That staging step needs **two** credentials, and **both resolve from Vault by name** as ordinary
 `SecretRef`s ([§3](#3-the-secretref-contract-a-name-never-a-value)):
 
@@ -256,12 +256,12 @@ the staging path; it specifies that the path carry no second store and no defaul
 
 The **upstream-pull** credential is, further, **scoped per app**. Naming a model to import is a first-class,
 provenance-carrying constructor (the import arm of a serveable `ModelArtifact`,
-[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
+[content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
 and each app's staging resolves only its **own** app-namespaced upstream `SecretRef` — one app's staging
 cannot pull, and therefore cannot mint an artifact from, another app's model source. This is the
 secrets-by-name face of per-app model isolation (an app serves only models it produced or imported); the
 content-store namespacing and the decode-foreclosed "app B serving/continuing app A's model without a grant" illegal
-state are owned by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
+state are owned by [content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
 and [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md); this section owns only that the pull credential
 is itself a per-app name. Correspondingly, the bytes that credential pulls are **verified against a pinned expected content-address, failing closed before `.ready`** — the pin-and-verify import constructor (and its
 layers: pin *presence* type-foreclosed, pin *match* decode-foreclosed, "the pin names the intended model" runtime-checked/assumed)
@@ -297,10 +297,10 @@ runs after authoring and cannot tell a live key from a fixture.
   does: by name, from Vault. There is no substitution and no second resolution path.
 - **It carries only what a phase reads.** A field no amoebius phase consumes does not belong in the seam,
   because an unread secret is pure liability. This is why amoebius's shape is narrower than the sibling's:
-  no phase requires a public DNS zone or email sender ([`phase_37`](../../DEVELOPMENT_PLAN/phase_37_keycloak_ingress.md)
+  no phase requires a public DNS zone or email sender ([`phase_43`](../../DEVELOPMENT_PLAN/phase_43_keycloak_ingress.md)
   accepts a local ACME chain), and the provider checkpoint backend is Vault-Transit-enveloped objects in the
   cluster's own MinIO rather than a cloud state bucket
-  ([`phase_49`](../../DEVELOPMENT_PLAN/phase_49_provider_deploy_checkpoint.md)).
+  ([`phase_55`](../../DEVELOPMENT_PLAN/phase_55_provider_deploy_checkpoint.md)).
 - **Production has no seam at all.** Every production entry point rejects `test-secrets.dhall`, its schema,
   and the test-harness credential arm before any effect. Elevated operator material is supplied at an interactive prompt, written
   into Vault, and discarded. It is never written to disk, never placed in an environment variable, and never
@@ -319,9 +319,9 @@ missing is the workload that needed it — mid-rollout, after objects have been 
 surfacing as a crash-looping pod rather than as a rejected spec. Worse, a spec can be rolled out to a child
 cluster whose Vault never received the injection, and nothing upstream notices.
 
-**Why the obvious alternative fails.** The tempting place to put the check is Gate 1 or Gate 2, beside the
-other spec validation. Neither can host it. Gate 1 runs in an author's editor and in CI with no cluster in
-reach, and Gate 2's whole justification is that it runs over the full config tree *without touching
+**Why the obvious alternative fails.** The tempting place to put the check is dhall-typecheck or gadt-decode, beside the
+other spec validation. Neither can host it. dhall-typecheck runs in an author's editor and in CI with no cluster in
+reach, and gadt-decode's whole justification is that it runs over the full config tree *without touching
 sensitive material* ([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)).
 Giving either a Vault dependency would make offline validation impossible and put a secrets client in the
 path of every typecheck.
@@ -346,8 +346,8 @@ readback before a spec may render:
 stand up a provider quickly "just to test". That ordering is the point rather than a side effect: because a
 spec cannot be admitted until its names resolve, **Vault necessarily precedes every live provider
 deployment**, and no phase ordering has to be remembered for that to hold. The root Vault this check reaches
-is built by [`phase_34`](../../DEVELOPMENT_PLAN/phase_34_vault_pki.md); the check itself is first enforced on
-a live apply path by [`phase_38`](../../DEVELOPMENT_PLAN/phase_38_live_dsl_deploy.md).
+is built by [`phase_40`](../../DEVELOPMENT_PLAN/phase_40_vault_pki.md); the check itself is first enforced on
+a live apply path by [`phase_44`](../../DEVELOPMENT_PLAN/phase_44_live_dsl_deploy.md).
 
 
 ---
@@ -442,8 +442,8 @@ re-enters the sealed régime, that reach is the **seal-critical, node-local** ar
 reach class — Vault-independent, never over the fabric — so a reboot's unseal never depends on the very Vault
 it is unsealing.
 
-> **Honesty.** Phase 34 implements and validates the password-encrypted root-unseal backend in amoebius;
-> Phase 38 implements and live-validates the node-local `vault init/unseal` control-plane daemon endpoint and `pb`
+> **Honesty.** Phase 40 implements and validates the password-encrypted root-unseal backend in amoebius;
+> Phase 44 implements and live-validates the node-local `vault init/unseal` control-plane daemon endpoint and `pb`
 > transport with a zero-persistence observer. Parent/child unseal remains owned by later phases. Status lives
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -724,9 +724,9 @@ the verification surface owned by [chaos_failover_doctrine.md](./chaos_failover_
 
 ---
 
-### Phase-34 validated root boundary
+### Phase-40 validated root boundary
 
-Phase 34 validated the root-only portion of this doctrine on the universal `linux-cpu` lane. A pristine
+Phase 40 validated the root-only portion of this doctrine on the universal `linux-cpu` lane. A pristine
 single-node cluster initialized a Shamir-sealed Vault exactly once on fixed ext4 retained backings; the unlock
 material used pinned Argon2id v1.3 parameters and ChaCha20-Poly1305-IETF in a mode-0600 host envelope, while
 the human password was never persisted. After the real cluster and API objects were deleted, a fresh cluster
@@ -739,7 +739,7 @@ Parent/child unseal, parent secret injection, and cross-cluster intermediate CAs
 Every hardware substrate can always run this `linux-cpu` lane. When a pristine Linux host is needed, the
 canonical VM is Incus on Linux/Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 
-The Phase-47 Register-3 instance realizes the child policy seams in
+The Phase-53 Register-3 instance realizes the child policy seams in
 `Amoebius.Multicluster.ChildUnseal`, `Amoebius.Vault.TransitChildKey`, and
 `Amoebius.Multicluster.SecretInjection`. The pure gate admits both sanctioned unseal modes, proves that the
 parent-held mode bricks while the parent is sealed, and rejects cross-child subtree decrypt. The live gate
@@ -749,7 +749,7 @@ cross-cluster intermediate-CA hierarchy remain UNVERIFIED. The CPU-only Linux fa
 every detected hardware class. Fresh guest isolation is provided by Incus for either Linux class, by Lima for
 Apple, and by WSL2 for Windows.
 
-The Phase-54 scoped infernix exercise keeps adapter configuration to Vault secret names, mints one-use
+The Phase-60 scoped infernix exercise keeps adapter configuration to Vault secret names, mints one-use
 tenant-scoped challenge credentials, observes tenant B denial against tenant A's model path, and records only
 audit metadata. Secret values never enter evidence. A worker consuming the Vault credential for direct MinIO
 artifact fetch remains UNVERIFIED, as do the full production inference chain and general isolation. Every
@@ -778,7 +778,7 @@ states the target shape and links back for status.
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — readiness_ordering [§5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers) and this doc's [§4 init-follows-readiness / fail-closed](#4-init-follows-readiness-fail-closed-vault-init) are the event-driven resolution of the readiness race, not a wait around it
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — the retained Vault backing, deterministic PV rebind, and init-once / unseal-on-rebuild durability
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — Vault-Transit-envelope encryption of the MinIO Pulumi backend and the public-edge ZeroSSL/route53 path
-- [Content Addressing & Determinism](./content_addressing_doctrine.md) — the content-addressed model store the Tier-2 staging credentials write to ([§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss))
+- [Content Addressing & Determinism](./content_addressing_doctrine.md) — the content-addressed model store the Tier-2 staging credentials write to ([§4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss))
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — the Curve25519 WireGuard peer keys in the same parent-custody KV secret family as the `Rke2NodeToken` ([§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken))
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — the host-only NodePort hop that is deliberately not PKI-secured
 - [Substrate Doctrine](./substrate_doctrine.md) — the no-environment-variables / no-`PATH` contract

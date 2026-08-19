@@ -14,7 +14,7 @@ numbers entering them come from, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/resource_capacity_construction.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/resource_capacity_types.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -72,16 +72,16 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Target fold and honesty boundary. The base subset is implemented and Register-1 validated in Phase 8; the physical residue that the kernel and kubelet honour the caps remains runtime-checked.*
+*Target fold and honesty boundary. The base subset is implemented and Register-1 validated in Phase 14; the physical residue that the kernel and kubelet honour the caps remains runtime-checked.*
 
-**Base-fold validation status.** The [Phase 8 gate](../../DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md)
+**Base-fold validation status.** The [Phase 14 gate](../../DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md)
 builds `Amoebius.Capacity.Types`, `Amoebius.Capacity.Fold`, and `Amoebius.Dsl.Topology` with exhaustive-pattern
 warnings promoted to errors. Fifteen direct negative/twin pairs, two real Dhall positives, four sampled
 properties with independent witness recomputation, and 19 seeded mutants validate the base CPU, memory,
 logical ephemeral, pod-slot, CSI-attach, finite CPU-policy, eligibility, and fixed/elastic placement axes
 (ledger `external-run-reference`).
 The storage, execution/runtime, accelerator, and provider-root extensions described below remain
-**UNVERIFIED** until Phases 9–10; live enforcement is not established by this result.
+**UNVERIFIED** until Phases 15–16; live enforcement is not established by this result.
 
 ### The four total functions
 
@@ -178,7 +178,7 @@ capacity check is never type-foreclosed ([§2](./resource_capacity_doctrine.md#2
 
 #### Host/engine-VM → image build
 
-The multi-arch builder follows the same host-worker arithmetic through its
+The per-architecture builder follows the same host-worker arithmetic through its
 dedicated `BuildExecutionEnvelope`, with concurrent stage CPU/memory, intermediate-layer scratch, and all
 observed build-cache residents charged to named carves before `buildx` can start. Live admission is bound to
 the host/engine-VM snapshot. An image's later node-store fit proves a different physical debit and cannot
@@ -511,7 +511,7 @@ ProvisionedKubernetesObjectKind =
   >
 
 CanonicalProvisionedKubernetesFields =
-  private Phase-12 object-source AST containing only fields copied from provisioned identities and witnesses
+  private Phase-18 object-source AST containing only fields copied from provisioned identities and witnesses
 
 RenderReconcileMode =
   < DeclarativeApply :
@@ -547,7 +547,7 @@ ProvisionedRenderSource identity =
   , sourceEquality : RenderSourceProvisionedPartEqualityWitness
   }
 
-ProvisionedRenderSourceSet = -- constructed in Phase 12; does not depend on Phase-14 K8sObject/Aeson types
+ProvisionedRenderSourceSet = -- constructed in Phase 18; does not depend on Phase-20 K8sObject/Aeson types
   { sources      : Map K8sObjectIdentity (ProvisionedRenderSource K8sObjectIdentity)
   , keyEquality  : RenderSourceMapKeyEmbeddedIdentityEqualityWitness
   , sourceDomain : WholeDeploymentRenderSourceDomainWitness
@@ -641,12 +641,12 @@ compatibility and every capacity/storage fold,
   deployment-global scheduler/admission/quota/RBAC/Lease/CRD sources), and constructs the new opaque
   `ProvisionedSpec`. Namespace, scheduler, quota, admission, RBAC, Lease, or CRD objects needed by multiple
   services have one global source owner and therefore render once; a second source for the same identity
-  rejects in Phase 12 without depending on Phase-14 renderer bytes or list order. Missing, stale, wrong-arm, or
+  rejects in Phase 18 without depending on Phase-20 renderer bytes or list order. Missing, stale, wrong-arm, or
   wrong-generation prior refs reject; an execution projection with mismatched deployment, source-unit,
   revision, ordinal, or resource identity also rejects. `FirstDeployment` denotes an exact empty prior
   execution map and cannot smuggle an implicit latest generation or non-empty predecessor. No authored field
-  can supply a prior envelope, prior rounded bytes, or a prior witness. Phase 14 defines the `K8sObject` model
-  and total private `renderSourcePrivate`; only deployment-level `renderAll` crosses the seal. Thus Phase 12
+  can supply a prior envelope, prior rounded bytes, or a prior witness. Phase 20 defines the `K8sObject` model
+  and total private `renderSourcePrivate`; only deployment-level `renderAll` crosses the seal. Thus Phase 18
   does not depend on a later renderer, and per-service callers cannot independently duplicate shared objects.
 `BoundDeployment` contains no `Provisioned*` record: it contains only normalized intents, unprovisioned demands,
 opaque prior refs, and execution envelopes. Every **deployable/render-source** `Provisioned*` record lives
@@ -657,7 +657,7 @@ call `renderAll` or masquerade as a deployment. The `ProvisionedSpec` constructo
 `(Topology, [Workload])` pair may be representable as raw input data, but the only deployable representation
 is the opaque `ProvisionedSpec`. For an incompatible pair, `provision` returns `Left` and therefore cannot
 construct that value. This is the precise sense in which a CUDA workload cannot be deployed to a cluster with
-no CUDA capacity without dishonestly calling value arithmetic a Gate-1 type proof.
+no CUDA capacity without dishonestly calling value arithmetic a dhall-typecheck type proof.
 
 ### Tenant-policy reconcile
 
@@ -720,7 +720,7 @@ Success returns a `Placement` — a **witness** that a feasible schedule exists;
    real pod→node witness. Unplaced workloads continue into the candidate cover.
 2. **Derive effective candidate capacity, then construct a class-count cover.** For each candidate class,
    subtract every topology-expanded per-node execution unit required on that class — CNI/device-plugin and
-   other DaemonSet-like services, the Phase-53 cache owner, and an accelerator owner where applicable — from
+   other DaemonSet-like services, the Phase-59 cache owner, and an accelerator owner where applicable — from
    declared allocatable CPU/memory/ephemeral/device/storage capacity. This is one subtraction per selected
    node, not hidden overhead. Each remaining atomic pod must `podFits` one such effective instance across CPU
    request and finite CPU-limit budget, memory, ephemeral storage, storage locality/zone, accelerator

@@ -24,13 +24,13 @@ import toolchain
 
 ROOT = Path(__file__).resolve().parent.parent
 ORACLE = ROOT / "test/oracle/execution_accelerator/execution_accelerator_cases.tsv"
-GATE1 = ROOT / "test/oracle/execution_accelerator/gate1_cases.tsv"
+DHALL_TYPECHECK = ROOT / "test/oracle/execution_accelerator/dhall_typecheck_cases.tsv"
 MUTANT_CAPABILITY = "execution_accelerator"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 RESULTS = ROOT / ".build/dsl/execution-accelerator/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/execution-accelerator/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/execution-accelerator"
-CONTRACT = "DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md"
 GATE_COMMAND = "python3 tools/execution_accelerator_gate.py"
 EXPECTATIONS = "test/oracle/execution_accelerator_surfaces.tsv"
 
@@ -87,7 +87,7 @@ def verify_pins() -> tuple[Path, Path, str]:
 
 def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     rows = read_tsv(ORACLE)
-    gate1 = read_tsv(GATE1)
+    dhall_typecheck = read_tsv(DHALL_TYPECHECK)
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(rows) != 32 or len({row["variant"] for row in rows}) != 32:
         raise GateFailure("Phase-10 fold oracle must contain 32 unique variants")
@@ -115,28 +115,28 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
     }
     if {row["family"] for row in rows} != required_families:
         raise GateFailure("Phase-10 oracle must preserve the exact eighteen negative families")
-    if len(gate1) != 1 or {row["entry"] for row in gate1} != {"3.28"}:
+    if len(dhall_typecheck) != 1 or {row["entry"] for row in dhall_typecheck} != {"3.28"}:
         raise GateFailure("Phase-10 Gate-1 oracle must contain the accelerator-owner barrier")
     if len(mutants) != 45 or len({row["mutant"] for row in mutants}) != 45:
         raise GateFailure("Phase-10 mutant manifest must contain 45 unique mutants")
     run([sys.executable, str(ROOT / "tools/locus_registry_lint.py")])
-    for row in gate1:
+    for row in dhall_typecheck:
         legal = run([str(dhall), "type", "--file", row["legal"], "--quiet"], require_success=False)
         if legal.returncode != 0:
             raise GateFailure(f"Gate-1 legal twin rejected: {row['legal']}\n{legal.stdout}")
         negative = run([str(dhall), "type", "--file", row["negative"], "--quiet"], require_success=False)
         if negative.returncode == 0 or row["required"] not in negative.stdout:
             raise GateFailure(f"Gate-1 negative missed exact locus: {row['negative']}\n{negative.stdout}")
-    verify_registry_coverage(rows, gate1)
+    verify_registry_coverage(rows, dhall_typecheck)
     return rows, mutants
 
 
-def verify_registry_coverage(rows: list[dict[str, str]], gate1: list[dict[str, str]]) -> None:
+def verify_registry_coverage(rows: list[dict[str, str]], dhall_typecheck: list[dict[str, str]]) -> None:
     registry = read_tsv(ROOT / "dhall/examples/locus_registry.tsv")
     owned = {(row["entry"], row["subcase"]) for row in registry if row["owner_phase"] == "Phase-10"}
     evidence_entries = {
         *(row["catalog"].split(":", 1)[0] for row in rows),
-        *(row["entry"] for row in gate1),
+        *(row["entry"] for row in dhall_typecheck),
     }
     covered = {(entry, subcase) for entry, subcase in owned if entry in evidence_entries}
     if len(owned) != 2 or covered != owned:
@@ -223,7 +223,7 @@ def write_results(rows: list[dict[str, str]], mutants: list[dict[str, str]]) -> 
         "variant-rows": f"{len(rows)}/{len(rows)}-specific-tag-red",
         "legal-twins": f"{len(rows)}/{len(rows)}-green",
         "positive-specs": "2/2-decode-and-full-vector-place",
-        "gate1-accelerator-owner": "1/1-exact-red-with-green-twin",
+        "dhall-typecheck-accelerator-owner": "1/1-exact-red-with-green-twin",
         "quickcheck-properties": "7/7-green-checkCoverage-30-percent-on-decision-folds",
         "mutants": f"{len(mutants)}/{len(mutants)}-red",
         "registry-subcases": "2/2-Phase-10-owned-discharged",
@@ -255,9 +255,9 @@ CHECKS = {
 
 SIDES = ("toolchain", "oracle", "suite", "mutant", "results")
 
-EXPECTED_RESULTS = {'named-negatives': '18/18-specific-tag-red', 'variant-rows': '32/32-specific-tag-red', 'legal-twins': '32/32-green', 'positive-specs': '2/2-decode-and-full-vector-place', 'gate1-accelerator-owner': '1/1-exact-red-with-green-twin', 'quickcheck-properties': '7/7-green-checkCoverage-30-percent-on-decision-folds', 'mutants': '45/45-red', 'registry-subcases': '2/2-Phase-10-owned-discharged', 'phase9-fold-totality': 'compile-exhaustive-and-sampled-no-crash', 'acceptance-token': 'spec-composition-proven-full-resource-vector', 'live-scheduler-and-storage': 'UNVERIFIED', 'live-accelerator-and-provider': 'UNVERIFIED', 'runtime-correspondence': 'UNVERIFIED'}
+EXPECTED_RESULTS = {'named-negatives': '18/18-specific-tag-red', 'variant-rows': '32/32-specific-tag-red', 'legal-twins': '32/32-green', 'positive-specs': '2/2-decode-and-full-vector-place', 'dhall-typecheck-accelerator-owner': '1/1-exact-red-with-green-twin', 'quickcheck-properties': '7/7-green-checkCoverage-30-percent-on-decision-folds', 'mutants': '45/45-red', 'registry-subcases': '2/2-Phase-10-owned-discharged', 'phase9-fold-totality': 'compile-exhaustive-and-sampled-no-crash', 'acceptance-token': 'spec-composition-proven-full-resource-vector', 'live-scheduler-and-storage': 'UNVERIFIED', 'live-accelerator-and-provider': 'UNVERIFIED', 'runtime-correspondence': 'UNVERIFIED'}
 
-SURFACE_MAP = {'execution-transition-source': 'copy-new-execution-as-old,drop-removed-execution', 'exact-prior-generation-resolution': 'execution-prior-old-revision,drop-execution-old-revision', 'kind-indexed-controller-expansion': 'execution-rollout-surge,drop-execution-surge', 'empty-capable-execution-epochs': 'invent-first-deploy-old,resolve-latest-execution', 'componentwise-execution-peak': 'execution-replica-peak,drop-execution-replica', 'scheduler-reservation-projection': 'scheduler-projection,scheduler-drop-pad', 'aggregate-root-ledger-cas': 'scheduler-aggregate-root,scheduler-per-record-cas', 'binding-inflight-retained-debit': 'scheduler-snapshot-cas,scheduler-timeout-release', 'ledger-only-absent-recovery': 'scheduler-binding-crash-release', 'zero-capable-host-release-partitions': 'partition-parent,partition-drop-system-reserve', 'kubelet-runtime-metadata-model': 'runtime-model,runtime-missing-model', 'planned-slot-observed-uid-separation': 'runtime-scope-domain,runtime-scope-confusion', 'runtime-component-role-routing': 'runtime-nodefs,runtime-swap-role', 'runtime-accounting-domain-equality': 'runtime-imagefs,runtime-drop-largest-metadata', 'node-image-content-join': 'image-content-join,image-manifest-join,image-drop-index', 'node-image-snapshot-join': 'image-snapshot-join,image-drop-snapshot', 'node-image-model-version': 'image-storage-model,image-ignore-model', 'node-image-pull-workspace': 'node-image-workspace,image-drop-workspace,image-drop-manifest', 'filesystem-layout-routing': 'split-image-containerd-v1,layout-enable-v1-split-image', 'alias-aware-backing-grouping': 'filesystem-layout-alias,layout-allow-alias,partition-carve-alias', 'physical-disk-parent-accounting': 'filesystem-layout-swapped,layout-ignore-observation,partition-double-debit-child', 'vm-usable-raw-unit-separation': 'partition-unit-mismatch,partition-mix-vm-usable,partition-use-vm-usable-as-raw', 'provider-instance-store-root': 'instance-store-root,provider-under-size-instance-store', 'provider-root-ebs-rounding': 'root-ebs-bytes-quota,provider-skip-allocation-rounding,provider-skip-presentation', 'provider-node-root-quota': 'root-ebs-volume-quota,provider-debit-durable', 'provider-cover-slot-identities': 'provider-reuse-template-id', 'accelerator-family-and-profile': 'cuda-family-absent,accelerator-treat-none-as-cuda', 'whole-accelerator-device-count': 'cuda-device-count,accelerator-drop-device-count', 'accelerator-source-workload-domains': 'accelerator-drop-source-domain', 'accelerator-coexistence-epochs': 'accelerator-favorable-epoch', 'accelerator-unsharded-residency': 'cuda-unsharded-fragmentation,accelerator-split-unsharded', 'accelerator-replicated-residency': 'metal-profile,accelerator-ignore-metal-profile', 'accelerator-sharded-residency': 'cuda-shard-byte-sum,accelerator-ignore-shard-sum', 'accelerator-interconnect': '', 'accelerator-net-allocatable-vram': 'cuda-vram-reserve,accelerator-spend-raw-vram', 'accelerator-exclusive-ownership': 'accelerator-shared-owner,accelerator-share-device', 'etcd-logical-transition': 'etcd-drop-preallocated-next,etcd-drop-wal', 'etcd-physical-transition': 'etcd-transition-physical,etcd-drop-snapshot-save,etcd-drop-defrag', 'build-execution-envelope': '', 'engine-system-reserve': '', 'monitoring-work-budget': '', 'pulumi-execution-envelope': '', 'composed-full-resource-vector': 'acceptance-token', 'independent-composed-validator': 'positive-specs', 'phase9-negative-corpus': 'named-negatives', 'phase9-gate1-accelerator-owner': 'gate1-accelerator-owner', 'phase9-property-battery': 'quickcheck-properties', 'phase9-mutant-battery': 'mutants', 'phase9-validation-locus-ledger': 'registry-subcases', 'phase9-fold-compile-totality': 'phase9-fold-totality', 'live-scheduler-binding': 'live-scheduler-and-storage', 'live-runtime-storage-observation': '', 'live-accelerator-observation': 'live-accelerator-and-provider', 'live-provider-root-materialization': '', 'runtime-model-correspondence': 'runtime-correspondence'}
+SURFACE_MAP = {'execution-transition-source': 'copy-new-execution-as-old,drop-removed-execution', 'exact-prior-generation-resolution': 'execution-prior-old-revision,drop-execution-old-revision', 'kind-indexed-controller-expansion': 'execution-rollout-surge,drop-execution-surge', 'empty-capable-execution-epochs': 'invent-first-deploy-old,resolve-latest-execution', 'componentwise-execution-peak': 'execution-replica-peak,drop-execution-replica', 'scheduler-reservation-projection': 'scheduler-projection,scheduler-drop-pad', 'aggregate-root-ledger-cas': 'scheduler-aggregate-root,scheduler-per-record-cas', 'binding-inflight-retained-debit': 'scheduler-snapshot-cas,scheduler-timeout-release', 'ledger-only-absent-recovery': 'scheduler-binding-crash-release', 'zero-capable-host-release-partitions': 'partition-parent,partition-drop-system-reserve', 'kubelet-runtime-metadata-model': 'runtime-model,runtime-missing-model', 'planned-slot-observed-uid-separation': 'runtime-scope-domain,runtime-scope-confusion', 'runtime-component-role-routing': 'runtime-nodefs,runtime-swap-role', 'runtime-accounting-domain-equality': 'runtime-imagefs,runtime-drop-largest-metadata', 'node-image-content-join': 'image-content-join,image-manifest-join,image-drop-index', 'node-image-snapshot-join': 'image-snapshot-join,image-drop-snapshot', 'node-image-model-version': 'image-storage-model,image-ignore-model', 'node-image-pull-workspace': 'node-image-workspace,image-drop-workspace,image-drop-manifest', 'filesystem-layout-routing': 'split-image-containerd-v1,layout-enable-v1-split-image', 'alias-aware-backing-grouping': 'filesystem-layout-alias,layout-allow-alias,partition-carve-alias', 'physical-disk-parent-accounting': 'filesystem-layout-swapped,layout-ignore-observation,partition-double-debit-child', 'vm-usable-raw-unit-separation': 'partition-unit-mismatch,partition-mix-vm-usable,partition-use-vm-usable-as-raw', 'provider-instance-store-root': 'instance-store-root,provider-under-size-instance-store', 'provider-root-ebs-rounding': 'root-ebs-bytes-quota,provider-skip-allocation-rounding,provider-skip-presentation', 'provider-node-root-quota': 'root-ebs-volume-quota,provider-debit-durable', 'provider-cover-slot-identities': 'provider-reuse-template-id', 'accelerator-family-and-profile': 'cuda-family-absent,accelerator-treat-none-as-cuda', 'whole-accelerator-device-count': 'cuda-device-count,accelerator-drop-device-count', 'accelerator-source-workload-domains': 'accelerator-drop-source-domain', 'accelerator-coexistence-epochs': 'accelerator-favorable-epoch', 'accelerator-unsharded-residency': 'cuda-unsharded-fragmentation,accelerator-split-unsharded', 'accelerator-replicated-residency': 'metal-profile,accelerator-ignore-metal-profile', 'accelerator-sharded-residency': 'cuda-shard-byte-sum,accelerator-ignore-shard-sum', 'accelerator-interconnect': '', 'accelerator-net-allocatable-vram': 'cuda-vram-reserve,accelerator-spend-raw-vram', 'accelerator-exclusive-ownership': 'accelerator-shared-owner,accelerator-share-device', 'etcd-logical-transition': 'etcd-drop-preallocated-next,etcd-drop-wal', 'etcd-physical-transition': 'etcd-transition-physical,etcd-drop-snapshot-save,etcd-drop-defrag', 'build-execution-envelope': '', 'engine-system-reserve': '', 'monitoring-work-budget': '', 'pulumi-execution-envelope': '', 'composed-full-resource-vector': 'acceptance-token', 'independent-composed-validator': 'positive-specs', 'phase9-negative-corpus': 'named-negatives', 'phase9-dhall-typecheck-accelerator-owner': 'dhall-typecheck-accelerator-owner', 'phase9-property-battery': 'quickcheck-properties', 'phase9-mutant-battery': 'mutants', 'phase9-validation-locus-ledger': 'registry-subcases', 'phase9-fold-compile-totality': 'phase9-fold-totality', 'live-scheduler-binding': 'live-scheduler-and-storage', 'live-runtime-storage-observation': '', 'live-accelerator-observation': 'live-accelerator-and-provider', 'live-provider-root-materialization': '', 'runtime-model-correspondence': 'runtime-correspondence'}
 
 SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     surface: ((metric, EXPECTED_RESULTS[metric]) if metric and EXPECTED_RESULTS.get(metric) not in (None, "UNVERIFIED") else None)

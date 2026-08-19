@@ -17,7 +17,7 @@ entries and their loci are owned here; the numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -42,8 +42,8 @@ The material this slice deliberately does **not** restate lives with its owners:
 - The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)),
   the **three-layer foreclosure** model (type-foreclosed / decode-foreclosed / runtime-checked, [§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
   and the **validation-locus axis** itself are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md).
-  The five loci referenced below — `Gate-1-editor` (fails `dhall type` at authoring time), `Gate-2-decoder`
-  (the total decoder returns `Left`), `provision-seal` (post-bind Phase-12 provision returns a `ProvisionError`
+  The five loci referenced below — `dhall-typecheck` (fails `dhall type` at authoring time), `gadt-decode`
+  (the total decoder returns `Left`), `provision-seal` (post-bind Phase-18 provision returns a `ProvisionError`
   before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by a golden test on the *rendered*
   manifest), and `live-effect` (only at reconcile / runtime) — are defined there; this slice only names, per
   entry, where each illegal state is caught.
@@ -61,9 +61,9 @@ the spec composes; it does not prove the cluster enforces it ([`illegal_state_te
 ```mermaid
 flowchart LR
   %% register: orientation
-  g1["Gate-1-editor<br/>3 entries"]
-  g2["Gate-2-decoder<br/>1 entry"]
-  g3["Gate-3-astcheck<br/>none in this slice"]
+  g1["dhall-typecheck<br/>3 entries"]
+  g2["gadt-decode<br/>1 entry"]
+  g3["extension-astcheck<br/>none in this slice"]
   ps["provision-seal<br/>5 entries"]
   rg["rendered-output-golden<br/>none in this slice"]
   le["live-effect<br/>none in this slice"]
@@ -77,7 +77,7 @@ flowchart LR
 
 ### 3.5 Undeployable pods (taints, tolerations & affinity)
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `topology`
 
@@ -103,13 +103,13 @@ never a per-pod `gpu` axis. **Owner:**
 decode-foreclosed for the existence fold; the derived-toleration shape is type-foreclosed ([§3.22](#322-a-hand-authored-un-derived-toleration)).
 **Validation-locus:** `provision-seal` (the whole-deployment schedulability existence fold returns a
 `ProvisionError` before any `ProvisionedSpec` exists when no node satisfies affinity and tolerates every taint) +
-`Gate-1-editor` (the derived-toleration shape has no hand-author
+`dhall-typecheck` (the derived-toleration shape has no hand-author
 constructor, [§3.22](#322-a-hand-authored-un-derived-toleration)) + `live-effect` (residue — that the scheduler actually lands the pod on the
 witnessed node).
 
 ### 3.17 An over-committed deploy or workload (host / VM / cluster capacity exceeded)
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-13`
 
 **Case-family:** `capacity`
 
@@ -157,7 +157,7 @@ Because capacity is a *value*, not a type index (Dhall has no dependent arithmet
 must finish after capability binding and before rendering; only success constructs the opaque
 `ProvisionedSpec`, so a raw or merely bound deployment cannot bypass capacity admission by calling
 deployment-global `renderAll`. The same boundary rejects an execution policy that has no possible progress:
-Gate 1 preserves raw Deployment `RollingUpdate { maxSurge, maxUnavailable }`, while Gate 2 exposes only the
+dhall-typecheck preserves raw Deployment `RollingUpdate { maxSurge, maxUnavailable }`, while gadt-decode exposes only the
 opaque `DeploymentRolloutPolicy` smart constructor and rejects `{ 0, 0 }`. The legal `{ 1, 0 }` and `{ 0, 1 }`
 controls prove this is the Deployment progress invariant, not an accidental both-positive rule. StatefulSet,
 DaemonSet, Job, and HostProcess use their own closed policy arms rather than this pair. Consequently the
@@ -171,9 +171,9 @@ and durable backing/claim sizes from
 [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md). **Technique:**
 [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (capacity-accounting total fold). **Layer:** decode-foreclosed.
-**Validation-locus:** `Gate-1-editor` (controller-specific closed policy records reject DaemonSet
+**Validation-locus:** `dhall-typecheck` (controller-specific closed policy records reject DaemonSet
 both-positive rollout fields, unsupported/nonzero StatefulSet partition arms, and a Job without terminal
-retention) + `Gate-2-decoder` (the decoder-local zero-progress rolling smart constructor returns
+retention) + `gadt-decode` (the decoder-local zero-progress rolling smart constructor returns
 `Left (UnspellableCombination "rollout.rollingProgress")`) + `provision-seal` (the post-bind reservation,
 finite-limit/physical-peak, named-pool, nested-host/build/engine, and monitoring-work folds return
 `Left Overcommit`/`Left StoragePoolOvercommit` before a `ProvisionedSpec` exists) + `live-effect` (residue —
@@ -184,7 +184,7 @@ finite-limit/physical-peak relation; the name does not assert synchronous epheme
 
 ### 3.22 A hand-authored (un-derived) toleration
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-20`
 
 **Case-family:** `topology`
 
@@ -196,9 +196,9 @@ unrepresentable, and the schedulability existence fold ([§3.5](#35-undeployable
 [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) (the closed `NodeTaintKind` set + node inventory) +
 [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (the derivation rule). **Technique:**
 [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the node inventory is the single owner of what taints exist) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a `Toleration` handle exists only once its taint edge does). **Layer:** type-foreclosed uninhabitable.
-**Validation-locus:** `Gate-1-editor` (the Dhall workload record carries **no** hand-authorable toleration
+**Validation-locus:** `dhall-typecheck` (the Dhall workload record carries **no** hand-authorable toleration
 field at all — a toleration is not a spellable input but a projection from a declared node taint in the
-Haskell render layer, so a free-text toleration is unwritable at authoring) + `Gate-2-decoder` (the
+Haskell render layer, so a free-text toleration is unwritable at authoring) + `gadt-decode` (the
 `Toleration` handle's constructor opacity is Haskell module-opacity, which Dhall cannot provide — Dhall has no
 opaque types ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)) — so the projection-only discipline's full teeth land
 at the GADT decoder) + `rendered-output-golden` (the derived toleration must appear correctly in the emitted
@@ -209,7 +209,7 @@ NetworkPolicy, [§3.6](./illegal_state_security.md#36-blocking-networkpolicy-ser
 
 ### 3.27 A deployment that fits in aggregate but has no resource-capable placement
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `capacity`
 
@@ -251,7 +251,7 @@ the elastic set).
 
 ### 3.28 Two accelerator owners on one node, or a fractional accelerator claim
 
-**Delivery-owner:** `Phase-10`
+**Delivery-owner:** `Phase-16`
 
 **Case-family:** `accelerator`
 
@@ -275,7 +275,7 @@ sub-budget because the Kubernetes device allocation is whole-device, not a VRAM 
 *two owners on one node* is **decode-foreclosed**: it is a constructible pair rejected by the post-bind
 ownership fold with a `ProvisionError`, not an absence of inhabitants; runtime-checked residue — that the one
 owner actually holds the devices at runtime.
-**Validation-locus:** `Gate-1-editor` (the closed accelerator-owner worker-kind union has no ordinary-pod or
+**Validation-locus:** `dhall-typecheck` (the closed accelerator-owner worker-kind union has no ordinary-pod or
 fractional-claim arm) + `provision-seal` (the post-bind per-node ownership index returns a `ProvisionError`
 before any `ProvisionedSpec` exists on a second owner; success derives one whole-device allocation) +
 `rendered-output-golden` (the owner pod's exact integer
@@ -284,7 +284,7 @@ runtime actually grant those devices only to the owner).
 
 ### 3.29 A host worker whose Demand overflows its physical host
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `capacity`
 
@@ -316,7 +316,7 @@ declares no physical-host `Capacity`) + `live-effect` (residue — that the host
 
 ### 3.30 An accelerator memory envelope that cannot fit the selected devices or unified-memory pool
 
-**Delivery-owner:** `Phase-10`
+**Delivery-owner:** `Phase-16`
 
 **Case-family:** `accelerator`
 
@@ -367,14 +367,14 @@ KV-cache / fragmentation), mirroring the `mem` cgroup ceiling behind the `mem` �
 is type-foreclosed.
 **Validation-locus:** `provision-seal` (the post-bind per-device/sharding and aggregate accelerator-memory
 folds return `Left AcceleratorVramShortage` before any `ProvisionedSpec` exists, including the raw-fits/net-fails
-boundary, and an undeclared envelope is rejected) + `Gate-1-editor` (an Apple host
+boundary, and an undeclared envelope is rejected) + `dhall-typecheck` (an Apple host
 declaring a separate `vram` arm fails the closed capacity shape) + `live-effect` (residue — observed devices
 and per-device raw/reserved/allocatable/current-free memory match the declaration/residual and the workload
 actually fits under real batch/context).
 
 ### 3.72 A compute headroom pad that reserves past its own limit
 
-**Delivery-owner:** `Phase-7`
+**Delivery-owner:** `Phase-13`
 
 **Case-family:** `capacity`
 
@@ -407,15 +407,15 @@ workload envelopes from
 [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (binding-by-construction: the pad and the ceiling it must respect are fields of one checked record).
 **Layer:** decode-foreclosed.
-**Validation-locus:** `Gate-1-editor` (no schema field carries a reserved/padded total, and the headroom
+**Validation-locus:** `dhall-typecheck` (no schema field carries a reserved/padded total, and the headroom
 reason is required rather than defaultable, so an authored reservation has nowhere to be written) +
-`Gate-2-decoder` (the smart constructor checks `requests + pad ≤ limits` per axis alongside the existing
+`gadt-decode` (the smart constructor checks `requests + pad ≤ limits` per axis alongside the existing
 `requests ≤ limits`, and the all-`Zero` pad fails `PositiveHeadroomAxisWitness` construction) + `live-effect`
 (residue — the rendered `requests` carries the padded total and the kubelet reserves exactly it).
 
 ### 3.73 A padded reservation that overcommits allocatable
 
-**Delivery-owner:** `Phase-8`
+**Delivery-owner:** `Phase-14`
 
 **Case-family:** `capacity`
 

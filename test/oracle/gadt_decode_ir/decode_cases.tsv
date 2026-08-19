@@ -1,0 +1,5 @@
+fixture	expected_tag	catalog_entry	positive_twin
+dhall/examples/illegal_decode_schema.dhall	SchemaMismatch	planning-ownership	test/mutant/gadt_decode_ir/legalized_schema.dhall
+dhall/examples/illegal_decode_domain.dhall	OutOfDomainArm	3.38	dhall/examples/legal_multisubstrate_cluster.dhall
+dhall/examples/illegal_decode_unspellable.dhall	UnspellableCombination	planning-ownership	dhall/examples/legal_deployment_rules.dhall
+dhall/examples/illegal_decode_plaintext_secret.dhall	PlaintextSecret	3.8	dhall/examples/legal_secret_app.dhall

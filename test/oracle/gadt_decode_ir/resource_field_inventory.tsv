@@ -1,0 +1,6 @@
+oracle	path	meaning
+include	test/oracle/dhall_typecheck_schema/resource_fields.csv	The complete 134-type/525-field authored schema inventory is inherited without regeneration.
+include	test/oracle/dhall_typecheck_schema/resource_type_requirements.csv	The 176 nested type bindings remain mandatory at the Gate-2 preservation boundary.
+rule	clusterNodes	Every normalized Record/List/Union/scalar node is retained with its exact structural path.
+rule	semanticHash	Every positive is pinned independently by the Dhall CLI semantic hash oracle.
+rule	mutant	Deleting or substituting any retained row changes the structural fingerprint and is rejected.
