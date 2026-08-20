@@ -40,7 +40,7 @@ RESULTS = ROOT / ".build/dsl/scoped-identity/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/scoped-identity/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/scoped-identity"
 TEMP_ROOT = ROOT / ".build/tmp/scoped-identity"
-CONTRACT = "DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_08_scope_index.md"
 GATE_COMMAND = "python3 tools/scoped_identity_gate.py"
 EXPECTATIONS = "test/oracle/scoped_identity_surfaces.tsv"
 
@@ -363,7 +363,7 @@ def surface_decisions(
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=17, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=8, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()

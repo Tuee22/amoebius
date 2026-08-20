@@ -18,7 +18,7 @@ those; this document wins on plan structure. It owns no phase status, which belo
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_10_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_12_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_17_capability_bind.md, DEVELOPMENT_PLAN/phase_18_provision_seal.md, DEVELOPMENT_PLAN/phase_19_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_20_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_22_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_23_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_24_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_25_ui_program_schema.md, DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_27_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_28_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_29_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_30_offline_language_plan.md, DEVELOPMENT_PLAN/phase_31_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_33_ui_local_composition.md, DEVELOPMENT_PLAN/phase_34_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_35_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_36_base_image_registry.md, DEVELOPMENT_PLAN/phase_37_object_reconciler.md, DEVELOPMENT_PLAN/phase_38_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_39_retained_storage.md, DEVELOPMENT_PLAN/phase_40_vault_pki.md, DEVELOPMENT_PLAN/phase_41_platform_backbone.md, DEVELOPMENT_PLAN/phase_42_platform_services_2.md, DEVELOPMENT_PLAN/phase_43_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_44_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_45_app_tenancy.md, DEVELOPMENT_PLAN/phase_46_pulsar_client.md, DEVELOPMENT_PLAN/phase_47_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_48_content_store_workflow.md, DEVELOPMENT_PLAN/phase_49_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_50_release_lifecycle.md, DEVELOPMENT_PLAN/phase_51_ui_program_release.md, DEVELOPMENT_PLAN/phase_52_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_53_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_54_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_55_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_56_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_57_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_58_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_60_infernix_lift.md, DEVELOPMENT_PLAN/phase_61_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_62_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_63_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_64_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_65_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_66_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_67_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_68_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_69_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_70_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_71_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_72_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_73_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_74_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -100,10 +100,10 @@ Every file in `DEVELOPMENT_PLAN/` opens with the standard block from
 | `system_components.md` | Target component inventory: surface → owning doctrine → planned module path. |
 | `substrates.md` | Authored substrate registry and per-phase substrate map. Generated views go to `.build/docs/`. |
 | `legacy_tracking_for_deletion.md` | The implementation/plan divergence and migration-removal ledger: observed mismatch, owner, and closure condition. |
-| `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_70_offline_multizone_continuity.md`). |
+| `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_88_offline_multizone_continuity.md`). |
 | `later_phases.md` | The in-scope, high-numbered phases not yet given their own document. |
 
-This deviates from prodbox's hyphenated names (`phase-4-gateway-dns.md`) on purpose: amoebius's
+This deviates from prodbox's hyphenated names (`phase-51-gateway-dns.md`) on purpose: amoebius's
 documentation standard mandates snake_case. The *structure* mirrors prodbox; the *naming* follows amoebius.
 
 **Generated artifacts are never a committed module path.** A phase's `Implementation` field
@@ -145,7 +145,8 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 **Phase scope:** <one cohesive capability claim, its sprint seams, one acceptance command, and the explicit split trigger>
 **Substrate:** <none | apple | linux-cpu | linux-cuda | windows> ([§L](#l-one-substrate-discipline))
 **Lane:** <none | linux-cpu/amd64 | linux-cpu/arm64 | metal | cuda> ([§L](#l-one-substrate-discipline))
-**Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live · 1/2 only for Phase 21 · — for Phase 0> ([§K](#k-honesty-proven--tested--assumed))
+**Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live · 1/2 only for Phase 34 · — for Phase 0> ([§K](#k-honesty-proven--tested--assumed))
+**Depends on:** <[Phase M](phase_MM_<slug>.md) — why, for each; or `none`> ([§F](#f-the-sprint-block))
 **Gate:** <the concrete acceptance test that must pass before the next phase opens; §S applies implicitly>
 
 ## Gate integrity            (optional; see below)
@@ -165,9 +166,15 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 single, checkable acceptance condition — ideally an `InForceSpec` topology that spins resources up, runs a
 workflow, and tears them down. Every gate also inherits the source-snapshot, generated-output, and target-tree
 postconditions of [§S](#s-universal-artifact-hygiene-gate) and [§U](#u-the-final-repository-layout), without
-duplicating them in the phase documents. A phase may state an optional **Phase scope** or legacy **Session scope** note;
-the enforceable sizing rules are owned by [§O](#o-sprint-sized-seams-and-bounded-phase-gates) and apply whether or not that
-summary note is present.
+duplicating them in the phase documents. The enforceable sizing rules are owned by
+[§O](#o-sprint-sized-seams-and-bounded-phase-gates) and apply independently of what the summary says.
+
+**The six Phase Summary fields are required, and the set is closed.** `Phase scope`, `Substrate`, `Lane`,
+`Register`, `Depends on`, and `Gate`, in that order, each on its own line with the colon **inside** the bold.
+Two of them were previously written as optional, and the cost of that was measurable: `Phase scope` was absent
+from sixty-four contracts and `Depends on` from fifty-seven, and nothing reported either, because no check
+reads them. A field that is optional in the skeleton and unchecked by the lint is a field that does not exist.
+The legacy **Session scope** note is retired; a phase that carried one states its claim as `Phase scope`.
 
 **Two optional sections have fixed slots and fixed names**, both in the gate-detail block between
 `## Phase Summary` and `## Doctrine adopted`, in this order. A phase whose gate-integrity apparatus (the
@@ -264,8 +271,8 @@ unbuildable when it is not.**
 
 | `Requires` precondition | What it is | Declared by |
 |---|---|---|
-| `cloud-account` | A credentialed provider account carrying the quota and permissions the `Managed Eks` registry entry names | Phases 55, 56, 57, 58, 62, 66, 70 |
-| `host-floor` | The per-substrate floor of [`substrate_doctrine.md` §3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply) — the package-manager root, a hardware or firmware fact, and nothing else. Named here, defined there | Phases 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 71, 73 |
+| `cloud-account` | A credentialed provider account carrying the quota and permissions the `Managed Eks` registry entry names | Phases 76, 77, 78, 79, 48, 84, 88 |
+| `host-floor` | The per-substrate floor of [`substrate_doctrine.md` §3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply) — the package-manager root, a hardware or firmware fact, and nothing else. Named here, defined there | Phases 1, 2, 50, 51, 35, 52, 53, 54, 25, 26, 93, 57 |
 
 **A tool is never a `Requires` precondition.** A tool with a supported install plan is *ensured*: probed,
 installed when absent, resolved to an absolute path, and invoked by it
@@ -275,8 +282,8 @@ acquiring; the retired `accelerator-device-plugin` token named a DaemonSet the r
 other operator install. Both are gone, and what remains is the floor, which no phase can build because it is
 the ground a phase stands on.
 
-No phase requires a live public DNS zone: [`phase_43`](phase_43_keycloak_ingress.md) accepts a local ACME
-chain in place of public issuance, and Phase 10's `dnsRecord` TTLs are model parameters, not live records.
+No phase requires a live public DNS zone: [`phase_64`](phase_64_keycloak_ingress.md) accepts a local ACME
+chain in place of public issuance, and Phase 17's `dnsRecord` TTLs are model parameters, not live records.
 
 **The table is the vocabulary, and the lint reads it.** The closed token set is this table's first column,
 parsed rather than restated in code, and the `Declared by` column joins to the phase documents in both
@@ -339,7 +346,7 @@ belongs in `.build/docs/`. This rule removes generated-marker fences from the ve
 
 ## J. Cross-reference path rules
 
-- Links **within** `DEVELOPMENT_PLAN/` use plain relative paths (`README.md`, `phase_04_…md`).
+- Links **within** `DEVELOPMENT_PLAN/` use plain relative paths (`README.md`, `phase_51_…md`).
 - Links to governed doctrine under `documents/` use the parent-relative path
   (`../documents/engineering/<doc>.md#<anchor>`).
 - A rename updates every inbound link in the same change; the `Referenced by` headers are reconciled from the
@@ -374,10 +381,11 @@ The argument is carried by [`development_plan_phase_model.md`](development_plan_
 
 ## M. Gate integrity (a gate cannot be passed by a stub)
 
-Twelve clauses a gate must satisfy before it can be trusted: independent oracle provenance, a committed
+Thirteen clauses a gate must satisfy before it can be trusted: independent oracle provenance, a committed
 mutation quota, independent reference predicates, generator coverage, external-observer traces, determinism
 honesty, a concrete corpus, specific-reason negatives, fresh-challenge binding, authenticated observer
-provenance, authority-paired security checks, and bypass-path negatives. A gate a stub can pass is not a gate.
+provenance, authority-paired security checks, bypass-path negatives, and extension-conformance discharge. A
+gate a stub can pass is not a gate.
 
 The argument is carried by [`development_plan_gate_integrity.md`](development_plan_gate_integrity.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
 
@@ -458,11 +466,12 @@ The argument is carried by [`development_plan_phase_model.md`](development_plan_
 <a id="s-commit-timing"></a>
 <a id="gate-integrity-delegation"></a>
 
-Fifteen postconditions every gate inherits on top of its own capability check: the source-snapshot binding,
+Sixteen postconditions every gate inherits on top of its own capability check: the source-snapshot binding,
 run-time surface enumeration, generated output confined to `.build/**`, production state confined to
 `.data/**`, test state confined to marker-owned `.test_data/**`, `test-secrets.dhall` rejected by production,
 the authored-root write guard, the repository-local attestation, the host inventory, the target-tree
-partition, and the recorded natural architecture. Commit timing is never a gate input.
+partition, the recorded natural architecture, and the illegal-state covering. Commit timing is never a gate
+input.
 
 The argument is carried by [`development_plan_gate_integrity.md`](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate).
 
@@ -498,4 +507,4 @@ The argument is carried by [`development_plan_gate_integrity.md`](development_pl
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine the phases adopt
 - [Repository Layout and Artifact Provenance](../documents/engineering/repository_layout_doctrine.md) — generated paths and ignore contracts
 - [Phase 0](phase_00_documentation_suite.md) — implements the documentation and artifact-policy gate
-- [Phase 13](phase_13_illegal_state_corpus.md) — owns the catalog-coverage implementation referenced by the rulebook
+- [Phase 27](phase_27_illegal_state_covering.md) — owns the catalog-coverage implementation referenced by the rulebook

@@ -1,5 +1,5 @@
 {
-  "phase": 19,
+  "phase": 37,
   "gate_command": "cabal test ui-program-schema-spec",
   "register": "2",
   "substrate": "none",
@@ -12,5 +12,5 @@
     {"name": "Runtime", "status": "UNVERIFIED"}
   ],
   "coverage": [{"surface": "ui.source.closed_union", "status": "tested"}],
-  "ledger_hash": "intentionally-invalid-because-tracker-is-primary"
+  "ledger_hash": "sha256:04ccc10b068b2f7dbb17cf469f6669f6c34cec020e17a38c60ff1d184ae4d577"
 }

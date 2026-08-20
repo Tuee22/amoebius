@@ -14,7 +14,7 @@ deliberately independent of a cluster's, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_24_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_35_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_39_retained_storage.md, DEVELOPMENT_PLAN/phase_53_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_54_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_55_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_56_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_58_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -109,11 +109,11 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   readiness-edge rule (a condition never a duration; the bootstrap tier's `discover`/`RuntimeWitness` gates)
   is owned by [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md).
 - **Bring-up is itself a reconcile.** "Come up" is not a one-shot script; it is the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) reconciler driving
-  the world toward the `.dhall`. Phase 35 now has pristine-Incus live evidence for empty-diff idempotence,
+  the world toward the `.dhall`. Phase 55 now has pristine-Incus live evidence for empty-diff idempotence,
   non-recreating repair, exact process/storage enforcement, complete inventory, six red mutants, and leak-free
   teardown; its complete gate passed. The `linux-cpu` lane is always available on all hardware, natively or
   via Incus on Linux and through Lima on Apple or WSL2 on Windows when a pristine Linux host is required. The
-  Phase-37 SSA reconciler, driven from the `.dhall` by the Phase-44 control-plane daemon, owns in-cluster convergence.
+  Phase-58 SSA reconciler, driven from the `.dhall` by the Phase-65 control-plane daemon, owns in-cluster convergence.
 - **A stretched rke2 agent joins only once it is reachable.** Growing a cluster with a **stretched** agent —
   a full member node whose declared network-locality `Site` differs from the control-plane servers' `Site`
   ([substrate_node_inventory.md §8.3](./substrate_node_inventory.md#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts)) —
@@ -207,7 +207,7 @@ Two encapsulation rules make the forest safe to reason about:
   [monitoring_doctrine.md](./monitoring_doctrine.md).
 
 > **Honesty.** Amoebic spawning, per-child unseal, and geo-replicated children are *specified* here and
-> scheduled for Phase 53; nothing in this section is a tested amoebius result. Status and gates live only in
+> scheduled for Phase 74; nothing in this section is a tested amoebius result. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
 
 ---
@@ -366,7 +366,7 @@ not ambient implementation details.
   ([platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)) plus durable rebind is the
   precondition for ephemeral teardown being *safe*, not just *possible*.
 
-**Delivered lifecycle evidence.** Phase 39 exercised this lifecycle consequence on the universal
+**Delivered lifecycle evidence.** Phase 60 exercised this lifecycle consequence on the universal
 `linux-cpu` lane: the real kind cluster, node container, and API endpoint were absent while independently
 inspected host images retained a run-unique Postgres row and MinIO object; recreation produced a new
 apiserver CA, cluster UID, PVs, and claim UIDs, and read both byte strings back without a post-recreate write.
@@ -427,9 +427,11 @@ set toward it.
 
 Every lifecycle action in this document — bring-up ([§2](#2-bring-up-and-bootstrap)), spawn ([§3](#3-amoebic-spawning--the-recursive-forest)), dynamic provisioning ([§8](#8-dynamic-node-provisioning)), and
 teardown ([§5](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) — is the **same shape**: *observe the world, compare it to the `.dhall`, enact the diff,
-re-observe.* There is no giant lifecycle state machine. This pattern is **generalized from the prodbox sibling's** reconciler-with-predicates doctrine
-(`prodbox/documents/engineering/lifecycle_reconciliation_doctrine.md`), lifted from
-"AWS-resource-leak prevention" to "any cluster / child / node / stack / PV the forest can create."
+re-observe.* There is no giant lifecycle state machine. This pattern is **re-derived** from the reconciler-with-predicates shape the `prodbox` seed exhibits, and
+widened from "AWS-resource-leak prevention" to "any cluster, child, node, stack or PV the forest can create."
+The guarantee that widening adds is the workflow calculus's: teardown is an obligation the type system tracks
+rather than a reconciler pass somebody remembers to run
+([`workflow_calculus_doctrine.md` §3](./workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation)).
 
 ```mermaid
 flowchart TD
@@ -477,7 +479,7 @@ flowchart TD
   **Unreachable**, and **`Unreachable → refuse`**: *"this could not be observed"* is never silently collapsed
   to *"it is gone."* A teardown that cannot confirm a resource is absent refuses rather than charging ahead
   and stranding live state — the same soundness rule as the [§6](#6-push-back-when-teardown-would-break-the-root-inforcespec) push-back and as the prodbox sibling's
-  Sprint-10.19 gate.
+  Sprint-17.19 gate.
 - **A stretched `Site` cross-checks through this same three-valued gate.** A cluster node or host worker
   carries a declared network-locality `Site`
   ([substrate_node_inventory.md §8.3](./substrate_node_inventory.md#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts))
@@ -521,20 +523,19 @@ validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. This doc states
 the target shape and links back to the plan for phase sequencing and status.
 
-The Phase-53 Register-3 instance realizes the `kind` child specialization in
+The Phase-74 Register-3 instance realizes the `kind` child specialization in
 `Amoebius.Multicluster.Spawn` and the opaque handoff in `Amoebius.Dsl.ChildInForceSpec`. A parent cluster ran
 two bounded Pulumi executor Jobs concurrently, projected each child and a grandchild without a sibling or
 ancestor branch, observed a byte-stable no-op second reconcile, and then removed both child stacks and all
 three test clusters through the same discover/diff/enact discipline. The compile corpus independently rejects
 sibling and ancestor fields. This is tested for two `kind` children; provider children and live rke2 joins
-remain UNVERIFIED. Every hardware substrate can always run the validated `linux-cpu` lane. A pristine Linux
-host uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+remain UNVERIFIED. Every hardware substrate can always run the validated `linux-cpu` lane.
 
-Phase 54 realizes teardown policy in `Amoebius.Multicluster.Teardown` and `Pushback`. The gate distinguishes
+Phase 75 realizes teardown policy in `Amoebius.Multicluster.Teardown` and `Pushback`. The gate distinguishes
 lossless-by-synchronization from bounded-by-failover-budget, refuses CPU, memory, ephemeral, durable, cache,
 device, and unreachable-survivor deficits before teardown, and records a named failback on explicit override.
 Its live inventory proves removal of the three test clusters, network namespaces, DNS authority, and external
-journal roots while retaining the Phase-35 backing platform.
+journal roots while retaining the Phase-55 backing platform.
 
 ---
 
@@ -549,7 +550,7 @@ verbs that stand it up. There is no rke2 state machine, exactly as there is no l
 
 This section is normative design, not a delivered live claim. Phases 11–16 own the pure node/reserve/template
 model; live multi-node rke2 host admission, snapshot-bound join, and enforcement remain an explicitly
-unassigned Phase-N gate. Phase 53's acceptance forest uses child `kind` clusters only.
+unassigned Phase-N gate. Phase 74's acceptance forest uses child `kind` clusters only.
 
 - **Root = the zero-secret degenerate.** The root cluster is
   `{ servers = Rke2Servers.Single { host, capacity, systemReserve }, agents = Fixed [] }` — the target single-node rke2 shape of [§2](#2-bring-up-and-bootstrap). One server, an empty
@@ -605,34 +606,29 @@ unassigned Phase-N gate. Phase 53's acceptance forest uses child `kind` clusters
 > **zero** rke2 code (its `HostTool` enum is Kubectl/Helm/Kind). Read this section as **design intent**, not
 > a tested amoebius result; the plan owns sequencing ([§10](#10-planning-ownership), > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
 
-Phase 55 adds a scoped cloud-keyed spawn boundary without claiming a provider child exists. The linux-cpu
+Phase 76 adds a scoped cloud-keyed spawn boundary without claiming a provider child exists. The linux-cpu
 parent's live `replicas=1` Deployment and two concurrently placed provider-executor Jobs were read back; the
 provider plan, CPU-only SKU/account checks, fingerprint-CAS, checkpoint envelope, and receipt-only
 materialization constructor are built. Six checkpoint objects round-tripped through Vault Transit and MinIO,
 and a sealed Vault refused before PUT. The configured AWS identity is invalid, so the actual control-plane daemon
-`pulumi up`, EKS control plane, managed node, and cloud lifecycle remain UNVERIFIED. Every hardware substrate
-can always supply the `linux-cpu` parent lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple,
-or WSL2 on Windows.
+`pulumi up`, EKS control plane, managed node, and cloud lifecycle remain UNVERIFIED.
 
-Phase 56 builds the provider-child bootstrap and authority protocol without converting that Phase-55 absence
+Phase 77 builds the provider-child bootstrap and authority protocol without converting that Phase-76 absence
 into an EKS claim. Pure contracts validate the finite add-on domain, readiness ordering, managed-authority
 mint, private immutable scheduler image, same-Lease freshness rules, exact standard-service set, and no-op
 refusal. A retained-kind Kubernetes drill externally observed four old-UID release/replacement joins and the
 parent-holder → fresh absence → child-holder sequence on one Lease UID with three resource versions; the child
 was non-Serving before acquire and zero parent/child out-of-order mutations occurred. That drill emulates the
 managed-child Kubernetes object shape: it does not prove EKS, a managed node, provider add-ons, or full service
-convergence. Those runtime layers remain UNVERIFIED until valid AWS authority exists. Hardware choice never
-removes the `linux-cpu` lane; pristine Linux is obtained with Incus on Linux/Linux-CUDA, Lima on Apple, or
-WSL2 on Windows.
+convergence. Those runtime layers remain UNVERIFIED until valid AWS authority exists.
 
-Phase 58 implements the declarative provider-node contract in `Amoebius.Cluster.NodeProvisioner` and the
+Phase 79 implements the declarative provider-node contract in `Amoebius.Cluster.NodeProvisioner` and the
 receipt-gated join/teardown boundary in `Amoebius.Pulumi.NodeGroup` and `Amoebius.Pulumi.Teardown`. Pure tests
 cover workflow-completion/load target derivation, quota and capability refusal before permission, distinct
 physical identities, taint/supply/layout/device/scheduler-authority gates, and `Unreachable → refuse`. A
 retained-Kubernetes drill observes the signal and ownership-metadata analogues with exact cleanup. It is not
 EKS, managed-node, or AWS leak-freedom evidence; those layers remain UNVERIFIED until valid AWS authority is
-available. Every hardware substrate can always supply the `linux-cpu` parent lane. For a pristine Linux host,
-use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+available. Every hardware substrate can always supply the `linux-cpu` parent lane.
 
 ---
 

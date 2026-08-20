@@ -14,7 +14,7 @@ and remains authoritative for the rulebook's structure.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_10_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_12_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_17_capability_bind.md, DEVELOPMENT_PLAN/phase_18_provision_seal.md, DEVELOPMENT_PLAN/phase_19_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_20_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_22_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_24_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_25_ui_program_schema.md, DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_27_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_28_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_29_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_30_offline_language_plan.md, DEVELOPMENT_PLAN/phase_31_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_33_ui_local_composition.md, DEVELOPMENT_PLAN/phase_34_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_35_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_36_base_image_registry.md, DEVELOPMENT_PLAN/phase_37_object_reconciler.md, DEVELOPMENT_PLAN/phase_38_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_39_retained_storage.md, DEVELOPMENT_PLAN/phase_40_vault_pki.md, DEVELOPMENT_PLAN/phase_41_platform_backbone.md, DEVELOPMENT_PLAN/phase_42_platform_services_2.md, DEVELOPMENT_PLAN/phase_43_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_44_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_45_app_tenancy.md, DEVELOPMENT_PLAN/phase_46_pulsar_client.md, DEVELOPMENT_PLAN/phase_47_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_48_content_store_workflow.md, DEVELOPMENT_PLAN/phase_49_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_50_release_lifecycle.md, DEVELOPMENT_PLAN/phase_51_ui_program_release.md, DEVELOPMENT_PLAN/phase_52_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_53_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_54_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_55_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_56_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_57_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_58_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_60_infernix_lift.md, DEVELOPMENT_PLAN/phase_61_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_62_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_63_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_64_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_65_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_66_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_67_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_68_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_69_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_70_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_71_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_72_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_73_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_74_apple_metal_host_daemon.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -110,6 +110,17 @@ happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gat
     the alternate direct paths as well as the intended path. Success through the sanctioned route cannot hide
     an independently reachable bypass.
 
+13. **Extension-conformance discharge.** A gate that delivers an extension — a domain, a provider, or a
+    hardware substrate — names, per law family, which laws it discharges and how: the L-law properties over its
+    own declared vocabulary, the C-law composition suite against every other member of the link set, and the
+    S- and P-law instances for the seams it declares. Each unrepresentability claim in that discharge names a
+    compile-fail fixture that fails for its pinned reason, and the gate produces a sealed verdict binding the
+    declaration digest, the core version the laws came from, the suite digest, and the result
+    ([`extension_conformance_doctrine.md` §6](../documents/engineering/extension_conformance_doctrine.md#6-the-verdict-seal)).
+    A gate delivering no extension marks the clause not applicable, on the same terms as clause 9. What this
+    forecloses is the failure mode extension guidelines always have: a conformance claim discharged by the
+    author's own reading rather than by a suite the author cannot weaken.
+
 These clauses are what a phase's **Gate** and each sprint's **Validation** are checked against. The Phase-0
 documentation lint verifies that every gate names its authored fixtures, mutant(s), and independent oracle.
 The generated run ledger records the result and is externally attested. The implementation author must not be
@@ -171,6 +182,22 @@ gate cannot pass unless all of these conditions hold:
     executes an artifact of another architecture under emulation, or that builds one through a cross-toolchain
     fails ([`substrate_doctrine.md` §1.1](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule)).
 
+16. A gate that adds or amends an illegal-state catalogue entry leaves the catalogue a **complete covering**
+    over its declared taxonomy: every cell of the product of the declared axes holds an entry or carries a
+    one-line justification for holding none, and an unjustified empty cell fails the gate
+    ([`documentation_standards.md` §16](../documents/documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list)).
+    The grid is generated; the entries and the justifications are authored.
+
+**Clause 16 is partly discharged.** The taxonomy is declared with all three axes closed and enumerated, the
+generator exists ([`../tools/covering_grid.py`](../tools/covering_grid.py)), and sixteen authored
+justifications close 98 of the 109 empty cells. Eleven cells still owe a reason and cannot be given one as the
+catalogue currently reads: an entry naming several foreclosure layers and several loci is credited with the
+product of them, so those cells are *unknown* rather than evidently empty
+([`../documents/illegal_state/README.md`](../documents/illegal_state/README.md)). Closing them means pairing a
+layer to a locus in each entry, which is authoring work on the catalogue. Until then a gate amending an entry
+inherits the postcondition and may not increase the eleven; which phase drives it to zero is recorded in
+[README.md](README.md).
+
 **Clause 15 invalidates every phase seal recorded before 2026-08-16.** No earlier gate recorded the
 architecture it proved, so no earlier attestation can be read as a claim about one — and the seal that did
 name two architectures reached the second under an emulator. This is the same shape as the containment
@@ -210,10 +237,10 @@ it is not a gate output, authored input, or version-controlled artifact.
 The target tree, the complete file classification, output inventory, ignore patterns, source-snapshot
 acceptance, and revision-history disposition are owned by
 [`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md). A phase document
-states only its capability-specific acceptance condition; it does not duplicate these eleven clauses.
+states only its capability-specific acceptance condition; it does not duplicate these sixteen clauses.
 
 **Clause 5 is enforced by every gate and remediated by the owning phase.** Read as a whole-tree condition it
-would make Phase 0 wait on phases 1–74, because the tracked resolver output, digest tables, and generated-root
+would make Phase 0 wait on phases 1–95, because the tracked resolver output, digest tables, and generated-root
 consumers those phases own are spread across the tree — which inverts the numeric order this plan is built on.
 [`repository_layout_doctrine.md §3.5`](../documents/engineering/repository_layout_doctrine.md#35-tsv-inventory-and-provenance)
 settles it: Phase 0 owns the shared corpora and the machinery, and each later phase owns its domain tables

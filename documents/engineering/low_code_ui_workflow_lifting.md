@@ -11,7 +11,7 @@ This document owns workflow and artifact lifting into the UX. It does not own th
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_28_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_33_ui_local_composition.md, DEVELOPMENT_PLAN/phase_61_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_72_jitml_ui_lift.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -81,7 +81,7 @@ different digest yields a typed conflict before Pulsar publication. Starts are i
 authored bounded dependency DAG orders them; no same-owner global FIFO is inferred. Count, encoded-byte, and
 age limits are positive finite values in the bound port contract, never adapter defaults. Expiry produces
 `Expired` before publish. Reconnect rechecks the current program/ABI, authentication, membership, policy,
-scope, catalog identities, and dependency receipts before replay. `Accepted` comes only from the Phase-49
+scope, catalog identities, and dependency receipts before replay. `Accepted` comes only from the Phase-70
 effect-owner-derived receipt carrying the same command/workflow identity; Redis and WebSocket delivery remain
 non-authoritative.
 
@@ -89,19 +89,19 @@ A specialized infernix or jitML interaction that the core algebra cannot express
 component implemented in the generic PureScript runtime and a matching Haskell contract witness. Extension
 Dhall configures that component; it does not ship arbitrary JavaScript or a separately trusted browser bundle.
 
-The scoped Phase-61 infernix instance now supplies the first concrete adapter for this rule. A constructor-
+The scoped Phase-92 infernix instance now supplies the first concrete adapter for this rule. A constructor-
 hidden ready handle flows through a bounded Dhall program into trusted, owner/tenant/port-qualified start and
-invoke operations; exact resend returns the original Phase-49-style receipt, changed input conflicts before an
+invoke operations; exact resend returns the original Phase-70-style receipt, changed input conflicts before an
 effect, and compiled scope/terminal-identity mutants turn red. Real Chrome, fresh Keycloak tenant sessions,
 retained Pulsar and MinIO, and a fresh Kubernetes reference worker exercise one own-tenant interaction and a
 foreign-tenant zero-effect denial; a second loopback server origin reads the terminal receipt from MinIO.
-This is a `reference-uppercase` computation, not the full Phase-60 output path. Browser-through-Envoy UI
-routing, Kubernetes UI-server replicas, Phase-61 native CBOR, production inference, Redis/socket recovery,
+This is a `reference-uppercase` computation, not the full Phase-91 output path. Browser-through-Envoy UI
+routing, Kubernetes UI-server replicas, Phase-92 native CBOR, production inference, Redis/socket recovery,
 direct-service isolation, and general noninterference remain UNVERIFIED. The portable fallback is always
 `linux-cpu`, regardless of the hardware substrate; where a clean Linux environment is required, select Incus
 for Linux or Linux-CUDA hosts, Lima for Apple hosts, and WSL2 for Windows hosts.
 
-The scoped Phase-72 jitML instance supplies the second adapter. Its hidden Ready-model constructor accepts only a matching Phase-71 committed artifact; pure tests pin owner, tenant, scope, identity, idempotency, transient-route loss, durable repair, and five mutation loci. Chrome exercises Ready, in-flight, failed, same-tenant non-owner, and foreign-tenant cases across two loopback origins, while a temporary durable-file observer and physical CUDA establish the bounded live result. Fresh Keycloak, retained MinIO/Pulsar/Redis, Envoy, Kubernetes UI replicas, native CBOR, complete sibling serving, and same-flow training remain UNVERIFIED. CPU-only Linux execution stays available for every host kind. An isolated Linux guest comes from Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+The scoped Phase-94 jitML instance supplies the second adapter. Its hidden Ready-model constructor accepts only a matching Phase-93 committed artifact; pure tests pin owner, tenant, scope, identity, idempotency, transient-route loss, durable repair, and five mutation loci. Chrome exercises Ready, in-flight, failed, same-tenant non-owner, and foreign-tenant cases across two loopback origins, while a temporary durable-file observer and physical CUDA establish the bounded live result. Fresh Keycloak, retained MinIO/Pulsar/Redis, Envoy, Kubernetes UI replicas, native CBOR, complete sibling serving, and same-flow training remain UNVERIFIED. CPU-only Linux execution stays available for every host kind.
 
 Workflow monitoring remains mandatory. A workflow view consumes the authenticated workflow-monitor projection
 or a typed monitoring link. The UI cannot introduce a public monitoring surface or redefine workflow health.

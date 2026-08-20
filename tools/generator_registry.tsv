@@ -29,3 +29,10 @@ tla/**/*.tla	src/Amoebius/Cli/Formal.hs	phase-9
 tmp/**	tools/doc_lint_verify.py	phase-0
 toolchain/<os>-<arch>/**	tools/toolchain.py	phase-1
 ui/**	-	phase-29
+artifacts/<address>/**	-	phase-3
+recipes/**	-	phase-3
+grants/**	-	phase-4
+sql/**	-	phase-36
+pulumi/**	-	phase-58
+tools/**	-	phase-47
+host_ensure_kernel/**	tools/host_ensure_kernel_gate.py	phase-51

@@ -19,7 +19,7 @@ does not own the cluster engine that runs on it, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_03_host_assert_cli.md, DEVELOPMENT_PLAN/phase_04_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_06_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_07_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_08_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_35_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_36_base_image_registry.md, DEVELOPMENT_PLAN/phase_46_pulsar_client.md, DEVELOPMENT_PLAN/phase_55_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_73_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_74_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/testing_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -40,7 +40,7 @@ does not own the cluster engine that runs on it, owned by
 
 ---
 
-**Pure inventory read-side status.** The [Phase 16 gate](../../DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md)
+**Pure inventory read-side status.** The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md)
 validates closed kubelet filesystem layouts, OCI/runtime metadata routing, provider-root template identities,
 accelerator family/profile ownership, and raw/reserved/allocatable VRAM arithmetic in Register 1. Detection,
 materialization, attachment, and observed readback remain unverified; ledger `external-run-reference`.
@@ -201,7 +201,7 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 > **Honesty.** The detector, universal-CPU/provider mapping, `AbsExe` tool boundary, and Python bootstrap coordinator are now
 > implemented. A pristine Incus VM on the physical `linux-cuda` parent exercised clean install, build, handoff,
 > idempotence, divergence repair, and teardown; evidence is retained under
-> `DEVELOPMENT_PLAN/evidence/phase_24`. This is not a complete Phase-35 pass because the full live enforcement
+> `DEVELOPMENT_PLAN/evidence/phase_19`. This is not a complete Phase-55 pass because the full live enforcement
 > inventory remains unfinished. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -363,8 +363,9 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 > that is type-enforced now; package-manager-canonical *discovery* is the part still to land. Do not read
 > the current discovery seam as the finished contract.
 >
-> **Delivered by [Phase 4](../../DEVELOPMENT_PLAN/phase_04_host_ensure_kernel.md) on 2026-08-19**, for the
-> parts that are amoebius's: an install step is a typed `Performer` plus an argument vector in which a
+> **Observed implementation.** [Phase 51](../../DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md) has a
+> footprint covering the parts that are amoebius's, whose status is recorded in the
+> [tracker](../../DEVELOPMENT_PLAN/README.md) and nowhere here: an install step is a typed `Performer` plus an argument vector in which a
 > version is a requirement reference rather than a literal, so a pin has one home; `HostTool` carries the
 > container engine, so it is ensured through the one closed enum instead of resolved beside it; a
 > reconciler is a row whose applicability column is the single statement of its set, with the diagnostic
@@ -372,11 +373,11 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 > it probed with. Discovery is still `findExecutable`-shaped, and remains UNVERIFIED against the
 > package-manager-canonical target.
 
-**Phase-46 code generation.** The retired `amoebius-pulsar/Setup.hs` resolved `protoc` and
+**Phase-67 code generation.** The retired `amoebius-pulsar/Setup.hs` resolved `protoc` and
 `proto-lens-protoc` by absolute path and gave `proto-lens-setup` a closed search domain — never the ambient
 host `PATH`, so no unrelated executable could shadow code generation. It went with the package split, because
 [§2.1](./repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package) admits no ground for a
-package that exists only to carry a `Setup.hs`. Phase 46 re-establishes the same invariant against
+package that exists only to carry a `Setup.hs`. Phase 67 re-establishes the same invariant against
 `.build/proto/**`; the generated modules stay build artifacts either way.
 
 ---
@@ -391,11 +392,30 @@ populated parent is clean. The VM is plumbing; the substrate the cluster sees is
 runs the parent's natural architecture** ([§1.1](#11-the-natural-architecture-rule)) — virtualization
 synthesizes an operating system, never an instruction set.
 
-| Host substrate | VM provider | What it synthesizes | Seed module |
-|----------------|-------------|---------------------|-------------|
-| **apple** | **Colima** (`colima`) or **Lima** (`limactl`), by workload ([§4.1](#41-colima-and-lima-on-apple-the-provider-follows-the-workload)) | An Ubuntu-24.04 `linux-cpu/arm64` VM, carrying a Docker endpoint under Colima | `HostBootstrap.Ensure.Colima`, `HostBootstrap.Ensure.Lima` |
-| **windows** | **WSL2** | An Ubuntu-24.04 `linux-cpu/amd64` distro | `HostBootstrap.Ensure.Wsl2`, `HostBootstrap.Wsl2` |
-| **linux-cpu** / **linux-cuda** | **Incus** | An Ubuntu-24.04 `linux-cpu` VM at the parent's natural architecture; CUDA devices are absent unless a different specialized gate explicitly requests passthrough | `HostBootstrap.Ensure.Incus`, `HostBootstrap.Incus` |
+| Host substrate | VM provider | What it synthesizes | Reference implementation |
+|----------------|-------------|---------------------|--------------------------|
+| **apple** | **Colima** (`colima`) or **Lima** (`limactl`), by workload ([§4.1](#41-colima-and-lima-on-apple-the-provider-follows-the-workload)) | An Ubuntu-24.04 `linux-cpu/arm64` VM, carrying a Docker endpoint under Colima | `hostbootstrap`'s Colima and Lima ensure modules |
+| **windows** | **WSL2** | An Ubuntu-24.04 `linux-cpu/amd64` distro | `hostbootstrap`'s WSL2 ensure module |
+| **linux-cpu** / **linux-cuda** | **Incus** | An Ubuntu-24.04 `linux-cpu` VM at the parent's natural architecture; CUDA devices are absent unless a different specialized gate explicitly requests passthrough | `hostbootstrap`'s Incus ensure module |
+
+The fourth column names a **reference implementation**, never a dependency: amoebius links none of those
+modules and re-derives the shape under its own obligations
+([`lift_and_compose_doctrine.md` §5](./lift_and_compose_doctrine.md#5-the-re-derivation-map)).
+
+**This section is one instance of the lift calculus.** The algebra — a closed layer set, a total transition
+relation, and a witness per transition — is owned by
+[`lift_and_compose_doctrine.md` §7](./lift_and_compose_doctrine.md#7-the-lift-calculus); what this doctrine owns
+is which layers exist on which hardware and which provider supplies each. The distinction matters because a
+new substrate is then an *extension* satisfying a contract rather than an edit to a union
+([`extension_conformance_doctrine.md` §8](./extension_conformance_doctrine.md#8-a-hardware-substrate-is-an-extension-too)).
+
+**What is built today, stated honestly.** Phase 51 delivered the frame layer as a three-constructor closed set —
+Linux on the metal, an Apple host's Linux guest, and a Windows host's Linux distribution — with the
+substrate-to-frame and frame-to-engine relations as *total wildcard-free* functions, and a lift context
+distinguishing running on the host, inside a frame through its resolved entry point, and inside a container
+through a resolved engine. That is the calculus's closed layer set and total relation, at one substrate family.
+It is not the general calculus, it carries no per-transition witness type yet, and the Incus row above is
+doctrine rather than delivered code. Status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 This provider mapping is mandatory for pristine-host gates: **Incus on either Linux hardware substrate,
 Lima on Apple, WSL2 on Windows**. “Pristine” means the guest is newly materialized from the pinned image and
@@ -478,7 +498,7 @@ a host worker*.
 > **Honesty.** Lima, WSL2, and Incus are implemented VM providers in the `hostbootstrap` seed. The headless,
 > on-host Apple build/run shape is **proven in the sibling jitML project** (its implemented fixed-Metal-bridge
 > path) and the sibling `infernix` library **removed** its own legacy Tart path in favour of it — that is
-> sibling evidence for physical Metal. Phase 74 now implements the Lima/brew plan, private disk/capacity fold,
+> sibling evidence for physical Metal. Phase 89 now implements the Lima/brew plan, private disk/capacity fold,
 > and headless bridge/build/lifecycle contracts, but its Linux `x86_64` scoped gate leaves live Apple/Lima/brew
 > and Metal **UNVERIFIED**. Under [§1.1](#11-the-natural-architecture-rule) that scoped gate cannot close them
 > later either: an `apple` claim is provable only on Apple Silicon, whose natural architecture is `arm64`.
@@ -587,7 +607,9 @@ that reinstalls the distribution from its source of truth. It is not a third mod
 tool rather than on a host or a cluster, and it is explicit because an installer that silently updates itself
 mid-run makes the run's own provenance unanswerable. Nothing else consults or mutates the installation.
 
-**Delivered by [Phase 3](../../DEVELOPMENT_PLAN/phase_03_host_assert_cli.md) on 2026-08-19.** The
+**Observed implementation.** [Phase 50](../../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md) has a footprint
+with the shape below; whether it is validated is recorded in the
+[tracker](../../DEVELOPMENT_PLAN/README.md) and nowhere here. The
 distribution is Poetry-built with an in-project virtualenv; the command surface is a Click group registered
 at import, so it is enumerable rather than discovered, and an unknown verb resolves to no command instead of
 being guessed at. A maintainer surface exists beside the consumer one and resolves to nothing outside a
@@ -598,13 +620,13 @@ mirrored live and captured at once — and it owns `exec` too, because a choke p
 not one. Every invocation is classified as a probe or a mutation and recorded, which is what makes the
 idempotence claim an observation: a converged second pass carries probes and no mutation at all.
 
-Phase 3 delivers the pre-binary mode and the closed surface both modes share; Phase 44 Sprint 44.4 owns the
+Phase 50 delivers the pre-binary mode and the closed surface both modes share; Phase 65 Sprint 65.4 owns the
 second mode's live validation in `pb/pb/admin.py` — node-local Vault init/unseal plus Dhall update and KV
 CRUD against the control-plane daemon — which remains UNVERIFIED until that phase runs. This does not change the universal baseline: every hardware substrate can always run
 `linux-cpu` at its own natural architecture ([§1.1](#11-the-natural-architecture-rule)), and a pristine Linux
 host uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-The Phase-55 provider-parent instance follows the same rule. The actual Pulumi 3.228.0 binary was resolved by
+The Phase-76 provider-parent instance follows the same rule. The actual Pulumi 3.228.0 binary was resolved by
 absolute path and observed through `strace` with zero child-environment entries, while the pure engine boundary
 also requires an absolute AWS-plugin path and rejects `PATH`, `PULUMI_*`, and `AWS_*`. The provider `up` and
 AWS-plugin `execve` remain UNVERIFIED because the configured AWS identity is invalid. This does not alter the
@@ -696,13 +718,13 @@ every inbound link already names.
 
 This document is normative substrate doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): substrate detection
-and the `bootstrap` contract land in **Phase 35** (`linux-cpu`); host compute daemons, the Lima/WSL2
-providers, and the headless Apple-Metal fixed-bridge contracts land in **Phase 74** (`apple`; physical Apple
+and the `bootstrap` contract land in **Phase 55** (`linux-cpu`); host compute daemons, the Lima/WSL2
+providers, and the headless Apple-Metal fixed-bridge contracts land in **Phase 89** (`apple`; physical Apple
 surfaces remain UNVERIFIED after its scoped Linux-host gate); the in-cluster CUDA path is exercised in
-**Phase 71** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
+**Phase 93** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
 and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
-Phase 59 validates deterministic recomputation and Tier-1 executable-engine cache reuse on the retained
+Phase 80 validates deterministic recomputation and Tier-1 executable-engine cache reuse on the retained
 `linux-cpu` platform. It does not establish cross-substrate bit equality, cross-node reuse, production
 llama.cpp inference, or CUDA/Metal cache behavior; those surfaces remain UNVERIFIED. This scoped result does
 not narrow platform availability: every hardware substrate can always run `linux-cpu` at its own natural

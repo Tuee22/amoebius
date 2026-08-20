@@ -31,7 +31,7 @@ that the rest of amoebius reads. It is the **single owner** (an ownership index,
 *which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
 consumers read it, and each is a foreclosure that depends on there being exactly one such list.
 
-**Phase 8 read-side status.** The [Phase 14 gate](../../DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md)
+**Phase 54 read-side status.** The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md)
 validates the capacity/topology fold against authored in-process `NodeCapacity`, host, candidate-class, taint,
 and quota values (ledger `external-run-reference`).
 It performs no live inventory read. The required `declared allocatable ≤ observed allocatable` cross-check,

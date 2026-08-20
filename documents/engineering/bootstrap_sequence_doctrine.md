@@ -15,7 +15,7 @@ by [platform_services_doctrine.md](./platform_services_doctrine.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_35_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_44_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -305,20 +305,20 @@ this doc specifies the single-node-root answer the plan adopts and does not sett
 This document is normative bootstrap-sequence + admin-control-plane doctrine only. Delivery sequencing,
 status, and gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never
 restated here. For orientation only (the plan is authoritative): the **chain/Step kernel** the ordered sequence
-is enacted through rides **Phase 21**, and the **bootstrap coordinator + single-node kind bring-up** rides **Phase 35**; the
-**host→control-plane daemon handoff** itself is delivered by **Phase 44** (the control-plane daemon). The **whole admin REST surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — is delivered by **Phase 44 Sprint 44.4**,
+is enacted through rides **Phase 34**, and the **bootstrap coordinator + single-node kind bring-up** rides **Phase 55**; the
+**host→control-plane daemon handoff** itself is delivered by **Phase 65** (the control-plane daemon). The **whole admin REST surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — is delivered by **Phase 65 Sprint 65.4**,
 because [§3](#3-the-ordered-bootstrap-sequence) step 8 exposes the surface *at* the handoff point: there is no
-control-plane daemon to host an endpoint before it. **Phase 40** (root Vault/PKI) delivers the Vault, the
+control-plane daemon to host an endpoint before it. **Phase 61** (root Vault/PKI) delivers the Vault, the
 password-sealed unlock-material envelope, and the built-in client that the `vault init/unseal` endpoint fronts —
-unsealing there is driven under the Phase-37 bootstrap-host authority, the only authority that exists that
+unsealing there is driven under the Phase-58 bootstrap-host authority, the only authority that exists that
 early. This doc states the target shape and links back for status.
 
-> **Honesty.** Phase 35 now carries the `pb` bootstrap coordinator mode and reconcile-driven single-node kind bring-up in
+> **Honesty.** Phase 55 now carries the `pb` bootstrap coordinator mode and reconcile-driven single-node kind bring-up in
 > amoebius code, and a pristine Incus VM exercises their absent→installed→build→`exec` path, no-op re-run,
 > divergence repairs, hard storage and transition boundaries, complete runtime inventory, exact process
-> envelopes, six red mutants, and leak-free teardown. The authoritative Phase-35 gate is complete. Every
+> envelopes, six red mutants, and leak-free teardown. The authoritative Phase-55 gate is complete. Every
 > hardware substrate always supplies the `linux-cpu` lane: Linux runs it natively or in Incus, Apple in Lima,
-> and Windows in WSL2 when a pristine Linux host is required. Phase 44 now delivers the typed host→control-plane daemon
+> and Windows in WSL2 when a pristine Linux host is required. Phase 65 now delivers the typed host→control-plane daemon
 > Lease handoff, the four endpoint families, and the `pb` admin-REST client mode; its Register-3 ledger is
 > `dynamically-resolved`. Claims beyond those delivered
 > boundaries remain design intent or inherited sibling evidence

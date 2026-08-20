@@ -17,7 +17,7 @@ vocabulary the rows are phrased in, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_09_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_10_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_20_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_22_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_37_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/workflow_calculus_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -33,9 +33,9 @@ manifests cannot be known correct until a cluster admits them. Taken at face val
 validation to the one setting that is slowest, most expensive, and least reproducible — a live cluster — and
 leaves the design unverifiable until late.
 
-That framing is false for amoebius because amoebius's behaviour is, by construction, **a pure value that is rendered**: the reconcile plan is `chain :: cfg -> [Step]`, the manifests are deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`, the DSL is decoded and then fully provisioned against its target by total functions, and the formal model is a `Model` value. Everything up to the point of *applying* an effect is a pure function of committed source plus an explicit authenticated observation fixture; no pure test contacts infrastructure. The sibling projects already prove this at scale — prodbox validates ~940 behaviours in a pure, no-process suite plus byte-for-byte dry-run goldens, with a single thin IO seam.
+That framing is false for amoebius because amoebius's behaviour is, by construction, **a pure value that is rendered**: the reconcile plan is `chain :: cfg -> [Step]`, the manifests are deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`, the DSL is decoded and then fully provisioned against its target by total functions, and the formal model is a `Model` value. Everything up to the point of *applying* an effect is a pure function of committed source plus an explicit authenticated observation fixture; no pure test contacts infrastructure. The seed projects show it is reachable at scale — `prodbox` validates on the order of a thousand behaviours in a pure, no-process suite with a single thin IO seam. That is evidence about a seed and proves nothing about amoebius ([`lift_and_compose_doctrine.md` §3](./lift_and_compose_doctrine.md#3-a-seed-is-a-reference-implementation)).
 
-amoebius adopts that as a rule: **build so that decode → bind/expand → `planInfrastructure` → either
+amoebius states it as a rule: **build so that decode → bind/expand → `planInfrastructure` → either
 golden-lock the non-renderable infrastructure batch or supply its authenticated materialization fixture →
 provision → `renderAll` → plan → dry-run is exercised in-process and golden-locked before any
 live-infrastructure work, for every feature.** What this forecloses is
@@ -59,8 +59,8 @@ Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_d
   from a live service handle, a derived NetworkPolicy — golden-tested on the *rendered* output); the `[Step]`
   plan and its `--dry-run`; the capability→provider→shape binder; the capacity/topology folds; the formal
   `Model` explorer + the emitted `.tla` checked by TLC ([formal_model_doctrine.md](./formal_model_doctrine.md));
-  the Phase-9 instance is built and validated over `ToyModel` with pinned TLC, 200 differential models, and no
-  live infrastructure; the Phase-10 instance is built and validated over both branches of `GatewayMigration`
+  the Phase-11 instance is built and validated over `ToyModel` with pinned TLC, 200 differential models, and no
+  live infrastructure; the Phase-17 instance is built and validated over both branches of `GatewayMigration`
   with exact explorer/TLC state-set agreement, bounded IOSimPOR safety schedules, mutation sensitivity, and a
   structural-cutoff property, also with no live infrastructure;
   the bounded `UiSource` algebra, scoped identity/authorization checks, binding, and deterministic
@@ -77,7 +77,7 @@ Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_d
   1 and 2 structurally cannot reach; owned by
   [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md) (register definition in [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing)).
   The substrate serving this activity is built and gated at Register 2 in
-  [Phase 22](../../DEVELOPMENT_PLAN/phase_22_deterministic_sim_substrate.md); later phases replay their own
+  [Phase 16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md); later phases replay their own
   production reconcilers on it.
 - **Register 3 — live infrastructure only.** The residue that cannot be settled by inspecting source or by
   simulation: the apiserver admitting and the scheduler placing pods, the LoadBalancer coming up, etcd forming
@@ -100,7 +100,7 @@ Two consequences follow directly:
 - The `--dry-run` preview is **byte-for-byte** what a live apply would submit, because both consume the same
   rendered value ([generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md)); the preview is a golden
   fixture of the renderer, not a committed artifact.
-- A large share of the illegal-state catalog is caught here, not at runtime: the **rendered-output-golden**
+- A large share of the illegal-state catalog is caught here, not at runtime: the **rendered-artifact-oracle**
   validation locus ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)) — an unsafe manifest is not a value
   `renderAll` can return, and a golden test over the emitted objects proves it without a cluster.
 
@@ -150,12 +150,12 @@ substrates behave as modeled), not first exposure.
 
 ## 5. Honesty: what the harness does and does not establish
 
-Phase 20 realizes the `renderAll` step in Register 1: eighteen canonical deployment outputs are byte-locked,
+Phase 33 realizes the `renderAll` step in Register 1: eighteen canonical deployment outputs are byte-locked,
 and the hardened-resource, ingress, and independently rederived NetworkPolicy predicates are non-vacuous.
 Its twelve seeded mutants fail at those properties. This is rendered-output evidence, not evidence that a
 live apiserver, admission stack, kubelet, or CNI enforces the values.
 
-Phase 21 realizes the Plan and fake-apply steps. Register 1 byte-locks two chain/descent plans with zero
+Phase 34 realizes the Plan and fake-apply steps. Register 1 byte-locks two chain/descent plans with zero
 actions executed; Register 2 drives the real executable against absolute-path fake tools and pins argv and
 stdin bytes. This proves the emitted boundary protocol, not real-tool fidelity or cluster convergence.
 
@@ -180,12 +180,12 @@ and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md):
 
 ## 6. Planning ownership
 
-This document is normative. Its Phase-9 Register-1 explorer/TLC instance is built; the remaining harness is
+This document is normative. Its Phase-11 Register-1 explorer/TLC instance is built; the remaining harness is
 stood up across later pre-cluster phases, and each live phase adds its
 Register-3 gate. Phase order, status, and gates live only in
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); the requirement that every phase's ledger records
 which register it reached is owned by [development_plan_standards.md](../../DEVELOPMENT_PLAN/development_plan_standards.md).
-Only that Phase-9 instance is a tested amoebius result here; later register instances remain design intent.
+Only that Phase-11 instance is a tested amoebius result here; later register instances remain design intent.
 
 ---
 
@@ -195,6 +195,6 @@ Only that Phase-9 instance is a tested amoebius result here; later register inst
 - [Generated Artifacts Doctrine](./generated_artifacts_doctrine.md) — why the render is pure and its output uncommitted
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — `renderAll` and the reconcile/apply seam
 - [Formal Model Doctrine](./formal_model_doctrine.md) — the in-process `Model` explorer that mirrors TLC
-- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — the rendered-output-golden validation locus
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — the rendered-artifact-oracle validation locus
 - [Documentation Standards](../documentation_standards.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

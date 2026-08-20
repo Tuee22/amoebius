@@ -40,7 +40,7 @@ EXPECTED_ACTIONS = ROOT / "test/fixture/live/reconcile-corpus/expected-actions.j
 NEVER_READY = ROOT / "test/fixture/live/reconcile-corpus-never-ready"
 RESULTS = ROOT / ".build/dsl/object-reconciler/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/object_reconciler_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_37_object_reconciler.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_58_object_reconciler.md"
 GATE_COMMAND = "python3 tools/object_reconciler_gate.py --execute"
 
 # The committed mutant domain, each mapped to the sprint whose evidence decides it. The
@@ -280,7 +280,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
 
     gate = gate_common.PhaseGate(
-        phase=26, contract=CONTRACT, command=GATE_COMMAND,
+        phase=58, contract=CONTRACT, command=GATE_COMMAND,
         expectations=str(EXPECTATIONS.relative_to(ROOT)),
         register="3", substrate="linux-cpu", sides=SIDES
     )

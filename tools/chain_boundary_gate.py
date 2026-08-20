@@ -32,7 +32,7 @@ RESULTS = ROOT / ".build/dsl/chain-boundary/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/chain-boundary/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/chain-boundary"
 TEMP_ROOT = ROOT / ".build/tmp/chain-boundary"
-CONTRACT = "DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md"
 GATE_COMMAND = "python3 tools/chain_boundary_gate.py"
 EXPECTATIONS = "test/oracle/chain_boundary_surfaces.tsv"
 
@@ -393,7 +393,7 @@ def enumerated_items() -> set[str]:
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=15, contract=CONTRACT, command=GATE_COMMAND, register="1/2", substrate="none", lane="none", sides=SIDES,
+        phase=34, contract=CONTRACT, command=GATE_COMMAND, register="1/2", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()

@@ -39,7 +39,7 @@ PLACEMENT_SOURCE = ROOT / "src/Amoebius/Scheduler/Placement.hs"
 RESERVATION_SOURCE = ROOT / "src/Amoebius/Scheduler/Reservation.hs"
 RESULTS = ROOT / ".build/dsl/capacity-scheduler/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/capacity_scheduler_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_38_capacity_scheduler.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md"
 GATE_COMMAND = "python3 tools/capacity_scheduler_gate.py --execute"
 
 # The committed mutant domain, each mapped to the sprint whose evidence decides it. The
@@ -258,7 +258,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
 
     gate = gate_common.PhaseGate(
-        phase=27, contract=CONTRACT, command=GATE_COMMAND,
+        phase=59, contract=CONTRACT, command=GATE_COMMAND,
         expectations=str(EXPECTATIONS.relative_to(ROOT)),
         register="3", substrate="linux-cpu", sides=SIDES
     )

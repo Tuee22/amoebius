@@ -17,7 +17,7 @@ entries and their loci are owned here; the numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -39,14 +39,12 @@ The material this slice deliberately does **not** restate lives with its owners:
 - The **catalog index** (which entries exist, the introductory framing) and the **load-bearing honesty limit**
   (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md).
-- The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)),
+- The **nine typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)),
   the **three-layer foreclosure** model (type-foreclosed / decode-foreclosed / runtime-checked, [§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
   and the **validation-locus axis** itself are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md).
-  The five loci referenced below — `dhall-typecheck` (fails `dhall type` at authoring time), `gadt-decode`
-  (the total decoder returns `Left`), `provision-seal` (post-bind Phase-18 provision returns a `ProvisionError`
-  before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by a golden test on the *rendered*
-  manifest), and `live-effect` (only at reconcile / runtime) — are defined there; this slice only names, per
-  entry, where each illegal state is caught.
+  The loci referenced below are defined and enumerated there
+  ([§6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer));
+  this slice only names, per entry, where each illegal state is caught.
 
 The validation-locus is **orthogonal** to the foreclosure layer: the `**Layer:**` tag says *which of the
 three foreclosure strengths* an entry earns (type-foreclosed vs decode-foreclosed vs runtime-checked), while
@@ -65,7 +63,7 @@ flowchart LR
   g2["gadt-decode<br/>1 entry"]
   g3["extension-astcheck<br/>none in this slice"]
   ps["provision-seal<br/>5 entries"]
-  rg["rendered-output-golden<br/>none in this slice"]
+  rg["rendered-artifact-oracle<br/>none in this slice"]
   le["live-effect<br/>none in this slice"]
   g1 -->|"anything the typecheck admits"| g2
   g2 -->|"linked extension source only"| g3
@@ -77,7 +75,7 @@ flowchart LR
 
 ### 3.5 Undeployable pods (taints, tolerations & affinity)
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-9`
 
 **Case-family:** `topology`
 
@@ -109,7 +107,7 @@ witnessed node).
 
 ### 3.17 An over-committed deploy or workload (host / VM / cluster capacity exceeded)
 
-**Delivery-owner:** `Phase-13`
+**Delivery-owner:** `Phase-27`
 
 **Case-family:** `capacity`
 
@@ -184,7 +182,7 @@ finite-limit/physical-peak relation; the name does not assert synchronous epheme
 
 ### 3.22 A hand-authored (un-derived) toleration
 
-**Delivery-owner:** `Phase-20`
+**Delivery-owner:** `Phase-33`
 
 **Case-family:** `topology`
 
@@ -201,7 +199,7 @@ field at all — a toleration is not a spellable input but a projection from a d
 Haskell render layer, so a free-text toleration is unwritable at authoring) + `gadt-decode` (the
 `Toleration` handle's constructor opacity is Haskell module-opacity, which Dhall cannot provide — Dhall has no
 opaque types ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)) — so the projection-only discipline's full teeth land
-at the GADT decoder) + `rendered-output-golden` (the derived toleration must appear correctly in the emitted
+at the GADT decoder) + `rendered-artifact-oracle` (the derived toleration must appear correctly in the emitted
 pod spec, exactly as a golden test checks the derived
 NetworkPolicy, [§3.6](./illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)).
 
@@ -209,7 +207,7 @@ NetworkPolicy, [§3.6](./illegal_state_security.md#36-blocking-networkpolicy-ser
 
 ### 3.27 A deployment that fits in aggregate but has no resource-capable placement
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-9`
 
 **Case-family:** `capacity`
 
@@ -251,7 +249,7 @@ the elastic set).
 
 ### 3.28 Two accelerator owners on one node, or a fractional accelerator claim
 
-**Delivery-owner:** `Phase-16`
+**Delivery-owner:** `Phase-29`
 
 **Case-family:** `accelerator`
 
@@ -278,13 +276,13 @@ owner actually holds the devices at runtime.
 **Validation-locus:** `dhall-typecheck` (the closed accelerator-owner worker-kind union has no ordinary-pod or
 fractional-claim arm) + `provision-seal` (the post-bind per-node ownership index returns a `ProvisionError`
 before any `ProvisionedSpec` exists on a second owner; success derives one whole-device allocation) +
-`rendered-output-golden` (the owner pod's exact integer
+`rendered-artifact-oracle` (the owner pod's exact integer
 extended-resource request/limit and affinity are preserved) + `live-effect` (residue — the device plugin and
 runtime actually grant those devices only to the owner).
 
 ### 3.29 A host worker whose Demand overflows its physical host
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-9`
 
 **Case-family:** `capacity`
 
@@ -316,7 +314,7 @@ declares no physical-host `Capacity`) + `live-effect` (residue — that the host
 
 ### 3.30 An accelerator memory envelope that cannot fit the selected devices or unified-memory pool
 
-**Delivery-owner:** `Phase-16`
+**Delivery-owner:** `Phase-29`
 
 **Case-family:** `accelerator`
 
@@ -374,7 +372,7 @@ actually fits under real batch/context).
 
 ### 3.72 A compute headroom pad that reserves past its own limit
 
-**Delivery-owner:** `Phase-13`
+**Delivery-owner:** `Phase-27`
 
 **Case-family:** `capacity`
 
@@ -415,7 +413,7 @@ reason is required rather than defaultable, so an authored reservation has nowhe
 
 ### 3.73 A padded reservation that overcommits allocatable
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-9`
 
 **Case-family:** `capacity`
 
@@ -451,7 +449,7 @@ re-observed residual capacity, and the pad is never added as a numeric delta to 
 ## Related Documents
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the parent catalog: the full entry index, the
   introductory framing, and the load-bearing honesty limit ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
-- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)),
+- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the nine typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)),
   the coverage matrix ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the three-layer foreclosure model ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
   and the **validation-locus axis** the per-entry `**Validation-locus:**` lines above draw on.
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract that a valid `InForceSpec` cannot

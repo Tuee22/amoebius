@@ -45,7 +45,7 @@ RESULTS = GENERATED / "phase-results.tsv"
 LOCUS_LEDGER = GENERATED / "validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build" / "dist-newstyle" / "illegal-state-corpus"
 BUILD_TMP = ROOT / ".build" / "tmp" / "illegal-state-corpus"
-CONTRACT = "DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md"
 GATE_COMMAND = "python3 tools/illegal_state_corpus_gate.py"
 EXPECTATIONS = "test/oracle/illegal_state_corpus_surfaces.tsv"
 
@@ -374,7 +374,7 @@ def measure(entries: int, subcases: int, killed: int, counts: dict[str, int], mu
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=7, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        phase=27, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
         register="1", substrate="none", lane="none", sides=SIDES
     )
     gate.begin()

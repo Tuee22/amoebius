@@ -32,9 +32,12 @@ The reconciler observes the live shape and enacts only the typed actions its sta
 **Requires**: `host-floor`
 **Gate:** `cabal test example-spec` is green — the committed golden corpus decodes against an independent oracle and one committed seeded mutant turns it red (Gate; 1.2 V1).
 
+- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; negatives under `test/negative/example/`.
+
 ## Doctrine adopted
 
 - [example_doctrine.md §2](../documents/engineering/example_doctrine.md#2-the-bound-shape)
+- `extension_conformance_doctrine.md` — the example extension is admitted by satisfying the contract.
 
 ## Sprints
 

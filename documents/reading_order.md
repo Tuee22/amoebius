@@ -25,6 +25,7 @@ prior knowledge, but every stop presumes the stops above it.
 - [Before starting](#before-starting)
 - [Stop 1. What amoebius is](#stop-1-what-amoebius-is)
 - [Stop 2. The one idea — illegal states are unrepresentable](#stop-2-the-one-idea--illegal-states-are-unrepresentable)
+- [Stop 2b. The algebra and the laws](#stop-2b-the-algebra-and-the-laws)
 - [Stop 3. The description language](#stop-3-the-description-language)
 - [Stop 4. From description to effect](#stop-4-from-description-to-effect)
 - [Stop 5. What the gates establish, and what they do not](#stop-5-what-the-gates-establish-and-what-they-do-not)
@@ -48,7 +49,7 @@ discussion.
 ## Stop 1. What amoebius is
 
 - [`DEVELOPMENT_PLAN/overview.md` §1](../DEVELOPMENT_PLAN/overview.md#1-the-everything-orchestrator-shape-one-runtime-binary-three-contexts) — one binary, three contexts, and the shape of the whole system.
-- [`DEVELOPMENT_PLAN/overview.md` §2](../DEVELOPMENT_PLAN/overview.md#2-the-constituent-projects-libraries-and-behaviours-unified-under-the-dsl) — the four sibling projects being unified, and why this is not a rewrite.
+- [`DEVELOPMENT_PLAN/overview.md` §2](../DEVELOPMENT_PLAN/overview.md#2-the-seed-projects-reference-implementations-amoebius-re-derives-from) — the five seed projects amoebius re-derives from, and why depending on none of them is the point.
 - [`DEVELOPMENT_PLAN/overview.md` §5](../DEVELOPMENT_PLAN/overview.md#5-current-baseline--reopened-implementation) — the reopened baseline; read this before treating an implemented surface as validated.
 - [`repository_layout_doctrine.md`](./engineering/repository_layout_doctrine.md) — the complete authored and generated tree, including what can never enter version control.
 
@@ -62,10 +63,29 @@ Everything else in the corpus is downstream of this stop. The foreclosure layers
 vocabulary of the validation registers, so that stop comes first.
 
 - [`testing_doctrine.md` §2](./engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — the registers of evidence, and what each one can and cannot reach.
-- [`illegal_state_techniques.md` §4](./illegal_state/illegal_state_techniques.md#4-the-typing-techniques) — the seven construction patterns that do the work.
+- [`illegal_state_techniques.md` §4](./illegal_state/illegal_state_techniques.md#4-the-typing-techniques) — the nine construction patterns that do the work.
 - [`illegal_state_techniques.md` §6](./illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) — the three foreclosure layers, and why the strongest is rarely available.
 - [`illegal_state_techniques.md` §6.1](./illegal_state/illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer) — the orthogonal axis naming where a state is actually caught.
 - [`illegal_state_catalog.md` §3](./illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent) — skim the enumeration, then read three entries in full. Three, not eighty.
+
+**Then read why the catalogue is finishable.** The list above is a technique set; the claim that it *covers*
+its subject rests on the covering obligation, and the claim that it survives an open set of domains rests on
+the algebra. Both are short:
+
+- [`documentation_standards.md` §16](./documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list) — why the catalogue is a covering over a declared taxonomy, and why an unjustified empty cell is a defect.
+- [`illegal_state/README.md`](./illegal_state/README.md) — the three axes that taxonomy names, and what is specified versus discharged.
+
+## Stop 2b. The algebra and the laws
+
+This is the stop that makes the previous one hold for code nobody has written yet. amoebius is an **open core**:
+it admits extensions carrying arbitrary logic, so it cannot enumerate its compositions and instead proves that
+lawful instances compose.
+
+- [`extension_conformance_doctrine.md` §1](./engineering/extension_conformance_doctrine.md#1-why-this-doctrine-exists)–[§3](./engineering/extension_conformance_doctrine.md#3-the-obligation-surface-one-component-per-calculus) — why an open core needs a contract, and the five-component obligation surface that is the whole of it.
+- [`extension_conformance_doctrine.md` §7](./engineering/extension_conformance_doctrine.md#7-link-time-union-closure) — the closure argument: read this one carefully, it is the load-bearing claim.
+- [`extension_conformance_laws.md` §2](./engineering/extension_conformance_laws.md#2-how-to-read-a-law) — how a law is stated, then skim L1–L5 and C1–C7.
+- [`extension_conformance_security.md` §3](./engineering/extension_conformance_security.md#3-the-skolem-scope) — the one mechanism five of the six security laws rest on.
+- [`lift_and_compose_doctrine.md` §2](./engineering/lift_and_compose_doctrine.md#2-the-two-non-dependencies) — why amoebius owns what it must prove, and what a seed project is for.
 
 ## Stop 3. The description language
 

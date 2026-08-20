@@ -15,7 +15,7 @@ authoritative for the rulebook's structure. No phase's status is stated here; th
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_03_host_assert_cli.md, DEVELOPMENT_PLAN/phase_04_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_05_amoebius_image_recipe.md, DEVELOPMENT_PLAN/phase_06_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_07_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_08_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_09_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_10_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_12_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_17_capability_bind.md, DEVELOPMENT_PLAN/phase_18_provision_seal.md, DEVELOPMENT_PLAN/phase_19_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_20_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_22_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_25_ui_program_schema.md, DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_27_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_28_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_29_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_30_offline_language_plan.md, DEVELOPMENT_PLAN/phase_31_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_33_ui_local_composition.md, DEVELOPMENT_PLAN/phase_34_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_35_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_37_object_reconciler.md, DEVELOPMENT_PLAN/phase_38_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_39_retained_storage.md, DEVELOPMENT_PLAN/phase_40_vault_pki.md, DEVELOPMENT_PLAN/phase_41_platform_backbone.md, DEVELOPMENT_PLAN/phase_42_platform_services_2.md, DEVELOPMENT_PLAN/phase_43_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_44_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_45_app_tenancy.md, DEVELOPMENT_PLAN/phase_46_pulsar_client.md, DEVELOPMENT_PLAN/phase_47_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_48_content_store_workflow.md, DEVELOPMENT_PLAN/phase_49_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_50_release_lifecycle.md, DEVELOPMENT_PLAN/phase_51_ui_program_release.md, DEVELOPMENT_PLAN/phase_52_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_53_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_54_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_55_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_56_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_57_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_58_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_60_infernix_lift.md, DEVELOPMENT_PLAN/phase_61_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_62_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_63_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_64_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_65_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_66_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_67_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_68_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_69_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_70_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_71_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_72_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_73_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_74_apple_metal_host_daemon.md, documents/engineering/validation_frame_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/validation_frame_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -81,6 +81,15 @@ specifically labelled historical observation, but it never converts progress int
   ✅ Done — is withdrawn, because it froze the plan's shape at the moment it became testable, which is the
   moment that shape is most likely to be wrong. A re-baseline still owes the audit map above, the
   [§N](#n-reopening-and-amending-a-phase) invariants, and a fresh attestation per phase.
+- **A band is a reading aid, never a second numbering.** A band is a contiguous run of ordinals given a name,
+  so that a reader can see what a stretch of the sequence is *for* without reading every contract. It has no
+  identity of its own: a phase is named by its ordinal and its slug, never by a band and an offset, and a band
+  boundary is derived from the ordinals rather than declared beside them. The nine bands of the 2026-08-19
+  re-baseline are foundations, the algebra, the proof stack, the extension contract, the generative surface,
+  test-as-workflow, pre-binary and host, the live platform, and the domain instances. Because a band range is
+  prose and nothing in the lint checks one, a re-baseline re-derives every range it has written down — the
+  ranges in [§K](#k-honesty-proven--tested--assumed) and [§L](#l-one-substrate-discipline) are the ones this
+  rulebook owns, and a stale range is a defect the audit map records rather than a difference a check finds.
 - **A sprint belongs to exactly one phase.** No sprint is duplicated across phases.
 - **No forward dependencies.** A sprint's `Blocked by` names only an earlier-or-same-phase sprint or an
   external prerequisite — **never** a later phase (that would violate the strict numeric order in
@@ -102,37 +111,48 @@ in **exactly one register** ([`conformance_harness_doctrine.md`](../documents/en
 **Register 1** (pure/golden, in-process, no cluster), **Register 2** (boundary integration with fake tools, no
 cluster), and **Register 3** (live infrastructure) — with exactly two deliberate exceptions: **Phase 0** (the
 documentation-lint gate) reaches **no** register because it validates text and the link graph, not amoebius
-behaviour; and **Phase 21** (the chain/Step kernel + `--dry-run` + boundary fake-tool harness) spans Register 1
+behaviour; and **Phase 34** (the chain/Step kernel + `--dry-run` + boundary fake-tool harness) spans Register 1
 (the in-process `chain`/`Step` corpus) and Register 2 (the boundary fake-tool harness). Every bounded-UI phase
-has one register: pure schema/check/bind/compiler work in Phases 25–30 and boundary browser/server/composition
-work in Phases 31–34 are deliberately separate. The **host-model band** (phases 3–5, substrate `none`)
-discharges Registers 1–2 over the pre-binary tool, the ensure algebra, and the image recipe; the
-**host-bring-up band** (phases 6–8) is Register 3, one phase per detected host family. The
-**DSL-validation band** (phases 9–34, substrate `none`) discharges Registers 1–2 and is where the DSL is
-modelled, unit-tested, and simulated in full; the live band (phases 35–70) is Register 3; the
-specialized-hardware band (phases 71–74) is Register 3 on a machine the linux-cpu chain never waits for.
+has one register: pure schema, authorization, binding and compiler work is separate from boundary
+browser/server/composition work, and both sit inside the generative surface.
+
+The 2026-08-19 re-baseline names **nine bands** over the contiguous sequence, each a reading aid with no
+identity of its own ([§E](#e-one-canonical-phase-model)). **Foundations** (phases 0–2, substrate `none`) is the
+repository floor. **The algebra** (phases 3–10, `none`, Register 1) delivers the five calculi and the two
+indices. **The proof stack** (phases 11–19, `none`, Registers 1–2) delivers the checkers amoebius owns and the
+models they check. **The extension contract** (phases 20–24, `none`, Register 1) delivers the obligation
+surface and the law families. **The generative surface** (phases 25–47, `none`, Registers 1–2) turns every
+artifact class into a recipe. **Test-as-workflow** (phases 48–49, `none`, Register 1) delivers the topology as
+values. **Pre-binary and host** (phases 50–57) is where the plan first touches a machine, one phase per
+detected host family. **The live platform** (phases 58–90) is Register 3. **Domain instances** (phases 91–95)
+re-derive the seeds as conforming extensions.
 
 Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_conventions.md).
 
 ```mermaid
 flowchart LR
 %% register: orientation
-  floor["0-2 repository floor: substrate none, Register 1"] --> model["3-5 host model: substrate none, Registers 1-2"]
-  model --> bring["6-8 host bring-up: one detected host family each, Register 3"]
-  floor --> dsl["9-34 DSL validation: substrate none, Registers 1-2"]
-  dsl --> live["35-70 live band: Register 3"]
-  live --> spec["71-74 specialized hardware: Register 3"]
-  bring --> live
+  floor["0-2 foundations: substrate none"] --> alg["3-10 the algebra: five calculi, two indices, Register 1"]
+  alg --> proof["11-19 the proof stack: amoebius-owned checkers, Registers 1-2"]
+  proof --> contract["20-24 the extension contract: obligations and laws, Register 1"]
+  contract --> gen["25-47 the generative surface: every artifact a recipe, Registers 1-2"]
+  gen --> tw["48-49 test-as-workflow: the topology as values, Register 1"]
+  tw --> host["50-57 pre-binary and host: the first machine, Registers 2-3"]
+  host --> live["58-90 the live platform: Register 3"]
+  live --> dom["91-95 domain instances: the seeds re-derived, Register 3"]
 ```
 *Orientation. Design intent. After the repository floor the plan forks: the host chain builds the thing every later gate runs on, and the DSL chain models the language, and neither names an artifact the other delivers until they reconverge at the live band. The substrate catalog each band names is owned by [substrates.md](substrates.md).*
 
-**The register cut is a property of the DSL-validation band, not of the plan's prefix.** Inside phases 9–34 no
-gate reaches Register 3, and no phase at 35 or above reaches Register 1 or 2 as its final register; the cut at
-34/35 is exact. The host-bring-up band sits *below* the DSL band and is Register 3 by construction — ensuring
-a container engine and building a native image are effects on a machine, which no in-process check can
-discharge — and it does not *enter* the DSL band, so the cut that band exists to hold is unbroken. What the
-earlier formulation got wrong was not the cut but the premise that the DSL band is the plan's first band: a plan
-may have a floor below its model. The former exception — promoted phases retaining a register their number
+**The register cut is now a property of the sequence, and it is exact at 51/52.** No phase at or below 51
+reaches Register 3, and no phase at 52 or above reaches Register 1 or 2 as its final register. The same
+boundary is the substrate boundary: phases 0–51 declare substrate `none` and 52–95 declare a real one. The cut
+sits there because the generative re-baseline put the pure work first — the calculi, the proof stack, the
+extension contract, the generative surface and the test-workflow algebra are all statements about values — and
+because the two pre-binary phases that follow them, the host-assertion CLI at 50 and the host-ensure kernel at
+51, are Register 2: each states its claim against a committed fake-host boundary rather than a machine. The
+first gate that needs a machine is the Linux engine bringup at 52. The earlier formulation had the cut at 34/35 with a
+Register-3 host band *below* it, which made the cut a property of one band rather than of the plan; ordering the
+algebra ahead of the host removes the exception rather than restating it. The former exception — promoted phases retaining a register their number
 disagreed with — is withdrawn, because the 2026-08-17 re-baseline moved those phases into the band their
 register already implied
 ([legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md#phase-re-baseline--2026-08-17)). **Rendering a plan / `--dry-run` must never require live infrastructure.** The per-phase proven/tested/assumed ledger names the register(s) its gate reached; a
@@ -150,7 +170,7 @@ ledger (its result is *tested against a modeled environment*, with the environme
 substrate recorded **assumed**), which does not by itself advance a `PromotionGate`.
 
 A **design-proof / in-process phase** — one whose substrate is `none` ([§L](#l-one-substrate-discipline)) and whose gate is an in-process
-type/model check rather than a live-substrate run, e.g. the DSL-validation band, [phases 9–34](README.md) —
+type/model check rather than a live-substrate run, e.g. every phase at or below 51, [phases 0–51](README.md) —
 emits a ledger whose acceptance token reads **"spec-composition proven"** / **"proven for the model"**, never
 **"runtime proven"**: a green Dhall typecheck, Haskell decoder, or TLC run establishes that the spec composes
 and the protocol is sound in the abstract, not that any cluster enforces it. Front-loading such a design
@@ -207,35 +227,39 @@ The gate's substrate is named in the phase's `Phase Summary` and tracked in
 [`substrates.md`](substrates.md). This prevents cross-substrate flip-flopping mid-development: a phase whose
 work would need both an Apple host and a CUDA host is split until each gate needs at most one.
 
-`windows` is gated by [Phase 8](phase_08_windows_engine_bringup.md) at lane `linux-cpu/amd64`, supplied by
+`windows` is gated by [Phase 54](phase_54_windows_engine_bringup.md) at lane `linux-cpu/amd64`, supplied by
 WSL2. The retired claim — that no phase needed to gate it, because a `linux-cuda` host supplies the same lane
 — confused a **lane** with a **route**: the lane is identical and the route is not, and the route is where
 firmware virtualization, elevation, and the reboot outcome live. What remains ungated is Windows-CUDA
-host-worker parity, which no phase in 0–74 keys its single substrate to.
+host-worker parity, which no phase in 0–95 keys its single substrate to.
 
 **Four named forms satisfy the one-substrate rule without naming a fixed catalog member on the parent gate**, and
 all four keep the discipline checkable rather than bending it:
 
-- **Deferred-to-generation** (Phase 62, `per generated test`). A gate that *emits* a test `.dhall` names the
-  **rule** that each generated test is substrate-locked to exactly one substrate, chosen at generation time — the
-  single-substrate property holds per generated artifact, not as a fixed member on the emitting gate.
-- **Parent-drives-provider** (Phases 55–58, 66, and 70, `linux-cpu → provider`). The gate runs from one selected
+- **Deferred-to-generation** ([Phase 90](phase_90_test_topology_live.md)). A gate that *emits* tests declares
+  a fixed substrate for its own run — Phase 90 declares `linux-cpu` at lane `linux-cpu/amd64` — and carries the
+  **rule** that each emitted test is substrate-locked to exactly one substrate chosen at generation time. The
+  form is about the emitted artifacts, not about the emitting gate's own declaration: no contract's
+  `**Substrate:**` field reads `per generated test`, and none may, because a field the catalog does not contain
+  is unrecoverable by any check. The pure half of the split states the same rule from the other side
+  ([Phase 48](phase_48_test_workflow_algebra.md), whose lane is `none`).
+- **Parent-drives-provider** (Phases 76, 77, 78, 79, 84 and 88, `linux-cpu → provider`). The gate runs from one selected
   `linux-cpu` parent lane and *targets* a provider it does not itself run — EKS is a **declared managed engine,
   not a detected substrate** ([`substrates.md` §2](substrates.md#2-substrate-inventory)). The parent lane may be
   native Linux or the Incus/Lima/WSL2 guest appropriate to its detected hardware; the provider is a
   compute-engine axis, never a fifth substrate. The parent's lane architecture must still be the one the
   provider's nodes run, because the images the parent publishes are what those nodes pull.
-- **Complementary-architecture pair** (Phases 36 and 73). One artifact must exist for both architectures, and
+- **Complementary-architecture pair** (Phases 56 and 57). One artifact must exist for both architectures, and
   no host may build the half it cannot execute. The capability is therefore split across two phases, each
-  gating **one** substrate at **one** natural architecture. They were adjacent until the 2026-08-17
-  re-baseline moved the complementary half to the specialized-hardware tail so that the `linux-cpu` chain
-  never waits on a second machine; the split is by architecture, and adjacency was never what made it work: the first builds, proves, and publishes its
+  gating **one** substrate at **one** natural architecture. The 2026-08-19 re-baseline put them adjacent at 56 and 57;
+  adjacency is a reading convenience and never what made the form work, because the split is by architecture
+  rather than by position: the first builds, proves, and publishes its
   own architecture's image, and the second does the same on the complementary substrate. Each publishes under
   its own architecture-qualified tag and is advertised only on the attestation produced by the hardware that
   executed it, so the pair proves what one emulated run only appeared to. Nothing joins the halves: the
   architecture is in the reference a consumer names
   ([`image_build_doctrine.md` §3](../documents/engineering/image_build_doctrine.md#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index)).
-- **Frame-lifted validation** (Phases 9–34, `none`). The gate runs its language-validation verbs inside
+- **Frame-lifted validation** (every phase at or below 51, `none`). The gate runs its language-validation verbs inside
   `amoebius-base` through `docker run --rm`, so the only host fact it depends on is a container engine — and
   the host band gates one on all three substrates at each one's natural architecture. Substrate `none` is a
   claim that a gate is decidable everywhere, not that it uses no tools, and a verb that runs in the image is

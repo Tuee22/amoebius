@@ -14,7 +14,7 @@ own the registers, the execution lane, or the ledger — owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_31_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_33_ui_local_composition.md, DEVELOPMENT_PLAN/phase_45_app_tenancy.md, DEVELOPMENT_PLAN/phase_47_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_49_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_51_ui_program_release.md, DEVELOPMENT_PLAN/phase_60_infernix_lift.md, DEVELOPMENT_PLAN/phase_63_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_64_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_65_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_66_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_67_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_70_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_71_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/testing_doctrine.md, documents/glossary.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/testing_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md
 **Generated sections**: none
 
 </details>
@@ -87,21 +87,21 @@ and independent oracle in its `## Gate integrity` section. A pure gate marks fre
 credentials not applicable and names the independent reference predicate instead; it does not fabricate an
 effectful observer.
 
-**Owner-projection multi-observer instance.** Phase 49 combines three freshly introspected Keycloak sessions,
+**Owner-projection multi-observer instance.** Phase 70 combines three freshly introspected Keycloak sessions,
 separate native Haskell consumers for workflow/projection/receipt messages, broker-admin counters and compaction
 status, and an OS-side scoped-query transcript. The observers agree on owner-qualified keys, original commands,
 watermarks, denials, and zero foreign subscription effect before authenticated Keycloak/Pulsar/Kubernetes
 inventories return empty. The evidence retains only challenge/issuer/topic/raw-observation digests; three
 committed scope-collapse mutants turn the unchanged Phase-0 oracle red.
 
-**Atomic UI-release multi-observer instance.** Phase 51 obtains a fresh Keycloak token through Envoy after the
+**Atomic UI-release multi-observer instance.** Phase 72 obtains a fresh Keycloak token through Envoy after the
 gate-only servers start, then sends fresh canaries through two exact paired releases. MinIO pointer/object
 history, the external append-only action journal, Envoy/Keycloak counters, and Kubernetes/containerd image
 inventory agree that exactly the A/A and B/B actions occurred, all eight stale/missing/mixed/bypass cases had
 zero effect, and both revisions used one generic image. Phase-0-authored matrices and three committed mutants
 prevent the projector or subject from defining its own success.
 
-**Raw-kernel fabric multi-observer instance.** [Phase 52](../../DEVELOPMENT_PLAN/phase_52_network_fabric_wireguard.md) resolves fresh Vault-custodied keypairs through the
+**Raw-kernel fabric multi-observer instance.** [Phase 73](../../DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md) resolves fresh Vault-custodied keypairs through the
 current Haskell Kubernetes-auth client, starts two real `wg0` interfaces, and sends a fresh canary from the
 spoke to the gateway-role hub. Independent `wg show`, ICMP/TCP, underlay `tcpdump`, cgroup-v2, `tc`, log/nodefs,
 process/socket, and cleanup observers agree with five pre-pinned oracles. The capture must contain WireGuard
@@ -109,27 +109,26 @@ UDP/51820 and not the plaintext canary; four committed key/endpoint/resource/rep
 their exact locus. The ledger marks the static tunnel and resource controls tested while geo-replication,
 hub repoint, and stretched control-plane peering remain UNVERIFIED.
 
-**Scoped provider-checkpoint multi-observer instance.** Phase 55 combines Kubernetes Deployment/Job
+**Scoped provider-checkpoint multi-observer instance.** Phase 76 combines Kubernetes Deployment/Job
 readback, OS `execve`, Vault seal/Transit APIs, MinIO object inventory/readback, exact cleanup, and independent
 Phase-0 Dhall/JSON/TSV/process oracles. It observed two concurrent executor Jobs, an absolute Pulumi 3.228.0
 process with zero environment entries, sealed-Vault HTTP 503 before checkpoint PUT, and six opaque objects
 that recovered only through direct Transit decrypt; three mutants turned the pinned assertions red. AWS
 returned `InvalidClientTokenId`, so the ledger marks provider-account observation, control-plane daemon provider `up`,
 EKS, the managed node group, CloudTrail, AWS-plugin `execve`, pod-filesystem observation, and direct-S3 denial
-UNVERIFIED. A green scoped receipt is not a green full provider gate. Every hardware substrate can always run
-the linux-cpu parent lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+UNVERIFIED. A green scoped receipt is not a green full provider gate.
 
-**Scoped provider-child multi-observer instance.** Phase 56 combines independently authored Dhall/text/JSON/
+**Scoped provider-child multi-observer instance.** Phase 77 combines independently authored Dhall/text/JSON/
 TSV oracles, pure contract refusals, retained Kubernetes API readback, a sealed live-evidence reader, exact
 cleanup, and a committed public-pull mutant. It observed the scheduler and initially non-Serving control-plane daemon,
 four cutovers, one-Lease parent→absence→child handoff, sixteen Service objects, zero second-pass Kubernetes
 mutations, private `Never` image policy, and namespace cleanup. The ledger marks EKS, managed-node and cloud
 LoadBalancer materialization, full reachability/HA, provider ingress, cloud/network/OS audit, actual Managed
-EKS topology readback, and the Phase-58 leak sweep UNVERIFIED. Retained kind is named as a scoped Kubernetes
+EKS topology readback, and the Phase-79 leak sweep UNVERIFIED. Retained kind is named as a scoped Kubernetes
 child-shape boundary and never accepted as EKS evidence. Substrate portability is asserted separately by the
 universal CPU and pristine-host route oracles, rather than inferred from this retained cluster.
 
-**Scoped provider-EBS multi-observer instance.** Phase 57 combines six Phase-0 oracles, a pure admission/
+**Scoped provider-EBS multi-observer instance.** Phase 78 combines six Phase-0 oracles, a pure admission/
 credential/static-CSI/scaling contract, five separately compiled red mutants, Kubernetes StorageClass/PV
 readback, a marker written through two retained PV identities, Vault-Transit-enveloped MinIO keys for distinct
 checkpoint classes, a sealed Haskell evidence reader, and exact cleanup. Its ledger leaves all AWS EBS, IAM,
@@ -137,32 +136,29 @@ CSI execution, provider attachment/reattachment, raw/usable geometry, provider m
 elevated reclamation surfaces UNVERIFIED. The retained hostPath marker is explicitly an analogue and cannot
 satisfy an EBS acceptance row. CPU portability and pristine-host routes are separately enumerated obligations.
 
-**Scoped provider-node and teardown multi-observer instance.** Phase 58 combines seven Phase-0 oracles, pure
+**Scoped provider-node and teardown multi-observer instance.** Phase 79 combines seven Phase-0 oracles, pure
 signal/quota/capability/identity/join/teardown contracts, eight separately compiled red mutants, a retained-
 Kubernetes signal reconcile, broadened ownership-metadata enumeration, a sealed Haskell reader, and exact
 cleanup. The ownership analogue catches two untagged run-owned objects missed by tag-only enumeration, but it
 cannot satisfy the AWS sweep or ephemeral leak-freedom rows. The ledger therefore leaves EKS, managed-node,
 RunInstances correlation, provider quota/root-EBS/supply/scheduler readback, cloud no-op audit, AWS run-owned
-sweep, durable sole-survivor, and the second provider cycle UNVERIFIED. Every hardware substrate can always
-run the `linux-cpu` parent lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on
-Windows.
+sweep, durable sole-survivor, and the second provider cycle UNVERIFIED.
 
-**Determinism and Tier-1 JIT-cache multi-observer instance.** Phase 59 has 23 pre-existing Phase-0 oracles and
+**Determinism and Tier-1 JIT-cache multi-observer instance.** Phase 80 has 23 pre-existing Phase-0 oracles and
 19 committed mutants: seven separately compiled production mutants turn the pure contract red, while twelve
 resource-shape mutants remain under direct custody. Four fresh compute Jobs write retained MinIO outputs;
 out-of-band reads establish equal bytes for equal seed/input and unequal bytes for altered seed or input. A real replaceable cache owner, two clients with no cache mount, an in-cluster `distribution` registry, first-
 miss convergence, warm HIT, pruning, resource high-water observation, exact namespace/object cleanup, and an
 independent Haskell evidence reader provide the live layers. The executable is a pinned resolver fixture, not
 production model inference. Cross-substrate equality, cross-node reuse, Tier-2 models, and Tier-3 CUDA kernels
-remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; a pristine Linux host uses Incus on
-Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+remain UNVERIFIED.
 
-**Scoped infernix artifact-lift multi-observer instance.** Phase 60 combines authored oracles, frozen sibling hashes, one compiled sibling module, closed constructors, pure contracts, four red mutants, and a sealed reader.
+**Scoped infernix artifact-lift multi-observer instance.** Phase 91 combines authored oracles, frozen sibling hashes, one compiled sibling module, closed constructors, pure contracts, four red mutants, and a sealed reader.
 Retained services observe MinIO publication, Pulsar dedup, two deterministic Jobs, cache reuse, and cleanup.
 The micro-model does not verify production TinyLlama, the full engine, end-to-end worker causality, general
 isolation, or cross-substrate equality. The CPU lane is universal; clean guests use Incus, Lima, or WSL2.
 
-**Scoped jitML CUDA-artifact instance.** Phase 71 combines five Phase-0 oracles, one compiled sibling CUDA generator, a constructor-hidden adapter, four independently red mutants, and a sealed reader. A fresh 24-byte challenge drives 200 `libcuda` kernel launches across ten million floats; `nvidia-smi`, full 40 MB byte comparison, and retained-MinIO blob/manifest/pointer readback are independent observers. The 412 conflict, unchanged pointer, unauthenticated 403, allocation release, and bucket cleanup are tested. Kubernetes GPU ownership, native CBOR/Pulsar, Vault authority, the complete sibling trainer/checkpoint format, mutable ETag-CAS, failover, and general correctness/isolation remain UNVERIFIED. Every substrate retains a `linux-cpu` execution path. For pristine Linux, select Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+**Scoped jitML CUDA-artifact instance.** Phase 93 combines five Phase-0 oracles, one compiled sibling CUDA generator, a constructor-hidden adapter, four independently red mutants, and a sealed reader. A fresh 24-byte challenge drives 200 `libcuda` kernel launches across ten million floats; `nvidia-smi`, full 40 MB byte comparison, and retained-MinIO blob/manifest/pointer readback are independent observers. The 412 conflict, unchanged pointer, unauthenticated 403, allocation release, and bucket cleanup are tested. Kubernetes GPU ownership, native CBOR/Pulsar, Vault authority, the complete sibling trainer/checkpoint format, mutable ETag-CAS, failover, and general correctness/isolation remain UNVERIFIED. Every substrate retains a `linux-cpu` execution path.
 
 This contract prevents spoofing of gate evidence at the modeled boundary. It does not prove that the kernel, identity provider, provider API, observer, or hardware is uncompromised. Those trust assumptions remain named in the proven/tested/assumed ledger.
 
@@ -180,15 +176,15 @@ the inspected boundary, not proof that the browser/OS is uncompromised.
 
 ---
 
-Phase 66's scoped evidence uses a fresh challenge, three independently addressable host-process roles, and a separate durable receipt/cursor file while forcing one role down. It deliberately records provider isolation, off-cluster OIDC, managed placement, Kubernetes/CNI, and provider data/audit readers as UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 84's scoped evidence uses a fresh challenge, three independently addressable host-process roles, and a separate durable receipt/cursor file while forcing one role down. It deliberately records provider isolation, off-cluster OIDC, managed placement, Kubernetes/CNI, and provider data/audit readers as UNVERIFIED.
 
-Phase 34 exercises the browser boundary with a fresh canary and a second Chrome process that reads the same raw IndexedDB/cache profile. It checks ciphertext, recovery, isolation, fencing, immutable assets, and quota outcomes independently of the Haskell model. PureScript production compilation and server replay remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 45 exercises the browser boundary with a fresh canary and a second Chrome process that reads the same raw IndexedDB/cache profile. It checks ciphertext, recovery, isolation, fencing, immutable assets, and quota outcomes independently of the Haskell model. PureScript production compilation and server replay remain UNVERIFIED.
 
-Phase 67 issues fresh scalar/infernix command ids through two local UI endpoints, drops one response after commit, clears transient route state, and lets a separate SQLite reader establish exactly one effect plus the original durable receipt. Real OIDC, Redis, broker, provider, Kubernetes, and CNI evidence remains UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 85 issues fresh scalar/infernix command ids through two local UI endpoints, drops one response after commit, clears transient route state, and lets a separate SQLite reader establish exactly one effect plus the original durable receipt. Real OIDC, Redis, broker, provider, Kubernetes, and CNI evidence remains UNVERIFIED.
 
-Phase 68 uses a fresh Chrome-encrypted blob, a second browser process, raw ciphertext inspection, interrupted/resumed upload, server hashing, independent filesystem readback, and paired denial to test the scoped dependency boundary. Real MinIO audit, Keycloak/Gateway, Kubernetes/CNI, and production PureScript remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 86 uses a fresh Chrome-encrypted blob, a second browser process, raw ciphertext inspection, interrupted/resumed upload, server hashing, independent filesystem readback, and paired denial to test the scoped dependency boundary. Real MinIO audit, Keycloak/Gateway, Kubernetes/CNI, and production PureScript remain UNVERIFIED.
 
-Phase 69 uses separate Chrome processes for A seed, B stage, crash inspection, B resume, reload, rollback, and final A inspection. A separate append-only local ledger observes A→B→A and one effect. Real Gateway/Pulsar/provider/Keycloak/Kubernetes/CNI and production PureScript remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows. Phase 70 uses real Chrome, three host-local endpoint roles, an actual role stop, SQLite and filesystem observers, route loss, current-authority denial/admission, exact retry, and eight red mutants. Provider whole-zone isolation, managed topology, real Redis/Sentinel and other platform services, Kubernetes/CNI, production PureScript, and offline jitML/CUDA remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; when a pristine Linux host is needed, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 87 uses separate Chrome processes for A seed, B stage, crash inspection, B resume, reload, rollback, and final A inspection. A separate append-only local ledger observes A→B→A and one effect. Real Gateway/Pulsar/provider/Keycloak/Kubernetes/CNI and production PureScript remain UNVERIFIED. Phase 88 uses real Chrome, three host-local endpoint roles, an actual role stop, SQLite and filesystem observers, route loss, current-authority denial/admission, exact retry, and eight red mutants. Provider whole-zone isolation, managed topology, real Redis/Sentinel and other platform services, Kubernetes/CNI, production PureScript, and offline jitML/CUDA remain UNVERIFIED.
 
 ## Related Documents
 - [Testing Doctrine](./testing_doctrine.md) — the hub this slice belongs to.

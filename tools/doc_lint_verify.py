@@ -22,6 +22,7 @@ import datetime as dt
 import hashlib
 import json
 import os
+import pathlib
 import shutil
 import subprocess
 import sys
@@ -47,6 +48,8 @@ SIDE_NAMES = (
     "fixture",
     "architecture",
     "corpus",
+    "contract",
+    "covering",
     "snapshot",
     "surface",
     "ledger",
@@ -58,6 +61,53 @@ SIDE_NAMES = (
 )
 
 
+def contract_side():
+    """Section D's skeleton and the promises each contract makes about its own gate.
+
+    `doc_lint` reads a phase document thoroughly as a document. What it does not read is
+    the contract half — the required Phase Summary fields, the mutant ids a gate names,
+    and whether the command a contract promises is the command its gate script runs. That
+    gap is why `**Phase scope:**` was missing from sixty-four contracts and `**Register:**`
+    had no check at all: both were normative in the rulebook and unread by every tool.
+    """
+    print("\ncontract side — section D's skeleton and each contract's promises\n")
+    problems = phase_contract_lint.check(pathlib.Path(ROOT))
+    counts = {}
+    for check, _, _ in problems:
+        counts[check] = counts.get(check, 0) + 1
+    for check in phase_contract_lint.CHECKS:
+        n = counts.get(check, 0)
+        print(f"  {'FAIL' if n else 'ok  '}  {check:4s} {phase_contract_lint.CHECKS[check]}"
+              + (f" — {n} violation(s)" if n else ""))
+    for check, rel, message in problems[:20]:
+        print(f"    {check}  {rel}: {message}")
+    return not problems
+
+
+def covering_side():
+    """Section S clause 16: the catalogue is a covering, and an empty cell owes a reason.
+
+    The grid is generated here rather than committed, so widening an axis reports its own
+    new empty cells instead of waiting to be noticed. What stays authored is the entries
+    and the justifications — each is an independent expectation, and deriving either from
+    the catalogue it measures would turn a test into a description.
+    """
+    print("\ncovering side — every cell holds an entry or a reason it holds none\n")
+    layers, loci, fams = covering_grid.axes()
+    occupied = covering_grid.occupancy()
+    total = len(layers) * len(loci) * len(fams)
+    bad = covering_grid.unjustified()
+    grid = covering_grid.emit()
+    print(f"  grid    {os.path.relpath(grid, ROOT)}")
+    print(f"  cells   {total} = {len(layers)} layers x {len(loci)} loci x {len(fams)} families")
+    print(f"  state   {len(occupied)} occupied, {total - len(occupied)} empty, {len(bad)} unjustified")
+    for cell in bad[:12]:
+        print(f"  FAIL    {cell[0]} x {cell[1]} x {cell[2]}")
+    if len(bad) > 12:
+        print(f"  FAIL    ... and {len(bad) - 12} more")
+    return not bad
+
+
 def run_id():
     """One directory per run. The bundle is evidence, so a wall-clock stamp is right."""
     return dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -65,6 +115,8 @@ def run_id():
 
 sys.path.insert(0, CORPUS)
 import _build  # noqa: E402
+import phase_contract_lint  # noqa: E402
+import covering_grid  # noqa: E402
 
 
 def expected(fixture_name):
@@ -154,6 +206,7 @@ def surface_side():
         "ledger_lint": set(ledger_lint.CHECKS),
         "artifact_policy": set(artifact_policy.RULES),
         "artifact_manifest_lint": set(artifact_manifest_lint.CHECKS),
+        "phase_contract_lint": set(phase_contract_lint.CHECKS),
     }
 
     if not os.path.isfile(EXPECTATIONS):
@@ -450,6 +503,8 @@ def main(argv):
     architecture_ok, architecture = gate_common.architecture_side()
 
     tree_ok = tree_side()
+    contract_ok = contract_side()
+    covering_ok = covering_side()
     snapshot_ok = snapshot_side()
     surface_ok, surfaces = surface_side()
     run_dir = os.path.join(ROOT, ".build", "runs", "phase_00", run_id())
@@ -478,6 +533,8 @@ def main(argv):
         "fixture": fixtures_ok,
         "architecture": architecture_ok,
         "corpus": tree_ok,
+        "contract": contract_ok,
+        "covering": covering_ok,
         "snapshot": snapshot_ok,
         "surface": surface_ok,
         "ledger": ledger_ok,

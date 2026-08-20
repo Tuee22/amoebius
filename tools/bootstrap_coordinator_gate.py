@@ -37,7 +37,7 @@ import toolchain
 ROOT = Path(__file__).resolve().parents[1]
 MUTANT_FIXTURES = ROOT / "test/mutant/bootstrap_coordinator"
 RESULTS = ROOT / ".build/dsl/bootstrap-coordinator/phase-results.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_35_bootstrap_coordinator_kind.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md"
 GATE_COMMAND = "python3 tools/bootstrap_coordinator_gate.py --execute"
 EXPECTATIONS = ROOT / "test/oracle/bootstrap_coordinator_surfaces.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/bootstrap-coordinator"
@@ -342,7 +342,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
 
     gate = gate_common.PhaseGate(
-        phase=24, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        phase=55, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
         register="3", substrate="linux-cpu", sides=SIDES,
     )
     gate.begin()

@@ -16,7 +16,7 @@ it, so these entries bound what that exception may do. Their numbering is held b
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_17_capability_bind.md, DEVELOPMENT_PLAN/phase_19_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -30,9 +30,7 @@ ML-asset and training illegal states ([§3.25](#325-an-ml-asset-named-by-arbitra
 
 It is **not** the index of the catalog. The full catalog index, the SSoT split, and the load-bearing honesty
 limit (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
-[`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure** model ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal `dhall-typecheck` / `gadt-decode` / `provision-seal` / `rendered-output-golden` /
-`live-effect` axis added on top of the foreclosure layer; `provision-seal` means post-bind Phase-18 provision
-returns a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
+[`illegal_state_catalog.md`](./illegal_state_catalog.md). The **nine typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure** model ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis**, whose members [`illegal_state_techniques.md` §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer) declares and this slice does not restate, are owned by
 [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice **references** those — it does not
 restate them. Each entry below preserves its original number and heading verbatim (inbound links depend on the
 slug), reproduces the entry body faithfully, and adds one **Validation-locus** line deriving the entry's place on
@@ -48,7 +46,7 @@ every "unrepresentable" as *design intent for the type discipline*, never as a t
 
 ### 3.25 An ML asset named by arbitrary URL (or an unready / unlanded model)
 
-**Delivery-owner:** `Phase-19`
+**Delivery-owner:** `Phase-32`
 
 **Case-family:** `ml-asset`
 
@@ -93,7 +91,7 @@ bytes loading on the substrate, and an imported model's pin/tag being truthful).
 
 ### 3.32 A continuous training run with no checkpoint cadence, or a feed with no bounded retention
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-28`
 
 **Case-family:** `storage`
 
@@ -121,7 +119,7 @@ mandatory `checkpointCadence` / bounded-retention `StorageBudget` fields, fail `
 
 ### 3.33 A multi-partition training feed with no defined merge order
 
-**Delivery-owner:** `Phase-46`
+**Delivery-owner:** `Phase-67`
 
 **Case-family:** `messaging`
 
@@ -137,7 +135,7 @@ function is a decode-checked total order, the total decoder returns `Left` on a 
 
 ### 3.34 An app serving or continuing another app's model without a grant
 
-**Delivery-owner:** `Phase-48`
+**Delivery-owner:** `Phase-69`
 
 **Case-family:** `ml-asset`
 
@@ -160,7 +158,7 @@ serve path honoring the per-app namespace).
 
 ### 3.84 A model output used as an authority-bearing command or identity
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase-38`
 
 **Case-family:** `ui`
 
@@ -208,7 +206,7 @@ protected action, or drop the inherited audience label; every mutant must fail b
 ## Related Documents
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog index this slice is
   carved from: owns the SSoT split, the honesty limit ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)), and the full list of entries.
-- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques, the coverage
+- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the nine typing techniques, the coverage
   matrix, the three-layer foreclosure model, and the **validation-locus axis** these entries are classified
   against.
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid `InForceSpec` cannot represent illegal state"); carries the `TrainBudget`/`TrainData` fields, whose foreclosure is owned elsewhere.

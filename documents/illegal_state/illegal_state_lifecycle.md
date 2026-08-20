@@ -18,7 +18,7 @@ be observed as having happened. The numbering belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_12_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_36_base_image_registry.md, DEVELOPMENT_PLAN/phase_50_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -39,7 +39,7 @@ flowchart LR
   g2["gadt-decode<br/>4 entries"]
   g3["extension-astcheck<br/>1 entry"]
   ps["provision-seal<br/>none in this slice"]
-  rg["rendered-output-golden<br/>none in this slice"]
+  rg["rendered-artifact-oracle<br/>none in this slice"]
   le["live-effect<br/>none in this slice"]
   g1 -->|"anything the typecheck admits"| g2
   g2 -->|"linked extension source only"| g3
@@ -67,10 +67,8 @@ It owns nothing of the catalog's framing.
 - The **catalog index** and the **load-bearing honesty limit** (a type-check proves the spec composes, not
   that the cluster enforces it) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced, not restated.
-- The **seven typing techniques**, the **coverage matrix**, the **three foreclosure layers**, and the new
-  **validation-locus axis** (`dhall-typecheck` / `gadt-decode` / `extension-astcheck` / `provision-seal` /
-  `rendered-output-golden` / `live-effect`, orthogonal to the foreclosure layer; `provision-seal` is post-bind
-  Phase-18 provision returning a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
+- The **nine typing techniques**, the **coverage matrix**, the **three foreclosure layers**, and
+  the **validation-locus axis**, whose members [`illegal_state_techniques.md` §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer) declares and this slice does not restate, are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced, not restated.
 - The *normative rule* behind each entry lives in that entry's owning doctrine (readiness/ordering, release
   lifecycle, monitoring, …). This doc names the owner and never restates its content.
@@ -92,7 +90,7 @@ adds one new **Validation-locus** line naming where the illegal state is caught 
 
 ### 3.41 A duration-gated / hand-ordered bring-up sequence (a readiness race)
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `lifecycle`
 
@@ -122,7 +120,7 @@ and the derived-edge handle; `decode-foreclosed` for the acyclic/complete DAG fo
 that the observed condition actually resolves (owned by [`readiness_ordering_doctrine.md` §6](../engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps), [`cluster_lifecycle_doctrine.md` §9](../engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine), and [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md)). *(Honesty: the `type-foreclosed` claim scopes to the sanctioned `Readiness`-typed surface, not the whole `IO` monad — a raw `threadDelay` is caught one layer out by the [`daemon_topology_doctrine.md` §6](../engineering/daemon_topology_doctrine.md#6-the-shared-daemon-spine) ban, a `runtime-checked` discipline.)*
 
 **Validation-locus:** `gadt-decode` (the closed `Readiness` union with no `AfterDuration` arm is a Haskell
-`data` type on the Phase-21 surface, and bring-up order is *derived*, never Dhall-authored — so no `dhall
+`data` type on the Phase-34 surface, and bring-up order is *derived*, never Dhall-authored — so no `dhall
 type` fixture can exercise it and "wait N then assume ready" is a GHC compile-fail golden, not an editor-time
 `dhall type` failure, per the dhall-typecheck-vs-gadt-decode caveat of [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force); a
 start-handle likewise exists only once its dependency's `Ready` edge does, and the total `mkBringUpOrder` fold
@@ -133,7 +131,7 @@ foreclosure layer above.
 
 ### 3.26 An unverified environment promotion (promote → prod without the required evidence)
 
-**Delivery-owner:** `Phase-50`
+**Delivery-owner:** `Phase-71`
 
 **Case-family:** `lifecycle`
 
@@ -156,14 +154,14 @@ actually ran and that prod actually converged on the promoted `Release`, owned b
 doctrines). Per the validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md),
 orthogonal to the foreclosure layer above.
 
-**Validated instance:** Phase 50 compiled the closed `Environment`/opaque `EvidenceWitness` boundary and
+**Validated instance:** Phase 71 compiled the closed `Environment`/opaque `EvidenceWitness` boundary and
 exercised it live. Runtime- and Protocol-missing fixtures returned their specific refusal tags and produced no
 pointer mutation; the tested Runtime witness produced the only Prod advance. The live wiring is tested, never
-proven; Phase 62 later automates topology derivation rather than owning this illegal-state boundary.
+proven; Phase 48 later automates topology derivation rather than owning this illegal-state boundary.
 
 ### 3.43 An unmonitored workflow or extension (or an unauthenticated monitoring surface)
 
-**Delivery-owner:** `Phase-18`
+**Delivery-owner:** `Phase-31`
 
 **Case-family:** `capacity`
 
@@ -190,7 +188,7 @@ and the `routes[].workflow`-vs-`name` reconciliation; `runtime-checked` residue 
 **Validation-locus:** `dhall-typecheck` (the mandatory `monitor` / `liveness` / `extMonitoring` fields, the
 `NonEmpty` `extMonitoring` list, and the absent `Off`/`Public` arms fail `dhall type` at authoring time) +
 `gadt-decode` (the coverage and non-vacuousness folds and the `routes[].workflow`-vs-`name` reconciliation return `Left` at decode) + `provision-seal` (the monitoring feasibility Σ fold returns a `ProvisionError`
-after binding and before any `ProvisionedSpec` exists) + `rendered-output-golden` (that the emitted monitoring surface renders
+after binding and before any `ProvisionedSpec` exists) + `rendered-artifact-oracle` (that the emitted monitoring surface renders
 behind the Keycloak-owned edge with no `Public` listener — the no-backdoor-ingress analog of
 [§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress), caught by a golden test on the rendered manifest rather than a
 cluster) + `live-effect` (that the SLO is actually met, the alert fires, the named `/metrics` series exists, and
@@ -201,7 +199,7 @@ a `SubjectScoped` filter actually excludes another subject's data). Per the vali
 
 ### 3.46 A chaos fault targeting a component the spec never declared
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `lifecycle`
 
@@ -234,7 +232,7 @@ component as the drill assumes). Per the validation-locus axis of
 
 ### 3.74 A container image amoebius did not generate
 
-**Delivery-owner:** `Phase-36`
+**Delivery-owner:** `Phase-56`
 
 **Case-family:** `image`
 
@@ -247,11 +245,11 @@ named catalog identities — the host-pulled `KindNode` image, the architecture-
 variant keyed by the reviewed trusted-adapter set linked into it — with **no `Foreign`, free-digest, or `Url` arm**. An app therefore has no image to name; its checked UI program is immutable release data interpreted by
 that generic runtime. Only a new trusted Haskell adapter can mint another runtime variant. This is
 the same closure `EngineRuntime` already carries against an operator-supplied engine address, applied one
-layer out. **Owner:** [`image_build_doctrine.md` §5](../engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)
+layer out. **Owner:** [`image_build_doctrine.md` §5](../engineering/image_build_doctrine.md#5-what-the-image-identity-is-given-that-the-tag-is-an-address)
 (the closed identity) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the `ImageArtifact` field). **Technique:** [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
 (a relation over a closed named catalog) + [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (identity as a required field, not an optional annotation). **Layer:** `type-foreclosed` — a foreign image
-reference has no constructor, with a `rendered-output-golden` residue that the *deployed* image is the one
+reference has no constructor, with a `rendered-artifact-oracle` residue that the *deployed* image is the one
 named (and a live containerd inspection independently confirms the pulled digest).
 
 **Validation-locus:** `dhall-typecheck` — the union is closed in the Dhall schema, so naming a foreign image
@@ -259,7 +257,7 @@ fails `dhall type` before any binary runs, exactly as an engine named by URL doe
 
 ### 3.75 A container whose process is unnamed
 
-**Delivery-owner:** `Phase-36`
+**Delivery-owner:** `Phase-56`
 
 **Case-family:** `image`
 
@@ -288,7 +286,7 @@ land at the decoder, per the validation-locus axis of
 
 ### 3.76 A build stage whose content is unmodeled
 
-**Delivery-owner:** `Phase-36`
+**Delivery-owner:** `Phase-56`
 
 **Case-family:** `image`
 
@@ -307,14 +305,14 @@ generated projection of that data. **Owner:**
 (the renderer). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (a `NonEmpty` required field) + [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
 (a pinned identity per step rather than a fetched address). **Layer:** `type-foreclosed` — an interpolated
-shell fragment has no constructor — with a `rendered-output-golden` residue pinning the emitted Dockerfile.
+shell fragment has no constructor — with a `rendered-artifact-oracle` residue pinning the emitted Dockerfile.
 
 **Validation-locus:** `dhall-typecheck` — the absent `RunShell`/`Url` arms are a Dhall-schema closure, so an
 authored shell fragment fails `dhall type` with no binary involved.
 
 ### 3.77 A worker naming an extension its own binary does not link
 
-**Delivery-owner:** `Phase-36`
+**Delivery-owner:** `Phase-56`
 
 **Case-family:** `image`
 
@@ -340,7 +338,7 @@ resolved by the total decoder, which returns `Left` when it is not.
 
 ### 3.78 Extension source that reaches outside the sanctioned API
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `lifecycle`
 
@@ -369,7 +367,7 @@ time over extension source before link, per the validation-locus axis of
 
 ### 3.87 An execution unit with no monitoring obligation
 
-**Delivery-owner:** `Phase-18`
+**Delivery-owner:** `Phase-31`
 
 **Case-family:** `capacity`
 
@@ -406,7 +404,7 @@ foreclosure layer above.
 
 ### 3.89 A one-shot command run holding a daemon role
 
-**Delivery-owner:** `Phase-35`
+**Delivery-owner:** `Phase-55`
 
 **Case-family:** `topology`
 
@@ -436,7 +434,7 @@ it does not type-check.
 
 ### 3.90 A role whose cardinality contradicts it
 
-**Delivery-owner:** `Phase-35`
+**Delivery-owner:** `Phase-55`
 
 **Case-family:** `topology`
 
@@ -462,7 +460,7 @@ replica field, so a count beside either is a type error in the editor, not a rej
 ## Related Documents
 - [The Illegal-State Catalog](./illegal_state_catalog.md) — the catalog index and the load-bearing honesty
   limit this slice inherits ([§1](#1-scope) framing, [§2](#2-the-readiness-promotion--monitoring-illegal-states) the honesty limit, [§6](illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the three foreclosure layers)
-- [Illegal States — Typing Techniques](./illegal_state_techniques.md) — the seven typing techniques, the
+- [Illegal States — Typing Techniques](./illegal_state_techniques.md) — the nine typing techniques, the
   coverage matrix, the foreclosure layers, and the **validation-locus axis** each entry above cites
 - [DSL Doctrine](../engineering/dsl_doctrine.md) — the contract this catalog enumerates (a valid `InForceSpec` cannot represent illegal state)
 - [Readiness Ordering Doctrine](../engineering/readiness_ordering_doctrine.md) — [§3.41](#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)

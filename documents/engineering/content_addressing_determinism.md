@@ -11,7 +11,7 @@ This document owns the determinism construction and its per-stage obligations. I
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_17_capability_bind.md, DEVELOPMENT_PLAN/phase_19_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_36_base_image_registry.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_60_infernix_lift.md, DEVELOPMENT_PLAN/phase_63_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_71_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -95,10 +95,20 @@ content-addressing/determinism *use* of it, the catalog owns the typing discipli
 
 ### 4.5 The ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss
 
-[Phase 17](../../DEVELOPMENT_PLAN/phase_17_capability_bind.md) validates the representational first step:
+[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) validates the representational first step:
 `InferenceEngine` carries one of the closed named `AppleMetal | Cuda | LinuxCpu` lanes, with no URL or download
 constructor, and the URL negative fails dhall-typecheck. The family/lane availability relation, bounded-cache
 materialization, and live first-miss resolution remain owned by their later phases.
+
+**The budget has since generalised past ML assets.** `CacheBudget` was introduced here because model weights,
+engines, and compiled kernels are the largest things amoebius materializes, and it reads throughout this
+subsection as a machine-learning concept. It is not one. *Every* retained just-in-time output — a rendered
+schema, a container recipe, an emitted manifest set, a generated tool, a compiled client bundle — is bytes that
+exist because something asked for them, and the argument that bounded them here bounds all of them. The general
+form is the **grant**, which carries its ceiling and its concurrency inseparably and demands a reaper for
+anything retained ([`jit_budget_doctrine.md`](./jit_budget_doctrine.md)). What follows is the ML-asset
+*instance* of that grant: the pool shape, the demand type, and the nesting relations below are specific to this
+asset axis and remain owned here.
 
 The three legs above pin the *training/inference math*; this subsection pins the **asset axis** that feeds it —
 the three kinds of heavy thing a model-serving pod needs (a runtime engine, model weights, a compiled kernel).
@@ -226,8 +236,8 @@ The three asset kinds, **one cache shape** (`resolve = {download | build}` on fi
   download — the identity is drawn from a closed catalog. The base image and the resolver's build inputs are
   owned by [`image_build_doctrine.md`](./image_build_doctrine.md); this **replaces** `infernix`'s per-engine
   Poetry-venv + curl-tar-at-image-build with the one shared resolve-on-miss path.
-  Phase 36.1, sealed 2026-08-14, has live-tested only the base image's resolver/toolchain presence and byte
-  identity on both Linux architectures; first-miss materialization into `CacheBudget` remains a Phase 59 gate.
+  Phase 56.1, sealed 2026-08-14, has live-tested only the base image's resolver/toolchain presence and byte
+  identity on both Linux architectures; first-miss materialization into `CacheBudget` remains a Phase 80 gate.
 - **Tier 2 — `ModelArtifact` = eager STAGE-THEN-SERVE, and *staging by name IS a provenance-carrying import*.**
   The parent-minted nested `infernix.dhall` names the model *set*; the in-cluster control-plane daemon stages each
   model into the shared bounded cache, and the `.ready` sentinel is written **last** so the `model` pointer ([§2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)) commits only a complete

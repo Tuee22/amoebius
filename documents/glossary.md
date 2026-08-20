@@ -31,7 +31,7 @@ as the set its first-use rule ranges over.
 - [6. Capacity and storage](#6-capacity-and-storage)
 - [7. Content addressing and the formal model](#7-content-addressing-and-the-formal-model)
 - [8. Applications, tenancy, and the UI surface](#8-applications-tenancy-and-the-ui-surface)
-- [9. Migration, release, and the sibling projects](#9-migration-release-and-the-sibling-projects)
+- [9. Migration, release, and the seed projects](#9-migration-release-and-the-seed-projects)
 - [10. Governed acronyms](#10-governed-acronyms)
 - [Related Documents](#related-documents)
 
@@ -56,7 +56,7 @@ as the set its first-use rule ranges over.
 - [illegal state](./illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent) — an enumerated cluster configuration a valid spec must be unable to express.
 - [foreclosure layer](./illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) — the three-valued axis: type-foreclosed, decode-foreclosed, or runtime-checked.
 - [validation-locus](./illegal_state/illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer) — the six-valued axis naming where a state is actually caught; orthogonal to the layer.
-- [the typing techniques](./illegal_state/illegal_state_techniques.md#4-the-typing-techniques) — the seven construction patterns by which the catalog's entries are foreclosed.
+- [the typing techniques](./illegal_state/illegal_state_techniques.md#4-the-typing-techniques) — the nine construction patterns by which the catalog's entries are foreclosed.
 - [dhall-typecheck](./engineering/dsl_doctrine.md#dhall-typecheck--the-dhall-typechecker) — the authoring-time Dhall typecheck, total and pure, before any effect.
 - [gadt-decode](./engineering/dsl_doctrine.md#gadt-decode--the-haskell-typed-decoder) — the total Haskell decoder that rejects a well-typed but incoherent value.
 - [extension-astcheck](./engineering/dsl_doctrine.md#extension-astcheck--the-extension-ast-checker) — the syntax-tree check over extension source, run at build time before link.
@@ -86,7 +86,7 @@ as the set its first-use rule ranges over.
 - [in-cluster role](./engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) — what job the one binary is doing in a pod: control-plane daemon, capacity scheduler, or a worker of some kind. Not the Kubernetes *node* role, and not an RBAC role; three unrelated senses share the word.
 - [worker kind](./engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected) — which worker a `Worker` role is, and the parameters that identify what it serves.
 - [validation frame](./engineering/validation_frame_doctrine.md#1-the-frame-one-environment-every-language) — the `amoebius-base` container every language-validation verb runs in, through `docker run --rm`. Unrelated to *frame config* below: two senses of "frame", one about where validation executes and one about what a running binary reads.
-- [`amoebius-base`](./engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster) — the published base image, four architecture-and-flavor-qualified tags, and the only image a consumer pulls rather than builds.
+- [`amoebius-base`](./engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster) — the base image a consumer pulls rather than builds. Its published tags are a cache, not a supply authority: the tag is derived from the recipe's content address, so a pull either hits the exact bytes the repository implies or misses and the consumer rebuilds ([§2.1](./engineering/image_build_doctrine.md#21-a-published-tag-is-a-cache-warm-up-and-its-name-is-the-content-address)).
 - [the Playwright image](./engineering/testing_doctrine.md#13-end-to-end-tests-run-in-the-playwright-image-against-three-browsers) — the test-only image carrying Chromium, Firefox, and WebKit, built on demand by the host binary and never published.
 - [Colima](./engineering/substrate_doctrine.md#41-colima-and-lima-on-apple-the-provider-follows-the-workload) — the Apple-host container-engine provider: an ephemeral VM for `docker build` and `docker run --rm`, and the provider for kind clusters. Lima is its sibling, used where a full Linux distribution is required.
 - [frame config](./engineering/dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness) — the static local `amoebius.dhall` a running copy of the binary reads to learn which frame it inhabits and which role it holds; the second Dhall authority surface, and never the `InForceSpec`.
@@ -135,14 +135,23 @@ as the set its first-use rule ranges over.
 - [`ClientPlan` and `UiServerPlan`](./engineering/low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) — the public browser projection and the private server projection of one checked program.
 - [typed effect port](./engineering/low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations) — the declared interface by which application logic reaches an effect.
 
-## 9. Migration, release, and the sibling projects
+## 9. Migration, release, and the seed projects
 
 - [the migration law](./engineering/migration_doctrine.md#2-the-law) — one create-new, verify, retire-old discipline instantiated across the whole system.
 - [`Release` and `releaseHash`](./engineering/release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash) — the immutable ledger entry and the content key identifying it.
 - [`Environment`](./engineering/release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer) — the closed set of promotion targets, each a single compare-and-swap pointer.
 - [`PromotionGate`](./engineering/release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable) — the evidence requirement making an unverified promotion to production unrepresentable.
-- [lift and compose](./engineering/lift_and_compose_doctrine.md#1-why-this-doctrine-exists) — re-homing proven sibling code onto an amoebius seam rather than reimplementing it.
-- [the reuse map](./engineering/lift_and_compose_doctrine.md#2-what-lifts-the-reuse-map) — which shape lifts from which sibling project onto which seam.
+- [lift and compose](./engineering/lift_and_compose_doctrine.md#1-why-this-doctrine-exists) — amoebius depends on no seed project and re-derives what it must prove.
+- [the re-derivation map](./engineering/lift_and_compose_doctrine.md#5-the-re-derivation-map) — one row per seed: the structure re-derived, and the guarantee amoebius must add.
+- [the lift calculus](./engineering/lift_and_compose_doctrine.md#7-the-lift-calculus) — the closed layer set, the total transition relation, and the witness each transition consumes.
+- [a calculus](./engineering/extension_conformance_doctrine.md#3-the-obligation-surface-one-component-per-calculus) — one of the five components of the core algebra: artifact, budget, lift, workflow, evidence.
+- [conformance, and the verdict seal](./engineering/extension_conformance_doctrine.md#6-the-verdict-seal) — the value a generated gate mints, and the only thing that admits an extension to a link set.
+- [a law family](./engineering/extension_conformance_doctrine.md#4-the-four-law-families) — L1–L5 per extension, C1–C7 over composition, S1–S6 for security, P1–P6 for transactions.
+- [the skolem scope](./illegal_state/illegal_state_techniques.md#48-the-skolem-scope--a-runtime-tenant-becomes-a-compile-time-index) — a tenant learned at run time becomes a fresh type variable, so cross-scope use fails to unify.
+- [the closed transaction vocabulary](./illegal_state/illegal_state_techniques.md#49-the-closed-transaction-vocabulary--only-valid-transactions-have-a-constructor) — the relational surface as a closed union of the transactions the domain has, with no query language.
+- [a grant](./engineering/jit_budget_doctrine.md#2-the-grant-is-the-authority-to-exist) — the authority a byte needs in order to exist, carrying its ceiling and its concurrency inseparably.
+- [to reap](./engineering/jit_artifact_doctrine.md#5-materialize-consume-reap) — what leaving an artifact region does to everything materialized in it and not promoted to retained.
+- [a covering](./documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list) — a catalogue measured against a declared taxonomy, where an unjustified empty cell is a defect.
 
 ## 10. Governed acronyms
 

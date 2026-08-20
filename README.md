@@ -1,9 +1,10 @@
 # amoebius
 
 >
-**Purpose**: Entry point for amoebius — an everything-orchestrator and bounded low-code UI runtime whose
-> Dhall DSLs make illegal deployment and application states unrepresentable where their modeled boundaries
-> permit that claim.
+**Purpose**: Entry point for amoebius — an **open core for distributed systems**: a fixed algebra whose lawful
+> instances are domains and hardware substrates, and a proof that *arbitrary compositions* of pure logic drawn
+> from those domains are well defined at run time, so illegal deployment, application, and security states are
+> unrepresentable where their modeled boundaries permit that claim.
 >
 **Read this if**: amoebius is unfamiliar, or a starting point into its documentation is needed.
 
@@ -43,6 +44,17 @@ WSL2 on Windows**. The complete mapping and its tested/assumed status live in th
 [substrate plan](./DEVELOPMENT_PLAN/substrates.md) and
 [substrate doctrine](./documents/engineering/substrate_doctrine.md).
 
+**Every artifact that is not Haskell source is generated from Haskell types**, and the exception list is closed:
+an artifact is exempt only if it must exist before the generator can run — the pre-binary Python that builds the
+binary, the package descriptions the compiler consumes, the ignore contracts version control reads, and authored
+expectations such as this documentation and the independently written test oracles. Everything else — the Dhall
+schema, the container recipe, the rendered manifests, the relational schema and its policies, the browser
+contracts, the build mutants, and the checking tools themselves — is rendered on demand, named by a content
+address that folds in its own rendered text, charged against a budget, and reaped when its region ends. That
+generalises jitML's just-in-time discipline from machine learning to everything amoebius touches, and it is
+owned by the [JIT artifact doctrine](./documents/engineering/jit_artifact_doctrine.md) and the
+[JIT budget doctrine](./documents/engineering/jit_budget_doctrine.md).
+
 Only authored inputs and reviewed external source belong in version control. Every amoebius-owned byte stays
 inside this checkout. `.build/` holds reproducible, transient, and evidentiary output; `.data/` holds
 operator-retained production runtime and durable state; `.test_data/` holds only harness-owned test state and
@@ -77,10 +89,10 @@ bounded host-bootstrap exception are owned by the
 [image-build doctrine](./documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster).
 
 **Observed implementation — refreshed 2026-08-16.** The natural-architecture amendment reopened every phase:
-Phase 0 is Active and Phases 1–74 are Blocked, each returning to work in numeric order. No prior seal records
+Phase 0 is Active and Phases 1–95 are Blocked, each returning to work in numeric order. No prior seal records
 the architecture it proved, and the one that claimed two reached the second under emulation, so every earlier
-result is an observed footprint rather than a current pass. The amendment also split the image phase — Phase 36
-builds and publishes its own architecture's child, and a new Phase 73 adds the complementary child on its own
+result is an observed footprint rather than a current pass. The amendment also split the image phase — Phase 56
+builds and publishes its own architecture's child, and a new Phase 57 adds the complementary child on its own
 hardware and publishes it under its own architecture-qualified tag — which shifted the phases above it by one.
 Earlier capability results remain historical evidence until their owner phase reruns; later tools still contain
 legacy repository-root, system-temp, user-home, and host-global container-engine assumptions. The exact
@@ -102,10 +114,24 @@ stated precisely in the [verification doctrine](./documents/engineering/testing_
 [browser-offline doctrine](./documents/engineering/browser_offline_runtime_doctrine.md), and the
 [honesty rule](./documents/documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
-Its constituent capabilities are unified libraries, not separate products: **prodbox** supplies root
-control-plane behaviour, **infernix** and **jitML** supply trusted ML/workflow adapters, and **hostbootstrap**
-supplies the bootstrap and DSL core. The sibling demo SPAs are UX evidence and migration fixtures; they are not
-amoebius application code or authority surfaces.
+**amoebius depends on no other project, and no other project depends on amoebius.** Five **seed projects** —
+`hostbootstrap`, `prodbox`, `jitML`, `infernix`, and `mattandjames` — are its **reference implementations**:
+each is authoritative about what its domain actually requires and about none of the solution, and amoebius
+**re-derives** their pure structures under stronger obligations rather than linking them. A re-derivation is
+admissible only once the doctrine specifying it names, in one sentence, the guarantee amoebius adds that the
+seed's version does not carry. The strongest evidence that this algebra is discoverable rather than invented is
+that the seeds converged on the same shapes independently, with no code dependency between them. The rule, the
+re-derivation map, and the lift calculus are owned by the
+[lift-and-compose doctrine](./documents/engineering/lift_and_compose_doctrine.md); the seed demo SPAs are UX
+evidence, never amoebius application code or authority surfaces.
+
+Because amoebius is an **open core** rather than a closed DSL, a new domain or a new hardware substrate joins by
+satisfying one contract: a component in each of the five calculi — artifact, budget, lift, workflow, evidence —
+and four law families, **L1–L5** per extension, **C1–C7** over composition, **S1–S6** for security, and
+**P1–P6** for relational transactions. The conformance gate is *generated from the extension's own declaration*
+rather than authored beside it, and a sealed verdict is what admits an extension to a link set — so composing
+two unrelated extensions is safe by induction rather than by review. That contract is owned by the
+[extension-conformance doctrine](./documents/engineering/extension_conformance_doctrine.md).
 
 Every amoebius-managed Kubernetes cluster — root, child, self-managed, or provider-managed — has
 **ephemeral infrastructure** and independently retained durable backing. Ephemeral means replaceable, not

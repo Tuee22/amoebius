@@ -15,7 +15,7 @@ pairing simply has no constructor, so nothing needs to reject it. The numbering 
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -31,11 +31,8 @@ host-per-node cardinality plus its etcd quorum shape and `Site`-locality.
 
 It owns nothing but the faithful reproduction of these entries. The catalog **index** and the load-bearing
 **honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are
-owned by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques**, the
-**coverage matrix**, the **three foreclosure layers**, and the **validation-locus axis** (the orthogonal
-axis — `dhall-typecheck` / `gadt-decode` / `provision-seal` / `rendered-output-golden` / `live-effect` — added
-on each entry below; `provision-seal` is post-bind Phase-18 provision returning a `ProvisionError` before any
-`ProvisionedSpec`) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice references
+owned by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **nine typing techniques**, the
+**coverage matrix**, the **three foreclosure layers**, and the **validation-locus axis**, whose members [`illegal_state_techniques.md` §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer) declares and this slice does not restate, are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice references
 them and does not restate them.
 
 Everything below is **design intent**, per the honesty discipline of
@@ -51,7 +48,7 @@ the running deployment enforces it. Each `**Layer:**` tag records where the fore
 
 ### 3.13 A compute engine incompatible with its substrates (managed providers first-class)
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-9`
 
 **Case-family:** `topology`
 
@@ -69,7 +66,7 @@ uninhabitable).
 
 ### 3.14 rke2/kind on a host with no Linux node (apple/windows without an interposed Linux VM)
 
-**Delivery-owner:** `Phase-13`
+**Delivery-owner:** `Phase-27`
 
 **Case-family:** `topology`
 
@@ -85,7 +82,7 @@ runtime-checked residue — that the Lima/WSL2 VM actually boots.
 
 ### 3.15 A multi-node kind cluster not on a single Linux host
 
-**Delivery-owner:** `Phase-11`
+**Delivery-owner:** `Phase-25`
 
 **Case-family:** `topology`
 
@@ -97,7 +94,7 @@ that one host, and a second host has no field to bind. **Owner:**
 
 ### 3.16 A multi-node rke2 cluster with fewer Linux hosts than nodes (or a host reused)
 
-**Delivery-owner:** `Phase-13`
+**Delivery-owner:** `Phase-27`
 
 **Case-family:** `topology`
 
@@ -122,7 +119,7 @@ a host).
 
 ### 3.24 An even/zero-server rke2 control plane (no etcd quorum / split-brain)
 
-**Delivery-owner:** `Phase-11`
+**Delivery-owner:** `Phase-25`
 
 **Case-family:** `topology`
 
@@ -144,7 +141,7 @@ actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](../engi
 
 ### 3.37 A full stretched node on a managed EKS control plane without a provider-native hybrid arm
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-9`
 
 **Case-family:** `topology`
 
@@ -165,15 +162,13 @@ surface-provider-vs-build discipline owned by [`cluster_lifecycle_doctrine.md`](
 arm is surfaced; runtime-checked residue — that the provider's hybrid mechanism actually joins the node.
 **Validation-locus:** `dhall-typecheck` (the closed provider-arm union — the hybrid arm is absent, so a full member node on a hostless `Managed Eks` control plane has no constructor and fails `dhall type`) + `live-effect` (that the provider's hybrid mechanism actually joins the node, once a provider-native arm is surfaced).
 
-The Phase-56 paired pure contract and retained-kind object inventory exercise the closed managed/self-managed
+The Phase-77 paired pure contract and retained-kind object inventory exercise the closed managed/self-managed
 shape and the `NoHostSubstrateOnManagedEks` refusal without claiming provider runtime proof. Actual Managed EKS
 host-foreclosure readback remains a `live-effect` obligation because AWS authority could not create the child.
-The parent always has a `linux-cpu` option on every hardware substrate, at that host's natural architecture; use Incus on Linux/Linux-CUDA, Lima on
-Apple, or WSL2 on Windows when the observation requires a pristine Linux host.
 
 ### 3.39 A split-Site etcd quorum
 
-**Delivery-owner:** `Phase-14`
+**Delivery-owner:** `Phase-9`
 
 **Case-family:** `topology`
 
@@ -195,7 +190,7 @@ actually keep a low-latency majority.
   ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)),
   and the three foreclosure layers ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
   This document is one themed slice of it.
-- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
+- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the nine typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
   coverage matrix ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the foreclosure layers, and the **validation-locus axis** used on every entry above.
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid `InForceSpec` cannot represent illegal state") these topology entries instantiate.
 - [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) — the owning doctrine for every entry

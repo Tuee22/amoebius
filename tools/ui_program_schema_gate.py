@@ -34,7 +34,7 @@ RESULTS = ROOT / ".build/dsl/ui-program-schema/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-program-schema/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-program-schema"
 TEMP_ROOT = ROOT / ".build/tmp/ui-program-schema"
-CONTRACT = "DEVELOPMENT_PLAN/phase_25_ui_program_schema.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_37_ui_program_schema.md"
 GATE_COMMAND = "python3 tools/ui_program_schema_gate.py"
 EXPECTATIONS = "test/oracle/ui_program_schema_surfaces.tsv"
 
@@ -300,7 +300,7 @@ def enumerated_items() -> set[str]:
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=16, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=37, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()

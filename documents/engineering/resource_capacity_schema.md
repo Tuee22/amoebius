@@ -1799,7 +1799,7 @@ enactBootstrapRegistry
 -- transport outcome returns a receipt; OutcomeUnknown exposes only re-observation, never the old action.
 
 -- This explicit cycle-break exists before the scheduler image can be pulled. It provisions and initializes
--- only the registry/proxy objects through a typed action using the same private source serializer as Phase 20;
+-- only the registry/proxy objects through a typed action using the same private source serializer as Phase 33;
 -- it does not expose per-service render/apply. A later whole-deployment ProvisionedSpec may adopt those exact
 -- identities only after observing equal source/field digests and transfers ownership once.
 

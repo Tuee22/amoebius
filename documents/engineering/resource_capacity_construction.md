@@ -14,7 +14,7 @@ provisioned. It does not carry the types themselves, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/resource_capacity_types.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/resource_capacity_types.md
 **Generated sections**: none
 
 </details>
@@ -50,7 +50,7 @@ Checked construction adds identity/derivation obligations that the record spelli
 
 - every container names both **which image it is** and **what it executes**, and the two must agree. An
   `ImageArtifact` carries a closed `ImageIdentity`
-  ([image_build_doctrine.md §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest))
+  ([image_build_doctrine.md §5](./image_build_doctrine.md#5-what-the-image-identity-is-given-that-the-tag-is-an-address))
   alongside its digests, so a digest alone no longer inhabits the type and there is no arm for a foreign
   image. A `ContainerEnvelope` carries a `ContainerProcess`, so what runs is a typed value rather than
   whatever the image's entrypoint happens to be. Two relations are checked at binding and reject before
@@ -295,7 +295,7 @@ observed old/terminating instance must turn the independent epoch oracle red.
   model, finite concurrency, failure window, maximum failures, and GC horizon to include simultaneous upload
   workspace and retained partial uploads as a model-derived object-extent multiset. The same private
   `ProvisionedRegistryStorageDemand` retains the digest map, structured `objectStorePeak`, and scalar
-  `derivedPeak`: the scalar sizes only the interim bounded filesystem volume, while Phase 41 feeds the
+  `derivedPeak`: the scalar sizes only the interim bounded filesystem volume, while Phase 62 feeds the
   structured resident objects and transient extents through MinIO's per-object stripe/parity/metadata
   geometry. Equal-byte peaks with different object counts therefore need not have equal physical demand.
   Its private admission witness configures the only mutating registry path: a local proxy authenticates the

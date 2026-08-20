@@ -81,31 +81,31 @@ mutants/	test/mutant/dhall_typecheck_schema/	mutants/**, test/live/mutants/**, t
 # the seven test role nouns — and the `.cabal` file itself is not relocated at all: it
 # becomes a stanza, so Sprint 2.3 removes it rather than moving it.
 
-amoebius-pulsar/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-pulsar/proto/	proto/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-pulsar/test/compile_fail/	test/negative/pulsar_client/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-pulsar/test/golden/	test/golden/pulsar_client/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-pulsar/test/	test/spec/pulsar/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-pulumi/src/Amoebius/Pulumi/Backend/EncryptedMinio.hs	src/Amoebius/Pulumi/Backend/CheckpointEnvelope.hs	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-pulumi/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-pulumi/test/	test/spec/provider/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-release/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-release/dhall/test/	dhall/test/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-release/test/live/	test/spec/release/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-runtime/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-runtime/dhall/test/	dhall/test/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-runtime/test/golden/	test/golden/workflow_runtime/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-runtime/test/live/	test/spec/runtime/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-runtime/test/provider/	test/spec/provider/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-runtime/test/sim/	test/spec/sim/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-store/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-amoebius-store/test/golden/	test/golden/content_store/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-infernix/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-infernix/dhall/	dhall/infernix/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+amoebius-pulsar/src/	src/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-pulsar/proto/	proto/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-pulsar/test/compile_fail/	test/negative/pulsar_client/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-pulsar/test/golden/	test/golden/pulsar_client/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-pulsar/test/	test/spec/pulsar/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-pulumi/src/Amoebius/Pulumi/Backend/EncryptedMinio.hs	src/Amoebius/Pulumi/Backend/CheckpointEnvelope.hs	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-pulumi/src/	src/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-pulumi/test/	test/spec/provider/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-release/src/	src/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-release/dhall/test/	dhall/test/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-release/test/live/	test/spec/release/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-runtime/src/	src/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-runtime/dhall/test/	dhall/test/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-runtime/test/golden/	test/golden/workflow_runtime/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-runtime/test/live/	test/spec/runtime/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-runtime/test/provider/	test/spec/provider/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-runtime/test/sim/	test/spec/sim/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-store/src/	src/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+amoebius-store/test/golden/	test/golden/content_store/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+infernix/src/	src/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+infernix/dhall/	dhall/infernix/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
 infernix/app/	test/spec/infernix/	infernix/app/**
-infernix-ui/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-jitml/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
-jitml-ui/src/	src/	the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots
+infernix-ui/src/	src/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+jitml/src/	src/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
+jitml-ui/src/	src/	the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots
 app/singleton/Main.hs	app/amoebius/Amoebius/Entry/ControlPlane.hs	app/singleton/**
 
 # --- Sprint 2.4: ui-runtime/ merges into ui/ ----------------------------------------

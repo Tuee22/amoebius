@@ -13,7 +13,7 @@ rule disagree, the rule is correct and the example is the defect. Nothing here h
 
 **Status**: Reference only
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_54_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -50,7 +50,7 @@ rule disagree, the rule is correct and the example is the defect. Nothing here h
 > The Second-Axis example, and the one the whole async-replication concern exists for: **what happens if a > cluster goes down mid geo-sync and the gateway is failed over to it?** It crosses the cluster boundary
 > (R1/[§17](./chaos_failover_second_axis.md#17-the-boundary-and-its-classifier), R9), rests on a bounded-staleness / data-loss premise and an explicit failover budget (R8, R9),
 > and reconciles divergent histories under an availability-first choice (R7). It is **forward-looking**:
-> amoebius runs no cross-cluster geo-replication today, but Phase 53 is exactly this shape, so the doctrine
+> amoebius runs no cross-cluster geo-replication today, but Phase 74 is exactly this shape, so the doctrine
 > works it through before the need is live.
 
 **The system.** Two sibling child clusters with the same parent geo-replicate a realtime workflow
@@ -147,7 +147,7 @@ converges on heal — R7); *≤ 1 gateway authority once views converge* (Append
 workflow with a live cluster eventually completes through one authority.* Honest limit: the model is in
 **logical time** — it encodes "an effect either had or had not crossed the boundary before the cut" but says
 **nothing** about the real size of that window; whether field lag stays within bound is the **R8/R9 assumed premise**, in the ledger, not the model. **The concrete spec is owned by
-[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) (Phase 10), which the
+[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) (Phase 17), which the
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) names as the phase that carries this proof.**
 
 **Inject applied.** Extend the test-`.dhall` harness into the inter-cluster dimension: **cut the replication channel** and assert divergence stays bounded and mergeable and ≤ 1 gateway authority once
@@ -163,9 +163,9 @@ dedup + pointer-merge fold (decision layer); the modeled two-cluster safety/live
 replication-lag/promotion-gate, and failback-idempotency drills. *Assumed* — the data-loss-window /
 replication-lag bound (R8/R9), monitored never proven; the PACELC latency-for-consistency posture (R7);
 runtime fidelity and behaviour beyond 2 clusters. **Under the two-tier schedule, the two-cluster
-design-model's safety/liveness properties are *proven for the model at scope 2* in Phase 10 (design-first), and
+design-model's safety/liveness properties are *proven for the model at scope 2* in Phase 17 (design-first), and
 model↔code correspondence is differentially checked; the runtime fidelity (real physics) and live
-cross-cluster-failover-in-a-running-forest remain UNVERIFIED — the Tier-2 Phase-54 obligation, and the single
+cross-cluster-failover-in-a-running-forest remain UNVERIFIED — the Tier-2 Phase-75 obligation, and the single
 place the per-system proof concentrates.**
 
 **Appendix B rests on doctrine (zero orphans).**

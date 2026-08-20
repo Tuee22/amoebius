@@ -46,7 +46,7 @@ MUTANTS = ROOT / "test/mutant/registry.tsv"
 RESULTS = ROOT / ".build/dsl/capacity-topology/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/capacity-topology/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/capacity-topology"
-CONTRACT = "DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_09_resource_index.md"
 GATE_COMMAND = "python3 tools/capacity_topology_gate.py"
 EXPECTATIONS = "test/oracle/capacity_topology_surfaces.tsv"
 
@@ -312,7 +312,7 @@ PROVEN_SURFACES = {"base-fold-compile-totality"}
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=8, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        phase=9, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
         register="1", substrate="none", lane="none", sides=SIDES
     )
     gate.begin()

@@ -57,7 +57,7 @@ GENERATED = ROOT / ".build" / "dsl" / "gadt-decode"
 RESULTS = GENERATED / "phase-results.tsv"
 OBSERVER_TAG = "gadt_decode_ir"
 BUILD_ROOT = ROOT / ".build" / "dist-newstyle" / "gadt-decoder-gadt_decode"
-CONTRACT = "DEVELOPMENT_PLAN/phase_12_gadt_decode_ir.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md"
 GATE_COMMAND = "python3 tools/gadt_decode_ir_gate.py"
 EXPECTATIONS = "test/oracle/gadt_decode_ir_surfaces.tsv"
 
@@ -396,7 +396,7 @@ def measure(observed: dict[str, Any], mutant: str, scan: str) -> tuple[dict[str,
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=6, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        phase=26, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
         register="1", substrate="none", lane="none", sides=SIDES
     )
     gate.begin()

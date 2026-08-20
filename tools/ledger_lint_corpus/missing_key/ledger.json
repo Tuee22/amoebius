@@ -1,5 +1,5 @@
 {
-  "phase": 19,
+  "phase": 37,
   "gate_command": "cabal test ui-program-schema-spec",
   "register": "1",
   "substrate": "none",

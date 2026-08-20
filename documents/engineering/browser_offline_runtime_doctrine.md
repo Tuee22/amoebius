@@ -14,7 +14,7 @@ replay. It does not own the online runtime it pairs with, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_30_offline_language_plan.md, DEVELOPMENT_PLAN/phase_34_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_67_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_68_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_69_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_70_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
@@ -46,7 +46,7 @@ contract; it does not claim that browser persistence or replay is implemented.
 
 An in-memory-only application loses pending user intent and useful projections when connectivity disappears.
 Adding ad hoc IndexedDB records or a service worker does not solve the semantic problem: a stale browser can
-queue an unauthorized command, replay it twice from two tabs, expose another tenant's cached data, or become
+queue an unauthorized intent, replay it twice from two tabs, expose another tenant's cached data, or become
 unreadable after the server drops its old decoder.
 
 Treating the browser outbox as authoritative fails because revocation, conflicts, and current provider state
@@ -140,7 +140,7 @@ this doctrine supplies the queue machinery but cannot broaden an adapter's eligi
 
 Local validation is advisory presentation. Reconnect always reruns server validation, authentication,
 authorization, membership, plan/contract compatibility, handle resolution, and provider preconditions. A
-locally valid command may therefore be rejected, conflicted, expired, or require reauthentication.
+locally valid intent may therefore be rejected, conflicted, expired, or require reauthentication.
 
 ---
 
@@ -178,7 +178,7 @@ CrossTabCoordination | LocalCryptography
 The runtime binds these facilities to IndexedDB, Cache Storage/service workers, optional OPFS, Web
 Locks/BroadcastChannel, and Web Crypto or an admitted equivalent. Application Dhall and trusted components do
 not access those APIs directly. `localStorage` may contain only a non-authoritative random device-instance id;
-it never contains application state, identity, scope, commands, or credentials.
+it never contains application state, identity, scope, intents, or credentials.
 
 Structured projections, outbox records, cursors, offline-auth metadata, storage migrations, quota accounting,
 and upload metadata are encrypted at rest. Local blobs are encrypted before IndexedDB/OPFS persistence. Keys
@@ -204,7 +204,7 @@ OnlineVerified | OfflineUnlocked | ReauthRequired | LocallyRevoked
 
 Before disconnect, the server may issue an opaque `OfflinePartitionHandle` bound to application, tenant,
 subject, device, program, scope epoch, storage schema, allowed persisted labels, and a maximum offline lease.
-The handle is local partition metadata, not a bearer credential and not authority to execute a command. It is
+The handle is local partition metadata, not a bearer credential and not authority to execute an intent. It is
 never accepted as a substitute for an online Keycloak session.
 
 Every local keyspace and encryption context includes the handle's partition identity. Switching tenant,
@@ -223,7 +223,7 @@ available monotonic/server-anchored evidence but is not described as tamper-proo
 
 At most one tab per offline partition is the active runtime leader. It owns the WebSocket, outbox replay,
 cursor advancement, and storage migration lock. Followers receive state/outcome notifications through the
-trusted `CrossTabCoordination` facility and can append a command only through an atomic store transaction.
+trusted `CrossTabCoordination` facility and can append an intent only through an atomic store transaction.
 
 Web Locks is the primary admitted lease mechanism, with BroadcastChannel for notifications. A bounded
 fencing-generation record in the structured store prevents a stale former leader from committing cursor or
@@ -234,8 +234,20 @@ back to a safe single-tab/refuse-concurrent-tab posture; it never replays indepe
 
 ## 9. Authoritative replay and typed outcomes
 
+**The queue element is an `Intent`, never a `Command`.** The name is normative, and it carries the whole
+security argument of this section. A *command* is something that will be executed; an *intent* is something a
+caller wishes to happen and the server may refuse. What a disconnected browser can produce is only ever the
+second — the caller may have lost authority, the scope may have changed, the schema may have moved — and giving
+it the first name invites every consumer downstream to treat it as settled. `Command` is reserved for the
+scope-qualified value the server derives *after* validation
+([UI Realtime Coordination §6](./ui_realtime_coordination_doctrine.md#6-durable-commands-receipts-and-replay)),
+which is exactly the claimed-versus-attested index of
+[`extension_conformance_security.md` §S1](./extension_conformance_security.md#s1-authentication-is-an-index-not-a-check)
+applied to a queued effect, with
+[§S3](./extension_conformance_security.md#s3-refusal-is-the-default-not-the-fallback) supplying the default.
+
 Reconnect establishes a fresh online session and WebSocket before replay. The server validates the partition,
-program/ABI/contracts, current scope, membership, policy, and device limits. Commands then replay in the
+program/ABI/contracts, current scope, membership, policy, and device limits. Queued intents then replay in the
 declared dependency/order relation under bounded concurrency. Each carries its immutable opaque client
 `RequestId` and the digest/schema identities recorded when queued. Only after current-authority validation
 does the server derive the scope-qualified `CommandId` from
@@ -256,10 +268,10 @@ Accepted receipt
 `Accepted` is emitted only from the authoritative receipt mechanism defined by
 [UI Realtime Coordination §6](./ui_realtime_coordination_doctrine.md#6-durable-commands-receipts-and-replay).
 Redis may route an outcome but does not establish it. A disconnect between effect and response leaves the
-command pending; the next replica queries the same durable receipt. Replay transitions and outcomes are
+intent pending; the next replica queries the same durable receipt. Replay transitions and outcomes are
 written atomically to the encrypted outbox before the UI reports completion.
 
-A rejected or conflicted command is retained with its typed public explanation until the application-defined
+A rejected or conflicted intent is retained with its typed public explanation until the application-defined
 resolution flow handles or explicitly discards it. `UpgradeRequired` preserves the record and names the
 required migration/compatible runtime; it never clears the outbox.
 
@@ -270,7 +282,7 @@ required migration/compatible runtime; it never clears the outbox.
 A `LocalBlobClass` declares media type, per-blob and aggregate byte bounds, retention, flow label, and the
 queued upload port that may consume it. The runtime encrypts bytes locally and assigns an opaque local identity.
 Reconnect obtains a fresh server upload handle, uploads bounded chunks, verifies the server-side content
-identity, and only then replays dependent commands.
+identity, and only then replays dependent intents.
 
 Local path names, OPFS handles, and plaintext content never enter a `ClientPlan` event or server request.
 Tenant/subject partition switching makes a blob unreachable from another partition. Quota pressure produces a
@@ -286,7 +298,7 @@ Every persisted envelope records:
 - `ProgramDigest`, `ClientRuntimeAbi`, and `UiServerAbi`;
 - public-contract and port-contract digests;
 - offline storage schema and record-kind version;
-- partition/scope epoch and command/cursor identity; and
+- partition/scope epoch and intent/cursor identity; and
 - encryption/key-generation identity.
 
 A release may become current only when every record schema within the deployment's maximum offline/replay
@@ -296,7 +308,7 @@ a decoder does not retain old authority.
 
 The compatibility horizon must be at least the maximum admitted offline record/blob age plus its bounded
 reconnect/replay window, and authoritative receipt retention must cover the longest period in which an
-accepted command can be retried or queried. A deployment whose queue, blob, receipt, and compatibility bounds
+accepted intent can be retried or queried. A deployment whose queue, blob, receipt, and compatibility bounds
 do not satisfy those relations is rejected before promotion.
 
 `ReloadRequired` may replace in-memory state but cannot discard an offline outbox or blob dependency. A release
@@ -333,7 +345,7 @@ The design is planned in Phases 30–69. Status and evidence remain solely in th
 The sibling `mattandjames` repository supplies implementation evidence for the motivating
 browser shape: its `offline_mode.md` and current PureScript/browser boundary use IndexedDB projections and an
 outbox, service-worker shell caching, optional OPFS blobs, partition keys, typed replay outcomes, Web Locks,
-BroadcastChannel, and server-authoritative reconnect. amoebius lifts those mechanisms into a reusable checked
+BroadcastChannel, and server-authoritative reconnect. amoebius re-derives those mechanisms as a reusable checked
 `UiSource` contract and deliberately strengthens the boundary with encrypted records, explicit finite
 queue/blob/compatibility relations, generated paired plans, and durable effect-owner receipts. It does not
 copy the sibling's app-specific record schema, fixed grace periods, Redis replay cache, or product names into
@@ -342,23 +354,6 @@ the application DSL. This is sibling evidence, not an amoebius implementation cl
 ---
 
 ## Related Documents
-
-Phase 30 implements the closed `OnlineOnly | Offline` source choice, bounded queue contracts, initial ML
-classification, and deterministic exact-key public/private plan projection. Independent tables and five
-compile-time mutants pass at Register 1; browser storage and live replay remain UNVERIFIED. Every hardware
-substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on
-Windows.
-
-Phase 34's scoped Register-2 result uses two real Chrome processes and one hermetic profile to test AES-GCM/PBKDF2, encrypted IndexedDB recovery, raw storage inspection, partition isolation, Web Locks fencing, BroadcastChannel handoff, immutable Service Worker caches, and explicit quota refusal. Six mutants turn red. The production PureScript bundle and server replay remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
-
-Phase 67's scoped result revalidates membership/program compatibility, retains pending records, scopes idempotency, and treats only the durable effect owner as acceptance authority. Two loopback UI endpoints share an independently queried SQLite owner; a response is dropped after effect and recovered through the other endpoint with one effect. Real platform providers remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
-
-Phase 68's scoped result encrypts a fresh blob in real Chrome, restarts and inspects raw storage, resumes a two-chunk upload, computes content identity server-side, reads the committed bytes independently, and releases one dependent effect only afterward. Captured handles deny non-owner and foreign scopes; six mutants turn red. Real MinIO/Gateway/Kubernetes/CNI and production PureScript remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
-
-Phase 69's scoped result requires a finite complete compatibility witness, preserves intent across reload, makes migration single-generation/atomic/resumable/idempotent, and reauthorizes retained handlers. Separate real Chrome processes exercise A→staged-B crash→B resume→A rollback without losing any record kind; six mutants turn red. Real platform rollout/provider observations remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
-
-Phase 70's scoped result composes the offline contract with a real Chrome A→B trace, encrypted blob recovery, a stopped host-local endpoint role, surviving-endpoint reconnect, SQLite cursor/effect/receipt recovery, filesystem content verification, route loss, and eight red mutants. It does not establish provider multi-zone continuity: provider whole-zone isolation, managed placement, real platform services, Kubernetes/CNI, production PureScript, and offline jitML/CUDA remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; when pristine Linux is required, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
-
 - [Low-Code UI Runtime](./low_code_ui_runtime_doctrine.md)
 - [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md)
 - [Release Lifecycle](./release_lifecycle_doctrine.md)

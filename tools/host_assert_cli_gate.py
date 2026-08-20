@@ -46,7 +46,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 
 GATE_COMMAND = "python3 tools/host_assert_cli_gate.py"
-CONTRACT = "DEVELOPMENT_PLAN/phase_03_host_assert_cli.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_50_host_assert_cli.md"
 EXPECTATIONS = "test/oracle/host_assert_cli_surfaces.tsv"
 
 DISTRIBUTION = ROOT / "pb"
@@ -516,7 +516,7 @@ SURFACE_EVIDENCE = {f"check.{name}": name for name in CHECKS}
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=3, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        phase=50, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
         register="2", substrate="none", lane="none", sides=SIDES,
     )
     gate.begin()

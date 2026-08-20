@@ -10,7 +10,7 @@ The contract is
 the floor it asserts is
 [§3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply).
 The plan that delivers it is
-[Phase 3](../DEVELOPMENT_PLAN/phase_03_host_assert_cli.md).
+[Phase 3](../DEVELOPMENT_PLAN/phase_50_host_assert_cli.md).
 
 ## Install
 

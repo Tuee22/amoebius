@@ -18,7 +18,7 @@ knowledge of amoebius; every term it uses about amoebius itself is routed throug
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -39,6 +39,7 @@ knowledge of amoebius; every term it uses about amoebius itself is routed throug
 - [13. Sentence and paragraph budget](#13-sentence-and-paragraph-budget)
 - [14. Navigation and canonical section names](#14-navigation-and-canonical-section-names)
 - [15. Splitting a document into a family](#15-splitting-a-document-into-a-family)
+- [16. The illegal-state catalogue is a covering, not a list](#16-the-illegal-state-catalogue-is-a-covering-not-a-list)
 - [Related Documents](#related-documents)
 
 The conventions adapt those proven in the sibling `prodbox` project. The Phase 0 documentation suite, and all
@@ -163,6 +164,14 @@ anchor **deep-links to the themed slice that owns the entry** — e.g. the visib
 holds the enumeration and the slice holds the heading. Bidirectionality (above) is still checked against the
 **slice actually linked** — that slice's `Referenced by` lists the citing document, not the index.
 
+### A law family is cited by its letter and number
+
+A conformance law belongs to a lettered family and is numbered within it — `L1`, `C3`, `S2`, `P5`. A reference
+keeps that identifier in the visible text and anchors to the section that owns the family, on the same terms
+the catalog rule above fixes: the identifier is the stable name a reader carries between documents, while the
+file holding the argument may move. The letter is the routing key — it says which aspect answers for the law
+without the reader having to know a filename.
+
 ### `§N` in a plan-suite task-note is shorthand, not a reader cross-reference
 
 A `§N` inside a **`Docs to update` entry, a `Documentation Requirements` bullet, or a `(§N backlink)` parenthetical** — where the owning document is named in that same entry — is build-task shorthand (like the
@@ -196,6 +205,21 @@ Every discovered mismatch between doctrine, plan, tests, and code is recorded in
 [`legacy_tracking_for_deletion.md`](../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md) under the
 reconciliation policy in
 [`development_plan_standards.md` §T](../DEVELOPMENT_PLAN/development_plan_standards.md#t-plan-to-implementation-reconciliation).
+
+**A claim of unrepresentability cites the fixture that proves it.** A document may state *in the indicative*
+that some illegal state has no inhabitant only where it names the compile-fail fixture establishing that.
+Without one the sentence records an intention rather than a result: the type may have admitted the state from
+the day it was written, and nothing in the corpus would have said so. This is the type-level twin of the rule
+above, because an unproven foreclosure claim is precisely the argued result reported as proven that this
+section opens by forbidding.
+
+Doctrine still has to *specify* foreclosures it does not yet have fixtures for — that is most of what a
+doctrine document does before its phase runs — so the rule polices the mood, not the subject. A foreclosure
+with no fixture is written in the specification voice and **names the phase that owes the fixture**: "the type
+is specified to admit no *X*; the compile-fail fixture is owed by Phase *N*". That form is admissible
+everywhere the indicative is not. What remains forbidden in every mood is the unqualified present tense — "*X*
+does not compile", "there is no back door" — about machinery no gate has run against, because a reader cannot
+tell it from a result.
 
 ---
 
@@ -378,7 +402,7 @@ are.
 **Why the obvious alternative fails.** The tempting alternative is to trust each author to break up prose by
 judgement. Measured against this corpus before these rules, that had already failed: dozens of sections
 exceeded 140 lines of non-fenced prose, one ran past six hundred, one list item spanned over 130 lines, and
-not one of the 133 documents carried a table of contents. Judgement produces a distribution with a long tail,
+not one document in the corpus carried a table of contents. Judgement produces a distribution with a long tail,
 and the tail is where the corpus is read least and needed most.
 
 **The rule.**
@@ -429,7 +453,7 @@ number this section states.
 prose it is the first thing anyone meets: across the corpus it totals well over a hundred thousand characters,
 and on the development plan's tracker it is a single line of more than five thousand. A reader opening a
 document for the first time was therefore shown its inbound-link set before its subject, and before this rule
-not one of the 133 documents stated who it was for.
+not one document in the corpus stated who it was for.
 
 **Why the obvious alternative fails.** Deleting the field is unavailable. Bidirectional reconciliation is the
 only mechanism that catches a rename which silently orphans a document, and it is checked by tooling that
@@ -479,9 +503,9 @@ flowchart LR
 
 ## 12. Naming what the reader does not know
 
-> **Purpose**: make a single document readable by someone who has not read the other hundred and thirty-two.
+> **Purpose**: make a single document readable by someone who has not read any of the others.
 
-**The problem.** `InForceSpec` — the central noun of the entire system — appears in 68 of 144 governed
+**The problem.** `InForceSpec` — the central noun of the entire system — appears in a third of the governed
 documents and is defined in none of them. The recurring acronyms behave the same way: `CAS`, `CSI`, `SSA`,
 `WAL`, `CNI`, `mTLS`, `GADT`, `DAG`, `IR`, `TTL`, `ABI`, `SKU`, and `OIDC` together appear well over a
 thousand times, and not one of them is expanded anywhere in the corpus. Each document is written as though its
@@ -611,6 +635,42 @@ over a ten-thousand-line document lists sections that are themselves longer than
 
 **What it forecloses.** A single canonical treatment of a large subject in one file, and the ability to read
 that subject start to finish without following a link.
+
+---
+
+## 16. The illegal-state catalogue is a covering, not a list
+
+> **Purpose**: make the catalogue's completeness checkable, so that a gap is a finding rather than an omission
+> nobody notices.
+
+**The problem.** A catalogue that is a *list* grows by whoever last thought of something. It can be long,
+well-cited and internally consistent while saying nothing whatever about what it omits, so a reader cannot
+distinguish an absent entry from an absent hazard. The corpus then reads as a safety argument while being a
+record of attention.
+
+**Why the obvious alternative fails.** Declaring the list exhaustive is not available. Exhaustiveness needs
+some independent characterisation of "illegal" to measure against, and a list supplies none — it defines the
+illegal set extensionally, by being itself, so the claim reduces to the list agreeing with the list.
+
+**The rule.** The catalogue is a **covering over a declared taxonomy**.
+
+1. **The taxonomy is declared** in `illegal_state/README.md` as a product of named axes, each a closed set —
+   the foreclosure layer, the validation locus, and whichever structural axes the doctrine owning them fixes.
+   The product of the axes is the cell set.
+2. **Every cell is occupied or justified.** A cell holds at least one catalogue entry, or a one-line statement
+   of why no illegal state lives there. **An unjustified empty cell is a defect**, reported like any other.
+3. **The grid is generated; the entries are authored.** The cell set follows from the axes, so widening an
+   axis reports its own new empty cells rather than waiting to be noticed. Entries stay human-authored,
+   because an entry is an independent expectation and deriving it from the thing it checks would turn a test
+   into a description ([§6](#6-honesty-the-proventestedassumed-discipline)). Generated views go to
+   `.build/docs/` under
+   [`development_plan_standards.md` §I](../DEVELOPMENT_PLAN/development_plan_standards.md#i-generated-documentation-remains-untracked).
+4. **The residue is stated, never implied.** A complete covering proves exhaustiveness *relative to the
+   declared taxonomy*. The taxonomy is a human choice, so a hazard along an axis nobody declared remains
+   outside the claim. That sentence travels with any assertion that the covering is complete.
+
+**What it forecloses.** Reading catalogue length as evidence of safety. One justified empty cell says more
+than a page of entries, because somebody had to make a claim to write it.
 
 ---
 

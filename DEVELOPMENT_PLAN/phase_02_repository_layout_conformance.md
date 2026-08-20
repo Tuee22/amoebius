@@ -14,7 +14,7 @@ Register 1: a pure tree-and-resolution gate, no host and no cluster.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_artifact_calculus.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -25,12 +25,12 @@ Register 1: a pure tree-and-resolution gate, no host and no cluster.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 2.1: `test/`'s second level collapses to the seven role nouns ✅](#sprint-21-tests-second-level-collapses-to-the-seven-role-nouns-)
-- [Sprint 2.2: The package-only roots become cabal stanzas ✅](#sprint-22-the-package-only-roots-become-cabal-stanzas-)
-- [Sprint 2.3: `ui-runtime/` merges into `ui/` ✅](#sprint-23-ui-runtime-merges-into-ui-)
-- [Sprint 2.4: Every authored name loses its phase ordinal ✅](#sprint-24-every-authored-name-loses-its-phase-ordinal-)
-- [Sprint 2.5: One mutant record format, one registry ✅](#sprint-25-one-mutant-record-format-one-registry-)
-- [Sprint 2.6: The allowlist and the register reconcile ✅](#sprint-26-the-allowlist-and-the-register-reconcile-)
+- [Sprint 2.1: `test/`'s second level collapses to the seven role nouns 📋](#sprint-21-tests-second-level-collapses-to-the-seven-role-nouns-)
+- [Sprint 2.2: The package-only roots become cabal stanzas 📋](#sprint-22-the-package-only-roots-become-cabal-stanzas-)
+- [Sprint 2.3: `ui-runtime/` merges into `ui/` 📋](#sprint-23-ui-runtime-merges-into-ui-)
+- [Sprint 2.4: Every authored name loses its phase ordinal 📋](#sprint-24-every-authored-name-loses-its-phase-ordinal-)
+- [Sprint 2.5: One mutant record format, one registry 📋](#sprint-25-one-mutant-record-format-one-registry-)
+- [Sprint 2.6: The allowlist and the register reconcile 📋](#sprint-26-the-allowlist-and-the-register-reconcile-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -38,16 +38,7 @@ Register 1: a pure tree-and-resolution gate, no host and no cluster.
 
 ## Phase Status
 
-✅ Done — sealed 2026-08-17. `python3 tools/repository_conformance_gate.py` passes all fourteen sides on
-substrate `none`, lane `none`, natural `arm64`, untranslated: 1,965 enumerated source-snapshot paths carry no
-case-collision pair, all 58 relocation-map rows name a destination the section 2 target tree admits and a
-license the doctrine states, every planned move happened with nothing left behind, no tracked file names a
-departed path, every `hs-source-dirs` and `main-is` in the one authored package resolves, the one mutant
-registry covers all 411 mutations, rules `r13` and `r15` report zero findings, all six committed mutants
-redden their own check and no other, and 27 surfaces join completely to 27 enumerated items. `cabal build all
---dry-run` and `cabal test all --dry-run` resolve against the merged package. The run left no authored path
-created, changed, or removed, and published attestation
-`sha256:3ffff73d52edc6defb74411f65d0f51acb0ca86309f8a8c138fd81e5f06389b9`.
+⏸️ Blocked pending Phase-1 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
 
 **Corrected again 2026-08-18: a root can be retired and still be there.** Deleting the three CPP `#include`
 shims and the eighteen folded `mutants.tsv` files left six directory skeletons behind — `jitml/`, `jitml-ui/`,
@@ -57,7 +48,7 @@ none. They survived a run that passed on fourteen sides. The gate gains a `no-em
 and mutant **m7**, because a skeleton misleads a reader about what roots the tree has and a later move into
 one silently resurrects a root this phase retired.
 
-**Corrected twice more 2026-08-17, after the seal, by the phases downstream of it.** Phase 22's rerun showed
+**Corrected twice more 2026-08-17, after the seal, by the phases downstream of it.** Phase 16's rerun showed
 the registry had flattened eight schemas into two columns: the eighteen `mutants.tsv` files it folded used
 `operator`, `variant`, `target`, `locus`, or `surface` for their second column and `expected_locus`,
 `expected_red_locus`, `expected`, `fixture`, or `token` for their third, so five capabilities' records had come
@@ -70,10 +61,10 @@ two suites that enumerate items from the registry were reading its first column,
 id and is now the capability; each asks for its own capability's mutants instead. Phases 14 through 22 were
 re-run against the rebuilt registry and are green.
 
-**Corrected 2026-08-17, after the seal, by Phase 14's rerun.** The first mutant-registry build carried a
+**Corrected 2026-08-17, after the seal, by Phase 9's rerun.** The first mutant-registry build carried a
 mutation only when a committed body file or a build flag held it, and silently dropped 101 `mutants.tsv` rows
 across six capabilities whose mutation the owning gate materializes from its own code — a field-deletion sweep
-over an authored inventory has no file to point at. Phase 14's gate failed on its own missing manifest, which
+over an authored inventory has no file to point at. Phase 9's gate failed on its own missing manifest, which
 is the registry doing its job one phase later than it should have. The record format now names that third
 carrier explicitly (`gate:<path>`), so a mutation nothing can reach is still refused while one the gate
 applies itself is not mistaken for one. The build had also normalized every mutant id to lowercase-underscore,
@@ -145,7 +136,7 @@ deletions stay with their last consumer.
 
 **Three things the phase found that a positional move alone could not fix, and did not defer.** Two libraries
 exposed the same module name from two packages, which the package split had hidden and the merge turned into
-a collision; the module Phase 55's contract spec consumes is now
+a collision; the module Phase 76's contract spec consumes is now
 `Amoebius.Pulumi.Backend.CheckpointEnvelope`, which is what it was always about. Three files under the lift
 roots were CPP `#include` shims of a module that already lived in `src/` — a package-split artifact with no
 destination, so they were deleted rather than relocated. And `test/inject/mutants/` held two capabilities'
@@ -163,7 +154,7 @@ it when they rerun.
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on**: [Phase 1](phase_01_toolchain_spike.md)
+**Depends on:** [Phase 1](phase_01_toolchain_spike.md)
 
 **Requires**: `host-floor`
 
@@ -181,6 +172,7 @@ The gate's independent oracle is **not this phase's code**: it is `parse_target_
 authored fixture is `tools/layout_relocation_map.tsv`, one row per moved prefix carrying its old prefix, its
 new prefix, and the [§2.2](../documents/engineering/repository_layout_doctrine.md#22-present-day-roots-and-their-required-destination) destination cell that licenses the move; it was authored **before** the move, so
 the gate compares the tree against a plan rather than against itself.
+
 
 Seven committed mutants under `test/mutant/repository_conformance/`, each of which must redden its own named
 check and no other:
@@ -228,9 +220,11 @@ flowchart LR
   gate -->|"each mutant reddens its own check"| refusal
 ```
 *Orientation. Design intent. The oracle and the fixture both come from outside this phase's code: the tree is read out of [`repository_layout_doctrine.md`](../documents/engineering/repository_layout_doctrine.md), a document Phase 0 owns, and the map was written before the move it plans. A mutant that reddened no check, or reddened two, is visible here as a missing or a doubled edge.*
+- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
 
 ## Doctrine adopted
 
+- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact repository layout conformance and de-phased naming emits is a recipe over a content address, never an authored file.
 - [repository_layout_doctrine.md §2 — complete repository structure](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure):
   the target tree, its fixed second levels, and the seven singular `test/` role nouns.
 - [repository_layout_doctrine.md §2.1 — when a unit warrants its own build package](../documents/engineering/repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package):
@@ -262,9 +256,8 @@ flowchart LR
 ```
 *Orientation. Which sprint produces what the next consumes, ending at the gate; the seam rules are owned by [development_plan_standards.md §F](development_plan_standards.md#f-the-sprint-block-format). The de-phasing precedes the registry because a registry authored first would name a hundred paths the same phase then renames.*
 
-## Sprint 2.1: `test/`'s second level collapses to the seven role nouns ✅
-
-**Status**: Done — 470 files relocated, 132 consumers updated in the same edit
+## Sprint 2.1: `test/`'s second level collapses to the seven role nouns 📋
+**Status**: Planned
 **Implementation**: `test/**`, `tools/layout_relocation_map.tsv`
 **Blocked by**: none within the phase.
 **Independent Validation**: `git ls-files test/ | cut -d/ -f2 | sort -u` equals exactly the seven nouns [§2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure)
@@ -291,9 +284,8 @@ None. `test/`'s second level is `fixture`, `golden`, `harness`, `mutant`, `negat
 1,084 files. The pair the index held as `test/ui/` and `test/Ui/` — one directory on this host's
 case-insensitive filesystem — is one `test/spec/ui/`.
 
-## Sprint 2.2: The package-only roots become cabal stanzas ✅
-
-**Status**: Done — fourteen package declarations retired into one
+## Sprint 2.2: The package-only roots become cabal stanzas 📋
+**Status**: Planned
 **Implementation**: `amoebius.cabal`, `cabal.project`, `src/**`, `proto/**`, `test/**`
 **Blocked by**: Sprint 2.1
 **Independent Validation**: `cabal build all --dry-run` and `cabal test all --dry-run` resolve; no root outside
@@ -328,13 +320,12 @@ module already lives and for the same reason — `hs-source-dirs` is a search pa
 `Setup.hs` generated the Pulsar protobuf bindings. A root `Setup.hs` is not in the section 2 tree and
 [§2.1](../documents/engineering/repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package)
 admits no ground for a package that exists only to carry one, so the generator retired with the split. The
-`.proto` schema is at `proto/**` where the target tree puts it, and Phase 46 re-establishes binding generation
+`.proto` schema is at `proto/**` where the target tree puts it, and Phase 67 re-establishes binding generation
 against `.build/proto/**` — which is where the same tree line already sends the rendered bindings. The row is
 in the register.
 
-## Sprint 2.3: `ui-runtime/` merges into `ui/` ✅
-
-**Status**: Done — one PureScript root under one spago project
+## Sprint 2.3: `ui-runtime/` merges into `ui/` 📋
+**Status**: Planned
 **Implementation**: `ui/**`
 **Blocked by**: Sprint 2.2
 **Independent Validation**: one spago project; every authored PureScript module is reachable from it.
@@ -360,9 +351,8 @@ named `ui-runtime/`'s spago output moved with it, in both contracts and in
 still beneath an authored root is a **behavioural** residue rather than a positional one: retargeting spago's
 output into `.build/**` belongs to the phase that owns the UI build, and the `r14` row is narrowed to it.
 
-## Sprint 2.4: Every authored name loses its phase ordinal ✅
-
-**Status**: Done — 468 paths, 216 build flags, 43 `main-is` values, one ignore rule
+## Sprint 2.4: Every authored name loses its phase ordinal 📋
+**Status**: Planned
 **Implementation**: `tools/**`, `test/**`, `src/**`, `amoebius.cabal`, `.gitignore`, `.dockerignore`
 **Blocked by**: Sprint 2.2
 **Independent Validation**: the `r15` audit reports zero findings; the only ordinal-bearing names left are
@@ -387,7 +377,7 @@ makes every future re-baseline documentation-only.
 ### Remaining Work
 None. **The ordinal a tree name carried was the *pre*-amendment one**, so the capability came from the same
 join `tools/migration_allowlist.tsv` already recorded between a `tools/phaseNN_*` glob and the phase that now
-owns it — `tools/phase31_gate.py` is `tools/platform_services_2_gate.py`, not Phase 37's anything. A data file
+owns it — `tools/phase31_gate.py` is `tools/platform_services_2_gate.py`, not Phase 58's anything. A data file
 grouped under its capability directory (`test/mutant/content_store_workflow/lease_election.mutant`), matching
 the already-conforming half of the tree; a Haskell suite main kept its descriptive half
 (a `PhaseNNServicesLiveSpec.hs` became `ServicesLiveSpec.hs`) except where that half was not distinctive on its
@@ -399,9 +389,8 @@ and `r15` does not scan it; the tree's own precedent — `PHASE26_*` beside `obj
 the phase that owns the module. Renaming two hundred macros across the Haskell sources would be a behavioural
 edit this phase's scope excludes.
 
-## Sprint 2.5: One mutant record format, one registry ✅
-
-**Status**: Done — 411 mutations in one registry, 99 of them formerly reachable only by a build flag
+## Sprint 2.5: One mutant record format, one registry 📋
+**Status**: Planned
 **Implementation**: `test/mutant/**`, `tools/mutant_registry.py`
 **Blocked by**: Sprint 2.4
 **Independent Validation**: every mutation is a registry row; no mutation is carried by a build flag alone.
@@ -432,9 +421,8 @@ records what is known and marks the rest `unstated` — and the gate admits `uns
 whose phase the tracker does not mark Done, so the first phase to seal against a mutation must state its
 operator and locus to get past its own gate. That is a ratchet, not a blank.
 
-## Sprint 2.6: The allowlist and the register reconcile ✅
-
-**Status**: Done — deferral total 876 → 314
+## Sprint 2.6: The allowlist and the register reconcile 📋
+**Status**: Planned
 **Implementation**: `tools/migration_allowlist.tsv`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`
 **Blocked by**: Sprint 2.5
 **Independent Validation**: the allowlist is shrink-only, so a deleted row *is* the closure evidence; the

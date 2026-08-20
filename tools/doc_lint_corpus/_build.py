@@ -36,6 +36,13 @@ DEST = os.path.join(ROOT, "gen", "test-corpora", "doc_lint")
 # and matrix row would seed three defects, not one.
 MUTATIONS = [
     # -- (a) header metadata, one negative per facet ------------------------
+    # -- section M clause 13: a contract that adopts the extension contract and
+    #    then discharges nothing. The doctrine citation stays, so the only thing the
+    #    lint can be reacting to is the missing discharge.
+    ("f6_extension_discharge_missing", "f6", set(), [
+        ("DEVELOPMENT_PLAN/phase_01_example.md",
+         "- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; negatives under `test/negative/example/`.\n\n",
+         "")]),
     ("a1_status_not_in_enum", "a1", set(), [
         ("documents/engineering/example_doctrine.md",
          "**Status**: Authoritative source", "**Status**: doctrine / notes")]),

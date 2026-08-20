@@ -32,7 +32,7 @@ LOCUS = ROOT / "test/oracle/capability_bind/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/capability-bind/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/capability-bind/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/capability-bind"
-CONTRACT = "DEVELOPMENT_PLAN/phase_17_capability_bind.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_30_capability_bind.md"
 GATE_COMMAND = "python3 tools/capability_bind_gate.py"
 EXPECTATIONS = "test/oracle/capability_bind_surfaces.tsv"
 
@@ -284,7 +284,7 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=11, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
+        phase=30, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()

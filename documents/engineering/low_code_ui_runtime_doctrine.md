@@ -17,7 +17,7 @@ owned by [browser_offline_runtime_doctrine.md](./browser_offline_runtime_doctrin
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_25_ui_program_schema.md, DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_27_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_28_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_29_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_30_offline_language_plan.md, DEVELOPMENT_PLAN/phase_31_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_33_ui_local_composition.md, DEVELOPMENT_PLAN/phase_47_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_49_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_51_ui_program_release.md, DEVELOPMENT_PLAN/phase_61_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_63_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_64_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_65_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_66_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_72_jitml_ui_lift.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_workflow_lifting.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_41_offline_language_plan.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_72_ui_program_release.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md, DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_workflow_lifting.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
@@ -151,12 +151,12 @@ The client projection cannot contain provider coordinates, internal resource ide
 role-binding rules, raw policy, or handler implementation details. The server projection cannot trust a client
 claim merely because the matching client plan would normally emit it.
 
-[Phase 29](../../DEVELOPMENT_PLAN/phase_29_ui_plan_compiler.md) validates this projection boundary in Register
+[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) validates this projection boundary in Register
 1. One opaque bound value emits byte-pinned client, private server, public-contract, and content-manifest JSON;
 concrete SHA-256 identities include private authority and resolved-link sources, and reversed insertion order in
 fresh cache-disabled processes preserves every byte. Both runtime interpreters remain UNVERIFIED.
 
-[Phase 31](../../DEVELOPMENT_PLAN/phase_31_ui_browser_interpreter.md) validates the client half in Register 2.
+[Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) validates the client half in Register 2.
 One pinned generic PureScript bundle interprets two plan values in real Chrome; its transitions agree with an
 independent Haskell semantics, its DOM/focus/transport observations match authored pins, and CSP, artifact,
 fresh-challenge, OS-network, and nine mutant checks pass. The UI-server interpreter, real authority/provider
@@ -286,7 +286,7 @@ and built-artifact gate test the canonical destination and absence of open-redir
 destination requires review of the trusted catalog; changing application Dhall cannot add one.
 
 The authored subset is built and validated in
-[Phase 25](../../DEVELOPMENT_PLAN/phase_25_ui_program_schema.md). Its closed `UiSource` record admits named link
+[Phase 37](../../DEVELOPMENT_PLAN/phase_37_ui_program_schema.md). Its closed `UiSource` record admits named link
 requirements but no raw URL field; the Register-1 gate checks this representational boundary only.
 
 ---
@@ -347,7 +347,7 @@ The PureScript runtime does not reproduce these proofs. It receives a compact pl
 possible only from the sealed Haskell value, validates its plan envelope and digest, and interprets the same
 closed instruction set defensively.
 
-Phase 25 implements the first checked graph with private `CheckedUiProgram` construction and total identity,
+Phase 37 implements the first checked graph with private `CheckedUiProgram` construction and total identity,
 reference, cycle, bound, port, event, and public-projection checks. Runtime interpretation, binding, scope, and
 authorization remain later-phase obligations.
 
@@ -487,7 +487,7 @@ request identifier, session epoch, and encoded public input. The authenticated e
 trusted subject, tenant scope, grants, authorization-policy version, and trace/audit context. A field duplicated
 inside the public input has no authority and is rejected when the contract forbids it.
 
-[Phase 28](../../DEVELOPMENT_PLAN/phase_28_ui_effect_binding.md) validates this pure binding seam. Seven closed
+[Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md) validates this pure binding seam. Seven closed
 effect arms exact-join independently authored handler, codec, scope, capability, retry, and audit tuples; named
 links independently exact-join two canonical fixed-HTTPS catalog entries. Provider coordinates and using a link
 as effect transport reject before `BoundUiProgram` exists. Browser, handler, and provider enforcement remains
@@ -511,6 +511,16 @@ flowchart LR
 
 ## 9. Routes, identity, authorization, and the edge
 
+> **The laws this section instantiates.** A route's relationship to identity is governed by
+> [`extension_conformance_security.md`](./extension_conformance_security.md): a handler is a function from a
+> scope obtained by authenticating, never from a request
+> ([§S2](./extension_conformance_security.md#s2-the-scope-is-skolemised-not-passed)); an anonymous caller
+> cannot name a scope, which is why the non-optional policy below is a type rather than a convention
+> ([§S1](./extension_conformance_security.md#s1-authentication-is-an-index-not-a-check)); and a refusal
+> discloses nothing about what it refused
+> ([§S4](./extension_conformance_security.md#s4-a-refusal-reveals-nothing)). This section owns the route
+> algebra and the edge; the laws own why it has this shape.
+
 Every application route carries a non-optional `AuthPolicyRef`. There is no application-authored `Public`
 policy in the first runtime contract. Login initiation, callback handling, health checks, and immutable asset
 delivery are platform-owned endpoints and cannot be repurposed as application handlers.
@@ -532,20 +542,20 @@ That rendering decision is only presentation. Every port invocation is independe
 authorized by the server against current policy. A hidden button, disabled route, or client-side guard never
 confers or removes authority.
 
-[Phase 27](../../DEVELOPMENT_PLAN/phase_27_ui_authorization_kernel.md) validates the pure kernel behind this
+[Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md) validates the pure kernel behind this
 rule. One constructor-private registry emits byte-equal client/server projections, and only current policy,
 membership, grant, and scope epochs plus a successful scope join can construct `AuthorizedAction`; the
 independent matrix includes hidden-but-invocable and absent-policy cases. Live edge, identity-provider,
 UI-server, and provider enforcement remains UNVERIFIED.
 
-[Phase 47](../../DEVELOPMENT_PLAN/phase_47_user_tenant_isolation_live.md) discharges the live provider-enforcement
+[Phase 68](../../DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md) discharges the live provider-enforcement
 slice for scoped actions. A private Haskell adapter accepts verified Keycloak credential context and ignores
 hostile caller tenant/subject fields; paired own/foreign requests are checked through Postgres RLS, derived
 MinIO keys, native Pulsar namespaces, and enforcing NetworkPolicy. Three real credentials, external provider
 readback, zero forbidden state/cursor effects, exact cleanup, and two red authority mutants pass in Register 3.
-Browser tenant switching remains Phase 64, and complete provider-audit-log correspondence remains `UNVERIFIED`.
+Browser tenant switching remains Phase 82, and complete provider-audit-log correspondence remains `UNVERIFIED`.
 
-[Phase 49](../../DEVELOPMENT_PLAN/phase_49_ui_projection_runtime.md) validates the next private UI seam. Fresh
+[Phase 70](../../DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md) validates the next private UI seam. Fresh
 Keycloak sessions become trusted request contexts; a server-sealed owner handle returns only its own challenged
 projection and watermark, while same-tenant foreign-owner, foreign-tenant, swapped-handle, guessed-id, forged-
 field, and stale-epoch variants return the same public denial. User credentials have no direct Pulsar path.
@@ -607,7 +617,7 @@ Confidentiality may be narrowed without new authority. Audience widening or cros
 closed named release/grant action with current authorization, declared purpose, target audience, audit class,
 and a server-issued result carrying the new label. There is no general declassification function.
 
-[Phase 26](../../DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md) builds and validates the pure scope and
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) builds and validates the pure scope and
 flow kernel behind this rule. Opaque identities, handles, labels, and witnesses match independent owner and flow
 tables; live identity-provider and provider-policy enforcement remains unverified.
 
@@ -655,7 +665,7 @@ declared byte and media constraints, performs configured quarantine/validation s
 short-lived opaque handles. Dhall cannot request a bucket, key, filesystem path, pre-signed provider URL, or
 arbitrary content type. The browser never receives MinIO, SQL, Pulsar, Vault, or inference-engine credentials.
 
-The Phase-49 live fold realizes this rule for workflow read models: every row key and subscription retains
+The Phase-70 live fold realizes this rule for workflow read models: every row key and subscription retains
 `(AppId, TenantId, Owner, ProjectionId)`, every receipt retains the original scoped `CommandId`, workflow work
 id, and handle, and conflicting normalized input produces `IdempotencyConflict` with zero new effect. Update,
 tombstone, recreate, exact redelivery, and resume from a non-final cursor match the independent Phase-0 tables.
@@ -668,13 +678,13 @@ Owned by [low_code_ui_workflow_lifting.md](./low_code_ui_workflow_lifting.md), a
 
 ## 13. Generic PureScript client and amoebius UI server
 
-Phase 63's scoped result implements and tests the single-tenant authorization, Origin/CSRF, provider-edge, cross-replica routing, and durable-receipt kernels. A real local socket transfers a fresh challenge between distinct endpoint roles. Fresh OIDC/browser, Keycloak/Envoy, Kubernetes replicas, and retained provider observations remain UNVERIFIED.
+Phase 81's scoped result implements and tests the single-tenant authorization, Origin/CSRF, provider-edge, cross-replica routing, and durable-receipt kernels. A real local socket transfers a fresh challenge between distinct endpoint roles. Fresh OIDC/browser, Keycloak/Envoy, Kubernetes replicas, and retained provider observations remain UNVERIFIED.
 
-Phase 64's scoped result adds opaque tenant choices, current-membership selection, scope-epoch rotation, stale-handle invalidation, and tenant/subject/epoch-keyed routing. Phase 65 adds immutable A→B→A transition state, watermark-gated traffic shifts, stale-plan reload, tenant/owner/stream cursor isolation, and old-epoch registration drain. Their local contract, durability, and mutation evidence is tested; real Keycloak, Gateway API/Envoy, Pulsar, browser, Kubernetes, CNI, and provider observations remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; when pristine Linux is needed, use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows.
+Phase 82's scoped result adds opaque tenant choices, current-membership selection, scope-epoch rotation, stale-handle invalidation, and tenant/subject/epoch-keyed routing. Phase 83 adds immutable A→B→A transition state, watermark-gated traffic shifts, stale-plan reload, tenant/owner/stream cursor isolation, and old-epoch registration drain. Their local contract, durability, and mutation evidence is tested; real Keycloak, Gateway API/Envoy, Pulsar, browser, Kubernetes, CNI, and provider observations remain UNVERIFIED. Every hardware substrate can always run `linux-cpu`; when pristine Linux is needed, use Incus on Linux or Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 
-Phase 66's scoped result admits only three-zone hard-spread UI-server, projector, Redis, and Keycloak shapes; it also pins PDB, non-sticky, whole-zone fault, current-authority, and durable-repair rules. A three-role loopback process probe survives loss of one role with one durable effect. Real provider-zone failure and off-cluster identity/data/network observers remain UNVERIFIED, so this is not an HA claim. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 84's scoped result admits only three-zone hard-spread UI-server, projector, Redis, and Keycloak shapes; it also pins PDB, non-sticky, whole-zone fault, current-authority, and durable-repair rules. A three-role loopback process probe survives loss of one role with one durable effect. Real provider-zone failure and off-cluster identity/data/network observers remain UNVERIFIED, so this is not an HA claim.
 
-Phase 30 implements `OnlineOnly | Offline` and exact-key paired client/replay projections at Register 1. The closed compiler makes bounds and replay semantics mandatory, permits only the two initial ML start operations, and exposes no browser or Redis mechanism. Runtime behavior remains UNVERIFIED. Every hardware substrate can always run `linux-cpu`; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Phase 41 implements `OnlineOnly | Offline` and exact-key paired client/replay projections at Register 1. The closed compiler makes bounds and replay semantics mandatory, permits only the two initial ML start operations, and exposes no browser or Redis mechanism. Runtime behavior remains UNVERIFIED.
 
 The client is one generic PureScript interpreter, versioned with the UI language and component catalog. It
 loads an immutable `ClientPlan`, verifies its envelope and digest, decodes public values, renders only trusted
@@ -709,20 +719,20 @@ incompatible binding for a referenced identity refuses readiness; there is no re
 name-based fallback. The generic binary may link handlers unused by a particular app, but they are unreachable
 because they are absent from that app's sealed dispatch table.
 
-[Phase 32](../../DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md) validates this boundary locally in Register 2.
+[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) validates this boundary locally in Register 2.
 The `serve-ui` responsibility derives request context from HMAC-signed credentials minted by a separate
 post-start authority process, refuses foreign/spoofed/revoked/origin/stale requests before a separate guarded
 handler sees bytes, and enforces startup exact-join, stable retry identity, fixed public headers/assets,
 private-plan non-disclosure, and scoped WebSocket admission. Keycloak, the live edge, provider policy,
 deployment, replica loss, and HA remain UNVERIFIED.
 
-[Phase 33](../../DEVELOPMENT_PLAN/phase_33_ui_local_composition.md) composes the client and server halves in
+[Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md) composes the client and server halves in
 Register 2. Two Dhall-authored applications reuse one generic bundle and the same `serve-ui` responsibility;
 real Chrome carries a fresh nonce through workflow start, ready receipt, an owner-paired artifact handle, and
 result rendering against separate infernix-/jitML-shaped fakes. Foreign users, copied/non-ready handles, and a
 direct browser/backend probe remain effect-free. Real domain adapters and all live layers remain UNVERIFIED.
 
-[Phase 47](../../DEVELOPMENT_PLAN/phase_47_user_tenant_isolation_live.md) validates the downstream live
+[Phase 68](../../DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md) validates the downstream live
 request-context-to-provider boundary used by this responsibility: real Keycloak password credentials are
 authenticated and introspected, authority is supplied through a constructor-private request value, and
 provider operations stay tenant/subject scoped under hostile body fields. It does not claim a browser,
@@ -794,10 +804,10 @@ and contract identity required by its port. During a rolling release, the server
 only when a checked compatibility witness covers the accepted pair. Without that witness, a stale client
 receives a typed `ReloadRequired` response and no effect executes.
 
-[Phase 51](../../DEVELOPMENT_PLAN/phase_51_ui_program_release.md) validates the fail-closed base case with two
+[Phase 72](../../DEVELOPMENT_PLAN/phase_72_ui_program_release.md) validates the fail-closed base case with two
 immutable releases: only the exact A-client/A-server and B-client/B-server pairs dispatch, while stale
 authority/content digests, either missing half, either mixed pair, an omitted digest, and a hand-authored tuple
-all return `ReloadRequired` before effect. Both releases use the same Phase-36 generic runtime image; no
+all return `ReloadRequired` before effect. Both releases use the same Phase-56 generic runtime image; no
 per-program image is built. The gate does not establish arbitrary compatibility witnesses or rolling
 overlap/reconnect, which remain UNVERIFIED until their owning phases run.
 

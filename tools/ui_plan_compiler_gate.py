@@ -49,7 +49,7 @@ RESULTS = ROOT / ".build/dsl/ui-plan-compiler/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-plan-compiler/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-plan-compiler"
 TEMP_ROOT = ROOT / ".build/tmp/ui-plan-compiler"
-CONTRACT = "DEVELOPMENT_PLAN/phase_29_ui_plan_compiler.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md"
 GATE_COMMAND = "python3 tools/ui_plan_compiler_gate.py"
 EXPECTATIONS = "test/oracle/ui_plan_compiler_surfaces.tsv"
 
@@ -366,7 +366,7 @@ def surface_decisions(
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=20, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=40, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()

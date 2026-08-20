@@ -1,11 +1,11 @@
 # The Illegal-State Catalog — Index
 
 > **Purpose**: The index to the catalog of illegal and unsafe cluster states amoebius makes
-> unrepresentable — the themed map of *which* states are foreclosed (deep treatment in the eight themed
-> sub-catalogs), a pointer to the seven typing techniques + coverage matrix + foreclosure layers
+> unrepresentable — the themed map of *which* states are foreclosed (deep treatment in the nine themed
+> sub-catalogs), a pointer to the nine typing techniques + coverage matrix + foreclosure layers
 > ([`illegal_state_techniques.md`](./illegal_state_techniques.md)), and the honest limits: a type-check
-> proves the *spec composes*, not that the *running cluster enforces it*, and the catalog is *enumerated,
-> not proven exhaustive*.
+> proves the *spec composes*, not that the *running cluster enforces it*, and the catalog is a *covering over
+> a declared taxonomy*, exhaustive only relative to the axes that taxonomy names.
 > **Read this if**: a specific illegal state has to be located, or a new one has to be added to the enumeration.
 
 This document is the index of the illegal-state enumeration: it holds the numbering and the themed map, while
@@ -19,7 +19,7 @@ different file than its target.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_12_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_17_capability_bind.md, DEVELOPMENT_PLAN/phase_18_provision_seal.md, DEVELOPMENT_PLAN/phase_19_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_20_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_43_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_46_pulsar_client.md, DEVELOPMENT_PLAN/phase_50_release_lifecycle.md, DEVELOPMENT_PLAN/phase_56_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -45,7 +45,7 @@ entry uninhabitable.
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) owns the **DSL surface and the contract** ("a valid spec cannot represent illegal state") as a property of the language.
 - **This document** is the **index** for the catalog: it owns the framing ([§1](#1-illegal-states-fail-to-type-check)), the
   load-bearing honesty limit ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)), and the **themed map** ([§3](#3-the-catalog--states-a-valid-spec-cannot-represent)) of *which* states are illegal. The
-  *deep treatment* of each entry lives in one of the eight themed sub-catalogs; the *how* — the seven
+  *deep treatment* of each entry lives in one of the nine themed sub-catalogs; the *how* — the nine
   typing techniques, the coverage matrix, the three foreclosure layers, and the validation-locus axis —
   lives in [`illegal_state_techniques.md`](./illegal_state_techniques.md). Together they are the SSoT for
   **which platform invariants are type-enforced** (the question
@@ -53,22 +53,22 @@ entry uninhabitable.
 - The *normative rule* behind each catalog entry lives in that entry's owning doctrine
   (storage, gateway/ingress, secrets, …). The catalog names the owner and never restates its content.
 
-Phase 11 validates the dhall-typecheck subset in-process: its eight canonical no-arm/required-field negatives and
+Phase 25 validates the dhall-typecheck subset in-process: its eight canonical no-arm/required-field negatives and
 three image/process negatives fail against the authored closed Dhall schema, with independent shape oracles
-and mutants. Phase 12 validates the focused gadt-decode subset: distinct schema/domain/unspellable refinement
+and mutants. Phase 26 validates the focused gadt-decode subset: distinct schema/domain/unspellable refinement
 classes, tenant/state/owner compile indices, full positive-tree retention, and fail-closed import/exception
-handling (ledger `external-run-reference`). Phase 13 validates the exhaustive catalog projection: all 88
+handling (ledger `external-run-reference`). Phase 27 validates the exhaustive catalog projection: all 88
 entries and 104 named subcases reconcile, the 33 reached dhall-typecheck/gadt-decode subcases discharge, and the remaining
 73 subcases retain exact later owners (ledger `external-run-reference`). The
-[Phase 14 gate](../../DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md) then supplies exact-locus evidence for
-all 11 Phase-14-owned subcases: three dhall-typecheck foreclosures, seven compile-time index pairs, and the direct
+[Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) then supplies exact-locus evidence for
+all 11 Phase-9-owned subcases: three dhall-typecheck foreclosures, seven compile-time index pairs, and the direct
 base capacity/topology provision-seal fixtures, with 15 negative/twin pairs, two positives, four sampled
 properties, and 19 red mutants (ledger `external-run-reference`). The
-[Phase 15 gate](../../DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md) supplies exact-locus evidence for all
-five Phase-15-owned subcases: two dhall-typecheck bounded-training barriers and 27 storage-geometry variant/twin rows
+[Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) supplies exact-locus evidence for all
+five Phase-28-owned subcases: two dhall-typecheck bounded-training barriers and 27 storage-geometry variant/twin rows
 cover logical/physical fit, backup-medium fit, disjoint capacity pools, and restore-target fit; six sampled
 properties pass and 31 mutants are red (ledger `external-run-reference`). The
-[Phase 16 gate](../../DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md) supplies the two owned
+[Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) supplies the two owned
 accelerator loci plus 32 exact execution/runtime-storage/accelerator/provider-root negative/twin variants,
 two composed positives, seven sampled properties, and 45 red mutants (ledger
 `dynamically-resolved`). These are checked rejections at the pure `provision-seal` fold boundary.
@@ -87,7 +87,7 @@ back for status.
 **The types prove that the *specification* composes into something internally coherent. They do not prove that the *running deployment* enforces it.** Conflating the two proves the wrong theorem.
 
 Applied to the three correctness layers from the chaos/failover doctrine
-([`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md), generalized from prodbox's `chaos_hardening_doctrine.md`):
+([`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md), re-derived against the shape `prodbox` shows in its `chaos_hardening_doctrine.md`):
 
 - **What a green type-check *is*.** A Dhall type-check (and the GADT-indexed Haskell decode behind it,
   [`illegal_state_techniques.md`](./illegal_state_techniques.md))
@@ -110,7 +110,7 @@ to the pre-cluster gates, while the cluster-enforcement claim is **Register 3** 
 real-resource phases). This is the same split that
 [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
 draws in tier vocabulary: **Register 1/2** here is its **Tier-1** (design-time / in-process) band, and **Register 3** is its
-**Tier-2** runtime-enforcement residue (Phase 44).
+**Tier-2** runtime-enforcement residue (Phase 65).
 
 Diagram vocabulary: [diagram_conventions.md](../engineering/diagram_conventions.md).
 
@@ -147,7 +147,7 @@ This is the reference instance of the diagram scheme — node shape encodes the 
 ## 3. The catalog — states a valid spec cannot represent
 
 This section is the **themed map**. Each illegal state is treated in depth in exactly one
-of the eight themed sub-catalogs below; the *how* — the seven typing techniques, the coverage matrix, and
+of the nine themed sub-catalogs below; the *how* — the nine typing techniques, the coverage matrix, and
 the foreclosure layers — is owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). Each
 entry: the **failure** (how it goes wrong in raw k8s), the **owning doctrine** (the SSoT for the rule), the
 **technique** that forecloses it, and its **validation-locus** tag.
@@ -156,17 +156,20 @@ entry: the **failure** (how it goes wrong in raw k8s), the **owning doctrine** (
 
 1. **Spec-vs-cluster** ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)). A green type-check proves the *spec* composes, never that the *running cluster*
    enforces it. Every "unrepresentable" is design intent for the type discipline, not a tested runtime fact.
-2. **Enumerated, not exhaustive.** This list is the *best-known* set of foreclosed states, not a
-   closed-world proof that no other illegal state exists. "Deployable" is **not denotationally defined**, so
-   the catalog cannot claim completeness — it is an enumerated corpus that the pre-cluster gates hold as
-   regressions, extended whenever a new illegal shape is found. The [`dsl_doctrine.md` §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
-   slogan "if it decodes, it is deployable" must always be read with this qualifier: *deployable* names the
-   enumerated-and-foreclosed set, not a proven-total denotation.
+2. **A covering, exhaustive only relative to its declared axes.** The catalog is not a list that grows by
+   whoever last thought of something: it is a covering over the taxonomy declared in [`README.md`](./README.md),
+   in which every cell holds an entry or a stated reason why none can, and an unjustified empty cell is a
+   defect. That makes the gap *countable* — the property a bare enumeration never had, and the reason this
+   axis replaces the "enumerated, not exhaustive" framing that stood here before. What it does not supply is a
+   ground truth: the axes are a human choice, so a hazard lying along a dimension nobody declared stays
+   outside the claim ([`illegal_state_techniques.md` §6.2](./illegal_state_techniques.md#62-the-covering-obligation--exhaustive-relative-to-a-declared-taxonomy),
+   [`../documentation_standards.md` §16](../documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list)).
+   The [`dsl_doctrine.md` §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
+   slogan "if it decodes, it is deployable" must always be read with that qualifier.
 
 **The validation-locus axis.** Orthogonal to *which foreclosure layer* catches a state (type-reject vs
 decode-reject vs runtime-check — [`illegal_state_techniques.md`](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)) is *where in the toolchain* the failure surfaces. Every
-sub-catalog entry carries a **Validation-locus** tag drawn from five values —
-`dhall-typecheck`, `gadt-decode`, `extension-astcheck`, `provision-seal`, `rendered-output-golden`, and `live-effect` — each
+sub-catalog entry carries a **Validation-locus** tag drawn from the six values the axis declares, each
 defined in [`illegal_state_techniques.md` §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer),
 the SSoT for the axis. Most entries name a primary locus plus a live-effect residue.
 
@@ -237,15 +240,25 @@ the SSoT for the axis. Most entries name a primary locus plus a live-effect resi
 - [§3.81](./illegal_state_security.md#381-a-ui-value-flowing-to-an-incompatible-tenant-subject-or-audience-scope) — A UI value flowing to an incompatible tenant, subject, or audience scope
 - [§3.83](./illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed) — A UI plan executed after an authority-bearing source changed
 
+### Tenancy, scope & authentication — [`illegal_state_tenancy.md`](./illegal_state_tenancy.md)
+
+- [§3.91](./illegal_state_tenancy.md#391-an-unauthenticated-route-whose-scope-comes-from-the-request) — An unauthenticated route whose scope comes from the request
+- [§3.92](./illegal_state_tenancy.md#392-a-scope-filter-whose-absent-value-means-every-scope) — A scope filter whose absent value means every scope
+- [§3.93](./illegal_state_tenancy.md#393-a-locally-reconstructed-session-bearing-the-type-of-an-attested-one) — A locally reconstructed session bearing the type of an attested one
+- [§3.94](./illegal_state_tenancy.md#394-two-same-typed-scope-identifiers-exchangeable-at-a-call-site) — Two same-typed scope identifiers exchangeable at a call site
+- [§3.95](./illegal_state_tenancy.md#395-a-replay-key-that-does-not-name-its-scope) — A replay key that does not name its scope
+- [§3.96](./illegal_state_tenancy.md#396-a-scope-column-that-admits-null) — A scope column that admits null
+- [§3.97](./illegal_state_tenancy.md#397-a-scope-key-whose-rendering-is-not-injective) — A scope key whose rendering is not injective
+
 ### Capability & messaging — [`illegal_state_capability_messaging.md`](./illegal_state_capability_messaging.md)
 
-- [§3.12](./illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability) — An app that names a product instead of a capability. Phase 17 validates the `Minio` constructor is absent at dhall-typecheck; live provider behavior is unverified.
+- [§3.12](./illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability) — An app that names a product instead of a capability. Phase 30 validates the `Minio` constructor is absent at dhall-typecheck; live provider behavior is unverified.
 - [§3.23](./illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload) — A non-CBOR Pulsar payload
 - [§3.82](./illegal_state_capability_messaging.md#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary) — A browser effect or provider call escaping the server-mediated capability boundary
 
 ### ML assets & training — [`illegal_state_ml_asset.md`](./illegal_state_ml_asset.md)
 
-- [§3.25](./illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) — An ML asset named by arbitrary URL (or an unready / unlanded model). Phase 17 validates the URL arm is absent at dhall-typecheck; readiness, landing, and resolution remain deferred.
+- [§3.25](./illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) — An ML asset named by arbitrary URL (or an unready / unlanded model). Phase 30 validates the URL arm is absent at dhall-typecheck; readiness, landing, and resolution remain deferred.
 - [§3.32](./illegal_state_ml_asset.md#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention) — A continuous training run with no checkpoint cadence, or a feed with no bounded retention
 - [§3.33](./illegal_state_ml_asset.md#333-a-multi-partition-training-feed-with-no-defined-merge-order) — A multi-partition training feed with no defined merge order
 - [§3.34](./illegal_state_ml_asset.md#334-an-app-serving-or-continuing-another-apps-model-without-a-grant) — An app serving or continuing another app's model without a grant
@@ -301,17 +314,18 @@ the catalog links back there for status and never restates it.
 
 ## Related Documents
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract this catalog enumerates.
-- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques, the coverage
+- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the nine typing techniques, the coverage
   matrix, the three foreclosure layers, and the validation-locus axis.
-- The eight themed sub-catalogs — the deep treatment of each entry:
+- The nine themed sub-catalogs — the deep treatment of each entry:
   [`illegal_state_storage.md`](./illegal_state_storage.md),
   [`illegal_state_topology.md`](./illegal_state_topology.md),
   [`illegal_state_capacity.md`](./illegal_state_capacity.md),
   [`illegal_state_security.md`](./illegal_state_security.md),
+  [`illegal_state_tenancy.md`](./illegal_state_tenancy.md),
   [`illegal_state_capability_messaging.md`](./illegal_state_capability_messaging.md),
   [`illegal_state_ml_asset.md`](./illegal_state_ml_asset.md),
   [`illegal_state_multicluster.md`](./illegal_state_multicluster.md),
   [`illegal_state_lifecycle.md`](./illegal_state_lifecycle.md).
 - [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) — the runtime-enforcement proof this catalog defers.
-- [`../README.md`](../README.md) — the top-level documentation index (the engineering and illegal-state families).
+- [`../README.md`](../README.md) — the top-level documentation index (the engineering, illegal-state, and extension-contract families).
 - [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md) — status and gates.

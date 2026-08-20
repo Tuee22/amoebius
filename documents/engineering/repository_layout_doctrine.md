@@ -15,7 +15,7 @@ rule in [`generated_artifacts_doctrine.md`](./generated_artifacts_doctrine.md) i
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_36_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -79,15 +79,16 @@ amoebius/
 ├── DEVELOPMENT_PLAN/**                   authored plan suite: rulebook, tracker, one contract per phase
 ├── documents/**                          authored doctrine suite and illegal-state catalog
 ├── src/**                                authored Haskell library source; one module tree, read by GHC
+│   └── vendor/**                         forked upstreams amoebius maintains as its own source, one directory per fork
 ├── app/amoebius/**                       the one executable's main module and its entry-point-only helpers
-├── dhall/**                              authored schemas, examples, and catalogs; read by the Dhall interpreter
+├── dhall/**                              TRANSITIONAL: renders to .build/dhall/; retires with its closing phase
 │   └── amoebius/Role.dhall               the closed process/role vocabulary every other module imports
-├── proto/**                              authored protobuf schemas; bindings render to .build/proto/
-├── ui/**                                 authored PureScript source and its one spago project
+├── proto/**                              TRANSITIONAL: renders to .build/proto/; retires with its closing phase
+├── ui/**                                 TRANSITIONAL: emitted output renders to .build/ui/; the interpreter's source moves to src/
 ├── pb/**                                 authored Python distribution whose console script is `pb`
-├── pulumi/**                             authored programs the Pulumi engine executes verbatim
+├── pulumi/**                             TRANSITIONAL: renders to .build/pulumi/; retires with its closing phase
 ├── test/**                               authored specs, fixtures, goldens, negatives, oracles, mutants, harnesses
-├── tools/**                              authored gates, generators, lints, policy inputs, declared seed corpora
+├── tools/**                              TRANSITIONAL: renders to .build/tools/; authored oracles move to test/oracle/
 ├── probe/**                              the standalone toolchain probe: the one package resolved apart
 ├── vendor/**                             reviewed external source with recorded upstream provenance
 ├── patches/**                            reviewed compatibility patches applied to out-of-tree source
@@ -97,6 +98,20 @@ amoebius/
 ├── test-secrets-types.dhall              tracked test-secret field/type shape; contains no values
 └── test-secrets.dhall                    ignored test-only cleartext values; never production input
 ```
+
+**Five rows are marked TRANSITIONAL, and the marker is a commitment rather than a hedge.** `dhall/`, `proto/`,
+`ui/`, `pulumi/`, and `tools/` each holds an artifact class that the generative re-baseline makes *rendered from
+Haskell types* rather than authored, so at completion there is nothing for any of them to contain
+([`jit_artifact_doctrine.md` §2](./jit_artifact_doctrine.md#2-the-rule-and-the-closed-exception-list)). Their
+rendered forms live beneath `.build/**` ([§3.1](#31-canonical-build-tree)) and their destinations are recorded
+per root in [§2.2](#22-present-day-roots-and-their-required-destination).
+
+They stay in this tree until the phase that closes each one, because the row and the **relocation map** move
+together: the map's destination cells are checked against this tree, so deleting a row here while a completed
+relocation still points at it turns one intended change into a page of unrelated findings. The removal is
+therefore part of the plan-suite re-baseline that re-bases the map, not of the doctrine amendment that states
+the target. Until then the marker is what a reader sees, and a `TRANSITIONAL` row may receive no new content —
+the same rule [§2.2](#22-present-day-roots-and-their-required-destination) applies to a migration surface.
 
 Two roots fix a second level, because their second level is where the taxonomy drifted:
 
@@ -114,6 +129,14 @@ app/
 ├── amoebius/Main.hs                      the one entry point: argv dispatch, nothing else
 └── amoebius/Amoebius/Entry/**            one entry-point-only seam per argv verb, never a second binary
 ```
+
+`src/vendor/**` is where a **forked upstream** lives once amoebius maintains it — a model checker, a refinement
+checker, a protocol client. It is distinct from the top-level `vendor/**`, which holds reviewed external source
+amoebius reads but does not own: a fork under `src/` compiles as part of the one package, carries amoebius's own
+obligations, and has no upstream maintainer to wait for
+([`formal_model_doctrine.md` §6.1](./formal_model_doctrine.md#61-the-proof-stack-is-amoebius-owned),
+[`lift_and_compose_doctrine.md` §2](./lift_and_compose_doctrine.md#2-the-two-non-dependencies)). One directory
+per fork, each recording the upstream commit it began from.
 
 `app/`'s second level has exactly one name, because there is exactly one executable and the role it runs is a
 decoded value rather than a filename
@@ -188,17 +211,22 @@ closure condition; none may receive new content.
 | `toolchain/bin/**`, `toolchain/runtime/**`, `toolchain/downloads/**`, `toolchain/cache/**` | `.build/toolchain/**`; the authored requirements file moves beside its only consumer under `tools/**` |
 | `docker/**` | **migrated.** The root is gone; the typed bake catalog under `dhall/**` is the authored half and `.build/docker/**/Dockerfile` the rendered one |
 | `app/singleton/**` | **relocated.** An `amoebius control-plane` verb over `app/amoebius/Amoebius/Entry/ControlPlane.hs`, beside the other seam and for the same reason: `hs-source-dirs` is a search path, not a module filter, so an entry point in `src/**` recompiles the shared core into the executable instead of linking it. The decoded `InClusterRole` arm stays with the phase that owns the role |
-| `infernix/app/**` | **migrated.** `test/spec/infernix/NativeDriver.hs` under a test-suite stanza; a gate driver is not an executable |
+| `infernix/app/**` | **the root is gone.** A seed's source tree is not an amoebius path under any name. What the driver exercised is re-derived as an amoebius extension and tested through the conformance gate ([`extension_conformance_doctrine.md`](./extension_conformance_doctrine.md)) |
 | `ui-runtime/**` | **migrated.** `ui/**`, under the one spago project at `ui/spago.yaml` |
-| the cabal-only package roots, the sibling-lift roots, and the `amoebius-*` package roots | **migrated.** All fourteen are stanzas in `amoebius.cabal`, their source under `src/**`, `test/**`, `proto/**`, and `dhall/**` |
-| out-of-tree `hs-source-dirs` reaching a sibling checkout | **migrated.** The infernix and jitML cores are `source-repository-package` entries in `cabal.project`, so the input is resolvable from the source snapshot |
+| the cabal-only package roots, the lift-era seed roots, and the `amoebius-*` package roots | **migrated.** Every surviving root is a stanza in `amoebius.cabal` over amoebius-owned source under `src/**`, `test/**`, `proto/**`, and `dhall/**`; the lift-era roots have no destination, because the code they held was a seed's |
+| out-of-tree `hs-source-dirs` reaching a seed checkout | **the root is gone.** No build input resolves outside this repository, and `source-repository-package` on a seed is forbidden by name ([`lift_and_compose_doctrine.md` §2](./lift_and_compose_doctrine.md#2-the-two-non-dependencies)). The structures those paths reached are re-derived as amoebius source under `src/**` |
 | root dependency lock/freeze files | `.build/locks/**` |
 | `toolchain/pins.json` | **migrated.** The authored half is the compatibility requirements — ranges, release channels, asset patterns, no paths; the resolved half is `.build/toolchain/resolved.json`, written per run |
 | `tools/doc_lint_corpus/**/negative_*` and `negative_multi_*` | keep authored positive seeds and mutation recipes; materialize negative copies under `.build/test-corpora/**` |
 | reference-program expected output beneath `test/golden/**` | retain the reference program and authored inputs; produce expected results under the run bundle |
-| frozen sibling-source and expected-hash tables | resolve the reviewed sibling boundary at run time and record observations under `.build/runs/**` |
+| frozen seed-source and expected-hash tables | **the tables are gone.** They pinned the contents of a checkout amoebius does not build; nothing downstream of the non-dependency rule has a boundary to freeze |
 | fixed versions, URLs, paths, or integrity fields in bootstrap/toolchain envelopes | split authored compatibility requirements from run-local resolution under `.build/toolchain/**` |
 | generated digest, checksum, trace, and expected-output fixtures | independently author and review the expectation, or regenerate it under the owning run bundle |
+| `dhall/**` | `.build/dhall/**`, reflected from the Haskell checked-IR types; an operator's own `InForceSpec` lives in the deployment that owns it, never here |
+| `proto/**` | `.build/proto/**`, rendered from the message types; the wire schema is a projection of them |
+| `ui/**` | `.build/ui/**` for every emitted contract, codec, and bundle; the generic interpreter's own source moves under `src/**` as ordinary authored source once its build is a recipe |
+| `pulumi/**` | `.build/pulumi/**`, rendered from the typed provider declarations |
+| `tools/**` | `.build/tools/**`, emitted from the declarations each tool checks; an independently authored oracle moves to `test/oracle/**`, where an authored expectation belongs |
 | `gen/**`, `dist-*/**`, `node_modules/**`, `toolchain/{bin,runtime,downloads,cache}/**` | the matching class beneath `.build/**` |
 | `/tmp/amoebius*`, `/var/tmp/amoebius*`, `/var/lib/amoebius/**`, `~/.amoebius/**`, `~/.local/share/amoebius/**` | `.build/**`, `.data/**`, or `.test_data/**` according to lifecycle; delete the external path after verified migration |
 | host-global Docker containers, volumes, build cache, and daemon data for amoebius | a project-scoped engine whose entire data root and runtime directory are beneath `.data/**` or `.test_data/**` |
@@ -317,6 +345,13 @@ patterns in §3.2. A generator requiring a new output class must amend this inve
 │   ├── screenshots/**
 │   ├── browser-profile/**
 │   └── topology/**
+├── host_ensure_kernel/**                 the ensure kernel's emitted plans; one such root per gate that emits
+├── artifacts/<address>/**                materialized JIT artifacts, one directory per content address
+├── recipes/**                            rendered recipes and the declaration digest each was rendered from
+├── grants/**                             per-region grant accounting: ceiling, concurrency, and outstanding reservations
+├── pulumi/**                             rendered provider programs
+├── tools/**                              emitted checking tools
+├── sql/**                                emitted schema, constraints, and row policies
 ├── docs/**                               generated dashboards and reports
 └── tmp/**                                disposable generator scratch space
 ```

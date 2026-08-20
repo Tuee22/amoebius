@@ -289,15 +289,15 @@ fabric to the home store.
 
 This document is normative single-logical-data-plane doctrine only. Delivery sequencing, completion status,
 and validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). For
-orientation only: the attach topology depends on the native Pulsar/MinIO client (Phase 46), the
-host-compute-daemon peer model it generalizes (Phase 74), and cloud spot provisioning + price-shopping
-(Phase 55), and rides the WireGuard fabric promoted from the former later-phase candidate into Phase 52 — but is
-*independent of Phase 53's geo-replication*, precisely because an attach pool is not a second cluster.
+orientation only: the attach topology depends on the native Pulsar/MinIO client (Phase 67), the
+host-compute-daemon peer model it generalizes (Phase 89), and cloud spot provisioning + price-shopping
+(Phase 76), and rides the WireGuard fabric promoted from the former later-phase candidate into Phase 73 — but is
+*independent of Phase 74's geo-replication*, precisely because an attach pool is not a second cluster.
 
 > **Honesty.** Everything here is Phase 0 **design intent**, specified before implementation. The
 > `DataPlane`/`FabricMember` binding, the remote-worker-pool-as-client model, and the attach-vs-second-cluster
 > distinction are **new amoebius design** — the host-compute-daemon peer model they generalize is itself an
-> unbuilt Phase-74 design, and its loopback-NodePort shape has only a prodbox precedent (evidence, not amoebius
+> unbuilt Phase-89 design, and its loopback-NodePort shape has only a prodbox precedent (evidence, not amoebius
 > proof). Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every prescriptive
 > statement as the contract amoebius intends to satisfy, never as a tested result.
 

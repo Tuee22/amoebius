@@ -17,7 +17,7 @@ decoupled from, owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doc
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_39_retained_storage.md, DEVELOPMENT_PLAN/phase_40_vault_pki.md, DEVELOPMENT_PLAN/phase_41_platform_backbone.md, DEVELOPMENT_PLAN/phase_42_platform_services_2.md, DEVELOPMENT_PLAN/phase_43_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_50_release_lifecycle.md, DEVELOPMENT_PLAN/phase_57_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_58_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_62_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_second_axis.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_folds.md, documents/engineering/resource_capacity_sources.md, documents/engineering/resource_capacity_storage.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -39,7 +39,7 @@ decoupled from, owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doc
 
 ---
 
-**Node-local read-side status.** The [Phase 16 gate](../../DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md)
+**Node-local read-side status.** The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md)
 validates model-pinned OCI content/snapshot joins, planned-slot versus observed-UID runtime metadata, closed
 layout routing, alias-aware backing groups, and physical raw-versus-VM-usable parent accounting. Live deletion,
 GC, allocation, and backing observation remain unverified; ledger `external-run-reference`.
@@ -73,9 +73,9 @@ model and the rebind contract, and references the rest.
 This model **generalizes** the single-node, host-path-only retained-storage scheme proven in the sibling
 prodbox project (`prodbox/documents/engineering/storage_lifecycle_doctrine.md`) and lifts it to amoebius's
 multi-node, multi-substrate world. Evidence inherited from prodbox remains evidence from a sibling system,
-not proof in amoebius. The Phase-39 amoebius retained-host slice is now independently live-tested: the exact
+not proof in amoebius. The Phase-60 amoebius retained-host slice is now independently live-tested: the exact
 scope and ledger are owned by
-[Phase 39](../../DEVELOPMENT_PLAN/phase_39_retained_storage.md). Phase 35 additionally live-tested the
+[Phase 60](../../DEVELOPMENT_PLAN/phase_60_retained_storage.md). Phase 55 additionally live-tested the
 linux-cpu distributed-service arm for MinIO's four retained drives and Pulsar's three ZooKeeper plus three
 BookKeeper claims; provider-backed arms remain design intent. Status and gates live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
@@ -209,7 +209,7 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Normative model. Phase 39 live-tested the host-retained arm: PV name and claimRef were pure identity functions, and independently observed fixed-size host images supplied the backing; provider-backed EBS remains a later-phase runtime proof obligation.*
+*Normative model. Phase 60 live-tested the host-retained arm: PV name and claimRef were pure identity functions, and independently observed fixed-size host images supplied the backing; provider-backed EBS remains a later-phase runtime proof obligation.*
 
 ---
 
@@ -236,7 +236,7 @@ all become guesswork. amoebius makes the declared size a **hard ceiling**, not a
   cannot spill past it onto shared host disk, and the mounted filesystem must expose at least the derived usable
   capacity. Provider volumes enforce the raw ceiling with the EBS volume size. A host-backed
   volume must name an amoebius-managed quota- or image-backed extent that enforces the same byte ceiling;
-  a raw shared-filesystem subdirectory is not an admissible `StorageBacking`. Phase 39 live-tested this
+  a raw shared-filesystem subdirectory is not an admissible `StorageBacking`. Phase 60 live-tested this
   enforcement with one fixed-raw-size ext4 image per retained PV: raw length equalled the private provisioned
   capacity, mounted usable capacity covered demand, and a fill plus one-byte write failed with `ENOSPC`
   without growing that image or consuming its sibling volume or shared host pools. The project does not
@@ -281,7 +281,7 @@ node-level precondition for the cluster-level guarantee in [§6](#6-the-lossless
 
 ### 5.2 The storage backing is bounded — the closed `StorageBacking` union
 
-**Pure read-side status.** The [Phase 15 gate](../../DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md)
+**Pure read-side status.** The [Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md)
 implements the closed Haskell `StorageBudget`/`StorageBacking` read side and independently tests physical
 geometry, filesystem presentation, allocation rounding, uniform per-backing claims, migrations, backup,
 restore, disjoint pools, and bounded snapshot-driven scaling (ledger
@@ -498,7 +498,7 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Normative model with delivered host-retained instances. Phase 39 observed the real cluster/node/API absent while host images retained run-unique bytes, recreated fresh cluster/PV/claim identities, and read the same Postgres row and MinIO object without a post-recreate write. Phase 41 then bound distributed MinIO/ZooKeeper/BookKeeper StatefulSet claims to identity-named fixed ext4 backings; provider instances remain later-phase proof obligations.*
+*Normative model with delivered host-retained instances. Phase 60 observed the real cluster/node/API absent while host images retained run-unique bytes, recreated fresh cluster/PV/claim identities, and read the same Postgres row and MinIO object without a post-recreate write. Phase 62 then bound distributed MinIO/ZooKeeper/BookKeeper StatefulSet claims to identity-named fixed ext4 backings; provider instances remain later-phase proof obligations.*
 
 **Deterministic rebind is guaranteed only when all of these hold** (adapted and generalized from the
 prodbox rebinding rules):
@@ -681,10 +681,10 @@ ReclaimEligible =
 > and external break-glass boundary) is design intent; treat it as a specification to be validated, never as a proven
 > result. Delivery is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
-Phase 50 is the validated database-schema instance of this discipline: two live PostgreSQL rounds performed
+Phase 71 is the validated database-schema instance of this discipline: two live PostgreSQL rounds performed
 `create-new → verified-migrate → retire-old`, matched an independent row oracle, and retained every old row
 after retirement. The broader volume-shrink and privileged reclaim machinery described above remains design
-intent; the Phase-50 retire step neither represented nor performed durable-byte deletion.
+intent; the Phase-71 retire step neither represented nor performed durable-byte deletion.
 
 ---
 
@@ -708,59 +708,54 @@ To keep the SSoT boundaries crisp:
 
 ### Validated Vault retained-state face
 
-Phase 40 exercised the Phase-39 retained-storage contract with the real root Vault: a 128 MiB fixed ext4 Raft
+Phase 61 exercised the Phase-60 retained-storage contract with the real root Vault: a 128 MiB fixed ext4 Raft
 image and a separate 64 MiB fixed ext4 rotated-audit image survived deletion of the kind node and every PV/PVC
 API object, rebound in a fresh cluster, and recovered the same Vault cluster id, canary, and PKI root by unseal
-only. The live Raft and audit high-water measurements remained below observed usable capacity. The proof ran on
-the universally available `linux-cpu` lane; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or
-WSL2 on Windows.
+only. The live Raft and audit high-water measurements remained below observed usable capacity.
 
 ## 10. Planning ownership
 
-Phase 48 consumes the retained Phase-39/41 MinIO backing without changing its lifetime rules. Its live gate
+Phase 69 consumes the retained Phase-60/41 MinIO backing without changing its lifetime rules. Its live gate
 writes immutable content and terminal-Job completion objects, proves failed-pointer-CAS orphan retention and
 fresh post-horizon deletion, then reports an empty test-owned MinIO remainder; normal platform teardown never
 deletes retained backing. This was validated on `linux-cpu`, a lane every hardware substrate can always run.
-When a pristine Linux host is needed, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
-Phase 54 exercises the same lifetime distinction during gateway movement. Graceful teardown is admitted only
-after synchronization and keeps the retained Phase-35 platform; chaos failover is labeled budgeted instead of
+Phase 75 exercises the same lifetime distinction during gateway movement. Graceful teardown is admitted only
+after synchronization and keeps the retained Phase-55 platform; chaos failover is labeled budgeted instead of
 lossless. The survivor-capacity check refuses durable, cache, ephemeral, compute, device, and unreachable
-shortfalls before resource release, and the live postflight removes only Phase-54 objects and temporary roots.
+shortfalls before resource release, and the live postflight removes only Phase-75 objects and temporary roots.
 
-Phase 57 adds the provider-storage model without claiming a provider effect. The pure contract keeps required
+Phase 78 adds the provider-storage model without claiming a provider effect. The pure contract keeps required
 usable bytes distinct from allocation-rounded bytes, seals a provider ID behind checked create receipt data,
 keeps old and replacement bytes/count/attachments/copy execution charged together, and renders only a Retain
 static-PV shape over a known handle. A retained-kind analogue preserved one marker across two PV API identities
 on one backing and separately observed opaque durable/ephemeral checkpoint keys in MinIO. The backing was
 hostPath, not EBS; real cluster-destroy EBS retention, CSI attach, same-handle reattach, cloud delete denial,
-and Phase-62 reclamation remain UNVERIFIED.
+and Phase-48 reclamation remain UNVERIFIED.
 
 This document is normative storage-lifecycle doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). This doc never maintains a competing
-status ledger; it states the target shape and links back for status. Phase 39 delivered and live-tested the
+status ledger; it states the target shape and links back for status. Phase 60 delivered and live-tested the
 host-side hard-cap, uniform-claim/backing admission, retained scaling/migration state machine, and
 delete/recreate rebind slice with ledger
 `dynamically-resolved`.
 Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
 that evidence must not be generalized to untested provider or control-plane subjects.
 
-Phase 41 further exercised the no-provisioner distributed-service face: four MinIO drive claims, three
+Phase 62 further exercised the no-provisioner distributed-service face: four MinIO drive claims, three
 ZooKeeper metadata claims, and three BookKeeper ledger claims bound to deterministic identity-named PVs backed
 by fixed ext4 images. Live capacity and exact projection checks passed, while the registry stored no PV of its
 own after its verified S3-driver rehome. This is a linux-cpu Register-3 tested result, not proof of consensus
-or provider storage. Every hardware substrate can always run `linux-cpu`; for a pristine Linux host use Incus
-on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+or provider storage.
 
-Phase 43 re-exercised the delete/recreate mechanism after the authenticated edge landed. The destructive
+Phase 64 re-exercised the delete/recreate mechanism after the authenticated edge landed. The destructive
 portion ran in the isolated `amoebius-keycloak-ingress-rebind` kind cluster so the retained Phase 35–43 platform stack
 remained available. The committed Keycloak-relational row payload and exact MinIO object survived old node/API
 absence and a run-two control plane with different CA, kube-system namespace UID, and node-container ID; no
 post-recreate writes preceded readback, and the scratch cluster was then removed while backing images remained.
-This is a regression projection of the Phase-39 storage guarantee, not a claim that the retained production-
-shaped edge cluster itself was destroyed. Every hardware substrate can always run its `linux-cpu` lane; use
-Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows for a pristine Linux host.
+This is a regression projection of the Phase-60 storage guarantee, not a claim that the retained production-
+shaped edge cluster itself was destroyed.
 
 ---
 

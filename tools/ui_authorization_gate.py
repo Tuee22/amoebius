@@ -41,7 +41,7 @@ RESULTS = ROOT / ".build/dsl/ui-authorization/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-authorization/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-authorization"
 TEMP_ROOT = ROOT / ".build/tmp/ui-authorization"
-CONTRACT = "DEVELOPMENT_PLAN/phase_27_ui_authorization_kernel.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md"
 GATE_COMMAND = "python3 tools/ui_authorization_gate.py"
 EXPECTATIONS = "test/oracle/ui_authorization_surfaces.tsv"
 
@@ -379,7 +379,7 @@ def surface_decisions(
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=18, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=38, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()

@@ -18,7 +18,7 @@ owned by [platform_services_doctrine.md](../engineering/platform_services_doctri
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_20_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_27_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_29_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_43_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_45_app_tenancy.md, DEVELOPMENT_PLAN/phase_47_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_64_ui_multi_tenant_live.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
@@ -38,8 +38,8 @@ This document is a **themed slice** of the illegal-state catalog: the security, 
 drawn from [`illegal_state_catalog.md`](./illegal_state_catalog.md) and reorganized as their own doc,
 reproducing each entry body faithfully. What this slice **authoritatively owns** is the per-entry
 **Validation-locus** classification it adds to each entry below. The **catalog index** (which states are illegal, in full) and the **load-bearing honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned
-by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
-**coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three foreclosure layers** ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal `dhall-typecheck` / `gadt-decode` / `provision-seal` / `rendered-output-golden` / `live-effect` classification each entry below carries) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice
+by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **nine typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
+**coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three foreclosure layers** ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal `dhall-typecheck` / `gadt-decode` / `provision-seal` / `rendered-artifact-oracle` / `live-effect` classification each entry below carries) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice
 **references** those; it does not restate them.
 
 Everything below is **design intent**, not a tested amoebius result. Per the honesty limit ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
@@ -54,7 +54,7 @@ correct manifests, whether the apiserver admits them, or whether the running clu
 
 Each entry keeps its **original catalog number and heading** (inbound links depend on the slug). The
 **Validation-locus** line added to each entry places it on the orthogonal validation-locus axis defined in
-[`illegal_state_techniques.md`](./illegal_state_techniques.md): `dhall-typecheck` (fails `dhall type` at authoring time), `gadt-decode` (the total decoder returns `Left`), `provision-seal` (post-bind Phase-18 provision returns a `ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by a golden test on the *rendered* manifest, not a live cluster), and `live-effect` (only observable at reconcile/runtime — the runtime-checked residue).
+[`illegal_state_techniques.md` §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer), which is the axis's single owner and enumerates its members.
 
 ```mermaid
 flowchart LR
@@ -63,7 +63,7 @@ flowchart LR
   g2["gadt-decode<br/>10 entries"]
   g3["extension-astcheck<br/>none in this slice"]
   ps["provision-seal<br/>1 entry"]
-  rg["rendered-output-golden<br/>2 entries"]
+  rg["rendered-artifact-oracle<br/>2 entries"]
   le["live-effect<br/>none in this slice"]
   g1 -->|"anything the typecheck admits"| g2
   g2 -->|"linked extension source only"| g3
@@ -71,11 +71,11 @@ flowchart LR
   ps -->|"anything the seal admits"| rg
   rg -->|"anything the golden admits"| le
 ```
-*Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. Security concentrates at the decoder, and carries two of the corpus's three rendered-output-golden entries. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
+*Orientation. Design intent. Where this slice's entries are caught, counted from the primary `**Validation-locus:**` of each entry below; an entry may also name a secondary locus, which this count does not show. Security concentrates at the decoder, and carries two of the corpus's three rendered-artifact-oracle entries. The axis itself is owned by [illegal_state_techniques.md §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer).*
 
 ### 3.3 Misconfigured gateway
 
-**Delivery-owner:** `Phase-13`
+**Delivery-owner:** `Phase-27`
 
 **Case-family:** `security`
 
@@ -89,13 +89,13 @@ with no matching service, cannot be written. **Owner:**
 **Layer:** type-foreclosed at the Haskell IR — a route to a non-existent backend has no constructor; runtime-checked residue — that the live gateway actually routes.
 **Validation-locus:** `gadt-decode` (a route is constructed only *from* a live service handle, and the
 cert/host name is a total function of the declared identity — a route to a non-existent backend or a listener
-with no matching service has no inhabitant) + `rendered-output-golden` (the emitted Gateway/HTTPRoute
+with no matching service has no inhabitant) + `rendered-artifact-oracle` (the emitted Gateway/HTTPRoute
 listeners and backends match the declaring service) + `live-effect` residue (that the LoadBalancer comes up
 and TLS actually terminates).
 
 ### 3.4 DNS that binds to the wrong IP
 
-**Delivery-owner:** `Phase-20`
+**Delivery-owner:** `Phase-33`
 
 **Case-family:** `security`
 
@@ -107,13 +107,13 @@ representation. **Owner:** [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_
 
 **Layer:** type-foreclosed at the Haskell IR — a name binds only to an allocated address, so an unowned target has no constructor; runtime-checked residue — that DNS actually resolves to it.
 **Validation-locus:** `gadt-decode` (the DNS binding is a total function of a service handle — there is no
-free string in which to type an unowned target IP) + `rendered-output-golden` (the emitted DNS record targets
+free string in which to type an unowned target IP) + `rendered-artifact-oracle` (the emitted DNS record targets
 the allocated LB address) + `live-effect` residue (the realized LoadBalancer address is what is actually bound
 at reconcile — the enforcement half the type cannot reach).
 
 ### 3.6 Blocking NetworkPolicy (services can't reach each other)
 
-**Delivery-owner:** `Phase-20`
+**Delivery-owner:** `Phase-33`
 
 **Case-family:** `security`
 
@@ -126,17 +126,17 @@ human never writes the policy. **Owner:**
 [`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md). **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the dependency graph is the single owner of connectivity) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a consumer handle only exists once the dependency edge does).
 
 **Layer:** type-foreclosed at the Haskell IR — NetworkPolicies are derived from the declared dependency graph and never hand-authored, so a severing policy has no constructor; runtime-checked residue — that the live CNI actually admits the traffic.
-**Validation-locus:** `rendered-output-golden` (the derived NetworkPolicy is checked in the emitted objects —
-a declared dependency is never a connection the policy blocks; Phase 20 validates exact edge-set equality
+**Validation-locus:** `rendered-artifact-oracle` (the derived NetworkPolicy is checked in the emitted objects —
+a declared dependency is never a connection the policy blocks; Phase 33 validates exact edge-set equality
 against its independent test-side oracle) + `gadt-decode` (the consumer handle exists
 only once the dependency edge does; the ownership fold over the dependency graph) + `live-effect` residue
-(that the CNI actually admits the derived flow). Phase 43 discharged that residue on linux-cpu with an
+(that the CNI actually admits the derived flow). Phase 64 discharged that residue on linux-cpu with an
 independent scratch Pod: absent edge denied, adding `scratch→minio` admitted, and removing it denied again;
 the policy-swap mutant failed the independently pinned set oracle.
 
 ### 3.7 Accidental insecure / backdoor ingress
 
-**Delivery-owner:** `Phase-13`
+**Delivery-owner:** `Phase-27`
 
 **Case-family:** `security`
 
@@ -152,18 +152,17 @@ host-local peer into a wild endpoint, and none that exposes a workload to the wi
 
 **Layer:** type-foreclosed at the Haskell IR — only the Keycloak edge holds the expose-to-wild capability and endpoint kinds do not interconvert; runtime-checked residue — that the running cluster in fact exposes no unauthenticated path.
 **Validation-locus:** `dhall-typecheck` (the application schema exposes no authorable wild-ingress or raw
-NodePort arm) + `rendered-output-golden` (the no-backdoor-ingress golden on the emitted objects — no wild
-NodePort or Keycloak-skipping Ingress in the rendered manifest, validated by Phase 20 in Register 1) + `gadt-decode` (only the edge holds
+NodePort arm) + `rendered-artifact-oracle` (the no-backdoor-ingress golden on the emitted objects — no wild
+NodePort or Keycloak-skipping Ingress in the rendered manifest, validated by Phase 33 in Register 1) + `gadt-decode` (only the edge holds
 the expose-to-wild capability, and endpoint kinds are distinct non-interconverting indices — a self-published
 wild endpoint has no constructor) + `live-effect` residue (that the running cluster in fact exposes no
-unauthenticated path). Phase 43 discharged that residue on linux-cpu: the sole LoadBalancer was the
+unauthenticated path). Phase 64 discharged that residue on linux-cpu: the sole LoadBalancer was the
 Keycloak/Envoy edge, a committed raw NodePort seed turned the scanner red and removal restored green, and the
 only allowed `HostLocalPeer` NodePort succeeded on node loopback while an actual WAN-Pod source was denied.
-Every hardware substrate can always supply this linux-cpu baseline at its own natural architecture; pristine Linux uses Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
 
 ### 3.8 Cross-tenant references and literal secrets
 
-**Delivery-owner:** `Phase-13`
+**Delivery-owner:** `Phase-27`
 
 **Case-family:** `security`
 
@@ -184,7 +183,7 @@ the child's Vault at runtime).
 
 ### 3.9 A plaintext spec at rest
 
-**Delivery-owner:** `Phase-40`
+**Delivery-owner:** `Phase-61`
 
 **Case-family:** `security`
 
@@ -206,7 +205,7 @@ ConfigMap or etcd — this row's enforcement is explicitly the runtime half).
 
 ### 3.10 A child spec that reaches beyond its own subtree
 
-**Delivery-owner:** `Phase-13`
+**Delivery-owner:** `Phase-27`
 
 **Case-family:** `security`
 
@@ -227,7 +226,7 @@ shape).
 
 ### 3.11 An unsafe workload (no resource limits, no hardened securityContext)
 
-**Delivery-owner:** `Phase-11`
+**Delivery-owner:** `Phase-25`
 
 **Case-family:** `security`
 
@@ -256,14 +255,14 @@ the generation discipline that makes the unsafe shape unconstructible is owned b
 `dhall type` at authoring) + `provision-seal` (the post-bind resource/capability fold must construct the opaque
 whole-deployment `ProvisionedSpec`, returning a `ProvisionError` before that seal when the selected target
 cannot supply any demand) +
-`rendered-output-golden` (the hardened non-root / no-privilege-escalation / dropped-capabilities /
+`rendered-artifact-oracle` (the hardened non-root / no-privilege-escalation / dropped-capabilities /
 read-only-root `securityContext` and the exact checked resource projection are present in the emitted
-manifest, validated by Phase 20 across all nine capability arms and both shapes) + `live-effect` residue (the running pod actually enforces the hardened context and resource
+manifest, validated by Phase 33 across all nine capability arms and both shapes) + `live-effect` residue (the running pod actually enforces the hardened context and resource
 ceilings).
 
 ### 3.40 A secure-gateway reach collapsing into wild ingress
 
-**Delivery-owner:** `Phase-20`
+**Delivery-owner:** `Phase-33`
 
 **Case-family:** `security`
 
@@ -280,13 +279,13 @@ The wild-ingress gateway (Keycloak/Envoy) stays wild-only. **Owner:**
 
 **Validation-locus:** `gadt-decode` (only the wild edge holds the `ExposeToWild` capability, and
 `SecureGatewayReach` is a distinct endpoint index with no constructor into `WildIngress` — the collapse has no
-inhabitant) + `rendered-output-golden` (the emitted objects carry no wild endpoint derived from the gateway
+inhabitant) + `rendered-artifact-oracle` (the emitted objects carry no wild endpoint derived from the gateway
 reach) + `live-effect` residue (that the authenticated secure-gateway wire actually stays non-wild at
 runtime).
 
 ### 3.42 An admin mutation without a root-token capability + an unsealed-Vault witness
 
-**Delivery-owner:** `Phase-40`
+**Delivery-owner:** `Phase-61`
 
 **Case-family:** `security`
 
@@ -319,7 +318,7 @@ not survive the host-daemon→control-plane daemon handoff) + `live-effect` resi
 
 ### 3.45 A cross-tenant or hand-authored RBAC binding
 
-**Delivery-owner:** `Phase-18`
+**Delivery-owner:** `Phase-31`
 
 **Case-family:** `capability-provision`
 
@@ -362,21 +361,21 @@ group (`TenantPolicyMinioGroupMismatch`), provider-quota supply
 (`UnsupportedTenantPolicyProviderObjectQuota`), MinIO static/dynamic drop/double-add
 (`MinioMetadataComponentMismatch`), and same-size/different-content (`PolicyContentDigestMismatch`) mutants
 reject before effects) +
-`rendered-output-golden` (only private provisioned projections emit a policy set matching the tenant→role
+`rendered-artifact-oracle` (only private provisioned projections emit a policy set matching the tenant→role
 graph, with no grant crossing a tenant tag) + `live-effect` residue (provider-state/action readback matches
 normalized content digests, one coalesced target/base witness, store-global MinIO components, and the sealed
 transition high-water; the policies refuse a live cross-tenant read).
 
-**Phase-45 evidence.** The Register-3 gate derives 18 qualified actions for two equal-shaped tenants and reads
+**Phase-66 evidence.** The Register-3 gate derives 18 qualified actions for two equal-shaped tenants and reads
 the resulting Keycloak, Vault, Pulsar, MinIO, Kubernetes, and Postgres administrative objects through six
 separated observers. The hand-authored-grant and outer/inner-tenant-mismatch twins have zero provider effects;
 `drop_provider_arm` and `collapse_tenant_key` both turn the unchanged gate red, and complete target inventories
-return to preflight. The actual cross-subject/cross-tenant request refusal remains the Phase-47 live-effect
-residue, not a Phase-45 claim. Ledger `external-run-reference`.
+return to preflight. The actual cross-subject/cross-tenant request refusal remains the Phase-68 live-effect
+residue, not a Phase-66 claim. Ledger `external-run-reference`.
 
 ### 3.79 A UI action whose server authorization does not match its declaration
 
-**Delivery-owner:** `Phase-27`
+**Delivery-owner:** `Phase-38`
 
 **Case-family:** `ui`
 
@@ -410,7 +409,7 @@ no Dhall arm) + `gadt-decode` (the referenced policy and public contracts resolv
 `provision-seal` (the normalized `PortId`, public contracts, handler, effect class, `AuthPolicyRef`, and scope
 tuples must match across the expanded gateway, server-dispatch, authorization, and audit projections before any
 plan is sealed) +
-`rendered-output-golden` (the emitted public routes terminate at the authenticated UI server, match the exact
+`rendered-artifact-oracle` (the emitted public routes terminate at the authenticated UI server, match the exact
 public-asset allowlist, and carry neither a handler-only bypass nor a private server-plan path) + `live-effect`
 residue (a direct unauthorized request and private-manifest fetch are denied).
 
@@ -422,22 +421,22 @@ unguarded, change a handler id without changing the policy, and serve the privat
 client asset; each must fail before effects or private disclosure. Black-box direct action and manifest
 requests are the live oracle, not a click-visibility test.
 
-**Phase-27 evidence.** The Register-1 gate matches five normalized registry tuples and byte-equal client/server
+**Phase-38 evidence.** The Register-1 gate matches five normalized registry tuples and byte-equal client/server
 projections against an independent extractor, matches six allow/deny rows and four exact stale-epoch failures,
 requires every denial to leave an empty pure effect trace, and kills both `default_allow` and
 `visibility_is_authorization`. Live gateway, UI-server, identity-provider, and provider-policy enforcement is
-still UNVERIFIED. See [Phase 27](../../DEVELOPMENT_PLAN/phase_27_ui_authorization_kernel.md).
+still UNVERIFIED. See [Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md).
 
-**Phase-32 evidence.** The Register-2 `serve-ui` process derives tenant, subject, permission, grant, and epoch
+**Phase-43 evidence.** The Register-2 `serve-ui` process derives tenant, subject, permission, grant, and epoch
 from a signed credential minted by a separate authority process. Own-scope read/mutation reaches a separate
 capability-guarded handler, while foreign, forged-header, revoked, wrong-origin, and stale twins produce zero
 handler bytes; startup, private-plan, idempotency, and WebSocket pairs also pass, and nine mutants turn red.
 Live Keycloak, edge exclusivity, provider policy, cluster deployment, and HA remain UNVERIFIED. See
-[Phase 32](../../DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md).
+[Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md).
 
 ### 3.80 A subject resolving or mutating another subject's resource without a grant
 
-**Delivery-owner:** `Phase-26`
+**Delivery-owner:** `Phase-8`
 
 **Case-family:** `ui`
 
@@ -466,7 +465,7 @@ residue — that the database, object store, message bus, caches, and live handl
 **Validation-locus:** `gadt-decode` (the public data/form algebra cannot construct a trusted scope, owner,
 grant, or opaque handle, and its declared scope kinds must agree) + `provision-seal` (ownership/grant resolution
 must succeed, and each bound data operation and provider policy must share the exact tenant, audience, resource,
-and action source) + `rendered-output-golden` (derived row policies/prefixes/namespaces carry the scoped
+and action source) + `rendered-artifact-oracle` (derived row policies/prefixes/namespaces carry the scoped
 predicates) + `live-effect` residue (cross-subject and cross-tenant probes return refusal without revealing
 existence).
 
@@ -478,12 +477,12 @@ drop only the tenant predicate, trust a browser-supplied tenant, key a cache by 
 grant after revocation; every cross-scope result must be indistinguishable from an unavailable resource and no
 mutation may occur.
 
-**Phase-26 evidence.** The Register-1 scope gate matches six owner/grant joins and the exact same-tenant
+**Phase-8 evidence.** The Register-1 scope gate matches six owner/grant joins and the exact same-tenant
 `OwnerMismatch` and cross-tenant `TenantMismatch` swaps. Raw `ResourceId` construction and scope retagging fail
 to compile, and the committed owner-equality mutant makes both swaps red. Provider enforcement remains the live
-residue. See [Phase 26](../../DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md).
+residue. See [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
 
-**Phase-47 evidence.** The Register-3 gate authenticates and introspects three real Keycloak credentials across
+**Phase-68 evidence.** The Register-3 gate authenticates and introspects three real Keycloak credentials across
 two tenants, then drives a constructor-private Haskell request context through paired own/foreign Postgres RLS,
 derived MinIO-key, and derived Pulsar-namespace operations. Independent provider and CNI observations find no
 foreign state, message, cursor, or network effect; exact teardown passes. `drop_user_predicate` and
@@ -493,7 +492,7 @@ provider-audit-log correspondence remain `UNVERIFIED`. Ledger
 
 ### 3.81 A UI value flowing to an incompatible tenant, subject, or audience scope
 
-**Delivery-owner:** `Phase-26`
+**Delivery-owner:** `Phase-8`
 
 **Case-family:** `ui`
 
@@ -519,7 +518,7 @@ the complete graph's dynamic labels and release edges are checked; `runtime-chec
 policies and the running renderer preserve the sealed scopes. **Validation-locus:** `gadt-decode` (the total
 information-flow fold returns every incompatible direct or transitive path) + `provision-seal` (late-bound data,
 workflow, model, messaging, storage, cache, and observability sinks must all be included before the flow graph is
-sealed) + `rendered-output-golden` (responses and provider policies contain no wider projection) + `live-effect`
+sealed) + `rendered-artifact-oracle` (responses and provider policies contain no wider projection) + `live-effect`
 residue (cross-audience probes and telemetry inspection reveal no protected value).
 
 **Independent oracle and mutants.** An independent graph checker computes transitive reachability from authored
@@ -529,14 +528,14 @@ formatter into a public response, log a labelled secret, key a cache without its
 topic, and feed untrusted model/browser text into an authority sink; each must identify the complete offending
 path before effects.
 
-**Phase-26 evidence.** The Register-1 flow gate matches four independently authored direct/transitive rows,
+**Phase-8 evidence.** The Register-1 flow gate matches four independently authored direct/transitive rows,
 meets six generated reject-class floors, and rejects general declassification at compile time. Cycle,
 missing-member, and transitive-leak diagnostics are total in the pure model; live sink behavior remains
-UNVERIFIED. See [Phase 26](../../DEVELOPMENT_PLAN/phase_26_scoped_identity_kernel.md).
+UNVERIFIED. See [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
 
 ### 3.83 A UI plan executed after an authority-bearing source changed
 
-**Delivery-owner:** `Phase-29`
+**Delivery-owner:** `Phase-40`
 
 **Case-family:** `ui`
 
@@ -565,7 +564,7 @@ immediately before effects; a mismatch is a fail-closed reload/conflict response
 **Layer:** `type-foreclosed` for re-tagging a sealed plan across generations; `decode-foreclosed` at plan sealing
 for incomplete or mismatched sources; currentness at request arrival is necessarily `runtime-checked`, because a
 type cannot prove that external policy or membership has not changed. **Validation-locus:** `provision-seal`
-(complete-source digest and exact-key equality must hold before a plan exists) + `rendered-output-golden` (the
+(complete-source digest and exact-key equality must hold before a plan exists) + `rendered-artifact-oracle` (the
 bundle and server projection carry the same non-authoritative plan identifier) + `live-effect` (the server
 compares against current authority immediately before execution and refuses an old plan/action without side
 effects).
@@ -578,18 +577,18 @@ current registry, publish only one plan half, swap equal-shaped client/server ge
 browser's claimed generation. Every stale or mixed replay must fail closed; a cosmetic-only change outside the
 declared source set remains executable, preventing an oracle that merely rejects all old bundles.
 
-**Phase-29 evidence.** The Register-1 compiler matches four logical projections, four canonical JSON goldens,
+**Phase-40 evidence.** The Register-1 compiler matches four logical projections, four canonical JSON goldens,
 four concrete SHA-256 identities, and six finite-demand cells. An independently assembled authority-source
 list detects both change and omission, opposite insertion orders in fresh processes are byte-identical, and all
 six projection/digest mutants turn red. Request-time freshness and live release pairing remain UNVERIFIED. See
-[Phase 29](../../DEVELOPMENT_PLAN/phase_29_ui_plan_compiler.md).
+[Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md).
 
 ---
 
 ## Related Documents
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog: the full index of
   illegal states and the load-bearing honesty limit ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)). This slice is carved from it.
-- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — owns the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
+- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — owns the nine typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
   coverage matrix ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the foreclosure layers, and the **validation-locus axis** each entry above is
   classified against.
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid `InForceSpec` cannot represent illegal state") these entries instantiate.

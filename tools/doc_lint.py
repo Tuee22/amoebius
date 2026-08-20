@@ -53,6 +53,7 @@ CHECKS = {
     "f4": "dependency graph: every declared edge points at a phase at or below its own",
     "u3": "slug integrity: a phase_NN_<slug> reference names the ordinal that slug carries",
     "f5": "ordinal integrity: a phase ordinal named in the plan resolves and is not stale",
+    "f6": "gate integrity: a contract delivering an extension discharges section M clause 13",
     "t": "commit independence: no document makes committing a gate precondition",
     "s1": "substrate discipline: one catalog member, at most one specialized",
     "s2": "requires: every Requires token is in the closed section-F vocabulary",
@@ -1311,6 +1312,69 @@ def check_u3_slug_integrity(docs, root, v):
                                        f"Phase {real[slug]}"))
 
 
+EXT_DOCTRINE = {
+    "extension_conformance_doctrine.md": ("L", "C"),
+    "extension_conformance_laws.md": ("L", "C"),
+    "extension_conformance_security.md": ("L", "C", "S"),
+    "extension_conformance_transactions.md": ("L", "C", "P"),
+}
+EXT_BULLET_RE = re.compile(r"^- \*\*Extension conformance \(§M\.13\)\.\*\*\s*(.+?)(?=\n- \*\*|\n\n|\n##)",
+                           re.M | re.S)
+EXT_NA_RE = re.compile(r"^\s*Not applicable\b", re.I)
+LAW_RE = {"L": re.compile(r"\bL1\b"), "C": re.compile(r"\bC1\b"),
+          "S": re.compile(r"\bS1\b"), "P": re.compile(r"\bP1\b")}
+NEGATIVE_RE = re.compile(r"`test/negative/[A-Za-z0-9_./-]+`")
+
+
+def check_f6_extension_conformance(docs, v):
+    """Section M clause 13, as the documentation obligation Phase 0 owns.
+
+    Which law families a contract owes is read from the doctrine it already cites, never
+    from a list kept here: a list in the lint would be a second declaration of the link
+    set, and two declarations of one thing diverge. A phase that *builds* the contract
+    rather than delivering an extension under it writes the not-applicable form, so no
+    exclusion roster is needed either — the clause 9 precedent, one hop over.
+    """
+    for doc in docs:
+        ph = _phase_no(doc.rel)
+        if ph is None:
+            continue
+        gm = re.search(r"^\*\*Gate:\*\*\s*(.+?)(?=\n\n|\n##)", doc.text, re.M | re.S)
+        if not gm:
+            continue
+        tail = doc.text[gm.start():]
+        stop = re.search(r"^##\s+(Doctrine adopted|Sprints)\s*$", tail, re.M)
+        scope = tail[:stop.start()] if stop else tail
+        adopted = ""
+        am = re.search(r"^## Doctrine adopted\s*$", doc.text, re.M)
+        if am:
+            rest = doc.text[am.end():]
+            nxt = re.search(r"^## ", rest, re.M)
+            adopted = rest[:nxt.start()] if nxt else rest
+        owed = set()
+        for name, families in EXT_DOCTRINE.items():
+            if name in adopted:
+                owed.update(families)
+        if not owed:
+            continue
+        line = doc.text.count("\n", 0, gm.start()) + 1
+        bullet = EXT_BULLET_RE.search(scope)
+        if not bullet:
+            v.append(Violation("f6", doc.rel, line,
+                               "adopts an extension-conformance doctrine but its gate discharges no §M.13"))
+            continue
+        body = bullet.group(1).strip()
+        if EXT_NA_RE.match(body):
+            continue
+        missing = sorted(f for f in owed if not LAW_RE[f].search(body))
+        if missing:
+            v.append(Violation("f6", doc.rel, line,
+                               f"§M.13 discharge names no {', '.join(m + '-family' for m in missing)} law"))
+        elif not NEGATIVE_RE.search(body):
+            v.append(Violation("f6", doc.rel, line,
+                               "§M.13 discharge pins no compile-fail fixture under test/negative/"))
+
+
 def check_f4_dependency_graph(docs, v):
     """standards section F: a gate may consume only what a phase at or below it delivers.
 
@@ -1938,6 +2002,7 @@ def run(root, only=None):
     check_s_substrate(docs, docs_by_rel, v)
     check_s3_lane(docs, docs_by_rel, v)
     check_f3_forward_gate(docs, v)
+    check_f6_extension_conformance(docs, v)
     check_f4_dependency_graph(docs, v)
     check_u3_slug_integrity(docs, root, v)
     check_f5_ordinal_integrity(docs, docs_by_rel, v)

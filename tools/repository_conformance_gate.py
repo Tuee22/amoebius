@@ -290,6 +290,7 @@ def check_reference(root: Path, paths: list[str]) -> list[str]:
     # history: their subject *is* the old path, and rewriting one destroys the record.
     history = {RELOCATION_MAP, ALLOWLIST, LAYOUT_DOCTRINE,
                "DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md",
+               "DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md",
                "DEVELOPMENT_PLAN/phase_00_documentation_suite.md",
                "DEVELOPMENT_PLAN/phase_01_toolchain_spike.md",
                "DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md"}

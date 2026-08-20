@@ -37,8 +37,8 @@ carries. Two runs of the same verb against the same source differ only if the im
 named by an architecture-qualified tag ([image_build_doctrine.md §3](./image_build_doctrine.md#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index)).
 The host contributes a container engine and nothing else.
 
-**The engine is the whole host requirement, and the host band supplies it on every substrate.** Phases 6, 7,
-and 8 exist to make exactly that true — Docker configured sudoless on Linux, Colima on Apple, WSL2-hosted
+**The engine is the whole host requirement, and the host band supplies it on every substrate.** Phases 52, 53,
+and 54 exist to make exactly that true — Docker configured sudoless on Linux, Colima on Apple, WSL2-hosted
 Docker on Windows — each at its own natural architecture
 ([substrate_doctrine.md §4.1](./substrate_doctrine.md#41-colima-and-lima-on-apple-the-provider-follows-the-workload)).
 That is why the frame is available before the DSL band opens and why the band may assume it.

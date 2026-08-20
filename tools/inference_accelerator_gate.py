@@ -33,7 +33,7 @@ LOCUS = ROOT / "test/oracle/inference_accelerator/validation_locus.tsv"
 RESULTS = ROOT / ".build/dsl/inference-accelerator/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/inference-accelerator/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/inference-accelerator"
-CONTRACT = "DEVELOPMENT_PLAN/phase_19_inference_accelerator_provision.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md"
 GATE_COMMAND = "python3 tools/inference_accelerator_gate.py"
 EXPECTATIONS = "test/oracle/inference_accelerator_surfaces.tsv"
 
@@ -244,7 +244,7 @@ def enumerated_items() -> set[str]:
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=13, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
+        phase=32, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()

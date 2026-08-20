@@ -46,7 +46,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 
 GATE_COMMAND = "python3 tools/host_ensure_kernel_gate.py"
-CONTRACT = "DEVELOPMENT_PLAN/phase_04_host_ensure_kernel.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md"
 EXPECTATIONS = "test/oracle/host_ensure_kernel_surfaces.tsv"
 
 PLAN_ORACLE = ROOT / "test/oracle/host_ensure_plans.tsv"
@@ -433,7 +433,7 @@ def report_side(name: str, verdict: dict[str, list[str]]) -> bool:
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=4, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        phase=51, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
         register="2", substrate="none", lane="none", sides=SIDES,
     )
     gate.begin()

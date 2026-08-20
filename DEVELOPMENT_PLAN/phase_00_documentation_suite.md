@@ -19,7 +19,7 @@ and remaining implementation are stated below.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md
 **Generated sections**: none
 
 </details>
@@ -30,21 +30,21 @@ and remaining implementation are stated below.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 0.1: Documentation standards + plan-suite spine ✅](#sprint-01-documentation-standards--plan-suite-spine-)
-- [Sprint 0.2: DSL core + cross-cutting method doctrine ✅](#sprint-02-dsl-core--cross-cutting-method-doctrine-)
-- [Sprint 0.3: Platform, cluster, storage, substrate & image doctrine ✅](#sprint-03-platform-cluster-storage-substrate--image-doctrine-)
-- [Sprint 0.4: Secrets/IaC + runtime/transport/determinism doctrine ✅](#sprint-04-secretsiac--runtimetransportdeterminism-doctrine-)
-- [Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate ✅](#sprint-05-verification-formal-model-doctrine--the-documentation-lint-gate-)
-- [Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts ✅](#sprint-06-readability-discipline--document-shape-the-two-diagram-registers-and-the-routing-artifacts-)
-- [Sprint 0.7: Artifact provenance, ignore coverage, and repository-local evidence ✅](#sprint-07-artifact-provenance-ignore-coverage-and-repository-local-evidence-)
-- [Sprint 0.8: The authored negative corpora as one declared set ✅](#sprint-08-the-authored-negative-corpora-as-one-declared-set-)
-- [Sprint 0.9: The target tree as a partition the gate decides ✅](#sprint-09-the-target-tree-as-a-partition-the-gate-decides-)
-- [Sprint 0.10: Repository-contained state contract ✅](#sprint-010-repository-contained-state-contract-)
-- [Sprint 0.11: The natural-architecture postcondition ✅](#sprint-011-the-natural-architecture-postcondition-)
-- [Sprint 0.12: The per-substrate floor, and a vocabulary the lint reads ✅](#sprint-012-the-per-substrate-floor-and-a-vocabulary-the-lint-reads-)
-- [Sprint 0.13: One binary, many roles ✅](#sprint-013-one-binary-many-roles-)
-- [Sprint 0.14: The ordering re-baseline ✅](#sprint-014-the-ordering-re-baseline-)
-- [Sprint 0.15: The re-baseline review pass ✅](#sprint-015-the-re-baseline-review-pass-)
+- [Sprint 0.1: Documentation standards + plan-suite spine 📋](#sprint-01-documentation-standards--plan-suite-spine-)
+- [Sprint 0.2: DSL core + cross-cutting method doctrine 📋](#sprint-02-dsl-core--cross-cutting-method-doctrine-)
+- [Sprint 0.3: Platform, cluster, storage, substrate & image doctrine 📋](#sprint-03-platform-cluster-storage-substrate--image-doctrine-)
+- [Sprint 0.4: Secrets/IaC + runtime/transport/determinism doctrine 📋](#sprint-04-secretsiac--runtimetransportdeterminism-doctrine-)
+- [Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate 📋](#sprint-05-verification-formal-model-doctrine--the-documentation-lint-gate-)
+- [Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts 📋](#sprint-06-readability-discipline--document-shape-the-two-diagram-registers-and-the-routing-artifacts-)
+- [Sprint 0.7: Artifact provenance, ignore coverage, and repository-local evidence 📋](#sprint-07-artifact-provenance-ignore-coverage-and-repository-local-evidence-)
+- [Sprint 0.8: The authored negative corpora as one declared set 📋](#sprint-08-the-authored-negative-corpora-as-one-declared-set-)
+- [Sprint 0.9: The target tree as a partition the gate decides 📋](#sprint-09-the-target-tree-as-a-partition-the-gate-decides-)
+- [Sprint 0.10: Repository-contained state contract 📋](#sprint-010-repository-contained-state-contract-)
+- [Sprint 0.11: The natural-architecture postcondition 📋](#sprint-011-the-natural-architecture-postcondition-)
+- [Sprint 0.12: The per-substrate floor, and a vocabulary the lint reads 📋](#sprint-012-the-per-substrate-floor-and-a-vocabulary-the-lint-reads-)
+- [Sprint 0.13: One binary, many roles 📋](#sprint-013-one-binary-many-roles-)
+- [Sprint 0.14: The ordering re-baseline 📋](#sprint-014-the-ordering-re-baseline-)
+- [Sprint 0.15: The re-baseline review pass 📋](#sprint-015-the-re-baseline-review-pass-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -52,13 +52,7 @@ and remaining implementation are stated below.
 
 ## Phase Status
 
-✅ Done — **resealed a seventh time on 2026-08-17**, against the tree Phase 2 moved. All eleven sides pass on
-natural `arm64`, untranslated: 49 seeded negatives redden, the artifact audit reports 17 rules clean with 314
-findings deferred — down from 876, because Phase 2 deleted every `r13` and `r15` row rather than re-owning it
-— and 37 surfaces join to 77 implemented checks. Attestation
-`sha256:7c9b0aa7180ec0a8ffa75c9e601658b68c70215658c3faa87d9b7b82b230d9e5`. The reseal also resolved the
-artifact manifest and eleven contracts' golden pins, which had named a pre-amendment ordinal since the
-ordering re-baseline and could not have resolved at any point since.
+🔄 Active — reopened 2026-08-19 by the generative re-baseline, which changes what this gate covers; the prior seal is history and no longer presents completion evidence.
 
 **Resealed a sixth time on 2026-08-17** against the documentation Phase 1's host-ensure closure
 touched: [`substrate_doctrine.md` §3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply)
@@ -100,7 +94,7 @@ and this phase renumbered the owner columns of the two tables its own gate reads
 354 ordinal-bearing paths under `test/` and `mutants/`: those belong to their owning phases, which rename them
 for the capability rather than for the new ordinal, so a pin the plan cites at its post-amendment ordinal is
 resolved through the audit map and reported as a deferral until then
-([`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#natural-architecture-rebaseline--2026-08-16)).
+([`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md#natural-architecture-rebaseline--2026-08-16)).
 
 **Pre-natural-architecture status record (invalidated where it claims completion):**
 
@@ -113,7 +107,7 @@ the verifier still parsed and wrote legacy roots; Sprint 0.10 removed them befor
 amendment, and 2026-08-13 before and after commit `0526152` first tracked this phase's own machinery —
 each passed the gate as it then stood and each was invalidated by a later amendment. None claims a current
 result. What they found, what closed, and what was deferred are recorded in
-[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#phase-0-closure-disposition--2026-08-12),
+[`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md#phase-0-closure-disposition--2026-08-12),
 which is where a superseded finding belongs once its seal no longer stands.
 
 ## Phase Summary
@@ -151,6 +145,11 @@ first written down here and then adopted, phase by phase, by the pre-cluster and
 `python3 tools/doc_lint_verify.py`; split before continuing if the work introduces implementation code, a new
 runtime surface, or an acceptance command other than the two-sided documentation gate.
 
+**Phase scope:** one cohesive claim — *the whole authored corpus says one thing, and every check that
+can decide whether it still does is running*. The sprint seams are the doctrine suite, the plan spine,
+and one seam per lint obligation. The acceptance command is the documentation verifier. The split
+trigger is a lint obligation that needs its own corpus to state, which becomes its own sprint.
+
 **Substrate:** none ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the gate is a pure documentation lint over text and the link graph; it touches no
 `apple`, `linux-cpu`, `linux-cuda`, or `windows` host and stands up no resources.
 
@@ -158,16 +157,35 @@ runtime surface, or an acceptance command other than the two-sided documentation
 
 **Register:** — (no register: the documentation-lint gate validates text and the link graph, not amoebius behaviour, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Gate:** against its source snapshot, `python3 tools/doc_lint_verify.py` passes the documentation,
-natural-architecture, semantic artifact-provenance, target-tree, ignore/context, authored-root-write,
-source-closure, dynamic-resolution, reachable-history, project-contained-attestation, state-containment,
-test-secrets, terminology, and seeded-mutant checks without creating an unignored
-or tracked generated file.
+**Depends on:** none.
+
+This phase opens the sequence, and the corpus it governs is the only input it reads.
+
+**Gate:** `python3 tools/doc_lint_verify.py` passes every documentation, containment and seeded-mutant check
+named in [Gate integrity](#gate-integrity) against its source snapshot, creating no tracked or unignored
+generated file. Phase 1 does not open unless the ledger records that corpus green.
 
 ## Gate integrity
 
 The gate verifies all governed headers, contents blocks, anchors, bidirectional links, status equality, phase
 numbering, gate ownership, illegal-state coverage, and documentation negative cases. It additionally verifies:
+
+
+**Three obligations were added by the 2026-08-19 generative re-baseline and are this gate's to discharge.**
+Each is a check with its own seeded negative, and each exists because a rule was normative and unread:
+
+- **The contract half of every phase document** — the section-D skeleton, the six required Phase Summary
+  fields, the mutant ids a gate names, and the agreement between what a contract promises and what its gate
+  script declares. `tools/phase_contract_lint.py` carries these as `d1`–`d4`; before it existed, `Phase scope`
+  was absent from sixty-four contracts and `Register` had no check at all.
+- **The illegal-state covering** of [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate)
+  clause 16: every cell of the declared taxonomy holds an entry or a one-line justification, and an
+  unjustified empty cell fails. The taxonomy is declared; the generator and the justifications are this
+  phase's to build.
+- **The extension-conformance discharge** of
+  [§M](development_plan_gate_integrity.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 13, as a
+  documentation obligation: a contract delivering an extension names its law discharges and its compile-fail
+  fixtures, or the gate reports it under-specified.
 
 - the generator registry covers every output class in repository-layout doctrine;
 - `.gitignore` and `.dockerignore` cover the normative patterns exactly or more strictly;
@@ -203,7 +221,7 @@ numbering, gate ownership, illegal-state coverage, and documentation negative ca
 
 The independent oracle is the authored positive seed, mutation definition, and expected diagnostic for every
 check. Materialized negatives, scan results, enumeration, logs, and ledgers remain under
-`.build/runs/phase_00/`, `.build/test-corpora/`, or `.build/tmp/` and are attested beneath
+`.build/runs/phase_0/`, `.build/test-corpora/`, or `.build/tmp/` and are attested beneath
 `.build/evidence-store/`. They are never
 copied into the plan or another authored root.
 
@@ -225,6 +243,7 @@ flowchart LR
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
 *Design intent. The redesigned Phase-0 gate joins authored policy with two-sided failure cases and retains only a repository-local attestation.*
+- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
 
 ## Doctrine adopted
 
@@ -329,14 +348,13 @@ flowchart LR
 ```
 *Design intent. Each sprint hands the next the artifact it checks: the spine fixes the shape, the doctrine supplies the corpus, the lint supplies the registry, and the last two sprints add the checks the single gate runs. The seam rule is owned by [development_plan_standards.md §O](development_plan_standards.md#o-sprint-sized-seams-and-bounded-phase-gates).*
 
-## Sprint 0.1: Documentation standards + plan-suite spine ✅
-
-**Status**: Done
+## Sprint 0.1: Documentation standards + plan-suite spine 📋
+**Status**: Planned
 **Implementation**: `documents/documentation_standards.md`,
 `DEVELOPMENT_PLAN/development_plan_standards.md`, `DEVELOPMENT_PLAN/README.md`,
 `DEVELOPMENT_PLAN/overview.md`, `DEVELOPMENT_PLAN/system_components.md`, `DEVELOPMENT_PLAN/substrates.md`,
 `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`, `DEVELOPMENT_PLAN/later_phases.md`, and the
-`phase_00`…`phase_64` phase docs (authored; artifact audit remains)
+`phase_0`…`phase_82` phase docs (authored; artifact audit remains)
 **Blocked by**: none
 **Independent Validation**: lint the spine files in isolation — each carries a valid header block, the status vocabulary
 and per-phase/per-sprint skeletons are defined, the 66-phase overview table is internally consistent, and
@@ -373,9 +391,8 @@ amoebius's snake_case rule), and the tracker is rebuilt for 65 contiguous single
 
 None.
 
-## Sprint 0.2: DSL core + cross-cutting method doctrine ✅
-
-**Status**: Done
+## Sprint 0.2: DSL core + cross-cutting method doctrine 📋
+**Status**: Planned
 **Implementation**: `documents/engineering/dsl_doctrine.md`,
 `app_vs_deployment_doctrine.md`, `illegal_state_catalog.md` (the pure index) and its eight themed
 sub-catalogs (`illegal_state_storage.md`, `illegal_state_topology.md`, `illegal_state_capacity.md`,
@@ -429,9 +446,8 @@ doctrines (the three validation registers, the generated-never-committed rule, a
 
 None.
 
-## Sprint 0.3: Platform, cluster, storage, substrate & image doctrine ✅
-
-**Status**: Done
+## Sprint 0.3: Platform, cluster, storage, substrate & image doctrine 📋
+**Status**: Planned
 **Implementation**: `documents/engineering/platform_services_doctrine.md`,
 `storage_lifecycle_doctrine.md`, `cluster_lifecycle_doctrine.md`, `gateway_migration_doctrine.md`,
 `readiness_ordering_doctrine.md`, `single_logical_data_plane_doctrine.md`, `cluster_topology_doctrine.md`,
@@ -473,9 +489,8 @@ detection with the no-env/no-`PATH` lazy tool-ensure contract, and baked-binary 
 
 None.
 
-## Sprint 0.4: Secrets/IaC + runtime/transport/determinism doctrine ✅
-
-**Status**: Done
+## Sprint 0.4: Secrets/IaC + runtime/transport/determinism doctrine 📋
+**Status**: Planned
 **Implementation**: `documents/engineering/vault_pki_doctrine.md`,
 `pulumi_iac_doctrine.md`, `daemon_topology_doctrine.md`, `host_cluster_comms_doctrine.md`,
 `bootstrap_sequence_doctrine.md`, `network_fabric_doctrine.md`, `pulsar_client_doctrine.md`,
@@ -521,9 +536,8 @@ jit-resolved-cache intent.
 
 None.
 
-## Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate ✅
-
-**Status**: Done — the two-sided run is green against the source snapshot; the negatives materialize under
+## Sprint 0.5: Verification, formal-model doctrine & the documentation-lint gate 📋
+**Status**: Planned
 `.build/test-corpora/doc_lint/` and no verifier input is an ignored worktree file
 **Implementation**: `documents/engineering/chaos_failover_doctrine.md`,
 `testing_doctrine.md`, `test_derivation_analysis.md`, `formal_model_doctrine.md`,
@@ -569,13 +583,13 @@ checker that *is* the Phase 0 gate.
   mutants, which are what the provenance review below runs on. Each candidate expectation is
   classified by history and independent review. Same-commit additions remain regression fixtures until
   reviewed or replaced. A generated run-local registry maps retained source to its owner and reject locus.
-- The convention-independent Phase-9 formal-model oracles, pinned here before `Interpret.hs`/`EmitTLA.hs`
-  exist ([`phase_9`](phase_09_formal_model_kernel.md)): `test/mutant/formal/emitTLA-mut-0{1..4}`, the
+- The convention-independent Phase-11 formal-model oracles, pinned here before `Interpret.hs`/`EmitTLA.hs`
+  exist ([`phase_11`](phase_11_formal_model_kernel.md)): `test/mutant/formal/emitTLA-mut-0{1..4}`, the
   `ToyModel` hand-derived reachable-distinct-state table, and the expected `INVARIANT`/`PROPERTY` name set.
   The byte-exact `test/golden/formal/ToyModel.{tla,cfg}.golden` is **not** pinned here: under
   [`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
   a byte-exact golden is pinned no earlier than the sprint fixing its rendering convention, which is
-  Phase 9's.
+  Phase 11's.
 - `tools/doc_lint.py`: a pure text/link checker (no amoebius-binary dependency), run **two-sided** — it must
   pass clean on the suite **and** fail on every case generated from the authored lint seeds and mutation
   definitions. It checks,
@@ -613,7 +627,7 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
   it validates the enumeration the fixture join will later consume. The *fixture* half (an entry with no
   committed witness yields an UNVERIFIED row) is **not** in Phase 0: it requires the
   `Delivery-owner:`/`Case-family:` enrichment and the `locus_registry.tsv` that
-  [`phase_13`](phase_13_illegal_state_corpus.md) Sprint 13.1 owns, and no fixture exists to join against
+  [`phase_27`](phase_27_illegal_state_covering.md) Sprint 27.1 owns, and no fixture exists to join against
   until then. An explicit `<a id="...">` is a valid anchor target for (b) and (g): the suite uses it to keep
   inbound links alive across a heading rename.
 - `tools/doc_lint_corpus/_positive/`, `_build.py`, and an authored expected-diagnostic table: **at least one
@@ -630,7 +644,7 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
   `surface` fails the lint) — with its own committed malformed-ledger negatives, including a `coverage` row
   naming a non-existent surface.
 - Both checkers are standalone scripts that do not depend on the amoebius binary, which first appears in the
-  pre-cluster implementation band from Phase 9 onward, and both are **Python** — matching the pre-binary `pb`
+  pre-cluster implementation band from Phase 11 onward, and both are **Python** — matching the pre-binary `pb`
   bootstrap coordinator ([README.md](README.md#toolchain)) and the recorded decision against bash logic
   ([`dsl_doctrine.md §2`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
   A shell script is not admitted.
@@ -658,15 +672,14 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
 
 None for the negative corpus, the ignored-input dependency, or the fresh-clone run. `_build.py` materializes
 all 41 negatives under `.build/test-corpora/doc_lint/`, the 410 reproducible copies are deleted, the run enumerates
-its own surfaces into `.build/test-surfaces/phase_00.json` and emits its ledger into the run bundle, and both hard
+its own surfaces into `.build/test-surfaces/phase_0.json` and emits its ledger into the run bundle, and both hard
 check families (`b1`, `c`) are clear because no authored document links into an ignored generated root any
 longer. The fixture-provenance review of the Phase-25–33 UI oracles is carried as an open obligation on those
 phases rather than here, recorded in
-[legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md#generated-artifact-and-terminology-migration--2026-08-11).
+[legacy_tracking_for_deletion_archive.md](legacy_tracking_for_deletion_archive.md#generated-artifact-and-terminology-migration--2026-08-11).
 
-## Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts ✅
-
-**Status**: Done — every hard readability diagnostic is cleared; `p3`, `p5`, and `p6` stay advisory
+## Sprint 0.6: Readability discipline — document shape, the two diagram registers, and the routing artifacts 📋
+**Status**: Planned
 **Implementation**: `documents/documentation_standards.md`,
 `DEVELOPMENT_PLAN/development_plan_standards.md`, the retitled
 `documents/engineering/diagram_conventions.md`, the new `documents/glossary.md` and
@@ -723,9 +736,8 @@ longer collects generated Markdown from inside the plan tree. The `p3`/`p5`/`p6`
 remains open and advisory under the policy above; it is authored editorial work, not a mechanical pass, and it
 does not gate the phase.
 
-## Sprint 0.7: Artifact provenance, ignore coverage, and repository-local evidence ✅
-
-**Status**: Done — the artifact-policy rules, each proven red by its own seeded negative
+## Sprint 0.7: Artifact provenance, ignore coverage, and repository-local evidence 📋
+**Status**: Planned
 **Implementation**: `tools/doc_lint_verify.py`, planned artifact-policy lint and generator registry,
 `.gitignore`, `.dockerignore`, and the external-attestation test adapter
 **Blocked by**: Sprint 0.5, Sprint 0.6
@@ -751,14 +763,14 @@ evidence, dynamic dependency resolution, exact ignore/context coverage, and the 
 - Lints rejecting locks/freezes, generated evidence, package integrity pins, developer-home paths, and obsolete
   terminology.
 - A synthetic external-attestation positive and negative corpus.
-- Reconciled phase status showing Phase 0 Active and phases 1–74 Blocked.
+- Reconciled phase status showing Phase 0 Active and phases 1–95 Blocked.
 
 ### Validation
 
 1. Run the redesigned Phase-0 command against the source snapshot with ordinary Python bytecode caching enabled.
 2. Confirm every positive policy and documentation check passes.
 3. Confirm every seeded negative fails at its named locus.
-4. Confirm the gate creates output only beneath ignored `.build/runs/phase_00/`.
+4. Confirm the gate creates output only beneath ignored `.build/runs/phase_0/`.
 5. Confirm the semantic tracked-tree and effective Docker-context scans satisfy the normative contract.
 6. Confirm every referenced authored input exists in the clone and no ignored worktree file is required.
 7. Audit reachable history and record its secret/non-secret disposition separately from unreachable local state.
@@ -779,9 +791,8 @@ instead gives Phase 0 the shared corpora and each later phase its domain tables.
 to the phase whose gate must clear it, and cross-checked against the legacy register, and a row matching
 nothing fails the gate — so the list can only shrink.
 
-## Sprint 0.8: The authored negative corpora as one declared set ✅
-
-**Status**: Done — the corpus declaration is authored in doctrine and its stale-row rule is proven red
+## Sprint 0.8: The authored negative corpora as one declared set 📋
+**Status**: Planned
 **Implementation**: `documents/engineering/repository_layout_doctrine.md`, `tools/artifact_policy.py`,
 `tools/artifact_policy_selftest.py`, `tools/attestation.py`, `tools/attestation_negative_corpus.py`
 **Blocked by**: Sprint 0.7
@@ -816,10 +827,11 @@ place where a real defect can hide.
 None. The declaration is minimal by construction: a row survives only while it suppresses a real finding, so
 the exemption set can shrink but not silently widen.
 
-## Sprint 0.9: The target tree as a partition the gate decides ✅
-
-**Status**: Done — the three partition checks are implemented, each proven red by its own seeded negative, and
-the write guard fails closed on a root that is no longer a directory
+## Sprint 0.9: The target tree as a partition the gate decides 📋
+**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that the
+three partition checks are implemented, each proven red by its own seeded negative, and the write guard
+fails closed on a root that is no longer a directory; that stands as history and no longer presents
+completion evidence.
 **Implementation**: `tools/artifact_policy.py`, `tools/artifact_policy_selftest.py`,
 `tools/artifact_manifest_lint.py`, `documents/engineering/repository_layout_doctrine.md`,
 `tools/migration_allowlist.tsv`, `.gitignore`, `.dockerignore`
@@ -865,12 +877,11 @@ the target tree is enforced by the gate instead of asserted by a document.
 
 None. What the checks report is 876 deferred findings across the tree, each attributed to the phase whose
 closure retires it — the migration itself is those phases' work, in numeric order, and
-[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#layout-and-naming-divergence-snapshot--2026-08-14)
+[`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md#layout-and-naming-divergence-snapshot--2026-08-14)
 carries each owner and closure condition.
 
-## Sprint 0.10: Repository-contained state contract ✅
-
-**Status**: Done — closed-root enforcement, host observation, and two-sided validation passed 2026-08-15
+## Sprint 0.10: Repository-contained state contract 📋
+**Status**: Planned
 **Implementation**: `documents/engineering/repository_layout_doctrine.md`, `.gitignore`, `.dockerignore`,
 `tools/artifact_policy.py`, `tools/artifact_policy_selftest.py`, and the Phase-0 verification command
 **Blocked by**: nothing; this is the lowest open work
@@ -913,10 +924,10 @@ host-global resources before effects, provides marker-proven exact test-run clea
 test-secrets boundary. The Phase-0 runner brackets all work with the host observer; the whole-tree scanner
 attributes legacy callers to their owning numerical phases through the shrink-only migration allowlist.
 
-## Sprint 0.11: The natural-architecture postcondition ✅
-
-**Status**: Done — the lane and architecture checks are implemented, each proven red by its own seeded
-negative, and the eleven-sided run passed 2026-08-17
+## Sprint 0.11: The natural-architecture postcondition 📋
+**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that the
+lane and architecture checks are implemented, each proven red by its own seeded negative, and the
+eleven-sided run passed 2026-08-17; that stands as history and no longer presents completion evidence.
 **Implementation**: `tools/doc_lint.py`, `tools/ledger_lint.py`, `tools/gate_common.py`,
 `tools/attestation.py`, `tools/doc_lint_verify.py`, `tools/artifact_manifest_lint.py`,
 `tools/migration_allowlist.tsv`, `test/oracle/documentation_suite_surfaces.tsv`
@@ -966,10 +977,11 @@ None for Phase 0. Every later phase's gate now declares the lane it runs, and a 
 at construction rather than sealing without one; each phase adopts that line at its own rerun, which is the
 single difference the amendment asks of it.
 
-## Sprint 0.12: The per-substrate floor, and a vocabulary the lint reads ✅
-
-**Status**: Done — the floor is authored in doctrine, the `Requires` vocabulary is parsed from the rulebook
-rather than restated in code, and the two-way join is proven red by its own seeded negative
+## Sprint 0.12: The per-substrate floor, and a vocabulary the lint reads 📋
+**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that the
+floor is authored in doctrine, the `Requires` vocabulary is parsed from the rulebook rather than restated in
+code, and the two-way join is proven red by its own seeded negative; that stands as history and no longer
+presents completion evidence.
 **Implementation**: `documents/engineering/substrate_doctrine.md`,
 `documents/engineering/repository_layout_doctrine.md`, `documents/engineering/image_build_doctrine.md`,
 `documents/engineering/apple_metal_headless_builds.md`, `documents/glossary.md`,
@@ -1014,13 +1026,13 @@ than required. The suite was exhaustive about what amoebius installs and silent 
 ### Remaining Work
 
 None for Phase 0. The floor's *enforcement* — a run that checks it before resolving — is Phase 1's, and the
-Haskell half is Phase 35's; both are recorded in
-[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#host-ensure-amendment--2026-08-17).
+Haskell half is Phase 55's; both are recorded in
+[`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md#host-ensure-amendment--2026-08-17).
 
-## Sprint 0.13: One binary, many roles ✅
-
-**Status**: Done — the role vocabulary has one owner and one shape, the target tree shows one executable, and
-the two states the shape forecloses are catalogued
+## Sprint 0.13: One binary, many roles 📋
+**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that the
+role vocabulary has one owner and one shape, the target tree shows one executable, and the two states the
+shape forecloses are catalogued; that stands as history and no longer presents completion evidence.
 **Implementation**: `documents/engineering/daemon_topology_doctrine.md`,
 `documents/engineering/repository_layout_doctrine.md`,
 `documents/engineering/resource_capacity_schema.md`, `documents/engineering/image_build_doctrine.md`,
@@ -1068,7 +1080,7 @@ daemon role, a container running the host daemon — were foreclosed by nothing.
 
 1. Run the phase command and confirm all eleven sides pass.
 2. Confirm the corpus gate's measured counters reach 90 catalog entries and 106 registry subcases, and that
-   `discharged-subcases` is unchanged at 33 — the new entries are owner-pinned beyond Phase 13, so they defer
+   `discharged-subcases` is unchanged at 33 — the new entries are owner-pinned beyond Phase 27, so they defer
    rather than demanding a fixture this phase cannot author.
 3. Confirm `d` reports no near-duplicate for the union, and `m` reports exactly one fenced declaration of
    each of `Process`, `InClusterRole`, and `WorkerKind`.
@@ -1078,14 +1090,14 @@ daemon role, a container running the host daemon — were foreclosed by nothing.
 ### Remaining Work
 
 None for Phase 0. Every consequence in code is owner-pinned in
-[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#one-binary-many-roles--2026-08-17): the
-schema module and its arm rows are Phase 11's, the decoder and its closedness negatives Phase 12's, the
-`FrameConfig` that carries the role Phase 35's, and the collapse of the second executable Phase 44's.
+[`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md#one-binary-many-roles--2026-08-17): the
+schema module and its arm rows are Phase 25's, the decoder and its closedness negatives Phase 26's, the
+`FrameConfig` that carries the role Phase 55's, and the collapse of the second executable Phase 65's.
 
-## Sprint 0.14: The ordering re-baseline ✅
-
-**Status**: Done — the plan runs 0–68 in an order every phase can actually be validated in, and two new
-checks decide the rule that previously held by convention alone
+## Sprint 0.14: The ordering re-baseline 📋
+**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that the
+plan runs 0–68 in an order every phase can actually be validated in, and two new checks decide the rule that
+previously held by convention alone; that stands as history and no longer presents completion evidence.
 **Implementation**: `DEVELOPMENT_PLAN/**`, `documents/engineering/{formal_model,gateway_migration_model,cluster_lifecycle}_doctrine.md`,
 `tools/doc_lint.py`, `tools/doc_lint_corpus/_build.py`, `tools/migration_allowlist.tsv`,
 `tools/artifact_manifest_lint.py`, `test/oracle/{documentation_suite_surfaces,preimplementation_artifacts}.tsv`
@@ -1109,13 +1121,13 @@ artifact tree that only tools read, the order was inverted.
 ### Deliverables
 
 - **Three phases inserted.** Phase 2 owns the whole-tree layout predicate that four register rows stated and
-  no distributed owner could satisfy. Phases 23 and 24 point the model kernel and the simulation substrate at
+  no distributed owner could satisfy. Phases 18 and 19 point the model kernel and the simulation substrate at
   the DSL itself, so the DSL is fully validated — modelled, unit-tested, and simulated — before any live
   behaviour is implemented.
 - **The band boundary made exact at 28/29.** Two Register-1/2 phases that sat behind 36 Register-3 phases move
   into the DSL-validation band, and the rulebook clause that excused them is withdrawn rather than reworded.
 - **The specialized-hardware islands moved to the tail**, so a developer with one `linux-cpu` machine reaches
-  Phase 70 instead of halting at old 25 for want of a second machine.
+  Phase 88 instead of halting at old 25 for want of a second machine.
 - **An exhaustive 69-row audit map**, because the previous re-baseline recorded only its changed ranges and
   eleven stale ordinals survived it.
 - **`f4` and `f5`**, with a seeded negative each, so the two failure modes this sprint repaired are now
@@ -1130,7 +1142,7 @@ artifact tree that only tools read, the order was inverted.
    ordinal in two phase documents, a link whose label and target disagreed, and a dependency cell naming one
    phase twice. None of those was visible to any check that existed before.
 3. Confirm `f4` reddens on a `Blocked by` naming a later phase.
-4. Confirm the audit map has one row per phase 0–74 and that every row names an old id or the word `new`.
+4. Confirm the audit map has one row per phase 0–95 and that every row names an old id or the word `new`.
 
 ### Remaining Work
 
@@ -1138,10 +1150,11 @@ None for Phase 0. The tree itself does not move here: that is Phase 2's gate, an
 because a re-baseline is documentation-only once no path names a phase. Until Phase 2 runs, every phase
 document naming an ordinal-bearing authored path is a divergence the audit map owns.
 
-## Sprint 0.15: The re-baseline review pass ✅
-
-**Status**: Done — the re-baseline was reviewed against the tree rather than against its own gates, and the
-three defect classes it introduced are repaired and now decided by checks
+## Sprint 0.15: The re-baseline review pass 📋
+**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that the
+re-baseline was reviewed against the tree rather than against its own gates, and the three defect classes it
+introduced are repaired and now decided by checks; that stands as history and no longer presents completion
+evidence.
 **Implementation**: `tools/doc_lint.py`, `tools/doc_lint_corpus/_build.py`,
 `tools/artifact_manifest_lint.py`, `tools/ledger_lint_corpus/**`, `tools/*.py` (gate scripts),
 `test/oracle/documentation_suite_surfaces.tsv`, `documents/engineering/daemon_topology_doctrine.md`,
@@ -1161,7 +1174,7 @@ passed. Reviewing the diff directly rather than the gates found it.
 ### Deliverables
 
 - **The token-local rewrite repaired.** The re-baseline mapped only the ordinal adjacent to a `Phase` keyword,
-  so a pair reading `Phases 4 and 5` came out naming 5 twice: 46 self-contradictory pairs where the tree had one, plus 150
+  so a pair reading `Phases 51 and 35` came out naming 5 twice: 46 self-contradictory pairs where the tree had one, plus 150
   half-mapped multi-ordinal expressions across 46 files. Each was re-derived from its pre-change form by
   mapping **every** number in the expression.
 - **Tree paths restored.** The rewrite moved ordinals inside string literals that name the filesystem, in 68
@@ -1185,8 +1198,8 @@ passed. Reviewing the diff directly rather than the gates found it.
 
 ### Remaining Work
 
-None for Phase 0. What the review found in later phases' contracts — Phase 23's differential-versus-refinement
-framing, Phase 24's property attribution, and Phase 2's counts — was corrected in place; the code those
+None for Phase 0. What the review found in later phases' contracts — Phase 18's differential-versus-refinement
+framing, Phase 19's property attribution, and Phase 2's counts — was corrected in place; the code those
 contracts describe remains unbuilt and owned by those phases.
 
 ## Documentation Requirements

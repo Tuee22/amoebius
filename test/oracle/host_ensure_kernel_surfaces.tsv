@@ -1,9 +1,9 @@
-# Authored expectation for the Phase-4 host-ensure surface join.
+# Authored expectation for the Phase-51 host-ensure surface join.
 #
 # `development_plan_gate_integrity.md` section S clause 2 requires the run to enumerate
 # its test surfaces and join them **completely** to an independently authored
 # expectation. This file is that expectation, and nothing in it is generated: the check
-# ids are read off the Phase-4 contract's Gate integrity section, the mutant ids off the
+# ids are read off the Phase-51 contract's Gate integrity section, the mutant ids off the
 # committed records under `test/mutant/host_ensure_kernel/`, the substrates off the
 # closed catalogue in `substrate_doctrine.md`, and the lift contexts off the exact
 # boundary of the no-PATH rule -- host, frame, container.

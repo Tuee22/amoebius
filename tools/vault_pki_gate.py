@@ -24,7 +24,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / ".build/dsl/vault-pki/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/vault_pki_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_40_vault_pki.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_61_vault_pki.md"
 GATE_COMMAND = "python3 tools/vault_pki_gate.py --execute"
 SIDES = ("toolchain", "oracle", "static", "simulation", "live", "mutant", "results")
 
@@ -197,7 +197,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
 
     gate = gate_common.PhaseGate(
-        phase=29, contract=CONTRACT, command=GATE_COMMAND,
+        phase=61, contract=CONTRACT, command=GATE_COMMAND,
         expectations=str(EXPECTATIONS.relative_to(ROOT)), register="3",
         substrate="linux-cpu", sides=SIDES,
     )

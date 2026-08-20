@@ -83,6 +83,11 @@ REGISTRY = HERE / "generator_registry.tsv"
 ALLOWLIST = HERE / "migration_allowlist.tsv"
 DISPOSITION = HERE / "history_disposition.tsv"
 LEGACY_REGISTER = ROOT / "DEVELOPMENT_PLAN" / "legacy_tracking_for_deletion.md"
+# The register is a two-file family: the hub holds every audit map, because check `u3`'s
+# historical exemption is keyed to its filename, and the archive slice holds the dated
+# sections that carry no map. An allowance may cite either, so a citation is resolved
+# against both — reading only the hub would retire allowances whose justification moved.
+LEGACY_ARCHIVE = ROOT / "DEVELOPMENT_PLAN" / "legacy_tracking_for_deletion_archive.md"
 LAYOUT_DOCTRINE = ROOT / "documents" / "engineering" / "repository_layout_doctrine.md"
 
 # Roots whose contents are authored inputs. A gate may not write beneath one.
@@ -419,7 +424,7 @@ def apply_allowances(report: Report, allowances: list[Allowance]) -> None:
 
 def audit_allowlist_integrity(report: Report, allowances: list[Allowance]) -> None:
     """An allowance may only shrink, and every row must be justified in the register."""
-    register = read_text(LEGACY_REGISTER)
+    register = read_text(LEGACY_REGISTER) + read_text(LEGACY_ARCHIVE)
     for row in allowances:
         if row.rule not in RULES:
             report.findings.append(

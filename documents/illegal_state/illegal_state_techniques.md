@@ -1,6 +1,6 @@
 # Illegal-State Techniques, Coverage & Foreclosure Layers
 
-> **Purpose**: The mechanism slice of the illegal-state catalog — the seven reusable typing techniques that
+> **Purpose**: The mechanism slice of the illegal-state catalog — the nine reusable typing techniques that
 > foreclose each illegal state, the coverage matrix mapping every state to its technique(s), the three-layer
 > foreclosure model (type- / decode- / runtime-foreclosed), and the orthogonal validation-locus axis that names
 > *where* each illegal state is caught — with the honest limit that a type-check proves the *spec composes*, not
@@ -18,7 +18,7 @@ the specification language of [dsl_doctrine.md](../engineering/dsl_doctrine.md).
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_12_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_17_capability_bind.md, DEVELOPMENT_PLAN/phase_18_provision_seal.md, DEVELOPMENT_PLAN/phase_19_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_20_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_25_ui_program_schema.md, DEVELOPMENT_PLAN/phase_59_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_node_inventory.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/glossary.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_tenancy.md, documents/illegal_state/illegal_state_topology.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -36,7 +36,7 @@ the specification language of [dsl_doctrine.md](../engineering/dsl_doctrine.md).
 
 ## 1. Scope
 
-This document is the **techniques** slice of the illegal-state catalog. It owns the seven reusable typing
+This document is the **techniques** slice of the illegal-state catalog. It owns the nine reusable typing
 techniques ([§4](#4-the-typing-techniques)), the coverage matrix ([§5](#5-coverage-matrix--which-technique-forecloses-which-illegal-state)),
 the three-layer foreclosure model ([§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and — new in
 this doc — the **validation-locus axis** (defined in [§6.1](#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer))
@@ -52,14 +52,14 @@ subsystem doctrine that defines its storage, gateway, secret, capacity, topology
 Everything here is **design intent**, not a tested amoebius result: the type discipline it describes (the spec
 composes; no illegal value is constructible) is a **Tier-1** (design-time / in-process) property targeted for
 in-process validation in the **pre-cluster type/decode gates (Phases 11–20)** (Dhall dhall-typecheck `dhall type` + the Haskell decoder gadt-decode + QuickCheck), while
-its **runtime enforcement** remains **Phase 44** (Tier 2). Status and gates live only in
+its **runtime enforcement** remains **Phase 65** (Tier 2). Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
 ## 4. The typing techniques
 
-The catalog is foreclosed by seven reusable techniques operating across **two type layers**:
+The catalog is foreclosed by nine reusable techniques operating across **two type layers**:
 
 - **The Dhall layer** gives totality, sum types (unions), required fields, and a DSL prelude of *smart
   constructors* — functions that only ever produce valid values, so the user composes from a vocabulary
@@ -69,12 +69,17 @@ The catalog is foreclosed by seven reusable techniques operating across **two ty
   **GADT-indexed** types carrying phantom tags and ownership indices, so the in-memory IR the interpreter
   walks has the same illegal-states-absent property as the spec it came from.
 
-The seven techniques follow. Each leads with the principle, then the mechanism. Techniques [§4.6](#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) were
+The nine techniques follow. Each leads with the principle, then the mechanism. Techniques [§4.6](#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) were
 added for the capacity / topology / bounded-storage block ([§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)); [§4.6](#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) is the one technique that is
 **wholly** decode-foreclosed — no part of it reaches type-inhabitance. Several others are **split** across
 the two layers: [§4.1](#41-pvcpv-binding-by-construction) and [§4.4](#44-ownership-indices--single-owner-ssot-structurally) each have a type-level part and a decode-time part, and every
 entry names its own concrete stage in its `Validation-locus:` line rather than inheriting one from its
-technique ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it), [§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
+technique ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it), [§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force)). Techniques
+[§4.8](#48-the-skolem-scope--a-runtime-tenant-becomes-a-compile-time-index) and
+[§4.9](#49-the-closed-transaction-vocabulary--only-valid-transactions-have-a-constructor) were added for the
+scope block ([§3.91](./illegal_state_tenancy.md#391-an-unauthenticated-route-whose-scope-comes-from-the-request)–[§3.97](./illegal_state_tenancy.md#397-a-scope-key-whose-rendering-is-not-injective)),
+where the entity a value belongs to is learned at run time rather than written down: they close the gap between
+a phantom tag that works in a fixture and one that survives contact with a real request.
 
 ### 4.1 PVC↔PV binding by construction
 
@@ -285,6 +290,49 @@ flows, propagates the most restrictive confidentiality and least trusted integri
 requires a named policy-owned release edge for any audience widening. It reports every incompatible path rather
 than trusting the renderer that emitted the graph ([§3.81](./illegal_state_security.md#381-a-ui-value-flowing-to-an-incompatible-tenant-subject-or-audience-scope)).
 
+### 4.8 The skolem scope — a runtime tenant becomes a compile-time index
+
+*Principle:* a phantom tenant tag ([§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable))
+forecloses a cross-tenant reference only while the tenants are known when the program is compiled. A deployment
+learns its tenant from a request, and a `Text` that arrives at run time cannot index a type — which is why a
+two-tag demonstration passes review and a real multi-tenant server still checks its scope with predicates.
+*Mechanism:* the tenant is not named, it is **skolemised**. A verified identity enters through one rank-2
+eliminator:
+
+```haskell
+withRequestScope :: ValidatedIdentity -> (forall s. RequestContext s -> IO a) -> IO a
+```
+
+The body is polymorphic in `s`, so the variable is fresh, unforgeable, and confined to that one request. Every
+scoped value the request derives — a resolved `Handle s kind`, a `ReplayKey s`, a `Statement s` — carries the
+same `s`, and two values minted under different identities have incompatible types. A cross-scope use is not
+rejected by a check; it fails to unify. `RequestContext` exports no constructor, so authentication is the only
+introduction rule, and the escape argument that makes `runST` safe applies unchanged: a scoped handle cannot
+leave the continuation that minted it. The technique behind
+[§3.91](./illegal_state_tenancy.md#391-an-unauthenticated-route-whose-scope-comes-from-the-request),
+[§3.93](./illegal_state_tenancy.md#393-a-locally-reconstructed-session-bearing-the-type-of-an-attested-one),
+[§3.94](./illegal_state_tenancy.md#394-two-same-typed-scope-identifiers-exchangeable-at-a-call-site), and
+[§3.95](./illegal_state_tenancy.md#395-a-replay-key-that-does-not-name-its-scope).
+
+### 4.9 The closed transaction vocabulary — only valid transactions have a constructor
+
+*Principle:* an object-relational mapper or a query builder is a language for writing *any* statement, so every
+safety property it has is a property of the statements somebody remembered to write correctly. A store holding
+more than one tenant's rows cannot be reached through a surface of that shape. *Mechanism:* the database surface
+is a **closed union of the transactions the domain actually has**. Each arm is a constructor taking a scope
+witness ([§4.8](#48-the-skolem-scope--a-runtime-tenant-becomes-a-compile-time-index)) and its domain arguments
+as required *fields*, never as an optional filter, so a statement missing its scope is an unapplied constructor
+rather than a widened query. There is no `query :: Text -> IO [Row]`, no `where` combinator, and no arm that
+accepts SQL. The statement text, the schema, its `NOT NULL` and composite foreign keys, and the row-level
+security policy are all emitted from that one declaration
+([§4.5](#45-content-address-totality--names-are-total-functions-of-content)), so a table cannot carry a nullable
+scope column and a policy cannot disagree with the statements run against it — neither is derivable. Adding a
+transaction means adding an arm and re-deriving, which is a change to the program and not something an
+application does while running. Forecloses
+[§3.92](./illegal_state_tenancy.md#392-a-scope-filter-whose-absent-value-means-every-scope),
+[§3.96](./illegal_state_tenancy.md#396-a-scope-column-that-admits-null), and
+[§3.97](./illegal_state_tenancy.md#397-a-scope-key-whose-rendering-is-not-injective).
+
 ---
 
 ## 5. Coverage matrix — which technique forecloses which illegal state
@@ -364,10 +412,10 @@ than trusting the renderer that emitted the graph ([§3.81](./illegal_state_secu
 | 3.71 A freshness watermark asserted rather than derived from captured content | 4.5 content-address totality (watermark is a total function of content) | [backup_recovery](../engineering/backup_recovery_doctrine.md), [content_addressing §4.5](../engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) |
 | 3.72 A compute headroom pad that reserves past its own limit | 4.1 binding-by-construction (`requests + pad ≤ limits` decode fold; the all-`Zero` pad has no constructor) | [resource_capacity](../engineering/resource_capacity_doctrine.md), [platform_services §10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope) |
 | 3.73 A padded reservation that overcommits allocatable | 4.6 capacity-accounting total fold over reserved (requests + pad) rather than requests alone | [resource_capacity](../engineering/resource_capacity_doctrine.md), [substrate](../engineering/substrate_doctrine.md) |
-| 3.74 A container image amoebius did not generate | 4.7 relation over a closed named catalog (`ImageIdentity`, no free-digest/`Url` arm) + 4.1 identity as a required field | [image_build §5](../engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest), [resource_capacity](../engineering/resource_capacity_doctrine.md) |
+| 3.74 A container image amoebius did not generate | 4.7 relation over a closed named catalog (`ImageIdentity`, no free-digest/`Url` arm) + 4.1 identity as a required field | [image_build §5](../engineering/image_build_doctrine.md#5-what-the-image-identity-is-given-that-the-tag-is-an-address), [resource_capacity](../engineering/resource_capacity_doctrine.md) |
 | 3.75 A container whose process is unnamed | 4.1 required `ContainerProcess` field + 4.7 process↔image and binary↔bake-content relations | [resource_capacity](../engineering/resource_capacity_doctrine.md), [daemon_topology §2](../engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) |
 | 3.76 A build stage whose content is unmodeled | 4.1 `NonEmpty BakeStep` required field (no `RunShell : Text` arm) + 4.5 pinned per-step identity rather than a fetched address | [image_build §6](../engineering/image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1), [generated_artifacts](../engineering/generated_artifacts_doctrine.md) |
-| 3.77 A worker naming an extension its own binary does not link | 4.7 membership relation over the variant's `linkedAdapters` set + 4.4 one owning image identity per worker | [daemon_topology §4](../engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected), [image_build §5](../engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest) |
+| 3.77 A worker naming an extension its own binary does not link | 4.7 membership relation over the variant's `linkedAdapters` set + 4.4 one owning image identity per worker | [daemon_topology §4](../engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected), [image_build §5](../engineering/image_build_doctrine.md#5-what-the-image-identity-is-given-that-the-tag-is-an-address) |
 | 3.78 Extension source that reaches outside the sanctioned API | 4.3 opaque `CheckedExtensionSource` as the only linkable state + 4.4 one producer of that value | [dsl §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract), [dsl §8](../engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-extension-astcheck-admits) |
 | 3.79 UI action whose server authorization differs from its declaration | 4.4 single action-registry owner/exact-key parity + 4.3 authorized-action transition + 4.2 server-held scoped capability | [low-code UI §8](../engineering/low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations), [§9](../engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge) |
 | 3.80 Subject resolves/mutates another subject's resource without a grant | 4.2 tenant/subject/audience-indexed handle + 4.4 ownership/grant fold | [low-code UI §10.2](../engineering/low_code_ui_runtime_doctrine.md#102-multi-tenant-mode), [§11](../engineering/low_code_ui_runtime_doctrine.md#11-data-forms-and-storage) |
@@ -381,6 +429,13 @@ than trusting the renderer that emitted the graph ([§3.81](./illegal_state_secu
 | 3.89 A one-shot command run holding a daemon role | 4.3 the legal context/role cell as the constructor, so the grid's blanks have no inhabitant | [daemon_topology §2](../engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) |
 | 3.90 A role whose cardinality contradicts it | 4.3 replica count indexed on the role arm; the exactly-one arms carry no count | [daemon_topology §3](../engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon) |
 | 3.88 A `Planned` gateway migration resting with no owner | 4.3 abort transition typed by phase index (unavailable once the target is promoted) | [gateway_migration §5.1](../engineering/gateway_migration_doctrine.md#51-stand-down-a-planned-migration-that-does-not-complete), [gateway_migration_model §3](../engineering/gateway_migration_model_doctrine.md#3-the-model) |
+| 3.91 An unauthenticated route whose scope comes from the request | 4.8 skolem request scope + 4.2 handler indexed by authentication state | [tenancy §7](../engineering/tenancy_doctrine.md#7-two-isolation-layers-and-the-honest-limit), [low-code UI §9](../engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge) |
+| 3.92 A scope filter whose absent value means every scope | 4.9 closed transaction arms taking the scope as a field + 4.4 one derivation of the row policy | [tenancy §5.1](../engineering/tenancy_doctrine.md#51-the-transaction-is-tenant-qualified-exhaustive-and-may-become-empty) |
+| 3.93 A locally reconstructed session bearing the type of an attested one | 4.3 claimed→attested transition with verification as the only introduction + 4.8 scope minted only by that transition | [browser offline §7](../engineering/browser_offline_runtime_doctrine.md#7-offline-identity-and-partitioning), [tenancy §7.1](../engineering/tenancy_doctrine.md#71-offline-browser-partitions-preserve-scope-but-cannot-prove-revocation-while-disconnected) |
+| 3.94 Two same-typed scope identifiers exchangeable at a call site | 4.8 per-scope skolem index + 4.2 one newtype per identifier kind | [tenancy §4](../engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding) |
+| 3.95 A replay key that does not name its scope | 4.8 scope-indexed key constructor + 4.5 the key as a total function of scope and intent | [browser offline §9](../engineering/browser_offline_runtime_doctrine.md#9-authoritative-replay-and-typed-outcomes) |
+| 3.96 A scope column that admits null | 4.9 schema derived from the scope-bearing row type + 4.5 totality of the emitted DDL | [tenancy §5.1](../engineering/tenancy_doctrine.md#51-the-transaction-is-tenant-qualified-exhaustive-and-may-become-empty) |
+| 3.97 A scope key whose rendering is not injective | 4.5 injective content-derived naming + 4.9 one emitter for every keyspace | [content_addressing](../engineering/content_addressing_doctrine.md), [tenancy §7](../engineering/tenancy_doctrine.md#7-two-isolation-layers-and-the-honest-limit) |
 
 ---
 
@@ -453,7 +508,7 @@ composed — and stays **deferred and UNVERIFIED** until its live real-resource 
 foreclosures ([§4.1](#41-pvcpv-binding-by-construction)–[§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed))
 are only **partially** `type-foreclosed` at dhall-typecheck: Dhall has no opaque types, so it cannot hide a record's or
 union's constructors, and the full "no illegal constructor" teeth land only at the Haskell **GADT** decoder (gadt-decode,
-`Dhall.inputFile`). So the Phase-13 corpus must **split** its negative fixtures into *dhall-typecheck-must-fail-`dhall type`*
+`Dhall.inputFile`). So the Phase-27 corpus must **split** its negative fixtures into *dhall-typecheck-must-fail-`dhall type`*
 (illegal already at the Dhall layer) and *gadt-decode-must-fail-decode* (well-typed Dhall the decoder rejects), and never
 bill a gadt-decode-only foreclosure as a dhall-typecheck type-check failure.
 
@@ -524,18 +579,23 @@ The six loci:
    has no linkable representation, so nothing downstream can consume it. Owned by
    [`dsl_doctrine.md` §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract).
 4. **`provision-seal` — post-bind whole-deployment provisioning returns `Left`.** gadt-decode has already produced
-   decoded, unprovisioned declarations. Phase 17 expands the complete source set and Phase 18's `provision` runs every
+   decoded, unprovisioned declarations. Phase 30 expands the complete source set and Phase 31's `provision` runs every
    capacity, placement, storage/retention, provider-quota, accelerator-count, and net-VRAM fold against the
    exact target inventory. Failure returns `ProvisionError`; success alone constructs the opaque
    `ProvisionedSpec`. This is the concrete locus for the whole-deployment face of `decode-foreclosed`.
-5. **`rendered-output-golden` — caught by a golden test on the rendered manifest, not a cluster.** Some invariants are
+5. **`rendered-artifact-oracle` — caught by an oracle over the rendered artifact, not a cluster.** Some invariants are
    properties of the **emitted objects**, observable after
    decode→bind/expand→plan/resolve-infrastructure→provision→renderAll but before any apply: that every generated
    workload carries the **hardened securityContext and exact checked resource projection**
    ([§3.11](./illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)),
    that the **NetworkPolicy set derived** from the declared dependency graph matches those edges
-   ([§3.6](./illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)), that **no emitted object opens a backdoor wild ingress** ([§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress)). These are verified by a **golden test over the rendered manifest** — the "the generator only ever produces safe objects" claim, checked against the output artifact, never
-   against a running cluster.
+   ([§3.6](./illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)), that **no emitted object opens a backdoor wild ingress** ([§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress)).
+   These are verified by an **independently authored predicate over the rendered artifact** — the "the
+   generator only ever produces safe objects" claim, checked against the output, never against a running
+   cluster. The locus was named `rendered-artifact-oracle` until the artifact calculus replaced byte goldens of
+   generated output with semantic oracles
+   ([`../engineering/jit_artifact_doctrine.md` §7](../engineering/jit_artifact_doctrine.md#7-goldens-become-oracles));
+   the axis member is the *stage*, and the stage outlived the mechanism it was named after.
 6. **`live-effect` — observable only at reconcile/runtime.** The `runtime-checked` residue: whether the LB comes up,
    the pod schedules, etcd forms and holds quorum, the Lima/WSL2 VM interposes, the autoscaler grows, the broker
    offloads to S3, the `drain-complete` edge is truthfully observed. **Not** in this catalog's promise; owned by
@@ -544,26 +604,57 @@ The six loci:
 Because the axes are orthogonal, a single entry commonly names several loci at once — e.g.
 [§3.43](./illegal_state_lifecycle.md#343-an-unmonitored-workflow-or-extension-or-an-unauthenticated-monitoring-surface) is `dhall-typecheck` (the mandatory monitor field, the absent `Off`/`Public` arms), `gadt-decode` (the coverage / feasibility folds),
 `provision-seal` (whole-deployment resource feasibility),
-`rendered-output-golden` (the derived rules/panels in the emitted objects), and `live-effect` (that the alert actually
+`rendered-artifact-oracle` (the derived rules/panels in the emitted objects), and `live-effect` (that the alert actually
 fires) — and the foreclosure *layer* of each part is stated separately in the entry. The loci also map loosely onto
-the two-tier band: `dhall-typecheck`, `gadt-decode`, `extension-astcheck`, `provision-seal`, and `rendered-output-golden` are
+the two-tier band: `dhall-typecheck`, `gadt-decode`, `extension-astcheck`, `provision-seal`, and `rendered-artifact-oracle` are
 **Tier-1** design-time / in-process gates (validated in the **pre-cluster type/decode gates, Phases 11–20** — inside the plan's pre-cluster band, Phases 1–34), while
 `live-effect` is the **Tier-2** runtime-enforcement residue
 deferred to its live phase.
 
-### 6.2 The enumeration limit — the catalog is enumerated, not proven exhaustive
+### 6.2 The covering obligation — exhaustive relative to a declared taxonomy
 
-The catalog is an **enumeration**, not a completeness proof. amoebius lists the illegal states it has identified and
-names the technique that forecloses each; it does **not** prove that the list is *exhaustive*, because there is **no denotational definition of "deployable"** against which exhaustiveness could be measured. "Deployable" is
-characterized *extensionally* — by the enumerated set of states declared illegal and foreclosed — not *denotationally*
-by a semantic predicate over all possible cluster states.
+The catalog is a **covering over a declared taxonomy**. The obligation, the axes, and the reporting rules are
+owned by [`documentation_standards.md` §16](../documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list)
+and the member lists by [`README.md`](./README.md); two of the axes are this document's
+([§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force),
+[§6.1](#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer)).
+What this section owns is one question: what the covering is worth.
 
-Consequently a green dhall-typecheck / gadt-decode pass proves two things and not a third: (a) a well-typed spec **composes** into
-an internally coherent value, and (b) **each enumerated** illegal state is unrepresentable or decode-rejected. It does
-**not** prove (c) that **every conceivable** unsafe cluster state has a catalog entry. New illegal states are added to
-the catalog as they are identified; the honesty discipline ([§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force), [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)) forbids reading
-the enumeration as a closed proof of safety, just as it forbids reading a `type-foreclosed` claim as a statement
-about the running cluster ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)).
+**It is worth a weakening of the old objection, not its dissolution.** The earlier framing held that the list
+could never be exhaustive because there is no denotational definition of "deployable" to measure against. That
+objection stands, and two tempting escapes from it do not work.
+
+The first is the algebra. A composition is well defined exactly when it satisfies the laws its components
+declare — but *well defined* is a property of declarations and *deployable* is a property of a cluster, and
+substituting one for the other is the move [`illegal_state_catalog.md` §2](./illegal_state_catalog.md) is named
+after. The second is that the laws supply the independent characterisation a list lacks. They do not: a law set
+defines the legal set by being itself, in exactly the way a list defines the illegal set by being itself, so
+the claim reduces from *the list agreeing with the list* to *the laws agreeing with the laws*. The law set is a
+human choice on the same terms the taxonomy is
+([`../engineering/extension_conformance_doctrine.md` §9](../engineering/extension_conformance_doctrine.md#9-what-conformance-does-not-prove)),
+and a thirteenth law is expected.
+
+What the covering does buy is real and worth the machinery: a **finite, declared index set** to report against.
+Before it, an absent entry and an absent hazard were indistinguishable. After it, the gap is a number, and
+widening an axis reports its own new empty cells rather than silently enlarging the thing being claimed. That
+is a reporting property, not a semantic one. Clause 4 of
+[`documentation_standards.md` §16](../documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list)
+owns how to say it.
+
+So a green dhall-typecheck / gadt-decode pass **establishes** three things and not a fourth: (a) a well-typed
+spec **composes** into an internally coherent value, (b) for each catalog entry, the fixture that entry names
+is rejected for its pinned reason, and (c) every declared cell is **accounted for**, by an entry or by a
+justification. It does not establish (d) that the declared axes name every way a cluster can be unsafe.
+
+Note the exact strength of (b), because it is the one routinely overstated. A compile-fail fixture shows that
+*that expression* is rejected. It does not show that no expression of the state exists — that is a property of
+the type, argued for rather than tested, and the distinction is owned by
+[`../engineering/evidence_calculus_doctrine.md` §3](../engineering/evidence_calculus_doctrine.md#3-the-four-fixture-kinds). The honesty discipline
+([§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force),
+[`documentation_standards.md` §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline))
+forbids reading a complete covering as a closed proof of safety, exactly as it forbids reading a
+`type-foreclosed` claim as a statement about the running cluster
+([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)).
 
 ---
 
@@ -585,5 +676,5 @@ about the running cluster ([§2](./illegal_state_catalog.md#2-the-load-bearing-l
 - [Pulumi IaC Doctrine](../engineering/pulumi_iac_doctrine.md) — route53 / zerossl name→address binding ([§4.5](#45-content-address-totality--names-are-total-functions-of-content))
 - [Chaos / Failover Doctrine](../engineering/chaos_failover_doctrine.md) — the `runtime-checked` / `live-effect` residue (the honest limit)
 - [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) — proven/tested/assumed honesty discipline
-- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 11–20) / Tier-2 (Phase 44) tier split
+- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 11–20) / Tier-2 (Phase 65) tier split
 - [Engineering Doctrine Index](../engineering/README.md)

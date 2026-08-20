@@ -41,7 +41,7 @@ ENTRY_POINT = ROOT / "app/amoebius/Amoebius/Entry/ServeUi.hs"
 HARNESS = ROOT / "test/harness/local_ui_composition/composition.mjs"
 RESULTS = ROOT / ".build/dsl/local-ui-composition/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/local-ui-composition/validation-locus-ledger.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_33_ui_local_composition.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_44_ui_local_composition.md"
 GATE_COMMAND = "python3 tools/local_ui_composition_gate.py"
 EXPECTATIONS = ROOT / "test/oracle/local_ui_composition_surfaces.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/local-ui-composition"
@@ -393,7 +393,7 @@ def surface_decisions(
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=23, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        phase=44, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
         register="2", substrate="none", sides=SIDES,
     )
     gate.begin()

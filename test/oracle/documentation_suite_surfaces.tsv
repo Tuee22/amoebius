@@ -20,7 +20,7 @@ documentation.anchored_links	doc_lint	b1,b2,i,n
 documentation.bidirectional_references	doc_lint	c
 documentation.normative_uniqueness	doc_lint	d,m
 documentation.status_consistency	doc_lint	e
-documentation.gate_integrity	doc_lint	f,f2,f3
+documentation.gate_integrity	doc_lint	f,f2,f3,f6
 documentation.numeric_order	doc_lint	f4,f5
 documentation.slug_integrity	doc_lint	u3
 documentation.illegal_state_catalog	doc_lint	g1,g2,g3,g4,g5
@@ -52,3 +52,11 @@ repository.ignore_partition	artifact_policy	r14
 repository.de_phased_naming	artifact_policy	r15
 repository.state_containment	artifact_policy	r16
 repository.test_secrets_boundary	artifact_policy	r17
+contract.shape	phase_contract_lint	d1
+contract.fields	phase_contract_lint	d2
+contract.mutants	phase_contract_lint	d3
+contract.promises	phase_contract_lint	d4
+contract.scope	phase_contract_lint	d5
+contract.conformance	phase_contract_lint	d6
+contract.status	phase_contract_lint	d7
+plan.arithmetic	phase_contract_lint	d8

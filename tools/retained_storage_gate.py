@@ -25,7 +25,7 @@ STORAGE_CLASS_GOLDEN = ROOT / "test/oracle/retained_storage/storage_class.yaml"
 CLAIMREF_TABLE = ROOT / "test/oracle/retained_storage/claimref_table.csv"
 RESULTS = ROOT / ".build/dsl/retained-storage/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/retained_storage_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_39_retained_storage.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_60_retained_storage.md"
 GATE_COMMAND = "python3 tools/retained_storage_gate.py --execute"
 
 EXPECTED_MUTANTS = {
@@ -202,7 +202,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
 
     gate = gate_common.PhaseGate(
-        phase=28, contract=CONTRACT, command=GATE_COMMAND,
+        phase=60, contract=CONTRACT, command=GATE_COMMAND,
         expectations=str(EXPECTATIONS.relative_to(ROOT)), register="3",
         substrate="linux-cpu", sides=SIDES,
     )

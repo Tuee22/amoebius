@@ -30,7 +30,7 @@ MUTANTS = ROOT / "test/mutant/registry.tsv"
 RESULTS = ROOT / ".build/dsl/execution-accelerator/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/execution-accelerator/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/execution-accelerator"
-CONTRACT = "DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md"
 GATE_COMMAND = "python3 tools/execution_accelerator_gate.py"
 EXPECTATIONS = "test/oracle/execution_accelerator_surfaces.tsv"
 
@@ -267,7 +267,7 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=10, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
+        phase=29, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()

@@ -84,13 +84,13 @@ ownerNumber ownerValue = case reads (Text.unpack (Text.drop (Text.length "Phase-
 -- registry's `owner_phase` column, but not the thresholds that read it, so the two
 -- disagreed about which phase owns a locus while both looked internally consistent.
 firstFoldPhase, renderPhase, astCheckPhase :: Int
-firstFoldPhase = 8   -- the capacity core fold, the earliest phase a provision row may be owned by
-renderPhase = 14     -- pure renderAll and the rendered-output goldens
-astCheckPhase = 15   -- the chain/Step kernel and the Gate-3 AST checker
+firstFoldPhase = 9   -- the resource index, the earliest phase a provision row may be owned by
+renderPhase = 33     -- pure renderAll and the rendered-artifact oracles
+astCheckPhase = 34   -- the chain/Step kernel and the Gate-3 AST checker
 
 validateDeferred :: [RegistryRow] -> IO ()
 validateDeferred rows = do
-  forEach [row | row <- rows, locus row == "rendered-output-golden"] $ \row ->
+  forEach [row | row <- rows, locus row == "rendered-artifact-oracle"] $ \row ->
     assert
       (ownerNumber (owner row) >= renderPhase)
       ("rendered row is owned before Phase " <> show renderPhase <> ": " <> show row)

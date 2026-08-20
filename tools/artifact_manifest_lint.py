@@ -64,11 +64,42 @@ def _phase_documents() -> dict[int, Path]:
     return found
 
 
+def _generative_map() -> dict[int, int]:
+    """old -> new for the 2026-08-19 generative re-baseline, read from its audit map.
+
+    A third hardcoded shift would not work and would not be honest: that re-baseline
+    reordered rather than shifted, so no single offset describes it. It also mapped
+    through the slug rather than the ordinal, because sending a stale ordinal through a
+    correct offset yields a confidently wrong answer — which is how the two re-baselines
+    before it each left stale ordinals behind. So the mapping is read from the row that
+    records it, on the terms this module already applies to the earlier translation.
+    """
+    text = LEGACY_REGISTER.read_text(encoding="utf-8")
+    start = text.find("## Generative re-baseline")
+    if start == -1:
+        raise ValueError("the legacy register records no generative re-baseline audit map")
+    section = text[start:text.find("\n## ", start + 1)]
+    out: dict[int, int] = {}
+    for row in re.finditer(r"^\| (\d{1,2}) \| `phase_\d\d_[a-z0-9_]+\.md` \| (\d{1,2}) \|", section, re.M):
+        out[int(row.group(2))] = int(row.group(1))
+    if not out:
+        raise ValueError("the generative audit map parses to no old-to-new row")
+    return out
+
+
+GENERATIVE = _generative_map()
 PHASE_DOCUMENTS = _phase_documents()
-_absent = sorted(p for p in PHASES if p + HOST_BAND_SHIFT not in PHASE_DOCUMENTS)
+
+
+def _owner_document(phase: int):
+    """The document that owns a manifest pin recorded at its pre-2026-08-18 ordinal."""
+    return PHASE_DOCUMENTS.get(GENERATIVE.get(phase + HOST_BAND_SHIFT, phase + HOST_BAND_SHIFT))
+
+
+_absent = sorted(p for p in PHASES if _owner_document(p) is None)
 if _absent:
     raise ValueError(f"no phase document for pin-owner ordinal(s): {_absent}")
-PLAN_DOCS = [PHASE_DOCUMENTS[phase + HOST_BAND_SHIFT] for phase in sorted(PHASES)]
+PLAN_DOCS = [_owner_document(phase) for phase in sorted(PHASES)]
 GITIGNORE_BYTECODE_PATTERNS = {"__pycache__/", "*.py[cod]"}
 DOCKERIGNORE_BYTECODE_PATTERNS = {
     "**/__pycache__",

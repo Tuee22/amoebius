@@ -14,7 +14,7 @@ Runtime, cluster, and gadt-decode semantic fidelity remain UNVERIFIED.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_09_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_21_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_44_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -25,13 +25,13 @@ Runtime, cluster, and gadt-decode semantic fidelity remain UNVERIFIED.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 1.1: Historical shared-resolution spike ✅](#sprint-11-historical-shared-resolution-spike-)
-- [Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅](#sprint-12-dhall-in-process-decoder-build-probe-gadt-decode-dependency-)
-- [Sprint 1.3: `io-sim` + `io-classes` simulation build probe ✅](#sprint-13-io-sim--io-classes-simulation-build-probe-)
-- [Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅](#sprint-14-jit-build-resolver-deps--purescript-bridge--consolidated-probe-gate-)
-- [Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe ✅](#sprint-15-supernova-fork--proto-lens-codegen-build-probe-)
-- [Sprint 1.6: Dynamic resolution and generated-output migration ✅](#sprint-16-dynamic-resolution-and-generated-output-migration-)
-- [Sprint 1.7: Discover, then ensure — the resolver acquires what it needs ✅](#sprint-17-discover-then-ensure--the-resolver-acquires-what-it-needs-)
+- [Sprint 1.1: Historical shared-resolution spike 📋](#sprint-11-historical-shared-resolution-spike-)
+- [Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) 📋](#sprint-12-dhall-in-process-decoder-build-probe-gadt-decode-dependency-)
+- [Sprint 1.3: `io-sim` + `io-classes` simulation build probe 📋](#sprint-13-io-sim--io-classes-simulation-build-probe-)
+- [Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate 📋](#sprint-14-jit-build-resolver-deps--purescript-bridge--consolidated-probe-gate-)
+- [Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe 📋](#sprint-15-supernova-fork--proto-lens-codegen-build-probe-)
+- [Sprint 1.6: Dynamic resolution and generated-output migration 📋](#sprint-16-dynamic-resolution-and-generated-output-migration-)
+- [Sprint 1.7: Discover, then ensure — the resolver acquires what it needs 📋](#sprint-17-discover-then-ensure--the-resolver-acquires-what-it-needs-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -39,14 +39,7 @@ Runtime, cluster, and gadt-decode semantic fidelity remain UNVERIFIED.
 
 ## Phase Status
 
-✅ Done — **resealed a second time on 2026-08-17**, against the tree Phase 2 moved. The one authored package
-now depends on the infernix and jitML cores as `source-repository-package` entries, so the seeded
-`drop-allow-newer` mutant had to gain them too: without them the solver died at an unknown package before it
-reached the intended `proto`/`base` conflict, which is a mutant turning the gate red for the wrong reason —
-indistinguishable, from the gate's side, from one that works. The mutant project now tracks `cabal.project`
-in every dimension but the one it perturbs. All twelve sides pass, two independent resolutions admit the same
-260 packages, and attestation `sha256:284dd6643d5175319f2b3973b62073d53cc2a2654d7ba18be60a5b48dffc94f6` binds
-source snapshot `sha256:bafc948bad016548…`.
+⏸️ Blocked pending Phase-0 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
 
 **The first 2026-08-17 seal, on the amended contract.** `python3 tools/toolchain_spike_gate.py` passes all
 twelve sides on substrate `none`, lane `none`, natural `arm64`, untranslated: 17 authored requirements resolve
@@ -118,7 +111,7 @@ unchanged. Twenty-two downstream gate scripts now consume run-local resolution.
 which made a Phase-1 gate depend on packages phases 9–70 own — the forward dependency
 [§E](development_plan_standards.md#e-one-canonical-phase-model) forbids. Narrowing it to the representative set
 exposed that `lib:dsl-core` does not compile, because the UI-server boundary ABI
-`src/Amoebius/Ui/Server/Main.hs` imports does not exist anywhere in the tree; that seam is Phase 32's and is
+`src/Amoebius/Ui/Server/Main.hs` imports does not exist anywhere in the tree; that seam is Phase 43's and is
 recorded in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md). Separately, the
 `source-closure` seeded negative had stopped firing because path normalization stripped the leading dot from
 its ignored root, so it proved nothing; it now seeds a non-dotted ignored root.
@@ -145,12 +138,16 @@ PureScript contract generation, and the native Pulsar client's protocol code gen
 source identities, compatibility adjustments, observed checksums, executable paths, and transcripts are run
 evidence. They are attested beneath `.build/evidence-store/**` and never copied into Markdown or a tracked manifest.
 
+**Phase scope:** one cohesive claim — *the toolchain is a resolved observation, never a committed pin*. Five probes exist only to show the resolution reaches everything a later phase needs.
+
 **Substrate:** `none` — no host, no cluster; the gate resolves and compiles Hackage packages on the developer
 toolchain only.
 
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 1 — pure/build, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
+
+**Depends on:** [Phase 0](phase_00_documentation_suite.md) — documentation suite (whole DSL), which this phase consumes rather than rebuilds.
 
 **Gate:** against its source snapshot, `python3 tools/toolchain_spike_gate.py` dynamically resolves a compatible graph,
 builds and runs every named probe and mutant, verifies every reviewed patch is tracked under an authored root,
@@ -162,6 +159,7 @@ The representative set is `dhall`, `io-sim`, `io-classes`, the jit-build resolve
 `purescript-bridge`, PureScript/Spago/browser tooling, the native Pulsar client, `supernova`, `proto-lens`,
 and `protoc`. The authored Dhall positive/negative pair, independent simulation expectation, schedule mutant,
 dependency-resolution mutant, and protocol round-trip fixture remain the oracle side.
+
 
 The gate builds that set and nothing later: the `probe` executables plus the Pulsar `proto` package, which
 between them link every member. It does not build the packages phases 9–70 own. A Phase-1 gate that built the
@@ -191,6 +189,7 @@ flowchart LR
   probe --> attest[repository-local attestation]
 ```
 *Design intent. Phase 1 resolves a current compatible graph per run and retains only repository-local evidence, as owned by [repository-layout doctrine §4](../documents/engineering/repository_layout_doctrine.md#4-dependency-and-toolchain-resolution).*
+- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
 
 ## Doctrine adopted
 
@@ -210,7 +209,7 @@ flowchart LR
   dependency, while the version-stable JVM TLC half stays unaffected by the GHC pin.
 - [`formal_model_doctrine.md §7 — Prototype validation`](../documents/engineering/formal_model_doctrine.md#7-prototype-validation):
   the reifiable-`Model` mechanism — one value rendering both `interpret` (runtime) and `emitTLA` (a generated,
-  never-committed `.tla`) — was prototyped in a throwaway spike; that is **sibling evidence, not an amoebius result**, and its Haskell side must build on the pin before Phase 9 authors it.
+  never-committed `.tla`) — was prototyped in a throwaway spike; that is **sibling evidence, not an amoebius result**, and its Haskell side must build on the pin before Phase 11 authors it.
 - [`content_addressing_determinism.md §4.5 — the ML-asset lifecycle`](../documents/engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
   ML engines/models/kernels are never baked or URL-fetched — the shared `jit-build` resolver materializes each
   **named catalog identity** on first miss into a `CacheBudget`-bounded content-addressed cache; the resolver's
@@ -226,13 +225,12 @@ flowchart LR
 > resolution, and no instruction to retain any of them governs future work. Sprint 1.6 is the replacement
 > contract and states what the current gate actually does.
 
-## Sprint 1.1: Historical shared-resolution spike ✅
-
-**Status**: Done — the capability this sprint recorded is re-established by the redesigned 2026-08-12 gate; its pin, freeze, and repository-resident evidence mechanics are superseded
+## Sprint 1.1: Historical shared-resolution spike 📋
+**Status**: Planned
 **Implementation**: `cabal.project`, `cabal.project.freeze`, and `toolchain/pins.json` — the **pin
 manifest**: the resolved absolute paths of `ghc`/`cabal`/`dhall` (invoked by absolute path from
-[Phase 12](phase_12_gadt_decode_ir.md) on) and of `spago`/`purs` + Chromium (the browser toolchain the UI
-phases from [Phase 31](phase_31_ui_browser_interpreter.md) on drive) — implemented and version-checked by the gate.
+[Phase 26](phase_26_gadt_decode_ir.md) on) and of `spago`/`purs` + Chromium (the browser toolchain the UI
+phases from [Phase 42](phase_42_ui_browser_interpreter.md) on drive) — implemented and version-checked by the gate.
 **Blocked by**: reopened numeric predecessor gates.
 **Requires**: `host-floor` — the package-manager root and the substrate's own build prerequisites. Every
 tool this sprint names is acquired rather than assumed.
@@ -260,9 +258,8 @@ this phase resolves against one dependency universe rather than a drifting one.
 ### Remaining Work
 None. Validated by the consolidated Phase-1 gate on 2026-08-08.
 
-## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) ✅
-
-**Status**: Done — the capability this sprint recorded is re-established by the redesigned 2026-08-12 gate; its pin, freeze, and repository-resident evidence mechanics are superseded
+## Sprint 1.2: `dhall` in-process decoder build probe (gadt-decode dependency) 📋
+**Status**: Planned
 **Implementation**: `probe/probe.cabal` (a `dhall` build-depends), `probe/app/Decode.hs`
 (decode a trivial `.dhall` in-process) — implemented as the retained gate harness.
 **Blocked by**: reopened numeric predecessor gates.
@@ -276,8 +273,8 @@ evidentiary branch rule.
 ### Objective
 Adopt [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note) with
 its [§5 gadt-decode](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract): prove
-the in-process `dhall` decoder — the structural gadt-decode leg that must precede Phase-17/18 bind/provision — is
-buildable on the pin before Phase 12 promises an executable decoder. `dhall` historically lags new GHC releases, so
+the in-process `dhall` decoder — the structural gadt-decode leg that must precede Phase-30/18 bind/provision — is
+buildable on the pin before Phase 26 promises an executable decoder. `dhall` historically lags new GHC releases, so
 `allow-newer` alone may be insufficient and a source patch or fork may be required.
 
 ### Deliverables
@@ -305,9 +302,8 @@ buildable on the pin before Phase 12 promises an executable decoder. `dhall` his
 None. The positive decode matched byte-for-byte and the negative failed at `DHALL_TYPE_ERROR` in the retained
 2026-08-08 gate evidence.
 
-## Sprint 1.3: `io-sim` + `io-classes` simulation build probe ✅
-
-**Status**: Done — the capability this sprint recorded is re-established by the redesigned 2026-08-12 gate; its pin, freeze, and repository-resident evidence mechanics are superseded
+## Sprint 1.3: `io-sim` + `io-classes` simulation build probe 📋
+**Status**: Planned
 **Implementation**: extend `probe/probe.cabal` (`io-sim`, `io-classes` build-depends),
 `probe/app/Sim.hs` (a trivial `IOSimPOR` run that **emits the terminal state it reaches on stdout** in the
 committed serialization), the external harness `probe/oracle/check-sim-terminal`, the Phase-0 oracle
@@ -324,8 +320,8 @@ backlink), `DEVELOPMENT_PLAN/system_components.md`.
 ### Objective
 Adopt [`gateway_migration_model_doctrine.md §4 — Simulate and prove`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
 amoebius's one formal obligation drives the gateway-migration `Model` against `io-classes`/`IOSimPOR`'s
-deterministic, partial-order-reduced scheduler. Prove that toolchain builds on the pin before Phase 10 authors
-the simulation. TLC (`tla2tools.jar`) is pure JVM and version-stable, so the Phase-9/10 TLC path is **not** gated
+deterministic, partial-order-reduced scheduler. Prove that toolchain builds on the pin before Phase 17 authors
+the simulation. TLC (`tla2tools.jar`) is pure JVM and version-stable, so the Phase-11/10 TLC path is **not** gated
 by this probe.
 
 ### Deliverables
@@ -352,9 +348,8 @@ by this probe.
 ### Remaining Work
 None. The external terminal-state oracle passed and the schedule perturbation mutant was killed on 2026-08-08.
 
-## Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate ✅
-
-**Status**: Done — the capability this sprint recorded is re-established by the redesigned 2026-08-12 gate; its pin, freeze, and repository-resident evidence mechanics are superseded
+## Sprint 1.4: jit-build resolver deps + `purescript-bridge` + consolidated probe gate 📋
+**Status**: Planned
 **Implementation**: `probe/probe.cabal` and its single consolidated `probe` executable, plus the
 recorded-resolution ledger in `DEVELOPMENT_PLAN/README.md` — implemented and retained as gate evidence.
 **Blocked by**: reopened numeric predecessor gates.
@@ -386,7 +381,7 @@ dependency universe — the phase gate.
 - The retained `cabal.project` + freeze file, all `cabal build`/`cabal run` transcripts, the external
   `probe/oracle/check-sim-terminal` harness with its `probe/fixtures/sim-terminal.expected` oracle, and **both**
   seeded mutants `probe/mutants/drop-allow-newer` and `probe/mutants/perturb-sim-schedule`, under
-  `DEVELOPMENT_PLAN/evidence/phase_01/` (or CI-archived and linked), kept until Phase 12 supersedes them.
+  `DEVELOPMENT_PLAN/evidence/phase_1/` (or CI-archived and linked), kept until Phase 26 supersedes them.
 - A first-class proven/tested/assumed ledger artifact ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) — naming **Register 1**, recording the green build +
   executed-fixture results as *tested*, and marking every runtime, cluster, and gadt-decode-semantics layer
   **UNVERIFIED** — retained even though the probe package itself is deleted after resolution.
@@ -410,9 +405,8 @@ dependency universe — the phase gate.
 ### Remaining Work
 None. The probe remains only as a re-runnable gate harness; it is not a durable amoebius runtime module.
 
-## Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe ✅
-
-**Status**: Done — the capability this sprint recorded is re-established by the redesigned 2026-08-12 gate; its pin, freeze, and repository-resident evidence mechanics are superseded
+## Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe 📋
+**Status**: Planned
 **Implementation**: extend `probe/probe.cabal` (the native Pulsar client's `supernova`
 fork + its `proto-lens` codegen, build-only), plus the generated protobuf modules the `proto-lens` codegen
 emits — implemented and retained as gate evidence.
@@ -440,7 +434,7 @@ consolidated gate.
   exactly that set, **or** a recorded blocker carrying the verbatim failing output and one failing transcript
   per remediation class (bare `allow-newer`, source patch, fork/pin).
 - The generated `proto-lens` protobuf module committed as the codegen's build-only deliverable, plus the
-  retained transcript, under `DEVELOPMENT_PLAN/evidence/phase_01/`.
+  retained transcript, under `DEVELOPMENT_PLAN/evidence/phase_1/`.
 
 ### Validation
 1. The `supernova` fork + `proto-lens` codegen resolve and compile green under the pin from a clean store,
@@ -456,11 +450,10 @@ consolidated gate.
 
 ### Remaining Work
 None. The observed fork identity, compatibility patch application, clean-store transcript, and generated
-protobuf module digests are retained in the Phase-1 run bundle beneath `.build/runs/phase_01/**`.
+protobuf module digests are retained in the Phase-1 run bundle beneath `.build/runs/phase_1/**`.
 
-## Sprint 1.6: Dynamic resolution and generated-output migration ✅
-
-**Status**: Done — re-established by the project-contained 2026-08-15 gate
+## Sprint 1.6: Dynamic resolution and generated-output migration 📋
+**Status**: Planned
 **Implementation**: `cabal.project`, `tools/toolchain_requirements.json`, `tools/toolchain.py`,
 `tools/toolchain_spike_gate.py`, `tools/toolchain_spike_negative_corpus.py`, `test/oracle/toolchain_spike_surfaces.tsv`,
 `patches/supernova_ghc_9_12.patch`, `vendor/dual/PROVENANCE.md`; generated `.build/{toolchain,locks,proto,runs,test-surfaces,test-corpora}/**`
@@ -510,9 +503,8 @@ resolves twice to the same graph, resolves it again from non-ignored source alon
 repository-local attestation. Cabal metadata, its package store, build roots, npm dependencies, tool downloads,
 and all temp/cache homes are confined to `.build/**`; the host inventory is unchanged.
 
-## Sprint 1.7: Discover, then ensure — the resolver acquires what it needs ✅
-
-**Status**: Done — implemented and sealed by the 2026-08-17 gate run
+## Sprint 1.7: Discover, then ensure — the resolver acquires what it needs 📋
+**Status**: Planned
 **Implementation**: `tools/toolchain_requirements.json`, `tools/toolchain.py`,
 `tools/host_platform.py`, `tools/gate_common.py`, `tools/toolchain_spike_gate.py`,
 `tools/toolchain_spike_negative_corpus.py`,

@@ -1,11 +1,11 @@
 # Amoebius Documentation
 
-> **Purpose**: Top-level index of the amoebius documentation — the two doctrine families
-> ([`engineering/`](./engineering/README.md) and [`illegal_state/`](./illegal_state/illegal_state_catalog.md))
-> and the shared [documentation standards](./documentation_standards.md).
+> **Purpose**: Top-level index of the amoebius documentation — the three doctrine families
+> ([`engineering/`](./engineering/README.md), [`illegal_state/`](./illegal_state/illegal_state_catalog.md),
+> and the extension contract) and the shared [documentation standards](./documentation_standards.md).
 > **Read this if**: the shape of the documentation corpus is unfamiliar and the question is which family owns what.
 
-This index routes to the two doctrine families and the shared standards; it owns no doctrine of its own and
+This index routes to the three doctrine families and the shared standards; it owns no doctrine of its own and
 states no rule. Sequence, rather than subject grouping, is owned by
 [reading_order.md](./reading_order.md), and phase order and status by
 [`../DEVELOPMENT_PLAN/README.md`](../DEVELOPMENT_PLAN/README.md). Nothing here presumes prior knowledge of
@@ -29,19 +29,26 @@ The two indexes below group documents by subject. Subject order is not reading o
 which document to open first.
 
 - [`reading_order.md`](./reading_order.md) — the sequence in which this corpus is read for the first time, in
-  seven stops, each naming where to stop reading.
+  eight stops, each naming where to stop reading.
 - [`glossary.md`](./glossary.md) — the routing table from every amoebius term and acronym to the section that
   owns it. Worth keeping open alongside any other document here.
 
-## The two doctrine families
+## The three doctrine families
 
 - **[`engineering/`](./engineering/README.md)** — the engineering & architecture doctrine set: the DSL, the
   formal-model docs, platform & cluster, runtime, security, and lifecycle doctrine. See
   [`engineering/README.md`](./engineering/README.md) for the full index.
 - **[`illegal_state/`](./illegal_state/README.md)** — the illegal-state catalog family: its
   [family router](./illegal_state/README.md) and authoritative
-  [index](./illegal_state/illegal_state_catalog.md) (the themed map of *which* states a valid `InForceSpec` cannot represent), eight themed sub-catalogs (storage · topology · capacity · security · capability-messaging · ml-asset · multi-cluster · lifecycle), and the [techniques doc](./illegal_state/illegal_state_techniques.md),
+  [index](./illegal_state/illegal_state_catalog.md) (the themed map of *which* states a valid `InForceSpec` cannot represent), nine themed sub-catalogs (storage · topology · capacity · security · tenancy · capability-messaging · ml-asset · multi-cluster · lifecycle), and the [techniques doc](./illegal_state/illegal_state_techniques.md),
   which maps enforcement technique, foreclosure layer, and validation locus.
+- **The extension contract** — the open-core half: the hub
+  [`engineering/extension_conformance_doctrine.md`](./engineering/extension_conformance_doctrine.md) with its
+  three slices ([laws](./engineering/extension_conformance_laws.md) L1–L5 and C1–C7,
+  [security](./engineering/extension_conformance_security.md) S1–S6,
+  [transactions](./engineering/extension_conformance_transactions.md) P1–P6), stating what a domain or hardware
+  extension satisfies to join the algebra and why arbitrary compositions of conforming extensions are
+  themselves conforming.
 
 ## Shared standards
 

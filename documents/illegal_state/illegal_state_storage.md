@@ -15,7 +15,7 @@ once in the type and again by a total check before any effect. The enumeration's
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md, DEVELOPMENT_PLAN/phase_13_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_16_execution_accelerator_folds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_storage.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 </details>
@@ -35,7 +35,7 @@ flowchart LR
   g2["gadt-decode<br/>11 entries"]
   g3["extension-astcheck<br/>none in this slice"]
   ps["provision-seal<br/>4 entries"]
-  rg["rendered-output-golden<br/>1 entry"]
+  rg["rendered-artifact-oracle<br/>1 entry"]
   le["live-effect<br/>none in this slice"]
   g1 -->|"anything the typecheck admits"| g2
   g2 -->|"linked extension source only"| g3
@@ -53,8 +53,8 @@ stay stable. It is not self-contained framing — it owns only the deep treatmen
 
 - The **catalog index** (which states are illegal, the full [§3](#3-the-backup--recovery-illegal-states).x list) and the **honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced here, not restated.
-- The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure**
-  ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal question of *where* each state is caught — `dhall-typecheck`, `gadt-decode`, `provision-seal` (post-bind Phase-18 provision returns a `ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden`, `live-effect`) are owned by
+- The **nine typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure**
+  ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis**, whose members [`illegal_state_techniques.md` §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer) declares and this slice does not restate, are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced here, not restated.
 
 Everything below is **design intent** (per [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
@@ -70,7 +70,7 @@ foreclosure layer, from [`illegal_state_techniques.md`](./illegal_state_techniqu
 
 ### 3.1 Bad / illegal durable storage
 
-**Delivery-owner:** `Phase-39`
+**Delivery-owner:** `Phase-60`
 
 **Case-family:** `storage`
 
@@ -87,7 +87,7 @@ default class are non-constructible — required-field / no-arm shapes that fail
 
 ### 3.2 PVCs that don't bind PVs
 
-**Delivery-owner:** `Phase-13`
+**Delivery-owner:** `Phase-27`
 
 **Case-family:** `storage`
 
@@ -100,12 +100,12 @@ its exactly-matching PV ([§4.1](./illegal_state_techniques.md#41-pvcpv-binding-
 **Validation-locus:** `gadt-decode` (the exactly-matching-PV pairing is a Haskell smart-constructor / GADT
 discipline whose teeth Dhall cannot hold — Dhall has no opaque types to hide the raw claim and PV record
 constructors ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), so the mismatched pair is a compile-fail
-golden pinned at Phase 13, not a `dhall type` failure at authoring) + `live-effect` residue (that the running
+golden pinned at Phase 27, not a `dhall type` failure at authoring) + `live-effect` residue (that the running
 PVC actually binds its PV at reconcile, owned by the runtime-enforcement proof).
 
 ### 3.18 Unbounded storage anywhere
 
-**Delivery-owner:** `Phase-11`
+**Delivery-owner:** `Phase-25`
 
 **Case-family:** `storage`
 
@@ -126,7 +126,7 @@ the union shape is type-foreclosed.
 
 ### 3.19 An application consuming more storage than its backing (MinIO and Pulsar)
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-28`
 
 **Case-family:** `storage`
 
@@ -150,7 +150,7 @@ unboundedness is a closed union checked at authoring).
 
 ### 3.20 A Pulsar topic without a bounded / tiered / retained lifecycle
 
-**Delivery-owner:** `Phase-11`
+**Delivery-owner:** `Phase-25`
 
 **Case-family:** `storage`
 
@@ -173,7 +173,7 @@ residue (the burst back-pressure and backlog quota actually holding at runtime).
 
 ### 3.21 Capacity growth without an amoebius-owned scaling policy
 
-**Delivery-owner:** `Phase-11`
+**Delivery-owner:** `Phase-25`
 
 **Case-family:** `storage`
 
@@ -199,7 +199,7 @@ cold-seed entries live in the multi-cluster slice ([§3.69](./illegal_state_mult
 
 ### 3.53 A backup larger than its bounded medium
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-28`
 
 **Case-family:** `storage`
 
@@ -217,7 +217,7 @@ medium physically caps bytes at runtime).
 
 ### 3.54 Deleting a backup in an append-only system
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -233,7 +233,7 @@ all — the closed-union / no-arm shape that gives the `StorageMutation` surface
 
 ### 3.55 amoebius holding a credential that can delete a backup
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -250,7 +250,7 @@ delete).
 
 ### 3.56 Automatically recovering from a manual air-gapped medium
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -265,7 +265,7 @@ air-gap medium has no inhabitant. **Owner:** [`backup_recovery_doctrine.md` §7]
 
 ### 3.57 A restore that overwrites live durable bytes
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -281,7 +281,7 @@ is empty because its backing was lost. **Owner:** [`backup_recovery_doctrine.md`
 
 ### 3.58 Unbounded backup history
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -294,7 +294,7 @@ a quota. **Owner:** [`backup_recovery_doctrine.md` §2](../engineering/backup_re
 
 ### 3.59 A backup in the same failure domain as its source
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -309,7 +309,7 @@ distinctness technique that rejects a cluster reused as active and standby in th
 
 ### 3.60 Backup bytes double-counted as live durable capacity
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-28`
 
 **Case-family:** `storage`
 
@@ -323,7 +323,7 @@ backing and from node ephemeral/cache pools, so the capacity fold cannot spend o
 
 ### 3.61 A plaintext backup at rest
 
-**Delivery-owner:** `Phase-20`
+**Delivery-owner:** `Phase-33`
 
 **Case-family:** `backup`
 
@@ -335,11 +335,11 @@ never inline; a constructor that emitted plaintext bytes to the medium has no in
 (envelope owned by [`vault_pki_doctrine.md` §3](../engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)).
 **Technique:** [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
 (envelope handle). **Layer:** decode-foreclosed handle + runtime decrypt-in-process. **Validation-locus:**
-`rendered-output-golden` + `live-effect`.
+`rendered-artifact-oracle` + `live-effect`.
 
 ### 3.62 A backup whose decryption key is escrowed only in the domain it protects
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -354,7 +354,7 @@ password-encrypted unseal path supplies it for the Vault-seed case. **Owner:** [
 
 ### 3.63 A restore from an unverified backup artifact
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -369,7 +369,7 @@ artifact, fails loud, and is never a valid restore source — the same `.ready`-
 
 ### 3.64 A cross-tenant or re-tagged backup or restore
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -383,7 +383,7 @@ append-only revocable capability edge, never a re-tag. **Owner:** [`backup_recov
 
 ### 3.65 An air-gapped medium carrying a live network credential
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -396,7 +396,7 @@ than a live credential. **Owner:** [`backup_recovery_doctrine.md` §3](../engine
 
 ### 3.66 Retention lowered below the currently-retained generations on an append-only medium
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -411,7 +411,7 @@ probe. **Validation-locus:** `gadt-decode` + `live-effect`.
 
 ### 3.67 A restore into a target smaller than or presentation-incompatible with the backup extent
 
-**Delivery-owner:** `Phase-15`
+**Delivery-owner:** `Phase-28`
 
 **Case-family:** `storage`
 
@@ -426,7 +426,7 @@ under-sized or presentation-mismatched restore is rejected before render. **Owne
 
 ### 3.68 Two conflicting backup policies on one coordinate
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
 
@@ -439,7 +439,7 @@ exactly one `BackupPolicy` owner under a total ownership-index fold; a double-cl
 
 ### 3.85 A spec verb that destroys durable bytes
 
-**Delivery-owner:** `Phase-21`
+**Delivery-owner:** `Phase-34`
 
 **Case-family:** `storage`
 
@@ -468,7 +468,7 @@ orthogonal to the foreclosure layer above.
 
 ### 3.86 A new generation that orphans a retained coordinate
 
-**Delivery-owner:** `Phase-50`
+**Delivery-owner:** `Phase-71`
 
 **Case-family:** `storage`
 
@@ -496,7 +496,7 @@ impossibility.
 
 ## Related Documents
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog index (the full [§3](./illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent).x list) and the load-bearing honesty limit (a type-check proves the spec composes, not that the cluster enforces it); this document is the storage slice carved from it.
-- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
+- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the nine typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
   coverage matrix ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the three-layer foreclosure ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the validation-locus axis referenced by every
   entry above.
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract that a valid `InForceSpec`

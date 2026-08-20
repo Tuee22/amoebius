@@ -35,7 +35,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 DHALL_TYPECHECK = ROOT / ".build" / "dhall" / "dhall-typecheck"
 RESULTS = DHALL_TYPECHECK / "phase-results.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_11_dhall_typecheck_schema.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md"
 GATE_COMMAND = "python3 tools/dhall_typecheck_schema_gate.py"
 EXPECTATIONS = "test/oracle/dhall_typecheck_schema_surfaces.tsv"
 
@@ -133,7 +133,7 @@ def battery_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[st
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=5, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        phase=25, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
         register="1", substrate="none", lane="none", sides=SIDES
     )
     gate.begin()

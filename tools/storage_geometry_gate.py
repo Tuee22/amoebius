@@ -30,7 +30,7 @@ MUTANTS = ROOT / "test/mutant/registry.tsv"
 RESULTS = ROOT / ".build/dsl/storage-geometry/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/storage-geometry/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/storage-geometry"
-CONTRACT = "DEVELOPMENT_PLAN/phase_15_storage_geometry_folds.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md"
 GATE_COMMAND = "python3 tools/storage_geometry_gate.py"
 EXPECTATIONS = "test/oracle/storage_geometry_surfaces.tsv"
 
@@ -255,7 +255,7 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=9, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        phase=28, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
         register="1", substrate="none", lane="none", sides=SIDES
     )
     gate.begin()

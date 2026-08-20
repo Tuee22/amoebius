@@ -46,7 +46,7 @@ ENTRY_POINT = ROOT / "app/amoebius/Amoebius/Entry/ServeUi.hs"
 RETIRED_ENTRY_POINT = ROOT / "src/Amoebius/Ui/Server/Main.hs"
 RESULTS = ROOT / ".build/dsl/ui-server-boundary/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/ui-server-boundary/validation-locus-ledger.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_32_ui_server_boundary.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md"
 GATE_COMMAND = "python3 tools/ui_server_boundary_gate.py"
 EXPECTATIONS = ROOT / "test/oracle/ui_server_boundary_surfaces.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/ui-server-boundary"
@@ -452,7 +452,7 @@ def surface_decisions(
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=22, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
+        phase=43, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
         register="2", substrate="none", sides=SIDES,
     )
     gate.begin()

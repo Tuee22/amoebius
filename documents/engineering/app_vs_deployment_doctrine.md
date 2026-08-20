@@ -15,7 +15,7 @@ capacity, capability, and platform doctrines it cites. It presumes only that a s
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_33_ui_local_composition.md, DEVELOPMENT_PLAN/phase_50_release_lifecycle.md, DEVELOPMENT_PLAN/phase_58_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_60_infernix_lift.md, DEVELOPMENT_PLAN/phase_62_test_topology_dsl.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -132,7 +132,7 @@ What is *conspicuously absent* from this surface is the whole vocabulary of [§3
 region, no failover policy, no chaos knob, no substrate selector. The app author cannot write those words
 because the type does not have those fields.
 
-[Phase 17](../../DEVELOPMENT_PLAN/phase_17_capability_bind.md) tests the capability instance of this split:
+[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) tests the capability instance of this split:
 the app-facing `CapabilityNeed` has no product, provider, or shape field, while two distinct composed files
 normalize to identical app slices and bind to structurally different provider graphs.
 
@@ -140,7 +140,7 @@ normalize to identical app slices and bind to structurally different provider gr
 
 ## 3. The deployment-rules surface — how the same app *runs*
 
-The Phase-17 `CapabilityBinding` realizes the provider/shape portion of this surface as a one-built-arm
+The Phase-30 `CapabilityBinding` realizes the provider/shape portion of this surface as a one-built-arm
 provider choice plus `SingleNode | Distributed n`; neither field is admitted by the app need.
 
 The deployment-rules surface is the mirror image of [§2](#2-the-application-logic-surface--what-an-app-is): **everything on this surface is about robustness, scale, and placement — and none of it changes what the app is.** Turn every one of these dials and a user sees the
@@ -190,7 +190,7 @@ The deployment-rules surface declares:
   type, the promotion pointer, and the immutable release ledger are owned by
   [release_lifecycle_doctrine.md §3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer). This is the type-level reason there is
   no separate "dev version" and "prod version" of an app ([§5](#5-why-the-split-matters--cashing-it-out)).
-  Phase 50 validated this rule by pointing Dev, Staging, and Prod at the same immutable release hash without
+  Phase 71 validated this rule by pointing Dev, Staging, and Prod at the same immutable release hash without
   rebuilding any app bytes, while environment changes remained CAS operations on pointer objects.
 - **Offline policy and realtime topology.** The application decides whether it is `OnlineOnly` or defines
   offline projections, queueable ports, blob classes, and an offline view: those choices change what the app
@@ -391,7 +391,7 @@ Cashing out "zero app change":
 - The app spec is **byte-identical** across the single-cluster and N-cluster deployments; the diff is
   entirely in the deployment-rules layer.
 
-> **Honesty.** Geo-replication is **Phase 53**; cross-cluster gateway failover is **Phase 54**; neither is
+> **Honesty.** Geo-replication is **Phase 74**; cross-cluster gateway failover is **Phase 75**; neither is
 > started. Synchronous
 > intra-cluster HA is delegated to the systems that do their own consensus (MinIO / Pulsar / Postgres /
 > Patroni); the **asynchronous** cross-cluster boundary — what happens if a cluster dies mid-geo-sync and amoebius
@@ -427,25 +427,22 @@ the concentration principle intact: distribution behavior is still exercised and
 boundary rather than duplicated inside each application
 ([chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives)).
 
-[Phase 33](../../DEVELOPMENT_PLAN/phase_33_ui_local_composition.md) supplies concrete local evidence for this
+[Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md) supplies concrete local evidence for this
 split. Five application-authored interactions and four visible-state expectations exact-join the generated
 workflow surface for single- and multi-tenant sources, while neither source contains a replica, topology,
 rollout, failover, or fault-schedule choice. The same expectations still require later operator-selected live
 topologies before any deployment, replica-loss, or HA claim becomes verified.
 
-Phase 58 supplies the concrete provider-node classification boundary: workflow-completion and load may be
+Phase 79 supplies the concrete provider-node classification boundary: workflow-completion and load may be
 inputs to a declared deployment `ScalingPolicy`, but application logic cannot request a node, select a provider
 SKU, weaken quota/capability admission, or bypass taint and scheduler authority. The contract and a retained-
-Kubernetes signal analogue pass; real EKS node mutation remains UNVERIFIED. This separation is portable because
-every hardware substrate can always run `linux-cpu`; when the parent must be a pristine Linux host use Incus on
-Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+Kubernetes signal analogue pass; real EKS node mutation remains UNVERIFIED.
 
-Phase 60 exercises this split at the core boundary: the application-facing contract names a scope-bound
+Phase 91 exercises this split at the core boundary: the application-facing contract names a scope-bound
 artifact workflow, while `linux-cpu`, the finite CPU resource envelope, the named engine, cache placement,
 Pulsar/MinIO/Vault wiring, and worker topology remain deployment/runtime choices. The scoped gate uses a pinned
 micro-decoder and one untouched sibling compacted-topic module; a production TinyLlama engine and the full
-sibling inference core remain UNVERIFIED. Every hardware substrate can always select `linux-cpu`. If the gate
-needs a pristine Linux host, use Incus on Linux/Linux-CUDA, Lima on Apple, or WSL2 on Windows.
+sibling inference core remain UNVERIFIED. Every hardware substrate can always select `linux-cpu`.
 
 ---
 

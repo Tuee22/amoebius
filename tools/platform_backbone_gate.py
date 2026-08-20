@@ -24,7 +24,7 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / ".build/dsl/platform-backbone/phase-results.tsv"
 EXPECTATIONS = ROOT / "test/oracle/platform_backbone_surfaces.tsv"
-CONTRACT = "DEVELOPMENT_PLAN/phase_41_platform_backbone.md"
+CONTRACT = "DEVELOPMENT_PLAN/phase_62_platform_backbone.md"
 GATE_COMMAND = "python3 tools/platform_backbone_gate.py --execute"
 SIDES = ("toolchain", "oracle", "static", "predecessor", "live", "mutant", "results")
 
@@ -270,7 +270,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
 
     gate = gate_common.PhaseGate(
-        phase=30,
+        phase=62,
         contract=CONTRACT,
         command=GATE_COMMAND,
         expectations=str(EXPECTATIONS.relative_to(ROOT)),
