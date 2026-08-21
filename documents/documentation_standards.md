@@ -657,15 +657,22 @@ illegal set extensionally, by being itself, so the claim reduces to the list agr
 1. **The taxonomy is declared** in `illegal_state/README.md` as a product of named axes, each a closed set —
    the foreclosure layer, the validation locus, and whichever structural axes the doctrine owning them fixes.
    The product of the axes is the cell set.
-2. **Every cell is occupied or justified.** A cell holds at least one catalogue entry, or a one-line statement
-   of why no illegal state lives there. **An unjustified empty cell is a defect**, reported like any other.
-3. **The grid is generated; the entries are authored.** The cell set follows from the axes, so widening an
-   axis reports its own new empty cells rather than waiting to be noticed. Entries stay human-authored,
-   because an entry is an independent expectation and deriving it from the thing it checks would turn a test
-   into a description ([§6](#6-honesty-the-proventestedassumed-discipline)). Generated views go to
-   `.build/docs/` under
+2. **Every cell is occupied, inadmissible, or justified.** A cell holds at least one catalogue entry, is
+   ruled out by a declared relation between two axes, or carries a one-line statement of why no illegal state
+   lives there. **An unjustified empty cell is a defect**, reported like any other. The middle state exists
+   because axes that classify different questions need not have an inhabited product: where the emptiness of a
+   whole row or column follows from what the axes *mean*, the relation is declared once beside them rather
+   than restated per cell.
+3. **An entry declares which cells it occupies.** A cell is a tuple of axis members, so an entry that names
+   several members of one axis and several of another does not thereby claim their product — and a generator
+   that credits it with one measures nothing. The entry pairs them, and the covering counts what it paired.
+4. **The grid is generated; the entries, the relation, and the justifications are authored.** The cell set
+   follows from the axes, so widening an axis reports its own new empty cells rather than waiting to be
+   noticed. The three authored inputs stay human-authored, because each is an independent expectation and
+   deriving one from the thing it checks would turn a test into a description
+   ([§6](#6-honesty-the-proventestedassumed-discipline)). Generated views go to `.build/docs/` under
    [`development_plan_standards.md` §I](../DEVELOPMENT_PLAN/development_plan_standards.md#i-generated-documentation-remains-untracked).
-4. **The residue is stated, never implied.** A complete covering proves exhaustiveness *relative to the
+5. **The residue is stated, never implied.** A complete covering proves exhaustiveness *relative to the
    declared taxonomy*. The taxonomy is a human choice, so a hazard along an axis nobody declared remains
    outside the claim. That sentence travels with any assertion that the covering is complete.
 

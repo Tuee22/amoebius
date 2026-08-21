@@ -15,6 +15,14 @@ ENTRY_RE = re.compile(r"^### (3\.\d+) .+$", re.MULTILINE)
 OWNER_RE = re.compile(r"^\*\*Delivery-owner:\*\*\s*`([^`]+)`\s*$", re.MULTILINE)
 FAMILY_RE = re.compile(r"^\*\*Case-family:\*\*\s*`([^`]+)`\s*$", re.MULTILINE)
 LOCUS_RE = re.compile(r"`(dhall-typecheck|gadt-decode|extension-astcheck|provision-seal|rendered-artifact-oracle|live-effect)`")
+CELLS_RE = re.compile(r"^\*\*Cells:\*\*\s*(.+)$", re.MULTILINE)
+PAIR_RE = re.compile(r"`([a-z-]+)`×`([a-z-]+)`")
+
+ALLOWED_LAYERS = {
+    "type-foreclosed",
+    "decode-foreclosed",
+    "runtime-checked",
+}
 
 ALLOWED_LOCI = {
     "dhall-typecheck",
@@ -72,7 +80,7 @@ def read_registry(root: Path) -> tuple[list[dict[str, str]], list[str]]:
         return [], [f"{path}: missing registry"]
     with path.open(encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle, delimiter="\t")
-        expected = ["entry", "subcase", "validation_locus", "owner_phase", "case_family"]
+        expected = ["entry", "subcase", "foreclosure_layer", "validation_locus", "owner_phase", "case_family"]
         if reader.fieldnames != expected:
             return [], [f"{path}: columns must be exactly {expected}"]
         return list(reader), []
@@ -101,6 +109,8 @@ def registry_violations(root: Path) -> list[tuple[str, int | None, str]]:
             errors.append(("dhall/examples/locus_registry.tsv", line, "subcase must be non-empty kebab-case"))
         if row["validation_locus"] not in ALLOWED_LOCI:
             errors.append(("dhall/examples/locus_registry.tsv", line, f"unknown locus {row['validation_locus']}"))
+        if row["foreclosure_layer"] not in ALLOWED_LAYERS:
+            errors.append(("dhall/examples/locus_registry.tsv", line, f"unknown layer {row['foreclosure_layer']}"))
         if not re.fullmatch(r"Phase-(?:[1-9]|[1-8][0-9]|9[0-5])", row["owner_phase"]):
             errors.append(("dhall/examples/locus_registry.tsv", line, f"unknown owner {row['owner_phase']}"))
         if row["case_family"] not in ALLOWED_FAMILIES:
@@ -127,10 +137,24 @@ def registry_violations(root: Path) -> list[tuple[str, int | None, str]]:
         if family_tags and any(row["case_family"] != family_tags[0] for row in entry_rows):
             errors.append((rel, line, f"entry {entry} family diverges from registry"))
         section_loci = set(LOCUS_RE.findall(section))
+        cells_tag = CELLS_RE.search(section)
+        cells = set(PAIR_RE.findall(cells_tag.group(1))) if cells_tag else set()
+        if not cells:
+            errors.append((rel, line, f"entry {entry} has no **Cells:** line"))
         for row in entry_rows:
             if row["validation_locus"] not in section_loci:
                 errors.append(
                     (rel, line, f"entry {entry}/{row['subcase']} locus {row['validation_locus']} is absent from catalog text")
+                )
+            # A row is a fixture pinned to one covering cell. If the entry does not declare
+            # that cell, either the fixture proves something the catalog never claimed or
+            # the catalog dropped a claim it still tests -- both are the divergence this
+            # ledger exists to refuse.
+            pair = (row["foreclosure_layer"], row["validation_locus"])
+            if cells and pair not in cells:
+                errors.append(
+                    (rel, line, f"entry {entry}/{row['subcase']} claims cell "
+                                f"{pair[0]}×{pair[1]}, which its **Cells:** line does not declare")
                 )
     return errors
 
@@ -173,7 +197,9 @@ def main(argv: list[str]) -> int:
         print(f"locus_registry: FAIL ({len(violations)} violation(s))", file=sys.stderr)
         return 1
     rows, _ = read_registry(root)
-    print(f"locus_registry: PASS ({len(catalog_sections(root))} entries, {len(rows)} subcases)")
+    cells = len({(row["foreclosure_layer"], row["validation_locus"], row["case_family"]) for row in rows})
+    print(f"locus_registry: PASS ({len(catalog_sections(root))} entries, {len(rows)} subcases, "
+          f"{cells} covering cell(s) carry a fixture)")
     return 0
 
 

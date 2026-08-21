@@ -173,8 +173,10 @@ guarantees the other sections rely on are actually established.
 | `Amoebius/Index/Resource` | the capacity vocabulary threaded through all five calculi | [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) |
 | `Amoebius/Extension/*` | the declaration, the four law families, the generated gate, and the verdict seal that admits an extension to a link set | [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) |
 
-None of these exists yet. They are named here so the inventory says what the plan intends to build rather than
-only what a past audit observed, and every row is a specification until its phase gate runs.
+Only the first row exists. `Amoebius/Calculus/Artifact` was built and sealed on 2026-08-20 as four modules —
+`Target`, `Recipe`, `Address`, `Region` — and every other row is a specification until its phase gate runs.
+They are named here so the inventory says what the plan intends to build rather than only what a past audit
+observed.
 
 ## 2. The DSL — Dhall decoder + chain/Step kernel
 

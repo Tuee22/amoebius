@@ -50,6 +50,8 @@ every "unrepresentable" as *design intent for the type discipline*, never as a t
 
 **Case-family:** `ml-asset`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
+
 Three ML-asset illegal states ride together. **(a) An engine named by arbitrary URL.** Sibling ML
 runtimes curl-tar native payloads and install venvs at image *build* and then re-select per engine — amoebius
 makes the compute engine an `EngineRuntime`, a **closed union of substrate-tagged engine identities with no arbitrary-`Url`/`Download` arm**: the engine is *named* by a typed identity from a closed catalog, selected by
@@ -95,6 +97,8 @@ bytes loading on the substrate, and an imported model's pin/tag being truthful).
 
 **Case-family:** `storage`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
+
 "Train forever from a live feed" is how a bounded training budget quietly becomes unbounded — no checkpoints
 means nothing serveable and no resume point, and unbounded topic retention means BookKeeper fills. This round
 adds a **`TrainBudget = Bounded { steps | epochs } | Continuous { checkpointCadence }`** union: `Continuous`
@@ -110,7 +114,7 @@ a bespoke election); cross-cluster is serve-by-replication, never a second train
 storage fold ([`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) + [`pulsar_client_doctrine.md` §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra)). **Technique:**
 [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `TrainBudget`/`Feed` unions with no unbounded arm) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (the retention room-fit). **Layer:** type-foreclosed for the mandatory-cadence / bounded-retention union shape; **runtime-checked**
-residue — that the trainer actually checkpoints at cadence and retention actually holds (mirroring [§3.21](illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)'s runtime-checked tail).
+residue — that the trainer actually checkpoints at cadence and retention actually holds (mirroring [§3.21](illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)'s runtime-checked tail). The post-bind retention room-fit that admits the budget is `decode-foreclosed`.
 
 **Validation-locus:** `dhall-typecheck` (the closed `TrainBudget`/`Feed` unions with no unbounded arm, and the
 mandatory `checkpointCadence` / bounded-retention `StorageBudget` fields, fail `dhall type` at authoring time) +
@@ -122,6 +126,8 @@ mandatory `checkpointCadence` / bounded-retention `StorageBudget` fields, fail `
 **Delivery-owner:** `Phase-67`
 
 **Case-family:** `messaging`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 A Pulsar topic with multiple partitions has no total consume order, so "train from this feed" is
 non-deterministic unless the merge is pinned — a prose "must consume in order" degrades to an untyped runtime
@@ -138,6 +144,8 @@ function is a decode-checked total order, the total decoder returns `Left` on a 
 **Delivery-owner:** `Phase-69`
 
 **Case-family:** `ml-asset`
+
+**Cells:** `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 With model artifacts content-addressed in shared project buckets, any app in a cluster could dedup-and-serve
 another app's model, leaking a private model or its provenance across the app-isolation boundary. This round
@@ -161,6 +169,8 @@ serve path honoring the per-app namespace).
 **Delivery-owner:** `Phase-38`
 
 **Case-family:** `ui`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
 
 Readiness and provenance establish which model produced an output; they do not make that output trustworthy or
 authorized. A model can hallucinate an action id, tenant, subject, resource identifier, permission, grant, policy,

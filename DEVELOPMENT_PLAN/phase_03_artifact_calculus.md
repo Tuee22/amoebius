@@ -25,7 +25,7 @@ The rule behind the artifact calculus is owned by [`jit_artifact_doctrine.md`](.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 3.1: The artifact calculus 📋](#sprint-31-the-artifact-calculus-)
+- [Sprint 3.1: The artifact calculus ✅](#sprint-31-the-artifact-calculus-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,7 +33,22 @@ The rule behind the artifact calculus is owned by [`jit_artifact_doctrine.md`](.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-2 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-20, the first of the five inserted calculi to be built. `python3
+tools/artifact_calculus_gate.py` passes all fourteen sides on substrate `none`, lane `none`, natural `arm64`,
+untranslated: the authored address oracle names 24 cells over six targets and four inputs, the four calculus
+modules carry no ambient read and no partial token, the in-process suite reaches its acceptance token with
+eleven checks green, two independently seeded processes render identical bytes over all six targets, the region
+escape has no type while its legal twin compiles, and all three seeded mutants redden their own locus and no
+other. Attestation
+`sha256:520eb5ce22f97fbc6e334b83aeae88de21d94384d180d4d1b6e49f6f9570cf98` binds to a 2,066-file source
+snapshot; as everywhere here, the reference names the run and this record follows it.
+
+**Two divergences this phase found rather than introduced**, both recorded in
+[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md#still-open-after-this-change): a library
+that shares `hs-source-dirs: src` with a sibling it also depends on recompiles that sibling's modules as home
+modules and fails to build, which `release-lifecycle` does today on an unmodified tree; and the content address
+now has two renderings, this phase's and the store's, because the calculus is below the store and cannot
+depend on it.
 
 ## Phase Summary
 
@@ -60,10 +75,16 @@ Give every artifact amoebius emits a type, a recipe, and a name that is a total 
 
 ## Sprints
 
-## Sprint 3.1: The artifact calculus 📋
+## Sprint 3.1: The artifact calculus ✅
 
-**Status**: Planned
-**Implementation**: planned module path; concrete when Done
+**Status**: Done — 2026-08-20.
+**Implementation**: `src/Amoebius/Calculus/Artifact/Target.hs`,
+`src/Amoebius/Calculus/Artifact/Recipe.hs`, `src/Amoebius/Calculus/Artifact/Address.hs`,
+`src/Amoebius/Calculus/Artifact/Region.hs`, `tools/artifact_calculus_gate.py`,
+`test/spec/calculus/ArtifactCalculusSpec.hs`, `test/spec/calculus/ArtifactCorpus.hs`,
+`test/oracle/artifact_calculus/address_inputs.tsv`, `test/oracle/artifact_calculus_surfaces.tsv`,
+`test/negative/compile_fail/artifact_calculus/handle_stays_in_region.hs`,
+`test/negative/compile_fail/artifact_calculus/handle_escapes_region.hs`
 **Blocked by**: None.
 **Independent Validation**: An address table authored from the doctrine, listing the digest inputs each target folds, written before the renderer exists.
 **Docs to update**: `documents/engineering/jit_artifact_doctrine.md`
@@ -83,9 +104,18 @@ Give every artifact amoebius emits a type, a recipe, and a name that is a total 
 
 Two independently seeded processes render each target and must agree byte for byte; an artifact referenced after its region ends fails to compile.
 
+**Both are checked where they can actually fail, which is not where the suite runs.** The determinism claim is
+one a single process structurally cannot settle: it shares whatever ambient state a recipe reached for, so it
+would agree with itself. The suite therefore prints its renderings under a seed given on the command line and
+the gate runs it twice with different seeds — and the clock mutant proves the arrangement is load-bearing, by
+leaving the in-process suite entirely green while the two reports diverge. The escape claim is a type-level
+one, so it is a committed compile-fail pair typechecked under `-fno-code` rather than a test that runs, and the
+gate requires the rejection to name the rigid type variable rather than merely to fail.
+
 ### Remaining Work
 
-Everything. No `Target`, no `Recipe`, no address and no region exists, and nothing yet refuses to name an artifact it did not render.
+None for this phase. The budget a materialization spends is the next calculus's and is recorded `UNVERIFIED`
+here; nothing in this register observes a running system.
 
 ## Documentation Requirements
 

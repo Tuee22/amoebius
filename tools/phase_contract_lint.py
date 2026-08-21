@@ -46,6 +46,11 @@ import mutant_registry  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 PLAN = ROOT / "DEVELOPMENT_PLAN"
 
+# Scratch state stays inside the checkout. The host default temporary directory is
+# outside it, and a run that writes there escapes the containment contract the
+# Phase-0 gate decides (`state_escapes_checkout`).
+TEMP_ROOT = ROOT / ".build" / "tmp" / "phase-contract-lint"
+
 # The registry the Phase-0 surface join enumerates. A check that is not here is invisible
 # to that join, which is the same failure this file exists to stop.
 CHECKS = {
@@ -154,6 +159,7 @@ def check(root: Path) -> list[tuple[str, str, str]]:
     known_caps = {r["capability"] for r in registry}
     known_ids = {(r["capability"], r["mutant"]) for r in registry}
     scripts = gate_scripts()
+    status = tracker_status(root)
 
     for path in contracts():
         rel = f"DEVELOPMENT_PLAN/{path.name}"
@@ -228,7 +234,9 @@ def check(root: Path) -> list[tuple[str, str, str]]:
             for oracle in sorted(set(ORACLE_RE.findall(text))):
                 if not (root / oracle).exists():
                     problems.append(("d4", rel, f"names oracle {oracle}, which does not exist"))
-        problems.extend(check_authored(root, rel, text))
+        ordinal = int(re.search(r"phase_(\d+)_", rel).group(1))
+        reopened = "✅" not in status.get(ordinal, "")
+        problems.extend(check_authored(root, rel, text, reopened))
     problems.extend(check_plan_arithmetic(root))
     if unbacked:
         print(f"phase_contract_lint: {len(unbacked)} of {len(contracts())} contracts have no gate script yet")
@@ -239,13 +247,30 @@ PURPOSE_RE = re.compile(r"^> \*\*Purpose\*\*:(.*?)(?=^> \*\*|^\s*$)", re.M | re.
 SCOPE_RE = re.compile(r"^\*\*Phase scope:\*\*(.*?)(?=^\*\*[A-Z]|^\s*$)", re.M | re.S)
 CLAUSE13_RE = re.compile(r"^- \*\*Extension conformance \(§M\.13\)\.\*\*", re.M)
 DONE_RE = re.compile(r"✅|\*\*Status\*\*:\s*Done\b")
+TRACKER_ROW_RE = re.compile(r"^\| (\d{1,2}) \|(?:[^|]*\|){4}([^|]*)\|", re.M)
+
+
+def tracker_status(root: Path) -> dict[int, str]:
+    """Phase ordinal -> the status cell of its Phase Overview row.
+
+    Read from the tracker rather than from the phase document, because the phase document
+    is the thing being judged. It also cannot be read from the document's own first
+    `**Status**:` line, which is the link-graph metadata block's `Authoritative source` --
+    that mistake made every phase look reopened, so no contract could ever carry a sealed
+    sprint and the check silently asserted the opposite of what it says.
+    """
+    path = root / "DEVELOPMENT_PLAN" / "README.md"
+    if not path.exists():
+        return {}
+    return {int(m.group(1)): m.group(2).strip()
+            for m in TRACKER_ROW_RE.finditer(path.read_text(encoding="utf-8"))}
 
 
 def words(text: str) -> list[str]:
     return re.findall(r"[a-z0-9`]+", text.lower())
 
 
-def check_authored(root: Path, rel: str, text: str) -> list[tuple[str, str, str]]:
+def check_authored(root: Path, rel: str, text: str, reopened: bool) -> list[tuple[str, str, str]]:
     """d5-d7: the three things a contract can say that no other check reads."""
     out = []
 
@@ -268,8 +293,6 @@ def check_authored(root: Path, rel: str, text: str) -> list[tuple[str, str, str]
     # d7 -- a sprint may not claim completion inside a phase the tracker has reopened.
     # doc_lint's `e` compares only the phase-level marker, so a stale sprint heading
     # passes lint while contradicting section N.
-    marker = re.search(r"^\*\*Status\*\*:\s*(.+)$", text, re.M)
-    reopened = not (marker and "Done" in marker.group(1))
     if reopened:
         for m in DONE_RE.finditer(text):
             line = text[:m.start()].count("\n") + 1
@@ -365,7 +388,10 @@ def self_test() -> int:
     document, so they are exercised by the gate itself and are not seeded here --
     which is stated rather than left to be inferred from their absence.
     """
-    base = (contracts()[0]).read_text(encoding="utf-8")
+    # The base must be a contract that carries no completion marker of its own, or the
+    # d7 seed cannot discriminate: the marker it adds would already be there.
+    base = next(text for text in (path.read_text(encoding="utf-8") for path in contracts())
+                if not DONE_RE.search(text))
     cases = [
         # d5 -- a scope that is the purpose blockquote again.
         ("d5", re.sub(r"^\*\*Phase scope:\*\*.*?(?=\n\*\*[A-Z])",
@@ -380,15 +406,22 @@ def self_test() -> int:
     ]
     failures = []
     for want, mutated in cases:
-        got = {cid for cid, _, _ in check_authored(ROOT, "seeded", mutated)}
-        clean = {cid for cid, _, _ in check_authored(ROOT, "seeded", base)}
+        got = {cid for cid, _, _ in check_authored(ROOT, "seeded", mutated, True)}
+        clean = {cid for cid, _, _ in check_authored(ROOT, "seeded", base, True)}
         if want not in got - clean:
             failures.append(f"{want}: seeded defect did not redden it (saw {sorted(got) or 'nothing'})")
+
+    # The control for d7. The same completion marker inside a phase the tracker has
+    # *sealed* is not a defect, and a check that fires either way reads nothing.
+    sealed = base.replace("## Sprints", "## Sprints\n\nThe whole sprint (✅ Done).", 1)
+    if "d7" in {cid for cid, _, _ in check_authored(ROOT, "seeded", sealed, False)}:
+        failures.append("d7: a completion marker reddened a phase the tracker has sealed")
 
     # d8 reads a tree rather than one document, so it is seeded against a scratch copy of
     # the plan. Both mutations are the exact defects the 2026-08-20 review found: a cut
     # stated one phase early, and a table row disagreeing with the contract it keys.
-    with tempfile.TemporaryDirectory() as td:
+    TEMP_ROOT.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="plan-", dir=TEMP_ROOT) as td:
         scratch = Path(td) / "repo" / "DEVELOPMENT_PLAN"
         scratch.mkdir(parents=True)
         for path in (ROOT / "DEVELOPMENT_PLAN").glob("*.md"):

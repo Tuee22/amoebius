@@ -76,6 +76,8 @@ deployment enforces it (the load-bearing limit owned by [`illegal_state_catalog.
 
 **Case-family:** `topology`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 Distributing one workload across clusters looks like "just fold capacity over both," but
 `place :: Topology -> [Workload] -> Either PlacementError Placement` takes exactly **one** `Topology`, and a `Topology` is one cluster ([`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§4](../engineering/cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)). A multi-cluster / fleet capacity fold
 therefore has **no constructor** — the same type-foreclosed "no arm" idiom that forecloses the worker pool as a fourth
@@ -104,6 +106,8 @@ the deferred geo-replication enaction, Phase 74).
 
 **Case-family:** `topology`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 A host worker whose declared network-locality `Site` differs from the control plane's is reached across the WAN,
 and reaching the data plane (MinIO/Pulsar) + Vault over an untrusted network with no declared secure transport
 is the silent-exposure hazard. This round makes a **networking capability mandatory**: the host-worker
@@ -130,6 +134,8 @@ declared `Site` matching reality, `discover = Unreachable → refuse`).
 
 **Case-family:** `topology`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 A full k8s node (a kubelet member) whose `Site` differs from the control plane's must reach the one
 apiserver/etcd across the WAN; raw tooling permits registering such an agent with no secure control-plane path,
 surfacing the split at reconcile. This round's node fold routes a declared-remote (`Site ≠ s_cp`) self-managed-rke2
@@ -153,6 +159,8 @@ gate has no off-networking constructor); `live-effect` (the kubelet session actu
 
 **Case-family:** `topology`
 
+**Cells:** `type-foreclosed`×`gadt-decode`
+
 The two stretched kinds must not blur — a host worker is a non-member data-plane/Vault client and must never be
 handed control-plane reach or counted as a kubelet member. This round's total `witness` fold yields, on its
 host-worker arms, **only** `DataPlaneOnly (FabricMember c)`; the `Reach` sum has **no** path taking a
@@ -170,6 +178,8 @@ per-kind `witness` dispatch). **Layer:** type-foreclosed uninhabitable.
 **Delivery-owner:** `Phase-75`
 
 **Case-family:** `multicluster`
+
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 Raw DNS failover treats a gateway move as "repoint the record and hope": TTL and resolver caching leave a
 window in which a live client still resolves the old gateway address, and if the old ingress is hard-stopped a
@@ -197,6 +207,8 @@ residue — that the `drain-complete` edge (old-gateway traffic ≈ 0) is truthf
 
 **Case-family:** `multicluster`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `runtime-checked`×`live-effect`
+
 Raw failover configuration lets an operator promise a recovery-point objective smaller than the asynchronous
 replication lag can actually lose, so the declared budget is a fiction the physics violates at the first
 partition: up to a full lag-window of acknowledged-but-un-replicated writes is gone at the instant of failover.
@@ -222,6 +234,8 @@ upload-time push-back of the declared bound against monitored lag).
 
 **Case-family:** `multicluster`
 
+**Cells:** `decode-foreclosed`×`gadt-decode`
+
 A failover pairing that names one cluster as both `active` and `standby` crosses no asynchronous boundary yet
 owes a failover budget — a degenerate "geo pair" raw configuration admits, and whose failover can never execute
 because there is no second cluster to promote. amoebius rejects `active == standby` on the parent-owned
@@ -239,6 +253,8 @@ cross-referencing the parent-owned relation of [`gateway_migration_doctrine.md` 
 **Delivery-owner:** `Phase-74`
 
 **Case-family:** `multicluster`
+
+**Cells:** `type-foreclosed`×`gadt-decode`
 
 The failover pairing is a forest relation with two endpoints (an `active` and a `standby` cluster); raw
 configuration would let a child author a pairing naming a sibling or ancestor, minting cross-cluster authority a
@@ -262,6 +278,8 @@ survives decode).
 **Delivery-owner:** `Phase-74`
 
 **Case-family:** `multicluster`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `runtime-checked`×`live-effect`
 
 Treating a gateway change as a free choice of posture, raw configuration would let an operator declare "prefer
 `Failover` / availability-first" as standing desired state on any gateway change — licensing an availability-first
@@ -288,6 +306,8 @@ observed at the gateway-change moment).
 
 **Case-family:** `multicluster`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `runtime-checked`×`live-effect`
+
 Raw configuration would let an operator label a genuinely non-confluent cross-cluster invariant — a global
 floor, global uniqueness, or a sum-to-whole — as "confluent", so it is merged active-active and diverges; the
 false claim type-checks, because confluence (closed-under-merge) is undecidable in Dhall. amoebius's authorable
@@ -301,7 +321,7 @@ realizing the I-confluence classifier of [`chaos_failover_doctrine.md` §17](../
 **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (a closed union whose vocabulary omits the `Confluent` arm — a false confluence claim has no word). **Layer:**
 `type-foreclosed` for the arm absence; the confluence classification itself is an `assumed` model obligation (the
-honest limit — a genuinely-confluent invariant's confluence is proven at design time, not decidable in the spec).
+honest limit — a genuinely-confluent invariant's confluence is proven at design time, not decidable in the spec). The classification actually holding under merge is `runtime-checked`.
 **Validation-locus:** `dhall-typecheck` (no `Confluent` arm exists in the authorable union); `live-effect` residue
 — the model's confluence classification actually holding under merge.
 
@@ -310,6 +330,8 @@ honest limit — a genuinely-confluent invariant's confluence is proven at desig
 **Delivery-owner:** `Phase-74`
 
 **Case-family:** `multicluster`
+
+**Cells:** `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 A forest with two geo-replicated pairs could name one survivor cluster as the `standby` of two distinct
 `dnsRecord`s — the shared-survivor topology. Its migrations are graph-independent (distinct records, no vertex
@@ -327,7 +349,7 @@ discharged; until then the shape is unavailable, not unsound. **Owner:**
 (a distinctness fold over the cluster identities projected across the migration graph — the same fold family that
 rejects a reused host or an `active == standby` pair, lifted from one edge to the whole graph). **Layer:**
 `decode-foreclosed` — the constraint is a cross-record fold over the decoded graph, not a single-field type
-index, so a total decoder returns `Left` rather than the shape being uninhabitable. **Validation-locus:**
+index, so a total decoder returns `Left` rather than the shape being uninhabitable. That stress-run residue is `runtime-checked`. **Validation-locus:**
 `gadt-decode` (the structural-fit fold returns `DecodeError` on a graph reusing a cluster across records,
 before any `ProvisionedSpec` exists); the over-scope stress run that *models* a shared survivor in is a
 `live-effect`/model residue, not an authorable shape.
@@ -337,6 +359,8 @@ before any `ProvisionedSpec` exists); the over-scope stress run that *models* a 
 **Delivery-owner:** `Phase-74`
 
 **Case-family:** `multicluster`
+
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 When a primary is down and a `ColdSeedFromBackup` secondary is stood up on demand and seeded from backups, a
 secondary that took the wild-ingress gateway before its seeded data was proven fresh would serve stale or
@@ -352,14 +376,17 @@ and the seed posture of [`backup_recovery_doctrine.md` §8](../engineering/backu
 **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (the gateway-take handle exists only from a `FreshnessProven` index). **Layer:** the ordering is
 type-foreclosed; the caught-up/fresh edge is a runtime-observed witness, proven for the model and tested by
-drill, never a constructive proof at reconcile. **Validation-locus:** `live-effect`, backed by the Register-1
-model check.
+drill, never a constructive proof at reconcile. Observing the caught-up edge at reconcile is `runtime-checked`. **Validation-locus:** `gadt-decode` (the take handle exists only from a `FreshnessProven`
+index, so a take without that witness has no inhabitant once decoded) + `live-effect`, backed
+by the Register-1 model check.
 
 ### 3.70 A `ColdSeedFromBackup` whose freshness bound is below the backup cadence
 
 **Delivery-owner:** `Phase-74`
 
 **Case-family:** `multicluster`
+
+**Cells:** `decode-foreclosed`×`gadt-decode`
 
 A cold-seed recovery whose declared `freshnessBound` is shorter than the backup `cadence` is statically
 unsatisfiable: a seed can never be fresher than the newest generation, so no seed could ever satisfy the
@@ -377,6 +404,8 @@ signal is consulted. **Owner:** [`backup_recovery_doctrine.md` §8](../engineeri
 
 **Case-family:** `multicluster`
 
+**Cells:** `decode-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
+
 If the freshness gate read an operator-asserted watermark instead of one derived from the backup's captured
 content, the consistency-over-availability guarantee would be spoofable: a stale backup could claim a freshness
 it never captured and be promoted. A `BackupArtifact`'s `watermark` is a total function of its content-addressed
@@ -385,7 +414,7 @@ digest, never an asserted field, so the freshness witness the gateway-take guard
 (content addressing owned by [`content_addressing_determinism.md` §4.5](../engineering/content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 **Technique:** [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
 (names are total functions of content). **Layer:** `decode-foreclosed` (the watermark is derived, not an
-authorable field) + `live-effect` residue (that the derived watermark reflects real lag). **Validation-locus:**
+authorable field) + `live-effect` residue (that the derived watermark reflects real lag). The derived watermark tracking real lag is `runtime-checked`. **Validation-locus:**
 `gadt-decode` + `provision-seal`.
 
 ### 3.88 A `Planned` gateway migration resting with no owner
@@ -393,6 +422,8 @@ authorable field) + `live-effect` residue (that the derived watermark reflects r
 **Delivery-owner:** `Phase-75`
 
 **Case-family:** `multicluster`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `runtime-checked`×`live-effect`
 
 The `Planned` handover's safety invariant is `UniqueGatewayOwner` — *at most* one cluster holds the wild
 ingress. "At most one" is satisfied by **zero**, so a migration that quiesces the source and then stalls

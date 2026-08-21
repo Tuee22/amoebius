@@ -64,6 +64,8 @@ no phase has yet built the scope kernel these entries describe. Status and gates
 
 **Case-family:** `security`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
+
 A route mounted outside the authentication boundary that still reads a tenant, organization, or account
 identifier out of its path, query string, or body performs an anonymous read of scoped data under a scope the
 caller chose. This is not a forgotten check. It is a handler whose entire notion of *whose data this is*
@@ -105,6 +107,8 @@ must turn the matrix red before any response body is produced.
 
 **Case-family:** `security`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 A query surface in which the scope predicate is optional, and in which omitting it selects every scope rather
 than refusing, converts a forgotten argument into a full disclosure. The idiom is common and it reads as
 defensive: a parameterized predicate that passes when the parameter is null, so one code path serves both the
@@ -123,10 +127,11 @@ the widening has no syntax to be written in. **Owner:**
 
 **Layer:** `type-foreclosed` — the transaction arm cannot be applied without its scope, so the widened
 statement has no inhabitant; `runtime-checked` residue — that the database enforces the emitted row policy for
-the role the application connects as.
+the role the application connects as. The emitted statement and its row policy are `decode-foreclosed`, compared by a total predicate over rendered output.
 **Validation-locus:** `gadt-decode` (a transaction value missing its scope does not typecheck) +
 `rendered-artifact-oracle` (the emitted statement text and its row-level security policy both carry the scope
-predicate, compared against an independently authored expectation).
+predicate, compared against an independently authored expectation) + `live-effect` residue (that the database
+enforces the emitted row policy for the role the application connects as).
 
 **Independent oracle and mutants.** A compile-fail fixture partially applies a transaction arm and passes it to
 the executor. An oracle independent of the emitter parses every emitted statement and requires a scope
@@ -139,6 +144,8 @@ filters on.
 **Delivery-owner:** `Phase-41`
 
 **Case-family:** `security`
+
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
 
 An offline-capable client that rebuilds its session, bootstrap, or entitlement value from browser-held storage
 produces a value of the same type the server produces, and hands it to code that cannot tell the two apart.
@@ -179,6 +186,8 @@ current.
 
 **Case-family:** `security`
 
+**Cells:** `type-foreclosed`×`gadt-decode`
+
 A function taking a tenant identifier and a subject identifier as adjacent parameters of the same type accepts
 them in either order. Both call sites typecheck, one of them is a cross-scope read, and the compiler has
 nothing to say about it. Real code reaches this state by transporting identifiers as strings or as a single
@@ -212,6 +221,8 @@ between scopes.
 
 **Case-family:** `security`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 An offline queue, an idempotency table, or a response cache keyed only by a client-chosen identifier puts two
 scopes in one keyspace. A replay then returns the record written by whoever used that key first, and the
 disclosure looks like a cache hit. The client chooses the key, so the collision is reachable on purpose as well
@@ -243,6 +254,8 @@ accept a caller-supplied key, and share one idempotency table across scopes with
 
 **Case-family:** `security`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 A table whose scope column is nullable admits a row belonging to nobody, and a row belonging to nobody matches
 a row-level policy written as an equality against a caller's scope in whichever direction the database's
 three-valued logic happens to take it. Such rows arrive from backfills, from imports, and from an earlier
@@ -260,8 +273,10 @@ review; it is not derivable from any row type that has a scope. **Owner:**
 
 **Layer:** `type-foreclosed` in the row type — a scope field of optional type is a different type with no
 transactions defined over it; `runtime-checked` residue — that the deployed schema is the emitted one and that
-no out-of-band migration has relaxed it.
-**Validation-locus:** `rendered-artifact-oracle` (the emitted DDL carries `NOT NULL` and the composite key for
+no out-of-band migration has relaxed it. The emitted DDL the oracle compares is `decode-foreclosed`.
+**Validation-locus:** `gadt-decode` (a row type whose scope column is optional is a different
+type, and no transaction is defined over it) +
+`rendered-artifact-oracle` (the emitted DDL carries `NOT NULL` and the composite key for
 every scope-bearing table, compared against an independently authored expectation) + `live-effect` residue (an
 insert of a scope-less row is rejected by the live database, and the deployed schema matches what was emitted).
 
@@ -276,6 +291,8 @@ application role.
 **Delivery-owner:** `Phase-36`
 
 **Case-family:** `security`
+
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`gadt-decode` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
 
 An object prefix, a topic name, or a cache key built by concatenating a scope and a resource name collides
 whenever the separator can occur inside either part. Two distinct scopes then address one location, and the
@@ -299,7 +316,8 @@ constructor; `decode-foreclosed` for a stored key that does not parse back to it
 `runtime-checked` residue — that no pre-existing key in a live store predates the renderer.
 **Validation-locus:** `gadt-decode` (a key cannot be constructed by concatenation, and the round-trip property
 holds for every generated component pair) + `rendered-artifact-oracle` (the emitted prefixes, topic names, and
-policies all use the one rendering, compared against an independently authored expectation).
+policies all use the one rendering, compared against an independently authored expectation) + `live-effect`
+residue (that no pre-existing key in a live store predates the renderer).
 
 **Independent oracle and mutants.** A property test over adversarial component pairs — names containing the
 separator, empty components, and shared prefixes — requires that rendering is injective and that parsing is its

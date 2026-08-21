@@ -52,6 +52,8 @@ the running deployment enforces it. Each `**Layer:**` tag records where the fore
 
 **Case-family:** `topology`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`gadt-decode`
+
 Raw tooling permits pointing kind, rke2, or a managed cluster at a substrate that cannot run it, and lets a
 managed provider (EKS) be a bolt-on afterthought rather than a first-class citizen. amoebius makes the
 compute engine a **declared axis** distinct from the *detected* substrate, and a `Node` is built by a
@@ -70,6 +72,8 @@ uninhabitable).
 
 **Case-family:** `topology`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 kind and rke2 need a Linux kernel; on a bare apple or windows host there is none until one is synthesized in
 a VM. amoebius makes a `LinuxHost` a **witness** whose only constructor on a non-Linux substrate is the
 virtualization provider (`limaHost` on apple, `wsl2Host` on windows), so "rke2/kind on a bare Apple host"
@@ -86,6 +90,8 @@ runtime-checked residue — that the Lima/WSL2 VM actually boots.
 
 **Case-family:** `topology`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck`
+
 kind runs every node as a container on one Docker host, so a multi-node kind cluster spanning machines is a
 category error. amoebius's `Kind` arm carries **exactly one** `LinuxHost` field; multi-node is `replicas` on
 that one host, and a second host has no field to bind. **Owner:**
@@ -97,6 +103,8 @@ that one host, and a second host has no field to bind. **Owner:**
 **Delivery-owner:** `Phase-27`
 
 **Case-family:** `topology`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`gadt-decode`
 
 A multi-node rke2 cluster needs one distinct Linux host per node; raw tooling permits asking for five nodes with
 three machines, or reusing one machine for two nodes. amoebius's `Rke2` arm carries
@@ -123,6 +131,8 @@ a host).
 
 **Case-family:** `topology`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `runtime-checked`×`live-effect`
+
 Raw rke2 HA permits standing up a **two**-server control plane — two etcd voters can never form a majority, so
 the first partition is a split-brain — or a **zero**-server "cluster" of agents with nowhere to join. amoebius
 makes the server set a **closed union** `Rke2Servers = < Single : LinuxHost | Ha3 : {…} | Ha5 : {…} >` whose
@@ -144,6 +154,8 @@ actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](../engi
 **Delivery-owner:** `Phase-9`
 
 **Case-family:** `topology`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `runtime-checked`×`live-effect`
 
 A managed control plane (EKS) is deliberately **hostless** — no `LinuxHost` field to hang a node off, no
 channel-1 mTLS — so a full **member** node stretched onto a `Managed Eks` control plane is representable **only**
@@ -171,6 +183,8 @@ host-foreclosure readback remains a `live-effect` obligation because AWS authori
 **Delivery-owner:** `Phase-9`
 
 **Case-family:** `topology`
+
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 An etcd quorum split across network-localities loses its low-latency majority and risks partition on the WAN
 link. This round keeps all rke2 servers **`Site`-co-located** by indexing the server set on one `Site`:

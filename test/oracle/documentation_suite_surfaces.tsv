@@ -12,7 +12,7 @@
 # conjure one.
 #
 # owner is the module whose registry supplies the ids: doc_lint, ledger_lint,
-# artifact_policy, or artifact_manifest_lint.
+# artifact_policy, artifact_manifest_lint, phase_contract_lint, or covering_grid.
 #
 # surface<TAB>owner<TAB>check ids (comma-separated)
 documentation.header_metadata	doc_lint	a1,a2,a3,a4,a5
@@ -60,3 +60,7 @@ contract.scope	phase_contract_lint	d5
 contract.conformance	phase_contract_lint	d6
 contract.status	phase_contract_lint	d7
 plan.arithmetic	phase_contract_lint	d8
+covering.cells	covering_grid	c1
+covering.admissibility	covering_grid	c2
+covering.completeness	covering_grid	c3
+covering.teeth	covering_grid	c4

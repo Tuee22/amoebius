@@ -67,6 +67,9 @@ bootstrap_coordinator	M-one-shot-kind-guard	test/mutant/bootstrap_coordinator/M-
 bootstrap_coordinator	M-steady-etcd-peak	test/mutant/bootstrap_coordinator/M-steady-etcd-peak.mutant	—	—
 bootstrap_coordinator	M-swap-runtime-roots	test/mutant/bootstrap_coordinator/M-swap-runtime-roots.mutant	—	—
 bootstrap_coordinator	one-shot-kind-guard	—	bootstrap-coordinator-one-shot-kind-guard-mutant	—
+artifact_calculus	address-drops-rendered	—	artifact-calculus-address-drops-rendered-mutant	operator=digest-input-deletion;expected_red_locus=address-folds-rendered
+artifact_calculus	handle-escapes-region	—	artifact-calculus-handle-escapes-region-mutant	operator=quantifier-weakening;expected_red_locus=compile-fail
+artifact_calculus	recipe-admits-clock	—	artifact-calculus-recipe-admits-clock-mutant	operator=ambient-observation-addition;expected_red_locus=determinism
 capability_bind	mutant_catchall_arm	test/mutant/capability_bind/mutant_catchall_arm/mutant.txt	—	operator=union-arm-addition;expected_locus=arm-golden-exhaustiveness
 capability_bind	mutant_copy_shape_tag	test/mutant/capability_bind/mutant_copy_shape_tag/mutant.txt	—	operator=effect-swap;expected_locus=object-node-multiset-oracle
 capability_bind	mutant_provisioned_value_in_bound_deployment	test/mutant/capability_bind/mutant_provisioned_value_in_bound_deployment/mutant.txt	—	operator=effect-swap;expected_locus=bound-structural-inventory

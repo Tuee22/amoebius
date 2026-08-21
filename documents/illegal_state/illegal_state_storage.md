@@ -74,6 +74,8 @@ foreclosure layer, from [`illegal_state_techniques.md`](./illegal_state_techniqu
 
 **Case-family:** `storage`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `runtime-checked`×`live-effect`
+
 Raw k8s permits mixing arbitrary storage classes, dynamic provisioners, and unsized claims, so "durable"
 data can quietly live on an ephemeral, auto-provisioned volume that vanishes with the node. amoebius admits
 **only** `no-provisioner`, explicitly-sized, retained PVs — the dynamic-provisioner
@@ -90,6 +92,8 @@ default class are non-constructible — required-field / no-arm shapes that fail
 **Delivery-owner:** `Phase-27`
 
 **Case-family:** `storage`
+
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 The canonical k8s silent-failure hazard: a StatefulSet's `volumeClaimTemplate` and the cluster's PVs are two independent
 objects that bind only if their sizes, access modes, and selectors happen to match — and a typo means a pod
@@ -108,6 +112,8 @@ PVC actually binds its PV at reconcile, owned by the runtime-enforcement proof).
 **Delivery-owner:** `Phase-25`
 
 **Case-family:** `storage`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`provision-seal`
 
 Raw k8s lets a volume grow until it fills the disk; "unbounded" is the default. amoebius admits storage that
 is **either** host-level (bounded by a physical disk) **or** cloud (bounded by a quota) — the closed
@@ -130,6 +136,8 @@ the union shape is type-foreclosed.
 
 **Case-family:** `storage`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`provision-seal`
+
 Even with each volume bounded, an app's logical object usage or a topic's retained hot bytes can expand past
 the physical backing. amoebius derives **per-bookie** BookKeeper write-quorum/recovery demand and
 **per-drive** MinIO erasure/healing/metadata usable demand, includes bounded concurrent writes and failed-write
@@ -141,7 +149,7 @@ logical/billed quota instead of invented internal geometry. "Unbounded" is repre
 [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) +
 [`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) (the MinIO store) +
 [`pulsar_client_doctrine.md`](../engineering/pulsar_client_doctrine.md) (topic retention). **Technique:** [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
-(logical→physical per-backing placement fold) + [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (the `Growable` arm gates unboundedness). **Layer:** decode-foreclosed.
+(logical→physical per-backing placement fold) + [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (the `Growable` arm gates unboundedness). **Layer:** decode-foreclosed. The `Growable` arm that gates unboundedness is `type-foreclosed` one layer earlier.
 **Validation-locus:** `provision-seal` (logical-fit/usable-or-raw overflow, dropped recovery/healing scenario,
 orphan horizon, presentation/quantum, and uniform-claim-skew cases return a `ProvisionError` after binding and
 before any `ProvisionedSpec` exists) +
@@ -153,6 +161,8 @@ unboundedness is a closed union checked at authoring).
 **Delivery-owner:** `Phase-25`
 
 **Case-family:** `storage`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
 
 Raw Pulsar lets a topic keep bytes forever, or offload on a **time-only** trigger that never bounds the hot
 tier — so if ingest outpaces the offload lag, BookKeeper fills, bookies go read-only, and the topic (often
@@ -176,6 +186,8 @@ residue (the burst back-pressure and backlog quota actually holding at runtime).
 **Delivery-owner:** `Phase-25`
 
 **Case-family:** `storage`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `runtime-checked`×`live-effect`
 
 An unbounded autoscaling ceiling is how a bounded budget becomes unbounded. amoebius makes growth
 representable **only** through a `Growable = Bounded | Autoscaled ScalingPolicy` union with **no bare-unbounded arm**: the sole path past a fixed cap carries a typed `ScalingPolicy` (capacity thresholds,
@@ -203,6 +215,8 @@ cold-seed entries live in the multi-cluster slice ([§3.69](./illegal_state_mult
 
 **Case-family:** `storage`
 
+**Cells:** `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
+
 A backup that writes more bytes than its target medium holds is the storage-overcommit hazard displaced onto
 the backup destination. amoebius folds the projected working set, the copy/verify Job workspace, and the full
 bounded retained generation set against the medium's `StorageBacking` before any `ProvisionedSpec` exists; one
@@ -212,7 +226,7 @@ itself a quota. **Owner:** [`backup_recovery_doctrine.md` §5](../engineering/ba
 (fold owned by [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md)). **Technique:**
 [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (summed demand within capacity). **Layer:** decode-foreclosed (a checked rejection of constructible values;
-Dhall has no dependent arithmetic). **Validation-locus:** `provision-seal` + `live-effect` residue (that the
+Dhall has no dependent arithmetic). The medium physically capping bytes is `runtime-checked`. **Validation-locus:** `provision-seal` + `live-effect` residue (that the
 medium physically caps bytes at runtime).
 
 ### 3.54 Deleting a backup in an append-only system
@@ -221,6 +235,8 @@ medium physically caps bytes at runtime).
 
 **Case-family:** `backup`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `runtime-checked`×`live-effect`
+
 An `AppendOnly` backup medium is write-once; a verb that deleted or overwrote an existing generation would
 break the WORM guarantee the regime exists to provide. The backup surface exposes no delete/overwrite verb at
 all — the closed-union / no-arm shape that gives the `StorageMutation` surface no `Delete` arm — so
@@ -228,7 +244,7 @@ all — the closed-union / no-arm shape that gives the `StorageMutation` surface
 **Owner:** [`backup_recovery_doctrine.md` §4](../engineering/backup_recovery_doctrine.md#4-the-write-but-never-delete-credential-boundary).
 **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (closed union, no delete arm) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed).
-**Layer:** type-foreclosed representation + runtime-enforced object-lock. **Validation-locus:** `dhall-typecheck`
+**Layer:** type-foreclosed representation + runtime-enforced object-lock. That object-lock enforcement is the `runtime-checked` half. **Validation-locus:** `dhall-typecheck`
 + `live-effect` residue (that the medium honors WORM).
 
 ### 3.55 amoebius holding a credential that can delete a backup
@@ -236,6 +252,8 @@ all — the closed-union / no-arm shape that gives the `StorageMutation` surface
 **Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
+
+**Cells:** `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 Retention and deletion of backups are out of band; amoebius must never authenticate as an actor that can
 delete one. The write credential is a `CloudAccountMutationCapability` whose `allowedActions` is a closed
@@ -245,7 +263,7 @@ delete durable-storage boundary. **Owner:** [`backup_recovery_doctrine.md` §4](
 (credential classes owned by [`pulumi_ebs_credential_model.md` §6](../engineering/pulumi_ebs_credential_model.md#6-the-ebs-create-vs-delete-credential-model)).
 **Technique:** [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (scoped mutation capability). **Layer:** decode-foreclosed credential shape + runtime-enforced at the cloud
-API. **Validation-locus:** `gadt-decode` + `live-effect` residue (that the cloud account actually denies
+API. The account actually refusing a delete is `runtime-checked`. **Validation-locus:** `gadt-decode` + `live-effect` residue (that the cloud account actually denies
 delete).
 
 ### 3.56 Automatically recovering from a manual air-gapped medium
@@ -253,6 +271,8 @@ delete).
 **Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
+
+**Cells:** `type-foreclosed`×`gadt-decode`
 
 An air-gapped medium whose `handling = Manual` requires a human to physically load media before it can be
 read; an unattended reconcile that "restored automatically" would either hang or act on absent media. Obtaining
@@ -268,6 +288,8 @@ air-gap medium has no inhabitant. **Owner:** [`backup_recovery_doctrine.md` §7]
 **Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
+
+**Cells:** `type-foreclosed`×`gadt-decode`
 
 A restore that wrote into an occupied durable coordinate would be a data-destruction verb by another name,
 and would contradict the no-destruction contract. Restore only ever targets a fresh (empty) coordinate — a
@@ -285,6 +307,8 @@ is empty because its backing was lost. **Owner:** [`backup_recovery_doctrine.md`
 
 **Case-family:** `backup`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck`
+
 Keeping every backup indefinitely is how a bounded medium becomes unbounded storage. `BackupRetention` is a
 closed `KeepN | KeepWindow | Growable` union with no keep-forever arm, so backup history is bounded by the same
 discipline the Pulsar retention surface uses; the only path past a fixed bound is a `Growable` whose ceiling is
@@ -297,6 +321,8 @@ a quota. **Owner:** [`backup_recovery_doctrine.md` §2](../engineering/backup_re
 **Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
+
+**Cells:** `decode-foreclosed`×`gadt-decode`
 
 A "remote" backup whose backing resolves to the same host disk, cluster, EBS availability zone, or cloud
 account as the data it protects is not a backup — the event that destroys the source destroys the copy. The
@@ -313,6 +339,8 @@ distinctness technique that rejects a cluster reused as active and standby in th
 
 **Case-family:** `storage`
 
+**Cells:** `decode-foreclosed`×`provision-seal`
+
 A plan that let the same physical bytes satisfy both the live-data budget and the backup budget could appear
 to fit when it does not. The backup medium is a distinct `StorageBacking`, disjoint from the source's durable
 backing and from node ephemeral/cache pools, so the capacity fold cannot spend one pool's bytes twice.
@@ -327,6 +355,8 @@ backing and from node ephemeral/cache pools, so the capacity fold cannot spend o
 
 **Case-family:** `backup`
 
+**Cells:** `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 A backup of durable data written unencrypted to a medium — especially one that leaves the trust boundary —
 exposes secrets and content at rest, the same hazard as a plaintext spec at rest ([§3.9](./illegal_state_security.md#39-a-plaintext-spec-at-rest)).
 A backup is written Vault-Transit-enveloped like the control-plane state object, its key a `SecretRef` and
@@ -334,7 +364,7 @@ never inline; a constructor that emitted plaintext bytes to the medium has no in
 [`backup_recovery_doctrine.md` §4](../engineering/backup_recovery_doctrine.md#4-the-write-but-never-delete-credential-boundary)
 (envelope owned by [`vault_pki_doctrine.md` §3](../engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)).
 **Technique:** [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
-(envelope handle). **Layer:** decode-foreclosed handle + runtime decrypt-in-process. **Validation-locus:**
+(envelope handle). **Layer:** decode-foreclosed handle + runtime decrypt-in-process. Decrypting in process and never at rest is `runtime-checked`. **Validation-locus:**
 `rendered-artifact-oracle` + `live-effect`.
 
 ### 3.62 A backup whose decryption key is escrowed only in the domain it protects
@@ -343,13 +373,15 @@ never inline; a constructor that emitted plaintext bytes to the medium has no in
 
 **Case-family:** `backup`
 
+**Cells:** `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 A backup of Vault (or of secrets) whose only decryption key lives in the very coordinate the backup would
 restore is a self-defeating loop: the disaster that requires the restore also destroys the key. The restore
 path requires a key-availability witness independent of the restored coordinate; the human-gated,
 password-encrypted unseal path supplies it for the Vault-seed case. **Owner:** [`backup_recovery_doctrine.md` §4](../engineering/backup_recovery_doctrine.md#4-the-write-but-never-delete-credential-boundary)
 (unseal owned by [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md)). **Technique:**
 [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (independence witness).
-**Layer:** decode-foreclosed structural half + `assumed` key-independence premise, stated honestly.
+**Layer:** decode-foreclosed structural half + `assumed` key-independence premise, stated honestly. Confirming the escrow really sits outside the protected domain is `runtime-checked`.
 **Validation-locus:** `gadt-decode` + `live-effect` residue.
 
 ### 3.63 A restore from an unverified backup artifact
@@ -358,13 +390,15 @@ password-encrypted unseal path supplies it for the Vault-seed case. **Owner:** [
 
 **Case-family:** `backup`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 Seeding from a backup that never proved its own integrity would silently propagate a corrupt or partial copy.
 A restore constructor demands a `BackupArtifact 'Verified`; a backup whose copy did not verify emits no such
 artifact, fails loud, and is never a valid restore source — the same `.ready`-gated discipline as the ML
 `ArtifactRef` and the verified-shrink `ReclaimEligible`. **Owner:** [`backup_recovery_doctrine.md` §6](../engineering/backup_recovery_doctrine.md#6-the-verified-content-addressed-backupartifact).
 **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (phase-indexed artifact). **Layer:** type-foreclosed (the unverified artifact has no restore constructor) +
-`live-effect` residue (that the verified bytes actually match). **Validation-locus:** `gadt-decode` +
+`live-effect` residue (that the verified bytes actually match). The verified bytes matching is `runtime-checked`. **Validation-locus:** `gadt-decode` +
 `live-effect`.
 
 ### 3.64 A cross-tenant or re-tagged backup or restore
@@ -372,6 +406,8 @@ artifact, fails loud, and is never a valid restore source — the same `.ready`-
 **Delivery-owner:** `Phase-34`
 
 **Case-family:** `backup`
+
+**Cells:** `type-foreclosed`×`gadt-decode`
 
 Restoring one tenant's backup into another, or re-tagging a backup's owning identity, would let a spec reach a
 foreign tenant's data. A backup's `source` is a phantom-tagged `Ref tenant DurableCoordinate`, and there is no
@@ -387,6 +423,8 @@ append-only revocable capability edge, never a re-tag. **Owner:** [`backup_recov
 
 **Case-family:** `backup`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck`
+
 An "air-gapped" medium that is actually reachable over the network is a contradiction — it is not air-gapped.
 The `AirGapMedia` arm carries no credential field; only `RemoteObjectStore` does, so a network-reachable
 air-gap medium has no inhabitant, and egress to and ingress from air-gap media is a witnessed handoff rather
@@ -400,6 +438,8 @@ than a live credential. **Owner:** [`backup_recovery_doctrine.md` §3](../engine
 
 **Case-family:** `backup`
 
+**Cells:** `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 Lowering a backup's retention below what is already retained on an append-only medium cannot be honored:
 amoebius holds no delete authority, so it cannot expire the excess generations to comply. A `dhall update`
 whose new retention floor falls below the currently-retained span is rejected, the same retention-floor fold
@@ -407,13 +447,15 @@ that rejects shrinking a topic's retention below its live data. **Owner:** [`bac
 (retention-floor fold owned by [`inforcespec_migration_doctrine.md` §5](../engineering/inforcespec_migration_doctrine.md#5-the-decode-time-no-orphan-fold)).
 **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (diff-over-a-collection fold). **Layer:** decode-foreclosed structural half + `live-effect` retained-state
-probe. **Validation-locus:** `gadt-decode` + `live-effect`.
+probe. The retained-state probe is `runtime-checked`. **Validation-locus:** `gadt-decode` + `live-effect`.
 
 ### 3.67 A restore into a target smaller than or presentation-incompatible with the backup extent
 
 **Delivery-owner:** `Phase-28`
 
 **Case-family:** `storage`
+
+**Cells:** `decode-foreclosed`×`provision-seal`
 
 A restore into a coordinate too small for the backed-up bytes, or of the wrong presentation (a Block backup
 into a Filesystem target), would truncate or fail mid-restore. The seed target is created new, sized from the
@@ -430,6 +472,8 @@ under-sized or presentation-mismatched restore is rejected before render. **Owne
 
 **Case-family:** `backup`
 
+**Cells:** `decode-foreclosed`×`gadt-decode`
+
 Two backup policies on one durable coordinate — for example one `AppendOnly` and one `RetainManaged` — would
 give a single datum two owners of its backup regime, and the single-source-of-truth would rot. A coordinate has
 exactly one `BackupPolicy` owner under a total ownership-index fold; a double-claim is a decode-time rejection.
@@ -442,6 +486,8 @@ exactly one `BackupPolicy` owner under a total ownership-index fold; a double-cl
 **Delivery-owner:** `Phase-34`
 
 **Case-family:** `storage`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `runtime-checked`×`live-effect`
 
 Every imperative infrastructure surface offers the destructive verb directly — `DROP`, `TRUNCATE`,
 `kubectl delete pvc`, a lifecycle rule that expires objects — so "no data loss" rests on the migration
@@ -471,6 +517,8 @@ orthogonal to the foreclosure layer above.
 **Delivery-owner:** `Phase-71`
 
 **Case-family:** `storage`
+
+**Cells:** `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 Removing the destructive verb ([§3.85](#385-a-spec-verb-that-destroys-durable-bytes)) leaves one way to
 destroy data by **omission**: upload a generation that simply stops naming a retained volume, bucket, topic,

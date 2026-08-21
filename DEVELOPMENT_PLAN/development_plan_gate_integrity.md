@@ -183,20 +183,21 @@ gate cannot pass unless all of these conditions hold:
     fails ([`substrate_doctrine.md` §1.1](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule)).
 
 16. A gate that adds or amends an illegal-state catalogue entry leaves the catalogue a **complete covering**
-    over its declared taxonomy: every cell of the product of the declared axes holds an entry or carries a
-    one-line justification for holding none, and an unjustified empty cell fails the gate
+    over its declared taxonomy: every cell of the product of the declared axes holds an entry, is inadmissible
+    under the declared layer-to-locus relation, or carries a one-line justification for holding none, and an
+    unjustified empty cell fails the gate
     ([`documentation_standards.md` §16](../documents/documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list)).
-    The grid is generated; the entries and the justifications are authored.
+    The grid is generated; the entries' pairings, the relation, and the justifications are authored.
 
-**Clause 16 is partly discharged.** The taxonomy is declared with all three axes closed and enumerated, the
-generator exists ([`../tools/covering_grid.py`](../tools/covering_grid.py)), and sixteen authored
-justifications close 98 of the 109 empty cells. Eleven cells still owe a reason and cannot be given one as the
-catalogue currently reads: an entry naming several foreclosure layers and several loci is credited with the
-product of them, so those cells are *unknown* rather than evidently empty
-([`../documents/illegal_state/README.md`](../documents/illegal_state/README.md)). Closing them means pairing a
-layer to a locus in each entry, which is authoring work on the catalogue. Until then a gate amending an entry
-inherits the postcondition and may not increase the eleven; which phase drives it to zero is recorded in
-[README.md](README.md).
+**Clause 16 is discharged, 2026-08-20.** All three axes are closed and enumerated, the generator exists
+([`../tools/covering_grid.py`](../tools/covering_grid.py)), and the 252 cells resolve as 64 occupied, 154
+inadmissible, and 34 justified, with none owing a reason
+([`../documents/illegal_state/README.md`](../documents/illegal_state/README.md)). What made the previous eleven
+unclosable was the instrument rather than the catalogue: an entry naming several foreclosure layers and several
+loci was credited with the product of them, so an empty cell could not be told from an unpaired one. Each entry
+now pairs a layer to a locus on its own `Cells:` line, which is what makes the count a measurement. A gate
+amending an entry inherits the postcondition and may not leave a cell unjustified — a rule that now bites,
+because there is no standing remainder to hide behind.
 
 **Clause 15 invalidates every phase seal recorded before 2026-08-16.** No earlier gate recorded the
 architecture it proved, so no earlier attestation can be read as a claim about one — and the seal that did

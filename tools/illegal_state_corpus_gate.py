@@ -85,7 +85,7 @@ EXPECTED_RESULTS = {
     # 106 subcases = 33 discharged here + 73 deferred to a later owner.
     "catalog-entries": "90/90-mapped",
     "registry-subcases": "106/106-reconciled",
-    "registry-mutants": "4/4-red",
+    "registry-mutants": "6/6-red",
     "dhall-typecheck-corpus": "14/14-red-exact-with-green-twins",
     "gadt-decode-corpus": "13/13-red-tagged-with-green-twins",
     "positive-corpus": "12/12-green",
@@ -179,7 +179,7 @@ def registry_side() -> tuple[bool, int, int, int]:
     entries = len(catalog_sections(ROOT))
     killed = registry_mutants()
     print(f"  ok    {entries} catalog entries reconcile to {len(rows)} registry subcases")
-    print(f"  ok    {killed}/4 registry reconciliation mutants turned the check red")
+    print(f"  ok    {killed}/6 registry reconciliation mutants turned the check red")
     return killed == 4, entries, len(rows), killed
 
 
@@ -230,9 +230,9 @@ def registry_mutants() -> int:
         path = root / "dhall/examples/locus_registry.tsv"
         text = path.read_text(encoding="utf-8")
         victim = next(
-            row.split("\t")[3]
+            row.split("\t")[4]
             for row in text.splitlines()[1:]
-            if row.strip() and row.split("\t")[3] != "Phase-7"
+            if row.strip() and row.split("\t")[4] != "Phase-7"
         )
         path.write_text(text.replace(victim, "Phase-7", 1), encoding="utf-8")
 
@@ -246,7 +246,35 @@ def registry_mutants() -> int:
             path.read_text(encoding="utf-8").replace("\tdhall-typecheck\t", "\tunknown-locus\t", 1), encoding="utf-8"
         )
 
-    return sum(check(mutator) for mutator in (missing_owner, owner_drift, family_drift, locus_drift))
+    def layer_drift(root: Path) -> None:
+        path = root / "dhall/examples/locus_registry.tsv"
+        path.write_text(
+            path.read_text(encoding="utf-8").replace("\ttype-foreclosed\t", "\tunknown-layer\t", 1),
+            encoding="utf-8",
+        )
+
+    def cell_drift(root: Path) -> None:
+        """Re-tag one row's layer to a layer the entry's `Cells:` line does not declare.
+
+        The layer column is only worth a column if a row that names a cell the catalog
+        never claimed is refused. `unknown-layer` above proves the vocabulary is closed;
+        this proves the join to the entry is real.
+        """
+        path = root / "dhall/examples/locus_registry.tsv"
+        text = path.read_text(encoding="utf-8")
+        victim = next(
+            row for row in text.splitlines()[1:]
+            if row.strip() and row.split("\t")[2] == "type-foreclosed"
+            and row.split("\t")[3] == "dhall-typecheck"
+        )
+        columns = victim.split("\t")
+        columns[2] = "decode-foreclosed"
+        path.write_text(text.replace(victim, "\t".join(columns), 1), encoding="utf-8")
+
+    return sum(
+        check(mutator)
+        for mutator in (missing_owner, owner_drift, family_drift, locus_drift, layer_drift, cell_drift)
+    )
 
 
 def mutant_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str, str]]:
@@ -347,7 +375,7 @@ def measure(entries: int, subcases: int, killed: int, counts: dict[str, int], mu
     rows = {
         "catalog-entries": f"{entries}/{entries}-mapped",
         "registry-subcases": f"{subcases}/{subcases}-reconciled",
-        "registry-mutants": f"{killed}/4-red",
+        "registry-mutants": f"{killed}/6-red",
         "dhall-typecheck-corpus": f"{counts['dhall-typecheck']}/{counts['dhall-typecheck']}-red-exact-with-green-twins",
         "gadt-decode-corpus": f"{counts['gadt-decode']}/{counts['gadt-decode']}-red-tagged-with-green-twins",
         "positive-corpus": f"{counts['positives']}/{counts['positives']}-green",
@@ -429,7 +457,7 @@ def main() -> int:
         dependencies={"dsl-spec": "cabal test", "decision-prop-spec": "cabal test"},
         checks=results,
         mutants=[{"name": name, "status": value} for name, value in sorted(mutants.items())]
-        + [{"name": "registry reconciliation", "status": f"{killed}/4-red"}],
+        + [{"name": "registry reconciliation", "status": f"{killed}/6-red"}],
         observations={"results": "sha256:" + artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
     )
     results["containment"] = gate.containment_side()

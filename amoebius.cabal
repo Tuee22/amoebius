@@ -4,6 +4,21 @@ version: 0.1.0.0
 build-type: Simple
 license: Apache-2.0
 
+flag artifact-calculus-address-drops-rendered-mutant
+  description: Build the artifact-calculus mutant whose address omits the rendered bytes
+  default: False
+  manual: True
+
+flag artifact-calculus-handle-escapes-region-mutant
+  description: Build the artifact-calculus mutant whose region admits a handle escape
+  default: False
+  manual: True
+
+flag artifact-calculus-recipe-admits-clock-mutant
+  description: Build the artifact-calculus mutant whose recipe folds an ambient observation
+  default: False
+  manual: True
+
 flag illegal-state-mutant
   description: Build the committed Phase-6 broken-decision mutant
   default: False
@@ -1556,6 +1571,28 @@ library content-store
   if flag(content-store-workflow-trust-gateway-ack-mutant)
     cpp-options: -DPHASE37_TRUST_GATEWAY_ACK_MUTANT
 
+library artifact-calculus
+  visibility: public
+  exposed-modules:
+      Amoebius.Calculus.Artifact.Address
+      Amoebius.Calculus.Artifact.Recipe
+      Amoebius.Calculus.Artifact.Region
+      Amoebius.Calculus.Artifact.Target
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(artifact-calculus-address-drops-rendered-mutant)
+    cpp-options: -DARTIFACT_CALCULUS_ADDRESS_DROPS_RENDERED_MUTANT
+  if flag(artifact-calculus-handle-escapes-region-mutant)
+    cpp-options: -DARTIFACT_CALCULUS_HANDLE_ESCAPES_REGION_MUTANT
+
 library workflow-runtime
   visibility: public
   exposed-modules:
@@ -2338,6 +2375,23 @@ test-suite job-terminal-retention
       text >=2.1 && <2.2
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite artifact-calculus-spec
+  type: exitcode-stdio-1.0
+  main-is: ArtifactCalculusSpec.hs
+  other-modules:
+      ArtifactCorpus
+  hs-source-dirs:
+      test/spec/calculus
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(artifact-calculus-recipe-admits-clock-mutant)
+    cpp-options: -DARTIFACT_CALCULUS_RECIPE_ADMITS_CLOCK_MUTANT
 
 test-suite capacity-topology-spec
   type: exitcode-stdio-1.0

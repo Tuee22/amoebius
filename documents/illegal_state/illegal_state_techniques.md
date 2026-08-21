@@ -548,12 +548,22 @@ growing capacity, and the cloud honoring the quota — are always runtime-checke
 The three foreclosure **layers** above classify *what kind of proof* forecloses an illegal state: type-inhabitance
 (`type-foreclosed`), a total pure pre-effect rejection (`decode-foreclosed`, whose concrete locus may be
 gadt-decode or the provision seal), or reconcile/runtime enforcement
-(`runtime-checked`). A **second, orthogonal axis** — the **validation-locus** — classifies *where in the pipeline*
+(`runtime-checked`). A **second axis** — the **validation-locus** — classifies *where in the pipeline*
 the illegal state is actually caught, i.e. the concrete gate at which a test would observe the rejection. The two
-axes are independent: the *layer* answers "by what kind of check," the *locus* answers "at which stage a fixture
+axes ask different questions: the *layer* answers "by what kind of check," the *locus* answers "at which stage a fixture
 must fail." Every catalog entry names a **primary locus**, and almost every entry also names a **`live-effect` residue** — the physical fact the spec-layer check structurally cannot settle. Each `### 3.x` entry in
 [`illegal_state_catalog.md`](./illegal_state_catalog.md) carries a **`Validation-locus:`** line naming its loci,
-derived from — but not identical to — its `Layer:` tag.
+derived from — but not identical to — its `Layer:` tag, and a **`Cells:`** line pairing each foreclosure it
+makes to the one locus that observes it.
+
+**Different questions, but not an unconstrained product.** Only seven of the eighteen layer×locus pairs are
+inhabitable, because a locus downstream of the check that forecloses a state never sees that state and a
+locus upstream of an effect cannot settle a residue about it. The relation is authored once, in
+[the catalog router](./README.md#which-locus-can-observe-which-layer), and the covering generator reads it
+there. Its consequence is worth naming here, where both axes are defined: the layer is a **function of the
+locus** at five of the six loci, and only `gadt-decode` admits both foreclosure layers — which is the
+dhall-typecheck-vs-gadt-decode caveat above, seen from the covering's side. That is why an entry's `Cells:`
+line is authored rather than derived: it carries exactly the one bit the locus does not.
 
 The six loci:
 

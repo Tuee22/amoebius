@@ -94,6 +94,8 @@ adds one new **Validation-locus** line naming where the illegal state is caught 
 
 **Case-family:** `lifecycle`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 Raw tooling makes the bring-up race the default: a chart assumes its database is up, an initContainer polls a
 port in a `sleep`-loop, a bootstrap script runs `sleep 30 && kubectl apply` and hopes the apiserver answered —
 each substituting a **duration** for a **condition**, so it passes on a fast host and flakes on a slow one, then
@@ -135,6 +137,8 @@ foreclosure layer above.
 
 **Case-family:** `lifecycle`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 Raw delivery permits pointing prod at any build — tested, untested, or actively red. amoebius makes
 `Environment = < Dev | Staging | Prod >` advance through a typed `PromotionGate`: advancing an environment's
 ETag-CAS pointer to a `Release` **requires** that the `Release`'s test-topology ledger
@@ -164,6 +168,8 @@ proven; Phase 48 later automates topology derivation rather than owning this ill
 **Delivery-owner:** `Phase-31`
 
 **Case-family:** `capacity`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
 
 Raw k8s treats monitoring as an optional add-on: a Deployment can run with no scrape target, no alert rule, and
 no dashboard, and a metrics or debug endpoint can be published to the wild with no authentication — so a
@@ -203,6 +209,8 @@ a `SubjectScoped` filter actually excludes another subject's data). Per the vali
 
 **Case-family:** `lifecycle`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 Raw fault-injection tooling lets a scenario name any target: a test can script "partition the VPN" or "kill the
 broker" against a cluster that runs neither, so the scenario is meaningless — or, worse, asserts an invariant no
 declared component upholds. amoebius makes the fault schedule a **typed projection over the enclosing `InForceSpec`'s declared components**: `ChaosSchedule = NonEmpty FaultInjection`, and each `FaultInjection`'s
@@ -236,6 +244,8 @@ component as the drill assumes). Per the validation-locus axis of
 
 **Case-family:** `image`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`rendered-artifact-oracle`
+
 Every other byte the cluster runs is accounted for — a baked binary, a linked library, a content-addressed
 asset — but an image reference was, until now, a free digest. `ImageArtifact` constrained *bytes*
 exhaustively (image manifest digest, config digest, per-layer blob digests) and
@@ -250,7 +260,7 @@ layer out. **Owner:** [`image_build_doctrine.md` §5](../engineering/image_build
 (a relation over a closed named catalog) + [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (identity as a required field, not an optional annotation). **Layer:** `type-foreclosed` — a foreign image
 reference has no constructor, with a `rendered-artifact-oracle` residue that the *deployed* image is the one
-named (and a live containerd inspection independently confirms the pulled digest).
+named (and a live containerd inspection independently confirms the pulled digest). That residue is `decode-foreclosed`: the deployed reference is a rendered value a total predicate reads.
 
 **Validation-locus:** `dhall-typecheck` — the union is closed in the Dhall schema, so naming a foreign image
 fails `dhall type` before any binary runs, exactly as an engine named by URL does.
@@ -260,6 +270,8 @@ fails `dhall type` before any binary runs, exactly as an engine named by URL doe
 **Delivery-owner:** `Phase-56`
 
 **Case-family:** `image`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`gadt-decode`
 
 A `ContainerEnvelope` named an image, a lifecycle, and a complete resource envelope — and never said what
 the container *executes*. No `command`, no `args`, no `entrypoint` field existed anywhere in the type layer,
@@ -277,7 +289,7 @@ in that identity's own build content — so a container cannot name an executabl
 (the closed role union). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (required field) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
 (process↔image and binary↔bake-content relations over the enclosing build). **Layer:** `type-foreclosed` for
-the field's presence and the union's closedness; the two cross-references are `gadt-decode` folds.
+the field's presence and the union's closedness; the two cross-references are `gadt-decode` folds. Those two folds are `decode-foreclosed` — a cross-field relation rejects a value that was constructible.
 
 **Validation-locus:** `dhall-typecheck` — a `ContainerEnvelope` missing `process`, or naming a role outside
 the closed union, does not type-check; the image↔process and binary↔content relations are cross-field and so
@@ -289,6 +301,8 @@ land at the decoder, per the validation-locus axis of
 **Delivery-owner:** `Phase-56`
 
 **Case-family:** `image`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`rendered-artifact-oracle`
 
 `BuildStageDemand` typed a build stage's *resources* totally — CPU reservation and ceiling, memory
 reservation and ceiling, peak intermediate bytes, peak cache-write bytes, and its `dependsOn` edges — and
@@ -305,7 +319,7 @@ generated projection of that data. **Owner:**
 (the renderer). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (a `NonEmpty` required field) + [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
 (a pinned identity per step rather than a fetched address). **Layer:** `type-foreclosed` — an interpolated
-shell fragment has no constructor — with a `rendered-artifact-oracle` residue pinning the emitted Dockerfile.
+shell fragment has no constructor — with a `rendered-artifact-oracle` residue pinning the emitted Dockerfile. Pinning the emitted Dockerfile is `decode-foreclosed`, a total predicate over the rendered file.
 
 **Validation-locus:** `dhall-typecheck` — the absent `RunShell`/`Url` arms are a Dhall-schema closure, so an
 authored shell fragment fails `dhall type` with no binary involved.
@@ -315,6 +329,8 @@ authored shell fragment fails `dhall type` with no binary involved.
 **Delivery-owner:** `Phase-56`
 
 **Case-family:** `image`
+
+**Cells:** `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 A trusted linked extension creates a pairing that did not previously exist: a worker Pod names the
 `WorkerKind` it runs, that kind names the `ExtensionId` whose library handles its work, and the Pod's image
@@ -334,13 +350,16 @@ decoder fold rather than a Dhall type index — with a `runtime-checked` residue
 actually serves.
 
 **Validation-locus:** `gadt-decode` — Dhall carries no dependent types, so "this id is in that set" is
-resolved by the total decoder, which returns `Left` when it is not.
+resolved by the total decoder, which returns `Left` when it is not — with a `live-effect` residue,
+that the linked handler actually serves the extension the worker names.
 
 ### 3.78 Extension source that reaches outside the sanctioned API
 
 **Delivery-owner:** `Phase-34`
 
 **Case-family:** `lifecycle`
+
+**Cells:** `type-foreclosed`×`extension-astcheck`
 
 Gates 1 and 2 prove things about a *value*; neither constrains the Haskell linked beside it. An
 `ExtensionSpec`'s `extChain` carries a `stepRun :: cfg -> IO ()`, and `IO ()` is a type, not a bound — so
@@ -370,6 +389,8 @@ time over extension source before link, per the validation-locus axis of
 **Delivery-owner:** `Phase-31`
 
 **Case-family:** `capacity`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
 
 [§3.43](#343-an-unmonitored-workflow-or-extension-or-an-unauthenticated-monitoring-surface) binds the
 workflow surface — a `Workflow`, a `RouteEntry`, an `ExtensionSpec`. It leaves everything else a spec
@@ -408,6 +429,8 @@ foreclosure layer above.
 
 **Case-family:** `topology`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck`
+
 Context and role are orthogonal axes
 ([`daemon_topology_doctrine.md` §2](../engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)),
 but not every pairing exists: a CLI run is not a daemon, and a host daemon is not a container process. Held as
@@ -437,6 +460,8 @@ it does not type-check.
 **Delivery-owner:** `Phase-55`
 
 **Case-family:** `topology`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `runtime-checked`×`live-effect`
 
 "Exactly one writer" is the whole content of the control-plane daemon
 ([`daemon_topology_doctrine.md` §3](../engineering/daemon_topology_doctrine.md#3-the-control-plane-daemon)),

@@ -45,6 +45,7 @@ and remaining implementation are stated below.
 - [Sprint 0.13: One binary, many roles 📋](#sprint-013-one-binary-many-roles-)
 - [Sprint 0.14: The ordering re-baseline 📋](#sprint-014-the-ordering-re-baseline-)
 - [Sprint 0.15: The re-baseline review pass 📋](#sprint-015-the-re-baseline-review-pass-)
+- [Sprint 0.16: The covering as a measurement ✅](#sprint-016-the-covering-as-a-measurement-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -52,7 +53,25 @@ and remaining implementation are stated below.
 
 ## Phase Status
 
-🔄 Active — reopened 2026-08-19 by the generative re-baseline, which changes what this gate covers; the prior seal is history and no longer presents completion evidence.
+✅ Done — resealed 2026-08-20 against the generative re-baseline's three added obligations. All thirteen sides
+of `python3 tools/doc_lint_verify.py` pass on natural `arm64`, untranslated: 50 seeded documentation negatives
+each redden their own check, 49 surfaces join completely to 90 implemented checks, 17 artifact-policy rules are
+clean with all 314 remaining findings attributed to an owning phase, and attestation
+`sha256:a2bdd9d5704eee36e4317d1fb894d965fbccb056b8b68e9d6a4595da23c0da71` binds to a 2,055-file source snapshot. The
+covering resolves its 252 cells with none owing a reason. As with every seal here, the attestation names the
+run that passed; the tree records it afterwards, so a later run's digest differs by exactly that record.
+
+**What closed the reopening.** Three obligations landed with the re-baseline and each is now a check with a
+seeded negative rather than a sentence. The contract half of every phase document is read by
+`tools/phase_contract_lint.py` (`d1`–`d8`). Clause 13's extension-conformance discharge is `d6`, and every one
+of the 96 contracts either discharges it or marks it not applicable. Clause 16's illegal-state covering is
+`c1`–`c4`, delivered by [Sprint 0.16](#sprint-016-the-covering-as-a-measurement-), which replaced a
+product-credited estimate of occupancy with the pairing each entry now authors — and in doing so found six
+defects the estimate had concealed.
+
+**One repair outside the covering.** `tools/phase_contract_lint.py` wrote its scratch tree to the host default
+temporary directory, which `state_escapes_checkout` reports and which the containment contract forbids; its
+scratch state now lives under `.build/tmp/`.
 
 **Resealed a sixth time on 2026-08-17** against the documentation Phase 1's host-ensure closure
 touched: [`substrate_doctrine.md` §3.1](../documents/engineering/substrate_doctrine.md#31-the-per-substrate-floor-what-only-the-operator-can-supply)
@@ -171,7 +190,7 @@ The gate verifies all governed headers, contents blocks, anchors, bidirectional 
 numbering, gate ownership, illegal-state coverage, and documentation negative cases. It additionally verifies:
 
 
-**Three obligations were added by the 2026-08-19 generative re-baseline and are this gate's to discharge.**
+**Three obligations were added by the 2026-08-19 generative re-baseline, and all three are discharged.**
 Each is a check with its own seeded negative, and each exists because a rule was normative and unread:
 
 - **The contract half of every phase document** — the section-D skeleton, the six required Phase Summary
@@ -179,9 +198,10 @@ Each is a check with its own seeded negative, and each exists because a rule was
   script declares. `tools/phase_contract_lint.py` carries these as `d1`–`d4`; before it existed, `Phase scope`
   was absent from sixty-four contracts and `Register` had no check at all.
 - **The illegal-state covering** of [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate)
-  clause 16: every cell of the declared taxonomy holds an entry or a one-line justification, and an
-  unjustified empty cell fails. The taxonomy is declared; the generator and the justifications are this
-  phase's to build.
+  clause 16: every cell of the declared taxonomy holds an entry, is inadmissible under the authored
+  layer-to-locus relation, or carries a one-line justification, and an unjustified empty cell fails. Occupancy
+  is what each entry's `Cells:` line asserts rather than the product of the tags its prose mentions, which is
+  what makes the count a measurement; `c1`–`c4` decide it and six seeded defects give it teeth.
 - **The extension-conformance discharge** of
   [§M](development_plan_gate_integrity.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 13, as a
   documentation obligation: a contract delivering an extension names its law discharges and its compile-fail
@@ -1201,6 +1221,62 @@ passed. Reviewing the diff directly rather than the gates found it.
 None for Phase 0. What the review found in later phases' contracts — Phase 18's differential-versus-refinement
 framing, Phase 19's property attribution, and Phase 2's counts — was corrected in place; the code those
 contracts describe remains unbuilt and owned by those phases.
+
+## Sprint 0.16: The covering as a measurement ✅
+**Status**: Done — 2026-08-20.
+**Implementation**: `documents/illegal_state/README.md`,
+`documents/illegal_state/illegal_state_techniques.md`,
+`documents/illegal_state/illegal_state_*.md` (the nine slices),
+`dhall/examples/locus_registry.tsv`, `tools/covering_grid.py`, `tools/locus_registry_lint.py`,
+`tools/doc_lint_verify.py`, `tools/phase_contract_lint.py`, `tools/illegal_state_corpus_gate.py`,
+`test/oracle/documentation_suite_surfaces.tsv`, `test/spec/dsl/ValidationLocusLedger.hs`
+**Blocked by**: Sprint 0.15
+**Independent Validation**: six seeded defects — a removed `Cells:` line, an inadmissible pairing, an unknown
+layer, a pairing the entry never states, a deleted justification row, and a widened family axis — each turn
+the covering red in a scratch copy and are confirmed green on the unmutated one first.
+**Docs to update**: `documents/illegal_state/README.md`,
+`documents/illegal_state/illegal_state_techniques.md`, the nine slices
+
+### Objective
+
+Close [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 16 honestly. The
+covering was green everywhere except eleven cells, and those eleven could not be justified as written: the
+generator credited an entry with the **product** of every foreclosure layer its prose named and every locus
+its prose named, so an empty cell might be genuinely empty or merely unpaired, and nobody could tell which.
+The count was an upper bound on occupancy and a floor on the defect, which is the wrong direction for a gate
+to be wrong in.
+
+### Deliverables
+
+- **Every entry pairs each foreclosure to the locus that observes it**, on an authored `Cells:` line. The
+  product estimate becomes a measurement: 143 credited cells resolve to the 64 the entries actually assert.
+- **The admissibility relation between the two axes**, authored in the catalog router and read by the
+  generator. Only seven of the eighteen layer×locus pairs are inhabitable, because a locus downstream of the
+  check that forecloses a state never sees it and a locus upstream of an effect cannot settle a residue about
+  it. The 154 cells that relation forecloses are reported as `inadmissible` rather than owed a sentence
+  apiece, and the two "contradictory by definition" justification rows fold into it.
+- **Six defects the product-credited grid had concealed.** Five entries claimed a foreclosure layer at no
+  locus at all, and one recorded an image state as having no runtime residue where the entry plainly claims
+  one; a seventh, a justification asserting that no `image` state is observed live, was false and is deleted.
+  Twenty-eight entries stated a layer for one part of their claim and left the others' unnamed.
+- **The layer is a column of the locus registry**, so the Phase-27 fixture ledger and the covering agree by
+  construction: a row naming a cell its entry does not declare is refused, and two new registry mutants prove
+  both halves of that join.
+- **Four checks (`c1`–`c4`) joined to the Phase-0 surface enumeration**, and the covering side of the gate
+  runs its own seeded defects rather than reporting a clean number nothing could have dirtied.
+
+### Validation
+
+1. Run the phase command and confirm all thirteen sides pass, the covering among them.
+2. Confirm the covering reports 252 cells as 64 occupied, 154 inadmissible, 34 justified, 0 unjustified.
+3. Confirm each of the six seeded covering defects turns it red and the unmutated copy is clean.
+
+### Remaining Work
+
+None. What remains beyond this phase is the Phase-27 obligation the pairing now keys: that each entry's
+foreclosure actually rejects a fixture at the locus its cell names. The covering says the claims are complete
+and consistent; it does not say they are true, and that distinction is stated in the router rather than left
+for a reader to infer.
 
 ## Documentation Requirements
 

@@ -560,10 +560,13 @@ def apply(record: dict[str, str], root: Path, paths: list[str]) -> list[str]:
 
 
 def mutant_side(paths: list[str], tree, clean: dict[str, list[str]]) -> tuple[bool, list[dict[str, str]]]:
-    print("\nmutant side — six seeded defects, each red at its own check\n")
+    # The count is read from the registry rather than written in the banner. It said six
+    # while seven ran, which is the same defect class this gate exists to catch: a number
+    # nobody re-derives drifts the first time the set behind it changes.
+    records = load_mutants(ROOT)
+    print(f"\nmutant side — {len(records)} seeded defects, each red at its own check\n")
     ok = True
     outcomes: list[dict[str, str]] = []
-    records = load_mutants(ROOT)
     base = materialize(paths)
     for record in records:
         scratch = SCRATCH / record["name"]

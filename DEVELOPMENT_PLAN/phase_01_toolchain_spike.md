@@ -39,7 +39,28 @@ Runtime, cluster, and gadt-decode semantic fidelity remain UNVERIFIED.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-0 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — resealed 2026-08-20, on the first run after Phase 0 closed. `python3 tools/toolchain_spike_gate.py`
+passes all twelve sides on substrate `none`, lane `none`, natural `arm64`, untranslated: the floor resolves with
+nothing expected on the host, two independent resolutions admit the same 260 packages, the same graph resolves
+from the 2,055-file source snapshot with no worktree help, the representative set builds into an empty store
+with the tracked `patches/` patch applied into the run-local checkout, all five probes match their independently
+authored expectations, both committed mutants redden, 40 surfaces join completely to 62 enumerated items, and
+the outside-host inventory is unchanged. Attestation
+`sha256:f83dc51468ad187962315e4961821dc23acd169a587dcdf9d5ca50a337c77acf` binds to source snapshot
+`sha256:103e06da436331c0…`, the same snapshot Phase 0 sealed against.
+
+**What the reopening asked of this phase was revalidation, not a new deliverable.** The 2026-08-19
+re-baseline reopened every phase, and named the five calculi as what changes each gate's coverage. Those calculi
+are phases 3 through 7 — *above* this one — so nothing they own can enter this contract without the forward
+dependency [§E](development_plan_phase_model.md#e-one-canonical-phase-model) forbids. The re-baseline's two
+added obligations resolve the same way: this gate amends no illegal-state catalogue entry, so
+[§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 16 does not reach it, and it
+delivers no extension, which its contract records as clause 13's explicit not-applicable rather than as
+silence. What the reopening did require is a pass of the *current* gate against a *current* snapshot, and this
+is it.
+
+**Reopened 2026-08-19 by the generative re-baseline**, which invalidated every prior seal below as a current
+result; each stands as history.
 
 **The first 2026-08-17 seal, on the amended contract.** `python3 tools/toolchain_spike_gate.py` passes all
 twelve sides on substrate `none`, lane `none`, natural `arm64`, untranslated: 17 authored requirements resolve

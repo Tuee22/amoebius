@@ -33,7 +33,7 @@ The rule behind the budget calculus is owned by [`jit_budget_doctrine.md`](../do
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-3 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+🔄 Active — Phase 3 sealed on 2026-08-20, so this is the open contract. Inserted 2026-08-19 by the generative re-baseline as the second of the five calculi; it has no prior seal, and `tools/budget_calculus_gate.py` does not yet exist.
 
 ## Phase Summary
 

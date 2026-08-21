@@ -55,6 +55,8 @@ Runtime layers and their enforcement is deferred on purpose (see [`illegal_state
 
 **Case-family:** `capability-provision`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck`
+
 Application logic that writes `minio` or `vault` welds itself to one realization and loses portability across
 clusters that deploy the capability differently. amoebius's app surface offers a **capability** union —
 `ObjectStore`, `SecretStore`, `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge` — with no
@@ -71,6 +73,8 @@ residue: the illegal shape is unrepresentable, not merely rejected downstream.
 **Delivery-owner:** `Phase-27`
 
 **Case-family:** `messaging`
+
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`gadt-decode`
 
 Raw messaging lets a producer put any bytes on a topic — JSON, base64-in-JSON (infernix's retired path),
 protobuf, an untyped blob — so two services silently disagree on the body format and a consumer mis-reads or
@@ -101,6 +105,8 @@ malformed received body returns `Left`, while two live namespaces round-trip typ
 **Delivery-owner:** `Phase-39`
 
 **Case-family:** `ui`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
 
 Arbitrary JavaScript, raw HTML, a fetch URL, a provider SDK, or a serialized provider handle turns an
 otherwise typed SPA into a second authority surface. It can skip current server authorization, leak a

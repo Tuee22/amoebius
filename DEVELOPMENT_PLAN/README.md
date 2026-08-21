@@ -148,6 +148,41 @@ condition** ([development_plan_standards.md §S](development_plan_standards.md#s
 
 ## Reopened numeric sequence
 
+### The 2026-08-20 covering closure, and Phase 0's reseal
+
+The re-baseline left three obligations on Phase 0's gate, and two of them were checks the day it landed. The
+third — [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 16, the illegal-state
+covering — was red on eleven cells for which the router said plainly that no honest reason could be written,
+because the instrument could not tell an empty cell from an unpaired one. The argument is
+[Sprint 0.16](phase_00_documentation_suite.md#sprint-016-the-covering-as-a-measurement-)'s; what follows is
+what changed in the plan.
+
+**The estimate is replaced by a measurement.** Every catalogue entry now pairs each foreclosure it makes to the
+one locus that observes it, on an authored `Cells:` line. Occupancy falls from 143 credited cells to the 64
+the entries assert, which is the size of the error the product had been hiding. A second authored input, the
+admissibility relation between the two axes, forecloses 154 more cells for a structural reason — a locus
+downstream of the check that forecloses a state never sees that state, and a locus upstream of an effect
+cannot settle a residue about it — leaving 34 empty admissible cells, each with a reason, and none owing one.
+
+**Six defects surfaced that every green gate had missed**, all of them concealed by the product. Five entries
+claimed a foreclosure layer at no locus at all, which is a claim with nothing behind it; one image state was
+recorded as having no runtime residue where its entry plainly claims one; and one justification row asserted
+that no `image` state is ever observed live, which was false and is deleted. Twenty-eight further entries
+stated the layer of one part of their claim and left the rest unnamed.
+
+**Four checks added**, because the review's finding is again that all of this coexisted with a clean lint:
+`c1` (an entry that pairs nothing, or pairs a layer its own text never states), `c2` (a pairing the relation
+forbids), `c3` (an admissible empty cell with no reason), and `c4` (six seeded defects that must each turn the
+covering red). The foreclosure layer also becomes a column of `locus_registry.tsv`, so a Phase-27 fixture
+cannot pin a cell the catalog never claimed.
+
+**Consequence for order of work.** Phases 0, 1 and 2 are ✅ Done and Phase 3 is the open contract. The
+remaining phases stay Blocked in numeric order, each pending its predecessor's revalidation. Phases 1 and 2
+needed no amendment to reopen and close: the five calculi the re-baseline named sit at phases 3–7, above both,
+so what each owed was a pass of the current gate against a current snapshot rather than a new deliverable.
+Phase 3 is different in kind — it is one of the inserted calculi, has no prior seal, and its gate script does
+not yet exist.
+
 ### The 2026-08-20 conformance review
 
 The re-baseline moved every ordinal and added eight documents, but most of the prose describing the world it
@@ -376,10 +411,24 @@ so a spec naming none needs no Vault — which is what keeps Phases 36–39 free
 
 ## Current implementation audit
 
-**Current conclusion — 2026-08-19:** **No phase is Policy-conformant.**
+**Current conclusion — 2026-08-20:** **Phases 0, 1, 2 and 3 are Policy-conformant; no other phase is.**
 [§C](development_plan_standards.md#c-status-vocabulary) reserves that term for a pass of the *current* gate,
-and the generative re-baseline changed what every current gate covers. What the rows below record is an
-**observed footprint**: a run that happened, against a contract that has since been superseded.
+and the generative re-baseline changed what every current gate covers. Phase 0's thirteen-sided run is the
+first to pass the re-baselined contract, including the two obligations that landed with it, and Phase 1's
+twelve-sided run and Phase 2's fourteen-sided run followed on their reopened contracts the same day, and
+Phase 3 — the first of the five inserted calculi — was built and sealed the same day against a contract that
+had never had an implementation. Those four rows below are current results; every other row is an **observed
+footprint**: a run that happened, against a contract that has since been superseded.
+
+**An attestation reference names the run, not the tree that records it.** Writing a digest into this tracker
+changes the corpus the digest was taken over, so no seal can cite a hash of the tree containing its own
+citation. Each row cites the run that passed and the record follows it; a later run differs from the cited one
+by exactly that record, which is a fact about self-reference rather than a gap in the evidence. The same
+argument bounds how far a *sweep* can converge: sealing phase N changes the tree phase N−1 sealed against, so
+four current seals sit on three snapshots that differ only by each other's records. On 2026-08-20 those are
+`sha256:103e06da436331c0…` for Phases 0 and 1, `sha256:e250a0b26286a422…` for Phase 2, and
+`sha256:de58afbe72cf6b7e…` for Phase 3 — each the tree as it stood when that gate ran, and each re-runnable
+green on demand.
 
 *The paragraphs that follow describe the pre-re-baseline conclusion and are retained as rationale.*
 
@@ -412,9 +461,10 @@ policy-conformant. Exact counts, paths, historical findings, and actionable mism
 
 | Phase(s) | Progress | Observed state | Required next boundary |
 |---|---|---|---|
-| 0 | **Observed footprint** | 2026-08-17, resealed against the tree Phase 2 moved: the eleven-sided gate passes on natural `arm64`, untranslated, with 17 clean artifact rules, 49 seeded documentation negatives red at their own checks, and 37 surfaces joined to 77 implemented checks. The deferral total is 314, down from 876, because Phase 2 deleted every `r13` and `r15` row rather than re-owning it. The reseal also resolved the pre-implementation manifest pins and eleven contracts' artifact paths, which had named a pre-amendment ordinal since the ordering re-baseline | None. The next boundary belongs to Phase 26 |
-| 1 | **Observed footprint** | 2026-08-17, resealed against the tree Phase 2 moved: the twelve-sided gate passes on natural `arm64`, untranslated. All 17 authored requirements resolve with none expected on the host, two independent resolutions admit the same 260 packages, the same graph resolves from the 1,965-file source snapshot alone, the representative set builds from an empty store, every probe matches its authored expectation, both mutants redden — the `drop-allow-newer` project regained the two sibling `source-repository-package` entries the merged package now needs, so it reddens at the seeded `proto`/`base` conflict rather than at an unknown package — and 40 surfaces join to 62 enumerated items | None. The next boundary belongs to Phase 26 |
-| 2 | **Observed footprint** | 2026-08-17: the fourteen-sided gate passes on substrate `none`, lane `none`, natural `arm64`, untranslated. `test/`'s second level is exactly the seven role nouns over 1,084 files; fourteen package declarations are one, and `cabal build all --dry-run` and `cabal test all --dry-run` resolve against it; 468 authored paths, 216 build flags, and 43 `main-is` values carry a capability name rather than a phase ordinal; one mutant registry covers all 411 mutations, 99 of which no file named before; rules `r13` and `r15` report zero findings and the allowlist carries no row for either; all six committed mutants redden their own check and no other; 27 surfaces join to 27 enumerated items. The deferral total falls from 876 to 314. **Reopened by an observation on 2026-08-19**: `questions.txt` is tracked outside the section 2 target tree, so `target-tree-clean` reports one `r13` finding and the gate exits 1 | Untrack `questions.txt`; every other side is green |
+| 0 | **Policy-conformant** | 2026-08-20, resealed against the re-baseline's added obligations: the thirteen-sided gate passes on natural `arm64`, untranslated, with 50 seeded documentation negatives red at their own checks, 49 surfaces joined to 90 implemented checks, 17 clean artifact rules, and a covering that resolves all 252 cells with none owing a reason. The reseal replaced the covering's product-credited occupancy with the pairing each catalogue entry now authors, which found six claims the estimate had concealed, and moved `phase_contract_lint`'s scratch tree inside the checkout. The deferral total is unchanged at 314. **Superseded observation —** 2026-08-17, resealed against the tree Phase 2 moved: the eleven-sided gate passes on natural `arm64`, untranslated, with 17 clean artifact rules, 49 seeded documentation negatives red at their own checks, and 37 surfaces joined to 77 implemented checks. The deferral total is 314, down from 876, because Phase 2 deleted every `r13` and `r15` row rather than re-owning it. The reseal also resolved the pre-implementation manifest pins and eleven contracts' artifact paths, which had named a pre-amendment ordinal since the ordering re-baseline | None. The next boundary belongs to Phase 26 |
+| 1 | **Policy-conformant** | 2026-08-20, resealed on the reopened contract: the twelve-sided gate passes on natural `arm64`, untranslated. The floor resolves with nothing expected on the host, two independent resolutions admit the same 260 packages, the same graph resolves from the 2,055-file source snapshot alone, the representative set builds into an empty store, all five probes match their authored expectations, both mutants redden, and 40 surfaces join to 62 enumerated items. The re-baseline asked this phase for revalidation rather than a deliverable: the five calculi it named sit at phases 3–7, above this one. **Superseded observation —** 2026-08-17, resealed against the tree Phase 2 moved: the twelve-sided gate passes on natural `arm64`, untranslated. All 17 authored requirements resolve with none expected on the host, two independent resolutions admit the same 260 packages, the same graph resolves from the 1,965-file source snapshot alone, the representative set builds from an empty store, every probe matches its authored expectation, both mutants redden — the `drop-allow-newer` project regained the two sibling `source-repository-package` entries the merged package now needs, so it reddens at the seeded `proto`/`base` conflict rather than at an unknown package — and 40 surfaces join to 62 enumerated items | None. The next boundary belongs to Phase 26 |
+| 2 | **Policy-conformant** | 2026-08-20, resealed after the reopening observation closed: the fourteen-sided gate passes on natural `arm64`, untranslated, with `r13` and `r15` at zero findings and no allowlist row for either, all seven committed mutants red at their own check, and 29 surfaces joined to 29 enumerated items. `questions.txt` is no longer tracked, which is what `target-tree-clean` was reporting. The gate's mutant banner said six while seven ran and is now read from the registry. **Superseded observation —** 2026-08-17: the fourteen-sided gate passes on substrate `none`, lane `none`, natural `arm64`, untranslated. `test/`'s second level is exactly the seven role nouns over 1,084 files; fourteen package declarations are one, and `cabal build all --dry-run` and `cabal test all --dry-run` resolve against it; 468 authored paths, 216 build flags, and 43 `main-is` values carry a capability name rather than a phase ordinal; one mutant registry covers all 411 mutations, 99 of which no file named before; rules `r13` and `r15` report zero findings and the allowlist carries no row for either; all six committed mutants redden their own check and no other; 27 surfaces join to 27 enumerated items. The deferral total falls from 876 to 314. **Reopened by an observation on 2026-08-19**: `questions.txt` is tracked outside the section 2 target tree, so `target-tree-clean` reports one `r13` finding and the gate exits 1 | Untrack `questions.txt`; every other side is green |
+| 3 | **Policy-conformant** | 2026-08-20, built from nothing: the fourteen-sided gate passes on natural `arm64`, untranslated. The authored address oracle names 24 cells over six targets and four inputs and the fold is checked as a biconditional in both directions; the four calculus modules carry no ambient read and no partial token; the suite reaches its acceptance token with eleven checks green; two independently seeded processes render identical bytes; the region escape has no type while its legal twin compiles; and all three seeded mutants redden their own locus and no other. The run found two divergences it did not introduce, both ledgered: a library sharing `hs-source-dirs: src` with a sibling it depends on does not build, and the content address now has two renderings | None. The next boundary belongs to Phase 4 |
 | 8 | **Observed footprint** | Historical, refreshed 2026-08-15: The complete twelve-sided gate passes: all owner joins/swaps, the independent flow matrix, three compile loci, six coverage classes, the owner-equality mutant, all ten metrics, and nine constructor-privacy checks pass; 40 surfaces join to 47 enumerated items; generated output, test scratch, Cabal state, and host state remain contained. None of it records the architecture it proved, so clause 15 leaves the result UNVERIFIED for every architecture | Rerun the amended gate, recording the substrate, lane, and natural architecture |
 | 9 | **Observed footprint** | 2026-08-17: the eleven-sided gate passes on natural `arm64`, untranslated. Every authored oracle holds its declared shape, all nineteen mutants redden at their own loci, every result is derived from an observation, and 25 surfaces join to 25 run-time items. The rerun found Phase 2's mutant registry had dropped 101 rows whose mutation the owning gate materializes from its own code rather than from a file | None. The next boundary belongs to Phase 11 |
 | 11 | **Observed footprint** | 2026-08-17: the ten-sided gate passes on natural `arm64`, untranslated. The JVM and TLC resolve from authored requirements and TLC identifies itself from a live banner probe; all 31 authored metrics match, every model-safety, spec-weakening, renderer-golden, and renderer-differential mutant is caught, 608 emitted `.tla`/`.cfg` files stay beneath `.build/**` and outside the 1,965-file source snapshot, 14 surfaces join to 39 run-time items, and the outside-host inventory is unchanged | None. The next boundary belongs to Phase 51 |
@@ -477,11 +527,11 @@ inherits the universal postcondition above.
 
 | Phase | Name | Substrate | Lane | Register | Status | Validation contract |
 |---|---|---|---|---|---|---|
-| 0 | Documentation suite (whole DSL) | none | `none` | — | 🔄 Active — reopened 2026-08-19 by the generative re-baseline; the suite is being re-authored against it | [phase_0](phase_00_documentation_suite.md) |
-| 1 | Toolchain spike | none | `none` | 1 | ⏸️ Blocked pending Phase-0 revalidation | [phase_1](phase_01_toolchain_spike.md) |
-| 2 | Repository layout conformance and de-phased naming | none | `none` | 1 | ⏸️ Blocked pending Phase-1 revalidation | [phase_2](phase_02_repository_layout_conformance.md) |
-| 3 | The artifact calculus | none | `none` | 1 | ⏸️ Blocked pending Phase-2 revalidation | [phase_3](phase_03_artifact_calculus.md) |
-| 4 | The budget calculus | none | `none` | 1 | ⏸️ Blocked pending Phase-3 revalidation | [phase_4](phase_04_budget_calculus.md) |
+| 0 | Documentation suite (whole DSL) | none | `none` | — | ✅ Done — resealed 2026-08-20 against the re-baseline's three added obligations; thirteen sides green at attestation `sha256:a2bdd9d5704eee3…`, which names that run rather than the tree that afterwards records it | [phase_0](phase_00_documentation_suite.md) |
+| 1 | Toolchain spike | none | `none` | 1 | ✅ Done — resealed 2026-08-20; twelve sides green at attestation `sha256:f83dc51468ad187…` | [phase_1](phase_01_toolchain_spike.md) |
+| 2 | Repository layout conformance and de-phased naming | none | `none` | 1 | ✅ Done — resealed 2026-08-20; fourteen sides green at attestation `sha256:18666fe07396d8c…` | [phase_2](phase_02_repository_layout_conformance.md) |
+| 3 | The artifact calculus | none | `none` | 1 | ✅ Done — built and sealed 2026-08-20; fourteen sides green at attestation `sha256:520eb5ce22f97fb…` | [phase_3](phase_03_artifact_calculus.md) |
+| 4 | The budget calculus | none | `none` | 1 | 🔄 Active — Phase 3 sealed 2026-08-20, so this contract is the open one | [phase_4](phase_04_budget_calculus.md) |
 | 5 | The lift calculus | none | `none` | 1 | ⏸️ Blocked pending Phase-4 revalidation | [phase_5](phase_05_lift_calculus.md) |
 | 6 | The workflow calculus | none | `none` | 1 | ⏸️ Blocked pending Phase-5 revalidation | [phase_6](phase_06_workflow_calculus.md) |
 | 7 | The evidence calculus | none | `none` | 1 | ⏸️ Blocked pending Phase-6 revalidation | [phase_7](phase_07_evidence_calculus.md) |

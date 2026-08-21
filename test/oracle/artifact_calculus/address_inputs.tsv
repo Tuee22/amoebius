@@ -1,0 +1,40 @@
+# The independent oracle for the Phase-3 address.
+#
+# Authored from `documents/engineering/jit_artifact_doctrine.md` section 4, which fixes
+# what the digest is taken over: "the target, the recipe's own identity, the declaration,
+# and the rendering". It is written from that sentence and not from the renderer, so it
+# stays red when the renderer is wrong — which is the whole job of an oracle
+# (`jit_artifact_doctrine.md` section 7).
+#
+# The gate reads it as a biconditional rather than a list. For each target it perturbs
+# each named input in turn and requires the address to change, and it requires that the
+# set of perturbations that change the address is exactly this set — a fold that ignores
+# a named input fails the first half, and one that folds something unnamed fails the
+# second. That is why `rendered` has a row: dropping it from the digest is the seeded
+# mutant, and without this row nothing would notice.
+#
+# target<TAB>input<TAB>why the doctrine folds it
+dhall-schema	target	A consumer expecting one kind cannot be handed another, so the kind is part of the name
+dhall-schema	recipe-identity	A recipe change and an input change are indistinguishable to a consumer, and both must be
+dhall-schema	declaration	The artifact is a rendering of this declaration and of no other
+dhall-schema	rendered	Two runs producing different bytes must produce different addresses
+container-recipe	target	A consumer expecting one kind cannot be handed another, so the kind is part of the name
+container-recipe	recipe-identity	A recipe change and an input change are indistinguishable to a consumer, and both must be
+container-recipe	declaration	The artifact is a rendering of this declaration and of no other
+container-recipe	rendered	Two runs producing different bytes must produce different addresses
+object-manifest	target	A consumer expecting one kind cannot be handed another, so the kind is part of the name
+object-manifest	recipe-identity	A recipe change and an input change are indistinguishable to a consumer, and both must be
+object-manifest	declaration	The artifact is a rendering of this declaration and of no other
+object-manifest	rendered	Two runs producing different bytes must produce different addresses
+sql-schema	target	A consumer expecting one kind cannot be handed another, so the kind is part of the name
+sql-schema	recipe-identity	A recipe change and an input change are indistinguishable to a consumer, and both must be
+sql-schema	declaration	The artifact is a rendering of this declaration and of no other
+sql-schema	rendered	Two runs producing different bytes must produce different addresses
+purescript-contract	target	A consumer expecting one kind cannot be handed another, so the kind is part of the name
+purescript-contract	recipe-identity	A recipe change and an input change are indistinguishable to a consumer, and both must be
+purescript-contract	declaration	The artifact is a rendering of this declaration and of no other
+purescript-contract	rendered	Two runs producing different bytes must produce different addresses
+build-mutant	target	A consumer expecting one kind cannot be handed another, so the kind is part of the name
+build-mutant	recipe-identity	A recipe change and an input change are indistinguishable to a consumer, and both must be
+build-mutant	declaration	The artifact is a rendering of this declaration and of no other
+build-mutant	rendered	Two runs producing different bytes must produce different addresses

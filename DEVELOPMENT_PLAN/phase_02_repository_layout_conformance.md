@@ -38,7 +38,31 @@ Register 1: a pure tree-and-resolution gate, no host and no cluster.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-1 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — resealed 2026-08-20. `python3 tools/repository_conformance_gate.py` passes all fourteen sides on
+substrate `none`, lane `none`, natural `arm64`, untranslated: the tree collides with nothing, the relocation map
+admits every destination, no reference dangles, every source directory resolves, rules `r13` and `r15` report
+zero findings with no allowlist row for either, all seven committed mutants redden their own check and no
+other, and 29 surfaces join completely to 29 enumerated items. Attestation
+`sha256:18666fe07396d8c354a266996849e9a64309d979f0a43bc96cdb74b70824f5f5` binds to a 2,066-file source snapshot; as
+everywhere here, the reference names the run and this record follows it.
+
+**The 2026-08-19 reopening observation is closed.** `questions.txt` was tracked outside the
+[§2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure) target tree, which
+made `target-tree-clean` report one `r13` finding; it is no longer tracked, and that side is green.
+
+**A count in this phase's own gate was stale.** The mutant banner said six while seven ran — the registry had
+grown by `m7-empty-directory` and the banner had not — so it is now read from the registry rather than written
+beside it, and the orientation diagram is re-derived to match. A number nobody re-derives drifts the first time
+the set behind it changes, which is precisely the failure this phase exists to make impossible for paths.
+
+**What the reopening asked of this phase was revalidation, not a new deliverable**, for the same reason it was
+for Phase 1: the five calculi the re-baseline named are phases 3 through 7, above this one, and
+[§E](development_plan_phase_model.md#e-one-canonical-phase-model) forbids a contract from consuming them. This
+gate amends no illegal-state catalogue entry and delivers no extension, so the re-baseline's two added
+obligations reach it only as the explicit not-applicable its contract records.
+
+**Reopened 2026-08-19 by the generative re-baseline**, which invalidated every prior seal below as a current
+result; each stands as history.
 
 **Corrected again 2026-08-18: a root can be retired and still be there.** Deleting the three CPP `#include`
 shims and the eighteen folded `mutants.tsv` files left six directory skeletons behind — `jitml/`, `jitml-ui/`,
@@ -210,7 +234,7 @@ flowchart LR
   gate["tools/repository_conformance_gate.py"]
   seal["phase seal + attestation"]
   refusal["refusal, named at one check"]
-  mut["six committed mutants"]
+  mut["seven committed mutants"]
   doc -->|"parsed by"| oracle
   oracle -->|"admits or refuses a path"| gate
   map -->|"the plan the tree is compared against"| gate

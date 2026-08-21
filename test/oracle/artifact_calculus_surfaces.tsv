@@ -1,0 +1,36 @@
+# Authored expectation for the Phase-3 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. The join is two-way and total, so a check that
+# exists but is claimed by no surface fails the gate, and a surface naming an id nothing
+# enumerates fails it too.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   metrics   the metric keys in .build/calculus/artifact/phase-results.tsv
+#   checks    the check ids tools/artifact_calculus_gate.py implements
+#
+# The three mutant loci are deliberately three different instruments — an in-process
+# check, a two-process comparison, and a typecheck — so each has its own surface rather
+# than one surface for "the mutants passed".
+#
+# The last two surfaces are the ones this register cannot reach: budget admission is the
+# next calculus's, and nothing here observes a running system. Both carry a metric whose
+# recorded value is the literal UNVERIFIED.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+closed-target-set	metrics	suite-checks
+pure-recipe	metrics	calculus-purity
+address-folds-declared-inputs	metrics	address-inputs
+render-determinism	metrics	seeded-renders
+handle-cannot-escape	metrics	compile-fail-pairs
+artifact-calculus-mutants	metrics	mutants
+artifact-calculus-acceptance	metrics	acceptance-token
+budget-admission	metrics	budget-admission
+runtime-fidelity	metrics	runtime
+address-oracle-shape	checks	address-oracle-complete
+calculus-purity-scan	checks	calculus-is-pure
+suite-acceptance	checks	suite-acceptance-token
+seeded-render-agreement	checks	renders-agree-across-seeds
+region-escape-typecheck	checks	handle-escape-rejected
+mutant-locus-separation	checks	mutants-red-at-own-locus
+generated-output-discipline	checks	emitted-results-untracked

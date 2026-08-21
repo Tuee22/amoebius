@@ -304,6 +304,7 @@ patterns in §3.2. A generator requiring a new output class must amend this inve
 ├── tla/**/*.cfg                          emitted TLC configurations
 ├── manifests/**/*.{yaml,yml,json}        rendered Kubernetes and provider objects
 ├── dhall/**/*.dhall                      reflected or projected Dhall
+├── calculus/**                           core-algebra battery observations, one directory per calculus
 ├── dsl/**                                decoder/fold/bind battery observations and locus ledgers
 ├── ui/**                                 client/server/offline plans and compiled browser output
 │   ├── client-plans/**

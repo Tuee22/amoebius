@@ -79,6 +79,8 @@ flowchart LR
 
 **Case-family:** `security`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 A hand-written Gateway/HTTPRoute can listen on a port nothing serves, terminate TLS with a cert for the
 wrong host, or route to a backend that doesn't exist. In amoebius the gateway is not free-form: routes are
 emitted from the same value that declares the service, so a route to a non-existent backend, or a listener
@@ -86,7 +88,7 @@ with no matching service, cannot be written. **Owner:**
 [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (Envoy + Gateway API, the single wild-ingress path). **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (GADT-indexed: a route is constructed *from* a live service handle)
 + [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) totality (the cert/host name is a function of the declared identity, not a free string).
 
-**Layer:** type-foreclosed at the Haskell IR — a route to a non-existent backend has no constructor; runtime-checked residue — that the live gateway actually routes.
+**Layer:** type-foreclosed at the Haskell IR — a route to a non-existent backend has no constructor; runtime-checked residue — that the live gateway actually routes. The emitted listeners and backends the oracle compares are `decode-foreclosed`.
 **Validation-locus:** `gadt-decode` (a route is constructed only *from* a live service handle, and the
 cert/host name is a total function of the declared identity — a route to a non-existent backend or a listener
 with no matching service has no inhabitant) + `rendered-artifact-oracle` (the emitted Gateway/HTTPRoute
@@ -99,13 +101,15 @@ and TLS actually terminates).
 
 **Case-family:** `security`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 Route53 (or any DNS) records are strings; nothing prevents pointing `app.example.com` at an address the
 cluster never owned. amoebius never lets the operator *type* the target IP: a DNS binding is a **total function of the allocated LoadBalancer address** — a name binds to a *service handle*, and the address is
 computed from the realized LB, not supplied. A record pointing at an unowned address therefore has no
 representation. **Owner:** [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md) (route53 + zerossl) and
 [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). **Technique:** [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) (content-address totality, applied to the name→address map).
 
-**Layer:** type-foreclosed at the Haskell IR — a name binds only to an allocated address, so an unowned target has no constructor; runtime-checked residue — that DNS actually resolves to it.
+**Layer:** type-foreclosed at the Haskell IR — a name binds only to an allocated address, so an unowned target has no constructor; runtime-checked residue — that DNS actually resolves to it. The emitted record targeting the allocated address is `decode-foreclosed`.
 **Validation-locus:** `gadt-decode` (the DNS binding is a total function of a service handle — there is no
 free string in which to type an unowned target IP) + `rendered-artifact-oracle` (the emitted DNS record targets
 the allocated LB address) + `live-effect` residue (the realized LoadBalancer address is what is actually bound
@@ -117,6 +121,8 @@ at reconcile — the enforcement half the type cannot reach).
 
 **Case-family:** `security`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 NetworkPolicies are deny-by-omission: a forgotten egress rule silently severs a service from
 its database, with no error anywhere. amoebius does not let operators hand-author allow/deny rules at all.
 Connectivity is **derived** from the declared dependency graph — if service A declares it consumes service
@@ -125,7 +131,7 @@ policy blocks. The "service stranded from a dependency it declared" state is not
 human never writes the policy. **Owner:**
 [`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md). **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the dependency graph is the single owner of connectivity) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a consumer handle only exists once the dependency edge does).
 
-**Layer:** type-foreclosed at the Haskell IR — NetworkPolicies are derived from the declared dependency graph and never hand-authored, so a severing policy has no constructor; runtime-checked residue — that the live CNI actually admits the traffic.
+**Layer:** type-foreclosed at the Haskell IR — NetworkPolicies are derived from the declared dependency graph and never hand-authored, so a severing policy has no constructor; runtime-checked residue — that the live CNI actually admits the traffic. Exact edge-set equality over the emitted policies is `decode-foreclosed`.
 **Validation-locus:** `rendered-artifact-oracle` (the derived NetworkPolicy is checked in the emitted objects —
 a declared dependency is never a connection the policy blocks; Phase 33 validates exact edge-set equality
 against its independent test-side oracle) + `gadt-decode` (the consumer handle exists
@@ -140,6 +146,8 @@ the policy-swap mutant failed the independently pinned set oracle.
 
 **Case-family:** `security`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 The highest-severity entry: a chart that opens its own NodePort to the wild, or an Ingress that skips Keycloak, so
 an unauthenticated path exists that nobody meant to ship. amoebius enforces **Keycloak owns all wild ingress** structurally: an app cannot publish its own wild ingress, because the
 only constructor that yields a wild-reachable endpoint routes through the Keycloak-owned edge. The sole
@@ -150,7 +158,7 @@ host-local peer into a wild endpoint, and none that exposes a workload to the wi
 **Owner:** [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (capability: only the edge holds the "expose-to-wild" capability) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct indices that do not interconvert).
 
-**Layer:** type-foreclosed at the Haskell IR — only the Keycloak edge holds the expose-to-wild capability and endpoint kinds do not interconvert; runtime-checked residue — that the running cluster in fact exposes no unauthenticated path.
+**Layer:** type-foreclosed at the Haskell IR — only the Keycloak edge holds the expose-to-wild capability and endpoint kinds do not interconvert; runtime-checked residue — that the running cluster in fact exposes no unauthenticated path. The no-backdoor golden over the emitted objects is `decode-foreclosed`.
 **Validation-locus:** `dhall-typecheck` (the application schema exposes no authorable wild-ingress or raw
 NodePort arm) + `rendered-artifact-oracle` (the no-backdoor-ingress golden on the emitted objects — no wild
 NodePort or Keycloak-skipping Ingress in the rendered manifest, validated by Phase 33 in Register 1) + `gadt-decode` (only the edge holds
@@ -165,6 +173,8 @@ only allowed `HostLocalPeer` NodePort succeeded on node loopback while an actual
 **Delivery-owner:** `Phase-27`
 
 **Case-family:** `security`
+
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 Two locked invariants ride together here. **(a) Secrets are names only** — a literal secret value in Dhall
 is unrepresentable; the spec carries a `SecretRef` (a name), and the parent injects the actual material
@@ -186,6 +196,8 @@ the child's Vault at runtime).
 **Delivery-owner:** `Phase-61`
 
 **Case-family:** `security`
+
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 The `InForceSpec` is sensitive even when it holds no secret *values* — it is the cluster's whole topology.
 So the spec has **no plaintext-at-rest representation**: a cluster never holds its own spec as a plaintext
@@ -209,6 +221,8 @@ ConfigMap or etcd — this row's enforcement is explicitly the runtime half).
 
 **Case-family:** `security`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 A child cluster's spec is, by construction, a projection of **exactly its own subtree** (its own config
 including its children's). There is no field in a `ChildInForceSpec` in which a sibling or ancestor-only branch can
 appear, so a parent cannot hand a child anything wider than its subtree, and a child cannot name a sibling's
@@ -229,6 +243,8 @@ shape).
 **Delivery-owner:** `Phase-25`
 
 **Case-family:** `security`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`provision-seal` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
 
 In raw k8s a Deployment may omit resource requests/limits — a noisy-neighbour or OOM-the-node risk — and run
 as root with a writable root filesystem and full Linux capabilities. amoebius **generates** every workload
@@ -266,6 +282,8 @@ ceilings).
 
 **Case-family:** `security`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 The new `Gateway` networking arm (`SecureGatewayReach c`, the authenticated secure-gateway wire a non-member host
 worker uses to reach the data plane + Vault) must not become a back-door into the wild — "Keycloak owns all wild
 ingress" ([§3.7](#37-accidental-insecure--backdoor-ingress)) must survive it. `SecureGatewayReach` is a **distinct `network_fabric` endpoint index** alongside `FabricPeer`/`ControlPlanePeer`/`HostLocalPeer`/`WildIngress`, with
@@ -275,7 +293,7 @@ The wild-ingress gateway (Keycloak/Envoy) stays wild-only. **Owner:**
 [`network_fabric_doctrine.md`](../engineering/network_fabric_doctrine.md) (the endpoint indices) +
 [`host_cluster_comms_doctrine.md`](../engineering/host_cluster_comms_doctrine.md) (channel 2 generalized to localhost / authenticated fabric / authenticated secure gateway). **Technique:**
 [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (only the wild edge holds the `ExposeToWild` capability — a `SecureGatewayReach` value cannot produce a wild endpoint) +
-[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct indices that do not interconvert). **Layer:** type-foreclosed uninhabitable. *(The K1 `Gateway`-arm authentication constructor itself is design intent this round names but defers — the witness type `FabricMember c` via `fabricMemberViaGateway` is named, the constructor not yet inhabited.)*
+[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct indices that do not interconvert). **Layer:** type-foreclosed uninhabitable. *(The K1 `Gateway`-arm authentication constructor itself is design intent this round names but defers — the witness type `FabricMember c` via `fabricMemberViaGateway` is named, the constructor not yet inhabited.)* The emitted objects carrying no gateway-derived wild endpoint is `decode-foreclosed`, and the authenticated wire staying non-wild at run time is `runtime-checked`.
 
 **Validation-locus:** `gadt-decode` (only the wild edge holds the `ExposeToWild` capability, and
 `SecureGatewayReach` is a distinct endpoint index with no constructor into `WildIngress` — the collapse has no
@@ -288,6 +306,8 @@ runtime).
 **Delivery-owner:** `Phase-61`
 
 **Case-family:** `security`
+
+**Cells:** `type-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
 
 Raw k8s hands anyone with a kubeconfig a mutating control surface — a new manifest, a config change — with no
 proof of authority beyond the cert, and no ordering against secret readiness. amoebius routes **all post-bootstrap admin through the control-plane daemon's REST API** (the control-plane daemon being a Deployment `replicas=1` with no
@@ -321,6 +341,8 @@ not survive the host-daemon→control-plane daemon handoff) + `live-effect` resi
 **Delivery-owner:** `Phase-31`
 
 **Case-family:** `capability-provision`
+
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
 
 Raw k8s (and Keycloak, Vault, Pulsar, and MinIO alongside it) lets an operator hand-write a `RoleBinding`,
 a realm-role grant, a Vault policy, a Pulsar ACL, or a bucket policy that grants one tenant reach into
@@ -378,6 +400,8 @@ residue, not a Phase-66 claim. Ledger `external-run-reference`.
 **Delivery-owner:** `Phase-38`
 
 **Case-family:** `ui`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
 
 A hidden or disabled control is presentation, never authorization. If the SPA can name a raw endpoint, if an
 action has no policy, or if its client-visible permission differs from the server handler's enforced permission,
@@ -440,6 +464,8 @@ Live Keycloak, edge exclusivity, provider policy, cluster deployment, and HA rem
 
 **Case-family:** `ui`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 Checking only that a resource identifier exists creates an insecure direct-object-reference path: two subjects
 inside one tenant can see one another's rows, or a subject can submit another tenant's identifier. Every request
 is decoded under `RequestContext tenant subject`, and a browser identifier resolves only to a private
@@ -496,6 +522,8 @@ provider-audit-log correspondence remain `UNVERIFIED`. Ledger
 
 **Case-family:** `ui`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 A page may read a correctly authorized value and still leak it through a broader response, log, topic, model
 prompt, cache, export, or downstream workflow. Every data source and sink therefore carries a
 `FlowLabel tenant audience integrity`; transforms preserve or restrict confidentiality and propagate the least
@@ -539,6 +567,8 @@ UNVERIFIED. See [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
 
 **Case-family:** `ui`
 
+**Cells:** `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 A compiled SPA plan becomes unsafe when authorization policy, tenant-role membership, handler schema, workflow
 contract, resource generation, or referenced model provenance changes while an old browser bundle or server
 cache continues to execute it. The paired `ClientPlan`/`UiServerPlan` projections of a sealed `BoundUiProgram`
@@ -563,7 +593,9 @@ immediately before effects; a mismatch is a fail-closed reload/conflict response
 
 **Layer:** `type-foreclosed` for re-tagging a sealed plan across generations; `decode-foreclosed` at plan sealing
 for incomplete or mismatched sources; currentness at request arrival is necessarily `runtime-checked`, because a
-type cannot prove that external policy or membership has not changed. **Validation-locus:** `provision-seal`
+type cannot prove that external policy or membership has not changed. **Validation-locus:** `gadt-decode`
+(a sealed plan carries its generation as an index, so no function re-tags one across generations) +
+`provision-seal`
 (complete-source digest and exact-key equality must hold before a plan exists) + `rendered-artifact-oracle` (the
 bundle and server projection carry the same non-authoritative plan identifier) + `live-effect` (the server
 compares against current authority immediately before execution and refuses an old plan/action without side

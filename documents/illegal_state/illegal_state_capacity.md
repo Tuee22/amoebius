@@ -79,6 +79,8 @@ flowchart LR
 
 **Case-family:** `topology`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
+
 In raw k8s a nodeSelector / affinity can match **no** node, *or* a taint no workload
 tolerates, *or* a toleration for a taint no node declares — the pod is admitted and then never schedules.
 amoebius constrains placement so that a workload's substrate/affinity requirement **and** its taint
@@ -98,7 +100,7 @@ and the two compose in `place`'s `podFits`: **substrate/affinity-capability exis
 the latter now reading accelerator fit through the wholesale-per-node owner ([§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim)),
 never a per-pod `gpu` axis. **Owner:**
 [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) (substrate/arch capabilities, the closed node-taint set + node inventory) and [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (the derived-toleration rule, parallel to derived NetworkPolicy). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (capability tags) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a derived toleration handle exists only once its taint edge does) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the node inventory is the single owner of "what substrates and taints exist"), the existence check itself being a [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) value-level fold. **Layer:**
-decode-foreclosed for the existence fold; the derived-toleration shape is type-foreclosed ([§3.22](#322-a-hand-authored-un-derived-toleration)).
+decode-foreclosed for the existence fold; the derived-toleration shape is type-foreclosed ([§3.22](#322-a-hand-authored-un-derived-toleration)). The scheduler landing the pod on the witnessed node is `runtime-checked`: an observation, never a fold.
 **Validation-locus:** `provision-seal` (the whole-deployment schedulability existence fold returns a
 `ProvisionError` before any `ProvisionedSpec` exists when no node satisfies affinity and tolerates every taint) +
 `dhall-typecheck` (the derived-toleration shape has no hand-author
@@ -110,6 +112,8 @@ witnessed node).
 **Delivery-owner:** `Phase-27`
 
 **Case-family:** `capacity`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`gadt-decode` · `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
 
 Raw k8s can admit a workload whose requests, declared limits, or physical peaks exceed the real target, a VM or host
 worker that overdraws its physical host, durable claims larger than their backing, or pod-ephemeral/cache
@@ -168,7 +172,7 @@ from [`platform_services_doctrine.md` §10](../engineering/platform_services_doc
 and durable backing/claim sizes from
 [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md). **Technique:**
 [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
-(capacity-accounting total fold). **Layer:** decode-foreclosed.
+(capacity-accounting total fold). **Layer:** decode-foreclosed. The controller-policy arms refused at authoring are `type-foreclosed` — an illegal rollout pair has no record to write — and staying inside the enforced boundaries at run time is `runtime-checked`.
 **Validation-locus:** `dhall-typecheck` (controller-specific closed policy records reject DaemonSet
 both-positive rollout fields, unsupported/nonzero StatefulSet partition arms, and a Job without terminal
 retention) + `gadt-decode` (the decoder-local zero-progress rolling smart constructor returns
@@ -186,6 +190,8 @@ finite-limit/physical-peak relation; the name does not assert synchronous epheme
 
 **Case-family:** `topology`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `type-foreclosed`×`gadt-decode` · `decode-foreclosed`×`rendered-artifact-oracle`
+
 A free-text toleration is how a pod "tolerates" a taint no node carries (or fails to tolerate the one it
 must). amoebius never lets an operator *write* a toleration: a `Toleration` handle has no exported
 constructor and is **projected** only from a declared node taint against the single node inventory — the same
@@ -193,7 +199,7 @@ derive-don't-author discipline as NetworkPolicy ([§3.6](./illegal_state_securit
 unrepresentable, and the schedulability existence fold ([§3.5](#35-undeployable-pods-taints-tolerations--affinity)) does the rest. **Owner:**
 [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) (the closed `NodeTaintKind` set + node inventory) +
 [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (the derivation rule). **Technique:**
-[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the node inventory is the single owner of what taints exist) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a `Toleration` handle exists only once its taint edge does). **Layer:** type-foreclosed uninhabitable.
+[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the node inventory is the single owner of what taints exist) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a `Toleration` handle exists only once its taint edge does). **Layer:** type-foreclosed uninhabitable. The derived toleration appearing correctly in the emitted pod spec is `decode-foreclosed`: a total predicate over rendered output, not an absent inhabitant.
 **Validation-locus:** `dhall-typecheck` (the Dhall workload record carries **no** hand-authorable toleration
 field at all — a toleration is not a spellable input but a projection from a declared node taint in the
 Haskell render layer, so a free-text toleration is unwritable at authoring) + `gadt-decode` (the
@@ -210,6 +216,8 @@ NetworkPolicy, [§3.6](./illegal_state_security.md#36-blocking-networkpolicy-ser
 **Delivery-owner:** `Phase-9`
 
 **Case-family:** `capacity`
+
+**Cells:** `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
 
 Raw k8s admits a workload whose demand fits a cluster *in aggregate* but whose individual pods cannot be packed
 onto individual nodes — for example, a 5-CPU pod on a cluster of 4-CPU nodes, or a pod whose memory or
@@ -253,6 +261,8 @@ the elastic set).
 
 **Case-family:** `accelerator`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`provision-seal` · `decode-foreclosed`×`rendered-artifact-oracle` · `runtime-checked`×`live-effect`
+
 Raw k8s extended-resource scheduling can distribute a node's integer devices among several pods, while
 vendor-specific sharing schemes can expose fractional-looking allocations, so ownership of a node's GPUs can
 become diffuse and contended. This round **reframes** a node's accelerators
@@ -286,6 +296,8 @@ runtime actually grant those devices only to the owner).
 
 **Case-family:** `capacity`
 
+**Cells:** `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
+
 A host-level accelerator worker (an Apple-Metal or Windows-CUDA native subprocess,
 [`substrate_doctrine.md` §5](../engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)) runs beside the Lima/WSL2 VM that backs the in-cluster
 node, both drawing on the same **physical host**; raw tooling accounts neither, so a host binary that
@@ -317,6 +329,8 @@ declares no physical-host `Capacity`) + `live-effect` (residue — that the host
 **Delivery-owner:** `Phase-29`
 
 **Case-family:** `accelerator`
+
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
 
 Accelerator memory is finite and a serving/training/JIT envelope — weights, KV cache, activations, optimizer
 state, batching/context headroom, and workspace — must fit it, but raw execution permits pointing an oversized
@@ -376,6 +390,8 @@ actually fits under real batch/context).
 
 **Case-family:** `capacity`
 
+**Cells:** `type-foreclosed`×`dhall-typecheck` · `decode-foreclosed`×`gadt-decode` · `runtime-checked`×`live-effect`
+
 Declared compute headroom is the one authorable over-reservation in the capacity model
 ([`resource_capacity_doctrine.md` §3](../engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)):
 a workload may reserve more of a node than it requires, provided the excess carries a closed
@@ -404,7 +420,7 @@ workload envelopes from
 **Technique:**
 [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (binding-by-construction: the pad and the ceiling it must respect are fields of one checked record).
-**Layer:** decode-foreclosed.
+**Layer:** decode-foreclosed. The absent reserved-total field is `type-foreclosed`, and the kubelet reserving exactly the padded request is `runtime-checked`.
 **Validation-locus:** `dhall-typecheck` (no schema field carries a reserved/padded total, and the headroom
 reason is required rather than defaultable, so an authored reservation has nowhere to be written) +
 `gadt-decode` (the smart constructor checks `requests + pad ≤ limits` per axis alongside the existing
@@ -416,6 +432,8 @@ reason is required rather than defaultable, so an authored reservation has nowhe
 **Delivery-owner:** `Phase-9`
 
 **Case-family:** `capacity`
+
+**Cells:** `decode-foreclosed`×`provision-seal` · `runtime-checked`×`live-effect`
 
 Declared compute headroom competes for the same node capacity as the requests it extends; there is no separate
 pool it is drawn from. A fold that admitted a workload set by summing only the required requests, while the
@@ -438,7 +456,7 @@ have no envelope and therefore no pad, and continue to contribute their observed
 **Owner:** [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md), consuming physical
 inventory from [`substrate_doctrine.md`](../engineering/substrate_doctrine.md). **Technique:**
 [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
-(capacity-accounting total fold over the reserved demand). **Layer:** decode-foreclosed.
+(capacity-accounting total fold over the reserved demand). **Layer:** decode-foreclosed. Re-folding the reservation ledger against re-observed residual capacity is `runtime-checked`.
 **Validation-locus:** `provision-seal` (the post-bind reservation fit sums effective reserved and returns
 `Left Overcommit` before a `ProvisionedSpec` exists, including the requests-fit/reserved-fails boundary) +
 `live-effect` (residue — each pre-Binding CAS re-folds the whole reservation ledger, pad included, against

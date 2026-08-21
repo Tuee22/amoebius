@@ -88,24 +88,45 @@ def covering_side():
     """Section S clause 16: the catalogue is a covering, and an empty cell owes a reason.
 
     The grid is generated here rather than committed, so widening an axis reports its own
-    new empty cells instead of waiting to be noticed. What stays authored is the entries
-    and the justifications — each is an independent expectation, and deriving either from
+    new empty cells instead of waiting to be noticed. What stays authored is each entry's
+    layer-to-locus pairing, the admissibility relation between the two axes, and the
+    justification rows — each is an independent expectation, and deriving any of them from
     the catalogue it measures would turn a test into a description.
+
+    A covering that reports zero unjustified cells says nothing on its own, so the side
+    also seeds each way the covering can be wrong into a scratch copy and requires it to
+    turn red there.
     """
     print("\ncovering side — every cell holds an entry or a reason it holds none\n")
     layers, loci, fams = covering_grid.axes()
-    occupied = covering_grid.occupancy()
     total = len(layers) * len(loci) * len(fams)
+    counts = covering_grid.census()
     bad = covering_grid.unjustified()
+    broken = covering_grid.entry_violations()
+    seeded = covering_grid.selftest()
     grid = covering_grid.emit()
     print(f"  grid    {os.path.relpath(grid, ROOT)}")
     print(f"  cells   {total} = {len(layers)} layers x {len(loci)} loci x {len(fams)} families")
-    print(f"  state   {len(occupied)} occupied, {total - len(occupied)} empty, {len(bad)} unjustified")
-    for cell in bad[:12]:
-        print(f"  FAIL    {cell[0]} x {cell[1]} x {cell[2]}")
-    if len(bad) > 12:
-        print(f"  FAIL    ... and {len(bad) - 12} more")
-    return not bad
+    print(f"  state   " + ", ".join(f"{v} {k.lower()}" for k, v in counts.items()))
+    entries = len(covering_grid.entries())
+    if broken:
+        for entry, message in broken[:12]:
+            print(f"  FAIL  c1/c2  {entry}: {message}")
+    else:
+        print(f"  ok    c1/c2  {entries} entries pair every foreclosure to an admissible locus")
+    if bad:
+        for cell in bad[:12]:
+            print(f"  FAIL  c3     {cell[0]} x {cell[1]} x {cell[2]}")
+        if len(bad) > 12:
+            print(f"  FAIL  c3     ... and {len(bad) - 12} more")
+    else:
+        print(f"  ok    c3     {counts['justified']} empty admissible cell(s) each carry a reason")
+    if seeded:
+        for message in seeded:
+            print(f"  FAIL  c4     {message}")
+    else:
+        print(f"  ok    c4     {len(covering_grid.MUTANTS)} seeded defects each turned it red")
+    return not (bad or broken or seeded)
 
 
 def run_id():
@@ -207,6 +228,7 @@ def surface_side():
         "artifact_policy": set(artifact_policy.RULES),
         "artifact_manifest_lint": set(artifact_manifest_lint.CHECKS),
         "phase_contract_lint": set(phase_contract_lint.CHECKS),
+        "covering_grid": set(covering_grid.CHECKS),
     }
 
     if not os.path.isfile(EXPECTATIONS):

@@ -213,8 +213,11 @@ output, so it stays red when the generator is wrong, which is the whole job
   content is all of those things and still wrong. That is the [§7](#7-goldens-become-oracles) oracle's job.
 - **It does not remove the bootstrap.** The exception list is small, and it is not empty, and the artifacts on
   it are exactly the ones with no generator to check them. They are reviewed the old way.
-- **It is not built.** No phase has yet delivered a target set, a recipe, an address, or a region. Every
-  statement above is a specification; status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+- **The calculus is built; the recipes are not.** Phase 3 delivered the target set, the recipe type, the
+  address and the region on 2026-08-20, with a corpus of six deliberately dull recipes that exists to exercise
+  them. The real renderings — the Dhall schema, the container recipe, the object set, the SQL schema, the
+  PureScript contract, the build mutant — belong to the phases that own those artifact classes, and none of
+  those is built. Status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 

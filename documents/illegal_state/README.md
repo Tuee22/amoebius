@@ -74,27 +74,61 @@ fixes. This router owns the declaration. The taxonomy is the product of three cl
   (its states are `security`), and `backup`, `image`, `ui` and `accelerator` are families with no slice of
   their own. A slice is a reading unit; a family is a subject.
 
-A **cell** is one triple. Every cell either holds at least one catalog entry or carries a one-line statement of
-why no illegal state lives there, and an unjustified empty cell is a defect. A justification may cover a whole
-row or column where the reason is structural rather than particular — a locus that a layer cannot reach names
-that once, not once per family. The grid itself is **generated** to `.build/docs/` from the three axes, so
-widening an axis reports its own new empty cells; the entries stay authored, because an entry is an independent
+A **cell** is one triple, and an entry declares the cells it occupies on its own **`Cells:`** line — one
+`` `layer`×`locus` `` pair per foreclosure the entry makes, so a reader and the generator see the same
+pairing. Every cell either holds at least one catalog entry, is inadmissible under the relation below, or
+carries a one-line statement of why no illegal state lives there; an unjustified empty cell is a defect. A
+justification may cover a whole row or column where the reason is structural rather than particular. The grid
+itself is **generated** to `.build/docs/` from the three axes, so widening an axis reports its own new empty
+cells; the entries, the relation, and the justifications stay authored, because each is an independent
 expectation.
+
+**Why the pairing is authored per entry.** It was not, until 2026-08-20. The generator credited an entry with
+the *product* of every layer its prose named and every locus its prose named, because the pairing lived in
+sentences no parser could split. Fifty-eight of the ninety-seven entries name more than one of each, so the
+grid reported 143 occupied cells where the entries assert 64 — occupancy was an upper bound, the unjustified
+count a floor, and eleven cells were left owing a reason nobody could honestly write, because each was
+*unknown* rather than empty. The `Cells:` line replaces that estimate with a measurement, and the eleven
+resolved into occupied, inadmissible, and three genuinely empty cells whose reasons are stated below.
+
+### Which locus can observe which layer
+
+The layer answers *what kind of impossibility is claimed*; the locus answers *where a fixture observes it*.
+They classify different questions, but their product is not inhabited: a locus **downstream** of the check
+that forecloses a state never sees that state, because the value did not survive to reach it, and a locus
+**upstream** of the effect a residue is about cannot settle it, because the effect has not happened yet. Seven
+of the eighteen pairs are inhabitable and the other eleven are empty for that reason rather than for want of
+an entry. [`../../tools/covering_grid.py`](../../tools/covering_grid.py) reads this table and reports those
+cells as `inadmissible`, instead of asking for fourteen identical sentences apiece.
+
+| layer | loci that can observe it | why not the others |
+|---|---|---|
+| `type-foreclosed` | `dhall-typecheck` · `gadt-decode` · `extension-astcheck` | An uninhabitable value has no constructor, so nothing after the authoring-time and link-time checks can observe it: the seal folds decoded values, the oracle reads rendered output, and the cluster runs an applied one. Where an entry appears to pair this layer with a later locus, it is pairing its *residue* — a different, weaker claim — with that locus, and its `Cells:` line says so. |
+| `decode-foreclosed` | `gadt-decode` · `provision-seal` · `rendered-artifact-oracle` | The three loci are the total pure checks that reject a **constructible** value before any effect. `dhall-typecheck` is excluded from the other side: a state the Dhall typechecker refuses is one the schema gives no inhabitant, which is type-foreclosure by definition. `live-effect` is excluded because a checked rejection happens before the effect exists. |
+| `runtime-checked` | `live-effect` | A runtime-checked residue is exactly what remains *after* every authoring-time, decode-time, seal-time, and render-time check has passed. Each of those runs before any effect exists to observe, so none of them can settle it. |
+
+The relation is a consequence of what the two axes mean, and it holds one honest surprise: the layer is a
+**function of the locus** everywhere except `gadt-decode`, which admits both foreclosure layers because Dhall
+has no opaque types and the residual teeth of a type-foreclosure land at the Haskell decoder
+([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
+So the layer axis carries one bit of information beyond the locus axis, at one locus, and that bit is what
+each entry's `Cells:` line authors.
 
 ### The justified empty cells
 
-In these rows `*` reads as "every member of that axis". The generated grid at `.build/docs/covering.tsv`
-resolves each cell against them.
+In these rows `*` reads as "every member of that axis". They apply only to **admissible** cells: the eleven
+inadmissible pairs are already foreclosed by the relation above and need no row. The generated grid at
+`.build/docs/covering.tsv` resolves each cell against occupancy, then the relation, then this table.
 
 | cell | why no illegal state lives there |
 |---|---|
 | `*` × `extension-astcheck` × `*` | The extension AST checker judges linked extension **source**, not a decoded spec value. Only a family whose illegal states are reachable from linked source can occupy this locus, which today is `lifecycle` alone ([§3.78](./illegal_state_lifecycle.md#378-extension-source-that-reaches-outside-the-sanctioned-api)). |
-| `decode-foreclosed` × `dhall-typecheck` × `*` | Contradictory by definition. A state the Dhall typechecker refuses is one the schema gives **no inhabitant** — that is type-foreclosure. A decode-foreclosed state is precisely one the schema admits and the decoder then rejects, so it is caught at `gadt-decode`. Where a family appears to occupy this pair, it is an entry naming both tags in different sentences and the grid crediting the product. |
-| `runtime-checked` × `dhall-typecheck` × `*` | Contradictory by definition, from the other side. A runtime-checked residue is what remains *after* every authoring-time check has passed; the typechecker runs before any effect exists to observe. |
 | `*` × `*` × `cache` | A cache is a substrate, not a subject. Every way a cache can be wrong is already some other family's state seen through it: a cache **key** that admits two scopes is a `security` state ([§3.95](./illegal_state_tenancy.md#395-a-replay-key-that-does-not-name-its-scope)), a cache that grows without a ceiling is a `capacity` state, and a cache holding a stale build output is an `ml-asset` or `image` state. Nothing is illegal *because* it is cached, so no cell in this column has an occupant that is not double-counted from another column. The family stays declared because a reviewer looks for it, and an axis member with a stated reason is more useful than a member quietly absent. |
-| `*` × `gadt-decode` × `accelerator` | Both accelerator states are capacity arithmetic over a node's declared devices — an ownership index and a memory envelope. Arithmetic is decided by the capacity fold, not by decoding a value's shape. |
+| `*` × `gadt-decode` × `accelerator` | Both accelerator states are capacity arithmetic over a node's declared devices — an ownership index and a memory envelope. Arithmetic is decided by the capacity fold at the seal, not by decoding a value's shape. |
+| `type-foreclosed` × `gadt-decode` × `capacity` | Capacity is a *value*, not a type index, and Dhall has no dependent arithmetic to make `Σ ≤ cap` a statement about inhabitance ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)). So no capacity state is uninhabitable at the decoder: the family's type-foreclosures are *shapes* — closed controller-policy arms, mandatory fields, the absent `Exempt` arm — and every one of those is refused at `dhall-typecheck`, while what reaches the decoder is a checked rejection. |
+| `type-foreclosed` × `gadt-decode` × `image` | An image state is settled by the schema: the closed `ImageIdentity` union, the required `process` field, and the closed build-content union each give the illegal shape no arm to write, so all three fail `dhall type`. What is left for the decoder is a *relation between names* — a worker naming an extension its binary does not link ([§3.77](./illegal_state_lifecycle.md#377-a-worker-naming-an-extension-its-own-binary-does-not-link)) — and a cross-field relation is a fold, never an absent inhabitant. |
+| `decode-foreclosed` × `gadt-decode` × `capability-provision` | A capability is a name in a closed union and a grant is the image of one total derivation of the tenant→role graph, so both illegal states are absences of a constructor rather than values a fold rejects. The family's one checked rejection is whole-deployment source equality between the derived policies and their demands, which is a `provision-seal` fold over the bound deployment, not a decode-local one. |
 | `*` × `provision-seal` × `backup` | A backup lives in a remote append-only store outside the deployment the seal folds. The seal decides whether *this* deployment's declared resources fit its targets, and a backup coordinate is neither a resource it provisions nor a capability it binds. |
-| `*` × `live-effect` × `image` | An image state is settled before anything runs: the recipe is rendered from the catalog and the image is built from the recipe. A running cluster can only show that the wrong image was *pulled*, which is the registry's state rather than the image's. |
 | `*` × `provision-seal` × `image` | The seal folds a deployment's resource and capability graph. An image's content is fixed at build time and enters that graph as an already-resolved identity, so there is nothing left for the seal to decide about it. |
 | `*` × `dhall-typecheck` × `lifecycle` | The lifecycle states are claims about *ordering and authority over time* — a readiness edge, a promotion, a chaos target, extension source. None is a shape a total typechecker can refuse; each needs a decoded graph or a running system. |
 | `*` × `provision-seal` × `lifecycle` | The same reason from the other side: the seal is a fold over resources and capabilities at one instant, and every lifecycle state is a claim about a sequence. |
@@ -105,36 +139,36 @@ resolves each cell against them.
 | `*` × `rendered-artifact-oracle` × `multicluster` | A multi-cluster state is a relation *between* two clusters' specs. The rendered output of either one shows only its own half, so the relation has no witness there. |
 | `*` × `rendered-artifact-oracle` × `storage` | Storage states are decided by the geometry folds before rendering and by the live volume afterwards. The emitted PVC/PV pair restates the fold's conclusion rather than testing it. |
 
-**What is specified, and what is still owed.** The taxonomy is normative and the grid is generated.
-[`../../tools/covering_grid.py`](../../tools/covering_grid.py) resolves all **252** cells — 3 layers × 6 loci ×
-14 families — against the 97 authored entries and the justification table above, and reports:
+**What the covering now claims.** [`../../tools/covering_grid.py`](../../tools/covering_grid.py) resolves all
+**252** cells — 3 layers × 6 loci × 14 families — against the 97 entries' authored pairings, the relation, and
+the table above:
 
 | | cells |
 |---|---|
-| occupied by at least one entry | 143 |
-| empty and justified | 98 |
-| **empty and still owing a reason** | **11** |
+| occupied by at least one entry | 64 |
+| inadmissible: the layer cannot be observed at that locus | 154 |
+| admissible, empty, and justified | 34 |
+| **admissible, empty, and still owing a reason** | **0** |
 
-The sixteen justification rows above close 98 of the 109 empty cells: one column for the extension AST checker,
-one for the `cache` family, twelve for families a particular locus structurally cannot reach, and two pairs
-that are contradictory by definition.
-
-**The eleven that remain are not justifiable as written, and that is the finding rather than a backlog item.**
-In each, the family already occupies that locus at another layer, so the cell is not evidently empty — it is
-*unknown*. The reason is a limitation of the entries, not of the tool: an entry that names several foreclosure
-layers and several loci in prose is credited with the **product** of them, because no parser can tell which
-layer the author paired with which locus. So the tool over-credits occupancy and under-reports the gap, and
-**11 is a floor rather than a measurement**. Writing a reason for these cells would be inventing one.
-
-They close when each entry pairs a layer to a locus explicitly, which is authoring work on the catalogue rather
-than a better regex. The phase that owes it is named in
-[`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), and until then the covering is a
-discharged obligation over 241 cells and a claim over 11.
+The obligation is discharged over every cell, and the honesty that survives it is stated rather than hidden.
+Occupancy is now what the entries assert rather than an upper bound over their prose, which is why the count
+fell from 143 to 64: the missing 79 were pairings no entry ever made. Two entries changed meaning in the
+course of authoring the pairings, and both were defects the product-credited grid had concealed — an
+`image` state was recorded as having no runtime residue when [§3.77](./illegal_state_lifecycle.md#377-a-worker-naming-an-extension-its-own-binary-does-not-link)
+plainly claims one, and five entries claimed a foreclosure layer at no locus at all
+([§3.69](./illegal_state_multicluster.md#369-a-cold-seeded-secondary-taking-the-gateway-without-proven-freshness),
+[§3.83](./illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed),
+[§3.92](./illegal_state_tenancy.md#392-a-scope-filter-whose-absent-value-means-every-scope),
+[§3.96](./illegal_state_tenancy.md#396-a-scope-column-that-admits-null),
+[§3.97](./illegal_state_tenancy.md#397-a-scope-key-whose-rendering-is-not-injective)), which is a claim with
+nothing behind it.
 
 A complete covering would establish exhaustiveness relative to these three axes and to nothing else — a hazard
 lying along an axis nobody declared stays outside the claim, which is the residue
 [`illegal_state_techniques.md` §6.2](./illegal_state_techniques.md#62-the-covering-obligation--exhaustive-relative-to-a-declared-taxonomy)
-carries.
+carries. The covering also says nothing about whether an occupied cell's entry is *right*; that each entry's
+foreclosure actually rejects its fixture at the locus it names is the Phase-27 corpus obligation, keyed to the
+same pairing through [`../../dhall/examples/locus_registry.tsv`](../../dhall/examples/locus_registry.tsv).
 
 ## Related Documents
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog index.

@@ -17,6 +17,7 @@ import System.Directory (createDirectoryIfMissing)
 data RegistryRow = RegistryRow
   { entry :: Text
   , subcase :: Text
+  , layer :: Text
   , locus :: Text
   , owner :: Text
   , family :: Text
@@ -44,8 +45,8 @@ loadRegistry = do
   traverse parseRow rows
  where
   parseRow columns = case columns of
-    [entryValue, subcaseValue, locusValue, ownerValue, familyValue] ->
-      pure (RegistryRow entryValue subcaseValue locusValue ownerValue familyValue)
+    [entryValue, subcaseValue, layerValue, locusValue, ownerValue, familyValue] ->
+      pure (RegistryRow entryValue subcaseValue layerValue locusValue ownerValue familyValue)
     _ -> failTest "malformed locus_registry.tsv row"
 
 loadCompileCoverage :: IO (Set CoverageKey)
@@ -110,13 +111,14 @@ emitLedger rows = do
   createDirectoryIfMissing True ".build/dsl/illegal-state-corpus"
   Text.writeFile ".build/dsl/illegal-state-corpus/validation-locus-ledger.tsv" $ Text.unlines
     ( "# Register-1 only; Tier-2/model-runtime correspondence UNVERIFIED"
-        : "entry\tsubcase\tvalidation_locus\towner_phase\tcase_family\tdisposition"
+        : "entry\tsubcase\tforeclosure_layer\tvalidation_locus\towner_phase\tcase_family\tdisposition"
         : fmap render (sort rows)
     )
  where
   render row = Text.intercalate "\t"
     [ entry row
     , subcase row
+    , layer row
     , locus row
     , owner row
     , family row
