@@ -15,7 +15,7 @@ rule in [`generated_artifacts_doctrine.md`](./generated_artifacts_doctrine.md) i
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -74,7 +74,7 @@ amoebius/
 ├── CLAUDE.md                             the same policy's second entry point; a link, never a copy
 ├── README.md                             authored repository entry point
 ├── amoebius.cabal                        the one authored Haskell package: libraries, executables, suites, flags
-├── cabal.project                         authored package set and out-of-tree source resolution
+├── cabal.project                         authored package set and compatibility requirements
 ├── package.json                          authored JavaScript/PureScript tool requirements
 ├── DEVELOPMENT_PLAN/**                   authored plan suite: rulebook, tracker, one contract per phase
 ├── documents/**                          authored doctrine suite and illegal-state catalog
@@ -90,8 +90,7 @@ amoebius/
 ├── test/**                               authored specs, fixtures, goldens, negatives, oracles, mutants, harnesses
 ├── tools/**                              TRANSITIONAL: renders to .build/tools/; authored oracles move to test/oracle/
 ├── probe/**                              the standalone toolchain probe: the one package resolved apart
-├── vendor/**                             reviewed external source with recorded upstream provenance
-├── patches/**                            reviewed compatibility patches applied to out-of-tree source
+├── vendor/**                             reviewed external source with recorded upstream provenance, one directory per upstream
 ├── .build/**                             reproducible, transient, and evidentiary local output; ignored by both contracts
 ├── .data/**                              production runtime and durable state; operator-retained; ignored by both contracts
 ├── .test_data/**                         harness-owned test runtime and durable state; safely disposable; ignored by both contracts
@@ -112,6 +111,15 @@ relocation still points at it turns one intended change into a page of unrelated
 therefore part of the plan-suite re-baseline that re-bases the map, not of the doctrine amendment that states
 the target. Until then the marker is what a reader sees, and a `TRANSITIONAL` row may receive no new content —
 the same rule [§2.2](#22-present-day-roots-and-their-required-destination) applies to a migration surface.
+
+A sixth root, `patches/`, carried the marker until 2026-08-20 and is now absent rather than transitional. It
+retired for a different reason than the five above, and the difference is worth recording because a reader who
+goes looking for the root should find why it is not here. A patch has no rendered form and no generator; it
+retired because its *subject* did. A patch applies to source resolved outside this repository, so the root was
+inhabited exactly as long as some build input was fetched rather than tracked — and its one patch's subject,
+`supernova`, is now reviewed source under `vendor/**`
+([§4.1](#41-a-compatibility-edit-is-vendored-source-not-a-patch-against-a-moving-head)).
+[§4](#4-dependency-and-toolchain-resolution) admits no later out-of-tree source that would re-inhabit it.
 
 Two roots fix a second level, because their second level is where the taxonomy drifted:
 
@@ -451,6 +459,33 @@ Transport authentication and upstream signatures are verified when an ecosystem 
 computed after resolution detects corruption within that run; it is not promoted into a permanent package
 pin. This policy deliberately trades repository-embedded frozen resolution for continuously refreshed
 compatibility evidence.
+
+### 4.1 A compatibility edit is vendored source, not a patch against a moving head
+
+**The problem.** A release channel resolves to whatever the branch head is on the day of the run, so the source
+a patch applies to is not fixed. Two failures follow, and the second is the dangerous one. A patch that stops
+applying fails the checkout loudly. A patch that still applies after the surrounding code changed applies
+cleanly to a different program, and nothing reports that: the diff was reviewed once, against source no run
+sees again. The defect surfaces at run time, in the resolver, and only as a compile error if the edit happens
+to conflict with the compiler.
+
+**Why the obvious alternative fails.** The tempting fix is to pin the revision the patch was reviewed against.
+That is resolver output promoted to an authored pin, which the rule above forbids, and it trades the whole of
+this section's dynamic-compatibility position for one file's stability. Re-reviewing the patch against each
+resolved head is the honest alternative and is unaffordable per run.
+
+**The rule.** A package amoebius must edit to compile is **vendored**: a reviewed source copy under
+`vendor/**`, one directory per upstream project, carrying a `PROVENANCE.md` that records that project, the
+upstream channel, and the released package name and version. It records no commit, tag, or archive checksum —
+those remain resolver observations. There is no patch root and no admitted patch: the last one, a
+compatibility edit to `supernova`, became `vendor/supernova/**` on 2026-08-20, and the `patches/` root retired
+with it ([§2](#2-complete-repository-structure)). A vendored
+package amoebius goes on to maintain as its own source becomes a fork and moves to `src/vendor/**`
+([§2](#2-complete-repository-structure)).
+
+**What it forecloses.** Automatic pickup of an upstream fix. A refresh becomes a reviewed source update on a
+schedule amoebius chooses, and the review surface grows from a diff to a tree — which is the cost of reviewing
+against something that holds still.
 
 **Resolution acquires; it does not require.** A requirement whose tool is absent is satisfied by installing
 it, not by reporting a manual prerequisite — the four-step ensure contract of

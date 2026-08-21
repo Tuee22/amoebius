@@ -85,8 +85,14 @@ This is the arm the algebra exists for.
 **Provision returns two things.** A handle to the resource, and a **teardown obligation** — a value that is
 discharged only by tearing that resource down. The obligation is not optional, not defaulted, and not
 discardable, and the mechanism is a linear obligation: the value has no discard rule, so it must be consumed
-exactly once, and a workflow ending while it still holds one is specified to be rejected at compile time. The
-compile-fail fixture establishing that is owed by the phase that builds the workflow calculus; none exists.
+exactly once, and a workflow ending while it still holds one is rejected at compile time.
+[Phase 6](../../DEVELOPMENT_PLAN/phase_06_workflow_calculus.md) built that, and it is worth recording *how*,
+because the shape decides what the guarantee covers. The outstanding obligations are the workflow's type
+index — a set of resource names that `provision` adds to and only `teardown` and `transfer` remove — and the
+runner accepts only a workflow whose set is empty at both ends. There is no combinator that shrinks the set
+any other way, so "no discard rule" holds by there being nothing to discard with. Three committed
+compile-fail fixtures establish it: a workflow that ends owing, a transfer with no condition, and a discharge
+of an obligation the workflow never held.
 This is the same shape as a region that ends holding an unreaped artifact
 ([`jit_artifact_doctrine.md` §5](./jit_artifact_doctrine.md#5-materialize-consume-reap)).
 

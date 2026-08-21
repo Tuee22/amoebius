@@ -1,0 +1,42 @@
+# The independent oracle for the Phase-6 obligation ledger.
+#
+# Authored from `documents/engineering/workflow_calculus_doctrine.md` section 3: provision
+# returns a handle and a teardown obligation together, and the obligation is discharged
+# either by tearing the resource down or by transferring it to a longer-lived declaration
+# "with a stated condition". Nothing below is read off the ledger it judges, which is what
+# lets it stay red when a workflow's accounting is wrong.
+#
+# One row per resource a workflow provisions, naming how that obligation left the
+# outstanding set. The table is a *replay*: it says what the ledger of each workflow must
+# come to, and the suite runs the workflow and compares.
+#
+# Three separate questions are asked of every workflow, and they are separate because they
+# fail separately — which is the whole reason a single "the ledger is correct" check would
+# be worth less than three:
+#
+#   balance        every resource provisioned was released and every resource released was
+#                  provisioned, as sets. A dropped obligation fails this. A doubled one
+#                  does not
+#   multiplicity   no resource left the outstanding set twice. A doubled discharge fails
+#                  this. A dropped one does not
+#   condition      a row whose discharge is `transferred` must carry the condition the
+#                  workflow stated, and the ledger must carry the same one. A transfer
+#                  recorded as a teardown fails this and leaves both sets untouched
+#
+# A `tore-down` row carries `-` for its condition: a resource that was returned needs no
+# statement about when it will be. That asymmetry is the doctrine's — a transfer is the
+# arm that outlives the workflow, so it is the arm that owes an explanation.
+#
+# The five workflows are the corpus: one resource torn down, one transferred, two nested,
+# two provisioned in parallel branches, and one of each in the same workflow. Between them
+# every arm of the algebra runs and both discharges occur.
+#
+# workflow<TAB>resource<TAB>discharge<TAB>condition
+single-resource	db-volume	tore-down	-
+transferred	cluster-lease	transferred	until the retained deployment that took it is deleted
+nested	vpc	tore-down	-
+nested	subnet	tore-down	-
+parallel	left-volume	tore-down	-
+parallel	right-volume	tore-down	-
+mixed	bucket	tore-down	-
+mixed	queue	transferred	when the owning tenant is deleted

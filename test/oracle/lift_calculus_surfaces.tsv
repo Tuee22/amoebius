@@ -1,0 +1,39 @@
+# Authored expectation for the Phase-5 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. The join is two-way and total, so a check that
+# exists but is claimed by no surface fails the gate, and a surface naming an id nothing
+# enumerates fails it too.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   metrics   the metric keys in .build/calculus/lift/phase-results.tsv
+#   checks    the check ids tools/lift_calculus_gate.py implements
+#
+# `no-fallback-arm` has a surface of its own because it is a claim about the source rather
+# than about any value the source computes: a dispatch that answers every pair correctly
+# today and carries a catch-all is still the thing a fourth layer would fall into. No
+# table can see that, so the scan is its own instrument and its own row.
+#
+# The last two surfaces are the ones this register cannot reach. Whether teardown is an
+# obligation the type system tracks is the workflow calculus's claim, which is the next
+# phase's; and nothing here observes a running system, so no frame is entered and no
+# engine answers. Both carry a metric whose recorded value is the literal UNVERIFIED.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+closed-layer-set	metrics	suite-checks
+total-transition-relation	metrics	transition-pairs
+no-fallback-arm	metrics	dispatch-arms
+witness-from-observation	metrics	witness-observations
+composition-is-a-type-equation	metrics	compile-fail-pairs
+lift-calculus-mutants	metrics	mutants
+lift-calculus-purity	metrics	calculus-purity
+lift-calculus-acceptance	metrics	acceptance-token
+workflow-teardown	metrics	workflow-teardown
+runtime-fidelity	metrics	runtime
+transition-oracle-shape	checks	transition-oracle-complete
+calculus-purity-scan	checks	calculus-is-pure
+dispatch-fallback-scan	checks	dispatch-has-no-fallback
+suite-acceptance	checks	suite-acceptance-token
+unmet-composition-typecheck	checks	unmet-and-asserted-rejected
+mutant-locus-separation	checks	mutants-red-at-own-locus
+generated-output-discipline	checks	emitted-results-untracked

@@ -1,0 +1,46 @@
+# Authored expectation for the Phase-4 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. The join is two-way and total, so a check that
+# exists but is claimed by no surface fails the gate, and a surface naming an id nothing
+# enumerates fails it too.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   metrics   the metric keys in .build/calculus/budget/phase-results.tsv
+#   checks    the check ids tools/budget_calculus_gate.py implements
+#
+# `grant-accounting` is the surface for `.build/grants/**`, the output class the generator
+# registry names this phase as the owner of: a ceiling, the concurrency it is shared
+# across, and the reservations outstanding against it, one row per region.
+#
+# The three mutant loci are three different instruments — a join against the authored
+# capacity table, an in-process invariant, and a comparison of two store images read in a
+# separate process — so the surfaces that carry them are separate rows rather than one row
+# for "the mutants passed".
+#
+# The last two surfaces are the ones this register cannot reach. Whether a composition's
+# grant is the sum of its parts' is C5's claim over the lift calculus, which is the next
+# phase's; and nothing here observes a running system, so the substrate's actual free
+# space stays the live-effect observation section 7 says it is. Both carry a metric whose
+# recorded value is the literal UNVERIFIED.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+grant-is-scarce-and-specific	metrics	suite-checks
+paired-ceiling-and-concurrency	metrics	admission-rows
+admission-refuses-with-a-reason	metrics	refusal-reasons
+refusal-leaves-nothing-behind	metrics	store-identity
+grant-accounting-per-region	metrics	grant-accounting
+retention-names-a-reaper	metrics	compile-fail-pairs
+budget-calculus-mutants	metrics	mutants
+budget-calculus-purity	metrics	calculus-purity
+budget-calculus-acceptance	metrics	acceptance-token
+lift-composition	metrics	lift-composition
+runtime-fidelity	metrics	runtime
+admission-oracle-shape	checks	admission-oracle-complete
+calculus-purity-scan	checks	calculus-is-pure
+suite-acceptance	checks	suite-acceptance-token
+store-identity-across-refusal	checks	refusal-leaves-store-identical
+grant-accounting-consistency	checks	grant-accounting-emitted
+unforgeable-constructor-typecheck	checks	forged-and-reaperless-rejected
+mutant-locus-separation	checks	mutants-red-at-own-locus
+generated-output-discipline	checks	emitted-results-untracked

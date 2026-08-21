@@ -1,0 +1,41 @@
+# The independent oracle for the Phase-7 evidence calculus: a hand-authored claim
+# inventory for one existing phase.
+#
+# The phase is Phase 5, the lift calculus. It is chosen because it is finished, small
+# enough to inventory by hand, and discharges its claims by three different instruments —
+# two authored tables, a scan of the source the compiler sees, and two compile-fail pairs
+# — so the inventory exercises more than one fixture kind.
+#
+# Authored from `documents/engineering/evidence_calculus_doctrine.md` sections 2, 3 and 5,
+# read against `DEVELOPMENT_PLAN/phase_05_lift_calculus.md`. Every row below is read off
+# the *contract*, never off the registry the implementation derives, which is what lets
+# this table stay red when the derivation is wrong.
+#
+# Four rules decide the rows:
+#
+#   one fixture   every claim names exactly one, because a claim discharged by "the suite"
+#                 is discharged by nothing in particular and stays green when the one
+#                 relevant case is deleted
+#   strength      a claim may say only what its fixture's kind entitles it to. A
+#                 compile-fail fixture entitles a claim to `this-expression-rejected` and
+#                 to nothing stronger; an authored table entitles it to
+#                 `satisfies-authored-predicate`
+#   register      Phase 5 is a Register-1 contract, so every fixture here runs `pure`.
+#                 A row claiming otherwise would be declaring a register its fixture
+#                 cannot reach, which section 5 calls its own illegal state
+#   mutant        a claim held by a mutation argument names the mutant and the locus that
+#                 mutant must redden. Its fixture is the one registry, because that is
+#                 where the expectation — the locus — is actually authored
+#
+# The two rows whose fixture is `test/mutant/registry.tsv` are the self-referential case
+# section 4 names: no expectation for them can be authored outside the machinery, so what
+# stands in for independence is that a named check reddens when a named defect is seeded.
+#
+# claim<TAB>fixture_kind<TAB>fixture<TAB>strength<TAB>register<TAB>mutant<TAB>locus
+the layer set is closed at three members	oracle	test/oracle/lift_calculus/transition_pairs.tsv	satisfies-authored-predicate	pure	-	-
+the transition relation admits exactly the pairs the doctrine admits	oracle	test/oracle/lift_calculus/transition_pairs.tsv	satisfies-authored-predicate	pure	-	-
+no dispatch over the layer set carries a catch-all arm	oracle	test/mutant/registry.tsv	satisfies-authored-predicate	pure	dispatch-admits-a-fallback	dispatch
+a witness exists only where an observation reported the transition's precondition	oracle	test/oracle/lift_calculus/witness_observations.tsv	satisfies-authored-predicate	pure	witness-forged-without-observation	witness-requires-observation
+a runtime-assembled plan joins two transitions only when they meet	oracle	test/mutant/registry.tsv	satisfies-authored-predicate	pure	composition-joins-unmet-layers	composition-requires-meeting-layers
+a witness cannot be written down	compile-fail	test/negative/compile_fail/lift_calculus/witness_asserted.hs	this-expression-rejected	pure	-	-
+two paths whose layers do not meet cannot be composed	compile-fail	test/negative/compile_fail/lift_calculus/paths_do_not_meet.hs	this-expression-rejected	pure	-	-

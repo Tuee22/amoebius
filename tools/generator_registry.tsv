@@ -32,7 +32,7 @@ toolchain/<os>-<arch>/**	tools/toolchain.py	phase-1
 ui/**	-	phase-29
 artifacts/<address>/**	-	phase-3
 recipes/**	-	phase-3
-grants/**	-	phase-4
+grants/**	tools/budget_calculus_gate.py	phase-4
 sql/**	-	phase-36
 pulumi/**	-	phase-58
 tools/**	-	phase-47

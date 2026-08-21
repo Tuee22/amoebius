@@ -1,0 +1,39 @@
+# Authored expectation for the Phase-7 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. The join is two-way and total, so a check that
+# exists but is claimed by no surface fails the gate, and a surface naming an id nothing
+# enumerates fails it too.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   metrics   the metric keys in .build/calculus/evidence/phase-results.tsv
+#   checks    the check ids tools/evidence_calculus_gate.py implements
+#
+# This phase's own surfaces are the one place in the corpus where the self-referential gap
+# is visible rather than argued about: the gate checks a calculus about evidence, using
+# evidence. What stands in for independence is that the inventory is for a *different*
+# phase — Phase 5's — authored by hand from that phase's contract, so the derivation being
+# wrong and the inventory being wrong are two errors rather than one.
+#
+# The last two surfaces are the ones this register cannot reach. What an extension must
+# declare, and how a link set is closed over declarations, is the extension contract's,
+# which is Phase 20's; and nothing here runs a fixture, so what any of them is worth in
+# practice stays the register model's claim rather than this gate's observation. Both carry
+# a metric whose recorded value is the literal UNVERIFIED.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+claim-names-its-fixture	metrics	claims
+mutant-record-names-its-locus	metrics	derived-records
+one-registry-with-a-carrier	metrics	suite-checks
+register-model-is-a-value	metrics	compile-fail-pairs
+evidence-calculus-mutants	metrics	mutants
+evidence-calculus-purity	metrics	calculus-purity
+evidence-calculus-acceptance	metrics	acceptance-token
+extension-declaration	metrics	extension-declaration
+runtime-fidelity	metrics	runtime
+claim-inventory-shape	checks	claim-inventory-well-formed
+calculus-purity-scan	checks	calculus-is-pure
+suite-acceptance	checks	suite-acceptance-token
+unbound-claim-typecheck	checks	unbound-claim-and-undeclared-register-rejected
+mutant-locus-separation	checks	mutants-red-at-own-locus
+generated-output-discipline	checks	emitted-results-untracked

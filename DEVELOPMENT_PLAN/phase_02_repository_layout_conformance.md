@@ -38,13 +38,23 @@ Register 1: a pure tree-and-resolution gate, no host and no cluster.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-20. `python3 tools/repository_conformance_gate.py` passes all fourteen sides on
-substrate `none`, lane `none`, natural `arm64`, untranslated: the tree collides with nothing, the relocation map
-admits every destination, no reference dangles, every source directory resolves, rules `r13` and `r15` report
-zero findings with no allowlist row for either, all seven committed mutants redden their own check and no
-other, and 29 surfaces join completely to 29 enumerated items. Attestation
-`sha256:18666fe07396d8c354a266996849e9a64309d979f0a43bc96cdb74b70824f5f5` binds to a 2,066-file source snapshot; as
-everywhere here, the reference names the run and this record follows it.
+✅ Done — resealed 2026-08-20, twice. `python3 tools/repository_conformance_gate.py` passes all fourteen sides
+on substrate `none`, lane `none`, natural `arm64`, untranslated: the tree collides with nothing, the relocation
+map admits every destination, no reference dangles, every source directory resolves, rules `r13` and `r15`
+report zero findings with no allowlist row for either, all seven committed mutants redden their own check and
+no other, and 29 surfaces join completely to 29 enumerated items. Attestation
+`sha256:7924df39d756bb8682fa3c7b3735071537a6dc9581e7d3c3484cbab6ca4cad12` binds to a 2,088-file source
+snapshot; as everywhere here, the reference names the run and this record follows it. The earlier seal of the
+same day, at `sha256:18666fe07396d8c…` over 2,066 files, stands as history.
+
+**A rule in this gate was an enumeration of today's instances.** `one-package-declaration` carried a literal
+list of the three `.cabal` paths that existed when it was written, and
+[§2.1](../documents/engineering/repository_layout_doctrine.md#21-when-a-unit-warrants-its-own-build-package)
+does not admit a list — it admits two *grounds*, and names the root each is instantiated at: foreign provenance
+is `vendor/**` and foreign resolution is `probe/**`. The list went stale the moment Phase 1 vendored a second
+upstream, and the check reported two packages the doctrine plainly admits. It now derives the admitted set from
+those roots, which is the same shape the rest of this gate already has: every other check reads the target tree
+rather than a copy of what the tree contained on the day.
 
 **The 2026-08-19 reopening observation is closed.** `questions.txt` was tracked outside the
 [§2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure) target tree, which

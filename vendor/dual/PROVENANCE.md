@@ -41,9 +41,17 @@ instances using the same argument reversal the binary instances already use, and
 **Why vendored rather than patched.** `dual` is two small modules and the edit touches the instance set of one
 of them. A patch would have to be re-reviewed against whatever the branch head happened to be on each clean
 resolution, which is the coupling to a frozen revision this repository is removing. A reviewed source copy of
-a two-module package carries its own review surface and no revision pin. The larger `supernova` dependency
-takes the opposite trade for the opposite reason and stays a four-line patch
-([`../../patches/supernova_ghc_9_12.patch`](../../patches/supernova_ghc_9_12.patch)).
+a two-module package carries its own review surface and no revision pin.
+
+That reasoning is now the general rule rather than this package's exception. An earlier revision of this file
+recorded `supernova` as taking the opposite trade and staying a four-line patch, on the ground that its tree
+was too large to review. Size decides how much review a copy costs; it does not decide whether a diff replayed
+against a moving head is still the diff that was reviewed.
+[`repository_layout_doctrine.md` §4.1](../../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-vendored-source-not-a-patch-against-a-moving-head)
+settles it in one direction for both packages. `supernova` now sits beside this one under
+[`vendor/supernova/`](../supernova/PROVENANCE.md); the copy landed with
+[`phase_01_toolchain_spike.md` Sprint 1.8](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md#sprint-18-vendor-supernova-retire-patches-),
+which deleted the patch and the `patches/` root along with it.
 
 **What it forecloses.** Automatic pickup of upstream `dual` fixes. That is the intended trade: the package has
 had no release in the compatibility window, so there is nothing to pick up, and a refresh is a reviewed source
@@ -51,5 +59,7 @@ update rather than a silent solver move.
 
 ## Related Documents
 
-- [Repository Layout and Artifact Provenance](../../documents/engineering/repository_layout_doctrine.md)
+- [Repository Layout and Artifact Provenance](../../documents/engineering/repository_layout_doctrine.md) —
+  [§4.1](../../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-vendored-source-not-a-patch-against-a-moving-head)
+  owns the patch-versus-vendored-source rule this file is one instance of
 - [Phase 1: Toolchain spike](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md)

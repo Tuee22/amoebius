@@ -97,6 +97,9 @@ LAYOUT_DOCTRINE = ROOT / "documents" / "engineering" / "repository_layout_doctri
 # guard. It once carried the present-day migration roots of doctrine section 2.2 as well
 # as the target roots of section 2, because a root on its way out is still authored while
 # it exists. Phase 2 moved every one of them, so the two lists are now the same list.
+# `patches` left the list the same way: the root retired with the last out-of-tree source
+# its one patch applied to, and a name kept here after its directory is gone is a finding
+# by the rule above rather than a harmless leftover.
 AUTHORED_ROOTS = (
     "DEVELOPMENT_PLAN",
     "documents",
@@ -111,7 +114,6 @@ AUTHORED_ROOTS = (
     "test",
     "tools",
     "vendor",
-    "patches",
 )
 
 # Directories a tree walk never descends into: VCS metadata plus the two present-day

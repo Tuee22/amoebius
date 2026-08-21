@@ -23,6 +23,7 @@ routing belongs to the [documentation index](../documents/README.md).
 
 ## Contents
 - [Ledger Status](#ledger-status)
+- [Vendored broker client — 2026-08-20](#vendored-broker-client--2026-08-20)
 - [Generative re-baseline — 2026-08-19](#generative-re-baseline--2026-08-19)
 - [Host-band re-baseline — 2026-08-18](#host-band-re-baseline--2026-08-18)
 - [Phase re-baseline — 2026-08-17](#phase-re-baseline--2026-08-17)
@@ -63,6 +64,55 @@ flowchart LR
   close -->|"retires the row, because"| stale
 ```
 *Orientation. The deferral list can only shrink, so the target tree is reached exactly when it empties; [development_plan_standards.md §S](development_plan_standards.md#s-universal-artifact-hygiene-gate) clause 5 owns the deferral mechanism.*
+
+---
+
+## Vendored broker client — 2026-08-20
+
+`supernova` was resolved from a git branch head and made to compile by a tracked patch replayed into the
+run-local checkout on every clean resolution. [`repository_layout_doctrine.md` §4.1](../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-vendored-source-not-a-patch-against-a-moving-head)
+admits neither half: a package amoebius edits to compile is reviewed source under `vendor/**`, and a
+patch is admitted only while its subject is still fetched.
+
+**Order of operations.** This section opened as the documentation act, with the tree act owed by
+[Sprint 1.8](phase_01_toolchain_spike.md#sprint-18-vendor-supernova-retire-patches-) — a contract that gains
+a deliverable is reopened rather than re-run
+([§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase)). That sprint has since run, so the
+statements below about a vendored `supernova` are observations rather than specification, and the `patches/`
+root is gone.
+
+**What the fetch cost beyond the doctrine.** Cabal writes each `source-repository-package` into
+`.build/dist-newstyle/**/src/<package>-<hash>/` with its upstream `.git` intact, so the build root contains
+nested git repositories. `git clean -fxd` refuses to descend into them and reports each as a skipped
+repository, which leaves the contained-state root of
+[`repository_layout_doctrine.md` §2.3](../documents/engineering/repository_layout_doctrine.md#23-the-closed-local-state-roots)
+non-disposable by the ordinary command. That was an observed consequence of the fetch, not an argument against
+it on its own; the doctrine row is what condemned it. Vendoring removes one of the three skips. The two that
+remain are `infernix` and `jitML`, and they belong to the still-open row below rather than to this one.
+
+### Closed by Sprint 1.8
+
+| observation | required end state | owner and closure |
+|-------------|--------------------|-------------------|
+| `cabal.project` resolved `supernova` from `tag: master` and applied `patches/supernova_ghc_9_12.patch` through a `post-checkout-command` | the upstream `lib` and `proto` packages are reviewed source under `vendor/supernova/**` with a `PROVENANCE.md` carrying no commit, tag, or checksum | **Closed (Phase 1, Sprint 1.8).** No `supernova` `source-repository-package` stanza resolves, the build writes no checkout for it, and the `vendor-refetched` seeded negative reddens the source-closure check |
+| the `patches/**` root and `tools/apply_supernova_patch`, whose only subject was that fetch | both deleted, and the `patches/**` row and its TRANSITIONAL marker removed from the [§2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure) tree | **Closed (Phase 1, Sprint 1.8).** The root is absent, `artifact_policy.AUTHORED_ROOTS` no longer names it, and the doctrine tree records the retirement instead of carrying the row |
+| `patches/supernova_ghc_9_12.patch` argued in prose that vendoring `supernova` would replace a reviewed diff with an unreviewable source copy | the argument retires with the file; [§4.1](../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-vendored-source-not-a-patch-against-a-moving-head) answers it, and `vendor/dual/PROVENANCE.md` records that the earlier trade is reversed | **Closed (Phase 1, Sprint 1.8).** No tracked file states the superseded position |
+
+### Still open after this change
+
+| observation | required end state | owner and closure |
+|-------------|--------------------|-------------------|
+| two further `source-repository-package` stanzas — `infernix` and `jitML` — keep writing nested checkouts into the build root | no seed is a build input at all | unchanged: [Phase 91](phase_91_infernix_rederivation.md) and [Phase 93](phase_93_jitml_rederivation.md), under the condemned-corpus row that already owns them. Vendoring is not their closure — [`lift_and_compose_doctrine.md` §2](../documents/engineering/lift_and_compose_doctrine.md#2-the-two-non-dependencies) forbids a vendored seed tree by name |
+
+### What the vendored copy does not carry
+
+Upstream commits `Proto/PulsarApi.hs` and `Proto/PulsarApi_Fields.hs` — the `proto-lens-protoc` output — into
+the `supernova` library's own source tree. Copying them would have moved 32,000 lines of generated code into
+an authored root, which [§3](../documents/engineering/repository_layout_doctrine.md#3-complete-generated-output-inventory)
+forbids and the universal hygiene gate's generated-banner check would have caught. The vendored copy drops
+them and takes the two modules from the `proto` package beside it, which generates them per run from the same
+`.proto`; `vendor/supernova/PROVENANCE.md` records that edit alongside the GHC 9.12 import. Upstream's Nix
+expressions, CI workflow, and test suite are not vendored either, for the reasons recorded there.
 
 ---
 

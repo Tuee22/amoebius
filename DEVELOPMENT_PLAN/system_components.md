@@ -173,10 +173,23 @@ guarantees the other sections rely on are actually established.
 | `Amoebius/Index/Resource` | the capacity vocabulary threaded through all five calculi | [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) |
 | `Amoebius/Extension/*` | the declaration, the four law families, the generated gate, and the verdict seal that admits an extension to a link set | [`extension_conformance_doctrine.md`](../documents/engineering/extension_conformance_doctrine.md) |
 
-Only the first row exists. `Amoebius/Calculus/Artifact` was built and sealed on 2026-08-20 as four modules —
-`Target`, `Recipe`, `Address`, `Region` — and every other row is a specification until its phase gate runs.
-They are named here so the inventory says what the plan intends to build rather than only what a past audit
-observed.
+All five calculus rows exist, built and sealed on 2026-08-20 and each as four modules:
+`Amoebius/Calculus/Artifact` as `Target`, `Recipe`, `Address`, `Region`; `Amoebius/Calculus/Budget` as
+`Grant`, `Admission`, `Store`, `Retention`; `Amoebius/Calculus/Lift` as `Layer`, `Witness`, `Transition`,
+`Compose`; `Amoebius/Calculus/Workflow` as `Arm`, `Obligation`, `Ledger`, `Run`; and
+`Amoebius/Calculus/Evidence` as `Register`, `Fixture`, `Claim`, `Mutant`. The two indices and the extension
+contract below them are a specification until their phase gates run. They are named here so the inventory
+says what the plan intends to build rather than only what a past audit observed.
+
+**None of the five depends on another, and that is deliberate rather than incidental.** A grant authorises
+bytes; how those bytes got their name is the artifact calculus's question, so `Amoebius/Calculus/Budget` names
+a placement by an address it is handed rather than by a recipe it renders. A lift says where an effect runs
+and says nothing about what the effect produces. The calculi meet at their points of use — Phase 4's suite is
+where a Phase-3 rendering and its address become the placement a Phase-4 grant authorises — which is what
+keeps the layer below every component from becoming a stack with an order of its own. The workflow calculus
+names the arms an effect can take and what each owes; which artifacts those arms produce, what they cost, and
+where they run stay the other three's questions. The evidence calculus is one step further out: it binds a
+claim to the fixture that would falsify it, and every claim the other four make is a claim it can hold.
 
 ## 2. The DSL — Dhall decoder + chain/Step kernel
 
@@ -318,7 +331,8 @@ There is exactly one server-side way to talk to Pulsar: a native-protocol Haskel
 TCP binary protocol — no Pulsar WebSocket proxy and no fallback. The browser's distinct UI-server WebSocket
 never exposes Pulsar. The native client is owned by
 [`pulsar_client_doctrine.md` §1 — One client, one wire, no WebSockets](../documents/engineering/pulsar_client_doctrine.md#1-one-client-one-wire-no-websockets).
-It starts as a fork of `cr-org/supernova`, inheriting the handshake / LOOKUP / produce / consume foundation
+It starts as a fork of `cr-org/supernova` — reviewed source under `vendor/supernova/**` rather than a
+resolved branch head — inheriting the handshake / LOOKUP / produce / consume foundation
 and adding the production concerns, per
 [`pulsar_client_doctrine.md` §4 — Forked from supernova — what amoebius re-derives and what it adds](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-re-derives-and-what-it-adds).
 Its capability surface — lookup, produce, consume, subscribe, seek — is owned by
@@ -331,6 +345,7 @@ providers.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
+| The fork's starting tree: upstream `supernova` as reviewed source | [pulsar_client §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-re-derives-and-what-it-adds), [repository-layout doctrine §4.1](../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-vendored-source-not-a-patch-against-a-moving-head) | authored `vendor/supernova/{lib,proto}/**` with `vendor/supernova/PROVENANCE.md`; the protocol bindings are generated per run and never tracked; no `source-repository-package` fetches it and no patch is replayed into a checkout (BUILT Phase 1) | [phase_1](phase_01_toolchain_spike.md), then [phase_67_pulsar_client.md](phase_67_pulsar_client.md) |
 | Wire framing / binary protocol (`proto-lens`-generated `PulsarApi`) | [pulsar_client §3](../documents/engineering/pulsar_client_doctrine.md#3-the-native-binary-protocol) / [§4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-re-derives-and-what-it-adds) | authored `proto/Amoebius/Pulsar/Proto/PulsarApi.proto` and `src/Amoebius/Pulsar/{Frame,Internal/Frame,Internal/Protocol}.hs`; generated bindings belong under `.build/proto/` or the build tree | [phase_67_pulsar_client.md](phase_67_pulsar_client.md) |
 | Connection / CONNECT handshake / LOOKUP discovery | [pulsar_client §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-re-derives-and-what-it-adds) | `src/Amoebius/Pulsar/Connection.hs` (BUILT/VALIDATED Phase 67) | [phase_67_pulsar_client.md](phase_67_pulsar_client.md) |
 | Producer / Consumer / Subscription / Seek | [pulsar_client §5](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek) | `src/Amoebius/Pulsar/{Producer,Consumer,Subscription,Seek}.hs` (BUILT/VALIDATED Phase 67; tenant enforcement remains Phase 68) | [phase_67_pulsar_client.md](phase_67_pulsar_client.md) |
@@ -562,7 +577,7 @@ the foreclosure layers + validation-locus by
 
 | Component / Surface | Owning doctrine | Planned module path (source; emitted artifacts not committed) | Phase |
 |---|---|---|---|
-| Dynamic compiler/package/browser/codegen resolution | [dsl_doctrine §9](../documents/engineering/dsl_doctrine.md#9-toolchain-note), [repository-layout doctrine §4](../documents/engineering/repository_layout_doctrine.md#4-dependency-and-toolchain-resolution) | authored `cabal.project`, `tools/toolchain_requirements.json`, and `patches/**`; resolver `tools/toolchain.py`; generated `.build/{toolchain,locks}/**`; no lock/freeze file, package checksum, resolved path, or library SHA is tracked (BUILT) | [phase_1](phase_01_toolchain_spike.md) |
+| Dynamic compiler/package/browser/codegen resolution | [dsl_doctrine §9](../documents/engineering/dsl_doctrine.md#9-toolchain-note), [repository-layout doctrine §4](../documents/engineering/repository_layout_doctrine.md#4-dependency-and-toolchain-resolution) | authored `cabal.project`, `tools/toolchain_requirements.json`, and `vendor/**`; resolver `tools/toolchain.py`; generated `.build/{toolchain,locks}/**`; no lock/freeze file, package checksum, resolved path, or library SHA is tracked (BUILT) | [phase_1](phase_01_toolchain_spike.md) |
 | Lazy tool-ensure: the `managed` source kind and its provider adapters (`ghcup`, the Playwright driver, the floor's package-manager root) | [substrate §3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) | `tools/toolchain.py`'s provider registry; no requirement is expected on the host, and a second pass installs nothing (BUILT) | [phase_1](phase_01_toolchain_spike.md) |
 | The one canonical `<os>-<arch>` platform token and the closed architecture/system/substrate vocabularies | [repository-layout doctrine §4](../documents/engineering/repository_layout_doctrine.md#4-dependency-and-toolchain-resolution), [substrate §1.1](../documents/engineering/substrate_doctrine.md#11-the-natural-architecture-rule) | `tools/host_platform.py`, read by `tools/gate_common.py`, `tools/toolchain.py`, and `pb/pb/bootstrap_toolchain.py`; standard library only, so the pre-binary coordinator can load it (BUILT) | [phase_1](phase_01_toolchain_spike.md) |
 

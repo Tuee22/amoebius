@@ -236,10 +236,20 @@ Forking — rather than depending on the published package — is the honest cho
    production concerns (robust reconnection, partitioned topics, dedup wiring, the topology algebra) are
    amoebius's to add.
 2. **Compatibility maintenance.** Supernova's published dependency bounds can lag current compatible GHC and
-   library APIs; the fork carries authored bounds/patches, while Phase 1 resolves and records the actual graph
+   library APIs; the fork carries authored bounds, while Phase 1 resolves and records the actual graph
    per run ([§3](#3-the-native-binary-protocol)).
 3. **Layering.** The topology algebra ([§6](#6-the-declarative-topology-algebra)) and the dedup contract ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) are amoebius doctrine, not generic
    client features; they live in the fork, above supernova's transport core.
+
+**The fork starts from a vendored copy, not from a resolved branch head.** Supernova sits under
+`vendor/supernova/**` as reviewed source with its provenance recorded there, on the terms
+[`repository_layout_doctrine.md` §4.1](./repository_layout_doctrine.md#41-a-compatibility-edit-is-vendored-source-not-a-patch-against-a-moving-head)
+fixes: a package amoebius edits to compile is vendored rather than patched against source that moves between
+runs. The copy landed with
+[`phase_01_toolchain_spike.md` Sprint 1.8](../../DEVELOPMENT_PLAN/phase_01_toolchain_spike.md#sprint-18-vendor-supernova-retire-patches-),
+which retired the `source-repository-package` stanza and the patch replayed into its checkout. Forking is
+therefore a change of ownership rather than of acquisition — the tree amoebius reviews is already the tree it
+builds — and this phase moves it to `src/vendor/**` when amoebius takes the maintenance obligation on.
 
 > **Honesty.** Supernova remains provenance, not evidence. Phase 67 independently validates amoebius's
 > generated framing, CONNECT/LOOKUP, produce/consume/subscribe/seek surface, broker dedup, redelivery, and

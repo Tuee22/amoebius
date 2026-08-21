@@ -1,0 +1,37 @@
+# Authored expectation for the Phase-6 test-surface join.
+#
+# Section S clause 2: the run enumerates its test surfaces and joins them completely to an
+# independently authored expectation. The join is two-way and total, so a check that
+# exists but is claimed by no surface fails the gate, and a surface naming an id nothing
+# enumerates fails it too.
+#
+# owner is the registry the ids are enumerated from at run time:
+#   metrics   the metric keys in .build/calculus/workflow/phase-results.tsv
+#   checks    the check ids tools/workflow_calculus_gate.py implements
+#
+# `obligation-ledger-balances` and `every-workflow-replayed` are two surfaces over one
+# table because they are two claims: that each workflow's accounting closes, and that every
+# workflow the table names was actually run rather than assumed.
+#
+# The last two surfaces are the ones this register cannot reach. Binding a claim to the
+# fixture that discharges it is the evidence calculus's, which is the next phase's; and
+# nothing here provisions anything, so a provider that fails to delete what it was asked to
+# delete stays the live-effect observation section 3 says it is. Both carry a metric whose
+# recorded value is the literal UNVERIFIED.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+five-arms-one-vocabulary	metrics	suite-checks
+obligation-ledger-balances	metrics	obligations
+every-workflow-replayed	metrics	workflows
+teardown-is-a-type-obligation	metrics	compile-fail-pairs
+workflow-calculus-mutants	metrics	mutants
+workflow-calculus-purity	metrics	calculus-purity
+workflow-calculus-acceptance	metrics	acceptance-token
+evidence-binding	metrics	evidence-binding
+runtime-fidelity	metrics	runtime
+ledger-oracle-shape	checks	ledger-oracle-complete
+calculus-purity-scan	checks	calculus-is-pure
+suite-acceptance	checks	suite-acceptance-token
+undischarged-obligation-typecheck	checks	undischarged-and-unconditional-rejected
+mutant-locus-separation	checks	mutants-red-at-own-locus
+generated-output-discipline	checks	emitted-results-untracked

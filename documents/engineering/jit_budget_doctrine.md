@@ -184,8 +184,15 @@ Stated plainly, because a budget calculus reads as stronger than it is:
   admitted against its declared bound, and a recipe that exceeds its own declaration is refused mid-write. That
   refusal is the one place a partial rendering can occur; [§4](#4-admission-fails-first-not-last)'s staging rule
   is what keeps it from becoming a partial *artifact*, and it is why the per-item bound is part of the grant.
-- **Nothing here is built.** No phase has yet delivered a grant, an admission, or a reaper. Status lives only
-  in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+- **The grant, admission, and the reaper are built; the rest of this document is not.**
+  [Phase 4](../../DEVELOPMENT_PLAN/phase_04_budget_calculus.md) delivered the grant issued from a finite pool,
+  the ceiling and concurrency as one bound, `admit`/`admitFirst` over a demand, the staging rule of
+  [§4](#4-admission-fails-first-not-last), and the retention grant that has no constructor without a reaper —
+  all as pure values in Register 1, which is a decision result and not a runtime one. What no phase has
+  delivered is [§6](#6-composition-sums-and-the-sum-is-checked)'s additivity, which is stated over the lift
+  calculus above this one, or any live observation of the free space
+  [§7](#7-the-residue) keeps outside the calculus. Status lives only in the
+  [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 

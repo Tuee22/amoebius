@@ -1,0 +1,52 @@
+# The independent oracle for the Phase-5 witness.
+#
+# Authored from `documents/engineering/lift_and_compose_doctrine.md` section 7: "a
+# transition consumes evidence that its precondition holds — that the frame exists, that
+# the engine is present, that the image is resolved. The witness is produced by
+# observation and cannot be asserted, so a step cannot claim to have crossed a boundary it
+# did not cross."
+#
+# The table is the refusing half of that sentence. The other half — that no constructor
+# exists to write a witness down with — is a claim about a module's export list, and the
+# committed compile-fail pair is what holds it; nothing a table can say would.
+#
+# Every admitted transition is crossed with every observation, so each row answers one
+# question: does *this* evidence license *this* move? Two rules decide all of them.
+#
+#   matching    the observation must report the precondition the transition needs. A
+#               running frame licenses entering a frame and staying in one; a responding
+#               engine licenses entering a container and staying in one; a responding host
+#               licenses staying on the host
+#   nothing     `nothing-observed` licenses no transition at all, which is the row that
+#               matters most: it is what a caller reaches for when there is nothing to
+#               observe, and a witness produced from it is one that was asserted
+#
+# A responding engine does not license entering a frame, and a running frame does not
+# license entering a container. That is deliberate and is why the witness is indexed by
+# the transition rather than by a layer: "the frame exists" and "the engine answered" are
+# different facts, and a step must not be able to spend one for the other.
+#
+# The five transitions are the ones the relation admits; a row for a pair with no
+# inhabitant would be asking about a witness for a move that cannot be made.
+#
+# source<TAB>target<TAB>observation<TAB>admits
+on-host	in-frame	host-responding	no
+on-host	in-frame	frame-running	yes
+on-host	in-frame	engine-responding	no
+on-host	in-frame	nothing-observed	no
+in-frame	in-container	host-responding	no
+in-frame	in-container	frame-running	no
+in-frame	in-container	engine-responding	yes
+in-frame	in-container	nothing-observed	no
+on-host	on-host	host-responding	yes
+on-host	on-host	frame-running	no
+on-host	on-host	engine-responding	no
+on-host	on-host	nothing-observed	no
+in-frame	in-frame	host-responding	no
+in-frame	in-frame	frame-running	yes
+in-frame	in-frame	engine-responding	no
+in-frame	in-frame	nothing-observed	no
+in-container	in-container	host-responding	no
+in-container	in-container	frame-running	no
+in-container	in-container	engine-responding	yes
+in-container	in-container	nothing-observed	no

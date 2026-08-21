@@ -1,0 +1,39 @@
+# The independent oracle for the Phase-5 transition relation.
+#
+# Authored from `documents/engineering/lift_and_compose_doctrine.md` section 7 — "every
+# pair either has a constructor that performs the transition or has no inhabitant at all"
+# — read with `substrate_doctrine.md` section 4, which is where the shape of the layer
+# stack comes from: a host synthesizes a Linux frame, and that frame runs a container.
+# Nothing below is read off the implementation, which is what lets this table stay red
+# when the relation is wrong.
+#
+# Three rules decide every row, and each is stated once here rather than nine times below:
+#
+#   outward     a transition moves one layer outward, so `on-host -> in-frame` and
+#               `in-frame -> in-container` have constructors
+#   no descent  nothing moves inward. An effect confined by a frame cannot reach the host
+#               that provides it — that confinement is what the frame is for — so the
+#               three inward pairs have no inhabitant
+#   no skipping `on-host -> in-container` has no inhabitant either. Reaching a container
+#               from the host is two moves, and saying so is what composition is for; a
+#               relation that closed under transitivity would erase the distinction
+#
+# The three reflexive pairs are admitted, because an effect that has not moved is still
+# somewhere and a relation with no identity is not one a path can be built over. They take
+# a witness like every other transition.
+#
+# The gate joins this table to `admits` in both directions: a pair the table admits and
+# the relation refuses fails, and so does a pair the relation admits and the table does
+# not. The nine rows are every ordered pair of the closed three-member set, so a tenth row
+# names a layer that does not exist and a missing row is a pair nothing decided.
+#
+# source<TAB>target<TAB>admitted<TAB>why
+on-host	on-host	yes	an effect that has not moved is still on the host
+on-host	in-frame	yes	the host provides the frame, and entering it is one move outward
+on-host	in-container	no	the container is run by the frame, so this is two moves and composition says so
+in-frame	on-host	no	no descent: an effect confined by a frame cannot reach the host that provides it
+in-frame	in-frame	yes	an effect that has not moved is still inside the frame
+in-frame	in-container	yes	the frame runs the container, and entering it is one move outward
+in-container	on-host	no	no descent, and across two boundaries at once
+in-container	in-frame	no	no descent: the container cannot reach the frame that runs it
+in-container	in-container	yes	an effect that has not moved is still inside the container

@@ -1,0 +1,63 @@
+# The independent oracle for the Phase-4 admission decision.
+#
+# Authored from `documents/engineering/jit_budget_doctrine.md` sections 2, 3 and 4, read
+# with the capacity vocabulary of `resource_capacity_doctrine.md` section 3 — a demand is
+# checked against a budget before the thing exists, and the check produces the witness the
+# operation requires. Every row below is a demand vector and the verdict the doctrine
+# gives it; none of them is read off the implementation, which is what lets this table
+# stay red when `admit` is wrong.
+#
+# The four properties the rows exercise, in the order the doctrine states them:
+#
+#   section 2, specific   a grant for one location and purpose does not authorise another,
+#                         so the demand's location and purpose are checked before its size
+#   section 3, per-item   "a recipe that renders more than its grant's per-item bound is
+#                         refused at admission, so the ceiling cannot be overrun by one
+#                         item any more than by many"
+#   section 3, ceiling    the sum of what is in flight and what is asked
+#   section 3, concurrency  "the ceiling was never the constraint; the ceiling **and** the
+#                         concurrency were, together" — the `concurrency-*` rows are the
+#                         ones that refuse while the ceiling still has room, and they are
+#                         the rows a grant that mislaid its concurrency bound admits
+#
+# The order matters and is part of the expectation: a demand that is wrong in two ways is
+# refused for the first reason in that list, so a refusal is attributable to one arm
+# rather than to whichever check happened to run first. The `per-item-before-ceiling`,
+# `wrong-location-before-size` and `wrong-purpose-before-size` rows are wrong in two ways
+# on purpose, and each names the earlier reason.
+#
+# A per-item bound above the ceiling is not a second policy, it is the ceiling: the
+# `per-item-clamped` row states that, and it is why no row expects `ceiling-exceeded` for
+# a single demand larger than the ceiling.
+#
+# Quantities are unit-free. Section 3's worked example is in gigabytes and the rows keep
+# its proportions; nothing scales them.
+#
+# The grant every row is issued against sits at location `cache-a` for purpose
+# `build-cache`. The demand columns vary; the grant does not.
+#
+# case<TAB>ceiling<TAB>concurrency<TAB>per_item<TAB>held_bytes<TAB>held_slots<TAB>demand_location<TAB>demand_purpose<TAB>demand_bytes<TAB>verdict<TAB>reason
+fits-empty	40	4	15	0	0	cache-a	build-cache	10	admitted	-
+fits-to-the-ceiling	40	4	15	30	2	cache-a	build-cache	10	admitted	-
+fits-on-the-last-slot	40	4	15	10	3	cache-a	build-cache	10	admitted	-
+fits-at-the-per-item-bound	40	4	15	0	0	cache-a	build-cache	15	admitted	-
+fits-nothing-asked	40	4	15	0	0	cache-a	build-cache	0	admitted	-
+narrow-grant-fits	1	1	1	0	0	cache-a	build-cache	1	admitted	-
+ceiling-one-over	40	4	15	31	1	cache-a	build-cache	10	refused	ceiling-exceeded
+ceiling-already-full	40	4	15	40	1	cache-a	build-cache	1	refused	ceiling-exceeded
+ceiling-sum-overruns	40	4	15	28	1	cache-a	build-cache	15	refused	ceiling-exceeded
+narrow-grant-ceiling	1	1	1	1	0	cache-a	build-cache	1	refused	ceiling-exceeded
+concurrency-with-room-to-spare	40	2	15	20	2	cache-a	build-cache	10	refused	concurrency-exhausted
+concurrency-single-slot	40	1	15	5	1	cache-a	build-cache	5	refused	concurrency-exhausted
+concurrency-none-granted	40	0	15	0	0	cache-a	build-cache	1	refused	concurrency-exhausted
+narrow-grant-concurrency	1	1	1	0	1	cache-a	build-cache	0	refused	concurrency-exhausted
+per-item-one-over	40	4	15	0	0	cache-a	build-cache	16	refused	per-item-bound-exceeded
+per-item-before-ceiling	40	4	15	30	1	cache-a	build-cache	16	refused	per-item-bound-exceeded
+per-item-clamped	40	4	60	0	0	cache-a	build-cache	41	refused	per-item-bound-exceeded
+wrong-location-empty	40	4	15	0	0	cache-b	build-cache	1	refused	wrong-location
+wrong-location-would-fit	40	4	15	0	0	scratch	build-cache	10	refused	wrong-location
+wrong-location-before-size	40	4	15	0	0	cache-b	build-cache	99	refused	wrong-location
+wrong-purpose-checkpoint	40	4	15	0	0	cache-a	model-checkpoint	1	refused	wrong-purpose
+wrong-purpose-artifact-store	40	4	15	0	0	cache-a	artifact-store	10	refused	wrong-purpose
+wrong-purpose-working-directory	40	4	15	0	0	cache-a	working-directory	10	refused	wrong-purpose
+wrong-purpose-before-size	40	4	15	30	1	cache-a	model-checkpoint	99	refused	wrong-purpose

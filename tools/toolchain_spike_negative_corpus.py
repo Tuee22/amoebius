@@ -7,9 +7,9 @@ them under `.build/test-corpora/phase_01/` and requires each to turn its own che
 other — the single-defect discipline of `development_plan_standards.md` section M clause 8.
 
 **This file deliberately contains the very strings the scan rejects**: a developer-home
-path, an archive checksum beside a URL, and a fixed dependency revision. That is what
-makes it a corpus rather than a description of one, and it is why the scanner declares
-this module a corpus seed and steps over it. The exemption is one named file whose whole
+path, an archive checksum beside a URL, a fixed dependency revision, and the retired
+`supernova` git source. That is what makes it a corpus rather than a description of one,
+and it is why the scanner declares this module a corpus seed and steps over it. The exemption is one named file whose whole
 purpose is visible in twenty lines, which is the same trade
 `artifact_policy.LEDGER_SHAPE_EXEMPT` already makes for the hand-written ledger corpus.
 Keeping the bodies inside the gate instead would have meant exempting the gate, and the
@@ -20,14 +20,19 @@ from __future__ import annotations
 
 import json
 
+# The control names an upstream that is fetched and *not* vendored, which is the one shape
+# `cabal.project` still admits. It carries no `post-checkout-command`, because there is no
+# longer an authored patch for one to name: the negatives that need a patch reference add
+# the line themselves, so each still differs from this body in exactly one dimension.
 _POSITIVE = (
     "packages:\n  ./probe/probe.cabal\n\n"
     "source-repository-package\n"
     "  type: git\n"
     "  location: https://example.invalid/upstream.git\n"
     "  tag: master\n"
-    "  post-checkout-command: apply_supernova_patch patches/supernova_ghc_9_12.patch\n"
 )
+
+_PATCH_LINE = "  post-checkout-command: apply-patch {}\n"
 
 # name -> (filename, the check it must turn red, body)
 NEGATIVES: dict[str, tuple[str, str, str]] = {
@@ -58,15 +63,25 @@ NEGATIVES: dict[str, tuple[str, str, str]] = {
     "source-closure": (
         "cabal.project",
         "source-closure",
+        _POSITIVE + _PATCH_LINE.format("test/fixture/__pycache__/ignored-upstream.patch"),
+    ),
+    # The other half of the same check, and the one Sprint 1.8 added. `supernova` is
+    # reviewed source under `vendor/**`; a project that fetches it from git again builds
+    # source no one here read, while the reviewed copy sits unused beside it. The seed is
+    # the exact stanza the sprint deleted, so the retirement is held by a mutant rather
+    # than by the absence of a file.
+    "vendor-refetched": (
+        "cabal.project",
+        "source-closure",
         _POSITIVE.replace(
-            "patches/supernova_ghc_9_12.patch",
-            "test/fixture/__pycache__/ignored-upstream.patch",
+            "  location: https://example.invalid/upstream.git\n",
+            "  location: https://github.com/cr-org/supernova.git\n  subdir: lib proto\n",
         ),
     ),
     "patch-under-authored-root": (
         "cabal.project",
         "patch-under-authored-root",
-        _POSITIVE.replace("supernova_ghc_9_12.patch", "absent_upstream.patch"),
+        _POSITIVE + _PATCH_LINE.format("patches/absent_upstream.patch"),
     ),
     "integrity-pin": (
         "requirements.json",

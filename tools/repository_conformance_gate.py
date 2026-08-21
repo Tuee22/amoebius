@@ -69,9 +69,19 @@ SCRATCH = ROOT / ".build" / "tmp" / "repository_conformance"
 # The decidable form is the target tree's own fixed second level, which the oracle parses.
 ROLE_NOUNS = ("spec", "fixture", "golden", "negative", "oracle", "mutant", "harness")
 
-# Units doctrine section 2.1 admits as separately resolvable: foreign resolution and
-# foreign provenance. Every other package declaration is a defect.
-ADMITTED_PACKAGES = ("amoebius.cabal", "probe/probe.cabal", "vendor/dual/dual.cabal")
+# Units doctrine section 2.1 admits two grounds as separately resolvable, and names the
+# root each is instantiated at: foreign provenance is `vendor/**`, foreign resolution is
+# `probe/**`. The admitted set is derived from those roots rather than enumerated, because
+# an enumeration is a list of today's instances wearing a rule's clothes — this one named
+# `vendor/dual/dual.cabal` and went stale the first time a second upstream was vendored,
+# reporting a package the doctrine plainly admits. Everything else is a defect.
+ADMITTED_PACKAGE_ROOTS = ("vendor/", "probe/")
+ADMITTED_PACKAGES = ("amoebius.cabal",)
+
+
+def package_admitted(path: str) -> bool:
+    """Whether one `.cabal` path is a unit section 2.1 admits apart from the one package."""
+    return path in ADMITTED_PACKAGES or path.startswith(ADMITTED_PACKAGE_ROOTS)
 
 SEVEN_NOUN_LICENSE = "seven-noun-rule"
 
@@ -376,7 +386,7 @@ def check_resolution(root: Path, paths: list[str]) -> tuple[list[str], list[str]
             problems.append(f"{PACKAGE}: main-is {name!r} resolves to nothing")
 
     declarations = sorted(path for path in paths if path.endswith(".cabal"))
-    stray = [path for path in declarations if path not in ADMITTED_PACKAGES]
+    stray = [path for path in declarations if not package_admitted(path)]
     package_problems = [
         f"{path} is a package declaration outside the units section 2.1 admits apart"
         for path in stray
@@ -384,7 +394,7 @@ def check_resolution(root: Path, paths: list[str]) -> tuple[list[str], list[str]
     project = read(root, PROJECT)
     for line in project.splitlines():
         candidate = line.strip().lstrip("./")
-        if candidate.endswith(".cabal") and candidate not in ADMITTED_PACKAGES:
+        if candidate.endswith(".cabal") and not package_admitted(candidate):
             package_problems.append(f"{PROJECT} names the package {candidate}")
     return problems, package_problems
 

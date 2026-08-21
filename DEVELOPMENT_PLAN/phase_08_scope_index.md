@@ -37,7 +37,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-7 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+🔄 Active — Phase 7 sealed on 2026-08-20, so this is the open contract. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence. All five now exist, which is what makes this contract's coverage decidable rather than pending.
 
 **Pre-natural-architecture status record (invalidated where it claims completion):**
 

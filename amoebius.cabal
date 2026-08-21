@@ -19,6 +19,66 @@ flag artifact-calculus-recipe-admits-clock-mutant
   default: False
   manual: True
 
+flag budget-calculus-ceiling-separated-from-concurrency-mutant
+  description: Build the budget-calculus mutant whose admission drops the concurrency bound
+  default: False
+  manual: True
+
+flag budget-calculus-grant-defaults-unbounded-mutant
+  description: Build the budget-calculus mutant whose issuer defaults an unsatisfiable request to a grant
+  default: False
+  manual: True
+
+flag budget-calculus-admit-after-partial-write-mutant
+  description: Build the budget-calculus mutant whose store commits before the declaration is checked
+  default: False
+  manual: True
+
+flag lift-calculus-dispatch-admits-a-fallback-mutant
+  description: Build the lift-calculus mutant whose transition dispatch grows a catch-all arm
+  default: False
+  manual: True
+
+flag lift-calculus-witness-forged-without-observation-mutant
+  description: Build the lift-calculus mutant whose frame witness exists whatever was observed
+  default: False
+  manual: True
+
+flag lift-calculus-composition-joins-unmet-layers-mutant
+  description: Build the lift-calculus mutant whose plan joins transitions that do not meet
+  default: False
+  manual: True
+
+flag workflow-calculus-obligation-dropped-mutant
+  description: Build the workflow-calculus mutant whose teardown records no release
+  default: False
+  manual: True
+
+flag workflow-calculus-obligation-discharged-twice-mutant
+  description: Build the workflow-calculus mutant whose teardown records its release twice
+  default: False
+  manual: True
+
+flag workflow-calculus-transfer-without-a-condition-mutant
+  description: Build the workflow-calculus mutant whose transfer records a teardown instead
+  default: False
+  manual: True
+
+flag evidence-calculus-claim-without-a-fixture-mutant
+  description: Build the evidence-calculus mutant that admits a fixture naming no path
+  default: False
+  manual: True
+
+flag evidence-calculus-mutant-points-at-the-wrong-locus-mutant
+  description: Build the evidence-calculus mutant whose records all report the same locus
+  default: False
+  manual: True
+
+flag evidence-calculus-second-mutant-registry-mutant
+  description: Build the evidence-calculus mutant that admits a second registry source
+  default: False
+  manual: True
+
 flag illegal-state-mutant
   description: Build the committed Phase-6 broken-decision mutant
   default: False
@@ -1593,6 +1653,92 @@ library artifact-calculus
   if flag(artifact-calculus-handle-escapes-region-mutant)
     cpp-options: -DARTIFACT_CALCULUS_HANDLE_ESCAPES_REGION_MUTANT
 
+library budget-calculus
+  visibility: public
+  exposed-modules:
+      Amoebius.Calculus.Budget.Admission
+      Amoebius.Calculus.Budget.Grant
+      Amoebius.Calculus.Budget.Retention
+      Amoebius.Calculus.Budget.Store
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(budget-calculus-ceiling-separated-from-concurrency-mutant)
+    cpp-options: -DBUDGET_CALCULUS_CEILING_SEPARATED_FROM_CONCURRENCY_MUTANT
+  if flag(budget-calculus-grant-defaults-unbounded-mutant)
+    cpp-options: -DBUDGET_CALCULUS_GRANT_DEFAULTS_UNBOUNDED_MUTANT
+  if flag(budget-calculus-admit-after-partial-write-mutant)
+    cpp-options: -DBUDGET_CALCULUS_ADMIT_AFTER_PARTIAL_WRITE_MUTANT
+
+library lift-calculus
+  visibility: public
+  exposed-modules:
+      Amoebius.Calculus.Lift.Compose
+      Amoebius.Calculus.Lift.Layer
+      Amoebius.Calculus.Lift.Transition
+      Amoebius.Calculus.Lift.Witness
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.21 && <4.22,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(lift-calculus-dispatch-admits-a-fallback-mutant)
+    cpp-options: -DLIFT_CALCULUS_DISPATCH_ADMITS_A_FALLBACK_MUTANT
+  if flag(lift-calculus-witness-forged-without-observation-mutant)
+    cpp-options: -DLIFT_CALCULUS_WITNESS_FORGED_WITHOUT_OBSERVATION_MUTANT
+  if flag(lift-calculus-composition-joins-unmet-layers-mutant)
+    cpp-options: -DLIFT_CALCULUS_COMPOSITION_JOINS_UNMET_LAYERS_MUTANT
+
+library workflow-calculus
+  visibility: public
+  exposed-modules:
+      Amoebius.Calculus.Workflow.Arm
+      Amoebius.Calculus.Workflow.Ledger
+      Amoebius.Calculus.Workflow.Obligation
+      Amoebius.Calculus.Workflow.Run
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.21 && <4.22,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(workflow-calculus-obligation-dropped-mutant)
+    cpp-options: -DWORKFLOW_CALCULUS_OBLIGATION_DROPPED_MUTANT
+  if flag(workflow-calculus-obligation-discharged-twice-mutant)
+    cpp-options: -DWORKFLOW_CALCULUS_OBLIGATION_DISCHARGED_TWICE_MUTANT
+  if flag(workflow-calculus-transfer-without-a-condition-mutant)
+    cpp-options: -DWORKFLOW_CALCULUS_TRANSFER_WITHOUT_A_CONDITION_MUTANT
+
+library evidence-calculus
+  visibility: public
+  exposed-modules:
+      Amoebius.Calculus.Evidence.Claim
+      Amoebius.Calculus.Evidence.Fixture
+      Amoebius.Calculus.Evidence.Mutant
+      Amoebius.Calculus.Evidence.Register
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.21 && <4.22,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(evidence-calculus-claim-without-a-fixture-mutant)
+    cpp-options: -DEVIDENCE_CALCULUS_CLAIM_WITHOUT_A_FIXTURE_MUTANT
+  if flag(evidence-calculus-mutant-points-at-the-wrong-locus-mutant)
+    cpp-options: -DEVIDENCE_CALCULUS_MUTANT_POINTS_AT_THE_WRONG_LOCUS_MUTANT
+  if flag(evidence-calculus-second-mutant-registry-mutant)
+    cpp-options: -DEVIDENCE_CALCULUS_SECOND_MUTANT_REGISTRY_MUTANT
+
 library workflow-runtime
   visibility: public
   exposed-modules:
@@ -2392,6 +2538,58 @@ test-suite artifact-calculus-spec
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
   if flag(artifact-calculus-recipe-admits-clock-mutant)
     cpp-options: -DARTIFACT_CALCULUS_RECIPE_ADMITS_CLOCK_MUTANT
+
+test-suite budget-calculus-spec
+  type: exitcode-stdio-1.0
+  main-is: BudgetCalculusSpec.hs
+  hs-source-dirs:
+      test/spec/calculus
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite lift-calculus-spec
+  type: exitcode-stdio-1.0
+  main-is: LiftCalculusSpec.hs
+  hs-source-dirs:
+      test/spec/calculus
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:lift-calculus,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite workflow-calculus-spec
+  type: exitcode-stdio-1.0
+  main-is: WorkflowCalculusSpec.hs
+  hs-source-dirs:
+      test/spec/calculus
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:workflow-calculus,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite evidence-calculus-spec
+  type: exitcode-stdio-1.0
+  main-is: EvidenceCalculusSpec.hs
+  hs-source-dirs:
+      test/spec/calculus
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:evidence-calculus,
+      directory >=1.3 && <1.4,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
 
 test-suite capacity-topology-spec
   type: exitcode-stdio-1.0

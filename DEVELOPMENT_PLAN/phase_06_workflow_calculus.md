@@ -12,7 +12,7 @@ The rule behind the workflow calculus is owned by [`workflow_calculus_doctrine.m
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, documents/engineering/workflow_calculus_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -25,7 +25,7 @@ The rule behind the workflow calculus is owned by [`workflow_calculus_doctrine.m
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 6.1: The workflow calculus 📋](#sprint-61-the-workflow-calculus-)
+- [Sprint 6.1: The workflow calculus ✅](#sprint-61-the-workflow-calculus-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,7 +33,30 @@ The rule behind the workflow calculus is owned by [`workflow_calculus_doctrine.m
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-5 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — built and sealed 2026-08-20, the fourth of the five inserted calculi to be built. `python3
+tools/workflow_calculus_gate.py` passes all thirteen sides on substrate `none`, lane `none`, natural `arm64`,
+untranslated. An independently authored obligation ledger names eight obligations over five workflows and
+every one is replayed against what the run actually recorded; the four calculus modules carry no ambient read
+and no partial token; the suite reaches its acceptance token with ten checks green; three compile-fail pairs
+are red at the reason each asserts; and all three seeded mutants redden their own locus and no other.
+Attestation `sha256:7f3b34a513bdad679fafa266b46e4e6509a8d038687911dc493b63216dc6c855` binds to a 2,127-file source snapshot; as everywhere here, the
+reference names the run and this record follows it.
+
+**Why the ledger asks three questions instead of one.** A single "the accounting is correct" check would have
+been cheaper and worth less, because the three ways an obligation can be mishandled are invisible to each
+other. Dropping one breaks the equality of the provisioned and released *sets* and leaves the multiplicity
+intact. Discharging one twice does the reverse — the sets stay equal, and only a count notices. And a transfer
+recorded as a teardown leaves both untouched while losing the only statement of when the resource actually
+goes away. Each seeded mutant reddens exactly one of the three, which is what makes the three questions
+separate claims rather than three spellings of one.
+
+**What the type system carries, and what it does not.** The outstanding-obligation set is the workflow's type
+index: `provision` adds a name, `teardown` and `transfer` remove one, and `runWorkflow` accepts only a
+workflow that begins and ends owing nothing. There is no combinator that shrinks the set any other way, which
+is what [`workflow_calculus_doctrine.md` §3](../documents/engineering/workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation)'s
+"no discard rule" means here — dropping an obligation is not refused at run time, it is unspellable. What the
+type does not carry is whether the provider actually deleted anything, which that same section already
+records as a `live-effect` observation and this register does not reach.
 
 ## Phase Summary
 
@@ -60,10 +83,13 @@ Make teardown an obligation the type system tracks rather than a step somebody r
 
 ## Sprints
 
-## Sprint 6.1: The workflow calculus 📋
+## Sprint 6.1: The workflow calculus ✅
 
-**Status**: Planned
-**Implementation**: planned module path; concrete when Done
+**Status**: Done — 2026-08-20.
+**Implementation**: `src/Amoebius/Calculus/Workflow/{Arm,Obligation,Ledger,Run}.hs`,
+`tools/workflow_calculus_gate.py`, `test/spec/calculus/WorkflowCalculusSpec.hs`,
+`test/oracle/workflow_calculus/obligation_ledger.tsv`, `test/oracle/workflow_calculus_surfaces.tsv`,
+`test/negative/compile_fail/workflow_calculus/{workflow_discharges_its_obligation,workflow_ends_owing_a_teardown,transfer_names_its_condition,transfer_without_a_condition,teardown_discharges_what_was_provisioned,teardown_of_an_unheld_obligation}.hs`
 **Blocked by**: None.
 **Independent Validation**: A resource-ledger oracle authored independently, replaying a workflow trace and requiring the provisioned and released sets to be equal.
 **Docs to update**: `documents/engineering/workflow_calculus_doctrine.md`
@@ -83,15 +109,32 @@ Make teardown an obligation the type system tracks rather than a step somebody r
 
 A workflow ending while holding an undischarged obligation must fail to compile; a transferred obligation must name its condition.
 
+**Both are compile-fail pairs, and a third joined them.** Discharging an obligation is discharging a *named*
+one, so tearing down something the workflow never provisioned is as much a defect as ending while still owing.
+Left to the ordinary machinery that would have been a stuck type family — a diagnostic a reader has to decode
+— so `Remove`'s empty case is a `TypeError` that names the resource, and the fixture asserts that message
+rather than merely asserting that something failed. Each of the three pairs differs from its twin in exactly
+one dimension: whether the obligation is discharged, whether the transfer states a condition, and which
+resource is named.
+
 ### Remaining Work
 
-Everything. No workflow value, no teardown obligation and no explicit transfer exists.
+None for this phase. Parallel composition is admitted over disjoint resources and the disjointness is a
+constraint rather than a convention, but nothing here executes: what parallel composition asserts is that the
+two orders are equally admissible, not that anything ran at once. Binding a claim to the fixture that
+discharges it is the evidence calculus's, which is the next phase's and is recorded `UNVERIFIED` here; and a
+provider that fails to delete what amoebius asked it to delete remains the `live-effect` residue
+[`workflow_calculus_doctrine.md` §3](../documents/engineering/workflow_calculus_doctrine.md#3-teardown-is-a-type-obligation)
+names, which no type discipline reaches.
 
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 
-- [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md)
+- [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md) — **done
+  2026-08-20.** §3's "the compile-fail fixture establishing that is owed by the phase that builds the workflow
+  calculus; none exists" is replaced by the three that do, and by what they establish: the obligation is a type
+  index, and dropping one is unspellable rather than refused.
 
 ## Related Documents
 - [Development Plan](README.md)

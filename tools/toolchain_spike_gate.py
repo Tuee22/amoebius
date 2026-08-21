@@ -80,9 +80,10 @@ SNAPSHOT_ROOT_NAME = ".build/dist-newstyle/phase_01-snapshot"
 STORE_PARENT = ROOT / ".build" / "cabal-store" / "phase_01"
 
 # `git` is listed even though nothing depends on it through the manifest: Cabal shells out
-# to it for the supernova source-repository-package, and a tool a gate needs is declared
-# and resolved rather than invoked bare (`substrate_doctrine.md` §3). Everything else these
-# names need — ghcup, node, npm, playwright — is pulled in by the resolver's own closure.
+# to it for the infernix and jitML source-repository-packages, and a tool a gate needs is
+# declared and resolved rather than invoked bare (`substrate_doctrine.md` §3). Everything
+# else these names need — ghcup, node, npm, playwright — is pulled in by the resolver's own
+# closure.
 TOOLS_REQUIRED = [
     "git", "ghc", "cabal", "dhall", "purs", "spago", "chromium",
     "protoc", "proto_lens_protoc", "java", "tla2tools",
@@ -94,7 +95,7 @@ CHECKS = {
     "resolved-path": "no tracked file carries a resolved home path",
     "integrity-pin": "no tracked file pins a package or archive integrity digest",
     "fixed-commit": "no tracked build configuration names a fixed dependency revision",
-    "source-closure": "no build configuration references an ignored worktree input",
+    "source-closure": "no build configuration references an ignored worktree input or refetches vendored source",
     "patch-under-authored-root": "every referenced compatibility patch is tracked under an authored root",
     "floor-decidable": "the floor is well formed and decidable for every substrate, not only this host's",
     "floor-satisfied": "every floor prerequisite of this host's substrate is satisfied",
@@ -144,6 +145,7 @@ FIXED_REVISION = re.compile(
 )
 BUILD_CONFIG_GLOBS = ("cabal.project", "*.project", "package.json", "*.cabal")
 PATCH_REFERENCE = re.compile(r"[A-Za-z0-9_.\-/]*patches/[A-Za-z0-9_.\-]+\.patch")
+GIT_LOCATION = re.compile(r"(?im)^\s*location\s*:\s*(\S+?)(?:\.git)?\s*$")
 
 
 class GateFailure(RuntimeError):
@@ -207,6 +209,29 @@ def scan_patch_references(relative: str, text: str) -> list[str]:
         while token.startswith("../"):
             token = token[3:]
         findings.append(token)
+    return findings
+
+
+def scan_refetched_vendor(text: str, present: set[str]) -> list[str]:
+    """A package vendored under `vendor/**` may not also be fetched from git.
+
+    `repository_layout_doctrine.md` section 4.1: a compatibility edit is reviewed source,
+    not a diff replayed against whatever the upstream branch head has become. The rule is
+    stated over the *pair* rather than over one package name, because what makes the fetch
+    wrong is that the reviewed copy exists — a project that refetches it is building
+    something no one read, while the tree carries the thing that was read. `supernova` is
+    the instance that retired the `patches/` root; the check outlives it.
+    """
+    vendored = {
+        path.split("/")[1]
+        for path in present
+        if path.startswith("vendor/") and path.count("/") >= 2
+    }
+    findings: list[str] = []
+    for match in GIT_LOCATION.finditer(text):
+        name = match.group(1).rstrip("/").rsplit("/", 1)[-1]
+        if name in vendored:
+            findings.append(f"fetches {name} from git though vendor/{name} is reviewed source")
     return findings
 
 
@@ -286,6 +311,8 @@ def closure_findings(relative: str, text: str, present: set[str] | None = None) 
             findings.append(
                 ("patch-under-authored-root", "r7", f"patch {patch} is not in the source snapshot")
             )
+    for message in scan_refetched_vendor(text, present):
+        findings.append(("source-closure", "r7", message))
     return findings
 
 
@@ -545,11 +572,16 @@ REPRESENTATIVE_TARGETS = ("probe:probe", "probe:decode", "probe:sim", "proto")
 
 
 def source_env(source_root: Path = ROOT) -> dict[str, str]:
-    environment = toolchain.contained_env()
-    environment["PATH"] = os.pathsep.join(
-        [str(source_root / "tools"), environment.get("PATH", "")]
-    )
-    return environment
+    """The contained subprocess environment, taken from the tree the run is solving.
+
+    This once prepended `<source_root>/tools` so that Cabal's `post-checkout-command`
+    found the patch helper inside whichever copy of the tree was being resolved — the
+    worktree for one pass, the snapshot for the other. The helper and the fetch it
+    patched are both gone, so the parameter now only records which tree the caller means;
+    nothing on `PATH` is read out of it.
+    """
+    del source_root
+    return toolchain.contained_env()
 
 
 def build_env(resolved: dict[str, Any], *, source_root: Path = ROOT) -> dict[str, str]:
@@ -564,8 +596,9 @@ def build_env(resolved: dict[str, Any], *, source_root: Path = ROOT) -> dict[str
     directories = [
         str(Path(resolved[name]["path"]).parent)
         # `git` is here for the same reason as the codegen pair: Cabal materializes the
-        # `source-repository-package` by running it, and a resolved tool that is not put
-        # where its consumer looks is a resolution the run then declines to use.
+        # remaining `source-repository-package` stanzas by running it, and a resolved tool
+        # that is not put where its consumer looks is a resolution the run then declines to
+        # use. `supernova` is no longer among them — it is read from `vendor/**`.
         for name in ("protoc", "proto_lens_protoc", "git")
         if name in resolved
     ]
@@ -742,15 +775,22 @@ def build_side(resolved: dict[str, Any], store: str, log: Path) -> bool:
         print(f"  FAIL  clean-store-build   cabal exited {status}; transcript at {rel(log)}")
         return False
 
-    checkouts = sorted(BUILD_ROOT.glob("src/supernova-*/lib/src/Pulsar/Internal/Core.hs"))
-    if len(checkouts) != 1:
-        print(f"  FAIL  clean-store-build   expected one supernova checkout, found {len(checkouts)}")
+    # The build has to have used the reviewed copy, and a green cabal alone does not say
+    # so: a project that refetched the upstream would compile just as happily against
+    # source no one here read. Two observations settle it — the run-local checkout root
+    # holds no `supernova`, and the compatibility edit is present in the tracked tree
+    # rather than replayed into a checkout.
+    checkouts = sorted(BUILD_ROOT.glob("src/supernova-*"))
+    if checkouts:
+        found = ", ".join(rel(path) for path in checkouts)
+        print(f"  FAIL  clean-store-build   supernova was fetched into a run-local checkout: {found}")
         return False
-    if "Control.Monad " not in checkouts[0].read_text(encoding="utf-8"):
-        print("  FAIL  clean-store-build   the authored compatibility patch did not reach the checkout")
+    vendored = ROOT / "vendor" / "supernova" / "lib" / "src" / "Pulsar" / "Internal" / "Core.hs"
+    if "Control.Monad " not in vendored.read_text(encoding="utf-8"):
+        print(f"  FAIL  clean-store-build   {rel(vendored)} carries no compatibility edit")
         return False
     print(f"  ok    clean-store-build   built into an empty store; transcript at {rel(log)}")
-    print("  ok    clean-store-build   the tracked patch under patches/ applied into the run-local checkout")
+    print("  ok    clean-store-build   built from vendored supernova source, with no git checkout")
     return True
 
 
@@ -804,10 +844,11 @@ def probe_side(resolved: dict[str, Any], store: str, run_dir: Path) -> bool:
 
 
 def codegen(resolved: dict[str, Any], run_dir: Path) -> bool:
-    sources = sorted(BUILD_ROOT.glob("src/supernova-*/proto/src/pulsar_api.proto"))
-    if len(sources) != 1:
-        print(f"  FAIL  protocol-codegen    expected one checked-out pulsar_api.proto, found {len(sources)}")
+    schema = ROOT / "vendor" / "supernova" / "proto" / "src" / "pulsar_api.proto"
+    if not schema.is_file():
+        print(f"  FAIL  protocol-codegen    the vendored schema {rel(schema)} is absent")
         return False
+    sources = [schema]
     output = clear(PROTO_OUT)
     result = capture(
         [

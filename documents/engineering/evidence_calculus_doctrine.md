@@ -146,8 +146,14 @@ Stated plainly, because an evidence calculus is exactly the kind of machinery th
 - **It does not close the self-referential gap.** [§4](#4-independence-is-what-makes-a-fixture-worth-running)'s
   mutation argument reduces the risk; it does not eliminate it, and a gate and its subject sharing an author
   share that author's blind spots.
-- **Nothing here is built.** No phase has yet delivered a claim value, a fixture binding, or a register
-  declaration. Status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+- **The claim value, the fixture binding, and the register declaration are built; the judgement is not.**
+  [Phase 7](../../DEVELOPMENT_PLAN/phase_07_evidence_calculus.md) delivered a claim that carries its
+  discharge, the four kinds paired one-to-one with what each entitles a claim to say, the register model as a
+  value, and the mutant record with its carrier and its locus — all as pure values in Register 1. The three
+  residues above are untouched by that, and the third one especially: the phase's own inventory is a hand
+  written one for a *different* phase, which makes the derivation and the expectation two errors rather than
+  one, and does not make them independent. Status lives only in the
+  [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 

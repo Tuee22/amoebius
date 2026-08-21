@@ -1,11 +1,13 @@
--- One authored package, plus the two units doctrine section 2.1 admits apart:
+-- One authored package, plus the units doctrine section 2.1 admits apart:
 -- probe/ solves against a deliberately perturbed project file (foreign resolution) and
--- vendor/dual is not authored here (foreign provenance). Every other root that once
+-- vendor/** is not authored here (foreign provenance). Every other root that once
 -- carried a package declaration is a stanza in amoebius.cabal.
 packages:
   ./amoebius.cabal
   ./probe/probe.cabal
   ./vendor/dual/dual.cabal
+  ./vendor/supernova/lib/supernova.cabal
+  ./vendor/supernova/proto/proto.cabal
 
 -- The compiler is an authored compatibility requirement, not a path. The range lives in
 -- tools/toolchain_requirements.json and the phase gate passes the resolved compiler on the command
@@ -24,25 +26,16 @@ allow-newer:
   supernova:text,
   proto:base
 
--- A release channel, not a resolved revision: each clean run resolves the current branch head
--- and records the observed identity under .build/locks/. The compatibility patch is a tracked
--- authored input under patches/, applied into the run-local build tree only.
---
--- The gate puts the authored path-independent patch helper on PATH. The helper resolves
--- the physical checkout from its own location, so every build root may live at the canonical
--- .build/dist-newstyle/** depth. A missing helper or patch fails the checkout loudly.
-source-repository-package
-  type: git
-  location: https://github.com/cr-org/supernova.git
-  tag: master
-  subdir: lib proto
-  post-checkout-command: apply_supernova_patch patches/supernova_ghc_9_12.patch
-
 -- The infernix and jitML cores are foreign provenance: their source is not authored here.
 -- lib:infernix and lib:jitml previously reached them with `hs-source-dirs: ../../infernix/src`
 -- and `../../jitML/src`, which resolves against the developer's home layout rather than the
--- source snapshot. Both are release channels, not pinned revisions, on the same terms as
--- supernova above (repository_layout_doctrine.md section 2.2, out-of-tree hs-source-dirs).
+-- source snapshot. Both name a release channel rather than a resolved revision
+-- (repository_layout_doctrine.md section 2.2, out-of-tree hs-source-dirs).
+--
+-- `supernova` is no longer among them. A compatibility edit is reviewed source under vendor/**,
+-- never a diff replayed against whatever the upstream branch head has become
+-- (repository_layout_doctrine.md section 4.1), so the two packages above are read from the
+-- source snapshot and the patches/ root that once carried the diff is gone.
 source-repository-package
   type: git
   location: https://github.com/Tuee22/infernix.git

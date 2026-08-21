@@ -14,7 +14,7 @@ Runtime, cluster, and gadt-decode semantic fidelity remain UNVERIFIED.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md, documents/engineering/pulsar_client_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -32,6 +32,7 @@ Runtime, cluster, and gadt-decode semantic fidelity remain UNVERIFIED.
 - [Sprint 1.5: `supernova` fork + `proto-lens` codegen build probe 📋](#sprint-15-supernova-fork--proto-lens-codegen-build-probe-)
 - [Sprint 1.6: Dynamic resolution and generated-output migration 📋](#sprint-16-dynamic-resolution-and-generated-output-migration-)
 - [Sprint 1.7: Discover, then ensure — the resolver acquires what it needs 📋](#sprint-17-discover-then-ensure--the-resolver-acquires-what-it-needs-)
+- [Sprint 1.8: Vendor `supernova`, retire `patches/` ✅](#sprint-18-vendor-supernova-retire-patches-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -39,7 +40,39 @@ Runtime, cluster, and gadt-decode semantic fidelity remain UNVERIFIED.
 
 ## Phase Status
 
-✅ Done — resealed 2026-08-20, on the first run after Phase 0 closed. `python3 tools/toolchain_spike_gate.py`
+✅ **Done — resealed 2026-08-20 on the contract [Sprint 1.8](#sprint-18-vendor-supernova-retire-patches-)
+added.** `python3 tools/toolchain_spike_gate.py` passes all twelve sides on substrate `none`, lane `none`,
+natural `arm64`, untranslated. The floor resolves with nothing expected on the host, two independent
+resolutions admit the same 260 packages, and the same graph resolves from the 2,088-file source snapshot with
+no worktree help. The representative set builds into an empty store **from vendored `supernova` source, with
+no git checkout written beneath the build root**, and all five probes match their independently authored
+expectations. All seven seeded provenance negatives — including the `vendor-refetched` seed this sprint added
+— redden their own check and no other, both committed mutants redden, 40 surfaces join completely to 62
+enumerated items, and the outside-host inventory is unchanged. Attestation
+`sha256:623f31521d922268cb637f74e9cb3ae31610d483db60ca35c43a52ad9b448c5e` binds to source snapshot
+`sha256:f2d7c0faf7462458…`, which names that run rather than the tree that afterwards records it.
+
+**What the sprint changed, and what it did not.** `supernova` is now `vendor/supernova/{lib,proto}/**` with a
+`PROVENANCE.md` carrying no commit, tag, or checksum; `cabal.project` reaches it through `packages:` and
+carries no `source-repository-package` stanza for it and no `post-checkout-command`;
+`patches/supernova_ghc_9_12.patch`, `tools/apply_supernova_patch`, and the `patches/` root are deleted, and
+`artifact_policy.AUTHORED_ROOTS` no longer names the root. The gate's `source-closure` check gained the arm
+that forbids fetching a package the tree also vendors, and the `vendor-refetched` negative holds the
+retirement rather than the absence of a file doing it. Nothing about the resolution contract moved: the same
+260 packages resolve, twice, from authored requirements.
+
+**One thing the vendored copy does not carry, recorded rather than absorbed.** Upstream commits the
+`proto-lens-protoc` output — some 32,000 lines of `Proto.PulsarApi` and `Proto.PulsarApi_Fields` — into the
+`supernova` library's own source tree, beside a `proto` package that generates the same two modules from the
+same `.proto` and then exposes neither. Copying them would have put generated output under an authored root,
+which the universal hygiene gate's generated-banner check rejects and
+[`repository_layout_doctrine.md` §3](../documents/engineering/repository_layout_doctrine.md#3-complete-generated-output-inventory)
+forbids. The vendored copy drops both modules and takes them from the `proto` package beside it, which
+generates them per run; `vendor/supernova/PROVENANCE.md` records that edit alongside the GHC 9.12 import.
+
+**Superseded seal (invalidated where it claims completion):**
+
+Done (invalidated) — resealed 2026-08-20, on the first run after Phase 0 closed. `python3 tools/toolchain_spike_gate.py`
 passes all twelve sides on substrate `none`, lane `none`, natural `arm64`, untranslated: the floor resolves with
 nothing expected on the host, two independent resolutions admit the same 260 packages, the same graph resolves
 from the 2,055-file source snapshot with no worktree help, the representative set builds into an empty store
@@ -196,9 +229,15 @@ host inventory that no tool wrote outside the checkout. The repository-local att
 sources, integrity observations, compatibility changes, and tool paths. A hard blocker is a red gate with
 external diagnostics, never a prose substitute for success.
 
-The source-closure check rejects a project or gate that references an ignored patch. Retained compatibility
-patches are reviewed external/authored inputs beneath `patches/**` or `vendor/**`; generated patch application
-results remain under `.build/`. The semantic scan also rejects a fixed dependency commit, package integrity hash,
+The source-closure check rejects a project or gate that references an ignored patch, and
+[Sprint 1.8](#sprint-18-vendor-supernova-retire-patches-) extends it to reject a `supernova` git source
+outright. A compatibility edit is reviewed source under `vendor/**` rather than a diff replayed against a
+resolved head
+([`repository_layout_doctrine.md` §4.1](../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-vendored-source-not-a-patch-against-a-moving-head)),
+so once that sprint lands the check's patch arm stands for the class it forbids rather than for a patch the
+tree carries.
+
+The semantic scan also rejects a fixed dependency commit, package integrity hash,
 or developer path even when no ignore pattern matches the file containing it.
 
 ```mermaid
@@ -472,6 +511,9 @@ consolidated gate.
 ### Remaining Work
 None. The observed fork identity, compatibility patch application, clean-store transcript, and generated
 protobuf module digests are retained in the Phase-1 run bundle beneath `.build/runs/phase_1/**`.
+[Sprint 1.8](#sprint-18-vendor-supernova-retire-patches-) supersedes the first two of those: a vendored
+`supernova` has no fork ref to observe and no patch to apply, and what this probe established about the
+codegen carries over unchanged.
 
 ## Sprint 1.6: Dynamic resolution and generated-output migration 📋
 **Status**: Planned
@@ -587,6 +629,71 @@ per-platform, keyed by the same canonical token. And the release-tarball unpacke
 first path segment unconditionally, which is right for an archive that unpacks into one versioned directory and
 throws away `bin/` for one that does not.
 
+## Sprint 1.8: Vendor `supernova`, retire `patches/` ✅
+**Status**: Done — 2026-08-20.
+**Implementation**: `vendor/supernova/{PROVENANCE.md,LICENSE,lib/**,proto/**}`, `cabal.project`,
+`probe/mutants/drop-allow-newer.project`, `tools/toolchain_spike_gate.py`,
+`tools/toolchain_spike_negative_corpus.py`, `tools/artifact_policy.py`; deleted
+`patches/supernova_ghc_9_12.patch`, `tools/apply_supernova_patch`, and the `patches/` root.
+**Blocked by**: Sprint 1.6
+**Independent Validation**: a clean resolution names no `supernova` git source, writes no checkout beneath
+`.build/dist-newstyle/**/src/`, and builds the probe from tracked source alone; a seeded stanza reintroducing
+the fetch reddens the source-closure check.
+**Docs to update**: `documents/engineering/repository_layout_doctrine.md`,
+`documents/engineering/pulsar_client_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`,
+`DEVELOPMENT_PLAN/README.md`
+
+### Objective
+
+Adopt [`repository_layout_doctrine.md` §4.1 — a compatibility edit is vendored source, not a patch against a
+moving head](../documents/engineering/repository_layout_doctrine.md#41-a-compatibility-edit-is-vendored-source-not-a-patch-against-a-moving-head):
+`supernova` becomes reviewed source under `vendor/**`, so the compatibility edit is read in place rather than
+re-applied each run to whatever the upstream branch head has become.
+
+### Deliverables
+
+- `vendor/supernova/**` carrying the upstream project's `lib` and `proto` packages as reviewed source, with
+  the GHC 9.12 `void` import applied in place rather than as a diff.
+- `vendor/supernova/PROVENANCE.md` recording the upstream project, its channel, and the released package
+  name and version, and no commit, tag, or archive checksum.
+- A `cabal.project` whose `packages` field reaches `vendor/supernova/**` and which carries no `supernova`
+  `source-repository-package` stanza and no `post-checkout-command`.
+- `patches/supernova_ghc_9_12.patch` and `tools/apply_supernova_patch` deleted, and the `patches/` root with
+  them.
+- A seeded negative that reintroduces a `supernova` git source and reddens the source-closure check, so the
+  retirement is held by a mutant rather than by the absence of a file.
+
+### Validation
+
+1. From the source snapshot with an empty store, the representative set resolves and builds with no git
+   checkout written beneath `.build/dist-newstyle/**/src/` for `supernova`.
+2. `git clean -fxd` removes every `supernova` path under `.build/` without reporting a skipped repository.
+   Two skips remain, for `infernix` and `jitML`, and they are that ledger row's to clear, not this sprint's.
+3. The seeded reintroduction mutant reddens the source-closure check and no other.
+4. The vendored tree carries no commit, tag, archive checksum, or developer-home path, and the provenance
+   scan reddens on a seeded one.
+
+### Remaining Work
+
+Two paths the plan named turned out to need no edit, which is worth recording rather than leaving as a silent
+difference. `probe/probe.cabal` still depends on `supernova` and `proto` by name, and those names now resolve
+to vendored packages instead of to a fetched subdirectory. `test/oracle/toolchain_spike_surfaces.tsv` is
+unchanged because the sprint adds a seeded negative rather than a check, so the authored join stays at 40
+surfaces over 62 items.
+
+None of the sprint's own work remains. `cabal.project` names no `supernova` git source, the clean-store build wrote no checkout for it beneath
+`.build/dist-newstyle/**/src/`, and the `vendor-refetched` seed reddens the source-closure check and no other.
+
+**Where the sprint's four validation items landed.** Items 1, 3 and 4 are gate checks and passed as such:
+`clean-store-build` now asserts the absence of the checkout rather than the presence of a patched one, the
+seeded reintroduction is one of seven provenance negatives each red at its own check, and the vendored tree
+carries no commit, tag, checksum, or developer-home path — the same `resolved-path`, `integrity-pin`, and
+`fixed-commit` scanners that cover the rest of the snapshot cover it, with their own seeded negatives behind
+them. Item 2 asked that `git clean -fxd` remove every `supernova` path without reporting a skipped
+repository; the gate settles the stronger form of it, because a run that writes no checkout leaves no nested
+repository to skip. The two skips the item predicted would remain are `infernix` and `jitML`, and they belong
+to the [legacy register](legacy_tracking_for_deletion.md) row that already owns them.
+
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
@@ -605,6 +712,12 @@ throws away `bin/` for one that does not.
   proven `io-sim`/`io-classes` build.
 - `documents/engineering/content_addressing_doctrine.md` — §4.5's `jit-build` resolver gets a backlink to the
   proven resolver-deps build.
+- `documents/engineering/repository_layout_doctrine.md` — **done 2026-08-20.** The `patches/**` tree row and
+  its TRANSITIONAL marker are deleted; §2 records why the root is absent rather than transitional, §2.2 no
+  longer carries a destination row for it, and §4.1 states that there is no patch root and no admitted patch.
+- `documents/engineering/pulsar_client_doctrine.md` — **done 2026-08-20.** §4's sentence about the fork's
+  starting tree flips from specification to observation: the vendored copy exists, and the stanza and patch
+  it replaced are gone.
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — the Toolchain section records only the authored compatibility policy or a
@@ -612,7 +725,8 @@ throws away `bin/` for one that does not.
   in the run bundle. Flip the Phase 1 status only when the gate passes.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-1 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `cabal.project` and the throwaway `probe/` package as
-  Phase-1 pre-flight rows, marked deleted-after-resolution.
+  Phase-1 pre-flight rows, marked deleted-after-resolution. **Extended 2026-08-20:** §6 registers
+  `vendor/supernova/**` as the tree the Phase-67 fork starts from, built by this phase.
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves; the sole home of the
