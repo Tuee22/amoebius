@@ -3,6 +3,28 @@
 
 module Main (main) where
 
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Scope.Index qualified as CalculusScope
 import Amoebius.Ui.Server.Dispatch
   ( BoundaryMutant (NoBoundaryMutant)
   , HandlerBinding (..)
@@ -131,7 +153,9 @@ runGreen root binary = do
   checkAuthorityBoundary observation
   checkStartupFunction root
   checkMutantFixtures root
-  putStrLn "ui-server-boundary-spec: PASS (7 HTTP rows, 5 access rows, 5 audits, 5 effects, 5 startup rows, 5 public assets, 5 private probes, 7 WebSocket rows, 9 mutants)"
+  checkCalculus root
+  putStrLn "ui-server-boundary-calculus: PASS (5 kinds, 80 projected units)"
+  putStrLn "ui-server-boundary-spec: PASS (7 HTTP rows, 5 access rows, 5 audits, 5 effects, 6 startup rows, 5 public assets, 5 private probes, 7 WebSocket rows, 9 mutants)"
 
 runMutant :: FilePath -> FilePath -> String -> IO ()
 runMutant root binary name = case lookup name mutants of
@@ -151,7 +175,7 @@ runHarness root binary mutant = do
         <> [mutant | not (null mutant)]
       command = proc "node" arguments
   (code, output, errors) <- readCreateProcessWithExitCode command ""
-  assertEqual "server harness exit" ExitSuccess code
+  assert (code == ExitSuccess) ("server harness exit: " <> show code <> "\n" <> output <> errors)
   assertEqual "server harness stderr" "" errors
   either (die . ("invalid server observation: " <>)) pure (eitherDecode (Lazy.pack output))
 
@@ -237,7 +261,7 @@ checkStartup :: FilePath -> BoundaryObservation -> IO ()
 checkStartup root observation = do
   rows <- loadTable (root </> "test/fixture/ui_server/startup_plan_matrix.tsv")
   forM_ rows $ \row -> case row of
-    [caseName, _count, _contract, _abi, expected] -> do
+    [caseName, _count, _unreferenced, _contract, _abi, expected] -> do
       actual <- maybe (die ("missing startup case: " <> caseName)) pure
         (find ((== Text.pack caseName) . startupCase) (startup observation))
       assertEqual (caseName <> " readiness") (expected == "true") (startupReady actual)
@@ -276,16 +300,50 @@ checkStartupFunction :: FilePath -> IO ()
 checkStartupFunction root = do
   rows <- loadTable (root </> "test/fixture/ui_server/startup_plan_matrix.tsv")
   forM_ rows $ \row -> case row of
-    [caseName, countText, contractText, abiText, expectedText] -> do
+    [caseName, countText, unreferencedText, contractText, abiText, expectedText] -> do
       count <- maybe (die ("invalid identity count: " <> countText)) pure (readMaybe countText)
+      unreferenced <- maybe (die ("invalid unreferenced count: " <> unreferencedText)) pure
+        (readMaybe unreferencedText)
       let expectedContract = HandlerContract "request-v1" "response-v1"
           actualContract = if contractText == "match" then expectedContract else HandlerContract "wrong" "wrong"
           bindings = replicate count (HandlerBinding "handler-main" actualContract)
+            <> replicate unreferenced (HandlerBinding "handler-extra" expectedContract)
           abi = if abiText == "ui-server-v1" then UiServerV1 else UnsupportedUiServerAbi (Text.pack abiText)
           admitted = either (const False) (const True)
             (admitServerPlan NoBoundaryMutant abi [("handler-main", expectedContract)] bindings)
       assertEqual (caseName <> " pure startup admission") (expectedText == "true") admitted
     _ -> die ("invalid startup row: " <> show row)
+
+checkCalculus :: FilePath -> IO ()
+checkCalculus root = do
+  expected <- loadTable (root </> "test/oracle/ui_server_boundary/calculus_projection.tsv")
+  tenant <- requireRight "calculus tenant" (CalculusScope.trustedTenant "ui-server-calculus-tenant")
+  subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "ui-server-calculus-subject")
+  membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
+  action <- requireRight "calculus request scope" $
+    CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+      let resources :: Int -> ResourceVector
+          resources count = ResourceVector 1 (fromIntegral count) 0 0
+          counts = [5, 5, 55, 6, 9] :: [Int]
+          artifact = artifactComponent scope "public-boundary-artifacts" (resources 5)
+            (RecipeId "ui-server-boundary" 5)
+          budget = budgetComponent scope "closed-authority-budget" (resources 5)
+            (allowance (Bytes 5) (Slots 1) (Bytes 5))
+          lift = liftComponent scope "server-boundary-corpus" (resources 55) OnHost
+          workflow = workflowComponent scope "startup-admission-workflow" (resources 6) emptyLedger
+          evidence = evidenceComponent scope "mutant-evidence" (resources 9) PureRegister
+          composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+          ResourceVector cpu memory ephemeral pods = compositionResource composition
+          render = Text.unpack . Text.intercalate ","
+          actual =
+            [ ["calculus-kinds", render (map calculusTag (compositionKinds composition))]
+            , ["component-names", render (compositionNames composition)]
+            , ["projection-counts", render (map (Text.pack . show) counts)]
+            , ["resource-vector", render (map (Text.pack . show) [cpu, memory, ephemeral, pods])]
+            ]
+      assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
+      assertEqual "server calculus projection" expected actual
+  action
 
 checkMutantFixtures :: FilePath -> IO ()
 checkMutantFixtures root = forM_ mutants $ \(name, _locus) -> do
@@ -362,6 +420,9 @@ assertEqual label expected actual = assert (expected == actual)
 
 assert :: Bool -> String -> IO ()
 assert condition message = unless condition (die message)
+
+requireRight :: Show problem => String -> Either problem value -> IO value
+requireRight label = either (die . ((label <> ": ") <>) . show) pure
 
 die :: String -> IO value
 die message = putStrLn ("ui-server-boundary-spec: FAIL: " <> message) >> exitFailure

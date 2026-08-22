@@ -42,8 +42,9 @@ not own the capacity types that cost passes through, owned by
 
 **Pure cost-model status.** The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md)
 executes the finite `MonitoringWorkBudget` evaluation, query/proxy compute, and TSDB temporary-plus-resident
-storage derivation in Register 1. Prometheus behavior and rendered/live correspondence remain unverified; the
-pure fold ledger is `external-run-reference`.
+storage derivation in Register 1. The 2026-08-21 reseal adds a direct one-axis volume-over-budget case beside
+its exact-fit twin. Prometheus behavior and rendered/live correspondence remain unverified; the pure fold
+ledger is `external-run-reference`.
 
 ## 1. Monitoring is a property of what is deployed, not a bolt-on
 

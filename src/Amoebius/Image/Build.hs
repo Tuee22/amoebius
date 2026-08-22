@@ -62,7 +62,6 @@ runBakeInventory arguments = case arguments of
     LazyChar8.putStrLn . Aeson.encode $
       Aeson.object
         [ "baseImage" .= catalog.baseImage
-        , "baseDigest" .= catalog.baseDigest
         , "steps" .= fmap describeStep (catalogSteps catalog)
         ]
 

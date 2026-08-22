@@ -150,7 +150,7 @@ workflow crossing an asynchronous boundary.
 
 **Depends on:** [Phase 73](phase_73_network_fabric_wireguard.md) — the WireGuard fabric over which a parent reaches the children it spawns.
 
-**Gate:** `cabal test multicluster-spawn-live` is green: a parent spawns two children, exercises the classified
+**Gate:** `python3 tools/run_phase_gate.py 74` is green: a parent spawns two children, exercises the classified
 geo-replicated workflow across the boundary, and tears the forest down leak-free — under the pre-effect
 capacity proof, oracles, observers, and mutants of [Gate integrity](#gate-integrity).
 

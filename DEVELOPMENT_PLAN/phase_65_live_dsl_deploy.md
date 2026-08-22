@@ -130,7 +130,7 @@ substrate is exercised by this phase's gate.
 
 **Depends on:** [Phase 64](phase_64_keycloak_ingress.md) — keycloak-owned ingress, which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/live_dsl_deploy_gate.py` passes on a single-node linux-cpu `kind` cluster: one `.dhall`,
+**Gate:** `python3 tools/run_phase_gate.py 65` passes on a single-node linux-cpu `kind` cluster: one `.dhall`,
 delivered through the control-plane daemon's admin REST surface, reconciles the standard platform-service stack plus a
 trivial app to convergence and tears down leak-free. [Gate integrity](#gate-integrity) carries the rest.
 

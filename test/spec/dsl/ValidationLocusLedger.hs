@@ -24,11 +24,12 @@ data RegistryRow = RegistryRow
   }
   deriving stock (Eq, Ord, Show)
 
-runValidationLocusLedger :: Set CoverageKey -> IO (Int, Int)
+runValidationLocusLedger :: Set CoverageKey -> IO (Int, Int, Int)
 runValidationLocusLedger corpusCoverage = do
   registry <- loadRegistry
   compileCoverage <- loadCompileCoverage
-  let allCoverage = corpusCoverage <> compileCoverage
+  predecessorCoverage <- loadPredecessorCoverage
+  let allCoverage = corpusCoverage <> compileCoverage <> predecessorCoverage
       reached = filter isReached registry
       expected = Set.fromList [(entry row, subcase row, locus row) | row <- reached]
       missing = expected Set.\\ allCoverage
@@ -37,7 +38,7 @@ runValidationLocusLedger corpusCoverage = do
   assert (Set.null unexpected) ("fixture coverage diverges from reached registry rows: " <> show (Set.toList unexpected))
   validateDeferred registry
   emitLedger registry
-  pure (length reached, length registry - length reached)
+  pure (length reached, length registry - length reached, Set.size predecessorCoverage)
 
 loadRegistry :: IO [RegistryRow]
 loadRegistry = do
@@ -63,13 +64,40 @@ loadCompileCoverage = do
       ]
     _ -> []
 
+loadPredecessorCoverage :: IO (Set CoverageKey)
+loadPredecessorCoverage = do
+  rows <- rowsOf "test/oracle/illegal_state_corpus/predecessor_coverage.tsv"
+  phase8 <- rowsOf "test/oracle/scoped_identity/validation_locus.tsv"
+  phase9 <- rowsOf "test/oracle/capacity_topology/compile_fail.tsv"
+  Set.fromList <$> traverse (parseRow phase8 phase9) rows
+ where
+  parseRow phase8 phase9 columns = case columns of
+    [entryValue, subcaseValue, locusValue, ownerValue, sourceValue, evidenceValue] -> do
+      assert (locusValue == "gadt-decode") ("predecessor row has the wrong locus: " <> show columns)
+      case (ownerValue, sourceValue) of
+        ("Phase-8", "phase8-locus") ->
+          assert
+            (any (\row -> case row of
+                [entryName, _className, _locusName, status] -> entryName == evidenceValue && status == "tested"
+                _ -> False) phase8)
+            ("Phase-8 predecessor evidence is absent: " <> Text.unpack evidenceValue)
+        ("Phase-9", "phase9-compile") ->
+          assert
+            (any (\row -> case row of
+                caseName : _ -> caseName == evidenceValue
+                _ -> False) phase9)
+            ("Phase-9 predecessor evidence is absent: " <> Text.unpack evidenceValue)
+        _ -> failTest ("unknown predecessor evidence source: " <> show columns)
+      pure (entryValue, subcaseValue, locusValue)
+    _ -> failTest "malformed predecessor_coverage.tsv row"
+
 -- The last phase whose rows this suite can discharge: the illegal-state corpus completes
 -- the Gate-1/Gate-2 rejection set, so a row owned at or before it is reached here and a
 -- later one is deferred to its owner. This threshold read 6 while the registry said
--- Phase-7, so twenty-six rows the corpus already rejected were read as deferred and the
+-- Phase-27, so twenty-six rows the corpus already rejected were read as deferred and the
 -- coverage comparison diverged from its own registry.
 corpusPhase :: Int
-corpusPhase = 7
+corpusPhase = 27
 
 isReached :: RegistryRow -> Bool
 isReached row =

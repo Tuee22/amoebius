@@ -44,7 +44,7 @@ Re-derive the multi-tenant web application as a conforming extension whose insec
 **Lane:** `linux-cpu/amd64`
 **Register:** 3
 **Depends on:** [Phase 24](phase_24_conformance_gate_generator.md) — the generated gate and its verdict, without which this phase's conformance claim is its own author's reading, and [Phase 23](phase_23_extension_security_laws.md), whose S-laws are what foreclose the states this re-derivation exists to remove.
-**Gate:** `python3 tools/webapp_rederivation_gate.py` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/run_phase_gate.py 95` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

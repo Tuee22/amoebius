@@ -106,7 +106,7 @@ constructor, introduces another runtime image, or needs a second acceptance comm
 **Lane:** cuda ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/jitml_ui_lift_gate.py --reuse-fresh-live` passes on linux-cuda: a browser reaches an owned,
+**Gate:** `python3 tools/run_phase_gate.py 94` passes on linux-cuda: a browser reaches an owned,
 committed, Ready jitML model and recovers its terminal training receipt across replica, Redis, and socket
 loss. Its denial matrix, fixtures, observers, oracle, and mutants are delegated to
 [Gate integrity](#gate-integrity).

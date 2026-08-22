@@ -1,6 +1,10 @@
+{-# LANGUAGE RankNTypes #-}
+
 module ScopeRetag where
 
-import Amoebius.Ui.Security.Scope
+import Amoebius.Scope.Index
 
-bad :: Tenant -> ScopedHandle scope -> ScopedHandle scope
-bad foreignTenant localHandle = retagHandle foreignTenant localHandle
+bad tenantA subjectA membershipA tenantB subjectB membershipB =
+  withRequestScope tenantA subjectA membershipA $ \scopeA ->
+    withRequestScope tenantB subjectB membershipB $ \scopeB ->
+      scopedValue (pairScoped (scoped scopeA ()) (scoped scopeB ()))

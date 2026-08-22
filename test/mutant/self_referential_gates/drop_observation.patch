@@ -1,0 +1,6 @@
+capability: self_referential_gates
+mutant: drop_observation
+build-flag: self-referential-gates-drop-observe-mutant
+operator: deletion
+production-locus: gateWorkflow/observe
+expected-red-locus: drop_observation

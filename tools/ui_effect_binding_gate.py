@@ -36,6 +36,7 @@ FIXTURES = ROOT / "test/fixture/ui_effect_binding"
 MUTANT_CAPABILITY = "ui_effect_binding"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/ui_effect_binding/validation_locus.tsv"
+CALCULUS = ROOT / "test/oracle/ui_effect_binding/calculus_projection.tsv"
 BIND = ROOT / "src/Amoebius/Ui/Bind.hs"
 LINKS = ROOT / "src/Amoebius/Ui/ExternalLinkCatalog.hs"
 REFERENCE = ROOT / "test/spec/ui/EffectBindingReference.hs"
@@ -49,7 +50,11 @@ EXPECTATIONS = "test/oracle/ui_effect_binding_surfaces.tsv"
 
 COMPILER = ""
 
-SANCTIONED_OBSERVERS = ("unshare-network-namespace", "strace-socket-EPERM")
+SANCTIONED_OBSERVERS = (
+    "unshare-network-namespace",
+    "darwin-sandbox-deny-network",
+    "strace-socket-EPERM",
+)
 
 # One check id per private type, in the module that owns it.
 OPAQUE_TYPES = (
@@ -96,7 +101,9 @@ CHECKS = {
     "reference-relation-independent": "the reference relation imports neither production binder",
     "bind-partial-token-scan": "no partial or unsafe token survives in the binder or link catalog",
     "capability-key-set-exact": "the capability oracle's handler keys equal the handler oracle's, both ways",
-    "phase18-registry-consumed": "the binder consumes the Phase-21 sealed registry rather than a local copy",
+    "phase38-registry-consumed": "the binder consumes the Phase-38 sealed registry rather than a local copy",
+    "semantic-oracles-complete": "binding, link, refusal, and calculus oracles are exact",
+    "totality-options": "the binding suite compiles with the project totality warnings",
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
     "toolchain-satisfies-requirements": "the resolved cabal and ghc satisfy the authored ranges",
     "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
@@ -112,6 +119,10 @@ EXPECTED_RESULTS = {
     "bounded-input-negatives": "3/3-distinct",
     "generated-coverage": "13/13-classes-at-5-percent",
     "mutants": "7/7-red",
+    "calculus-kinds": "5/5",
+    "calculus-components": "5/5",
+    "calculus-projection-counts": "7,2,19,13,7",
+    "calculus-resource-vector": "5,48,0,0",
     "network-observer": "sanctioned-observer",
     "browser-enforcement": "UNVERIFIED",
     "handler-implementation-truth": "UNVERIFIED",
@@ -136,7 +147,9 @@ CHECK_SIDE = {
     "refusal-arms-present": "source",
     "reference-relation-independent": "source",
     "bind-partial-token-scan": "source",
-    "phase18-registry-consumed": "source",
+    "phase38-registry-consumed": "source",
+    "semantic-oracles-complete": "oracle",
+    "totality-options": "source",
     "capability-key-set-exact": "oracle",
     "emitted-results-untracked": "results",
     "recorded-results-match-oracle": "results",
@@ -147,6 +160,16 @@ PINNED_ERRORS = [
     "MissingHandler", "DuplicateHandler", "ContractMismatch", "MissingCapability",
     "ScopeMismatch", "IdempotencyRequired", "ProviderCoordinateForbidden", "ExternalLinkNotAnEffect",
 ]
+
+MUTANT_TOKENS = {
+    "M-first-handler-wins": "ui-effect-binding-mutant: RED M-first-handler-wins locus=duplicate-handler",
+    "M-drop-capability": "ui-effect-binding-mutant: RED M-drop-capability locus=missing-capability",
+    "M-erase-handler-scope": "ui-effect-binding-mutant: RED M-erase-handler-scope locus=scope-mismatch",
+    "M-swap-response-codec": "ui-effect-binding-mutant: RED M-swap-response-codec locus=codec-mismatch",
+    "M-retry-without-idempotency": "ui-effect-binding-mutant: RED M-retry-without-idempotency locus=unsafe-retry",
+    "export_raw_topic": "ui-effect-binding-mutant: RED export_raw_topic locus=raw-topic",
+    "M-link-id-as-url": "ui-effect-binding-mutant: RED M-link-id-as-url locus=link-as-url",
+}
 
 PORT_EFFECTS = [
     "ReadData", "MutateData", "StartWorkflow", "ObserveWorkflow",
@@ -196,6 +219,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     links = read_tsv(FIXTURES / "external_link_catalog.tsv")
     resolved = read_tsv(FIXTURES / "expected_external_links.tsv")
     errors = read_tsv(FIXTURES / "bind_errors.tsv")
+    calculus = read_tsv(CALCULUS)
     if len(ports) != 7 or [row["effect"] for row in ports] != PORT_EFFECTS:
         raise GateFailure("port registry must pin the seven closed effect arms")
     if not all(len(rows) == 7 for rows in (handlers, capabilities, bindings)):
@@ -214,15 +238,27 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         raise GateFailure("external-link oracle must contain two fixed HTTPS joins")
     if [row["error"] for row in errors] != PINNED_ERRORS:
         raise GateFailure("bind error oracle drifted")
+    expected_calculus = [
+        {"metric": "calculus-kinds", "value": "artifact,budget,lift,workflow,evidence"},
+        {"metric": "component-names", "value": "port-bindings,external-link-bindings,binding-refusals,generated-coverage-workflow,mutant-evidence"},
+        {"metric": "projection-counts", "value": "7,2,19,13,7"},
+        {"metric": "resource-vector", "value": "5,48,0,0"},
+    ]
+    if calculus != expected_calculus:
+        raise GateFailure("effect-binding five-calculus projection oracle drifted")
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
-    if len(mutants) != 7 or len({row["mutant"] for row in mutants}) != 7:
-        raise GateFailure("Phase-22 mutant manifest must contain seven unique rows")
+    if len(mutants) != 7 or {row["mutant"] for row in mutants} != set(MUTANT_TOKENS):
+        raise GateFailure("Phase-39 mutant manifest must contain the seven contract mutants")
     locus = read_tsv(LOCUS)
     if len(locus) != 48 or len({row["entry"] for row in locus}) != 48:
-        raise GateFailure("Phase-22 validation locus must contain forty-eight unique rows")
+        raise GateFailure("Phase-39 validation locus must contain forty-eight unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
-    if len([row for row in phase0_rows if row["# phase"] == "19"]) != 14:
-        raise GateFailure("Phase-0 manifest must pin fourteen Phase-22 artifacts")
+    phase39 = [row for row in phase0_rows if row["# phase"] == "22"]
+    if len(phase39) != 14:
+        raise GateFailure("Phase-0 manifest must pin fourteen Phase-39 artifacts")
+    missing = [row["path"] for row in phase39 if not (ROOT / row["path"]).is_file()]
+    if missing:
+        raise GateFailure(f"Phase-39 preimplementation artifacts are absent: {missing}")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 1 only; browser/handler/provider/live isolation UNVERIFIED\n"
@@ -286,14 +322,19 @@ def verify_source_boundaries() -> None:
         if token not in bind:
             raise GateFailure(f"refusal-arms-present: binding refusal arm disappeared: {token}")
     if not re.search(r"import\s+Amoebius\.Ui\.Security\.Authorization\s*\(([^)]*)\)", bind):
-        raise GateFailure("phase18-registry-consumed: the binder no longer imports the Phase-21 registry")
+        raise GateFailure("phase38-registry-consumed: the binder no longer imports the Phase-38 registry")
     imported = re.search(r"import\s+Amoebius\.Ui\.Security\.Authorization\s*\(([^)]*)\)", bind).group(1)
     for name in ("BoundActionRegistry", "authorizationDigestSource"):
         if name not in imported:
-            raise GateFailure(f"phase18-registry-consumed: the binder no longer consumes {name}")
+            raise GateFailure(f"phase38-registry-consumed: the binder no longer consumes {name}")
     reference = REFERENCE.read_text(encoding="utf-8")
     if "Amoebius.Ui.Bind" in reference or "Amoebius.Ui.ExternalLinkCatalog" in reference:
         raise GateFailure("reference-relation-independent: the independent relation imports a production binder")
+    cabal = (ROOT / "amoebius.cabal").read_text(encoding="utf-8")
+    stanza = cabal.split("test-suite ui-effect-binding-spec", 1)[1].split("\ntest-suite ", 1)[0]
+    for option in ("-Werror=missing-methods", "-Werror=incomplete-patterns"):
+        if option not in stanza:
+            raise GateFailure(f"totality-options: effect-binding suite lacks {option}")
 
 
 def isolated_green(cabal: Path) -> tuple[str, str]:
@@ -304,13 +345,37 @@ def isolated_green(cabal: Path) -> tuple[str, str]:
     TEMP_ROOT.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="network-", dir=TEMP_ROOT) as directory:
         trace = Path(directory) / "network.trace"
-        probe = run(["unshare", "-n", "true"], require_success=False)
-        if probe.returncode == 0:
+        if shutil.which("unshare") and run(["unshare", "-n", "true"], require_success=False).returncode == 0:
             result = run(["unshare", "-n", str(binary)])
             observer = "unshare-network-namespace"
+        elif shutil.which("sandbox-exec"):
+            profile = Path(directory) / "deny-network.sb"
+            profile.write_text("(version 1)\n(allow default)\n(deny network*)\n", encoding="utf-8")
+            control = run(
+                [
+                    "sandbox-exec",
+                    "-f",
+                    str(profile),
+                    sys.executable,
+                    "-c",
+                    "import socket,sys;\n"
+                    "try:\n socket.create_connection(('127.0.0.1', 9), timeout=1).close()\n"
+                    "except PermissionError:\n sys.exit(0)\n"
+                    "except OSError:\n sys.exit(3)\n"
+                    "sys.exit(4)\n",
+                ],
+                require_success=False,
+            )
+            if control.returncode != 0:
+                raise GateFailure(
+                    f"sandbox-exec did not deny a socket (control exit {control.returncode}); "
+                    "the isolation this observer claims is not in force"
+                )
+            result = run(["sandbox-exec", "-f", str(profile), str(binary)])
+            observer = "darwin-sandbox-deny-network"
         else:
             if shutil.which("strace") is None:
-                raise GateFailure("neither network namespace isolation nor strace socket injection is available")
+                raise GateFailure("none of unshare, sandbox-exec, or strace is available as a network observer")
             result = run([
                 "strace", "-f", "-qq", "-e", "trace=%network", "-e", "inject=socket:error=EPERM",
                 "-o", str(trace), str(binary),
@@ -327,8 +392,9 @@ def run_green(cabal: Path) -> tuple[str, str]:
     suite = run([str(cabal), "test", "ui-effect-binding-spec", "--test-show-details=direct"])
     isolated, observer = isolated_green(cabal)
     token = "ui-effect-binding-spec: PASS (7 ports, 2 links, 8 errors, 13 coverage classes, 7 mutants)"
-    if token not in suite.stdout or token not in isolated:
-        raise GateFailure("Phase-22 acceptance token is absent from normal or isolated execution")
+    calculus = "ui-effect-binding-calculus: PASS (5 kinds, 48 projected units)"
+    if token not in suite.stdout or token not in isolated or calculus not in suite.stdout or calculus not in isolated:
+        raise GateFailure("Phase-39 acceptance tokens are absent from normal or isolated execution")
     return suite.stdout + isolated, observer
 
 
@@ -337,13 +403,11 @@ def run_mutants(cabal: Path, mutants: list[dict[str, str]]) -> tuple[str, int]:
     reddened = 0
     for row in mutants:
         mutant = row["mutant"]
-        case_name = row["target"].split(":")[-1]
         result = run([
             str(cabal), "test", "ui-effect-binding-spec", "--test-show-details=direct",
             f"--test-options=--mutant={mutant}",
         ], require_success=False)
-        token = f"ui-effect-binding-mutant: RED {mutant} {case_name}"
-        if result.returncode == 0 or token not in result.stdout:
+        if result.returncode == 0 or MUTANT_TOKENS[mutant] not in result.stdout:
             raise GateFailure(f"mutant survived or missed its red locus: {mutant}\n{result.stdout}")
         reddened += 1
         logs.append(result.stdout)
@@ -360,6 +424,10 @@ def write_results(counts: Mapping[str, int], reddened: int, total: int, observer
         "bounded-input-negatives": "3/3-distinct",
         "generated-coverage": "13/13-classes-at-5-percent",
         "mutants": f"{reddened}/{total}-red",
+        "calculus-kinds": "5/5",
+        "calculus-components": "5/5",
+        "calculus-projection-counts": "7,2,19,13,7",
+        "calculus-resource-vector": "5,48,0,0",
         "network-observer": observer,
         "browser-enforcement": "UNVERIFIED",
         "handler-implementation-truth": "UNVERIFIED",
@@ -396,11 +464,14 @@ def surface_decisions(
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=39, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=39, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []
@@ -434,9 +505,10 @@ def main() -> int:
             print(f"  ok    {check}")
         print("  ok    port-requirement-no-raw-coordinate no raw text, URL, or link entered PortRequirement")
         print("  ok    refusal-arms-present               every named refusal arm is still declared")
-        print("  ok    phase18-registry-consumed          the binder consumes the Phase-21 sealed registry")
+        print("  ok    phase38-registry-consumed          the binder consumes the Phase-38 sealed registry")
         print("  ok    reference-relation-independent     the reference imports neither production binder")
         print("  ok    bind-partial-token-scan            no partial or unsafe token in the binder modules")
+        print("  ok    totality-options                   suite totality warnings are enabled")
         results["source"] = True
 
         print("\nsuite side — the pure binding battery under a network observer\n")

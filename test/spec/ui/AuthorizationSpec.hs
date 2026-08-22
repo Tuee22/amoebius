@@ -2,6 +2,28 @@
 
 module Main (main) where
 
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Scope.Index qualified as CalculusScope
 import Amoebius.Ui.Check (checkUiSource)
 import Amoebius.Ui.Security.Authorization
 import Amoebius.Ui.Security.Scope
@@ -11,6 +33,7 @@ import Control.Monad (forM_, unless)
 import Data.List (sort)
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
+import qualified Data.Text.IO as TextIO
 import System.Directory (canonicalizePath, getCurrentDirectory)
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
@@ -73,7 +96,9 @@ runGreen root fixture = do
   checkAuthorizationMatrix root fixture
   checkStaleEpochs root fixture
   checkCoverageProperties fixture
+  checkCalculus root
   checkMutantControls root fixture
+  putStrLn "ui-authorization-calculus: PASS (5 kinds, 30 projected units)"
   putStrLn "ui-authorization-spec: PASS (5 actions, 6 matrix rows, 4 parity errors, 4 stale epochs, 9 coverage classes, 2 mutants)"
 
 buildFixture :: FilePath -> IO Fixture
@@ -192,6 +217,33 @@ checkCoverageProperties fixture = do
   result <- quickCheckWithResult args $ forAll (elements classes) (coverageProperty fixture classes)
   assert (isSuccess result) "authorization generated coverage failed"
 
+checkCalculus :: FilePath -> IO ()
+checkCalculus root = do
+  expected <- loadTextTable (root </> "test/oracle/ui_authorization/calculus_projection.tsv")
+  tenant <- either (fail . show) pure (CalculusScope.trustedTenant "ui-authorization-calculus-tenant")
+  subject <- either (fail . show) pure (CalculusScope.trustedSubject tenant "ui-authorization-calculus-subject")
+  membership <- either (fail . show) pure (CalculusScope.activeMembership tenant subject)
+  action <- either (fail . show) pure $ CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+    let resources :: Int -> ResourceVector
+        resources count = ResourceVector 1 (fromIntegral count) 0 0
+        counts = [5, 6, 8, 9, 2] :: [Int]
+        artifact = artifactComponent scope "action-registry" (resources 5) (RecipeId "ui-authorization" 5)
+        budget = budgetComponent scope "authorization-decisions" (resources 6) (allowance (Bytes 6) (Slots 1) (Bytes 6))
+        lift = liftComponent scope "parity-and-epoch-refusals" (resources 8) OnHost
+        workflow = workflowComponent scope "generated-coverage-workflow" (resources 9) emptyLedger
+        evidence = evidenceComponent scope "mutant-evidence" (resources 2) PureRegister
+        composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+        ResourceVector cpu memory ephemeral pods = compositionResource composition
+        actual =
+          [ ["calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition))]
+          , ["component-names", Text.intercalate "," (compositionNames composition)]
+          , ["projection-counts", Text.intercalate "," (map (Text.pack . show) counts)]
+          , ["resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods])]
+          ]
+    assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
+    assertEqual "authorization calculus projection" expected actual
+  action
+
 coverageProperty :: Fixture -> [CoverageClass] -> CoverageClass -> Property
 coverageProperty fixture classes selected =
   checkCoverage
@@ -243,13 +295,13 @@ checkMutantControls root _fixture = do
 runDefaultAllowMutant :: FilePath -> Fixture -> IO ()
 runDefaultAllowMutant root fixture = do
   checkMutantControls root fixture
-  putStrLn "ui-authorization-mutant: RED default_allow default-deny"
+  putStrLn "ui-authorization-mutant: RED default_allow locus=default-deny"
   exitFailure
 
 runVisibilityMutant :: FilePath -> Fixture -> IO ()
 runVisibilityMutant root fixture = do
   checkMutantControls root fixture
-  putStrLn "ui-authorization-mutant: RED visibility_is_authorization hidden-invocable+stale"
+  putStrLn "ui-authorization-mutant: RED visibility_is_authorization locus=hidden-invocable+stale"
   exitFailure
 
 defaultAllowMutant :: [String] -> Bool
@@ -397,6 +449,13 @@ loadTable path = do
   case lines content of
     [] -> die ("empty TSV: " <> path)
     _header : rows -> pure (map splitTabs (filter (not . null) rows))
+
+loadTextTable :: FilePath -> IO [[Text.Text]]
+loadTextTable path = do
+  content <- TextIO.readFile path
+  case Text.lines content of
+    [] -> die ("empty TSV: " <> path)
+    _header : rows -> pure (map (Text.splitOn "\t") (filter (not . Text.null) rows))
 
 splitTabs :: String -> [String]
 splitTabs value = case break (== '\t') value of

@@ -4,19 +4,13 @@
 # independently authored expectation.
 #
 # owner is the registry the ids are enumerated from at run time:
-#   items     the arm slugs, Gate-1 and Gate-2 case names, and mutant names the run read
+#   items     the nine arm slugs, seven Gate-1/Gate-2 cases, and four mutant names
 #   metrics   the metric keys in .build/dsl/capability-bind/phase-results.tsv
 #   checks    the check ids tools/capability_bind_gate.py implements
 #
-# The 24 items are partitioned so each is claimed exactly once. `app-byte-invariance` and
-# the nine capability arms sit on the closed-union surface together, because the union's
-# closure is exactly the claim that all nine arms are present and no tenth is.
-#
-# **Five contract surfaces carry no id.** `controller-child-source-expansion`,
-# `unresolved-transition-references`, `registry-storage-bound-intent`, `extension-totality`,
-# and `phase10-validation-locus-ledger` have no case, mutant, or metric of their own, so
-# the ledger carries them UNVERIFIED rather than asserting a result the run did not
-# produce. The gap is recorded against Phase 11 in legacy_tracking_for_deletion.md.
+# The 20 items are partitioned one-to-one. All 30 surfaces have a concrete owner; the five
+# formerly empty structural surfaces now carry exact invariant metrics, and the five-calculus
+# surface carries the independently authored composition projection.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 
@@ -30,21 +24,22 @@ explicit-provider-object-graphs	items	mutant_catchall_arm,mutant_shared_app_impo
 structural-object-node-multiset-oracle	items	mutant_copy_shape_tag
 normalized-app-byte-invariance	metrics	app-byte-invariance
 kind-indexed-bound-execution-set	metrics	acceptance-token
-controller-child-source-expansion	checks	
-unresolved-transition-references	checks	
+controller-child-source-expansion	metrics	controller-child-source-expansion
+unresolved-transition-references	metrics	unresolved-transition-references
 bound-deployment-no-provisioned-values	items	mutant_provisioned_value_in_bound_deployment
-registry-storage-bound-intent	checks	
-extension-totality	checks	
+registry-storage-bound-intent	metrics	registry-storage-bound-intent
+extension-totality	metrics	extension-totality
 extension-acyclicity	items	cyclic-extension
 extension-no-shadowing	items	shadowing-extension
-phase10-dhall-typecheck-corpus	metrics	dhall-typecheck-negatives
-phase10-gadt-decode-corpus	metrics	gadt-decode-negatives
-phase10-arm-exhaustiveness	metrics	capability-arms
-phase10-golden-corpus	metrics	shape-goldens
-phase10-property-coverage	metrics	quickcheck-properties
-phase10-mutant-battery	metrics	mutants
-phase10-validation-locus-ledger	checks	
+phase30-dhall-typecheck-corpus	metrics	dhall-typecheck-negatives
+phase30-gadt-decode-corpus	metrics	gadt-decode-negatives
+phase30-arm-exhaustiveness	metrics	capability-arms
+phase30-semantic-shape-oracle	metrics	semantic-shape-oracle
+phase30-property-coverage	metrics	quickcheck-properties
+phase30-mutant-battery	metrics	mutants
+phase30-validation-locus-ledger	metrics	validation-locus-entries
 capability-bind-compile-totality	metrics	structural-shape-oracle
+capability-bind-five-calculus-projection	metrics	calculus-kinds,calculus-components,calculus-projection-counts,calculus-resource-vector
 live-provider-realization	metrics	live-provider-realization
 live-engine-resolution	metrics	live-engine-resolution
 runtime-model-correspondence	metrics	runtime-correspondence

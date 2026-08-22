@@ -1,24 +1,20 @@
 # Phase 8: Scoped identity kernel
 
-> **Purpose**: Build the pure scope, audience, provenance, and information-flow kernel that prevents UI data
-> or authority from being retagged across subjects or tenants.
-> **Read this if**: phase 8 is next in the queue, or a later phase depends on what its gate establishes.
+> **Purpose**: Deliver the pure scope index and information-flow relation that prevent values and handles from
+> being forged, retagged, widened, or exchanged across request scopes.
+> **Read this if**: Phase 8 is the open contract, or a later phase needs the type-level scope boundary it
+> establishes.
 
-Phase 8 delivers the scoped identity kernel; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-Gate passed on 2026-08-09 with ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+Phase 8 owns the standalone scope index below the UI language and every live identity or provider boundary.
+The tenant model belongs to [tenancy_doctrine.md](../documents/engineering/tenancy_doctrine.md); the pure
+security mechanism belongs here, and provider enforcement remains later work.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/extension_conformance_security.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_tenancy.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +25,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 8.1: Scope-indexed handles and total flow checking 📋](#sprint-81-scope-indexed-handles-and-total-flow-checking-)
+- [Sprint 8.1: Rank-2 scope index and total flow checking ✅](#sprint-81-rank-2-scope-index-and-total-flow-checking-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,185 +33,131 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-🔄 Active — Phase 7 sealed on 2026-08-20, so this is the open contract. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence. All five now exist, which is what makes this contract's coverage decidable rather than pending.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-15. `python3 tools/scoped_identity_gate.py` passed all twelve sides: all owner
-joins/swaps, the independent flow matrix, three compile loci, six coverage classes, the owner-equality mutant,
-all ten metrics, and nine constructor-privacy checks pass; 40 surfaces join to 47 enumerated items. The
-project-contained attestation is `sha256:9aeed4fb73be7214c732f671f86c14a0f376f50ffd5197b980f7ad5f2df1ab58`,
-bound to source snapshot `sha256:823a8dffbc72114a…`; Phase 8 owns no remaining migration deferral.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:f6ee1e7d69f37a07…`
-(1942 non-ignored files) and published a verified pre-containment external attestation
-`sha256:45ba0ed3a546b6dd436f611f2d12e80378bc64c5d349d8f9fdf44f32c727b18a`.
-
-**Observed progress — 2026-08-13:** **Policy-conformant.** The scoped-identity result is unchanged and
-re-run: six owner-join rows and two swap rows match the independent tables at their exact `ScopeError` tags,
-four flow rows agree with a reference relation that shares no helper with the kernel, three compile loci hold,
-six generated classes clear their 5% floor, and the owner-equality mutant reddens on both swap pins. Evidence
-and the ledger move into `.build/runs/phase_33/<run-id>/`, and 40 surfaces join two-way to 47 run-time enumerated
-items.
-
-**Every cabal invocation now carries the resolved compiler.** The pre-migration gate ran `cabal exec ghc`
-bare, so on a host offering a newer GHC than the authored range the compile-fail battery failed to resolve
-`base` and reported a drifted locus — a toolchain mismatch wearing the costume of a capability regression.
-The gate resolves `ghc` and passes it to every cabal call, as Phase 9 established.
-
-**Constructor opacity is nine checks, not one.** Each private type — `Tenant`, `Subject`, `Membership`,
-`RequestContext`, `ScopeWitness`, `ScopedHandle`, `ResourceId`, `FlowLabel`, `CanFlowTo` — has its own check
-id and its own surface, because a single "the constructors are private" bit stays green while one of them
-quietly opens. The scan also no longer assumes the author's spacing: `Tenant(..)` opens a constructor exactly
-as `Tenant (..)` does.
-
-**Three contract surfaces have no recorded observation and are honestly UNVERIFIED.** The kernel declares
-`TenantFlowMismatch`, a cycle diagnostic, and `MissingFlowMember`, but the committed four-row flow matrix
-decides audience widening, integrity elevation, and one transitive leak — and nothing else. `tenant-flow-preservation`,
-`cycle-diagnostic`, and `missing-member-diagnostic` therefore carry no id, and the gap is recorded against
-Phase 8 in the legacy register rather than asserted away.
-
-**Invalidated historical record:**
-
-Done (invalidated). The owner/grant and flow relations, constructor-closure compile failures, generated coverage, and
-owner-equality mutant pass. Identity-provider and provider-runtime enforcement remain UNVERIFIED. See the
-Phase-8 ledger.
+✅ Done — sealed 2026-08-21. `python3 tools/scoped_identity_gate.py` passes all thirteen sides on natural
+`arm64`: 45 surfaces join to 59 items, all eleven metrics match, five compile pairs hold, the mutant reddens,
+and containment is clean. Attestation `sha256:05f9c2f19d07c604d0ec425ae5761d36495e28e2bf034c4f0e71d84834e97ded`
+binds source snapshot `sha256:3783dab57707c462…` (2,149 files). Live layers remain `UNVERIFIED`.
 
 ## Phase Summary
 
-This phase implements one seam: the constructor-private Haskell kernel for `Tenant`, `Subject`, `Membership`,
-`Owner`, `RequestContext`, `ScopeWitness`, `Audience`, scoped handles, provenance, `FlowLabel`, and `CanFlowTo`.
-It consumes the Phase-37 checked UI
-IR and makes tenant, subject, audience, and integrity preservation explicit before authorization or effects are
-introduced. Single-tenant programs retain the tenant index and receive one fixed server-supplied witness; they
-do not use a weaker unscoped representation.
+This phase supplies a constructor-private request scope whose rank-2 eliminator introduces one fresh type
+index. Scoped values, resolved handles, labels, and flow witnesses retain that index. A total pure checker
+decides owner/grant joins and direct or transitive confidentiality and integrity flows with stable errors.
 
-**Session scope:** one pure scoped-identity/flow algebra and its total checker; acceptance command
-`cabal test ui-scope-spec`; split immediately if work requires a server interpreter, live credentials, a second
-register, or a substrate.
-**Depends on:** [Phase 7](phase_07_evidence_calculus.md) — the evidence calculus, which binds each claim below to its fixture. The edge to the UI program schema is **reversed** by the re-baseline: the scope index is a pure type-level construct that the UI schema is indexed *by*, so the schema now depends on this phase rather than the other way round.
-**Phase scope:** one cohesive claim — *a value cannot acquire an audience it did not arrive with*. Scope, provenance and information flow are one index, and the kernel is where it becomes a type rather than a convention.
-
-**Substrate:** none — no host, browser, identity provider, provider service, or cluster is contacted.
+**Phase scope:** One Register-1 scope-index/flow kernel, accepted by `python3 tools/scoped_identity_gate.py`;
+split if work needs a live identity, provider, runtime interpreter, second register, or substrate.
+**Substrate:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-
-**Register:** 1 — pure/golden.
-**Gate:** `python3 tools/scoped_identity_gate.py` passes the paired scope corpus, independent
-flow relation, three compile failures, six coverage floors, isolated execution, explicit mutant-red run, and
-ledger check.
+**Register:** 1 — pure/golden
+**Depends on:** [Phase 7](phase_07_evidence_calculus.md) — its claim-to-fixture calculus binds every gate
+surface to an observed locus.
+**Gate:** `python3 tools/run_phase_gate.py 08` passes the committed representative corpus, independent
+predicates, exact compile pairs, generated coverage floors, network-observed pure run, seeded mutant, ledger,
+and universal artifact-hygiene checks described in [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
-All reference material below is authored and committed in Phase 0 before `Amoebius.Ui.Security.Scope` exists. The test
-must parse the pins independently; it may not call the kernel under test to manufacture expected decisions.
+- **Representative set:** tenants `t-a` and `t-b`; subjects Alice and Bob in `t-a` and Carol in `t-b`;
+  subject-owned, tenant-owned, actively granted, revoked, and absent-grant resources; direct, transitive,
+  subject-mismatched, cyclic, incomplete-member, and missing-path flow graphs.
+- **Oracle provenance:** the owner, swap, and flow decisions predate the replacement kernel. The diagnostic
+  and compile expectations transcribe the pre-existing phase contract and doctrine; they are authored from
+  intended errors, never copied from a failing run.
+- **Independent predicates:** `owner_join_table.tsv`, `owner_tenant_swaps.tsv`, and `flow_matrix.tsv` are read
+  as finite relations by tests that share no resolver, label relation, or graph traversal with production.
+  `flow_diagnostics.tsv` owns exact tags and paths.
+- **Specific negatives:** five legal/illegal twins separately pin raw identifier construction, scope
+  retagging, general declassification, request-index escape, and forged request scope. Each illegal twin must
+  fail at its own compiler reason while its legal twin compiles.
+- **Generator coverage:** QuickCheck forces tenant, subject, grant, audience, integrity, transitive,
+  subject-flow, cycle, and missing-member rejection classes to meet a 5% floor.
+- **External observation:** the pure suite runs with networking denied by macOS `sandbox-exec`, Linux network
+  namespaces, or injected Linux socket failure. No credential source is available to the contained process.
+- **Seeded mutant:** the registry-backed `drop_owner_equality` build flag removes subject-owner equality. Both
+  same-tenant and cross-tenant swap pins must redden it at its declared locus.
+- **Fresh challenge and authority pairing:** not applicable to this pure phase. Runtime identity, real
+  credentials, provider enforcement, and live noninterference remain `UNVERIFIED` for their later live gates.
+- **Extension conformance (§M.13).** Not applicable because the phase delivers a core index, not a domain,
+  provider, or hardware extension.
 
-
-- **Representative set:** two tenants (`t-a`, `t-b`), two subjects in `t-a`, one subject in `t-b`, and
-  equal-shaped subject-owned, tenant-wide, role-shared, and explicitly granted resources. Every allowed row has
-  a paired denial differing only in subject, tenant, audience, integrity, or grant state.
-- **Pinned oracles:** `test/fixture/ui_scope/owner_join_table.tsv` owns the independent
-  `Tenant`/`Subject`/`Membership`/`Owner` join; `owner_tenant_swaps.tsv` owns paired rejection cases;
-  `flow_matrix.tsv` owns direct and transitive source-to-sink decisions; `decode_errors.tsv` owns exact error
-  tags; and `compile_fail/` proves that raw `ResourceId`, scope retagging, and general declassification do not
-  type-check.
-- **Independent predicates:** the matrix reader implements the finite reference relation directly from its
-  columns. It shares no `CanFlowTo`, handle resolver, graph walk, or normalization helper with the subject.
-- **Specific negatives:** own-subject success is paired with same-tenant/foreign-subject denial and
-  foreign-tenant denial; an active grant is paired with its revoked twin; each rejection asserts its committed
-  `ScopeError` or `FlowError` tag rather than merely observing `Left`.
-- **Generator coverage:** QuickCheck classifies tenant mismatch, subject mismatch, absent/revoked grant,
-  audience widening, integrity elevation, and transitive-only leak, with each reject class meeting a 5% floor.
-- **Effect discipline:** a fresh effect challenge and real authority credentials are not applicable in this
-  Register-1 phase. Denied cases must nevertheless leave the independent pure effect trace empty; Phase 68 owns
-  the corresponding real-credential and external-observer claim.
-- **Seeded mutant:** `drop_owner_equality` deletes the owner-equality guard from the join. It is committed and
-  must turn the gate red on both the same-tenant owner swap and the cross-tenant owner swap pins.
-
-The gate therefore proves sampled agreement with an independent finite relation and constructor closure. It
-does not prove Keycloak truth, provider row policy, network isolation, or noninterference of future handlers.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+The gate proves agreement with finite authored relations and compiler-enforced lexical scope separation. It
+does not prove identity-provider truth, persisted-value re-entry, provider row policy, browser behavior, or
+live handler noninterference.
 
 ## Doctrine adopted
 
-- [`low_code_ui_runtime_doctrine.md` §4.2 — the client-safe value universe](../documents/engineering/low_code_ui_runtime_doctrine.md#42-the-client-safe-value-universe): opaque handles cannot be made from public identifiers.
-- [`low_code_ui_runtime_doctrine.md` §5 — gadt-decode and the checked Haskell IR](../documents/engineering/low_code_ui_runtime_doctrine.md#5-gadt-decode-and-the-checked-haskell-ir): scope and flow evidence is constructor-private.
-- [`low_code_ui_runtime_doctrine.md` §10 — single-tenant and multi-tenant applications](../documents/engineering/low_code_ui_runtime_doctrine.md#10-single-tenant-and-multi-tenant-applications): both modes retain trusted scope indices.
-- [`low_code_ui_runtime_doctrine.md` §10.3 — information-flow labels](../documents/engineering/low_code_ui_runtime_doctrine.md#103-information-flow-labels): the total graph relation preserves confidentiality and integrity.
-- [`illegal_state_catalog.md` §3.80](../documents/illegal_state/illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant) and [`§3.81`](../documents/illegal_state/illegal_state_security.md#381-a-ui-value-flowing-to-an-incompatible-tenant-subject-or-audience-scope): the paired oracle and mutants are the phase's explicit foreclosure obligations.
+- [`extension_conformance_security.md` §3 — the skolem scope](../documents/engineering/extension_conformance_security.md#3-the-skolem-scope): a rank-2 eliminator mints one fresh request index and private constructors prevent a second introduction rule.
+- [`low_code_ui_runtime_doctrine.md` §10.3 — information-flow labels](../documents/engineering/low_code_ui_runtime_doctrine.md#103-information-flow-labels): labels preserve subject audience and integrity across direct and transitive pure flows.
+- [`tenancy_doctrine.md` §4 — the typed shapes](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding): tenant, subject, membership, owner, and grant distinctions are constructor-private.
+- [`illegal_state_security.md` §3.80 — foreign resource resolution](../documents/illegal_state/illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant): paired owner and tenant swaps exercise exact denial reasons.
+- [`illegal_state_security.md` §3.81 — incompatible UI value flow](../documents/illegal_state/illegal_state_security.md#381-a-ui-value-flowing-to-an-incompatible-tenant-subject-or-audience-scope): the finite flow relation and total graph diagnostics exercise the pure foreclosure layer.
+- [`illegal_state_tenancy.md` §3.94 — same-typed scope identifiers](../documents/illegal_state/illegal_state_tenancy.md#394-two-same-typed-scope-identifiers-exchangeable-at-a-call-site): distinct private identity types and the request skolem reject transposition and cross-scope reuse.
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
-> established by the current phase gate plus universal artifact hygiene.
+## Sprint 8.1: Rank-2 scope index and total flow checking ✅
 
-## Sprint 8.1: Scope-indexed handles and total flow checking 📋
-**Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Security/{Scope,Flow}.hs`, `test/spec/ui/ScopeSpec.hs`,
-and `test/fixture/ui_scope/compile_fail/` — built and validated.
+**Status**: Done
+**Implementation**: `src/Amoebius/Scope/{Index,Flow}.hs`, the `scope-index` Cabal library,
+`test/spec/ui/ScopeSpec.hs`, `test/fixture/ui_scope/**`, `test/oracle/scoped_identity/**`, and
+`tools/scoped_identity_gate.py`.
 **Blocked by**: None.
-**Independent Validation**: `ui-scope-spec` matches all owner/swap and flow rows, and six generated reject
-classes meet their floors. Three external construction attempts fail to compile; the committed mutant fails.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/illegal_state/illegal_state_security.md`, `documents/engineering/testing_doctrine.md`
+**Independent Validation**: Five finite tables and five compiler-positive twins provide expectations outside
+the subject. Nine generated reject classes and the real build-flag mutant exercise branches the tables alone
+cannot establish.
+**Docs to update**: `documents/engineering/{extension_conformance_security,low_code_ui_runtime_doctrine,tenancy_doctrine,testing_doctrine}.md` and `documents/illegal_state/{illegal_state_security,illegal_state_tenancy}.md`.
 
 ### Objective
 
-Adopt the low-code runtime's scoped Haskell IR and information-flow rules: make it impossible for public UI
-data to construct or retag trusted tenant/subject authority, and reject every incompatible direct or transitive
-flow before a `CheckedUiProgram` can proceed to authorization binding.
+Adopt [`extension_conformance_security.md` §3 — the skolem scope](../documents/engineering/extension_conformance_security.md#3-the-skolem-scope)
+and [`low_code_ui_runtime_doctrine.md` §10.3 — information-flow labels](../documents/engineering/low_code_ui_runtime_doctrine.md#103-information-flow-labels): make trusted scope introduction singular and every pure value flow explicit.
 
 ### Deliverables
 
-- Private constructors and smart constructors for scoped request context, audiences, grants, handles,
-  provenance, labels, and flow witnesses; there is no unscoped/global-resource provider input.
-- A total scope resolver and transitive flow checker returning stable structured errors with complete offending
-  paths, including cycles or missing graph members as failures rather than partial traversal.
-- Compile-fail coverage for raw identifier use, scope coercion, label erasure, and general declassification.
-- Property tests, matrix parser, coverage floors, committed mutant configurations, and a Register-1
-  proven/tested/assumed ledger marking all live enforcement layers UNVERIFIED.
+- A constructor-private rank-2 request-scope index and scope-preserving value operations.
+- Constructor-private tenant, subject, membership, owner, grant, resource, and resolved-handle types.
+- Indexed flow labels and witnesses with a total direct and graph-path checker.
+- Stable structured errors for owner, grant, subject-flow, audience, integrity, cycle, missing-member, missing-path, and transitive failures.
+- Five specific-reason compiler-negative fixtures, each paired with a legal twin.
+- An independent finite corpus, nine-class generated coverage, and one registry-backed build-flag mutant.
+- A contained Register-1 gate with architecture, source-snapshot, ledger, surface-join, and artifact-hygiene evidence.
 
 ### Validation
 
-1. Run `cabal test ui-scope-spec`; every own/foreign and active/revoked pair matches the independently authored
-   matrices, every negative reports its pinned tag/path, and every coverage floor is met.
-2. Compile-fail cases demonstrate that raw identifiers, browser-derived scope, foreign-scope handles, and
-   unlabelled authority sinks cannot inhabit the trusted APIs.
-3. Run `drop_owner_equality`; both pinned owner/tenant swap families must expose it and turn the gate red.
-4. Verify the test process makes no network or credential access and the ledger says “spec-composition
-   proven,” never “runtime proven.”
+1. Match all six owner rows, both exact swap errors, four flow decisions, and four exact flow diagnostic
+   tag/path rows against independently read fixtures.
+2. Compile every legal twin and require each illegal twin to fail at its pinned compiler reason.
+3. Meet all nine QuickCheck reject-class floors and require `drop_owner_equality` to redden on both swaps.
+4. Run the suite with OS-observed network denial, scan the public API for twelve closed constructors and no
+   retag/declassification escape, and reject partial or unsafe source tokens.
+5. Join every enumerated item and surface, keep all outputs generated, bind the result to the natural
+   architecture and source snapshot, and record provider/runtime layers as `UNVERIFIED`.
 
 ### Remaining Work
 
-Done for the pure kernel. Live identity and provider enforcement remain UNVERIFIED, and so do the three flow
-diagnostics no committed row exercises — tenant-flow preservation, the cycle diagnostic, and the missing-member
-diagnostic.
+None.
 
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
-
-- `documents/engineering/low_code_ui_runtime_doctrine.md` — record the Phase-8 pure scope/flow kernel evidence
-  without changing the runtime-enforcement honesty boundary.
-- `documents/illegal_state/illegal_state_security.md` — attach the §3.80/§3.81 Register-1 fixture and mutant
-  evidence to their gadt-decode loci.
-- `documents/engineering/testing_doctrine.md` — register the independent scope/access-matrix pattern.
+- `documents/engineering/extension_conformance_security.md` — record the delivered lexical skolem mechanism and retain the persisted-value re-entry residue.
+- `documents/engineering/low_code_ui_runtime_doctrine.md` — record the pure label/index result without promoting live enforcement.
+- `documents/engineering/tenancy_doctrine.md` — distinguish the pure request index from later provider isolation.
+- `documents/engineering/testing_doctrine.md` — record the exact authored-expectation/generated-enumeration split.
+- `documents/illegal_state/illegal_state_security.md` and `illegal_state_tenancy.md` — refresh the Phase-8 evidence at the type and pure-decision loci.
 
 **Cross-references to add:**
-
-- `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, and
-  `DEVELOPMENT_PLAN/system_components.md` — index the phase, `none` substrate, gate, and target module.
-- `DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md` — retain Phase 8 as its exact dependency.
+- `DEVELOPMENT_PLAN/README.md`, `overview.md`, and `system_components.md` — reconcile status, sequence, and concrete module paths.
+- `DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md` — consume Phase 8 rather than present a reverse dependency.
 
 ## Related Documents
 
-- [Development Plan Standards](development_plan_standards.md) — phase shape, Register-1 honesty, and gate integrity.
-- [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — the scoped value and flow contract implemented here.
-- [Tenancy Doctrine](../documents/engineering/tenancy_doctrine.md) — authoritative tenant, subject, membership, ownership, and grant model.
-- [Illegal-State Security Slice](../documents/illegal_state/illegal_state_security.md) — subject ownership and information-flow illegal states.
+- [Development Plan Standards](development_plan_standards.md) — the phase shape and gate contract.
+- [Development Plan Tracker](README.md) — numeric order and current status.
+- [Evidence Calculus](phase_07_evidence_calculus.md) — the preceding claim-to-fixture boundary.
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) — the authored-expectation and generated-enumeration split.
+- [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — the later UI consumer and information-flow rule.
+- [Extension Security Laws](../documents/engineering/extension_conformance_security.md) — the shared skolem mechanism and its honest residue.
+- [Tenancy Doctrine](../documents/engineering/tenancy_doctrine.md) — the authoritative tenant and subject model.
+- [Illegal-State Security Slice](../documents/illegal_state/illegal_state_security.md) — foreign-resource and incompatible-flow states.
+- [Illegal-State Tenancy Slice](../documents/illegal_state/illegal_state_tenancy.md) — run-time scope-index states.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""The Phase-6 gate — the GADT-indexed IR and its total decoder (Gate 2).
+"""The Phase-26 gate — the GADT-indexed IR and its total decoder (Gate 2).
 
-The capability claim is unchanged: `dsl-spec` decodes every positive fixture to its
+The capability claim is unchanged: `gadt-decode-spec` decodes every positive fixture to its
 authored tree, each tagged negative fails at its own distinct `DecodeError`, three
 compile-fail pairs separate legal from illegal at their authored loci, the structural
 inventory and its deletion/substitution mutants hold, the decoder source contains no
@@ -78,7 +78,10 @@ CHECKS = {
 SIDES = ("toolchain", "suite", "mutant", "source", "oracle", "artifact")
 
 ACCEPTANCE = re.compile(
-    r"dsl-spec: PASS \((\d+) positives, (\d+) tagged negatives, (\d+) compile-fail pairs\)"
+    r"gadt-decode-spec: PASS \((\d+) positives, (\d+) tagged negatives, (\d+) compile-fail pairs\)"
+)
+CALCULUS_ACCEPTANCE = re.compile(
+    r"gadt-decode-calculus: PASS \((\d+) kinds, (\d+) retained rows\)"
 )
 
 EXPECTED_RESULTS = {
@@ -108,6 +111,7 @@ EXPECTED_RESULTS = {
     "absolute-tool-argv": "cabal+dhall+ghc-absolute",
     "argv-observer-mutants": "2/2-red",
     "acceptance-token": "spec-composition-proven-gadt_decode",
+    "calculus-composition-projection": "5/5-kinds-5527/5527-rows",
     "capacity-feasibility": "UNVERIFIED",
     "binding-feasibility": "UNVERIFIED",
     "runtime": "UNVERIFIED",
@@ -136,6 +140,7 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
         "absolute-tool-argv-observer": "absolute-tool-argv",
         "argv-observer-mutants": "argv-observer-mutants",
         "gadt-decode-spec-decode": "acceptance-token",
+        "decoded-calculus-composition": "calculus-composition-projection",
     }.items()
 }
 SURFACE_EVIDENCE.update(
@@ -203,8 +208,8 @@ def toolchain_side() -> tuple[bool, dict[str, Any]]:
 def suite_side(
     resolved: dict[str, Any], observer: argv_observer.ArgvObserver, run_dir: Path
 ) -> tuple[bool, dict[str, Any]]:
-    """Run dsl-spec through the boundary argv observer and measure what came back."""
-    print("\nsuite side — dsl-spec through the boundary argv observer\n")
+    """Run the Phase-26-only suite through the boundary argv observer and measure it."""
+    print("\nsuite side — gadt-decode-spec through the boundary argv observer\n")
     GENERATED.mkdir(parents=True, exist_ok=True)
     if BUILD_ROOT.exists():
         shutil.rmtree(BUILD_ROOT)
@@ -216,7 +221,7 @@ def suite_side(
     command = [
         observer.tool("cabal"), f"--with-compiler={resolved['ghc']['path']}",
         f"--builddir={BUILD_ROOT}", f"--store-dir={ROOT / '.build' / 'cabal-store'}",
-        "test", "dsl-spec", "--test-show-details=direct",
+        "test", "gadt-decode-spec", "--test-show-details=direct",
     ]
     result = subprocess.run(
         command, cwd=ROOT, env=suite_env(resolved, observer), text=True,
@@ -225,15 +230,20 @@ def suite_side(
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "suite.log").write_text(result.stdout, encoding="utf-8")
     if result.returncode != 0:
-        print(f"  FAIL  dsl-spec exited {result.returncode}; transcript at {gate_common.rel(run_dir / 'suite.log')}")
+        print(f"  FAIL  gadt-decode-spec exited {result.returncode}; transcript at {gate_common.rel(run_dir / 'suite.log')}")
         print("        " + result.stdout[-1500:].replace("\n", "\n        "))
         return False, {}
     match = ACCEPTANCE.search(result.stdout)
     if match is None:
-        print("  FAIL  dsl-spec printed no acceptance token, so its counts cannot be measured")
+        print("  FAIL  gadt-decode-spec printed no acceptance token, so its counts cannot be measured")
         return False, {}
     positives, negatives, pairs = (int(value) for value in match.groups())
-    print(f"  ok    dsl-spec green: {positives} positives, {negatives} tagged negatives, {pairs} compile-fail pairs")
+    calculus_match = CALCULUS_ACCEPTANCE.search(result.stdout)
+    if calculus_match is None:
+        print("  FAIL  gadt-decode-spec printed no five-calculus projection token")
+        return False, {}
+    calculus_kinds, calculus_rows = (int(value) for value in calculus_match.groups())
+    print(f"  ok    gadt-decode-spec green: {positives} positives, {negatives} tagged negatives, {pairs} compile-fail pairs")
 
     try:
         families, ambient = observer.observations()
@@ -249,7 +259,14 @@ def suite_side(
         return False, {}
     print(f"  ok    absolute-tool-argv every {'/'.join(sorted(families))} invocation took the "
           "declared absolute route, and no name resolved through PATH")
-    return True, {"positives": positives, "negatives": negatives, "pairs": pairs, "families": families}
+    return True, {
+        "positives": positives,
+        "negatives": negatives,
+        "pairs": pairs,
+        "calculus_kinds": calculus_kinds,
+        "calculus_rows": calculus_rows,
+        "families": families,
+    }
 
 
 def observer_mutants(resolved: dict[str, Any]) -> tuple[bool, str]:
@@ -306,7 +323,7 @@ def mutant_side(
     result = subprocess.run(
         [observer.tool("cabal"), f"--with-compiler={resolved['ghc']['path']}",
          f"--builddir={BUILD_ROOT}", f"--store-dir={ROOT / '.build' / 'cabal-store'}",
-         "test", "dsl-spec", "--test-show-details=direct"],
+         "test", "gadt-decode-spec", "--test-show-details=direct"],
         cwd=ROOT, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
     )
     (run_dir / "mutant.log").write_text(result.stdout, encoding="utf-8")
@@ -375,6 +392,9 @@ def measure(observed: dict[str, Any], mutant: str, scan: str) -> tuple[dict[str,
         "absolute-tool-argv": "+".join(sorted(observed["families"])) + "-absolute",
         "argv-observer-mutants": observed["observer_mutants"],
         "acceptance-token": "spec-composition-proven-gadt_decode",
+        "calculus-composition-projection": (
+            f"{observed['calculus_kinds']}/5-kinds-{observed['calculus_rows']}/{nodes}-rows"
+        ),
         "capacity-feasibility": "UNVERIFIED",
         "binding-feasibility": "UNVERIFIED",
         "runtime": "UNVERIFIED",
@@ -452,7 +472,7 @@ def main() -> int:
             for name, record in resolved.items()
             if name != "platform"
         },
-        dependencies={"dsl-spec": "cabal test"},
+        dependencies={"gadt-decode-spec": "cabal test"},
         checks=results,
         mutants=[
             {"name": "legalized schema negative", "status": mutant_value},

@@ -25,7 +25,7 @@ The rule behind the self-referential gate suite is owned by [`workflow_calculus_
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 49.1: The self-referential gate suite 📋](#sprint-491-the-self-referential-gate-suite-)
+- [Sprint 49.1: The self-referential gate suite ✅](#sprint-491-the-self-referential-gate-suite-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -33,25 +33,43 @@ The rule behind the self-referential gate suite is owned by [`workflow_calculus_
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-48 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-22. The fourteen-sided Register-1 gate passed on natural `arm64`, untranslated.
+An independently authored boundary inventory names all 96 phase contracts: 93 carry runnable commands and
+three remain honestly descriptive. Every runnable `Gate:` consumer now enters through one closed-argv runner,
+while the original command remains a separate inventory value and execution mechanism. The typed derivation
+records exactly Provision, Build, Deploy, Observe and Teardown, balances one provision against one release,
+and carries both PASS and RED exit verdicts as evidence. The legal teardown twin compiles, the leaking twin is
+rejected, the direct and routed Phase-0 mechanisms both pass, and the observation-drop, resource-leak and
+mutant-skip defects each redden only its named locus. All nine metrics match; seven surfaces join to 122
+items. Attestation `sha256:bddbcecde00b62f28aaa9afd76894c6da8a8a18e927ba94a4f991bf66b2bb79b`
+binds source `sha256:0a796e4c78466571…` over 2,318 files. Live effects retain their owning phase's
+register; Phase 49 proves the workflow value and routing boundary, not those effects again.
 
 ## Phase Summary
 
 Express amoebius own gates as workflow values, so the calculus is exercised by every gate run.
 
-**Phase scope:** one cohesive claim — *amoebius's own gates are workflow values in the algebra those gates validate*. The derived gate must reach the same verdict as the authored one it replaces, on every phase it replaces.
+**Phase scope:** one cohesive claim — *every runnable phase-gate declaration is a workflow value and every
+declared consumer routes through it*. The separately authored command remains the independent mechanism;
+descriptive future contracts acquire a value only when they first acquire a runnable command.
 **Substrate:** `none`
 **Lane:** `none`
 **Register:** 1
 **Depends on:** [Phase 48](phase_48_test_workflow_algebra.md) — the test-workflow algebra, in which a gate is expressed. This is the phase where the self-reference the corpus warns about becomes concrete, and it inherits the mutation argument as its only defence.
-**Gate:** `python3 tools/self_referential_gates_gate.py` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/run_phase_gate.py 49` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
-- **Independent oracle.** The authored gates serve as the expectation, retained until every derived gate matches them.
-- **Committed mutants.** Mutants drop the observation arm, leak a provisioned resource, and derive a gate that skips a mutant.
-- **Specific-reason negatives.** Each negative fixture asserts the reason it fails, paired with a positive differing only in a derivation from a gate declaration to its runnable form.
-- **Fresh challenge.** Not applicable — this gate is pure, so the separately authored predicate stands in for it: the authored gates serve as the expectation, retained until every derived gate matches them.
+- **Independent oracle.** `test/oracle/self_referential_gates/gate_inventory.tsv` was authored before the
+  derivation and retains each original command. The gate joins it both ways to all 96 contracts and executes
+  Phase 0 both directly and through the derived consumer; both verdicts must be PASS.
+- **Committed mutants.** Registry capability `self_referential_gates` drops the observation arm, leaks a
+  provisioned resource, and derives a gate that skips its mutant set. Each is a production CPP defect with a
+  distinct expected red locus.
+- **Specific-reason negatives.** `legal_gate.hs` derives teardown and compiles;
+  `leaked_gate.hs` differs at that derivation and fails while naming the outstanding gate-process type.
+- **Fresh challenge.** Not applicable — this gate is pure. The separately authored commands are retained as
+  executable predicates, and the Phase-0 direct-versus-routed comparison challenges the runner on each run.
 - **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
 
 ## Doctrine adopted
@@ -60,12 +78,15 @@ Express amoebius own gates as workflow values, so the calculus is exercised by e
 
 ## Sprints
 
-## Sprint 49.1: The self-referential gate suite 📋
+## Sprint 49.1: The self-referential gate suite ✅
 
-**Status**: Planned
-**Implementation**: planned module path; concrete when Done
+**Status**: Done
+**Implementation**: `src/self-referential-gates/Amoebius/Gate/SelfReferential.hs`;
+`tools/run_phase_gate.py`; `tools/self_referential_gates_gate.py`;
+`test/spec/workflow/SelfReferentialGatesSpec.hs`
 **Blocked by**: None.
-**Independent Validation**: The authored gates serve as the expectation, retained until every derived gate matches them.
+**Independent Validation**: The pre-derivation 96-row inventory retains the authored commands; the gate joins
+every contract and compares Phase 0's direct and routed verdicts.
 **Docs to update**: `documents/engineering/workflow_calculus_doctrine.md`
 
 ### Objective
@@ -85,11 +106,13 @@ A gate expressed as a value must produce the same verdict as the authored gate i
 
 ### Remaining Work
 
-Everything. Every gate is still an authored Python script with no value behind it.
+None in this phase. The three descriptive-only contracts (Phases 73, 77 and 89) own no runnable gate yet and
+therefore cannot be routed; their owning phases must add a command before they can open. Live mechanism
+behavior remains at each mechanism's declared register and is not reclassified as a Phase-49 result.
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated with the sealed boundary:**
 
 - [`workflow_calculus_doctrine.md`](../documents/engineering/workflow_calculus_doctrine.md)
 

@@ -23,7 +23,7 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/content_addressing_determinism.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -34,8 +34,8 @@ The Register-1 gate passed on 2026-08-09 with ledger
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision 📋](#sprint-321-the-inferenceengine-capability--target-offering-selected-runtime--accelerator-provision-)
-- [Sprint 32.2: The accelerator-provision corpus + the Register-1 gate 📋](#sprint-322-the-accelerator-provision-corpus--the-register-1-gate-)
+- [Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ✅](#sprint-321-the-inferenceengine-capability--target-offering-selected-runtime--accelerator-provision-)
+- [Sprint 32.2: The accelerator-provision corpus + the Register-1 gate ✅](#sprint-322-the-accelerator-provision-corpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -43,7 +43,18 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-31 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — resealed 2026-08-21. `python3 tools/inference_accelerator_gate.py` passes all eleven sides on natural
+`darwin/arm64`, untranslated. The bounded suite provisions three inference positives, checks all four offering
+quotients and twelve family/lane cells, rejects the URL fixture at dhall-typecheck and eight exact provision
+negatives at the seal, and covers all eight generated rejection branches. The 17-entry validation-locus ledger
+is exact; all five paired mutants redden; 34 observed units compose through all five calculus kinds; all 18
+metrics match; and all 29 surfaces join to 45 items. The final project-contained attestation is recorded after
+the post-documentation rerun: `sha256:7ec3964301757207c836b03009f32f04992cabaefe62286f55b25ff1a0750879`,
+bound to source snapshot `sha256:5ee180b5f8a72121…` over 2,253 files. Live engine resolution, cross-lane weight
+loading, and runtime correspondence remain UNVERIFIED at their later owners.
+
+Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi
+changed what this phase's gate had to cover, so the earlier seals below remain history.
 
 **Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
@@ -71,12 +82,13 @@ three inference positives provision, the target-offering quotient is exact acros
 relation is exact across twelve pairs, the hand-authored coexistence aggregation matches, the URL dhall-typecheck
 negative reddens at its specific locus, eight provision negatives redden at their tags, the eight-branch
 QuickCheck coverage floor holds, and all five seeded mutants redden. Evidence and the ledger move into
-`.build/runs/phase_27/<run-id>/`, and 23 run-time items — one coexistence epoch, four engine families, four
+`.build/runs/phase_32/<run-id>/`, and 23 run-time items — one coexistence epoch, four engine families, four
 target lanes, nine provision cases, and five mutant names — partition one-to-one across the claim surfaces.
 
-**Two contract surfaces carry no id and are now honestly UNVERIFIED**:
-`opaque-provisioned-engine-accelerator` and `phase12-validation-locus-ledger`. The gap is recorded against
-Phase 32 in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
+**Two formerly unverified contract surfaces are now measured directly**: one metric checks that the
+`ProvisionedEngineAccelerator` constructor remains hidden behind its three accessors, and another checks the
+complete 17-row validation-locus ledger. The pre-amendment gap is closed in
+[`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md).
 
 **Invalidated historical record:**
 
@@ -149,7 +161,7 @@ Phase-31 provision seal.
 
 **Depends on:** [Phase 31](phase_31_provision_seal.md) — whole-deployment provision seal + expansion, which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/inference_accelerator_gate.py` passed on no substrate, Register 1.
+**Gate:** `python3 tools/run_phase_gate.py 32` passed on no substrate, Register 1.
 It covers three positives, all quotient/relation cells, nine negatives, one covered property, and five mutants.
 The complete apparatus is named in [Gate integrity](#gate-integrity).
 
@@ -190,11 +202,11 @@ flowchart LR
 The gate's positive corpus is *exactly* the three oracle-pinned fixtures
 `dhall/examples/legal_inference_singlenode.dhall`, `dhall/examples/legal_inference_distributed.dhall` (the
 `InferenceEngine` arm bound under `SingleNode` and `Distributed { nodes = n }`, n ≥ 2, satisfying the
-[Phase-30](phase_30_capability_bind.md) object-node-multiset shape oracle against the reviewer-authored
-goldens `test/golden/capability/golden_servicespec_inference_singlenode.golden` and
-`golden_servicespec_inference_distributed.golden`), and `dhall/examples/legal_inference_cuda.dhall` (the
+[Phase-30](phase_30_capability_bind.md) object-node-multiset shape oracle against the inference rows in the
+independently authored `test/oracle/capability_bind/bound_shape_semantics.tsv`), and
+`dhall/examples/legal_inference_cuda.dhall` (the
 CUDA accelerator positive that binds and provisions by selecting the matching CUDA target offering with its
-residency/coexistence epochs inside net allocatable VRAM). All three fixtures, both goldens, and every
+residency/coexistence epochs inside net allocatable VRAM). All three fixtures, the semantic projection, and every
 expected error/locus tag below are **authored and committed in this phase's oracle-pinning sprint before the `Amoebius.Capability.Engine` implementation exists** (§M.1); a golden regenerated from `bind`'s own output
 is not a test. An `Immediate` provision path applies — the `InferenceEngine` owner needs no bootstrap-staged
 render activation.
@@ -334,7 +346,7 @@ device count equals the owner requirement) and each minimally-differing one-devi
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-21 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -342,8 +354,8 @@ device count equals the owner requirement) and each minimally-differing one-devi
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
 > established by the current phase gate plus universal artifact hygiene.
 
-## Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision 📋
-**Status**: Planned
+## Sprint 32.1: The `InferenceEngine` capability — target-offering-selected runtime + accelerator provision ✅
+**Status**: Done
 **Implementation**: `dhall/amoebius/Capability.dhall` carries the URL-free runtime and family unions.
 `src/Amoebius/Capability/Engine.hs` owns offerings, the lane quotient, family relation, owner demands, policies,
 and the opaque checked accelerator. `src/Amoebius/Capacity/Provision.hs` incorporates it into the seal.
@@ -413,10 +425,11 @@ resolve.
    family×lane relation (§M.3), never the fold's own accumulator.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The URL-free union, quotient, family relation, opaque checked accelerator, exact identity/policy
+domains, all permitted epochs, and residency rules are sealed by the Phase-32 gate.
 
-## Sprint 32.2: The accelerator-provision corpus + the Register-1 gate 📋
-**Status**: Planned
+## Sprint 32.2: The accelerator-provision corpus + the Register-1 gate ✅
+**Status**: Done
 **Implementation**: `test/spec/capability/EngineAccelerator{Fixtures,Props,Gate,Mutants,Spec}.hs`, the paired Dhall
 corpus, `test/oracle/inference_accelerator/`, `test/mutant/inference_accelerator/`, and `tools/inference_accelerator_gate.py`.
 **Blocked by**: None.
@@ -425,7 +438,6 @@ one dhall-typecheck and eight provision negatives, and eight QuickCheck branches
 checks exact locus coverage, retains evidence, and validates the hashed Register-1 ledger.
 **Docs to update**:
 `documents/engineering/service_capability_doctrine.md` (§4.1),
-`documents/illegal_state/illegal_state_catalog.md` (§3.25 → realized layer),
 `documents/engineering/content_addressing_doctrine.md` (§4.5 Tier-1 engine read-side),
 `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-32 status when the
 gate passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-32 `none` gate row).
@@ -440,7 +452,7 @@ per-entry validation-locus ledger that names the honest foreclosure layer of eac
 
 ### Deliverables
 - The concrete corpus named in [Gate integrity](#gate-integrity): the three positive fixtures
-  (`legal_inference_{singlenode,distributed}`, `legal_inference_cuda`) with their two reviewer-authored goldens,
+  (`legal_inference_{singlenode,distributed}`, `legal_inference_cuda`) with the authored Phase-30 semantic projection,
   and the nine engine/accelerator negatives, each paired with a positive differing only in the foreclosed
   dimension and each asserting its specific `dhall type` error locus or `provision-seal` `ProvisionError` tag.
 - The property battery: the offering→lane quotient totality property (and the no-inhabitant OS-vs-`Cuda`
@@ -464,7 +476,7 @@ per-entry validation-locus ledger that names the honest foreclosure layer of eac
 ### Validation
 1. `cabal test capability-spec` is green over the InferenceEngine/accelerator slice — `legal_inference_cuda`
    provisions by selecting the matching CUDA offering; the `legal_inference_{singlenode,distributed}` pair is
-   byte-invariant and structurally different by the object-node-multiset oracle against its committed golden;
+   byte-invariant and structurally different by the object-node-multiset oracle against its authored semantic projection;
    `illegal_engine_by_url` fails `dhall type` at its asserted locus; each provision negative returns its
    specifically-tagged `Left`; the coverage obligations meet `checkCoverage`; exact-fit boundaries accept and
    each one-device/one-byte-short pair rejects; and the suite is red under each of the five committed seeded
@@ -472,7 +484,8 @@ per-entry validation-locus ledger that names the honest foreclosure layer of eac
    turns the suite **red** if any named fixture, negative reason, or mutant is missing.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The eleven-sided Register-1 gate, 17-row locus ledger, 34-unit five-calculus projection, 18 metrics, and
+29-surface/45-item join are sealed.
 
 ## Documentation Requirements
 

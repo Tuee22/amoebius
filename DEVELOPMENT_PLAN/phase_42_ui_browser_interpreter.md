@@ -19,7 +19,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md
 **Generated sections**: none
 
 </details>
@@ -30,7 +30,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 42.1: Generic `ClientPlan` interpreter and browser boundary gate 📋](#sprint-421-generic-clientplan-interpreter-and-browser-boundary-gate-)
+- [Sprint 42.1: Generic `ClientPlan` interpreter and browser boundary gate ✅](#sprint-421-generic-clientplan-interpreter-and-browser-boundary-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -38,60 +38,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-41 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_browser_interpreter_gate.py` passed all eleven sides in
-resolved Chrome: two plans, five event arms, four independently derived traces, two DOM snapshots, three
-accessibility rows, five focus rows, four transport rows, CSP and WebSocket checks, all nine mutants, and all
-sixteen metrics pass; 66 surfaces join to 84 enumerated items. The project-contained attestation is
-`sha256:9813b93d168470d07173b797177ef225e38f619edf9320865fa8c9c1ef48a47b`, bound to source snapshot
-`sha256:a70b1cd50e69733b…`; Phase 42 owns no remaining migration deferral.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:05f7d7c56b159a83…`
-(1944 non-ignored files) and published a verified pre-containment external attestation
-`sha256:9494bf7e55160959786c7028baa5d9e0dad2ecb7227e541a03164cd08e6ed3e8`.
-
-**Observed progress — 2026-08-13:** **Policy-conformant.** The browser-boundary result is unchanged and
-re-run: two per-app plans drive one generic bundle in real headless Chrome, five interactions join the
-generated event set exactly, four differential trace steps agree with the independent Haskell semantics, two
-DOM snapshots, three accessibility rows, five keyboard/focus rows, and four transport rows match their pins, a
-fresh post-ready nonce carries through, the built-artifact scanner and browser CSP canary hold, the OS
-observer sees only loopback, and all nine mutants redden. Evidence and the ledger move into
-`.build/runs/phase_37/<run-id>/`, and 66 surfaces join two-way to 84 run-time enumerated items.
-
-**`reference_traces.tsv` is deleted, which is what this phase owed.** The table held exactly what
-`ReferenceClientPlan.referenceTraces` returns from the authored interactions, so the assertion that compared
-them proved only that a file agreed with the function that generated it. The suite now derives that side at
-run time, the comparison that matters — browser against independent semantics — is unchanged, and a
-`derived-trace-table-untracked` check refuses any tracked fixture whose header names the trace columns.
-
-**The route join stopped agreeing with every corpus.** `authoredRouteRows` ignored its argument and returned
-two constant rows, so the generated/authored route join passed for any interaction table at all. It now
-derives the authored side from the same independent semantics, and a route added to a plan has to appear in an
-interaction before the join can cover it.
-
-**The browser driver resolves instead of being typed in.** The gate carried the literal `1.62.1` in two
-places and refused anything else. `playwright` is now an entry in `tools/toolchain_requirements.json` with a
-`>=1.55 <2` range, resolved per run like every other tool.
-
-**Three enumeration names were collapsed into the observations that decide them.** `home-route`,
-`workflow-route`, and `choose-tenant-route` named the route column of one four-step differential trace;
-`external-request-body-observation` named the body the same-origin action request already carries;
-`atomic-state-transition` named what the sequential-state-writes mutant proves. One observation reported under
-three surfaces reads as three independent results.
-
-**Invalidated historical record:**
-
-Done (invalidated). Two immutable plans run through one generic PureScript bundle in real Chrome and agree with an
-independent Haskell transition oracle. Five interactions, four differential trace steps, two DOM snapshots,
-three accessibility rows, five keyboard/focus rows, four transport rows, a fresh nonce, browser-enforced CSP,
-the built-artifact scanner, the OS network observer, and all nine mutants pass. Live identity, server
-authorization, provider isolation, release rollout, and HA behavior remain UNVERIFIED. See the
-Phase-42 ledger.
+✅ Done — sealed 2026-08-21. `python3 tools/ui_browser_interpreter_gate.py` passes all thirteen sides on
+natural `arm64`, untranslated, in resolved Chrome. Two immutable plans drive one generic bundle; five
+interactions, four independently derived traces, two DOM snapshots, three accessibility rows, five focus rows,
+four transport rows, the fresh-challenge/CSP checks, and all nine production mutants pass. The real
+five-calculus projection accounts for 72 units, all 20 metrics match, and 73 surfaces join to 91 run-time
+items. The Darwin OS observer admits loopback, denies an external connection at the kernel, and still permits
+Chromium's local IPC. Attestation
+`sha256:7da8538efe9b17ecb8eb3c1dd536e2c7b9abb4cdd9db412eb39da63f8d9621a6` binds source
+`sha256:e58ef921b89f759d…` over 2,267 files. Server authorization, live provider isolation, release rollout, and
+HA remain UNVERIFIED.
 
 ## Phase Summary
 
@@ -110,20 +66,14 @@ implemented without the PureScript transition helpers, consumes the same generat
 step-for-step on visible state, requested effects, cancellations, and route transitions. It uses a fake UI
 server only as a boundary peer; server authorization semantics belong to Phase 43.
 
-**Session scope:** one generic `ClientPlan` browser interpreter and its differential/Playwright conformance harness;
-acceptance command `python3 tools/ui_browser_interpreter_gate.py`; split immediately if work requires server policy
-evaluation, a second production interpreter, a live identity/provider service, release publication, a second
-register, or a substrate.
-**Depends on:** [Phase 40](phase_40_ui_plan_compiler.md) — canonical immutable `ClientPlan` encoding and public contracts.
 **Phase scope:** one cohesive claim — *one generic interpreter runs every plan, so no application ships browser code*. Its behaviour is checked against a reference semantics written in another language.
-
 **Substrate:** none — local Chromium and harness-owned fake processes only; no cluster or external service.
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `python3 tools/ui_browser_interpreter_gate.py` builds the generic bundle and passes every check and seeded mutant
-in [Gate integrity](#gate-integrity), emitting a Register-2 ledger whose live layers stay UNVERIFIED. Phase 44
-does not open on the browser branch until it does.
+**Depends on:** [Phase 40](phase_40_ui_plan_compiler.md) — canonical immutable `ClientPlan` encoding and public
+contracts; [Phase 41](phase_41_offline_language_plan.md) — the completed five-calculus projection pattern.
+**Gate:** `python3 tools/run_phase_gate.py 42` builds the generic bundle and passes every check and
+seeded mutant in [Gate integrity](#gate-integrity); Phase 43 does not open until it does.
 
 ## Gate integrity
 
@@ -153,9 +103,9 @@ or renderer output.
   for every step. The Playwright/OS observations of the PureScript interpreter must match exactly; the
   reference side imports no production compiler or PureScript transition implementation.
 - **Independent observation:** Playwright reads the browser DOM and focus state. The harness-owned loopback
-  server records the HTTP method, path, and body outside the bundle, while `strace` observes browser-process
-  `connect`/`sendto` calls. Only loopback connections establish; Chrome's two IPv6 reachability probes hard-fail
-  with `ENETUNREACH`. Self-emitted client “sent” traces are ignored.
+  server records the HTTP method, path, and body outside the bundle. On Darwin, `sandbox-exec` admits loopback
+  and denies non-loopback outbound IP at the kernel while leaving local IPC available; on Linux, `strace`
+  observes browser-process `connect`/`sendto` calls. Self-emitted client “sent” traces are ignored.
 - **Accessibility and browser hardening:** authored keyboard-only sequences pin focus entry, trap, restoration,
   error-summary navigation, and route-change focus. An independent scanner inspects the built bundle for
   inline/eval-like code, dynamic remote imports, forbidden storage/network APIs, provider strings, secrets,
@@ -195,20 +145,13 @@ authority-paired own/foreign enforcement is owned by the UI-server boundary and 
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
-> established by the current phase gate plus universal artifact hygiene.
+## Sprint 42.1: Generic `ClientPlan` interpreter and browser boundary gate ✅
 
-## Sprint 42.1: Generic `ClientPlan` interpreter and browser boundary gate 📋
-**Status**: Planned
+**Status**: Done
 **Implementation**: `ui/src/Amoebius/Ui/{Interpreter,Components}.purs`, `ui/src/Main.{purs,js}`,
 `test/spec/ui/{UiBrowserInterpreterSpec,ReferenceClientPlan}.hs`,
 `test/harness/ui_browser/browser.mjs`, `test/harness/ui_browser/scan_artifact.py`, and `tools/ui_browser_interpreter_gate.py`
-**Blocked by**: None.
+**Blocked by**: [Phase 41](phase_41_offline_language_plan.md) gate
 **Independent Validation**: `python3 tools/ui_browser_interpreter_gate.py` builds via `spago`, drives Chromium with authored
 Playwright interactions, reads DOM plus OS-boundary traffic, and requires every named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
@@ -250,8 +193,8 @@ no raw rendering, network, authority, or persistence escape is available to app 
 
 ### Remaining Work
 
-None. The UI-server authorization/runtime, real provider isolation, release rollout, and HA layers remain
-explicitly UNVERIFIED for their owning later phases.
+None. UI-server authority, live provider isolation, release rollout, and HA remain later-phase claims rather
+than Phase-42 work.
 
 ## Documentation Requirements
 
@@ -274,7 +217,9 @@ explicitly UNVERIFIED for their owning later phases.
 
 ## Related Documents
 
+- [Phase 10](phase_10_calculus_composition.md) — the real five-calculus composition projected by this gate.
 - [Phase 40](phase_40_ui_plan_compiler.md) — the required immutable `ClientPlan` and public contracts.
+- [Phase 41](phase_41_offline_language_plan.md) — the immediately preceding paired-plan boundary.
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — generic-client boundary and verification obligations.
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — authored expectations and spoof-resistant evidence.
 - [Illegal-State Capability/Messaging Slice](../documents/illegal_state/illegal_state_capability_messaging.md) — browser/provider escape foreclosure.

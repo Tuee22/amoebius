@@ -160,19 +160,33 @@ metadataFor :: ProvisionedRenderSource -> ObjectMetadata
 metadataFor source =
   ObjectMetadata
     { metadataName = objectName (renderSourceIdentity source)
-    , metadataNamespace = namespaceFor (renderSourceOwner source) (renderSourceWitness source)
+          , metadataNamespace = namespaceFor (renderSourceIdentity source) (renderSourceWitness source)
     , metadataLabels = Map.fromList [("app.kubernetes.io/managed-by", "amoebius"), ("amoebius.io/owner", ownerText (renderSourceOwner source))]
     , metadataAnnotations = Map.fromList [("amoebius.io/source", identity), ("amoebius.io/activation", Text.pack (show (renderSourceActivation source)))]
     }
  where
   K8sObjectIdentity identity = renderSourceIdentity source
 
-namespaceFor :: RenderSourceOwner -> ProvisionedPartWitness -> Maybe Text
-namespaceFor owner witness = case witness of
+namespaceFor :: K8sObjectIdentity -> ProvisionedPartWitness -> Maybe Text
+namespaceFor identity witness = case witness of
   NamespacePart -> Nothing
-  _ -> Just $ case owner of
-    DeploymentGlobalOwner -> "amoebius-system"
-    CapabilityServiceOwner service -> "capability-" <> sanitize service
+  ManagedCapacityAdmissionPart -> Nothing
+  CapacitySchedulerPart -> Just "amoebius-capacity-scheduler"
+  BootstrapAddonCutoverPart -> Just "amoebius-capacity-scheduler"
+  _ -> Just (capabilityNamespace identity)
+
+capabilityNamespace :: K8sObjectIdentity -> Text
+capabilityNamespace (K8sObjectIdentity identity) = case Text.takeWhile (/= '/') identity of
+  "objectstore" -> "amoebius-minio"
+  "secretstore" -> "amoebius-vault"
+  "messagebus" -> "amoebius-pulsar"
+  "sql" -> "amoebius-postgres"
+  "identity" -> "amoebius-keycloak"
+  "observability" -> "amoebius-observability"
+  "registry" -> "amoebius-registry"
+  "edge" -> "amoebius-edge"
+  "inferenceengine" -> "amoebius-inference"
+  capability -> "amoebius-" <> sanitize capability
 
 specFor :: ProvisionedRenderSource -> K8sObjectKind -> ObjectSpec
 specFor source kind = case kind of

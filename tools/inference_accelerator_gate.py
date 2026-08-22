@@ -27,6 +27,7 @@ CASES = ROOT / "test/oracle/inference_accelerator/provision_cases.tsv"
 OFFERINGS = ROOT / "test/oracle/inference_accelerator/offering_lane.tsv"
 FAMILIES = ROOT / "test/oracle/inference_accelerator/family_lane.tsv"
 COEXISTENCE = ROOT / "test/oracle/inference_accelerator/coexistence.tsv"
+CALCULUS_PROJECTION = ROOT / "test/oracle/inference_accelerator/calculus_projection.tsv"
 MUTANT_CAPABILITY = "inference_accelerator"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/inference_accelerator/validation_locus.tsv"
@@ -59,6 +60,19 @@ def read_tsv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle, delimiter="\t"))
 
 
+def read_surface_map(path: Path) -> dict[str, str]:
+    mapping: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line or line.startswith("#"):
+            continue
+        fields = line.split("\t")
+        if len(fields) != 3:
+            raise GateFailure(f"malformed surface row: {line}")
+        surface, _owner, ids = fields
+        mapping[surface] = ids
+    return mapping
+
+
 def verify_pins() -> tuple[Path, Path, str]:
     pins = toolchain.resolve(["cabal", "dhall", "ghc"])
     executables = {name: Path(pins[name]["path"]) for name in ("cabal", "ghc", "dhall")}
@@ -83,18 +97,27 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     offerings = read_tsv(OFFERINGS)
     families = read_tsv(FAMILIES)
     coexistence = read_tsv(COEXISTENCE)
+    calculus_projection = read_tsv(CALCULUS_PROJECTION)
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     locus = read_tsv(LOCUS)
     if len(cases) != 9 or len({row["case"] for row in cases}) != 9:
-        raise GateFailure("Phase-13 provision oracle must enumerate nine unique negatives")
+        raise GateFailure("Phase-32 provision oracle must enumerate nine unique negatives")
     if len(offerings) != 4 or {row["offering"] for row in offerings} != {"apple", "linux-cpu", "linux-cuda", "windows"}:
-        raise GateFailure("Phase-13 offering quotient oracle is incomplete")
+        raise GateFailure("Phase-32 offering quotient oracle is incomplete")
     if len(families) != 12 or len({(row["family"], row["lane"]) for row in families}) != 12:
-        raise GateFailure("Phase-13 family/lane relation must contain all twelve cells")
+        raise GateFailure("Phase-32 family/lane relation must contain all twelve cells")
     if coexistence != [{"epoch": "all-classes", "device": "cuda-a", "bytes": "15"}]:
-        raise GateFailure("Phase-13 hand-authored coexistence aggregation drifted")
+        raise GateFailure("Phase-32 hand-authored coexistence aggregation drifted")
+    expected_calculus = [
+        {"metric": "calculus-kinds", "value": "artifact,budget,lift,workflow,evidence"},
+        {"metric": "component-names", "value": "inference-positives,availability-cells,boundary-negatives,accelerator-property,mutant-evidence"},
+        {"metric": "projection-counts", "value": "3,16,9,1,5"},
+        {"metric": "resource-vector", "value": "5,34,0,0"},
+    ]
+    if calculus_projection != expected_calculus:
+        raise GateFailure("Phase-32 five-calculus projection oracle drifted")
     if len(mutants) != 5 or len({row["mutant"] for row in mutants}) != 5:
-        raise GateFailure("Phase-13 mutant manifest must contain five unique mutants")
+        raise GateFailure("Phase-32 mutant manifest must contain five unique mutants")
     expected_locus = {
         "legal_inference_singlenode",
         "legal_inference_distributed",
@@ -103,7 +126,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         *(row["mutant"] for row in mutants),
     }
     if len(locus) != len(expected_locus) or {row["entry"] for row in locus} != expected_locus:
-        raise GateFailure("Phase-13 validation-locus ledger has incomplete or duplicate coverage")
+        raise GateFailure("Phase-32 validation-locus ledger has incomplete or duplicate coverage")
     for fixture in (
         "dhall/examples/legal_inference_singlenode.dhall",
         "dhall/examples/legal_inference_distributed.dhall",
@@ -111,7 +134,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     ):
         checked = run([str(dhall), "type", "--file", fixture, "--quiet"], require_success=False)
         if checked.returncode != 0:
-            raise GateFailure(f"Phase-13 positive is not Dhall-well-typed: {fixture}\n{checked.stdout}")
+            raise GateFailure(f"Phase-32 positive is not Dhall-well-typed: {fixture}\n{checked.stdout}")
     url = run([str(dhall), "type", "--file", "dhall/examples/illegal_engine_by_url.dhall", "--quiet"], require_success=False)
     if url.returncode == 0 or "Url" not in url.stdout:
         raise GateFailure("engine-by-URL fixture missed its Gate-1 Url locus")
@@ -121,7 +144,7 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         for stem in (row["case"], row["legal_twin"]):
             checked = run([str(dhall), "type", "--file", f"dhall/examples/{stem}.dhall", "--quiet"], require_success=False)
             if checked.returncode != 0:
-                raise GateFailure(f"Phase-13 semantic fixture is not Dhall-well-typed: {stem}\n{checked.stdout}")
+                raise GateFailure(f"Phase-32 semantic fixture is not Dhall-well-typed: {stem}\n{checked.stdout}")
     for row in mutants:
         descriptor = ROOT / f"test/mutant/inference_accelerator/{row['mutant']}/mutant.txt"
         if not descriptor.is_file() or not descriptor.read_text(encoding="utf-8").strip():
@@ -157,8 +180,10 @@ def verify_totality_sources() -> None:
 def run_green_suite(cabal: Path) -> str:
     result = run([str(cabal), "test", "capability-spec", "--test-show-details=direct"])
     token = "capability-spec: PASS (3 inference positives, 4 offering quotients, 12 family/lane cells, 1 Gate-1, 8 provision negatives, 5 mutants, 1 covered property)"
-    if token not in result.stdout or "each >=9%" not in result.stdout:
-        raise GateFailure(f"Phase-13 acceptance or property token is absent:\n{result.stdout}")
+    calculus = "engine-accelerator-calculus: PASS (5 kinds, 34 projected units)"
+    invariants = "engine-accelerator-invariants: PASS (1 opaque accelerator, 17 locus rows)"
+    if token not in result.stdout or calculus not in result.stdout or invariants not in result.stdout or "each >=9%" not in result.stdout:
+        raise GateFailure(f"Phase-32 acceptance, calculus, invariant, or property token is absent:\n{result.stdout}")
     return result.stdout
 
 
@@ -186,7 +211,13 @@ def write_results(mutants: list[dict[str, str]]) -> None:
         "provision-negatives": "8/8-specific-tag-red",
         "quickcheck-properties": "1/1-eight-branches-at-least-9-percent",
         "mutants": f"{len(mutants)}/{len(mutants)}-red",
+        "opaque-provisioned-engine-accelerator": "constructor-hidden-accessors-only",
+        "validation-locus-entries": "17/17-exact",
         "acceptance-token": "accelerator-provision-composition-proven",
+        "calculus-kinds": "5/5-artifact-budget-lift-workflow-evidence",
+        "calculus-components": "inference-positives,availability-cells,boundary-negatives,accelerator-property,mutant-evidence",
+        "calculus-projection-counts": "3,16,9,1,5",
+        "calculus-resource-vector": "5,34,0,0",
         "live-jit-engine-resolution": "UNVERIFIED",
         "cross-lane-runtime-weight-load": "UNVERIFIED",
         "runtime-correspondence": "UNVERIFIED",
@@ -215,9 +246,28 @@ CHECKS = {
 
 SIDES = ("toolchain", "oracle", "suite", "mutant", "results")
 
-EXPECTED_RESULTS = {'inference-positives': '3/3-green', 'offering-quotient': '4/4-exact', 'family-lane-relation': '12/12-exact', 'coexistence-aggregation': '1/1-hand-authored-exact', 'dhall-typecheck-url-negative': '1/1-specific-locus-red', 'provision-negatives': '8/8-specific-tag-red', 'quickcheck-properties': '1/1-eight-branches-at-least-9-percent', 'mutants': '5/5-red', 'acceptance-token': 'accelerator-provision-composition-proven', 'live-jit-engine-resolution': 'UNVERIFIED', 'cross-lane-runtime-weight-load': 'UNVERIFIED', 'runtime-correspondence': 'UNVERIFIED'}
+EXPECTED_RESULTS = {
+    'inference-positives': '3/3-green',
+    'offering-quotient': '4/4-exact',
+    'family-lane-relation': '12/12-exact',
+    'coexistence-aggregation': '1/1-hand-authored-exact',
+    'dhall-typecheck-url-negative': '1/1-specific-locus-red',
+    'provision-negatives': '8/8-specific-tag-red',
+    'quickcheck-properties': '1/1-eight-branches-at-least-9-percent',
+    'mutants': '5/5-red',
+    'opaque-provisioned-engine-accelerator': 'constructor-hidden-accessors-only',
+    'validation-locus-entries': '17/17-exact',
+    'acceptance-token': 'accelerator-provision-composition-proven',
+    'calculus-kinds': '5/5-artifact-budget-lift-workflow-evidence',
+    'calculus-components': 'inference-positives,availability-cells,boundary-negatives,accelerator-property,mutant-evidence',
+    'calculus-projection-counts': '3,16,9,1,5',
+    'calculus-resource-vector': '5,34,0,0',
+    'live-jit-engine-resolution': 'UNVERIFIED',
+    'cross-lane-runtime-weight-load': 'UNVERIFIED',
+    'runtime-correspondence': 'UNVERIFIED',
+}
 
-SURFACE_MAP = {'url-free-engine-runtime': 'illegal_engine_by_url', 'closed-engine-family-union': 'LlamaFamily,VllmFamily,DiffusionFamily,OnnxFamily,illegal_engine_family_unavailable_on_lane', 'target-offering-lane-quotient': 'offering-quotient', 'cuda-os-quotient': 'apple,linux-cpu,linux-cuda,windows,illegal_cuda_on_cpu_target', 'partial-family-lane-relation': 'family-lane-relation', 'identity-complete-cuda-owner-demand': 'illegal_accelerator_count_shortage', 'identity-complete-metal-owner-demand': 'mutant_accept_accelerator_domain_mismatch', 'source-workload-key-equality': 'illegal_accelerator_source_workload_mismatch', 'class-complete-coexistence-policy': 'coexistence-aggregation', 'all-policy-permitted-epochs': 'mutant_select_favorable_accelerator_epoch', 'unsharded-residency-validation': 'illegal_accelerator_residency_placement', 'replicated-per-device-validation': 'mutant_drop_accelerator_overlap_debit', 'sharded-residency-validation': 'mutant_skip_accelerator_shard_validation', 'net-allocatable-vram': 'illegal_accelerator_vram_shortage', 'device-count-boundary': 'illegal_accelerator_policy_domain_mismatch', 'per-device-coexistence-aggregation': 'all-classes,illegal_accelerator_coexistence_overcommit,mutant_drop_accelerator_work_item', 'engine-accelerator-provision-seal': 'acceptance-token', 'opaque-provisioned-engine-accelerator': '', 'phase12-dhall-typecheck-url-negative': 'dhall-typecheck-url-negative', 'phase12-provision-negative-corpus': 'provision-negatives', 'phase12-property-coverage': 'quickcheck-properties', 'phase12-mutant-battery': 'mutants', 'phase12-validation-locus-ledger': '', 'phase12-compile-totality': 'inference-positives', 'live-jit-engine-resolution': 'live-jit-engine-resolution', 'cross-lane-runtime-weight-load': 'cross-lane-runtime-weight-load', 'runtime-model-correspondence': 'runtime-correspondence'}
+SURFACE_MAP = read_surface_map(ROOT / EXPECTATIONS)
 
 SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     surface: ((ids, EXPECTED_RESULTS[ids]) if ids in EXPECTED_RESULTS and EXPECTED_RESULTS[ids] != "UNVERIFIED" else None)
@@ -259,6 +309,11 @@ def main() -> int:
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []
     item_names: set[str] = set()
+    family_names: set[str] = set()
+    offering_names: set[str] = set()
+    coexistence_names: set[str] = set()
+    case_names: set[str] = set()
+    mutant_names: set[str] = set()
 
     try:
         resolved = toolchain.resolve(["cabal", "dhall", "ghc"])
@@ -279,6 +334,11 @@ def main() -> int:
         mutant_rows = verify_oracles(Path(resolved["dhall"]["path"]))
         verify_totality_sources()
         item_names = enumerated_items()
+        family_names = {row["family"] for row in read_tsv(FAMILIES)}
+        offering_names = {row["offering"] for row in read_tsv(OFFERINGS)}
+        coexistence_names = {row["epoch"] for row in read_tsv(COEXISTENCE)}
+        case_names = {row["case"] for row in read_tsv(CASES)}
+        mutant_names = {row["mutant"] for row in mutant_rows}
         print(f"  ok    {len(item_names)} enumerated items, {len(mutant_rows)} mutants, loci exact")
         results["oracle"] = True
 
@@ -296,7 +356,7 @@ def main() -> int:
 
         write_results(mutant_rows)
         rows = gate_common.metric_rows(RESULTS)
-        banner_ok = not GENERATED_LEDGER.is_file() or GENERATED_LEDGER.read_text(encoding="utf-8").startswith(
+        banner_ok = GENERATED_LEDGER.is_file() and GENERATED_LEDGER.read_text(encoding="utf-8").startswith(
             "# Register-1 only;"
         )
         oracle_ok = gate_common.oracle_side(rows, EXPECTED_RESULTS)
@@ -310,10 +370,35 @@ def main() -> int:
     except (GateFailure, OSError, KeyError, ValueError, json.JSONDecodeError) as problem:
         print(f"inference-accelerator-gate: FAIL: {problem}", file=sys.stderr)
 
-    item_evidence = {
-        surface: ("acceptance-token", EXPECTED_RESULTS["acceptance-token"])
+    case_evidence = {
+        surface: (
+            "dhall-typecheck-url-negative",
+            EXPECTED_RESULTS["dhall-typecheck-url-negative"],
+        )
+        if "illegal_engine_by_url" in ids.split(",")
+        else ("provision-negatives", EXPECTED_RESULTS["provision-negatives"])
         for surface, ids in SURFACE_MAP.items()
-        if ids and set(ids.split(",")) & item_names
+        if ids and set(ids.split(",")) & case_names
+    }
+    mutant_evidence = {
+        surface: ("mutants", EXPECTED_RESULTS["mutants"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and set(ids.split(",")) & mutant_names
+    }
+    family_evidence = {
+        surface: ("family-lane-relation", EXPECTED_RESULTS["family-lane-relation"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and set(ids.split(",")) & family_names
+    }
+    offering_evidence = {
+        surface: ("offering-quotient", EXPECTED_RESULTS["offering-quotient"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and set(ids.split(",")) & offering_names
+    }
+    coexistence_evidence = {
+        surface: ("coexistence-aggregation", EXPECTED_RESULTS["coexistence-aggregation"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and set(ids.split(",")) & coexistence_names
     }
     layers = {
         "Decision": "tested" if rows.get("acceptance-token") == EXPECTED_RESULTS["acceptance-token"] else "UNVERIFIED",
@@ -324,16 +409,23 @@ def main() -> int:
         results,
         implemented={"metrics": set(rows), "checks": set(CHECKS), "items": item_names},
         rows=rows,
-        evidence={**SURFACE_EVIDENCE, **item_evidence},
+        evidence={
+            **SURFACE_EVIDENCE,
+            **case_evidence,
+            **mutant_evidence,
+            **family_evidence,
+            **offering_evidence,
+            **coexistence_evidence,
+        },
         layers=layers,
         toolchain={
             name: {"version": record["version"], "requirement": record["requirement"]}
             for name, record in resolved.items()
             if name != "platform"
         },
-        dependencies={"battery": "cabal test"},
+        dependencies={"battery": "cabal test capability-spec"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-13 mutants", "status": "unrun"}],
+        or [{"name": "phase-32 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

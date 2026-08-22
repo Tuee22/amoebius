@@ -80,7 +80,7 @@ peer-to-peer transfer are out of scope.
 
 **Depends on:** [Phase 85](phase_85_offline_replay_receipts.md) — offline replay and durable receipts, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test offline-blobs-isolation-live` queues an encrypted fresh blob offline, restarts and
+**Gate:** `python3 tools/run_phase_gate.py 86` queues an encrypted fresh blob offline, restarts and
 switches partitions, reconnects, resumes a faulted chunk upload, verifies content identity, and externally
 proves that only the owning tenant/subject can release the dependent effect.
 

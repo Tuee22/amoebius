@@ -24,6 +24,7 @@ module Amoebius.Capacity.Provision
   , ObservedInfrastructureMaterialization
   , observedMaterializedIdentities
   , observedMaterializedCapacity
+  , materializationIsReceiptBound
   , planInfrastructure
   , deriveInfrastructureDemand
   , validateInfrastructurePlan
@@ -270,6 +271,14 @@ data ObservedReadback = ObservedReadback
 data MaterializationEvidence = AlreadyMaterializedEvidence | ReceiptBoundEvidence PlanToken ActionToken
   deriving stock (Eq, Generic, Show)
   deriving anyclass (NFData)
+
+-- | Observe only whether provider action receipts justify this materialization.
+-- The receipt tokens remain private, so callers cannot forge a provision context
+-- from the observation.
+materializationIsReceiptBound :: ObservedInfrastructureMaterialization -> Bool
+materializationIsReceiptBound observation = case observedMaterializationEvidence observation of
+  AlreadyMaterializedEvidence -> False
+  ReceiptBoundEvidence {} -> True
 
 data ObservedInfrastructureMaterialization = ObservedInfrastructureMaterialization
   { observedMaterializedIdentities :: Set Text

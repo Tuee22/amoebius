@@ -6,19 +6,13 @@
 
 Phase 43 delivers the UI server boundary; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), and the plan for reaching it is owned here.
 Register 2: a real boundary against fake tools.
-Gate passed on 2026-08-09 with ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion_archive.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_security.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +23,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 43.1: Authenticated scoped UI-server dispatch 📋](#sprint-431-authenticated-scoped-ui-server-dispatch-)
+- [Sprint 43.1: Authenticated scoped UI-server dispatch ✅](#sprint-431-authenticated-scoped-ui-server-dispatch-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,69 +31,16 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-42 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_server_boundary_gate.py` passed every boundary and universal
-side: seven HTTP rows, five access rows, five sanitized audit rows, five handler-effect rows, five startup
-rows, five public assets, five private probes, seven WebSocket rows, loopback-only OS observation, and all
-nine mutants. All 77 surfaces join to 94 run-time items. Build, test scratch, generated ledgers, and evidence
-remain beneath `.build/**`; the outside-host inventory is unchanged; Phase 43 owns no migration deferral. The
-project-contained attestation is
-`sha256:eb3b77ef745fb93f5b3c423f1e2e37b19f1fd4de2f61eade51f9c5e63ce3ec80`, bound to source snapshot
-`sha256:430c1570a582be9c…`.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:3f78cc6ef4e5814e…`
-(1945 non-ignored files) and published a verified pre-containment external attestation
-`sha256:eec403a9845ec9acf5201e49bf916cd7d3c8e69cdd66c5daef743efb90aac59e`.
-
-**Observed progress — 2026-08-13:** **Policy-conformant.** Seven HTTP rows, five access rows, five sanitized
-audit rows, five effect rows, five pre-readiness startup rows, five public assets, five private probes, seven
-WebSocket rows, one stable idempotent retry, and all nine mutants pass against separately started signing-authority
-and handler processes, with the OS observer seeing loopback traffic only. Evidence and the ledger move into
-`.build/runs/phase_8/<run-id>/`, and 77 surfaces join two-way to 94 run-time enumerated items.
-
-**This is the first run of this gate that could ever have passed.** The boundary ABI the entry point consumes —
-`ActionRequest`, `BoundaryResponse`, `HandlerInvocation`, `HandlerBinding`, `HandlerContract`, `UiServerAbi`,
-`BoundaryMutant`, `admitServerPlan`, `authorizeAndDispatch`, `parseBoundaryMutant`, `publicResponse`, and
-`unavailableResponse` — was declared by an import list and defined nowhere, so `exe:amoebius` did not build.
-`Amoebius.Ui.Server.Dispatch` now implements it: admission resolves each referenced identity to exactly one
-linked binding with a matching contract before readiness, and `authorizeAndDispatch` returns the refusal and the
-handler call as one value, so there is no way to dispatch without holding a decision.
-
-**The seeded mutants are inputs, not compile-time flags.** A boundary whose mutant lives behind CPP needs a
-rebuild per mutant, and a rebuild is a different binary from the one the gate observed. Carrying
-`BoundaryMutant` through the decision means all nine run against exactly the binary under test.
-
-**The executable's packaging defect is fixed with it.** `hs-source-dirs` is a search path, not a module filter:
-listing `src` in the `amoebius` executable made GHC recompile every module `app/amoebius/Main.hs` imports into that
-component against its own much shorter `build-depends` — which is why the build failed on
-`Amoebius.Vault.SecretRef`, a module the executable never mentions, and would have put two separately compiled
-copies of the shared core in one program. The entry point moved to `app/amoebius/Amoebius/Entry/ServeUi.hs`,
-beneath the one executable's directory, and a gate check holds both properties. The search-path half of that
-check is a **transitional** guard: once `app/`'s second level is the single name
-[repository_layout_doctrine.md §2](../documents/engineering/repository_layout_doctrine.md#2-complete-repository-structure)
-declares, "searches `app/amoebius` alone" is true of the only directory there is, and the check can only fail
-by the tree regaining a second executable — which is Phase 65's closure, not a property this gate can
-establish. It stays red-able until then and retires with the collapse.
-
-**One contract surface has no recorded observation and is honestly UNVERIFIED.**
-`unreferenced-handler-unreachable` — extra linked handlers staying legal and unreachable, which is what lets one
-binary serve more than one plan — is implemented, but the startup matrix varies only the count of the
-*referenced* identity. Nothing this run observed exercises an unreferenced one, and the gap is recorded against
-Phase 43 in the legacy register.
-
-**Invalidated historical record:**
-
-Done (invalidated). The amoebius executable now owns `serve-ui`; a separate signing-authority process mints post-start
-own/foreign/revoked credentials and a separate capability-guarded handler process records raw effects. Seven
-HTTP rows, five access/audit/effect rows, five startup rows, five public assets, five private probes, seven
-WebSocket rows, one stable retry, 29 loopback network syscalls, and all nine mutants pass. Live Keycloak/Envoy,
-provider-side isolation, cluster deployment, replica loss, and HA remain UNVERIFIED. See the
-Phase-43 ledger.
+✅ Done — sealed 2026-08-22. `python3 tools/ui_server_boundary_gate.py` passes all fourteen sides on natural
+`arm64`, untranslated. Seven HTTP rows, five access rows, five sanitized audits, five handler-effect rows, six
+pre-readiness startup rows, five public assets, five private probes, seven WebSocket rows, the post-start
+challenge/idempotency checks, and all nine production mutants pass. The added startup row proves an
+unreferenced linked handler is legal without entering the plan's dispatch set. The real five-calculus
+projection accounts for 80 units, all 23 metrics match, and 84 surfaces join to 102 run-time items. Darwin
+loopback-only enforcement passes. Attestation
+`sha256:0bf76e1e1c17b9d525470fd9a72c3d51f931999a60058801cbd7f049b014f0e9` binds source
+`sha256:28428437a5b25a11…` over 2,268 files. Live Keycloak/Envoy, provider policy, cluster deployment, replica
+loss, and HA remain UNVERIFIED.
 
 ## Phase Summary
 
@@ -131,17 +72,16 @@ The boundary returns sanitized structured refusal or `ReloadRequired` responses 
 on every denial. This phase does not implement the browser interpreter, a domain provider, deployment
 manifests, replicas, failover, or a separate server artifact.
 
-**Session scope:** one `serve-ui` HTTPS/WebSocket/session-to-`AuthorizedAction`-to-handler boundary in the existing executable;
-acceptance command `python3 tools/ui_server_boundary_gate.py`; split immediately if work requires browser rendering,
-a live Keycloak/provider, deployment/HA, a second register, or a substrate.
-**Depends on:** [Phase 40](phase_40_ui_plan_compiler.md) — canonical `UiServerPlan`, public contracts, route dispatch, and authority digests.
-**Phase scope:** one cohesive claim — *no request reaches an effect without being freshly authenticated, scoped and authorized*. Boundary fakes are what let that be asserted before a live edge exists.
-
+**Phase scope:** one `serve-ui` HTTPS/WebSocket/session-to-`AuthorizedAction`-to-handler boundary in the existing
+executable, with acceptance command `python3 tools/ui_server_boundary_gate.py`; split immediately if work
+requires browser rendering, a live Keycloak/provider, deployment/HA, a second register, or a substrate.
 **Substrate:** none — harness-owned local authority/handler processes only; no cluster or external service.
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `python3 tools/ui_server_boundary_gate.py` emits a green Register-2 ledger with live identity, provider, and
+**Depends on:** [Phase 40](phase_40_ui_plan_compiler.md) — canonical `UiServerPlan`, public contracts, route
+dispatch, and authority digests; [Phase 42](phase_42_ui_browser_interpreter.md) — the exact browser-facing
+security-header and same-origin transport contract.
+**Gate:** `python3 tools/run_phase_gate.py 43` emits a green Register-2 ledger with live identity, provider, and
 HA layers UNVERIFIED, and Phase 44's server branch waits on it. The apparatus is
 [Gate integrity](#gate-integrity).
 
@@ -172,7 +112,8 @@ observations; and every seeded mutant below turning its own oracle row red.
   verified token; spoofed `X-Tenant`, `X-Subject`, owner, and role fields never affect the decision.
 - **Fresh challenge and external observation:** after readiness, the harness creates an unpredictable nonce
   and includes it in an authorized typed mutation. A separate handler process records raw request bytes to an
-  append-only harness-owned descriptor, while `strace` records `connect`/`sendto` system calls. Both
+  append-only harness-owned descriptor. Darwin applies an OS sandbox that allows loopback and denies
+  non-loopback outbound IP; Linux records `connect`/`sendto` calls with `strace`. Both
   observers must recover the nonce and matching scoped action; self-reported server audit is insufficient.
 - **Paired denials and bypass probes:** same request with a foreign-subject token, foreign-tenant token,
   revoked grant, stale epoch, invalid origin/CSRF token, direct handler address, or caller tenant header returns
@@ -215,21 +156,14 @@ edge exclusivity, provider policy, storage isolation, and behavior after replica
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+## Sprint 43.1: Authenticated scoped UI-server dispatch ✅
 
-## Sprint 43.1: Authenticated scoped UI-server dispatch 📋
-**Status**: Planned
+**Status**: Done
 **Implementation**:
 `app/amoebius/Amoebius/Entry/ServeUi.hs`, `src/Amoebius/Ui/Server/{Dispatch,RequestContext,SecurityHeaders,WebSocket}.hs`,
 `src/Amoebius/Ui/Realtime/{Class,Envelope}.hs`, `test/spec/ui/UiServerBoundarySpec.hs`,
 `test/harness/ui_server/server_boundary.mjs`, and `tools/ui_server_boundary_gate.py`
-**Blocked by**: None.
+**Blocked by**: [Phase 42](phase_42_ui_browser_interpreter.md) gate
 **Independent Validation**: `python3 tools/ui_server_boundary_gate.py` starts the
 authority/server/handler as separate processes, drives paired HTTP
 requests, reads independent raw effect/network observations, and requires every named mutant to fail.
@@ -278,10 +212,8 @@ identity, compatible scope, explicit authorization, current plan identity, and t
 
 ### Remaining Work
 
-Done for the local boundary. One in-phase gap stays open: no oracle row exercises an unreferenced linked
-handler, so `unreferenced-handler-unreachable` is UNVERIFIED until the startup matrix gains a row that links a
-handler the plan never references. Live identity, edge exclusivity, provider/storage policy, cluster
-deployment, replica loss, and HA remain explicitly UNVERIFIED for their owning later phases.
+None. Live identity, edge exclusivity, provider/storage policy, cluster deployment, replica loss, and HA remain
+explicitly UNVERIFIED for their owning later phases rather than Phase-43 work.
 
 ## Documentation Requirements
 
@@ -302,7 +234,11 @@ deployment, replica loss, and HA remain explicitly UNVERIFIED for their owning l
 
 ## Related Documents
 
+- [Development Plan Tracker](README.md) — numeric order and current status.
+- [Phase 10](phase_10_calculus_composition.md) — the real five-calculus composition projected by this gate.
 - [Phase 40](phase_40_ui_plan_compiler.md) — the required immutable `UiServerPlan` and dispatch contracts.
+- [Repository Layout Doctrine](../documents/engineering/repository_layout_doctrine.md) — the single executable
+  source-root and generated-output boundary.
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — server role, authorization, scope, and freshness boundary.
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — authority-paired spoof-resistant evidence.
 - [Illegal-State Security Slice](../documents/illegal_state/illegal_state_security.md) — authorization, ownership, and stale-plan illegal states.

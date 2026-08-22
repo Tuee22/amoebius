@@ -142,7 +142,7 @@ on Apple, and WSL2 on Windows.
 
 **Depends on:** [Phase 60](phase_60_retained_storage.md) — no-provisioner retained storage + lossless rebind, which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/vault_pki_gate.py --execute` passes the representative live, simulation, secret-boundary,
+**Gate:** `python3 tools/run_phase_gate.py 61` passes the representative live, simulation, secret-boundary,
 oracle, and mutant checks of [Gate integrity](#gate-integrity) on one fresh private linux-cpu cluster fixture,
 then removes the marker-owned test run without changing the outside-host inventory.
 

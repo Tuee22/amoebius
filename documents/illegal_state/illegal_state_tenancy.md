@@ -23,7 +23,7 @@ exist for the entries below. The tenant model itself is owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_08_scope_index.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 </details>
@@ -50,8 +50,9 @@ matrix**, the **three foreclosure layers**, and the **validation-locus axis** ar
 [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced here, not restated. Each entry
 below names its owning doctrine, which remains the SSoT for the normative rule.
 
-Everything below is **design intent** for the type discipline, stated as a specification and not as a result:
-no phase has yet built the scope kernel these entries describe. Status and gates live only in
+Everything below states the target type discipline. [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md)
+delivers its lexical request-index kernel; authentication, persisted re-entry, provider enforcement, replay,
+and other entry-specific residues remain with their delivery owners. Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -214,6 +215,12 @@ API, construct a handle from a raw string, and coerce a handle from one request 
 oracle independent of the API walks every exported scoped function and requires that no two adjacent parameters
 share a type. Mutants collapse two identifier newtypes into one, export a raw constructor, and add a coercion
 between scopes.
+
+**Phase-8 evidence.** The Register-1 kernel gives tenant and subject distinct private types and introduces a
+fresh request index through one rank-2 eliminator. Legal twins compile; scope retagging, request-index escape,
+and forged scope construction fail at pinned reasons. Constructor scans reject a second introduction or
+retagging rule. Live authentication and persisted-value re-entry remain `UNVERIFIED`. See
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
 
 ### 3.95 A replay key that does not name its scope
 

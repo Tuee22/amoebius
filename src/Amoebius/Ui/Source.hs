@@ -12,6 +12,7 @@ module Amoebius.Ui.Source
   , decodeUiSource
   ) where
 
+import Amoebius.Ui.Offline.Types (Continuity)
 import Control.Exception (SomeException, displayException, try)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -69,6 +70,7 @@ newtype ExternalLinkRequirement = ExternalLinkRequirement
 data UiSource = UiSource
   { caseName :: Text
   , tenantMode :: TenantMode
+  , continuity :: Continuity
   , modules :: [UiModule]
   , externalLinks :: [ExternalLinkRequirement]
   }

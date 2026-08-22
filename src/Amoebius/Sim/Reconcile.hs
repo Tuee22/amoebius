@@ -2,19 +2,26 @@
 
 module Amoebius.Sim.Reconcile
   ( referenceReconcile
+  , referenceReconcileCommands
   ) where
 
 import Amoebius.Sim.Env
+import Control.Monad (forM)
 import Control.Monad.Class.MonadAsync (MonadAsync, async, wait)
+import Data.Text (Text)
 
 -- | A committed reference program for the substrate gate. Later phases run
 -- their own reconcilers through the same 'Env' interface.
 referenceReconcile :: MonadAsync m => Env m -> m InvariantOutcome
-referenceReconcile env = do
-  first <- async (envPublish env commandsTopic "activate:object-store")
-  second <- async (envPublish env commandsTopic "activate:sql")
-  _ <- wait first
-  _ <- wait second
+referenceReconcile = referenceReconcileCommands ["object-store", "sql"]
+
+-- | The same reference program with its intended component sequence supplied as data.
+-- Phase 16 uses this seam to consume a real Phase-10 'Composition' projection without
+-- making the simulation substrate depend on the calculi it can host.
+referenceReconcileCommands :: MonadAsync m => [Text] -> Env m -> m InvariantOutcome
+referenceReconcileCommands commands env = do
+  publishers <- forM commands (async . envPublish env commandsTopic . ("activate:" <>))
+  _ <- mapM wait publishers
   initial <- envConsume env commandsTopic
   messages <- if null initial then envDelay env 10 >> envConsume env commandsTopic else pure initial
   if null messages

@@ -25,6 +25,7 @@ import toolchain
 ROOT = Path(__file__).resolve().parent.parent
 SCHEDULES = ROOT / "test/fixture/deterministic_simulation/schedules"
 EXPECTED_OUTCOMES = ROOT / "test/oracle/deterministic_simulation/expected_outcomes.tsv"
+CALCULUS_PROJECTION = ROOT / "test/oracle/deterministic_simulation/calculus_projection.tsv"
 MUTANT_CAPABILITY = "deterministic_simulation"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/deterministic_simulation/validation_locus.tsv"
@@ -113,12 +114,22 @@ def verify_oracles() -> None:
         raise GateFailure("the independent expected-outcome table does not cover the schedule corpus")
     if any(row[1:] != ["upheld", "-"] for row in outcomes):
         raise GateFailure("reference schedule outcomes must be independently pinned as upheld")
+    projection = read_tsv_no_header(CALCULUS_PROJECTION)
+    expected_projection = [
+        ["calculus-order", "artifact,budget,lift,workflow,evidence"],
+        ["component-names", "artifact,budget,lift,workflow,evidence"],
+        ["resource-total", "15,150,1500,15"],
+        ["published-commands", "activate:artifact,activate:budget,activate:evidence,activate:lift,activate:workflow"],
+        ["outcome", "upheld"],
+    ]
+    if projection != expected_projection:
+        raise GateFailure("the five-calculus semantic projection oracle drifted")
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 1 or mutants[0]["id"] != "m1-dropped-partition-handling":
         raise GateFailure("Phase-16 mutant manifest must name the dropped-partition mutant exactly once")
     locus = read_tsv(LOCUS)
-    if len(locus) != 20 or len({row["entry"] for row in locus}) != 20:
-        raise GateFailure("Phase-16 validation locus must contain twenty unique entries")
+    if len(locus) != 21 or len({row["entry"] for row in locus}) != 21:
+        raise GateFailure("Phase-16 validation locus must contain twenty-one unique entries")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 2 modeled environment; real-substrate fidelity ASSUMED; live runtime UNVERIFIED\n"
@@ -154,7 +165,7 @@ def verify_source_boundaries() -> None:
 def run_green(cabal: Path) -> str:
     build = run([str(cabal), "build", "lib:dsl-core"])
     suite = run([str(cabal), "test", "sim-spec", "--test-show-details=direct"])
-    token = "sim-spec: PASS (2 interpreters, 6 fake contracts, 4 schedules, same-seed bytes, sensitivity, IOSimPOR, 1 mutant)"
+    token = "sim-spec: PASS (2 interpreters, 6 fake contracts, 4 schedules, 5-calculus projection, same-seed bytes, sensitivity, IOSimPOR, 1 mutant)"
     if token not in suite.stdout:
         raise GateFailure(f"Phase-16 acceptance token is absent:\n{suite.stdout}")
     return build.stdout + suite.stdout
@@ -182,6 +193,7 @@ def write_results() -> None:
         "interpreters": "2/2-reference-program-green",
         "fake-contracts": "6/6-with-knob-controls",
         "schedules": "4/4-oracle-pinned",
+        "calculus-composition": "5/5-projected-to-reference-reconciler",
         "same-seed-traces": "4/4-byte-identical",
         "schedule-sensitivity": "1/1-distinct",
         "iosimpor": "4/4-bounded-replays-green",
@@ -214,6 +226,7 @@ EXPECTED_RESULTS = {
     "interpreters": "2/2-reference-program-green",
     "fake-contracts": "6/6-with-knob-controls",
     "schedules": "4/4-oracle-pinned",
+    "calculus-composition": "5/5-projected-to-reference-reconciler",
     "same-seed-traces": "4/4-byte-identical",
     "schedule-sensitivity": "1/1-distinct",
     "iosimpor": "4/4-bounded-replays-green",
@@ -224,7 +237,7 @@ EXPECTED_RESULTS = {
     "live-substrate-runtime": "UNVERIFIED",
 }
 
-SURFACE_MAP = {'typed-env-interface': 'no-bare-io-signature', 'io-classes-polymorphism-source-gate': 'non-vacuous-polymorphism-tokens', 'real-client-interpreter': 'real_interpreter', 'iosim-interpreter': 'sim_interpreter', 'reference-reconciler-one-source': 'interpreters', 'pulsar-partition-heal': 'pulsar_partition_heal', 'pulsar-redelivery-dedup': 'redelivery_schedule', 'pulsar-reorder': 'pulsar_reorder', 'pulsar-duplicate': 'pulsar_duplicate', 'minio-if-none-match-412': 'minio_412', 'apiserver-resource-version-conflict': 'apiserver_conflict', 'apiserver-watch-gap': 'apiserver_watch_gap', 'apiserver-crash-once': 'apiserver_crash', 'route53-stale-propagation': 'route53_stale_no_cas', 'route53-no-cas': 'fake-contracts', 'vault-sealed-rejection': 'vault_sealed', 'modeled-clock-delay': 'clock_delay', 'four-schedule-corpus': 'schedules', 'independent-outcome-oracle': 'partition_schedule,reorder_schedule,crash_schedule,same_seed_trace,distinct_seed_trace,iosimpor_corpus,dropped_partition_handling,m1-dropped-partition-handling', 'same-seed-byte-identical-trace': 'same-seed-traces', 'distinct-seed-schedule-sensitivity': 'schedule-sensitivity', 'iosimpor-replay': 'iosimpor', 'dropped-partition-mutant': 'mutants', 'modeled-environment-fidelity': 'modeled-env-fidelity', 'live-substrate-runtime': 'live-substrate-runtime', 'generated-artifact-discipline': 'emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle,simulation-scope-exact'}
+SURFACE_MAP = {'typed-env-interface': 'no-bare-io-signature', 'io-classes-polymorphism-source-gate': 'non-vacuous-polymorphism-tokens', 'real-client-interpreter': 'real_interpreter', 'iosim-interpreter': 'sim_interpreter', 'reference-reconciler-one-source': 'interpreters', 'pulsar-partition-heal': 'pulsar_partition_heal', 'pulsar-redelivery-dedup': 'redelivery_schedule', 'pulsar-reorder': 'pulsar_reorder', 'pulsar-duplicate': 'pulsar_duplicate', 'minio-if-none-match-412': 'minio_412', 'apiserver-resource-version-conflict': 'apiserver_conflict', 'apiserver-watch-gap': 'apiserver_watch_gap', 'apiserver-crash-once': 'apiserver_crash', 'route53-stale-propagation': 'route53_stale_no_cas', 'route53-no-cas': 'fake-contracts', 'vault-sealed-rejection': 'vault_sealed', 'modeled-clock-delay': 'clock_delay', 'four-schedule-corpus': 'schedules', 'calculus-composition-construction': 'calculus_composition_projection', 'calculus-composition-projection': 'calculus-composition', 'independent-outcome-oracle': 'partition_schedule,reorder_schedule,crash_schedule,same_seed_trace,distinct_seed_trace,iosimpor_corpus,dropped_partition_handling,m1-dropped-partition-handling', 'same-seed-byte-identical-trace': 'same-seed-traces', 'distinct-seed-schedule-sensitivity': 'schedule-sensitivity', 'iosimpor-replay': 'iosimpor', 'dropped-partition-mutant': 'mutants', 'modeled-environment-fidelity': 'modeled-env-fidelity', 'live-substrate-runtime': 'live-substrate-runtime', 'generated-artifact-discipline': 'emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle,simulation-scope-exact'}
 
 SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     surface: ((ids, EXPECTED_RESULTS[ids]) if ids in EXPECTED_RESULTS and EXPECTED_RESULTS[ids] not in ("UNVERIFIED", "ASSUMED") else None)

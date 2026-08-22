@@ -33,6 +33,7 @@ tools beside it.
 from __future__ import annotations
 
 import argparse
+import csv
 import shutil
 import tempfile
 import re
@@ -45,6 +46,7 @@ import mutant_registry  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 PLAN = ROOT / "DEVELOPMENT_PLAN"
+SELF_REFERENTIAL_INVENTORY = ROOT / "test/oracle/self_referential_gates/gate_inventory.tsv"
 
 # Scratch state stays inside the checkout. The host default temporary directory is
 # outside it, and a run that writes there escapes the containment contract the
@@ -148,6 +150,19 @@ def gate_scripts() -> dict[str, dict[str, str]]:
     return out
 
 
+def retained_gate_mechanisms() -> dict[str, str]:
+    """Contract path -> independent mechanism retained by the Phase-49 consumer switch."""
+    if not SELF_REFERENTIAL_INVENTORY.is_file():
+        return {}
+    with SELF_REFERENTIAL_INVENTORY.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle, delimiter="\t"))
+    return {
+        row["contract"]: row["authored_command"]
+        for row in rows
+        if row.get("authored_command") not in {None, "—"}
+    }
+
+
 def check(root: Path) -> list[tuple[str, str, str]]:
     """(check id, contract, message) for every violation."""
     problems: list[tuple[str, str, str]] = []
@@ -159,6 +174,7 @@ def check(root: Path) -> list[tuple[str, str, str]]:
     known_caps = {r["capability"] for r in registry}
     known_ids = {(r["capability"], r["mutant"]) for r in registry}
     scripts = gate_scripts()
+    retained = retained_gate_mechanisms()
     status = tracker_status(root)
 
     for path in contracts():
@@ -220,7 +236,15 @@ def check(root: Path) -> list[tuple[str, str, str]]:
             gate = GATE_RE.search(text)
             commands = COMMAND_RE.findall(gate.group(1) if gate else "")
             want = script.get("command")
-            if want and want not in [c.strip() for c in commands]:
+            named = [c.strip() for c in commands]
+            wrapper = f"python3 tools/run_phase_gate.py {int(path.name[6:8]):02d}"
+            if any(command.startswith("python3 tools/run_phase_gate.py ") for command in named):
+                if wrapper not in named:
+                    problems.append(("d4", rel, f"self-referential runner does not name phase {path.name[6:8]}"))
+                mechanism = retained.get(rel)
+                if mechanism is not None:
+                    named.append(mechanism)
+            if want and want not in named:
                 problems.append(("d4", rel, f"gate names {commands or 'no command'}; {script['script']} runs {want!r}"))
             for field, pattern in (("register", REGISTER_RE), ("substrate", SUBSTRATE_RE), ("lane", LANE_RE)):
                 mm = pattern.search(text)

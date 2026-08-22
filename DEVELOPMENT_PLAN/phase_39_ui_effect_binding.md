@@ -1,17 +1,13 @@
 # Phase 39: UI effect binding
 
-> **Purpose**: Bind every checked UI port to exactly one trusted, scope-compatible handler, public contract,
-> capability, and retry/audit policy before sealing a `BoundUiProgram`.
-> **Read this if**: phase 39 is next in the queue, or a later phase depends on what its gate establishes.
+> **Purpose**: Bind every checked UI port and named external link to exactly one trusted, compatible catalog
+> entry before exposing a constructor-private `BoundUiProgram`.
+> **Read this if**: the port/handler/capability relation, fixed-HTTPS link catalog, or `BoundUiProgram`
+> boundary has to change.
 
-Phase 39 delivers the UI effect binding; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [service_capability_doctrine.md](../documents/engineering/service_capability_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-Gate passed on 2026-08-09 with ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This phase owns the pure binding decision between checked requirements and trusted catalogs. It does not
+compile client/server plans, dispatch handlers, authenticate a request, contact a provider, or prove live
+tenant isolation. Those effects belong to later phases.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -29,7 +25,9 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 39.1: Seal the effect-handler-capability relation 📋](#sprint-391-seal-the-effect-handler-capability-relation-)
+- [Sprint 39.1: Exact port and capability binding ✅](#sprint-391-exact-port-and-capability-binding-)
+- [Sprint 39.2: Trusted links and negative controls ✅](#sprint-392-trusted-links-and-negative-controls-)
+- [Sprint 39.3: Calculus projection and phase seal ✅](#sprint-393-calculus-projection-and-phase-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,196 +35,201 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-38 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-21. The complete twelve-sided gate passes on natural `darwin/arm64`, untranslated.
+Seven ports exact-join their handlers, codecs, capabilities, scopes, retry rules, and audit classes; two named
+links resolve to canonical fixed-HTTPS entries. Eight binding errors, eight link errors, three bounded-input
+errors, thirteen generated classes, and all seven paired mutants pass. The real five-calculus composition
+projects counts `7,2,19,13,7` to resource vector `5,48,0,0`. All 16 metrics match and 61 surfaces join to 91
+enumerated items. Attestation `sha256:6466f549d0a079b773a86cda14acc2625c45fd3161bfa19d3444786c092f8b4a`
+binds source `sha256:a9a2fe607e95c82e…` over 2,262 files.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+**Activated 2026-08-21** when Phase 38 sealed. The generative re-baseline invalidated the earlier result because
+it had no calculus projection or natural-architecture record.
 
-Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_effect_binding_gate.py` passed all eleven sides: seven
-ports, two trusted links, eight exact errors, thirteen coverage classes, all seven mutants, all twelve metrics,
-and four closed-sum plus independent key-set checks pass; 55 surfaces join to 85 enumerated items. The
-project-contained attestation is `sha256:7856f436a05c393072bd2fabfc62fe77c7c07a40bc85f8c3c526b50515b2ae7d`,
-bound to source snapshot `sha256:27a64549485f9ff0…`; Phase 39 owns no remaining migration deferral.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:2fb7ae466ee82194…`
-(1944 non-ignored files) and published a verified pre-containment external attestation
-`sha256:470c58ccbca52b5e580058c7e086a5b22d5af0bc506ee58d14e397529903587d`.
-
-**Observed progress — 2026-08-13:** **Policy-conformant.** The effect-binding result is unchanged and re-run:
-seven ports exact-join their handler, capability, scope, idempotency, and audit tuples against a relation that
-imports neither production binder, two named links resolve to fixed HTTPS targets, all eight pinned bind
-errors, eight link negatives, and three bounded-input negatives refuse at their own tag with an empty trace,
-thirteen generated classes clear their 5% floor, and all seven seeded mutants redden. Evidence and the ledger
-move into `.build/runs/phase_16/<run-id>/`, and 55 surfaces join two-way to 85 run-time enumerated items.
-
-**The four closed sums are checked as sums.** `PortEffect`, `CapabilityName`, `ScopeRequirement`, and
-`RetryPolicy` each have a check that reads the declaration, compares the arms against the contract's list, and
-requires the `Bounded`/`Enum` deriving that makes the union enumerably closed. Seven pinned port rows say the
-seven arms work; they say nothing about an eighth arm being added beside them.
-
-**The two authored key sets are now cross-checked.** `handlers.tsv` and `capabilities.tsv` are separate files
-that must describe one system. The gate compares their handler keys both ways and rejects a duplicate, so a
-handler that exists in one and not the other fails instead of quietly binding to nothing — a defect no row
-count can see.
-
-**The response codec keeps one surface, not two.** `UiBindError` carries a single `ContractMismatch PortId`
-for the request/response pair, so the only thing separating the response side is the mutant that swaps it.
-That mutant is the surface's evidence; a second surface naming the same mutant would report one observation
-as two independent results.
-
-**Invalidated historical record:**
-
-Done (invalidated). Seven ports exact-join their handler/capability/contract tuples, two named links resolve through the
-fixed-HTTPS catalog, all pinned and bounded-input failures are exact with empty traces, coverage floors pass,
-and seven mutants turn red. This pure seal does not establish that a live handler or provider enforces its
-declared authorization, tenancy, idempotency, or storage behavior. See the
-Phase-39 ledger.
+---
 
 ## Phase Summary
 
-This phase implements one seam: the total binder from the Phase-38 checked authorization program and trusted
-handler/capability/external-link catalogs to a constructor-private `BoundUiProgram`. Every `PortId` must resolve to exactly
-one compatible handler, request/response public codec, semantic capability, scope requirement, audit class,
-and idempotency/conflict contract. Every `ExternalLinkId` must independently resolve exactly once to a canonical
-fixed-HTTPS trusted catalog entry. Data, workflow, subscription, upload, and ready-artifact ports use the same
-closed binding boundary; no application-authored URL, provider endpoint, secret, raw resource id, or
-caller-selected tenant can enter it.
+Seven `PortRequirement` values span data read/write, workflow start/observation, subscription, bounded upload,
+and ready-artifact use. Binding exact-joins each port to one trusted handler, public request/response codecs,
+semantic capability, scope requirement, retry contract, and audit class. Missing, duplicate, unexpected,
+contract-mismatched, scope-mismatched, capability-less, unsafe-retry, unbounded, and unready inputs retain
+distinct refusals and no partial effect trace.
 
-The binder validates exact key-set parity and produces no partial plan on failure. It consumes the action and
-current-authority kernel from Phase 38; it does not reproduce policy evaluation, compile plans, or run effects.
+Two `ExternalLinkId` requirements exact-join a separate trusted catalog. Only canonical, lowercase,
+userinfo-free, wildcard-free, caller-template-free HTTPS entries enter the private `BoundExternalLinks` value.
+A named link cannot be interpreted as effect transport, and a provider coordinate cannot enter `PortEffect`.
 
-**Session scope:** one pure UI requirement-to-trusted-catalog binder producing `BoundUiProgram`; acceptance command
-`cabal test ui-effect-binding-spec`; split immediately if work requires plan encoding, HTTP, a browser/server
-interpreter, a live provider, a second register, or a substrate.
-**Depends on:** [Phase 38](phase_38_ui_authorization_kernel.md) — the sealed action registry, scoped authority transition, and stale-authority refusal.
-**Phase scope:** one cohesive claim — *a port with no trusted, scope-compatible handler cannot be bound*. Sealing is the point at which an unbound port stops being representable.
+**Phase scope:** one cohesive claim — a checked UI requirement cannot become a `BoundUiProgram` until every
+port and external link has exactly one compatible trusted binding. Plan compilation and runtime effects split
+out.
 
-**Substrate:** none — no network, credential, provider process, browser, or cluster is contacted.
-**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+**Substrate:** `none` — the finite relations, generated properties, calculus composition, and mutants are pure
+host processes with credentials scrubbed and networking denied.
 
-**Register:** 1 — pure/golden.
-**Gate:** `python3 tools/ui_effect_binding_gate.py` passes the Phase-0-pinned port/handler/capability corpus,
-independent binding relation, exact-key checks, negative tags, coverage floors, isolated execution, and every
-seeded mutant in [Gate integrity](#gate-integrity). Handler and provider runtime enforcement stays UNVERIFIED.
+**Lane:** `none` ([§L](development_plan_standards.md#l-one-substrate-discipline)).
+
+**Register:** 1 — pure/generative: independently authored tables constrain the binding relation; handler
+implementation, provider state, browser enforcement, and live tenant isolation remain UNVERIFIED.
+
+**Depends on:** [Phase 10](phase_10_calculus_composition.md) — actual five-calculus composition; [Phase
+38](phase_38_ui_authorization_kernel.md) — the sealed action registry carried into the bound program.
+
+**Gate:** `python3 tools/run_phase_gate.py 39` passes the exact binding/link independent oracle, refusal,
+generated-coverage, five-calculus, paired-mutant, network-observer, natural-architecture, surface, containment,
+and attestation checks in [Gate integrity](#gate-integrity).
+
+---
 
 ## Gate integrity
 
-Phase 0 commits the catalogs, expected joins, and diagnostics before `Amoebius.Ui.Bind` exists. The oracle side
-may not import the binder, registry normalizer, contract matcher, scope checker, or capability resolver under
-test.
+`ports.tsv`, `handlers.tsv`, `capabilities.tsv`, and `expected_bindings.tsv` are separate authored relations.
+The Haskell suite builds production values and compares their normalized projection with
+`EffectBindingReference`, which imports neither production binder. Handler and capability key sets are checked
+both ways, including duplicates, so equal-cardinality swaps cannot pass by count.
 
+The seven effect arms are enumerably closed. Six private identifiers and sealed values remain
+constructor-private. Source checks reject partial tokens and raw coordinates in `PortRequirement`; project
+totality warnings keep later closed-sum growth visible in the suite.
 
-- **Representative set:** `ReadData`, `MutateData`, `StartWorkflow`, `ObserveWorkflow`, `Subscribe`,
-  `UploadBounded`, and `UseReadyArtifact` ports span read, mutation, workflow, stream, upload, and artifact
-  effects in single-tenant and multi-tenant programs. Two named-link requirements resolve against a separately
-  authored trusted catalog without becoming effect destinations.
-- **Pinned oracles:** `test/fixture/ui_effect_binding/ports.tsv`, `handlers.tsv`, and `capabilities.tsv` own
-  the inputs; `expected_bindings.tsv` owns the exact handler/codec/capability/scope/audit/idempotency tuple for
-  each port; `external_link_catalog.tsv` and `expected_external_links.tsv` own fixed canonical link joins; and
-  `bind_errors.tsv` owns every rejection tag and offending key.
-- **Independent predicates:** a hand-authored finite relational join reads the TSV columns directly and
-  compares serialized outcomes. It shares no production lookup, compatibility, set-equality, or digest helper.
-- **Specific negatives:** missing and duplicate handlers, request/response codec mismatch, absent capability,
-  scope/audience mismatch, unbounded upload/subscription, mutation retry without idempotency, and non-ready
-  artifact use each pair with a valid twin and assert one stable `UiBindError`. Missing, duplicate, HTTP,
-  userinfo-bearing, wildcard, noncanonical, and caller-templated external-link entries have distinct paired
-  `UiLinkBindError` rows.
-- **Generator coverage:** QuickCheck covers every effect arm and requires at least 5% for missing, duplicate,
-  mismatched-contract, mismatched-scope, missing-capability, and unsafe-retry rejections.
-- **Effect discipline:** fresh challenges, authority credentials, and OS-boundary observers are not applicable
-  to this Register-1 relation. The pure denied-effect trace must remain empty, while live handler truth and
-  provider isolation remain UNVERIFIED.
-- **Seeded mutants:** `M-first-handler-wins` (quantifier weakening), `M-drop-capability` (guard deletion),
-  `M-erase-handler-scope` (scope guard deletion), `M-swap-response-codec` (effect/type swap), and
-  `M-retry-without-idempotency` (invariant-clause delete), plus `export_raw_topic` (provider-coordinate escape),
-  and `M-link-id-as-url` (escape-arm addition) are committed and must each turn a distinct pin red.
+Eight pinned binding failures leave an empty pure trace. Eight external-link defects and three bounded-input
+defects retain distinct tags. Thirteen QuickCheck classes cover all seven effects and six central refusal
+classes at a 5% floor.
 
-Passing proves binding completeness and sampled agreement with an independent finite relation. It does not
-prove a handler's implementation, current provider state, live authorization, or end-to-end tenant isolation.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+Each mutant runs in its own process and must report its exact locus: duplicate-handler quantifier weakening,
+missing capability, erased scope guard, swapped response codec, missing idempotency, raw provider topic, or
+external-link-as-effect. A generic non-zero exit is insufficient.
+
+Artifact, budget, lift, workflow, and evidence components carry the `7,2,19,13,7`
+port/link/refusal/property/mutant counts and compose to resource vector `5,48,0,0`. Normal and Darwin
+network-denied executions must report both calculus and binding tokens. Generated records remain beneath
+`.build/**`.
+
+Passing proves the pure closed binding relation for this bounded corpus. Browser traffic, handler behavior,
+provider authentication/state, and live tenant isolation remain UNVERIFIED.
+
+- **Extension conformance (§M.13).** Not applicable. This core UI binder has no extension declaration or
+  linked set to judge.
 
 ## Doctrine adopted
 
-- [`low_code_ui_runtime_doctrine.md` §8 — effects are typed ports](../documents/engineering/low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations): all effects resolve through one sealed server-side registry.
-- [`low_code_ui_runtime_doctrine.md` §10 — single-tenant and multi-tenant applications](../documents/engineering/low_code_ui_runtime_doctrine.md#10-single-tenant-and-multi-tenant-applications): handler scope is retained in both modes and cannot come from the client.
-- [`low_code_ui_runtime_doctrine.md` §11 — data, forms, and storage](../documents/engineering/low_code_ui_runtime_doctrine.md#11-data-forms-and-storage): storage is reached through typed bounded ports and opaque handles.
-- [`low_code_ui_workflow_lifting.md` §12 — workflows and artifact lifting](../documents/engineering/low_code_ui_workflow_lifting.md#12-workflows-and-artifact-lifting-into-the-ux): workflow and ready-artifact handles bind like every other scoped effect.
-- [`low_code_ui_runtime_doctrine.md` §4.4 — external links are trusted names](../documents/engineering/low_code_ui_runtime_doctrine.md#44-external-links-are-names-resolved-by-a-trusted-catalog): named requirements exact-join a linked fixed-HTTPS catalog and cannot become effect URLs.
-- [`service_capability_doctrine.md` §2 — the capability set](../documents/engineering/service_capability_doctrine.md#2-the-capability-set): application ports bind semantic capabilities, never provider product coordinates.
-- [`illegal_state_capability_messaging.md` §3.82](../documents/illegal_state/illegal_state_capability_messaging.md#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary): no direct browser/provider escape enters the bound program.
+- [`low_code_ui_runtime_doctrine.md` §4.4 — external links are trusted names](../documents/engineering/low_code_ui_runtime_doctrine.md#44-external-links-are-names-resolved-by-a-trusted-catalog): named requirements exact-join the fixed-HTTPS catalog.
+- [`low_code_ui_runtime_doctrine.md` §8 — effects are typed ports](../documents/engineering/low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations): semantic effects bind through one sealed server-side relation.
+- [`service_capability_doctrine.md` §2 — capability set](../documents/engineering/service_capability_doctrine.md#2-the-capability-set): ports name semantic capabilities rather than provider coordinates.
+- [`low_code_ui_workflow_lifting.md` §12 — workflow and artifact lifting](../documents/engineering/low_code_ui_workflow_lifting.md#12-workflows-and-artifact-lifting-into-the-ux): workflow and ready-artifact handles bind through the same port relation.
+- [`illegal_state_capability_messaging.md` §3.82](../documents/illegal_state/illegal_state_capability_messaging.md#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary): raw browser/provider escape arms remain absent.
+
+---
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
-> established by the current phase gate plus universal artifact hygiene.
+## Sprint 39.1: Exact port and capability binding ✅
 
-## Sprint 39.1: Seal the effect-handler-capability relation 📋
-**Status**: Planned
-**Implementation**: `src/Amoebius/Ui/{Bind,ExternalLinkCatalog}.hs`,
-`test/spec/ui/UiEffectBindingSpec.hs`, `test/spec/ui/EffectBindingReference.hs`, and `tools/ui_effect_binding_gate.py`
-**Blocked by**: None.
-**Independent Validation**: `cabal test ui-effect-binding-spec`
-compares the private binder's serialized result with the Phase-0 finite relation, verifies empty failure
-traces, and requires every named mutant to fail. The full hermetic gate is
-`python3 tools/ui_effect_binding_gate.py`.
-**Docs to update**:
-`documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/service_capability_doctrine.md`,
-`documents/illegal_state/illegal_state_capability_messaging.md`
+**Status**: Done
+**Implementation**: `src/Amoebius/Ui/Bind.hs`, `test/fixture/ui_effect_binding/{ports,handlers,capabilities,expected_bindings}.tsv`, `test/spec/ui/EffectBindingReference.hs`
+**Blocked by**: [Phase 38](phase_38_ui_authorization_kernel.md) gate
+**Independent Validation**: seven normalized production bindings equal both the authored expectation and the independent finite join; handler/capability keys agree exactly
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/service_capability_doctrine.md`
 
 ### Objective
 
-Adopt the sole effect-binding boundary so a checked UI cannot become runnable until every port has one and only
-one compatible trusted implementation and every effect invariant is present in the sealed value.
+Adopt one exact relation whose only successful result is a constructor-private `BoundUiProgram`.
 
 ### Deliverables
 
-- Private `BoundUiProgram` and total handler, codec, capability, external-link, scope, audit, and retry-policy binder.
-- Structured `UiBindError` values with complete offending keys and no partially usable result.
-- Independent relation reader, paired corpus, property coverage, mutant configurations, and Register-1 ledger.
+- Seven closed effect requirements and their exact handler/capability/contract tuples.
+- Six constructor-private identifiers and bound values.
+- Exact key-set parity, empty refusal traces, and generated coverage floors.
 
 ### Validation
 
-1. Run `cabal test ui-effect-binding-spec`; every valid port maps to the exact pinned tuple and every invalid
-   twin rejects with its pinned tag/key before a pure effect can be recorded.
-2. Compare normalized port, handler, capability, and bound key sets for exact equality, including equal-count
-   swaps and duplicates rather than cardinality alone.
-3. Run `M-first-handler-wins`, `M-drop-capability`, `M-erase-handler-scope`,
-   `M-swap-response-codec`, `M-retry-without-idempotency`, `export_raw_topic`, and `M-link-id-as-url`; each
-   turns a distinct oracle row red.
-4. Verify the ledger reports only pure binding evidence and leaves browser, server, authority, and provider
-   enforcement UNVERIFIED.
+1. All seven bindings agree with the authored table and independent relation.
+2. Missing, duplicate, unexpected, mismatched, unbounded, and unready cases fail distinctly.
+3. Closed-union, constructor-export, partial-token, and totality checks pass.
 
 ### Remaining Work
 
-None in Phase 39. Browser, handler, provider-state, authorization-runtime, and live tenant-isolation truth stay
-UNVERIFIED and remain assigned to later gates.
+None.
+
+## Sprint 39.2: Trusted links and negative controls ✅
+
+**Status**: Done
+**Implementation**: `src/Amoebius/Ui/ExternalLinkCatalog.hs`, `test/fixture/ui_effect_binding/{external_link_catalog,expected_external_links,bind_errors}.tsv`, `test/mutant/ui_effect_binding/**`
+**Blocked by**: Sprint 39.1
+**Independent Validation**: two names exact-join canonical fixed-HTTPS entries; nineteen distinct refusals and seven exact mutant loci pass
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/illegal_state/illegal_state_capability_messaging.md`
+
+### Objective
+
+Keep navigation names separate from effect transport and provider coordinates.
+
+### Deliverables
+
+- Exact named-link catalog parity and canonical fixed-HTTPS validation.
+- Nineteen binding/link/bounded-input refusals.
+- Seven paired quantifier, guard, type, invariant, and escape mutants.
+
+### Validation
+
+1. Both link projections equal the independent relation.
+2. Every binding/link/bounded refusal retains its exact tag before a trace exists.
+3. Every mutant exits red and reports only its authored locus.
+
+### Remaining Work
+
+None.
+
+## Sprint 39.3: Calculus projection and phase seal ✅
+
+**Status**: Done
+**Implementation**: `test/oracle/ui_effect_binding/{calculus_projection,validation_locus}.tsv`, `test/oracle/ui_effect_binding_surfaces.tsv`, `tools/ui_effect_binding_gate.py`
+**Blocked by**: Sprint 39.2
+**Independent Validation**: real five-calculus values match all four projection rows; normal and Darwin network-denied suite executions report both acceptance tokens
+**Docs to update**: `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, `DEVELOPMENT_PLAN/system_components.md`
+
+### Objective
+
+Seal the pure binding claim with current calculus, architecture, surface, containment, and attestation evidence.
+
+### Deliverables
+
+- A real five-calculus composition over the phase's bounded sets.
+- Linux and Darwin network-denial observers plus a natural-architecture declaration.
+- A complete surface/ledger join with live runtime/provider residues retained as UNVERIFIED.
+
+### Validation
+
+1. The authored calculus rows fix the five-kind order, component names, count vector, and resource sum.
+2. Ordinary and Darwin-denied executions accept; seven isolated mutant executions report their exact loci.
+3. Architecture, surfaces, ledger, containment, write guard, and attestation all close on the same run.
+
+### Remaining Work
+
+None.
+
+---
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated with this seal:**
 
-- `documents/engineering/low_code_ui_runtime_doctrine.md` — record pure bind evidence without claiming handler
-  or provider enforcement.
-- `documents/engineering/service_capability_doctrine.md` — record the semantic UI-port binding consumer.
-- `documents/illegal_state/illegal_state_capability_messaging.md` — attach binder fixtures and mutants to the
-  browser-effect escape locus.
+- `documents/engineering/low_code_ui_runtime_doctrine.md` — pure exact binding and honest live residues.
+- `documents/engineering/service_capability_doctrine.md` — semantic capability consumer evidence.
+- `documents/illegal_state/illegal_state_capability_messaging.md` — exact escape controls and mutants.
 
-**Cross-references to add:**
+**Cross-references updated:**
 
 - `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, and
-  `DEVELOPMENT_PLAN/system_components.md` — index the phase, `none` substrate, gate, and target modules.
-- Phase 40 — consume only the sealed `BoundUiProgram`.
+  `DEVELOPMENT_PLAN/system_components.md` — seal, substrate, gate, and owned modules.
+
+---
 
 ## Related Documents
 
-- [Phase 38](phase_38_ui_authorization_kernel.md) — the required action registry and authority transition.
-- [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — the effect and binding contract implemented here.
-- [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — semantic capability ownership.
-- [Illegal-State Capability/Messaging Slice](../documents/illegal_state/illegal_state_capability_messaging.md) — direct browser/provider escape foreclosure.
+- [Development Plan Tracker](README.md) — phase order and current status.
+- [Development Plan Standards](development_plan_standards.md) — phase shape, register honesty, and gate integrity.
+- [Phase 10](phase_10_calculus_composition.md) — five-calculus composition.
+- [Phase 38](phase_38_ui_authorization_kernel.md) — sealed authorization registry.
+- [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — port and link binding ownership.
+- [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — semantic capabilities.
+- [Illegal-State Capability/Messaging Slice](../documents/illegal_state/illegal_state_capability_messaging.md) — browser/provider escape foreclosure.

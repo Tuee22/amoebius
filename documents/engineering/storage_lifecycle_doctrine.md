@@ -41,8 +41,9 @@ decoupled from, owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doc
 
 **Node-local read-side status.** The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md)
 validates model-pinned OCI content/snapshot joins, planned-slot versus observed-UID runtime metadata, closed
-layout routing, alias-aware backing groups, and physical raw-versus-VM-usable parent accounting. Live deletion,
-GC, allocation, and backing observation remain unverified; ledger `external-run-reference`.
+layout routing, alias-aware backing groups, and physical raw-versus-VM-usable parent accounting. The
+2026-08-21 reseal keeps these observations inside the bounded Phase-29 suite and exact negative/twin corpus.
+Live deletion, GC, allocation, and backing observation remain unverified; ledger `external-run-reference`.
 
 ## 1. Cluster and storage have independent lifetimes
 

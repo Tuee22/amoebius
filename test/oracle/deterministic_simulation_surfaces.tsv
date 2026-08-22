@@ -15,8 +15,8 @@
 # bare-IO-signature scan, the non-vacuous polymorphism-token check, and the exact
 # ten-module simulation scope.
 #
-# **2 contract surfaces carry no id** and are carried UNVERIFIED; the gap is
-# recorded against Phase 16 in legacy_tracking_for_deletion.md.
+# Two surfaces intentionally carry no positive evidence: model fidelity is ASSUMED and live runtime is
+# UNVERIFIED. Both still have explicit metric ids so the run-time join remains total.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 
@@ -38,6 +38,8 @@ route53-no-cas	metrics	fake-contracts
 vault-sealed-rejection	items	vault_sealed
 modeled-clock-delay	items	clock_delay
 four-schedule-corpus	metrics	schedules
+calculus-composition-construction	items	calculus_composition_projection
+calculus-composition-projection	metrics	calculus-composition
 independent-outcome-oracle	items	partition_schedule,reorder_schedule,crash_schedule,same_seed_trace,distinct_seed_trace,iosimpor_corpus,dropped_partition_handling,m1-dropped-partition-handling
 same-seed-byte-identical-trace	metrics	same-seed-traces
 distinct-seed-schedule-sensitivity	metrics	schedule-sensitivity

@@ -5,7 +5,7 @@ module Main (main) where
 import Amoebius.Sim.Env
 import Amoebius.Sim.Interp.Real (noOpRealClients, realEnv)
 import Amoebius.Sim.Interp.Sim
-import Amoebius.Sim.Reconcile (referenceReconcile)
+import Amoebius.Sim.Reconcile (referenceReconcile, referenceReconcileCommands)
 import Control.Monad (forM, forM_, unless)
 import Control.Monad.Class.MonadTest (exploreRaces)
 import Control.Monad.IOSim
@@ -24,6 +24,10 @@ import Data.List (isInfixOf, isSuffixOf, sort)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
+import CalculusProjection
+  ( CalculusProjection (..)
+  , referenceCalculusProjection
+  )
 import DroppedPartitionMutant (droppedPartitionReconcile)
 import FaultContracts (checkFaultContracts)
 import System.Directory (canonicalizePath, doesDirectoryExist, getCurrentDirectory, listDirectory)
@@ -57,12 +61,13 @@ runGreen root = do
   checkFaultCoverage schedules
   checkFaultContracts
   checkRealInterpreter
+  checkCalculusProjection root schedules
   forM_ schedules checkSameSeed
   checkScheduleSensitivity schedules
   forM_ schedules checkIOSimPOR
   checkPartitionMutant schedules
   checkPolymorphismSourceGate root
-  putStrLn "sim-spec: PASS (2 interpreters, 6 fake contracts, 4 schedules, same-seed bytes, sensitivity, IOSimPOR, 1 mutant)"
+  putStrLn "sim-spec: PASS (2 interpreters, 6 fake contracts, 4 schedules, 5-calculus projection, same-seed bytes, sensitivity, IOSimPOR, 1 mutant)"
 
 runMutantMode :: FilePath -> IO ()
 runMutantMode root = do
@@ -117,6 +122,43 @@ checkRealInterpreter = do
   let environment = realEnv noOpRealClients :: Env IO
   outcome <- referenceReconcile environment
   assertEqual "reference reconciler under real-client interpreter" Upheld outcome
+
+checkCalculusProjection :: FilePath -> [FaultSchedule] -> IO ()
+checkCalculusProjection root schedules = do
+  expected <- loadProjectionExpected root
+  schedule <- findSchedule "crash-retry" schedules
+  projection <- either die pure referenceCalculusProjection
+  let names = projectionNames projection
+      (outcome, trace) = runSimOrThrow $ do
+        handle <- newIOSimEnv schedule
+        observed <- referenceReconcileCommands names (simEnv handle)
+        events <- simReadTrace handle
+        pure (observed, events)
+      published = sort
+        [ messagePayload message
+        | Published message <- trace
+        ]
+      facts = Map.fromList
+        [ ("calculus-order", Text.intercalate "," (projectionOrder projection))
+        , ("component-names", Text.intercalate "," names)
+        , ("resource-total", projectionResources projection)
+        , ("published-commands", Text.intercalate "," published)
+        , ("outcome", renderOutcome outcome)
+        ]
+  assertEqual "calculus composition projection" expected facts
+
+loadProjectionExpected :: FilePath -> IO (Map.Map Text.Text Text.Text)
+loadProjectionExpected root = do
+  source <- readFile (root </> "test/oracle/deterministic_simulation/calculus_projection.tsv")
+  rows <- forM (filter (not . null) (lines source)) $ \line -> case splitTabs line of
+    [name, value] -> pure (Text.pack name, Text.pack value)
+    _ -> die ("invalid calculus-projection row: " <> line)
+  pure (Map.fromList rows)
+
+renderOutcome :: InvariantOutcome -> Text.Text
+renderOutcome outcome = case outcome of
+  Upheld -> "upheld"
+  Violated invariant -> "violated:" <> invariant
 
 checkSameSeed :: FaultSchedule -> IO ()
 checkSameSeed schedule = do

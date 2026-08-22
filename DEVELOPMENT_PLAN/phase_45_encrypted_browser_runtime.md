@@ -6,19 +6,13 @@
 
 Phase 45 delivers the encrypted browser offline runtime; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), and the plan for reaching it is owned here.
 Register 2: a real boundary against fake tools.
-The scoped gate passed on 2026-08-11 against real Chrome; the production PureScript bundle remains
-`UNVERIFIED` because no PureScript compiler is installed.
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +23,7 @@ The scoped gate passed on 2026-08-11 against real Chrome; the production PureScr
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 45.1: Build the encrypted local interpreter ⏸️](#sprint-451-build-the-encrypted-local-interpreter-)
+- [Sprint 45.1: Build the encrypted local interpreter ✅](#sprint-451-build-the-encrypted-local-interpreter-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,25 +31,14 @@ The scoped gate passed on 2026-08-11 against real Chrome; the production PureScr
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-44 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-🟡 Scoped gate passed. A fresh real Chrome profile exercises WebCrypto, IndexedDB, process restart, raw
-storage inspection, partitions, Web Locks, BroadcastChannel, Service Worker/cache state, quota results, and
-all six mutants. Production PureScript compilation and server replay remain `UNVERIFIED`.
+✅ Done — sealed 2026-08-22. `python3 tools/encrypted_browser_runtime_gate.py` passes all fourteen sides on
+natural `arm64`, untranslated. The production PureScript graph and generic bundle compile with all offline
+modules; two real Chrome processes pass the fourteen-action trace and all twelve WebCrypto, IndexedDB,
+partition, Web Locks, BroadcastChannel, Service Worker, cache, restart, and quota observations. Three storage
+rows, two immutable assets, three quota rows, three access rows, and all six production-reference mutants pass.
+The real five-calculus projection accounts for 50 units, all 17 metrics match, and 66 surfaces join completely.
+Attestation `sha256:ae246b901d94b7b2013812e71af9de8d9f65676fdb8346e75b4e1ef4b9c8d8ef` binds source
+`sha256:593e71d60584b02e…` over 2,274 files. Server replay and live multi-zone behavior remain UNVERIFIED.
 
 ## Phase Summary
 
@@ -64,9 +47,6 @@ encrypted IndexedDB/OPFS blobs, immutable public service-worker assets, explicit
 unlock and offline-auth states, and a Web Locks/BroadcastChannel leader with a durable fencing generation.
 Credentials, refresh tokens, private plans, and cross-partition records cannot be stored. A browser lacking the
 required coordination primitives takes the safe single-tab/refuse-concurrency path.
-
-**Session scope:** Implement and browser-test local facilities only; server replay and accepted receipts remain
-out of scope until Phase 85.
 
 **Phase scope:** one cohesive claim — *offline state at rest is encrypted, partitioned by identity, and owned by exactly one fenced tab*. Ownership is what makes replay safe rather than merely ordered.
 
@@ -78,7 +58,7 @@ out of scope until Phase 85.
 
 **Depends on:** [Phase 44](phase_44_ui_local_composition.md) — local UI composition, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test offline-browser-runtime-spec` drives fresh browser profiles through queue, restart,
+**Gate:** `python3 tools/run_phase_gate.py 45` drives fresh browser profiles through queue, restart,
 unlock, quota, tenant/subject switch, two-tab handoff, service-worker upgrade, and storage inspection; it finds
 no prohibited plaintext or cross-partition disclosure and turns every named mutant red.
 
@@ -103,22 +83,14 @@ neither calls the runtime under test.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+## Sprint 45.1: Build the encrypted local interpreter ✅
 
-## Sprint 45.1: Build the encrypted local interpreter ⏸️
-
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
+**Status**: Done
 **Implementation**:
-`ui/src/Amoebius/Ui/Offline/{Store,Crypto,Partition,Leader,ServiceWorker}.purs`,
+`ui/src/Amoebius/Ui/Offline/{Store,Crypto,Partition,Leader,ServiceWorker,Runtime}.{purs,js}`,
 `src/Amoebius/Ui/Offline/Browser/{Store,Crypto,Partition,Leader,ServiceWorker}.hs`,
 `test/spec/browser/OfflineRuntimeSpec.hs`, `tools/encrypted_browser_runtime_live.py`, and `tools/encrypted_browser_runtime_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
+**Blocked by**: [Phase 44](phase_44_ui_local_composition.md) gate
 **Independent Validation**: `python3 tools/encrypted_browser_runtime_gate.py` with a two-process
 Chrome profile, raw browser-storage/cache inspection, model contracts, and six compile-time mutants
 **Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`,
@@ -142,8 +114,8 @@ Persist and recover bounded offline state without disclosing protected records o
 
 ### Remaining Work
 
-Compile and link the PureScript modules into the production generic client bundle once the PureScript toolchain
-is available. Server replay remains owned by Phase 85. Neither surface is inferred from the Chrome harness.
+None. Server replay remains owned by Phase 85, and live multi-zone continuity remains owned by Phase 88;
+neither is inferred from this local browser boundary.
 
 ## Documentation Requirements
 

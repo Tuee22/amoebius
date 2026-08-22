@@ -1,0 +1,29 @@
+# Authored Phase-22 surface expectation.
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+composition-case-corpus	metrics	composition-cases
+pair-law-grid	metrics	pair-law-verdicts
+authored-subject-grid	metrics	subject-verdicts
+lawful-address-controls	metrics	lawful-controls
+identity-by-value	metrics	identity-equalities
+associativity-by-value	metrics	associativity-equalities
+budget-additivity-folds	metrics	budget-folds
+address-behavior	metrics	address-controls
+exact-mutant-loci	metrics	mutants
+typed-request-scope	metrics	typed-scope
+shared-authority-scans	metrics	source-scans
+independent-address-recomputation	metrics	independent-addresses
+runtime-correspondence	metrics	runtime
+pure-shared-authority-boundary	checks	shared-authority-scan
+authored-composition-table	checks	composition-table-independent
+authored-verdict-grid	checks	verdict-grid-independent
+python-content-address	checks	content-address-independent
+same-request-compiler-barrier	checks	typed-scope-barrier
+generated-artifact-discipline	checks	results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
+c1-closure-mutant	mutants	claim-omitted
+c2-identity-mutant	mutants	left-identity-broken
+c3-associativity-mutant	mutants	associativity-regrouped
+c4-interference-mutant	mutants	shared-state-interference
+c5-budget-mutant	mutants	budget-max-not-sum
+c6-scope-mutant	mutants	cross-scope-widened
+c7-address-mutant	mutants	artifact-address-collision

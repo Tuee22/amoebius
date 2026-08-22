@@ -1,0 +1,6 @@
+keyspace	left_tenant	left_subject	left_domain	right_tenant	right_subject	right_domain
+RowKey	ab	c	d	a	bc	d
+ObjectPrefix	tenant-a	subject	object	tenant	a-subject	object
+TopicName	xy	z	topic	x	yz	topic
+CacheKey	cache-left	owner	entry	cache	left-owner	entry
+ReplayKey	replay-left	owner	command	replay	left-owner	command

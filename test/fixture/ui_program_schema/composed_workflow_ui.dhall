@@ -2,6 +2,7 @@ let T = ../../../dhall/amoebius/ui/Types.dhall
 
 in  { caseName = "composed_workflow_ui"
     , tenantMode = T.TenantMode.SingleTenant
+    , continuity = T.UiOffline.Continuity.OnlineOnly
     , modules =
       [ { moduleId = "app.workflow"
         , nodes =

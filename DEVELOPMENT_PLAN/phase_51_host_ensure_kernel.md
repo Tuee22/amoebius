@@ -18,7 +18,7 @@ fixes and this phase only consumes.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -29,11 +29,11 @@ fixes and this phase only consumes.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 51.1: The closed substrate algebra 📋](#sprint-511-the-closed-substrate-algebra-)
-- [Sprint 51.2: Install steps as typed data 📋](#sprint-512-install-steps-as-typed-data-)
-- [Sprint 51.3: The reconciler table 📋](#sprint-513-the-reconciler-table-)
-- [Sprint 51.4: The probe-first ensure driver 📋](#sprint-514-the-probe-first-ensure-driver-)
-- [Sprint 51.5: The lift fold to argv 📋](#sprint-515-the-lift-fold-to-argv-)
+- [Sprint 51.1: The closed substrate algebra ✅](#sprint-511-the-closed-substrate-algebra-)
+- [Sprint 51.2: Install steps as typed data ✅](#sprint-512-install-steps-as-typed-data-)
+- [Sprint 51.3: The reconciler table ✅](#sprint-513-the-reconciler-table-)
+- [Sprint 51.4: The probe-first ensure driver ✅](#sprint-514-the-probe-first-ensure-driver-)
+- [Sprint 51.5: The lift fold to argv ✅](#sprint-515-the-lift-fold-to-argv-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,7 +41,19 @@ fixes and this phase only consumes.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-50 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-22. The workflow-routed twelve-sided gate passes on natural `arm64`, untranslated:
+the closed host algebra builds with every warning an error and has no wildcard arm; all four catalogue plans
+join their authored oracle; applicability, diagnostics and refusal derive from one reconciler table; replay
+converges once and mutates nothing thereafter; and the one lift fold preserves all three contexts. All five
+seeded defects redden their exact checks, all 23 surfaces join, and the authored tree and outside-host
+inventory remain unchanged. Attestation
+`sha256:ecd9481e8540827635b55f31947ccaa619266faecad103fd6e1b7d9287b2a6e5` binds source
+`sha256:42ce8e5f7946e151…` over 2,318 files. The run also removed a redundant workflow-calculus constructor
+import that the phase's `-Werror` boundary correctly refused. Phase 52 is now the sole open contract.
+
+Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi
+change what this phase's gate must cover, so any earlier seal is history and no longer presents completion
+evidence.
 
 The run found three defects. `dsl-core` needed `Amoebius.Pulumi.Engine` at compile time and never
 declared it, so `-Werror=missing-home-modules` refused the build outright — the module is now
@@ -89,7 +101,7 @@ second substrate appears.
 
 **Requires**: `host-floor`
 
-**Gate:** `python3 tools/host_ensure_kernel_gate.py` passes every check named in
+**Gate:** `python3 tools/run_phase_gate.py 51` passes every check named in
 [Gate integrity](#gate-integrity). Phase 52 does not open until it is green.
 
 ---
@@ -161,8 +173,8 @@ different check:
 
 ## Sprints
 
-## Sprint 51.1: The closed substrate algebra 📋
-**Status**: Planned
+## Sprint 51.1: The closed substrate algebra ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Host/Frame.hs`, `src/Amoebius/Host/Substrate.hs`
 **Blocked by**: none within the phase
 **Requires**: `host-floor`
@@ -198,8 +210,8 @@ member.
 
 None.
 
-## Sprint 51.2: Install steps as typed data 📋
-**Status**: Planned
+## Sprint 51.2: Install steps as typed data ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs`
 **Blocked by**: Sprint 51.1
 **Independent Validation**: no install step carries a free-form string, and every step renders to an argv whose head is a resolved `AbsExe`
@@ -232,8 +244,8 @@ make an install step a value the driver executes rather than a label a reader in
 
 None.
 
-## Sprint 51.3: The reconciler table 📋
-**Status**: Planned
+## Sprint 51.3: The reconciler table ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Host/Reconciler.hs`, `test/fixture/host_ensure_kernel/`
 **Blocked by**: Sprint 51.2
 **Independent Validation**: applicability, diagnostic, and install plan for every reconciler derive from one row, and a second declaration of any of the three is refused
@@ -265,8 +277,8 @@ express a reconciler as a row so its three views cannot disagree with each other
 
 None.
 
-## Sprint 51.4: The probe-first ensure driver 📋
-**Status**: Planned
+## Sprint 51.4: The probe-first ensure driver ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Host/Ensure.hs`, `src/Amoebius/Host/Context.hs`
 **Blocked by**: Sprint 51.3
 **Independent Validation**: the absent → present → present replay against the committed fake tool directory converges once and issues no install argv thereafter
@@ -298,8 +310,8 @@ pre-condition.
 
 None.
 
-## Sprint 51.5: The lift fold to argv 📋
-**Status**: Planned
+## Sprint 51.5: The lift fold to argv ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Host/Lift.hs`, `test/spec/host/HostEnsureKernelSpec.hs`
 **Blocked by**: Sprint 51.4
 **Independent Validation**: one fold produces host, VM, and container argv from a single step list, each compared against the authored oracle

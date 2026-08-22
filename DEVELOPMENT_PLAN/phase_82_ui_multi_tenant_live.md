@@ -83,7 +83,7 @@ multicluster, or HA-failure claim.
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 — live infrastructure.
-**Gate:** `cabal test ui-multi-tenant-live` drives the generic PureScript client through a real
+**Gate:** `python3 tools/run_phase_gate.py 82` drives the generic PureScript client through a real
 Keycloak-authenticated scope change and satisfies every pinned matrix, fresh challenge, stale replay, bypass
 probe, and mutant in [Gate integrity](#gate-integrity). Forbidden effects require authenticated external
 zero-delta evidence.

@@ -1,7 +1,10 @@
 # Phase 34: chain/Step kernel + `--dry-run` + boundary fake-tool harness + extension-astcheck AST checker
 
 > **Purpose**: Seed the pure chain/Step reconcile kernel and its `--dry-run` plan render — `chain :: cfg ->
-> [Step]` as a pure value whose byte-for-byte preview is produced with no effects and whose descent is > golden-locked (Register 1) — then run the real amoebius binary over that same pure `[Step]` plan against fake > `kubectl`/`docker`/`pulumi` invoked by absolute path, asserting the exact argv stream and applied bytes > (Register 2), the two-register boundary that closes the pre-cluster conformance spine in-process, before any
+> [Step]` as a pure value whose semantic projection and canonical encoding are checked with no effects
+> (Register 1) — then run the real amoebius binary against fake `kubectl`/`docker`/`pulumi` invoked by absolute
+> path, asserting the exact argv stream and relayed bytes (Register 2), the two-register boundary that closes the
+> pre-cluster conformance spine in-process, before any
 > cluster or effectful interpreter exists.
 > **Read this if**: phase 34 is next in the queue, or a later phase depends on what its gate establishes.
 
@@ -30,15 +33,15 @@ The composite Register-1/2 gate passed on 2026-08-09. Live tools, apiserver appl
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 34.1: The `Step` algebra + `chain :: cfg -> \[Step\]` builder 📋](#sprint-341-the-step-algebra--chain--cfg---step-builder-)
-- [Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (golden-locked) 📋](#sprint-342-the-pure-descent--nextframeafter--foldlift-golden-locked-)
-- [Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) 📋](#sprint-343-renderchainplan----dry-run-byte-for-byte-render-no-live-infra-)
-- [Sprint 34.4: The plan-render golden battery (`chain-spec`) — the Part-A gate 📋](#sprint-344-the-plan-render-golden-battery-chain-spec--the-part-a-gate-)
-- [Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton 📋](#sprint-345-the-single-typed-subprocess-seam--boundary-spec-skeleton-)
-- [Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders 📋](#sprint-346-the-fake-kubectlhelmdockerpulumi-recorders-)
-- [Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate 📋](#sprint-347-the-boundary-battery--exact-commands--applied-bytes--no-path--the-part-b-gate-)
-- [Sprint 34.8: The sanctioned-API surface — what extension source may reach 📋](#sprint-348-the-sanctioned-api-surface--what-extension-source-may-reach-)
-- [Sprint 34.9: extension-astcheck — the extension AST checker and the link seal 📋](#sprint-349-extension-astcheck--the-extension-ast-checker-and-the-link-seal-)
+- [Sprint 34.1: The `Step` algebra + `chain :: cfg -> \[Step\]` builder ✅](#sprint-341-the-step-algebra--chain--cfg---step-builder-)
+- [Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked) ✅](#sprint-342-the-pure-descent--nextframeafter--foldlift-semantic-oracle-locked-)
+- [Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ✅](#sprint-343-renderchainplan----dry-run-byte-for-byte-render-no-live-infra-)
+- [Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate ✅](#sprint-344-the-semantic-plan-battery-chain-spec--the-part-a-gate-)
+- [Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton ✅](#sprint-345-the-single-typed-subprocess-seam--boundary-spec-skeleton-)
+- [Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ✅](#sprint-346-the-fake-kubectlhelmdockerpulumi-recorders-)
+- [Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ✅](#sprint-347-the-boundary-battery--exact-commands--applied-bytes--no-path--the-part-b-gate-)
+- [Sprint 34.8: The sanctioned-API surface — what extension source may reach ✅](#sprint-348-the-sanctioned-api-surface--what-extension-source-may-reach-)
+- [Sprint 34.9: extension-astcheck — the extension AST checker and the link seal ✅](#sprint-349-extension-astcheck--the-extension-ast-checker-and-the-link-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -46,7 +49,18 @@ The composite Register-1/2 gate passed on 2026-08-09. Live tools, apiserver appl
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-33 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-21 by the amended generative gate. The artifact, budget, lift, workflow and evidence
+calculi are projected explicitly, and the current result supersedes every invalidated historical seal below.
+
+**Validation record.** The amended thirteen-sided gate
+passes on natural `arm64`, untranslated. Both semantic cases and all nineteen ordered Plan rows pass with zero
+render actions and one observed canary; exact boundary argv/bytes and the hostile-`PATH` canary pass; all seven
+paired mutants redden. All 29 metrics match and 45 surfaces join to 58 items. Attestation
+`sha256:c7da6c817733030e3ef69578629de6c781260c9e002d70d7bcd7c334734b52bb` binds source
+`sha256:bb3fa3736080d8d2…` over 2,233 files. Live tools, apiserver apply, and runtime correspondence remain
+UNVERIFIED.
+
+**Activated 2026-08-21** when the preceding phase resealed.
 
 **A third sanctioned network observer, because two of them were the same substrate's.** The render path's
 no-network claim was proven by `unshare -n` or, failing that, by `strace` socket injection — both Linux kernel
@@ -134,7 +148,10 @@ committed source and completes with no apiserver, no credentials, no broker, no 
 through which the amoebius binary invokes every external tool (`src/Amoebius/Exec/Tool.hs`, the boundary
 facade that runs a resolved tool **by absolute path**, never a `PATH` lookup), the four fake tool
 recorders (`kubectl`, `helm`, `docker`, `pulumi`) that capture argv and applied-manifest bytes and return canned
-success, and the `boundary-spec` test-suite that drives the *real* binary over the Part-A `[Step]` plan against those fakes and asserts the exact command stream and applied bytes. Nothing here contacts live infrastructure: the plan and the manifest bytes the fakes receive are the same pure rendered value Part A already golden-locked, so the applied bytes a fake records are byte-for-byte what a live apply would submit — the identity owned by [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md). The mocking
+success, and the `boundary-spec` test-suite that drives the *real* binary against those fakes and asserts the
+exact command stream and relayed bytes. Nothing here contacts live infrastructure: Part A fixes plan meaning
+through an independent semantic oracle and canonical generated encodings; Part B passes an authored protocol
+input through the real binary and proves the fake receives precisely those bytes. The mocking
 posture is strict: mocking happens **only** at the subprocess boundary; the planning and rendering code under
 test stays pure and untouched. The harness also proves the cross-cutting no-`PATH` invariant at the boundary —
 the binary invokes each fake by the exact absolute path it was handed and never resolves a tool against the
@@ -151,7 +168,7 @@ that this boundary harness unblocks lives in [phase_16_deterministic_sim_substra
 **Phase scope:** one cohesive claim — *the plan is a pure value and the execution of it is observed at the boundary*. Two registers meet here, which is why this is the only contract that declares both.
 
 **Substrate:** none — no host, no cluster, no live effectful interpreter; the gate is an in-process
-`cabal test chain-spec` plan-render battery (Part A, analogous to the Phase-33 rendered-output goldens) plus an
+`cabal test chain-spec` semantic-plan and canonical-render battery (Part A) plus an
 in-process `cabal test boundary-spec` battery driving the real binary against fake tool binaries in a controlled
 directory (Part B).
 
@@ -160,9 +177,10 @@ directory (Part B).
 **Register:** 1/2 — a two-register gate: **Part A is Register 1** (pure/golden, in-process, no cluster) and
 **Part B is Register 2** (boundary integration with fake tools, no cluster), both in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 33](phase_33_render_manifest_oracles.md) — pure `renderAll` + rendered-output goldens, which this phase consumes rather than rebuilds.
+**Depends on:** [Phase 33](phase_33_render_manifest_oracles.md) — pure `renderAll` plus its semantic renderer
+oracle, which this phase composes into the chain without consuming generated snapshots.
 
-**Gate:** `python3 tools/chain_boundary_gate.py` passes the Part-A, Part-B, extension-astcheck,
+**Gate:** `python3 tools/run_phase_gate.py 34` passes the Part-A, Part-B, extension-astcheck,
 compile-fail, network-observer, mutant, and ledger checks. The committed
 Phase-34 ledger records the exact commands, oracle coverage,
 and live-runtime residue.
@@ -182,9 +200,9 @@ pinned at the start of Phase 34 before the executor — the §M.1 named exceptio
 flowchart LR
   %% register: orientation
   s0["Sprint 34.1: The Step algebra + chain :: cfg -> [Step] builder"]
-  s1["Sprint 34.2: The pure descent — nextFrameAfter / foldLift (golden-locked)"]
+  s1["Sprint 34.2: The pure descent — nextFrameAfter / foldLift (semantic oracle)"]
   s2["Sprint 34.3: renderChainPlan / --dry-run byte-for-byte render (no live infra)"]
-  s3["Sprint 34.4: The plan-render golden battery (chain-spec) — the Part-A gate"]
+  s3["Sprint 34.4: The semantic plan battery (chain-spec) — the Part-A gate"]
   s4["Sprint 34.5: The single typed subprocess seam + boundary-spec skeleton"]
   s5["Sprint 34.6: The fake kubectl/helm/docker/pulumi recorders"]
   s6["Sprint 34.7: The boundary battery — exact commands + applied bytes…"]
@@ -201,35 +219,25 @@ flowchart LR
   s7 -->|"produces what the next consumes"| s8
   s8 -->|"the last seam the gate closes over"| gate
 ```
-*Orientation. The seams phase 34 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+*Orientation. The seams phase 34 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. The 2026-08-21 gate executed the complete path.*
 
 ### Part A (Register 1) — the pure plan-render corpus (`test/spec/kernel/`)
 
-- **Representative set (§M.7, concrete corpus).** Exactly two oracle-pinned raw cfg fixtures at
-  `test/fixture/chain_boundary/cfg/`, each passed through the real
-  decode→bind/expand→plan/resolve-infrastructure→provision path before `chain`: `multi.cfg.json` (≥ 2 frames,
-  ≥ 3 declared services, with one service whose step is **out-of-frame** so its `stepRun` must never be reached)
-  and `minimal.cfg.json` (one frame, one service). "Fixture chain" everywhere in this phase means `chain` applied
-  to the resulting checked config containing its opaque `ProvisionedSpec` — the builder exercised end-to-end —
-  never a hand-authored opaque witness or `[Step]` literal. A provision failure produces no plan. - **Oracle-pinning (§M.1).** The `--dry-run` plan goldens
-  (`test/fixture/chain_boundary/plan/{multi,minimal}.plan.golden`) and the descent goldens
-  (`test/fixture/chain_boundary/descent/{multi,minimal}.descent.golden`) are hand-authored and **committed in this phase's oracle-pinning sprint before `renderChainPlan` exists**; a golden regenerated from the renderer is not a test.
-- **Independent step-set reference (§M.3).** The step-set reference is a hand-authored table
-  `test/fixture/chain_boundary/plan/expected_steps.json` (one entry per declared service/frame per cfg), authored from
-  the cfg by hand — **not** from `chain`'s output; the plan is asserted to contain exactly that step set
-  structurally against the table, never read back off the plan golden.
-- **Cross-golden render identity (§M.3, independent oracle).** `chain` produces a pure `[Step]` value whose
-  manifest-bearing steps are identity-selected subsets of the one **Phase-33** `renderAll` golden for the
-  fixture's whole `ProvisionedSpec`; their disjoint identity union equals that complete object set byte-for-byte,
-  and no Step invokes a per-service renderer. Both cfg fixtures are the same oracle-pinned fixtures Phase 33
-  golden-locked, so a corresponding whole-deployment `renderAll` golden exists for each fixture's
-  `ProvisionedSpec`. The reference side is Phase 33's independently committed output, not the kernel's own.
-- **Committed mutants (§M.2), re-run every gate run.** `cabal test chain-spec` turns **red** on each of two
-  committed seeded mutants under `test/mutant/chain_boundary/`: **m1** (`m1_cfg_drop_service`, cfg mutant removing one
-  service from `multi.cfg.json` — plan and descent goldens must diverge) and **m2** (`m2_descent_inframe`,
-  descent mutant weakening `nextFrameAfter` so the out-of-frame step is placed in-frame — the
-  `descent/multi.descent.golden` byte-diverges; the zero-`stepRun` counter is invariant under m2, since no
-  `stepRun` runs during render). Each mutant is committed and re-run, not run once.
+- **Representative set (§M.7, concrete corpus).** `test/oracle/chain_boundary/cases.tsv` is the consumed,
+  independently authored input table: the minimal case provisions `objectstore` as `SingleNode`, while the
+  multi case provisions `sql` as `Distributed 3`. Each row travels through the real fixture binding and
+  provision path before `chain`; neither an unused description of a case nor a hand-authored `[Step]` can pass.
+- **Semantic oracle (§M.1/§M.3).** `test/oracle/chain_boundary/plan_semantics.tsv` fixes all nineteen ordered
+  `PlanEntry` projections — case, position, label, frame, kind, and object identity — independently of
+  `renderChainPlan`. The suite compares `foldLift` structurally, then decodes and canonically re-encodes each
+  generated plan. Renderer-produced plan and descent snapshots are forbidden rather than committed.
+- **Whole-render identity (§M.3).** For both cases, manifest-bearing steps are identity-disjoint and their
+  ordered union equals the one in-memory `renderAll` result for the retained whole `ProvisionedSpec`. Phase 33's
+  semantic renderer oracle establishes the renderer independently; Phase 34 does not depend on its retired
+  output snapshots.
+- **Committed mutants (§M.2).** `m1_cfg_drop_service` drops the final multi-case entry and must diverge from the
+  semantic Plan oracle. `m2_descent_inframe` moves managed admission into the cutover frame and must diverge
+  from the authored frame column. Each control first proves the unmutated Plan equals the oracle.
 - **Zero-`stepRun` via a canaried counter (§M.5, OS-boundary observer).** Every `Step` is constructible **only**
   through the counting smart constructor (the raw constructor is not exported), and the counter increments **when the `stepRun` IO action is executed** (not when the field thunk is forced; `stepRun` is excluded from the
   `NFData` instance so `deepseq`-ing the plan cannot execute an action). The battery asserts the counter reads
@@ -255,15 +263,12 @@ flowchart LR
   fixture-authoring time from the spec — **never** by the executor's own `Step→argv` fold or any function
   reachable from it. A source gate rejects any import of executor argv-building code into the oracle; a check
   whose oracle is the subject under test is a tautology.
-- **Applied-manifest bytes (§M.3, cross-golden).** The applied-manifest bytes the fakes capture equal the
-  **Phase-33** `renderAll` goldens and the **Part-A** plan goldens byte-for-byte — the same rendered value the
-  `--dry-run` preview emits (both consume the one rendered source, per
-  [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)). Neither is
-  committed as a runtime artifact.
+- **Applied bytes (§M.3).** `test/fixture/chain_boundary/boundary/apply_input.json` is an authored protocol
+  input, not renderer output. The real binary relays it to the fake `kubectl` byte-for-byte; the byte mutant
+  changes one byte and the original-equal/mutated-unequal pair must hold.
 - **Committed mutants (§M.2), re-run every gate run.** `cabal test boundary-spec` turns **red** on each of three
   committed seeded mutants under `test/mutant/chain_boundary/boundary/`: **mB1** (`mB1_argv`, an executor argv mutant — drop a
-  flag / reorder two argv elements / swap a subcommand), **mB2** (`mB2_byte`, a byte mutant — one flipped byte in
-  a Phase-33 `renderAll` golden), and **mB3** (`mB3_path_resolve`, a `PATH`-resolution mutant — the seam
+  flag), **mB2** (`mB2_byte`, a one-byte relay mutation), and **mB3** (`mB3_path_resolve`, a `PATH`-resolution mutant — the seam
   resolving the tool by bare name instead of by absolute path). The suite failing on each is a demonstrated
   negative control, not merely assertion logic; each is committed and re-run.
 - **No-`PATH` invariant via an external-observer trace (§M.5, OS-boundary observer).** The no-`PATH` invariant is
@@ -282,9 +287,9 @@ flowchart LR
   `typed-process` (`runProcess`/`readProcess`/`startProcess`/`withProcessWait`), `System.Posix.Process`
   (`executeFile`/`forkProcess`/`createSession`), and any raw FFI `c_exec*`/`system` import — and red if the
   enumerated set is empty (guarding against a vacuous scope).
-- **Lossless recorder round-trip (§M.3).** `test/spec/boundary/Fakes.hs` carries a unit check proving the transcript
-  ADT captures argv order and applied-manifest bytes **losslessly** (round-trips the recorded bytes with no
-  re-encoding); it is red if any byte or argv element is dropped or re-encoded.
+- **Lossless recorder round-trip (§M.3).** `test/spec/boundary/BoundarySpec.hs` reads each fake's argv and stdin
+  transcript and proves every expected argv element is ordered and every input byte survives without
+  normalization; it is red if any byte or argv element is dropped or re-encoded.
 
 - **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`; negatives under `test/negative/chain_kernel_boundary/`.
 
@@ -308,15 +313,17 @@ flowchart LR
   cluster, Part B: the real binary run with fake `helm`/`kubectl`/`docker`/`pulumi` that record their argv and
   applied bytes) and
   [`§4 — the spine`](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run)
-  (the **Plan** step — *"`chain` produces the `[Step]` value; `--dry-run` renders it; a golden test pins the plan"* — for Part A, and the **fake apply** step — the binary runs the plan against fake tools and the recorded commands and applied bytes are asserted — for Part B, closing the pre-cluster spine).
+  (the **Plan** step — `chain` produces the `[Step]` value, the semantic oracle fixes its meaning, and canonical
+  round trips constrain its generated bytes — for Part A; and the **fake apply** step — the binary runs against
+  fake tools while commands and relayed bytes are asserted — for Part B, closing the pre-cluster spine).
 - [`conformance_harness_doctrine.md §5 — honesty: what the harness does and does not establish`](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish)
   (Part B): a green boundary run is quoted as *"the binary emits the exact commands and applied bytes,"* never as
   *"the cluster is correct."*
 - [`generated_artifacts_doctrine.md §3 — The rule`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
-  (Parts A and B): the rendered plan is emitted from the Haskell source of truth and **never committed** — the
-  `--dry-run` preview is a golden fixture of the renderer, not a committed runtime artifact — and the
-  applied-manifest bytes the fakes capture in Part B are byte-for-byte the same rendered value as the `--dry-run`
-  preview (both consume the one rendered source); regeneration is deterministic and reproducible.
+  (Parts A and B): the rendered plan is emitted from the Haskell source of truth and **never committed**. An
+  independently authored semantic table constrains the plan, and canonical decode/re-encode checks constrain
+  its generated bytes. Part B separately proves lossless relay of an authored boundary input; neither test
+  mistakes subject-produced output for an oracle.
 - [`testing_doctrine.md §2 — the registers of amoebius testing`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
   (Register 1 for Part A and **Register 2, boundary integration with fakes** for Part B). Pure code never
   touches a mock; fakes live at the subprocess boundary while planning and rendering stay pure. See also
@@ -325,11 +332,11 @@ flowchart LR
   model↔runtime correspondence and runtime fidelity UNVERIFIED (owned by
   [phase_58_object_reconciler.md](phase_58_object_reconciler.md) and
   [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md)); fail-fast, no skips — a missing fake or a
-  missing golden fails with an actionable error, never a pass-with-a-skip.
+  missing oracle or fake fails with an actionable error, never a pass-with-a-skip.
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-21 amended gate. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -337,15 +344,15 @@ flowchart LR
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
 > established by the current phase gate plus universal artifact hygiene.
 
-## Sprint 34.1: The `Step` algebra + `chain :: cfg -> [Step]` builder 📋
-**Status**: Planned
+## Sprint 34.1: The `Step` algebra + `chain :: cfg -> [Step]` builder ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Kernel/Step.hs` (the `Step` type, `StepKind`, and the
 `stepRun` action field), `src/Amoebius/Kernel/Chain.hs` (the `chain :: cfg -> [Step]` builder) — built and
 validated.
 **Blocked by**: None.
 **Independent Validation**: both fixtures pass the real path through provision and `chain`. Their plans force
 to normal form while the counted actions remain at zero. Each Step contains an identity-selected subset of one
-whole-deployment `renderAll` result; the disjoint union equals the Phase-33 golden byte-for-byte.
+whole-deployment `renderAll` result; the disjoint ordered union equals that in-memory result exactly.
 **Docs to update**:
 `documents/engineering/dsl_doctrine.md` (§2 chain/Step-kernel status backlink).
 
@@ -367,25 +374,25 @@ seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `ch
   `renderAll` output, so the plan is derivable from the step value alone without a second render boundary.
 
 ### Validation
-1. The real provision path followed by `chain` on each fixture cfg (`multi.cfg.json`, `minimal.cfg.json`)
+1. The real provision path followed by `chain` on each consumed case in `cases.tsv`
    produces a pure `[Step]` whose renderable shape is fully inspectable without executing any `stepRun`; the evaluation is partiality-free in the sense above (`deepseq` to normal form succeeds; `stepRun` excluded from `NFData`).
-2. The identity-disjoint union of all manifest-bearing Step projections equals the Phase-33 committed `renderAll`
-   golden for the fixture's whole `ProvisionedSpec` byte-for-byte (independent cross-golden oracle, not the
-   kernel's own output); every projected object is byte-identical to the same identity in that golden and no
+2. The identity-disjoint union of all manifest-bearing Step projections equals the one whole-deployment
+   `renderAll` value exactly; every projected object is identical to the same identity in that value and no
    public per-service renderer is reachable.
-3. The `[Step]` step set equals the hand-authored `expected_steps.json` table for the cfg (one entry per declared service/frame), asserted structurally against the table.
+3. The `[Step]` projection equals the nineteen independently authored ordered rows in
+   `plan_semantics.tsv`, asserted structurally rather than read from renderer output.
 
 ### Remaining Work
-Done. Live execution remains UNVERIFIED.
+None.
 
-## Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (golden-locked) 📋
-**Status**: Planned
+## Sprint 34.2: The pure descent — `nextFrameAfter` / `foldLift` (semantic-oracle locked) ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Kernel/Descent.hs` (`nextFrameAfter`, `foldLift`),
 plus the effectful seam `runChainFromFrame` in `src/Amoebius/Kernel/Chain.hs` — built and validated.
 **Blocked by**: None.
-**Independent Validation**: both functions remain pure and the multi fixture matches its descent golden. The
-fold-derived plan forces to normal form with a zero action count. Mutant m2 weakens the frame guard and turns
-the golden check red.
+**Independent Validation**: both functions remain pure and both cases match the authored frame and order
+columns. The fold-derived plan forces to normal form with a zero action count. Mutant m2 changes one frame and
+turns the semantic check red.
 **Docs to update**: `documents/engineering/dsl_doctrine.md` (§2 descent/seam status
 backlink).
 
@@ -393,27 +400,32 @@ backlink).
 Adopt [`dsl_doctrine.md §2`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)'s
 recursive-descent claim: the interpreter *"runs a step's action only when the binary is in that step's frame; the
 descent logic itself is pure and unit-tested, and `runChainFromFrame` is the thin effectful seam."* This sprint
-builds and golden-locks the **pure** half — `nextFrameAfter` (which frame follows a step) and `foldLift` (folding
+builds and semantic-oracle-locks the **pure** half — `nextFrameAfter` (which frame follows a step) and `foldLift` (folding
 the chain into the lift/plan structure) — and only *declares* the effectful seam, whose invocation is deferred to
 Part B (Register 2) and Register 3.
 
 ### Deliverables
-- Pure `nextFrameAfter :: Frame -> [Step] -> Maybe Frame` and `foldLift :: cfg -> [Step] -> Plan`, neither carrying `IO`, computing the frame/step assignment and the fold-derived plan with no action run. - The effectful `runChainFromFrame` **declared** as the single IO seam, with an in-file honesty note that its *invocation* is out of scope in Part A — Part B exercises it against fake tools (Sprints 9.5–14.7) and Register 3 against the live Deployment-`replicas=1` control-plane daemon ([phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md)); there is no election or standby anywhere in
-  the kernel.
+- Pure `nextFrameAfter :: Frame -> [Step] -> Maybe Frame` and `foldLift :: cfg -> [Step] -> Plan`, neither carrying
+  `IO`, computing the frame/step assignment and the fold-derived plan with no action run.
+- The effectful `runChainFromFrame` is declared as the single IO seam, with an in-file honesty note that its
+  invocation is out of scope in Part A. Part B exercises it against fake tools (Sprints 34.5–34.7) and Register 3
+  against the live Deployment-`replicas=1` control-plane daemon
+  ([phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md)); there is no election or standby anywhere in the
+  kernel.
 
 ### Validation
-1. A descent over the fixture chain (`chain` applied to `multi.cfg.json`) reproduces the committed golden
-   frame/step assignment byte-for-byte; the out-of-frame step appears in the fold but its `stepRun` is
+1. A descent over both case chains reproduces the authored ordered frame/step assignments exactly; the
+   out-of-frame step appears in the fold but its `stepRun` is
    unreachable (`deepseq`-to-NF of the plan with the constructor counter reading zero confirms no action
    executed).
-2. The committed descent mutant (m2, `nextFrameAfter` guard weakened so the out-of-frame step is placed in-frame)
-   turns this validation **red** — committed and re-run, not run once.
+2. The committed descent mutant (m2, managed admission moved into the cutover frame) diverges from the authored
+   frame column and turns this validation **red** — committed and re-run, not run once.
 
 ### Remaining Work
-Done. Live execution remains UNVERIFIED.
+None.
 
-## Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) 📋
-**Status**: Planned
+## Sprint 34.3: `renderChainPlan` / `--dry-run` byte-for-byte render (no live infra) ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Kernel/Plan.hs` (`renderChainPlan` / `renderChain`),
 `src/Amoebius/Cli.hs` (the `--dry-run` **render** path, kept structurally separate from any apply path) — built
 and validated.
@@ -457,87 +469,73 @@ only on the (here-absent) apply path.
    network/process/credential module. Both mechanisms run on every gate execution, not once.
 
 ### Remaining Work
-Done. Live execution remains UNVERIFIED.
+None.
 
-## Sprint 34.4: The plan-render golden battery (`chain-spec`) — the Part-A gate 📋
-**Status**: Planned
-**Implementation**: `test/spec/kernel/PlanSpec.hs`, the oracle-pinned fixtures under
-`test/fixture/chain_boundary/cfg/` (`multi.cfg.json`, `minimal.cfg.json`),
-`test/fixture/chain_boundary/plan/{multi,minimal}.plan.golden`,
-`test/fixture/chain_boundary/descent/{multi,minimal}.descent.golden`, the hand-authored step-set table
-`test/fixture/chain_boundary/plan/expected_steps.json`, and the committed mutants under `test/mutant/chain_boundary/`
-(`m1_cfg_drop_service`, `m2_descent_inframe`) — built and validated against the independently authored
-goldens and tables.
+## Sprint 34.4: The semantic plan battery (`chain-spec`) — the Part-A gate ✅
+**Status**: Done
+**Implementation**: `test/spec/kernel/PlanSpec.hs`, the consumed case table and nineteen-row semantic oracle
+under `test/oracle/chain_boundary/`, the calculus projection beside them, and the committed mutants under
+`test/mutant/chain_boundary/` (`m1_cfg_drop_service`, `m2_descent_inframe`) — built and validated without
+committing renderer output.
 **Blocked by**: None.
 **Independent Validation**: `chain-spec` passes with credentials scrubbed and socket calls blocked and
-observed. Both plans and descent assignments match their goldens; Step projections union to the Phase-33
-objects; the expected step set and zero-action canary hold. Both mutants turn the suite red.
+observed. Both generated Plans match all nineteen semantic rows, round-trip canonically, and project the exact
+whole-render object union; the zero-action canary and both paired mutants hold.
 **Docs to update**:
-`documents/engineering/conformance_harness_doctrine.md` (§4 the Plan spine step is golden-locked here),
+`documents/engineering/conformance_harness_doctrine.md` (§4 the Plan spine step is semantic-oracle locked here),
 `documents/engineering/testing_doctrine.md` (the Register-1 plan-render ledger variant).
 
 ### Objective
 Adopt [`conformance_harness_doctrine.md §4`](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run)'s
-spine **Plan** step (*"`chain` produces the `[Step]` value; `--dry-run` renders it; a golden test pins the plan"*) and [`§2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)'s
-**Register 1**: assemble the in-process battery that pins the `--dry-run` plan and the descent byte-for-byte and
+spine **Plan** step and [`§2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)'s
+**Register 1**: assemble the in-process battery that pins the Plan semantics and canonical render stability and
 proves no action runs during render, emitting a Register-1 proven/tested/assumed ledger with model↔runtime
 correspondence and runtime fidelity marked UNVERIFIED (owned by Part B and Register 3).
 
 ### Deliverables
-- The oracle-pinned corpus: `test/fixture/chain_boundary/cfg/{multi,minimal}.cfg.json` (the representative set —
-  `multi` has ≥ 2 frames, ≥ 3 services, one out-of-frame step; `minimal` has one frame/one service), the plan
-  goldens, the descent goldens, and the hand-authored `expected_steps.json` step-set table — all authored and
-  committed **before** the renderer exists (a golden regenerated from the implementation is not a test).
-- `test/spec/kernel/PlanSpec.hs` asserting, for each fixture cfg: the `--dry-run` render of `chain cfg` equals its
-  committed plan golden byte-for-byte; the manifest-bearing steps are identity-disjoint projections of one
-  `renderAll` call and their union is byte-identical to the **Phase-33 committed whole-deployment golden** for the
-  fixture `ProvisionedSpec` (independent cross-golden oracle); the `[Step]` step set equals `expected_steps.json`
-  (structural, not read off the golden); the `nextFrameAfter`/`foldLift` descent goldens hold.
+- The independently authored corpus: two consumed rows in `cases.tsv`, nineteen ordered entries in
+  `plan_semantics.tsv`, and a five-component calculus projection. Renderer-produced plan/descent bytes remain
+  uncommitted and cannot satisfy the semantic oracle.
+- `test/spec/kernel/PlanSpec.hs` asserts exact `foldLift` semantics, identity-disjoint projections of one
+  `renderAll` value, exact whole-render union, all four activation frames and descent edges, canonical
+  decode/re-encode stability, and the canonical zero-step Plan.
 - A **canaried** instrumentation counter: `Step` values are constructible **only** via the counting smart
   constructor, and the counter increments when a `stepRun` IO action is *executed*. The battery asserts zero
   executions over the render, and a committed **canary control case** deliberately executes one `stepRun` and
   asserts the counter reads nonzero (proving the counter can detect an invocation and the zero-assertion is
   falsifiable). "Zero `stepRun` invocations" means the IO action is never executed — forcing/`deepseq`-ing the
   plan value (with `stepRun` excluded from `NFData`) is permitted and does not increment the counter.
-- The two committed seeded mutants: `test/mutant/chain_boundary/m1_cfg_drop_service` (removes a service from
-  `multi.cfg.json` — plan and descent goldens must diverge) and `test/mutant/chain_boundary/m2_descent_inframe` (weakens
-  `nextFrameAfter` so the out-of-frame step is placed in-frame — the descent golden must byte-diverge; the
-  zero-`stepRun` counter is invariant under m2, since no `stepRun` runs during render). The gate re-runs both;
+- The two committed seeded mutants: `test/mutant/chain_boundary/m1_cfg_drop_service` drops the last multi-case
+  entry, and `test/mutant/chain_boundary/m2_descent_inframe` changes managed admission's frame. Each control
+  proves the original equals the oracle and the mutated value does not; the zero-action invariant still holds.
+  The gate re-runs both;
   each MUST turn the suite red.
 - The gate command runs `chain-spec` with credential variables scrubbed and socket calls blocked and observed,
   plus the committed static import-closure assertion that `Amoebius.Kernel.Plan` and the
   `--dry-run` path reach no network/process/credential module.
 - A Register-1 ledger led by a Tier-2-UNVERIFIED banner: the plan is proven pure and exact in-process, but no
-  runtime-enforcement or effectful-fidelity claim is made — that residue is Part B (fake-tool, Sprints 9.5–14.7)
+  runtime-enforcement or effectful-fidelity claim is made — that residue is Part B (fake-tool, Sprints 34.5–34.7)
   and [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md) (live control-plane daemon).
 
 ### Validation
-1. `cabal test chain-spec`, run with credentials scrubbed and socket calls blocked and observed, is green. For each
-   fixture cfg the plan and descent goldens match byte-for-byte, the manifest-bearing Step projections are
-   identity-disjoint and union to the Phase-33 committed whole-deployment `renderAll` golden, the step set matches
-   `expected_steps.json`, and the canaried zero-`stepRun`-execution assertion holds (with the canary case proving
-   nonzero detection); the suite is red if the render drifts from its golden or if any action is executed during
-   render.
-2. Both committed mutants turn the suite red: m1 (cfg service-drop) diverges the plan and descent goldens; m2
-   (descent guard-weaken) byte-diverges the descent golden (the zero-`stepRun` counter is invariant under m2,
-   since no `stepRun` runs during render). Both are committed and re-run every gate.
+1. `cabal test chain-spec`, run with credentials scrubbed and socket calls blocked and observed, is green. Both
+   cases match all nineteen semantic entries, their canonical Plan bytes decode and re-encode identically, the
+   object/frame/descent invariants hold, and the canaried action count remains zero during render.
+2. Both paired semantic mutants turn the suite red at their named row/frame loci and are re-run every gate.
 3. The committed import-closure static assertion passes: `Amoebius.Kernel.Plan` and the `--dry-run` path reach no
    network/process/credential module. This is the **Part-A (Register 1)** half of the phase gate.
 
 ### Remaining Work
-Done. Live execution remains UNVERIFIED.
+None.
 
-## Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton 📋
-**Status**: Planned — reopened 2026-08-19 by the generative re-baseline. The prior run established that the
-capability is re-established by the migrated gate; the sprint's committed-ledger, pinned-toolchain, and
-repository-resident evidence mechanics are superseded implementation behind `AbsExe` without widening the
-seam.; that stands as history and no longer presents completion evidence.
+## Sprint 34.5: The single typed subprocess seam + `boundary-spec` skeleton ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Exec/Tool.hs` (the Phase-34 boundary facade that invokes a tool by absolute
 path over the `[Step]`/effect data) and, after Phase 55, `src/Amoebius/Host/Ensure.hs` (the sole raw
 `typed-process` implementation), a `boundary-spec` test-suite stanza in
 `amoebius.cabal`, and `test/spec/boundary/` — built and validated.
 **Blocked by**: None.
-**Independent Validation**: the build and boundary suite pass on the pinned toolchain. A non-vacuous source
+**Independent Validation**: the build and boundary suite pass on the dynamically resolved authored toolchain. A non-vacuous source
 gate scans all of `src/` and confirms `Host/Ensure.hs` is the sole subprocess-primitive site while the
 Phase-34 boundary cases continue to pass through `Exec/Tool.hs`.
 **Docs to update**: `DEVELOPMENT_PLAN/system_components.md` (register the exec seam + `boundary-spec` suite), this
@@ -562,13 +560,13 @@ prodbox single-IO-seam shape as *sibling evidence, not an amoebius result*.
    seam is the only subprocess call site.
 
 ### Remaining Work
-Done. Live tool fidelity remains UNVERIFIED.
+None.
 
-## Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders 📋
-**Status**: Planned
+## Sprint 34.6: The fake `kubectl`/`helm`/`docker`/`pulumi` recorders ✅
+**Status**: Done
 **Implementation**: `test/harness/chain_boundary/fakes/{kubectl,helm,docker,pulumi}` (the four fake
-executables that append argv + stdin bytes to a transcript and exit with a canned response) and
-`test/spec/boundary/Fakes.hs` (the transcript ADT + the canned-response table) — built and validated.
+executables that append argv + stdin bytes to per-tool transcripts and exit with canned success), exercised
+directly by `test/spec/boundary/BoundarySpec.hs` — built and validated.
 **Blocked by**: None.
 **Independent Validation**: each fake, invoked directly, appends its full argv
 (in order) and its complete stdin bytes to the run transcript and returns its canned exit; a unit check
@@ -588,21 +586,22 @@ prerequisite — that distinction is what keeps Register 2 honestly separate fro
 ### Deliverables
 - Four fake tool executables that transcribe argv + stdin (the applied-manifest bytes) and return a canned exit,
   placed at controlled absolute paths for the seam to invoke.
-- `test/spec/boundary/Fakes.hs`: the transcript ADT (an ordered command/argv/bytes log) and the canned-response table,
-  with a lossless round-trip check over recorded bytes.
+- `BoundarySpec.hs` reads the per-tool argv, stdin, and sabotage-marker transcripts and checks the recorder
+  results without an executor-reachable reference implementation.
 
 ### Validation
 1. Each fake transcribes argv order and applied-manifest bytes losslessly and returns its canned exit; the
    round-trip check is red if any byte or argv element is dropped or re-encoded.
 
 ### Remaining Work
-Done. Live tool fidelity remains UNVERIFIED.
+None.
 
-## Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate 📋
-**Status**: Planned
-**Implementation**: `test/spec/boundary/BoundarySpec.hs`; the applied-manifest bytes reuse
-the Phase-33 `renderAll` goldens; the **expected-argv transcripts are a separate committed hand-authored oracle** (`test/golden/chain_boundary/argv/`), NOT derived from the Part-A plan golden by any executor-reachable
-function; the committed mutants under `test/mutant/chain_boundary/boundary/` (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`)
+## Sprint 34.7: The boundary battery — exact commands + applied bytes + no-`PATH` — the Part-B gate ✅
+**Status**: Done
+**Implementation**: `test/spec/boundary/BoundarySpec.hs`; the exact relay input is the authored protocol fixture
+`test/fixture/chain_boundary/boundary/apply_input.json`; the **expected-argv transcripts are a separate committed
+hand-authored oracle** (`test/golden/chain_boundary/argv/`), not derived by any executor-reachable function; the
+committed mutants under `test/mutant/chain_boundary/boundary/` (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`)
 — built and validated.
 **Blocked by**: None.
 **Independent Validation**: `boundary-spec` drives the real binary through all three invoked tools and keeps
@@ -631,9 +630,7 @@ is owned by [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md) and the l
 - The committed **seeded mutants** named in the Gate (`mB1_argv`, `mB2_byte`, `mB3_path_resolve`) with a harness
   that re-runs each and asserts `boundary-spec` red (§M.2).
 - `test/spec/boundary/BoundarySpec.hs` asserting: the recorded argv stream equals the committed hand-authored
-  expected-argv transcript; the applied-manifest bytes equal the Phase-33/Part-A goldens byte-for-byte (the same
-  rendered value the `--dry-run` previews, per
-  [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)); each of the
+  expected-argv transcript; the applied-manifest bytes equal the authored boundary input byte-for-byte; each of the
   three invoked tool transcripts (`kubectl`/`docker`/`pulumi`) is non-empty and the `helm` transcript is empty;
   and each fake was invoked by its exact absolute path under the hostile decoy-`PATH` arrangement with no decoy
   sabotage-marker observed.
@@ -643,7 +640,7 @@ is owned by [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md) and the l
 
 ### Validation
 1. `cabal test boundary-spec` is green — commands match the committed hand-authored argv transcript, applied
-   bytes match the Phase-33/Part-A goldens exactly, the three invoked tool transcripts (`kubectl`/`docker`/`pulumi`)
+   bytes match the authored boundary input exactly, the three invoked tool transcripts (`kubectl`/`docker`/`pulumi`)
    are non-empty and the `helm` transcript is empty, and invocation is by absolute path under the hostile
    decoy-`PATH` arrangement. This is the **Part-B (Register 2)** half of the phase gate; together with Sprint 34.4
    (Part A) it constitutes the two-part Phase-34 gate.
@@ -651,10 +648,10 @@ is owned by [phase_65_live_dsl_deploy.md](phase_65_live_dsl_deploy.md) and the l
    (`PATH`-resolution) — is re-run and turns `boundary-spec` red. A green run against any mutant fails the gate.
 
 ### Remaining Work
-Done. Live apiserver application remains UNVERIFIED.
+None.
 
-## Sprint 34.8: The sanctioned-API surface — what extension source may reach 📋
-**Status**: Planned
+## Sprint 34.8: The sanctioned-API surface — what extension source may reach ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Dsl/SanctionedApi.hs`,
 `dhall/amoebius/SanctionedApi.dhall`, and the oracle-pinned oracle
 `test/fixture/chain_boundary/sanctioned_api_expected.dhall` (the hand-authored module and effect allowlist,
@@ -685,10 +682,10 @@ so that widening it is a reviewed amendment rather than something an extension a
 2. No sanctioned effect arm exposes raw `IO`, FFI, or an `unsafe*` operation.
 
 ### Remaining Work
-Done. Checked-source runtime behavior remains UNVERIFIED.
+None.
 
-## Sprint 34.9: extension-astcheck — the extension AST checker and the link seal 📋
-**Status**: Planned
+## Sprint 34.9: extension-astcheck — the extension AST checker and the link seal ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Dsl/AstCheck.hs`, `test/spec/dsl/AstCheckSpec.hs`, and
 `test/fixture/chain_boundary/astcheck/`. The corpus contains positives and one exact-span negative for each of the
 six `AstViolationReason` arms. The checker and its opaque `CheckedExtensionSource` are built and validated.
@@ -721,7 +718,7 @@ Deliver extension-astcheck: admit extension source against the Sprint-33.8 surfa
    **UNVERIFIED**; the checker bounds what code may reach, never what it computes.
 
 ### Remaining Work
-Done. Checked-source runtime behavior remains UNVERIFIED.
+None.
 
 ## Documentation Requirements
 
@@ -730,13 +727,12 @@ Done. Checked-source runtime behavior remains UNVERIFIED.
   this in-process Phase-34 seed; keep the effectful `runChainFromFrame` live invocation as the deferred Register-3
   residue.
 - `documents/engineering/conformance_harness_doctrine.md` — record that §3's rendering-never-touches-infra
-  invariant and §4's Plan spine step are golden-locked in Phase 34 for the `[Step]` plan (Part A), and that §2/§4's
+  invariant and §4's Plan spine step are semantic-oracle locked in Phase 34 for the `[Step]` plan (Part A), and that §2/§4's
   fake-apply step is exercised by the in-process Phase-34 boundary harness (Part B); keep Register 3 (live apply)
   as the residue owned by the live band.
-- `documents/engineering/generated_artifacts_doctrine.md` — record that the `--dry-run` plan is a rendered,
-  uncommitted artifact whose golden fixture pins the renderer's output, and annotate that the applied bytes the
-  fakes capture are byte-for-byte the same rendered value as the `--dry-run` preview (both consume the one
-  rendered source).
+- `documents/engineering/generated_artifacts_doctrine.md` — record that the `--dry-run` plan is rendered and
+  uncommitted, constrained by an authored semantic oracle plus canonical round trips; record the independent
+  authored boundary input used to prove byte-preserving fake-tool relay.
 - `documents/engineering/testing_doctrine.md` — record the Register-1 plan-render ledger variant (Part A) and the
   Register-2 fake-tool recorder + per-run ledger variant (Part B) this composite gate emits (Tier-2
   runtime/correspondence UNVERIFIED).
@@ -746,7 +742,8 @@ Done. Checked-source runtime behavior remains UNVERIFIED.
 - `DEVELOPMENT_PLAN/substrates.md` — the Phase-34 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Kernel/{Step,Chain,Descent,Plan}.hs`, the
   `--dry-run` render path in `src/Amoebius/Cli.hs`, the `chain-spec` test-suite, `src/Amoebius/Exec/Tool.hs`,
-  `test/spec/boundary/` (the fakes + `Fakes.hs` + `BoundarySpec.hs`), and the `boundary-spec` test-suite as Phase-34
+  `test/spec/boundary/BoundarySpec.hs`, the fake tools under `test/harness/chain_boundary/`, and the
+  `boundary-spec` test-suite as Phase-34
   design-first rows. Phase 55 separately registers `src/Amoebius/Host/Ensure.hs` as the strengthened raw
   process implementation.
 

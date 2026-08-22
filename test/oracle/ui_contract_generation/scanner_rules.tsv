@@ -1,0 +1,7 @@
+token	reason
+rawHtml	raw-browser-sink
+innerHTML	raw-browser-sink
+ServerHandle	private-server-handle
+handlerId	private-server-field
+providerCoordinate	undeclared-provider-coordinate
+provider.invalid	provider-coordinate

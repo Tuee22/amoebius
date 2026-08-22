@@ -76,9 +76,12 @@ per-constructor coverage floor ([DEVELOPMENT_PLAN/phase_11_formal_model_kernel.m
 quantifies over an enumerated set and not over prose.
 
 **Implementation status.** Phase 11 built this fragment in `src/Amoebius/Formal/Model.hs` and validated both
-readings on 2026-08-09 with the Register-1 gate in
+readings on 2026-08-21 with the Register-1 gate in
 [phase_11](../../DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md). The gate exercised every constructor below
-across 200 generated models; this is tested renderer correspondence, not Phase-17 code or runtime fidelity.
+across 200 generated models. Its dedicated-root `formal-composition-model` adapter also projects the real
+Phase-10 ordered calculus sequence and exact resource fold into a one-state `Model`; it consumes that algebra
+rather than defining a formal substitute. This is tested renderer correspondence, not Phase-17 code or
+runtime fidelity.
 
 ```haskell
 data Model = Model
@@ -303,7 +306,8 @@ produce identical **canonical state-fingerprint *sets*** — not merely equal ca
 alone do not establish (equal count + equal verdict is not equal state set) — alongside the same verdict,
 shrinking any divergence to a minimal offending model. This differential faithfulness claim is **scoped to the safety sub-fragment**: the generator exercises `emitTLA`'s `Init`/`Next`/`INVARIANT`/`CONSTRAINT` rendering, and
 the explorer checks no liveness, so the `modelFairness`/`modelProperties` (`WF`/`SF`/`PROPERTY`) rendering is
-**not** covered by this test and rests on the `emitTLA` golden and the TLC-only liveness runs instead. This is the single most valuable place in the
+**not** covered by this test and rests on the authored renderer-semantic fact oracle and the TLC-only liveness
+runs instead. This is the single most valuable place in the
 kernel for a **proof assistant**: a machine-checked meta-theorem that each `Expr`/`Temporal` constructor's
 `interpret`-denotation equals the TLA+ denotation `emitTLA` targets would upgrade faithfulness from
 *tested* to *proven*. That meta-theorem, and the fold-closure proofs the confluence ledger requires
@@ -313,40 +317,45 @@ which checks the *actual* Haskell and so introduces no second artifact to drift,
 broad proof-assistant layer would re-introduce exactly the artifact-drift the `Model`-as-data pattern exists to
 foreclose ([§1](#1-why-this-doctrine-exists)).
 
-### 4.1 The reference model, and why its rendering is byte-locked
+### 4.1 The reference model and its semantic oracle
 
 **The problem.** The renderers are the load-bearing artifacts, and nothing in the scheme so far exercises them
 against an expectation authored independently of them. A renderer validated only by re-running itself proves
 that it is stable, not that it is right; and the differential test above is **safety-scoped**, so an emitter
 that renders `StrongFair` as `WF_vars`, or swaps `[]` for `<>`, is invisible to every other oracle in the kernel. Both gaps are invisible at author time and surface as a TLC run that model-checks a protocol the daemon does not implement.
 
-**Why the obvious alternative fails.** The tempting fixture is a model generated or snapshotted from the
-renderer's own first output. That is not an oracle: it re-derives the expectation from the artifact under
-test, so it can only ever fail on a *change*, never on an *error*. Equally tempting is a structural
-(AST-level) assertion on the emitted spec instead of a byte comparison — but the defects that matter here are
-exactly the ones a structural comparison normalizes away: operator precedence, the fairness conjunct attached
-to the temporal `Spec` formula, and the `CONSTRAINT`/`CHECK_DEADLOCK` conventions the two checkers must agree
-on.
+**Why a byte snapshot fails.** Copying the renderer's first output into source tests only whether the next
+output is identical to the last. It cannot distinguish a semantic repair from a regression, and regenerating
+the snapshot after a failure erases its evidence. The content address already observes byte change. Acceptance
+therefore asks what the generated module *means*, not whether its whitespace and declaration layout remained
+frozen.
 
 **The chosen rule.** The kernel carries a **reference model** — one small, complete, hand-authored `Model`
-that exists only to validate the renderers, distinct from every model that describes a real amoebius
-protocol — and its rendering is pinned **byte-for-byte** against a fixture authored *before* the renderer
-exists. Three properties make the fixture an oracle rather than a snapshot:
+that exists only to validate the renderers, distinct from every model that describes a real amoebius protocol.
+Its committed expectations are semantic:
 
-1. **Independence.** The golden is authored and committed in the documentation phase, before any emitter
-   source exists, under the gate-integrity discipline
-   ([development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
-   A golden regenerated from the renderer's own output is not a test.
-2. **Sole coverage of the liveness path.** Because the differential test is safety-scoped, this golden is the
-   **only** oracle that pins the rendered bytes of the fairness and temporal constructors — `WeakFair` and
-   `StrongFair` as `WF_vars`/`SF_vars` conjuncts, and `Always`/`Eventually`/`LeadsTo` as `[]`/`<>`/`~>`. Committed renderer mutants that swap one for another must turn it red, or the oracle has no teeth. 3. **Non-vacuity by structural assertion.** A reference model that exercised only booleans would let the golden pass while quantifier, function, and fairness translation stayed stubbed. A committed assertion therefore walks the reference model's own `Expr`/`Action`/`Temporal` nodes and fails unless it carries at least one finite quantifier, one function literal/update/application, **both** `Fairness` constructors, and **all three** `Temporal` constructors. The fixture cannot be weakened without that assertion failing first.
+1. `ToyModel.renderer_semantics.tsv` fixes the exact set of module, extension, declaration, initial-assignment,
+   action, fairness-strength, invariant, constraint, temporal-kind, specification, and deadlock facts. The
+   suite extracts those facts from the freshly rendered `.tla`/`.cfg` and compares sets in both directions.
+2. `ToyModel.invariant_cases.tsv` fixes an independently authored truth table over valid and independently
+   invalid states. It catches obligation weakening that retains the same invariant name and would remain green
+   under model checking.
+3. The safety differential and TLC syntax/semantic run retain the details a fact projection intentionally
+   does not restate: action effects, `UNCHANGED`, quantifier denotation, precedence, state constraints, and the
+   complete reachable-state fingerprint set.
+4. Non-vacuity remains structural: the reference model must carry finite quantifier and function
+   literal/update/application nodes, both fairness constructors, and all three temporal constructors.
 
-**What it forecloses.** The renderer can no longer be reformatted freely: any change to emitted layout is a
-golden change, and a golden may be amended only under the oracle-amendment discipline
-([development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)),
-never rewritten from a failing run's actual output. That rigidity is the point: it is what makes the byte
-comparison an oracle. The concrete reference model — its name, its protocol, its committed fixture paths, and
-the mutants that must break it — is a build artifact of the formal-model phase and is named in
+The two liveness renderer mutants (`StrongFair`→`WeakFair`, `Always`→`Eventually`) must change the fact set;
+the invariant-clause deletion must change the truth table; the two safety renderer mutants must diverge from
+the explorer under TLC. This partition matters: no one oracle is credited for a defect it cannot observe.
+
+**What it forecloses.** Generated TLA+/CFG bytes may be reformatted without an expectation rewrite, but their
+declared semantics may change only through the oracle-amendment discipline
+([development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
+Copying fresh output into an expected fixture remains prohibited. The concrete reference model — its name, its
+protocol, its semantic fixture paths, and the mutants that must break them — is a build artifact of the
+formal-model phase and is named in
 [DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md);
 this doctrine owns only the obligation and its rationale. The reference model proves the **kernel**; it is not
 an amoebius protocol, and no claim about amoebius follows from it. The obligations that ride the kernel this
@@ -356,10 +365,11 @@ fixture validates are the **cross-cluster gateway migration**
 snapshot-token/CAS and reservation protocols.
 
 **Why the DSL is modelled, when its pure surfaces are already total.** A model adds nothing to totality that
-the type system has not already settled, and for those surfaces the obligation is stated as **refinement**:
-the TLA+ operator is the specification, the Haskell fold is the implementation, and the checker compares them
-over a bounded domain. That catches a fold disagreeing with its own specification, and it is honestly weaker
-than a proof over the unbounded domain. The obligations that a model alone can discharge are the ones about
+the type system has not already settled. The pure-surface obligation is therefore a **bounded differential**:
+actual Haskell behavior is compared with independently authored semantic expectations over declared finite
+cases and domains. That catches disagreement at those bounds; it is neither a TLA+-to-Haskell refinement proof
+nor a claim over the unbounded DSL. Generated normalization hashes are change detectors and do not count as
+semantic acceptance. The obligations that a model alone can discharge are the ones about
 **behaviour over time** — a token that must not be reused after an observed transition, a reservation that
 must not double-debit, a Lease that must admit one writer. No type in the decoder constrains their
 interleavings, and until they were modelled the only proof claim attached to the reconcile loop was evidence
@@ -439,14 +449,45 @@ Four layers, each answering a limit the one above it leaves:
 - **A deterministic-scheduler simulator,** answering the concurrency limit, where the bug is an interleaving
   rather than a state ([`deterministic_simulation_doctrine.md`](./deterministic_simulation_doctrine.md)).
 
-**One decision is open and is not made here.** For the symbolic layer and the refinement layer, mature external
-implementations exist, and "amoebius-owned" admits two readings. The first is to **vendor and maintain the
-existing tree**, inheriting its full semantics and its full weight, including a toolchain the rest of amoebius
-does not otherwise need. The second is to **write an amoebius-owned checker over the `Model` type already in
-this doctrine**, discharging to a solver directly — far less capable at the outset, but small, in the corpus's
-own language, and covering exactly the fragment [§2](#2-the-model-is-data) defines. The trade is capability
-against ownership cost, it differs between the two layers, and it is recorded here as **open**: no phase
-depends on the answer yet, and the tracker names the phase that will settle it.
+**The explicit-state layer is concrete.** [Phase 12](../../DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md)
+built a dedicated-root checker that independently breadth-first searches the shared `Model`/`interpret`
+semantics; it does not call the Phase-11 explorer. Its verdict distinguishes safe completion, invariant or
+deadlock counterexamples, and bound exhaustion, and binds the result to a checker-local digest of the model
+constructor tree plus the declared bound. Counterexample steps bind and replay their source/event/target
+fingerprints. Seven hand-enumerated models cover all four result classes, five overlap cases agree with the
+reference explorer, and guard-widening, invariant-skip, and frontier-truncation defects are each red at their
+own locus. This strengthens checker ownership, not model fidelity: runtime correspondence and every state
+beyond the declared bound remain `UNVERIFIED`.
+
+**The symbolic ownership choice is settled.**
+[Phase 13](../../DEVELOPMENT_PLAN/phase_13_symbolic_checker.md) implements the second reading: amoebius owns a
+total classifier, QF linear-integer/boolean SMT-LIB translation, and full-conjunction base/step induction
+schema over `Model`; a dynamically resolved absolute Z3 path supplies only the formula decision procedure.
+An unsatisfiable set of obligations produces a query-digest witness, a satisfiable obligation retains its
+solver model as a base or step counterexample, and unsupported syntax or `unknown` remains explicit rather
+than becoming proof. Five overlapping fixtures agree with the independent explicit-state result, while one
+reachable-safe model is deliberately non-inductive and therefore demonstrates conservative incompleteness.
+The result is unbounded only for an invariant admitted by one-step induction in the supported theory; solver
+correctness, model intent, code refinement, and runtime fidelity remain premises or `UNVERIFIED`.
+
+**The refinement ownership choice is settled.**
+[Phase 14](../../DEVELOPMENT_PLAN/phase_14_refinement_checker.md) implements the deliberately smaller owned
+fragment instead of vendoring a general-purpose refinement checker. Actual one-equation `Integer` Haskell
+modules carry a closed source annotation and are first accepted by an injected absolute GHC. The owned checker
+then parses the same supported arithmetic/boolean/conditional body, constructs preservation and
+postcondition-to-invariant implication queries, and injects absolute Z3 only to decide them. The invariant
+input is not copied from a prose table: a compiled Haskell projection constructs two real `Model` values,
+requires the Phase-11 explorer to find their eight reachable states safe, and structurally emits their named
+invariant expressions beneath `.build/checkers/**`; an authored table is retained only as an independent
+semantic expectation over that projection.
+
+This is a narrow source proof, not a whole-language theorem. The fixture annotation declares which named
+model result the function implements, and the supported models deliberately share the state name `result`;
+the checker does not infer an arbitrary state projection. It does not admit effects, recursion, higher-order
+values, algebraic data, polymorphism, or nonlinear arithmetic, and it does not prove that a production call
+site takes exactly the model action. Within that boundary, both the preservation and projected-invariant
+implication formulas must be unsatisfiable; unsupported source, an unknown invariant, a satisfying
+counterexample, or a non-decision is never promoted to proof.
 
 ---
 
@@ -461,10 +502,26 @@ counterexample in both. The spike has been removed; per
 was historical evidence that the mechanism worked. Phase 11 has now superseded that spike with the built
 amoebius kernel: eight exact `ToyModel` fingerprints, safety and liveness under fairness, fairness sensitivity,
 all committed mutants killed, and 200 differential models green. The result remains scoped to the model and
-does not by itself establish Phase-17 protocol correspondence or runtime fidelity. Phase 17 subsequently used
-that kernel for the concrete `GatewayMigration` value: explorer/TLC agreement on 53 states, five safety and
-three liveness obligations green, bounded IOSimPOR agreement, and all committed mutants caught. Runtime
-fidelity remains UNVERIFIED.
+does not by itself establish Phase-17 protocol correspondence or runtime fidelity. Phase 12 separately
+enumerates the same model semantics through an amoebius-owned BFS and agrees with the reference explorer on
+all five applicable finite fixtures; this is checker-algorithm correspondence, not production-code
+correspondence. Phase 13 adds an independent symbolic reading: three fixture invariants pass 14 base/step
+obligations, base and step failures carry satisfying solver models, and the safe-but-non-inductive fixture is
+rejected without being called unsafe. That is an unbounded result only within the supported QF_LIA/boolean
+theory and the stated induction schema. Phase 14 compiles six real Haskell source fixtures and the two
+Phase-11 `Model` values whose safe invariants it projects; three functions preserve their refinements and
+imply those projected predicates, while three exact negatives and three checker defects are rejected. That
+is code refinement only for the owned one-equation fragment and the declared result projection. Phase 17
+subsequently used that kernel for the concrete `GatewayMigration` value: explorer/TLC agreement on 53 states,
+five safety and three liveness obligations green, bounded IOSimPOR agreement, and all committed mutants
+caught. Its generated TLA+/CFG acceptance is the same semantic rule as §4.1: twelve authored facts replace
+the former byte snapshots, and two meaning-changing renderer mutations must disturb them. The phase also
+passes the actual Phase-10 composition through the Phase-11 formal bridge. Phase 18 adds a bounded DSL and
+protocol tranche: five DSL/protocol models plus the composition model cover 18 reachable states, eight safety
+and four fair-liveness obligations, five explorer/TLC fingerprint agreements, eight exact safety mutants, and
+four fairness-removal controls. Its actual-code side exercises named decoder, capacity, render/chain, Lease,
+reservation, and node-observation cases; it is a finite differential, not general DSL or effectful-runtime
+correspondence. Runtime fidelity remains UNVERIFIED.
 
 ---
 
@@ -491,8 +548,13 @@ live forest). The concrete obligation for the one model is owned by
 ## 9. Planning ownership
 
 This document remains the normative formal-model doctrine. The `Model` EDSL, the `interpret` explorer, and the
-`emitTLA` renderer were built and validated in Phase 11; the one concrete model (`GatewayMigration`, both
-branches) was built and validated in Phase 17. Phase order, status, and gates live only in
+`emitTLA` renderer were built and validated in Phase 11; the bounded amoebius explicit-state checker was built
+and validated in Phase 12; the QF_LIA/boolean symbolic induction checker was built and validated in Phase 13;
+the bounded compiled-source refinement checker was built and validated in Phase 14; the concrete
+`GatewayMigration` model, both branches, was built and validated in Phase 17 with semantic renderer and actual
+five-calculus projections. The bounded DSL/protocol set was built and validated in Phase 18 with semantic
+actual-code projections, explorer/TLC agreement, and load-bearing mutation controls. Phase order, status, and
+gates live only in
 [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). The kernel and protocol claims above are
 tested/proven-for-the-model at their recorded scopes; effectful-daemon and live-runtime fidelity remain design
 intent and UNVERIFIED.

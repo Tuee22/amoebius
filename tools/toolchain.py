@@ -171,6 +171,24 @@ def parse_version(text: str) -> tuple[int, ...]:
     return tuple(int(part) for part in match.group(1).split("."))
 
 
+def parse_reported_version(text: str, spec: dict[str, Any]) -> tuple[int, ...]:
+    """Parse a tool report, honoring an authored capture when its product name has digits.
+
+    The default first-number rule is right for reports such as ``cabal-install version
+    3.18`` but not ``Z3 version 5.1``: the product's own name would otherwise become
+    version 3.  A requirement may therefore supply one regular expression whose first
+    capture is the version token.  The expression remains compatibility policy, not a
+    resolved observation.
+    """
+    pattern = spec.get("version_pattern")
+    if not pattern:
+        return parse_version(text)
+    match = re.search(pattern, text)
+    if match is None or match.lastindex is None:
+        raise ResolutionError(f"version report {text!r} does not match authored pattern {pattern!r}")
+    return tuple(int(part) for part in match.group(1).split("."))
+
+
 def pad(left: tuple[int, ...], right: tuple[int, ...]) -> tuple[tuple[int, ...], tuple[int, ...]]:
     width = max(len(left), len(right))
     return left + (0,) * (width - len(left)), right + (0,) * (width - len(right))
@@ -625,7 +643,7 @@ def _managed_record(
     **extra: Any,
 ) -> dict[str, Any]:
     reported = run_version([path, *spec["version_argv"]])
-    version = parse_version(reported)
+    version = parse_reported_version(reported, spec)
     if not satisfies(version, spec["requirement"]):
         raise ResolutionError(
             f"{name}: {provider} supplied {reported.splitlines()[0]!r}, "
@@ -1200,6 +1218,15 @@ def self_test() -> int:
         if actual != expected:
             failures += 1
         print(f"  {status} parse {text!r} -> {actual}")
+
+    z3_report = "Z3 version 5.1.0 - 64 bit"
+    z3_spec = {"version_pattern": r"\bversion\s+([0-9]+(?:\.[0-9]+)*)"}
+    z3_actual = parse_reported_version(z3_report, z3_spec)
+    z3_expected = (5, 1, 0)
+    z3_status = "ok  " if z3_actual == z3_expected else "FAIL"
+    if z3_actual != z3_expected:
+        failures += 1
+    print(f"  {z3_status} authored-pattern parse {z3_report!r} -> {z3_actual}")
 
     for problem in manifest_problems():
         print(f"  FAIL {problem}")

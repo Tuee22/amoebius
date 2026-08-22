@@ -1,3 +1,5 @@
+let UiOffline = ../UiOffline.dhall
+
 let TenantMode = < SingleTenant | MultiTenant >
 
 let NodeKind = < Route | State | Event | Port | Collection | Branch | ExternalLink >
@@ -32,11 +34,13 @@ let ExternalLinkRequirement = { name : Text }
 let UiSource =
       { caseName : Text
       , tenantMode : TenantMode
+      , continuity : UiOffline.Continuity
       , modules : List UiModule
       , externalLinks : List ExternalLinkRequirement
       }
 
-in  { TenantMode
+in  { UiOffline
+    , TenantMode
     , NodeKind
     , ValueType
     , UiNode

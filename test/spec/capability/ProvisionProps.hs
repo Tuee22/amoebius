@@ -32,12 +32,13 @@ import Test.QuickCheck
   , stdArgs
   )
 
-runProvisionProps :: CapabilityFixture -> IO ()
+runProvisionProps :: CapabilityFixture -> IO Int
 runProvisionProps fixture = do
   deployment <- either (fail . show) pure (fixtureDeployment fixture SingleNode)
   result <- quickCheckWithResult stdArgs {chatty = False, maxSuccess = 400} (infrastructureBoundary deployment)
-  unless (isSuccess result) (fail ("Phase-11 infrastructure property failed: " <> show result))
+  unless (isSuccess result) (fail ("Phase-31 infrastructure property failed: " <> show result))
   putStrLn "provision-properties: TESTED exact infrastructure vs one-unit-short (accept/reject >=40%)"
+  pure 1
 
 infrastructureBoundary :: BoundDeployment -> Bool -> Property
 infrastructureBoundary deployment exact =

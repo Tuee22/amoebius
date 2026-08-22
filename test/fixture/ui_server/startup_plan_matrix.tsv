@@ -1,6 +1,7 @@
-case	identity_count	contract	abi	ready
-canonical	1	match	ui-server-v1	true
-missing	0	match	ui-server-v1	false
-duplicate	2	match	ui-server-v1	false
-contract-mismatch	1	mismatch	ui-server-v1	false
-abi-mismatch	1	match	ui-server-v0	false
+case	identity_count	unreferenced_count	contract	abi	ready
+canonical	1	0	match	ui-server-v1	true
+unreferenced	1	1	match	ui-server-v1	true
+missing	0	0	match	ui-server-v1	false
+duplicate	2	0	match	ui-server-v1	false
+contract-mismatch	1	0	mismatch	ui-server-v1	false
+abi-mismatch	1	0	match	ui-server-v0	false

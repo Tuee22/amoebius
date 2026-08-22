@@ -49,7 +49,7 @@ import Amoebius.Calculus.Workflow.Ledger
   , recordRelease
   )
 import Amoebius.Calculus.Workflow.Obligation (Append, Disjoint, Remove)
-import Data.Proxy (Proxy (Proxy))
+import Data.Proxy (Proxy)
 import Data.Text qualified as Text
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 

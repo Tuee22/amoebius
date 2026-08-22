@@ -123,8 +123,9 @@ or resource handle. The UI-specific port and request-context contract is owned b
 
 [Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md) supplies Register-1 evidence for that consumer:
 all seven fixture ports bind exactly once to closed semantic capabilities through independently checked
-handler/codec/scope tuples, while an absent capability and a raw provider coordinate fail at distinct loci.
-Actual handler behavior and provider state remain UNVERIFIED.
+handler/codec/scope/retry/audit tuples, while an absent capability and a raw provider coordinate fail at
+distinct loci. Thirteen generated classes, seven paired mutants, all 16 metrics, and the 48-unit real
+five-calculus projection pass on natural `arm64`. Actual handler behavior and provider state remain UNVERIFIED.
 
 ---
 
@@ -185,8 +186,14 @@ would be reporting a designed extension point as a built one.
 
 [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) realizes this representational seam in
 `Amoebius.Capability.{Types,Binding}`. Its gate binds all nine arms under both shapes, checks 18 exact graph
-goldens, and proves normalized app bytes remain invariant while an independent object-node-multiset oracle
-observes structural graph differences. Provision and runtime provider health remain outside that result.
+semantics against an authored product/object/controller/execution/intent projection, and proves normalized app
+bytes remain invariant while an independent object-node-multiset oracle observes structural graph differences.
+The generated-byte snapshots and their test-only renderer are retired. Provision and runtime provider health
+remain outside that result. [Phase 31](../../DEVELOPMENT_PLAN/phase_31_provision_seal.md) now realizes the
+post-bind planner/seal in `Amoebius.Capacity.{Provision,RuntimeStorage,RenderSource}`: its Register-1 gate
+provisions all 18 bound shapes, exercises both planner arms, checks the opaque identity-keyed source set and
+four activation stages, and rejects ten exact seal-locus failures. Live provider health remains outside both
+pure results.
 
 A capability becomes a running service through a **three-part binding**, and the three parts live on different
 surfaces:
@@ -443,8 +450,10 @@ of these mistakes into unrepresentable states is owned by
 base container, the engine *payload* is not (it is materialized on first miss into the `CacheBudget`-bounded
 content-addressed cache, [content_addressing_determinism.md §4.5](./content_addressing_determinism.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 
-> **Honesty.** `InferenceEngine` is Phase-N design intent — the ML-serving capability, specified before
-> implementation like the rest of this doctrine. The sibling **infernix** project is *evidence* that the
+> **Honesty.** Phase 32 implements and tests the pure `InferenceEngine` offering quotient, family/lane
+> relation, identity-complete CUDA/Metal owner demands, residency/coexistence checks, and opaque provisioned
+> accelerator. Live jit-resolution and cross-lane weight loading remain UNVERIFIED. The sibling **infernix**
+> project is *evidence* that the
 > select-don't-fetch engine binding is real code — **sibling evidence, not an amoebius result**:
 > `src/Infernix/Runtime/Worker.hs` (sibling source)
 > selects the engine by `adapterType` (`case engineBindingAdapterType engineBinding of …`) and **never fetches > it** — precisely the Tier-1 discipline above. But infernix also shows the exact divergences amoebius fixes:
@@ -665,7 +674,8 @@ always-available option on every hardware substrate.
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 
-> **Honesty.** The pure capability representation and binder are built and tested by Phase 30; manifest
+> **Honesty.** The pure capability representation and binder are built and tested by Phase 30, and the pure
+> conditional planner/post-bind provision seal is built and tested by Phase 31; manifest
 > generation and the typed reconciler remain Phase 58 work. The design is generalized from evidence in the
 > sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering, a chart-platform planner), and
 > prodbox itself names products and

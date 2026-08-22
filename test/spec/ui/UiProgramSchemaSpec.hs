@@ -2,6 +2,33 @@
 
 module Main (main) where
 
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Scope.Index
+  ( activeMembership
+  , trustedSubject
+  , trustedTenant
+  , withRequestScope
+  )
 import Amoebius.Ui.Check
 import Amoebius.Ui.Source
 import Control.Monad (forM, forM_, unless)
@@ -48,6 +75,15 @@ data GraphRow = GraphRow
   }
   deriving stock (Eq, Show)
 
+data ProgramRow = ProgramRow
+  { programName :: Text.Text
+  , programTenantMode :: Text.Text
+  , programModules :: [Text.Text]
+  , programNodes :: [Text.Text]
+  , programLinks :: [Text.Text]
+  }
+  deriving stock (Eq, Ord, Show)
+
 data InvalidClass
   = DuplicateClass
   | MissingClass
@@ -75,13 +111,15 @@ runGreen root cases = do
   let positives = [checked | (row, Right checked) <- results, rowKind row == "positive"]
   assertEqual "positive count" 3 (length positives)
   assertEqual "negative count" 10 (length [() | (row, Left _) <- results, rowKind row == "negative"])
-  checkWireGolden root positives
+  checkProgramSemantics root positives
   checkGraphOracle root positives
   checkClosedSurface root
   checkRoundTrip root cases
   checkGeneratedCoverage
+  checkCalculus root
   checkMutantControls root cases
-  putStrLn "ui-program-schema-spec: PASS (3 positives, 10 exact negatives, 3 graph rows, 8 coverage classes, 6 mutants, opaque seal)"
+  putStrLn "ui-program-schema-calculus: PASS (5 kinds, 30 projected units)"
+  putStrLn "ui-program-schema-spec: PASS (3 semantic positives, 10 exact negatives, 3 graph rows, 8 coverage classes, 6 mutants, opaque seal)"
 
 runCase :: FilePath -> CaseRow -> IO (CaseRow, Either (String, String) CheckedUiProgram)
 runCase root row = do
@@ -125,23 +163,28 @@ errorSpan problem = Text.unpack $ case problem of
   NonExhaustiveEvent _ spanText -> spanText
   PrivateValueProjection _ spanText -> spanText
 
-checkWireGolden :: FilePath -> [CheckedUiProgram] -> IO ()
-checkWireGolden root checked = do
-  expected <- Text.readFile (root </> "test/fixture/ui_program_schema/normalized_wire.golden")
+checkProgramSemantics :: FilePath -> [CheckedUiProgram] -> IO ()
+checkProgramSemantics root checked = do
+  expected <- loadProgramRows root
   sources <- mapM (requireDecoded root) ["minimal_single_tenant.dhall", "minimal_multi_tenant.dhall", "composed_workflow_ui.dhall"]
-  let actual = Text.unlines (map renderWire sources)
-  assertEqual "normalized wire golden" expected actual
+  let actual = map programProjection sources
+  assertEqual "program semantic oracle" expected actual
   assertEqual "checked corpus identity" (sort (map checkedCaseName checked)) (sort (map caseName sources))
 
-renderWire :: UiSource -> Text.Text
-renderWire source =
-  Text.intercalate ";"
-    [ "case=" <> caseName source
-    , "mode=" <> Text.pack (show (tenantMode source))
-    , "modules=" <> showText (length (modules source))
-    , "nodes=" <> showText (sum (map (length . nodes) (modules source)))
-    , "links=" <> Text.intercalate "," (map name (externalLinks source))
-    ]
+programProjection :: UiSource -> ProgramRow
+programProjection source =
+  ProgramRow
+    { programName = caseName source
+    , programTenantMode = tenantModeTag (tenantMode source)
+    , programModules = sort (map moduleId (modules source))
+    , programNodes = sort [moduleId uiModule <> "." <> nodeId node | uiModule <- modules source, node <- nodes uiModule]
+    , programLinks = sort (map name (externalLinks source))
+    }
+
+tenantModeTag :: TenantMode -> Text.Text
+tenantModeTag mode = case mode of
+  SingleTenant -> "single-tenant"
+  MultiTenant -> "multi-tenant"
 
 checkGraphOracle :: FilePath -> [CheckedUiProgram] -> IO ()
 checkGraphOracle root checked = do
@@ -183,6 +226,33 @@ checkGeneratedCoverage = do
       args = stdArgs {maxSuccess = 320, replay = Just (mkQCGen 160016, 0), chatty = False}
   result <- quickCheckWithResult args $ forAll (elements classes) (coverageProperty base classes)
   assert (isSuccess result) "generated rejection coverage failed"
+
+checkCalculus :: FilePath -> IO ()
+checkCalculus root = do
+  expected <- loadCalculusRows root
+  tenant <- either (fail . show) pure (trustedTenant "ui-program-schema-calculus-tenant")
+  subject <- either (fail . show) pure (trustedSubject tenant "ui-program-schema-calculus-subject")
+  membership <- either (fail . show) pure (activeMembership tenant subject)
+  action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+    let resources :: Int -> ResourceVector
+        resources count = ResourceVector 1 (fromIntegral count) 0 0
+        counts = [3, 10, 8, 3, 6] :: [Int]
+        artifact = artifactComponent scope "program-semantics" (resources 3) (RecipeId "ui-program-schema" 3)
+        budget = budgetComponent scope "diagnostic-budget" (resources 10) (allowance (Bytes 10) (Slots 1) (Bytes 10))
+        lift = liftComponent scope "generated-rejection-classes" (resources 8) OnHost
+        workflow = workflowComponent scope "graph-check-workflow" (resources 3) emptyLedger
+        evidence = evidenceComponent scope "mutant-evidence" (resources 6) PureRegister
+        composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+        ResourceVector cpu memory ephemeral pods = compositionResource composition
+        actual =
+          [ ["calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition))]
+          , ["component-names", Text.intercalate "," (compositionNames composition)]
+          , ["projection-counts", Text.intercalate "," (map showText counts)]
+          , ["resource-vector", Text.intercalate "," (map showText [cpu, memory, ephemeral, pods])]
+          ]
+    assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
+    assertEqual "five-calculus semantic projection" expected actual
+  action
 
 coverageProperty :: UiSource -> [InvalidClass] -> InvalidClass -> Property
 coverageProperty base classes selected =
@@ -226,7 +296,7 @@ runMutant root cases mutant = do
   unless (mutant `elem` mutantNames) (die ("unknown mutant: " <> mutant))
   survives <- mutantWouldAccept root cases mutant
   if survives
-    then putStrLn ("ui-program-schema-mutant: RED " <> mutant) >> exitFailure
+    then putStrLn ("ui-program-schema-mutant: RED " <> mutant <> " locus=" <> mutantLocus mutant) >> exitFailure
     else die ("mutant did not reach acceptance: " <> mutant)
 
 mutantWouldAccept :: FilePath -> [CaseRow] -> String -> IO Bool
@@ -273,6 +343,18 @@ mutantTarget mutant = fromMaybe "" (lookup mutant table)
       , ("M-swap-port-contract", "port_type_mismatch.dhall")
       ]
 
+mutantLocus :: String -> String
+mutantLocus mutant = fromMaybe "unknown" (lookup mutant table)
+  where
+    table =
+      [ ("add_raw_js_arm", "RawBrowserEscape")
+      , ("add_raw_url_arm", "RawExternalLinkUrl")
+      , ("M-drop-bound-check", "UnboundedCollection")
+      , ("M-first-id-wins", "DuplicateQualifiedId")
+      , ("M-skip-exhaustiveness", "NonExhaustiveEvent")
+      , ("M-swap-port-contract", "PortTypeMismatch")
+      ]
+
 mutantFile :: String -> FilePath
 mutantFile mutant = mutant <> ".mutant"
 
@@ -308,6 +390,22 @@ loadGraphRows root = do
   where
     csv "" = []
     csv value = map Text.pack (splitComma value)
+
+loadProgramRows :: FilePath -> IO [ProgramRow]
+loadProgramRows root = do
+  source <- readFile (root </> "test/oracle/ui_program_schema/program_semantics.tsv")
+  pure
+    [ ProgramRow (Text.pack program) (Text.pack mode) (csv moduleNames) (csv qualifiedNodes) (csv externalLinkNames)
+    | [program, mode, moduleNames, qualifiedNodes, externalLinkNames] <- map splitTabs (drop 1 (lines source))
+    ]
+ where
+  csv "" = []
+  csv value = sort (map Text.pack (splitComma value))
+
+loadCalculusRows :: FilePath -> IO [[Text.Text]]
+loadCalculusRows root = do
+  source <- Text.readFile (root </> "test/oracle/ui_program_schema/calculus_projection.tsv")
+  pure (map (Text.splitOn "\t") (drop 1 (Text.lines source)))
 
 requireDecoded :: FilePath -> FilePath -> IO UiSource
 requireDecoded root name = do

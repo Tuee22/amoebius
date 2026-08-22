@@ -1,0 +1,2 @@
+operator=drop-first-mutation-declaration
+expected=mutation-operator-missing

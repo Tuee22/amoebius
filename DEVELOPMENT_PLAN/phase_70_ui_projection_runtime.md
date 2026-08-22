@@ -102,7 +102,7 @@ redundancy claim.
 
 **Register:** 3 — live infrastructure.
 
-**Gate:** `cabal test ui-projection-runtime-live` passed the Phase-0 matrix with fresh Keycloak sessions. The
+**Gate:** `python3 tools/run_phase_gate.py 70` passed the Phase-0 matrix with fresh Keycloak sessions. The
 scoped query, durable receipt, native consumers, broker compaction observer, edge transcript, teardown, and all
 three red mutants agreed on the exact owner-qualified projection and original command identity.
 

@@ -18,5 +18,5 @@ main = do
             then putStrLn ("capacity-topology-mutant: SURVIVED " <> Text.unpack mutant)
             else do
               putStrLn ("capacity-topology-mutant: RED " <> Text.unpack mutant)
-              fail ("Phase-7 mutant rejected: " <> Text.unpack mutant)
+              fail ("capacity/topology mutant rejected: " <> Text.unpack mutant)
     _ -> runCapacityTopologyGate

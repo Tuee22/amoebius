@@ -104,9 +104,13 @@ def parse_tracker(path: Path) -> dict[int, dict[str, str]]:
         if len(cells) < 4 or cells[0] or cells[-1]:
             continue
         cells = cells[1:-1]
+        # README contains historical phase tables before the authoritative Phase
+        # overview. Reset on every exact `Phase` header so the last such table owns the
+        # rows instead of freezing the parser onto the first historical table it sees.
+        if cells[0].lower() == "phase":
+            header = [cell.lower() for cell in cells]
+            continue
         if header is None:
-            if cells[0].lower() == "phase":
-                header = [cell.lower() for cell in cells]
             continue
         if len(cells) != len(header) or not re.fullmatch(r"\d+", cells[0]):
             continue

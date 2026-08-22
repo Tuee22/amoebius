@@ -110,7 +110,7 @@ platform capability, or creates a server/UI runtime.
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/infernix_lift_gate.py --reuse-fresh-live` passes every fixture, observer, oracle, paired
+**Gate:** `python3 tools/run_phase_gate.py 91` passes every fixture, observer, oracle, paired
 case, and mutant of [Gate integrity](#gate-integrity). `cabal test infernix-core-artifact-lift-live-gate` is an
 independent evidence reader, never the acceptance command.
 

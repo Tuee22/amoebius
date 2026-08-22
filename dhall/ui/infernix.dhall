@@ -2,6 +2,27 @@ let T = ../amoebius/ui/Types.dhall
 
 in  { caseName = "infernix-ui"
     , tenantMode = T.TenantMode.SingleTenant
+    , continuity =
+        T.UiOffline.Continuity.Offline
+          { projections = [ { projectionId = "workflow-progress" } ]
+          , queuedPorts =
+            [ { operation = T.UiOffline.Operation.InfernixStart
+              , contract =
+                { maxCount = 8
+                , maxBytes = 65536
+                , maxAgeSeconds = 86400
+                , localValidation = "advisory"
+                , idempotency = "command-id"
+                , conflict = "reject"
+                , ordering = "preserve"
+                , dependency = "workflow-root"
+                , authoritativeValidation = "current-authority"
+                }
+              }
+            ]
+          , localBlobs = [] : List T.UiOffline.BlobClass
+          , offlineView = "infernix.workflow.home"
+          }
     , modules =
       [ { moduleId = "infernix.workflow"
         , nodes =

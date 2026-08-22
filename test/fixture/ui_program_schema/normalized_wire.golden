@@ -1,3 +1,0 @@
-case=minimal_single_tenant;mode=SingleTenant;modules=1;nodes=2;links=docs
-case=minimal_multi_tenant;mode=MultiTenant;modules=1;nodes=2;links=docs
-case=composed_workflow_ui;mode=SingleTenant;modules=1;nodes=2;links=docs

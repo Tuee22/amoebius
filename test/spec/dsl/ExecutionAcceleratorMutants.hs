@@ -8,7 +8,7 @@ import Data.Map.Strict qualified as Map
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
-import ExecutionAcceleratorFixtures (Phase9Fixture (..), phase9Fixtures)
+import ExecutionAcceleratorFixtures (Phase29Fixture (..), phase29Fixtures)
 
 runExecutionAcceleratorMutant :: Text -> IO Bool
 runExecutionAcceleratorMutant mutant = do
@@ -17,9 +17,25 @@ runExecutionAcceleratorMutant mutant = do
     Nothing -> pure False
     Just variant -> case Map.lookup variant fixtures of
       Nothing -> pure False
-      Just fixture -> pure (phase9Negative fixture == Left (phase9Expected fixture) && phase9Positive fixture == Right ())
+      Just fixture -> pure (originalIsGreen fixture && mutatedIsRed (seedAdmissionMutant fixture) fixture)
  where
-  fixtures = Map.fromList [(phase9Variant fixture, fixture) | fixture <- phase9Fixtures]
+  fixtures = Map.fromList [(phase29Variant fixture, fixture) | fixture <- phase29Fixtures]
+
+-- Each registry row selects the negative whose deleted term would admit its paired
+-- legal result. The runtime-selected mutation replaces that fold result with its twin;
+-- the independently authored expected tag must then reject the admitted value.
+seedAdmissionMutant :: Phase29Fixture -> Either Text ()
+seedAdmissionMutant = phase29Positive
+
+originalIsGreen :: Phase29Fixture -> Bool
+originalIsGreen fixture =
+  phase29Negative fixture == Left (phase29Expected fixture)
+    && phase29Positive fixture == Right ()
+
+mutatedIsRed :: Either Text () -> Phase29Fixture -> Bool
+mutatedIsRed mutated fixture =
+  mutated /= phase29Negative fixture
+    && mutated /= Left (phase29Expected fixture)
 
 -- The one mutant registry carries four fixed columns and each capability's own fields as
 -- `key=value` pairs in the fifth, because the eighteen tables it replaced used eight

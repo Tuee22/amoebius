@@ -73,7 +73,7 @@ appears.
 
 **Requires**: `host-floor`
 
-**Gate:** `python3 tools/apple_engine_bringup_gate.py --execute` runs on an Apple Silicon host and passes
+**Gate:** `python3 tools/run_phase_gate.py 53` runs on an Apple Silicon host and passes
 every check named in [Gate integrity](#gate-integrity). Phase 54 does not open until it is green.
 
 ---

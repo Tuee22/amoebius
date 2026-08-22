@@ -1,0 +1,25 @@
+# Authored expectation for the Phase-10 run-time surface join.
+#
+# The pair oracle is the independent side: it enumerates all 25 ordered pairs of the
+# closed five-calculus set and states their exact resource sums.  The check inventory is
+# authored here rather than derived from tools/calculus_composition_gate.py.
+#
+# surface<TAB>owner<TAB>ids (comma-separated)
+five-calculus-set	metrics	calculus-kinds
+ordered-pair-closure	metrics	ordered-pairs
+resource-index-additivity	metrics	resource-index
+scope-index-conjunction	metrics	scope-index
+associative-composition	metrics	exhaustive-triples
+generated-index-laws	metrics	quickcheck-properties
+scope-widening-type-barrier	metrics	compile-fail-pairs
+calculus-composition-mutants	metrics	mutants
+calculus-composition-acceptance	metrics	acceptance-token
+runtime-correspondence	metrics	runtime
+pair-oracle-shape	checks	pair-oracle-complete
+mutant-registry-shape	checks	mutant-registry-complete
+pure-total-composition	checks	calculus-composition-pure
+suite-acceptance	checks	suite-acceptance-token
+scope-compile-fail	checks	scope-widening-rejected
+mutant-locus-separation	checks	mutants-red-at-own-locus
+result-oracle-join	checks	recorded-results-match-oracle
+generated-output-discipline	checks	emitted-results-untracked

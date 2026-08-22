@@ -136,7 +136,7 @@ The live gate uses the Phase-55 single-node `kind` cluster; pure StorageClass/PV
 
 **Depends on:** [Phase 59](phase_59_capacity_scheduler.md) — amoebius-capacity scheduler + bootstrap cutover, which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/retained_storage_gate.py --execute` passes durable **storage rebinds after a cluster delete + recreate with no data loss** — the Postgres row
+**Gate:** `python3 tools/run_phase_gate.py 60` passes durable **storage rebinds after a cluster delete + recreate with no data loss** — the Postgres row
 and MinIO object markers round-trip byte-for-byte across a real teardown, against the corpus, oracles,
 ceilings, observers, and seeded mutants of [Gate integrity](#gate-integrity).
 

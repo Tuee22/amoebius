@@ -2,6 +2,7 @@ let T = ../../../dhall/amoebius/ui/Types.dhall
 
 in  { caseName = "minimal_multi_tenant"
     , tenantMode = T.TenantMode.MultiTenant
+    , continuity = T.UiOffline.Continuity.OnlineOnly
     , modules =
       [ { moduleId = "app.main"
         , nodes =

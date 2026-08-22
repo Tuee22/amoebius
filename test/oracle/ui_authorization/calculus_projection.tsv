@@ -1,0 +1,5 @@
+metric	value
+calculus-kinds	artifact,budget,lift,workflow,evidence
+component-names	action-registry,authorization-decisions,parity-and-epoch-refusals,generated-coverage-workflow,mutant-evidence
+projection-counts	5,6,8,9,2
+resource-vector	5,30,0,0

@@ -168,7 +168,7 @@ reclamation *explicitly deferred to [Phase 48](phase_48_test_workflow_algebra.md
 
 **Depends on:** [Phase 78](phase_78_provider_ebs_credential.md) — per-PV EBS decoupling + create-vs-delete credential, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test provider-dynamic-nodes-live` is green: `test/fixture/dhall/phase_69_provider_provision.dhall`
+**Gate:** `python3 tools/run_phase_gate.py 79` is green: `test/fixture/dhall/phase_69_provider_provision.dhall`
 spins a provider EKS cluster up from a linux-cpu parent, provisions an extra node by signal, verifies a
 zero-mutation no-op, and tears the per-run stack down leak-free. Its apparatus is
 [Gate integrity](#gate-integrity).

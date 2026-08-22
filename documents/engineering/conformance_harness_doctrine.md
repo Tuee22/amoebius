@@ -17,7 +17,7 @@ vocabulary the rows are phrased in, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/workflow_calculus_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/workflow_calculus_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -36,8 +36,9 @@ leaves the design unverifiable until late.
 That framing is false for amoebius because amoebius's behaviour is, by construction, **a pure value that is rendered**: the reconcile plan is `chain :: cfg -> [Step]`, the manifests are deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`, the DSL is decoded and then fully provisioned against its target by total functions, and the formal model is a `Model` value. Everything up to the point of *applying* an effect is a pure function of committed source plus an explicit authenticated observation fixture; no pure test contacts infrastructure. The seed projects show it is reachable at scale — `prodbox` validates on the order of a thousand behaviours in a pure, no-process suite with a single thin IO seam. That is evidence about a seed and proves nothing about amoebius ([`lift_and_compose_doctrine.md` §3](./lift_and_compose_doctrine.md#3-a-seed-is-a-reference-implementation)).
 
 amoebius states it as a rule: **build so that decode → bind/expand → `planInfrastructure` → either
-golden-lock the non-renderable infrastructure batch or supply its authenticated materialization fixture →
-provision → `renderAll` → plan → dry-run is exercised in-process and golden-locked before any
+semantically lock the non-renderable infrastructure batch or supply its authenticated materialization fixture →
+provision → `renderAll` → plan → dry-run is exercised in-process against independently authored semantic
+oracles before any
 live-infrastructure work, for every feature.** What this forecloses is
 a design whose correctness is unknown until a cluster is stood up; the cluster is reserved for the residue that
 genuinely requires it (that pods schedule, that the LB comes up, that a partition heals).
@@ -59,8 +60,9 @@ Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_d
   from a live service handle, a derived NetworkPolicy — golden-tested on the *rendered* output); the `[Step]`
   plan and its `--dry-run`; the capability→provider→shape binder; the capacity/topology folds; the formal
   `Model` explorer + the emitted `.tla` checked by TLC ([formal_model_doctrine.md](./formal_model_doctrine.md));
-  the Phase-11 instance is built and validated over `ToyModel` with pinned TLC, 200 differential models, and no
-  live infrastructure; the Phase-17 instance is built and validated over both branches of `GatewayMigration`
+  the Phase-11 instance is built and validated over `ToyModel` with resolved compatible TLC, 25 authored
+  renderer-semantic facts, an eight-case invariant truth table, 200 differential models, and no live
+  infrastructure; the Phase-17 instance is built and validated over both branches of `GatewayMigration`
   with exact explorer/TLC state-set agreement, bounded IOSimPOR safety schedules, mutation sensitivity, and a
   structural-cutoff property, also with no live infrastructure;
   the bounded `UiSource` algebra, scoped identity/authorization checks, binding, and deterministic
@@ -137,7 +139,7 @@ For every feature, the harness exercises the full pure pipeline and locks it:
    expansion. Failure returns a structured `Left`; success alone constructs the opaque whole
    `ProvisionedSpec` and its sealed identity-keyed `ProvisionedRenderSourceSet`.
 5. **`renderAll`** — the sole public manifest function,
-   `renderAll :: ProvisionedSpec -> [K8sObject]`, privately total-maps that equal-keyed source set; a golden test pins the complete typed object set byte-for-byte and asserts the by-construction safety properties on the output. The root-ledger CAS state and Lease holder/renewal state are absent from the generic SSA projection and remain typed-action fields. `renderAll` contains all four `RenderActivation` classes; the plan preserves their disjoint identity partition so later-stage objects are visible in desired output without becoming early-stage apply actions. 6. **Plan** — `chain` receives a checked plan config containing the whole `ProvisionedSpec`, produces the `[Step]` value, and `--dry-run` renders it; a golden test pins the plan. 7. **Fake apply (Register 2)** — the binary runs the plan against fake tools; the recorded commands and applied bytes are asserted. 8. **Simulate (Register 2.5)** — where a feature carries real concurrency (a reconcile loop, a failover
+   `renderAll :: ProvisionedSpec -> [K8sObject]`, privately total-maps that equal-keyed source set; an independently authored semantic oracle pins the complete identity/kind/activation/reconcile/workload projection and asserts the by-construction safety properties on the output. The root-ledger CAS state and Lease holder/renewal state are absent from the generic SSA projection and remain typed-action fields. `renderAll` contains all four `RenderActivation` classes; the plan preserves their disjoint identity partition so later-stage objects are visible in desired output without becoming early-stage apply actions. 6. **Plan** — `chain` receives a checked plan config containing the whole `ProvisionedSpec`, produces the `[Step]` value, and `--dry-run` renders it; a golden test pins the plan. 7. **Fake apply (Register 2)** — the binary runs the plan against fake tools; the recorded commands and applied bytes are asserted. 8. **Simulate (Register 2.5)** — where a feature carries real concurrency (a reconcile loop, a failover
    takeover, a dedup fold), the real code runs under `IOSim`/`IOSimPOR` against the modeled faulty environment,
    asserting its invariants under injected schedules and faults ([deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md)).
 
@@ -150,14 +152,16 @@ substrates behave as modeled), not first exposure.
 
 ## 5. Honesty: what the harness does and does not establish
 
-Phase 33 realizes the `renderAll` step in Register 1: eighteen canonical deployment outputs are byte-locked,
-and the hardened-resource, ingress, and independently rederived NetworkPolicy predicates are non-vacuous.
-Its twelve seeded mutants fail at those properties. This is rendered-output evidence, not evidence that a
+Phase 33 realizes the `renderAll` step in Register 1: eighteen exact semantic rows cover 164 objects, canonical
+Aeson round trips, four activations, all reconcile modes, derived namespaces/API versions, and the non-vacuous
+hardened-resource, ingress, and independently rederived NetworkPolicy predicates. Its twelve paired seeded
+mutants fail only at their named properties. This is rendered-output evidence, not evidence that a
 live apiserver, admission stack, kubelet, or CNI enforces the values.
 
-Phase 34 realizes the Plan and fake-apply steps. Register 1 byte-locks two chain/descent plans with zero
-actions executed; Register 2 drives the real executable against absolute-path fake tools and pins argv and
-stdin bytes. This proves the emitted boundary protocol, not real-tool fidelity or cluster convergence.
+Phase 34 realizes the Plan and fake-apply steps. Register 1 consumes two authored cases, checks all nineteen
+ordered Plan semantics, and establishes canonical generated encodings with zero actions executed; Register 2
+drives the real executable against absolute-path fake tools and pins argv plus exact relayed input bytes. These
+checks establish the emitted boundary protocol, not real-tool fidelity or cluster convergence.
 
 Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)
 and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md):

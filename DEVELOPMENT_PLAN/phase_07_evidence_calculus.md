@@ -12,7 +12,7 @@ The rule behind the evidence calculus is owned by [`evidence_calculus_doctrine.m
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md, DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md, documents/engineering/evidence_calculus_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md, DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md, documents/engineering/evidence_calculus_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -69,7 +69,7 @@ Bind every claim a phase makes to the fixture that discharges it, so an unchecke
 **Lane:** `none`
 **Register:** 1
 **Depends on:** [Phase 3](phase_03_artifact_calculus.md) — the artifact calculus, because a fixture and a mutant are both artifacts something has to address and reap. No obligation from the workflow calculus is consumed here.
-**Gate:** `python3 tools/evidence_calculus_gate.py` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/run_phase_gate.py 07` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

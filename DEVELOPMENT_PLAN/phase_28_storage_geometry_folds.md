@@ -34,10 +34,10 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold 📋](#sprint-281-the-storagebudgetgrowable-arithmetic--logicalphysical-geometry-fold-)
-- [Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` 📋](#sprint-282-the-policy-only-storage-scaling-fold--provisionedstoragescalingenvelope--planstoragescaling-)
-- [Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim 📋](#sprint-283-quickcheck-properties--storage-accepts--in-envelope-pulsar-two-ceiling-uniform-claim-)
-- [Sprint 28.4: The storage-geometry fold-negative corpus + the gate 📋](#sprint-284-the-storage-geometry-fold-negative-corpus--the-gate-)
+- [Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ✅](#sprint-281-the-storagebudgetgrowable-arithmetic--logicalphysical-geometry-fold-)
+- [Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ✅](#sprint-282-the-policy-only-storage-scaling-fold--provisionedstoragescalingenvelope--planstoragescaling-)
+- [Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ✅](#sprint-283-quickcheck-properties--storage-accepts--in-envelope-pulsar-two-ceiling-uniform-claim-)
+- [Sprint 28.4: The storage-geometry fold-negative corpus + the gate ✅](#sprint-284-the-storage-geometry-fold-negative-corpus--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -45,7 +45,21 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-27 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-21. `python3 tools/storage_geometry_gate.py` passed all eleven sides on natural
+`arm64`, untranslated. The bounded suite rejects 30 direct variants beside 30 legal twins, admits two decoded
+positive specs, retains both Gate-1 pairs, and composes 99 observed units through all five calculus kinds. All
+31 mutants redden, all 17 metrics match, all five Phase-28 registry rows discharge, and 43 surfaces join to 51
+items. The project-contained attestation is
+`sha256:baf06e5a7d5512990b583fcf29912f008819e2e358c14da4f38937dc8cdb1d58`, bound to source snapshot
+`sha256:5c316f972c37912d…` over 2,266 files. Repository conformance and documentation support gates pass; Phase
+28 owns no remaining migration deferral.
+
+**The first amended run exposed and closed stale boundaries.** The phase now runs only the bounded `storage-geometry-spec`, not
+the shared `dsl-spec` that also executes Phase-29-through-33 checks. Current Phase-28 registry ownership is
+reconciled directly, and an independently authored projection composes the 30 negatives, 30 twins, two
+positive specs, six envelope properties and 31 mutants through all five Phase-10 calculus kinds. The amended
+eleven-sided gate passes all 17 metrics and joins 43 surfaces to 51 items; the final source-bound result is
+recorded above.
 
 **Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
@@ -74,15 +88,13 @@ training cases hold, two positives decode and fit, six QuickCheck properties hol
 directions, and all 31 seeded mutants redden. Evidence and the ledger move into
 `.build/runs/phase_11/<run-id>/`, and the run publishes a snapshot-bound attestation.
 
-**The surface join found a real gap and it is recorded rather than papered over.** A first draft pointed twenty
-of this phase's claim surfaces at the single acceptance-token metric; the join rejected it, correctly, because
-one token is not independent evidence for twenty claims. The contract names 27 storage claims and the case
-oracle carries 27 cases, so the join is now a one-to-one partition — but the two vocabularies were authored
-separately and three pairs do not match by name. Those three associations are marked provisional in
-`test/oracle/storage_geometry_surfaces.tsv` and recorded against Phase 28 in
-[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) for the owner to confirm or correct.
-`test/spec/dsl/StorageGeometryGate.hs` also stopped hard-coding a developer `dhall` path, and every cabal
-invocation now carries the resolved compiler.
+**The surface join's three provisional associations are closed.** The earlier draft pointed twenty claim
+surfaces at one acceptance token, then forced 27 cases into 27 slots by associating complete failure scenarios
+with object-count quota, allocation rounding with root-EBS quota, and the Pulsar hot-tier ceiling with an
+`emptyDir` cache bound. Phase 28 adds three direct negative/twin rows for the named claims and gives the three
+formerly borrowed cases their actual surface names. The resulting 30-case partition is exact rather than
+provisional. `test/spec/dsl/StorageGeometryGate.hs` also resolves `dhall` per run, and every Cabal invocation
+carries the resolved compiler.
 
 **Invalidated historical record:**
 
@@ -164,11 +176,15 @@ fold + QuickCheck battery, analogous to the Phase 26 decode battery and the Phas
 
 **Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 9](phase_09_resource_index.md) — the base capacity fold this geometry extends to physical storage. The illegal-state corpus at the numeric predecessor holds this phase's negatives but supplies it no vocabulary.
+**Depends on:** [Phase 9](phase_09_resource_index.md) for the base capacity fold this geometry extends to
+physical storage, [Phase 10](phase_10_calculus_composition.md) for the five-calculus projection, and
+[Phase 27](phase_27_illegal_state_covering.md) for the reached illegal-state registry boundary. The numeric
+predecessor holds this phase's negative ownership rows but supplies no storage-fold vocabulary.
 
-**Gate:** `python3 tools/storage_geometry_gate.py` is green: the logical→physical storage-geometry fold is provably total and
-accepts exactly the in-envelope producers, each committed negative refuses on its own over-backing axis, and
-every seeded mutant reddens the suite. [Gate integrity](#gate-integrity) fixes each term.
+**Gate:** `python3 tools/run_phase_gate.py 28` is green: the logical→physical storage-geometry fold is
+provably total and accepts the in-envelope producers, each committed negative refuses on its own
+over-backing axis, every seeded mutant reddens the bounded suite, and the authored five-calculus projection
+matches. [Gate integrity](#gate-integrity) fixes each term.
 
 <a id="n-gate-integrity-refinements"></a>
 ## Gate integrity
@@ -201,11 +217,13 @@ flowchart LR
   s1["Sprint 28.2: The policy-only storage-scaling fold —…"]
   s2["Sprint 28.3: QuickCheck properties — storage accepts ⟺ in-envelope…"]
   s3["Sprint 28.4: The storage-geometry fold-negative corpus + the gate"]
+  calc["authored five-calculus storage projection"]
   gate["the phase 28 gate"]
   s0 -->|"produces what the next consumes"| s1
   s1 -->|"produces what the next consumes"| s2
   s2 -->|"produces what the next consumes"| s3
   s3 -->|"the last seam the gate closes over"| gate
+  calc -->|"independent expectation"| gate
 ```
 *Implemented Phase 28 seams; [Gate integrity](#gate-integrity) owns the apparatus.*
 
@@ -244,11 +262,17 @@ in turn. `illegal_hot_tier_over_bookie` has logical-fit/physical-overflow cases 
 write-quorum/recovery placement. These are variants inside the named fixtures, not unnamed additions to the
 exact corpus, and do not change the five-negative/two-positive representative count.
 
-The committed case table contains **27** independently pinned variant rows and 27 legal twins under those
-five stable negative-family names. It also covers the later registry additions for backup-medium fit,
+The committed case table contains **30** independently pinned variant rows and 30 legal twins under those
+five stable negative-family names. Three rows directly close the former provisional joins for complete
+failure scenarios, backing-allocation rounding, and the Pulsar hot-tier ceiling. It also covers the later registry additions for backup-medium fit,
 disjoint capacity pools, and restore-target fit. Together with the two dhall-typecheck training-retention barriers,
-the emitted `.build/dsl/phase8/validation-locus-ledger.tsv` supplies evidence for all **5** Phase-28-owned
+the emitted `.build/dsl/storage-geometry/validation-locus-ledger.tsv` supplies evidence for all **5** Phase-28-owned
 registry subcases at their declared loci.
+
+The bounded suite also composes the observed `30,30,2,6,31` negative/twin/positive/property/mutant counts as
+artifact, budget, lift, workflow and evidence components at one request scope. The exact component order,
+names, counts and resource vector `5,99,0,0` are pinned independently in
+`test/oracle/storage_geometry/calculus_projection.tsv`.
 
 ### Committed per-geometry seeded-mutant battery (§M.2)
 
@@ -356,7 +380,8 @@ check that runs on no substrate.
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
+> **Current validation record.** The sealed amended run on 2026-08-21 covers every sprint through the
+> bounded `storage-geometry-spec`, including the five-calculus projection. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -364,8 +389,8 @@ check that runs on no substrate.
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
 > the current phase gate plus universal artifact hygiene.
 
-## Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold 📋
-**Status**: Planned
+## Sprint 28.1: The `StorageBudget`/`Growable` arithmetic + logical→physical geometry fold ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Capacity/Storage.hs`, `src/Amoebius/Capacity/StorageGeometry.hs`,
 `src/Amoebius/Capacity/ServiceStorage.hs`, and `src/Amoebius/Capacity/Growable.hs`, extending
 `src/Amoebius/Capacity/Types.hs`. The Deliverables below inventory what each carries.
@@ -499,8 +524,8 @@ phase; this sprint consumes that base and owns the storage declarations plus the
 ### Remaining Work
 None.
 
-## Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` 📋
-**Status**: Planned
+## Sprint 28.2: The policy-only storage-scaling fold — `ProvisionedStorageScalingEnvelope` / `planStorageScaling` ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Capacity/StorageScaling.hs`
 (`ProvisionedStorageScalingEnvelope`, `ObservedStorageScalingSnapshot`, `planStorageScaling`) — built and
 exhaustively pattern-checked.
@@ -551,8 +576,8 @@ observed snapshot — never a live mutation, and never a check that requires a l
 ### Remaining Work
 None.
 
-## Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim 📋
-**Status**: Planned
+## Sprint 28.3: QuickCheck properties — storage `accepts ⟺ in-envelope`, Pulsar two-ceiling, uniform-claim ✅
+**Status**: Done
 **Implementation**: `test/spec/dsl/StorageGeometryProps.hs` (QuickCheck generators for
 logical-demand/backing inputs + the property battery: BookKeeper/MinIO scenario derivation,
 presentation/allocation rounding, uniform-claim grouping, the six-arm object-store merge, the two Pulsar
@@ -560,7 +585,7 @@ ceilings, cache nesting, provider-root storage, control-plane physical transitio
 and the storage `Σ ≤ backing` equivalence), reusing the Phase-27 property harness; the independently selected
 mutants live in `test/spec/dsl/StorageGeometryMutants.hs` and the `storage_geometry` registry rows.
 **Blocked by**: Sprint 28.1, Sprint 28.2.
-**Independent Validation**: `cabal test dsl-spec` proves the storage folds accept exactly the in-backing
+**Independent Validation**: `cabal test storage-geometry-spec` proves the storage folds accept exactly the in-backing
 inputs, with each equivalence property clearing its committed coverage floor in both directions, and no
 mutant in the per-geometry battery of [Gate integrity](#gate-integrity) survives. The Validation list below
 enumerates the properties and the mutants.
@@ -634,15 +659,17 @@ compute `place`.
 ### Remaining Work
 None.
 
-## Sprint 28.4: The storage-geometry fold-negative corpus + the gate 📋
-**Status**: Planned
+## Sprint 28.4: The storage-geometry fold-negative corpus + the gate ✅
+**Status**: Done
 **Implementation**:
-`test/spec/dsl/StorageGeometryFixtures.hs` holds the 27 direct post-decode geometry variants and twins pinned by
-`test/oracle/storage_geometry/storage_cases.tsv`; two real Dhall dhall-typecheck pairs live under `dhall/examples/storage_geometry/` and
-are pinned by `test/oracle/storage_geometry/dhall_typecheck_cases.tsv`; the real
+`test/spec/dsl/StorageGeometryFixtures.hs` holds the 30 direct post-decode geometry variants and twins pinned by
+`test/oracle/storage_geometry/storage_cases.tsv`; two Dhall dhall-typecheck pairs live under `dhall/examples/storage_geometry/` and
+are pinned by `test/oracle/storage_geometry/dhall_typecheck_cases.tsv`; the
 `legal_multisubstrate_cluster`/`legal_managed_eks` specs are decoded before their positive geometry rows run.
-`test/spec/dsl/StorageGeometry{Props,Mutants,Gate,Spec}.hs` and `tools/storage_geometry_gate.py` provide the property,
-31-mutant, registry-ledger, and sealing harnesses (§M.1, [Gate integrity](#gate-integrity)).
+`test/spec/dsl/StorageGeometry{Props,Mutants,Gate,Spec}.hs`,
+`test/oracle/storage_geometry/calculus_projection.tsv`, and `tools/storage_geometry_gate.py` provide the
+property, 31-mutant, registry-ledger, five-calculus, and sealing harnesses (§M.1,
+[Gate integrity](#gate-integrity)).
 **Blocked by**: Sprint 28.1, Sprint 28.2, Sprint 28.3; [Phase 25](phase_25_dhall_schema_generation.md) gate.
 **Independent Validation**: the gate applies the storage-geometry folds directly to each hand-authored
 logical-demand/backing fixture, so every positive row fits its backing feasibly and every negative returns
@@ -711,7 +738,7 @@ honest foreclosure layer of each.
   prodbox's platform-backbone recovery accounting, not an amoebius result.
 
 ### Validation
-1. `cabal test dsl-spec` is green — every one of the five storage-geometry fold negatives
+1. `cabal test storage-geometry-spec` is green — every one of the five storage-geometry fold negatives
    ([Gate integrity](#gate-integrity) representative set) returns its **specific committed** tagged `Left`, both
    positive fixtures' storage-geometry rows fit feasibly, the QuickCheck battery holds at its coverage minima,
    and the committed per-geometry seeded-mutant battery ([Gate integrity](#gate-integrity)) turns the suite red

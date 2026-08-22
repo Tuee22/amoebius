@@ -2,11 +2,11 @@
 
 > **Purpose**: Stand up the pure, total `renderAll :: ProvisionedSpec -> [K8sObject]`, mapping Phase 31's
 > unique identity-keyed private render sources to typed objects, and lock its emitted deployment object
-> set byte-for-byte with rendered-output goldens — proving the by-construction manifest-safety invariants on
+> set against independently authored semantic projections — proving the by-construction manifest-safety invariants on
 > the emitted objects in-process, before any cluster exists.
 > **Read this if**: phase 33 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 33 delivers the pure `renderAll` + rendered-output goldens; its design is owned by [namespace_layout_doctrine.md](../documents/engineering/namespace_layout_doctrine.md), [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), [conformance_harness_doctrine.md](../documents/engineering/conformance_harness_doctrine.md), and the plan for reaching it is owned here.
+Phase 33 delivers the pure `renderAll` + rendered-artifact semantic oracles; its design is owned by [namespace_layout_doctrine.md](../documents/engineering/namespace_layout_doctrine.md), [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), [conformance_harness_doctrine.md](../documents/engineering/conformance_harness_doctrine.md), and the plan for reaching it is owned here.
 Register 1: an in-process battery, no cluster.
 The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED.
 
@@ -20,7 +20,7 @@ The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -31,9 +31,9 @@ The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 33.1: The typed `K8sObject` model + Aeson serialization 📋](#sprint-331-the-typed-k8sobject-model--aeson-serialization-)
-- [Sprint 33.2: Pure total `renderAll` + best-practice-by-construction 📋](#sprint-332-pure-total-renderall--best-practice-by-construction-)
-- [Sprint 33.3: The rendered-output golden battery (`render-golden`) — the gate 📋](#sprint-333-the-rendered-output-golden-battery-render-golden--the-gate-)
+- [Sprint 33.1: The typed `K8sObject` model + Aeson serialization ✅](#sprint-331-the-typed-k8sobject-model--aeson-serialization-)
+- [Sprint 33.2: Pure total `renderAll` + best-practice-by-construction ✅](#sprint-332-pure-total-renderall--best-practice-by-construction-)
+- [Sprint 33.3: The rendered-output semantic-oracle battery (`render-golden`) — the gate ✅](#sprint-333-the-rendered-output-semantic-oracle-battery-render-golden--the-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,7 +41,26 @@ The Register-1 gate passed on 2026-08-09. Runtime enforcement remains UNVERIFIED
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-32 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — resealed 2026-08-21. `python3 tools/render_manifest_gate.py` passes all eleven sides on natural
+`darwin/arm64`, untranslated. The bounded suite compares eighteen exact semantic projections covering 164
+objects, checks all-object canonical Aeson round trips, the exact source/identity/activation/reconcile/
+namespace/API projections, and three non-vacuous safety predicates. All twelve paired mutants redden only at
+their named loci, the 33-row validation ledger is exact, 198 observed units compose through all five calculus
+kinds, all 26 metrics match, and all 35 surfaces join to 62 items. The eighteen renderer-produced digest
+snapshots are retired. The final project-contained attestation is
+`sha256:ae04f382a58b27465b85a7bbe483a2359f1c00973a2523dc9dd3a29345f1234e`, bound to source snapshot
+`sha256:e7ce8ed1cc41fe2a…` over 2,236 files. Live apiserver, network-policy, and runtime correspondence remain
+UNVERIFIED at their live owners.
+
+Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi
+changed what this phase's gate had to cover, so the earlier seals below remain history.
+
+**Amended implementation record — 2026-08-21:** the eighteen self-derived output-digest snapshots are retired.
+`test/oracle/render_manifest/semantic_projection.tsv` now authors the exact identity, kind, activation,
+reconcile-mode, workload, policy, exposure, and accelerator projection for all nine capability arms in both
+shapes. The suite separately proves canonical all-object Aeson round trips, source-domain equality, namespace
+and API-version projection, safety predicates, twelve paired exact-locus mutants, and the five-calculus
+projection. The final documented run above seals that amendment.
 
 **Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
@@ -72,11 +91,11 @@ all twelve seeded projection mutants redden at their property loci. Evidence and
 partition one-to-one across the claim surfaces.
 
 **Two surfaces gained the evidence they always had, and seven lost evidence they never had.**
-`sole-public-render-facade` and `phase13-compile-totality` are decided by real source checks — the facade
+`sole-public-render-facade` and `phase33-compile-totality` are decided by real source checks — the facade
 export scan and the `-Werror=incomplete-patterns` assertion — and now join to those checks by name. The other
 seven — `aeson-round-trip`, `sealed-render-source-domain`, `deterministic-identity-order`,
 `exact-source-identity-projection`, `closed-reconcile-mode`, `default-deny-network-policy`, and
-`phase13-validation-locus-ledger` — have no corpus row, mutant, or metric at all, so the ledger carries them
+`phase33-validation-locus-ledger` — have no corpus row, mutant, or metric at all, so the ledger carries them
 UNVERIFIED. The gap is recorded against Phase 33 in
 [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
 
@@ -93,7 +112,7 @@ enforcement remains UNVERIFIED.
 ## Phase Summary
 
 This phase delivers the pure manifest renderer: the typed `K8sObject` model, the total function
-`renderAll :: ProvisionedSpec -> [K8sObject]` that emits the complete whole-deployment Kubernetes object set from Haskell ADTs serialized via Aeson — no Helm, no text template, no `values.yaml` — and the rendered-output golden battery that locks that output and proves its by-construction safety. `renderAll` performs no I/O, reaches no apiserver, and is total over the opaque, capacity/capability-checked `ProvisionedSpec` the Phase-31 bind/provision boundary produces. Phase 31 has already sealed a `Map K8sObjectIdentity (ProvisionedRenderSource K8sObjectIdentity)`; `KubernetesObjectId` is only a
+`renderAll :: ProvisionedSpec -> [K8sObject]` that emits the complete whole-deployment Kubernetes object set from Haskell ADTs serialized via Aeson — no Helm, no text template, no `values.yaml` — and the rendered-output semantic-oracle battery that proves its by-construction safety. `renderAll` performs no I/O, reaches no apiserver, and is total over the opaque, capacity/capability-checked `ProvisionedSpec` the Phase-31 bind/provision boundary produces. Phase 31 has already sealed a `Map K8sObjectIdentity (ProvisionedRenderSource K8sObjectIdentity)`; `KubernetesObjectId` is only a
 compatibility alias for `K8sObjectIdentity`, not a second identity type. Duplicate
 `(apiGroup,apiVersion,kind,namespace,name)` sources cannot inhabit it, and Namespace, ResourceQuota, scheduler,
 admission, RBAC, Lease, and CRD identities have one deployment-global source owner. This phase total-maps
@@ -127,8 +146,10 @@ guarded controllers. Its own fully provisioned bootstrap Pod is the sole domain-
 `ProvisionedKubeletRuntimeMetadataDemand`s remain capacity witnesses and emit no manifest scalar; and only
 the renderable whole-device claim/affinity projection derived from `ProvisionedCudaOwnerDemand` reaches a
 Kubernetes pod (`ProvisionedMetalOwnerDemand` remains host-tier). Thus the emitted object set
-is a *value* the suite inspects end to end. The battery does two things: it pins the emitted `[K8sObject]` **byte-for-byte** against a golden fixture (any change to the renderer's output is a red diff, never a silent drift), and it asserts the **rendered-artifact-oracle illegal states** directly on the emitted objects — an
-unsafe manifest is not a value `renderAll` can return, so a golden test over the output proves the property with
+is a *value* the suite inspects end to end. The battery does two things: it compares the emitted `[K8sObject]`
+to an independently authored semantic projection (exact identities and typed meanings, never renderer-produced
+bytes), and it asserts the **rendered-artifact-oracle illegal states** directly on the emitted objects — an
+unsafe manifest is not a value `renderAll` can return, so an oracle test over the output proves the property with
 no cluster. What is *not* here: snapshot-bound typed actions (including scoped SSA, staged delete/resume,
 host actions, scheduler-ledger CAS, and Job completion/cleanup), wait-for-ready, drift-heal, and live
 convergence — all deferred to [Phase 58](phase_58_object_reconciler.md); and
@@ -146,7 +167,7 @@ analogous to the Phase-26 decode battery and the Phase-25 `dhall type` corpus.
 
 **Depends on:** [Phase 31](phase_31_provision_seal.md) — the sealed `ProvisionedSpec` whose identity-keyed render sources this phase maps to objects.
 
-**Gate:** `python3 tools/render_manifest_gate.py` passes the oracle-pinned corpus,
+**Gate:** `python3 tools/run_phase_gate.py 33` passes the oracle-pinned corpus,
 property coverage, source-totality scan, twelve mutant runs, and ledger checks. See the
 Phase-33 ledger for the exact tested and UNVERIFIED boundary.
 
@@ -179,10 +200,13 @@ flowchart LR
 - **Specific-reason negatives.** Every negative names the predicate it fails, paired with a positive differing only in the projected field under test.
 - **Fresh challenge.** Not applicable — `renderAll` is pure and total, so the independently authored predicates stand in for a live challenge.
 - **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+- **Five-calculus projection.** The 18 semantic deployments, 164 rendered objects, three safety predicates,
+  one covered renderer property, and twelve mutant observations compose in artifact → budget → lift →
+  workflow → evidence order to the authored `ResourceVector 5 198 0 0`.
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact pure `renderAll` + rendered-output goldens emits is a recipe over a content address, never an authored file.
+- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact pure `renderAll` emits is a recipe over a content address, never an authored file; authored expectations describe meaning rather than reproduce those bytes.
 - [`namespace_layout_doctrine.md §2`](../documents/engineering/namespace_layout_doctrine.md#2-one-namespace-per-platform-capability--the-derived-set)
   — **one namespace per platform capability, derived never authored.** The render-golden battery asserts every
   emitted object lands in its doctrine-**derived** namespace and that a free-text or cross-capability namespace
@@ -201,8 +225,8 @@ flowchart LR
 - [`conformance_harness_doctrine.md §3`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
   — **the load-bearing invariant: rendering never touches live infrastructure**, and its [§4](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run) decode →
   bind/expand → plan/resolve infrastructure → provision → `renderAll` → plan → dry-run spine (this phase locks the **`renderAll`** step). `renderAll` is a pure function of
-  committed source that completes in-process with no apiserver, no credentials, no Vault; the byte-for-byte
-  golden is a fixture of the renderer, and the rendered-artifact-oracle validation locus catches a large share
+  committed source that completes in-process with no apiserver, no credentials, no Vault; the semantic
+  projection is independently authored, and the rendered-artifact-oracle validation locus catches a large share
   of the illegal-state catalog here, not at runtime.
 - [`illegal_state_catalog.md §3.11`](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)
   (the unsafe workload — no resource limits, no hardened `securityContext`),
@@ -225,7 +249,7 @@ flowchart LR
   objects), not the rules themselves.
 - [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
   — generated artifacts are emitted from a Haskell source of truth and **never committed**: the rendered
-  `[K8sObject]` set is never a checked-in deployment artifact; the byte-for-byte golden is a *test fixture* that pins the renderer, not a committed manifest. - [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — **Register 1** (pure/golden, in-process, no cluster): the register this phase's gate reaches; and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) — the per-run
+  `[K8sObject]` set is never a checked-in deployment artifact; only its semantic expectation is committed. - [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — **Register 1** (pure/golden, in-process, no cluster): the register this phase's gate reaches; and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) — the per-run
   proven/tested/assumed ledger the battery emits, marking runtime-enforcement correspondence UNVERIFIED
   (owned by the live band).
 
@@ -239,13 +263,13 @@ flowchart LR
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
 > established by the current phase gate plus universal artifact hygiene.
 
-## Sprint 33.1: The typed `K8sObject` model + Aeson serialization 📋
-**Status**: Planned
+## Sprint 33.1: The typed `K8sObject` model + Aeson serialization ✅
+**Status**: Done — the closed typed model round-trips all 164 corpus objects and its canonical encoder is stable.
 **Implementation**: `src/Amoebius/Manifest/{K8sObject,Types}.hs`; the closed object-kind sum, typed specs,
 Aeson instances, and canonical encoder are built and validated.
 **Blocked by**: None.
 **Independent Validation**: the object model compiles under the pinned GHC 9.12.4; a hand-built object round-trips through
-Aeson (`toJSON`/`fromJSON`) to an equal value, and its encoding matches a small byte-for-byte golden —
+Aeson (`toJSON`/`fromJSON`) to equal values, and re-encoding those values is canonical and stable —
 proving the record *is* the manifest with no template layer.
 **Docs to update**:
 `documents/engineering/manifest_generation_doctrine.md` (Phase-33 backlink for the typed object model),
@@ -265,13 +289,13 @@ text.
 
 ### Validation
 1. The model compiles on the pinned toolchain; a hand-built object round-trips through Aeson to an equal
-   value and encodes to a byte-for-byte golden.
+   value and re-encodes to the same canonical bytes.
 
 ### Remaining Work
 Done. Live Kubernetes decoding and apiserver correspondence remain UNVERIFIED.
 
-## Sprint 33.2: Pure total `renderAll` + best-practice-by-construction 📋
-**Status**: Planned
+## Sprint 33.2: Pure total `renderAll` + best-practice-by-construction ✅
+**Status**: Done — all eighteen source domains map one-for-one in deterministic identity order and satisfy the emitted-object predicates.
 **Implementation**: `src/Amoebius/Manifest/Render.hs` (`renderSourcePrivate ::
 ProvisionedRenderSource identity -> K8sObject`) and `src/Amoebius/Manifest/RenderAll.hs` (`renderAll ::
 ProvisionedSpec -> [K8sObject]` over the sealed unique source map and deterministic serialization) — built.
@@ -339,7 +363,7 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
 - A closed `RenderReconcileMode` projection that includes only immutable schema/initial fields for the
   scheduler root ledger and mandatory Lease. Ledger rows/CAS versions and Lease holder/renewal fields have no
   generic-SSA source path and are owned only by the corresponding typed actions in Phase 58.
-- Exact preservation of each source's `RenderActivation`; the golden covers all four arms. The renderer emits
+- Exact preservation of each source's `RenderActivation`; the semantic oracle covers all four arms. The renderer emits
   the complete desired set irrespective of stage, while a companion partition oracle proves the later action
   planner can select only the identities active at a given readiness witness.
 - An in-file honesty note: this is the render half only — the SSA/ApplySet apply, prune, wait-for-ready, and
@@ -396,12 +420,12 @@ bounded, while memory-backed volumes retain their access, persistence, and one-c
 ### Remaining Work
 Done. SSA, ApplySet pruning, readiness, and live convergence remain Phase-58 work.
 
-## Sprint 33.3: The rendered-output golden battery (`render-golden`) — the gate 📋
-**Status**: Planned
+## Sprint 33.3: The rendered-output semantic-oracle battery (`render-golden`) — the gate ✅
+**Status**: Done — the final eleven-sided phase gate passes.
 **Implementation**: `test/spec/manifest/{RenderGoldenSpec,RenderGoldenGate,RenderGoldenProps,DepGraphOracle}.hs`
-and eighteen `test/golden/manifest/*.json.golden` fixtures cover every capability arm and both shapes.
+plus `test/oracle/render_manifest/{semantic_projection,calculus_projection}.tsv` cover every capability arm and both shapes.
 **Blocked by**: None.
-**Independent Validation**: `cabal test render-golden` checks canonical bytes and all three non-vacuous
+**Independent Validation**: `cabal test render-golden` checks exact semantic projections, canonical Aeson stability, and all three non-vacuous
 properties. The independent dependency oracle catches extra edges, and all twelve property mutants turn red.
 **Docs to update**: `documents/engineering/conformance_harness_doctrine.md` (record the
 rendered-artifact-oracle locus realized in Register 1), `documents/illegal_state/illegal_state_catalog.md`
@@ -413,7 +437,7 @@ status when the gate passes).
 
 ### Objective
 Adopt [`conformance_harness_doctrine.md §3`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
-and its [§4](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run) spine's **`renderAll`** step: assemble the in-process battery that pins `renderAll`'s output byte-for-byte
+and its [§4](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run) spine's **`renderAll`** step: assemble the in-process battery that pins `renderAll`'s exact semantic projection
 and proves the three rendered-artifact-oracle illegal states — the unsafe-workload
 ([`§3.11`](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)),
 backdoor-ingress ([`§3.7`](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)),
@@ -421,7 +445,7 @@ and blocking/underived-NetworkPolicy ([`§3.6`](../documents/illegal_state/illeg
 states — directly on the emitted objects, all without a cluster.
 
 ### Deliverables
-- Eighteen canonical goldens cover every capability arm under `SingleNode` and `Distributed`.
+- Eighteen semantic rows cover every capability arm under `SingleNode` and `Distributed`, including exact identity, kind, activation, reconcile-mode, workload, policy, exposure, and accelerator facts.
 - Shape checks preserve the selected workload kind and sealed source-identity domain.
 - Workloads project checked resources, hardened security, content-digested images, bounded volumes,
   schedulers, and accelerator claims.
@@ -431,7 +455,7 @@ states — directly on the emitted objects, all without a cluster.
 
 #### Twelve committed seeded mutants
 
-Each committed mutant must turn its targeted property red, independently of the byte-diff check:
+Each committed mutant must turn exactly its targeted semantic property red while its unmutated twin stays green:
 
 - **R1/R2:** alter checked resources or the root-filesystem/ephemeral projection.
 - **R3/R4:** remove bounded scratch or memory-volume accounting.
@@ -444,30 +468,27 @@ Each committed mutant must turn its targeted property red, independently of the 
 - **S3:** add an undeclared allow edge.
 - A Register-1 proven/tested/assumed ledger led by a runtime-UNVERIFIED banner: the emitted objects are
   proven safe *as values* in-process; no claim is made that a live cluster enforces them (deferred to the
-  live band). The golden fixtures are test artifacts, never committed deployment manifests.
+  live band). The semantic oracle is authored source; rendered deployments remain generated and untracked.
 
 ### Validation
-1. `cabal test render-golden` is green — output matches the oracle-pinned byte-for-byte goldens (canonical
-   encoding) across the concrete corpus, shape-completeness and corpus-wide non-zero counts hold (no vacuous
+1. `cabal test render-golden` is green — output matches the independently authored semantic projection across
+   the concrete corpus, canonical round-trip stability holds, shape-completeness and corpus-wide non-zero counts hold (no vacuous
    universal), and every rendered-output invariant holds — the NetworkPolicy check by allow-edge set equality
    against the independent `DepGraphOracle`. Each of the twelve committed seeded mutants (R1 CPU/memory drift,
    R2 pod-ephemeral/private allowance, R3 unbounded scratch/cache, R4 memory-volume lifecycle/accounting,
    R5 image-platform/store accounting, R6 durable-size drift, R7 accelerator projection, R8 CR-child
    projection, R9 monitoring-work projection, S1 unhardened pod, S2 wild/Keycloak-skipping route, and S3
-   undeclared allow edge), with its golden
-   regenerated to its own output, must
-   turn the corresponding **property assertion** red — so a mutant is caught by a safety property, not merely by
-   the byte diff.
+   undeclared allow edge), must turn exactly the corresponding **property assertion** red — so a mutant is
+   caught by the intended semantic property.
 
 ### Remaining Work
-Migrate the gate's generated output to `.build/runs/`, externally attest it, and rerun after Phase 32 closes.
-Live enforcement remains UNVERIFIED.
+Live enforcement remains UNVERIFIED at Phase 58.
 
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/manifest_generation_doctrine.md` — backlink §2/§3 to the Phase-33 pure renderer and
-  rendered-output goldens; keep §5's snapshot-bound typed action reconciler explicitly as the live-band
+  rendered-output semantic oracles; keep §5's snapshot-bound typed action reconciler explicitly as the live-band
   [Phase 58](phase_58_object_reconciler.md) residue, run by the Deployment-`replicas=1` control-plane daemon under its
   mandatory Lease.
 - `documents/engineering/conformance_harness_doctrine.md` — record the rendered-artifact-oracle validation
@@ -479,7 +500,7 @@ Live enforcement remains UNVERIFIED.
   rule: the render-golden battery is the rendered-output enactment that gates the namespace-layout
   foreclosure (every emitted object lands in its doctrine-derived namespace, and a free-text or
   cross-capability namespace is not a value `renderAll` can emit).
-- `documents/engineering/generated_artifacts_doctrine.md` — note that the rendered `[K8sObject]` set is emitted from Haskell and never committed; the byte-for-byte golden is a test fixture of the renderer.
+- `documents/engineering/generated_artifacts_doctrine.md` — note that the rendered `[K8sObject]` set is emitted from Haskell and never committed; only the independently authored semantic projection is source.
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-33 status when the gate passes; link this document.

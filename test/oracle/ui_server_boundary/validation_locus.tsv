@@ -19,6 +19,7 @@ startup-missing	Dispatch.admitServerPlan	tested
 startup-duplicate	Dispatch.admitServerPlan	tested
 startup-contract	Dispatch.admitServerPlan	tested
 startup-abi	Dispatch.admitServerPlan	tested
+startup-unreferenced	Dispatch.admitServerPlan	tested
 asset-root	SecurityHeaders.contentTypeForPath	tested
 asset-index	SecurityHeaders.contentTypeForPath	tested
 asset-script	SecurityHeaders.contentTypeForPath	tested

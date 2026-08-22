@@ -5,8 +5,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import hashlib
-import json
 import os
 import re
 import shutil
@@ -28,6 +26,10 @@ MUTANT_CAPABILITY = "chain_boundary"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/chain_boundary/validation_locus.tsv"
 AST_ORACLE = ROOT / "test/fixture/chain_boundary/astcheck/astcheck_negatives.expected"
+CASES_ORACLE = ROOT / "test/oracle/chain_boundary/cases.tsv"
+PLAN_ORACLE = ROOT / "test/oracle/chain_boundary/plan_semantics.tsv"
+CALCULUS_ORACLE = ROOT / "test/oracle/chain_boundary/calculus_projection.tsv"
+BOUNDARY_INPUT = ROOT / "test/fixture/chain_boundary/boundary/apply_input.json"
 RESULTS = ROOT / ".build/dsl/chain-boundary/phase-results.tsv"
 GENERATED_LEDGER = ROOT / ".build/dsl/chain-boundary/validation-locus-ledger.tsv"
 BUILD_ROOT = ROOT / ".build/dist-newstyle/chain-boundary"
@@ -103,22 +105,51 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     locus = read_tsv(LOCUS)
     ast_rows = read_tsv(AST_ORACLE)
-    cfgs = sorted((ROOT / "test/fixture/chain_boundary/cfg").glob("*.cfg.json"))
-    plans = sorted((ROOT / "test/fixture/chain_boundary/plan").glob("*.plan.golden"))
-    descents = sorted((ROOT / "test/fixture/chain_boundary/descent").glob("*.descent.golden"))
-    if len(cfgs) != 2 or len(plans) != 2 or len(descents) != 2:
-        raise GateFailure("Phase-15 Part-A corpus must contain two cfg, plan, and descent fixtures")
-    expected_steps = json.loads((ROOT / "test/fixture/chain_boundary/plan/expected_steps.json").read_text(encoding="utf-8"))
-    if set(expected_steps) != {"minimal", "multi"} or any(not labels for labels in expected_steps.values()):
-        raise GateFailure("Phase-15 independent step-set oracle is incomplete")
+    cases = read_tsv(CASES_ORACLE)
+    plan_rows = read_tsv(PLAN_ORACLE)
+    calculus = {row["metric"]: row["value"] for row in read_tsv(CALCULUS_ORACLE)}
+    expected_cases = [
+        {"case": "minimal", "fixture": "objectstore", "shape": "SingleNode", "nodes": "1"},
+        {"case": "multi", "fixture": "sql", "shape": "Distributed", "nodes": "3"},
+    ]
+    if cases != expected_cases:
+        raise GateFailure(f"Phase-34 consumed case oracle drifted: {cases}")
+    expected_counts = {"minimal": 7, "multi": 12}
+    for case, count in expected_counts.items():
+        rows = [row for row in plan_rows if row["case"] == case]
+        if len(rows) != count or [int(row["position"]) for row in rows] != list(range(1, count + 1)):
+            raise GateFailure(f"Phase-34 semantic plan positions drifted for {case}")
+    if (
+        len(plan_rows) != 19
+        or {row["case"] for row in plan_rows} != set(expected_counts)
+        or any(row["kind"] != "ApplyObjects" or row["label"] != row["object_id"] for row in plan_rows)
+        or {row["frame"] for row in plan_rows}
+        != {"ImmediateFrame", "BootstrapSchedulerFrame", "AfterBootstrapAddonCutoverFrame", "AfterManagedCapacityReadyFrame"}
+    ):
+        raise GateFailure("Phase-34 semantic plan oracle is incomplete or malformed")
+    expected_calculus = {
+        "calculus-kinds": "artifact,budget,lift,workflow,evidence",
+        "component-names": "semantic-plan-rows,boundary-transcripts,ast-negatives,kernel-properties,mutant-evidence",
+        "projection-counts": "19,4,6,2,7",
+        "resource-vector": "5,38,0,0",
+    }
+    if calculus != expected_calculus:
+        raise GateFailure(f"Phase-34 calculus projection drifted: {calculus}")
+    retired = [
+        *sorted((ROOT / "test/fixture/chain_boundary/cfg").glob("*.cfg.json")),
+        *sorted((ROOT / "test/fixture/chain_boundary/plan").glob("*")),
+        *sorted((ROOT / "test/fixture/chain_boundary/descent").glob("*")),
+    ]
+    if retired:
+        raise GateFailure(f"retired generated or duplicate chain fixtures remain: {[str(path.relative_to(ROOT)) for path in retired]}")
     reasons = {row["reason"] for row in ast_rows}
     if len(ast_rows) != 6 or reasons != {"UnsanctionedImport", "RawIO", "ForeignCall", "UnsafeOperation", "TemplateHaskell", "OrphanInstance"}:
         raise GateFailure("Gate-3 oracle must enumerate all six violation reasons exactly once")
     if len(mutants) != 7 or len({row["mutant"] for row in mutants}) != 7:
-        raise GateFailure("Phase-15 mutant manifest must contain seven unique mutants")
+        raise GateFailure("Phase-34 mutant manifest must contain seven unique mutants")
     if len(locus) != 20 or len({row["entry"] for row in locus}) != 20:
-        raise GateFailure("Phase-15 validation-locus ledger must contain twenty unique rows")
-    for path in [*cfgs, *plans, *descents, ROOT / "test/fixture/chain_boundary/plan/expected_steps.json"]:
+        raise GateFailure("Phase-34 validation-locus ledger must contain twenty unique rows")
+    for path in [CASES_ORACLE, PLAN_ORACLE, CALCULUS_ORACLE, BOUNDARY_INPUT]:
         if not path.is_file() or not path.read_bytes():
             raise GateFailure(f"empty oracle fixture: {path.relative_to(ROOT)}")
     for tool in ("kubectl", "docker", "helm", "pulumi"):
@@ -259,7 +290,7 @@ def network_isolated_chain(cabal: Path) -> tuple[str, str]:
             raise GateFailure(
                 "no sanctioned network observer is available: none of unshare, sandbox-exec, or strace"
             )
-    token = "chain-spec: PASS (2 cfg fixtures, 2 plan goldens, 2 descent goldens, 0 render actions, 1 canary, 2 mutants)"
+    token = "chain-spec: PASS (2 semantic cases, 19 exact plan/descent entries, 1 zero-step render, 2 mutants)"
     if token not in isolated.stdout:
         raise GateFailure(f"isolated chain acceptance token is absent:\n{isolated.stdout}")
     return isolated.stdout, observer
@@ -275,14 +306,17 @@ def run_green_suites(cabal: Path) -> tuple[str, str]:
     boundary = run([str(cabal), "test", "boundary-spec", "--test-show-details=direct"], environment=environment)
     astcheck = run([str(cabal), "test", "astcheck-spec", "--test-show-details=direct"])
     tokens = [
-        "chain-spec: PASS (2 cfg fixtures, 2 plan goldens, 2 descent goldens, 0 render actions, 1 canary, 2 mutants)",
+        "chain-calculus: PASS (5 kinds, 38 projected units)",
+        "chain-invariants: PASS (2 consumed cases, 19 semantic plan rows, 19 canonical round-trips, 4 activation frames, 0 render actions, 1 canary)",
+        "chain-spec: PASS (2 semantic cases, 19 exact plan/descent entries, 1 zero-step render, 2 mutants)",
+        "boundary-invariants: PASS (1 exact byte relay, 1 hostile PATH canary)",
         "boundary-spec: PASS (4 real-binary invocations, 3 invoked tools, 1 zero-invocation helm control, exact argv and bytes, absolute paths, 3 mutants)",
         "astcheck-spec: PASS (2 positives, 6 exact reason/span negatives, 2 sanctioned modules, 4 sanctioned effects, opaque link seal, 2 mutants)",
     ]
     combined = chain.stdout + isolated + boundary.stdout + astcheck.stdout
     for token in tokens:
         if token not in combined:
-            raise GateFailure(f"Phase-15 acceptance token is absent: {token}")
+            raise GateFailure(f"Phase-34 acceptance token is absent: {token}")
     return combined, observer
 
 
@@ -312,14 +346,32 @@ def verify_mutants(cabal: Path, mutants: list[dict[str, str]]) -> str:
 
 def write_results(mutants: list[dict[str, str]], observer: str) -> None:
     metrics = {
-        "chain-fixtures": "2/2-plan-and-descent-byte-locked",
+        "semantic-plan-cases": "2/2-consumed",
+        "semantic-plan-rows": "19/19-exact",
         "render-actions": "0-with-1/1-canary-observed",
+        "counted-step-runs": "1/1-canary-exact",
+        "step-nfdata-action-exclusions": "2/2-action-counters-zero",
+        "whole-plan-configs": "2/2-whole-provisioned-specs-retained",
+        "pure-chain-builds": "2/2-stable",
+        "identity-disjoint-projections": "19/19-disjoint",
+        "render-all-unions": "2/2-exact",
+        "activation-frames": "4/4-exact",
+        "next-frame-descent": "8/8-exact",
+        "fold-lift": "19/19-exact",
+        "canonical-plan-renders": "19/19-round-trip-stable",
+        "zero-step-render": "1/1-canonical",
         "network-observer": observer,
         "boundary-tools": "3/3-invoked-helm-0",
         "boundary-transcripts": "4/4-argv-and-bytes-exact",
+        "exact-applied-bytes": "1/1-equal",
+        "hostile-path-canary": "1/1-ambient-decoy-observed",
         "astcheck": "2/2-positive-6/6-exact-negative",
         "compile-link-seal": "1/1-illegal-construction-rejected",
         "mutants": f"{len(mutants)}/{len(mutants)}-red",
+        "calculus-kinds": "5/5-exact",
+        "calculus-components": "19,4,6,2,7",
+        "calculus-resources": "5,38,0,0",
+        "calculus-projection": "5-components-38-units",
         "live-tool-fidelity": "UNVERIFIED",
         "live-apiserver-apply": "UNVERIFIED",
         "runtime-correspondence": "UNVERIFIED",
@@ -350,27 +402,91 @@ CHECKS = {
     "dry-run-import-closure": "the dry-run surface reaches no process, network, or credential module",
     "subprocess-primitive-sites": "the subprocess primitive appears only at its declared sites",
     "partial-token-scan": "no partial or unsafe token survives in the kernel modules",
-    "independent-step-set-oracle-complete": "the independent step-set oracle names both fixtures with labels",
+    "semantic-plan-oracle-complete": "the independent semantic oracle names both cases and all nineteen ordered entries",
     "fake-tools-executable": "every fake boundary tool is present and executable",
 }
 
 SIDES = ("toolchain", "oracle", "source", "seal", "suite", "mutant", "results")
 
 EXPECTED_RESULTS = {
-    "chain-fixtures": "2/2-plan-and-descent-byte-locked",
+    "semantic-plan-cases": "2/2-consumed",
+    "semantic-plan-rows": "19/19-exact",
     "render-actions": "0-with-1/1-canary-observed",
+    "counted-step-runs": "1/1-canary-exact",
+    "step-nfdata-action-exclusions": "2/2-action-counters-zero",
+    "whole-plan-configs": "2/2-whole-provisioned-specs-retained",
+    "pure-chain-builds": "2/2-stable",
+    "identity-disjoint-projections": "19/19-disjoint",
+    "render-all-unions": "2/2-exact",
+    "activation-frames": "4/4-exact",
+    "next-frame-descent": "8/8-exact",
+    "fold-lift": "19/19-exact",
+    "canonical-plan-renders": "19/19-round-trip-stable",
+    "zero-step-render": "1/1-canonical",
     "network-observer": "sanctioned-observer",
     "boundary-tools": "3/3-invoked-helm-0",
     "boundary-transcripts": "4/4-argv-and-bytes-exact",
+    "exact-applied-bytes": "1/1-equal",
+    "hostile-path-canary": "1/1-ambient-decoy-observed",
     "astcheck": "2/2-positive-6/6-exact-negative",
     "compile-link-seal": "1/1-illegal-construction-rejected",
     "mutants": "7/7-red",
+    "calculus-kinds": "5/5-exact",
+    "calculus-components": "19,4,6,2,7",
+    "calculus-resources": "5,38,0,0",
+    "calculus-projection": "5-components-38-units",
     "live-tool-fidelity": "UNVERIFIED",
     "live-apiserver-apply": "UNVERIFIED",
     "runtime-correspondence": "UNVERIFIED",
 }
 
-SURFACE_MAP = {'opaque-step-constructor': 'step-constructor-opaque', 'counted-step-run': '', 'step-nfdata-excludes-action': '', 'whole-provisioned-plan-config': '', 'pure-chain-builder': '', 'identity-disjoint-step-projections': '', 'render-all-object-union': '', 'four-frame-activation-projection': '', 'pure-next-frame-after': '', 'pure-fold-lift': '', 'canonical-render-chain-plan': '', 'dry-run-effect-import-closure': 'dry-run-import-closure', 'zero-step-run-render': '', 'step-run-canary': 'render-actions', 'two-cfg-plan-goldens': 'minimal_cfg,multi_cfg', 'two-descent-goldens': 'chain-fixtures', 'independent-step-set-oracle': 'independent-step-set-oracle-complete', 'chain-mutant-battery': 'm1_cfg_drop_service,m2_descent_inframe', 'single-subprocess-seam': 'subprocess-primitive-sites', 'absolute-tool-path-seal': 'fake-tools-executable', 'real-binary-fake-boundary': 'boundary_corpus', 'exact-argv-transcripts': 'boundary-transcripts', 'exact-applied-bytes': '', 'hostile-path-canary': '', 'helm-zero-invocation-control': 'boundary-tools', 'boundary-mutant-battery': 'mB1_argv,mB2_byte,mB3_path_resolve', 'closed-sanctioned-api': 'sanctioned_api', 'no-raw-io-effect-arm': 'astcheck', 'six-arm-ast-violation-union': 'negative_import,negative_raw_io,negative_foreign,negative_unsafe,negative_template_haskell,negative_orphan', 'exact-ast-reason-span-corpus': 'positive_basic,positive_manifest', 'opaque-checked-extension-source': 'checked_ctor_illegal', 'checked-source-compile-fail-seal': 'compile-link-seal', 'astcheck-mutant-battery': 'astcheck-allow-rawio,astcheck-export-ctor', 'phase14-validation-locus-ledger': 'mutants', 'phase14-compile-totality': 'partial-token-scan', 'network-isolated-render-observer': 'network-observer', 'live-tool-fidelity': 'live-tool-fidelity', 'live-apiserver-apply': 'live-apiserver-apply', 'runtime-model-correspondence': 'runtime-correspondence', 'generated-artifact-discipline': 'emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle'}
+SURFACE_MAP = {
+    "opaque-step-constructor": "step-constructor-opaque",
+    "counted-step-run": "counted-step-runs",
+    "step-nfdata-excludes-action": "step-nfdata-action-exclusions",
+    "whole-provisioned-plan-config": "whole-plan-configs",
+    "pure-chain-builder": "pure-chain-builds",
+    "identity-disjoint-step-projections": "identity-disjoint-projections",
+    "render-all-object-union": "render-all-unions",
+    "four-frame-activation-projection": "activation-frames",
+    "pure-next-frame-after": "next-frame-descent",
+    "pure-fold-lift": "fold-lift",
+    "canonical-render-chain-plan": "canonical-plan-renders",
+    "dry-run-effect-import-closure": "dry-run-import-closure",
+    "zero-step-run-render": "zero-step-render",
+    "step-run-canary": "render-actions",
+    "two-consumed-chain-cases": "minimal_case,multi_case",
+    "consumed-semantic-case-cardinality": "semantic-plan-cases",
+    "nineteen-semantic-plan-rows": "semantic-plan-rows",
+    "independent-semantic-plan-oracle": "semantic-plan-oracle-complete",
+    "chain-mutant-battery": "m1_cfg_drop_service,m2_descent_inframe",
+    "single-subprocess-seam": "subprocess-primitive-sites",
+    "absolute-tool-path-seal": "fake-tools-executable",
+    "real-binary-fake-boundary": "boundary_corpus",
+    "exact-argv-transcripts": "boundary-transcripts",
+    "exact-applied-bytes": "exact-applied-bytes",
+    "hostile-path-canary": "hostile-path-canary",
+    "helm-zero-invocation-control": "boundary-tools",
+    "boundary-mutant-battery": "mB1_argv,mB2_byte,mB3_path_resolve",
+    "closed-sanctioned-api": "sanctioned_api",
+    "no-raw-io-effect-arm": "astcheck",
+    "six-arm-ast-violation-union": "negative_import,negative_raw_io,negative_foreign,negative_unsafe,negative_template_haskell,negative_orphan",
+    "exact-ast-reason-span-corpus": "positive_basic,positive_manifest",
+    "opaque-checked-extension-source": "checked_ctor_illegal",
+    "checked-source-compile-fail-seal": "compile-link-seal",
+    "astcheck-mutant-battery": "astcheck-allow-rawio,astcheck-export-ctor",
+    "phase34-validation-locus-ledger": "mutants",
+    "phase34-compile-totality": "partial-token-scan",
+    "five-calculus-kind-cardinality": "calculus-kinds",
+    "five-calculus-component-vector": "calculus-components",
+    "five-calculus-resource-vector": "calculus-resources",
+    "five-calculus-projection": "calculus-projection",
+    "network-isolated-render-observer": "network-observer",
+    "live-tool-fidelity": "live-tool-fidelity",
+    "live-apiserver-apply": "live-apiserver-apply",
+    "runtime-model-correspondence": "runtime-correspondence",
+    "generated-artifact-discipline": "emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle",
+}
 
 SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     surface: ((ids, EXPECTED_RESULTS[ids]) if ids in EXPECTED_RESULTS and EXPECTED_RESULTS[ids] != "UNVERIFIED" else None)
@@ -428,7 +544,7 @@ def main() -> int:
         mutant_rows = verify_oracles(Path(resolved["dhall"]["path"]))
         item_names = enumerated_items()
         print(f"  ok    {len(item_names)} enumerated items, {len(mutant_rows)} mutants")
-        print("  ok    independent-step-set-oracle-complete both fixtures named with labels")
+        print("  ok    semantic-plan-oracle-complete both cases and nineteen ordered entries")
         print("  ok    fake-tools-executable    every fake boundary tool present and executable")
         results["oracle"] = True
 
@@ -476,7 +592,7 @@ def main() -> int:
         )
         rows = compared
         results["results"] = oracle_ok and artifact_ok
-    except (GateFailure, OSError, KeyError, ValueError, json.JSONDecodeError) as problem:
+    except (GateFailure, OSError, KeyError, ValueError) as problem:
         print(f"chain-boundary-gate: FAIL: {problem}", file=sys.stderr)
 
     item_evidence = {
@@ -490,7 +606,7 @@ def main() -> int:
         if ids and set(ids.split(",")) & set(CHECKS) and results.get("source") and results.get("oracle")
     }
     layers = {
-        "Decision": "tested" if rows.get("chain-fixtures") == EXPECTED_RESULTS["chain-fixtures"] else "UNVERIFIED",
+        "Decision": "tested" if rows.get("semantic-plan-rows") == EXPECTED_RESULTS["semantic-plan-rows"] else "UNVERIFIED",
         "Protocol": "tested" if rows.get("boundary-transcripts") == EXPECTED_RESULTS["boundary-transcripts"] else "UNVERIFIED",
         "Runtime": "UNVERIFIED",
     }
@@ -505,8 +621,8 @@ def main() -> int:
             for name, record in resolved.items()
             if name != "platform"
         },
-        dependencies={"chain-spec": "cabal test", "boundary-spec": "cabal test", "astcheck-spec": "cabal test"},
-        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-15 mutants", "status": "unrun"}],
+        dependencies={"chain-spec": "cabal test chain-spec", "boundary-spec": "cabal test boundary-spec", "astcheck-spec": "cabal test astcheck-spec"},
+        mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows] or [{"name": "phase-34 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

@@ -80,7 +80,7 @@ if a second substrate or a second acceptance register appears.
 
 **Requires**: `host-floor`
 
-**Gate:** `python3 tools/windows_engine_bringup_gate.py --execute` passes every check named in
+**Gate:** `python3 tools/run_phase_gate.py 54` passes every check named in
 [Gate integrity](#gate-integrity), on a Windows host at lane `linux-cpu/amd64`. The phase does not seal until
 it is green, and a reboot-required verdict seals nothing.
 

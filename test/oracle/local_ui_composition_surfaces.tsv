@@ -29,6 +29,9 @@ browser-ui-server-edge-only	checks	browser-edge-source-scan
 server-composition-boundary	checks	ready-handle-boundary-present
 composition-harness-observers	checks	harness-observers-present
 generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
+semantic-oracles-complete	checks	semantic-oracles-complete
+compile-totality	checks	totality-options
+contained-credential-environment	checks	credential-environment-scrub
 single-tenant-authored-application	items	single-source
 multi-tenant-authored-application	items	multi-source
 infernix-shaped-fake-adapter	items	infernix-fake
@@ -81,4 +84,8 @@ generic-bundle-digest	metrics	bundle
 post-ready-fresh-workflow-challenge	metrics	fresh-challenge
 five-mutant-battery	metrics	mutants
 loopback-only-os-network-observer	metrics	network-observer
+five-calculus-kind-cardinality	metrics	calculus-kinds
+five-calculus-component-vector	metrics	calculus-components
+five-calculus-projection-counts	metrics	calculus-projection-counts
+five-calculus-resource-vector	metrics	calculus-resource-vector
 unverified-live-layers	metrics	live-infernix-adapter,live-jitml-adapter,live-keycloak-edge,live-provider-storage-isolation,release-rollout,replica-loss,ha-behavior

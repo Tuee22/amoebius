@@ -16,7 +16,7 @@ are stated over are owned by their own doctrines.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_20_extension_declaration.md, DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_gate_integrity.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_20_extension_declaration.md, DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -65,9 +65,10 @@ claim. Its implementation is ordinary Haskell that the declaration refers to.
 The consequences of extensions being values rather than directories are the ones that matter:
 
 - **The declaration is inspectable before anything runs.** A gate can be derived from it, because it is data.
-- **There is exactly one of it.** An extension cannot have a second, informal surface — a configuration file,
-  an environment variable, a side channel — because anything not in the declaration is invisible to
-  composition and therefore unavailable to it.
+- **There is one complete declaration surface.** A constructed declaration cannot omit a calculus component.
+  Proving that a linked library exports only one competing declaration and has no informal configuration,
+  environment, or side-channel surface is a conformance/admission obligation; the value shape alone cannot
+  establish either claim.
 - **Composition is an operation on declarations.** Composing two extensions is not linking two programs and
   hoping; it is combining two values, and the combination either has a type or does not.
 
@@ -93,6 +94,16 @@ core needs, and an extension that has left one empty is not a partial extension 
 
 The surface is deliberately small. A domain author's freedom is in the *logic*, which the core never inspects;
 the obligations are about the seams where that logic meets everything else.
+
+**Implemented boundary.** `lib:extension-declaration` stores five Phase-10 `Component scope` values behind a
+private constructor. Its checked introduction rule requires them in calculus order, with one shared generative
+request-scope index; its resource observation is the exact natural-number composition fold. Five readers
+derive the per-calculus singleton sets. The declaration identity hashes a versioned, length-framed projection
+of the name, calculus tags, component names, resource coordinates, and explicit canonical payload fields.
+`Show` output is diagnostic only and does not participate. Phase 20 tests that boundary over two declarations
+and ten authored component rows, with a separately implemented digest oracle and compiler barriers for a
+missing component and mixed scopes. This is finite Register-1 evidence. It does not establish L1–L5, prevent
+an implementation from using an undeclared side channel, or make either fixture a conforming extension.
 
 ---
 
@@ -155,6 +166,20 @@ link set and asserting every C-law over each pair; a compile-fail corpus, one fi
 claim, each required to fail for its pinned reason and no other; and the S- and P- instances for whichever
 seams the extension declares. The suite is generated to `.build/` and is never tracked.
 
+**Implemented boundary.** `lib:extension-conformance-gate` derives a pure suite plan from one complete
+`ExtensionDeclaration scope` and a same-request peer list. The L cases follow the declaration vocabulary, C
+cases cross every named peer with C1–C7, compile cases follow evidence claims, and S1–S6 name the security
+boundary. It emits five canonical suite manifests plus a generated coverage grid beneath `.build/**`; their
+joint length-framed SHA-256 digest is independent of traversal order. The bounded Phase-24 corpus has one
+Infernix declaration and one JitML peer: nineteen executable case identities and 24 coverage cells. P1–P6 are
+explicitly `not-applicable` because the Phase-20 declaration cannot name a transaction axis before Phase 36;
+the transaction suite is empty rather than silently credited.
+
+These files are executable obligations only in the sense that a runner must return exactly one result for
+each derived identity. The pure boundary verifies those identities and results; it does not generate Haskell
+semantics from names, execute extension code, or authenticate the observer supplying a result. Consequently
+the tested generator mechanics do not themselves make the bounded fixture a conforming extension.
+
 **The honesty residue.** A generated gate tests the laws as the core states them. If a law is too weak, every
 extension passes and the composition still breaks. Strengthening a law is therefore a change to the core, it
 reddens existing extensions, and that is the intended cost — it is the signal that the law was doing no work.
@@ -184,6 +209,18 @@ third has to be built rather than derived from it:
 This is the [`release_lifecycle_doctrine.md`](./release_lifecycle_doctrine.md) evidence-gate shape applied to
 extensions: a handle that only a passing run can mint, and that every downstream operation demands.
 
+**Implemented boundary.** The pure runner accepts only the exact generated file set and exactly one passing
+observation per case. It then constructs an opaque verdict whose content address folds the declaration digest,
+core-law version, generated-suite digest, and passing result. `GatePlan`, `CoreVersion`, `ConformanceVerdict`,
+and `LinkSet` constructors are private; admission requires a same-request plan, declaration, verdict, and link
+set, re-verifies the seal, and rejects duplicate or mismatched declarations. Compiler fixtures reject direct
+verdict construction, verdict omission, and cross-request verdict use.
+
+That is content binding and a single API introduction path, not authenticated execution. Any in-process
+caller can supply an observation bundle to the pure runner; no signature, process isolation, or external gate
+service proves where those results came from. Phase 24 records this as UNVERIFIED rather than promoting the
+modeled passing seal to the unforgeability claim above. SHA-256 collision absence is likewise ASSUMED.
+
 ---
 
 ## 7. Link-time union closure
@@ -206,8 +243,9 @@ in which an arbitrary composition is well defined.
 - **The step the induction actually needs is not the step the gate checks.** The step is `X ∘ c` for an
   arbitrary composite `X`, and the combinations of a link set of size *n* number 2ⁿ, not *n*². A pairwise
   check covers the pairs; it does not cover the step.
-- **Nothing enters the link set without a verdict.** An extension with no sealed verdict has no constructor
-  that adds it, so no member is unchecked at the base case.
+- **Nothing enters the bounded pure link-set API without a verdict.** Its constructor is private and its only
+  admission function consumes and re-verifies the same-request seal. This is not yet an authenticated binary
+  linker or runtime plugin boundary.
 
 So the honest claim is conditional: *given* C1, closure follows. A proof of C1 — by parametricity over the
 declaration type, or by a mechanised argument in the proof stack — is owed and does not exist. Until it does,
@@ -262,8 +300,14 @@ Stated plainly, because a conformance verdict is exactly the kind of artifact th
 - **It does not prove the law set is sufficient.** The laws are a human choice, exactly as the catalogue's
   taxonomy is, and a hazard along a dimension no law names passes every gate
   ([`documentation_standards.md` §16](../documentation_standards.md#16-the-illegal-state-catalogue-is-a-covering-not-a-list)).
-- **Nothing here is built yet.** This document specifies a contract; no phase has yet emitted a gate or sealed
-  a verdict. Status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+- **The implemented boundary is pure and bounded.** [Phase 10](../../DEVELOPMENT_PLAN/phase_10_calculus_composition.md)
+  supplies the base same-request calculus composition; [Phase
+  20](../../DEVELOPMENT_PLAN/phase_20_extension_declaration.md) stores the complete declaration; [Phases
+  21–23](../../DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md) supply bounded L, C, and S evaluators;
+  and Phase 24 supplies the derived plan, suite bytes, modeled passing verdict, and guarded pure link set
+  described above. P instances await Phase 36's transaction vocabulary. None of these authenticates a result
+  observer, proves C1, closes S/P composition, or establishes runtime correspondence. Status lives only in the
+  [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 

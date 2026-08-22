@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-5 gate — the Dhall Gate-1 schema and its smart-constructor prelude.
+"""The Phase-25 gate — the Dhall Gate-1 schema and its smart-constructor prelude.
 
 The capability claim is unchanged: every positive cluster/app/deployment fixture typechecks,
 every catalog, image/process, and import-policy negative fails at its own specific `dhall`
@@ -35,19 +35,23 @@ import toolchain  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 DHALL_TYPECHECK = ROOT / ".build" / "dhall" / "dhall-typecheck"
 RESULTS = DHALL_TYPECHECK / "phase-results.tsv"
+CONFORMANCE_PROJECTION = DHALL_TYPECHECK / "conformance-projection.tsv"
+EXPECTED_CONFORMANCE_PROJECTION = ROOT / "test/oracle/dhall_typecheck_schema/conformance_projection.tsv"
+BUILD_ROOT = ROOT / ".build/dist-newstyle/dhall-schema-conformance"
 CONTRACT = "DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md"
 GATE_COMMAND = "python3 tools/dhall_typecheck_schema_gate.py"
 EXPECTATIONS = "test/oracle/dhall_typecheck_schema_surfaces.tsv"
 
 CHECKS = {
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
+    "phase24-plan-consumed": "the Dhall schema derives all Phase-24 obligations and mints no unsupported verdict",
     "toolchain-satisfies-requirements": "the resolved dhall satisfies the authored range",
     "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
 }
 
-SIDES = ("toolchain", "battery", "oracle", "artifact")
+SIDES = ("toolchain", "battery", "conformance", "oracle", "artifact")
 
-# The authored oracle, read off the Phase-5 contract.
+# The authored oracle, read off the Phase-25 contract.
 EXPECTED_RESULTS = {
     # Amended 2026-08-12 from intent, not from a failing run. The count moved 14 -> 17
     # because Phase 19 added SanctionedApi, Phase 24 added UiOffline, and Phase 30 added
@@ -71,6 +75,8 @@ EXPECTED_RESULTS = {
     "special-resource-mutants": "4/4-red",
     "custom-arm-mutant": "red",
     "acceptance-token": "spec-composition-proven",
+    "extension-conformance-plan": "19/19-derived",
+    "extension-conformance-verdict": "UNVERIFIED",
     # Both of these are honestly UNVERIFIED at this register and say so in the results.
     "gadt-decode-residue": "UNVERIFIED",
     "runtime": "UNVERIFIED",
@@ -92,20 +98,23 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     "special-resource-mutants": ("special-resource-mutants", "4/4-red"),
     "custom-arm-mutant": ("custom-arm-mutant", "red"),
     "spec-composition": ("acceptance-token", "spec-composition-proven"),
+    "extension-conformance-plan": ("extension-conformance-plan", "19/19-derived"),
+    "extension-conformance-verdict": None,
     "gadt-decode-residue": None,
     "runtime-fidelity": None,
 }
 
 
 def toolchain_side() -> tuple[bool, dict[str, Any]]:
-    print("toolchain side — dhall resolved from authored requirements\n")
+    print("toolchain side — Dhall and the Phase-24 projection toolchain from authored requirements\n")
     try:
-        resolved = toolchain.resolve(["dhall"])
+        resolved = toolchain.resolve(["dhall", "cabal", "ghc"])
     except toolchain.ResolutionError as error:
         print(f"  FAIL  toolchain-satisfies-requirements {error}")
         return False, {}
-    record = resolved["dhall"]
-    print(f"  ok    dhall        {record['version']:<12} satisfies {record['requirement']}")
+    for name in ("dhall", "ghc", "cabal"):
+        record = resolved[name]
+        print(f"  ok    {name:<8} {record['version']:<12} satisfies {record['requirement']}")
     return True, resolved
 
 
@@ -131,6 +140,61 @@ def battery_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[st
     return True, rows
 
 
+def cabal_command(resolved: dict[str, Any], *arguments: str) -> list[str]:
+    return [
+        resolved["cabal"]["path"],
+        f"--with-compiler={resolved['ghc']['path']}",
+        f"--builddir={BUILD_ROOT}",
+        f"--store-dir={ROOT / '.build/cabal-store'}",
+        "--jobs=1",
+        *arguments,
+    ]
+
+
+def conformance_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str, str]]:
+    print("\nconformance side — Phase-24 plan is derived and its unsupported verdict stays absent\n")
+    env = toolchain.contained_env()
+    env["AMOEBIUS_SOURCE_ROOT"] = str(ROOT)
+    result = subprocess.run(
+        cabal_command(
+            resolved,
+            "test",
+            "dhall-schema-conformance-spec",
+            "--test-show-details=direct",
+            f"--test-options={ROOT}",
+        ),
+        cwd=ROOT,
+        env=env,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        check=False,
+    )
+    (run_dir / "conformance.log").write_text(result.stdout, encoding="utf-8")
+    token = "dhall-schema-conformance-spec: PASS (19 generated obligations, verdict UNVERIFIED)"
+    if result.returncode != 0 or token not in result.stdout or not CONFORMANCE_PROJECTION.is_file():
+        print(f"  FAIL  phase24-plan-consumed; transcript at {gate_common.rel(run_dir / 'conformance.log')}")
+        return False, {}
+    expected = sorted(EXPECTED_CONFORMANCE_PROJECTION.read_text(encoding="utf-8").splitlines()[1:])
+    actual = sorted(CONFORMANCE_PROJECTION.read_text(encoding="utf-8").splitlines()[1:])
+    green = len(actual) == 19 and actual == expected
+    print(f"  {'ok  ' if green else 'FAIL'}  phase24-plan-consumed 19 obligations derived; verdict remains UNVERIFIED")
+    if not green:
+        return False, {}
+    return True, {
+        "extension-conformance-plan": "19/19-derived",
+        "extension-conformance-verdict": "UNVERIFIED",
+    }
+
+
+def write_results(rows: dict[str, str]) -> None:
+    RESULTS.parent.mkdir(parents=True, exist_ok=True)
+    RESULTS.write_text(
+        "metric\tresult\n" + "".join(f"{key}\t{rows[key]}\n" for key in EXPECTED_RESULTS if key in rows),
+        encoding="utf-8",
+    )
+
+
 def main() -> int:
     gate = gate_common.PhaseGate(
         phase=25, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
@@ -149,7 +213,11 @@ def main() -> int:
     rows: dict[str, str] = {}
     if results["toolchain"]:
         results["battery"], rows = battery_side(resolved, gate.run_dir)
-    if rows:
+    if results["battery"]:
+        results["conformance"], conformance_rows = conformance_side(resolved, gate.run_dir)
+        rows.update(conformance_rows)
+        write_results(rows)
+    if results["conformance"]:
         results["oracle"] = gate_common.oracle_side(rows, EXPECTED_RESULTS)
         results["artifact"] = gate_common.untracked_side(
             [DHALL_TYPECHECK],
@@ -177,7 +245,10 @@ def main() -> int:
             for name, record in resolved.items()
             if name != "platform"
         },
-        dependencies={"dhall-typecheck": "tools/dhall_typecheck.py"},
+        dependencies={
+            "dhall-typecheck": "tools/dhall_typecheck.py",
+            "dhall-schema-conformance-spec": "Phase-24 obligation projection",
+        },
         checks=results,
         mutants=[
             {"name": "resource-field deletion", "status": rows.get("resource-field-deletion-mutants", "unrun")},
@@ -185,7 +256,12 @@ def main() -> int:
             {"name": "special-resource", "status": rows.get("special-resource-mutants", "unrun")},
             {"name": "custom-arm", "status": rows.get("custom-arm-mutant", "unrun")},
         ],
-        observations={"results": "sha256:" + artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
+        observations={
+            "results": "sha256:" + artifact_policy.digest(str(RESULTS)),
+            "conformance_projection": "sha256:" + artifact_policy.digest(str(CONFORMANCE_PROJECTION)),
+        }
+        if RESULTS.is_file() and CONFORMANCE_PROJECTION.is_file()
+        else {},
     )
     results["containment"] = gate.containment_side()
     results["write-guard"] = gate.write_guard_side()

@@ -41,6 +41,7 @@ module Amoebius.Image.BakeInventory
   ) where
 
 import Amoebius.Image.BuildAdmission
+import Amoebius.Image.BaseChannel (mkBaseChannel)
 import Control.DeepSeq (NFData)
 import Control.Exception (SomeException, displayException, try)
 import Data.Char (isAlpha, isAlphaNum, isSpace)
@@ -325,7 +326,6 @@ data BakeCatalog = BakeCatalog
   , cacheBacking :: Text
   , cacheCapacityBytes :: Natural
   , baseImage :: Text
-  , baseDigest :: Text
   , acquisitionTools :: [AcquisitionTool]
   , runtimeEnvironment :: [RuntimeEnvironment]
   , stages :: [BakeStage]
@@ -342,6 +342,7 @@ data CatalogError
   | CatalogBinaryNameDuplicate Text
   | CatalogPathNotAbsolute Text
   | CatalogSourceDigestInvalid Text
+  | CatalogBaseChannelInvalid Text
   | CatalogVersionProbeEmpty Text
   | CatalogDockerTokenInvalid Text
   | CatalogEnvironmentNameInvalid Text
@@ -369,6 +370,9 @@ decodeBakeCatalog path = do
 
 validateBakeCatalog :: BakeCatalog -> Either CatalogError ()
 validateBakeCatalog catalog = do
+  case mkBaseChannel catalog.baseImage of
+    Left _ -> Left (CatalogBaseChannelInvalid catalog.baseImage)
+    Right _ -> Right ()
   if null (stages catalog) then Left CatalogStageSetEmpty else Right ()
   case duplicate (fmap (\stage -> stage.name) catalog.stages) of
     Just value -> Left (CatalogStageNameDuplicate value)

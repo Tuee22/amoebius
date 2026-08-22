@@ -14,10 +14,20 @@ document each invariant cites. It presumes nothing.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md, DEVELOPMENT_PLAN/phase_67_pulsar_client.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
+
+---
+
+## Contents
+- [1. The everything-orchestrator shape: one runtime binary, three contexts](#1-the-everything-orchestrator-shape-one-runtime-binary-three-contexts)
+- [2. The seed projects: reference implementations amoebius re-derives from](#2-the-seed-projects-reference-implementations-amoebius-re-derives-from)
+- [3. The hard constraints (cross-cutting invariants)](#3-the-hard-constraints-cross-cutting-invariants)
+- [4. The phase index (one line per phase)](#4-the-phase-index-one-line-per-phase)
+- [5. Current baseline — reopened implementation](#5-current-baseline--reopened-implementation)
+- [Related Documents](#related-documents)
 
 ---
 
@@ -191,8 +201,8 @@ here goes stale the moment a gate runs, which is what happened to the sentence t
 
 The DSL is designed to be validated and **simulated per phase**, never as a monolithic pre-implementation: each pre-cluster
 phase discharges an in-process Register-1/2 gate and each live-band phase a Register-3 gate before the next
-opens. **The DSL is validated in full before any live behaviour is implemented**: its semantics are
-model-checked in [Phase 18](phase_18_dsl_formal_model.md) and its reconcile decision core is replayed under
+opens. A bounded DSL decision/protocol tranche is model-checked in
+[Phase 18](phase_18_dsl_formal_model.md), and the actual reconcile decision core is replayed under
 `IOSim`/`IOSimPOR` in [Phase 19](phase_19_reconcile_core_simulation.md), both inside the DSL-validation band.
 The **Register-2.5 deterministic-simulation activity is never a phase gate**
 ([development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)); where a
@@ -213,27 +223,42 @@ runtime fidelity UNVERIFIED until that phase discharges them
 - **Phase 5 — The lift calculus** → [phase_5](phase_05_lift_calculus.md).
 - **Phase 6 — The workflow calculus** → [phase_6](phase_06_workflow_calculus.md).
 - **Phase 7 — The evidence calculus** → [phase_7](phase_07_evidence_calculus.md).
-- **Phase 8 — Scoped identity kernel** → [phase_8](phase_08_scope_index.md).
+- **Phase 8 — Scope index / scoped identity kernel** → [phase_8](phase_08_scope_index.md).
 - **Phase 9 — Capacity core fold + topology relation** → [phase_9](phase_09_resource_index.md).
 - **Phase 10 — Composition across the five calculi** → [phase_10](phase_10_calculus_composition.md).
 
 *The proof stack — the checkers amoebius owns (substrate `none`, Registers 1–2):*
-- **Phase 11 — Formal-model EDSL (`Model`/`interpret`/`emitTLA`)** → [phase_11](phase_11_formal_model_kernel.md).
-- **Phase 12 — The amoebius explicit-state checker** → [phase_12](phase_12_explicit_state_checker.md).
-- **Phase 13 — The amoebius symbolic checker** → [phase_13](phase_13_symbolic_checker.md).
-- **Phase 14 — The amoebius refinement checker** → [phase_14](phase_14_refinement_checker.md).
-- **Phase 15 — The compile-fail fixture harness** → [phase_15](phase_15_compile_fail_harness.md).
-- **Phase 16 — Deterministic-simulation substrate** → [phase_16](phase_16_deterministic_sim_substrate.md).
-- **Phase 17 — Gateway-migration model (both branches)** → [phase_17](phase_17_gateway_migration_model.md).
-- **Phase 18 — DSL formal model** → [phase_18](phase_18_dsl_formal_model.md).
-- **Phase 19 — Reconcile decision core under deterministic simulation** → [phase_19](phase_19_reconcile_core_simulation.md).
+- **Phase 11 — Formal-model EDSL (`Model`/`interpret`/`emitTLA`)**, consuming the Phase-10 indexed composition through a dedicated formal projection → [phase_11](phase_11_formal_model_kernel.md).
+- **Phase 12 — The amoebius explicit-state checker**, independently enumerating the shared `Model` and producing replayable bound/model-bound verdicts → [phase_12](phase_12_explicit_state_checker.md).
+- **Phase 13 — The amoebius symbolic checker**, owning QF_LIA/boolean induction obligations while injecting a dynamically resolved SMT decision procedure → [phase_13](phase_13_symbolic_checker.md).
+- **Phase 14 — The amoebius refinement checker**, compiling actual bounded-fragment Haskell functions and
+  proving preservation plus implication to invariant expressions projected from safe Phase-11 `Model` values
+  → [phase_14](phase_14_refinement_checker.md).
+- **Phase 15 — The compile-fail fixture harness**, binding ten claims to legal/illegal Haskell twins and exact
+  structured GHC code/span/message reasons across five calculus-owner phases → [phase_15](phase_15_compile_fail_harness.md).
+- **Phase 16 — Deterministic-simulation substrate**, running one polymorphic reference reconciler through
+  injected-client and `IOSim` interpreters, six controlled service models, four semantic fault schedules, and
+  a real five-calculus composition projection; same-seed bytes are a dynamic determinism control rather than a
+  committed golden, while modeled fidelity remains assumed → [phase_16](phase_16_deterministic_sim_substrate.md).
+- **Phase 17 — Gateway-migration model (both branches)**, with explorer/TLC agreement on 53 states, five safety and three fair-liveness obligations, bounded schedule agreement, semantic TLA+/CFG facts, the actual five-calculus formal projection, and an argued/tested structural cutoff; runtime fidelity remains UNVERIFIED → [phase_17](phase_17_gateway_migration_model.md).
+- **Phase 18 — DSL formal model**, joining named decoder/capacity/render/protocol readings to six bounded models with eight safety and four fair-liveness obligations; runtime fidelity remains UNVERIFIED → [phase_18](phase_18_dsl_formal_model.md).
+- **Phase 19 — Reconcile decision core under deterministic simulation**, with nine actual/reference planner cases, typed Present-only deletion, four convergent modeled-store schedules/POR runs, and bounded token/reservation recovery evidence; live fidelity remains UNVERIFIED → [phase_19](phase_19_reconcile_core_simulation.md).
 
 *The extension contract (substrate `none`, Register 1):*
-- **Phase 20 — The extension declaration** → [phase_20](phase_20_extension_declaration.md).
-- **Phase 21 — The per-extension laws L1-L5** → [phase_21](phase_21_extension_laws_per_extension.md).
-- **Phase 22 — The compositional laws C1-C7** → [phase_22](phase_22_extension_laws_compositional.md).
-- **Phase 23 — The security laws S1-S6** → [phase_23](phase_23_extension_security_laws.md).
-- **Phase 24 — The generated conformance gate** → [phase_24](phase_24_conformance_gate_generator.md).
+- **Phase 20 — The extension declaration**, an opaque five-component/same-scope value checked against two
+  ten-row fixture inventories and independently recomputed content identities; no law verdict or runtime
+  fidelity is claimed → [phase_20](phase_20_extension_declaration.md).
+- **Phase 21 — The per-extension laws L1-L5**, a declaration-joined evaluator checked over two lawful controls,
+  five exact single-law defects, six operation inputs, isolated renders, actual budget/evidence values, finite
+  source scans, and one pinned compiler barrier; generated gates and runtime conformance remain UNVERIFIED →
+  [phase_21](phase_21_extension_laws_per_extension.md).
+- **Phase 22 — The compositional laws C1-C7**, a same-request normalized composite checked by value over seven
+  pair/triple cases, 63 authored verdicts, exact resource folds, isolated-part projections, shared and distinct
+  content addresses, a compiler barrier, and seven mutants; universal C1 and runtime fidelity remain
+  UNVERIFIED → [phase_22](phase_22_extension_laws_compositional.md).
+- **Phase 23 — The security laws S1-S6**, a claimed/attested identity and rank-2 scope boundary checked over fifteen operations, five refusal and namespace pairs, two authority policies, 42 verdicts, four compiler
+  barriers, and six mutants; cryptographic, timing, persistence, composition, and runtime fidelity remain UNVERIFIED → [phase_23](phase_23_extension_security_laws.md).
+- **Phase 24 — The generated conformance gate**, deriving nineteen cases, five suite files, 24 coverage cells, and an opaque pure-link verdict; P execution, observer authenticity, C1 proof, and runtime fidelity remain UNVERIFIED → [phase_24](phase_24_conformance_gate_generator.md).
 
 *The generative surface — every artifact class becomes a recipe (substrate `none`, Registers 1–2):*
 - **Phase 25 — Dhall dhall-typecheck schema + smart-constructor prelude** → [phase_25](phase_25_dhall_schema_generation.md).

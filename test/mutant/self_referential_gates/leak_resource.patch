@@ -1,0 +1,6 @@
+capability: self_referential_gates
+mutant: leak_resource
+build-flag: self-referential-gates-leak-resource-mutant
+operator: obligation-injection
+production-locus: deriveGate/mutateLedger
+expected-red-locus: leak_resource

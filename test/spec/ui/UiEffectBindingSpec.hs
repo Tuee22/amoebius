@@ -2,6 +2,28 @@
 
 module Main (main) where
 
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Scope.Index qualified as CalculusScope
 import Amoebius.Ui.Bind
 import Amoebius.Ui.Check (checkUiSource)
 import Amoebius.Ui.ExternalLinkCatalog
@@ -91,7 +113,9 @@ runGreen root fixture = do
   checkAdditionalLinkErrors
   checkBoundedPortErrors fixture
   checkCoverageProperties fixture
+  checkCalculus root
   checkMutantControls root fixture
+  putStrLn "ui-effect-binding-calculus: PASS (5 kinds, 48 projected units)"
   putStrLn "ui-effect-binding-spec: PASS (7 ports, 2 links, 8 errors, 13 coverage classes, 7 mutants)"
 
 buildFixture :: FilePath -> IO Fixture
@@ -234,6 +258,36 @@ checkCoverageProperties fixture = do
   result <- quickCheckWithResult args $ forAll (elements classes) (coverageProperty fixture classes)
   assert (isSuccess result) "effect-binding generated coverage failed"
 
+checkCalculus :: FilePath -> IO ()
+checkCalculus root = do
+  expected <- loadTable (root </> "test/oracle/ui_effect_binding/calculus_projection.tsv")
+  tenant <- requireRight "calculus tenant" (CalculusScope.trustedTenant "ui-effect-binding-calculus-tenant")
+  subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "ui-effect-binding-calculus-subject")
+  membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
+  action <- requireRight "calculus request scope" $
+    CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+      let resources :: Int -> ResourceVector
+          resources count = ResourceVector 1 (fromIntegral count) 0 0
+          counts = [7, 2, 19, 13, 7] :: [Int]
+          artifact = artifactComponent scope "port-bindings" (resources 7) (RecipeId "ui-effect-binding" 7)
+          budget = budgetComponent scope "external-link-bindings" (resources 2)
+            (allowance (Bytes 2) (Slots 1) (Bytes 2))
+          lift = liftComponent scope "binding-refusals" (resources 19) OnHost
+          workflow = workflowComponent scope "generated-coverage-workflow" (resources 13) emptyLedger
+          evidence = evidenceComponent scope "mutant-evidence" (resources 7) PureRegister
+          composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+          ResourceVector cpu memory ephemeral pods = compositionResource composition
+          render = Text.unpack . Text.intercalate ","
+          actual =
+            [ ["calculus-kinds", render (map calculusTag (compositionKinds composition))]
+            , ["component-names", render (compositionNames composition)]
+            , ["projection-counts", render (map (Text.pack . show) counts)]
+            , ["resource-vector", render (map (Text.pack . show) [cpu, memory, ephemeral, pods])]
+            ]
+      assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
+      assertEqual "effect-binding calculus projection" expected actual
+  action
+
 coverageProperty :: Fixture -> [CoverageClass] -> CoverageClass -> Property
 coverageProperty fixture classes selected =
   checkCoverage
@@ -302,7 +356,7 @@ runMutant root fixture name = case firstMatching ((== name) . mutantName) mutant
   Nothing -> die ("unknown mutant: " <> name)
   Just mutant -> do
     checkMutantControls root fixture
-    putStrLn ("ui-effect-binding-mutant: RED " <> mutantName mutant <> " " <> mutantCase mutant)
+    putStrLn ("ui-effect-binding-mutant: RED " <> mutantName mutant <> " locus=" <> mutantCase mutant)
     exitFailure
 
 bindFixture

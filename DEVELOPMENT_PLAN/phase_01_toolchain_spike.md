@@ -203,7 +203,7 @@ toolchain only.
 
 **Depends on:** [Phase 0](phase_00_documentation_suite.md) — documentation suite (whole DSL), which this phase consumes rather than rebuilds.
 
-**Gate:** against its source snapshot, `python3 tools/toolchain_spike_gate.py` dynamically resolves a compatible graph,
+**Gate:** against its source snapshot, `python3 tools/run_phase_gate.py 01` dynamically resolves a compatible graph,
 builds and runs every named probe and mutant, verifies every reviewed patch is tracked under an authored root,
 writes only ignored run output, leaves authored paths unchanged, and publishes a verified repository-local attestation.
 

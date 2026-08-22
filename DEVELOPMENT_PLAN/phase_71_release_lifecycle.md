@@ -113,7 +113,7 @@ protocols and the `PromotionGate` are substrate-agnostic in design but validated
 
 **Depends on:** [Phase 70](phase_70_ui_projection_runtime.md) — owner-scoped UI projection runtime, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test release-lifecycle-live` is green: one `InForceSpec` topology on the linux-cpu kind
+**Gate:** `python3 tools/run_phase_gate.py 71` is green: one `InForceSpec` topology on the linux-cpu kind
 cluster exercises the ledger write, the refused promotion, the satisfied advance, and the ordered rollout
 end-to-end. Its representative set, oracles, observers, and mutants are delegated to
 [Gate integrity](#gate-integrity).

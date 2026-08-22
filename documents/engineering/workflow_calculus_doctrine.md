@@ -154,6 +154,14 @@ itself can be consistently wrong. The mitigation is the independent-oracle disci
 is authored against the requirement, by a path that does not run through the machinery under test — and that
 discipline is owned by [`testing_doctrine.md`](./testing_doctrine.md), not by this algebra.
 
+The pure boundary now exists. Phase 49 freezes one independent declaration inventory over all 96 contracts,
+derives workflow values for the 93 entries that carry commands, and routes those entries through one runner.
+The runner executes the retained command without a shell, observes its exit verdict, then seals that verdict
+through a typed workflow whose ledger contains the five arms and balances the gate-process obligation. The
+three contracts with prose-only gates do not receive invented commands; their values arise when their owning
+phases make the gate runnable. This is a Decision-layer result. Whatever live effects a retained mechanism
+performs keep that mechanism's own register and evidence burden.
+
 ---
 
 ## 6. What the calculus does not decide
@@ -172,8 +180,10 @@ discipline is owned by [`testing_doctrine.md`](./testing_doctrine.md), not by th
   *before* the provider call and reconciled after a restart, which is the reconciler's shape rather than the
   calculus's ([`cluster_lifecycle_doctrine.md`](./cluster_lifecycle_doctrine.md)). Until a phase delivers it,
   crash-orphaned resources are a `live-effect` residue that this calculus does not reduce.
-- **It is not built.** No phase has yet delivered a workflow value, a teardown obligation, or a generated gate.
-  Status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+- **It does not make the retained mechanism self-authenticating.** Phase 49 delivers workflow values, the
+  teardown obligation, and the routed consumer, but keeps each authored command as an independent executable
+  predicate. Removing that path would turn the self-reference from a risk with a control into an unchecked
+  assumption. Status and the exact delivered counts live in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 

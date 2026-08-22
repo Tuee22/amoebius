@@ -36,6 +36,8 @@ independent-oracle-isolation	checks	reference-oracle-independent
 kernel-source-discipline	checks	compile-partial-token-scan
 canonical-json-goldens	checks	goldens-are-canonical-json
 no-tracked-digest-table	checks	derived-digest-table-untracked
+semantic-oracles-complete	checks	semantic-oracles-complete
+compile-totality	checks	totality-options
 generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
 bound-program-only-compiler-input	items	bound_program_input
 inseparable-client-server-compilation	items	paired_plan_output
@@ -77,6 +79,10 @@ fresh-process-determinism-battery	metrics	fresh-process-determinism
 specific-negative-battery	metrics	pinned-negatives
 type-seal-battery	metrics	type-seals
 six-mutant-battery	metrics	mutants
+five-calculus-kind-cardinality	metrics	calculus-kinds
+five-calculus-component-vector	metrics	calculus-components
+five-calculus-projection-counts	metrics	calculus-projection-counts
+five-calculus-resource-vector	metrics	calculus-resource-vector
 network-isolated-pure-gate	metrics	network-observer
 browser-interpreter-fidelity	metrics	browser-interpreter-fidelity
 server-interpreter-fidelity	metrics	server-interpreter-fidelity

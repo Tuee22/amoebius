@@ -158,9 +158,9 @@ host-local peer into a wild endpoint, and none that exposes a workload to the wi
 **Owner:** [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (capability: only the edge holds the "expose-to-wild" capability) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct indices that do not interconvert).
 
-**Layer:** type-foreclosed at the Haskell IR — only the Keycloak edge holds the expose-to-wild capability and endpoint kinds do not interconvert; runtime-checked residue — that the running cluster in fact exposes no unauthenticated path. The no-backdoor golden over the emitted objects is `decode-foreclosed`.
+**Layer:** type-foreclosed at the Haskell IR — only the Keycloak edge holds the expose-to-wild capability and endpoint kinds do not interconvert; runtime-checked residue — that the running cluster in fact exposes no unauthenticated path. The no-backdoor semantic predicate over the emitted objects is `decode-foreclosed`.
 **Validation-locus:** `dhall-typecheck` (the application schema exposes no authorable wild-ingress or raw
-NodePort arm) + `rendered-artifact-oracle` (the no-backdoor-ingress golden on the emitted objects — no wild
+NodePort arm) + `rendered-artifact-oracle` (the no-backdoor-ingress semantic predicate on the emitted objects — no wild
 NodePort or Keycloak-skipping Ingress in the rendered manifest, validated by Phase 33 in Register 1) + `gadt-decode` (only the edge holds
 the expose-to-wild capability, and endpoint kinds are distinct non-interconverting indices — a self-published
 wild endpoint has no constructor) + `live-effect` residue (that the running cluster in fact exposes no
@@ -448,13 +448,17 @@ requests are the live oracle, not a click-visibility test.
 **Phase-38 evidence.** The Register-1 gate matches five normalized registry tuples and byte-equal client/server
 projections against an independent extractor, matches six allow/deny rows and four exact stale-epoch failures,
 requires every denial to leave an empty pure effect trace, and kills both `default_allow` and
-`visibility_is_authorization`. Live gateway, UI-server, identity-provider, and provider-policy enforcement is
-still UNVERIFIED. See [Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md).
+`visibility_is_authorization` at distinct loci. Nine generated classes meet their floor, the real five-calculus
+projection composes counts `5,6,8,9,2` to `5,30,0,0`, all 15 metrics match, and 46 surfaces join to 63 items.
+Live gateway, UI-server, identity-provider, and provider-policy enforcement is still UNVERIFIED. See
+[Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md).
 
 **Phase-43 evidence.** The Register-2 `serve-ui` process derives tenant, subject, permission, grant, and epoch
 from a signed credential minted by a separate authority process. Own-scope read/mutation reaches a separate
 capability-guarded handler, while foreign, forged-header, revoked, wrong-origin, and stale twins produce zero
 handler bytes; startup, private-plan, idempotency, and WebSocket pairs also pass, and nine mutants turn red.
+The startup battery now includes an extra unreferenced linked handler, and the real five-calculus projection
+accounts for 80 units.
 Live Keycloak, edge exclusivity, provider policy, cluster deployment, and HA remain UNVERIFIED. See
 [Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md).
 
@@ -504,9 +508,10 @@ grant after revocation; every cross-scope result must be indistinguishable from 
 mutation may occur.
 
 **Phase-8 evidence.** The Register-1 scope gate matches six owner/grant joins and the exact same-tenant
-`OwnerMismatch` and cross-tenant `TenantMismatch` swaps. Raw `ResourceId` construction and scope retagging fail
-to compile, and the committed owner-equality mutant makes both swaps red. Provider enforcement remains the live
-residue. See [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
+`OwnerMismatch` and cross-tenant `TenantMismatch` swaps. Legal twins compile while raw `ResourceId`
+construction, scope retagging, request-index escape, and request-scope forgery fail at pinned compiler reasons;
+the registry-backed owner-equality mutant makes both swaps red. Provider enforcement remains the live residue.
+See [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
 
 **Phase-68 evidence.** The Register-3 gate authenticates and introspects three real Keycloak credentials across
 two tenants, then drives a constructor-private Haskell request context through paired own/foreign Postgres RLS,
@@ -556,10 +561,11 @@ formatter into a public response, log a labelled secret, key a cache without its
 topic, and feed untrusted model/browser text into an authority sink; each must identify the complete offending
 path before effects.
 
-**Phase-8 evidence.** The Register-1 flow gate matches four independently authored direct/transitive rows,
-meets six generated reject-class floors, and rejects general declassification at compile time. Cycle,
-missing-member, and transitive-leak diagnostics are total in the pure model; live sink behavior remains
-UNVERIFIED. See [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
+**Phase-8 evidence.** The Register-1 flow gate matches four independently authored direct/transitive decisions
+and exact subject-mismatch, cycle, missing-member, and missing-path diagnostic rows. Nine generated rejection
+classes meet their floors, general declassification fails at its pinned compiler reason, and the total checker
+reports transitive leaks with complete paths. Live sink behavior remains `UNVERIFIED`. See
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
 
 ### 3.83 A UI plan executed after an authority-bearing source changed
 
@@ -610,9 +616,11 @@ browser's claimed generation. Every stale or mixed replay must fail closed; a co
 declared source set remains executable, preventing an oracle that merely rejects all old bundles.
 
 **Phase-40 evidence.** The Register-1 compiler matches four logical projections, four canonical JSON goldens,
-four concrete SHA-256 identities, and six finite-demand cells. An independently assembled authority-source
+four run-time-derived SHA-256 identities, and six finite-demand cells. The logical rows, not the same-commit
+regression goldens, provide the independent semantic relation. An independently assembled authority-source
 list detects both change and omission, opposite insertion orders in fresh processes are byte-identical, and all
-six projection/digest mutants turn red. Request-time freshness and live release pairing remain UNVERIFIED. See
+six projection/digest mutants turn red at exact loci. The real five-calculus composition accounts for 32 units.
+Request-time freshness and live release pairing remain UNVERIFIED. See
 [Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md).
 
 ---

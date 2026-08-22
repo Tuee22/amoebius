@@ -1,0 +1,5 @@
+metric	value
+calculus-kinds	artifact,budget,lift,workflow,evidence
+component-names	generic-composition-artifact,closed-scope-budget,local-composition-corpus,ordered-effect-workflow,mutant-evidence
+projection-counts	1,3,42,4,5
+resource-vector	5,55,0,0

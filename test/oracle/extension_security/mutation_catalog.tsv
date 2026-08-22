@@ -1,0 +1,7 @@
+mutant	subject	red_law	red_property
+tampered-identity-accepted	s1-tampered-accepted	S1	AttestedIdentityOnly
+caller-supplied-scope	s2-caller-scope	S2	SkolemScopeOnly
+unscoped-default-arm	s3-unscoped-arm	S3	RefusalByDefault
+distinguishable-refusal	s4-distinguishable	S4	IndistinguishableRefusal
+resource-only-cache-key	s5-key-collapse	S5	InjectiveNamespace
+revocation-policy-omitted	s6-policy-omitted	S6	RevocationBound

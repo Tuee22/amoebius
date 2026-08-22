@@ -16,7 +16,7 @@ Phase 56's and are consumed unchanged. Register 3, live, on the `apple` substrat
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md
 **Generated sections**: none
 
 </details>
@@ -81,7 +81,7 @@ the host, not the accelerator. Any host natively running `arm64` Linux satisfies
 
 **Depends on:** [Phase 56](phase_56_base_image_registry.md) — the base image, the jit-build resolver, and the in-cluster registry, which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/complementary_arch_gate.py --execute` publishes the complementary architecture's tag
+**Gate:** `python3 tools/run_phase_gate.py 57` publishes the complementary architecture's tag
 on a natively produced attestation, and satisfies every fixture, oracle, OS-boundary observation, and seeded
 mutant named in [Gate integrity](#gate-integrity).
 

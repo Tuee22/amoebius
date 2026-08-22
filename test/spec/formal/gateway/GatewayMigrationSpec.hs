@@ -6,6 +6,11 @@ import Amoebius.Formal.GatewayMigration
 import Amoebius.Formal.Interpret
 import Amoebius.Formal.Model
 import Amoebius.Multicluster.StructuralFit
+import CalculusProjection
+  ( CalculusProjection (..)
+  , referenceCalculusModel
+  , referenceCalculusProjection
+  )
 import Control.Concurrent.Class.MonadSTM
   ( atomically
   , modifyTVar'
@@ -28,6 +33,7 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import qualified Data.Text as Text
 import System.Directory (canonicalizePath, createDirectoryIfMissing, doesFileExist, getCurrentDirectory)
 import System.Environment (lookupEnv)
 import System.Exit (ExitCode (..), exitFailure)
@@ -88,7 +94,8 @@ main = do
   assertEqual "GatewayMigration distinct-state oracle" 53 (Map.size (exploreStates explorer))
   assertEqual "GatewayMigration explorer safety" Nothing (exploreViolation explorer)
   checkReachability explorer
-  checkGolden root
+  rendererMutants <- checkRendererSemantics root (emitTLA gatewayMigrationModel)
+  calculusProjection <- checkCalculusComposition root
 
   putStrLn "gateway-migration-model-spec: TLC safety and liveness"
   safetyTlc <- runTlc java jar output "safety" True safetyModel
@@ -136,7 +143,7 @@ main = do
   stressMutantTlc <- runTlc java jar output "scope3-shared-resource-mutant" False sharedResourceMutant
   assertTlcRed "shared-resource mutant TLC" stressMutantTlc
 
-  writeResults output safetyTlc fairnessDrops iosimAgreement cutoffMutants
+  writeResults output safetyTlc fairnessDrops iosimAgreement cutoffMutants rendererMutants calculusProjection
   putStrLn "gateway-migration-model-spec: PASS"
 
 safetyModel :: Model
@@ -214,13 +221,82 @@ atomAt name state = case Map.lookup name state of
 boolAt :: Name -> State -> Bool
 boolAt name state = Map.lookup name state == Just (BoolValue True)
 
-checkGolden :: FilePath -> IO ()
-checkGolden root = do
-  expectedTla <- readFile (root </> "test/golden/formal/gateway/GatewayMigration.tla.golden")
-  expectedCfg <- readFile (root </> "test/golden/formal/gateway/GatewayMigration.cfg.golden")
-  let (Tla actualTla, Cfg actualCfg) = emitTLA gatewayMigrationModel
-  assertEqual "GatewayMigration TLA byte golden" expectedTla actualTla
-  assertEqual "GatewayMigration CFG byte golden" expectedCfg actualCfg
+checkRendererSemantics :: FilePath -> (Tla, Cfg) -> IO Int
+checkRendererSemantics root rendered@(Tla tla, Cfg cfg) = do
+  expected <- readMetricOracle (root </> "test/oracle/formal/gateway/renderer_semantics.tsv")
+  assertEqual "GatewayMigration renderer semantic facts" expected (rendererFacts gatewayMigrationModel rendered)
+  let dropInvariant = (Tla tla, Cfg (rewriteLine "INVARIANT UniqueGatewayOwner" "" cfg))
+      weakenFairness = (Tla (rewriteLine "  /\\ WF_vars(ClientWrite)" "  /\\ SF_vars(ClientWrite)" tla), Cfg cfg)
+      mutants = [("drop-invariant", dropInvariant), ("weak-to-strong-fairness", weakenFairness)]
+  forM_ mutants $ \(name, mutant) ->
+    assert (rendererFacts gatewayMigrationModel mutant /= expected) (name <> " survived renderer semantics")
+  pure (length mutants)
+
+rendererFacts :: Model -> (Tla, Cfg) -> Map.Map String String
+rendererFacts model (Tla tla, Cfg cfg) = Map.fromList
+  [ ("module", moduleName)
+  , ("extensions", lineAfter "EXTENDS " tla)
+  , ("constants", lineAfter "CONSTANTS " tla)
+  , ("variables", lineAfter "VARIABLES " tla)
+  , ("initial-assignments", presentNames (\name -> ("/\\ " <> name <> " = ") `isInfixOf` tla) (map fst (modelInit model)))
+  , ("actions", presentNames (\name -> (name <> " ==") `elem` lines tla) (map actionName (modelActions model)))
+  , ("weak-fairness", presentNames (\name -> ("WF_vars(" <> name <> ")") `isInfixOf` tla) (map fairnessAction (modelFairness model)))
+  , ("invariants", presentNames (\name -> definition name tla && cfgEntry "INVARIANT " name cfg) (map namedExprName (modelInvariants model)))
+  , ("properties", presentNames (\name -> propertyRendered name && cfgEntry "PROPERTY " name cfg) (map propertyName (modelProperties model)))
+  , ("constraint", maybe "" (\value -> if definition (namedExprName value) tla && cfgEntry "CONSTRAINT " (namedExprName value) cfg then namedExprName value else "") (modelConstraint model))
+  , ("specification", lineAfter "SPECIFICATION " cfg)
+  , ("check-deadlock", lineAfter "CHECK_DEADLOCK " cfg)
+  ]
+ where
+  moduleName = case find ("---- MODULE " `isPrefixOf`) (lines tla) of
+    Just line -> takeWhile (/= ' ') (drop (length "---- MODULE ") line)
+    Nothing -> ""
+  presentNames predicate = intercalate "," . filter predicate
+  definition name contents = any ((name <> " ==") `isPrefixOf`) (lines contents)
+  propertyRendered name = any (\line -> (name <> " ==") `isPrefixOf` line && " ~> " `isInfixOf` line) (lines tla)
+  cfgEntry prefix name contents = (prefix <> name) `elem` lines contents
+
+lineAfter :: String -> String -> String
+lineAfter prefix contents = case find (prefix `isPrefixOf`) (lines contents) of
+  Just line -> drop (length prefix) line
+  Nothing -> ""
+
+rewriteLine :: String -> String -> String -> String
+rewriteLine old new = unlines . map (\line -> if line == old then new else line) . lines
+
+checkCalculusComposition :: FilePath -> IO Bool
+checkCalculusComposition root = do
+  expected <- readMetricOracle (root </> "test/oracle/formal/CalculusComposition.expected.tsv")
+  projection <- either (failCheck "calculus projection") pure referenceCalculusProjection
+  model <- either (failCheck "calculus formal model") pure referenceCalculusModel
+  assertEqual "calculus formal-model structural problems" [] (modelProblems model)
+  explored <- requireRight "calculus formal-model explorer" (explore model)
+  let resourceParts = map Text.unpack (Text.splitOn (Text.pack ",") (projectionResources projection))
+      actual = case resourceParts of
+        [cpu, memory, ephemeral, pods] -> Map.fromList
+          [ ("calculus-kinds", intercalate "," (map Text.unpack (projectionOrder projection)))
+          , ("component-count", show (length (projectionNames projection)))
+          , ("cpu", cpu)
+          , ("memory", memory)
+          , ("ephemeral", ephemeral)
+          , ("pods", pods)
+          , ("formal-distinct-state-count", show (Map.size (exploreStates explored)))
+          , ("formal-safety", if exploreViolation explored == Nothing then "green" else "red")
+          ]
+        _ -> Map.empty
+  assertEqual "gateway five-calculus semantic projection" expected actual
+  pure True
+ where
+  failCheck label problem = putStrLn ("FAIL: " <> label <> ": " <> problem) >> exitFailure
+
+readMetricOracle :: FilePath -> IO (Map.Map String String)
+readMetricOracle path = do
+  rows <- readTsv path
+  Map.fromList <$> forM rows (\row -> case row of
+    [name, value] -> pure (name, value)
+    _ -> failCheck ("malformed metric oracle row in " <> path <> ": " <> show row))
+ where
+  failCheck message = putStrLn ("FAIL: " <> message) >> exitFailure
 
 runTlc :: FilePath -> FilePath -> FilePath -> String -> Bool -> Model -> IO TlcResult
 runTlc java jar output suffix dumpStates model = do
@@ -376,7 +452,7 @@ checkInvariantDelete root = do
       (Tla correctTla, Cfg correctCfg) = emitTLA gatewayMigrationModel
       (Tla mutantTla, Cfg mutantCfg) = emitTLA mutant
   assert (required /= actual) "invariant-delete mutant survived obligation oracle"
-  assert (correctTla /= mutantTla && correctCfg /= mutantCfg) "invariant-delete mutant survived byte golden"
+  assert (correctTla /= mutantTla && correctCfg /= mutantCfg) "invariant-delete mutant left rendered artifacts unchanged"
 
 checkIOSimPOR :: ExploreResult -> [(String, Name, Model)] -> IO Bool
 checkIOSimPOR correctExplorer mutants = do
@@ -596,8 +672,8 @@ bool = Literal . BoolValue
 int :: Integer -> Expr
 int = Literal . IntValue
 
-writeResults :: FilePath -> TlcResult -> Int -> Bool -> Int -> IO ()
-writeResults output safetyTlc fairnessDrops iosimAgreement cutoffMutants =
+writeResults :: FilePath -> TlcResult -> Int -> Bool -> Int -> Int -> Bool -> IO ()
+writeResults output safetyTlc fairnessDrops iosimAgreement cutoffMutants rendererMutants calculusProjection =
   writeFile (output </> "phase-results.tsv") . unlines $
     [ "metric\tvalue"
     , "gateway-distinct-state-count\t" <> show (fromMaybe 0 (tlcDistinctCount safetyTlc))
@@ -611,6 +687,8 @@ writeResults output safetyTlc fairnessDrops iosimAgreement cutoffMutants =
     , "iosimpor-agreement\t" <> if iosimAgreement then "green" else "red"
     , "cutoff-clause-delete-mutants\t" <> show cutoffMutants <> "/8-red"
     , "scope3-shared-resource-mutant\tred"
+    , "renderer-semantic-mutants\t" <> show rendererMutants <> "/2-red"
+    , "calculus-composition-projection\t" <> if calculusProjection then "green" else "red"
     , "decomposition-lemma\tOPEN"
     ]
 

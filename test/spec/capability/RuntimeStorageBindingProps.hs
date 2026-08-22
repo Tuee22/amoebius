@@ -52,7 +52,7 @@ instancesForBody body = case body of
   JobBody completions parallelism _ _ -> fromIntegral (min completions parallelism)
   HostProcessBody slots _ -> length slots
 
-runRuntimeStorageBindingProps :: CapabilityFixture -> IO ()
+runRuntimeStorageBindingProps :: CapabilityFixture -> IO Int
 runRuntimeStorageBindingProps fixture = do
   deployment <- either (fail . show) pure (fixtureDeployment fixture SingleNode)
   let requiredBytes = fromIntegral (expectedDesiredInstances deployment * 7)
@@ -60,8 +60,9 @@ runRuntimeStorageBindingProps fixture = do
     quickCheckWithResult
       stdArgs {chatty = False, maxSuccess = 400}
       (runtimeBoundary fixture requiredBytes)
-  unless (isSuccess result) (fail ("Phase-11 runtime-storage property failed: " <> show result))
+  unless (isSuccess result) (fail ("Phase-31 runtime-storage property failed: " <> show result))
   putStrLn "provision-runtime-storage-properties: TESTED exact backing vs one-byte-short (accept/reject >=40%)"
+  pure 1
 
 runtimeBoundary :: CapabilityFixture -> Natural -> Bool -> Property
 runtimeBoundary fixture requiredBytes exact =

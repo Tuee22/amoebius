@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""The Phase-7 gate — the illegal-state corpus and its validation-locus ledger.
+"""The Phase-27 gate — the illegal-state corpus and its validation-locus ledger.
 
 The capability claim is unchanged: every catalog entry reconciles to an owner and family,
 the Gate-1 and Gate-2 negative corpora each fail at their own locus with a green twin that
 differs only in the foreclosed dimension, the compile-fail pairs separate legal from
 illegal, four QuickCheck properties hold under `checkCoverage`, the RKE2 server arms are
-exhausted, and five seeded mutants — registry reconciliation, union-arm addition, resource
-normalization, GADT-index weakening, and the broken-decision mutant — each turn the battery
-red at their intended locus.
+exhausted, six registry mutants and four implementation mutants each turn the battery red
+at their intended locus, and the reached Phase-8/9 rows join through explicit predecessor
+evidence rather than disappearing at an obsolete owner threshold.
 
-As in Phase 6, the results table used to restate the gate's intentions as string literals.
+As in Phase 26, the results table used to restate the gate's intentions as string literals.
 Every row that the run can observe is now measured: the catalog and registry counts come
 from the registry reader, the corpus counts and locus-ledger tallies from the suite's own
 acceptance token, the decision-mutant row from the set of properties that actually went
@@ -53,6 +53,12 @@ HONESTY_BANNER = "# Register-1 only; Tier-2/model-runtime correspondence UNVERIF
 ACCEPTANCE = re.compile(
     r"illegal-state-dsl-spec: PASS \((\d+) Gate-1, (\d+) Gate-2, (\d+) positives, (\d+) discharged, (\d+) deferred\)"
 )
+CALCULUS_ACCEPTANCE = re.compile(
+    r"illegal-state-calculus: PASS \((\d+) kinds, (\d+) projected units\)"
+)
+PREDECESSOR_ACCEPTANCE = re.compile(
+    r"illegal-state-predecessors: PASS \((\d+) joined gadt rows, (\d+) compile pairs\)"
+)
 
 CHECKS = {
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
@@ -75,30 +81,30 @@ PROPERTIES = {
 }
 
 EXPECTED_RESULTS = {
-    # 90 is the number of catalog entries carrying a Delivery-owner across
+    # 97 is the number of catalog entries carrying a Delivery-owner across
     # documents/illegal_state/*.md — independently checkable with a grep, and the same
-    # count the registry reader reconciles against. It was 88 until the one-binary
-    # amendment added `3.89 context-role-cell` and `3.90 role-indexed-cardinality`, the
-    # context/role grid's two Gate-1 entries, without updating these pins in the same
-    # change. The three counts reconcile with each other and with `discharged-subcases`,
-    # which is what makes the update a judgement rather than a fit to whatever ran:
-    # 106 subcases = 33 discharged here + 73 deferred to a later owner.
-    "catalog-entries": "90/90-mapped",
-    "registry-subcases": "106/106-reconciled",
+    # count the registry reader reconciles against. The current arithmetic is independently
+    # joined rather than copied from a passing run: 121 subcases = 43 discharged rows +
+    # 78 exact-owner deferrals, and the discharged set includes seven explicit Phase-8/9
+    # predecessor mappings whose evidence ids must still exist.
+    "catalog-entries": "97/97-mapped",
+    "registry-subcases": "121/121-reconciled",
     "registry-mutants": "6/6-red",
-    "dhall-typecheck-corpus": "14/14-red-exact-with-green-twins",
+    "dhall-typecheck-corpus": "17/17-red-exact-with-green-twins",
     "gadt-decode-corpus": "13/13-red-tagged-with-green-twins",
     "positive-corpus": "12/12-green",
     "compile-fail-pairs": "5/5-legal-green-illegal-type-red",
     "quickcheck-properties": "4/4-green-checkCoverage",
     "rke2-arms": "3/3-exhausted-PROVEN",
-    "discharged-subcases": "33/33",
-    "deferred-subcases": "73/73-owner-pinned",
+    "discharged-subcases": "43/43",
+    "deferred-subcases": "78/78-owner-pinned",
+    "predecessor-gadt-coverage": "7/7-joined-4/4-compile-pairs",
     "union-arm-mutant": "red",
     "normalization-mutant": "red",
     "gadt-index-mutant": "red",
     "decision-mutant": "4/4-properties-red",
     "acceptance-token": "spec-composition-proven-illegal-state-corpus",
+    "calculus-composition-projection": "5/5-kinds-172/172-units",
     "capacity-feasibility": "UNVERIFIED",
     "render-fidelity": "UNVERIFIED",
     "runtime": "UNVERIFIED",
@@ -117,12 +123,20 @@ SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     "quickcheck-property-coverage": ("quickcheck-properties", EXPECTED_RESULTS["quickcheck-properties"]),
     "rke2-server-arms-finite-domain": ("rke2-arms", EXPECTED_RESULTS["rke2-arms"]),
     "validation-locus-ledger": ("discharged-subcases", EXPECTED_RESULTS["discharged-subcases"]),
+    "predecessor-gadt-coverage": (
+        "predecessor-gadt-coverage",
+        EXPECTED_RESULTS["predecessor-gadt-coverage"],
+    ),
     "catalog-registry-mutants": ("registry-mutants", EXPECTED_RESULTS["registry-mutants"]),
     "union-arm-addition-mutant": ("union-arm-mutant", "red"),
     "resource-normalization-mutant": ("normalization-mutant", "red"),
     "gadt-index-weakening-mutant": ("gadt-index-mutant", "red"),
     "broken-decision-mutant": ("decision-mutant", EXPECTED_RESULTS["decision-mutant"]),
     "illegal-state-spec-composition": ("acceptance-token", EXPECTED_RESULTS["acceptance-token"]),
+    "illegal-state-calculus-composition": (
+        "calculus-composition-projection",
+        EXPECTED_RESULTS["calculus-composition-projection"],
+    ),
     "capacity-feasibility": None,
     "binding-feasibility": None,
     "render-fidelity": None,
@@ -180,7 +194,7 @@ def registry_side() -> tuple[bool, int, int, int]:
     killed = registry_mutants()
     print(f"  ok    {entries} catalog entries reconcile to {len(rows)} registry subcases")
     print(f"  ok    {killed}/6 registry reconciliation mutants turned the check red")
-    return killed == 4, entries, len(rows), killed
+    return killed == 6, entries, len(rows), killed
 
 
 def registry_mutants() -> int:
@@ -301,7 +315,7 @@ def mutant_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str
 
     normalization = run(
         [cabal, f"--with-compiler={ghc}", f"--builddir={BUILD_ROOT}",
-         f"--store-dir={ROOT / '.build' / 'cabal-store'}", "test", "dsl-spec", "-f-illegal-state-mutant",
+         f"--store-dir={ROOT / '.build' / 'cabal-store'}", "test", "illegal-state-corpus-spec", "-f-illegal-state-mutant",
          "-fresource-normalization-mutant", "--test-show-details=direct"],
         env=env, expect=False,
     )
@@ -345,20 +359,30 @@ def suite_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str,
     print("\nsuite side — the green corpus and the generated locus ledger\n")
     result = run(
         [resolved["cabal"]["path"], f"--with-compiler={resolved['ghc']['path']}",
-         f"--builddir={BUILD_ROOT}", f"--store-dir={ROOT / '.build' / 'cabal-store'}", "test", "dsl-spec",
+         f"--builddir={BUILD_ROOT}", f"--store-dir={ROOT / '.build' / 'cabal-store'}", "test", "illegal-state-corpus-spec",
          "-f-illegal-state-mutant", "-f-resource-normalization-mutant", "--test-show-details=direct"],
         env=env_for(resolved), expect=False,
     )
     (run_dir / "suite.log").write_text(result.stdout, encoding="utf-8")
     if result.returncode != 0:
-        print(f"  FAIL  dsl-spec exited {result.returncode}; transcript at {gate_common.rel(run_dir / 'suite.log')}")
+        print(f"  FAIL  illegal-state-corpus-spec exited {result.returncode}; transcript at {gate_common.rel(run_dir / 'suite.log')}")
         print("        " + result.stdout[-1500:].replace("\n", "\n        "))
         return False, {}
     match = ACCEPTANCE.search(result.stdout)
     if match is None:
-        print("  FAIL  the Phase-7 acceptance token is absent, so its counts cannot be measured")
+        print("  FAIL  the Phase-27 acceptance token is absent, so its counts cannot be measured")
         return False, {}
     dhall_typecheck, gadt_decode, positives, discharged, deferred = (int(v) for v in match.groups())
+    calculus = CALCULUS_ACCEPTANCE.search(result.stdout)
+    if calculus is None:
+        print("  FAIL  the five-calculus projection token is absent")
+        return False, {}
+    calculus_kinds, calculus_units = (int(value) for value in calculus.groups())
+    predecessor = PREDECESSOR_ACCEPTANCE.search(result.stdout)
+    if predecessor is None:
+        print("  FAIL  the predecessor-coverage token is absent")
+        return False, {}
+    predecessor_rows, predecessor_compile_pairs = (int(value) for value in predecessor.groups())
     print(f"  ok    corpus green: {dhall_typecheck} Gate-1, {gadt_decode} Gate-2, {positives} positives")
     if not LOCUS_LEDGER.is_file():
         print(f"  FAIL  locus-ledger-honesty-banner no ledger was emitted at {gate_common.rel(LOCUS_LEDGER)}")
@@ -368,7 +392,9 @@ def suite_side(resolved: dict[str, Any], run_dir: Path) -> tuple[bool, dict[str,
         return False, {}
     print(f"  ok    locus-ledger-honesty-banner {discharged} discharged, {deferred} deferred, banner present")
     return True, {"dhall-typecheck": dhall_typecheck, "gadt-decode": gadt_decode, "positives": positives,
-                  "discharged": discharged, "deferred": deferred}
+                  "discharged": discharged, "deferred": deferred, "calculus-kinds": calculus_kinds,
+                  "calculus-units": calculus_units, "predecessor-rows": predecessor_rows,
+                  "predecessor-compile-pairs": predecessor_compile_pairs}
 
 
 def measure(entries: int, subcases: int, killed: int, counts: dict[str, int], mutants: dict[str, str]) -> dict[str, str]:
@@ -384,11 +410,18 @@ def measure(entries: int, subcases: int, killed: int, counts: dict[str, int], mu
         "rke2-arms": "3/3-exhausted-PROVEN",
         "discharged-subcases": f"{counts['discharged']}/{counts['discharged']}",
         "deferred-subcases": f"{counts['deferred']}/{counts['deferred']}-owner-pinned",
+        "predecessor-gadt-coverage": (
+            f"{counts['predecessor-rows']}/7-joined-"
+            f"{counts['predecessor-compile-pairs']}/4-compile-pairs"
+        ),
         "union-arm-mutant": mutants["union-arm-mutant"],
         "normalization-mutant": mutants["normalization-mutant"],
         "gadt-index-mutant": mutants["gadt-index-mutant"],
         "decision-mutant": mutants["decision-mutant"],
         "acceptance-token": "spec-composition-proven-illegal-state-corpus",
+        "calculus-composition-projection": (
+            f"{counts['calculus-kinds']}/5-kinds-{counts['calculus-units']}/172-units"
+        ),
         "capacity-feasibility": "UNVERIFIED",
         "render-fidelity": "UNVERIFIED",
         "runtime": "UNVERIFIED",
@@ -454,7 +487,7 @@ def main() -> int:
             for name, record in resolved.items()
             if name != "platform"
         },
-        dependencies={"dsl-spec": "cabal test", "decision-prop-spec": "cabal test"},
+        dependencies={"illegal-state-corpus-spec": "cabal test", "decision-prop-spec": "cabal test"},
         checks=results,
         mutants=[{"name": name, "status": value} for name, value in sorted(mutants.items())]
         + [{"name": "registry reconciliation", "status": f"{killed}/6-red"}],

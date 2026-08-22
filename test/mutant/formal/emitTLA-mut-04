@@ -1,2 +1,2 @@
 operator: render Always with <> instead of []
-expected: ToyModel byte golden differs at the temporal operator
+expected: authored renderer semantic facts reject Eventually for AlwaysMutualExclusion

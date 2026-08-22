@@ -280,7 +280,7 @@ the provider nodes of Phases 49–52 pull. Its complement is [Phase 57](phase_57
 
 **Depends on:** [Phase 55](phase_55_bootstrap_coordinator_kind.md) — python bootstrap coordinator + substrate detect + single kind cluster, which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/base_image_registry_gate.py --execute` publishes this architecture's base image
+**Gate:** `python3 tools/run_phase_gate.py 56` publishes this architecture's base image
 atomically into the in-cluster `distribution` registry and satisfies every fixture, oracle, OS-boundary
 observation, and seeded mutant named in [Gate integrity](#gate-integrity). A self-emitted compliance trace
 cannot satisfy it.

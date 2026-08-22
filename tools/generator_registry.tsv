@@ -14,6 +14,7 @@ docs/**	-	phase-62
 dhall/**/*.dhall	tools/dhall_typecheck.py	phase-11
 dist-newstyle/**	tools/toolchain_spike_gate.py	phase-1
 calculus/**	tools/artifact_calculus_gate.py	phase-3
+checkers/**	tools/explicit_state_checker_gate.py	phase-12
 dsl/**	tools/gadt_decode_ir_gate.py	phase-12
 docker/**/Dockerfile	tools/base_image_registry_live_build.py	phase-36
 evidence-store/**	tools/attestation.py	phase-0

@@ -1,0 +1,43 @@
+# Authored expectation for the Phase-36 closed transaction-vocabulary surface join.
+# SQL output is generated per run and is deliberately absent from this file.
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+three-row-declarations	metrics	row-declarations
+three-authored-row-semantics	items	document,job,release
+ten-required-columns	metrics	required-columns
+all-columns-not-null	metrics	not-null-columns
+three-composite-primary-keys	metrics	primary-keys
+three-scope-foreign-keys	metrics	scope-foreign-keys
+three-row-policies	metrics	row-policies
+one-declaration-drives-policy-and-statement	checks	shared-declaration-source
+five-closed-transactions	metrics	transactions
+five-authored-transaction-semantics	items	insert-document,read-document,list-subject-jobs,advance-job-status,record-release
+closed-operation-vector	metrics	operation-vector
+required-request-scope	metrics	required-scope-fields
+exact-scope-predicate	metrics	exact-scope-predicates
+scope-indexed-results	metrics	scope-indexed-results
+opaque-transaction-constructors	checks	transaction-constructors-opaque
+no-general-query-surface	checks	general-query-surface-absent
+four-compile-barriers	metrics	compile-barriers
+four-authored-compile-barriers	items	unscoped-transaction,raw-statement,predicate-constructor,cross-scope-composition
+two-additive-transitions	metrics	additive-transitions
+five-generation-cases	metrics	generation-cases
+five-authored-generation-cases	items	generation-1-to-2,generation-2-to-3,generation-2-to-1,generation-1-to-3,generation-3-to-3
+three-exact-generation-refusals	metrics	generation-refusals
+zero-destructive-verbs	metrics	destructive-verbs
+two-deterministic-projections	metrics	deterministic-projections
+semantic-oracles-complete	checks	semantic-oracles-complete
+compile-totality	checks	totality-options
+source-totality	checks	partial-source-absent
+retired-sql-output-golden	checks	retired-sql-golden-absent
+three-paired-mutants	metrics	mutants
+three-authored-mutants	items	transaction-optional-scope,transaction-match-all,transaction-wrong-policy-column
+validation-locus-ledger	metrics	validation-locus-entries
+five-calculus-kind-cardinality	metrics	calculus-kinds
+five-calculus-component-vector	metrics	calculus-components
+five-calculus-projection-counts	metrics	calculus-projection-counts
+five-calculus-resource-vector	metrics	calculus-resource-vector
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
+live-catalog-enforcement	metrics	live-catalog-enforcement
+live-row-policy-enforcement	metrics	live-row-policy-enforcement
+executor-role-fidelity	metrics	executor-role-fidelity

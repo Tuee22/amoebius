@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pinned GHC expect-fail harness for the Phase-8 topology indices."""
+"""Pinned GHC expect-fail harness for the capacity/topology indices."""
 
 from __future__ import annotations
 
@@ -18,7 +18,14 @@ ORACLE = ROOT / "test/oracle/capacity_topology/compile_fail.tsv"
 
 def compile_fixture(ghc: str, fixture: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [ghc, "-fno-code", "-fforce-recomp", "-isrc", "-XGHC2024", fixture],
+        [
+            ghc,
+            "-fno-code",
+            "-fforce-recomp",
+            "-isrc/capacity-topology",
+            "-XGHC2024",
+            fixture,
+        ],
         cwd=ROOT,
         text=True,
         stdout=subprocess.PIPE,

@@ -1,0 +1,4 @@
+mutant	red_property
+law-instance-omitted	GeneratedInventoryComplete
+suite-digest-ignored	SuiteDigestBinding
+unsealed-extension-admitted	VerdictRequiredForAdmission

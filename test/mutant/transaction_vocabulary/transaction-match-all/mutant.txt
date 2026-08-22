@@ -1,0 +1,4 @@
+operator=predicate-replacement
+subject=transaction scope predicate
+mutation=replace the required scope equality with an always-true predicate
+expected_locus=exact-scope-predicate

@@ -10,33 +10,34 @@
 #   metrics   the metric keys in .build/dsl/scoped-identity/phase-results.tsv
 #   checks    the check ids tools/scoped_identity_gate.py implements
 #
-# The 23 items are partitioned so each is claimed exactly once. A rejection surface takes
+# The 31 items are partitioned so each is claimed exactly once. A rejection surface takes
 # both halves of its evidence where both exist — the pinned negative row that must fail and
 # the generated class that must keep firing at its coverage floor — because a foreclosure a
 # single hand-picked row decides is a foreclosure one edit can hollow out.
 #
-# Three surfaces carry no id, and that is the honest result rather than an omission. The
-# kernel declares TenantFlowMismatch, SubjectFlowMismatch, a cycle diagnostic, and
-# MissingFlowMember, but the committed flow matrix exercises none of them: its four rows
-# decide audience widening, integrity elevation, and one transitive leak. Nothing this run
-# observed stands behind tenant-flow-preservation, cycle-diagnostic, or
-# missing-member-diagnostic, so the ledger reports them UNVERIFIED and the gap is recorded
-# against Phase 20 in the legacy register.
+# The rank-2 index makes cross-request flow a compile-time mismatch. The direct flow table
+# covers audience and integrity, while the diagnostic table pins subject mismatch, cycle,
+# missing-member, and missing-path errors with their exact paths.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 
 opaque-tenant-identity	checks	tenant-constructor-private
 opaque-subject-identity	checks	subject-constructor-private
 opaque-membership	checks	membership-constructor-private
-opaque-request-context	checks	request-context-constructor-private
-opaque-scope-witness	checks	scope-witness-constructor-private
+opaque-owner	checks	owner-constructor-private
+opaque-grant	checks	grant-constructor-private
+opaque-request-scope	checks	request-scope-constructor-private
+scope-indexed-value	checks	scoped-value-constructor-private
 scope-indexed-handle	checks	scoped-handle-constructor-private
+opaque-some-scoped-handle	checks	some-scoped-handle-constructor-private
 opaque-resource-id	checks	resource-id-constructor-private
 opaque-flow-label	checks	flow-label-constructor-private
 opaque-can-flow-to-witness	checks	can-flow-to-constructor-private
 untrusted-resource-id-rejected	items	raw_resource_id
 no-scope-retagging	items	scope_retag
 no-general-declassification	items	general_declassify
+scope-indexed-handle-cannot-escape	items	handle_escape
+request-scope-only-via-eliminator	items	forge_request_scope
 subject-owner-join	items	own_subject
 tenant-owner-join	items	tenant_owner
 active-grant-join	items	active_grant
@@ -45,16 +46,19 @@ tenant-mismatch-rejection	items	foreign_tenant,cross_tenant_swap,tenant_generate
 subject-mismatch-rejection	items	foreign_subject,same_tenant_swap,subject_generated
 audience-preservation	items	tenant_to_subject,audience_generated
 integrity-non-elevation	items	low_to_high,integrity_generated
-subject-flow-preservation	items	subject_direct
+subject-flow-preservation	items	subject_direct,subject_flow_mismatch,subject_flow_generated
 transitive-leak-path	items	subject_to_public_via_route
 total-flow-path-check	items	transitive_generated
-phase16-sealed-program-consumption	items	phase16_checked_program
+cycle-diagnostic	items	cycle_diagnostic,cycle_generated
+missing-member-diagnostic	items	missing_member_diagnostic,missing_member_generated
+missing-path-diagnostic	items	missing_path_diagnostic
 drop-owner-equality-mutant	items	drop_owner_equality
 independent-owner-matrix	metrics	owner-joins
 owner-swap-error-tags	metrics	owner-swaps
 independent-flow-matrix	metrics	flow-matrix
+exact-flow-diagnostics	metrics	flow-diagnostics
 constructor-closure-compile-seal	metrics	compile-fail
-six-class-generated-coverage	metrics	generated-coverage
+nine-class-generated-coverage	metrics	generated-coverage
 single-mutant-battery	metrics	mutants
 network-isolated-pure-gate	metrics	network-observer
 identity-provider-truth	metrics	identity-provider-truth
@@ -62,6 +66,3 @@ provider-row-policy	metrics	provider-row-policy
 live-noninterference	metrics	live-noninterference
 kernel-source-discipline	checks	no-general-authority-escape,scope-partial-token-scan
 generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
-tenant-flow-preservation	items
-cycle-diagnostic	items
-missing-member-diagnostic	items

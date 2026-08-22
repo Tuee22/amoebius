@@ -1,0 +1,8 @@
+# surface	owner	ids
+runnable gate declaration values	gate-values	phase-00,phase-01,phase-02,phase-03,phase-04,phase-05,phase-06,phase-07,phase-08,phase-09,phase-10,phase-11,phase-12,phase-13,phase-14,phase-15,phase-16,phase-17,phase-18,phase-19,phase-20,phase-21,phase-22,phase-23,phase-24,phase-25,phase-26,phase-27,phase-28,phase-29,phase-30,phase-31,phase-32,phase-33,phase-34,phase-35,phase-36,phase-37,phase-38,phase-39,phase-40,phase-41,phase-42,phase-43,phase-44,phase-45,phase-46,phase-47,phase-48,phase-49,phase-50,phase-51,phase-52,phase-53,phase-54,phase-55,phase-56,phase-57,phase-58,phase-59,phase-60,phase-61,phase-62,phase-63,phase-64,phase-65,phase-66,phase-67,phase-68,phase-69,phase-70,phase-71,phase-72,phase-74,phase-75,phase-76,phase-78,phase-79,phase-80,phase-81,phase-82,phase-83,phase-84,phase-85,phase-86,phase-87,phase-88,phase-90,phase-91,phase-92,phase-93,phase-94,phase-95
+descriptive contracts remain non-runnable	descriptive	phase-73,phase-77,phase-89
+pass and red verdicts are evidence	verdicts	verdict-pass,verdict-red
+teardown is a type obligation	compile	legal-teardown,leaked-teardown
+three independent seeded defects	mutants	drop-observation,leak-resource,skip-mutant
+phase-49 integrity checks	checks	inventory-two-way-join,workflow-source-total,runner-argv-boundary,consumer-switch-exact,independent-mechanisms-retained,compile-rejects-leak,three-mutants-red,results-equal-oracle,emitted-results-untracked,toolchain-satisfies-requirements
+exact recorded outcomes	metrics	gate-declarations,runnable-gates,descriptive-contracts,workflow-arms,verdicts,compile-pairs,mutants,consumer-switches,tracked-output

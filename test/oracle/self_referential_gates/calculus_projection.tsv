@@ -1,0 +1,9 @@
+metric	value
+arms	provision,build,deploy,observe,teardown
+runnable-gates	93
+descriptive-contracts	3
+provisioned	phase-gate-process
+released	phase-gate-process:tore-down
+verdicts	PASS,RED
+mutants	3
+consumer-switches	93

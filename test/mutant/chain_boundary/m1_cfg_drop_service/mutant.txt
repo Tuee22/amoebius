@@ -1,1 +1,1 @@
-Drop the last multi-fixture step; the independent step table and both plan projections must diverge.
+Drop the last multi-case step; the independently authored semantic Plan oracle must diverge.

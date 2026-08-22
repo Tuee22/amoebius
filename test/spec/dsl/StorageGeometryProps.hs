@@ -74,7 +74,7 @@ data ScalingCase = ScalingCase Bool Natural
 instance Arbitrary ScalingCase where
   arbitrary = ScalingCase <$> arbitrary <*> natural 1 80
 
-runStorageGeometryProps :: IO ()
+runStorageGeometryProps :: IO Int
 runStorageGeometryProps = do
   results <- sequence
     [ runProperty "prop_bookKeeperEquivalence" propBookKeeperEquivalence
@@ -87,6 +87,7 @@ runStorageGeometryProps = do
   let failed = [name | (name, result) <- results, not (isSuccess result)]
   unless (null failed) (fail ("storage geometry properties failed: " <> show failed))
   putStrLn "storage-properties: TESTED sampled (6) with >=30% accept/reject coverage"
+  pure (length results)
 
 propBookKeeperEquivalence :: EnvelopeCase -> Property
 propBookKeeperEquivalence (EnvelopeCase logical shouldFit margin) = checkCoverage

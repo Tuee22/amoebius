@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-4 gate — the gateway-migration model, both branches.
+"""The Phase-17 gate — the gateway-migration model, both branches.
 
 The capability claim is unchanged: the concrete `GatewayMigration` model renders through
 `emitTLA`, the in-process explorer and TLC agree on its 53 distinct reachable states and
@@ -51,7 +51,7 @@ CHECKS = {
 
 SIDES = ("toolchain", "suite", "oracle", "artifact")
 
-# The authored oracle, read off the Phase-4 contract's Gate paragraph.
+# The authored oracle, read off the Phase-17 contract's Gate paragraph.
 EXPECTED_RESULTS = {
     "gateway-distinct-state-count": "53",
     "explorer-tlc-fingerprints": "equal",
@@ -64,6 +64,8 @@ EXPECTED_RESULTS = {
     "iosimpor-agreement": "green",
     "cutoff-clause-delete-mutants": "8/8-red",
     "scope3-shared-resource-mutant": "red",
+    "renderer-semantic-mutants": "2/2-red",
+    "calculus-composition-projection": "green",
     # The decomposition lemma is deliberately open: the contract records it as an
     # unproven obligation, and a gate that quietly reported it closed would be the
     # dishonest reading.
@@ -84,6 +86,8 @@ SURFACE_EVIDENCE = {
     "structural-fit-cutoff": ("cutoff-clause-delete-mutants", "8/8-red"),
     "cutoff-clause-mutants": ("cutoff-clause-delete-mutants", "8/8-red"),
     "scope3-shared-resource-stress": ("scope3-shared-resource-mutant", "red"),
+    "semantic-renderer-oracle": ("renderer-semantic-mutants", "2/2-red"),
+    "gateway-calculus-composition": ("calculus-composition-projection", "green"),
     # OPEN is the honest value, not a passing one. The surface stays UNVERIFIED.
     "decomposition-lemma": None,
     "runtime-fidelity": None,
@@ -255,6 +259,7 @@ def main() -> int:
             {"name": "mechanical safety mutants", "status": rows.get("mechanical-safety-mutants", "unrun")},
             {"name": "fairness-drop mutants", "status": rows.get("fairness-drop-mutants", "unrun")},
             {"name": "cutoff-clause delete mutants", "status": rows.get("cutoff-clause-delete-mutants", "unrun")},
+            {"name": "renderer semantic mutants", "status": rows.get("renderer-semantic-mutants", "unrun")},
             {"name": "scope-3 shared-resource mutant", "status": rows.get("scope3-shared-resource-mutant", "unrun")},
         ],
         observations={"results": "sha256:" + artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},

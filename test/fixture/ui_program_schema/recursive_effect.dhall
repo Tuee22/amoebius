@@ -2,6 +2,7 @@ let T = ../../../dhall/amoebius/ui/Types.dhall
 let Node = T.UiNode
 in  { caseName = "recursive_effect"
     , tenantMode = T.TenantMode.SingleTenant
+    , continuity = T.UiOffline.Continuity.OnlineOnly
     , modules =
       [ { moduleId = "app.effect"
         , nodes =

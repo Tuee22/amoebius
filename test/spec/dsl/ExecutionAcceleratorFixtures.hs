@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module ExecutionAcceleratorFixtures
-  ( Phase9Fixture (..)
-  , phase9Fixtures
-  , phase9PositiveRows
-  , phase9ComposedWitnessRows
+  ( Phase29Fixture (..)
+  , phase29Fixtures
+  , phase29PositiveRows
+  , phase29ComposedWitnessRows
   , acceleratorOffering
   , acceleratorDemand
   , baseEtcdLogical
@@ -12,7 +12,7 @@ module ExecutionAcceleratorFixtures
   , imageCatalog
   , imageDemand
   , metadataModel
-  , runPhase9DeterministicChecks
+  , runPhase29DeterministicChecks
   ) where
 
 import Amoebius.Capacity.Accelerator
@@ -115,6 +115,7 @@ import Amoebius.Capacity.PulumiExecution
   , BuildStageDemand (..)
   , EngineProcessDemand (..)
   , EngineSystemReserve (..)
+  , HostComputeError
   , MonitoringWorkBudget (..)
   , PulumiExecutionDemand (..)
   , provisionBuildExecution
@@ -122,6 +123,7 @@ import Amoebius.Capacity.PulumiExecution
   , provisionMonitoringWork
   , provisionPulumiExecution
   )
+import Amoebius.Capacity.PulumiExecution qualified as PulumiExecution
 import Amoebius.Capacity.Storage
   ( BackingAllocationPolicy (..)
   , BackingId (..)
@@ -145,19 +147,19 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Numeric.Natural (Natural)
 
-data Phase9Fixture = Phase9Fixture
-  { phase9Variant :: Text
-  , phase9Family :: Text
-  , phase9Operation :: Text
-  , phase9Expected :: Text
-  , phase9Twin :: Text
-  , phase9Catalog :: Text
-  , phase9Negative :: Either Text ()
-  , phase9Positive :: Either Text ()
+data Phase29Fixture = Phase29Fixture
+  { phase29Variant :: Text
+  , phase29Family :: Text
+  , phase29Operation :: Text
+  , phase29Expected :: Text
+  , phase29Twin :: Text
+  , phase29Catalog :: Text
+  , phase29Negative :: Either Text ()
+  , phase29Positive :: Either Text ()
   }
 
-phase9Fixtures :: [Phase9Fixture]
-phase9Fixtures =
+phase29Fixtures :: [Phase29Fixture]
+phase29Fixtures =
   [ fixture "execution-replica-peak" "illegal_hard_ceiling_overcommit" "execution" "Overcommit:CpuAxis" (executionResult 3 deploymentOne) (executionResult 4 deploymentOne)
   , fixture "execution-rollout-surge" "illegal_hard_ceiling_overcommit" "execution" "Overcommit:CpuAxis" (executionResult 5 deploymentRolling) (executionResult 6 deploymentRolling)
   , fixture "execution-prior-old-revision" "illegal_hard_ceiling_overcommit" "execution-update" "Overcommit:CpuAxis" (executionUpdateResult 3) (executionUpdateResult 4)
@@ -190,19 +192,24 @@ phase9Fixtures =
   , fixture "cuda-vram-reserve" "illegal_accelerator_vram_reserve_boundary" "accelerator" "AcceleratorNetAllocatableViolation" acceleratorReserveBroken acceleratorFit
   , fixture "metal-profile" "illegal_apple_metal_profile_mismatch" "accelerator" "AcceleratorProfileMismatch" metalProfileMismatch metalProfileFit
   , fixture "accelerator-shared-owner" "illegal_shared_accelerator_double_owner" "accelerator-owner" "AcceleratorSharedDevice:cuda-a" sharedOwnerResult distinctOwnerResult
+  , fixture "accelerator-peer-graph" "illegal_accelerator_vram_fragmentation" "accelerator-interconnect" "AcceleratorInterconnectMissing" (acceleratorInterconnectResult False) (acceleratorInterconnectResult True)
+  , fixture "build-cache-budget" "illegal_hard_ceiling_overcommit" "build-execution" "BuildCacheOvercommit" (buildExecutionResult 14) (buildExecutionResult 15)
+  , fixture "engine-storage-reserve" "illegal_control_plane_storage_transition_overrun" "engine-system-reserve" "EngineStorageOvercommit" (engineReserveResult 10) (engineReserveResult 11)
+  , fixture "monitoring-volume-budget" "illegal_hard_ceiling_overcommit" "monitoring-work" "MonitoringStorageOvercommit" (monitoringWorkResult 14) (monitoringWorkResult 15)
+  , fixture "pulumi-executor-concurrency" "illegal_hard_ceiling_overcommit" "pulumi-execution" "PulumiConcurrencyZero" (pulumiExecutionResult 0) (pulumiExecutionResult 1)
   ]
 
-phase9PositiveRows :: [(Text, Either Text ())]
-phase9PositiveRows = fmap (\(name, outcome) -> (name, resultText outcome)) phase9ComposedWitnessRows
+phase29PositiveRows :: [(Text, Either Text ())]
+phase29PositiveRows = fmap (\(name, outcome) -> (name, resultText outcome)) phase29ComposedWitnessRows
 
-phase9ComposedWitnessRows :: [(Text, Either Text ComposedPlacementWitness)]
-phase9ComposedWitnessRows =
+phase29ComposedWitnessRows :: [(Text, Either Text ComposedPlacementWitness)]
+phase29ComposedWitnessRows =
   [ ("legal_multisubstrate_cluster", composedPositive "legal_multisubstrate_cluster" 1)
   , ("legal_managed_eks", composedPositive "legal_managed_eks" 2)
   ]
 
-runPhase9DeterministicChecks :: IO ()
-runPhase9DeterministicChecks = do
+runPhase29DeterministicChecks :: IO ()
+runPhase29DeterministicChecks = do
   let controllerUnits =
         [ BoundExecutionUnit "stateful" 1 baseEnvelope (StatefulSetBody 2 StatefulSetNativeSerial)
         , BoundExecutionUnit "daemon" 1 baseEnvelope (DaemonSetBody ["node-a", "node-b"] (DaemonSetSurge 1))
@@ -273,9 +280,9 @@ runPhase9DeterministicChecks = do
     Right value -> pure value
   assertCheck condition message = unless condition (fail message)
 
-fixture :: Text -> Text -> Text -> Text -> Either Text () -> Either Text () -> Phase9Fixture
+fixture :: Text -> Text -> Text -> Text -> Either Text () -> Either Text () -> Phase29Fixture
 fixture variant family operation expected negative positive =
-  Phase9Fixture variant family operation expected ("legal_" <> variant) (catalogFor family) negative positive
+  Phase29Fixture variant family operation expected ("legal_" <> variant) (catalogFor family) negative positive
 
 catalogFor :: Text -> Text
 catalogFor family
@@ -456,6 +463,53 @@ sharedOwnerResult, distinctOwnerResult :: Either Text ()
 sharedOwnerResult = resultAccelerator (validateExclusiveAcceleratorOwners [("cluster-a", Set.singleton "cuda-a"), ("cluster-b", Set.singleton "cuda-a")])
 distinctOwnerResult = resultAccelerator (validateExclusiveAcceleratorOwners [("cluster-a", Set.singleton "cuda-a"), ("cluster-b", Set.singleton "cuda-b")])
 
+acceleratorInterconnectResult :: Bool -> Either Text ()
+acceleratorInterconnectResult connected = resultAccelerator (provisionAccelerator offering demand)
+ where
+  peerSet own peer = if connected then Set.singleton peer else Set.singleton own
+  offering =
+    AcceleratorOffering
+      ( Map.fromList
+          [ ("cuda-a", cudaA {acceleratorPeerDevices = peerSet "cuda-a" "cuda-b"})
+          , ("cuda-b", cudaB {acceleratorPeerDevices = peerSet "cuda-b" "cuda-a"})
+          ]
+      )
+  demand =
+    AcceleratorDemand
+      "cluster"
+      CudaFamily
+      "a10"
+      (Set.fromList ["cuda-a", "cuda-b"])
+      2
+      (Set.singleton "model")
+      (Set.singleton "serving")
+      [ AcceleratorCoexistenceEpoch
+          "serve"
+          [AcceleratorResidencyDemand "weights" "model" "serving" 5 ReplicatedPerDevice FullyConnectedPeerAccess]
+      ]
+
+buildExecutionResult :: Natural -> Either Text ()
+buildExecutionResult budget =
+  resultHostCompute
+    ( provisionBuildExecution
+        (BuildExecutionEnvelope [BuildStageDemand "compile" (resources 2 3 0 0) 4 5] 1 1 10 budget)
+    )
+
+engineReserveResult :: Natural -> Either Text ()
+engineReserveResult available =
+  resultHostCompute
+    ( provisionEngineSystemReserve
+        (EngineSystemReserve "control-plane" [EngineProcessDemand "engine" (resources 1 1 0 0)] 11 available)
+    )
+
+monitoringWorkResult :: Natural -> Either Text ()
+monitoringWorkResult volume =
+  resultHostCompute (provisionMonitoringWork (MonitoringWorkBudget 1 2 3 4 2 5 6 1 2 10 5 volume))
+
+pulumiExecutionResult :: Natural -> Either Text ()
+pulumiExecutionResult concurrency =
+  resultHostCompute (provisionPulumiExecution (PulumiExecutionDemand (resources 1 1 1 0) [] concurrency 10))
+
 imageCatalog :: ImageMetadataCatalog
 imageCatalog =
   ImageMetadataCatalog
@@ -556,6 +610,9 @@ resultEtcd = resultBy etcdTag
 resultAccelerator :: Either AcceleratorError value -> Either Text ()
 resultAccelerator = resultBy acceleratorTag
 
+resultHostCompute :: Either HostComputeError value -> Either Text ()
+resultHostCompute = resultBy hostComputeTag
+
 firstAccelerator :: Either AcceleratorError value -> Either Text value
 firstAccelerator = firstBy acceleratorTag
 
@@ -650,6 +707,17 @@ acceleratorTag problem = case problem of
   AcceleratorShardInvalid {} -> "AcceleratorShardInvalid"
   AcceleratorInterconnectMissing {} -> "AcceleratorInterconnectMissing"
   AcceleratorDeviceMissing _ -> "AcceleratorDeviceMissing"
+
+hostComputeTag :: HostComputeError -> Text
+hostComputeTag problem = case problem of
+  PulumiExecution.BuildStageAlias _ -> "BuildStageAlias"
+  PulumiExecution.BuildConcurrencyZero -> "BuildConcurrencyZero"
+  PulumiExecution.BuildCacheOvercommit {} -> "BuildCacheOvercommit"
+  PulumiExecution.EngineProcessAlias _ -> "EngineProcessAlias"
+  PulumiExecution.EngineProcessInventoryEmpty -> "EngineProcessInventoryEmpty"
+  PulumiExecution.EngineStorageOvercommit {} -> "EngineStorageOvercommit"
+  PulumiExecution.MonitoringStorageOvercommit {} -> "MonitoringStorageOvercommit"
+  PulumiExecution.PulumiConcurrencyZero -> "PulumiConcurrencyZero"
 
 axisTag :: Axis -> Text
 axisTag axis = case axis of

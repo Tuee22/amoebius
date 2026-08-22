@@ -1,0 +1,4 @@
+row	table	columns	primary_key	foreign_key	policy_column	policy_parameter
+document	documents	tenant_id:text:not-null|document_id:text:not-null|body:text:not-null	tenant_id,document_id	tenant_id->amoebius_scope.tenant_id	tenant_id	scope_tenant
+job	jobs	tenant_id:text:not-null|subject_id:text:not-null|job_id:text:not-null|status:text:not-null	tenant_id,job_id	tenant_id->amoebius_scope.tenant_id	tenant_id	scope_tenant
+release	releases	tenant_id:text:not-null|release_id:text:not-null|content_digest:text:not-null	tenant_id,release_id	tenant_id->amoebius_scope.tenant_id	tenant_id	scope_tenant

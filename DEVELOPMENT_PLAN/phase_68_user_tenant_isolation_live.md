@@ -82,7 +82,7 @@ Linux-CUDA hardware, Lima on Apple hardware, and WSL2 on Windows hardware.
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 — live infrastructure.
-**Gate:** `cabal test user-tenant-isolation-live` passes the real-credential paired matrix and committed
+**Gate:** `python3 tools/run_phase_gate.py 68` passes the real-credential paired matrix and committed
 mutants. Authenticated external observations establish zero forbidden SQL, MinIO, and Pulsar effects; a public
 denial alone cannot pass. The phase gate repeats the sealed reader, mutants, documentation lint, and ledger lint.
 

@@ -83,7 +83,7 @@ Linux-CUDA, Lima on Apple, and WSL2 on Windows.
 
 **Depends on:** [Phase 82](phase_82_ui_multi_tenant_live.md) — multi-tenant low-code UI isolation, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test phase57-ui-rollout-reconnect` performs the pinned transition and satisfies the
+**Gate:** `python3 tools/run_phase_gate.py 83` performs the pinned transition and satisfies the
 independent timeline, fresh-action, cursor, stale-plan, rollback, and mutant predicates in
 [Gate integrity](#gate-integrity). UI-server readiness or an app-authored rollout trace alone is insufficient.
 

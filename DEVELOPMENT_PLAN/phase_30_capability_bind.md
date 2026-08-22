@@ -23,7 +23,7 @@ Phase-30 capability-bind ledger.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_determinism.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -34,9 +34,9 @@ Phase-30 capability-bind ledger.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure 📋](#sprint-301-the-closed-capability-union--the-no-product-arm-dhall-typecheck-foreclosure-)
-- [Sprint 30.2: The `CapabilityBinding` + total representational `bind` 📋](#sprint-302-the-capabilitybinding--total-representational-bind-)
-- [Sprint 30.3: The bind property/corpus + the Register-1 gate 📋](#sprint-303-the-bind-propertycorpus--the-register-1-gate-)
+- [Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure ✅](#sprint-301-the-closed-capability-union--the-no-product-arm-dhall-typecheck-foreclosure-)
+- [Sprint 30.2: The `CapabilityBinding` + total representational `bind` ✅](#sprint-302-the-capabilitybinding--total-representational-bind-)
+- [Sprint 30.3: The bind property/corpus + the Register-1 gate ✅](#sprint-303-the-bind-propertycorpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -44,7 +44,19 @@ Phase-30 capability-bind ledger.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-29 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — resealed 2026-08-21. `python3 tools/capability_bind_gate.py` passes all eleven sides on natural
+`darwin/arm64`, untranslated. The bounded suite binds all nine arms under both shapes against 18 authored
+semantic projections, preserves nine distinct normalized app slices, observes 18 exact controller-child
+inventories and three unresolved transition references, and rejects the three dhall-typecheck plus four
+gadt-decode negatives at their named loci. All four paired mutants redden; the 29-entry validation-locus
+ledger is exact; 39 observed units compose through all five calculus kinds; all 21 metrics match; and all 30
+surfaces join to 45 items. The project-contained attestation is
+`sha256:02597da00b53added138d476f488681f82119cd3f5bb411efa3a293867f66088`, bound to source snapshot
+`sha256:ee38ea5e6012b70d…` over 2,251 files. Live provider realization, engine resolution, and model/runtime
+correspondence remain UNVERIFIED at their later owners.
+
+Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi
+changed what this phase's gate had to cover, so the earlier seals below remain history.
 
 **Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
@@ -147,9 +159,8 @@ corpus battery, analogous to the Phase-26 decode battery.
 
 **Depends on:** [Phase 29](phase_29_execution_accelerator_folds.md) — execution-epoch + scheduler + accelerator + provider-root folds, which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/capability_bind_gate.py` passes the nine-arm two-shape corpus, its reviewer-authored
-goldens, the object-node-multiset and app-surface-byte oracles, the seven specific-reason negatives, and the
-four seeded mutants of [Gate integrity](#gate-integrity). Provision, the folds, and accelerator/inference
+**Gate:** `python3 tools/run_phase_gate.py 30` passes the authored nine-arm/two-shape semantics, seven exact
+negatives, covered property, five-calculus projection, and four mutants. Provision and accelerator/inference
 availability stay UNVERIFIED here; they are Phases 31 and 32.
 
 ## Gate integrity
@@ -184,10 +195,10 @@ flowchart LR
 
 **Oracle-pinning (§M.1).** Authored and committed in **Phase 0** before `bind` exists:
 
-- The **per-arm goldens** `test/golden/capability/golden_servicespec_<arm>_<shape>.golden` — one reviewer-authored
-  `BoundServiceSpec` golden for each of the nine arms under each of `SingleNode` and `Distributed`. Authored
-  before `bind` exists, so a golden **cannot be regenerated from `bind`'s output**; a golden regenerated from the
-  implementation passes for any output, a stub's included, and is therefore forbidden.
+- The **per-arm semantic projection** `test/oracle/capability_bind/bound_shape_semantics.tsv` — one
+  reviewer-authored row per arm pinning product identity, member object kind, controller kind, bootstrap
+  presence, both shapes' object/execution counts, and provider-intent count. The gate reconstructs the exact
+  object-kind/role and controller-kind multisets from those rows; it compares no generated rendering to itself.
 - The **nine-arm positive corpus** `dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` for all nine arms
   (including the specifically-named `legal_objectstore_{singlenode,distributed}` and `legal_inference_cuda`), each
   a full `CapabilityNeed` fixture — the corpus is **not** scope-shrunk to the three named fixtures.
@@ -205,7 +216,7 @@ substituted:
   selecting a manifest graph. It defeats a plain `/=`-only diff but is caught by the object-node-multiset oracle
   (the two shapes now differ only in a copied tag, not in member multiplicity). **This is the primary shape-oracle mutant the gate names.**
 - `mutant_catchall_arm` *(union-arm addition)* — a catch-all `bind` arm returns a degenerate `BoundServiceSpec`
-  for the six capabilities lacking an explicit positive shape; caught by the per-arm golden + the nine-arm
+  for capabilities whose authored need must survive unchanged; caught by the per-arm semantic projection + the nine-arm
   exhaustiveness check.
 - `mutant_shared_app_import` *(dropped distinctness)* — the two composed fixtures share one app-surface import,
   making byte-equality a file-compared-to-itself tautology; caught by the distinct-composed-file requirement of
@@ -316,8 +327,8 @@ at the wholly unprovisioned `BoundDeployment`.
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
 > established by the current phase gate plus universal artifact hygiene.
 
-## Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure 📋
-**Status**: Planned
+## Sprint 30.1: The closed capability union + the no-product-arm dhall-typecheck foreclosure ✅
+**Status**: Done
 **Implementation**: `dhall/amoebius/Capability.dhall` carries the closed union and the app-surface
 `CapabilityNeed` records; `src/Amoebius/Capability/Types.hs` carries their Haskell counterparts and the
 `BoundServiceSpec` skeleton the binder targets.
@@ -368,15 +379,15 @@ contains.
 ### Remaining Work
 None. The closed union, need records, and dhall-typecheck corpus are sealed by the Phase-30 gate.
 
-## Sprint 30.2: The `CapabilityBinding` + total representational `bind` 📋
-**Status**: Planned
+## Sprint 30.2: The `CapabilityBinding` + total representational `bind` ✅
+**Status**: Done
 **Implementation**: `dhall/amoebius/Capability.dhall`, extended with the `CapabilityBinding` records, and
 `src/Amoebius/Capability/Binding.hs`, which carries the total `bind`, the kind-indexed execution vocabulary,
 and the `BoundDeployment` assembly.
 **Blocked by**: None.
 **Independent Validation**: a unit + property suite binds one `ObjectStore` and one `Sql` need under both the
-single-node and the distributed shape and compares each result against the independently authored oracles and
-the reviewer-authored goldens rather than against `bind`; the numbered Validation list below carries the
+single-node and the distributed shape and compares each result against the independently authored semantic
+projection rather than against `bind`; the numbered Validation list below carries the
 assertions, the loci, and the mutants.
 **Docs to update**:
 `documents/engineering/service_capability_doctrine.md` (§3/§4/§5 binding backlink),
@@ -439,7 +450,7 @@ stopping at the wholly unprovisioned `BoundDeployment`.
   [Phase 33](phase_33_render_manifest_oracles.md) `K8sObject`/Aeson renderer.
 
 ### Validation
-1. The same `CapabilityNeed`, bound under two shapes, produces two `BoundServiceSpec`s that are **structurally different by the object-node-multiset oracle** (deep structural diff per [§5](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values), red on a scalar-only or copied-shape-tag difference; each equal to its oracle-pinned golden), while the **app-surface bytes**
+1. The same `CapabilityNeed`, bound under two shapes, produces two `BoundServiceSpec`s that are **structurally different by the object-node-multiset oracle** (deep structural diff per [§5](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values), red on a scalar-only or copied-shape-tag difference; each equal to its oracle-pinned semantic projection), while the **app-surface bytes**
    (beta-normalized app-surface slices from two distinct composed spec files) are identical; a binding to an
    unbuilt provider arm returns a structured `Left` tagged (gadt-decode); a shape/provider authored on the app
    surface fails `dhall type` at its asserted locus; `bind` never throws. A structural inventory proves
@@ -458,11 +469,11 @@ stopping at the wholly unprovisioned `BoundDeployment`.
 ### Remaining Work
 None. The total binder, explicit object graphs, exact execution inventory, and unprovisioned deployment boundary are sealed.
 
-## Sprint 30.3: The bind property/corpus + the Register-1 gate 📋
-**Status**: Planned
+## Sprint 30.3: The bind property/corpus + the Register-1 gate ✅
+**Status**: Done
 **Implementation**: `test/spec/capability/BindProps.hs`, `test/spec/capability/ShapeOracle.hs`, and
-`test/spec/capability/BindGate.hs`, over the corpus in `dhall/examples/`, the goldens in
-`test/golden/capability/`, and the seeded mutants in `test/mutant/capability_bind/`.
+`test/spec/capability/BindGate.hs`, over the corpus in `dhall/examples/`, the semantic expectations in
+`test/oracle/capability_bind/`, and the seeded mutants in `test/mutant/capability_bind/`.
 **Blocked by**: None.
 **Independent Validation**: `cabal
 test capability-bind-spec` is green — see below.
@@ -520,7 +531,7 @@ honest foreclosure layer of each.
   committed and re-run (not run once), that the gate MUST turn red: `mutant_copy_shape_tag` (effect swap: `bind`
   copies the shape tag into a `providerGraph` field instead of selecting a manifest graph — defeats a `/=`-only
   diff, caught by the multiset oracle); `mutant_catchall_arm` (union-arm addition: a catch-all `bind` arm returns
-  a degenerate `BoundServiceSpec` for the six uncovered capabilities — caught by the per-arm golden +
+  a degenerate `BoundServiceSpec` for an arm whose authored need must survive unchanged — caught by the per-arm semantic projection +
   exhaustiveness check); `mutant_shared_app_import` (the two composed fixtures share one app-surface import —
   makes byte-equality vacuous — caught by the distinct-composed-file requirement in (a)); and
   `mutant_provisioned_value_in_bound_deployment` (inject a `Provisioned*` result into `BoundDeployment` before
@@ -535,7 +546,7 @@ honest foreclosure layer of each.
 1. `cabal test capability-bind-spec` is green — each of the **nine per-arm** positives binds byte-invariant
    (beta-normalized app-surface slices from distinct composed files) under both shapes and structurally
    different by the object-node-multiset oracle (red on scalar-only / copied-shape-tag) against its
-   oracle-pinned golden; the exhaustiveness check covers all nine arms and the totality property meets
+   oracle-pinned semantic projection; the exhaustiveness check covers all nine arms and the totality property meets
    `checkCoverage` (each constructor ≥ 8%); each dhall-typecheck negative (`illegal_product_in_app`,
    `illegal_engine_by_url`, `illegal_shape_in_app`) fails `dhall type` at its asserted locus, and each gadt-decode
    negative (`illegal_unbuilt_provider`, `illegal_unbound_capability`, `illegal_cyclic_extension`,
@@ -545,11 +556,16 @@ honest foreclosure layer of each.
    `mutant_shared_app_import`, `mutant_provisioned_value_in_bound_deployment`). The validation-locus ledger is
    present and its coverage-assertion machinery (Phase-27 precedent) turns the suite **red** if any named fixture,
    negative reason, or mutant is missing — 'honestly classifies' is thus a machine oracle, not a hand-written
-   attestation. Provision, the capacity/storage folds, and the accelerator/inference availability relation are
-   out of scope here and validated by Phases 18/19.
+   attestation. It also observes all 18 source-expanded execution inventories, preserves the execution/volume/
+   registry transition references exactly, checks Registry intent under both shapes, and pairs one missing
+   extension requirement with a closed positive. The authored calculus projection accounts for the nine arms,
+   18 shapes, seven negatives, one property, and four mutants as 39 units over artifact, budget, lift, workflow,
+   and evidence. Provision and accelerator/inference availability are out of scope here and owned by Phases
+   31/32.
 
 ### Remaining Work
-None. The 18 goldens, three dhall-typecheck negatives, four gadt-decode negatives, coverage property, validation ledger, and four mutants are sealed.
+None. The 18 semantic shape observations, three dhall-typecheck negatives, four gadt-decode negatives,
+five-calculus projection, coverage property, exact validation ledger, and four mutants are sealed.
 
 ## Documentation Requirements
 

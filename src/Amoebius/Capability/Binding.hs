@@ -8,7 +8,6 @@ module Amoebius.Capability.Binding
   , decodeCapabilityProvider
   , validateBindingCoverage
   , validateExtensionGraph
-  , renderBoundServiceSpec
   ) where
 
 import Amoebius.Capacity.Execution
@@ -25,7 +24,6 @@ import Amoebius.Capacity.Types
   )
 import Amoebius.Capability.Types
 import Amoebius.Dsl.Error (DecodeError (..))
-import Data.List (sortOn)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Set (Set)
@@ -127,19 +125,6 @@ validateExtensionGraph extensions = do
             | requirement <- Set.toList (extensionRequires extension)
             , Just provider <- [Map.lookup requirement index]
             ]
-
-renderBoundServiceSpec :: BoundServiceSpec -> Text
-renderBoundServiceSpec service = Text.unlines
-  ( [ "capability=" <> armName (capabilityArm (boundCapabilityNeed service))
-    , "resource=" <> capabilityResourceName (boundCapabilityNeed service)
-    , "provider=Canonical"
-    , "product=" <> boundProviderProduct service
-    , "shape=" <> shapeName (boundShape service)
-    ]
-      <> fmap renderObject (sortOn providerObjectIdentity (boundProviderGraph service))
-      <> fmap renderExecution (Map.elems (boundExecutionUnits (boundServiceExecutions service)))
-      <> fmap renderIntent (boundProviderIntents service)
-  )
 
 canonicalProduct :: CapabilityArm -> Text
 canonicalProduct arm = case arm of
@@ -261,11 +246,6 @@ shapeNodes shape = case shape of
   SingleNode -> 1
   Distributed nodes -> nodes
 
-shapeName :: ServiceShape -> Text
-shapeName shape = case shape of
-  SingleNode -> "SingleNode"
-  Distributed nodes -> "Distributed(" <> naturalText nodes <> ")"
-
 workloadKind :: CapabilityArm -> Text
 workloadKind arm = case arm of
   Edge -> "Deployment"
@@ -289,33 +269,6 @@ findExtension name extensions = case extensions of
   extension : rest
     | extensionName extension == name -> Just extension
     | otherwise -> findExtension name rest
-
-renderObject :: ProviderObject -> Text
-renderObject object = Text.intercalate "|"
-  [ "object"
-  , providerObjectIdentity object
-  , providerObjectKind object
-  , providerObjectRole object
-  , maybe "-" id (providerObjectOwner object)
-  ]
-
-renderExecution :: BoundExecutionUnit -> Text
-renderExecution unit = Text.intercalate "|"
-  [ "execution"
-  , executionUnitId unit
-  , controllerName (executionBody unit)
-  ]
-
-controllerName :: ControllerBody -> Text
-controllerName body = case body of
-  DeploymentBody {} -> "Deployment"
-  StatefulSetBody {} -> "StatefulSet"
-  DaemonSetBody {} -> "DaemonSet"
-  JobBody {} -> "Job"
-  HostProcessBody {} -> "HostProcess"
-
-renderIntent :: ProviderIntent -> Text
-renderIntent intent = "intent=" <> Text.pack (show intent)
 
 naturalText :: Natural -> Text
 naturalText = Text.pack . show

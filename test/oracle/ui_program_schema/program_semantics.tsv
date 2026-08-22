@@ -1,0 +1,4 @@
+program	tenant_mode	modules	qualified_nodes	external_links
+minimal_single_tenant	single-tenant	app.main	app.main.home,app.main.submit	docs
+minimal_multi_tenant	multi-tenant	app.main	app.main.home,app.main.tenant	docs
+composed_workflow_ui	single-tenant	app.workflow	app.workflow.progress,app.workflow.start	docs

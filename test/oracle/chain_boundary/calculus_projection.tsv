@@ -1,0 +1,5 @@
+metric	value
+calculus-kinds	artifact,budget,lift,workflow,evidence
+component-names	semantic-plan-rows,boundary-transcripts,ast-negatives,kernel-properties,mutant-evidence
+projection-counts	19,4,6,2,7
+resource-vector	5,38,0,0

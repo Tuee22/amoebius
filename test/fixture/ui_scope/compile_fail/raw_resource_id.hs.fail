@@ -2,7 +2,7 @@
 
 module RawResourceId where
 
-import Amoebius.Ui.Security.Scope (ResourceId)
+import Amoebius.Scope.Index (ResourceId)
 
 bad :: ResourceId
 bad = ResourceId "caller-controlled"

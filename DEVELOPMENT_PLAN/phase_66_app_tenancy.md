@@ -94,7 +94,7 @@ Windows, provider-cloud, multicluster, or availability claim is made.
 
 **Register:** 3 — live infrastructure.
 
-**Gate:** `cabal test tenant-provider-provisioning-live` passes the pinned six-arm projection relation, the
+**Gate:** `python3 tools/run_phase_gate.py 66` passes the pinned six-arm projection relation, the
 paired illegal twins, the bypass probes, the teardown inventory, and both committed mutants of
 [Gate integrity](#gate-integrity) — Register 3 green, the application data path UNVERIFIED until Phase 67.
 

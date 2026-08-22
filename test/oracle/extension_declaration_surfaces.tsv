@@ -1,0 +1,21 @@
+# Authored Phase-20 surface expectation.
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+two-concrete-declarations	metrics	declarations
+five-mandatory-components	metrics	components
+closed-calculus-slots	metrics	calculus-slots
+calculus-specific-readers	metrics	reader-sets
+exact-resource-folds	metrics	resource-folds
+content-derived-identity	metrics	digests
+semantic-refusals	metrics	semantic-refusals
+compile-time-barriers	metrics	compile-barriers
+exact-mutant-loci	metrics	mutants
+runtime-correspondence	metrics	runtime
+pure-declaration-boundary	checks	declaration-source-pure
+private-total-constructor	checks	constructor-private-and-total
+independent-inventory	checks	inventory-independent
+independent-digest	checks	digest-independently-recomputed
+generated-artifact-discipline	checks	results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
+optional-component-mutant	mutants	optional-component
+scope-index-mutant	mutants	drop-scope-index
+recipe-omission-mutant	mutants	omit-declared-recipe

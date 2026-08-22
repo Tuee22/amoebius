@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Amoebius.Ui.Offline.Decode
   ( DecodeError (..)
@@ -12,6 +13,7 @@ data DecodeError
   = MissingCountBound
   | MissingByteBound
   | MissingAgeBound
+  | MissingLocalValidation
   | MissingIdempotency
   | MissingConflictRule
   | MissingOrderRule
@@ -36,9 +38,10 @@ decodeQueueContract queued@(QueuedPort operation contract)
 #ifndef OFFLINE_LANGUAGE_PLAN_DROP_QUEUE_BOUND_MUTANT
   | maxAgeSeconds contract <= 0 = Left MissingAgeBound
 #endif
-  | null (idempotencyRule contract) = Left MissingIdempotency
-  | null (conflictRule contract) = Left MissingConflictRule
-  | null (orderRule contract) = Left MissingOrderRule
-  | null (dependencyRule contract) = Left MissingDependencyRule
-  | null (authoritativeValidation contract) = Left MissingAuthorityValidation
+  | localValidation contract == "" = Left MissingLocalValidation
+  | idempotency contract == "" = Left MissingIdempotency
+  | conflict contract == "" = Left MissingConflictRule
+  | ordering contract == "" = Left MissingOrderRule
+  | dependency contract == "" = Left MissingDependencyRule
+  | authoritativeValidation contract == "" = Left MissingAuthorityValidation
   | otherwise = Right queued

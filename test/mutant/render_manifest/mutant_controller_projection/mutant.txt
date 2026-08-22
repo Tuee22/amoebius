@@ -1,1 +1,1 @@
-Change a workload object to the Service arm; kind-projection must turn red.
+Change the workload arm while preserving its object kind; controller-kind alone must turn red.

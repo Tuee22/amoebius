@@ -1,5 +1,29 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
+
 module Main (main) where
 
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (..))
+import Amoebius.Calculus.Budget.Grant (Bytes (..), Slots (..), allowance)
+import Amoebius.Calculus.Composition
+  ( Composition
+  , append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionResource
+  , evidenceComponent
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (..))
+import Amoebius.Formal.CalculusComposition (compositionModel)
 import Amoebius.Formal.EmitTLA
 import Amoebius.Formal.Explore
 import Amoebius.Formal.Interpret
@@ -14,6 +38,14 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Data.Text qualified as Text
+import Amoebius.Scope.Index
+  ( RequestScope
+  , activeMembership
+  , trustedSubject
+  , trustedTenant
+  , withRequestScope
+  )
 import System.Directory (canonicalizePath, createDirectoryIfMissing, doesFileExist, getCurrentDirectory)
 import System.Environment (lookupEnv)
 import System.Exit (ExitCode (..), exitFailure)
@@ -50,6 +82,16 @@ data DifferentialRecord = DifferentialRecord
   }
   deriving stock (Eq, Show)
 
+data InvariantCase = InvariantCase
+  { casePc0 :: String
+  , casePc1 :: String
+  , caseMirror0 :: String
+  , caseMirror1 :: String
+  , caseCriticalCount :: Integer
+  , caseExpected :: Bool
+  }
+  deriving stock (Eq, Show)
+
 emptyRecord :: DifferentialRecord
 emptyRecord = DifferentialRecord 0 0 0 Map.empty
 
@@ -72,14 +114,18 @@ main = do
   assertEqual "ToyModel structural well-formedness" [] (modelProblems toyModel)
   checkRequiredConstructors root
   checkHandTransitions root
+  checkInvariantTruthTable root toyModel
   toyExplorer <- requireRight "ToyModel explorer" (explore toyModel)
   assertEqual "ToyModel distinct states" 8 (Map.size (exploreStates toyExplorer))
   assertEqual "ToyModel safety" Nothing (exploreViolation toyExplorer)
 
-  putStrLn "formal-model-spec: byte golden and renderer mutants"
-  checkGolden root
-  rendererGoldenCaught <- checkRendererGoldenMutants root
+  putStrLn "formal-model-spec: semantic renderer oracle and renderer mutants"
+  rendererFacts <- checkRendererSemanticOracle root (emitTLA toyModel)
+  rendererSemanticCaught <- checkRendererSemanticMutants rendererFacts
   checkNeverCommitted root
+
+  putStrLn "formal-model-spec: Phase-10 calculus-composition projection"
+  compositionProjection <- checkCalculusCompositionBridge root
 
   putStrLn "formal-model-spec: TLC round-trip and liveness sensitivity"
   toyTlc <- runTlc java jar output Correct toyModel
@@ -115,7 +161,7 @@ main = do
     assert (Map.findWithDefault 0 label (recordCoverage record) * 5 >= recordCases record)
       ("constructor coverage below 20%: " <> label)
   writePhaseResults output toyExplorer toyTlc fairnessSensitivity modelMutantsCaught
-    specWeakeningCaught rendererGoldenCaught rendererDifferentialCaught record
+    specWeakeningCaught rendererSemanticCaught rendererDifferentialCaught compositionProjection record
   putStrLn ("formal-model-spec: PASS (" <> show (recordCases record) <> " differential models)")
 
 resolveTool :: FilePath -> String -> FilePath -> IO FilePath
@@ -243,27 +289,142 @@ eventFromText text = case splitOn '-' text of
     capitalize [] = []
     capitalize (first : rest) = toEnum (fromEnum first - 32) : rest
 
-checkGolden :: FilePath -> IO ()
-checkGolden root = do
-  expectedTla <- readFile (root </> "test/golden/formal/ToyModel.tla.golden")
-  expectedCfg <- readFile (root </> "test/golden/formal/ToyModel.cfg.golden")
-  let (Tla actualTla, Cfg actualCfg) = emitTLA toyModel
-  assertEqual "ToyModel TLA byte golden" expectedTla actualTla
-  assertEqual "ToyModel CFG byte golden" expectedCfg actualCfg
-  assert ("WF_vars" `isInfixOf` actualTla) "golden does not exercise WeakFair"
-  assert ("SF_vars" `isInfixOf` actualTla) "golden does not exercise StrongFair"
-  assert ("[](" `isInfixOf` actualTla) "golden does not exercise Always"
-  assert ("<>(" `isInfixOf` actualTla) "golden does not exercise Eventually"
-  assert (" ~> " `isInfixOf` actualTla) "golden does not exercise LeadsTo"
+checkInvariantTruthTable :: FilePath -> Model -> IO ()
+checkInvariantTruthTable root model = do
+  cases <- readInvariantCases root
+  actual <- mapM (invariantOutcome model) cases
+  assertEqual "ToyModel invariant truth table" (map caseExpected cases) actual
 
-checkRendererGoldenMutants :: FilePath -> IO Int
-checkRendererGoldenMutants root = do
-  golden <- readFile (root </> "test/golden/formal/ToyModel.tla.golden")
+readInvariantCases :: FilePath -> IO [InvariantCase]
+readInvariantCases root = do
+  rows <- lines <$> readFile (root </> "test/oracle/formal/ToyModel.invariant_cases.tsv")
+  case rows of
+    [] -> assert False "invariant oracle is empty" >> pure []
+    header : body -> do
+      assertEqual "invariant oracle header"
+        "pc0\tpc1\tmirror0\tmirror1\tcritical_count\texpected" header
+      mapM parse body
+ where
+  parse row = case splitOn '\t' row of
+    [pc0, pc1, mirror0, mirror1, countText, expectedText] -> case reads countText of
+      [(count, "")] -> case expectedText of
+        "true" -> pure (InvariantCase pc0 pc1 mirror0 mirror1 count True)
+        "false" -> pure (InvariantCase pc0 pc1 mirror0 mirror1 count False)
+        _ -> malformed row
+      _ -> malformed row
+    _ -> malformed row
+  malformed row = assert False ("malformed invariant oracle row: " <> row) >> pure (InvariantCase "" "" "" "" 0 False)
+
+invariantOutcome :: Model -> InvariantCase -> IO Bool
+invariantOutcome model fixture = case modelInvariants model of
+  invariant : _ -> requireRight "invariant truth-table evaluation"
+    (evalExpr model Map.empty (invariantState fixture) (namedExprBody invariant) >>= valueAsBool)
+  [] -> assert False "model has no invariant for the truth table" >> pure False
+
+invariantState :: InvariantCase -> State
+invariantState fixture = Map.fromList
+  [ ("pc", function (casePc0 fixture) (casePc1 fixture))
+  , ("mirror", function (caseMirror0 fixture) (caseMirror1 fixture))
+  , ("criticalCount", IntValue (caseCriticalCount fixture))
+  ]
+ where
+  function left right = FunctionValue
+    [(AtomValue "p0", AtomValue left), (AtomValue "p1", AtomValue right)]
+
+type RendererFact = (String, String, String)
+
+checkRendererSemanticOracle :: FilePath -> (Tla, Cfg) -> IO (Set RendererFact)
+checkRendererSemanticOracle root rendered = do
+  expected <- readRendererFacts root
+  let actual = renderedSemanticFacts rendered
+  assertEqual "ToyModel renderer semantic facts" expected actual
+  pure expected
+
+checkRendererSemanticMutants :: Set RendererFact -> IO Int
+checkRendererSemanticMutants expected = do
   caught <- forM [(StrongAsWeak, "emitTLA-mut-03"), (AlwaysAsEventually, "emitTLA-mut-04")] $ \(mode, name) -> do
-    let (Tla mutant, _) = emitTLAWith mode toyModel
-    assert (mutant /= golden) (name <> " survived byte golden")
+    let actual = renderedSemanticFacts (emitTLAWith mode toyModel)
+    assert (actual /= expected) (name <> " survived the semantic renderer oracle")
     pure True
   pure (length (filter id caught))
+
+readRendererFacts :: FilePath -> IO (Set RendererFact)
+readRendererFacts root = do
+  rows <- lines <$> readFile (root </> "test/oracle/formal/ToyModel.renderer_semantics.tsv")
+  case rows of
+    [] -> assert False "renderer semantic oracle is empty" >> pure Set.empty
+    header : body -> do
+      assertEqual "renderer semantic oracle header" "kind\tname\tvalue" header
+      Set.fromList <$> mapM parse body
+ where
+  parse row = case splitOn '\t' row of
+    [kind, name, value] -> pure (kind, name, value)
+    fields -> assert False ("malformed renderer semantic row: " <> show fields) >> pure ("", "", "")
+
+renderedSemanticFacts :: (Tla, Cfg) -> Set RendererFact
+renderedSemanticFacts (Tla tla, Cfg cfg) = Set.fromList . concat $
+  [ maybe [] (\name -> [("module", name, "present")]) (moduleName tla)
+  , [("generated-stamp", "amoebius-dev-model", "stable")
+    | "\\* GENERATED by amoebius dev model from Model " `isPrefixOfAnyLine` tla]
+  , namedListFacts "extension" "EXTENDS " tla
+  , namedListFacts "constant" "CONSTANTS " tla
+  , namedListFacts "variable" "VARIABLES " tla
+  , [("initial-assignment", name, "present") | name <- initAssignments tla]
+  , [("action", name, "present") | name <- actionDefinitions tla]
+  , fairnessFacts "WF_vars(" "weak" tla
+  , fairnessFacts "SF_vars(" "strong" tla
+  , [("invariant", name, "present") | name <- cfgNamesList "INVARIANT " cfg]
+  , [("constraint", name, "present") | name <- cfgNamesList "CONSTRAINT " cfg]
+  , propertyFacts tla
+  , [("specification", name, "present") | name <- cfgNamesList "SPECIFICATION " cfg]
+  , [("check-deadlock", "value", map toLowerAscii value)
+    | value <- cfgNamesList "CHECK_DEADLOCK " cfg]
+  ]
+ where
+  moduleName contents = do
+    let modulePrefix = "---- MODULE " :: String
+    line <- find (modulePrefix `isPrefixOf`) (lines contents)
+    pure (takeWhile (/= ' ') (drop (length modulePrefix) line))
+  namedListFacts kind prefix contents =
+    [(kind, trim name, "present")
+    | line <- lines contents
+    , prefix `isPrefixOf` line
+    , name <- splitOn ',' (drop (length prefix) line)
+    ]
+  isPrefixOfAnyLine prefix = any (prefix `isPrefixOf`) . lines
+  initAssignments contents =
+    [ trim name
+    | line <- takeWhile (not . null) (drop 1 (dropWhile (/= "Init ==") (lines contents)))
+    , let body = fromMaybe line (stripAfter "/\\ " line)
+    , let (name, equals) = breakOn " = " body
+    , not (null equals)
+    ]
+  actionDefinitions contents =
+    [ takeWhile (/= '(') line
+    | line <- lines contents
+    , ") ==" `isSuffixOf` line
+    ]
+  fairnessFacts marker kind contents =
+    [ ("fairness", takeWhile (/= '(') rest, kind)
+    | line <- lines contents
+    , Just rest <- [stripAfter marker line]
+    ]
+  propertyFacts contents =
+    [ ("property", trim name, temporalKind (trim (drop 4 separator)))
+    | line <- lines contents
+    , let (name, separator) = breakOn " == " line
+    , not (null separator)
+    , let rhs = trim (drop 4 separator)
+    , " ~> " `isInfixOf` rhs || "[](" `isPrefixOf` rhs || "<>" `isPrefixOf` rhs
+    ]
+  temporalKind rhs
+    | " ~> " `isInfixOf` rhs = "leads-to"
+    | "[](" `isPrefixOf` rhs = "always"
+    | otherwise = "eventually"
+  cfgNamesList prefix = map (drop (length prefix)) . filter (prefix `isPrefixOf`) . lines
+  toLowerAscii character
+    | character >= 'A' && character <= 'Z' = toEnum (fromEnum character + 32)
+    | otherwise = character
 
 checkNeverCommitted :: FilePath -> IO ()
 checkNeverCommitted root = do
@@ -271,6 +432,92 @@ checkNeverCommitted root = do
   assert (exitCode == ExitSuccess) ("git ls-files failed: " <> stderrText)
   assert (null stdoutText) ("generated TLA artifacts are tracked:\n" <> stdoutText)
   assert (root `isPrefixOf` root) "repository root resolution failed"
+
+checkCalculusCompositionBridge :: FilePath -> IO Bool
+checkCalculusCompositionBridge root = do
+  expected <- readMetricOracle (root </> "test/oracle/formal/CalculusComposition.expected.tsv")
+  result <- withReferenceComposition $ \composition -> do
+    let model = compositionModel composition
+        resources = compositionResource composition
+        expectedKinds = intercalate "," (map (Text.unpack . calculusTag) (compositionKinds composition))
+    assertEqual "composition formal-model structural problems" [] (modelProblems model)
+    assertEqual "composition model variables"
+      ["componentCount", "cpu", "memory", "ephemeral", "pods"] (modelVariables model)
+    assertEqual "composition model calculus projection"
+      (Just (SetValue (map (AtomValue . Text.unpack . calculusTag) (compositionKinds composition))))
+      (lookup "Calculi" (modelConstants model))
+    assertEqual "composition model component count"
+      (Just (IntValue (fromIntegral (length (compositionKinds composition)))))
+      (initialValue "componentCount" model)
+    assertEqual "composition model cpu" (Just (naturalValue (resourceCpu resources))) (initialValue "cpu" model)
+    assertEqual "composition model memory" (Just (naturalValue (resourceMemory resources))) (initialValue "memory" model)
+    assertEqual "composition model ephemeral"
+      (Just (naturalValue (resourceEphemeralStorage resources))) (initialValue "ephemeral" model)
+    assertEqual "composition model pods" (Just (naturalValue (resourcePodSlots resources))) (initialValue "pods" model)
+    explored <- requireRight "composition formal model explorer" (explore model)
+    let actual = Map.fromList
+          [ ("calculus-kinds", expectedKinds)
+          , ("component-count", show (length (compositionKinds composition)))
+          , ("cpu", show (resourceCpu resources))
+          , ("memory", show (resourceMemory resources))
+          , ("ephemeral", show (resourceEphemeralStorage resources))
+          , ("pods", show (resourcePodSlots resources))
+          , ("formal-distinct-state-count", show (Map.size (exploreStates explored)))
+          , ("formal-safety", if exploreViolation explored == Nothing then "green" else "red")
+          ]
+    assertEqual "calculus-composition semantic projection oracle" expected actual
+    pure True
+  case result of
+    Left problem -> assert False ("cannot mint composition reference scope: " <> problem) >> pure False
+    Right passed -> pure passed
+ where
+  initialValue name model = do
+    expression <- lookup name (modelInit model)
+    case expression of
+      Literal value -> Just value
+      _ -> Nothing
+  naturalValue = IntValue . fromIntegral
+
+readMetricOracle :: FilePath -> IO (Map String String)
+readMetricOracle path = do
+  rows <- lines <$> readFile path
+  case rows of
+    [] -> assert False ("metric oracle is empty: " <> path) >> pure Map.empty
+    header : body -> do
+      assertEqual ("metric oracle header " <> path) "metric\tvalue" header
+      Map.fromList <$> mapM parse body
+ where
+  parse row = case splitOn '\t' row of
+    [metric, value] -> pure (metric, value)
+    fields -> assert False ("malformed metric oracle row: " <> show fields) >> pure ("", "")
+
+withReferenceComposition
+  :: (forall scope. Composition scope -> IO result)
+  -> IO (Either String result)
+withReferenceComposition continuation = case trustedTenant "phase-11-tenant" of
+  Left problem -> pure (Left (show problem))
+  Right tenant -> case trustedSubject tenant "phase-11-subject" of
+    Left problem -> pure (Left (show problem))
+    Right subject -> case activeMembership tenant subject of
+      Left problem -> pure (Left (show problem))
+      Right membership -> case withRequestScope tenant subject membership
+        (continuation . referenceComposition) of
+          Left problem -> pure (Left (show problem))
+          Right action -> Right <$> action
+
+referenceComposition :: RequestScope scope -> Composition scope
+referenceComposition scope =
+  append
+    (append (compose artifact budget) (compose lift workflow))
+    (singleton evidence)
+ where
+  artifact = artifactComponent scope "artifact" (resource 1 10 100 1) (RecipeId "formal-artifact" 1)
+  budget = budgetComponent scope "budget" (resource 2 20 200 2)
+    (allowance (Bytes 4096) (Slots 4) (Bytes 1024))
+  lift = liftComponent scope "lift" (resource 3 30 300 3) OnHost
+  workflow = workflowComponent scope "workflow" (resource 4 40 400 4) emptyLedger
+  evidence = evidenceComponent scope "evidence" (resource 5 50 500 5) PureRegister
+  resource = ResourceVector
 
 checkObligationSet :: FilePath -> Model -> IO ()
 checkObligationSet root model = do
@@ -296,7 +543,7 @@ checkFairnessSensitivity java jar output = do
     ("fairness-drop failed for the wrong reason:\n" <> tlcOutput result)
   let (Tla correct, _) = emitTLA toyModel
       (Tla renderedMutant, _) = emitTLA mutant
-  assert (correct /= renderedMutant) "fairness-drop mutant survived byte golden"
+  assert (correct /= renderedMutant) "fairness-drop mutant did not alter the rendered specification"
   pure (tlcExit result /= ExitSuccess)
 
 checkModelMutants :: FilePath -> FilePath -> FilePath -> IO Int
@@ -342,17 +589,17 @@ flipForAll expression = case expression of
 
 checkSpecWeakening :: FilePath -> IO Bool
 checkSpecWeakening root = do
-  golden <- readFile (root </> "test/golden/formal/ToyModel.tla.golden")
+  cases <- readInvariantCases root
   let weaken named = named {namedExprBody = case namedExprBody named of
         And (_ : rest) -> And rest
         _ -> Literal (BoolValue True)}
       mutant = toyModel {modelName = "ToyModel", modelInvariants = map weaken (modelInvariants toyModel)}
-      (Tla rendered, Cfg cfg) = emitTLA mutant
-      (_, Cfg correctCfg) = emitTLA toyModel
-  assert (rendered /= golden) "invariant-clause-delete mutant survived byte golden"
-  assertEqual "invariant-clause-delete retains named obligation set"
-    (cfgNames "INVARIANT " correctCfg) (cfgNames "INVARIANT " cfg)
-  pure (rendered /= golden)
+  correct <- mapM (invariantOutcome toyModel) cases
+  mutated <- mapM (invariantOutcome mutant) cases
+  assertEqual "correct invariant agrees with authored truth table" (map caseExpected cases) correct
+  assert (mutated /= map caseExpected cases)
+    "invariant-clause-delete mutant survived the authored semantic truth table"
+  pure (mutated /= map caseExpected cases)
 
 checkRendererDifferentialMutants :: FilePath -> FilePath -> FilePath -> IO Int
 checkRendererDifferentialMutants java jar output = do
@@ -673,9 +920,10 @@ splitOn delimiter text = case break (== delimiter) text of
   (piece, _ : rest) -> piece : splitOn delimiter rest
 
 writePhaseResults
-  :: FilePath -> ExploreResult -> TlcResult -> Bool -> Int -> Bool -> Int -> Int -> DifferentialRecord -> IO ()
+  :: FilePath -> ExploreResult -> TlcResult -> Bool -> Int -> Bool -> Int -> Int -> Bool -> DifferentialRecord -> IO ()
 writePhaseResults output explorer tlc fairnessSensitivity modelMutants specWeakening
-    rendererGolden rendererDifferential record = writeFile (output </> "phase-results.tsv") . unlines $
+    rendererSemantic rendererDifferential compositionProjection record =
+      writeFile (output </> "phase-results.tsv") . unlines $
   [ "metric\tvalue"
   , "toy-distinct-state-count\t" <> show (Map.size (exploreStates explorer))
   , "toy-safety-explorer\t" <> green (exploreViolation explorer == Nothing)
@@ -685,8 +933,9 @@ writePhaseResults output explorer tlc fairnessSensitivity modelMutants specWeake
   , "fairness-drop-liveness\t" <> if fairnessSensitivity then "red" else "green"
   , "model-safety-mutants-caught\t" <> show modelMutants <> "/5"
   , "spec-weakening-mutants-caught\t" <> if specWeakening then "1/1" else "0/1"
-  , "renderer-golden-mutants-caught\t" <> show rendererGolden <> "/2"
+  , "renderer-semantic-mutants-caught\t" <> show rendererSemantic <> "/2"
   , "renderer-differential-mutants-caught\t" <> show rendererDifferential <> "/2"
+  , "calculus-composition-projection\t" <> green compositionProjection
   , "case-count\t" <> show (recordCases record)
   , "safety-violating-count\t" <> show (recordViolating record)
   , "constraint-boundary-count\t" <> show (recordBoundary record)

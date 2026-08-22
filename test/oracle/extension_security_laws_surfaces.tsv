@@ -1,0 +1,29 @@
+# Authored Phase-23 surface expectation.
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+identity-attestation	metrics	identity-envelope,independent-signature
+scoped-operation-matrix	metrics	operation-matrix
+indistinguishable-refusal	metrics	refusal-pairs
+modeled-refusal-timing	metrics	timing-envelope
+injective-keyspaces	metrics	namespaces
+revocation-policy	metrics	revocation-layers
+authored-security-verdicts	metrics	law-verdicts
+single-law-defects	metrics	single-law-defects
+exact-mutant-summary	metrics	mutants
+security-compiler-barriers	metrics	compile-barriers
+closed-security-source	metrics	source-scans
+runtime-correspondence	metrics	runtime
+opaque-mandatory-boundary	checks	opaque-mandatory-scan
+authored-operation-oracle	checks	operation-matrix-independent,refusal-matrix-independent
+authored-namespace-oracle	checks	namespace-output-independent
+authored-revocation-oracle	checks	revocation-table-independent
+authored-verdict-oracle	checks	verdict-grid-independent
+python-signature-oracle	checks	signature-independent
+specific-compiler-negatives	checks	typed-security-barriers
+generated-artifact-discipline	checks	results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
+s1-attestation-mutant	mutants	tampered-identity-accepted
+s2-skolem-mutant	mutants	caller-supplied-scope
+s3-default-mutant	mutants	unscoped-default-arm
+s4-refusal-mutant	mutants	distinguishable-refusal
+s5-namespace-mutant	mutants	resource-only-cache-key
+s6-revocation-mutant	mutants	revocation-policy-omitted

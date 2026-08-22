@@ -1,0 +1,97 @@
+phase	contract	authored_command	mechanism_state
+0	DEVELOPMENT_PLAN/phase_00_documentation_suite.md	python3 tools/doc_lint_verify.py	present
+1	DEVELOPMENT_PLAN/phase_01_toolchain_spike.md	python3 tools/toolchain_spike_gate.py	present
+2	DEVELOPMENT_PLAN/phase_02_repository_layout_conformance.md	python3 tools/repository_conformance_gate.py	present
+3	DEVELOPMENT_PLAN/phase_03_artifact_calculus.md	python3 tools/artifact_calculus_gate.py	present
+4	DEVELOPMENT_PLAN/phase_04_budget_calculus.md	python3 tools/budget_calculus_gate.py	present
+5	DEVELOPMENT_PLAN/phase_05_lift_calculus.md	python3 tools/lift_calculus_gate.py	present
+6	DEVELOPMENT_PLAN/phase_06_workflow_calculus.md	python3 tools/workflow_calculus_gate.py	present
+7	DEVELOPMENT_PLAN/phase_07_evidence_calculus.md	python3 tools/evidence_calculus_gate.py	present
+8	DEVELOPMENT_PLAN/phase_08_scope_index.md	python3 tools/scoped_identity_gate.py	present
+9	DEVELOPMENT_PLAN/phase_09_resource_index.md	python3 tools/capacity_topology_gate.py	present
+10	DEVELOPMENT_PLAN/phase_10_calculus_composition.md	python3 tools/calculus_composition_gate.py	present
+11	DEVELOPMENT_PLAN/phase_11_formal_model_kernel.md	python3 tools/formal_model_kernel_gate.py	present
+12	DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md	python3 tools/explicit_state_checker_gate.py	present
+13	DEVELOPMENT_PLAN/phase_13_symbolic_checker.md	python3 tools/symbolic_checker_gate.py	present
+14	DEVELOPMENT_PLAN/phase_14_refinement_checker.md	python3 tools/refinement_checker_gate.py	present
+15	DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md	python3 tools/compile_fail_harness_gate.py	present
+16	DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md	python3 tools/deterministic_simulation_gate.py	present
+17	DEVELOPMENT_PLAN/phase_17_gateway_migration_model.md	python3 tools/gateway_migration_model_gate.py	present
+18	DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md	python3 tools/dsl_formal_model_gate.py	present
+19	DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md	python3 tools/reconcile_core_simulation_gate.py	present
+20	DEVELOPMENT_PLAN/phase_20_extension_declaration.md	python3 tools/extension_declaration_gate.py	present
+21	DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md	python3 tools/extension_laws_per_extension_gate.py	present
+22	DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md	python3 tools/extension_laws_compositional_gate.py	present
+23	DEVELOPMENT_PLAN/phase_23_extension_security_laws.md	python3 tools/extension_security_laws_gate.py	present
+24	DEVELOPMENT_PLAN/phase_24_conformance_gate_generator.md	python3 tools/conformance_gate_generator_gate.py	present
+25	DEVELOPMENT_PLAN/phase_25_dhall_schema_generation.md	python3 tools/dhall_typecheck_schema_gate.py	present
+26	DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md	python3 tools/gadt_decode_ir_gate.py	present
+27	DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md	python3 tools/illegal_state_corpus_gate.py	present
+28	DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md	python3 tools/storage_geometry_gate.py	present
+29	DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md	python3 tools/execution_accelerator_gate.py	present
+30	DEVELOPMENT_PLAN/phase_30_capability_bind.md	python3 tools/capability_bind_gate.py	present
+31	DEVELOPMENT_PLAN/phase_31_provision_seal.md	python3 tools/provision_seal_gate.py	present
+32	DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md	python3 tools/inference_accelerator_gate.py	present
+33	DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md	python3 tools/render_manifest_gate.py	present
+34	DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md	python3 tools/chain_boundary_gate.py	present
+35	DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md	python3 tools/amoebius_image_recipe_gate.py	present
+36	DEVELOPMENT_PLAN/phase_36_transaction_vocabulary.md	python3 tools/transaction_vocabulary_gate.py	present
+37	DEVELOPMENT_PLAN/phase_37_ui_program_schema.md	python3 tools/ui_program_schema_gate.py	present
+38	DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md	python3 tools/ui_authorization_gate.py	present
+39	DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md	python3 tools/ui_effect_binding_gate.py	present
+40	DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md	python3 tools/ui_plan_compiler_gate.py	present
+41	DEVELOPMENT_PLAN/phase_41_offline_language_plan.md	python3 tools/offline_language_plan_gate.py	present
+42	DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md	python3 tools/ui_browser_interpreter_gate.py	present
+43	DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md	python3 tools/ui_server_boundary_gate.py	present
+44	DEVELOPMENT_PLAN/phase_44_ui_local_composition.md	python3 tools/local_ui_composition_gate.py	present
+45	DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md	python3 tools/encrypted_browser_runtime_gate.py	present
+46	DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md	python3 tools/ui_contract_generation_gate.py	present
+47	DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md	python3 tools/tool_and_mutant_generation_gate.py	present
+48	DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md	python3 tools/test_topology_dsl_gate.py	present
+49	DEVELOPMENT_PLAN/phase_49_self_referential_gates.md	python3 tools/self_referential_gates_gate.py	planned-source
+50	DEVELOPMENT_PLAN/phase_50_host_assert_cli.md	python3 tools/host_assert_cli_gate.py	present
+51	DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md	python3 tools/host_ensure_kernel_gate.py	present
+52	DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md	python3 tools/linux_engine_bringup_gate.py --execute	planned-source
+53	DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md	python3 tools/apple_engine_bringup_gate.py --execute	planned-source
+54	DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md	python3 tools/windows_engine_bringup_gate.py --execute	planned-source
+55	DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md	python3 tools/bootstrap_coordinator_gate.py --execute	present
+56	DEVELOPMENT_PLAN/phase_56_base_image_registry.md	python3 tools/base_image_registry_gate.py --execute	present
+57	DEVELOPMENT_PLAN/phase_57_complementary_arch_child.md	python3 tools/complementary_arch_gate.py --execute	planned-source
+58	DEVELOPMENT_PLAN/phase_58_object_reconciler.md	python3 tools/object_reconciler_gate.py --execute	present
+59	DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md	python3 tools/capacity_scheduler_gate.py --execute	present
+60	DEVELOPMENT_PLAN/phase_60_retained_storage.md	python3 tools/retained_storage_gate.py --execute	present
+61	DEVELOPMENT_PLAN/phase_61_vault_pki.md	python3 tools/vault_pki_gate.py --execute	present
+62	DEVELOPMENT_PLAN/phase_62_platform_backbone.md	python3 tools/platform_backbone_gate.py --execute	present
+63	DEVELOPMENT_PLAN/phase_63_platform_services_2.md	python3 tools/platform_services_2_gate.py	present
+64	DEVELOPMENT_PLAN/phase_64_keycloak_ingress.md	python3 tools/keycloak_ingress_gate.py	present
+65	DEVELOPMENT_PLAN/phase_65_live_dsl_deploy.md	python3 tools/live_dsl_deploy_gate.py	present
+66	DEVELOPMENT_PLAN/phase_66_app_tenancy.md	cabal test tenant-provider-provisioning-live	present
+67	DEVELOPMENT_PLAN/phase_67_pulsar_client.md	cabal test pulsar-client-live	present
+68	DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md	cabal test user-tenant-isolation-live	present
+69	DEVELOPMENT_PLAN/phase_69_content_store_workflow.md	cabal test content-store-workflow-live	present
+70	DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md	cabal test ui-projection-runtime-live	present
+71	DEVELOPMENT_PLAN/phase_71_release_lifecycle.md	cabal test release-lifecycle-live	present
+72	DEVELOPMENT_PLAN/phase_72_ui_program_release.md	cabal test ui-program-release-live-gate	present
+73	DEVELOPMENT_PLAN/phase_73_network_fabric_wireguard.md	—	descriptive-only
+74	DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md	cabal test multicluster-spawn-live	present
+75	DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md	cabal test gateway-migration-drills-live	present
+76	DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md	cabal test provider-deploy-checkpoint-live	present
+77	DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md	—	descriptive-only
+78	DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md	cabal test provider-ebs-credential-live	present
+79	DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md	cabal test provider-dynamic-nodes-live	present
+80	DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md	cabal test determinism-jitcache-live	present
+81	DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md	cabal test phase55-ui-single-tenant-live	planned-component
+82	DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md	cabal test ui-multi-tenant-live	present
+83	DEVELOPMENT_PLAN/phase_83_ui_rollout_reconnect.md	cabal test phase57-ui-rollout-reconnect	planned-component
+84	DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md	cabal test phase58-ui-ha-multizone	planned-component
+85	DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md	cabal test offline-replay-receipts-live	present
+86	DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md	cabal test offline-blobs-isolation-live	present
+87	DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md	cabal test offline-release-evolution-live	present
+88	DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md	python3 tools/offline_multizone_continuity_gate.py	present
+89	DEVELOPMENT_PLAN/phase_89_apple_metal_host_daemon.md	—	descriptive-only
+90	DEVELOPMENT_PLAN/phase_90_test_topology_live.md	python3 tools/test_topology_live_gate.py	planned-source
+91	DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md	python3 tools/infernix_lift_gate.py --reuse-fresh-live	present
+92	DEVELOPMENT_PLAN/phase_92_infernix_ui_rederivation.md	python3 tools/infernix_ui_lift_gate.py --reuse-fresh-live	present
+93	DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md	python3 tools/jitml_lift_cuda_gate.py --reuse-fresh-live	present
+94	DEVELOPMENT_PLAN/phase_94_jitml_ui_rederivation.md	python3 tools/jitml_ui_lift_gate.py --reuse-fresh-live	present
+95	DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md	python3 tools/webapp_rederivation_gate.py	planned-source

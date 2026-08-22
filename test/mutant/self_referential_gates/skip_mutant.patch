@@ -1,0 +1,6 @@
+capability: self_referential_gates
+mutant: skip_mutant
+build-flag: self-referential-gates-skip-mutant-mutant
+operator: boolean-substitution
+production-locus: deriveGate/includesMutants
+expected-red-locus: skip_mutant

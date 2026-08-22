@@ -83,7 +83,7 @@ or a replica/failure-domain fault claim.
 
 **Depends on:** [Phase 70](phase_70_ui_projection_runtime.md) — the owner-scoped projection runtime, and [Phase 72](phase_72_ui_program_release.md), the released plan the generic interpreter runs.
 
-**Gate:** `cabal test phase55-ui-single-tenant-live` deploys the concrete representative topology and satisfies
+**Gate:** `python3 tools/run_phase_gate.py 81` deploys the concrete representative topology and satisfies
 every fixture, external observation, paired authority check, fresh challenge, bypass probe, and mutant in
 [Gate integrity](#gate-integrity). A browser screenshot, app-emitted compliance event, or `replicas=1` topology
 cannot satisfy the gate.

@@ -16,7 +16,7 @@ discharges them, and the closure argument that consumes C1 are owned by the hub,
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, documents/README.md, documents/engineering/README.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md, DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, documents/README.md, documents/engineering/README.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_security.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/jit_budget_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -39,8 +39,28 @@ to the hub, and the security and transaction families — which are *instances* 
 seams — belong to [`extension_conformance_security.md`](./extension_conformance_security.md) and
 [`extension_conformance_transactions.md`](./extension_conformance_transactions.md).
 
-Everything here is design intent stated as a specification. No phase has yet delivered a law, a gate, or a
-verdict; status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+[Phase 10](../../DEVELOPMENT_PLAN/phase_10_calculus_composition.md) implements the base five-calculus operation
+and finite Register-1 instances of C2, C3, C5, and C6: five component arms, 25 ordered pairs, 125 kind triples,
+exact resource addition, and a request-scope compiler barrier. That result is not an extension-law verdict.
+[Phase 20](../../DEVELOPMENT_PLAN/phase_20_extension_declaration.md) supplies the complete five-component
+declaration that law observations name.
+
+[Phase 21](../../DEVELOPMENT_PLAN/phase_21_extension_laws_per_extension.md) implements a pure L1–L5 evaluator
+over explicit operation, artifact, budget, flow, and claim observations joined to that declaration. Its bounded
+Register-1 suite covers two declaration shapes, six authored operation inputs, two independently seeded child-
+process render comparisons, actual budget and evidence values, and five single-law negative subjects. Finite
+source scanners and the Phase-15 pinned claim/fixture compiler negative supplement those observations. This
+does not prove termination or scanner completeness, generate a gate for an arbitrary declaration, certify a
+runtime extension, or mint a conformance verdict.
+
+[Phase 22](../../DEVELOPMENT_PLAN/phase_22_extension_laws_compositional.md) implements a separate normalized
+composite value and a bounded C1–C7 evaluator. Seven ordered identity/link cases over the two declaration
+fixtures yield 49 green pair-law cells; a separate 63-cell table covers two lawful address controls and seven
+exact negative subjects. Composition preserves one request-scope index, unions Phase-21 vocabularies, and
+folds exact resource vectors. Python independently checks pair sums and four SHA-256 addresses. These samples
+do not prove universal C1, arbitrary-link closure, scanner completeness, collision absence, or runtime
+correspondence. Gate generation, verdict sealing, and the universal C1 proof remain owned by Phase 24 and
+later proof work. Current status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -135,6 +155,27 @@ that a later change which makes it representable turns the fixture green and the
 failure *for its pinned reason* rather than any failure, and requires each committed mutant to redden a named
 assertion. This is the [`testing_doctrine.md`](./testing_doctrine.md) evidence discipline applied per
 extension.
+
+### Implemented discharge boundary
+
+The Phase-21 evaluator makes each L-law a separate typed verdict. Before deciding a verdict, it requires the
+observed operation, artifact, budget, flow, or claim names to cover the corresponding sets derived from the
+Phase-20 declaration. Its current executable evidence is deliberately finite:
+
+- L1 catches exceptions over six authored inputs and scans one pure fixture for known partial tokens and
+  wildcard dispatch; looping and scanner completeness remain UNVERIFIED.
+- L2 compares bytes from two differently seeded child processes and scans that fixture for known ambient
+  clock, randomness, environment, and directory primitives; arbitrary hidden effects remain UNVERIFIED.
+- L3 drives two real grants to refusal before a third materialization and constructs two retained values with
+  reapers.
+- L4 evaluates the closed test relation `RequestFlow < TenantFlow < GlobalFlow` and rejects the seeded widening
+  from request to tenant flow.
+- L5 constructs two real evidence claims bound to fixtures and reuses the Phase-15 legal/illegal compiler pair
+  for a claim with its fixture argument omitted.
+
+The 7-by-5 authored verdict table has two all-green controls and five subjects that each fail exactly one law.
+Those verdicts establish the evaluator's behavior over this corpus; they are not extension conformance seals
+and make no claim about the namesake `infernix` or `jitml` runtimes.
 
 ---
 
@@ -247,6 +288,29 @@ so equal addresses follow from equal content. The converse — that different co
 — is collision resistance, a cryptographic assumption rather than a type property, and it is the assumption
 this law rests on. The gate asserts the law over the link set's declared artifact sets, pairing each shared
 address with a content comparison.
+
+### Implemented compositional discharge boundary
+
+The Phase-22 evaluator returns one typed verdict per C-law over a scope-preserving composite of complete
+Phase-20 declarations:
+
+- C1 evaluates Phase-21 L1–L5 over each operand and the composite vocabulary. Its current seven cases are a
+  counterexample search, not the universal implication [C1](#c1-closure) requires.
+- C2 compares both empty-composite identities by value; C3 compares both groupings after declaration-key
+  normalization.
+- C4 restricts the composite operation, artifact, budget, and flow observations to each part and compares them
+  with its isolated observations. The pure fixture is scanned for a finite set of shared-authority primitives;
+  a committed mutant introduces a real process-global `IORef` through `unsafePerformIO`.
+- C5 compares the observed composite resource vector with the exact natural-number sum of its operands.
+- C6 rejects a sink wider than its source. The seeded widening also reddens C1 and C4, because it breaks L4
+  closure and changes the affected part's projected behavior.
+- C7 recomputes addresses from bytes, admits two byte-identical artifacts sharing one address, and rejects
+  different bytes forced to one address. Four SHA-256 results are independently recomputed in Python;
+  collision resistance remains ASSUMED.
+
+The cross-request compiler sibling fails at the composite's phantom request index. These observations cover
+only `infernix`, `jitml`, and the empty composite; they are not a generated conformance verdict for either
+runtime.
 
 ---
 

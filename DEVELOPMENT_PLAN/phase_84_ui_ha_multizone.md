@@ -89,7 +89,7 @@ Windows.
 
 **Depends on:** [Phase 83](phase_83_ui_rollout_reconnect.md) — UI rollout, projection catch-up, and reconnect, which this phase extends across failure domains.
 
-**Gate:** `cabal test phase58-ui-ha-multizone` provisions the exact redundant topology, runs the declared
+**Gate:** `python3 tools/run_phase_gate.py 84` provisions the exact redundant topology, runs the declared
 whole-zone isolation while an off-cluster authenticated probe exercises the pinned operation and tenant matrix,
 and satisfies every external availability, isolation, placement, disruption, reconnect, and mutant predicate in
 [Gate integrity](#gate-integrity).

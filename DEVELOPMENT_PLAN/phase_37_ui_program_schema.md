@@ -1,24 +1,20 @@
 # Phase 37: Bounded UI-program schema
 
-> **Purpose**: Add the bounded `UiSource` Dhall algebra and total UI checker that seals structurally valid
-> application programs as `CheckedUiProgram` values without admitting executable browser escape hatches.
-> **Read this if**: phase 37 is next in the queue, or a later phase depends on what its gate establishes.
+> **Purpose**: Admit bounded declarative UI programs through a total checker and expose only a
+> constructor-private `CheckedUiProgram` to later UI phases.
+> **Read this if**: the UI source algebra, graph checker, program fixture corpus, or checked-program boundary
+> has to change.
 
-Phase 37 delivers the UI program schema; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [dsl_doctrine.md](../documents/engineering/dsl_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-Gate passed on 2026-08-09 with ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This phase owns the pure `UiSource` admission seam. It does not scope a user request, evaluate authorization,
+bind an effect handler, emit client/server plans, or run a browser or server. Those boundaries remain with
+Phases 38–44.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +25,9 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 37.1: Bounded `UiSource` and total structural checker 📋](#sprint-371-bounded-uisource-and-total-structural-checker-)
+- [Sprint 37.1: Closed source algebra and total checker ✅](#sprint-371-closed-source-algebra-and-total-checker-)
+- [Sprint 37.2: Independent semantics and rejection coverage ✅](#sprint-372-independent-semantics-and-rejection-coverage-)
+- [Sprint 37.3: Calculus projection and phase seal ✅](#sprint-373-calculus-projection-and-phase-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,186 +35,228 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-36 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-21 by the amended bounded-UI Register-1 gate.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+**Validation record.** The thirteen-sided gate passed on natural `darwin/arm64`, untranslated. Three positive
+program-semantic projections and ten exact diagnostic rows pass; all eight generated rejection classes meet
+their coverage floor; the constructor seal rejects its illegal twin; all six mutants redden at their exact
+loci; and the real five-calculus composition accounts for 30 projected units. All 17 metrics match, and 39
+surfaces join to 56 enumerated items. The normalized-wire byte golden is absent. Attestation
+`sha256:99821aa662d19520fee179bae3cc860d03b6ac5e6bff98fad128f02854778b5e` binds source
+`sha256:4db7e943dae7534f…` over 2,260 files. Browser, server, authorization, handler, and provider enforcement
+remain UNVERIFIED.
 
-Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_program_schema_gate.py` passed all twelve sides: three
-positives, ten exact negatives, graph/wire oracles, eight coverage classes, the compile seal, network
-isolation, all six mutants, and all ten metrics pass; 29 surfaces join to 46 enumerated items. The
-project-contained attestation is `sha256:2016b288fe76e5fa1d609d203269c7b17ea81c202eaa341f18e12ea99440e2b9`,
-bound to source snapshot `sha256:7c8debd11c8ba98a…`; Phase 37 owns no remaining migration deferral.
+**Observed progress — 2026-08-21:** **Known partial.** Three positive programs decode and check, ten negative
+programs fail with exact tag/span diagnostics, all eight generated rejection classes meet their coverage
+floor, the checked-program constructor seal compiles only its legal twin, all six paired mutants have distinct
+loci, and the real five-calculus composition matches its `3,10,8,3,6` projection. The former normalized-wire
+byte golden is retired in favour of an authored program-semantic table.
 
-**Pre-containment status record (invalidated where it claims completion):**
+**Activated 2026-08-21** after Phase 36 sealed. The generative re-baseline invalidated the former seal because
+it had no five-calculus projection and treated derived wire bytes as an oracle.
 
-Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:89b25d3a…`
-(1941 non-ignored files) and published a verified pre-containment external attestation
-`sha256:4580dcd430b5608434256528d6500153f7aac31b5bfe27bcf1b484e53ab44c9c`.
-
-**Observed progress — 2026-08-13:** **Policy-conformant.** The bounded UI-program schema result is unchanged
-and re-run: three positive programs decode and ten negatives fail with exact diagnostics, the graph reference
-and normalized wire golden hold byte-identically, the eight generated classes each clear their coverage floor,
-the checked-program compile seal rejects its illegal construction, and all six seeded mutants redden. Evidence
-and the ledger move into `.build/runs/phase_32/<run-id>/`, and 30 run-time items partition one-to-one across the
-schema's foreclosure surfaces.
-
-**Each foreclosure surface takes both halves of its evidence.** The bound check joins its negative fixture
-*and* `M-drop-bound-check`; exhaustiveness joins its negative *and* `M-skip-exhaustiveness`; port unification
-joins its negative *and* `M-swap-port-contract`. A foreclosure is only evidenced by both — the negative that
-must fail, and the mutant proving the check has teeth — and the join now says so.
-
-Three surfaces join to source checks the gate always performed but never named: the forbidden browser-source
-arm scan, the `CheckedUiProgram` constructor-export check, and the UI partial-token scan. Only
-`runtime-noninterference` carries no id, because it is a runtime property this pure register cannot reach. The
-network observer is normalized to the sanctioned pair as in Phase 34, so a host proving isolation by the other
-route still passes.
-
-**Invalidated historical record:**
-
-Done (invalidated). The closed Dhall wire, total structural checker, independent oracles, generated coverage, constructor
-seal, and all six mutants pass. Browser, UI-server, identity-provider, and storage-provider enforcement remain
-UNVERIFIED. See the Phase-37 ledger.
+---
 
 ## Phase Summary
 
-This phase implements one admission seam: normalized Dhall `UiSource` decodes to a closed wire value and a
-total Haskell checker validates module identities, references, types, bounded graphs, routes, state/event
-tables, exhaustive branches, public-value projections, and deterministic composition before sealing a
-constructor-private `CheckedUiProgram`. Raw JavaScript, HTML, CSS, URLs, provider coordinates, recursive
-effects, unbounded collections, and caller-authored authority have no source constructor.
+The closed Dhall `UiSource` record carries a tenant mode, finite modules, finite nodes, and named external-link
+requirements. Its node and value types are closed unions; there is no source constructor for JavaScript,
+HTML, CSS, a raw URL, provider coordinates, or authority credentials. Real Dhall decoding feeds one total
+Haskell checker.
 
-The result reifies the client-safe value universe and structural graph consumed by later scope,
-authorization, binding, and runtime phases. This phase does not bind a handler, evaluate authorization, emit
-runtime plans, or interpret an effect.
+The checker qualifies node identities, refuses duplicate or missing references, detects graph cycles, enforces
+finite collection bounds, unifies port types, checks exhaustive event branches, and prevents server-private
+values from entering a public projection. Successful checking produces a normalized, constructor-private
+`CheckedUiProgram`; later phases can inspect its bounded graph but cannot forge it.
 
-**Session scope:** one `UiSource` wire schema and its total structural checker; acceptance command
-`cabal test ui-program-schema-spec`; split immediately if work requires scoped authorization, effect binding,
-plan emission, a browser/server interpreter, a second register, or a substrate.
-**Depends on:** [Phase 16](phase_16_deterministic_sim_substrate.md) — the pre-cluster design band and deterministic test substrate are available; this
-gate itself is pure and does not consume simulated effects.
-**Phase scope:** one cohesive claim — *an application program is a checked value with no escape hatch into executable browser code*. Bounding the algebra is what makes every later UI phase decidable.
+**Phase scope:** one cohesive claim — an application UI is bounded declarative data whose complete structural
+admission precedes every scope, authorization, binding, plan, and runtime effect. Any request identity,
+authorization decision, handler binding, plan emission, browser interpretation, or server dispatch splits out.
 
-**Substrate:** none — no host, browser, network, credential, provider service, or cluster is contacted.
-**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+**Substrate:** `none` — Dhall decode, graph checking, compiler barriers, QuickCheck properties, and calculus
+composition are pure host processes; no browser, provider, credential, or cluster is contacted
+([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
 
-**Register:** 1 — pure/golden.
-**Gate:** `python3 tools/ui_program_schema_gate.py` passes the Phase-0 corpus, structural and
-wire oracles, coverage floors, constructor compile seal, network observer, six explicit mutant-red runs, and
-ledger check.
+**Lane:** `none` ([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
+
+**Register:** 1 — pure/generative: semantic tables and negative controls constrain the decision boundary;
+browser, server, identity-provider, and storage-provider enforcement remain UNVERIFIED
+([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
+
+**Depends on:** [Phase 8](phase_08_scope_index.md) — the generative request scope used by the calculus
+projection; [Phase 10](phase_10_calculus_composition.md) — the actual five-calculus composition; [Phase
+25](phase_25_dhall_schema_generation.md) — the Dhall Gate-1 toolchain and closed-schema discipline.
+
+**Gate:** `python3 tools/run_phase_gate.py 37` passes the semantic, diagnostic, graph, generated-property,
+compile-seal, five-calculus, exact-mutant-locus, network-observer, surface-join, containment, and attestation
+checks in [Gate integrity](#gate-integrity).
+
+---
 
 ## Gate integrity
 
-Phase 0 commits every fixture, expected result, diagnostic tag/span, and reference table below before the
-`Amoebius.Ui` schema or checker exists. The test may parse those pins but may not regenerate them from the
-checker under test.
+The gate consumes exactly three positive programs and ten independently pinned negatives. Each negative has a
+stable rejection tag and source span in `test/fixture/ui_program_schema/cases.tsv`; the two failures at Dhall
+Gate 1 and the eight failures in the Haskell checker remain distinguishable.
 
+`test/oracle/ui_program_schema/program_semantics.tsv` independently names each positive program's tenant mode,
+module identities, fully qualified node identities, and external-link names. It replaces the retired rendered
+wire-byte golden. `graph_reference.tsv` separately names one representative checked node per program with its
+kind, value type, qualified edges, and exhaustive event set. Repeated decode/check results must agree, but no
+fresh output is copied into an authored oracle.
 
-- **Representative set:** `minimal_single_tenant.dhall`, `minimal_multi_tenant.dhall`, and
-  `composed_workflow_ui.dhall` cover every source union arm, qualified module import, route, state/event/value
-  type, bounded collection, branch table, typed port declaration, named external-link requirement, and public
-  projection.
-- **Pinned negatives:** `raw_browser_escape.dhall`, `recursive_effect.dhall`,
-  `unbounded_collection.dhall`, `duplicate_qualified_id.dhall`, `missing_reference.dhall`,
-  `raw_external_link_url.dhall`, `duplicate_external_link_requirement.dhall`,
-  `port_type_mismatch.dhall`, `non_exhaustive_event.dhall`, and `private_value_projection.dhall` each differ
-  from a positive twin only in the named illegal dimension and assert a committed dhall-typecheck or `UiCheckError`
-  tag plus source span.
-- **Pinned oracles:** `test/fixture/ui_program_schema/cases.tsv` owns accept/reject and diagnostic outcomes;
-  `normalized_wire.golden` owns the canonical decoded wire shape; and `graph_reference.tsv` explicitly lists
-  the expected qualified nodes, edges, types, and exhaustive event coverage for the three positives.
-- **Independent predicates:** the reference reader performs a finite table/graph comparison without importing
-  production normalization, lookup, type-unification, graph-walk, or exhaustiveness helpers. Goldens are
-  hand-authored from the doctrine and fixtures, never refreshed from observed output.
-- **Generator coverage:** QuickCheck classifies every source arm and forces duplicate, missing, cyclic,
-  ill-typed, over-bound, non-exhaustive, and private-projection rejection classes to at least 5% each.
-- **Effect discipline:** fresh challenges, authority credentials, and OS-boundary effect observers are not
-  applicable to this Register-1 gate. The process runs with network unavailable and credential variables
-  scrubbed; the ledger says “spec-composition proven,” never “runtime proven.”
-- **Seeded mutants:** `add_raw_js_arm` and `add_raw_url_arm` (union-arm additions), `M-drop-bound-check` (guard weakening),
-  `M-first-id-wins` (duplicate collapse), `M-skip-exhaustiveness` (invariant-clause delete), and
-  `M-swap-port-contract` (effect/type swap) are committed and must each turn a distinct pinned case red.
+QuickCheck selects all eight illegal classes with a 5% minimum coverage floor: duplicate identity, missing
+reference, cycle, port mismatch, excessive bound, non-exhaustive events, private projection, and duplicate
+link. The closed tenant, node-kind, and value-type arm vectors are checked explicitly. A legal compiler twin
+can consume `CheckedUiProgram`; an illegal twin cannot construct one.
 
-Passing proves that the checked corpus has the intended closed structure and sampled properties. It does not
-prove browser safety, authorization truth, handler correctness, tenant isolation at a provider, or runtime
-noninterference.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+Six paired mutants each start from an oracle-conforming subject, neutralize one rejection, and must exit red
+at its exact locus: `RawBrowserEscape`, `RawExternalLinkUrl`, `UnboundedCollection`, `DuplicateQualifiedId`,
+`NonExhaustiveEvent`, or `PortTypeMismatch`. A generic non-zero exit or another mutant's token is insufficient.
+
+The artifact, budget, lift, workflow, and evidence components carry the `3,10,8,3,6`
+program/diagnostic/generated-class/graph/mutant counts and compose to resource vector `5,30,0,0`. Normal and
+kernel-observed network-isolated executions must both carry the semantic and calculus acceptance tokens.
+Generated results and ledgers stay beneath `.build/**`.
+
+Passing proves the bounded source admission boundary. It does not prove browser safety, authorization truth,
+handler correctness, provider tenant isolation, or runtime noninterference; those rows remain UNVERIFIED.
+
+- **Extension conformance (§M.13).** Not applicable: this phase declares no extension and composes no extension
+  set. Its compiler seal, semantic oracles, and paired mutants constrain a standalone language boundary.
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact bounded UI-program schema emits is a recipe over a content address, never an authored file.
-- [`low_code_ui_runtime_doctrine.md` §4 — the authored Dhall surface](../documents/engineering/low_code_ui_runtime_doctrine.md#4-the-authored-dhall-surface): `UiSource` is bounded data with no raw browser or network language.
-- [`low_code_ui_runtime_doctrine.md` §5 — gadt-decode and the checked Haskell IR](../documents/engineering/low_code_ui_runtime_doctrine.md#5-gadt-decode-and-the-checked-haskell-ir): the checker is total and `CheckedUiProgram` has a private constructor.
-- [`low_code_ui_runtime_doctrine.md` §6 — modules and total composition](../documents/engineering/low_code_ui_runtime_doctrine.md#6-modules-and-total-composition): qualified identities and deterministic graph merge replace textual inclusion.
-- [`low_code_ui_runtime_doctrine.md` §7 — state, events, and deterministic updates](../documents/engineering/low_code_ui_runtime_doctrine.md#7-state-events-and-deterministic-updates): closed state/event tables are bounded and exhaustive.
-- [`dsl_doctrine.md` §2 — Dhall carries params, Haskell carries logic](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) and [`§5 — illegal-state-unrepresentable contract`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract): UI source enters through the existing dhall-typecheck/gadt-decode discipline.
+- [`low_code_ui_runtime_doctrine.md` §4 — the authored Dhall surface](../documents/engineering/low_code_ui_runtime_doctrine.md#4-the-authored-dhall-surface):
+  the UI language is finite data with no arbitrary browser or network language.
+- [`low_code_ui_runtime_doctrine.md` §5 — GADT decode and the checked Haskell IR](../documents/engineering/low_code_ui_runtime_doctrine.md#5-gadt-decode-and-the-checked-haskell-ir):
+  checking is total and only successful admission creates the private checked value.
+- [`low_code_ui_runtime_doctrine.md` §6 — modules and total composition](../documents/engineering/low_code_ui_runtime_doctrine.md#6-modules-and-total-composition):
+  qualified identities and deterministic merge replace textual inclusion.
+- [`low_code_ui_runtime_doctrine.md` §7 — state, events, and deterministic updates](../documents/engineering/low_code_ui_runtime_doctrine.md#7-state-events-and-deterministic-updates):
+  event tables and collections are finite and exhaustive.
+- [`dsl_doctrine.md` §2 — Dhall carries params, Haskell carries logic](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic):
+  Dhall describes the program while Haskell owns the admission logic.
+- [`generated_artifacts_doctrine.md` §5 — authored vs generated](../documents/engineering/generated_artifacts_doctrine.md#5-authored-vs-generated-the-committed-source):
+  authored semantic inputs constrain per-run derived output; rendered wire bytes are not committed evidence.
+
+---
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
-> established by the current phase gate plus universal artifact hygiene.
+## Sprint 37.1: Closed source algebra and total checker ✅
 
-## Sprint 37.1: Bounded `UiSource` and total structural checker 📋
-**Status**: Planned
-**Implementation**: `dhall/amoebius/ui/`, `src/Amoebius/Ui/{Source,Check}.hs`, and
-`test/spec/ui/UiProgramSchemaSpec.hs` — built and validated.
-**Blocked by**: None.
-**Independent Validation**: the suite reads the Phase-0 decisions and independent graph/wire tables. Three
-positives and ten exact negatives pass, eight generated classes meet their floors, and all six mutants fail.
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/dsl_doctrine.md`,
-`documents/engineering/generated_artifacts_doctrine.md`
+**Status**: Done
+**Implementation**: `dhall/amoebius/ui/`, `src/Amoebius/Ui/{Source,Check}.hs`
+**Blocked by**: [Phase 25](phase_25_dhall_schema_generation.md) gate
+**Independent Validation**: the real decoder admits all three positive programs, the checker returns the exact eight semantic error constructors, and the legal/illegal compiler twins preserve constructor opacity
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/dsl_doctrine.md`
 
 ### Objective
 
-Adopt the low-code UI source and checking boundary: make executable escape hatches absent, reject every
-malformed or semantically incomplete graph with a stable diagnostic, and expose only a sealed checked value to
-later phases.
+Adopt the bounded source and checked-IR doctrines; make executable escape hatches absent and structural
+admission total.
 
 ### Deliverables
 
-- Closed normalized Dhall records/unions, smart-constructor prelude, wire decoder, and canonical module merge.
-- Private `CheckedUiProgram` plus total reference, type, bounds, graph, branch, and projection checks.
-- Phase-0 corpus readers, independent reference-table comparator, round-trip properties, coverage floors,
-  mutant configurations, and a Register-1 honesty ledger.
+- Closed tenant, node-kind, and value-type unions plus finite module/node records.
+- A deterministic decoder and normalizer with no raw browser or authority arm.
+- A private checked-program constructor and total graph/type/bounds/event/projection folds.
 
 ### Validation
 
-1. Run `cabal test ui-program-schema-spec`; all positive programs normalize/decode/check identically and every
-   negative rejects at its pinned layer, tag, and span.
-2. Confirm every generated module/event/route/port obligation joins the independent reference tables and no
-   expected outcome is generated from the subject.
-3. Run `add_raw_js_arm`, `add_raw_url_arm`, `M-drop-bound-check`, `M-first-id-wins`, `M-skip-exhaustiveness`, and
-   `M-swap-port-contract`; every mutant turns a distinct pin red.
-4. Verify the gate makes no network or credential access and its ledger leaves browser/server/provider claims
-   UNVERIFIED.
+1. All three positives decode/check and all ten negatives reject at their exact layer, tag, and span.
+2. The forbidden-arm, totality-token, and constructor-export scans pass.
+3. The legal compiler twin builds and the illegal construction fails for the pinned reason.
 
 ### Remaining Work
 
-Done. All runtime-enforcement layers remain UNVERIFIED.
+None.
+
+## Sprint 37.2: Independent semantics and rejection coverage ✅
+
+**Status**: Done
+**Implementation**: `test/fixture/ui_program_schema/**`, `test/oracle/ui_program_schema/{program_semantics,validation_locus}.tsv`, `test/spec/ui/UiProgramSchemaSpec.hs`, `test/mutant/ui_program_schema/**`
+**Blocked by**: Sprint 37.1
+**Independent Validation**: three program-semantic rows and three graph rows match real checked values; eight generated classes meet their floor; six controls each discriminate one exact locus
+**Docs to update**: `documents/engineering/generated_artifacts_doctrine.md`, `documents/engineering/low_code_ui_runtime_doctrine.md`
+
+### Objective
+
+Constrain the admission meaning with independent semantic facts and falsifiable negative controls rather than a
+snapshot of derived bytes.
+
+### Deliverables
+
+- Three authored program-semantic rows and three independent graph rows.
+- Ten exact diagnostics and eight generated rejection classes with coverage floors.
+- Six registered paired mutants and a complete 30-entry validation-locus inventory.
+
+### Validation
+
+1. Program and graph projections join their authored tables in both directions.
+2. Two repeated decodes/checks agree without becoming the semantic oracle.
+3. The retired normalized-wire golden is absent and every paired mutant reaches only its named locus.
+
+### Remaining Work
+
+None.
+
+## Sprint 37.3: Calculus projection and phase seal ✅
+
+**Status**: Done
+**Implementation**: `test/oracle/ui_program_schema/calculus_projection.tsv`, `test/oracle/ui_program_schema_surfaces.tsv`, `tools/ui_program_schema_gate.py`
+**Blocked by**: Sprint 37.2
+**Independent Validation**: the real five-calculus values match all four authored projection rows and both normal and isolated suite executions carry the acceptance tokens
+**Docs to update**: `documents/engineering/generated_artifacts_doctrine.md`, `documents/engineering/low_code_ui_runtime_doctrine.md`
+
+### Objective
+
+Seal the bounded admission claim with the re-baselined calculus, natural-architecture proof, complete surface
+join, and repository-local attestation.
+
+### Deliverables
+
+- One five-calculus composition over the phase's actual bounded counts.
+- A gate with Darwin/Linux network observers, exact mutant loci, generated-output containment, and lane
+  declaration.
+- A complete surface map retaining runtime and provider residues as UNVERIFIED.
+
+### Validation
+
+1. The calculus kind order, component names, counts, and resource vector match the authored oracle.
+2. Normal and network-isolated executions pass; all six explicit mutant executions fail exactly.
+3. The universal surface, ledger, containment, write-guard, architecture, and attestation sides pass.
+
+### Remaining Work
+
+None.
+
+---
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update when the gate seals:**
 
-- `documents/engineering/low_code_ui_runtime_doctrine.md` — record dhall-typecheck/gadt-decode schema evidence without
-  claiming runtime enforcement.
-- `documents/engineering/dsl_doctrine.md` — record the checked `UiSource` specialization of the general DSL.
-- `documents/engineering/generated_artifacts_doctrine.md` — record generated wire/coverage artifacts while
-  retaining the never-commit rule.
+- `documents/engineering/low_code_ui_runtime_doctrine.md` — record the bounded checked-graph evidence while
+  retaining runtime claims as UNVERIFIED.
+- `documents/engineering/dsl_doctrine.md` — record the checked `UiSource` specialization of Gate 1/2.
+- `documents/engineering/generated_artifacts_doctrine.md` — replace the wire-table language with the semantic
+  program oracle and retain the no-generated-output rule.
 
-**Cross-references to add:**
+**Cross-references to update:**
 
 - `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, and
-  `DEVELOPMENT_PLAN/system_components.md` — index the phase, `none` substrate, gate, and target modules.
-- Phase 8 — consume only the sealed program and reified public-value universe.
+  `DEVELOPMENT_PLAN/system_components.md` — record the seal, `none` substrate/lane, concrete gate, and honest
+  live residues.
+
+---
 
 ## Related Documents
 
-- [Development Plan Standards](development_plan_standards.md) — one-session scope, Register-1 honesty, and gate integrity.
-- [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — the source algebra and checked IR implemented here.
+- [Development Plan Tracker](README.md) — the phase order and current status.
+- [Development Plan Standards](development_plan_standards.md) — phase shape, one-substrate discipline, and gate integrity.
+- [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — the source algebra and checked IR.
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the shared Dhall/Haskell admission discipline.
+- [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — semantic-oracle and generated-output ownership.
 - [Illegal-State Techniques](../documents/illegal_state/illegal_state_techniques.md) — closed sums, private constructors, bounded values, and total folds.

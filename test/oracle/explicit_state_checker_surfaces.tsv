@@ -1,0 +1,20 @@
+# Authored Phase-12 surface expectation.
+# surface<TAB>owner<TAB>ids (comma-separated)
+checker-api	metrics	fixture-count,digest-binding
+safe-verdicts	metrics	safe-count
+invariant-counterexample	metrics	invariant-counterexample-count
+deadlock-counterexample	metrics	deadlock-counterexample-count
+counterexample-replay	metrics	replayed-counterexample-count
+bound-exhaustion	metrics	bound-exceeded-count
+explorer-parity	metrics	explorer-parity-count,distinct-state-total
+model-oracle	checks	model-oracle-complete
+mutant-registry	checks	mutant-registry-complete
+independent-frontier	checks	checker-does-not-import-explorer
+checker-totality	checks	checker-source-total
+suite-acceptance	checks	suite-acceptance-token
+checker-mutants	mutants	guard-widening,invariant-skip,frontier-truncation
+mutant-results	metrics	mutants-red
+mutant-locus	checks	mutants-red-at-own-locus
+result-oracle	checks	recorded-results-match-oracle
+generated-output	checks	emitted-results-untracked
+runtime-fidelity	checks	

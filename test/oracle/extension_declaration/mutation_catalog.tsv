@@ -1,0 +1,4 @@
+mutant	red_property	carrier
+optional-component	RequiredComponents	extension-declaration-optional-component-mutant
+drop-scope-index	ScopeIndexPreserved	extension-declaration-drops-scope-index-mutant
+omit-declared-recipe	ArtifactReaderComplete	test/mutant/extension_declaration/ExtensionDeclarationMutants.hs

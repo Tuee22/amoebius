@@ -5,17 +5,44 @@ module ExecutionAcceleratorGate
   ) where
 
 import Amoebius.Dsl.Decode (decodeCluster)
-import Control.Monad (forM_, unless)
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Scope.Index
+  ( activeMembership
+  , trustedSubject
+  , trustedTenant
+  , withRequestScope
+  )
+import Control.Monad (forM, forM_, unless)
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
 import ExecutionAcceleratorFixtures
-  ( Phase9Fixture (..)
-  , phase9Fixtures
-  , phase9PositiveRows
-  , runPhase9DeterministicChecks
+  ( Phase29Fixture (..)
+  , phase29Fixtures
+  , phase29PositiveRows
+  , runPhase29DeterministicChecks
   )
 import ExecutionAcceleratorProps (runExecutionAcceleratorProps)
 import System.Environment (lookupEnv)
@@ -34,31 +61,45 @@ data OracleRow = OracleRow
 runExecutionAcceleratorGate :: IO ()
 runExecutionAcceleratorGate = do
   rows <- loadOracle "test/oracle/execution_accelerator/execution_accelerator_cases.tsv"
-  assert (length rows == 32) "Phase-9 oracle must contain 32 variant rows"
-  let fixtureMap = Map.fromList [(phase9Variant fixture, fixture) | fixture <- phase9Fixtures]
+  assert (length rows == 37) "Phase-29 oracle must contain 37 variant rows"
+  let fixtureMap = Map.fromList [(phase29Variant fixture, fixture) | fixture <- phase29Fixtures]
       families = Set.fromList (fmap oracleFamily rows)
-  assert (Map.keysSet fixtureMap == Set.fromList (fmap oracleVariant rows)) "Phase-9 fixture/oracle variants diverged"
-  assert (families == requiredFamilies) "Phase-9 oracle does not preserve the exact eighteen negative families"
+  assert (Map.keysSet fixtureMap == Set.fromList (fmap oracleVariant rows)) "Phase-29 fixture/oracle variants diverged"
+  assert (families == requiredFamilies) "Phase-29 oracle does not preserve the exact eighteen negative families"
   forM_ rows $ \row -> case Map.lookup (oracleVariant row) fixtureMap of
-    Nothing -> fail ("missing Phase-9 fixture: " <> Text.unpack (oracleVariant row))
+    Nothing -> fail ("missing Phase-29 fixture: " <> Text.unpack (oracleVariant row))
     Just fixture -> do
-      assert (phase9Family fixture == oracleFamily row) (drift row "family")
-      assert (phase9Operation fixture == oracleOperation row) (drift row "operation")
-      assert (phase9Expected fixture == oracleExpected row) (drift row "expected tag")
-      assert (phase9Twin fixture == oracleTwin row) (drift row "twin")
-      assert (phase9Catalog fixture == oracleCatalog row) (drift row "catalog")
-      assert (phase9Negative fixture == Left (oracleExpected row)) (drift row "negative result")
-      assert (phase9Positive fixture == Right ()) (drift row "legal twin")
-  forM_ phase9PositiveRows $ \(name, result) -> do
+      assert (phase29Family fixture == oracleFamily row) (drift row "family")
+      assert (phase29Operation fixture == oracleOperation row) (drift row "operation")
+      assert (phase29Expected fixture == oracleExpected row) (drift row "expected tag")
+      assert (phase29Twin fixture == oracleTwin row) (drift row "twin")
+      assert (phase29Catalog fixture == oracleCatalog row) (drift row "catalog")
+      assert (phase29Negative fixture == Left (oracleExpected row)) (drift row "negative result")
+      assert (phase29Positive fixture == Right ()) (drift row "legal twin")
+  forM_ phase29PositiveRows $ \(name, result) -> do
     decoded <- decodeCluster ("dhall/examples/" <> Text.unpack name <> ".dhall")
     case decoded of
-      Left problem -> fail (Text.unpack name <> " failed Gate 2 before Phase-9 composition: " <> show problem)
+      Left problem -> fail (Text.unpack name <> " failed Gate 2 before Phase-29 composition: " <> show problem)
       Right _ -> pure ()
     assert (result == Right ()) (Text.unpack name <> " composed placement rejected: " <> show result)
-  checkGate1
-  runPhase9DeterministicChecks
-  runExecutionAcceleratorProps
-  putStrLn "execution-accelerator-spec: PASS (18 named negatives, 32 variants, 32 twins, 2 positives, 1 Gate-1, 7 properties)"
+  gate1Count <- checkGate1
+  runPhase29DeterministicChecks
+  propertyCount <- runExecutionAcceleratorProps
+  mutantCount <- countExecutionAcceleratorMutants
+  checkExecutionAcceleratorCalculusProjection (length rows) (length phase29PositiveRows) propertyCount mutantCount
+  putStrLn
+    ( "execution-accelerator-spec: PASS (18 named negatives, "
+        <> show (length rows)
+        <> " variants, "
+        <> show (length rows)
+        <> " twins, "
+        <> show (length phase29PositiveRows)
+        <> " positives, "
+        <> show gate1Count
+        <> " Gate-1, "
+        <> show propertyCount
+        <> " properties)"
+    )
 
 requiredFamilies :: Set.Set Text
 requiredFamilies =
@@ -96,14 +137,14 @@ loadOracle path = do
     [variant, family, operation, expected, twin, catalog] -> pure (OracleRow variant family operation expected twin catalog)
     _ -> fail (path <> " malformed row: " <> Text.unpack row)
 
-checkGate1 :: IO ()
+checkGate1 :: IO Int
 checkGate1 = do
   contents <- Text.readFile "test/oracle/execution_accelerator/dhall_typecheck_cases.tsv"
   case Text.lines contents of
-    [] -> fail "Phase-9 Gate-1 oracle is empty"
+    [] -> fail "Phase-29 Gate-1 oracle is empty"
     header : rows -> do
-      assert (header == "entry\tnegative\tlegal\trequired") "Phase-9 Gate-1 oracle header drifted"
-      assert (length rows == 1) "Phase-9 Gate-1 oracle must contain one row"
+      assert (header == "entry\tnegative\tlegal\trequired") "Phase-29 Gate-1 oracle header drifted"
+      assert (length rows == 1) "Phase-29 Gate-1 oracle must contain one row"
       forM_ rows $ \row -> case Text.splitOn "\t" row of
         [_, negative, legal, required] -> do
           dhall <- resolvedDhall
@@ -112,7 +153,55 @@ checkGate1 = do
           (negativeExit, negativeOut, negativeError) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack negative, "--quiet"]) ""
           let observed = Text.pack (negativeOut <> negativeError)
           assert (negativeExit /= ExitSuccess && required `Text.isInfixOf` observed) (Text.unpack negative <> " missed exact Gate-1 locus")
-        _ -> fail ("malformed Phase-9 Gate-1 row: " <> Text.unpack row)
+        _ -> fail ("malformed Phase-29 Gate-1 row: " <> Text.unpack row)
+      pure (length rows)
+
+countExecutionAcceleratorMutants :: IO Int
+countExecutionAcceleratorMutants = do
+  contents <- Text.readFile "test/mutant/registry.tsv"
+  let isExecutionAccelerator row = case Text.splitOn "\t" row of
+        capability : _ -> capability == "execution_accelerator"
+        [] -> False
+      count = length (filter isExecutionAccelerator (Text.lines contents))
+  assert (count == 45) "Phase-29 mutant registry must contain 45 rows"
+  pure count
+
+checkExecutionAcceleratorCalculusProjection :: Int -> Int -> Int -> Int -> IO ()
+checkExecutionAcceleratorCalculusProjection variants positives properties mutants = do
+  expected <- loadMetricOracle "test/oracle/execution_accelerator/calculus_projection.tsv"
+  tenant <- either (fail . show) pure (trustedTenant "execution-accelerator-tenant")
+  subject <- either (fail . show) pure (trustedSubject tenant "execution-accelerator-subject")
+  membership <- either (fail . show) pure (activeMembership tenant subject)
+  action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+    let resources count = ResourceVector 1 (fromIntegral count) 0 0
+        artifact = artifactComponent scope "execution-negatives" (resources variants) (RecipeId "execution-accelerator-corpus" 1)
+        budget = budgetComponent scope "execution-twins" (resources variants) (allowance (Bytes (fromIntegral variants)) (Slots 1) (Bytes (fromIntegral variants)))
+        lift = liftComponent scope "composed-positives" (resources positives) OnHost
+        workflow = workflowComponent scope "placement-properties" (resources properties) emptyLedger
+        evidence = evidenceComponent scope "mutant-evidence" (resources mutants) PureRegister
+        composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+        ResourceVector cpu memory ephemeral pods = compositionResource composition
+        actual =
+          [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
+          , ("component-names", Text.intercalate "," (compositionNames composition))
+          , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [variants, variants, positives, properties, mutants]))
+          , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
+          ]
+    assert (compositionKinds composition == everyCalculus) "execution/accelerator projection omitted or reordered a calculus"
+    assert (actual == expected) ("execution/accelerator calculus projection changed: " <> show actual)
+  action
+  putStrLn
+    ( "execution-accelerator-calculus: PASS (5 kinds, "
+        <> show (variants + variants + positives + properties + mutants)
+        <> " projected units)"
+    )
+
+loadMetricOracle :: FilePath -> IO [(Text, Text)]
+loadMetricOracle path = do
+  contents <- Text.readFile path
+  forM (drop 1 (Text.lines contents)) $ \row -> case Text.splitOn "\t" row of
+    [metric, value] -> pure (metric, value)
+    _ -> fail ("malformed calculus metric row: " <> Text.unpack row)
 
 
 drift :: OracleRow -> String -> String

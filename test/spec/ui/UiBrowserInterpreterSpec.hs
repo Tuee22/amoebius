@@ -3,6 +3,28 @@
 
 module Main (main) where
 
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Scope.Index qualified as CalculusScope
 import Control.Monad (forM_, unless)
 import Data.Aeson (FromJSON, eitherDecode)
 import qualified Data.ByteString.Lazy.Char8 as Lazy
@@ -102,7 +124,40 @@ runGreen root = do
   checkSecurityHeaders root observation
   checkBrowserNegatives observation
   checkMutantControls root observation
+  checkCalculus root
+  putStrLn "ui-browser-interpreter-calculus: PASS (5 kinds, 72 projected units)"
   putStrLn "ui-browser-interpreter-spec: PASS (2 plans, 5 interactions, 4 traces, 2 DOM snapshots, 3 accessibility rows, 5 focus rows, 4 transport rows, 9 mutants)"
+
+checkCalculus :: FilePath -> IO ()
+checkCalculus root = do
+  expected <- loadTable (root </> "test/oracle/ui_browser_interpreter/calculus_projection.tsv")
+  tenant <- requireRight "calculus tenant" (CalculusScope.trustedTenant "ui-browser-calculus-tenant")
+  subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "ui-browser-calculus-subject")
+  membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
+  action <- requireRight "calculus request scope" $
+    CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+      let resources :: Int -> ResourceVector
+          resources count = ResourceVector 1 (fromIntegral count) 0 0
+          counts = [9, 5, 45, 4, 9] :: [Int]
+          artifact = artifactComponent scope "browser-bundle-artifacts" (resources 9)
+            (RecipeId "ui-browser-interpreter" 9)
+          budget = budgetComponent scope "closed-browser-budget" (resources 5)
+            (allowance (Bytes 5) (Slots 1) (Bytes 5))
+          lift = liftComponent scope "browser-boundary-corpus" (resources 45) OnHost
+          workflow = workflowComponent scope "differential-browser-workflow" (resources 4) emptyLedger
+          evidence = evidenceComponent scope "mutant-evidence" (resources 9) PureRegister
+          composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+          ResourceVector cpu memory ephemeral pods = compositionResource composition
+          render = Text.unpack . Text.intercalate ","
+          actual =
+            [ ["calculus-kinds", render (map calculusTag (compositionKinds composition))]
+            , ["component-names", render (compositionNames composition)]
+            , ["projection-counts", render (map (Text.pack . show) counts)]
+            , ["resource-vector", render (map (Text.pack . show) [cpu, memory, ephemeral, pods])]
+            ]
+      assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
+      assertEqual "browser calculus projection" expected actual
+  action
 
 buildBundle :: FilePath -> IO ()
 buildBundle root = do
@@ -134,7 +189,7 @@ runBrowser :: FilePath -> IO BrowserObservation
 runBrowser root = do
   let command = (proc "node" [root </> "test/harness/ui_browser/browser.mjs"]) {cwd = Just root}
   (code, output, errors) <- readCreateProcessWithExitCode command ""
-  assertEqual "Playwright harness exit" ExitSuccess code
+  assert (code == ExitSuccess) ("Playwright harness exit: " <> show code <> "\n" <> output <> errors)
   assertEqual "Playwright harness stderr" "" errors
   either (die . ("invalid browser observation: " <>)) pure (eitherDecode (Lazy.pack output))
 
@@ -306,6 +361,9 @@ assertEqual label expected actual = assert (expected == actual) (label <> ": exp
 
 assert :: Bool -> String -> IO ()
 assert condition message = unless condition (die message)
+
+requireRight :: Show problem => String -> Either problem value -> IO value
+requireRight label = either (die . ((label <> ": ") <>) . show) pure
 
 die :: String -> IO value
 die message = putStrLn ("ui-browser-interpreter-spec: FAIL: " <> message) >> exitFailure

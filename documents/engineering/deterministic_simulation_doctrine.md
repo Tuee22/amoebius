@@ -85,8 +85,20 @@ The standing cost is named honestly: making the concurrency-touching signatures 
 The substrate instance is built and validated in
 [Phase 16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md): one reference reconciler runs under
 the injected real-client interface and `IOSim`, while a source gate excludes bare `IO` signatures and raw
-concurrency primitives from the simulation surface. Later phases must run their own production reconcilers on
-this interface; Phase 16 does not claim those later programs have already been exercised.
+concurrency primitives from the simulation surface. The amended gate also constructs the actual Phase-10
+artifact/budget/lift/workflow/evidence `Composition`, projects its ordered names and exact resource fold, and
+feeds those names to the same reference reconciler under `IOSim`. A hand-authored semantic table checks that
+projection; the adapter does not invent a parallel calculus vocabulary. Later phases must run their own
+production reconcilers on this interface; Phase 16 does not claim those later programs have already been
+exercised.
+
+[Phase 19](../../DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md) is the first amoebius-owned
+pre-cluster subject rather than another substrate demonstration. Its standalone pure planner runs one
+three-action world under exactly four authored schedules: baseline, duplicate delivery, crash before apply,
+and stale snapshot. All four converge to the authored inventory under `IOSim` and bounded `IOSimPOR`; four
+fresh same-seed encodings agree and a changed seed changes semantic action order. This is a Register-2 phase
+gate over a modeled versioned store, not a Register-2.5 production-daemon claim. Store fidelity is ASSUMED and
+effectful runtime fidelity is UNVERIFIED.
 
 [Phase 58](../../DEVELOPMENT_PLAN/phase_58_object_reconciler.md) is the first such production-code adoption:
 its real Lease-token, scoped-SSA, serial, host/device-release, Job-terminal, authenticated-delete, and readiness
@@ -158,8 +170,11 @@ spine ([conformance_harness_doctrine.md §4](./conformance_harness_doctrine.md#4
   cannot reach, and which Register 3 reaches only by sampling. Deterministically replayable, no cluster.
 
 The no-cluster substrate serving this activity is built in Phase 16. Its own gate is Register 2 and exercises a
-committed reference reconciler across four oracle-pinned schedules; this validates the substrate without
-pre-claiming later Register-2.5 production-code results.
+committed reference reconciler across four oracle-pinned schedules plus a semantic projection from the actual
+five-calculus composition; this validates the substrate without pre-claiming later Register-2.5 production-code
+results. Same-seed encoded traces are compared between two fresh executions and a changed seed must differ.
+Those bytes are a run-time determinism control, not a committed generated-output golden; schedule verdicts and
+composition facts are the authored semantic oracles.
 
 Register 2.5 is also where **trace validation** ([formal_model_doctrine.md §8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge))
 first runs against the built daemon: the simulated daemon's observed transitions are checked against the emitted
@@ -253,7 +268,10 @@ inferred from the simulated delay model.
 ## 8. Planning ownership
 
 This document is normative doctrine. The io-classes environment substrate was built and validated in the
-pre-cluster deterministic-simulation phase ([phase_16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md)); each concurrency-bearing
+pre-cluster deterministic-simulation phase
+([phase_16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md)); the bounded pure reconcile-core
+subject was built and validated in
+[phase_19](../../DEVELOPMENT_PLAN/phase_19_reconcile_core_simulation.md). Each concurrency-bearing
 live-band phase adds its Register-2.5 validation sprint before its Register-3 gate; the determinism seams are the
 [phase_80](../../DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md) kernel's. Phase order, status, and gates live
 only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Phases 58 and 59 have completed

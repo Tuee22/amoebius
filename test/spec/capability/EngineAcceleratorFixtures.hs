@@ -7,6 +7,10 @@ module EngineAcceleratorFixtures
   , cpuOffering
   , baseCudaOwner
   , classCompleteCudaOwner
+  , sourceMismatchCudaOwner
+  , policyMismatchCudaOwner
+  , invalidShardCudaOwner
+  , coexistenceOvercommitCudaOwner
   , EngineNegative (..)
   , engineNegatives
   ) where
@@ -26,7 +30,6 @@ import Amoebius.Capability.Engine
   , EngineOwnerDemand (..)
   , EngineProvisionError
   , EngineWorkloadClass (..)
-  , MetalOwnerDemand (MetalOwnerDemand)
   , ProvisionedEngineAccelerator
   , TargetOffering (..)
   , provisionEngineOwner
@@ -72,6 +75,32 @@ classCompleteCudaOwner =
         (Map.singleton "all-classes" (Set.fromList ["serve", "train", "jit", "library"]))
     )
 
+sourceMismatchCudaOwner :: CudaOwnerDemand
+sourceMismatchCudaOwner = baseCudaOwner {cudaOwnerWorkloads = Map.empty}
+
+policyMismatchCudaOwner :: CudaOwnerDemand
+policyMismatchCudaOwner =
+  baseCudaOwner
+    { cudaOwnerPolicy =
+        EngineCoexistencePolicy
+          Map.empty
+          (Map.singleton ServedModel 1)
+          (Map.singleton "steady" (Set.singleton "model"))
+    }
+
+invalidShardCudaOwner :: CudaOwnerDemand
+invalidShardCudaOwner =
+  singleWorkload
+    20
+    ( Sharded
+        [ VramShardAssignment "duplicate" "cuda-a" 10
+        , VramShardAssignment "duplicate" "cuda-a" 10
+        ]
+    )
+
+coexistenceOvercommitCudaOwner :: CudaOwnerDemand
+coexistenceOvercommitCudaOwner = coexistenceOwner 12 9
+
 data EngineNegative = EngineNegative
   { engineNegativeName :: Text
   , engineNegativeExpected :: Text
@@ -86,10 +115,10 @@ engineNegatives =
   , negative "illegal_cuda_on_cpu_target" "MissingCapability" "legal_cuda_on_cuda_target" (provisionEngineOwner cpuOffering LlamaFamily (CudaEngineOwner baseCudaOwner)) basePositive
   , negative "illegal_accelerator_count_shortage" "AcceleratorCountShortage" "legal_accelerator_count_exact" (cudaResult baseCudaOwner {cudaOwnerDeviceIds = Set.singleton "cuda-a", cudaOwnerDeviceCount = 2}) (cudaResult baseCudaOwner {cudaOwnerDeviceIds = Set.singleton "cuda-a", cudaOwnerDeviceCount = 1})
   , negative "illegal_accelerator_vram_shortage" "VramOvercommit" "legal_accelerator_vram_exact" (cudaResult (singleWorkload 21 Unsharded)) (cudaResult (singleWorkload 20 Unsharded))
-  , negative "illegal_accelerator_source_workload_mismatch" "EngineSourceWorkloadMismatch" "legal_accelerator_source_workload_equal" (cudaResult baseCudaOwner {cudaOwnerWorkloads = Map.empty}) basePositive
-  , negative "illegal_accelerator_policy_domain_mismatch" "EnginePolicyDomainMismatch" "legal_accelerator_policy_domain_equal" (cudaResult baseCudaOwner {cudaOwnerPolicy = EngineCoexistencePolicy Map.empty (Map.singleton ServedModel 1) (Map.singleton "steady" (Set.singleton "model"))}) basePositive
-  , negative "illegal_accelerator_residency_placement" "EngineResidencyPlacementInvalid" "legal_accelerator_residency_placement" (cudaResult (singleWorkload 20 (Sharded [VramShardAssignment "duplicate" "cuda-a" 10, VramShardAssignment "duplicate" "cuda-a" 10]))) (cudaResult (singleWorkload 20 (Sharded [VramShardAssignment "only" "cuda-a" 20])))
-  , negative "illegal_accelerator_coexistence_overcommit" "AcceleratorCoexistenceOvercommit" "legal_accelerator_coexistence_exact" (cudaResult (coexistenceOwner 12 9)) (cudaResult (coexistenceOwner 12 8))
+  , negative "illegal_accelerator_source_workload_mismatch" "EngineSourceWorkloadMismatch" "legal_accelerator_source_workload_equal" (cudaResult sourceMismatchCudaOwner) basePositive
+  , negative "illegal_accelerator_policy_domain_mismatch" "EnginePolicyDomainMismatch" "legal_accelerator_policy_domain_equal" (cudaResult policyMismatchCudaOwner) basePositive
+  , negative "illegal_accelerator_residency_placement" "EngineResidencyPlacementInvalid" "legal_accelerator_residency_placement" (cudaResult invalidShardCudaOwner) (cudaResult (singleWorkload 20 (Sharded [VramShardAssignment "only" "cuda-a" 20])))
+  , negative "illegal_accelerator_coexistence_overcommit" "AcceleratorCoexistenceOvercommit" "legal_accelerator_coexistence_exact" (cudaResult coexistenceOvercommitCudaOwner) (cudaResult (coexistenceOwner 12 8))
   ]
  where
   negative = EngineNegative
@@ -111,7 +140,15 @@ coexistenceOwner leftBytes rightBytes =
   ownerWith
     (Map.fromList [("left", ServedModel), ("right", ServedModel)])
     (Map.fromList [("left", residency "left" ServedModel leftBytes Unsharded), ("right", residency "right" ServedModel rightBytes Unsharded)])
-    (EngineCoexistencePolicy (Map.singleton ServedModel 2) (Map.singleton ServedModel 2) (Map.singleton "together" (Set.fromList ["left", "right"])))
+    ( EngineCoexistencePolicy
+        (Map.singleton ServedModel 2)
+        (Map.singleton ServedModel 2)
+        ( Map.fromList
+            [ ("favorable", Set.singleton "left")
+            , ("together", Set.fromList ["left", "right"])
+            ]
+        )
+    )
 
 residency identity workloadClass bytes placement =
   AcceleratorResidencyDemand (identity <> ":residency") identity (classText workloadClass) bytes placement NoPeerRequirement

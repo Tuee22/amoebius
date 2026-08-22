@@ -92,6 +92,7 @@ derived — not a layout an installer hand-maintains:
 | `amoebius-registry` | Registry | `distribution` (`registry:2`), blobs in MinIO, no PV ([platform_services_doctrine.md §3](./platform_services_doctrine.md#3-the-registry--the-single-image-source)) |
 | `amoebius-keycloak` | Identity | Keycloak — owns all wild ingress ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)) |
 | `amoebius-edge` | Edge | Envoy + Gateway API + the L4 LoadBalancer (MetalLB or cloud LB) |
+| `amoebius-inference` | InferenceEngine | the target-offering-selected serving runtime and its provisioned workload |
 | `amoebius-capacity-scheduler` | capacity-scheduler bootstrap role (not a capability) | the one `amoebius-capacity` scheduler Deployment, its namespaced config/root projection, and its exact `ResourceQuota pods=1` cycle break |
 | `amoebius-control-plane` | the orchestrator control-plane daemon (not a capability) | the control-plane Deployment `replicas=1` ([§6](#6-the-control-plane-namespace--a-stateless-daemon-no-pvc)) |
 

@@ -110,17 +110,20 @@ and refresh tokens are absent.
 ## 4. Typed routing and resume envelope
 
 [Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) validates the pure paired-plan and finite-demand
-compiler that owns this envelope's generated location. It does not execute WebSockets, Redis routing, resume,
-or cross-pod dispatch; those protocol/runtime claims remain UNVERIFIED until their later owning phases.
+compiler that owns this envelope's generated location. Its six exact demand cells and 32-unit five-calculus
+projection are Register-1 facts. It does not execute WebSockets, Redis routing, resume, or cross-pod dispatch;
+those protocol/runtime claims remain UNVERIFIED until their later owning phases.
 
 [Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) observes the browser opening the one
-same-origin WebSocket path against a loopback fake server and observes no established non-loopback connection.
+same-origin WebSocket path against a loopback fake server and uses an OS policy to deny a non-loopback attempt
+while preserving the browser's local IPC.
 It does not validate session registration, Redis routing, resume, durable receipts, or cross-pod dispatch;
 those protocol/runtime claims remain UNVERIFIED.
 
 [Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) validates local server admission for the same
 path. A signed credential, same origin, fixed subprotocol, single-use session nonce, current program/ABI/scope,
-complete envelope, and available injected coordinator admit one registration; six paired twins refuse. Redis
+complete envelope, and available injected coordinator admit one registration; six paired twins refuse. The
+OS observer enforces loopback-only traffic for the boundary processes. Redis
 routing, resume, durable receipts, cross-pod dispatch, replica drain, and failover remain UNVERIFIED.
 
 Every routed frame carries an envelope equivalent to:

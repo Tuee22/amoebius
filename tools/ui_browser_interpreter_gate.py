@@ -40,6 +40,7 @@ FIXTURES = ROOT / "test/fixture/ui_browser"
 MUTANT_CAPABILITY = "ui_browser_interpreter"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/ui_browser_interpreter/validation_locus.tsv"
+CALCULUS = ROOT / "test/oracle/ui_browser_interpreter/calculus_projection.tsv"
 RUNTIME = ROOT / "ui/src/Amoebius/Ui"
 HARNESS = ROOT / "test/harness/ui_browser/browser.mjs"
 REFERENCE = ROOT / "test/spec/ui/ReferenceClientPlan.hs"
@@ -72,6 +73,9 @@ CHECKS = {
     "reference-independent": "the independent Haskell semantics imports no production UI code",
     "playwright-harness": "the harness drives the resolved browser driver",
     "derived-trace-table-untracked": "no committed trace table shadows what the run derives",
+    "semantic-oracles-complete": "browser, transport, security, calculus, and mutation oracles are exact",
+    "totality-options": "the browser interpreter suite compiles with project totality warnings",
+    "credential-environment-scrub": "the gate removes ambient provider and cluster credentials",
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
     "toolchain-satisfies-requirements": "the resolved cabal, purs, spago, browser, and driver satisfy the authored ranges",
     "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
@@ -91,6 +95,10 @@ EXPECTED_RESULTS = {
     "artifact-csp": "scanner+browser-canary-pass",
     "mutants": "9/9-red",
     "network-observer": "loopback-only",
+    "calculus-kinds": "5/5",
+    "calculus-components": "5/5",
+    "calculus-projection-counts": "9,5,45,4,9",
+    "calculus-resource-vector": "5,72,0,0",
     "server-authorization-truth": "UNVERIFIED",
     "provider-isolation": "UNVERIFIED",
     "live-edge-enforcement": "UNVERIFIED",
@@ -155,6 +163,9 @@ CHECK_SIDE = {
     "reference-independent": "source",
     "playwright-harness": "source",
     "derived-trace-table-untracked": "oracle",
+    "semantic-oracles-complete": "oracle",
+    "totality-options": "source",
+    "credential-environment-scrub": "source",
     "emitted-results-untracked": "results",
     "recorded-results-match-oracle": "results",
     "toolchain-satisfies-requirements": "toolchain",
@@ -177,6 +188,8 @@ ACCEPTANCE_TOKEN = (
     "(2 plans, 5 interactions, 4 traces, 2 DOM snapshots, 3 accessibility rows, "
     "5 focus rows, 4 transport rows, 9 mutants)"
 )
+
+CALCULUS_TOKEN = "ui-browser-interpreter-calculus: PASS (5 kinds, 72 projected units)"
 
 
 class GateFailure(RuntimeError):
@@ -223,6 +236,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     focus = read_tsv(FIXTURES / "expected_keyboard_focus.tsv")
     transport = read_tsv(FIXTURES / "expected_transport.tsv")
     allowlist = read_tsv(FIXTURES / "artifact_allowlist.tsv")
+    calculus = read_tsv(CALCULUS)
     if len(interactions) != 5:
         raise GateFailure("browser corpus must pin five interactions")
     if len(accessibility) != 3 or len(focus) != 5 or len(transport) != 4:
@@ -239,6 +253,14 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         raise GateFailure(f"generated/authored event join is incomplete: {generated_events ^ authored_events}")
     if len(read_tsv(ROOT / "test/fixture/ui_security/production_headers.tsv")) != 5:
         raise GateFailure("production browser header set must contain five rows")
+    expected_calculus = [
+        {"metric": "calculus-kinds", "value": "artifact,budget,lift,workflow,evidence"},
+        {"metric": "component-names", "value": "browser-bundle-artifacts,closed-browser-budget,browser-boundary-corpus,differential-browser-workflow,mutant-evidence"},
+        {"metric": "projection-counts", "value": "9,5,45,4,9"},
+        {"metric": "resource-vector", "value": "5,72,0,0"},
+    ]
+    if calculus != expected_calculus:
+        raise GateFailure("browser-interpreter five-calculus projection oracle drifted")
     # The reference trace table is a reproducible observation of the interactions, so it can
     # never be an authored expectation. The check is on the corpus, not on one retired
     # filename: any tracked fixture whose header names the trace columns is the same defect.
@@ -252,13 +274,17 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
             raise GateFailure(f"derived-trace-table-untracked: {relative} tracks a reproducible trace table")
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 9 or {row["mutant"] for row in mutants} != set(MUTANT_LOCI):
-        raise GateFailure("Phase-25 mutant manifest must contain exactly the nine contract mutants")
+        raise GateFailure("Phase-42 mutant manifest must contain exactly the nine contract mutants")
     locus = read_tsv(LOCUS)
     if len(locus) != 45 or len({row["entry"] for row in locus}) != 45:
-        raise GateFailure("Phase-25 validation locus must contain forty-five unique rows")
+        raise GateFailure("Phase-42 validation locus must contain forty-five unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
-    if len([row for row in phase0_rows if row["# phase"] == "21"]) != 19:
-        raise GateFailure("Phase-0 manifest must pin nineteen Phase-25 artifacts")
+    custody = [row for row in phase0_rows if row["# phase"] == "25"]
+    if len(custody) != 19:
+        raise GateFailure("Phase-0 manifest must pin nineteen Phase-42 artifacts under custody phase 25")
+    missing = [row["path"] for row in custody if not (ROOT / row["path"]).is_file()]
+    if missing:
+        raise GateFailure(f"Phase-42 preimplementation artifacts are absent: {missing}")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 2 with local Chrome/fakes; server/provider/live runtime UNVERIFIED\n"
@@ -316,12 +342,31 @@ def verify_source_boundaries() -> None:
     reference = REFERENCE.read_text(encoding="utf-8")
     if "Amoebius.Ui" in reference:
         raise GateFailure("reference-independent: the independent Haskell semantics imports production UI code")
+    cabal = (ROOT / "amoebius.cabal").read_text(encoding="utf-8")
+    stanza = cabal.split("test-suite ui-browser-interpreter-spec", 1)[1].split("\ntest-suite ", 1)[0]
+    for component in (
+        "artifact-calculus", "budget-calculus", "calculus-composition", "capacity-topology",
+        "evidence-calculus", "lift-calculus", "scope-index", "workflow-calculus",
+    ):
+        if f"amoebius:{component}" not in stanza:
+            raise GateFailure(f"semantic-oracles-complete: suite lacks {component}")
+    for option in ("-Werror=missing-methods", "-Werror=incomplete-patterns"):
+        if option not in stanza:
+            raise GateFailure(f"totality-options: browser suite lacks {option}")
+    scrubbed = environment()
+    leaked = [
+        name for name in scrubbed
+        if name in {"KUBECONFIG", "GOOGLE_APPLICATION_CREDENTIALS"}
+        or name.startswith(("AWS_", "AZURE_", "VAULT_", "KUBE_"))
+    ]
+    if leaked:
+        raise GateFailure(f"credential-environment-scrub: ambient credentials survived: {leaked}")
 
 
 def run_green(cabal: Path) -> str:
     result = run([str(cabal), "test", "ui-browser-interpreter-spec", "--test-show-details=direct"])
-    if ACCEPTANCE_TOKEN not in result.stdout:
-        raise GateFailure("Phase-25 acceptance token is absent")
+    if ACCEPTANCE_TOKEN not in result.stdout or CALCULUS_TOKEN not in result.stdout:
+        raise GateFailure("Phase-42 acceptance or calculus token is absent")
     return result.stdout
 
 
@@ -329,35 +374,58 @@ def observed_binary(cabal: Path) -> tuple[str, str, int]:
     """Read the boundary's network behaviour from the OS, not from the code under test."""
     run([str(cabal), "build", "test:ui-browser-interpreter-spec"])
     binary = Path(run([str(cabal), "list-bin", "test:ui-browser-interpreter-spec"]).stdout.strip())
-    if shutil.which("strace") is None:
-        raise GateFailure("strace is required for the browser OS-network observer")
     TEMP_ROOT.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="network-", dir=TEMP_ROOT) as directory:
         trace = Path(directory) / "network.trace"
-        result = run([
-            "strace", "-f", "-qq", "-e", "trace=connect,sendto",
-            "-e", "status=successful,failed", "-e", "signal=none",
-            "-o", str(trace), str(binary),
-        ])
-        trace_text = trace.read_text(encoding="utf-8")
-        forbidden = []
-        hard_failed = []
-        for line in trace_text.splitlines():
-            if "AF_INET" not in line and "AF_INET6" not in line:
-                continue
-            if any(allowed in line for allowed in (
-                'inet_addr("127.', 'inet_pton(AF_INET6, "::1"', 'sin_addr=htonl(INADDR_LOOPBACK)'
-            )):
-                continue
-            if " = -1 ENETUNREACH " in line:
-                hard_failed.append(line)
-                continue
-            forbidden.append(line)
-        if forbidden:
-            raise GateFailure("browser boundary attempted non-loopback network access:\n" + "\n".join(forbidden[:30]))
-    if ACCEPTANCE_TOKEN not in result.stdout:
-        raise GateFailure("observed browser binary missed its acceptance token")
-    return result.stdout, "loopback-only", len(hard_failed)
+        if sys.platform == "darwin" and shutil.which("sandbox-exec"):
+            profile = (
+                '(version 1) (allow default) '
+                '(deny network-outbound (remote ip "*:*")) '
+                '(allow network-outbound (remote ip "localhost:*"))'
+            )
+            control = run([
+                "sandbox-exec", "-p", profile, sys.executable, "-c",
+                "import socket,sys\n"
+                "server=socket.socket();server.bind(('127.0.0.1',0));server.listen()\n"
+                "client=socket.create_connection(server.getsockname());peer,_=server.accept()\n"
+                "client.send(b'x');assert peer.recv(1)==b'x'\n"
+                "external=socket.socket();external.settimeout(1)\n"
+                "try: external.connect(('1.1.1.1',80))\n"
+                "except PermissionError: sys.exit(0)\n"
+                "except OSError: sys.exit(3)\n"
+                "sys.exit(4)\n",
+            ], require_success=False)
+            if control.returncode != 0:
+                raise GateFailure(f"Darwin loopback-only control exited {control.returncode}: {control.stdout}")
+            result = run(["sandbox-exec", "-p", profile, str(binary)])
+            refused = 1
+        else:
+            if shutil.which("strace") is None:
+                raise GateFailure("neither Darwin sandbox-exec nor strace is available as an OS network observer")
+            result = run([
+                "strace", "-f", "-qq", "-e", "trace=connect,sendto",
+                "-e", "status=successful,failed", "-e", "signal=none",
+                "-o", str(trace), str(binary),
+            ])
+            trace_text = trace.read_text(encoding="utf-8")
+            forbidden = []
+            refused = 0
+            for line in trace_text.splitlines():
+                if "AF_INET" not in line and "AF_INET6" not in line:
+                    continue
+                if any(allowed in line for allowed in (
+                    'inet_addr("127.', 'inet_pton(AF_INET6, "::1"', 'sin_addr=htonl(INADDR_LOOPBACK)'
+                )):
+                    continue
+                if " = -1 ENETUNREACH " in line:
+                    refused += 1
+                    continue
+                forbidden.append(line)
+            if forbidden:
+                raise GateFailure("browser boundary attempted non-loopback network access:\n" + "\n".join(forbidden[:30]))
+    if ACCEPTANCE_TOKEN not in result.stdout or CALCULUS_TOKEN not in result.stdout:
+        raise GateFailure("observed browser binary missed its acceptance or calculus token")
+    return result.stdout, "loopback-only", refused
 
 
 def run_mutants(cabal: Path, mutants: list[dict[str, str]]) -> tuple[str, int]:
@@ -391,6 +459,10 @@ def write_results(counts: Mapping[str, int], reddened: int, total: int, observer
         "artifact-csp": "scanner+browser-canary-pass",
         "mutants": f"{reddened}/{total}-red",
         "network-observer": observer,
+        "calculus-kinds": "5/5",
+        "calculus-components": "5/5",
+        "calculus-projection-counts": "9,5,45,4,9",
+        "calculus-resource-vector": "5,72,0,0",
         "server-authorization-truth": "UNVERIFIED",
         "provider-isolation": "UNVERIFIED",
         "live-edge-enforcement": "UNVERIFIED",
@@ -427,7 +499,7 @@ def surface_decisions(
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=42, contract=CONTRACT, command=GATE_COMMAND, register="2", substrate="none", sides=SIDES,
+        phase=42, contract=CONTRACT, command=GATE_COMMAND, register="2", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()
@@ -452,8 +524,8 @@ def main() -> int:
             if path.exists():
                 shutil.rmtree(path)
         shutil.copytree(
-            ROOT / "ui-runtime", WORKSPACE_ROOT,
-            ignore=shutil.ignore_patterns(".spago", "output", "dist", "spago.lock"),
+            ROOT / "ui", WORKSPACE_ROOT,
+            ignore=shutil.ignore_patterns(".spago", "output", "dist", "spago.lock", "Offline"),
         )
         cabal = Path(resolved["cabal"]["path"])
 
@@ -462,6 +534,7 @@ def main() -> int:
         classes = item_classes()
         print("  ok    per-app-plan-is-json-data          two JSON plans and no bundled application code")
         print("  ok    derived-trace-table-untracked      no tracked fixture carries a reproducible trace table")
+        print("  ok    semantic-oracles-complete          browser tables and five-calculus projection are exact")
         print(f"  ok    {len(classes)} enumerated items, {len(mutant_rows)} mutants")
         results["oracle"] = True
 
@@ -471,6 +544,7 @@ def main() -> int:
             "closed-event-arms", "forbidden-browser-tokens", "escaped-dom-sink", "same-origin-websocket-sink",
             "generic-bundle-no-app-identity", "plan-digest-verified", "server-handle-codec-absent",
             "playwright-harness", "reference-independent",
+            "totality-options", "credential-environment-scrub",
         ):
             print(f"  ok    {check}")
         results["source"] = True
@@ -533,7 +607,7 @@ def main() -> int:
         },
         dependencies={"ui-browser-interpreter-spec": "cabal test"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-25 mutants", "status": "unrun"}],
+        or [{"name": "phase-42 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

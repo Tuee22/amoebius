@@ -59,7 +59,7 @@ import ExecutionAcceleratorFixtures
   , baseEtcdModel
   , imageCatalog
   , imageDemand
-  , phase9ComposedWitnessRows
+  , phase29ComposedWitnessRows
   )
 import Numeric.Natural (Natural)
 import Test.QuickCheck
@@ -85,7 +85,7 @@ data FitCase = FitCase Natural Bool Natural
 instance Arbitrary FitCase where
   arbitrary = FitCase <$> natural 1 40 <*> arbitrary <*> natural 1 20
 
-runExecutionAcceleratorProps :: IO ()
+runExecutionAcceleratorProps :: IO Int
 runExecutionAcceleratorProps = do
   results <- sequence
     [ runProperty "prop_executionEpochEquivalence" propExecutionEpochEquivalence
@@ -97,8 +97,9 @@ runExecutionAcceleratorProps = do
     , runProperty "prop_composedIndependentValidator" propComposedIndependentValidator
     ]
   let failed = [name | (name, result) <- results, not (isSuccess result)]
-  unless (null failed) (fail ("Phase-9 properties failed: " <> show failed))
+  unless (null failed) (fail ("Phase-29 properties failed: " <> show failed))
   putStrLn "execution-accelerator-properties: TESTED sampled (7) with >=30% accept/reject coverage on each decision fold"
+  pure (length results)
 
 propExecutionEpochEquivalence :: FitCase -> Property
 propExecutionEpochEquivalence (FitCase replicas shouldFit margin) = decisionCoverage shouldFit outcome
@@ -156,7 +157,7 @@ propComposedIndependentValidator :: Property
 propComposedIndependentValidator =
   counterexample (show results) (property (all valid results))
  where
-  results = fmap snd phase9ComposedWitnessRows
+  results = fmap snd phase29ComposedWitnessRows
   valid outcome = case outcome of
     Left _ -> False
     Right witness -> validateComposedWitnessIndependent witness

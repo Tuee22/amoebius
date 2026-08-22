@@ -327,8 +327,6 @@ in  { architectureConcurrency = 2
     , cacheBacking = "base-image-registry-build-cache"
     , cacheCapacityBytes = 21474836480
     , baseImage = "ubuntu:24.04"
-    , baseDigest =
-        "sha256:561618e2c15bf2397621dd04f96926663a3b5616c189cf7e38db7e82f5c538ea"
     , acquisitionTools =
           [ { package = "ca-certificates"
             , packageVersion = "20260601~24.04.1"

@@ -43,6 +43,7 @@ FIXTURES = ROOT / "test/fixture/ui_plan_compiler"
 MUTANT_CAPABILITY = "ui_plan_compiler"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/ui_plan_compiler/validation_locus.tsv"
+CALCULUS = ROOT / "test/oracle/ui_plan_compiler/calculus_projection.tsv"
 COMPILE_DIR = ROOT / "src/Amoebius/Ui/Compile"
 REFERENCE = ROOT / "test/spec/ui/PlanCompilerReference.hs"
 RESULTS = ROOT / ".build/dsl/ui-plan-compiler/phase-results.tsv"
@@ -55,7 +56,11 @@ EXPECTATIONS = "test/oracle/ui_plan_compiler_surfaces.tsv"
 
 COMPILER = ""
 
-SANCTIONED_OBSERVERS = ("unshare-network-namespace", "strace-socket-EPERM")
+SANCTIONED_OBSERVERS = (
+    "unshare-network-namespace",
+    "darwin-sandbox-deny-network",
+    "strace-socket-EPERM",
+)
 
 COMPILE_MODULES = {"ClientPlan.hs", "ServerPlan.hs", "Manifest.hs", "Demand.hs"}
 
@@ -74,12 +79,14 @@ OPAQUE_TYPES = (
 
 CHECKS = {
     **{check: f"the {name} constructor is not exported" for name, _file, check in OPAQUE_TYPES},
-    "compiler-input-signature": "the compiler accepts only the Phase-22 sealed bound program",
+    "compiler-input-signature": "the compiler accepts only the Phase-39 sealed bound program",
     "module-inventory-exact": "the paired-compiler module inventory is exactly the four authored modules",
     "reference-oracle-independent": "the reference oracle imports no production projection or digest code",
     "compile-partial-token-scan": "no partial or unsafe token survives in the compiler modules",
     "goldens-are-canonical-json": "every authored golden is already in the canonical minified form",
     "derived-digest-table-untracked": "no committed digest table shadows what the run derives from the goldens",
+    "semantic-oracles-complete": "projection, artifact, digest, demand, refusal, and calculus oracles are exact",
+    "totality-options": "the plan-compiler suite compiles with the project totality warnings",
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
     "toolchain-satisfies-requirements": "the resolved cabal and ghc satisfy the authored ranges",
     "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
@@ -96,6 +103,10 @@ EXPECTED_RESULTS = {
     "type-seals": "2/2-sealed",
     "fresh-process-determinism": "2/2-byte-identical",
     "mutants": "6/6-red",
+    "calculus-kinds": "5/5",
+    "calculus-components": "5/5",
+    "calculus-projection-counts": "4,6,14,2,6",
+    "calculus-resource-vector": "5,32,0,0",
     "network-observer": "sanctioned-observer",
     "browser-interpreter-fidelity": "UNVERIFIED",
     "server-interpreter-fidelity": "UNVERIFIED",
@@ -124,6 +135,8 @@ CHECK_SIDE = {
     "compile-partial-token-scan": "source",
     "goldens-are-canonical-json": "oracle",
     "derived-digest-table-untracked": "oracle",
+    "semantic-oracles-complete": "oracle",
+    "totality-options": "source",
     "emitted-results-untracked": "results",
     "recorded-results-match-oracle": "results",
     "toolchain-satisfies-requirements": "toolchain",
@@ -136,6 +149,11 @@ MUTANT_LOCI = {
     "M-client-only-authority-digest": "authority-digest",
     "M-link-navigation-as-fetch": "docs.link",
     "M-preserve-map-insertion-order": "fresh-process-bytes",
+}
+
+MUTANT_TOKENS = {
+    mutant: f"ui-plan-compiler-mutant: RED {mutant} locus={locus}"
+    for mutant, locus in MUTANT_LOCI.items()
 }
 
 
@@ -190,12 +208,21 @@ def derived_digests() -> dict[str, str]:
 
 def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     projections = read_tsv(FIXTURES / "projection_rows.tsv")
+    calculus = read_tsv(CALCULUS)
     if len(projections) != 4 or sum(row["server"] != "-" for row in projections) != 2:
         raise GateFailure("projection oracle must contain four rows and two server actions")
     for name in GOLDENS:
         payload = (FIXTURES / name).read_text(encoding="utf-8").strip()
         if json.dumps(json.loads(payload), sort_keys=True, separators=(",", ":")) != payload:
             raise GateFailure(f"goldens-are-canonical-json: noncanonical JSON golden: {name}")
+    expected_calculus = [
+        {"metric": "calculus-kinds", "value": "artifact,budget,lift,workflow,evidence"},
+        {"metric": "component-names", "value": "canonical-plan-artifacts,finite-runtime-demand,projection-digest-and-refusal-checks,deterministic-plan-workflow,mutant-evidence"},
+        {"metric": "projection-counts", "value": "4,6,14,2,6"},
+        {"metric": "resource-vector", "value": "5,32,0,0"},
+    ]
+    if calculus != expected_calculus:
+        raise GateFailure("plan-compiler five-calculus projection oracle drifted")
     # A digest table is a reproducible observation of the goldens, so it can never be an
     # authored expectation. The check is on the corpus, not on one retired filename: any
     # tracked fixture *other than the four canonical goldens* carrying a sha256 literal is
@@ -214,13 +241,17 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
             raise GateFailure(f"derived-digest-table-untracked: {relative} tracks a reproducible digest")
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 6 or {row["mutant"] for row in mutants} != set(MUTANT_LOCI):
-        raise GateFailure("Phase-23 mutant manifest must contain exactly the six contract mutants")
+        raise GateFailure("Phase-40 mutant manifest must contain exactly the six contract mutants")
     locus = read_tsv(LOCUS)
     if len(locus) != 35 or len({row["entry"] for row in locus}) != 35:
-        raise GateFailure("Phase-23 validation locus must contain thirty-five unique rows")
+        raise GateFailure("Phase-40 validation locus must contain thirty-five unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
-    if len([row for row in phase0_rows if row["# phase"] == "20"]) != 11:
-        raise GateFailure("Phase-0 manifest must pin eleven Phase-23 artifacts")
+    phase40 = [row for row in phase0_rows if row["# phase"] == "23"]
+    if len(phase40) != 11:
+        raise GateFailure("Phase-0 manifest must pin eleven Phase-40 artifacts")
+    missing = [row["path"] for row in phase40 if not (ROOT / row["path"]).is_file()]
+    if missing:
+        raise GateFailure(f"Phase-40 preimplementation artifacts are absent: {missing}")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 1 only; interpreters/release/edge runtime UNVERIFIED\n"
@@ -251,7 +282,7 @@ def verify_source_boundaries() -> None:
         if re.search(rf"\b{type_name}\s*\(\s*\.\.", header):
             raise GateFailure(f"{check}: private compiler constructor exported: {type_name}")
     if "compileUiPlans :: BoundUiProgram -> Either UiPlanError CompiledUiPlans" not in sources["Manifest.hs"]:
-        raise GateFailure("compiler-input-signature: the compiler no longer accepts only the Phase-22 sealed value")
+        raise GateFailure("compiler-input-signature: the compiler no longer accepts only the Phase-39 sealed value")
     prohibited = re.compile(r"\b(error|undefined|fromJust|head|tail|unsafePerformIO|unsafeCoerce)\b|!!")
     for name, source in sources.items():
         stripped = re.sub(r'"(?:\\.|[^"\\])*"', '""', re.sub(r"--[^\n]*", "", source))
@@ -261,6 +292,11 @@ def verify_source_boundaries() -> None:
     reference = REFERENCE.read_text(encoding="utf-8")
     if "Amoebius.Ui.Compile" in reference or "Amoebius.Ui.Bind" in reference:
         raise GateFailure("reference-oracle-independent: the oracle imports production projection or digest code")
+    cabal = (ROOT / "amoebius.cabal").read_text(encoding="utf-8")
+    stanza = cabal.split("test-suite ui-plan-compiler-spec", 1)[1].split("\ntest-suite ", 1)[0]
+    for option in ("-Werror=missing-methods", "-Werror=incomplete-patterns"):
+        if option not in stanza:
+            raise GateFailure(f"totality-options: plan-compiler suite lacks {option}")
 
 
 def isolated_green(cabal: Path) -> tuple[str, str]:
@@ -271,13 +307,37 @@ def isolated_green(cabal: Path) -> tuple[str, str]:
     TEMP_ROOT.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="network-", dir=TEMP_ROOT) as directory:
         trace = Path(directory) / "network.trace"
-        probe = run(["unshare", "-n", "true"], require_success=False)
-        if probe.returncode == 0:
+        if shutil.which("unshare") and run(["unshare", "-n", "true"], require_success=False).returncode == 0:
             result = run(["unshare", "-n", str(binary)])
             observer = "unshare-network-namespace"
+        elif shutil.which("sandbox-exec"):
+            profile = Path(directory) / "deny-network.sb"
+            profile.write_text("(version 1)\n(allow default)\n(deny network*)\n", encoding="utf-8")
+            control = run(
+                [
+                    "sandbox-exec",
+                    "-f",
+                    str(profile),
+                    sys.executable,
+                    "-c",
+                    "import socket,sys;\n"
+                    "try:\n socket.create_connection(('127.0.0.1', 9), timeout=1).close()\n"
+                    "except PermissionError:\n sys.exit(0)\n"
+                    "except OSError:\n sys.exit(3)\n"
+                    "sys.exit(4)\n",
+                ],
+                require_success=False,
+            )
+            if control.returncode != 0:
+                raise GateFailure(
+                    f"sandbox-exec did not deny a socket (control exit {control.returncode}); "
+                    "the isolation this observer claims is not in force"
+                )
+            result = run(["sandbox-exec", "-f", str(profile), str(binary)])
+            observer = "darwin-sandbox-deny-network"
         else:
             if shutil.which("strace") is None:
-                raise GateFailure("neither network namespace isolation nor strace socket injection is available")
+                raise GateFailure("none of unshare, sandbox-exec, or strace is available as a network observer")
             result = run([
                 "strace", "-f", "-qq", "-e", "trace=%network", "-e", "signal=none",
                 "-e", "inject=socket:error=EPERM", "-o", str(trace), str(binary),
@@ -297,8 +357,9 @@ def run_green(cabal: Path) -> tuple[str, str]:
         "ui-plan-compiler-spec: PASS "
         "(4 projections, 4 canonical artifacts, 4 digests, 6 demand cells, 2 fresh processes, 6 mutants)"
     )
-    if token not in suite.stdout or token not in isolated:
-        raise GateFailure("Phase-23 acceptance token is absent from normal or isolated execution")
+    calculus = "ui-plan-compiler-calculus: PASS (5 kinds, 32 projected units)"
+    if token not in suite.stdout or token not in isolated or calculus not in suite.stdout or calculus not in isolated:
+        raise GateFailure("Phase-40 acceptance tokens are absent from normal or isolated execution")
     return suite.stdout + isolated, observer
 
 
@@ -311,8 +372,7 @@ def run_mutants(cabal: Path, mutants: list[dict[str, str]]) -> tuple[str, int]:
             str(cabal), "test", "ui-plan-compiler-spec", "--test-show-details=direct",
             f"--test-options=--mutant={mutant}",
         ], require_success=False)
-        token = f"ui-plan-compiler-mutant: RED {mutant} {MUTANT_LOCI[mutant]}"
-        if result.returncode == 0 or token not in result.stdout:
+        if result.returncode == 0 or MUTANT_TOKENS[mutant] not in result.stdout:
             raise GateFailure(f"mutant survived or missed its red locus: {mutant}\n{result.stdout}")
         reddened += 1
         logs.append(result.stdout)
@@ -330,6 +390,10 @@ def write_results(counts: Mapping[str, int], reddened: int, total: int, observer
         "type-seals": "2/2-sealed",
         "fresh-process-determinism": "2/2-byte-identical",
         "mutants": f"{reddened}/{total}-red",
+        "calculus-kinds": "5/5",
+        "calculus-components": "5/5",
+        "calculus-projection-counts": "4,6,14,2,6",
+        "calculus-resource-vector": "5,32,0,0",
         "network-observer": observer,
         "browser-interpreter-fidelity": "UNVERIFIED",
         "server-interpreter-fidelity": "UNVERIFIED",
@@ -366,11 +430,14 @@ def surface_decisions(
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=40, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=40, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []
@@ -407,6 +474,7 @@ def main() -> int:
         print("  ok    compiler-input-signature          the compiler accepts only the sealed bound program")
         print("  ok    reference-oracle-independent      the oracle imports no production projection code")
         print("  ok    compile-partial-token-scan        no partial or unsafe token in the compiler modules")
+        print("  ok    totality-options                  suite totality warnings are enabled")
         results["source"] = True
 
         print("\nsuite side — the paired-plan battery under a network observer\n")
@@ -475,7 +543,7 @@ def main() -> int:
         },
         dependencies={"ui-plan-compiler-spec": "cabal test"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-23 mutants", "status": "unrun"}],
+        or [{"name": "phase-40 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

@@ -3,9 +3,10 @@
 module Amoebius.Kernel.Plan
   ( renderChainPlan
   , renderChain
+  , renderPlan
   ) where
 
-import Amoebius.Kernel.Descent (foldLift)
+import Amoebius.Kernel.Descent (Plan, foldLift)
 import Amoebius.Kernel.Step (Step)
 import Data.Aeson.Encode.Pretty
   ( Config (confCompare, confIndent)
@@ -17,10 +18,13 @@ import Data.Aeson.Encode.Pretty
 import Data.ByteString.Lazy (ByteString)
 
 renderChainPlan :: [Step cfg] -> ByteString
-renderChainPlan steps = encodePretty' canonicalConfig (foldLift () steps) <> "\n"
+renderChainPlan = renderPlan . foldLift ()
 
 renderChain :: [Step cfg] -> ByteString
 renderChain = renderChainPlan
+
+renderPlan :: Plan -> ByteString
+renderPlan plan = encodePretty' canonicalConfig plan <> "\n"
 
 canonicalConfig :: Config
 canonicalConfig =

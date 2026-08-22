@@ -79,7 +79,7 @@ incompatible release.
 
 **Depends on:** [Phase 86](phase_86_offline_blobs_isolation.md) — offline blobs and partition isolation, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test offline-release-evolution-live` queues A-version records offline, deploys B, reconnects
+**Gate:** `python3 tools/run_phase_gate.py 87` queues A-version records offline, deploys B, reconnects
 through both migration and retained-handler cases, rolls back, and externally proves one authorized outcome
 per command; the gate rejects a release that removes its last compatible path before the horizon.
 

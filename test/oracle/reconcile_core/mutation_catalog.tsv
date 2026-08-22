@@ -1,0 +1,6 @@
+mutant	red_property
+fixed-point-reemit	FixedPoint
+oscillating-apply	Convergence
+token-guard-removed	NoTokenReuse
+reservation-crash-drop	BoundRetainedAfterCrash
+delete-unreachable-witness	DeleteRequiresPresentWitness

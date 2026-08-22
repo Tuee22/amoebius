@@ -1,24 +1,18 @@
 # Phase 41: Offline language and paired plans
 
-> **Purpose**: Make offline continuity an explicit bounded application contract and compile it into exactly
-> matching public-client and private-server replay plans without exposing browser or Redis mechanisms in the DSL.
-> **Read this if**: phase 41 is next in the queue, or a later phase depends on what its gate establishes.
+> **Purpose**: Make offline continuity an explicit bounded application contract and compile it into matching
+> public-client and private-server replay plans without exposing browser or Redis mechanisms in the DSL.
+> **Read this if**: the Phase-41 language boundary or a later offline-runtime dependency must be understood.
 
-Phase 41 delivers the offline language and paired plans; its design is owned by [browser_offline_runtime_doctrine.md](../documents/engineering/browser_offline_runtime_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-The gate passed on 2026-08-11; runtime behavior remains `UNVERIFIED` by construction.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+Phase 41 owns the pure offline language, its validation relation, and deterministic paired-plan projection.
+Browser persistence, encryption, and authoritative replay are later runtime claims and remain UNVERIFIED here.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +23,9 @@ The gate passed on 2026-08-11; runtime behavior remains `UNVERIFIED` by construc
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 41.1: Compile the offline contract ⏸️](#sprint-411-compile-the-offline-contract-)
+- [Sprint 41.1: Author the continuity language ✅](#sprint-411-author-the-continuity-language-)
+- [Sprint 41.2: Compile paired offline plans ✅](#sprint-412-compile-paired-offline-plans-)
+- [Sprint 41.3: Seal the pure boundary ✅](#sprint-413-seal-the-pure-boundary-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,136 +33,167 @@ The gate passed on 2026-08-11; runtime behavior remains `UNVERIFIED` by construc
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-40 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Blocked (superseded) — containment amendment recorded 2026-08-15. Any earlier capability seal is historical and
-invalidated until this phase reruns in numerical order with all amoebius-owned state confined to the
-repository roots defined by Phase 0. Scope amendments below remain normative.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Blocked (superseded) by the reopened numeric sequence. Reopened 2026-08-11: the prior seal did not include the universal artifact-hygiene
-postcondition. This phase returns to numeric order only after Phase 0 closes, then must rerun its capability
-gate against its source snapshot and publish repository-local evidence without changing an authored path.
-
-**Invalidated historical record:**
-
-Done (invalidated). The closed offline source types, validation tags, deterministic paired projections, generated-artifact
-commands, independent fixtures, and five compiler mutation loci pass at Register 1.
+✅ Done — sealed 2026-08-21 on natural `darwin/arm64`. The twelve-sided Register-1 gate passes 17 exact
+metrics, 52 surfaces joined to 76 enumerated items, normal and network-denied execution, a 40-unit real
+five-calculus projection, and five distinct production mutants. Attestation
+`sha256:7944511e6443a31dc21930a6709f44eaf88f80c75a1ff485f72aa0ab979c7cb8` binds source snapshot
+`sha256:0ef61fb8294d82f1…` over 2,266 files. Browser persistence and live replay authority remain UNVERIFIED.
 
 ## Phase Summary
 
-This phase adds `UiSource.continuity = OnlineOnly | Offline OfflineSource`, the closed offline projection,
-queueable-port, and local-blob source types, and the gadt-decode relations that require every queueable action to
-have finite count/byte/age bounds, idempotency, conflict, order, dependency, and authoritative-validation
-semantics. Binding emits matching `ClientPlan.offline` and `UiServerPlan.replay` projections; browser APIs,
-Redis, WebSocket routes, credentials, private policy, and provider coordinates remain unnameable in authored
-application source. The representative catalog fixes the initial ML classification: infernix workflow start
-and jitML training start may opt into `QueuedPort`; workflow progress is a cached cursor projection; ML
-signals, cancellation, and artifact/model invocation are `OnlineOnly`.
+This phase adds `UiSource.continuity = OnlineOnly | Offline OfflineSource`. Its closed source types name cached
+projections, queueable ports, local blob classes, and an offline view. Every queueable port carries finite
+count, byte, and age bounds plus local validation, idempotency, conflict, ordering, dependency, and current
+authority validation semantics. The compiler retains equal queue, projection, and blob key sets in the public
+client and private replay plans while keeping private policy and browser mechanisms out of authored source.
 
-**Session scope:** Add and test only the language, decoder, binder, and generated-plan projection; browser
-persistence and live replay belong to later phases.
+The representative product declarations permit only infernix workflow start and jitML training start to
+queue. Workflow progress is a cached projection; ML signals, workflow cancellation, and model invocation
+remain online-only.
 
-**Phase scope:** one cohesive claim — *offline is a declared application contract, not a browser mechanism leaking into the DSL*. The two replay plans are paired so neither can drift from the other.
-
-**Substrate:** `none` — this pure gate is decidable on any detected hardware, so it names no catalog member
-([§L](development_plan_standards.md#l-one-substrate-discipline)).
-
+**Phase scope:** one cohesive claim — offline continuity is a bounded application contract compiled into
+deterministic paired plans, not a browser or server-storage mechanism.
+**Substrate:** `none` — the gate is pure and provisions no runtime resource.
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-
 **Register:** 1 — pure/type-level validation.
-
-**Depends on:** [Phase 40](phase_40_ui_plan_compiler.md) — the UI plan compiler, whose paired plans this phase extends with an offline contract.
-
-**Gate:** `cabal test offline-plan-spec` accepts the independently authored positive corpus, rejects each
-boundedness/plan-equality/security negative with its pinned tag, emits deterministic paired plans, and turns
-red for every named plan-compiler mutant. Its apparatus is [Gate integrity](#gate-integrity).
+**Depends on:** [Phase 40](phase_40_ui_plan_compiler.md) — the sealed UI plan compiler boundary extended here.
+**Gate:** `python3 tools/run_phase_gate.py 41` passes committed
+`test/fixture/offline_language_plan/`, `test/golden/offline_language_plan/`, and the calculus, isolation, and
+exact-locus mutation batteries in [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
-Phase 0 pins positive `OnlineOnly` and `Offline` programs, positive infernix-start and jitML-training queue
-contracts, negative Dhall/gadt-decode fixtures for every online-only ML operation and missing queue-contract field,
-expected error tags, and an independently authored public/private key-set table. Mutants remove a queue bound,
-omit the server handler for a client codec, make model invocation queueable, persist a forbidden private field,
-and add a browser/Redis product constructor. The oracle parses normalized plan values without invoking the
-compiler under test; no live authority or fresh challenge is applicable at Register 1.
+Phase 0 pins three positive continuity rows, thirteen exact refusal rows, eight independent client/replay key
+rows, and five mutation bodies. A separate calculus oracle names all five real components and their exact
+resource projection. The run joins 38 validation loci plus five central registry entries to an independently
+authored surface expectation in both directions.
 
+The gate decodes one online-only and two offline Dhall products, compiles both products separately and together,
+and compares queue, cached-projection, and local-blob key sets. It repeats the pure compilation, asserts zero
+private fields and mechanism constructors, runs again under Darwin network denial, then requires each
+compile-time mutant to fail at its own token before restoring the all-flags-off baseline.
 
-The pinned queue contracts are the complete ones, because an incomplete one is exactly what the language is
-meant to make unrepresentable: each queueable infernix or jitML start carries identity, conflict, order,
-dependency, count, byte, and age terms. Alongside them the corpus carries the refusals — an attempt to queue
-any operation the classification holds online-only is a negative fixture, not an omission.
 - **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+- **Honesty boundary.** Decision semantics are proven for the model. Protocol and runtime layers are
+  UNVERIFIED; no browser persistence or live replay authority is inferred from this gate.
 
 ## Doctrine adopted
 
-- Adopt [Browser Offline Runtime §3](../documents/engineering/browser_offline_runtime_doctrine.md#3-the-authored-continuity-surface): applications name offline semantics, not mechanisms.
-- Adopt [Browser Offline Runtime §4](../documents/engineering/browser_offline_runtime_doctrine.md#4-queueable-ports-are-a-stricter-port-class): queueability requires complete bounded replay semantics.
-- Adopt [Browser Offline Runtime §5](../documents/engineering/browser_offline_runtime_doctrine.md#5-one-bound-program-paired-online-and-offline-plans): the two plan projections have exact-key equality.
+- Adopt [Browser Offline Runtime §3 — the authored continuity surface](../documents/engineering/browser_offline_runtime_doctrine.md#3-the-authored-continuity-surface): applications name offline semantics, not mechanisms.
+- Adopt [Browser Offline Runtime §4 — queueable ports are a stricter port class](../documents/engineering/browser_offline_runtime_doctrine.md#4-queueable-ports-are-a-stricter-port-class): queueability requires the complete bounded replay contract.
+- Adopt [Browser Offline Runtime §5 — one bound program, paired online and offline plans](../documents/engineering/browser_offline_runtime_doctrine.md#5-one-bound-program-paired-online-and-offline-plans): public and private plan key sets cannot drift.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+## Sprint 41.1: Author the continuity language ✅
 
-## Sprint 41.1: Compile the offline contract ⏸️
+**Status**: Done
+**Implementation**: `dhall/amoebius/UiOffline.dhall`, `dhall/amoebius/ui/Types.dhall`,
+`src/offline-language-types/Amoebius/Ui/Offline/Types.hs`, `src/Amoebius/Ui/Source.hs`,
+`dhall/ui/{infernix,jitml}.dhall`
+**Blocked by**: [Phase 40](phase_40_ui_plan_compiler.md) gate
+**Independent Validation**: `offline-plan-spec` decodes three independently authored product rows and checks
+the exact six-operation, two-arm, four-field continuity shape.
+**Docs to update**: `documents/engineering/browser_offline_runtime_doctrine.md`,
+`documents/engineering/low_code_ui_runtime_doctrine.md`
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `dhall/amoebius/UiOffline.dhall`,
-`src/Amoebius/Ui/Offline/{Types,Decode,Plan}.hs`, `test/spec/ui/OfflinePlanSpec.hs`, and
-`tools/offline_language_plan_gate.py`
-**Blocked by**: reopened numeric predecessor gates.
-**Independent Validation**: `python3 tools/offline_language_plan_gate.py` against authored
-fixtures, the independent key-set oracle, five compile-time mutants, documentation, and the coverage ledger
-**Docs to update**:
-`documents/engineering/browser_offline_runtime_doctrine.md`,
-`documents/engineering/low_code_ui_runtime_doctrine.md`,
+### Objective
+
+Adopt the authored continuity surface and make its complete bounded queue terms part of every decoded source.
+
+### Deliverables
+
+- One closed Dhall/Haskell continuity mirror shared by the DSL and offline compiler components.
+- Product declarations for one online-only case and the initial infernix/jitML offline cases.
+- Thirteen structured refusal cases covering every missing bound or semantic term and every online-only arm.
+
+### Validation
+
+1. Decode all three product declarations and compare their normalized contract rows with the authored table.
+2. Require every malformed or forbidden queue case to return its exact structured tag.
+
+### Remaining Work
+
+None.
+
+## Sprint 41.2: Compile paired offline plans ✅
+
+**Status**: Done
+**Implementation**: `src/Amoebius/Ui/Offline/{Decode,Plan}.hs`,
+`test/spec/ui/OfflinePlanSpec.hs`, `test/golden/offline_language_plan/plan_keys.tbl`
+**Blocked by**: Sprint 41.1
+**Independent Validation**: the test compiles each product and their combined source, then compares eight
+authored rows and three independent key-set equalities.
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/generated_artifacts_doctrine.md`
 
 ### Objective
 
-Compile one bounded authored offline contract into coherent public and private plans.
+Adopt paired offline-plan projection so a public queued/cached/blob key cannot exist without its private replay
+counterpart.
 
 ### Deliverables
 
-- Closed continuity, projection, queued-port, blob-class, and queue-contract source/IR types.
-- Closed infernix/jitML operation classification plus paired-plan entries only for the two eligible start ports.
-- Structured dhall-typecheck/gadt-decode errors for unbounded, mismatched, or forbidden fields.
-- Deterministic offline plan projections and generated-artifact commands.
-- Independent fixtures, expected tags, and mutants.
+- A total validator for finite queue bounds, complete semantics, and the closed operation classification.
+- Deterministic client and replay plans retaining queue contracts, projections, blob classes, and offline view.
+- Exact client/replay artifact commands and explicit exclusion of private fields and browser mechanisms.
 
 ### Validation
 
-1. Run `python3 tools/offline_language_plan_gate.py`; require the canonical corpus green, each attempt to queue progress,
-   signal, cancellation, or invocation to fail at its pinned tag, and every named mutant to turn red.
+1. Compare the compiler result with all eight independent plan rows and all three paired key sets.
+2. Repeat compilation and require equal results, zero private fields, zero mechanism constructors, and two
+   exact artifact commands.
 
 ### Remaining Work
 
-Browser persistence, encryption, tab ownership, live authority, and replay are not Register-1 claims. They
-remain `UNVERIFIED` here and belong to Phases 34–69.
+None.
+
+## Sprint 41.3: Seal the pure boundary ✅
+
+**Status**: Done
+**Implementation**: `test/oracle/offline_language_plan/**`, `test/mutant/offline_language_plan/**`,
+`test/mutant/registry.tsv`, `tools/offline_language_plan_gate.py`
+**Blocked by**: Sprint 41.2
+**Independent Validation**: `python3 tools/offline_language_plan_gate.py` runs the clean, isolated, calculus,
+surface-join, artifact-hygiene, and five-mutant batteries.
+**Docs to update**: `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`,
+`DEVELOPMENT_PLAN/system_components.md`
+
+### Objective
+
+Seal the Register-1 claim with current gate infrastructure and no repository-resident generated evidence.
+
+### Deliverables
+
+- An independently authored 38-locus validation inventory and 52-surface expectation.
+- Five central-registry build flags wired to five distinct production CPP loci.
+- A project-contained run bundle, natural-architecture record, and source-snapshot attestation.
+
+### Validation
+
+1. Require all twelve gate sides, all 17 metrics, all five mutation reds, and the restored baseline to pass.
+2. Require generated results to remain beneath `.build/**` and the authored-root and host inventories to remain
+   unchanged.
+
+### Remaining Work
+
+None.
 
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
-- `documents/engineering/browser_offline_runtime_doctrine.md` — record the exact implemented source and plan types.
-- `documents/engineering/low_code_ui_runtime_doctrine.md` — record the continuity field and compiler evidence.
-- `documents/engineering/generated_artifacts_doctrine.md` — record emitted offline-plan artifact commands.
+- `documents/engineering/browser_offline_runtime_doctrine.md` — record the concrete Register-1 language mirror.
+- `documents/engineering/low_code_ui_runtime_doctrine.md` — record continuity and paired-plan evidence.
+- `documents/engineering/generated_artifacts_doctrine.md` — record the two deterministic artifact commands.
 
 **Cross-references to add:**
-- The tracker, substrate map, and component inventory must identify the new compiler surface.
+- The tracker, substrate map, component inventory, and calculus backlink identify the sealed compiler surface.
 
 ## Related Documents
 
 - [Development Plan](README.md)
 - [Development Plan Standards](development_plan_standards.md)
+- [Calculus Composition](phase_10_calculus_composition.md)
 - [Browser Offline Runtime](../documents/engineering/browser_offline_runtime_doctrine.md)
 - [Low-Code UI Runtime](../documents/engineering/low_code_ui_runtime_doctrine.md)
 - [Generated Artifacts](../documents/engineering/generated_artifacts_doctrine.md)

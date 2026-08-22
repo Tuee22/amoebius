@@ -2,6 +2,27 @@ let T = ../amoebius/ui/Types.dhall
 
 in  { caseName = "jitml-ui"
     , tenantMode = T.TenantMode.MultiTenant
+    , continuity =
+        T.UiOffline.Continuity.Offline
+          { projections = [ { projectionId = "workflow-progress" } ]
+          , queuedPorts =
+            [ { operation = T.UiOffline.Operation.JitmlTrainingStart
+              , contract =
+                { maxCount = 4
+                , maxBytes = 131072
+                , maxAgeSeconds = 43200
+                , localValidation = "advisory"
+                , idempotency = "command-id"
+                , conflict = "reject"
+                , ordering = "preserve"
+                , dependency = "dataset-blob"
+                , authoritativeValidation = "current-authority"
+                }
+              }
+            ]
+          , localBlobs = [ { blobClassId = "dataset" } ]
+          , offlineView = "jitml.workflow.home"
+          }
     , modules =
       [ { moduleId = "jitml.workflow"
         , nodes =

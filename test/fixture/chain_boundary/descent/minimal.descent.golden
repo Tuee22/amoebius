@@ -1,7 +1,0 @@
-AfterBootstrapAddonCutoverFrame	global/bootstrap-addon-cutover
-BootstrapSchedulerFrame	global/capacity-scheduler
-AfterManagedCapacityReadyFrame	global/managed-capacity-admission
-ImmediateFrame	global/namespace
-ImmediateFrame	objectstore/assets/config
-AfterBootstrapAddonCutoverFrame	objectstore/assets/member-0
-AfterBootstrapAddonCutoverFrame	objectstore/assets/service

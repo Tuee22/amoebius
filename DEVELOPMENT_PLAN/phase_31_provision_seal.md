@@ -22,7 +22,7 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 </details>
@@ -33,10 +33,10 @@ The Register-1 gate passed on 2026-08-09 with ledger
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) 📋](#sprint-311-the-conditional-infrastructure-planner--materialization-boundary-planinfrastructure-)
-- [Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion 📋](#sprint-312-the-whole-deployment-provision-fold--executionruntime-storageobjectobservabilitymigrationscheduler-expansion-)
-- [Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation 📋](#sprint-313-the-provisionedspec-seal--identity-keyed-render-source-set--four-stage-activation-)
-- [Sprint 31.4: The provision-seal property/corpus + the Register-1 gate 📋](#sprint-314-the-provision-seal-propertycorpus--the-register-1-gate-)
+- [Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ✅](#sprint-311-the-conditional-infrastructure-planner--materialization-boundary-planinfrastructure-)
+- [Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ✅](#sprint-312-the-whole-deployment-provision-fold--executionruntime-storageobjectobservabilitymigrationscheduler-expansion-)
+- [Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ✅](#sprint-313-the-provisionedspec-seal--identity-keyed-render-source-set--four-stage-activation-)
+- [Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ✅](#sprint-314-the-provision-seal-propertycorpus--the-register-1-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -44,7 +44,18 @@ The Register-1 gate passed on 2026-08-09 with ledger
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-30 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — resealed 2026-08-21. `python3 tools/provision_seal_gate.py` passes all eleven sides on natural
+`darwin/arm64`, untranslated. The bounded suite provisions all 18 inherited arm/shape positives, exercises
+both infrastructure-planner paths, rejects ten specific seal-locus negatives, observes all four activation
+stages, and covers both provision properties. The 40-entry validation-locus ledger is exact; all ten paired
+mutants redden; 42 observed units compose through all five calculus kinds; all 25 metrics match; and all 37
+surfaces join to 55 items. The project-contained attestation is
+`sha256:f7b2deabc1f523c89e54d63ddbd01ccf6b17c716a71f612b865c540df70312f1`, bound to source snapshot
+`sha256:731bcd90f8e4074f…` over 2,252 files. Provider realization, engine resolution, and model/runtime
+correspondence remain UNVERIFIED at their later owners.
+
+Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi
+changed what this phase's gate had to cover, so the earlier seals below remain history.
 
 **The rerun corrected a second consequence of Phase 2's registry merge.** This gate enumerates its run-time
 items from a list of authored sources and read each one's first column. That column was the mutant id while
@@ -78,15 +89,15 @@ Done (invalidated) — sealed 2026-08-12. The migrated gate passed against sourc
 inherited capability positives provision, both infrastructure-planner paths hold, the creation plan validates
 under CAS and enacts against its readback, the render source set is one equal-keyed map across four activation
 stages, ten specific negatives redden at their tags, both property boundaries hold exact-versus-one-short, and
-all ten seeded mutants redden. Evidence and the ledger move into `.build/runs/phase_26/<run-id>/`, and 26
+all ten seeded mutants redden. Evidence and the ledger move into `.build/runs/phase_31/<run-id>/`, and 26
 run-time items — four activation witnesses, two planner cases, ten provision cases, and ten mutant names —
 partition one-to-one across the claim surfaces.
 
-**Six contract surfaces carry no id and are now honestly UNVERIFIED**: `creation-provider-action-batch`,
-`plan-token-replay-rejection`, `action-token-replay-rejection`, `receipt-bound-materialization-readback`,
-`promised-identity-rejection`, and `phase11-validation-locus-ledger`. None has an oracle case, a mutant, or a
-metric of its own; the pre-amendment ledger reported them tested by naming them in a hand-maintained set. The
-gap is recorded against Phase 31 in [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
+**Six formerly unverified contract surfaces are now measured directly**: exact metrics cover the one creation
+action batch, plan-token replay rejection, action-token replay rejection, all three materialization-evidence
+classifications, both promised-identity rejections, and the complete 40-row validation-locus ledger. The
+pre-amendment gap is closed in
+[`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md).
 
 **Invalidated historical record:**
 
@@ -167,7 +178,7 @@ of every provider and the jit-resolve of every engine are marked **UNVERIFIED**,
 
 **Depends on:** [Phase 30](phase_30_capability_bind.md) — capability union + representational bind, which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/provision_seal_gate.py` passed on no substrate, Register 1.
+**Gate:** `python3 tools/run_phase_gate.py 31` passed on no substrate, Register 1.
 It covers both planner paths, 18 provision positives, ten specific negatives, two boundary properties, and ten
 mutants. The complete apparatus is named in [`## Gate integrity`](#gate-integrity).
 
@@ -175,7 +186,7 @@ mutants. The complete apparatus is named in [`## Gate integrity`](#gate-integrit
 
 This section carries this sub-phase's **slice** of the source capability-binder gate apparatus, partitioned
 along the provision-seal seam (per [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
-The `bind`/shape-oracle apparatus (`golden_servicespec_<arm>_<shape>`, `mutant_copy_shape_tag`,
+The `bind`/shape-oracle apparatus (`bound_shape_semantics.tsv`, `mutant_copy_shape_tag`,
 `mutant_catchall_arm`, `mutant_shared_app_import`, the dhall-typecheck/gadt-decode negatives) stays in
 [Phase 30](phase_30_capability_bind.md); the identity-complete accelerator source/workload/residency/coexistence
 apparatus (`illegal_accelerator_count_shortage`, `illegal_accelerator_source_workload_mismatch`,
@@ -211,7 +222,7 @@ below):
 
 (authored in this phase's oracle-pinning sprint, provisioned here): the nine per-arm positive fixtures
 `dhall/examples/legal_<arm>_{singlenode,distributed}.dhall` for all nine capability arms — each already
-`bind`-checked against its `golden_servicespec_<arm>_<shape>` in Phase 30 — are provisioned against their
+`bind`-checked against its independently authored semantic projection in Phase 30 — are provisioned against their
 declared target topologies. Two oracle-pinned `ProvisionTargetSupply` fixtures drive the planner boundary:
 a **pre-existing** fixture that must yield `NoInfrastructureRequired`, and a **creation** fixture that must
 return one `InfrastructureRequired` plan, validate/CAS-enact its `ProvisionedProviderActionBatch` into a
@@ -350,7 +361,7 @@ each one-resource-or-one-byte-short minimally-differing pair rejects, exercising
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-21 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -358,8 +369,8 @@ each one-resource-or-one-byte-short minimally-differing pair rejects, exercising
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
 > established by the current phase gate plus universal artifact hygiene.
 
-## Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) 📋
-**Status**: Planned
+## Sprint 31.1: The conditional infrastructure planner + materialization boundary (`planInfrastructure`) ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Capacity/Provision.hs` implements the planner, supply/result types, internal
 demand derivation, validation/enaction, observed readback, and receipt-bound context. It imports no renderer.
 **Blocked by**: None.
@@ -398,10 +409,11 @@ already materialized or returns exactly one non-renderable plan owning the close
    `ProvisionContext`, and replay / missing-readback / promised-identity inputs reject.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. Both planner arms, the exact action batch, separate plan/action replay refusals, receipt-bound readback,
+and promised-identity refusals are sealed by the Phase-31 gate.
 
-## Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion 📋
-**Status**: Planned
+## Sprint 31.2: The whole-deployment `provision` fold + execution/runtime-storage/object/observability/migration/scheduler expansion ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Capacity/Provision.hs` implements `provision` and the opaque seal.
 `src/Amoebius/Capacity/RuntimeStorage.hs` supplies scope-indexed metadata and node runtime/image accounting.
 **Blocked by**: None.
@@ -506,10 +518,11 @@ and an impossible target has no deployable value.
    suite goes **red** under each of the ten inherited seeded mutants.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The 18 inherited deployments, ten exact negatives, two boundary properties, and ten paired mutants seal
+the post-bind provision fold and its expansion boundary.
 
-## Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation 📋
-**Status**: Planned
+## Sprint 31.3: The `ProvisionedSpec` seal + identity-keyed render-source set + four-stage activation ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Capacity/RenderSource.hs` implements opaque, identity-keyed sources,
 their four activation stages, and the checked source-set constructor without importing a renderer.
 **Blocked by**: None.
@@ -550,13 +563,13 @@ identity-keyed render-source set with per-field ownership and a four-stage activ
    missing/extra stage, an early-staged managed taint/admission source, or an owner-disagreeing activation.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The opaque source set, exact domain/key/owner correspondence, and all four activation stages are sealed.
 
-## Sprint 31.4: The provision-seal property/corpus + the Register-1 gate 📋
-**Status**: Planned
+## Sprint 31.4: The provision-seal property/corpus + the Register-1 gate ✅
+**Status**: Done
 **Implementation**: `test/spec/capability/{ProvisionProps,RuntimeStorageBindingProps,ProvisionSealGate}.hs`,
 `test/oracle/provision_seal/`, `test/mutant/provision_seal/`, the paired Dhall corpus, and `tools/provision_seal_gate.py`.
-The 18 per-arm/shape fixtures remain inherited from [Phase 30](phase_30_capability_bind.md).
+The 18 per-arm/shape semantic fixtures remain inherited from [Phase 30](phase_30_capability_bind.md).
 **Blocked by**: None.
 **Independent Validation**: `cabal test provision-seal-spec` covers 18 positives, two planner paths, ten exact
 negative tags, four activation stages, and two boundary properties. The phase gate runs all ten mutants
@@ -618,7 +631,8 @@ UNVERIFIED.
    attestation.
 
 ### Remaining Work
-The whole sprint (📋 Planned).
+None. The eleven-sided Register-1 gate, 40-row locus ledger, 42-unit five-calculus projection, 25 metrics, and
+37-surface/55-item join are sealed.
 
 ## Documentation Requirements
 

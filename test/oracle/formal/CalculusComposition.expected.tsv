@@ -1,0 +1,9 @@
+metric	value
+calculus-kinds	artifact,budget,lift,workflow,evidence
+component-count	5
+cpu	15
+memory	150
+ephemeral	1500
+pods	15
+formal-distinct-state-count	1
+formal-safety	green

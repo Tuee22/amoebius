@@ -1,0 +1,5 @@
+metric	value
+calculus-kinds	artifact,budget,lift,workflow,evidence
+component-names	semantic-deployments,rendered-objects,safety-predicates,renderer-property,mutant-evidence
+projection-counts	18,164,3,1,12
+resource-vector	5,198,0,0

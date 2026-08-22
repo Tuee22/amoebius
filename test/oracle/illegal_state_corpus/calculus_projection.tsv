@@ -1,0 +1,5 @@
+metric	value
+calculus-kinds	artifact,budget,lift,workflow,evidence
+component-names	negative-corpus,deferred-ledger,positive-corpus,compile-pairs,discharged-ledger
+projection-counts	30,78,12,9,43
+resource-vector	5,172,0,0

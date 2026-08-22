@@ -30,6 +30,8 @@ resource-type-substitution-mutants	metrics	resource-type-substitution-mutants
 special-resource-mutants	metrics	special-resource-mutants
 custom-arm-mutant	metrics	custom-arm-mutant
 spec-composition	metrics	acceptance-token
+extension-conformance-plan	metrics	extension-conformance-plan
+extension-conformance-verdict	metrics	extension-conformance-verdict
 gadt-decode-residue	metrics	gadt-decode-residue
 runtime-fidelity	metrics	runtime
-generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
+generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle,phase24-plan-consumed

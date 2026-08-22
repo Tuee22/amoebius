@@ -4,6 +4,7 @@ import Prelude
 
 import Amoebius.Ui.Components (headingFor, statusFor)
 import Amoebius.Ui.Interpreter (Transition, transition)
+import Amoebius.Ui.Offline.Runtime (installOfflineRuntime, offlineCapabilities)
 import Effect (Effect)
 
 foreign import install
@@ -13,4 +14,6 @@ foreign import install
   -> Effect Unit
 
 main :: Effect Unit
-main = install transition headingFor statusFor
+main = do
+  installOfflineRuntime offlineCapabilities
+  install transition headingFor statusFor

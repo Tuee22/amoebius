@@ -163,7 +163,7 @@ check discharges it.
 
 **Depends on:** [Phase 75](phase_75_gateway_migration_drills.md) — gateway-migration drills + model-correspondence, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test provider-deploy-checkpoint-live` is green: an `InForceSpec` in which the **linux-cpu**
+**Gate:** `python3 tools/run_phase_gate.py 76` is green: an `InForceSpec` in which the **linux-cpu**
 parent's `replicas=1` control-plane daemon stands up a provider-managed **EKS control plane + one base managed node
 group** and holds the whole checkpoint as enveloped MinIO objects. Its apparatus is
 [Gate integrity](#gate-integrity).

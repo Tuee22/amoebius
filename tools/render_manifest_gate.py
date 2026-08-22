@@ -5,8 +5,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import hashlib
-import json
 import os
 import re
 import shutil
@@ -23,7 +21,8 @@ import toolchain
 
 
 ROOT = Path(__file__).resolve().parent.parent
-CORPUS = ROOT / "test/oracle/render_manifest/corpus.tsv"
+SEMANTIC_PROJECTION = ROOT / "test/oracle/render_manifest/semantic_projection.tsv"
+CALCULUS_PROJECTION = ROOT / "test/oracle/render_manifest/calculus_projection.tsv"
 MUTANT_CAPABILITY = "render_manifest"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/render_manifest/validation_locus.tsv"
@@ -78,25 +77,36 @@ def verify_pins() -> tuple[Path, str]:
 
 
 def verify_oracles() -> list[dict[str, str]]:
-    corpus = read_tsv(CORPUS)
+    corpus = read_tsv(SEMANTIC_PROJECTION)
+    calculus_projection = read_tsv(CALCULUS_PROJECTION)
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     locus = read_tsv(LOCUS)
     if len(corpus) != 18 or len({row["deployment"] for row in corpus}) != 18:
-        raise GateFailure("Phase-14 corpus must enumerate eighteen unique deployments")
+        raise GateFailure("Phase-33 semantic oracle must enumerate eighteen unique deployments")
     if {row["deployment"].rsplit("_", 1)[-1] for row in corpus} != {"singlenode", "distributed"}:
-        raise GateFailure("Phase-14 corpus must cover both shapes")
+        raise GateFailure("Phase-33 semantic oracle must cover both shapes")
+    if sum(int(row["objects"]) for row in corpus) != 164:
+        raise GateFailure("Phase-33 semantic oracle must enumerate exactly 164 rendered objects")
     for row in corpus:
-        golden = ROOT / row["golden"]
-        try:
-            summary = json.loads(golden.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as problem:
-            raise GateFailure(f"invalid render golden {golden.relative_to(ROOT)}: {problem}") from problem
-        if summary.get("objects") != int(row["objects"]) or not re.fullmatch(r"[0-9a-f]{64}", summary.get("sha256", "")):
-            raise GateFailure(f"render golden metadata drifted: {golden.relative_to(ROOT)}")
-        if not golden.read_bytes().endswith(b"\n"):
-            raise GateFailure(f"render golden lacks its canonical trailing LF: {golden.relative_to(ROOT)}")
+        identities = row["identities"].split(",")
+        if len(identities) != int(row["objects"]) or identities != sorted(set(identities)):
+            raise GateFailure(f"semantic identity domain is incomplete, duplicated, or unordered: {row['deployment']}")
+        for field in ("kinds", "activations", "reconcile_modes", "workloads"):
+            if not all(re.fullmatch(r"[A-Za-z]+:[0-9]+", cell) for cell in row[field].split(",")):
+                raise GateFailure(f"malformed {field} bag in semantic oracle: {row['deployment']}")
+        for field in ("network_policies", "load_balancers", "accelerator_claims"):
+            if not row[field].isdigit():
+                raise GateFailure(f"non-numeric {field} in semantic oracle: {row['deployment']}")
+    expected_calculus = [
+        {"metric": "calculus-kinds", "value": "artifact,budget,lift,workflow,evidence"},
+        {"metric": "component-names", "value": "semantic-deployments,rendered-objects,safety-predicates,renderer-property,mutant-evidence"},
+        {"metric": "projection-counts", "value": "18,164,3,1,12"},
+        {"metric": "resource-vector", "value": "5,198,0,0"},
+    ]
+    if calculus_projection != expected_calculus:
+        raise GateFailure("Phase-33 five-calculus projection oracle drifted")
     if len(mutants) != 12 or len({row["mutant"] for row in mutants}) != 12:
-        raise GateFailure("Phase-14 mutant manifest must contain twelve unique mutants")
+        raise GateFailure("Phase-33 mutant manifest must contain twelve unique mutants")
     expected_locus = {
         *(row["deployment"] for row in corpus),
         "unsafe_workload",
@@ -105,7 +115,9 @@ def verify_oracles() -> list[dict[str, str]]:
         *(row["mutant"] for row in mutants),
     }
     if len(locus) != len(expected_locus) or {row["entry"] for row in locus} != expected_locus:
-        raise GateFailure("Phase-14 validation-locus ledger has incomplete or duplicate coverage")
+        raise GateFailure("Phase-33 validation-locus ledger has incomplete or duplicate coverage")
+    if len(locus) != 33:
+        raise GateFailure("Phase-33 validation-locus ledger must contain exactly 33 rows")
     for row in mutants:
         descriptor = ROOT / f"test/mutant/render_manifest/{row['mutant']}/mutant.txt"
         if not descriptor.is_file() or not descriptor.read_text(encoding="utf-8").strip():
@@ -145,9 +157,11 @@ def verify_totality_sources() -> None:
 
 def run_green_suite(cabal: Path) -> str:
     result = run([str(cabal), "test", "render-golden", "--test-show-details=direct"])
-    token = "render-golden: PASS (18 byte-locked deployment goldens, 9 object variants, 3 non-vacuous safety predicates, 12 mutants, 1 covered property)"
-    if token not in result.stdout or "each >=4%" not in result.stdout:
-        raise GateFailure(f"Phase-14 acceptance or property token is absent:\n{result.stdout}")
+    token = "render-manifest: PASS (18 semantic projections, 164 objects, 9 object variants, 3 non-vacuous safety predicates, 12 mutants, 1 covered property)"
+    invariants = "render-manifest-invariants: PASS (18 source domains, 164 identity/namespace/API/reconcile projections, 164 Aeson round-trips, 33 locus rows)"
+    calculus = "render-manifest-calculus: PASS (5 kinds, 198 projected units)"
+    if token not in result.stdout or invariants not in result.stdout or calculus not in result.stdout or "each >=4%" not in result.stdout:
+        raise GateFailure(f"Phase-33 acceptance, invariant, calculus, or property token is absent:\n{result.stdout}")
     return result.stdout
 
 
@@ -167,13 +181,29 @@ def verify_mutants(cabal: Path, mutants: list[dict[str, str]]) -> str:
 
 def write_results(mutants: list[dict[str, str]]) -> None:
     metrics = {
-        "deployment-goldens": "18/18-byte-locked",
+        "semantic-deployments": "18/18-exact",
         "capability-shapes": "9/9-arms-times-2-shapes",
+        "rendered-objects": "164/164-exact",
         "object-variant-coverage": "9/9-exact",
         "safety-predicates": "3/3-non-vacuous",
+        "canonical-encoding-stability": "18/18-stable",
+        "aeson-round-trips": "164/164-equal",
+        "sealed-source-domains": "18/18-exact",
+        "deterministic-identity-orders": "18/18-ascending",
+        "source-identity-projections": "164/164-one-to-one",
+        "activation-domains": "18/18-four-arms",
+        "reconcile-mode-projections": "164/164-exact",
+        "namespace-projections": "164/164-exact",
+        "api-version-projections": "164/164-exact",
+        "default-deny-policies": "18/18-exact",
         "quickcheck-properties": "1/1-arms-and-shapes-at-least-4-percent",
         "mutants": f"{len(mutants)}/{len(mutants)}-red-at-property-locus",
+        "validation-locus-entries": "33/33-exact",
         "acceptance-token": "rendered-output-proven-for-the-model",
+        "calculus-kinds": "artifact,budget,lift,workflow,evidence",
+        "calculus-components": "semantic-deployments,rendered-objects,safety-predicates,renderer-property,mutant-evidence",
+        "calculus-projection-counts": "18,164,3,1,12",
+        "calculus-resource-vector": "5,198,0,0",
         "live-apiserver-enforcement": "UNVERIFIED",
         "live-network-policy-enforcement": "UNVERIFIED",
         "runtime-correspondence": "UNVERIFIED",
@@ -191,7 +221,7 @@ COMPILER = ""
 # Where the run reads its enumerable items from. Nothing here is a list this gate carries;
 # each is a file the run opens, so deleting a case or a mutant shrinks the enumeration and
 # breaks the authored join.
-ITEM_SOURCES = ['test/oracle/render_manifest/corpus.tsv', 'test/mutant/registry.tsv']
+ITEM_SOURCES = ['test/oracle/render_manifest/semantic_projection.tsv', 'test/mutant/registry.tsv']
 
 CHECKS = {
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
@@ -204,9 +234,71 @@ CHECKS = {
 
 SIDES = ("toolchain", "oracle", "suite", "mutant", "results")
 
-EXPECTED_RESULTS = {'deployment-goldens': '18/18-byte-locked', 'capability-shapes': '9/9-arms-times-2-shapes', 'object-variant-coverage': '9/9-exact', 'safety-predicates': '3/3-non-vacuous', 'quickcheck-properties': '1/1-arms-and-shapes-at-least-4-percent', 'mutants': '12/12-red-at-property-locus', 'acceptance-token': 'rendered-output-proven-for-the-model', 'live-apiserver-enforcement': 'UNVERIFIED', 'live-network-policy-enforcement': 'UNVERIFIED', 'runtime-correspondence': 'UNVERIFIED'}
+EXPECTED_RESULTS = {
+    "semantic-deployments": "18/18-exact",
+    "capability-shapes": "9/9-arms-times-2-shapes",
+    "rendered-objects": "164/164-exact",
+    "object-variant-coverage": "9/9-exact",
+    "safety-predicates": "3/3-non-vacuous",
+    "canonical-encoding-stability": "18/18-stable",
+    "aeson-round-trips": "164/164-equal",
+    "sealed-source-domains": "18/18-exact",
+    "deterministic-identity-orders": "18/18-ascending",
+    "source-identity-projections": "164/164-one-to-one",
+    "activation-domains": "18/18-four-arms",
+    "reconcile-mode-projections": "164/164-exact",
+    "namespace-projections": "164/164-exact",
+    "api-version-projections": "164/164-exact",
+    "default-deny-policies": "18/18-exact",
+    "quickcheck-properties": "1/1-arms-and-shapes-at-least-4-percent",
+    "mutants": "12/12-red-at-property-locus",
+    "validation-locus-entries": "33/33-exact",
+    "acceptance-token": "rendered-output-proven-for-the-model",
+    "calculus-kinds": "artifact,budget,lift,workflow,evidence",
+    "calculus-components": "semantic-deployments,rendered-objects,safety-predicates,renderer-property,mutant-evidence",
+    "calculus-projection-counts": "18,164,3,1,12",
+    "calculus-resource-vector": "5,198,0,0",
+    "live-apiserver-enforcement": "UNVERIFIED",
+    "live-network-policy-enforcement": "UNVERIFIED",
+    "runtime-correspondence": "UNVERIFIED",
+}
 
-SURFACE_MAP = {'typed-k8s-object-model': 'object-variant-coverage', 'canonical-aeson-encoding': 'deployment-goldens', 'aeson-round-trip': '', 'pure-total-render-all': 'acceptance-token', 'sole-public-render-facade': 'render-facade-sealed', 'sealed-render-source-domain': '', 'deterministic-identity-order': '', 'exact-source-identity-projection': '', 'render-activation-domain': 'mutant_monitoring_projection', 'closed-reconcile-mode': '', 'capability-shape-corpus': 'objectstore_singlenode,objectstore_distributed,secretstore_singlenode,secretstore_distributed,messagebus_singlenode,messagebus_distributed,sql_singlenode,sql_distributed,identity_singlenode,identity_distributed', 'nine-emitted-object-variants': 'capability-shapes', 'byte-locked-render-goldens': 'observability_singlenode,observability_distributed,registry_singlenode,registry_distributed,edge_singlenode,edge_distributed,inferenceengine_singlenode,inferenceengine_distributed', 'hardened-pod-projection': 'mutant_unhardened_pod', 'exact-resource-projection': 'mutant_resource_projection', 'content-digested-image-projection': 'mutant_image_platform', 'bounded-volume-projection': 'mutant_unbounded_scratch,mutant_memory_volume_lifecycle,mutant_ephemeral_rootfs,mutant_durable_size', 'accelerator-claim-projection': 'mutant_accelerator_projection', 'controller-kind-projection': 'mutant_controller_projection', 'single-declared-edge-exposure': 'safety-predicates', 'no-bare-ingress': 'mutant_wild_ingress', 'default-deny-network-policy': '', 'independent-allow-edge-equality': 'mutant_undeclared_allow_edge', 'phase13-property-coverage': 'quickcheck-properties', 'phase13-mutant-battery': 'mutants', 'phase13-validation-locus-ledger': '', 'phase13-compile-totality': 'render-totality-options', 'live-apiserver-enforcement': 'live-apiserver-enforcement', 'live-network-policy-enforcement': 'live-network-policy-enforcement', 'runtime-model-correspondence': 'runtime-correspondence'}
+SURFACE_MAP = {
+    "typed-k8s-object-model": "object-variant-coverage",
+    "canonical-aeson-encoding": "canonical-encoding-stability",
+    "aeson-round-trip": "aeson-round-trips",
+    "pure-total-render-all": "acceptance-token",
+    "sole-public-render-facade": "render-facade-sealed",
+    "sealed-render-source-domain": "sealed-source-domains",
+    "deterministic-identity-order": "deterministic-identity-orders",
+    "exact-source-identity-projection": "source-identity-projections",
+    "render-activation-domain": "activation-domains",
+    "closed-reconcile-mode": "reconcile-mode-projections",
+    "derived-namespace-projection": "namespace-projections",
+    "canonical-api-version-projection": "api-version-projections",
+    "capability-shape-corpus": "objectstore_singlenode,objectstore_distributed,secretstore_singlenode,secretstore_distributed,messagebus_singlenode,messagebus_distributed,sql_singlenode,sql_distributed,identity_singlenode,identity_distributed,observability_singlenode,observability_distributed,registry_singlenode,registry_distributed,edge_singlenode,edge_distributed,inferenceengine_singlenode,inferenceengine_distributed",
+    "nine-emitted-object-variants": "capability-shapes",
+    "semantic-render-projection": "semantic-deployments,rendered-objects",
+    "hardened-pod-projection": "mutant_unhardened_pod",
+    "exact-resource-projection": "mutant_resource_projection",
+    "monitoring-resource-projection": "mutant_monitoring_projection",
+    "content-digested-image-projection": "mutant_image_platform",
+    "bounded-volume-projection": "mutant_unbounded_scratch,mutant_memory_volume_lifecycle,mutant_ephemeral_rootfs,mutant_durable_size",
+    "accelerator-claim-projection": "mutant_accelerator_projection",
+    "controller-kind-projection": "mutant_controller_projection",
+    "single-declared-edge-exposure": "safety-predicates",
+    "no-bare-ingress": "mutant_wild_ingress",
+    "default-deny-network-policy": "default-deny-policies",
+    "independent-allow-edge-equality": "mutant_undeclared_allow_edge",
+    "phase33-property-coverage": "quickcheck-properties",
+    "phase33-mutant-battery": "mutants",
+    "phase33-validation-locus-ledger": "validation-locus-entries",
+    "phase33-compile-totality": "render-totality-options",
+    "render-manifest-five-calculus-projection": "calculus-kinds,calculus-components,calculus-projection-counts,calculus-resource-vector",
+    "live-apiserver-enforcement": "live-apiserver-enforcement",
+    "live-network-policy-enforcement": "live-network-policy-enforcement",
+    "runtime-model-correspondence": "runtime-correspondence",
+}
 
 SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     surface: ((ids, EXPECTED_RESULTS[ids]) if ids in EXPECTED_RESULTS and EXPECTED_RESULTS[ids] != "UNVERIFIED" else None)
@@ -285,7 +377,7 @@ def main() -> int:
 
         write_results(mutant_rows)
         rows = gate_common.metric_rows(RESULTS)
-        banner_ok = not GENERATED_LEDGER.is_file() or GENERATED_LEDGER.read_text(encoding="utf-8").startswith(
+        banner_ok = GENERATED_LEDGER.is_file() and GENERATED_LEDGER.read_text(encoding="utf-8").startswith(
             "# Register-1 only;"
         )
         oracle_ok = gate_common.oracle_side(rows, EXPECTED_RESULTS)
@@ -296,11 +388,15 @@ def main() -> int:
         )
         print(f"  {'ok  ' if banner_ok else 'FAIL'}  locus-ledger-honesty-banner")
         results["results"] = oracle_ok and artifact_ok and banner_ok
-    except (GateFailure, OSError, KeyError, ValueError, json.JSONDecodeError) as problem:
+    except (GateFailure, OSError, KeyError, ValueError) as problem:
         print(f"render-manifest-gate: FAIL: {problem}", file=sys.stderr)
 
     item_evidence = {
-        surface: ("acceptance-token", EXPECTED_RESULTS["acceptance-token"])
+        surface: (
+            ("mutants", EXPECTED_RESULTS["mutants"])
+            if any(name.startswith("mutant_") for name in ids.split(","))
+            else ("semantic-deployments", EXPECTED_RESULTS["semantic-deployments"])
+        )
         for surface, ids in SURFACE_MAP.items()
         if ids and set(ids.split(",")) & item_names
     }
@@ -320,9 +416,9 @@ def main() -> int:
             for name, record in resolved.items()
             if name != "platform"
         },
-        dependencies={"battery": "cabal test"},
+        dependencies={"battery": "cabal test render-golden"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-14 mutants", "status": "unrun"}],
+        or [{"name": "phase-33 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

@@ -31,3 +31,8 @@ cuda-shard-byte-sum	illegal_accelerator_vram_fragmentation	accelerator	Accelerat
 cuda-vram-reserve	illegal_accelerator_vram_reserve_boundary	accelerator	AcceleratorNetAllocatableViolation	legal_cuda-vram-reserve	3.30:accelerator-memory-fit
 metal-profile	illegal_apple_metal_profile_mismatch	accelerator	AcceleratorProfileMismatch	legal_metal-profile	3.30:accelerator-memory-fit
 accelerator-shared-owner	illegal_shared_accelerator_double_owner	accelerator-owner	AcceleratorSharedDevice:cuda-a	legal_accelerator-shared-owner	3.28:accelerator-owner
+accelerator-peer-graph	illegal_accelerator_vram_fragmentation	accelerator-interconnect	AcceleratorInterconnectMissing	legal_accelerator-peer-graph	3.30:accelerator-memory-fit
+build-cache-budget	illegal_hard_ceiling_overcommit	build-execution	BuildCacheOvercommit	legal_build-cache-budget	3.17:capacity-accounting
+engine-storage-reserve	illegal_control_plane_storage_transition_overrun	engine-system-reserve	EngineStorageOvercommit	legal_engine-storage-reserve	3.17:capacity-accounting
+monitoring-volume-budget	illegal_hard_ceiling_overcommit	monitoring-work	MonitoringStorageOvercommit	legal_monitoring-volume-budget	3.17:capacity-accounting
+pulumi-executor-concurrency	illegal_hard_ceiling_overcommit	pulumi-execution	PulumiConcurrencyZero	legal_pulumi-executor-concurrency	3.17:capacity-accounting

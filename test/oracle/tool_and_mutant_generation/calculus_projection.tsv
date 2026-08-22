@@ -1,0 +1,5 @@
+metric	value
+calculus-kinds	artifact,budget,lift,workflow,evidence
+component-names	generated-checking-corpus,closed-generation-budget,tool-and-mutation-declarations,equivalence-workflow,mutant-evidence
+projection-counts	605,2,605,4,3
+resource-vector	5,1219,0,0

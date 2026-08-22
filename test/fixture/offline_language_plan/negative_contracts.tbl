@@ -2,6 +2,7 @@ case expected_tag
 zero-count MissingCountBound
 zero-bytes MissingByteBound
 zero-age MissingAgeBound
+missing-local-validation MissingLocalValidation
 missing-idempotency MissingIdempotency
 missing-conflict MissingConflictRule
 missing-order MissingOrderRule

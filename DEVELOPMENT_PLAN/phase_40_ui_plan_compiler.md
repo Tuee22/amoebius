@@ -1,17 +1,13 @@
 # Phase 40: UI plan compiler
 
-> **Purpose**: Compile one sealed `BoundUiProgram` deterministically into matching immutable `ClientPlan`,
-> `UiServerPlan`, public-contract, content-manifest, route-dispatch, and finite runtime-demand artifacts.
-> **Read this if**: phase 40 is next in the queue, or a later phase depends on what its gate establishes.
+> **Purpose**: Compile one sealed `BoundUiProgram` deterministically into matching immutable client, server,
+> public-contract, content-manifest, digest, and finite-demand projections.
+> **Read this if**: the paired-plan compiler, its canonical artifact boundary, or its Register-1 evidence has
+> to change.
 
-Phase 40 delivers the UI plan compiler; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [ui_realtime_coordination_doctrine.md](../documents/engineering/ui_realtime_coordination_doctrine.md), [generated_artifacts_doctrine.md](../documents/engineering/generated_artifacts_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-Gate passed on 2026-08-09 with ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This phase owns the pure compilation decision from one constructor-private bound program to one inseparable
+artifact set. It does not interpret either plan, serve HTTP, publish a release, enforce current authority at
+runtime, or prove browser, provider, or edge behavior.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -29,7 +25,9 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 40.1: Deterministic paired-plan projection 📋](#sprint-401-deterministic-paired-plan-projection-)
+- [Sprint 40.1: Paired semantic projection ✅](#sprint-401-paired-semantic-projection-)
+- [Sprint 40.2: Canonical artifacts, digests, and demand ✅](#sprint-402-canonical-artifacts-digests-and-demand-)
+- [Sprint 40.3: Calculus projection and phase seal ✅](#sprint-403-calculus-projection-and-phase-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,207 +35,212 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-39 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-21. The complete twelve-sided gate passes on natural `darwin/arm64`, untranslated.
+Four logical projections match an independent relation; four canonical regression artifacts and their four
+run-time-derived digests are byte-exact; six demand cells, four pinned negatives, two fresh-process runs, and
+all six exact-locus mutants pass. The real five-calculus composition projects counts `4,6,14,2,6` to resource
+vector `5,32,0,0`. All 17 metrics match and 61 surfaces join to 72 enumerated items. Attestation
+`sha256:9dde7747671bfbc30e18c84853a2c940e91bd01ad0ee2c314da6891433ab4010` binds source
+`sha256:6fdf9fdecbff0cb8…` over 2,263 files.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+**Activated 2026-08-21** when Phase 39 sealed. The generative re-baseline invalidated the earlier result because
+it had no calculus projection or natural-architecture record.
 
-Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_plan_compiler_gate.py` passed all eleven sides: four
-independent projections, four byte-exact canonical artifacts, four independently derived digests, six finite
-demand cells, two fresh-process determinism checks, all six mutants, and all thirteen metrics pass; 55
-surfaces join to 66 enumerated items. The project-contained attestation is
-`sha256:a9f17c21a0a39642219d8b31e3d666d06baa9c02db1b9a4cdd7d2db1a7d91d4a`, bound to source snapshot
-`sha256:f6739fd9fd7f6fd2…`; Phase 40 owns no remaining migration deferral.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:3587049c696ded8e…`
-(1944 non-ignored files) and published a verified pre-containment external attestation
-`sha256:6e567d5b9a009a424ba1974e7d62957e579bd56f928e9bc1076365584aaaa8be`.
-
-**Observed progress — 2026-08-13:** **Policy-conformant.** The paired-plan result is unchanged and re-run:
-four logical projections match a reference relation that imports no production projection code, four canonical
-artifacts are byte-exact, four digests agree with an independent adapter, six demand cells are finite and
-exact, two fresh cache-disabled processes with reversed insertion order emit identical bytes, and all six
-seeded mutants redden. Evidence and the ledger move into `.build/runs/phase_18/<run-id>/`, and 55 surfaces join
-two-way to 66 run-time enumerated items.
-
-**`expected_digests.tsv` is deleted, which is what this phase owed.** A table of four SHA-256 values over
-bytes the goldens already pin is not an expectation anyone can author or review — it is a reproducible
-observation, and a second copy of a fact can only agree or be wrong. The suite now derives that side at run
-time by hashing the authored goldens with the independent adapter, the run bundle records the derived table,
-and a `derived-digest-table-untracked` check refuses to let any tracked fixture other than the four goldens
-carry a `sha256:` literal again. The Phase-0 gate was re-run green after its manifest row was removed.
-
-**The four plan goldens remain regression fixtures, and this seal does not change that.** They were first
-committed alongside the implementation, so Git establishes no chronology between fixture and subject
-([development_plan_standards.md §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-clause 1). They hold byte-exactly and the mutants prove the comparison has teeth; what they cannot do is prove
-the intended output was authored before the observed one. Only an independent human reviewer can discharge
-that, and the obligation stays open in the legacy register rather than being absorbed by a green run.
-
-**Invalidated historical record:**
-
-Done (invalidated). Four logical rows compile inseparably into four canonical artifacts, four concrete SHA-256 identities,
-and six finite-demand cells; reversed source insertion in two cache-disabled fresh processes is byte-identical,
-and six mutants turn red. This proves pure projection and serialization only. It does not claim interpreter
-correctness or a live release. See the Phase-40 ledger.
+---
 
 ## Phase Summary
 
-This phase implements one seam: the pure plan compiler over `BoundUiProgram`. It emits a compact client
-instruction/value plan and matching serializable server dispatch/policy manifest, with exact
-action/route/contract key parity,
-public-only payload schemas, canonical ordering, complete authority/content digests, a per-application content
-manifest, a navigation-only projection of the resolved external-link subset, and finite client/server runtime
-demand. Subscription/port projections include the complete application/session/scope/program/ABI/stream/cursor
-routing envelope required by the authenticated WebSocket and cross-pod dispatcher; no Redis key or product
-choice enters either application plan. The generic PureScript bundle is not rebuilt per app; these
-immutable plans and manifests are generated Release/content artifacts and are never treated as authored source.
+One private `BoundUiProgram` produces public client instructions, a serializable private server dispatch
+manifest, public contracts, a content manifest, complete authority/content identities, and finite client/server
+runtime demand together. Exact action, route, contract, audit, handler, and resolved-link projections cannot
+drift between halves. Public output excludes private fields, handles, policies, provider coordinates, and raw
+effect destinations.
 
-The compiler consumes only private checked/bound values and returns all projections together. The server
-manifest carries exact linked-handler identities and codecs, never Haskell functions. There is no API that
-compiles a client plan alone, accepts a hand-authored server route, or serializes a trusted handle or private
-field into the browser universe.
+The compiler exposes no client-only or server-only entry point. Canonical ordering and encoding make repeated
+fresh compilation stable, while changing or omitting an authority-bearing source changes the authority digest.
+The outputs remain generated release/content artifacts; the four committed JSON files are regression fixtures,
+not independently authored statements of intended semantics.
 
-**Session scope:** one deterministic `BoundUiProgram` plan compiler and canonical serializer; acceptance
-command `cabal test ui-plan-compiler-spec`; split immediately if work requires interpreting a plan, serving
-HTTP, publishing a Release, a second register, or a substrate.
-**Depends on:** [Phase 39](phase_39_ui_effect_binding.md) — the sealed `BoundUiProgram` with complete effect bindings.
-**Phase scope:** one cohesive claim — *one sealed program compiles to one immutable set of matching artifacts*. Determinism here is what lets a plan be content-addressed later.
+**Phase scope:** one cohesive claim — one sealed program compiles purely and deterministically to one matching,
+finite artifact set. Interpretation, publication, serving, and live freshness split out.
 
-**Substrate:** none — no browser, network, credential, artifact store, provider, or cluster is contacted.
-**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+**Substrate:** `none` — compilation, reference comparison, calculus composition, and mutants are pure host
+processes with credentials scrubbed and networking denied.
 
-**Register:** 1 — pure/golden.
-**Gate:** `python3 tools/ui_plan_compiler_gate.py` passes the projection/key oracle, run-time-derived reference
-digests, canonical-encoding and cache-bypassed determinism checks, private-field negatives, isolated
-execution, and all seeded mutants in [Gate integrity](#gate-integrity). Both interpreter fidelities stay
-UNVERIFIED.
+**Lane:** `none` ([§L](development_plan_standards.md#l-one-substrate-discipline)).
+
+**Register:** 1 — pure/golden. Logical projection is independently constrained; interpreter fidelity, release
+publication, edge enforcement, and live authority freshness remain UNVERIFIED.
+
+**Depends on:** [Phase 10](phase_10_calculus_composition.md) — actual five-calculus composition; [Phase
+39](phase_39_ui_effect_binding.md) — the sealed `BoundUiProgram` accepted by the compiler.
+
+**Gate:** `python3 tools/run_phase_gate.py 40` passes the independent semantic projection, canonical
+regression, digest, demand, refusal, fresh-process, five-calculus, paired-mutant, network-observer,
+natural-architecture, surface, containment, and attestation checks in [Gate integrity](#gate-integrity).
+
+---
 
 ## Gate integrity
 
-The app fixtures and logical projection tables remain authored source only after Phase 0 records independent
-review. Existing same-commit plan goldens are regression fixtures until reviewed or replaced. Concrete digests
-are recomputed during the gate by the distinct reference adapter and remain generated run evidence; shipped
-plan output is likewise generated and uncommitted.
+`projection_rows.tsv` states four logical client/server/route/contract projections. The Haskell suite compares
+production output with `PlanCompilerReference`, which imports neither the production binder nor compiler.
+Client/server action key parity is checked directly, and authority inputs are assembled independently.
 
+The four canonical JSON goldens were committed with the implementation. They therefore detect byte drift but
+do not establish preimplementation semantic intent; the gate credits the independent logical rows for meaning
+and the goldens only for regression and canonical encoding. Concrete digest values are not committed: the gate
+hashes the goldens at run time through the distinct reference adapter, records the observations beneath
+`.build/**`, and rejects a second tracked digest table.
 
-- **Representative set:** the same minimal single-tenant, multi-tenant, data/form, workflow/subscription, and
-  ready-artifact programs exercise every client instruction, public value type, route guard, effect class,
-  server dispatch arm, fixed named-link navigation, and manifest entry.
-- **Oracle candidates:** after independent review, `test/fixture/ui_plan_compiler/projection_rows.tsv` owns
-  the logical client/server/route/contract/audit/handler-identity tuples. The four existing plan goldens must
-  be reviewed or replaced before serving as canonical-encoding oracles. `expected_digests.tsv` is removed;
-  concrete authority, client, server, and contract digests are generated at run time from separately authored
-  digest-source expectations. Finite demand is independently counted from the reviewed projection rows.
-- **Independent predicates:** one test reader compares serialized key sets and public/private field
-  classifications directly from `projection_rows.tsv`; another hand-authored digest input list is fed to a
-  distinct reference hash adapter. Neither imports compiler projections, ordering, or digest-source folds.
-- **Specific negatives:** a client-only/server-only action, equal-count action swap, missing route guard,
-  private field/handle in a public codec, omitted authority source, duplicate manifest path, and noncanonical
-  map order each assert a stable `UiPlanError` or golden mismatch. A link destination reused as an effect URL
-  or omitted from the digest-source set has a separate pinned failure.
-- **Determinism:** two fresh processes compile from independently decoded input with cache disabled and
-  randomized insertion order; their bytes and digests must match. A cache hit or reused first-run bytes does
-  not satisfy the check.
-- **Effect discipline:** a fresh effect challenge and OS-boundary observer are not applicable in Register 1.
-  Generated plans are never executed by this gate, and all runtime layers remain UNVERIFIED.
-- **Seeded mutants:** `M-drop-server-action` (dropped effect), `M-swap-action-targets` (effect swap),
-  `M-emit-private-field` (projection guard deletion), `M-client-only-authority-digest` (invariant-clause
-  delete), `M-link-navigation-as-fetch` (effect swap), and `M-preserve-map-insertion-order` (determinism
-  violation) are committed and must each turn a distinct pin red.
+Four specific negatives cover private-field projection, link-as-effect escape, changed authority input, and
+omitted authority input. Two cache-disabled fresh processes compile opposite insertion orders and must emit
+identical bytes. Each of six mutants reports its exact locus: dropped server action, swapped action targets,
+private-field emission, client-only authority digest, link navigation treated as fetch, or preserved insertion
+order. A generic non-zero exit is insufficient.
 
-Passing proves byte-stable projection for the checked corpus and sampled programs. It does not prove either
-interpreter, release publication, transport security, or runtime freshness enforcement.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+Artifact, budget, lift, workflow, and evidence components carry the `4,6,14,2,6`
+artifact/demand/check/workflow/mutant counts and compose to resource vector `5,32,0,0`. Normal and Darwin
+network-denied executions report both acceptance tokens. Generated plans, results, ledgers, traces, and Cabal
+state remain beneath `.build/**`.
+
+Passing proves pure paired projection, canonical regression stability, finite demand, and determinism for this
+bounded corpus. Browser and server interpretation, release publication, edge enforcement, provider behavior,
+and request-time freshness remain UNVERIFIED.
+
+- **Extension conformance (§M.13).** Not applicable. This core paired-plan compiler declares no extension or
+  linked set.
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact uI plan compiler emits is a recipe over a content address, never an authored file.
-- [`low_code_ui_runtime_doctrine.md` §3 — one checked value, two runtime plans](../documents/engineering/low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans): both plans are inseparable projections of one bound value.
+- [`jit_artifact_doctrine.md` §3 — targets and recipes](../documents/engineering/jit_artifact_doctrine.md#3-targets-and-recipes): each emitted plan is generated from typed source rather than authored as product input.
+- [`low_code_ui_runtime_doctrine.md` §3 — one checked value, two runtime plans](../documents/engineering/low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans): both plan halves are inseparable projections of one bound value.
 - [`low_code_ui_runtime_doctrine.md` §9 — routes, identity, authorization, and the edge](../documents/engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge): route and action projections retain mandatory policy references.
 - [`low_code_ui_runtime_doctrine.md` §15 — versioning, rollout, and generated artifacts](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts): complete authority/content identities and immutable per-app plans are derived.
-- [`ui_realtime_coordination_doctrine.md §4 — typed routing and resume envelope`](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): both plan halves project the complete scoped routing/cursor identity while Redis remains platform-internal.
-- [`generated_artifacts_doctrine.md` §2 — what is generated](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what) and [`§3 — the rule`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule): plans, manifests, codecs, and route projections are generated and never committed as product artifacts.
-- [`illegal_state_security.md` §3.79](../documents/illegal_state/illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration) and [`§3.83`](../documents/illegal_state/illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed): exact projection parity and complete freshness identity are mandatory.
+- [`ui_realtime_coordination_doctrine.md` §4 — typed routing and resume envelope](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): both halves carry the scoped routing identity while Redis remains platform-internal.
+- [`generated_artifacts_doctrine.md` §2 — what is generated](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what): plan and manifest output remains generated and uncommitted.
+- [`illegal_state_security.md` §3.83](../documents/illegal_state/illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed): complete freshness identity is mandatory.
+
+---
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
-> established by the current phase gate plus universal artifact hygiene.
+## Sprint 40.1: Paired semantic projection ✅
 
-## Sprint 40.1: Deterministic paired-plan projection 📋
-**Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Compile/{ClientPlan,ServerPlan,Manifest,Demand}.hs`
-and `test/spec/ui/{UiPlanCompilerSpec,PlanCompilerReference}.hs`, plus `tools/ui_plan_compiler_gate.py`
-**Blocked by**: None.
-**Independent Validation**: `cabal test ui-plan-compiler-spec` compares fresh compiler output with the
-Phase-0 tables/goldens and requires every named projection/determinism mutant to fail. The full hermetic gate
-is `python3 tools/ui_plan_compiler_gate.py`.
-**Docs to update**:
-`documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/ui_realtime_coordination_doctrine.md`,
-`documents/engineering/generated_artifacts_doctrine.md`, `documents/illegal_state/illegal_state_security.md`
+**Status**: Done
+**Implementation**: `src/Amoebius/Ui/Compile/{ClientPlan,ServerPlan,Manifest}.hs`, `test/fixture/ui_plan_compiler/projection_rows.tsv`, `test/spec/ui/PlanCompilerReference.hs`
+**Blocked by**: [Phase 39](phase_39_ui_effect_binding.md) gate
+**Independent Validation**: four normalized production projections equal the separately authored logical relation, and client/server action keys agree exactly
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/illegal_state/illegal_state_security.md`
 
 ### Objective
 
-Adopt the single-source paired-plan compiler so no client/server drift, private browser projection, incomplete
-freshness identity, or per-application client build is representable in the emitted artifact set.
+Adopt one compiler entry point whose only successful result contains both public and private plan halves.
 
 ### Deliverables
 
-- Total paired compiler, canonical WebSocket routing/cursor codecs, complete digest-source fold, finite demand projection, and
-  structured `UiPlanError` values.
-- Exact key-set and public-projection checks performed before any artifact is returned.
-- Reviewed golden/table readers, run-time reference-digest generation, a fresh-process determinism harness,
-  mutant configurations, and a generated Register-1 ledger.
+- Constructor-private `ClientPlan`, `UiServerPlan`, and combined result values.
+- Four exact logical projections and direct action-key parity.
+- Public allowlisting and authority-source change/omission refusals.
 
 ### Validation
 
-1. Run `cabal test ui-plan-compiler-spec`; each emitted byte stream matches an independently reviewed
-   expectation, each digest matches a fresh distinct-reference computation, and all required key sets match.
-2. Recompile in a fresh process with randomized source insertion order and cache bypass; output remains
-   byte-identical while one authority-bearing input change changes the authority digest.
-3. Run `M-drop-server-action`, `M-swap-action-targets`, `M-emit-private-field`,
-   `M-client-only-authority-digest`, `M-link-navigation-as-fetch`, and
-   `M-preserve-map-insertion-order`; every mutant turns a pin red.
-4. Verify the ledger says projection/serialization tested in Register 1 and leaves interpretation, release,
-   edge, and provider behavior UNVERIFIED.
+1. All four production projections equal the independent reference relation.
+2. Client and server action keys agree exactly.
+3. Private-field, link-as-effect, changed-authority, and omitted-authority controls retain distinct loci.
 
 ### Remaining Work
 
-Done for the compiler. `expected_digests.tsv` is removed, the reference digests are derived at run time and
-recorded in the run bundle, and the gate ran under universal artifact hygiene. One obligation stays open and
-is not this gate's to close: the four plan goldens are same-commit regression fixtures until an independent
-human reviewer validates or replaces them. Browser/server interpretation, release publication, edge
-enforcement, and live freshness remain UNVERIFIED and belong to later gates.
+None.
+
+## Sprint 40.2: Canonical artifacts, digests, and demand ✅
+
+**Status**: Done
+**Implementation**: `src/Amoebius/Ui/Compile/{Manifest,Demand}.hs`, `test/fixture/ui_plan_compiler/{client_plan,ui_server_plan,public_contracts,content_manifest}.golden.json`, `test/spec/ui/UiPlanCompilerSpec.hs`
+**Blocked by**: Sprint 40.1
+**Independent Validation**: four regression artifacts are canonical and byte-stable, four digests are derived independently at run time, six demand cells are exact, and opposite insertion orders agree across fresh processes
+**Docs to update**: `documents/engineering/generated_artifacts_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`
+
+### Objective
+
+Make compilation finite and reproducible without mistaking generated bytes or digest observations for authored
+semantic intent.
+
+### Deliverables
+
+- Four canonical JSON regression artifacts and four run-time-derived digest observations.
+- Six finite client/server demand cells.
+- Cache-disabled fresh-process determinism and insertion-order sensitivity control.
+
+### Validation
+
+1. Every regression artifact is canonical JSON and byte-exact; no committed digest table exists.
+2. The independent adapter derives the four matching digests from the current golden bytes.
+3. Two fresh processes with opposite insertion order emit identical artifacts, while the deliberately ordered
+   control differs.
+
+### Remaining Work
+
+None. The same-commit goldens remain regression fixtures and are not credited as independent semantic oracles.
+
+## Sprint 40.3: Calculus projection and phase seal ✅
+
+**Status**: Done
+**Implementation**: `test/oracle/ui_plan_compiler/{calculus_projection,validation_locus}.tsv`, `test/oracle/ui_plan_compiler_surfaces.tsv`, `test/mutant/ui_plan_compiler/**`, `tools/ui_plan_compiler_gate.py`
+**Blocked by**: Sprint 40.2
+**Independent Validation**: real five-calculus values match all four projection rows; normal and Darwin network-denied executions report both acceptance tokens; six mutant processes report exact loci
+**Docs to update**: `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, `DEVELOPMENT_PLAN/system_components.md`
+
+### Objective
+
+Seal the pure compiler claim with current calculus, architecture, surface, containment, and attestation
+evidence.
+
+### Deliverables
+
+- A real five-calculus composition over the phase's observed sets.
+- Six paired mutants with exact red tokens.
+- A complete natural-architecture, surface, ledger, containment, write-guard, and attestation record.
+
+### Validation
+
+1. The authored calculus rows fix kind order, component names, count vector, and resource sum.
+2. Ordinary and Darwin-denied executions accept; all six mutant executions fail at their own loci.
+3. All 17 metrics and the 61-surface/72-item join pass in the attested run.
+
+### Remaining Work
+
+None.
+
+---
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs updated with this seal:**
 
-- `documents/engineering/low_code_ui_runtime_doctrine.md` — record paired-plan compiler evidence without
-  claiming runtime interpretation.
-- `documents/engineering/generated_artifacts_doctrine.md` — record concrete generated artifacts and their
-  never-commit/build-boundary treatment.
-- `documents/illegal_state/illegal_state_security.md` — attach projection/digest fixtures and mutants.
+- `documents/engineering/low_code_ui_runtime_doctrine.md` — pure paired projection, calculus evidence, and
+  honest runtime residues.
+- `documents/engineering/generated_artifacts_doctrine.md` — generated artifact boundary and regression-golden
+  limitation.
+- `documents/engineering/ui_realtime_coordination_doctrine.md` — finite routing-envelope compilation without
+  runtime claims.
+- `documents/illegal_state/illegal_state_security.md` — authority/refusal evidence and exact mutants.
 
-**Cross-references to add:**
+**Cross-references updated:**
 
 - `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, and
-  `DEVELOPMENT_PLAN/system_components.md` — index the phase, `none` substrate, gate, and target modules.
-- Phases 42 and 43 — consume the paired artifacts independently; neither may recompile or reinterpret source.
+  `DEVELOPMENT_PLAN/system_components.md` — seal, substrate, gate, and owned modules.
+
+---
 
 ## Related Documents
 
-- [Phase 39](phase_39_ui_effect_binding.md) — the required sealed bound program.
+- [Development Plan Tracker](README.md) — phase order and current status.
+- [Development Plan Standards](development_plan_standards.md) — phase shape, register honesty, and gate integrity.
+- [Phase 10](phase_10_calculus_composition.md) — five-calculus composition.
+- [Phase 39](phase_39_ui_effect_binding.md) — sealed bound program.
+- [JIT Artifact Doctrine](../documents/engineering/jit_artifact_doctrine.md) — generated recipe/address ownership.
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — paired-plan and versioning contract.
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — generated-vs-authored boundary.
-- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md) — typed
-  WebSocket/cross-pod routing envelope compiled without exposing Redis in application data.
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md) — typed routing envelope.
 - [Illegal-State Security Slice](../documents/illegal_state/illegal_state_security.md) — projection parity and stale-plan foreclosure.

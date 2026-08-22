@@ -10,7 +10,7 @@
 #   metrics   the metric keys in .build/dsl/ui-effect-binding/phase-results.tsv
 #   checks    the check ids tools/ui_effect_binding_gate.py implements
 #
-# The 54 items are partitioned so each is claimed exactly once. A rejection surface takes
+# The 55 items are partitioned so each is claimed exactly once. A rejection surface takes
 # both halves of its evidence where both exist — the pinned negative that must be refused
 # and the generated class that must keep firing at its coverage floor.
 #
@@ -41,7 +41,9 @@ refusal-arms-declared	checks	refusal-arms-present
 independent-relation-isolation	checks	reference-relation-independent
 kernel-source-discipline	checks	bind-partial-token-scan
 exact-capability-key-set	checks	capability-key-set-exact
-phase18-registry-consumption	checks	phase18-registry-consumed
+phase38-registry-consumption	checks	phase38-registry-consumed
+semantic-oracles-complete	checks	semantic-oracles-complete
+compile-totality	checks	totality-options
 generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
 exact-handler-key-set	items	read_port,mutate_port,start_port,observe_port,subscribe_port,upload_port,artifact_port
 seven-effect-arm-coverage	items	read_generated,mutate_generated,start_generated,observe_generated,subscribe_generated,upload_generated,artifact_generated
@@ -76,6 +78,10 @@ link-negative-battery	metrics	link-negatives
 bounded-input-battery	metrics	bounded-input-negatives
 thirteen-class-generated-coverage	metrics	generated-coverage
 seven-mutant-battery	metrics	mutants
+five-calculus-kind-cardinality	metrics	calculus-kinds
+five-calculus-component-vector	metrics	calculus-components
+five-calculus-projection-counts	metrics	calculus-projection-counts
+five-calculus-resource-vector	metrics	calculus-resource-vector
 network-isolated-pure-gate	metrics	network-observer
 browser-enforcement	metrics	browser-enforcement
 handler-implementation-truth	metrics	handler-implementation-truth

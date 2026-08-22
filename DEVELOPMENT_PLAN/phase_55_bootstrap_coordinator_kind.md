@@ -215,7 +215,7 @@ tears down leak-free; a Register-1/2 in-process check cannot discharge it.
 
 **Depends on:** [Phase 52](phase_52_linux_engine_bringup.md) — the Linux engine this coordinator brings a cluster up on. The Windows bringup at the numeric predecessor is a sibling substrate and supplies nothing here.
 
-**Gate:** `python3 tools/bootstrap_coordinator_gate.py --execute` drives a pristine `linux-cpu` guest to exactly one `Ready`
+**Gate:** `python3 tools/run_phase_gate.py 55` drives a pristine `linux-cpu` guest to exactly one `Ready`
 kind node through the Python `pb` bootstrap coordinator, and the identical re-run changes nothing. Its
 inventory, absolute-path, divergence-repair, and teardown obligations are delegated to
 [Gate integrity](#gate-integrity).

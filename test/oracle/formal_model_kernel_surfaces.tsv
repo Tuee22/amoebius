@@ -26,7 +26,8 @@ interpret-hand-oracle	metrics	toy-distinct-state-count,toy-safety-explorer
 toy-safety	metrics	toy-safety-tlc,toy-state-fingerprints-equal
 toy-liveness-under-fairness	metrics	toy-liveness-under-fairness,coverage-Always,coverage-Eventually,coverage-LeadsTo
 fairness-sensitivity	metrics	fairness-drop-liveness,coverage-WeakFair,coverage-StrongFair
-tla-renderer-golden	metrics	renderer-golden-mutants-caught
+tla-renderer-semantics	metrics	renderer-semantic-mutants-caught
+phase-10-composition-projection	metrics	calculus-composition-projection
 mechanical-model-mutants	metrics	model-safety-mutants-caught,spec-weakening-mutants-caught
 renderer-mutants	metrics	renderer-differential-mutants-caught
 renderer-mutant-corpus	mutants	emitTLA-mut-01,emitTLA-mut-02,emitTLA-mut-03,emitTLA-mut-04

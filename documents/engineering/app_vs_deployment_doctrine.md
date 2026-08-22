@@ -134,7 +134,8 @@ because the type does not have those fields.
 
 [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) tests the capability instance of this split:
 the app-facing `CapabilityNeed` has no product, provider, or shape field, while two distinct composed files
-normalize to identical app slices and bind to structurally different provider graphs.
+normalize to identical app slices and bind to structurally different provider graphs whose product,
+object-role, controller, execution, and intent semantics match an independently authored projection.
 
 ---
 

@@ -165,11 +165,7 @@ r5	tools/apple_metal_host_daemon_gate.py	names generated path DEVELOPMENT_PLAN/e
 r5	tools/apple_metal_host_daemon_gate.py	names generated path test/enumeration/*	phase-86	`test/enumeration/**`
 r5	tools/apple_metal_host_daemon_gate.py	names generated path test/golden/*	phase-86	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
 r6	tools/apple_metal_host_daemon_gate.py	tracked file carries a resolved home path*	phase-86	Absolute developer-home executable paths
-r5	tools/test_topology_dsl_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-77	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/test_topology_dsl_gate.py	names generated path test/enumeration/*	phase-77	`test/enumeration/**`
-r5	tools/test_topology_dsl_gate.py	names generated path test/golden/*	phase-77	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
 r5	tools/test_topology_dsl_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-77	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r6	tools/test_topology_dsl_gate.py	tracked file carries a resolved home path*	phase-77	Absolute developer-home executable paths
 r5	tools/ui_single_tenant_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-78	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
 r5	tools/ui_single_tenant_gate.py	names generated path test/enumeration/*	phase-78	`test/enumeration/**`
 r5	tools/ui_single_tenant_gate.py	names generated path test/golden/*	phase-78	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
@@ -190,15 +186,6 @@ r5	tools/ui_ha_multizone_gate.py	names generated path test/enumeration/*	phase-9
 r5	tools/ui_ha_multizone_gate.py	names generated path test/golden/*	phase-91	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
 r5	tools/ui_ha_multizone_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-91	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
 r6	tools/ui_ha_multizone_gate.py	tracked file carries a resolved home path*	phase-91	Absolute developer-home executable paths
-r5	tools/offline_language_plan_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-19	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/offline_language_plan_gate.py	names generated path test/enumeration/*	phase-19	`test/enumeration/**`
-r5	tools/offline_language_plan_gate.py	names generated path test/golden/*	phase-19	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r6	tools/offline_language_plan_gate.py	tracked file carries a resolved home path*	phase-19	Absolute developer-home executable paths
-r5	tools/encrypted_browser_runtime_live.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-39	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/encrypted_browser_runtime_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-39	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
-r5	tools/encrypted_browser_runtime_gate.py	names generated path test/enumeration/*	phase-39	`test/enumeration/**`
-r5	tools/encrypted_browser_runtime_gate.py	names generated path test/golden/*	phase-39	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
-r6	tools/encrypted_browser_runtime_gate.py	tracked file carries a resolved home path*	phase-39	Absolute developer-home executable paths
 r5	tools/offline_replay_receipts_gate.py	names generated path DEVELOPMENT_PLAN/evidence*	phase-92	Generated files beneath `DEVELOPMENT_PLAN/evidence/**`
 r5	tools/offline_replay_receipts_gate.py	names generated path test/enumeration/*	phase-92	`test/enumeration/**`
 r5	tools/offline_replay_receipts_gate.py	names generated path test/golden/*	phase-92	`test/golden/phase_*_ledger.json` and Phase-62 expected-run ledger
@@ -261,7 +248,6 @@ r16	tools/ui_single_tenant_*	*	phase-78	Many gate scripts and tests use `tempfil
 r16	tools/ui_multi_tenant_*	*	phase-79	Many gate scripts and tests use `tempfile`
 r16	tools/ui_rollout_reconnect_*	*	phase-80	Many gate scripts and tests use `tempfile`
 r16	tools/ui_ha_multizone_*	*	phase-91	Many gate scripts and tests use `tempfile`
-r16	tools/encrypted_browser_runtime_*	*	phase-39	Many gate scripts and tests use `tempfile`
 r16	tools/offline_replay_receipts_*	*	phase-92	Many gate scripts and tests use `tempfile`
 r16	tools/offline_blobs_isolation_*	*	phase-48	Many gate scripts and tests use `tempfile`
 r16	tools/offline_release_evolution_*	*	phase-81	Many gate scripts and tests use `tempfile`

@@ -1,0 +1,5 @@
+metric	value
+calculus-kinds	artifact,budget,lift,workflow,evidence
+component-names	recipe-step-semantics,build-argv-tokens,renderer-laws,build-cases,mutant-evidence
+projection-counts	22,44,4,4,3
+resource-vector	5,77,0,0

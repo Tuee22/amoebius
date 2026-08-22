@@ -1,0 +1,5 @@
+metric	value
+calculus-kinds	artifact,budget,lift,workflow,evidence
+component-names	canonical-plan-artifacts,finite-runtime-demand,projection-digest-and-refusal-checks,deterministic-plan-workflow,mutant-evidence
+projection-counts	4,6,14,2,6
+resource-vector	5,32,0,0

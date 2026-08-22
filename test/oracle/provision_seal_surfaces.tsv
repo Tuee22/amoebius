@@ -4,17 +4,13 @@
 # independently authored expectation.
 #
 # owner is the registry the ids are enumerated from at run time:
-#   items     the activation witnesses, planner cases, provision cases, and mutant names
-#             the run read
+#   items     the four activation witnesses, two planner cases, ten provision cases, and ten mutants
 #   metrics   the metric keys in .build/dsl/provision-seal/phase-results.tsv
 #   checks    the check ids tools/provision_seal_gate.py implements
 #
-# The 26 items are partitioned so each is claimed exactly once.
-#
-# **6 contract surfaces carry no id**: `creation-provider-action-batch`, `plan-token-replay-rejection`, `action-token-replay-rejection`, `receipt-bound-materialization-readback`, `promised-identity-rejection`, `phase11-validation-locus-ledger`.
-# None has an oracle case, a mutant, or a metric of its own, so the ledger carries them
-# UNVERIFIED rather than asserting results the run did not produce. The gap is recorded
-# against Phase 12 in legacy_tracking_for_deletion.md.
+# The 26 items are partitioned one-to-one. All 37 surfaces have a concrete owner: the six
+# formerly empty planner/locus surfaces now have exact metrics, and the five-calculus surface
+# carries the independently authored composition projection.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 
@@ -23,31 +19,34 @@ internally-derived-infrastructure-demand	items	illegal_elastic_per_node_expansio
 standalone-root-supply	items	illegal_cuda_on_cpu_target
 forest-member-budget	items	illegal_monitoring_work_over_budget
 preexisting-no-infrastructure-required	metrics	infrastructure-planner-paths
-creation-provider-action-batch	checks	
-plan-token-replay-rejection	checks	
-action-token-replay-rejection	checks	
+creation-provider-action-batch	metrics	creation-provider-action-batch
+plan-token-replay-rejection	metrics	plan-token-replay-rejection
+action-token-replay-rejection	metrics	action-token-replay-rejection
 snapshot-cas-validation	metrics	creation-plan-validation-readback
-receipt-bound-materialization-readback	checks	
-promised-identity-rejection	checks	
+receipt-bound-materialization-readback	metrics	receipt-bound-materialization-readback
+promised-identity-rejection	metrics	promised-identity-rejection
 whole-deployment-provision-seal	metrics	acceptance-token
-phase7-placement-fold-composition	items	illegal_post_bind_expansion_overcommit
-phase8-storage-fold-composition	items	illegal_accelerator_vram_shortage
-phase9-execution-fold-composition	items	illegal_controller_child_unbounded,mutant_double_debit_controller_child
+phase9-placement-fold-composition	items	illegal_post_bind_expansion_overcommit
+phase28-storage-fold-composition	items	illegal_accelerator_vram_shortage
+phase29-execution-fold-composition	items	illegal_controller_child_unbounded,mutant_double_debit_controller_child
 kind-indexed-execution-expansion	items	mutant_drop_surge,mutant_drop_execution_replica
 planned-runtime-storage-binding	items	mutant_drop_largest_kubelet_metadata,mutant_missing_metadata_model
 finite-monitoring-work-envelope	items	mutant_fixed_prometheus
 prior-artifact-reference-resolution	items	illegal_prior_provision_ref_missing,illegal_prior_provision_ref_stale,illegal_prior_provision_ref_wrong_generation,illegal_prior_provision_ref_wrong_arm,mutant_unchecked_prior
-opaque-provisioned-spec	items	mutant_provisioned_in_bound
+opaque-provisioned-spec	metrics	opaque-provisioned-spec
 identity-keyed-render-source-set	metrics	render-source-domain
-render-source-key-identity-equality	metrics	render-activation-stages
-render-source-owner-correspondence	items	mutant_wrong_revision_join
+render-source-key-identity-equality	metrics	render-source-key-identity-equality
+render-source-owner-correspondence	metrics	render-source-owner-correspondence
+execution-revision-source-correspondence	items	mutant_old_revision,mutant_wrong_revision_join
 four-stage-render-activation	items	NamespacePart,CapacitySchedulerPart,BootstrapAddonCutoverPart,ManagedCapacityAdmissionPart
-bound-deployment-no-provisioned-values	items	mutant_old_revision
-phase11-negative-corpus	metrics	specific-negatives
-phase11-property-boundaries	metrics	quickcheck-properties
-phase11-mutant-battery	metrics	mutants
-phase11-validation-locus-ledger	checks	
+four-stage-render-activation-count	metrics	render-activation-stages
+bound-deployment-no-provisioned-values	items	mutant_provisioned_in_bound
+phase31-negative-corpus	metrics	specific-negatives
+phase31-property-boundaries	metrics	quickcheck-properties
+phase31-mutant-battery	metrics	mutants
+phase31-validation-locus-ledger	metrics	validation-locus-entries
 provision-seal-compile-totality	metrics	inherited-capability-positives
+provision-seal-five-calculus-projection	metrics	calculus-kinds,calculus-components,calculus-projection-counts,calculus-resource-vector
 live-provider-realization	metrics	live-provider-realization
 live-engine-resolution	metrics	live-engine-resolution
 runtime-model-correspondence	metrics	runtime-correspondence

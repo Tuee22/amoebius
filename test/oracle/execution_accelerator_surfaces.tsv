@@ -4,22 +4,17 @@
 # independently authored expectation.
 #
 # owner is the registry the ids are enumerated from at run time:
-#   items     the 32 variant names and 45 mutant names the run actually read, as one pool
+#   items     the 37 variant names and 45 mutant names the run actually read, as one pool
 #   metrics   the metric keys in .build/dsl/execution-accelerator/phase-results.tsv
 #   checks    the check ids tools/execution_accelerator_gate.py implements
 #
-# The 77 cases and mutants are partitioned across this phase's claim surfaces so each item
+# The 82 cases and mutants are partitioned across this phase's claim surfaces so each item
 # is claimed exactly once. That is what makes the join evidence rather than decoration:
 # an item nobody claims, or one claimed twice, fails the gate.
 #
-# **Five contract surfaces carry no id, and that is a finding, not an oversight.**
-# `accelerator-interconnect`, `build-execution-envelope`, `engine-system-reserve`,
-# `monitoring-work-budget`, and `pulumi-execution-envelope` are named in the Phase-29
-# contract, but the battery records no distinct observation for any of them: they have no
-# oracle case, no mutant, and no metric of their own. The ledger therefore carries them
-# UNVERIFIED, and the gap is recorded against Phase 10 in legacy_tracking_for_deletion.md.
-# Pointing them at a shared acceptance token would have made the ledger claim five results
-# the run did not produce.
+# The five formerly empty contract surfaces now each name a direct one-axis negative and
+# legal twin. The five-calculus surface names the four independently authored projection
+# metrics. Live-only surfaces remain empty because this Register-1 phase cannot observe them.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 
@@ -56,23 +51,24 @@ accelerator-coexistence-epochs	items	accelerator-favorable-epoch
 accelerator-unsharded-residency	items	cuda-unsharded-fragmentation,accelerator-split-unsharded
 accelerator-replicated-residency	items	metal-profile,accelerator-ignore-metal-profile
 accelerator-sharded-residency	items	cuda-shard-byte-sum,accelerator-ignore-shard-sum
-accelerator-interconnect	checks	
+accelerator-interconnect	items	accelerator-peer-graph
 accelerator-net-allocatable-vram	items	cuda-vram-reserve,accelerator-spend-raw-vram
 accelerator-exclusive-ownership	items	accelerator-shared-owner,accelerator-share-device
 etcd-logical-transition	items	etcd-drop-preallocated-next,etcd-drop-wal
 etcd-physical-transition	items	etcd-transition-physical,etcd-drop-snapshot-save,etcd-drop-defrag
-build-execution-envelope	checks	
-engine-system-reserve	checks	
-monitoring-work-budget	checks	
-pulumi-execution-envelope	checks	
+build-execution-envelope	items	build-cache-budget
+engine-system-reserve	items	engine-storage-reserve
+monitoring-work-budget	items	monitoring-volume-budget
+pulumi-execution-envelope	items	pulumi-executor-concurrency
 composed-full-resource-vector	metrics	acceptance-token
 independent-composed-validator	metrics	positive-specs
-phase9-negative-corpus	metrics	named-negatives,variant-rows,legal-twins
-phase9-dhall-typecheck-accelerator-owner	metrics	dhall-typecheck-accelerator-owner
-phase9-property-battery	metrics	quickcheck-properties
-phase9-mutant-battery	metrics	mutants
-phase9-validation-locus-ledger	metrics	registry-subcases
-phase9-fold-compile-totality	metrics	phase9-fold-totality
+phase29-negative-corpus	metrics	named-negatives,variant-rows,legal-twins
+phase29-dhall-typecheck-accelerator-owner	metrics	dhall-typecheck-accelerator-owner
+phase29-property-battery	metrics	quickcheck-properties
+phase29-mutant-battery	metrics	mutants
+phase29-validation-locus-ledger	metrics	registry-subcases
+phase29-fold-compile-totality	metrics	phase29-fold-totality
+five-calculus-execution-projection	metrics	calculus-kinds,calculus-components,calculus-projection-counts,calculus-resource-vector
 live-scheduler-binding	metrics	live-scheduler-and-storage
 live-runtime-storage-observation	checks	
 live-accelerator-observation	metrics	live-accelerator-and-provider

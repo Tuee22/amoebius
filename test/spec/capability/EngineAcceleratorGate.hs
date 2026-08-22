@@ -8,6 +8,27 @@ import Amoebius.Capacity.Accelerator
   ( ProvisionedAccelerator (..)
   , ProvisionedAcceleratorEpoch (..)
   )
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
 import Amoebius.Capacity.Provision
   ( provisionedEngineAccelerators
   )
@@ -15,7 +36,6 @@ import Amoebius.Capability.Engine
   ( EngineFamily (..)
   , EngineLane (..)
   , EngineOwnerDemand (CudaEngineOwner)
-  , TargetOffering
   , engineProvisionErrorTag
   , familyAvailable
   , offeringLane
@@ -25,12 +45,18 @@ import Amoebius.Capability.Engine
   , provisionedEngineLane
   )
 import Amoebius.Capability.Types (ServiceShape (..))
+import Amoebius.Scope.Index
+  ( activeMembership
+  , trustedSubject
+  , trustedTenant
+  , withRequestScope
+  )
 import BindFixtures
   ( CapabilityFixture (..)
   , capabilityFixtures
   , fixturePath
   )
-import Control.Monad (forM_, unless)
+import Control.Monad (forM, forM_, unless)
 import Data.List (find)
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
@@ -40,7 +66,6 @@ import Data.Text.IO qualified as Text
 import EngineAcceleratorFixtures
   ( EngineNegative (..)
   , appleOffering
-  , baseCudaOwner
   , classCompleteCudaOwner
   , cpuOffering
   , cudaOffering
@@ -58,14 +83,24 @@ import System.Process (proc, readCreateProcessWithExitCode)
 runEngineAcceleratorGate :: IO ()
 runEngineAcceleratorGate = do
   inference <- fixtureNamed "inferenceengine"
-  checkPositiveCorpus inference
-  checkOfferingQuotient
-  checkFamilyRelation
-  checkClassCompleteOwner
-  checkNegativeCorpus
+  positiveCount <- checkPositiveCorpus inference
+  offeringCount <- checkOfferingQuotient
+  familyCount <- checkFamilyRelation
+  opaqueCount <- checkClassCompleteOwner
+  negativeCount <- checkNegativeCorpus
   checkStructuralBoundary
-  checkValidationLocus
-  runEngineAcceleratorProps
+  locusCount <- checkValidationLocus
+  propertyCount <- runEngineAcceleratorProps
+  let mutantCount = length engineAcceleratorMutants
+      availabilityCount = offeringCount + familyCount
+  checkEngineAcceleratorCalculusProjection positiveCount availabilityCount negativeCount propertyCount mutantCount
+  putStrLn
+    ( "engine-accelerator-invariants: PASS ("
+        <> show opaqueCount
+        <> " opaque accelerator, "
+        <> show locusCount
+        <> " locus rows)"
+    )
   putStrLn "capability-spec: PASS (3 inference positives, 4 offering quotients, 12 family/lane cells, 1 Gate-1, 8 provision negatives, 5 mutants, 1 covered property)"
 
 fixtureNamed :: Text -> IO CapabilityFixture
@@ -73,7 +108,7 @@ fixtureNamed slug = case find ((== slug) . fixtureSlug) capabilityFixtures of
   Nothing -> fail ("missing capability fixture: " <> Text.unpack slug)
   Just fixture -> pure fixture
 
-checkPositiveCorpus :: CapabilityFixture -> IO ()
+checkPositiveCorpus :: CapabilityFixture -> IO Int
 checkPositiveCorpus inference = do
   forM_ [SingleNode, Distributed 3] $ \shape -> do
     checkDhallGreen (fixturePath inference shape)
@@ -82,8 +117,9 @@ checkPositiveCorpus inference = do
   checkDhallGreen "dhall/examples/legal_inference_cuda.dhall"
   checkDhallGreen "dhall/examples/legal_inference_singlenode.dhall"
   checkDhallGreen "dhall/examples/legal_inference_distributed.dhall"
+  pure 3
 
-checkOfferingQuotient :: IO ()
+checkOfferingQuotient :: IO Int
 checkOfferingQuotient = do
   rows <- rowsOf "test/oracle/inference_accelerator/offering_lane.tsv"
   let observed =
@@ -96,8 +132,9 @@ checkOfferingQuotient = do
       expected = Set.fromList [(name, lane) | [name, lane] <- rows]
   assert (length rows == 4 && rendered == expected) "target-offering to engine-lane quotient drifted"
   assert (offeringLane cudaOffering == offeringLane windowsCudaOffering) "CUDA lane was split by operating system"
+  pure (length rows)
 
-checkFamilyRelation :: IO ()
+checkFamilyRelation :: IO Int
 checkFamilyRelation = do
   rows <- rowsOf "test/oracle/inference_accelerator/family_lane.tsv"
   let observed =
@@ -108,8 +145,9 @@ checkFamilyRelation = do
           ]
       expected = Set.fromList [(family, lane, status) | [family, lane, status] <- rows]
   assert (length rows == 12 && observed == expected) "family/lane availability relation drifted"
+  pure (length rows)
 
-checkClassCompleteOwner :: IO ()
+checkClassCompleteOwner :: IO Int
 checkClassCompleteOwner = do
   checked <- either (fail . show) pure (provisionEngineOwner cudaOffering LlamaFamily (CudaEngineOwner classCompleteCudaOwner))
   assert (provisionedEngineLane checked == CudaLane) "provisioned engine lane differs from selected offering"
@@ -124,26 +162,28 @@ checkClassCompleteOwner = do
           ]
       expected = Set.fromList [(epoch, device, bytes) | [epoch, device, bytes] <- oracle]
   assert (observed == expected) "per-device coexistence aggregation differs from the hand-authored oracle"
+  pure 1
 
-checkNegativeCorpus :: IO ()
+checkNegativeCorpus :: IO Int
 checkNegativeCorpus = do
   oracle <- rowsOf "test/oracle/inference_accelerator/provision_cases.tsv"
   let expectedDomain = Set.fromList [name | [name, _tag, _twin, _layer] <- oracle]
       observedDomain = Set.insert "illegal_engine_by_url" (Set.fromList (fmap engineNegativeName engineNegatives))
-  assert (length oracle == 9 && observedDomain == expectedDomain) "Phase-12 negative oracle must cover exactly nine cases"
+  assert (length oracle == 9 && observedDomain == expectedDomain) "Phase-32 negative oracle must cover exactly nine cases"
   checkGate1Url
   forM_ engineNegatives $ \negative -> do
     case [row | row@[name, _tag, _twin, _layer] <- oracle, name == engineNegativeName negative] of
       [[_name, expected, twin, "provision-seal"]] -> do
-        assert (expected == engineNegativeExpected negative) "Phase-12 expected tag drifted"
-        assert (twin == engineNegativeTwin negative) "Phase-12 legal twin drifted"
-      _ -> fail "missing or duplicate Phase-12 provision oracle row"
+        assert (expected == engineNegativeExpected negative) "Phase-32 expected tag drifted"
+        assert (twin == engineNegativeTwin negative) "Phase-32 legal twin drifted"
+      _ -> fail "missing or duplicate Phase-32 provision oracle row"
     case engineNegativeOutcome negative of
       Left problem -> assert (engineProvisionErrorTag problem == engineNegativeExpected negative) ("wrong engine provision tag: " <> show problem)
       Right _ -> fail ("illegal engine case accepted: " <> Text.unpack (engineNegativeName negative))
     assertRight (engineNegativeTwinOutcome negative) ("legal engine twin rejected: " <> Text.unpack (engineNegativeTwin negative))
     checkDhallGreen ("dhall/examples/" <> Text.unpack (engineNegativeName negative) <> ".dhall")
     checkDhallGreen ("dhall/examples/" <> Text.unpack (engineNegativeTwin negative) <> ".dhall")
+  pure (length oracle)
 
 checkGate1Url :: IO ()
 checkGate1Url = do
@@ -160,7 +200,7 @@ checkStructuralBoundary = do
   assert (not ("Url" `Text.isInfixOf` runtimeDeclaration || "Download" `Text.isInfixOf` runtimeDeclaration)) "EngineRuntime gained a URL/download escape arm"
   assert (not ("ProvisionedEngineAccelerator (.." `Text.isInfixOf` exportHeader)) "provisioned engine accelerator constructor is exported"
 
-checkValidationLocus :: IO ()
+checkValidationLocus :: IO Int
 checkValidationLocus = do
   rows <- rowsOf "test/oracle/inference_accelerator/validation_locus.tsv"
   let observed = Set.fromList [entry | [entry, _className, _locus, _status] <- rows]
@@ -174,7 +214,46 @@ checkValidationLocus = do
               <> fmap engineNegativeName engineNegatives
               <> engineAcceleratorMutants
           )
-  assert (length rows == Set.size expected && observed == expected) "Phase-12 validation-locus coverage drifted"
+  assert (length rows == Set.size expected && observed == expected) "Phase-32 validation-locus coverage drifted"
+  assert (length rows == 17) "Phase-32 validation-locus ledger must contain exactly 17 rows"
+  pure (length rows)
+
+checkEngineAcceleratorCalculusProjection :: Int -> Int -> Int -> Int -> Int -> IO ()
+checkEngineAcceleratorCalculusProjection positives availability negatives properties mutants = do
+  expected <- loadMetricOracle "test/oracle/inference_accelerator/calculus_projection.tsv"
+  tenant <- either (fail . show) pure (trustedTenant "inference-accelerator-tenant")
+  subject <- either (fail . show) pure (trustedSubject tenant "inference-accelerator-subject")
+  membership <- either (fail . show) pure (activeMembership tenant subject)
+  action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+    let resources count = ResourceVector 1 (fromIntegral count) 0 0
+        artifact = artifactComponent scope "inference-positives" (resources positives) (RecipeId "inference-accelerator-corpus" 1)
+        budget = budgetComponent scope "availability-cells" (resources availability) (allowance (Bytes (fromIntegral availability)) (Slots 1) (Bytes (fromIntegral availability)))
+        lift = liftComponent scope "boundary-negatives" (resources negatives) OnHost
+        workflow = workflowComponent scope "accelerator-property" (resources properties) emptyLedger
+        evidence = evidenceComponent scope "mutant-evidence" (resources mutants) PureRegister
+        composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+        ResourceVector cpu memory ephemeral pods = compositionResource composition
+        actual =
+          [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
+          , ("component-names", Text.intercalate "," (compositionNames composition))
+          , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [positives, availability, negatives, properties, mutants]))
+          , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
+          ]
+    assert (compositionKinds composition == everyCalculus) "inference accelerator projection omitted or reordered a calculus"
+    assert (actual == expected) ("inference accelerator calculus projection changed: " <> show actual)
+  action
+  putStrLn
+    ( "engine-accelerator-calculus: PASS (5 kinds, "
+        <> show (positives + availability + negatives + properties + mutants)
+        <> " projected units)"
+    )
+
+loadMetricOracle :: FilePath -> IO [(Text, Text)]
+loadMetricOracle path = do
+  contents <- Text.readFile path
+  forM (drop 1 (Text.lines contents)) $ \row -> case Text.splitOn "\t" row of
+    [metric, value] -> pure (metric, value)
+    _ -> fail ("malformed calculus metric row: " <> Text.unpack row)
 
 checkDhallGreen :: FilePath -> IO ()
 checkDhallGreen path = do

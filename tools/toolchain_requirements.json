@@ -346,6 +346,21 @@
       "install_name": "tla2tools.jar",
       "requirement": ">=1.7",
       "reason": "the TLC model checker the formal-model phases drive"
+    },
+    "z3": {
+      "source": "managed",
+      "provider": "package-manager",
+      "supplies": "z3",
+      "package_map": {
+        "apple": "z3",
+        "linux-cpu": "z3",
+        "linux-cuda": "z3"
+      },
+      "relative_path": "bin/z3",
+      "version_argv": ["--version"],
+      "version_pattern": "\\bversion\\s+([0-9]+(?:\\.[0-9]+)*)",
+      "requirement": ">=4.13 <6",
+      "reason": "the SMT solver driven by the amoebius symbolic checker"
     }
   }
 }

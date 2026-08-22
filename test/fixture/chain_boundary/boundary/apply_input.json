@@ -1,0 +1,1 @@
+{"apiVersion":"v1","data":{"phase":"34","purpose":"exact-boundary-byte-relay"},"kind":"ConfigMap","metadata":{"name":"amoebius-boundary-fixture","namespace":"amoebius-system"}}

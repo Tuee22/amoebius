@@ -3,6 +3,7 @@ package:
   dependencies:
     - console
     - effect
+    - maybe
     - prelude
   test:
     main: Test.Main

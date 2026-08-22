@@ -142,7 +142,7 @@ that names Register 3 and marks the runtime layer *tested*, not proved.
 
 **Depends on:** [Phase 62](phase_62_platform_backbone.md) — platform backbone (MetalLB + MinIO + Pulsar HA), which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/platform_services_2_gate.py` brings the whole standard stack up on the Phase-62 backbone cluster
+**Gate:** `python3 tools/run_phase_gate.py 63` brings the whole standard stack up on the Phase-62 backbone cluster
 in the [§11](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
 derived readiness-DAG order, every service in its HA-capable topology. The apparatus is
 [Gate integrity](#gate-integrity).

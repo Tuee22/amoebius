@@ -48,6 +48,7 @@ import Amoebius.Capacity.Storage
 import Amoebius.Capacity.StorageGeometry
   ( BookKeeperPolicy (..)
   , DeclaredVolumeDemand (..)
+  , GeometryWitness (..)
   , MigrationDemand (..)
   , MinioPolicy (..)
   , NodeRootSupply (..)
@@ -58,6 +59,7 @@ import Amoebius.Capacity.StorageGeometry
   , StatefulSetClaimSlot (..)
   , VolumeGeometry (..)
   , mergeObjectStoreLogicalPeaks
+  , minioPhysicalDemand
   , provisionNodeRootVolume
   , provisionObjectStoreProducer
   , provisionPulsar
@@ -91,9 +93,11 @@ data StorageFixture = StorageFixture
 storageFixtures :: [StorageFixture]
 storageFixtures =
   [ fixture "direct-backing" "illegal_store_over_backing" "fit" "3.19:logical-physical-fit" "StorageOverBacking:direct" (volumeResult directOver) (volumeResult directFit)
-  , fixture "bookkeeper-recovery" "illegal_hot_tier_over_bookie" "bookkeeper" "3.19:logical-physical-fit" "StorageOverBacking:bookie" (pulsarResult hotOver) (pulsarResult hotFit)
+  , fixture "bookkeeper-recovery" "illegal_hot_tier_over_bookie" "bookkeeper" "3.19:logical-physical-fit" "StorageOverBacking:bookkeeper" (volumeResult bookKeeperOver) (volumeResult bookKeeperFit)
   , fixture "minio-parity-healing-orphan" "illegal_store_over_backing" "minio" "3.19:logical-physical-fit" "StorageOverBacking:minio" (volumeResult minioOver) (volumeResult minioFit)
+  , fixture "complete-failure-scenarios" "illegal_store_over_backing" "failure-scenarios" "3.19:logical-physical-fit" "FailureScenarioProductMismatch" (failureScenarioResult 1) (failureScenarioResult 2)
   , fixture "filesystem-overhead-rounding" "illegal_store_over_backing" "presentation" "3.19:logical-physical-fit" "StorageOverBacking:filesystem" (volumeResult filesystemOver) (volumeResult filesystemFit)
+  , fixture "backing-allocation-rounding" "illegal_store_over_backing" "allocation" "3.19:logical-physical-fit" "StorageOverBacking:allocation" (volumeResult allocationOver) (volumeResult allocationFit)
   , fixture "uniform-claim-per-backing" "illegal_store_over_backing" "uniform-claims" "3.19:logical-physical-fit" "StorageOverBacking:uniform" uniformOver uniformFit
   , fixture "registry-upload-partials" "illegal_store_over_backing" "registry" "3.19:logical-physical-fit" "StorageOverBacking:registry" (serviceResult (registryStoragePeak registryOver)) (serviceResult (registryStoragePeak registryFit))
   , fixture "zookeeper-recovery" "illegal_store_over_backing" "zookeeper" "3.19:logical-physical-fit" "StorageOverBacking:zookeeper" (serviceResult (provisionZooKeeperMetadataStore zooKeeperOver)) (serviceResult (provisionZooKeeperMetadataStore zooKeeperFit))
@@ -109,6 +113,7 @@ storageFixtures =
   , fixture "disjoint-capacity-pool" "illegal_store_over_backing" "pool-ownership" "3.60:disjoint-capacity-pool" "DisjointCapacityPoolViolation:shared-pool" disjointPoolOver disjointPoolFit
   , fixture "restore-target-fit" "illegal_store_over_backing" "restore" "3.67:restore-target-fit" "StorageOverBacking:restore" (witnessResult (provisionRestore restoreOver)) (witnessResult (provisionRestore restoreFit))
   , fixture "pulsar-durable-total" "illegal_topic_time_only_offload" "pulsar-durable" "3.19:logical-physical-fit" "PulsarDurableCeilingUnbounded:events" (pulsarResult durableUnbounded) (pulsarResult durableBounded)
+  , fixture "pulsar-hot-tier-ceiling" "illegal_hot_tier_over_bookie" "pulsar-hot" "3.19:logical-physical-fit" "StorageOverBacking:bookie" (pulsarResult hotOver) (pulsarResult hotFit)
   , fixture "native-cache-pool" "illegal_cache_over_local_pool" "cache-native" "3.60:disjoint-capacity-pool" "StorageOverBacking:cache" (cacheResult nativeCacheOver) (cacheResult nativeCacheFit)
   , fixture "incluster-cache-budget" "illegal_incluster_cache_bound_mismatch" "cache-incluster" "3.19:logical-physical-fit" "CacheBudgetNestingViolation:models" (cacheResult inClusterPeakOver) (cacheResult inClusterFit)
   , fixture "incluster-cache-emptydir" "illegal_incluster_cache_bound_mismatch" "cache-incluster" "3.19:logical-physical-fit" "CacheBudgetNestingViolation:models" (cacheResult inClusterEmptyDirOver) (cacheResult inClusterFit)
@@ -147,17 +152,32 @@ minioPolicy = MinioPolicy 1 2 1 10 2 5 1 1 1 20
 volume :: Text -> Natural -> StorageBacking -> VolumeGeometry -> FilesystemPresentation -> DeclaredVolumeDemand
 volume name logical owner geometry presentation = DeclaredVolumeDemand name (claim name 0) owner logical geometry presentation
 
-directOver, directFit, minioOver, minioFit, filesystemOver, filesystemFit :: DeclaredVolumeDemand
+directOver, directFit, bookKeeperOver, bookKeeperFit, minioOver, minioFit, filesystemOver, filesystemFit, allocationOver, allocationFit :: DeclaredVolumeDemand
 directOver = volume "direct" 101 (backing "direct" 100) (DirectGeometry 1) BlockPresentation
 directFit = volume "direct" 100 (backing "direct" 100) (DirectGeometry 1) BlockPresentation
+bookKeeperOver = volume "bookkeeper" 100 (backing "bookkeeper" 314) (BookKeeperGeometry bookKeeperPolicy) BlockPresentation
+bookKeeperFit = bookKeeperOver {volumeBacking = backing "bookkeeper" 315}
 minioOver = volume "minio" 100 (backing "minio" 295) (MinioGeometry minioPolicy) BlockPresentation
 minioFit = volume "minio" 100 (backing "minio" 296) (MinioGeometry minioPolicy) BlockPresentation
 filesystemOver = volume "filesystem" 100 fsOverBacking (DirectGeometry 1) (FilesystemPresentation "ext4-v1" 1000)
 filesystemFit = volume "filesystem" 100 fsFitBacking (DirectGeometry 1) (FilesystemPresentation "ext4-v1" 1000)
+allocationOver = volume "allocation" 65 allocationOverBacking (DirectGeometry 1) BlockPresentation
+allocationFit = allocationOver {volumeBacking = allocationFitBacking}
 
 fsOverBacking, fsFitBacking :: StorageBacking
 fsOverBacking = StorageBacking (BackingId "filesystem") 127 (BackingAllocationPolicy 0 64)
 fsFitBacking = StorageBacking (BackingId "filesystem") 128 (BackingAllocationPolicy 0 64)
+
+allocationOverBacking, allocationFitBacking :: StorageBacking
+allocationOverBacking = StorageBacking (BackingId "allocation") 127 (BackingAllocationPolicy 0 64)
+allocationFitBacking = allocationOverBacking {backingCapacityBytes = 128}
+
+failureScenarioResult :: Int -> Either Text ()
+failureScenarioResult expected = case minioPhysicalDemand minioPolicy 100 of
+  Left problem -> Left (storageTag problem)
+  Right witness
+    | length (geometryFailureScenarios witness) == expected -> Right ()
+    | otherwise -> Left "FailureScenarioProductMismatch"
 
 uniformOver, uniformFit :: Either Text ()
 uniformOver = uniformResult 150

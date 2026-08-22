@@ -53,27 +53,38 @@ entry uninhabitable.
 - The *normative rule* behind each catalog entry lives in that entry's owning doctrine
   (storage, gateway/ingress, secrets, …). The catalog names the owner and never restates its content.
 
-Phase 25 validates the dhall-typecheck subset in-process: its eight canonical no-arm/required-field negatives and
-three image/process negatives fail against the authored closed Dhall schema, with independent shape oracles
-and mutants. Phase 26 validates the focused gadt-decode subset: distinct schema/domain/unspellable refinement
-classes, tenant/state/owner compile indices, full positive-tree retention, and fail-closed import/exception
-handling (ledger `external-run-reference`). Phase 27 validates the exhaustive catalog projection: all 88
-entries and 104 named subcases reconcile, the 33 reached dhall-typecheck/gadt-decode subcases discharge, and the remaining
-73 subcases retain exact later owners (ledger `external-run-reference`). The
+Phase 25 validates the dhall-typecheck subset in-process: its eight canonical no-arm/required-field negatives,
+three image/process negatives, one plaintext-secret negative, and two import-policy negatives fail at their
+authored reasons against the closed Dhall schema, while four paired positive surfaces pass. Independent shape
+oracles catch 525 required-field deletions, 176 type substitutions, four special-resource mutations, and the
+extra capability arm. Its Phase-24 projection derives nineteen extension obligations but deliberately leaves
+all extension semantics UNVERIFIED; it is not catalog foreclosure evidence. Phase 26 validates the focused
+gadt-decode subset: distinct schema/domain/unspellable/plaintext-secret refinement
+classes, tenant/state/owner compile indices, full positive-tree retention, a five-calculus composition
+projection, and fail-closed import/exception
+handling (ledger `external-run-reference`). Phase 27 validates the exhaustive catalog projection: all 97
+entries and 121 named subcases reconcile, the 43 reached dhall-typecheck/gadt-decode subcases discharge through
+direct and explicit Phase-8/9 predecessor evidence, and the remaining 78 subcases retain exact later owners
+(ledger `external-run-reference`). The
 [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md) then supplies exact-locus evidence for
-all 11 Phase-9-owned subcases: three dhall-typecheck foreclosures, seven compile-time index pairs, and the direct
-base capacity/topology provision-seal fixtures, with 15 negative/twin pairs, two positives, four sampled
-properties, and 19 red mutants (ledger `external-run-reference`). The
+eight of 11 Phase-9-owned subcases: seven compile-time index pairs and the direct base capacity/topology
+provision-seal fixtures, with 15 negative/twin pairs, two positives, four sampled properties, and 19 red
+mutants. The three Dhall-typecheck foreclosures remain deferred to Phase 25. The
 [Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md) supplies exact-locus evidence for all
 five Phase-28-owned subcases: two dhall-typecheck bounded-training barriers and 27 storage-geometry variant/twin rows
 cover logical/physical fit, backup-medium fit, disjoint capacity pools, and restore-target fit; six sampled
 properties pass and 31 mutants are red (ledger `external-run-reference`). The
 [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md) supplies the two owned
-accelerator loci plus 32 exact execution/runtime-storage/accelerator/provider-root negative/twin variants,
-two composed positives, seven sampled properties, and 45 red mutants (ledger
-`dynamically-resolved`). These are checked rejections at the pure `provision-seal` fold boundary.
-Capability binding, whole-deployment post-bind sealing, extension-astcheck, rendered output, and live-effect entries remain
-unverified at their later loci.
+accelerator loci plus 37 exact execution/runtime-storage/accelerator/provider-root negative/twin variants,
+two composed positives, seven sampled properties, 45 red mutants, and a 128-unit five-calculus projection
+(ledger `external-run-reference`). These are checked rejections at the pure `provision-seal` fold boundary;
+the added one-axis cases cover accelerator interconnect and the build, engine, monitoring and Pulumi envelopes.
+[Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) then validates capability binding across all nine
+arms and both shapes: three dhall-typecheck and four gadt-decode cases retain exact reasons, the 29-entry locus
+ledger is exact, and four mutants redden. [Phase 31](../../DEVELOPMENT_PLAN/phase_31_provision_seal.md) validates
+whole-deployment post-bind sealing: ten distinct provision errors retain their exact reasons, both boundary
+properties and all ten paired mutants pass, and every entry in the 40-row provision-seal locus ledger is
+observed. Extension-astcheck, rendered output, and live-effect entries remain unverified at their later loci.
 Runtime enforcement remains a **live-cluster** concern (Register 3 — the orchestration DSL + the
 `replicas=1` control-plane daemon that renders and reconciles a live cluster). Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md); per
@@ -258,7 +269,7 @@ the SSoT for the axis. Most entries name a primary locus plus a live-effect resi
 
 ### ML assets & training — [`illegal_state_ml_asset.md`](./illegal_state_ml_asset.md)
 
-- [§3.25](./illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) — An ML asset named by arbitrary URL (or an unready / unlanded model). Phase 30 validates the URL arm is absent at dhall-typecheck; readiness, landing, and resolution remain deferred.
+- [§3.25](./illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) — An ML asset named by arbitrary URL (or an unready / unlanded model). Phase 30 validates the URL arm is absent at dhall-typecheck; Phase 32 validates the offering/family relation and eight accelerator provision refusals at the post-bind seal. Readiness, landing, live resolution, and cross-lane load fidelity remain deferred.
 - [§3.32](./illegal_state_ml_asset.md#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention) — A continuous training run with no checkpoint cadence, or a feed with no bounded retention
 - [§3.33](./illegal_state_ml_asset.md#333-a-multi-partition-training-feed-with-no-defined-merge-order) — A multi-partition training feed with no defined merge order
 - [§3.34](./illegal_state_ml_asset.md#334-an-app-serving-or-continuing-another-apps-model-without-a-grant) — An app serving or continuing another app's model without a grant
@@ -304,7 +315,7 @@ the SSoT for the axis. Most entries name a primary locus plus a live-effect resi
 This catalog is a **doctrine** artifact: it enumerates the target shape of the type discipline and names, per
 entry, the owning doctrine and foreclosing technique. It states no status and no schedule. The gate at which
 each foreclosure is first *validated* — the pre-cluster Dhall/decoder/property corpus for the type- and
-decode-foreclosed entries, the rendered-output goldens for the manifest-shaped entries, and the
+decode-foreclosed entries, the rendered-output semantic oracles for the manifest-shaped entries, and the
 live-infrastructure registers for the runtime residue — is owned exclusively by
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). Per
 [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)

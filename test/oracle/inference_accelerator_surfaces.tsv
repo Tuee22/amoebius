@@ -9,11 +9,9 @@
 #   metrics   the metric keys in .build/dsl/inference-accelerator/phase-results.tsv
 #   checks    the check ids tools/inference_accelerator_gate.py implements
 #
-# The 23 items are partitioned so each is claimed exactly once.
-#
-# **2 contract surfaces carry no id**: `opaque-provisioned-engine-accelerator`, `phase12-validation-locus-ledger`.
-# Neither has an oracle case, a mutant, or a metric of its own, so the ledger carries them
-# UNVERIFIED. The gap is recorded against Phase 13 in legacy_tracking_for_deletion.md.
+# The 23 run-time items are partitioned so each is claimed exactly once. All 29 surfaces
+# have a concrete owner: the formerly empty opaque-output and locus-ledger surfaces have
+# exact metrics, and the five-calculus surface carries the independently authored projection.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 
@@ -34,13 +32,14 @@ net-allocatable-vram	items	illegal_accelerator_vram_shortage
 device-count-boundary	items	illegal_accelerator_policy_domain_mismatch
 per-device-coexistence-aggregation	items	all-classes,illegal_accelerator_coexistence_overcommit,mutant_drop_accelerator_work_item
 engine-accelerator-provision-seal	metrics	acceptance-token
-opaque-provisioned-engine-accelerator	checks	
-phase12-dhall-typecheck-url-negative	metrics	dhall-typecheck-url-negative
-phase12-provision-negative-corpus	metrics	provision-negatives
-phase12-property-coverage	metrics	quickcheck-properties
-phase12-mutant-battery	metrics	mutants
-phase12-validation-locus-ledger	checks	
-phase12-compile-totality	metrics	inference-positives
+opaque-provisioned-engine-accelerator	metrics	opaque-provisioned-engine-accelerator
+phase32-dhall-typecheck-url-negative	metrics	dhall-typecheck-url-negative
+phase32-provision-negative-corpus	metrics	provision-negatives
+phase32-property-coverage	metrics	quickcheck-properties
+phase32-mutant-battery	metrics	mutants
+phase32-validation-locus-ledger	metrics	validation-locus-entries
+phase32-compile-totality	metrics	inference-positives
+inference-accelerator-five-calculus-projection	metrics	calculus-kinds,calculus-components,calculus-projection-counts,calculus-resource-vector
 live-jit-engine-resolution	metrics	live-jit-engine-resolution
 cross-lane-runtime-weight-load	metrics	cross-lane-runtime-weight-load
 runtime-model-correspondence	metrics	runtime-correspondence

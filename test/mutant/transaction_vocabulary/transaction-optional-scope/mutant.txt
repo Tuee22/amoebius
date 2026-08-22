@@ -1,0 +1,4 @@
+operator=field-optionality
+subject=transaction scope predicate
+mutation=change the required scope parameter to optional
+expected_locus=required-scope

@@ -1,6 +1,6 @@
 module Declassify where
 
-import Amoebius.Ui.Security.Flow
+import Amoebius.Scope.Flow
 
-bad :: FlowLabel -> FlowLabel
+bad :: FlowLabel scope -> FlowLabel scope
 bad privateValue = declassify privateValue

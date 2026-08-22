@@ -1,0 +1,6 @@
+mutant	red_law	red_property
+partial-operation	L1	Totality
+ambient-render	L2	Determinism
+retained-reaper-omitted	L3	BudgetHonesty
+scope-widened	L4	ScopePropagation
+claim-fixture-omitted	L5	EvidenceBinding

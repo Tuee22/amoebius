@@ -192,7 +192,7 @@ it when they rerun.
 
 **Requires**: `host-floor`
 
-**Gate:** `python3 tools/repository_conformance_gate.py` passes every check named in
+**Gate:** `python3 tools/run_phase_gate.py 02` passes every check named in
 [Gate integrity](#gate-integrity). Phase 3 does not open unless the ledger records Register 1 green, the
 artifact audit reports zero `r13` and `r15` findings, and the seeded mutants are red.
 

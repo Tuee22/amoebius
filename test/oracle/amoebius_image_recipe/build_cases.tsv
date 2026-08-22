@@ -1,0 +1,5 @@
+case	flavor	observed	requested	tag
+cpu-amd64	cpu	amd64	amd64	amoebius-base-cpu-amd64
+cpu-arm64	cpu	arm64	arm64	amoebius-base-cpu-arm64
+cuda-amd64	cuda	amd64	amd64	amoebius-base-cuda-amd64
+cuda-arm64	cuda	arm64	arm64	amoebius-base-cuda-arm64

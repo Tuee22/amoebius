@@ -81,7 +81,7 @@ but this linux-cpu gate does not claim a live offline CUDA training result.
 
 **Depends on:** [Phase 45](phase_45_encrypted_browser_runtime.md) — the encrypted browser runtime holding the outbox, and [Phase 41](phase_41_offline_language_plan.md), the offline contract that declared it.
 
-**Gate:** `cabal test offline-replay-receipts-live` queues fresh commands while disconnected, reconnects to a
+**Gate:** `python3 tools/run_phase_gate.py 85` queues fresh commands while disconnected, reconnects to a
 different UI-server replica, faults Redis and the socket between effect and response, and externally proves
 the exact typed outcome and zero duplicate/foreign effect per challenged command.
 [Gate integrity](#gate-integrity) fixes the apparatus.

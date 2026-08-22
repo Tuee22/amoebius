@@ -79,6 +79,91 @@ flag evidence-calculus-second-mutant-registry-mutant
   default: False
   manual: True
 
+flag scope-index-drop-owner-equality-mutant
+  description: Build the scope-index mutant whose subject-owner join drops both owner equalities
+  default: False
+  manual: True
+
+flag calculus-composition-widens-scope-mutant
+  description: Build the calculus-composition mutant that admits components from different request scopes
+  default: False
+  manual: True
+
+flag calculus-composition-saturates-resource-sum-mutant
+  description: Build the calculus-composition mutant that saturates the resource-index sum
+  default: False
+  manual: True
+
+flag calculus-composition-drops-transform-index-mutant
+  description: Build the calculus-composition mutant that drops the resource index during a label transform
+  default: False
+  manual: True
+
+flag transaction-vocabulary-test-unscoped
+  description: Compile the transaction negative that omits its request scope
+  default: False
+  manual: True
+
+flag transaction-vocabulary-test-raw-query
+  description: Compile the transaction negative that asks for a raw statement constructor
+  default: False
+  manual: True
+
+flag transaction-vocabulary-test-predicate
+  description: Compile the transaction negative that asks for a predicate constructor
+  default: False
+  manual: True
+
+flag transaction-vocabulary-test-cross-scope
+  description: Compile the transaction negative that combines two generative request scopes
+  default: False
+  manual: True
+
+flag reconcile-core-delete-unreachable-mutant
+  description: Build the reconcile-core negative whose Delete action carries an Unreachable observation
+  default: False
+  manual: True
+
+flag extension-declaration-optional-component-mutant
+  description: Build the extension declaration mutant that admits no evidence component
+  default: False
+  manual: True
+
+flag extension-declaration-drops-scope-index-mutant
+  description: Build the extension declaration mutant that erases distinct request-scope indices
+  default: False
+  manual: True
+
+flag explicit-state-widens-action-guard-mutant
+  description: Build the explicit-state checker mutant that replaces every action guard with true
+  default: False
+  manual: True
+
+flag explicit-state-skips-invariant-mutant
+  description: Build the explicit-state checker mutant that never reports an invariant violation
+  default: False
+  manual: True
+
+flag explicit-state-truncates-frontier-mutant
+  description: Build the explicit-state checker mutant that retains only one successor per frontier node
+  default: False
+  manual: True
+
+flag symbolic-drops-conjoined-hypothesis-mutant
+  description: Build the symbolic checker mutant that assumes only the target invariant in a step obligation
+  default: False
+  manual: True
+
+flag symbolic-negates-action-guard-mutant
+  description: Build the symbolic checker mutant that encodes every action guard with the opposite polarity
+  default: False
+  manual: True
+
+flag symbolic-accepts-sat-step-mutant
+  description: Build the symbolic checker mutant that treats a satisfiable step counterexample as a proof
+  default: False
+  manual: True
+
 flag illegal-state-mutant
   description: Build the committed Phase-6 broken-decision mutant
   default: False
@@ -994,6 +1079,45 @@ flag encrypted-browser-runtime-reuse-partition-key-mutant
   default: False
   manual: True
 
+flag ui-contract-generation-raw-sink-mutant
+  default: False
+  manual: True
+
+flag ui-contract-generation-serialize-server-handle-mutant
+  default: False
+  manual: True
+
+flag ui-contract-generation-undeclared-codec-mutant
+  default: False
+  manual: True
+
+flag tool-generation-missing-rule-mutant
+  default: False
+  manual: True
+
+flag tool-generation-drop-operator-mutant
+  default: False
+  manual: True
+
+flag tool-generation-track-output-mutant
+  default: False
+  manual: True
+
+flag self-referential-gates-drop-observe-mutant
+  description: Build the self-referential gate mutant that drops the observation arm
+  default: False
+  manual: True
+
+flag self-referential-gates-leak-resource-mutant
+  description: Build the self-referential gate mutant that leaks a provisioned gate process
+  default: False
+  manual: True
+
+flag self-referential-gates-skip-mutant-mutant
+  description: Build the self-referential gate mutant that omits its mutant set
+  default: False
+  manual: True
+
 flag offline-replay-receipts-ack-redis-publish-mutant
   default: False
   manual: True
@@ -1116,6 +1240,7 @@ library formal-model
       Amoebius.Formal.EmitTLA
       Amoebius.Formal.ToyModel
       Amoebius.Formal.GatewayMigration
+      Amoebius.Formal.Dsl.Models
       Amoebius.Multicluster.StructuralFit
       Amoebius.Multicluster.GatewayMigration
       Amoebius.Cli.Formal
@@ -1129,6 +1254,134 @@ library formal-model
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods
 
+library formal-composition-model
+  visibility: public
+  exposed-modules:
+      Amoebius.Formal.CalculusComposition
+  hs-source-dirs:
+      src/formal-composition-model
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:formal-model,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+library explicit-state-checker
+  visibility: public
+  exposed-modules:
+      Amoebius.Checker.ExplicitState
+  hs-source-dirs:
+      src/explicit-state-checker
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:formal-model,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+  if flag(explicit-state-widens-action-guard-mutant)
+    cpp-options: -DEXPLICIT_STATE_WIDENS_ACTION_GUARD_MUTANT
+  if flag(explicit-state-skips-invariant-mutant)
+    cpp-options: -DEXPLICIT_STATE_SKIPS_INVARIANT_MUTANT
+  if flag(explicit-state-truncates-frontier-mutant)
+    cpp-options: -DEXPLICIT_STATE_TRUNCATES_FRONTIER_MUTANT
+
+library symbolic-checker
+  visibility: public
+  exposed-modules:
+      Amoebius.Checker.Symbolic
+  hs-source-dirs:
+      src/symbolic-checker
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:formal-model,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+  if flag(symbolic-drops-conjoined-hypothesis-mutant)
+    cpp-options: -DSYMBOLIC_DROPS_CONJOINED_HYPOTHESIS_MUTANT
+  if flag(symbolic-negates-action-guard-mutant)
+    cpp-options: -DSYMBOLIC_NEGATES_ACTION_GUARD_MUTANT
+  if flag(symbolic-accepts-sat-step-mutant)
+    cpp-options: -DSYMBOLIC_ACCEPTS_SAT_STEP_MUTANT
+
+library capacity-topology
+  visibility: public
+  exposed-modules:
+      Amoebius.Capacity.Fold
+      Amoebius.Capacity.Types
+      Amoebius.Dsl.Topology
+  hs-source-dirs:
+      src/capacity-topology
+  build-depends:
+      base >=4.21 && <4.22,
+      containers >=0.7 && <0.8,
+      deepseq >=1.5 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+library offline-language-types
+  visibility: public
+  exposed-modules:
+      Amoebius.Ui.Offline.Types
+  hs-source-dirs:
+      src/offline-language-types
+  build-depends:
+      base >=4.21 && <4.22,
+      dhall ==1.42.3,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+library ui-contract-generation
+  visibility: public
+  exposed-modules:
+      Amoebius.Ui.Generate.BrowserContracts
+  hs-source-dirs: src/ui-contract-generation
+  build-depends:
+      base >=4.21 && <4.22,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      amoebius:dsl-core,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+  if flag(ui-contract-generation-raw-sink-mutant)
+    cpp-options: -DUI_CONTRACT_GENERATION_RAW_SINK_MUTANT
+  if flag(ui-contract-generation-serialize-server-handle-mutant)
+    cpp-options: -DUI_CONTRACT_GENERATION_SERIALIZE_SERVER_HANDLE_MUTANT
+  if flag(ui-contract-generation-undeclared-codec-mutant)
+    cpp-options: -DUI_CONTRACT_GENERATION_UNDECLARED_CODEC_MUTANT
+
+library tool-and-mutant-generation
+  visibility: public
+  exposed-modules:
+      Amoebius.Generate.CheckingCorpus
+  hs-source-dirs: src/tool-and-mutant-generation
+  build-depends:
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+  if flag(tool-generation-missing-rule-mutant)
+    cpp-options: -DTOOL_GENERATION_MISSING_RULE_MUTANT
+  if flag(tool-generation-drop-operator-mutant)
+    cpp-options: -DTOOL_GENERATION_DROP_OPERATOR_MUTANT
+  if flag(tool-generation-track-output-mutant)
+    cpp-options: -DTOOL_GENERATION_TRACK_OUTPUT_MUTANT
+
 library dsl-core
   visibility: public
   exposed-modules:
@@ -1138,7 +1391,6 @@ library dsl-core
       Amoebius.Capacity.Composed
       Amoebius.Capacity.Etcd
       Amoebius.Capacity.Execution
-      Amoebius.Capacity.Fold
       Amoebius.Capacity.Growable
       Amoebius.Capacity.HostReservation
       Amoebius.Capacity.NodeLocalStorage
@@ -1152,7 +1404,6 @@ library dsl-core
       Amoebius.Capacity.Storage
       Amoebius.Capacity.StorageGeometry
       Amoebius.Capacity.StorageScaling
-      Amoebius.Capacity.Types
       Amoebius.Capability.Binding
       Amoebius.Capability.Engine
       Amoebius.Capability.Types
@@ -1165,7 +1416,6 @@ library dsl-core
       Amoebius.Dsl.Ref
       Amoebius.Dsl.SmartConstructors
       Amoebius.Dsl.SanctionedApi
-      Amoebius.Dsl.Topology
       Amoebius.Dsl.Types
       Amoebius.Dsl.ChildInForceSpec
       Amoebius.Manifest
@@ -1234,11 +1484,14 @@ library dsl-core
       Amoebius.Cluster.Kind
       Amoebius.Cluster.Inventory
       Amoebius.Cluster.Bootstrap
+      Amoebius.Cluster.NodeProvisioner
       Amoebius.Image.Artifact
+      Amoebius.Image.BaseChannel
       Amoebius.Image.BakeInventory
       Amoebius.Image.BootstrapRegistry
       Amoebius.Image.BuildAdmission
       Amoebius.Image.Build
+      Amoebius.Image.BuildArgv
       Amoebius.Image.BuildRuntime
       Amoebius.Image.Gate
       Amoebius.Image.NodeLoad
@@ -1335,6 +1588,8 @@ library dsl-core
       src
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:capacity-topology,
+      amoebius:offline-language-types,
       amoebius:provider-pulumi,
       aeson ==2.2.5.0,
       aeson-pretty ==0.8.11,
@@ -1739,6 +1994,187 @@ library evidence-calculus
   if flag(evidence-calculus-second-mutant-registry-mutant)
     cpp-options: -DEVIDENCE_CALCULUS_SECOND_MUTANT_REGISTRY_MUTANT
 
+library scope-index
+  visibility: public
+  exposed-modules:
+      Amoebius.Scope.Flow
+      Amoebius.Scope.Index
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.21 && <4.22,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(scope-index-drop-owner-equality-mutant)
+    cpp-options: -DSCOPE_INDEX_DROP_OWNER_EQUALITY_MUTANT
+
+library transaction-vocabulary
+  visibility: public
+  exposed-modules:
+      Amoebius.Transaction.Vocabulary
+  hs-source-dirs:
+      src/transaction-vocabulary
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:scope-index,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+library calculus-composition
+  visibility: public
+  exposed-modules:
+      Amoebius.Calculus.Composition
+  hs-source-dirs:
+      src/calculus-composition
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(calculus-composition-widens-scope-mutant)
+    cpp-options: -DCALCULUS_COMPOSITION_WIDENS_SCOPE_MUTANT
+  if flag(calculus-composition-saturates-resource-sum-mutant)
+    cpp-options: -DCALCULUS_COMPOSITION_SATURATES_RESOURCE_SUM_MUTANT
+  if flag(calculus-composition-drops-transform-index-mutant)
+    cpp-options: -DCALCULUS_COMPOSITION_DROPS_TRANSFORM_INDEX_MUTANT
+
+library extension-declaration
+  visibility: public
+  exposed-modules:
+      Amoebius.Extension.Declaration
+  hs-source-dirs:
+      src/extension-declaration
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 ==0.11.102.1,
+      bytestring >=0.12 && <0.13,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(extension-declaration-optional-component-mutant)
+    cpp-options: -DEXTENSION_DECLARATION_OPTIONAL_COMPONENT_MUTANT
+  if flag(extension-declaration-drops-scope-index-mutant)
+    cpp-options: -DEXTENSION_DECLARATION_DROPS_SCOPE_INDEX_MUTANT
+
+library extension-laws-per-extension
+  visibility: public
+  exposed-modules:
+      Amoebius.Extension.Laws.PerExtension
+  hs-source-dirs:
+      src/extension-laws
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:extension-declaration,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+library extension-laws-compositional
+  visibility: public
+  exposed-modules:
+      Amoebius.Extension.Laws.Compositional
+  hs-source-dirs:
+      src/extension-laws-compositional
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:capacity-topology,
+      amoebius:extension-declaration,
+      amoebius:extension-laws-per-extension,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 >=0.11 && <0.12,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+library extension-security-laws
+  visibility: public
+  exposed-modules:
+      Amoebius.Extension.Laws.Security
+  hs-source-dirs:
+      src/extension-security-laws
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:scope-index,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 >=0.11 && <0.12,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+library extension-conformance-gate
+  visibility: public
+  exposed-modules:
+      Amoebius.Extension.Conformance.Gate
+  hs-source-dirs:
+      src/extension-conformance-gate
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:extension-declaration,
+      amoebius:extension-laws-compositional,
+      amoebius:extension-laws-per-extension,
+      amoebius:extension-security-laws,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      cryptohash-sha256 >=0.11 && <0.12,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+library deterministic-simulation-calculus
+  visibility: private
+  exposed-modules:
+      CalculusProjection
+  hs-source-dirs:
+      test/harness/deterministic_simulation
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:formal-composition-model,
+      amoebius:formal-model,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+library reconcile-core
+  visibility: public
+  exposed-modules:
+      Amoebius.Reconcile.Core
+      Amoebius.Reconcile.Sim
+  hs-source-dirs:
+      src/reconcile-core
+  build-depends:
+      base >=4.21 && <4.22,
+      aeson ==2.2.5.0,
+      containers >=0.7 && <0.8,
+      io-classes ==1.10.1.0,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
 library workflow-runtime
   visibility: public
   exposed-modules:
@@ -2045,6 +2481,43 @@ library test-topology
   if flag(test-topology-dsl-wrong-subscription-mutant)
     cpp-options: -DPHASE54_WRONG_SUBSCRIPTION_MUTANT
 
+library test-workflow-algebra-core
+  visibility: public
+  exposed-modules:
+      Amoebius.Test.WorkflowAlgebra
+  hs-source-dirs: src/test-workflow-algebra
+  build-depends:
+      base >=4.21 && <4.22,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+  if flag(test-topology-dsl-skip-teardown-mutant)
+    cpp-options: -DPHASE54_SKIP_TEARDOWN_MUTANT
+  if flag(test-topology-dsl-tag-query-mutant)
+    cpp-options: -DPHASE54_TAG_QUERY_MUTANT
+  if flag(test-topology-dsl-all-tested-mutant)
+    cpp-options: -DPHASE54_ALL_TESTED_MUTANT
+  if flag(test-topology-dsl-wrong-subscription-mutant)
+    cpp-options: -DPHASE54_WRONG_SUBSCRIPTION_MUTANT
+
+library self-referential-gates
+  visibility: public
+  exposed-modules:
+      Amoebius.Gate.SelfReferential
+  hs-source-dirs: src/self-referential-gates
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:workflow-calculus,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(self-referential-gates-drop-observe-mutant)
+    cpp-options: -DSELF_REFERENTIAL_GATES_DROP_OBSERVE_MUTANT
+  if flag(self-referential-gates-leak-resource-mutant)
+    cpp-options: -DSELF_REFERENTIAL_GATES_LEAK_RESOURCE_MUTANT
+  if flag(self-referential-gates-skip-mutant-mutant)
+    cpp-options: -DSELF_REFERENTIAL_GATES_SKIP_MUTANT_MUTANT
+
 library ui-live
   visibility: public
   exposed-modules:
@@ -2132,36 +2605,38 @@ library offline-runtime
       Amoebius.Ui.Offline.Receipt
       Amoebius.Ui.Offline.Replay
       Amoebius.Ui.Offline.Ha.MultiZone
-      Amoebius.Ui.Offline.Types
       Amoebius.Release.OfflineCompatibility
   hs-source-dirs: src
   build-depends:
       base >=4.21 && <4.22,
-      containers >=0.7 && <0.8
+      amoebius:offline-language-types,
+      containers >=0.7 && <0.8,
+      dhall ==1.42.3,
+      text >=2.1 && <2.2
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
   if flag(offline-language-plan-drop-queue-bound-mutant)
-    cpp-options: -DPHASE59_DROP_QUEUE_BOUND_MUTANT
+    cpp-options: -DOFFLINE_LANGUAGE_PLAN_DROP_QUEUE_BOUND_MUTANT
   if flag(offline-language-plan-omit-server-handler-mutant)
-    cpp-options: -DPHASE59_OMIT_SERVER_HANDLER_MUTANT
+    cpp-options: -DOFFLINE_LANGUAGE_PLAN_OMIT_SERVER_HANDLER_MUTANT
   if flag(offline-language-plan-queue-model-invocation-mutant)
-    cpp-options: -DPHASE59_QUEUE_MODEL_INVOCATION_MUTANT
+    cpp-options: -DOFFLINE_LANGUAGE_PLAN_QUEUE_MODEL_INVOCATION_MUTANT
   if flag(offline-language-plan-persist-private-field-mutant)
-    cpp-options: -DPHASE59_PERSIST_PRIVATE_FIELD_MUTANT
+    cpp-options: -DOFFLINE_LANGUAGE_PLAN_PERSIST_PRIVATE_FIELD_MUTANT
   if flag(offline-language-plan-browser-redis-constructor-mutant)
-    cpp-options: -DPHASE59_BROWSER_REDIS_CONSTRUCTOR_MUTANT
+    cpp-options: -DOFFLINE_LANGUAGE_PLAN_BROWSER_REDIS_CONSTRUCTOR_MUTANT
   if flag(encrypted-browser-runtime-store-plaintext-mutant)
-    cpp-options: -DPHASE60_STORE_PLAINTEXT_MUTANT
+    cpp-options: -DENCRYPTED_BROWSER_RUNTIME_STORE_PLAINTEXT_MUTANT
   if flag(encrypted-browser-runtime-retain-credentials-mutant)
-    cpp-options: -DPHASE60_RETAIN_CREDENTIALS_MUTANT
+    cpp-options: -DENCRYPTED_BROWSER_RUNTIME_RETAIN_CREDENTIALS_MUTANT
   if flag(encrypted-browser-runtime-two-replay-leaders-mutant)
-    cpp-options: -DPHASE60_TWO_REPLAY_LEADERS_MUTANT
+    cpp-options: -DENCRYPTED_BROWSER_RUNTIME_TWO_REPLAY_LEADERS_MUTANT
   if flag(encrypted-browser-runtime-omit-fencing-mutant)
-    cpp-options: -DPHASE60_OMIT_FENCING_MUTANT
+    cpp-options: -DENCRYPTED_BROWSER_RUNTIME_OMIT_FENCING_MUTANT
   if flag(encrypted-browser-runtime-silent-dependency-eviction-mutant)
-    cpp-options: -DPHASE60_SILENT_DEPENDENCY_EVICTION_MUTANT
+    cpp-options: -DENCRYPTED_BROWSER_RUNTIME_SILENT_DEPENDENCY_EVICTION_MUTANT
   if flag(encrypted-browser-runtime-reuse-partition-key-mutant)
-    cpp-options: -DPHASE60_REUSE_PARTITION_KEY_MUTANT
+    cpp-options: -DENCRYPTED_BROWSER_RUNTIME_REUSE_PARTITION_KEY_MUTANT
   if flag(offline-replay-receipts-ack-redis-publish-mutant)
     cpp-options: -DPHASE61_ACK_REDIS_PUBLISH_MUTANT
   if flag(offline-replay-receipts-omit-durable-lookup-mutant)
@@ -2263,14 +2738,55 @@ test-suite formal-model-spec
       test/spec/formal
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:formal-composition-model,
       amoebius:formal-model,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       directory >=1.3 && <1.4,
       filepath >=1.5 && <1.6,
       process >=1.6 && <1.7,
-      QuickCheck >=2.18 && <2.19
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+test-suite explicit-state-checker-spec
+  type: exitcode-stdio-1.0
+  main-is: ExplicitStateCheckerSpec.hs
+  hs-source-dirs:
+      test/spec/formal/explicit
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:explicit-state-checker,
+      amoebius:formal-model,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite symbolic-checker-spec
+  type: exitcode-stdio-1.0
+  main-is: SymbolicCheckerSpec.hs
+  hs-source-dirs:
+      test/spec/formal/symbolic
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:explicit-state-checker,
+      amoebius:formal-model,
+      amoebius:symbolic-checker,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
 test-suite gateway-migration-model-spec
   type: exitcode-stdio-1.0
@@ -2279,6 +2795,7 @@ test-suite gateway-migration-model-spec
       test/spec/formal/gateway
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:deterministic-simulation-calculus,
       amoebius:formal-model,
       containers >=0.7 && <0.8,
       directory >=1.3 && <1.4,
@@ -2286,9 +2803,87 @@ test-suite gateway-migration-model-spec
       io-classes ==1.10.1.0,
       io-sim ==1.10.1.0,
       process >=1.6 && <1.7,
-      QuickCheck >=2.18 && <2.19
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+test-suite dsl-formal-model-spec
+  type: exitcode-stdio-1.0
+  main-is: DslFormalModelSpec.hs
+  other-modules:
+      BindFixtures
+      ProvisionFixtures
+  hs-source-dirs:
+      test/spec/formal/dsl
+      test/spec/capability
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:deterministic-simulation-calculus,
+      amoebius:dsl-core,
+      amoebius:formal-model,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite gadt-decode-spec
+  type: exitcode-stdio-1.0
+  main-is: DecodeSpec.hs
+  hs-source-dirs:
+      test/spec/dsl
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      containers >=0.7 && <0.8,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+  cpp-options: -DGADT_DECODE_ONLY
+
+test-suite illegal-state-corpus-spec
+  type: exitcode-stdio-1.0
+  main-is: DecodeSpec.hs
+  other-modules:
+      CorpusSpec
+      DecisionPropSpec
+      ValidationLocusLedger
+  hs-source-dirs:
+      test/spec/dsl
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods
+  cpp-options: -DILLEGAL_STATE_CORPUS_ONLY
 
 test-suite dsl-spec
   type: exitcode-stdio-1.0
@@ -2329,7 +2924,15 @@ test-suite dsl-spec
       test/spec/manifest
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       aeson ==2.2.5.0,
       bytestring >=0.12 && <0.13,
       containers >=0.7 && <0.8,
@@ -2366,7 +2969,15 @@ test-suite host-ensure-kernel-spec
       test/spec/host
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       directory >=1.3 && <1.4,
       filepath >=1.5 && <1.6
@@ -2392,7 +3003,15 @@ test-suite base-image-registry-spec
       test/spec/image
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       dhall ==1.42.3,
       directory >=1.3 && <1.4,
@@ -2407,7 +3026,15 @@ test-suite object-reconciler-spec
       test/spec/live
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       aeson ==2.2.5.0,
       bytestring >=0.12 && <0.13,
       containers >=0.7 && <0.8,
@@ -2422,7 +3049,15 @@ test-suite scheduler-ledger-spec
       test/spec/live
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       aeson ==2.2.5.0,
       bytestring >=0.12 && <0.13,
       containers >=0.7 && <0.8,
@@ -2437,7 +3072,15 @@ test-suite scheduler-readiness-spec
       test/spec/live
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       text >=2.1 && <2.2
   default-language: GHC2024
@@ -2450,7 +3093,15 @@ test-suite scheduler-reservation-spec
       test/spec/live
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       io-classes ==1.10.1.0,
       text >=2.1 && <2.2
@@ -2591,6 +3242,26 @@ test-suite evidence-calculus-spec
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
 
+test-suite calculus-composition-spec
+  type: exitcode-stdio-1.0
+  main-is: CalculusCompositionSpec.hs
+  hs-source-dirs:
+      test/spec/calculus
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
 test-suite capacity-topology-spec
   type: exitcode-stdio-1.0
   main-is: CapacityTopologySpec.hs
@@ -2603,7 +3274,7 @@ test-suite capacity-topology-spec
       test/spec/dsl
   build-depends:
       base >=4.21 && <4.22,
-      amoebius:dsl-core,
+      amoebius:capacity-topology,
       containers >=0.7 && <0.8,
       process >=1.6 && <1.7,
       QuickCheck >=2.18 && <2.19,
@@ -2623,7 +3294,15 @@ test-suite storage-geometry-spec
       test/spec/dsl
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       process >=1.6 && <1.7,
       QuickCheck >=2.18 && <2.19,
@@ -2644,7 +3323,15 @@ test-suite execution-accelerator-spec
       test/spec/dsl
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       process >=1.6 && <1.7,
       QuickCheck >=2.18 && <2.19,
@@ -2665,7 +3352,15 @@ test-suite capability-bind-spec
       test/spec/capability
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       dhall ==1.42.3,
       directory >=1.3 && <1.4,
@@ -2689,7 +3384,15 @@ test-suite provision-seal-spec
       test/spec/capability
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       process >=1.6 && <1.7,
       QuickCheck >=2.18 && <2.19,
@@ -2711,7 +3414,15 @@ test-suite capability-spec
       test/spec/capability
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       process >=1.6 && <1.7,
       QuickCheck >=2.18 && <2.19,
@@ -2734,11 +3445,18 @@ test-suite render-golden
       test/spec/capability
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       aeson ==2.2.5.0,
       bytestring >=0.12 && <0.13,
       containers >=0.7 && <0.8,
-      cryptohash-sha256 ==0.11.102.1,
       QuickCheck >=2.18 && <2.19,
       text >=2.1 && <2.2
   default-language: GHC2024
@@ -2755,7 +3473,15 @@ test-suite chain-spec
       test/spec/capability
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       aeson ==2.2.5.0,
       bytestring >=0.12 && <0.13,
       containers >=0.7 && <0.8,
@@ -2778,6 +3504,70 @@ test-suite boundary-spec
       temporary ==1.3
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods
+
+test-suite image-recipe-spec
+  type: exitcode-stdio-1.0
+  main-is: ImageRecipeSpec.hs
+  hs-source-dirs:
+      test/spec/image
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      containers >=0.7 && <0.8,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite transaction-vocabulary-spec
+  type: exitcode-stdio-1.0
+  main-is: TransactionVocabularySpec.hs
+  hs-source-dirs:
+      test/spec/transaction
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:transaction-vocabulary,
+      amoebius:workflow-calculus,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite transaction-vocabulary-compile
+  type: exitcode-stdio-1.0
+  main-is: TransactionCompile.hs
+  hs-source-dirs:
+      test/negative/compile_fail/transaction_vocabulary
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:scope-index,
+      amoebius:transaction-vocabulary,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(transaction-vocabulary-test-unscoped)
+    cpp-options: -DTRANSACTION_VOCABULARY_TEST_UNSCOPED
+  if flag(transaction-vocabulary-test-raw-query)
+    cpp-options: -DTRANSACTION_VOCABULARY_TEST_RAW_QUERY
+  if flag(transaction-vocabulary-test-predicate)
+    cpp-options: -DTRANSACTION_VOCABULARY_TEST_PREDICATE
+  if flag(transaction-vocabulary-test-cross-scope)
+    cpp-options: -DTRANSACTION_VOCABULARY_TEST_CROSS_SCOPE
 
 test-suite astcheck-spec
   type: exitcode-stdio-1.0
@@ -2803,6 +3593,7 @@ test-suite sim-spec
       test/mutant/deterministic_simulation/dropped_partition_handling
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:deterministic-simulation-calculus,
       amoebius:dsl-core,
       aeson ==2.2.5.0,
       bytestring >=0.12 && <0.13,
@@ -2816,6 +3607,280 @@ test-suite sim-spec
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
+test-suite reconcile-core-simulation-spec
+  type: exitcode-stdio-1.0
+  main-is: ReconcileCoreSimulationSpec.hs
+  other-modules:
+      ReconcileCoreMutants
+      ReferencePlanner
+  hs-source-dirs:
+      test/spec/reconcile
+      test/harness/reconcile_core
+      test/mutant/reconcile_core
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:dsl-core,
+      amoebius:formal-model,
+      amoebius:reconcile-core,
+      aeson ==2.2.5.0,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      io-classes ==1.10.1.0,
+      io-sim ==1.10.1.0,
+      QuickCheck >=2.18 && <2.19,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite reconcile-core-delete-witness
+  type: exitcode-stdio-1.0
+  main-is: DeleteWitnessCompile.hs
+  hs-source-dirs:
+      test/negative/compile_fail/reconcile_core
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:reconcile-core,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+  if flag(reconcile-core-delete-unreachable-mutant)
+    cpp-options: -DRECONCILE_CORE_DELETE_UNREACHABLE_MUTANT
+
+test-suite extension-declaration-spec
+  type: exitcode-stdio-1.0
+  main-is: ExtensionDeclarationSpec.hs
+  other-modules:
+      ExtensionDeclarationMutants
+  hs-source-dirs:
+      test/spec/extension
+      test/mutant/extension_declaration
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:extension-declaration,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite extension-declaration-compile
+  type: exitcode-stdio-1.0
+  main-is: DeclarationCompile.hs
+  hs-source-dirs:
+      test/negative/compile_fail/extension_declaration
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:extension-declaration,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+  if flag(extension-declaration-optional-component-mutant)
+    cpp-options: -DEXTENSION_DECLARATION_OPTIONAL_COMPONENT_MUTANT
+  if flag(extension-declaration-drops-scope-index-mutant)
+    cpp-options: -DEXTENSION_DECLARATION_DROPS_SCOPE_INDEX_MUTANT
+
+test-suite extension-laws-per-extension-spec
+  type: exitcode-stdio-1.0
+  main-is: ExtensionLawsPerExtensionSpec.hs
+  other-modules:
+      ExtensionLawMutants
+      LawFixtures
+  hs-source-dirs:
+      test/spec/extension
+      test/harness/extension_laws
+      test/mutant/extension_laws
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:extension-declaration,
+      amoebius:extension-laws-per-extension,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      bytestring >=0.12 && <0.13,
+      containers >=0.7 && <0.8,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      process >=1.6 && <1.7,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite extension-laws-compositional-spec
+  type: exitcode-stdio-1.0
+  main-is: ExtensionLawsCompositionalSpec.hs
+  other-modules:
+      CompositionFixtures
+      ExtensionCompositionMutants
+      LawFixtures
+  hs-source-dirs:
+      test/spec/extension
+      test/harness/extension_laws
+      test/mutant/extension_laws
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:extension-declaration,
+      amoebius:extension-laws-compositional,
+      amoebius:extension-laws-per-extension,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      bytestring >=0.12 && <0.13,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite extension-laws-compositional-compile
+  type: exitcode-stdio-1.0
+  main-is: CompositionScopeCompile.hs
+  hs-source-dirs:
+      test/negative/compile_fail/extension_laws_compositional
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:extension-declaration,
+      amoebius:extension-laws-compositional,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite extension-security-laws-spec
+  type: exitcode-stdio-1.0
+  main-is: ExtensionSecurityLawsSpec.hs
+  other-modules:
+      SecurityFixtures
+      SecurityLawMutants
+  hs-source-dirs:
+      test/spec/extension
+      test/harness/extension_security
+      test/mutant/extension_security
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:extension-security-laws,
+      amoebius:scope-index,
+      bytestring >=0.12 && <0.13,
+      cryptohash-sha256 >=0.11 && <0.12,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite extension-security-laws-compile
+  type: exitcode-stdio-1.0
+  main-is: SecurityCompile.hs
+  hs-source-dirs:
+      test/negative/compile_fail/extension_security
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:extension-security-laws,
+      amoebius:scope-index,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite extension-conformance-gate-spec
+  type: exitcode-stdio-1.0
+  main-is: ExtensionConformanceGateSpec.hs
+  other-modules:
+      ConformanceGateMutants
+      LawFixtures
+  hs-source-dirs:
+      test/spec/extension
+      test/harness/extension_laws
+      test/mutant/extension_conformance
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:extension-conformance-gate,
+      amoebius:extension-declaration,
+      amoebius:extension-laws-per-extension,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      bytestring >=0.12 && <0.13,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite extension-conformance-gate-compile
+  type: exitcode-stdio-1.0
+  main-is: ConformanceCompile.hs
+  hs-source-dirs:
+      test/negative/compile_fail/extension_conformance
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:extension-conformance-gate,
+      amoebius:extension-declaration
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
+test-suite dhall-schema-conformance-spec
+  type: exitcode-stdio-1.0
+  main-is: DhallSchemaConformanceSpec.hs
+  hs-source-dirs:
+      test/spec/extension
+  build-depends:
+      base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:extension-conformance-gate,
+      amoebius:extension-declaration,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      directory >=1.3 && <1.4,
+      filepath >=1.5 && <1.6,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
 test-suite reconcile-sim
   type: exitcode-stdio-1.0
   main-is: ReconcileSim.hs
@@ -2825,7 +3890,15 @@ test-suite reconcile-sim
       test/spec/sim
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       aeson ==2.2.5.0,
       bytestring >=0.12 && <0.13,
       containers >=0.7 && <0.8,
@@ -2956,7 +4029,15 @@ test-suite ui-program-schema-spec
       test/spec/ui
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       directory >=1.3 && <1.4,
       dhall ==1.42.3,
@@ -2967,14 +4048,14 @@ test-suite ui-program-schema-spec
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
-test-suite ui-scope-spec
+test-suite scope-index-spec
   type: exitcode-stdio-1.0
   main-is: ScopeSpec.hs
   hs-source-dirs:
       test/spec/ui
   build-depends:
       base >=4.21 && <4.22,
-      amoebius:dsl-core,
+      amoebius:scope-index,
       containers >=0.7 && <0.8,
       directory >=1.3 && <1.4,
       filepath >=1.5 && <1.6,
@@ -2992,7 +4073,15 @@ test-suite ui-authorization-spec
       test/spec/ui
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       directory >=1.3 && <1.4,
       filepath >=1.5 && <1.6,
@@ -3010,7 +4099,15 @@ test-suite ui-effect-binding-spec
       test/spec/ui
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       containers >=0.7 && <0.8,
       directory >=1.3 && <1.4,
       filepath >=1.5 && <1.6,
@@ -3028,7 +4125,15 @@ test-suite ui-plan-compiler-spec
       test/spec/ui
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       bytestring >=0.12 && <0.13,
       cryptohash-sha256 ==0.11.102.1,
       directory >=1.3 && <1.4,
@@ -3047,6 +4152,14 @@ test-suite ui-browser-interpreter-spec
       test/spec/ui
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       aeson ==2.2.5.0,
       bytestring >=0.12 && <0.13,
       containers >=0.7 && <0.8,
@@ -3064,7 +4177,15 @@ test-suite ui-server-boundary-spec
       test/spec/ui
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
       amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       aeson ==2.2.5.0,
       bytestring >=0.12 && <0.13,
       containers >=0.7 && <0.8,
@@ -3082,6 +4203,14 @@ test-suite ui-local-composition-spec
       test/spec/ui
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       aeson ==2.2.5.0,
       bytestring >=0.12 && <0.13,
       containers >=0.7 && <0.8,
@@ -3843,6 +4972,41 @@ test-suite test-topology-live-gate
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
 
+test-suite test-workflow-algebra
+  type: exitcode-stdio-1.0
+  main-is: TestWorkflowAlgebraSpec.hs
+  hs-source-dirs: test/spec/workflow
+  build-depends:
+      base >=4.21 && <4.22,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:test-workflow-algebra-core,
+      amoebius:workflow-calculus,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite self-referential-gates-spec
+  type: exitcode-stdio-1.0
+  main-is: SelfReferentialGatesSpec.hs
+  hs-source-dirs: test/spec/workflow
+  build-depends:
+      base >=4.21 && <4.22,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      amoebius:self-referential-gates,
+      amoebius:workflow-calculus,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns -Werror=incomplete-uni-patterns
+
 test-suite ui-single-tenant-live-ui-single-tenant-live
   type: exitcode-stdio-1.0
   main-is: UiSingleTenantSpec.hs
@@ -3902,9 +5066,19 @@ test-suite offline-plan-spec
   hs-source-dirs: test/spec/ui
   build-depends:
       base >=4.21 && <4.22,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:dsl-core,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
       directory >=1.3 && <1.4,
       filepath >=1.4 && <1.6,
       amoebius:offline-runtime,
+      amoebius:offline-language-types,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
       text >=2.1 && <2.2
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
@@ -3915,9 +5089,62 @@ test-suite offline-browser-runtime-spec
   hs-source-dirs: test/spec/browser
   build-depends:
       base >=4.21 && <4.22,
+      aeson >=2.2 && <2.3,
+      bytestring >=0.12 && <0.13,
       directory >=1.3 && <1.4,
       filepath >=1.4 && <1.6,
       amoebius:offline-runtime,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:workflow-calculus,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite ui-contract-generation-spec
+  type: exitcode-stdio-1.0
+  main-is: UiContractGenerationSpec.hs
+  hs-source-dirs: test/spec/ui
+  build-depends:
+      base >=4.21 && <4.22,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:ui-contract-generation,
+      amoebius:workflow-calculus,
+      text >=2.1 && <2.2
+  default-language: GHC2024
+  ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns
+
+test-suite tool-and-mutant-generation-spec
+  type: exitcode-stdio-1.0
+  main-is: ToolAndMutantGenerationSpec.hs
+  hs-source-dirs: test/spec/generation
+  build-depends:
+      base >=4.21 && <4.22,
+      bytestring >=0.12 && <0.13,
+      directory >=1.3 && <1.4,
+      filepath >=1.4 && <1.6,
+      amoebius:artifact-calculus,
+      amoebius:budget-calculus,
+      amoebius:calculus-composition,
+      amoebius:capacity-topology,
+      amoebius:evidence-calculus,
+      amoebius:lift-calculus,
+      amoebius:scope-index,
+      amoebius:tool-and-mutant-generation,
+      amoebius:workflow-calculus,
       text >=2.1 && <2.2
   default-language: GHC2024
   ghc-options: -Wall -Wcompat -Werror=missing-methods -Werror=incomplete-patterns

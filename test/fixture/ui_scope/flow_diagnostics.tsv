@@ -1,0 +1,5 @@
+case	expected_error	expected_path
+subject-mismatch	SubjectFlowMismatch	-
+cycle	FlowCycleDetected	source>route>source
+missing-member	MissingFlowMember	missing
+missing-path	FlowPathMissing	source>sink

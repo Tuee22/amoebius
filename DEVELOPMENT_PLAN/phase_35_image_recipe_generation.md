@@ -1,23 +1,23 @@
 # Phase 35: The amoebius image recipe
 
-> **Purpose**: Seal the rendered image recipe as bytes — a pure projection of the typed bake catalog, pinned
-> to a committed golden — and pin the invocation that carries it to exactly one architecture.
-> **Read this if**: the recipe's rendered bytes have to change, or the build argv has to gain or lose a token.
+> **Purpose**: Constrain the generated image recipe with independently authored semantics, and constrain the
+> plain native build invocation token by token, without committing renderer output or running a container
+> engine.
+> **Read this if**: the typed bake catalog, Dockerfile projection, base-channel boundary, or image-build argv
+> has to change.
 
-This phase owns the recipe as a value: the bytes the renderer projects from the typed bake catalog, and the
-argv that would hand those bytes to a container engine. It does not own the engine, the build, the push, or
-the registry — those are effects on a live substrate, and
-[Phase 56](phase_56_base_image_registry.md) owns them under
-[`image_build_doctrine.md` §8](../documents/engineering/image_build_doctrine.md#8-build-mechanics-under-the-no-env--no-path-contract).
-Its one prerequisite is the ensure algebra [Phase 51](phase_51_host_ensure_kernel.md) delivered, which is what
-resolves a tool to an absolute path.
+This phase owns the pure recipe and invocation boundary. The typed catalog projects to an untracked
+Dockerfile whose meaning is checked by authored semantic rows; the build emitter projects one absolute-path
+plain-build argv for one observed architecture. It does not own engine bring-up, image construction,
+publication, or runtime correspondence. Those are live effects owned by later phases, beginning with
+[Phase 52](phase_52_linux_engine_bringup.md) and [Phase 56](phase_56_base_image_registry.md).
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -28,10 +28,10 @@ resolves a tool to an absolute path.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 35.1: The typed catalog and its total projection 📋](#sprint-351-the-typed-catalog-and-its-total-projection-)
-- [Sprint 35.2: The sealed recipe golden 📋](#sprint-352-the-sealed-recipe-golden-)
-- [Sprint 35.3: The authored channel and the resolved digest 📋](#sprint-353-the-authored-channel-and-the-resolved-digest-)
-- [Sprint 35.4: The one-architecture build argv 📋](#sprint-354-the-one-architecture-build-argv-)
+- [Sprint 35.1: The typed catalog and its total projection ✅](#sprint-351-the-typed-catalog-and-its-total-projection-)
+- [Sprint 35.2: The semantic recipe oracle ✅](#sprint-352-the-semantic-recipe-oracle-)
+- [Sprint 35.3: The authored channel and run-local resolution value ✅](#sprint-353-the-authored-channel-and-run-local-resolution-value-)
+- [Sprint 35.4: The one-architecture build argv ✅](#sprint-354-the-one-architecture-build-argv-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -39,248 +39,246 @@ resolves a tool to an absolute path.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-34 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-21 by the reconciled Register-1 semantic-recipe and exact-argv gate.
+
+**Validation record.** The isolated gate passed on natural `darwin/arm64`, untranslated. All 26 metrics
+match; 37 surfaces join to 63 enumerated items; all three paired mutants redden at their exact loci; and the
+rendered Dockerfile remains beneath `.build/**`. Attestation
+`sha256:438484c249a92f555afce5a684425a75f24522368e847aed60fa08a1e39368f4` binds source
+`sha256:2e1f9a9e9e580eaf…` over 2,246 files. Live image build, publication, and runtime correspondence remain
+UNVERIFIED.
+
+**Activated 2026-08-21** when the preceding phase resealed.
 
 ---
 
 ## Phase Summary
 
-The recipe is not a file a person maintains, it is the output of a pure projection over the typed bake
-catalog. This phase seals that output. One committed golden holds the exact rendered bytes, and the gate
-compares every render against them. A projection that is only asserted pure drifts one stage at a time and
-nothing reports it; a projection whose bytes are pinned cannot drift without a reviewed diff.
+The recipe is a deterministic projection of the typed bake catalog, not a file maintained by hand. Its
+independently authored semantic oracle fixes all twenty-two ordered step identities and their four acquisition
+rungs. Structural assertions then decide the three stages, directive counts, published values, built-product
+copies, environment, dynamic base reference, and repeated-render identity. The generated Dockerfile is
+inspected during the run and remains untracked; no copy of renderer output becomes an expectation.
 
-*The recipe does not change as the remaining Haskell lands* is not a promise a plan can hold — a plan cannot
-observe a later commit. What holds it is the golden: its bytes are fixed here, and no later phase's
-`Docs to update` block names it. A phase whose new understanding moves those bytes reopens this phase rather
-than editing the golden in passing ([§N](development_plan_phase_model.md#n-reopening-and-amending-a-phase)).
+The base is an authored channel, `ubuntu:24.04`, rather than an authored digest. `BaseChannel` excludes digest
+syntax, while `BaseResolution` records a run-local digest and its resolution source as a value later live code
+can fill. The renderer declares `ARG BASE_IMAGE` and has exactly one `FROM ${BASE_IMAGE}`. This phase proves
+that the pure boundary carries no authored digest; it does not claim that a registry was contacted or a digest
+resolved.
 
-Two properties travel with the bytes and are sealed beside them. The recipe declares `ARG BASE_IMAGE` and
-opens `FROM ${BASE_IMAGE}`, so no authored digest reaches it: the channel is authored, and the digest is
-resolved per run and recorded beside the output. A digest a reviewer typed is one resolution asserted
-forever, so the seal holds only while the rendered bytes carry none. The argv carries exactly one
-architecture and no platform flag — no buildx, no BuildKit multi-platform invocation, no emulation — because a
-container shares the host kernel and therefore the host instruction set.
+The invocation boundary likewise remains pure. `BuildArgv` accepts an already resolved absolute engine path,
+compares the requested architecture with the observed architecture, and emits exactly one plain `docker build`
+for one of the four fixed flavor/architecture tags. It admits no `buildx`, `--platform`, emulation setting, or
+multi-architecture join. Four authored cases enumerate all forty-four tokens in both directions, and two
+cross-architecture requests refuse before argv emission.
 
-**Phase scope:** one cohesive claim — *the rendered recipe is sealed byte-for-byte and its build argv is
-pinned to exactly one architecture*. Its sprint seams are the projection, the golden, the digest boundary, and
-the argv. It splits if a second architecture, a second acceptance register, or a live build appears.
+**Phase scope:** one cohesive claim — the generated recipe has independently constrained semantics and its
+build argv can express only one native architecture. The seams are the typed projection, semantic oracle,
+digest-free base value, and exact argv; a live engine, build, publication, or runtime probe splits out.
 
-**Substrate:** `none` — a Dockerfile is text and an argv is a value, so neither claim needs a host ([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
+**Substrate:** `none` — the Dockerfile, catalog, base boundary, and argv are values; no engine or registry is
+consulted ([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
 
 **Lane:** none ([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
 
-**Register:** 1 — pure/golden: the claim is about a value, and no daemon is consulted to decide it ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
+**Register:** 1 — pure/generative: semantic oracles constrain generated output without treating an output copy
+as authority ([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
 
-**Depends on:** [Phase 34](phase_34_chain_kernel_boundary.md)
+**Depends on:** [Phase 34](phase_34_chain_kernel_boundary.md) — its opaque absolute `ToolPath` boundary is the
+input the argv emitter consumes; no later host-ensure phase is a prerequisite for this pure projection.
 
-**Requires**: `host-floor`
-
-**Gate:** `python3 tools/amoebius_image_recipe_gate.py` passes every check named in
-[Gate integrity](#gate-integrity). Phase 36 does not open until it is green.
+**Gate:** `python3 tools/run_phase_gate.py 35` passes the semantic recipe, exact argv,
+five-calculus, mutant, generated-output, ledger, containment, and attestation checks in [Gate integrity](#gate-integrity).
 
 ---
 
 ## Gate integrity
 
-The gate is `python3 tools/amoebius_image_recipe_gate.py`, and it decides four things that are decidable
-without a container engine.
+The gate is `python3 tools/amoebius_image_recipe_gate.py`. It decides only the pure recipe and invocation
+claims that Register 1 can observe.
 
+**The representative recipe set is independently authored.**
+`test/oracle/amoebius_image_recipe/recipe_semantics.tsv` lists all twenty-two catalog steps in order: seven
+`AptPackage`, nine `OfficialArtifact`, six `BuildProduct`, and zero `CopyOci` rows. The suite joins the real
+Dhall decode and renderer to those rows, verifies every apt identity, publisher URL and checksum-manifest
+projection, built-product copy, stage and directive count, and renders twice from the same value. The
+generated Dockerfile is emitted to `.build/dsl/image-recipe/Dockerfile`; a tracked renderer-output golden is
+forbidden.
 
-**The render is compared to committed bytes, not to a description.**
-`test/golden/amoebius_image_recipe/Dockerfile.golden` holds the complete rendered recipe, committed in full
-rather than as a hash — a hash tells a reviewer that something moved and never what. Any difference fails,
-whichever side is right, and the gate carries no refresh path: a golden a gate may rewrite records nothing.
+**The base boundary is digest-free but does not pretend to resolve.** The source and rendered recipe contain no
+authored `baseDigest` or `sha256:` value, and the render contains exactly one global `ARG BASE_IMAGE` and one
+`FROM ${BASE_IMAGE}`. Two distinct `BaseResolution` values prove that resolution is run-local data. Network
+resolution, digest fidelity, live build use, and runtime correspondence are recorded as UNVERIFIED.
 
-**No authored digest reaches the recipe.** The gate scans the rendered bytes for a `sha256:` literal and for a
-`FROM` whose reference is anything other than `${BASE_IMAGE}`; either is a failure. The digest belongs to the
-run's record rather than to a tracked file, so the rendered bytes are stable across a republished upstream
-base and a reviewer never approves a diff that carries no decision.
+**The invocation oracle is exact in both directions.**
+`test/oracle/amoebius_image_recipe/{build_cases,build_argv}.tsv` names the CPU/CUDA × amd64/arm64 product and all
+eleven ordered tokens for each case. The first token is an absolute engine path, the second is `build`, each
+tag is fixed, and neither `buildx` nor `--platform` appears. Two observed/requested mismatches must return the
+typed refusal rather than an argv.
 
-**The argv is joined against an independently authored oracle.**
-`test/oracle/amoebius_image_recipe/build_argv.tsv` enumerates every token the invocation may carry, in order,
-with the one architecture its tag names. The join runs in both directions, so a token the oracle does not name
-and an oracle row the emitter never produces are both failures. The oracle is authored from the doctrine, not
-captured from a run, because an emitter that writes its own expectation proves only that it is consistent.
+**The five calculi reach the real code.**
+`test/oracle/amoebius_image_recipe/calculus_projection.tsv` fixes the artifact, budget, lift, workflow, and
+evidence component names, their `22,44,4,4,3` projection counts, and their `5,77,0,0` resource vector. The
+test constructs those real calculus values and checks their composition rather than printing a disconnected
+claim.
 
-**Three mutants are committed to `test/mutant/registry.tsv`**, and each must turn exactly one check red. An
-argv that reaches the engine through a `buildx` subcommand reddens the oracle join. A second platform flag
-reddens the one-architecture check. A `FROM` carrying an authored `sha256:` literal reddens the
-digest-boundary scan. A mutant that reddens two checks is as much a defect as one that reddens none, because
-it shows the checks do not separate what they claim to separate.
+**Three paired mutants separate the claims.** The registry and descriptors name an authored base digest, a
+`buildx` insertion, and a second platform flag. For each, the original must pass, the mutated value must fail,
+and the process must exit red at the mutant's own expected locus. The 29-row validation-locus ledger joins all
+twenty-two recipe steps, four build cases, and three mutants in both directions.
 
----
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+- **Extension conformance (§M.13).** Not applicable: this phase delivers no extension.
 
 ## Doctrine adopted
 
-- [`jit_artifact_doctrine.md`](../documents/engineering/jit_artifact_doctrine.md) — every artifact the amoebius image recipe emits is a recipe over a content address, never an authored file.
+- [`jit_artifact_doctrine.md` §7 — goldens become oracles](../documents/engineering/jit_artifact_doctrine.md#7-goldens-become-oracles):
+  the image recipe is generated per run and constrained by authored semantics, never by a committed copy of
+  renderer output.
 - [`image_build_doctrine.md` §3 — one image per architecture](../documents/engineering/image_build_doctrine.md#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index):
-  one plain build per architecture on a host of that architecture, the architecture in the reference rather
-  than in a manifest index, and no join between the two.
+  the pure argv emitter produces one plain native build and refuses observed/requested architecture mismatch.
 - [`image_build_doctrine.md` §8 — build mechanics under the no-env / no-`PATH` contract](../documents/engineering/image_build_doctrine.md#8-build-mechanics-under-the-no-env--no-path-contract):
-  a rendered recipe carries no authored digest, and the engine is invoked by a resolved absolute path rather
-  than found on an ambient search path.
+  an authored channel reaches the dynamic base argument, no authored digest reaches the recipe, and the engine
+  arrives as an already resolved absolute path.
 - [`generated_artifacts_doctrine.md` §2 — what is generated (and from what)](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what):
-  the recipe's source of truth is the typed bake catalog and its renderer is pure and total, so the rendered
-  file is emitted rather than committed.
+  the typed bake catalog and total renderer are the source; the Dockerfile remains emitted output.
 
 ---
 
 ## Sprints
 
-## Sprint 35.1: The typed catalog and its total projection 📋
+## Sprint 35.1: The typed catalog and its total projection ✅
 
-**Status**: Planned
+**Status**: Done
 **Implementation**: `dhall/amoebius/BakeCatalog.dhall`, `src/Amoebius/Image/BakeInventory.hs`, `src/Amoebius/Image/RenderDockerfile.hs`
 **Blocked by**: none within the phase
-**Requires**: `host-floor`
-**Independent Validation**: the renderer is total over the catalog's step union and emits identical bytes on repetition
+**Independent Validation**: the real catalog decodes, all four arms are exhaustive, and two renders are byte-identical
 **Docs to update**: `documents/engineering/generated_artifacts_doctrine.md`
 
 ### Objective
 
 Adopt [`generated_artifacts_doctrine.md` §2 — what is generated (and from what)](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what);
-make the recipe the output of one authored value rather than a file anyone edits by hand.
+make the recipe one total projection over the authored catalog.
 
 ### Deliverables
 
-- The typed bake catalog as the single authored source: each stage a non-empty step sequence, with no arm
-  carrying a free shell string or a free URL, because either arm re-admits the untyped recipe this projection
-  exists to replace.
-- A total renderer over that step union with no default case, so an unhandled arm is a compile failure rather
-  than a stage silently dropped from the output.
-- A deterministic emission order derived from the catalog's own structure, so the bytes do not depend on the
-  traversal order of a map.
-- The rendered file's home beneath `.build/`, untracked, because an artifact that is both generated and
-  tracked has two sources of truth and no rule saying which wins.
+- A closed `BakeStep` union with seven package, nine official-artifact, six built-product, and zero copy-image
+  values in the current catalog.
+- A total renderer with incomplete patterns rejected by the compiler.
+- Deterministic catalog-order emission to `.build/**`, with no tracked Dockerfile output.
 
 ### Validation
 
-1. Adding an arm to the step union fails to compile until the renderer handles it.
-2. Two renders of the same catalog in one process emit byte-identical output.
+1. The focused `image-recipe-spec` suite decodes the real catalog and handles every arm.
+2. Two renders of the same decoded value are byte-identical.
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
-## Sprint 35.2: The sealed recipe golden 📋
+## Sprint 35.2: The semantic recipe oracle ✅
 
-**Status**: Planned
-**Implementation**: `test/golden/amoebius_image_recipe/Dockerfile.golden`, `tools/amoebius_image_recipe_gate.py`
+**Status**: Done
+**Implementation**: `test/oracle/amoebius_image_recipe/{recipe_semantics,calculus_projection,validation_locus}.tsv`, `test/spec/image/ImageRecipeSpec.hs`, `tools/amoebius_image_recipe_gate.py`
 **Blocked by**: Sprint 35.1
-**Independent Validation**: the render matches the committed golden byte for byte, and no gate path rewrites it
+**Independent Validation**: twenty-two authored semantics join to the real render and the output remains untracked
 **Docs to update**: `documents/engineering/generated_artifacts_doctrine.md`
 
 ### Objective
 
-Seal the projection's output, so that changing the recipe is a reviewed change to committed bytes rather than
-an observation made after the fact.
+Adopt [`jit_artifact_doctrine.md` §7 — goldens become oracles](../documents/engineering/jit_artifact_doctrine.md#7-goldens-become-oracles);
+constrain what the recipe means without committing a copy of generated bytes.
 
 ### Deliverables
 
-- One golden holding the complete rendered recipe, so a reviewer reads the change rather than a digest of it.
-- A comparison that reports the first differing line and its byte offset, so a failure is actionable without
-  reaching for a second tool.
-- No refresh path inside the gate; regeneration is an explicit maintainer command the gate never invokes.
-- A registry row per seeded mutant naming the single check it must redden, so a mutant that spreads across
-  checks is visible as a defect in the checks.
+- Twenty-two ordered semantic rows, independently authored from the acquisition requirements.
+- Exact stage, rung, directive, package, publisher-value, built-product, and environment projections.
+- One real five-calculus composition and a generated-output check that forbids the retired planned golden.
 
 ### Validation
 
-1. A one-byte change to the renderer's output fails the gate.
-2. Two consecutive gate runs leave the golden's bytes unchanged.
+1. Removing, reordering, or changing any catalog step makes the semantic join red.
+2. The generated recipe and results exist only beneath `.build/**`.
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
-## Sprint 35.3: The authored channel and the resolved digest 📋
+## Sprint 35.3: The authored channel and run-local resolution value ✅
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Image/BaseChannel.hs`, `src/Amoebius/Image/RenderDockerfile.hs`
+**Status**: Done
+**Implementation**: `src/Amoebius/Image/BaseChannel.hs`, `src/Amoebius/Image/{BakeInventory,RenderDockerfile}.hs`, `dhall/amoebius/BakeCatalog.dhall`
 **Blocked by**: Sprint 35.2
-**Independent Validation**: the rendered bytes carry no `sha256:` literal and exactly one `FROM ${BASE_IMAGE}`
+**Independent Validation**: the catalog and recipe admit no authored digest and contain one dynamic base reference
 **Docs to update**: `documents/engineering/image_build_doctrine.md`
 
 ### Objective
 
 Adopt [`image_build_doctrine.md` §8 — build mechanics under the no-env / no-`PATH` contract](../documents/engineering/image_build_doctrine.md#8-build-mechanics-under-the-no-env--no-path-contract);
-keep every public identity an authored channel in the tree and a resolved digest in the run's record.
+separate the authored base channel from the digest a later live run observes.
 
 ### Deliverables
 
-- `ARG BASE_IMAGE` declared ahead of the first `FROM`, and `FROM ${BASE_IMAGE}` as the recipe's only base
-  reference, so the digest enters as an argument value rather than as recipe text.
-- The channel authored in the catalog as a name and a tag with no digest field at all, because a field that
-  can hold a digest eventually holds one.
-- The run record's shape — the channel, the digest it resolved to, and where that resolution came from —
-  authored here as a type; the resolution that fills it is the live build's at
-  [Phase 56](phase_56_base_image_registry.md).
+- An opaque `BaseChannel` that rejects digest syntax and malformed channel values.
+- A `BaseResolution` value carrying channel, digest, and canonical-or-rate-limit-mirror source.
+- A catalog with no `baseDigest` field and a renderer with one `ARG BASE_IMAGE` / `FROM ${BASE_IMAGE}` pair.
 
 ### Validation
 
-1. A `sha256:` literal anywhere in the rendered bytes fails the gate.
-2. The rendered bytes are unchanged when the channel is stated to resolve to a different digest.
+1. A digest literal in the catalog, renderer source, or emitted recipe fails the gate.
+2. Distinct run-local resolutions do not alter the recipe's bytes.
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
-## Sprint 35.4: The one-architecture build argv 📋
+## Sprint 35.4: The one-architecture build argv ✅
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Image/BuildArgv.hs`, `test/oracle/amoebius_image_recipe/build_argv.tsv`
+**Status**: Done
+**Implementation**: `src/Amoebius/Image/BuildArgv.hs`, `test/oracle/amoebius_image_recipe/{build_cases,build_argv}.tsv`
 **Blocked by**: Sprint 35.3
-**Independent Validation**: the emitted argv joins to the authored oracle in both directions and names one architecture
+**Independent Validation**: four emitted argv vectors join exactly to forty-four authored tokens and two mismatches refuse
 **Docs to update**: `documents/engineering/image_build_doctrine.md`
 
 ### Objective
 
 Adopt [`image_build_doctrine.md` §3 — one image per architecture](../documents/engineering/image_build_doctrine.md#3-one-image-per-architecture--the-tag-carries-the-architecture-not-an-index);
-emit an invocation that can build only the architecture the host already executes.
+make a multi-architecture or ambient-path invocation unrepresentable at this boundary.
 
 ### Deliverables
 
-- A plain build argv with no `buildx` subcommand, no platform flag, and no emulation setting, because a
-  container shares the host kernel and an image for an instruction set the host cannot run is not something a
-  build honestly produces.
-- The architecture carried in the tag the argv names rather than in a manifest index, so the reference
-  identifies bytes rather than a set of them.
-- An engine named by an absolute path supplied to the emitter, never as a bare command token; resolving that
-  path is Phase 51's and this sprint only consumes the result.
-- A refusal that compares the requested architecture against the observed host architecture before emitting
-  anything, so a mismatch stops the emission instead of producing an argv that would emulate.
+- One plain-build argv with an absolute engine path and no `buildx`, platform flag, or emulation setting.
+- Four fixed CPU/CUDA × amd64/arm64 tag cases and an exact eleven-token oracle for each.
+- A typed refusal when observed and requested architectures differ.
 
 ### Validation
 
-1. An argv naming two architectures is unrepresentable: the emitter takes one architecture and its type
-   admits no list.
-2. A `buildx` token in the emitted argv fails the oracle join.
+1. The four vectors join to all forty-four oracle rows in both directions.
+2. The buildx and second-platform mutants fail at their separate loci.
 
 ### Remaining Work
 
-The whole sprint.
+None.
 
 ---
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
-- `documents/engineering/image_build_doctrine.md` — §3 records the sealed single-architecture argv and §8 the
-  recipe's digest-free base reference, once both are sealed rather than planned.
-- `documents/engineering/generated_artifacts_doctrine.md` — §2's image-recipe row names the golden that pins
-  the projection's output.
+**Engineering docs to update when the reconciled gate seals:**
+- `documents/engineering/image_build_doctrine.md` — §3 records the tested pure native-build argv boundary and
+  §8 records the tested digest-free recipe boundary while keeping live resolution UNVERIFIED.
+- `documents/engineering/generated_artifacts_doctrine.md` — §3.1 records the renderer-output golden as retired
+  and names the semantic recipe oracle that replaced it.
 
-**Cross-references to add:**
-- `DEVELOPMENT_PLAN/system_components.md` — the bake-catalog row points here for the sealed recipe and at
-  Phase 56 for the build that consumes it.
+**Cross-references to update:**
+- `DEVELOPMENT_PLAN/system_components.md` — the pure recipe and argv row points here; Phase 56 retains the live
+  build and publication boundary.
 
 ---
 
 ## Related Documents
 - [Image Build & Registry](../documents/engineering/image_build_doctrine.md)
 - [Generated Artifacts](../documents/engineering/generated_artifacts_doctrine.md)
-- [Phase 51](phase_51_host_ensure_kernel.md)
+- [Phase 34](phase_34_chain_kernel_boundary.md)
+- [Phase 52](phase_52_linux_engine_bringup.md)
 - [Phase 56](phase_56_base_image_registry.md)
 - [Development Plan](README.md)

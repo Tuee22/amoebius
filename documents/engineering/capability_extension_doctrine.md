@@ -135,7 +135,8 @@ wired by the same graph every other extension is wired by.
 [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) implements a two-member link set of `{infernix, jitML}`
 provide/require refinement in `Amoebius.Capability.Binding`: requirements must resolve, duplicate providers
 are rejected as anti-shadow violations, and provider edges must be acyclic. Its paired legal/cyclic/shadowing
-fixtures establish this only for the pure gadt-decode model; linked runtime behavior remains unverified.
+fixtures plus a direct missing-requirement/closed-graph pair establish totality only for the pure gadt-decode
+model; linked runtime behavior remains unverified.
 
 [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability) owns the `ExtensionSpec` seam itself — `extDhall`,
 `extChain :: cfg -> [Step]`, `extCapabilities`, and the mandatory `extMonitoring` — and the fact that specs are merged at compile/link time into one binary. This doctrine owns one addition to that contract: extending the capability declaration from **export-only** to **PROVIDE + REQUIRE**.

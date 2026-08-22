@@ -10,13 +10,33 @@ module BindGate
 import Amoebius.Capacity.Execution
   ( BoundExecutionUnit (..)
   , ControllerBody (..)
-  , ExecutionTransitionSource (FirstDeployment)
+  , ExecutionTransitionSource (FirstDeployment, UpdateFrom)
   )
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
 import Amoebius.Capability.Binding
   ( assembleBoundDeployment
   , bind
   , decodeCapabilityProvider
-  , renderBoundServiceSpec
   , validateBindingCoverage
   , validateExtensionGraph
   )
@@ -27,24 +47,32 @@ import Amoebius.Capability.Types
   , CapabilityArm (..)
   , CapabilityBinding (..)
   , CapabilityNeed (..)
+  , CapabilityProvider (CanonicalProvider)
   , EngineRuntime (AppleMetal)
   , ExtensionDescriptor (ExtensionDescriptor)
   , ExtensionName (..)
   , InferenceEngineNeed (InferenceEngineNeed)
   , ObjectStoreProducerKind (RegistryProducer)
   , ProviderIntent (RegistryStorageProducerIntent)
+  , PriorRegistryProvisionRef (PriorRegistryProvisionRef)
+  , PriorVolumeProvisionRef (PriorVolumeProvisionRef)
   , RegistryStorageIntent (RegistryStorageIntent)
   , ServiceShape (..)
   , capabilityArm
   , capabilityResourceName
   )
 import Amoebius.Dsl.Error (DecodeError (..), decodeErrorTag)
+import Amoebius.Scope.Index
+  ( activeMembership
+  , trustedSubject
+  , trustedTenant
+  , withRequestScope
+  )
 import BindFixtures
   ( CapabilityFixture (..)
   , capabilityFixtures
   , distributedBinding
   , fixturePath
-  , goldenPath
   , oracleArms
   , singleBinding
   )
@@ -59,7 +87,8 @@ import Data.Text.IO qualified as Text
 import Dhall qualified
 import GHC.Generics (Generic)
 import ShapeOracle
-  ( normalizedAppSlice
+  ( objectNodeMultiset
+  , normalizedAppSlice
   , structurallyDifferentByNodeMultiset
   , validateBoundExecutionInventory
   )
@@ -67,11 +96,25 @@ import System.Exit (ExitCode (ExitSuccess))
 import System.Environment (lookupEnv)
 import System.IO.Unsafe (unsafePerformIO)
 import System.Process (proc, readCreateProcessWithExitCode)
+import Text.Read (readMaybe)
 
 data ArmOracleRow = ArmOracleRow
   { oracleSlug :: Text
   , oracleArm :: Text
   , oracleResource :: Text
+  }
+
+data ShapeSemanticRow = ShapeSemanticRow
+  { semanticSlug :: Text
+  , semanticProduct :: Text
+  , semanticMemberKind :: Text
+  , semanticControllerKind :: Text
+  , semanticHasBootstrap :: Bool
+  , semanticSingleObjects :: Int
+  , semanticDistributedObjects :: Int
+  , semanticSingleExecutions :: Int
+  , semanticDistributedExecutions :: Int
+  , semanticIntentCount :: Int
   }
 
 data RawProvider = RawProvider
@@ -111,24 +154,53 @@ newtype RawExtensionGraph = RawExtensionGraph
 runBindGate :: IO ()
 runBindGate = do
   oracle <- loadArmOracle
-  assert (length oracle == 9) "Phase-10 arm oracle must contain exactly nine rows"
+  semantics <- loadShapeSemanticOracle
+  assert (length oracle == 9) "Phase-30 arm oracle must contain exactly nine rows"
+  assert (length semantics == 9) "Phase-30 semantic shape oracle must contain exactly nine rows"
   assert (fmap fixtureArm capabilityFixtures == oracleArms) "fixture list no longer covers the independently pinned arm order"
   assert (Set.fromList (fmap fixtureSlug capabilityFixtures) == Set.fromList (fmap oracleSlug oracle)) "fixture/oracle slug coverage drifted"
+  assert (fmap semanticSlug semantics == fmap oracleSlug oracle) "semantic shape oracle no longer follows the pinned arm order"
   assert (Set.fromList (fmap (Text.pack . show) oracleArms) == Set.fromList (fmap oracleArm oracle)) "fixture/oracle arm coverage drifted"
   assert (Set.fromList (fmap (capabilityResourceName . fixtureNeed) capabilityFixtures) == Set.fromList (fmap oracleResource oracle)) "fixture/oracle resource coverage drifted"
-  services <- fmap concat (mapM checkFixture capabilityFixtures)
-  checkGate1
-  checkGate2
-  checkDeployment services
-  checkRegistryIntent services
+  services <- fmap concat (sequence (zipWith checkFixture capabilityFixtures semantics))
+  gate1Count <- checkGate1
+  gate2Count <- checkGate2
+  unresolvedReferenceCount <- checkDeployment services
+  registryShapeCount <- checkRegistryIntent services
+  extensionTotalityCount <- checkExtensionTotality
   checkControllerKinds services
   checkStructuralBoundary
-  checkLedgerCoverage
-  runBindProps
-  putStrLn "capability-bind-spec: PASS (9 arms, 18 shape goldens, 3 Gate-1, 4 Gate-2, 4 mutants, 1 covered property)"
+  ledgerCount <- checkLedgerCoverage
+  propertyCount <- runBindProps
+  let mutantCount = length capabilityMutants
+      executionInventoryCount = length services
+  assert (mutantCount == 4) "Phase-30 mutant set must contain four entries"
+  checkCapabilityBindCalculusProjection (length oracle) (length services) (gate1Count + gate2Count) propertyCount mutantCount
+  putStrLn
+    ( "capability-bind-invariants: PASS ("
+        <> show executionInventoryCount
+        <> " execution inventories, "
+        <> show unresolvedReferenceCount
+        <> " unresolved references, "
+        <> show registryShapeCount
+        <> " registry shapes, "
+        <> show extensionTotalityCount
+        <> " extension-totality cases, "
+        <> show ledgerCount
+        <> " locus rows)"
+    )
+  putStrLn
+    ( "capability-bind-spec: PASS (9 arms, 18 semantic shapes, "
+        <> show gate1Count
+        <> " Gate-1, "
+        <> show gate2Count
+        <> " Gate-2, 4 mutants, "
+        <> show propertyCount
+        <> " covered property)"
+    )
 
-checkFixture :: CapabilityFixture -> IO [BoundServiceSpec]
-checkFixture fixture = do
+checkFixture :: CapabilityFixture -> ShapeSemanticRow -> IO [BoundServiceSpec]
+checkFixture fixture semantics = do
   let singlePath = fixturePath fixture SingleNode
       distributedPath = fixturePath fixture (Distributed 3)
       single = bind (fixtureNeed fixture) singleBinding
@@ -142,29 +214,65 @@ checkFixture fixture = do
   assert (structurallyDifferentByNodeMultiset single distributed) (Text.unpack (fixtureSlug fixture) <> " changed only by scalar/tag, not object-node multiset")
   assert (validateBoundExecutionInventory single) (Text.unpack (fixtureSlug fixture) <> " single-node execution inventory diverged")
   assert (validateBoundExecutionInventory distributed) (Text.unpack (fixtureSlug fixture) <> " distributed execution inventory diverged")
-  checkGolden fixture SingleNode single
-  checkGolden fixture (Distributed 3) distributed
+  checkSemanticShape semantics SingleNode single
+  checkSemanticShape semantics (Distributed 3) distributed
   pure [single, distributed]
 
-checkGolden :: CapabilityFixture -> ServiceShape -> BoundServiceSpec -> IO ()
-checkGolden fixture shape service = do
-  expected <- Text.readFile (goldenPath fixture shape)
-  let actual = renderBoundServiceSpec service
-  assert (actual == expected) (goldenPath fixture shape <> " differs from bound representation\nEXPECTED:\n" <> Text.unpack expected <> "ACTUAL:\n" <> Text.unpack actual)
+checkSemanticShape :: ShapeSemanticRow -> ServiceShape -> BoundServiceSpec -> IO ()
+checkSemanticShape semantics shape service = do
+  let isDistributed = case shape of
+        SingleNode -> False
+        Distributed _ -> True
+      memberCount = if isDistributed then 3 else 1
+      objectCount = if isDistributed then semanticDistributedObjects semantics else semanticSingleObjects semantics
+      executionCount = if isDistributed then semanticDistributedExecutions semantics else semanticSingleExecutions semantics
+      bootstrapObjects = if semanticHasBootstrap semantics then [("Job", "bootstrap", 1)] else []
+      distributedObjects =
+        if isDistributed
+          then [("Service", "member-discovery", 1), ("PodDisruptionBudget", "quorum-policy", 1)]
+          else []
+      expectedObjects =
+        Map.fromList
+          ( [ ( ("Service", "stable-endpoint"), 1)
+            , ( ("ConfigMap", "provider-config"), 1)
+            , ( (semanticMemberKind semantics, "member"), memberCount)
+            ]
+              <> [((kind, role), count) | (kind, role, count) <- bootstrapObjects <> distributedObjects]
+          )
+      expectedControllers =
+        Map.fromList
+          ( [(semanticControllerKind semantics, memberCount)]
+              <> if semanticHasBootstrap semantics then [("Job", 1)] else []
+          )
+      actualControllers =
+        Map.fromListWith (+)
+          [ (controllerTag (executionBody unit), 1 :: Int)
+          | unit <- Map.elems (boundExecutionUnits (boundServiceExecutions service))
+          ]
+      label = Text.unpack (semanticSlug semantics) <> " " <> show shape
+  assert (boundProvider service == CanonicalProvider) (label <> " provider drifted")
+  assert (boundShape service == shape) (label <> " shape drifted")
+  assert (boundProviderProduct service == semanticProduct semantics) (label <> " product drifted")
+  assert (length (boundProviderGraph service) == objectCount) (label <> " object count drifted")
+  assert (Map.size (boundExecutionUnits (boundServiceExecutions service)) == executionCount) (label <> " execution count drifted")
+  assert (length (boundProviderIntents service) == semanticIntentCount semantics) (label <> " intent count drifted")
+  assert (objectNodeMultiset service == expectedObjects) (label <> " object kind/role multiset drifted")
+  assert (actualControllers == expectedControllers) (label <> " controller-kind multiset drifted")
 
-checkGate1 :: IO ()
+checkGate1 :: IO Int
 checkGate1 = do
   rows <- rowsOf "test/oracle/capability_bind/dhall_typecheck_cases.tsv"
-  assert (length rows == 3) "Phase-10 Gate-1 oracle must contain three negatives"
+  assert (length rows == 3) "Phase-30 Gate-1 oracle must contain three negatives"
   forM_ rows $ \row -> case row of
     [_caseName, negative, legal, required] -> do
       checkDhallGreen (Text.unpack legal)
       (exitCode, stdoutText, stderrText) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack negative, "--quiet"]) ""
       let observed = Text.pack (stdoutText <> stderrText)
       assert (exitCode /= ExitSuccess && required `Text.isInfixOf` observed) (Text.unpack negative <> " missed exact Gate-1 locus " <> Text.unpack required)
-    _ -> fail "malformed Phase-10 Gate-1 oracle row"
+    _ -> fail "malformed Phase-30 Gate-1 oracle row"
+  pure (length rows)
 
-checkGate2 :: IO ()
+checkGate2 :: IO Int
 checkGate2 = do
   providerNegative <- decodeProviderFixture "dhall/examples/illegal_unbuilt_provider.dhall"
   providerPositive <- decodeProviderFixture "dhall/examples/legal_built_provider.dhall"
@@ -184,14 +292,15 @@ checkGate2 = do
   assertRight extensionPositive "legal infernix/jitML extension graph rejected"
 
   oracle <- rowsOf "test/oracle/capability_bind/gadt_decode_cases.tsv"
-  assert (length oracle == 4) "Phase-10 Gate-2 oracle must contain four negatives"
+  assert (length oracle == 4) "Phase-30 Gate-2 oracle must contain four negatives"
   assert
     ( Set.fromList [expected | [_name, expected, _negative, _legal] <- oracle]
         == Set.fromList ["UnbuiltProviderArm", "UnboundCapability", "CyclicExtension", "ShadowingExtension"]
     )
-    "Phase-10 Gate-2 specific-tag oracle drifted"
+    "Phase-30 Gate-2 specific-tag oracle drifted"
+  pure (length oracle)
 
-checkDeployment :: [BoundServiceSpec] -> IO ()
+checkDeployment :: [BoundServiceSpec] -> IO Int
 checkDeployment services = do
   let oneShape = everyOther services
   deployment <- case assembleBoundDeployment FirstDeployment Nothing Nothing oneShape of
@@ -202,14 +311,42 @@ checkDeployment services = do
   assert (Map.size (boundDeploymentServices deployment) == 9) "BoundDeployment omitted a capability service"
   assert (actualUnits == expectedUnits) "BoundDeployment execution set omitted or duplicated a runnable"
   assert (length (boundDeploymentControllerExplanations deployment) == expectedUnits) "controller explanations are not exactly one per runnable"
+  let executionRef = "execution-provision:v7"
+      volumeRef = PriorVolumeProvisionRef "volume-provision:v7"
+      registryRef = PriorRegistryProvisionRef "registry-provision:v7"
+  transitioned <- case assembleBoundDeployment (UpdateFrom executionRef) (Just volumeRef) (Just registryRef) oneShape of
+    Left problem -> fail ("update BoundDeployment assembly failed: " <> show problem)
+    Right value -> pure value
+  assert (boundDeploymentTransition transitioned == UpdateFrom executionRef) "execution transition reference was resolved or changed during bind"
+  assert (boundPriorVolumeRef transitioned == Just volumeRef) "prior volume reference was resolved or changed during bind"
+  assert (boundPriorRegistryRef transitioned == Just registryRef) "prior registry reference was resolved or changed during bind"
+  pure 3
 
-checkRegistryIntent :: [BoundServiceSpec] -> IO ()
-checkRegistryIntent services = case [service | service <- services, capabilityArmOf service == Registry] of
-  [] -> fail "registry service is absent"
-  service : _ ->
-    assert
-      (boundProviderIntents service == [RegistryStorageProducerIntent RegistryProducer (RegistryStorageIntent "images")])
-      "Registry did not cross ObjectStoreProducerIntent.Registry into RegistryStorageIntent on the bound side"
+checkRegistryIntent :: [BoundServiceSpec] -> IO Int
+checkRegistryIntent services = do
+  let registryServices = [service | service <- services, capabilityArmOf service == Registry]
+      expected = [RegistryStorageProducerIntent RegistryProducer (RegistryStorageIntent "images")]
+  assert (length registryServices == 2) "registry service is absent from one of the two shapes"
+  assert (all ((== expected) . boundProviderIntents) registryServices) "Registry did not cross ObjectStoreProducerIntent.Registry into RegistryStorageIntent on the bound side"
+  pure (length registryServices)
+
+checkExtensionTotality :: IO Int
+checkExtensionTotality = do
+  let missingRequirement =
+        [ ExtensionDescriptor
+            InfernixExtension
+            (Set.singleton InferenceEngine)
+            (Set.singleton ObjectStore)
+        ]
+      closedGraph =
+        [ ExtensionDescriptor
+            InfernixExtension
+            (Set.singleton InferenceEngine)
+            Set.empty
+        ]
+  assertTag "UnboundCapability" (validateExtensionGraph missingRequirement)
+  assertRight (validateExtensionGraph closedGraph) "closed extension requirement graph rejected"
+  pure 2
 
 checkControllerKinds :: [BoundServiceSpec] -> IO ()
 checkControllerKinds services = do
@@ -219,12 +356,14 @@ checkControllerKinds services = do
   assert (tags == Set.fromList ["Deployment", "StatefulSet", "DaemonSet", "Job", "HostProcess"]) "bound execution vocabulary does not exercise all five controller kinds"
  where
   controllerTags service = fmap (controllerTag . executionBody) (Map.elems (boundExecutionUnits (boundServiceExecutions service)))
-  controllerTag body = case body of
-    DeploymentBody {} -> "Deployment"
-    StatefulSetBody {} -> "StatefulSet"
-    DaemonSetBody {} -> "DaemonSet"
-    JobBody {} -> "Job"
-    HostProcessBody {} -> "HostProcess"
+
+controllerTag :: ControllerBody -> Text
+controllerTag body = case body of
+  DeploymentBody {} -> "Deployment"
+  StatefulSetBody {} -> "StatefulSet"
+  DaemonSetBody {} -> "DaemonSet"
+  JobBody {} -> "Job"
+  HostProcessBody {} -> "HostProcess"
 
 checkStructuralBoundary :: IO ()
 checkStructuralBoundary = do
@@ -243,7 +382,7 @@ checkStructuralBoundary = do
   assert (not ("Provisioned" `Text.isInfixOf` declaration)) "BoundDeployment contains a Provisioned field or value"
   assert (all (`Text.isInfixOf` declaration) requiredFields) "BoundDeployment structural inventory drifted"
 
-checkLedgerCoverage :: IO ()
+checkLedgerCoverage :: IO Int
 checkLedgerCoverage = do
   rows <- rowsOf "test/oracle/capability_bind/validation_locus.tsv"
   let observed = Set.fromList [entry | [entry, _className, _locus, _status] <- rows]
@@ -264,7 +403,9 @@ checkLedgerCoverage = do
           , "illegal_shadowing_extension"
           ]
       expected = positives <> negatives <> Set.fromList capabilityMutants
-  assert (observed == expected) "Phase-10 validation-locus ledger does not cover every positive, negative, and mutant"
+  assert (observed == expected) "Phase-30 validation-locus ledger does not cover every positive, negative, and mutant"
+  assert (length rows == 29) "Phase-30 validation-locus ledger must contain exactly 29 rows"
+  pure (length rows)
 
 decodeProviderFixture :: FilePath -> IO (Either DecodeError ())
 decodeProviderFixture path = do
@@ -322,7 +463,81 @@ loadArmOracle = do
  where
   parse row = case row of
     [slug, arm, resource] -> pure (ArmOracleRow slug arm resource)
-    _ -> fail "malformed Phase-10 arm oracle row"
+    _ -> fail "malformed Phase-30 arm oracle row"
+
+loadShapeSemanticOracle :: IO [ShapeSemanticRow]
+loadShapeSemanticOracle = do
+  rows <- rowsOf "test/oracle/capability_bind/bound_shape_semantics.tsv"
+  traverse parse rows
+ where
+  parse row = case row of
+    [slug, productName, memberKind, controllerKind, bootstrapText, singleObjectsText, distributedObjectsText, singleExecutionsText, distributedExecutionsText, intentCountText] -> do
+      bootstrap <- parseBool "bootstrap" bootstrapText
+      singleObjects <- parseInt "single objects" singleObjectsText
+      distributedObjects <- parseInt "distributed objects" distributedObjectsText
+      singleExecutions <- parseInt "single executions" singleExecutionsText
+      distributedExecutions <- parseInt "distributed executions" distributedExecutionsText
+      intentCount <- parseInt "intent count" intentCountText
+      pure
+        ShapeSemanticRow
+          { semanticSlug = slug
+          , semanticProduct = productName
+          , semanticMemberKind = memberKind
+          , semanticControllerKind = controllerKind
+          , semanticHasBootstrap = bootstrap
+          , semanticSingleObjects = singleObjects
+          , semanticDistributedObjects = distributedObjects
+          , semanticSingleExecutions = singleExecutions
+          , semanticDistributedExecutions = distributedExecutions
+          , semanticIntentCount = intentCount
+          }
+    _ -> fail "malformed Phase-30 semantic shape oracle row"
+
+  parseBool field value = case value of
+    "true" -> pure True
+    "false" -> pure False
+    _ -> fail (field <> " is not a boolean: " <> Text.unpack value)
+
+  parseInt field value = case readMaybe (Text.unpack value) of
+    Just number | number >= 0 -> pure number
+    _ -> fail (field <> " is not a non-negative integer: " <> Text.unpack value)
+
+checkCapabilityBindCalculusProjection :: Int -> Int -> Int -> Int -> Int -> IO ()
+checkCapabilityBindCalculusProjection arms shapes negatives properties mutants = do
+  expected <- loadMetricOracle "test/oracle/capability_bind/calculus_projection.tsv"
+  tenant <- either (fail . show) pure (trustedTenant "capability-bind-tenant")
+  subject <- either (fail . show) pure (trustedSubject tenant "capability-bind-subject")
+  membership <- either (fail . show) pure (activeMembership tenant subject)
+  action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+    let resources count = ResourceVector 1 (fromIntegral count) 0 0
+        artifact = artifactComponent scope "capability-arms" (resources arms) (RecipeId "capability-bind-corpus" 1)
+        budget = budgetComponent scope "bound-service-shapes" (resources shapes) (allowance (Bytes (fromIntegral shapes)) (Slots 1) (Bytes (fromIntegral shapes)))
+        lift = liftComponent scope "boundary-negatives" (resources negatives) OnHost
+        workflow = workflowComponent scope "bind-property" (resources properties) emptyLedger
+        evidence = evidenceComponent scope "mutant-evidence" (resources mutants) PureRegister
+        composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+        ResourceVector cpu memory ephemeral pods = compositionResource composition
+        actual =
+          [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
+          , ("component-names", Text.intercalate "," (compositionNames composition))
+          , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [arms, shapes, negatives, properties, mutants]))
+          , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
+          ]
+    assert (compositionKinds composition == everyCalculus) "capability bind projection omitted or reordered a calculus"
+    assert (actual == expected) ("capability bind calculus projection changed: " <> show actual)
+  action
+  putStrLn
+    ( "capability-bind-calculus: PASS (5 kinds, "
+        <> show (arms + shapes + negatives + properties + mutants)
+        <> " projected units)"
+    )
+
+loadMetricOracle :: FilePath -> IO [(Text, Text)]
+loadMetricOracle path = do
+  contents <- Text.readFile path
+  forM (drop 1 (Text.lines contents)) $ \row -> case Text.splitOn "\t" row of
+    [metric, value] -> pure (metric, value)
+    _ -> fail ("malformed calculus metric row: " <> Text.unpack row)
 
 checkDhallGreen :: FilePath -> IO ()
 checkDhallGreen path = do

@@ -22,8 +22,8 @@ main :: IO ()
 main = do
   arguments <- getArgs
   case arguments of
-    ["--mutant=astcheck-allow-rawio"] -> rejectMutant "astcheck-allow-rawio" =<< rawIoCaught
-    ["--mutant=astcheck-export-ctor"] -> rejectMutant "astcheck-export-ctor" =<< constructorOpaque
+    ["--mutant=astcheck-allow-rawio"] -> rejectMutant "astcheck-allow-rawio" =<< rawIoMutationCaught
+    ["--mutant=astcheck-export-ctor"] -> rejectMutant "astcheck-export-ctor" =<< constructorExportMutationCaught
     _ -> runGreen
 
 runGreen :: IO ()
@@ -98,14 +98,27 @@ constructorOpaque :: IO Bool
 constructorOpaque = do
   source <- Text.readFile "src/Amoebius/Dsl/AstCheck.hs"
   let header = fst (Text.breakOn ") where" source)
-  pure (not ("CheckedExtensionSource (" `Text.isInfixOf` header))
+  pure (headerIsOpaque header)
 
-rawIoCaught :: IO Bool
-rawIoCaught = do
+rawIoMutationCaught :: IO Bool
+rawIoMutationCaught = do
   source <- Text.readFile (fixturePath "negative_raw_io.hs")
   pure $ case checkExtensionSource "negative_raw_io.hs" source of
-    Rejected violations -> any ((== RawIO) . violationReason) violations
+    Rejected violations ->
+      let reasons = fmap violationReason (NonEmpty.toList violations)
+          mutantRemainder = filter (/= RawIO) reasons
+       in reasons == [RawIO] && null mutantRemainder
     Accepted _ -> False
+
+constructorExportMutationCaught :: IO Bool
+constructorExportMutationCaught = do
+  source <- Text.readFile "src/Amoebius/Dsl/AstCheck.hs"
+  let header = fst (Text.breakOn ") where" source)
+      widened = Text.replace ", CheckedExtensionSource\n" ", CheckedExtensionSource (..)\n" header
+  pure (headerIsOpaque header && widened /= header && not (headerIsOpaque widened))
+
+headerIsOpaque :: Text.Text -> Bool
+headerIsOpaque = not . Text.isInfixOf "CheckedExtensionSource ("
 
 rejectMutant :: String -> Bool -> IO ()
 rejectMutant name caught =

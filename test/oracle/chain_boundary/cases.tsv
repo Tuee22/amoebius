@@ -1,0 +1,3 @@
+case	fixture	shape	nodes
+minimal	objectstore	SingleNode	1
+multi	sql	Distributed	3

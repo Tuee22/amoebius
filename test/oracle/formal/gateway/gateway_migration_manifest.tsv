@@ -3,5 +3,5 @@ oracle	test/oracle/formal/gateway/model_contract.tsv	hand-authored-contract; Sta
 oracle	test/oracle/formal/gateway/invariant_mutants.tsv	hand-authored-before-GatewayMigration.hs
 oracle	test/oracle/formal/gateway/cutoff_cases.tsv	independent-envelope-corpus
 mutant	test/oracle/formal/gateway/cutoff_mutants.tsv	eight-clause-delete-catalog
-golden	test/golden/formal/gateway/GatewayMigration.tla.golden	canonical-rendering oracle patched before gate for StandbyCrash sensitivity
-golden	test/golden/formal/gateway/GatewayMigration.cfg.golden	canonical-rendering obligation oracle
+oracle	test/oracle/formal/gateway/renderer_semantics.tsv	hand-authored semantic projection of emitted TLA/CFG
+oracle	test/oracle/formal/CalculusComposition.expected.tsv	Phase-10 composition semantic projection shared with Phase 11

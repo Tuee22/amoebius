@@ -46,19 +46,26 @@ EXPECTATIONS = "test/oracle/scoped_identity_surfaces.tsv"
 
 COMPILER = ""
 
-SANCTIONED_OBSERVERS = ("unshare-network-namespace", "strace-socket-EPERM")
+SANCTIONED_OBSERVERS = (
+    "macos-sandbox-network-deny",
+    "unshare-network-namespace",
+    "strace-socket-EPERM",
+)
 
 # The scope/flow kernel's private constructors, each with the check id that decides it.
 # One id per type rather than one for the set: a single "constructors are private" bit
 # stays green while one of them quietly opens.
 OPAQUE_TYPES = (
-    ("Tenant", "scope", "tenant-constructor-private"),
-    ("Subject", "scope", "subject-constructor-private"),
-    ("Membership", "scope", "membership-constructor-private"),
-    ("RequestContext", "scope", "request-context-constructor-private"),
-    ("ScopeWitness", "scope", "scope-witness-constructor-private"),
-    ("ScopedHandle", "scope", "scoped-handle-constructor-private"),
-    ("ResourceId", "scope", "resource-id-constructor-private"),
+    ("Tenant", "index", "tenant-constructor-private"),
+    ("Subject", "index", "subject-constructor-private"),
+    ("Membership", "index", "membership-constructor-private"),
+    ("Owner", "index", "owner-constructor-private"),
+    ("Grant", "index", "grant-constructor-private"),
+    ("RequestScope", "index", "request-scope-constructor-private"),
+    ("Scoped", "index", "scoped-value-constructor-private"),
+    ("ScopedHandle", "index", "scoped-handle-constructor-private"),
+    ("SomeScopedHandle", "index", "some-scoped-handle-constructor-private"),
+    ("ResourceId", "index", "resource-id-constructor-private"),
     ("FlowLabel", "flow", "flow-label-constructor-private"),
     ("CanFlowTo", "flow", "can-flow-to-constructor-private"),
 )
@@ -78,8 +85,9 @@ EXPECTED_RESULTS = {
     "owner-joins": "6/6-exact",
     "owner-swaps": "2/2-exact-errors",
     "flow-matrix": "4/4-independent-agreement",
-    "compile-fail": "3/3-constructor-closure",
-    "generated-coverage": "6/6-classes-at-5-percent",
+    "flow-diagnostics": "4/4-exact-tags-and-paths",
+    "compile-fail": "5/5-specific-reason-pairs",
+    "generated-coverage": "9/9-classes-at-5-percent",
     "mutants": "1/1-red-on-2-swaps",
     "network-observer": "sanctioned-observer",
     "identity-provider-truth": "UNVERIFIED",
@@ -94,12 +102,10 @@ CLASS_METRIC = {
     "owner": "owner-joins",
     "negative": "owner-swaps",
     "flow": "flow-matrix",
+    "flow-diagnostic": "flow-diagnostics",
     "compile-fail": "compile-fail",
     "property": "generated-coverage",
     "mutant": "mutants",
-    # The Phase-19 seal is consumed before the owner battery runs in the same process; the
-    # owner metric is written only if that consumption succeeded first.
-    "dependency": "owner-joins",
 }
 
 # Which side's result decides each check id.
@@ -114,9 +120,13 @@ CHECK_SIDE = {
 
 COMPILE_LOCI = {
     "raw_resource_id.hs.fail": "Illegal term-level use of the type constructor ‘ResourceId’",
-    "scope_retag.hs.fail": "Variable not in scope:",
-    "declassify.hs.fail": "Variable not in scope: declassify",
+    "scope_retag.hs.fail": "Couldn't match type",
+    "declassify.hs.fail": "Variable not in scope:",
+    "handle_escape.hs.fail": "is a rigid type variable bound by",
+    "forge_request_scope.hs.fail": "Illegal term-level use of the type constructor ‘RequestScope’",
 }
+
+COMPILE_POSITIVES = tuple(name.removesuffix(".fail") for name in COMPILE_LOCI)
 
 
 class GateFailure(RuntimeError):
@@ -163,6 +173,21 @@ def read_tsv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle, delimiter="\t"))
 
 
+def refresh_package_index(cabal: Path) -> None:
+    """Make a clean contained Cabal home capable of resolving project dependencies."""
+    result = subprocess.run(
+        [str(cabal), "--ignore-project", "update"],
+        cwd=ROOT,
+        env=environment(),
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise GateFailure(f"contained cabal package-index update failed:\n{result.stdout}")
+
+
 def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     """Check the authored pins still say what the contract says they say.
 
@@ -172,6 +197,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     owner = read_tsv(FIXTURES / "owner_join_table.tsv")
     swaps = read_tsv(FIXTURES / "owner_tenant_swaps.tsv")
     flows = read_tsv(FIXTURES / "flow_matrix.tsv")
+    diagnostics = read_tsv(FIXTURES / "flow_diagnostics.tsv")
     errors = read_tsv(FIXTURES / "decode_errors.tsv")
     if len(owner) != 6 or sum(row["decision"] == "allow" for row in owner) != 3:
         raise GateFailure("owner join oracle must contain three allows and three denies")
@@ -179,28 +205,41 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         raise GateFailure("owner swap error oracle drifted")
     if len(flows) != 4 or [row["decision"] for row in flows] != ["allow", "deny", "deny", "deny"]:
         raise GateFailure("flow oracle decisions drifted")
+    if [(row["expected_error"], row["expected_path"]) for row in diagnostics] != [
+        ("SubjectFlowMismatch", "-"),
+        ("FlowCycleDetected", "source>route>source"),
+        ("MissingFlowMember", "missing"),
+        ("FlowPathMissing", "source>sink"),
+    ]:
+        raise GateFailure("flow diagnostic oracle drifted")
     if {row["error"] for row in errors} != {
         "UntrustedResourceId", "ScopeRetagForbidden", "DeclassificationForbidden",
+        "ScopeEscapeForbidden", "RequestScopeConstructorPrivate",
     }:
         raise GateFailure("compile-fail error oracle drifted")
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 1:
-        raise GateFailure("Phase-20 mutant manifest must contain exactly one row")
+        raise GateFailure("Phase-8 mutant registry must contain exactly one row")
+    if mutants[0]["flag"] != "scope-index-drop-owner-equality-mutant":
+        raise GateFailure("the Phase-8 owner-equality mutant has no build-flag carrier")
     if not MUTANT_FIXTURE.is_file():
         raise GateFailure("the committed owner-equality mutant fixture is absent")
     locus = read_tsv(LOCUS)
-    if len(locus) != 23 or len({row["entry"] for row in locus}) != 23:
-        raise GateFailure("Phase-20 validation locus must contain twenty-three unique rows")
-    phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
-    if len([row for row in phase0_rows if row["# phase"] == "17"]) != 8:
-        raise GateFailure("Phase-0 manifest must pin eight Phase-20 artifacts")
+    if len(locus) != 31 or len({row["entry"] for row in locus}) != 31:
+        raise GateFailure("Phase-8 validation locus must contain thirty-one unique rows")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 1 only; identity-provider/provider/runtime enforcement UNVERIFIED\n"
         + LOCUS.read_text(encoding="utf-8"),
         encoding="utf-8",
     )
-    counts = {"owner": len(owner), "swaps": len(swaps), "flows": len(flows), "errors": len(errors)}
+    counts = {
+        "owner": len(owner),
+        "swaps": len(swaps),
+        "flows": len(flows),
+        "diagnostics": len(diagnostics),
+        "errors": len(errors),
+    }
     return mutants, counts
 
 
@@ -213,9 +252,9 @@ def item_classes() -> dict[str, str]:
 
 
 def verify_source_boundaries() -> None:
-    scope = (ROOT / "src/Amoebius/Ui/Security/Scope.hs").read_text(encoding="utf-8")
-    flow = (ROOT / "src/Amoebius/Ui/Security/Flow.hs").read_text(encoding="utf-8")
-    headers = {"scope": scope.split(") where", 1)[0], "flow": flow.split(") where", 1)[0]}
+    index = (ROOT / "src/Amoebius/Scope/Index.hs").read_text(encoding="utf-8")
+    flow = (ROOT / "src/Amoebius/Scope/Flow.hs").read_text(encoding="utf-8")
+    headers = {"index": index.split(") where", 1)[0], "flow": flow.split(") where", 1)[0]}
     for type_name, module, check in OPAQUE_TYPES:
         header = headers[module]
         if not re.search(rf"^\s*[,(]?\s*{type_name}\b", header, re.MULTILINE):
@@ -225,11 +264,15 @@ def verify_source_boundaries() -> None:
         # a closed constructor for an open one.
         if re.search(rf"\b{type_name}\s*\(\s*\.\.", header):
             raise GateFailure(f"{check}: private constructor exported: {type_name}")
-    for forbidden in ("retagHandle", "declassify"):
-        if forbidden in headers["scope"] + headers["flow"]:
+    for forbidden in ("retagHandle", "retagScoped", "declassify"):
+        if forbidden in headers["index"] + headers["flow"]:
             raise GateFailure(f"no-general-authority-escape: {forbidden} is exported")
+    if not re.search(r"forall\s+scope\.\s*RequestScope\s+scope", index):
+        raise GateFailure("withRequestScope no longer introduces a rank-2 request index")
+    if "Amoebius.Ui." in index + flow:
+        raise GateFailure("the Phase-8 scope index imports the later UI-program surface")
     prohibited = re.compile(r"\b(error|undefined|fromJust|head|tail|unsafePerformIO|unsafeCoerce)\b|!!")
-    for path in sorted((ROOT / "src/Amoebius/Ui/Security").glob("*.hs")):
+    for path in sorted((ROOT / "src/Amoebius/Scope").glob("*.hs")):
         source = re.sub(r'"(?:\\.|[^"\\])*"', '""', re.sub(r"--[^\n]*", "", path.read_text(encoding="utf-8")))
         match = prohibited.search(source)
         if match:
@@ -241,11 +284,15 @@ def verify_source_boundaries() -> None:
 def compile_failures(cabal: Path) -> tuple[str, int]:
     logs = []
     observed = 0
-    run([str(cabal), "build", "lib:amoebius"])
+    run([str(cabal), "build", "lib:scope-index"])
     common = [
         str(cabal), "exec", "ghc", "--",
         "-fno-code", "-XGHC2024", "-XOverloadedStrings", "-isrc", "-x", "hs",
     ]
+    for name in COMPILE_POSITIVES:
+        result = run(common + [str(FIXTURES / "compile_pass" / name)], require_success=False)
+        if result.returncode != 0:
+            raise GateFailure(f"compile-positive twin failed: {name}\n{result.stdout}")
     for name, token in COMPILE_LOCI.items():
         result = run(common + [str(FIXTURES / "compile_fail" / name)], require_success=False)
         if result.returncode == 0 or token not in result.stdout:
@@ -256,15 +303,18 @@ def compile_failures(cabal: Path) -> tuple[str, int]:
 
 
 def isolated_green(cabal: Path) -> tuple[str, str]:
-    run([str(cabal), "build", "test:ui-scope-spec"])
-    binary = Path(run([str(cabal), "list-bin", "test:ui-scope-spec"]).stdout.strip())
+    run([str(cabal), "build", "test:scope-index-spec"])
+    binary = Path(run([str(cabal), "list-bin", "test:scope-index-spec"]).stdout.strip())
     if not binary.is_absolute() or not binary.is_file():
-        raise GateFailure("ui-scope-spec binary path is not absolute")
+        raise GateFailure("scope-index-spec binary path is not absolute")
     TEMP_ROOT.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="network-", dir=TEMP_ROOT) as directory:
         trace = Path(directory) / "network.trace"
-        probe = run(["unshare", "-n", "true"], require_success=False)
-        if probe.returncode == 0:
+        if sys.platform == "darwin" and shutil.which("sandbox-exec") is not None:
+            profile = "(version 1) (allow default) (deny network*)"
+            result = run(["sandbox-exec", "-p", profile, str(binary)])
+            observer = "macos-sandbox-network-deny"
+        elif shutil.which("unshare") is not None and run(["unshare", "-n", "true"], require_success=False).returncode == 0:
             result = run(["unshare", "-n", str(binary)])
             observer = "unshare-network-namespace"
         else:
@@ -281,11 +331,11 @@ def isolated_green(cabal: Path) -> tuple[str, str]:
 
 
 def run_green(cabal: Path) -> tuple[str, str]:
-    suite = run([str(cabal), "test", "ui-scope-spec", "--test-show-details=direct"])
+    suite = run([str(cabal), "test", "scope-index-spec", "--test-show-details=direct"])
     isolated, observer = isolated_green(cabal)
-    token = "ui-scope-spec: PASS (6 owner rows, 2 swap errors, 4 flow rows, 3 compile loci, 6 coverage classes, 1 mutant)"
+    token = "scope-index-spec: PASS (6 owner rows, 2 swap errors, 8 flow rows, 5 compile loci, 9 coverage classes, 1 mutant)"
     if token not in suite.stdout or token not in isolated:
-        raise GateFailure("Phase-20 acceptance token is absent from normal or isolated execution")
+        raise GateFailure("Phase-8 acceptance token is absent from normal or isolated execution")
     return suite.stdout + isolated, observer
 
 
@@ -294,14 +344,11 @@ def run_mutants(cabal: Path, mutants: list[dict[str, str]]) -> tuple[str, int]:
     reddened = 0
     for row in mutants:
         name = row["mutant"]
-        result = run(
-            [
-                str(cabal), "test", "ui-scope-spec", "--test-show-details=direct",
-                f"--test-options=--mutant={name}",
-            ],
-            require_success=False,
-        )
-        token = f"scoped-identity-mutant: RED {name} same-tenant+cross-tenant"
+        flag = f"-f{row['flag']}"
+        run([str(cabal), "build", "test:scope-index-spec", flag])
+        binary = Path(run([str(cabal), "list-bin", "test:scope-index-spec", flag]).stdout.strip())
+        result = run([str(binary), f"--mutant={name}"], require_success=False)
+        token = f"scope-index-mutant: RED {name} same-tenant+cross-tenant"
         if result.returncode == 0 or token not in result.stdout:
             raise GateFailure(f"mutant survived or missed its red locus: {name}\n{result.stdout}")
         reddened += 1
@@ -320,8 +367,9 @@ def write_results(counts: Mapping[str, int], loci: int, reddened: int, mutant_to
         "owner-joins": f"{counts['owner']}/6-exact",
         "owner-swaps": f"{counts['swaps']}/2-exact-errors",
         "flow-matrix": f"{counts['flows']}/4-independent-agreement",
-        "compile-fail": f"{loci}/3-constructor-closure",
-        "generated-coverage": "6/6-classes-at-5-percent",
+        "flow-diagnostics": f"{counts['diagnostics']}/4-exact-tags-and-paths",
+        "compile-fail": f"{loci}/5-specific-reason-pairs",
+        "generated-coverage": "9/9-classes-at-5-percent",
         "mutants": f"{reddened}/{mutant_total}-red-on-{counts['swaps']}-swaps",
         "network-observer": observer,
         "identity-provider-truth": "UNVERIFIED",
@@ -363,11 +411,14 @@ def surface_decisions(
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=8, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=8, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []
@@ -385,8 +436,9 @@ def main() -> int:
         if BUILD_ROOT.exists():
             shutil.rmtree(BUILD_ROOT)
         cabal = Path(resolved["cabal"]["path"])
+        refresh_package_index(cabal)
 
-        print("\noracle side — the owner join, swap, flow, and compile-fail pins\n")
+        print("\noracle side — the owner, flow, diagnostic, and compile-fail pins\n")
         mutant_rows, counts = verify_oracles()
         classes = item_classes()
         print(f"  ok    {len(classes)} enumerated items, {len(mutant_rows)} mutant(s)")
@@ -400,10 +452,10 @@ def main() -> int:
         print("  ok    scope-partial-token-scan          no partial or unsafe token in the security modules")
         results["source"] = True
 
-        print("\nseal side — the three constructor-closure compile failures\n")
+        print("\nseal side — five legal/illegal compile pairs at their pinned reasons\n")
         compile_log, loci = compile_failures(cabal)
         (gate.run_dir / "compile-fail.log").write_text(compile_log, encoding="utf-8")
-        print(f"  ok    {loci}/{len(COMPILE_LOCI)} compile loci rejected at their pinned diagnostic")
+        print(f"  ok    {loci}/{len(COMPILE_LOCI)} legal twins green and illegal twins red at their pinned diagnostic")
         results["seal"] = True
 
         print("\nsuite side — the pure scope battery under a network observer\n")
@@ -466,7 +518,7 @@ def main() -> int:
             for name, record in resolved.items()
             if name != "platform"
         },
-        dependencies={"ui-scope-spec": "cabal test"},
+        dependencies={"scope-index-spec": "cabal test"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
         or [{"name": "drop_owner_equality", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}

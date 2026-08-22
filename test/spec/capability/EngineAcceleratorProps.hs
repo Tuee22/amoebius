@@ -12,7 +12,6 @@ import EngineAcceleratorFixtures (EngineNegative (..), engineNegatives)
 import Test.QuickCheck
   ( Arbitrary (arbitrary)
   , Args (chatty, maxSuccess)
-  , Gen
   , Property
   , checkCoverage
   , chooseInt
@@ -30,11 +29,12 @@ newtype GeneratedEngineCase = GeneratedEngineCase Int
 instance Arbitrary GeneratedEngineCase where
   arbitrary = GeneratedEngineCase <$> chooseInt (0, length engineNegatives - 1)
 
-runEngineAcceleratorProps :: IO ()
+runEngineAcceleratorProps :: IO Int
 runEngineAcceleratorProps = do
   result <- quickCheckWithResult stdArgs {chatty = False, maxSuccess = 1200} propSpecificEngineBranches
-  unless (isSuccess result) (fail ("Phase-12 accelerator-provision property failed: " <> show result))
+  unless (isSuccess result) (fail ("Phase-32 accelerator-provision property failed: " <> show result))
   putStrLn "engine-accelerator-properties: TESTED sampled (8 provision branches, each >=9%)"
+  pure 1
 
 propSpecificEngineBranches :: GeneratedEngineCase -> Property
 propSpecificEngineBranches (GeneratedEngineCase selected) =

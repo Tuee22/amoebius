@@ -83,7 +83,7 @@ a provider it does not itself run.
 
 **Depends on:** [Phase 87](phase_87_offline_release_evolution.md) — offline release and schema evolution, which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/offline_multizone_continuity_gate.py` runs the contract, scoped live campaign,
+**Gate:** `python3 tools/run_phase_gate.py 88` runs the contract, scoped live campaign,
 eight mutants, docs, and evidence ledger. Its infernix row preserves command/work identity in the durable
 receipt; offline jitML/CUDA remains unclaimed.
 

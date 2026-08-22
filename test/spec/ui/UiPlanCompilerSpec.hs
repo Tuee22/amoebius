@@ -2,6 +2,28 @@
 
 module Main (main) where
 
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Scope.Index qualified as CalculusScope
 import Amoebius.Ui.Bind
 import Amoebius.Ui.Check (checkUiSource)
 import Amoebius.Ui.Compile.ClientPlan (clientActionPorts)
@@ -71,7 +93,9 @@ runGreen root fixture = do
   checkRuntimeDemand compiled
   checkSpecificNegatives fixture compiled
   checkFreshProcessDeterminism
+  checkCalculus root
   checkMutantControls root fixture compiled
+  putStrLn "ui-plan-compiler-calculus: PASS (5 kinds, 32 projected units)"
   putStrLn "ui-plan-compiler-spec: PASS (4 projections, 4 canonical artifacts, 4 digests, 6 demand cells, 2 fresh processes, 6 mutants)"
 
 buildFixture :: FilePath -> Bool -> IO Fixture
@@ -218,6 +242,37 @@ checkFreshProcessDeterminism = do
   assertEqual "fresh-process stderr" ("", "") (forwardErr, reverseErr)
   assertEqual "cache-bypassed randomized-order bytes" forward reversed
 
+checkCalculus :: FilePath -> IO ()
+checkCalculus root = do
+  expected <- loadTable (root </> "test/oracle/ui_plan_compiler/calculus_projection.tsv")
+  tenant <- requireRight "calculus tenant" (CalculusScope.trustedTenant "ui-plan-compiler-calculus-tenant")
+  subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "ui-plan-compiler-calculus-subject")
+  membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
+  action <- requireRight "calculus request scope" $
+    CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+      let resources :: Int -> ResourceVector
+          resources count = ResourceVector 1 (fromIntegral count) 0 0
+          counts = [4, 6, 14, 2, 6] :: [Int]
+          artifact = artifactComponent scope "canonical-plan-artifacts" (resources 4)
+            (RecipeId "ui-plan-compiler" 4)
+          budget = budgetComponent scope "finite-runtime-demand" (resources 6)
+            (allowance (Bytes 6) (Slots 1) (Bytes 6))
+          lift = liftComponent scope "projection-digest-and-refusal-checks" (resources 14) OnHost
+          workflow = workflowComponent scope "deterministic-plan-workflow" (resources 2) emptyLedger
+          evidence = evidenceComponent scope "mutant-evidence" (resources 6) PureRegister
+          composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+          ResourceVector cpu memory ephemeral pods = compositionResource composition
+          render = Text.unpack . Text.intercalate ","
+          actual =
+            [ ["calculus-kinds", render (map calculusTag (compositionKinds composition))]
+            , ["component-names", render (compositionNames composition)]
+            , ["projection-counts", render (map (Text.pack . show) counts)]
+            , ["resource-vector", render (map (Text.pack . show) [cpu, memory, ephemeral, pods])]
+            ]
+      assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
+      assertEqual "plan-compiler calculus projection" expected actual
+  action
+
 emitPlans :: Fixture -> IO ()
 emitPlans fixture = do
   compiled <- requireRight "emit compile" (compileUiPlans (boundProgram fixture))
@@ -254,7 +309,7 @@ runMutant root fixture name = case firstMatching ((== name) . mutantName) mutant
   Just mutant -> do
     compiled <- requireRight "mutant control compile" (compileUiPlans (boundProgram fixture))
     checkMutantControls root fixture compiled
-    putStrLn ("ui-plan-compiler-mutant: RED " <> mutantName mutant <> " " <> mutantLocus mutant)
+    putStrLn ("ui-plan-compiler-mutant: RED " <> mutantName mutant <> " locus=" <> mutantLocus mutant)
     exitFailure
 
 parseProjectionRequirement :: [String] -> IO UiProjectionRequirement

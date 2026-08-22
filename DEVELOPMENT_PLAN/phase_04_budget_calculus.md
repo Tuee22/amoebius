@@ -12,7 +12,7 @@ The rule behind the budget calculus is owned by [`jit_budget_doctrine.md`](../do
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, documents/engineering/jit_budget_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, documents/engineering/jit_budget_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -74,7 +74,7 @@ Make a byte unable to exist without a grant that carries both its ceiling and th
 **Lane:** `none`
 **Register:** 1
 **Depends on:** [Phase 3](phase_03_artifact_calculus.md) — the artifact calculus, whose materialize step is the operation a grant authorises.
-**Gate:** `python3 tools/budget_calculus_gate.py` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/run_phase_gate.py 04` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

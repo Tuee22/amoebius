@@ -18,7 +18,7 @@ and the algebra it rests on belongs to
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_extension_security_laws.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_23_extension_security_laws.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_61_vault_pki.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_95_webapp_rederivation.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/extension_conformance_transactions.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -37,8 +37,19 @@ and the algebra it rests on belongs to
 
 This document is a **family slice**. It owns S1–S6 and the skolem-scope mechanism they share. It does not own
 the tenant model, the gateway and identity edge, the offline runtime, or the relational data plane; each S-law
-names the doctrine that does. Everything here is design intent stated as a specification: no phase has yet
-delivered a scope kernel, and status lives only in the [tracker](../../DEVELOPMENT_PLAN/README.md).
+names the doctrine that does. [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) supplies the lexical
+pure mechanism; the laws and live boundaries retain their own delivery owners, and status lives only in the
+[tracker](../../DEVELOPMENT_PLAN/README.md).
+
+The bounded pure implementation is `Amoebius.Extension.Laws.Security`. It distinguishes claimed and attested
+identities, eliminates an attested identity through Phase 8's fresh request scope, requires that scope at the
+operation and derived-key boundaries, represents only revocation-edge or positive-staleness-bound authority
+layers, and evaluates S1–S6 over explicit observations. Its evidence covers one valid and one tampered fixture
+envelope, fifteen operations in a two-tenant/two-subject store, five foreign/absent refusal pairs, five
+namespace transpositions, two authority layers, 42 authored verdicts, four compiler negatives, and six exact
+mutants. This is bounded Register-1 evidence: the fixture SHA-256 check is not production cryptographic
+verification, equal modeled steps are not wall-clock timing, the layer pair is not a runtime inventory, and no
+compositional S-law or persisted-value re-entry path is thereby discharged.
 
 ---
 
@@ -92,6 +103,10 @@ Two properties are specified to make this work rather than merely look elegant. 
 constructor, so authentication is the sole introduction rule and no test, migration, or admin path has a second
 one. And the escape argument that makes the region pattern safe in its original setting carries: a scoped value
 cannot outlive the continuation that minted it, so it cannot be stashed and reused under another identity.
+Phase 8 exercises those claims with legal/illegal compiler pairs for constructor forgery, retagging, and
+request-index escape, plus a constructor-closure scan. The bounded security-law kernel reuses that eliminator;
+its adjacent compiler twins additionally reject claimed-as-attested use, an explicit promotion, a missing
+scope argument, and a key minted by another request.
 
 **The residue this mechanism leaves, and it is the largest in this document.** The region argument protects a
 lexically nested, in-memory scope. Every law below involves a value crossing an asynchronous boundary where the
@@ -103,7 +118,8 @@ comparison, which is the scope check this section opened by saying the tag techn
 
 That re-entry combinator is unavoidable and it is the mechanism's one back door. It is named here rather than
 left implicit, and the obligation it carries is that it appear exactly once, be audited as carefully as the
-authentication path, and be the only unchecked coercion in the scoped surface. Nothing yet enforces that.
+authentication path, and be the only unchecked coercion in the scoped surface. Phase 8 deliberately contains
+no persisted-value re-entry combinator; no later gate yet establishes the required single audited back door.
 
 Two further limits. Skolemisation is a **static** distinctness property, not a runtime identity: type variables
 are erased, so nothing at run time distinguishes two scopes. And two requests from the *same* identity also get
@@ -124,8 +140,9 @@ difference.
 way to obtain the second, and there is no promotion function. Offline and degraded paths produce claimed
 identities and can only reach operations typed for them.
 
-**Discharge.** Compile-fail fixtures apply a scoped operation to a claimed identity and attempt to export a
-promotion function; a tampered-envelope probe requires refusal rather than a session. Foreclosed state:
+**Discharge.** The bounded fixture applies an attested-only consumer to a claimed identity and attempts to
+export a promotion function; both fail at the claimed/attested type mismatch. Its tampered-envelope probe
+requires refusal rather than an identity, and the corresponding executable mutant reddens only S1. Foreclosed state:
 [§3.93](../illegal_state/illegal_state_tenancy.md#393-a-locally-reconstructed-session-bearing-the-type-of-an-attested-one).
 
 **Seed observation.** In `mattandjames`, the offline bootstrap path reconstructs the server's own bootstrap
@@ -140,9 +157,10 @@ scope of the same type, and each of those is a silent cross-tenant read.
 **Guideline.** Obtain the scope from the request eliminator of [§3](#3-the-skolem-scope), thread the resulting context, and never
 convert it to a plain value. If you want to pass "the tenant id" to a helper, pass the context.
 
-**Discharge.** Compile-fail fixtures construct a context directly, retag one scope as another, and let a scoped
-handle escape its continuation; a signature oracle requires that no exported scoped operation takes two
-adjacent parameters of the same type. Foreclosed states:
+**Discharge.** Phase 8's compile-fail fixtures construct a context directly, retag one scope as another, and
+let a scoped handle escape its continuation. The bounded S2 fixture rejects a key from another rank-2 request,
+and the source oracle requires a `RequestScope scope` at scoped operations rather than two exchangeable plain
+identifiers. Foreclosed states:
 [§3.91](../illegal_state/illegal_state_tenancy.md#391-an-unauthenticated-route-whose-scope-comes-from-the-request),
 [§3.94](../illegal_state/illegal_state_tenancy.md#394-two-same-typed-scope-identifiers-exchangeable-at-a-call-site).
 
@@ -160,9 +178,9 @@ full disclosure, and the widened result is well formed, so nothing downstream ca
 scope is null; never give a scope parameter a default. If an operation genuinely spans scopes, it is a
 different operation with its own name, its own authority requirement, and its own audit obligation.
 
-**Discharge.** The data plane exposes no arm that omits its scope field, so the widened statement has no
-inhabitant; the gate additionally parses every emitted statement and requires a scope predicate bound to a
-mandatory parameter. Foreclosed state:
+**Discharge.** The bounded operation kernel exposes no arm that omits its scope argument, so its widened call
+has no inhabitant; the adjacent negative fails at `RequestScope`, and a finite source scan rejects optional
+scope shapes. This does not yet parse statements from a production data plane. Foreclosed state:
 [§3.92](../illegal_state/illegal_state_tenancy.md#392-a-scope-filter-whose-absent-value-means-every-scope).
 P1–P3 are this law at the relational seam
 ([`extension_conformance_transactions.md`](./extension_conformance_transactions.md)).
@@ -181,10 +199,10 @@ decides second, so it never holds the knowledge that would let it answer differe
 foreign resource and for an absent one is the same value, including its timing envelope where that is
 achievable.
 
-**Discharge.** A cross-scope probe over every scoped operation requires byte-identical refusals for foreign and
-absent resources, and requires no mutation to have occurred; mutants that return a distinguishable error must
-redden it. **Residue:** timing indistinguishability is asserted only within a declared bound, and the bound is
-recorded rather than implied. Foreclosed state:
+**Discharge.** A cross-scope probe over all five bounded operations requires byte-identical refusals for
+foreign and absent resources and no mutation; the distinguishable-refusal mutant reddens only S4. **Residue:**
+the current timing evidence is equality of three modeled steps under a declared zero-step difference. No
+wall-clock measurement or production timing envelope is established. Foreclosed state:
 [§3.80](../illegal_state/illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant).
 
 **Seed observation.** In `mattandjames`, the resolve-then-authorize order appears in the handler layer, so a
@@ -200,9 +218,10 @@ another's bytes, and it needs no privilege to trigger.
 the key; it takes the scope context and the domain identity and returns a scope-indexed key type. If you need a
 new keyspace, add it to the renderer rather than beside it.
 
-**Discharge.** A property test over adversarial component pairs requires the rendering to be injective and
-parsing to invert it; an emitted-output scan rejects key-shaped literals assembled by concatenation; a lookup
-typed at one scope cannot be applied to a key minted at another. Foreclosed states:
+**Discharge.** Five authored component-transposition pairs—one per bounded keyspace—require length-framed
+rendering to remain distinct and parsing to invert it; Python independently recomputes the emitted renderings.
+A lookup typed at one request cannot consume a key minted by another. This finite corpus is not a proof of
+injectivity over all text and no production emitted-output scanner is claimed. Foreclosed states:
 [§3.95](../illegal_state/illegal_state_tenancy.md#395-a-replay-key-that-does-not-name-its-scope),
 [§3.97](../illegal_state/illegal_state_tenancy.md#397-a-scope-key-whose-rendering-is-not-injective).
 
@@ -220,10 +239,11 @@ because it removes the pressure to bound it.
 maximum staleness it can exhibit. A disconnected partition cannot learn about revocation, so it says so: its
 type carries the bound, and operations that cannot tolerate the bound are unavailable to it.
 
-**Discharge.** The gate requires every authority-caching layer in the declaration to carry either a revocation
-edge or a staleness bound, and drives a revocation probe through each layer that claims an edge. **Residue:**
-this law is honest about a genuine impossibility rather than foreclosing it — a disconnected client provably
-cannot observe revocation, so what is checked is that the bound is declared and enforced on reconnection.
+**Discharge.** The bounded authority-layer value has only a revocation-edge constructor and a positive-bound
+constructor. Its corpus observes the `membership-epoch` edge for a socket cache and models enforcement of a
+300-unit bound for an offline partition; omission reddens only S6. **Residue:** this is not a discovered
+runtime layer inventory, live revocation probe, clock, or reconnection implementation. A disconnected client
+provably cannot observe revocation, so the live obligation remains to declare and enforce its bound.
 Related state:
 [§3.93](../illegal_state/illegal_state_tenancy.md#393-a-locally-reconstructed-session-bearing-the-type-of-an-attested-one),
 and the honest limit in
@@ -254,8 +274,10 @@ They are also evidence and not proof, on the terms
 [`lift_and_compose_doctrine.md` §3](./lift_and_compose_doctrine.md#3-a-seed-is-a-reference-implementation)
 fixes. That a state is representable in a seed makes it worth foreclosing; it does not establish that anything
 has ever reached it. And it says nothing about
-whether amoebius forecloses it, which is a claim only an amoebius gate can make, and none has run. The seed is
-also under no obligation to satisfy these laws — it predates them, and its own guarantees are its own to set.
+whether an arbitrary amoebius runtime forecloses it. The bounded pure gate described in [§1](#1-scope) has run
+against its finite kernel and corpus; it does not promote that result to production cryptography, wall-clock
+behavior, persistence, composition, or live provider enforcement. The seed is also under no obligation to
+satisfy these laws — it predates them, and its own guarantees are its own to set.
 
 ---
 

@@ -1,0 +1,25 @@
+# Authored Phase-21 surface expectation.
+# surface<TAB>owner<TAB>ids (comma-separated)
+
+law-subject-corpus	metrics	subjects
+five-law-verdict-grid	metrics	law-verdicts
+lawful-controls	metrics	lawful-verdicts
+single-law-negatives	metrics	single-law-defects
+generated-totality-inputs	metrics	generated-operation-inputs
+independent-process-determinism	metrics	independent-process-renders
+actual-budget-protocol	metrics	budget-protocols
+actual-evidence-values	metrics	evidence-values
+pure-source-scans	metrics	source-scans
+l5-compile-fixture	metrics	compile-fixture
+exact-mutant-loci	metrics	mutants
+runtime-correspondence	metrics	runtime
+totality-source-boundary	checks	totality-scan
+ambient-source-boundary	checks	ambient-scan
+authored-verdict-oracle	checks	verdict-oracle-independent
+phase15-harness-reuse	checks	compile-harness-reused
+generated-artifact-discipline	checks	results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
+l1-partial-mutant	mutants	partial-operation
+l2-ambient-mutant	mutants	ambient-render
+l3-reaper-mutant	mutants	retained-reaper-omitted
+l4-scope-mutant	mutants	scope-widened
+l5-fixture-mutant	mutants	claim-fixture-omitted

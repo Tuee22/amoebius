@@ -1,4 +1,4 @@
-# Authored expectation for the Phase-26 test-surface join.
+# Authored expectation for the Phase-43 test-surface join.
 #
 # Section S clause 2: the run enumerates its test surfaces and joins them completely to an
 # independently authored expectation. This file replaces the retired committed enumeration,
@@ -10,7 +10,7 @@
 #   metrics   the metric keys in .build/dsl/ui-server-boundary/phase-results.tsv
 #   checks    the check ids tools/ui_server_boundary_gate.py implements
 #
-# The 63 items are partitioned so each is claimed exactly once. Each of the nine mutants
+# The 64 items are partitioned so each is claimed exactly once. Each of the nine mutants
 # joins its own surface beside the locus entry naming its red target.
 #
 # Where the retired enumeration listed several names for one observation, they are collapsed
@@ -21,11 +21,9 @@
 # handler-process, and byte-observer names were the fresh-challenge round trip. One
 # observation reported under five surfaces reads as five independent results.
 #
-# `unreferenced-handler-unreachable` carries no id, and that is the honest answer rather
-# than an omission. `admitServerPlan` ignores linked handlers the plan never references —
-# that is what keeps one binary able to serve more than one plan — but the startup matrix
-# varies only the count of the *referenced* identity, so nothing this run observed exercises
-# an unreferenced one. The gap is recorded against Phase 26 in the legacy register.
+# `unreferenced-handler-unreachable` is decided by a startup row that links one compatible
+# handler the plan does not reference. The same binary reaches readiness and the sealed
+# dispatch table still contains only the referenced identity.
 #
 # surface<TAB>owner<TAB>ids (comma-separated)
 
@@ -38,6 +36,9 @@ strict-content-types	checks	fixed-five-header-set
 websocket-admission-source	checks	websocket-admission-present
 no-provider-authority-token	checks	forbidden-server-token-scan
 generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
+semantic-oracles-complete	checks	semantic-oracles-complete
+compile-totality	checks	totality-options
+contained-credential-environment	checks	credential-environment-scrub
 hmac-signed-credential	items	signed-credential
 credential-claims-derived	items	derived-context
 caller-tenant-header-hostile	items	tenant-spoof
@@ -92,7 +93,7 @@ live-storage-isolation	items	storage
 cluster-deployment	items	cluster
 replica-loss	items	replicas
 ha-behavior	items	ha
-unreferenced-handler-unreachable	items
+unreferenced-handler-unreachable	items	startup-unreferenced
 http-response-battery	metrics	http
 access-decision-battery	metrics	access
 sanitized-audit-battery	metrics	audit
@@ -105,4 +106,8 @@ fresh-challenge-round-trip	metrics	fresh-challenge
 idempotent-replay-battery	metrics	idempotency
 nine-mutant-battery	metrics	mutants
 loopback-only-os-network-observer	metrics	network-observer
+five-calculus-kind-cardinality	metrics	calculus-kinds
+five-calculus-component-vector	metrics	calculus-components
+five-calculus-projection-counts	metrics	calculus-projection-counts
+five-calculus-resource-vector	metrics	calculus-resource-vector
 unverified-live-layers	metrics	live-keycloak-truth,live-edge-exclusivity,live-provider-policy,live-storage-isolation,cluster-deployment,replica-loss,ha-behavior

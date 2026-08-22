@@ -1,5 +1,6 @@
 let T = ../../../dhall/amoebius/ui/Types.dhall
 in  { caseName = "private_value_projection", tenantMode = T.TenantMode.SingleTenant
+    , continuity = T.UiOffline.Continuity.OnlineOnly
     , modules = [ { moduleId = "app.main", nodes =
       [ { nodeId = "secret", nodeKind = T.NodeKind.State, valueType = T.ValueType.ServerHandle
         , edges = [] : List Text, events = [] : List Text, branches = [] : List Text

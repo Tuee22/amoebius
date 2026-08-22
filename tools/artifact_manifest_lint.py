@@ -16,7 +16,13 @@ MANIFEST = ROOT / "test" / "oracle" / "preimplementation_artifacts.tsv"
 # The one enumerable surface this module owns, declared so the run-time enumeration can
 # discover it rather than the expectation file asserting it unilaterally.
 CHECKS = {"manifest": "every pre-implementation oracle and mutant resolves and is owned"}
-PHASES = {3, *range(19, 29), *range(41, 67), 68}
+PHASES = {3, *range(19, 31), *range(41, 67), 68, 149}
+# Phase 49 is new in the generative re-baseline, so it has no historical pin-owner
+# ordinal to translate.  Prefixing its current ordinal with 1 keeps the four-column
+# manifest unambiguous without reassigning the historical `49` rows that still belong
+# to the provider-deploy checkpoint.  New current owners use this explicit map; they do
+# not flow through either legacy shift below.
+CURRENT_PIN_OWNERS = {149: 49}
 # Pin-owner ordinals as `MANIFEST` records them, which is the pre-2026-08-18 numbering.
 # The host-band re-baseline moved every phase *document* at or above 3 up by six and left
 # the manifest column alone, because a dozen gates select their own rows by literal
@@ -93,6 +99,8 @@ PHASE_DOCUMENTS = _phase_documents()
 
 def _owner_document(phase: int):
     """The document that owns a manifest pin recorded at its pre-2026-08-18 ordinal."""
+    if phase in CURRENT_PIN_OWNERS:
+        return PHASE_DOCUMENTS.get(CURRENT_PIN_OWNERS[phase])
     return PHASE_DOCUMENTS.get(GENERATIVE.get(phase + HOST_BAND_SHIFT, phase + HOST_BAND_SHIFT))
 
 

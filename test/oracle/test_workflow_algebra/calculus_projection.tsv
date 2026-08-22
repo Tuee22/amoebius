@@ -1,0 +1,5 @@
+metric	value
+calculus-kinds	artifact,budget,lift,workflow,evidence
+component-names	test-workflow-algebra,closed-test-budget,suggest-test-projections,teardown-workflow,evidence-ledger
+projection-counts	15,2,4,3,2
+resource-vector	5,26,0,0

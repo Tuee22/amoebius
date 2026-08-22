@@ -180,7 +180,7 @@ trigger is a lint obligation that needs its own corpus to state, which becomes i
 
 This phase opens the sequence, and the corpus it governs is the only input it reads.
 
-**Gate:** `python3 tools/doc_lint_verify.py` passes every documentation, containment and seeded-mutant check
+**Gate:** `python3 tools/run_phase_gate.py 00` passes every documentation, containment and seeded-mutant check
 named in [Gate integrity](#gate-integrity) against its source snapshot, creating no tracked or unignored
 generated file. Phase 1 does not open unless the ledger records that corpus green.
 
@@ -606,10 +606,9 @@ checker that *is* the Phase 0 gate.
 - The convention-independent Phase-11 formal-model oracles, pinned here before `Interpret.hs`/`EmitTLA.hs`
   exist ([`phase_11`](phase_11_formal_model_kernel.md)): `test/mutant/formal/emitTLA-mut-0{1..4}`, the
   `ToyModel` hand-derived reachable-distinct-state table, and the expected `INVARIANT`/`PROPERTY` name set.
-  The byte-exact `test/golden/formal/ToyModel.{tla,cfg}.golden` is **not** pinned here: under
-  [`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-  a byte-exact golden is pinned no earlier than the sprint fixing its rendering convention, which is
-  Phase 11's.
+  Phase 11 later replaces the historical generated-output snapshot with independently stated renderer facts
+  and an invariant truth table; those semantic expectations are owned and amended by Phase 11 rather than
+  retroactively attributed to this earlier pin.
 - `tools/doc_lint.py`: a pure text/link checker (no amoebius-binary dependency), run **two-sided** — it must
   pass clean on the suite **and** fail on every case generated from the authored lint seeds and mutation
   definitions. It checks,

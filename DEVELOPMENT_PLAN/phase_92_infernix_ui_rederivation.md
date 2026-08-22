@@ -103,7 +103,7 @@ generic UI constructor, Phase-91 compute change, or second client runtime was re
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/infernix_ui_lift_gate.py --reuse-fresh-live` checks custody,
+**Gate:** `python3 tools/run_phase_gate.py 92` checks custody,
 package/program contracts, live evidence and cleanup, compiled mutants, documentation, and the ledger. The
 Haskell live suite independently reads evidence; it does not drive infrastructure.
 

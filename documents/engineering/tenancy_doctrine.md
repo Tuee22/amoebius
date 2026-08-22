@@ -308,8 +308,11 @@ than failing a check
 The six security laws stated over it — attestation as an index, the skolemised scope, refusal as the default,
 indistinguishable refusal, derived injective namespaces, and honest revocation bounds — are owned by
 [`extension_conformance_security.md`](./extension_conformance_security.md), and the states they foreclose are
-catalogued in [`../illegal_state/illegal_state_tenancy.md`](../illegal_state/illegal_state_tenancy.md). None of
-it is built; this paragraph is a specification and the [tracker](../../DEVELOPMENT_PLAN/README.md) owns status.
+catalogued in [`../illegal_state/illegal_state_tenancy.md`](../illegal_state/illegal_state_tenancy.md).
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) implements the lexical Register-1 mechanism: its
+rank-2 request eliminator, private constructors, and compile pairs prevent request-index forgery, retagging,
+and escape. Persisted re-entry, law-family conformance, and provider enforcement remain outside that result;
+the [tracker](../../DEVELOPMENT_PLAN/README.md) owns current status.
 
 **Application code is shared; authority is not.** Low-code applications use the same generic client and server
 interpreters. Isolation therefore cannot rely on one tenant's compiled UI being absent from another image. It

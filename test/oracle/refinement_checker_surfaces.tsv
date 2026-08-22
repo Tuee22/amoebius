@@ -1,0 +1,23 @@
+# Authored Phase-14 surface expectation.
+# surface<TAB>owner<TAB>ids (comma-separated)
+refinement-api	metrics	fixture-count,source-digest-count
+proved-functions	metrics	proved-count
+postcondition-counterexample	metrics	postcondition-counterexample-count
+correspondence-mismatch	metrics	correspondence-mismatch-count
+unknown-invariant	metrics	unknown-invariant-count
+required-correspondence	metrics	required-invariant-count,covered-invariant-count
+ghc-compilation	metrics	ghc-compiled-count
+diagnostics	metrics	diagnostic-count
+function-oracle	checks	function-oracle-complete
+model-invariant-registry	checks	model-invariant-registry-complete
+compiled-model-projection	checks	compiled-model-projection
+mutant-registry	checks	mutant-registry-complete
+owned-source-parser	checks	owned-parser-total
+solver-boundary	checks	solver-resolved-not-ambient
+suite-acceptance	checks	suite-acceptance-token
+checker-mutants	mutants	precondition-conjunct-drop,correspondence-skip,postcondition-weakening
+mutant-results	metrics	mutants-red
+mutant-locus	checks	mutants-red-at-own-locus
+result-oracle	checks	recorded-results-match-oracle
+generated-output	checks	emitted-results-untracked
+runtime-fidelity	checks	

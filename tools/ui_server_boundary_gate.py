@@ -42,6 +42,7 @@ FIXTURES = ROOT / "test/fixture/ui_server"
 MUTANT_CAPABILITY = "ui_server_boundary"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/ui_server_boundary/validation_locus.tsv"
+CALCULUS = ROOT / "test/oracle/ui_server_boundary/calculus_projection.tsv"
 ENTRY_POINT = ROOT / "app/amoebius/Amoebius/Entry/ServeUi.hs"
 RETIRED_ENTRY_POINT = ROOT / "src/Amoebius/Ui/Server/Main.hs"
 RESULTS = ROOT / ".build/dsl/ui-server-boundary/phase-results.tsv"
@@ -64,6 +65,9 @@ CHECKS = {
     "fixed-five-header-set": "the production security-header set is exactly five fixed headers",
     "websocket-admission-present": "WebSocket admission still checks the coordinator and envelope",
     "forbidden-server-token-scan": "no provider coordinate or caller-authored identity token is in the server",
+    "semantic-oracles-complete": "boundary tables, custody, five-calculus projection, and mutants are exact",
+    "totality-options": "the boundary suite compiles with project totality warnings",
+    "credential-environment-scrub": "the gate removes ambient provider and cluster credentials",
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
     "toolchain-satisfies-requirements": "the resolved cabal and ghc satisfy the authored ranges",
     "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
@@ -76,7 +80,7 @@ EXPECTED_RESULTS = {
     "access": "5/5-exact",
     "audit": "5/5-sanitized",
     "handler-effects": "5/5-allow-deny",
-    "startup": "5/5-pre-readiness",
+    "startup": "6/6-pre-readiness",
     "public-assets": "5/5-allowlisted",
     "private-probes": "5/5-nondisclosing",
     "websocket": "7/7-admission",
@@ -84,6 +88,10 @@ EXPECTED_RESULTS = {
     "idempotency": "2-requests/1-handler-effect",
     "mutants": "9/9-red",
     "network-observer": "loopback-only",
+    "calculus-kinds": "5/5",
+    "calculus-components": "5/5",
+    "calculus-projection-counts": "5,5,55,6,9",
+    "calculus-resource-vector": "5,80,0,0",
     "live-keycloak-truth": "UNVERIFIED",
     "live-edge-exclusivity": "UNVERIFIED",
     "live-provider-policy": "UNVERIFIED",
@@ -116,6 +124,7 @@ SURFACE_METRIC = {
     "startup-duplicate-handler-refusal": "startup",
     "startup-contract-mismatch-refusal": "startup",
     "startup-abi-mismatch-refusal": "startup",
+    "unreferenced-handler-unreachable": "startup",
     "public-root-asset": "public-assets",
     "public-index-asset": "public-assets",
     "public-script-asset": "public-assets",
@@ -162,6 +171,9 @@ CHECK_SIDE = {
     "fixed-five-header-set": "source",
     "websocket-admission-present": "source",
     "forbidden-server-token-scan": "source",
+    "semantic-oracles-complete": "oracle",
+    "totality-options": "source",
+    "credential-environment-scrub": "source",
     "emitted-results-untracked": "results",
     "recorded-results-match-oracle": "results",
     "toolchain-satisfies-requirements": "toolchain",
@@ -169,9 +181,11 @@ CHECK_SIDE = {
 
 ACCEPTANCE_TOKEN = (
     "ui-server-boundary-spec: PASS "
-    "(7 HTTP rows, 5 access rows, 5 audits, 5 effects, 5 startup rows, 5 public assets, "
+    "(7 HTTP rows, 5 access rows, 5 audits, 5 effects, 6 startup rows, 5 public assets, "
     "5 private probes, 7 WebSocket rows, 9 mutants)"
 )
+
+CALCULUS_TOKEN = "ui-server-boundary-calculus: PASS (5 kinds, 80 projected units)"
 
 
 class GateFailure(RuntimeError):
@@ -223,7 +237,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         "expected_http.tsv": 7,
         "expected_effects.tsv": 5,
         "expected_audit.tsv": 5,
-        "startup_plan_matrix.tsv": 5,
+        "startup_plan_matrix.tsv": 6,
         "public_asset_allowlist.tsv": 5,
         "forbidden_server_manifest_paths.tsv": 4,
         "websocket_registration.tsv": 7,
@@ -235,6 +249,15 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         if actual != expected:
             raise GateFailure(f"{name} must retain {expected} rows, got {actual}")
         counts[name] = actual
+    calculus = read_tsv(CALCULUS)
+    expected_calculus = [
+        {"metric": "calculus-kinds", "value": "artifact,budget,lift,workflow,evidence"},
+        {"metric": "component-names", "value": "public-boundary-artifacts,closed-authority-budget,server-boundary-corpus,startup-admission-workflow,mutant-evidence"},
+        {"metric": "projection-counts", "value": "5,5,55,6,9"},
+        {"metric": "resource-vector", "value": "5,80,0,0"},
+    ]
+    if calculus != expected_calculus:
+        raise GateFailure("UI-server five-calculus projection oracle drifted")
     headers = read_tsv(ROOT / "test/fixture/ui_security/production_headers.tsv")
     if len(headers) != 5 or {row["header"] for row in headers} != {
         "Content-Security-Policy", "Cross-Origin-Opener-Policy", "Cross-Origin-Resource-Policy",
@@ -243,17 +266,29 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         raise GateFailure("production security-header contract drifted")
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 9 or len({row["mutant"] for row in mutants}) != 9:
-        raise GateFailure("Phase-26 mutant manifest must contain nine unique rows")
+        raise GateFailure("Phase-43 mutant manifest must contain nine unique rows")
     for row in mutants:
         fixture = ROOT / row["fixture"]
         if not fixture.is_file() or "operator=" not in fixture.read_text(encoding="utf-8"):
             raise GateFailure(f"mutant fixture is absent or malformed: {fixture}")
     locus = read_tsv(LOCUS)
-    if len(locus) != 54 or len({row["entry"] for row in locus}) != 54:
-        raise GateFailure("Phase-26 validation locus must contain fifty-four unique rows")
+    if len(locus) != 55 or len({row["entry"] for row in locus}) != 55:
+        raise GateFailure("Phase-43 validation locus must contain fifty-five unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
-    if len([row for row in phase0_rows if row["# phase"] == "22"]) != 19:
-        raise GateFailure("Phase-0 manifest must pin nineteen Phase-26 artifacts")
+    custody = [row for row in phase0_rows if row["# phase"] == "26"]
+    if len(custody) != 19:
+        raise GateFailure("Phase-0 manifest must pin nineteen Phase-43 artifacts under custody phase 26")
+    missing = [row["path"] for row in custody if not (ROOT / row["path"]).is_file()]
+    if missing:
+        raise GateFailure(f"Phase-43 preimplementation artifacts are absent: {missing}")
+    mutant_descriptors = {
+        row["expected gate locus"] for row in custody if row["kind"] == "mutant"
+    }
+    expected_descriptors = {
+        f"gate-red:phase_26_{Path(row['fixture']).name}" for row in mutants
+    }
+    if mutant_descriptors != expected_descriptors:
+        raise GateFailure("Phase-43 mutant custody descriptors do not name custody phase 26 exactly")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 2 with local signed authority/handler fakes; live layers UNVERIFIED\n"
@@ -320,6 +355,24 @@ def verify_source_boundaries() -> None:
         raise GateFailure(
             f"entry-point-outside-shared-core: the executable searches {directories}, not app/amoebius alone"
         )
+    suite_stanza = cabal.split("test-suite ui-server-boundary-spec", 1)[1].split("\ntest-suite ", 1)[0]
+    for component in (
+        "artifact-calculus", "budget-calculus", "calculus-composition", "capacity-topology",
+        "dsl-core", "evidence-calculus", "lift-calculus", "scope-index", "workflow-calculus",
+    ):
+        if f"amoebius:{component}" not in suite_stanza:
+            raise GateFailure(f"semantic-oracles-complete: suite lacks {component}")
+    for option in ("-Werror=missing-methods", "-Werror=incomplete-patterns"):
+        if option not in suite_stanza:
+            raise GateFailure(f"totality-options: boundary suite lacks {option}")
+    scrubbed = environment()
+    leaked = [
+        name for name in scrubbed
+        if name in {"KUBECONFIG", "GOOGLE_APPLICATION_CREDENTIALS"}
+        or name.startswith(("AWS_", "AZURE_", "VAULT_", "KUBE_"))
+    ]
+    if leaked:
+        raise GateFailure(f"credential-environment-scrub: ambient credentials survived: {leaked}")
 
 
 def build_binaries(cabal: Path) -> tuple[Path, Path, str]:
@@ -327,7 +380,7 @@ def build_binaries(cabal: Path) -> tuple[Path, Path, str]:
     executable = Path(run([str(cabal), "list-bin", "exe:amoebius"]).stdout.strip())
     suite = Path(run([str(cabal), "list-bin", "test:ui-server-boundary-spec"]).stdout.strip())
     if not executable.is_file() or not suite.is_file():
-        raise GateFailure("Phase-26 executable or suite binary is absent")
+        raise GateFailure("Phase-43 executable or suite binary is absent")
     return executable, suite, build.stdout
 
 
@@ -336,42 +389,69 @@ def run_green(cabal: Path, executable: Path) -> str:
         [str(cabal), "test", "ui-server-boundary-spec", "--test-show-details=direct"],
         extra_env={"AMOEBIUS_BIN": str(executable)},
     )
-    if ACCEPTANCE_TOKEN not in result.stdout:
-        raise GateFailure("Phase-26 acceptance token is absent")
+    if ACCEPTANCE_TOKEN not in result.stdout or CALCULUS_TOKEN not in result.stdout:
+        raise GateFailure("Phase-43 acceptance or calculus token is absent")
     return result.stdout
 
 
 def observed_binary(executable: Path, suite: Path) -> tuple[str, str, int]:
     """Read the boundary's network behaviour from the OS, not from the code under test."""
-    if shutil.which("strace") is None:
-        raise GateFailure("strace is required for the UI-server OS-network observer")
     TEMP_ROOT.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="network-", dir=TEMP_ROOT) as directory:
         trace = Path(directory) / "network.trace"
-        result = run([
-            "strace", "-f", "-qq", "-e", "trace=connect,sendto",
-            "-e", "status=successful,failed", "-e", "signal=none",
-            "-o", str(trace), str(suite),
-        ], extra_env={"AMOEBIUS_BIN": str(executable)})
-        trace_text = trace.read_text(encoding="utf-8")
-        forbidden = []
-        loopback = []
-        for line in trace_text.splitlines():
-            if "AF_INET" not in line and "AF_INET6" not in line:
-                continue
-            if any(allowed in line for allowed in (
-                'inet_addr("127.', 'inet_pton(AF_INET6, "::1"', "sin_addr=htonl(INADDR_LOOPBACK)",
-            )):
-                loopback.append(line)
-                continue
-            forbidden.append(line)
-        if forbidden:
-            raise GateFailure("UI-server boundary used a non-loopback network address:\n" + "\n".join(forbidden[:30]))
-        if len(loopback) < 3:
-            raise GateFailure("OS observer did not see server/authority/handler boundary traffic")
-    if "ui-server-boundary-spec: PASS" not in result.stdout:
-        raise GateFailure("observed Phase-26 binary missed its acceptance token")
-    return result.stdout, "loopback-only", len(loopback)
+        if sys.platform == "darwin" and shutil.which("sandbox-exec"):
+            profile = (
+                '(version 1) (allow default) '
+                '(deny network-outbound (remote ip "*:*")) '
+                '(allow network-outbound (remote ip "localhost:*"))'
+            )
+            control = run([
+                "sandbox-exec", "-p", profile, sys.executable, "-c",
+                "import socket,sys\n"
+                "server=socket.socket();server.bind(('127.0.0.1',0));server.listen()\n"
+                "client=socket.create_connection(server.getsockname());peer,_=server.accept()\n"
+                "client.send(b'x');assert peer.recv(1)==b'x'\n"
+                "external=socket.socket();external.settimeout(1)\n"
+                "try: external.connect(('1.1.1.1',80))\n"
+                "except PermissionError: sys.exit(0)\n"
+                "except OSError: sys.exit(3)\n"
+                "sys.exit(4)\n",
+            ], require_success=False)
+            if control.returncode != 0:
+                raise GateFailure(f"Darwin loopback-only control exited {control.returncode}: {control.stdout}")
+            result = run(
+                ["sandbox-exec", "-p", profile, str(suite)],
+                extra_env={"AMOEBIUS_BIN": str(executable)},
+            )
+            observed = 1
+        else:
+            if shutil.which("strace") is None:
+                raise GateFailure("neither Darwin sandbox-exec nor strace is available as an OS network observer")
+            result = run([
+                "strace", "-f", "-qq", "-e", "trace=connect,sendto",
+                "-e", "status=successful,failed", "-e", "signal=none",
+                "-o", str(trace), str(suite),
+            ], extra_env={"AMOEBIUS_BIN": str(executable)})
+            trace_text = trace.read_text(encoding="utf-8")
+            forbidden = []
+            loopback = []
+            for line in trace_text.splitlines():
+                if "AF_INET" not in line and "AF_INET6" not in line:
+                    continue
+                if any(allowed in line for allowed in (
+                    'inet_addr("127.', 'inet_pton(AF_INET6, "::1"', "sin_addr=htonl(INADDR_LOOPBACK)",
+                )):
+                    loopback.append(line)
+                    continue
+                forbidden.append(line)
+            if forbidden:
+                raise GateFailure("UI-server boundary used a non-loopback network address:\n" + "\n".join(forbidden[:30]))
+            if len(loopback) < 3:
+                raise GateFailure("OS observer did not see server/authority/handler boundary traffic")
+            observed = len(loopback)
+    if ACCEPTANCE_TOKEN not in result.stdout or CALCULUS_TOKEN not in result.stdout:
+        raise GateFailure("observed Phase-43 binary missed its acceptance or calculus token")
+    return result.stdout, "loopback-only", observed
 
 
 def run_mutants(executable: Path, suite: Path, mutants: list[dict[str, str]]) -> tuple[str, int]:
@@ -398,7 +478,7 @@ def write_results(counts: Mapping[str, int], reddened: int, total: int, observer
         "access": f"{counts['access_matrix.tsv']}/5-exact",
         "audit": f"{counts['expected_audit.tsv']}/5-sanitized",
         "handler-effects": f"{counts['expected_effects.tsv']}/5-allow-deny",
-        "startup": f"{counts['startup_plan_matrix.tsv']}/5-pre-readiness",
+        "startup": f"{counts['startup_plan_matrix.tsv']}/6-pre-readiness",
         "public-assets": f"{counts['public_asset_allowlist.tsv']}/5-allowlisted",
         "private-probes": "5/5-nondisclosing",
         "websocket": f"{counts['websocket_registration.tsv']}/7-admission",
@@ -406,6 +486,10 @@ def write_results(counts: Mapping[str, int], reddened: int, total: int, observer
         "idempotency": "2-requests/1-handler-effect",
         "mutants": f"{reddened}/{total}-red",
         "network-observer": observer,
+        "calculus-kinds": "5/5",
+        "calculus-components": "5/5",
+        "calculus-projection-counts": "5,5,55,6,9",
+        "calculus-resource-vector": "5,80,0,0",
         "live-keycloak-truth": "UNVERIFIED",
         "live-edge-exclusivity": "UNVERIFIED",
         "live-provider-policy": "UNVERIFIED",
@@ -453,7 +537,7 @@ def surface_decisions(
 def main() -> int:
     gate = gate_common.PhaseGate(
         phase=43, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
-        register="2", substrate="none", sides=SIDES,
+        register="2", substrate="none", lane="none", sides=SIDES,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
@@ -480,6 +564,7 @@ def main() -> int:
         print("\noracle side — the request, access, audit, startup, asset, and socket pins\n")
         mutant_rows, counts = verify_oracles()
         classes = item_classes()
+        print("  ok    semantic-oracles-complete          boundary tables, custody, and calculus are exact")
         print(f"  ok    {len(classes)} enumerated items, {len(mutant_rows)} mutants")
         results["oracle"] = True
 
@@ -489,7 +574,7 @@ def main() -> int:
             "verified-credential-opaque", "hmac-credential-boundary", "dispatch-boundary-present",
             "server-boundary-present", "fixed-five-header-set", "websocket-admission-present",
             "serve-ui-executable-responsibility", "entry-point-outside-shared-core",
-            "forbidden-server-token-scan",
+            "forbidden-server-token-scan", "totality-options", "credential-environment-scrub",
         ):
             print(f"  ok    {check}")
         results["source"] = True
@@ -509,7 +594,7 @@ def main() -> int:
         print("\nobserver side — the OS boundary decides what the server reached\n")
         observed, observer, loopback = observed_binary(executable, suite)
         (gate.run_dir / "server-observed.log").write_text(observed, encoding="utf-8")
-        print(f"  ok    loopback-only network use across {loopback} observed syscall(s)")
+        print(f"  ok    loopback-only network use; {loopback} OS-boundary observation(s)")
         results["observer"] = True
 
         print("\nmutant side — every seeded mutant red at its own locus\n")
@@ -558,7 +643,7 @@ def main() -> int:
         },
         dependencies={"ui-server-boundary-spec": "cabal test", "amoebius": "cabal build exe"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-26 mutants", "status": "unrun"}],
+        or [{"name": "phase-43 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

@@ -29,13 +29,13 @@ elementwise-topology-compatibility	checks	compatibility-both-directions
 rke2-host-distinctness	metrics	compile-fail-pairs
 linux-host-quorum-compile-barriers	checks	compile-oracle-shape
 capacity-topology-negative-corpus	metrics	legal-twins
-legal-multisubstrate-fixed-placement	checks	positive-decodes-and-places
+legal-multisubstrate-fixed-placement	checks	positive-constructs-and-places
 legal-managed-eks-elastic-placement	checks	elastic-envelope-witness
 independent-placement-validator	checks	independent-validator-separate
 quickcheck-capacity-topology-properties	metrics	quickcheck-properties
 base-fold-compile-totality	metrics	base-fold-totality
-phase7-mutant-battery	metrics	mutants
-phase7-validation-locus-ledger	metrics	registry-subcases
+capacity-topology-mutant-battery	metrics	mutants
+capacity-topology-validation-locus-ledger	metrics	registry-subcases
 capacity-feasibility	metrics	acceptance-token
 storage-geometry	metrics	storage-geometry
 execution-accelerator-provider-root-fit	metrics	execution-accelerator-provider-root-fit

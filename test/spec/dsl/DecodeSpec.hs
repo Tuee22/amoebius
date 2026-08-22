@@ -1,17 +1,51 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main (main) where
 
+#if !defined(GADT_DECODE_ONLY)
 import CorpusSpec (CorpusSummary (..), runCorpusSpec)
-import CapacityTopologyGate (runCapacityTopologyGate)
 import DecisionPropSpec (runDecisionPropSpec)
+import ValidationLocusLedger (runValidationLocusLedger)
+#endif
+#if !defined(GADT_DECODE_ONLY) && !defined(ILLEGAL_STATE_CORPUS_ONLY)
+import CapacityTopologyGate (runCapacityTopologyGate)
 import ExecutionAcceleratorGate (runExecutionAcceleratorGate)
 import StorageGeometryGate (runStorageGeometryGate)
 import BindGate (runBindGate)
 import ProvisionSealGate (runProvisionSealGate)
 import EngineAcceleratorGate (runEngineAcceleratorGate)
 import RenderGoldenGate (runRenderGoldenGate)
-import ValidationLocusLedger (runValidationLocusLedger)
+#endif
+#if defined(GADT_DECODE_ONLY) || defined(ILLEGAL_STATE_CORPUS_ONLY)
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Scope.Index
+  ( activeMembership
+  , trustedSubject
+  , trustedTenant
+  , withRequestScope
+  )
+#endif
 import Amoebius.Dsl.Decode (decodeCluster)
 import Amoebius.Dsl.Error (decodeErrorTag)
 import Amoebius.Dsl.Types
@@ -46,7 +80,7 @@ data NegativeCase = NegativeCase
   , negativeTwin :: FilePath
   }
 
--- The suite invokes ghc and dhall by absolute path on purpose: the Phase-5 argv observer
+-- The suite invokes ghc and dhall by absolute path on purpose: the Phase-26 argv observer
 -- asserts that no tool is reached through an ambient PATH lookup. Which absolute path is a
 -- run-local resolution, not a fact about the repository, so the resolver supplies it and
 -- the suite fails closed rather than falling back to one developer's home directory.
@@ -58,7 +92,11 @@ resolvedTool name = do
     _ ->
       fail
         ( name
-            <> " is unset: run dsl-spec through tools/gadt_decode_ir_gate.py, which resolves the "
+            <> " is unset: run "
+            <> suiteName
+            <> " through "
+            <> gateCommand
+            <> ", which resolves the "
             <> "toolchain from tools/toolchain_requirements.json"
         )
 
@@ -79,10 +117,18 @@ runSuite = do
   forM_ negativeCases (checkNegative schemaOverride)
   checkImportPolicy
   checkCompilePairs "test/oracle/gadt_decode_ir/compile_pairs.tsv"
+#ifdef GADT_DECODE_ONLY
+  checkDecodedCalculusProjection decoded
+#endif
+#ifndef GADT_DECODE_ONLY
   corpus <- runCorpusSpec
-  checkPhase6CompileFail
+  localCompilePairs <- checkPhase27CompileFail
+  predecessorCompilePairs <- checkPhase9CompileFail
   runDecisionPropSpec
-  (discharged, deferred) <- runValidationLocusLedger (coveredKeys corpus)
+  (discharged, deferred, predecessorRows) <- runValidationLocusLedger (coveredKeys corpus)
+#ifdef ILLEGAL_STATE_CORPUS_ONLY
+  checkIllegalStateCalculusProjection corpus (localCompilePairs + predecessorCompilePairs) discharged deferred
+#else
   runCapacityTopologyGate
   runStorageGeometryGate
   runExecutionAcceleratorGate
@@ -90,13 +136,24 @@ runSuite = do
   runProvisionSealGate
   runEngineAcceleratorGate
   runRenderGoldenGate
+#endif
   putStrLn
-    ( "dsl-spec: PASS ("
+    ( "illegal-state-predecessors: PASS ("
+        <> show predecessorRows
+        <> " joined gadt rows, "
+        <> show predecessorCompilePairs
+        <> " compile pairs)"
+    )
+#endif
+  putStrLn
+    ( suiteName
+        <> ": PASS ("
         <> show (length positiveCases)
         <> " positives, "
         <> show (length negativeCases)
         <> " tagged negatives, 3 compile-fail pairs)"
     )
+#ifndef GADT_DECODE_ONLY
   putStrLn
     ( "illegal-state-dsl-spec: PASS ("
         <> show (dhallTypecheckCount corpus)
@@ -110,6 +167,92 @@ runSuite = do
         <> show deferred
         <> " deferred)"
     )
+#endif
+
+suiteName :: String
+#ifdef GADT_DECODE_ONLY
+suiteName = "gadt-decode-spec"
+#elif defined(ILLEGAL_STATE_CORPUS_ONLY)
+suiteName = "illegal-state-corpus-spec"
+#else
+suiteName = "dsl-spec"
+#endif
+
+gateCommand :: String
+#ifdef ILLEGAL_STATE_CORPUS_ONLY
+gateCommand = "tools/illegal_state_corpus_gate.py"
+#else
+gateCommand = "tools/gadt_decode_ir_gate.py"
+#endif
+
+#ifdef GADT_DECODE_ONLY
+checkDecodedCalculusProjection :: [ClusterIR] -> IO ()
+checkDecodedCalculusProjection decoded = case decoded of
+  [artifactIr, budgetIr, liftIr, workflowIr, evidenceIr] -> do
+    expected <- loadMetricOracle "test/oracle/gadt_decode_ir/calculus_projection.tsv"
+    tenant <- either (die . show) pure (trustedTenant "gadt-decode-tenant")
+    subject <- either (die . show) pure (trustedSubject tenant "gadt-decode-subject")
+    membership <- either (die . show) pure (activeMembership tenant subject)
+    action <- either (die . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+      let resources ir = ResourceVector 1 (fromIntegral (length (clusterNodes ir))) 0 0
+          artifact = artifactComponent scope "decoded-artifact" (resources artifactIr) (RecipeId (clusterSemanticHash artifactIr) 1)
+          budgetRows = fromIntegral (length (clusterNodes budgetIr))
+          budget = budgetComponent scope "decoded-budget" (resources budgetIr) (allowance (Bytes budgetRows) (Slots 1) (Bytes budgetRows))
+          lift = liftComponent scope "decoded-lift" (resources liftIr) OnHost
+          workflow = workflowComponent scope "decoded-workflow" (resources workflowIr) emptyLedger
+          evidence = evidenceComponent scope "decoded-evidence" (resources evidenceIr) PureRegister
+          composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+          ResourceVector cpu memory ephemeral pods = compositionResource composition
+          actual =
+            [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
+            , ("component-names", Text.intercalate "," (compositionNames composition))
+            , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
+            ]
+      assert (compositionKinds composition == everyCalculus) "decoded projection omitted or reordered a calculus"
+      assert (actual == expected) ("decoded calculus projection changed: " <> show actual)
+    action
+    putStrLn "gadt-decode-calculus: PASS (5 kinds, 5527 retained rows)"
+  _ -> die "decoded calculus projection requires exactly five authored positives"
+#endif
+
+#ifdef ILLEGAL_STATE_CORPUS_ONLY
+checkIllegalStateCalculusProjection :: CorpusSummary -> Int -> Int -> Int -> IO ()
+checkIllegalStateCalculusProjection corpus compilePairs discharged deferred = do
+  expected <- loadMetricOracle "test/oracle/illegal_state_corpus/calculus_projection.tsv"
+  tenant <- either (die . show) pure (trustedTenant "illegal-state-corpus-tenant")
+  subject <- either (die . show) pure (trustedSubject tenant "illegal-state-corpus-subject")
+  membership <- either (die . show) pure (activeMembership tenant subject)
+  action <- either (die . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+    let negativeCount = dhallTypecheckCount corpus + gadtDecodeCount corpus
+        positiveRows = positiveCount corpus
+        resources count = ResourceVector 1 (fromIntegral count) 0 0
+        artifact = artifactComponent scope "negative-corpus" (resources negativeCount) (RecipeId "illegal-state-corpus" 1)
+        budget = budgetComponent scope "deferred-ledger" (resources deferred) (allowance (Bytes (fromIntegral deferred)) (Slots 1) (Bytes (fromIntegral deferred)))
+        lift = liftComponent scope "positive-corpus" (resources positiveRows) OnHost
+        workflow = workflowComponent scope "compile-pairs" (resources compilePairs) emptyLedger
+        evidence = evidenceComponent scope "discharged-ledger" (resources discharged) PureRegister
+        composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+        ResourceVector cpu memory ephemeral pods = compositionResource composition
+        actual =
+          [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
+          , ("component-names", Text.intercalate "," (compositionNames composition))
+          , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [negativeCount, deferred, positiveRows, compilePairs, discharged]))
+          , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
+          ]
+    assert (compositionKinds composition == everyCalculus) "illegal-state projection omitted or reordered a calculus"
+    assert (actual == expected) ("illegal-state calculus projection changed: " <> show actual)
+  action
+  putStrLn "illegal-state-calculus: PASS (5 kinds, 172 projected units)"
+#endif
+
+#if defined(GADT_DECODE_ONLY) || defined(ILLEGAL_STATE_CORPUS_ONLY)
+loadMetricOracle :: FilePath -> IO [(Text, Text)]
+loadMetricOracle path = do
+  contents <- Text.readFile path
+  forM (dropHeader (Text.lines contents)) $ \row -> case Text.splitOn "\t" row of
+    [metric, value] -> pure (metric, value)
+    _ -> die ("malformed metric row: " <> Text.unpack row)
+#endif
 
 printGate2Oracle :: IO ()
 printGate2Oracle = do
@@ -137,11 +280,21 @@ printGate2Oracle = do
     AppSurface -> "App"
     DeploymentSurface -> "Deployment"
 
-checkPhase6CompileFail :: IO ()
-checkPhase6CompileFail = do
+#ifndef GADT_DECODE_ONLY
+checkPhase27CompileFail :: IO Int
+checkPhase27CompileFail = do
   (exitCode, stdout, stderr) <- readCreateProcessWithExitCode (proc "sh" ["tools/compile_fail.sh"]) ""
-  assert (exitCode == ExitSuccess) ("Phase-6 compile-fail harness failed:\n" <> stdout <> stderr)
-  assert ("compile-fail: PASS (5 legal/illegal one-token pairs)" `contains` stdout) "Phase-6 compile-fail token missing"
+  assert (exitCode == ExitSuccess) ("Phase-27 compile-fail harness failed:\n" <> stdout <> stderr)
+  assert ("compile-fail: PASS (5 legal/illegal one-token pairs)" `contains` stdout) "Phase-27 compile-fail token missing"
+  pure 5
+
+checkPhase9CompileFail :: IO Int
+checkPhase9CompileFail = do
+  (exitCode, stdout, stderr) <- readCreateProcessWithExitCode (proc "python3" ["tools/capacity_topology_compile_fail.py"]) ""
+  assert (exitCode == ExitSuccess) ("Phase-9 predecessor compile-fail harness failed:\n" <> stdout <> stderr)
+  assert ("capacity-topology-compile-fail: PASS (7 legal/illegal minimal pairs)" `contains` stdout) "Phase-9 predecessor compile-fail token missing"
+  pure 4
+#endif
 
 checkPositive :: PositiveCase -> IO ClusterIR
 checkPositive PositiveCase {positiveFile, positiveSurface, positiveHash, positiveNodeCount, positiveFingerprint} = do
@@ -360,5 +513,5 @@ assert condition message = unless condition (die message)
 
 die :: String -> IO value
 die message = do
-  putStrLn ("dsl-spec: FAIL: " <> message)
+  putStrLn (suiteName <> ": FAIL: " <> message)
   exitFailure

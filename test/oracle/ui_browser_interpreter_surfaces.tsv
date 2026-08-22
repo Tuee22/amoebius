@@ -44,6 +44,9 @@ same-origin-websocket-source	checks	same-origin-websocket-sink
 independent-haskell-reference	checks	reference-independent
 browser-harness-drives-playwright	checks	playwright-harness
 no-tracked-trace-table	checks	derived-trace-table-untracked
+semantic-oracles-complete	checks	semantic-oracles-complete
+compile-totality	checks	totality-options
+contained-credential-environment	checks	credential-environment-scrub
 generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
 single-tenant-plan	items	single_plan
 multi-tenant-plan	items	multi_plan
@@ -94,6 +97,10 @@ websocket-upgrade-observed	metrics	websocket
 bundle-and-csp-battery	metrics	artifact-csp
 nine-mutant-battery	metrics	mutants
 loopback-only-os-network-observer	metrics	network-observer
+five-calculus-kind-cardinality	metrics	calculus-kinds
+five-calculus-component-vector	metrics	calculus-components
+five-calculus-projection-counts	metrics	calculus-projection-counts
+five-calculus-resource-vector	metrics	calculus-resource-vector
 server-authorization-truth	metrics	server-authorization-truth
 provider-isolation	metrics	provider-isolation
 live-edge-enforcement	metrics	live-edge-enforcement

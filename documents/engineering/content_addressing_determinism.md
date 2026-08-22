@@ -97,8 +97,10 @@ content-addressing/determinism *use* of it, the catalog owns the typing discipli
 
 [Phase 30](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md) validates the representational first step:
 `InferenceEngine` carries one of the closed named `AppleMetal | Cuda | LinuxCpu` lanes, with no URL or download
-constructor, and the URL negative fails dhall-typecheck. The family/lane availability relation, bounded-cache
-materialization, and live first-miss resolution remain owned by their later phases.
+constructor, and the URL negative fails dhall-typecheck. [Phase 32](../../DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md)
+validates the complete offering quotient, family/lane availability relation, identity-complete owner demands,
+and accelerator provision against every permitted coexistence epoch. Bounded-cache materialization and live
+first-miss resolution remain owned by their later phases.
 
 **The budget has since generalised past ML assets.** `CacheBudget` was introduced here because model weights,
 engines, and compiled kernels are the largest things amoebius materializes, and it reads throughout this

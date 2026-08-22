@@ -78,10 +78,9 @@ flowchart TD
 builds `Amoebius.Capacity.Types`, `Amoebius.Capacity.Fold`, and `Amoebius.Dsl.Topology` with exhaustive-pattern
 warnings promoted to errors. Fifteen direct negative/twin pairs, two real Dhall positives, four sampled
 properties with independent witness recomputation, and 19 seeded mutants validate the base CPU, memory,
-logical ephemeral, pod-slot, CSI-attach, finite CPU-policy, eligibility, and fixed/elastic placement axes
-(ledger `external-run-reference`).
+logical ephemeral, pod-slot, CSI-attach, finite CPU-policy, eligibility, and fixed/elastic placement axes.
 The storage, execution/runtime, accelerator, and provider-root extensions described below remain
-**UNVERIFIED** until Phases 15–16; live enforcement is not established by this result.
+**UNVERIFIED** until Phases 28–29; live enforcement is not established by this result.
 
 ### The four total functions
 

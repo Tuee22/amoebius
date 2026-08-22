@@ -3,6 +3,28 @@
 
 module Main (main) where
 
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
+import Amoebius.Scope.Index qualified as CalculusScope
 import Control.Monad (forM_, unless)
 import Data.Aeson (FromJSON (..), eitherDecode, withObject, (.:))
 import qualified Data.ByteString.Lazy.Char8 as Lazy
@@ -115,6 +137,8 @@ runGreen root binary = do
   checkFreshness observation
   checkNetworkBoundary observation
   checkMutantFixtures root
+  checkCalculus root
+  putStrLn "ui-local-composition-calculus: PASS (5 kinds, 55 projected units)"
   putStrLn "ui-local-composition-spec: PASS (2 apps, 5 interactions, 4 visible pins, 4 effect rows, 3 access rows, 5 denials, 5 mutants)"
 
 runMutant :: FilePath -> FilePath -> String -> IO ()
@@ -159,7 +183,7 @@ buildBundle root = do
         }
   createDirectoryIfMissing True bundleRoot
   (code, output, errors) <- readCreateProcessWithExitCode command ""
-  assertEqual "generic bundle exit" ExitSuccess code
+  assert (code == ExitSuccess) ("generic bundle exit: " <> show code <> "\n" <> output <> errors)
   assert ("Bundle succeeded" `contains` (output <> errors)) "generic bundle success token absent"
 
 runHarness :: FilePath -> FilePath -> String -> IO CompositionObservation
@@ -169,7 +193,7 @@ runHarness root binary mutant = do
         , root </> ".build/ui/local-composition/ui.js"
         ] <> [mutant | not (null mutant)]
   (code, output, errors) <- readCreateProcessWithExitCode (proc "node" arguments) ""
-  assertEqual "composition harness exit" ExitSuccess code
+  assert (code == ExitSuccess) ("composition harness exit: " <> show code <> "\n" <> output <> errors)
   assertEqual "composition harness stderr" "" errors
   either (die . ("invalid composition observation: " <>)) pure (eitherDecode (Lazy.pack output))
 
@@ -270,6 +294,37 @@ checkMutantFixtures root = forM_ mutants $ \(name, _locus) -> do
   source <- readFile path
   assert ("operator=" `contains` source && "expected=" `contains` source) (name <> " fixture drifted")
 
+checkCalculus :: FilePath -> IO ()
+checkCalculus root = do
+  expected <- loadTable (root </> "test/oracle/local_ui_composition/calculus_projection.tsv")
+  tenant <- requireRight "calculus tenant" (CalculusScope.trustedTenant "local-composition-calculus-tenant")
+  subject <- requireRight "calculus subject" (CalculusScope.trustedSubject tenant "local-composition-calculus-subject")
+  membership <- requireRight "calculus membership" (CalculusScope.activeMembership tenant subject)
+  action <- requireRight "calculus request scope" $
+    CalculusScope.withRequestScope tenant subject membership $ \scope -> do
+      let resources :: Int -> ResourceVector
+          resources count = ResourceVector 1 (fromIntegral count) 0 0
+          counts = [1, 3, 42, 4, 5] :: [Int]
+          artifact = artifactComponent scope "generic-composition-artifact" (resources 1)
+            (RecipeId "local-ui-composition" 1)
+          budget = budgetComponent scope "closed-scope-budget" (resources 3)
+            (allowance (Bytes 3) (Slots 1) (Bytes 3))
+          lift = liftComponent scope "local-composition-corpus" (resources 42) OnHost
+          workflow = workflowComponent scope "ordered-effect-workflow" (resources 4) emptyLedger
+          evidence = evidenceComponent scope "mutant-evidence" (resources 5) PureRegister
+          composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+          ResourceVector cpu memory ephemeral pods = compositionResource composition
+          render = Text.unpack . Text.intercalate ","
+          actual =
+            [ ["calculus-kinds", render (map calculusTag (compositionKinds composition))]
+            , ["component-names", render (compositionNames composition)]
+            , ["projection-counts", render (map (Text.pack . show) counts)]
+            , ["resource-vector", render (map (Text.pack . show) [cpu, memory, ephemeral, pods])]
+            ]
+      assertEqual "five calculus kinds" everyCalculus (compositionKinds composition)
+      assertEqual "composition calculus projection" expected actual
+  action
+
 -- The binary under test is named by the gate, which resolved it. The fallback asks
 -- whichever cabal is on PATH; it never names an absolute developer-home path, because a
 -- tracked test that hard-codes one passes only on the machine it was written on.
@@ -337,6 +392,9 @@ assertEqual label expected actual = assert (expected == actual)
 
 assert :: Bool -> String -> IO ()
 assert condition message = unless condition (die message)
+
+requireRight :: Show problem => String -> Either problem value -> IO value
+requireRight label = either (die . ((label <> ": ") <>) . show) pure
 
 die :: String -> IO value
 die message = putStrLn ("ui-local-composition-spec: FAIL: " <> message) >> exitFailure

@@ -123,7 +123,7 @@ impossibility of a self-published ingress was already golden-locked pre-cluster 
 
 **Depends on:** [Phase 63](phase_63_platform_services_2.md) — platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG), which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/keycloak_ingress_gate.py` is green on the live `linux-cpu` stack: the only wild path to any
+**Gate:** `python3 tools/run_phase_gate.py 64` is green on the live `linux-cpu` stack: the only wild path to any
 surface is `LoadBalancer → Envoy/Gateway API → Keycloak`, and every fixture, origin probe, oracle, observer,
 and committed mutant in [Gate integrity](#gate-integrity) holds.
 

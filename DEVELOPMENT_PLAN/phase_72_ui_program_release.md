@@ -90,7 +90,7 @@ schema migration, amoebius runtime image build, or second acceptance command.
 **Lane:** linux-cpu/amd64 ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Gate:** `cabal test ui-program-release-live-gate` publishes two atomic paired-plan UI releases over one
+**Gate:** `python3 tools/run_phase_gate.py 72` publishes two atomic paired-plan UI releases over one
 unchanged amoebius runtime image and admits only an exact-matching plan pair — stale, missing, or mixed
 client/server identities return `ReloadRequired` with zero action effect. Apparatus:
 [Gate integrity](#gate-integrity).

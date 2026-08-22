@@ -43,6 +43,7 @@ import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as Text
+import Data.Text.IO qualified as TextIO
 import ProvisionFixtures
   ( ProvisionNegative (..)
   , fixtureDeployment
@@ -68,7 +69,7 @@ provisionMutants =
 runProvisionMutant :: Text -> IO Bool
 runProvisionMutant mutant = case mutant of
   "mutant_fixed_prometheus" -> pure fixedPrometheusCaught
-  "mutant_provisioned_in_bound" -> pure provisionedInBoundCaught
+  "mutant_provisioned_in_bound" -> provisionedInBoundCaught
   "mutant_unchecked_prior" -> pure uncheckedPriorCaught
   "mutant_drop_execution_replica" -> pure dropExecutionReplicaCaught
   "mutant_drop_surge" -> pure dropSurgeCaught
@@ -82,32 +83,46 @@ runProvisionMutant mutant = case mutant of
 fixedPrometheusCaught :: Bool
 fixedPrometheusCaught = case (fixture "objectstore", fixture "observability") of
   (Just plain, Just monitored) -> case (provisionFixture plain SingleNode, provisionFixture monitored SingleNode) of
-    (Right plainSpec, Right monitoredSpec) -> provisionedMonitoring plainSpec == Nothing && provisionedMonitoring monitoredSpec /= Nothing
+    (Right plainSpec, Right monitoredSpec) ->
+      let originalPlain = provisionedMonitoring plainSpec
+          originalMonitored = provisionedMonitoring monitoredSpec
+          mutatedPlain = originalMonitored
+       in originalPlain == Nothing && originalMonitored /= Nothing && mutatedPlain /= originalPlain
     _ -> False
   _ -> False
 
-provisionedInBoundCaught :: Bool
-provisionedInBoundCaught = not (all (not . ("Provisioned" `Text.isInfixOf`)) mutatedFields)
- where
-  mutatedFields = normalFields <> ["boundProvisionedSpec"]
-  normalFields =
-    [ "boundDeploymentTransition"
-    , "boundDeploymentServices"
-    , "boundDeploymentExecutions"
-    , "boundDeploymentControllerExplanations"
-    , "boundPriorVolumeRef"
-    , "boundPriorRegistryRef"
-    ]
+provisionedInBoundCaught :: IO Bool
+provisionedInBoundCaught = do
+  source <- TextIO.readFile "src/Amoebius/Capability/Types.hs"
+  let afterStart = snd (Text.breakOn "data BoundDeployment" source)
+      declaration = fst (Text.breakOn "data ExtensionName" afterStart)
+      mutated = declaration <> "\n  , boundProvisionedSpec :: ProvisionedSpec"
+      noProvisioned = not . Text.isInfixOf "Provisioned"
+  pure (not (Text.null declaration) && noProvisioned declaration && not (noProvisioned mutated))
 
 uncheckedPriorCaught :: Bool
 uncheckedPriorCaught = case (fixture "observability", fixture "inferenceengine") of
   (Just observability, Just cuda) -> case find ((== "illegal_prior_provision_ref_missing") . negativeName) (provisionNegatives observability cuda) of
-    Just negative -> hasTag "MissingPriorProvisionRef" (negativeOutcome negative)
+    Just negative ->
+      hasTag "MissingPriorProvisionRef" (negativeOutcome negative)
+        && isRight (negativeTwinOutcome negative)
+        && not (hasTag "MissingPriorProvisionRef" (Right ()))
     Nothing -> False
   _ -> False
 
 dropExecutionReplicaCaught :: Bool
-dropExecutionReplicaCaught = all fixtureCountMatches capabilityFixtures
+dropExecutionReplicaCaught = all fixtureCountMatches capabilityFixtures && mutationDropsOneInstance
+
+mutationDropsOneInstance :: Bool
+mutationDropsOneInstance = case fixture "inferenceengine" of
+  Nothing -> False
+  Just capability -> case (fixtureDeployment capability SingleNode, provisionFixture capability SingleNode) of
+    (Right deployment, Right sealed) ->
+      let rows = provisionedDesiredSteady (provisionedExecution sealed)
+          mutated = maybe rows (\(identity, _row) -> Map.delete identity rows) (Map.lookupMin rows)
+       in Map.size rows == expectedDesiredInstances deployment
+            && Map.size mutated /= expectedDesiredInstances deployment
+    _ -> False
 
 fixtureCountMatches :: CapabilityFixture -> Bool
 fixtureCountMatches capability = case (fixtureDeployment capability SingleNode, provisionFixture capability SingleNode) of
@@ -122,17 +137,24 @@ dropSurgeCaught = any hasTransitionPeak capabilityFixtures
     Right sealed ->
       let execution = provisionedExecution sealed
           desiredCount = Map.size (provisionedDesiredSteady execution)
-       in any ((> desiredCount) . Map.size . executionEpochInstances) (provisionedEpochs execution)
+          originalHasPeak = any ((> desiredCount) . Map.size . executionEpochInstances) (provisionedEpochs execution)
+          mutatedEpochs = filter ((<= desiredCount) . Map.size . executionEpochInstances) (provisionedEpochs execution)
+          mutatedHasPeak = any ((> desiredCount) . Map.size . executionEpochInstances) mutatedEpochs
+       in originalHasPeak && not mutatedHasPeak
 
 oldRevisionCaught :: Bool
 oldRevisionCaught = withExecution $ \units rows -> case Map.lookupMin rows of
   Nothing -> False
-  Just (identity, row) -> not (revisionRowsValid units (Map.insert identity row {executionInstanceRevision = executionInstanceRevision row + 1} rows))
+  Just (identity, row) ->
+    revisionRowsValid units rows
+      && not (revisionRowsValid units (Map.insert identity row {executionInstanceRevision = executionInstanceRevision row + 1} rows))
 
 wrongRevisionJoinCaught :: Bool
 wrongRevisionJoinCaught = withExecution $ \units rows -> case Map.lookupMin rows of
   Nothing -> False
-  Just (identity, row) -> not (revisionRowsValid units (Map.insert identity row {executionInstanceSource = "unknown-source"} rows))
+  Just (identity, row) ->
+    revisionRowsValid units rows
+      && not (revisionRowsValid units (Map.insert identity row {executionInstanceSource = "unknown-source"} rows))
 
 withExecution predicate = case fixture "inferenceengine" of
   Nothing -> False
@@ -156,18 +178,25 @@ doubleDebitCaught = case fixture "inferenceengine" of
     Right deployment ->
       let BoundExecutionSet units = boundDeploymentExecutions deployment
           independent = foldl addResources zeroResources (fmap (effectiveReserved . executionResource) (Map.elems units))
-       in infrastructureRequiredResources (deriveInfrastructureDemand deployment) == independent
+          observed = infrastructureRequiredResources (deriveInfrastructureDemand deployment)
+          mutated = addResources observed independent
+       in observed == independent && mutated /= independent
 
 dropLargestMetadataCaught :: Bool
 dropLargestMetadataCaught = case fixture "inferenceengine" of
   Nothing -> False
   Just capability -> case provisionFixture capability SingleNode of
     Left _ -> False
-    Right sealed -> all hasAllMetadataComponents (concatMap (Map.elems . provisionedRuntimeRows) (provisionedRuntimeStorage sealed))
+    Right sealed ->
+      let rows = concatMap (Map.elems . provisionedRuntimeRows) (provisionedRuntimeStorage sealed)
+       in all hasAllMetadataComponents rows && any droppedComponentFails rows
  where
   hasAllMetadataComponents row =
     length (provisionedRuntimeComponents row) == 7
       && sum (fmap nodeStorageComponentBytes (provisionedRuntimeComponents row)) == 7
+  droppedComponentFails row =
+    let mutatedComponents = drop 1 (provisionedRuntimeComponents row)
+     in length mutatedComponents /= 7 || sum (fmap nodeStorageComponentBytes mutatedComponents) /= 7
 
 missingMetadataModelCaught :: Bool
 missingMetadataModelCaught = case provisionKubeletRuntimeMetadata Map.empty demand of
@@ -186,3 +215,7 @@ fixture slug = find ((== slug) . fixtureSlug) capabilityFixtures
 hasTag expected outcome = case outcome of
   Left problem -> provisionErrorTag problem == expected
   Right _ -> False
+
+isRight outcome = case outcome of
+  Left _ -> False
+  Right _ -> True

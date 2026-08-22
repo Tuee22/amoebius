@@ -1,14 +1,13 @@
 # Phase 48: The test-workflow algebra
 
-> **Purpose**: Deliver amoebius testing as a self-tearing-down `.dhall` topology — the always-teardown
-> test-topology type, the `suggest-test` generator, flagged test credentials, and the elevated harness as the
-> sole automated deleter of test-owned durable storage — gated live by a generated, reviewed test that runs a
-> delegated-failover simulation on one named substrate and tears down leak-free.
+> **Purpose**: Deliver the pure test-workflow algebra: a phantom-state teardown obligation, deterministic
+> `suggest-test` projections, named flagged credentials, and an honest evidence projection.
 > **Read this if**: phase 48 is next in the queue, or a later phase depends on what its gate establishes.
 
-Phase 48 delivers the test-topology DSL + suggest-test + elevated harness; its design is owned by [testing_doctrine.md](../documents/engineering/testing_doctrine.md), [app_vs_deployment_doctrine.md](../documents/engineering/app_vs_deployment_doctrine.md), [resource_capacity_types.md](../documents/engineering/resource_capacity_types.md), and the plan for reaching it is owned here.
-Register 3, scoped live, on the `per generated test` substrate.
-The scoped gate passed on 2026-08-11; full Kubernetes/provider cleanup observations remain `UNVERIFIED`.
+Phase 48 owns only the Register-1 value boundary. The 2026-08-19 re-baseline transferred generated Dhall,
+host probing, the elevated harness, Kubernetes/provider cleanup, and delegated failover to
+[Phase 90](phase_90_test_topology_live.md). Their historical specification remains below as that phase's
+inherited input; it is not evidence for this gate.
 
 > **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
 > in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
@@ -31,11 +30,11 @@ The scoped gate passed on 2026-08-11; full Kubernetes/provider cleanup observati
 - [Resource provision — the generator, harness, and failover epoch](#resource-provision--the-generator-harness-and-failover-epoch)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 48.1: The test-topology type — a deployment-rules layer that always tears down ⏸️](#sprint-481-the-test-topology-type--a-deployment-rules-layer-that-always-tears-down-)
-- [Sprint 48.2: `suggest-test` — detect substrate + credential authority, emit a representative test `.dhall` ⏸️](#sprint-482-suggest-test--detect-substrate--credential-authority-emit-a-representative-test-dhall-)
-- [Sprint 48.3: Flagged test credentials + test-owned resource tagging ⏸️](#sprint-483-flagged-test-credentials--test-owned-resource-tagging-)
-- [Sprint 48.4: The elevated harness as sole automated deleter of test-owned storage + leak-free sweep ⏸️](#sprint-484-the-elevated-harness-as-sole-automated-deleter-of-test-owned-storage--leak-free-sweep-)
-- [Sprint 48.5: The per-run ledger artifact + the delegated-failover gate topology ⏸️](#sprint-485-the-per-run-ledger-artifact--the-delegated-failover-gate-topology-)
+- [Sprint 48.1: The test-topology type — a deployment-rules layer that always tears down ✅](#sprint-481-the-test-topology-type--a-deployment-rules-layer-that-always-tears-down-)
+- [Sprint 48.2: `suggest-test` — detect substrate + credential authority, emit a representative test `.dhall` ✅](#sprint-482-suggest-test--detect-substrate--credential-authority-emit-a-representative-test-dhall-)
+- [Sprint 48.3: Flagged test credentials + test-owned resource tagging ✅](#sprint-483-flagged-test-credentials--test-owned-resource-tagging-)
+- [Sprint 48.4: The elevated harness as sole automated deleter of test-owned storage + leak-free sweep ✅](#sprint-484-the-elevated-harness-as-sole-automated-deleter-of-test-owned-storage--leak-free-sweep-)
+- [Sprint 48.5: The per-run ledger artifact + the delegated-failover gate topology ✅](#sprint-485-the-per-run-ledger-artifact--the-delegated-failover-gate-topology-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -43,7 +42,15 @@ The scoped gate passed on 2026-08-11; full Kubernetes/provider cleanup observati
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-47 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-22. The fourteen-sided Register-1 gate passed on natural `arm64`, untranslated. A
+phantom teardown state admits the legal compile twin and rejects the missing-teardown twin at its exact type
+mismatch; 15 independently authored suggestion rows cover four branches, two credential refusals, and all
+nine one-short resource axes; two pure render observations are byte-identical under denied networking;
+evidence preserves Tested versus UNVERIFIED; all four build mutants redden; all 14 metrics match; and 47
+surfaces join to 53 runtime items. Attestation
+`sha256:77e2d39f21282e8b3f82e1783501dd1cb535c0fa35afc6ec9940683e0eb84889` binds source
+`sha256:7cf44e7ae9fc20d1…` over 2,304 files. Generated Dhall, host probes, allocation, teardown, leak sweeps,
+and failover remain Phase-90 work; Protocol and Runtime are UNVERIFIED.
 
 **Pre-natural-architecture status record (invalidated where it claims completion):**
 
@@ -162,9 +169,7 @@ because a live harness cannot precede the platform it exercises.
 
 **Depends on:** [Phase 47](phase_47_tool_and_mutant_generation.md) — generated checking tools and mutants, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test test-workflow-algebra` passes: a workflow value holding an undischarged teardown
-obligation fails to compile, the `suggest-test` derivation matches an independently authored oracle, and every
-committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/run_phase_gate.py 48` passes: the missing-teardown twin fails to compile, all 15 `suggest-test` rows match their independent oracle, and all four pure build mutants redden exact loci. See [Gate integrity](#gate-integrity).
 
 **The criteria below belong to [Phase 90](phase_90_test_topology_live.md).** They are retained here as the
 specification that phase inherits: this phase proves the algebra, and Phase 90 proves the live cycle.
@@ -249,6 +254,25 @@ The gate is checked against these committed, oracle-pinned criteria (see
 
 ## Gate integrity
 
+**The current Phase-48 apparatus is pure and closed.**
+
+- **Independent oracle.** `test/oracle/test_workflow_algebra/suggest_projection.tsv` fixes four accepted
+  branch projections and eleven exact refusals, including one-short supply on all nine resource axes.
+- **Compiler barrier.** `legal_teardown.hs` and `missing_teardown.hs` differ only by `attachTeardown`; resolved
+  GHC must accept the first and reject the second at `CarriesTeardown` versus `MissingTeardown`.
+- **Committed mutants.** The four existing `test-topology-dsl-*` build flags admit a missing teardown, bypass
+  CPU supply, overclaim an unperformed evidence row, or change the delegated subscription. Each has one exact
+  red locus and the clean configuration is rebuilt afterward.
+- **Fresh challenge.** Two fresh pure renders are byte-identical, and the clean executable repeats its
+  acceptance token under a sanctioned denied-network observer.
+- **Honesty.** The gate proves Decision-layer value semantics only. Protocol and Runtime remain UNVERIFIED
+  and are not inferred from the historical portable/live footprint.
+- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+
+**Transferred live apparatus — Phase 90 only.** Everything from this paragraph through the resource envelope
+below is retained as Phase 90's inherited live specification. None is a Phase-48 gate requirement, result, or
+completion claim.
+
 The harness first resolves the physical checkout and exclusively creates
 `.test_data/runs/<run-id>/**` with an ownership marker. Every temp directory, kubeconfig, virtual disk,
 retained backing, service state, container-engine data root/runtime directory/volume/cache, and generated
@@ -257,7 +281,7 @@ inside `.data/**`, any production configuration, a pre-existing marker, and any 
 fallback. Teardown re-resolves and marker-verifies the exact run root before deletion; changed ownership
 evidence causes quarantine and a red gate, never broader deletion.
 
-**What the acceptance run must show.** The run happens in Register 3, on live infrastructure. Its `.dhall`
+**What the Phase-90 acceptance run must show.** The run happens in Register 3, on live infrastructure. Its `.dhall`
 comes from a real `amoebius suggest-test` execution on the gate host: a real Phase-55 host classification,
 with the SSH/AWS credential probe either run for real or its layer explicitly recorded UNVERIFIED in the
 ledger. The failover that topology schedules kills the active worker and observes a name-ordered standby take
@@ -303,7 +327,7 @@ flowchart LR
   s3 -->|"produces what the next consumes"| s4
   s4 -->|"the last seam the gate closes over"| gate
 ```
-*Orientation. The seams phase 48 builds, in order; [Gate integrity](#gate-integrity) owns the apparatus. Not run.*
+*Orientation. The live seams transferred to [Phase 90](phase_90_test_topology_live.md), in their inherited order. This diagram is not the Phase-48 gate apparatus.*
 
 **Committed, oracle-pinned oracles and mutants (authored before any implementation exists).**
 - `test/oracles/phase_76_expected_moves.json` — the independently authored expected applicability/strength
@@ -361,16 +385,18 @@ flowchart LR
 - `test/fixture/dhall/phase_76_review_allowlist.json` — the committed allowlist bounding which fields operator review
   may edit, making emitted→reviewed provenance falsifiable.
 
-**Register binding for all sprint validations.** Every Sprint 48.1–47.5 Independent Validation and Validation
-below is discharged in the register named on the criterion. Where a criterion names Register 2 (Phase-34 fake
+**Register binding for the transferred live validations.** Every live Independent Validation and Validation
+below is discharged by Phase 90 in the register named on the criterion. Where a criterion names Register 2 (Phase-34 fake
 tools / fixed fake inputs), it is a type-level or pure-function check and its live layer is recorded UNVERIFIED
 in the ledger; the leak-free teardown, the live identity-boundary denial (Sprint 48.4), and the failover
 simulation of the Gate are discharged only in **Register 3** on the `linux-cpu` `kind` cluster. No validation
 may silently choose its own world: the register is stated on each, and a Register-2 discharge never counts as
 the Register-3 gate obligation.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
 
 ## Resource provision — the generator, harness, and failover epoch
+
+This entire provision envelope belongs to Phase 90. Phase 48 provisions no resource and claims no live
+observation from it.
 
 `suggest-test` and the elevated harness are real host processes. Their pure inputs therefore carry a selected
 executable digest/installed bytes, substrate-matched `HostResources`, bounded credential/API response buffers,
@@ -590,23 +616,16 @@ object-store, provider and backing mutation trace empty.
 
 ## Sprints
 
-> **Current revalidation rule.** Every sprint is blocked by the reopened numeric sequence. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Reconciled sprint rule.** Each sprint is Done only for its pure value-level portion or for the explicit
+> ownership transfer to Phase 90. Historical live validation prose below remains Phase 90's inherited target,
+> not a Phase-48 result. Generated output stays beneath `.build/**`; Protocol and Runtime remain UNVERIFIED.
 
-## Sprint 48.1: The test-topology type — a deployment-rules layer that always tears down ⏸️
+## Sprint 48.1: The test-topology type — a deployment-rules layer that always tears down ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Test/Topology.hs`, `dhall/test/Topology.dhall` (the
-`TestTopology` Dhall type + its Haskell decoder), `src/Amoebius/Test/Runner.hs` (the structured-cleanup
-runner), and `src/Amoebius/Test/ResourceWitness.hs` (comparison of the reviewed topology with the opaque
-execution/runtime- storage projection) (target paths from [system_components.md](system_components.md); not
-yet built)
-**Blocked by**: reopened numeric predecessor gates.
+**Status**: Done for the pure algebra; live execution is transferred to Phase 90
+**Implementation**: `src/test-workflow-algebra/Amoebius/Test/WorkflowAlgebra.hs`,
+`test/negative/test_workflow_algebra/{legal_teardown,missing_teardown}.hs`
+**Blocked by**: [Phase 47](phase_47_tool_and_mutant_generation.md) gate.
 **Independent Validation**: the resource-reclamation criteria are discharged in
 **Register 3** on the `linux-cpu` `kind` cluster (a teardown against Phase-34 fakes does not prove real
 reclamation, so it does not count) and the resource set is confirmed empty by the implementation-independent
@@ -674,16 +693,14 @@ none the wiser ([`app_vs_deployment_doctrine.md §3`](../documents/engineering/a
    runner.
 
 ### Remaining Work
-Portable contracts are implemented; the full Kubernetes/Pulsar/provider Register-3 obligations remain UNVERIFIED.
+None for the pure algebra. Phase 90 owns every live execution and reclamation obligation described above.
 
-## Sprint 48.2: `suggest-test` — detect substrate + credential authority, emit a representative test `.dhall` ⏸️
+## Sprint 48.2: `suggest-test` — detect substrate + credential authority, emit a representative test `.dhall` ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Test/SuggestTest.hs`,
-`app/Amoebius/Command/SuggestTest.hs` (the `amoebius suggest-test` subcommand), and
-`test/spec/dsl/SuggestTestRuntimeStorageSpec.hs` (planned-slot shapes, component roles/layout backings, node
-scope/domain/ownership/grouping, SplitRuntime boundary and alias mutants) (target paths; not yet built)
-**Blocked by**: reopened numeric predecessor gates.
+**Status**: Done for deterministic value derivation; host detection and Dhall emission are transferred to Phase 90
+**Implementation**: `src/test-workflow-algebra/Amoebius/Test/WorkflowAlgebra.hs`,
+`test/oracle/test_workflow_algebra/suggest_projection.tsv`, `test/spec/workflow/TestWorkflowAlgebraSpec.hs`
+**Blocked by**: Sprint 48.1.
 **Requires**: `cloud-account` — credentials whose authority this sprint *probes*; it asserts what they may
 do, and requires no pre-existing provider resource.
 **Independent Validation**: Register 2 — pure, over Phase-34 fake tools, so the live probe layer is recorded
@@ -799,15 +816,14 @@ the emitted chaos schedule injects a *delegated* failover.
    records the emitted-to-reviewed provenance.
 
 ### Remaining Work
-Portable contracts are implemented; the full Kubernetes/Pulsar/provider Register-3 obligations remain UNVERIFIED.
+None for the pure projection. Phase 90 owns host probing, reviewed Dhall emission, and live reprovisioning.
 
-## Sprint 48.3: Flagged test credentials + test-owned resource tagging ⏸️
+## Sprint 48.3: Flagged test credentials + test-owned resource tagging ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Test/Credentials.hs`,
-`dhall/test/TestCredential.dhall` (the flagged test-simulation identity type + the test-owned tag) (target
-paths; not yet built)
-**Blocked by**: reopened numeric predecessor gates.
+**Status**: Done for the named flagged-credential value; allocation tagging is transferred to Phase 90
+**Implementation**: `src/test-workflow-algebra/Amoebius/Test/WorkflowAlgebra.hs`,
+`test/oracle/test_workflow_algebra/suggest_projection.tsv`
+**Blocked by**: Sprint 48.2.
 **Independent Validation**: Register 2 — type-level, over Phase-34 fake tools. This sprint pins the
 *representability* boundary only; the *live* identity-boundary denial is Sprint 48.4's Register-3 obligation.
 The numbered validation list below states the paired type-check foreclosures for the flagged credential and
@@ -846,15 +862,13 @@ requirement of the create-vs-delete model owned by
    `SecretRef`, never inlined.
 
 ### Remaining Work
-Portable contracts are implemented; the full Kubernetes/Pulsar/provider Register-3 obligations remain UNVERIFIED.
+None for the credential value. Phase 90 owns secret resolution, allocation tagging, and authority readback.
 
-## Sprint 48.4: The elevated harness as sole automated deleter of test-owned storage + leak-free sweep ⏸️
+## Sprint 48.4: The elevated harness as sole automated deleter of test-owned storage + leak-free sweep ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Test/Harness.hs`, `src/Amoebius/Test/Sweep.hs` (the
-elevated harness + test-flag reclaim + independent Kubernetes/host/cloud postflight inventory) (target
-paths; not yet built)
-**Blocked by**: reopened numeric predecessor gates.
+**Status**: Done as an ownership transfer; no live-harness result is credited to Phase 48
+**Implementation**: none in Phase 48; [Phase 90](phase_90_test_topology_live.md) owns the target harness and sweep
+**Blocked by**: None.
 **Independent Validation**: Register 3 on the live `kind` cluster. Within automated test workflows only the
 elevated harness, holding the flagged delete-capable credential, can destroy durable **backing**, and only
 backing flagged test-owned. The numbered validation list below keeps the binding-object and backing
@@ -920,17 +934,14 @@ untagged and backing-only leaks are visible.
    reported as a leak; a resource absent pre-run but present post-run is.
 
 ### Remaining Work
-Portable contracts are implemented; the full Kubernetes/Pulsar/provider Register-3 obligations remain UNVERIFIED.
+None in this phase. The entire implementation and validation surface belongs to Phase 90.
 
-## Sprint 48.5: The per-run ledger artifact + the delegated-failover gate topology ⏸️
+## Sprint 48.5: The per-run ledger artifact + the delegated-failover gate topology ✅
 
-**Status**: Blocked by the reopened numeric sequence; prior capability footprint retained for migration
-**Implementation**: `src/Amoebius/Test/Ledger.hs` (the proven/tested/assumed artifact
-emitter), `test/fixture/dhall/phase_76_failover.dhall` (the gate topology), `test/spec/live/FailoverGateSpec.hs`, and
-`test/spec/live/FailoverRuntimeStorageSpec.hs` (planned-slot→observed-Pod-UID equality, node
-scope/domain/ownership/grouping, reservation/observed no-double-debit, both SplitRuntime backings, and
-Unified/SplitImage alias controls) (target paths; not yet built)
-**Blocked by**: reopened numeric predecessor gates.
+**Status**: Done for the pure evidence projection; the live ledger and failover topology are transferred to Phase 90
+**Implementation**: `src/test-workflow-algebra/Amoebius/Test/WorkflowAlgebra.hs`,
+`tools/test_topology_dsl_gate.py`, `test/oracle/test_workflow_algebra/{calculus_projection,validation_locus}.tsv`
+**Blocked by**: Sprint 48.3.
 **Independent Validation**: Register 3 on the live `kind` cluster: a test `.dhall` emitted by a real
 `amoebius suggest-test` run on the gate host runs the single-substrate delegated failover, tears down with an
 empty inventory-diff sweep, and emits the proven/tested/assumed ledger. The numbered validation list below
@@ -1019,28 +1030,19 @@ injects is delegated to Pulsar (Phase 69), never a bespoke amoebius election.
 > ML-workflow runtime — sibling evidence, not an amoebius result.
 
 ### Remaining Work
-Portable contracts are implemented; the full Kubernetes/Pulsar/provider Register-3 obligations remain UNVERIFIED.
+None for the pure evidence projection. Phase 90 owns the live ledger artifact and delegated-failover topology.
 
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
-- `documents/engineering/testing_doctrine.md` — record that §3 / §4 / §5 / §6 / §7 / §8 gain concrete amoebius
-  module paths (the `TestTopology` type, `suggest-test`, the flagged credential, the elevated harness + sweep,
-  the ledger emitter); status of those realizations lives here in the plan, never as doctrine status. Reconcile
-  the §5 "leadership election" prose with the delegated-failover posture (single-instance a k8s/etcd property;
-  worker takeover a Pulsar subscription).
-- `documents/engineering/app_vs_deployment_doctrine.md` — §3's deployment-rules surface gains the realized
-  test-topology layer (Sprint 48.1): the `TestTopology` is an ordinary deployment-rules layer over a production
-  app/platform spec and the chaos/failover schedule attaches on that surface, keeping application logic and
-  deployment rules separate DSL surfaces; realization status lives here in the plan, never as doctrine status.
-- `documents/engineering/resource_capacity_doctrine.md` — §3.1's systematic provision matrix / §4's total
-  provision fold gain the `suggest-test` sizing + runner-recheck realization (CPU, memory, logical Pod-local
-  ephemeral, layout-routed node storage, runtime-metadata component→role→layout maps, presented durable/cache,
-  CUDA/Metal owner epochs, and every provider-quota class); only the opaque provisioned topology reaches
-  allocation, and the status of that realization lives here in the plan.
-- `documents/engineering/storage_lifecycle_doctrine.md` — §7.1 gains the realized automated test-reclaim owner
-  (`src/Amoebius/Test/Sweep.hs`, `src/Amoebius/Test/Harness.hs`); §8 remains explicitly outside this harness,
-  with production backing deletion an external privileged operator action.
+- `documents/engineering/testing_doctrine.md` — record the pure teardown, suggestion, credential, and evidence
+  module and leave generated/live topology, harness, sweep, and per-run evidence explicitly to Phase 90.
+- `documents/engineering/app_vs_deployment_doctrine.md` — retain the deployment-rules target while recording
+  that Phase 48 validates only its pure workflow value.
+- `documents/engineering/resource_capacity_doctrine.md` — retain the full live provision target while
+  distinguishing Phase 48's nine-axis pure suggestion projection from Phase 90's allocation/readback proof.
+- `documents/engineering/storage_lifecycle_doctrine.md` — leave §7.1's automated test-reclaim owner UNVERIFIED
+  until Phase 90; Phase 48 owns no delete authority.
 - `documents/engineering/pulumi_iac_doctrine.md` — §6's create-vs-delete credential model gains the testing-side
   realization: the flagged test-simulation identity is the sole automated holder of destroy authority for
   test-owned durable storage. Production backing is outside this harness and remains reclaimable only by the
@@ -1051,11 +1053,9 @@ Portable contracts are implemented; the full Kubernetes/Pulsar/provider Register
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-48 status when the gate passes; link this document.
-- `DEVELOPMENT_PLAN/system_components.md` — add the `Amoebius/Test/*` modules (`Topology`, `Runner`,
-  `SuggestTest`, `Credentials`, `Harness`, `Sweep`, `Ledger`) to the component inventory as Phase-48
-  design-first rows, mapped to the owning testing and storage-lifecycle doctrines.
-- `DEVELOPMENT_PLAN/substrates.md` — record the Phase 48 "per generated test" substrate posture (each generated
-  test substrate-locked; the canonical gate run on `linux-cpu`) in the per-phase substrate map.
+- `DEVELOPMENT_PLAN/system_components.md` — record `lib:test-workflow-algebra-core` as Phase 48's Decision-layer
+  component and keep live `Amoebius/Test/*` ownership at Phase 90.
+- `DEVELOPMENT_PLAN/substrates.md` — retain Phase 48 at `none`/`none`; Phase 90 owns the generated test's live substrate.
 
 ## Related Documents
 - [README.md](README.md) — the live tracker; Phase 48 objective, gate, and substrate

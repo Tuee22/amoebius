@@ -35,6 +35,7 @@ FIXTURES = ROOT / "test/fixture/ui_authorization"
 MUTANT_CAPABILITY = "ui_authorization"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/ui_authorization/validation_locus.tsv"
+CALCULUS = ROOT / "test/oracle/ui_authorization/calculus_projection.tsv"
 MODULE = ROOT / "src/Amoebius/Ui/Security/Authorization.hs"
 REFERENCE = ROOT / "test/spec/ui/AuthorizationReference.hs"
 RESULTS = ROOT / ".build/dsl/ui-authorization/phase-results.tsv"
@@ -47,7 +48,11 @@ EXPECTATIONS = "test/oracle/ui_authorization_surfaces.tsv"
 
 COMPILER = ""
 
-SANCTIONED_OBSERVERS = ("unshare-network-namespace", "strace-socket-EPERM")
+SANCTIONED_OBSERVERS = (
+    "unshare-network-namespace",
+    "darwin-sandbox-deny-network",
+    "strace-socket-EPERM",
+)
 
 # One check id per private type. A single "the constructors are private" bit stays green
 # while one of them quietly opens, so the scan reports each separately.
@@ -83,6 +88,8 @@ CHECKS = {
     "effect-requires-authorized-action": "the effect interpreter consumes AuthorizedAction and nothing weaker",
     "reference-evaluator-independent": "the reference evaluator does not import the module under test",
     "authorization-partial-token-scan": "no partial or unsafe token survives in the authorization module",
+    "semantic-oracles-complete": "registry, decision, parity, epoch, and calculus oracles are exact",
+    "totality-options": "the authorization suite compiles with the project totality warnings",
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
     "toolchain-satisfies-requirements": "the resolved cabal and ghc satisfy the authored ranges",
     "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
@@ -98,6 +105,10 @@ EXPECTED_RESULTS = {
     "stale-epochs": "4/4-exact-empty-trace",
     "generated-coverage": "9/9-classes-at-5-percent",
     "mutants": "2/2-red",
+    "calculus-kinds": "5/5",
+    "calculus-components": "5/5",
+    "calculus-projection-counts": "5,6,8,9,2",
+    "calculus-resource-vector": "5,30,0,0",
     "network-observer": "sanctioned-observer",
     "identity-provider-truth": "UNVERIFIED",
     "runtime-policy-enforcement": "UNVERIFIED",
@@ -120,14 +131,16 @@ CHECK_SIDE = {
     "effect-requires-authorized-action": "source",
     "reference-evaluator-independent": "source",
     "authorization-partial-token-scan": "source",
+    "semantic-oracles-complete": "oracle",
+    "totality-options": "source",
     "emitted-results-untracked": "results",
     "recorded-results-match-oracle": "results",
     "toolchain-satisfies-requirements": "toolchain",
 }
 
 MUTANT_TOKENS = {
-    "default_allow": "ui-authorization-mutant: RED default_allow default-deny",
-    "visibility_is_authorization": "ui-authorization-mutant: RED visibility_is_authorization hidden-invocable+stale",
+    "default_allow": "ui-authorization-mutant: RED default_allow locus=default-deny",
+    "visibility_is_authorization": "ui-authorization-mutant: RED visibility_is_authorization locus=hidden-invocable+stale",
 }
 
 
@@ -175,6 +188,7 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     matrix = read_tsv(FIXTURES / "authorization_matrix.tsv")
     errors = read_tsv(FIXTURES / "decode_errors.tsv")
     stale = read_tsv(FIXTURES / "stale_decision_cases.tsv")
+    calculus = read_tsv(CALCULUS)
     expected_effects = ["ReadData", "MutateData", "StartWorkflow", "ObserveWorkflow", "EndSession"]
     if len(registry) != 5 or [row["effect"] for row in registry] != expected_effects:
         raise GateFailure("action registry must pin the five closed effect arms in order")
@@ -194,15 +208,27 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
         "StalePolicyEpoch", "StaleMembershipEpoch", "StaleGrantEpoch", "StaleScopeEpoch",
     ]:
         raise GateFailure("authority epoch errors drifted")
+    expected_calculus = [
+        {"metric": "calculus-kinds", "value": "artifact,budget,lift,workflow,evidence"},
+        {"metric": "component-names", "value": "action-registry,authorization-decisions,parity-and-epoch-refusals,generated-coverage-workflow,mutant-evidence"},
+        {"metric": "projection-counts", "value": "5,6,8,9,2"},
+        {"metric": "resource-vector", "value": "5,30,0,0"},
+    ]
+    if calculus != expected_calculus:
+        raise GateFailure("authorization five-calculus projection oracle drifted")
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 2 or {row["mutant"] for row in mutants} != set(MUTANT_TOKENS):
-        raise GateFailure("Phase-21 mutant manifest must contain exactly the two contract mutants")
+        raise GateFailure("Phase-38 mutant manifest must contain exactly the two contract mutants")
     locus = read_tsv(LOCUS)
     if len(locus) != 30 or len({row["entry"] for row in locus}) != 30:
-        raise GateFailure("Phase-21 validation locus must contain thirty unique rows")
+        raise GateFailure("Phase-38 validation locus must contain thirty unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
-    if len([row for row in phase0_rows if row["# phase"] == "18"]) != 6:
-        raise GateFailure("Phase-0 manifest must pin six Phase-21 artifacts")
+    phase38 = [row for row in phase0_rows if row["# phase"] == "21"]
+    if len(phase38) != 6:
+        raise GateFailure("Phase-0 manifest must pin six Phase-38 artifacts")
+    missing = [row["path"] for row in phase38 if not (ROOT / row["path"]).is_file()]
+    if missing:
+        raise GateFailure(f"Phase-38 preimplementation artifacts are absent: {missing}")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 1 only; identity/provider/runtime enforcement UNVERIFIED\n"
@@ -273,6 +299,11 @@ def verify_source_boundaries() -> None:
         raise GateFailure(
             "reference-evaluator-independent: the independent evaluator imports the production module"
         )
+    cabal = (ROOT / "amoebius.cabal").read_text(encoding="utf-8")
+    stanza = cabal.split("test-suite ui-authorization-spec", 1)[1].split("\ntest-suite ", 1)[0]
+    for option in ("-Werror=missing-methods", "-Werror=incomplete-patterns"):
+        if option not in stanza:
+            raise GateFailure(f"totality-options: authorization suite lacks {option}")
 
 
 def isolated_green(cabal: Path) -> tuple[str, str]:
@@ -283,13 +314,37 @@ def isolated_green(cabal: Path) -> tuple[str, str]:
     TEMP_ROOT.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="network-", dir=TEMP_ROOT) as directory:
         trace = Path(directory) / "network.trace"
-        probe = run(["unshare", "-n", "true"], require_success=False)
-        if probe.returncode == 0:
+        if shutil.which("unshare") and run(["unshare", "-n", "true"], require_success=False).returncode == 0:
             result = run(["unshare", "-n", str(binary)])
             observer = "unshare-network-namespace"
+        elif shutil.which("sandbox-exec"):
+            profile = Path(directory) / "deny-network.sb"
+            profile.write_text("(version 1)\n(allow default)\n(deny network*)\n", encoding="utf-8")
+            control = run(
+                [
+                    "sandbox-exec",
+                    "-f",
+                    str(profile),
+                    sys.executable,
+                    "-c",
+                    "import socket,sys;\n"
+                    "try:\n socket.create_connection(('127.0.0.1', 9), timeout=1).close()\n"
+                    "except PermissionError:\n sys.exit(0)\n"
+                    "except OSError:\n sys.exit(3)\n"
+                    "sys.exit(4)\n",
+                ],
+                require_success=False,
+            )
+            if control.returncode != 0:
+                raise GateFailure(
+                    f"sandbox-exec did not deny a socket (control exit {control.returncode}); "
+                    "the isolation this observer claims is not in force"
+                )
+            result = run(["sandbox-exec", "-f", str(profile), str(binary)])
+            observer = "darwin-sandbox-deny-network"
         else:
             if shutil.which("strace") is None:
-                raise GateFailure("neither network namespace isolation nor strace socket injection is available")
+                raise GateFailure("none of unshare, sandbox-exec, or strace is available as a network observer")
             result = run([
                 "strace", "-f", "-qq", "-e", "trace=%network", "-e", "inject=socket:error=EPERM",
                 "-o", str(trace), str(binary),
@@ -309,8 +364,9 @@ def run_green(cabal: Path) -> tuple[str, str]:
         "ui-authorization-spec: PASS "
         "(5 actions, 6 matrix rows, 4 parity errors, 4 stale epochs, 9 coverage classes, 2 mutants)"
     )
-    if token not in suite.stdout or token not in isolated:
-        raise GateFailure("Phase-21 acceptance token is absent from normal or isolated execution")
+    calculus = "ui-authorization-calculus: PASS (5 kinds, 30 projected units)"
+    if token not in suite.stdout or token not in isolated or calculus not in suite.stdout or calculus not in isolated:
+        raise GateFailure("Phase-38 acceptance tokens are absent from normal or isolated execution")
     return suite.stdout + isolated, observer
 
 
@@ -343,6 +399,10 @@ def write_results(counts: Mapping[str, int], reddened: int, total: int, observer
         "stale-epochs": f"{counts['stale']}/4-exact-empty-trace",
         "generated-coverage": "9/9-classes-at-5-percent",
         "mutants": f"{reddened}/{total}-red",
+        "calculus-kinds": "5/5",
+        "calculus-components": "5/5",
+        "calculus-projection-counts": "5,6,8,9,2",
+        "calculus-resource-vector": "5,30,0,0",
         "network-observer": observer,
         "identity-provider-truth": "UNVERIFIED",
         "runtime-policy-enforcement": "UNVERIFIED",
@@ -379,11 +439,14 @@ def surface_decisions(
 
 def main() -> int:
     gate = gate_common.PhaseGate(
-        phase=38, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", sides=SIDES,
+        phase=38, contract=CONTRACT, command=GATE_COMMAND, register="1", substrate="none", lane="none", sides=SIDES,
         expectations=EXPECTATIONS,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
+    results["architecture"] = gate.architecture_side()
+    if not results["architecture"]:
+        return gate.report(results)
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []
@@ -418,6 +481,7 @@ def main() -> int:
         print("  ok    effect-requires-authorized-action   the interpreter consumes AuthorizedAction")
         print("  ok    reference-evaluator-independent     the reference does not import the subject")
         print("  ok    authorization-partial-token-scan    no partial or unsafe token in the module")
+        print("  ok    totality-options                    suite totality warnings are enabled")
         results["source"] = True
 
         print("\nsuite side — the pure authorization battery under a network observer\n")
@@ -482,7 +546,7 @@ def main() -> int:
         },
         dependencies={"ui-authorization-spec": "cabal test"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-21 mutants", "status": "unrun"}],
+        or [{"name": "phase-38 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

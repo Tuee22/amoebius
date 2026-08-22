@@ -50,7 +50,8 @@ CONTRACT = "DEVELOPMENT_PLAN/phase_50_host_assert_cli.md"
 EXPECTATIONS = "test/oracle/host_assert_cli_surfaces.tsv"
 
 DISTRIBUTION = ROOT / "pb"
-VENV_PYTHON = DISTRIBUTION / ".venv" / "bin" / "python"
+ENVIRONMENT_ROOT = ROOT / ".build" / "toolchain" / "host_assert_cli"
+VIRTUALENVS = ENVIRONMENT_ROOT / "virtualenvs"
 HARNESS = ROOT / "test" / "harness" / "host_assert_cli" / "observe.py"
 TRANSCRIPT = ROOT / "test" / "fixture" / "host_assert_cli" / "ensure_transcript.tsv"
 MUTANT_DIR = ROOT / "test" / "mutant" / "host_assert_cli"
@@ -132,20 +133,69 @@ def poetry() -> Path:
     raise GateFailure("poetry is absent; the distribution's own environment cannot be ensured")
 
 
+def poetry_environment() -> dict[str, str]:
+    """Keep every Poetry-owned cache, datum and virtualenv beneath `.build`."""
+    environment = dict(os.environ)
+    settings = {
+        "POETRY_CACHE_DIR": ENVIRONMENT_ROOT / "cache",
+        "POETRY_DATA_DIR": ENVIRONMENT_ROOT / "data",
+        "POETRY_VIRTUALENVS_IN_PROJECT": "false",
+        "POETRY_VIRTUALENVS_PATH": VIRTUALENVS,
+        "PIP_CACHE_DIR": ENVIRONMENT_ROOT / "pip-cache",
+    }
+    for name, value in settings.items():
+        environment[name] = str(value)
+    return environment
+
+
+def resolved_environment_python(environment: dict[str, str]) -> Path | None:
+    """Ask Poetry for the interpreter it selected, then enforce containment."""
+    result = subprocess.run(
+        [str(poetry()), "env", "info", "--path"],
+        cwd=DISTRIBUTION,
+        env=environment,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0 or not result.stdout.strip():
+        return None
+    environment_path = Path(result.stdout.strip()).resolve()
+    try:
+        environment_path.relative_to(VIRTUALENVS.resolve())
+    except ValueError as error:
+        raise GateFailure(
+            f"poetry selected {environment_path}, outside the governed build root"
+        ) from error
+    candidate = environment_path / "bin" / "python"
+    if not candidate.is_file() or not os.access(candidate, os.X_OK):
+        return None
+    return candidate
+
+
 def ensure_environment() -> Path:
-    """Probe for the in-project virtualenv, install it when absent, resolve it.
+    """Probe for the build-contained virtualenv, install it when absent, resolve it.
 
     The same four-step ensure the distribution itself performs, applied to the
     distribution: a gate that assumed the environment would fail on a fresh clone
     with a message about a missing interpreter rather than about the phase.
     """
-    if VENV_PYTHON.is_file() and os.access(VENV_PYTHON, os.X_OK):
-        return VENV_PYTHON
-    print(f"  note  {rel(VENV_PYTHON)} is absent; installing the distribution's environment")
-    subprocess.run([str(poetry()), "install", "--no-interaction"], cwd=DISTRIBUTION, check=True)
-    if not VENV_PYTHON.is_file():
-        raise GateFailure(f"poetry install did not produce {rel(VENV_PYTHON)}")
-    return VENV_PYTHON
+    environment = poetry_environment()
+    VIRTUALENVS.mkdir(parents=True, exist_ok=True)
+    python = resolved_environment_python(environment)
+    if python is not None:
+        return python
+    print("  note  the build-contained Poetry environment is absent; installing it")
+    subprocess.run(
+        [str(poetry()), "install", "--no-interaction"],
+        cwd=DISTRIBUTION,
+        env=environment,
+        check=True,
+    )
+    python = resolved_environment_python(environment)
+    if python is None:
+        raise GateFailure("poetry install did not produce a build-contained interpreter")
+    return python
 
 
 def refusing_shims(directory: Path, log: Path) -> Path:

@@ -101,6 +101,11 @@ Conceptually, `OfflineSource` contains:
 }
 ```
 
+Phase 41's concrete Register-1 mirror uses `Projection { projectionId : Text }`,
+`BlobClass { blobClassId : Text }`, and a textual `offlineView`. Those identifiers are language-level keys;
+the richer browser policy, retention labels, encrypted stores, and runtime handles remain later-phase types
+and are UNVERIFIED by the pure compiler gate.
+
 `OnlineOnly` preserves the memory-only behavior. `Offline` names semantics only: values that may be projected
 locally, ports whose user intent may be queued, blob classes needed before upload, and the bounded view shown
 without the network. It cannot name IndexedDB, OPFS, Cache Storage, a service worker, Web Locks,
@@ -128,8 +133,13 @@ data OfflineQueueContract = OfflineQueueContract
   , maximumCount         :: PositiveInt
   , maximumBytes         :: Bytes
   , maximumAge           :: Duration
-  }
+}
 ```
+
+The Phase-41 mirror names the nine required terms `maxCount`, `maxBytes`, `maxAgeSeconds`,
+`localValidation`, `idempotency`, `conflict`, `ordering`, `dependency`, and
+`authoritativeValidation`. Its exact refusal corpus covers every absent term and every operation that must stay
+online-only; no browser persistence or live authority behavior follows from that result.
 
 Read-only ports and subscriptions are represented as cached projections with cursors, not queued reads.
 Uploads use the local-blob protocol in [§10](#10-offline-blobs). A port without authoritative validation,
@@ -339,7 +349,12 @@ not equivalent to server-side Vault custody. Encryption at rest does not protect
 compromised same-origin runtime code, browser extensions, or a compromised device; CSP, dependency integrity,
 the bounded generated client, and local unlock reduce that exposure but do not remove it.
 
-The design is planned in Phases 30–69. Status and evidence remain solely in the
+Phase 45 validates the local browser portion in Register 2. The production PureScript graph and generic bundle
+compile with the five closed offline facilities; two real Chrome processes preserve and recover a fresh
+AES-GCM canary from encrypted IndexedDB, enforce own/foreign partitions and one fenced Web Locks owner, observe
+BroadcastChannel handoff, retain only the immutable service-worker asset set, and report quota refusal. The
+five-calculus projection accounts for 50 units and all six reference mutants redden. Server replay and live
+multi-zone continuity remain UNVERIFIED. Status and evidence remain solely in the
 [Development Plan](../../DEVELOPMENT_PLAN/README.md).
 
 The sibling `mattandjames` repository supplies implementation evidence for the motivating

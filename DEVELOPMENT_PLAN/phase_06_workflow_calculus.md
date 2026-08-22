@@ -12,7 +12,7 @@ The rule behind the workflow calculus is owned by [`workflow_calculus_doctrine.m
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, documents/engineering/workflow_calculus_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, documents/engineering/workflow_calculus_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -67,7 +67,7 @@ Make teardown an obligation the type system tracks rather than a step somebody r
 **Lane:** `none`
 **Register:** 1
 **Depends on:** [Phase 5](phase_05_lift_calculus.md) — the lift calculus, whose layers and witnesses each arm is placed at, and through it the budget calculus the build arm spends against.
-**Gate:** `python3 tools/workflow_calculus_gate.py` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/run_phase_gate.py 06` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

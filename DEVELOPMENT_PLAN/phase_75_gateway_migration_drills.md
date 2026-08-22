@@ -122,7 +122,7 @@ is explicitly outside the achieved boundary.
 
 **Depends on:** [Phase 74](phase_74_multicluster_spawn_georepl.md) — multi-cluster spawn + geo-replication, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test gateway-migration-drills-live` is green: the `Planned` handover and the `Failover`
+**Gate:** `python3 tools/run_phase_gate.py 75` is green: the `Planned` handover and the `Failover`
 takeover each satisfy every oracle, committed budget, named invariant, observer, and mutant of
 [Gate integrity](#gate-integrity). A bare "loss = 0" report cannot satisfy it.
 

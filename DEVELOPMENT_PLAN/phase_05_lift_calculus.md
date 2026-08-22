@@ -12,7 +12,7 @@ The rule behind the lift calculus is owned by [`lift_and_compose_doctrine.md`](.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, documents/engineering/lift_and_compose_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_workflow_calculus.md, documents/engineering/lift_and_compose_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -66,7 +66,7 @@ Make where an effect runs part of its type, and make the relation between layers
 **Lane:** `none`
 **Register:** 1
 **Depends on:** [Phase 3](phase_03_artifact_calculus.md) — the artifact calculus, which supplies the first effects a layer has to place. This phase is independent of the budget calculus; the ordinal between them is sequence, not dependency.
-**Gate:** `python3 tools/lift_calculus_gate.py` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/run_phase_gate.py 05` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

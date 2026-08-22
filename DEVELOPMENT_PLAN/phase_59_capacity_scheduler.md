@@ -250,7 +250,7 @@ flowchart LR
 ```
 *Orientation for the ordered scheduler delivery owned by the [Phase 59 plan](phase_59_capacity_scheduler.md).*
 
-**Gate:** `python3 tools/capacity_scheduler_gate.py --execute` is green on the live `kind` corpus:
+**Gate:** `python3 tools/run_phase_gate.py 59` is green on the live `kind` corpus:
 the two readiness witnesses and the controller cutover occur in order, then every guarded Pod binds
 exclusively through the reservation CAS, under the fixtures, observer, and mutants of
 [Gate integrity](#gate-integrity).

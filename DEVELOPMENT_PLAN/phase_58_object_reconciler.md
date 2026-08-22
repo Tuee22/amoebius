@@ -274,7 +274,7 @@ Phase 89 respectively).
 
 **Depends on:** [Phase 33](phase_33_render_manifest_oracles.md) — pure `renderAll`, whose object list this reconciler enacts, and [Phase 56](phase_56_base_image_registry.md), the registry it pulls from.
 
-**Gate:** `python3 tools/object_reconciler_gate.py --execute` passes in Register 3 the pinned reconcile corpus renders, enacts on the live single-node `kind` cluster
+**Gate:** `python3 tools/run_phase_gate.py 58` passes in Register 3 the pinned reconcile corpus renders, enacts on the live single-node `kind` cluster
 through stage-eligible typed actions alone, converges under observed postconditions, and re-runs byte-stable as
 a no-op against every fixture, oracle, and mutant in [Gate integrity](#gate-integrity).
 

@@ -133,7 +133,7 @@ live evidence reader, and one aggregate command; no Phase-94 presentation work i
 **Lane:** cuda ([§L](development_plan_standards.md#l-one-substrate-discipline))
 
 **Register:** 3 (live infrastructure)
-**Gate:** `python3 tools/jitml_lift_cuda_gate.py --reuse-fresh-live` checks Phase-0
+**Gate:** `python3 tools/run_phase_gate.py 93` checks Phase-0
 custody, package/Dhall contracts, physical-CUDA and retained-MinIO evidence, cleanup, the independent reader,
 four compiled mutants, documentation, and the ledger. Details are delegated to [Gate integrity](#gate-integrity).
 

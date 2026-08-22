@@ -4,9 +4,9 @@ model-mut-guard-weakening	guard-weakening	explorer-and-tlc-safety-red
 model-mut-effect-swap	effect-swap	explorer-and-tlc-safety-red
 model-mut-drop-effect	dropped-effect-entry	explorer-and-tlc-safety-red
 model-mut-quantifier-flip	forall-to-exists	explorer-and-tlc-safety-red
-model-mut-fairness-drop	fairness-drop	tlc-liveness-red-and-byte-golden
-model-mut-invariant-clause-delete	invariant-clause-delete	byte-golden
+model-mut-fairness-drop	fairness-drop	tlc-liveness-red-and-semantic-fact-drift
+model-mut-invariant-clause-delete	invariant-clause-delete	invariant-truth-table
 emitTLA-mut-01	drop-unchanged	differential-state-fingerprint
 emitTLA-mut-02	forall-to-exists	differential-safety-verdict
-emitTLA-mut-03	strong-fair-to-weak-fair	byte-golden
-emitTLA-mut-04	always-to-eventually	byte-golden
+emitTLA-mut-03	strong-fair-to-weak-fair	renderer-semantic-facts
+emitTLA-mut-04	always-to-eventually	renderer-semantic-facts

@@ -151,14 +151,17 @@ effect.
 **Phase-39 evidence.** The Register-1 binder matches seven port tuples and two canonical fixed-HTTPS link joins
 against independent string relations. Eight pinned failures, eight link-catalog failures, and three bounded
 input failures occur before a bound program can emit its pure binding trace; all seven guard/escape mutants turn
-red. Browser traffic, handler behavior, provider authentication, and live isolation remain UNVERIFIED. See
+red at exact loci. Thirteen generated classes meet their floor, the real five-calculus projection composes
+`7,2,19,13,7` to `5,48,0,0`, all 16 metrics match, and 61 surfaces join to 91 items. Browser traffic, handler
+behavior, provider authentication, and live isolation remain UNVERIFIED. See
 [Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md).
 
 **Phase-42 evidence.** The Register-2 generic bundle renders untrusted values through `textContent`, accepts
 only its closed PureScript event arms, and emits same-origin HTTP/WebSocket requests in real Chrome. An
 independent bundle scanner, browser-enforced CSP canary, fresh request nonce, navigation-only link observation,
-and `strace` network observer all pass; raw-sink, direct-provider, stale-plan, sequential-write, focus, CSP, and
-canned-response mutants turn red. Server authorization, provider authentication, and live isolation remain
+and OS-enforced loopback-only network observer all pass; raw-sink, direct-provider, stale-plan,
+sequential-write, focus, CSP, and canned-response mutants turn red. The real five-calculus projection accounts
+for 72 units. Server authorization, provider authentication, and live isolation remain
 UNVERIFIED. See [Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md).
 
 ---

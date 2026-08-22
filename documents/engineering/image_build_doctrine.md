@@ -227,6 +227,11 @@ reference names bytes some machine actually ran. On a mixed-architecture cluster
 from the registry to the manifest that names the image, which is a deployment concern owned by
 [service_capability_doctrine.md](./service_capability_doctrine.md).
 
+[Phase 35](../../DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md) supplies the Register-1 boundary for
+this rule: four CPU/CUDA × amd64/arm64 cases join to forty-four exact plain-build argv tokens, and two
+observed/requested architecture mismatches refuse before emission. That proves the pure invocation value, not
+an engine build, published image, or runtime correspondence; those live layers remain UNVERIFIED here.
+
 Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
@@ -662,7 +667,7 @@ It discovers tools lazily through the substrate's package manager and invokes th
 ([../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) cross-cutting invariants; [substrate_doctrine.md](./substrate_doctrine.md)). The build pipeline lives entirely under that contract,
 which forces a concrete divergence from prodbox's mechanics:
 
-- **The Docker/buildx binary is full-path-invoked, lazily ensured.** amoebius does not rely on a `docker`
+- **The Docker engine binary is full-path-invoked, lazily ensured.** amoebius does not rely on a `docker`
   on `PATH`; it ensures the engine and calls the resolved absolute path. The engine is ensured **inside the
   Linux frame** the substrate supplies — natively on Linux, in the Lima VM on Apple, in the WSL2 distro on
   Windows ([`substrate_doctrine.md` §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)) —
@@ -689,6 +694,11 @@ which forces a concrete divergence from prodbox's mechanics:
   authored digest is a resolution the repository performed once and then asserts forever; a channel plus its
   recorded resolution is a resolution *this run* performed. It also stops the rendered recipe changing every
   time an upstream base is republished, which is a diff nobody reads and everybody approves.
+
+  [Phase 35](../../DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md) supplies the Register-1 evidence for
+  this pure boundary: the catalog has no `baseDigest` field, `BaseChannel` excludes digest syntax, and the
+  renderer emits one `ARG BASE_IMAGE` and one `FROM ${BASE_IMAGE}` while two run-local resolution values leave
+  its bytes unchanged. Registry resolution and use of the observed digest in a live build remain UNVERIFIED.
 - **No `DOCKER_CONFIG` environment variable — use `docker --config <dir>`.** prodbox isolated registry-push
   auth from public-pull auth with an **ephemeral `DOCKER_CONFIG`** (`local_registry_pipeline.md` §6.1).
   That mechanism is an environment variable, which amoebius forbids. amoebius instead points the build at an

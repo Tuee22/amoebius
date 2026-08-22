@@ -19,7 +19,7 @@ nor the phase gates that consume its registers, owned by
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_08_scope_index.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_12_explicit_state_checker.md, DEVELOPMENT_PLAN/phase_13_symbolic_checker.md, DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_30_capability_bind.md, DEVELOPMENT_PLAN/phase_31_provision_seal.md, DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_33_render_manifest_oracles.md, DEVELOPMENT_PLAN/phase_34_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_44_ui_local_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/phase_50_host_assert_cli.md, DEVELOPMENT_PLAN/phase_51_host_ensure_kernel.md, DEVELOPMENT_PLAN/phase_52_linux_engine_bringup.md, DEVELOPMENT_PLAN/phase_54_windows_engine_bringup.md, DEVELOPMENT_PLAN/phase_56_base_image_registry.md, DEVELOPMENT_PLAN/phase_58_object_reconciler.md, DEVELOPMENT_PLAN/phase_59_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_60_retained_storage.md, DEVELOPMENT_PLAN/phase_62_platform_backbone.md, DEVELOPMENT_PLAN/phase_63_platform_services_2.md, DEVELOPMENT_PLAN/phase_66_app_tenancy.md, DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_69_content_store_workflow.md, DEVELOPMENT_PLAN/phase_70_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_71_release_lifecycle.md, DEVELOPMENT_PLAN/phase_74_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_75_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_76_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_77_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_78_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_79_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_80_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_81_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_82_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_84_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_85_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_86_offline_blobs_isolation.md, DEVELOPMENT_PLAN/phase_87_offline_release_evolution.md, DEVELOPMENT_PLAN/phase_88_offline_multizone_continuity.md, DEVELOPMENT_PLAN/phase_90_test_topology_live.md, DEVELOPMENT_PLAN/phase_91_infernix_rederivation.md, DEVELOPMENT_PLAN/phase_93_jitml_rederivation.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/chaos_failover_worked_examples.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/evidence_calculus_doctrine.md, documents/engineering/extension_conformance_doctrine.md, documents/engineering/extension_conformance_laws.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/jit_artifact_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_ebs_credential_model.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/repository_layout_doctrine.md, documents/engineering/resource_capacity_sources.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_spoof_resistance.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/validation_frame_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/workflow_calculus_doctrine.md, documents/glossary.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md, documents/reading_order.md
 **Generated sections**: none
 
 </details>
@@ -106,9 +106,10 @@ Three consequences fall straight out of "a test is a spec":
   a *test* rather than a deployment are the chaos schedule, the expectation surface, and the always-teardown
   contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
 
-> **Honesty.** Phase 48 implements the topology, suggestion, credential, runner, inventory, delete-authorization,
-> and ledger kernels; its scoped live run proves host-process cleanup and untagged-leak detection. Kubernetes,
-> retained backing deletion, Pulsar takeover, and Vault/AWS authority remain **UNVERIFIED**. Status is owned by
+> **Honesty.** Phase 48 implements and validates only the pure topology algebra: the teardown phantom state,
+> deterministic suggestion/resource projection, named flagged-credential value, and honest evidence rows.
+> Generated Dhall, host probing, runner/inventory/delete authority, Kubernetes and retained-backing cleanup,
+> Pulsar takeover, and Vault/AWS authority belong to Phase 90 and remain **UNVERIFIED**. Status is owned by
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); prodbox remains sibling evidence. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every prescriptive statement here as
 > a specification to be validated — evidence inherited from prodbox is evidence from a sibling system, never
@@ -118,9 +119,8 @@ Three consequences fall straight out of "a test is a spec":
 
 ## 2. The registers of amoebius testing
 
-Phase 34 supplies a concrete composite example: Register 1 renders and byte-locks the pure `[Step]` plan with
-zero actions, while Register 2 invokes the real executable against subprocess recorders and compares exact
-argv/stdin transcripts. Neither result is a Register-3 live-substrate claim.
+Phase 34 supplies a concrete composite example: Register 1 checks nineteen ordered semantics and canonical generated encodings for the pure `[Step]` plan with zero actions,
+while Register 2 invokes the real executable against subprocess recorders and compares exact argv plus byte-preserving stdin relay. Neither result is a Register-3 live-substrate claim.
 
 A defect can hide at three depths, and each depth needs a *different* kind of test, because
 a test pitched at one depth is structurally blind to the others. amoebius keeps **three phase-gate registers**
@@ -150,6 +150,9 @@ and the honesty tradeoff are owned by
 [Phase 16](../../DEVELOPMENT_PLAN/phase_16_deterministic_sim_substrate.md) builds the substrate serving this
 activity and gates it at Register 2 with a reference reconciler. Its ledger marks modeled-schedule invariants
 tested, model fidelity assumed, and live runtime unverified; later phases supply their own Register-2.5 runs.
+The concrete gate uses four authored semantic schedule verdicts and a separate five-row oracle over an actual
+Phase-10 composition projection. Equal same-seed trace bytes are checked only between executions and paired
+with changed-seed sensitivity; no generated trace snapshot is committed as an oracle.
 
 The first two registers **generalize the prodbox interpreter-only mocking doctrine**: *pure code never
 touches mocks; all mocking happens at the subprocess or interpreter boundary* — pure helpers, DAG logic,
@@ -160,15 +163,19 @@ The standard Haskell test stack (Cabal `test-suite` stanzas, `tasty`/HUnit/Quick
 toolchain owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Toolchain) — this
 doc does not restate the version pins.
 
-**Register-1 ledger instance now validated.** Phase 26's `dsl-spec` gate is the concrete no-cluster decode
-instance: five semantic-hash-pinned positives, three distinct tagged negatives, three compile-fail index
-pairs, an executed legalized-negative red run, and 5,527 exact structural rows. It emits the ordinary
+**Register-1 ledger instance now validated.** Phase 26's bounded `gadt-decode-spec` gate is the concrete
+no-cluster decode instance: five semantic-hash-pinned positives, four distinct tagged negatives, three
+compile-fail index pairs, an executed legalized-negative red run, 5,527 exact structural rows, and an
+independently authored projection of those positives into the five Phase-10 calculus kinds. The shared
+`dsl-spec` remains the later umbrella so Phase-26 validation cannot execute future-phase checks. It emits the ordinary
 decision/protocol/runtime ledger with only the recorded spec-decode surface proven for the model and runtime
 fidelity UNVERIFIED (ledger `external-run-reference`).
 
 **Validation-locus projection now validated.** Phase 27 joins every catalog entry and named subcase
 against the independently authored registry, discharging the dhall-typecheck/gadt-decode subcases whose owners have
-been reached and recording an exact-owner deferral for the rest; the counts are a dated observation and live
+been reached, including explicit Phase-8/9 predecessor evidence, and recording an exact-owner deferral for
+the rest. Its bounded `illegal-state-corpus-spec` also checks an independently authored five-calculus
+corpus/ledger projection; the counts are a dated observation and live
 in the [tracker](../../DEVELOPMENT_PLAN/README.md), not here. Its four infinite-domain QuickCheck properties are
 labelled **TESTED (sampled)** under `checkCoverage`; only the finite three-arm `Rke2Servers` enumeration is
 labelled **PROVEN (exhausted)**. This Register-1 result establishes spec composition at the registered loci;
@@ -176,28 +183,78 @@ model-to-runtime correspondence and runtime fidelity remain **UNVERIFIED** (ledg
 `dynamically-resolved`).
 
 **Base capacity/topology Register-1 instance now validated.** The [Phase 9 gate](../../DEVELOPMENT_PLAN/phase_09_resource_index.md)
-adds 15 direct fold negatives with 15 legal twins, two decoded-and-placed positive specs, three dhall-typecheck pairs,
-seven compile-index pairs, an exhausted 3×3 compatibility matrix, and four sampled QuickCheck properties
+adds 15 direct fold negatives with 15 legal twins, two constructed-and-placed positive topologies, seven
+compile-index pairs, an exhausted 3×3 compatibility matrix, and four sampled QuickCheck properties
 whose independent witness validator never calls the placement implementation. Every property meets its
-accept/reject coverage floor, all 19 seeded mutants turn red, and all 11 Phase-9-owned registry subcases
-carry evidence at their exact loci. Compile exhaustiveness is proven for the base modules; infinite-domain
+accept/reject coverage floor, all 19 seeded mutants turn red, and eight of eleven Phase-9-owned registry
+subcases carry evidence at their exact loci. The three Dhall loci are deferred to Phase 25. Compile
+exhaustiveness is proven for the base modules; infinite-domain
 properties remain **TESTED (sampled)**, and runtime fidelity remains **UNVERIFIED** (ledger
 `dynamically-resolved`).
 
+**Five-calculus composition Register-1 instance now validated.** The
+[Phase 10 gate](../../DEVELOPMENT_PLAN/phase_10_calculus_composition.md) exhausts the closed five-calculus
+constructor set, all 25 ordered pairs, and all 125 ordered triples. Its independent pair table states exact
+four-axis resource sums. Three 500-case QuickCheck properties sample numeric additivity, associativity, and
+transform preservation with per-constructor coverage, while a legal/illegal compiler pair holds the rank-2
+request-scope barrier and three real mutants weaken separate indices. Finite kind structure is
+**PROVEN (exhausted)**; numeric and payload domains are **TESTED (sampled)**. Arbitrary-extension closure,
+protocol behaviour, and runtime fidelity remain **UNVERIFIED** until their owning phases.
+
+**Structured compile-fail Register-1 instance now validated.** The
+[Phase 15 gate](../../DEVELOPMENT_PLAN/phase_15_compile_fail_harness.md) binds ten unrepresentability claims
+from Phases 4, 5, 6, 7, and 10 to legal/illegal Haskell twins. A legal source must compile before its negative
+is considered; the negative is accepted only when every structured GHC error has the authored code and one
+record occurs at the exact authored line/column with all message fragments. Opposing source probes name the
+foreclosed dimension, while missing modules, parse failures, unbound names, and arbitrary nonzero exits are
+wrong reasons. This is evidence at the calculus's `this-expression-rejected` strength: it establishes that
+those ten expressions fail under the resolved GHC, not that every representation of a state is uninhabited.
+The first inventory is deliberately a representative tranche, not a declaration that later negative corpora
+have migrated; each later owner remains responsible for adopting the same schema when it opens.
+
 **Storage-geometry Register-1 instance now validated.** The [Phase 28 gate](../../DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md)
-checks 27 exact negative/twin variants under five stable storage families, two decoded positive specs, and two
+checks 30 exact negative/twin variants under five stable storage families, two decoded positive specs, and two
 dhall-typecheck bounded-training pairs. Six independently calculated equivalence properties satisfy their accept/reject
 coverage floors, all 31 mutants turn red, and all five Phase-28-owned registry subcases carry exact-locus
-evidence. Compile totality is proven for the five storage modules; infinite arithmetic domains remain
-**TESTED (sampled)**. Live backing observation/mutation and model-to-runtime correspondence remain
-**UNVERIFIED** (ledger `external-run-reference`).
+evidence. The bounded `storage-geometry-spec` composes the observed corpus, property and mutant counts through
+all five Phase-10 calculus kinds against an independently authored projection. Compile totality is proven for
+the five storage modules; infinite arithmetic domains remain **TESTED (sampled)**. Live backing
+observation/mutation and model-to-runtime correspondence remain **UNVERIFIED**.
 
 **Full-vector Register-1 instance now validated.** The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md)
-checks 32 exact negative/twin variants spanning eighteen stable families, one accelerator-owner dhall-typecheck pair,
+checks 37 exact negative/twin variants spanning eighteen stable families, one accelerator-owner dhall-typecheck pair,
 and two decoded composed positives. Seven independent properties meet the decision folds' accept/reject floors,
-all 45 committed mutants turn red, and both Phase-29-owned registry rows have exact-locus evidence. Compiler
-exhaustiveness covers the ten owner modules; scheduler, storage, accelerator, and provider runtime fidelity
-remain **UNVERIFIED** (ledger `external-run-reference`).
+all 45 committed mutants turn red, and both Phase-29-owned registry rows have exact-locus evidence. The bounded
+`execution-accelerator-spec` projects those 37 negatives, 37 twins, two positives, seven properties and 45
+mutants through all five Phase-10 calculus kinds against an independently authored 128-unit projection. Direct
+one-axis controls cover the accelerator peer graph and the build, engine, monitoring and Pulumi envelopes.
+Compiler exhaustiveness covers the ten owner modules; scheduler, storage, accelerator, and provider runtime
+fidelity remain **UNVERIFIED** (ledger `external-run-reference`).
+
+**Capability-bind Register-1 instance now validated.** The [Phase 30 gate](../../DEVELOPMENT_PLAN/phase_30_capability_bind.md)
+binds nine arms under both shapes against 18 independently authored semantic projections, keeps nine distinct
+normalized app slices equal, and observes exact controller-child inventories, unresolved references, Registry
+intent, extension totality, and the 29-row validation-locus ledger. Three dhall-typecheck and four gadt-decode
+negatives retain their exact reasons; all four paired behavioral mutants redden. The bounded
+`capability-bind-spec` projects nine arms, 18 shapes, seven negatives, one covered property, and four mutants
+through all five Phase-10 calculus kinds as 39 units. The former generated-byte snapshots are retired;
+provider realization, engine resolution, and model/runtime correspondence remain **UNVERIFIED**.
+
+**Provision-seal Register-1 instance now validated.** The [Phase 31 gate](../../DEVELOPMENT_PLAN/phase_31_provision_seal.md)
+provisions the same 18 arm/shape deployments, exercises both infrastructure-planner paths, and distinguishes
+the one creation batch, separate plan/action replay refusals, receipt-bound materialization evidence, and
+promised-identity refusal. Ten exact provision negatives, two boundary properties, and all ten paired mutants
+pass; the 40-row locus ledger is exact. The bounded `provision-seal-spec` projects 42 units through all five
+Phase-10 calculus kinds, all 25 metrics match, and 37 surfaces join to 55 items. Provider realization, engine
+resolution, and model/runtime correspondence remain **UNVERIFIED**.
+
+**Inference-accelerator Register-1 instance now validated.** The [Phase 32 gate](../../DEVELOPMENT_PLAN/phase_32_inference_accelerator_provision.md)
+provisions three positives, checks four target-offering quotient cells and all twelve family/lane cells, and
+retains the URL negative's dhall-typecheck locus plus eight distinct provision tags. Its eight-branch covered
+property passes, all five paired behavioral mutants redden, and the 17-row locus ledger is exact. The bounded
+`capability-spec` projects 34 units through all five Phase-10 calculus kinds; all 18 metrics match and 29
+surfaces join to 45 items. Live jit-resolution, cross-lane weight loading, and runtime correspondence remain
+**UNVERIFIED**.
 
 **First complete Register-3 application now validated — sealed 2026-08-14.** The
 [Phase 56 gate](../../DEVELOPMENT_PLAN/phase_56_base_image_registry.md) composes the pure image/registry
@@ -589,20 +646,26 @@ already forbids — an equivalence check defines its reference side independentl
 | **Enumeration** — which surfaces exist | declared components, admissible fault targets, capability arms, illegal-state entries, contract constructors | never lags the spec | **generated** from committed source, never committed |
 | **Expectation** — what must hold | assertions, oracles, expected error tags, goldens | independent of the code under test | **authored** and committed |
 
-Phase 8 applies this split to security relations: generated coverage enumerates scope/flow rejection classes,
-while committed owner-join, swap, and flow matrices supply the independent decisions. See
+Phase 8 applies this split to security relations: nine generated coverage classes enumerate rejection
+branches, while committed owner-join, swap, flow-decision, and exact diagnostic matrices supply expectations.
+Five compiler-negative loci have independently compiling twins, and a registry-backed build mutant must turn
+red at both owner-swap pins. See
 [Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md).
 
 Phase 38 applies the same boundary to authorization: its committed action, decision, registry-error, and
 stale-epoch tables are evaluated by a string-level reference module that imports no production authorization
 code. Generated properties cover four denial classes and all five effect arms, every denied result has an empty
-pure effect trace, and separate default-allow and visibility-as-authorization runs must fail. See
+pure effect trace, and separate default-allow and visibility-as-authorization runs fail at exact distinct
+loci. The artifact, budget, lift, workflow, and evidence values are real calculus values rather than copied
+arithmetic; their authored `5,6,8,9,2` projection composes to `5,30,0,0`. See
 [Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md).
 
 Phase 42 applies the boundary across languages and a real browser. Its PureScript transitions are compared with
 a separately implemented Haskell interpreter, while committed DOM, accessibility, focus, and transport tables
 own the expected observations. Playwright reads browser state, the loopback server owns request observations,
-and `strace` owns the process-network observation; nine explicit mutants must fail at distinct loci. See
+and the OS boundary owns the network observation (`sandbox-exec` on Darwin, `strace` on Linux); nine explicit
+mutants must fail at distinct loci. Its real artifact, budget, lift, workflow, and evidence values project
+`9,5,45,4,9` into resource vector `5,72,0,0`. See
 [Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md).
 
 Phase 44 applies the same split to the complete local application story. Generated `start`, `observe`, and
@@ -610,6 +673,14 @@ Phase 44 applies the same split to the complete local application story. Generat
 remain the reference side. Real Chrome, separate domain-process append logs, and `strace` recover a post-ready
 workflow nonce through ready-handle use, while five mutations fail at distinct DOM, scope, edge, digest, and
 ordering loci. See [Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md).
+The same gate constructs the real five-calculus component vector `1,3,42,4,5`, projects it to
+`5,55,0,0`, and joins all four calculus metrics to the authored surface table.
+
+Phase 45 applies the boundary to encrypted browser persistence. A second real Chrome process opens the same
+repository-contained profile and independently recovers a fresh canary while raw IndexedDB bytes exclude it;
+Web Locks refuses the concurrent tab, a later owner advances the fencing generation, and cache/storage rows
+join the authored inventories. The production PureScript bundle is the page under test, six reference mutants
+fail at distinct loci, and the real calculus vector `2,3,25,14,6` projects to `5,50,0,0`.
 
 The split also applies to lint and mutation corpora. An authored positive seed, mutation recipe, and expected
 diagnostic may be committed. The recipe's materialized negative copies are generated enumeration/input and
@@ -726,8 +797,9 @@ assumed-and-monitored and leave Route53/WAN fidelity UNVERIFIED.
 
 ## 11. Planning ownership
 
-This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates, and remaining work — the test-topology DSL, `suggest-test`, flagged credentials, the elevated storage-deleting harness, and the per-run ledger artifact — are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 48; with the cross-cluster failover proof artifacts in Phase 75). This doc never maintains a competing status ledger; it states the target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
+This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates, and remaining work are owned by
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): Phase 48 owns the pure workflow algebra,
+Phase 90 the generated/live topology and harness, and Phase 75 the cross-cluster failover proof artifacts. This doc never maintains a competing status ledger; it states the target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
 the phase-specific validated instances above are amoebius results; the unimplemented test-topology and cross-cluster shapes remain design intent generalized from prodbox.
 
 ---

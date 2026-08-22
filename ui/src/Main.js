@@ -15,6 +15,7 @@ const fetchJson = async (path, options = {}) => {
 };
 
 export const install = transition => headingFor => statusFor => () => {
+  if (window.location.pathname === "/offline-runtime.html") return;
   const bootstrap = async () => {
     const query = window.location.search;
     const plan = await fetchJson(`/ui/client-plan${query}`);

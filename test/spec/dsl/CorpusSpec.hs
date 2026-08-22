@@ -41,7 +41,7 @@ resolvedDhall = do
   value <- lookupEnv "AMOEBIUS_DHALL"
   case value of
     Just path | not (null path) -> pure path
-    _ -> fail "AMOEBIUS_DHALL is unset: run dsl-spec through tools/illegal_state_corpus_gate.py"
+    _ -> fail "AMOEBIUS_DHALL is unset: run illegal-state-corpus-spec through tools/illegal_state_corpus_gate.py"
 
 runCorpusSpec :: IO CorpusSummary
 runCorpusSpec = do

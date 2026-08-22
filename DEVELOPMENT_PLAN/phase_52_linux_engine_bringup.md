@@ -10,8 +10,8 @@ anything is installed, what the run installs into it, and what a second identica
 It does not own how that guest is materialized — the provider mapping and the pristine-guest contract belong
 to
 [`substrate_doctrine.md` §4](../documents/engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux),
-which this phase consumes without restating. Nor does it own the recipe it builds: those bytes are sealed as
-a value by [Phase 35](phase_35_image_recipe_generation.md), and the pre-binary command surface belongs to
+which this phase consumes without restating. Nor does it own the recipe it builds: its generated semantics and
+native invocation value are constrained by [Phase 35](phase_35_image_recipe_generation.md), and the pre-binary command surface belongs to
 [Phase 50](phase_50_host_assert_cli.md).
 
 <details>
@@ -19,7 +19,7 @@ a value by [Phase 35](phase_35_image_recipe_generation.md), and the pre-binary c
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_35_image_recipe_generation.md, DEVELOPMENT_PLAN/phase_53_apple_engine_bringup.md, DEVELOPMENT_PLAN/phase_55_bootstrap_coordinator_kind.md
 **Generated sections**: none
 
 </details>
@@ -42,7 +42,16 @@ a value by [Phase 35](phase_35_image_recipe_generation.md), and the pre-binary c
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-51 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+🔄 Active — Phase 51 sealed 2026-08-22. This is the sole open contract. No live gate implementation or
+current `linux-cpu/amd64` evidence exists yet; the phase remains open until both are present.
+
+The 2026-08-22 routed attempt reached the retained command and returned RED because
+`tools/linux_engine_bringup_gate.py` is absent. This native Darwin/`arm64` workstation also cannot supply the
+contract's natural `linux-cpu/amd64` lane; an ARM guest or an emulated AMD64 guest cannot substitute for it.
+
+Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi
+change what this phase's gate must cover, so any earlier seal is history and no longer presents completion
+evidence.
 
 ---
 
@@ -87,7 +96,7 @@ appears.
 
 **Requires**: `host-floor`
 
-**Gate:** `python3 tools/linux_engine_bringup_gate.py --execute` passes every check named in
+**Gate:** `python3 tools/run_phase_gate.py 52` passes every check named in
 [Gate integrity](#gate-integrity), twice in succession against one guest. Phase 53 does not open until it is
 green.
 

@@ -79,6 +79,7 @@ data ServeConfig = ServeConfig
   , configSessionNonce :: Text
   , configAuditFile :: FilePath
   , configRegistryCount :: Int
+  , configUnreferencedCount :: Int
   , configHandlerContract :: Text
   , configAbi :: Text
   , configCoordinatorAvailable :: Bool
@@ -130,8 +131,10 @@ startupAdmitted config = case admitServerPlan (configMutant config) abi required
   where
     contract = HandlerContract "request-v1" "response-v1"
     required = [("handler-main", contract)]
-    linked = replicate (configRegistryCount config)
-      (HandlerBinding "handler-main" (if configHandlerContract config == "match" then contract else HandlerContract "wrong" "wrong"))
+    linked =
+      replicate (configRegistryCount config)
+        (HandlerBinding "handler-main" (if configHandlerContract config == "match" then contract else HandlerContract "wrong" "wrong"))
+      <> replicate (configUnreferencedCount config) (HandlerBinding "handler-extra" contract)
     abi = if configAbi config == "ui-server-v1" then UiServerV1 else UnsupportedUiServerAbi (configAbi config)
 
 openListener :: IO Socket
@@ -471,7 +474,7 @@ readInt = readMaybe . Text.unpack
 
 parseConfig :: [String] -> IO (Either String ServeConfig)
 parseConfig arguments = do
-  mutantText <- maybe "" Text.pack <$> lookupEnv "AMOEBIUS_PHASE22_MUTANT"
+  mutantText <- maybe "" Text.pack <$> lookupEnv "AMOEBIUS_UI_SERVER_BOUNDARY_MUTANT"
   let options = pairs arguments
       required name = maybe (Left ("missing " <> name)) Right (lookup name options)
   handlerPortContent <- case lookup "--handler-port-file" options of
@@ -492,6 +495,7 @@ parseConfig arguments = do
     nonce <- Text.pack <$> required "--session-nonce"
     auditFile <- required "--audit-file"
     registryCount <- optionalInt options "--registry-count" 1
+    unreferencedCount <- optionalInt options "--unreferenced-count" 0
     contract <- Text.pack <$> optional options "--handler-contract" "match"
     abi <- Text.pack <$> optional options "--abi" "ui-server-v1"
     coordinator <- optional options "--coordinator" "available"
@@ -499,7 +503,7 @@ parseConfig arguments = do
     challengeFile <- Right (lookup "--challenge-file" options)
     handlerPort <- maybe (Left "invalid handler port") Right
       ((readMaybe =<< firstLine handlerPortContent) :: Maybe PortNumber)
-    mutant <- if Text.null mutantText then Right NoBoundaryMutant else maybe (Left "unknown Phase-22 mutant") Right (parseBoundaryMutant mutantText)
+    mutant <- if Text.null mutantText then Right NoBoundaryMutant else maybe (Left "unknown UI-server boundary mutant") Right (parseBoundaryMutant mutantText)
     Right ServeConfig
       { configPortFile = portFile
       , configHandlerPort = handlerPort
@@ -509,6 +513,7 @@ parseConfig arguments = do
       , configSessionNonce = nonce
       , configAuditFile = auditFile
       , configRegistryCount = registryCount
+      , configUnreferencedCount = unreferencedCount
       , configHandlerContract = contract
       , configAbi = abi
       , configCoordinatorAvailable = coordinator == "available"

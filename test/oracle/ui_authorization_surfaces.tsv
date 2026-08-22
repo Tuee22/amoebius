@@ -38,6 +38,8 @@ visibility-independent	checks	visibility-absent-from-authorize
 effect-after-authorization-only	checks	effect-requires-authorized-action
 independent-evaluator-isolation	checks	reference-evaluator-independent
 kernel-source-discipline	checks	authorization-partial-token-scan
+semantic-oracles-complete	checks	semantic-oracles-complete
+compile-totality	checks	totality-options
 generated-artifact-discipline	checks	emitted-results-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle
 independent-registry-projection	items	read_data,mutate_data,start_workflow,observe_workflow,end_session
 five-effect-arm-coverage	items	read_data_generated,mutate_data_generated,start_workflow_generated,observe_workflow_generated,end_session_generated
@@ -61,6 +63,10 @@ registry-projection-parity	metrics	registry-errors
 denial-zero-effect-trace	metrics	stale-epochs
 nine-class-generated-coverage	metrics	generated-coverage
 two-mutant-battery	metrics	mutants
+five-calculus-kind-cardinality	metrics	calculus-kinds
+five-calculus-component-vector	metrics	calculus-components
+five-calculus-projection-counts	metrics	calculus-projection-counts
+five-calculus-resource-vector	metrics	calculus-resource-vector
 network-isolated-pure-gate	metrics	network-observer
 identity-provider-truth	metrics	identity-provider-truth
 runtime-policy-enforcement	metrics	runtime-policy-enforcement

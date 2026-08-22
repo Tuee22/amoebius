@@ -12,7 +12,7 @@ The rule behind the live test topology and elevated harness is owned by [`testin
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_phase_model.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_48_test_workflow_algebra.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -44,7 +44,7 @@ Run a self-tearing-down topology against the live platform under the elevated ha
 **Lane:** `linux-cpu/amd64`
 **Register:** 3
 **Depends on:** [Phase 48](phase_48_test_workflow_algebra.md) — the pure topology values this phase runs, and the live platform they are run against. It cannot precede the platform it exercises, which is what moved it here.
-**Gate:** `python3 tools/test_topology_live_gate.py` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/run_phase_gate.py 90` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

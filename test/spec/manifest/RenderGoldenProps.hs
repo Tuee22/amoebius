@@ -13,6 +13,7 @@ import Amoebius.Capacity.RenderSource
   , provisionedRenderSourceMap
   , renderSourceActivation
   , renderSourceFields
+  , renderSourceIdentity
   , renderSourceReconcileMode
   , renderSourceWitness
   )
@@ -28,6 +29,7 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import DepGraphOracle (expectedAllowEdges)
 import ProvisionFixtures (provisionFixture)
+import Numeric.Natural (Natural)
 import Test.QuickCheck
   ( Arbitrary (arbitrary)
   , Args (chatty, maxSuccess)
@@ -63,6 +65,8 @@ renderInvariantFailures sealed objects =
     Nothing -> ["unknown-object"]
     Just source ->
       identityFailures source object
+        <> namespaceFailures source object
+        <> apiVersionFailures source object
         <> activationFailures source object
         <> kindFailures source object
         <> specFailures source object
@@ -73,7 +77,62 @@ identityFailures source object =
   | Map.lookup "amoebius.io/source" (metadataAnnotations (objectMetadata object)) /= Just rawIdentity
   ]
  where
-  K8sObjectIdentity rawIdentity = objectIdentity object
+  K8sObjectIdentity rawIdentity = renderSourceIdentity source
+
+namespaceFailures :: ProvisionedRenderSource -> K8sObject -> [Text]
+namespaceFailures source object =
+  [ "namespace-projection"
+  | metadataNamespace (objectMetadata object) /= expectedNamespace
+  ]
+ where
+  expectedNamespace = case renderSourceWitness source of
+    NamespacePart -> Nothing
+    ManagedCapacityAdmissionPart -> Nothing
+    CapacitySchedulerPart -> Just "amoebius-capacity-scheduler"
+    BootstrapAddonCutoverPart -> Just "amoebius-capacity-scheduler"
+    _ -> Just (expectedCapabilityNamespace (objectIdentity object))
+
+expectedCapabilityNamespace :: K8sObjectIdentity -> Text
+expectedCapabilityNamespace (K8sObjectIdentity identity) = case Text.takeWhile (/= '/') identity of
+  "objectstore" -> "amoebius-minio"
+  "secretstore" -> "amoebius-vault"
+  "messagebus" -> "amoebius-pulsar"
+  "sql" -> "amoebius-postgres"
+  "identity" -> "amoebius-keycloak"
+  "observability" -> "amoebius-observability"
+  "registry" -> "amoebius-registry"
+  "edge" -> "amoebius-edge"
+  "inferenceengine" -> "amoebius-inference"
+  capability -> "amoebius-" <> Text.toLower (Text.replace "_" "-" capability)
+
+apiVersionFailures :: ProvisionedRenderSource -> K8sObject -> [Text]
+apiVersionFailures source object =
+  [ "api-version-projection"
+  | objectApiVersion object /= expectedApiVersion (expectedKind source)
+  ]
+
+expectedApiVersion :: K8sObjectKind -> String
+expectedApiVersion kind = case kind of
+  NamespaceKind -> "v1"
+  ServiceKind -> "v1"
+  ConfigMapKind -> "v1"
+  PersistentVolumeKind -> "v1"
+  PersistentVolumeClaimKind -> "v1"
+  ResourceQuotaKind -> "v1"
+  LimitRangeKind -> "v1"
+  SecretReferenceKind -> "v1"
+  DeploymentKind -> "apps/v1"
+  StatefulSetKind -> "apps/v1"
+  DaemonSetKind -> "apps/v1"
+  JobKind -> "batch/v1"
+  NetworkPolicyKind -> "networking.k8s.io/v1"
+  ValidatingWebhookConfigurationKind -> "admissionregistration.k8s.io/v1"
+  MutatingWebhookConfigurationKind -> "admissionregistration.k8s.io/v1"
+  LeaseKind -> "coordination.k8s.io/v1"
+  HTTPRouteKind -> "gateway.networking.k8s.io/v1"
+  GatewayKind -> "gateway.networking.k8s.io/v1"
+  CustomResourceDefinitionKind -> "apiextensions.k8s.io/v1"
+  _ -> "amoebius.io/v1"
 
 activationFailures :: ProvisionedRenderSource -> K8sObject -> [Text]
 activationFailures source object =
@@ -157,6 +216,7 @@ podFailures source pod =
     | podAcceleratorClaim pod /= expectedAccelerator (renderSourceFields source)
     ]
 
+expectedResources :: Map.Map Text Text -> ResourceVector
 expectedResources fields =
   ResourceVector
     (positive "cpu")
@@ -168,24 +228,29 @@ expectedResources fields =
     Just value -> max 1 value
     Nothing -> 1
 
+nonZeroResources :: ResourceVector -> Bool
 nonZeroResources resources =
   resourceCpu resources > 0
     && resourceMemory resources > 0
     && resourceEphemeralStorage resources > 0
     && resourcePodSlots resources > 0
 
+expectedScheduler :: ProvisionedPartWitness -> Text
 expectedScheduler witness = case witness of
   CapacitySchedulerPart -> "default-scheduler"
   _ -> "amoebius-capacity"
 
+expectedAccelerator :: Map.Map Text Text -> Maybe Natural
 expectedAccelerator fields
   | Map.lookup "kind" fields == Just "EngineWorkload" = Just 1
   | otherwise = Nothing
 
+validExposure :: K8sObject -> ServiceExposure -> Bool
 validExposure object exposure = case exposure of
   ClusterInternal -> True
   DeclaredEdgeLoadBalancer -> Map.lookup "amoebius.io/owner" (metadataLabels (objectMetadata object)) == Just "public-edge"
 
+validateIngress :: K8sObject -> [Text]
 validateIngress object = case objectKind object of
   HTTPRouteKind -> case objectSpec object of
     ExtensionSpec fields -> ["httproute-parent" | Map.lookup "parent" fields /= Just "keycloak-gateway"]
@@ -201,7 +266,7 @@ instance Arbitrary GeneratedRenderCase where
 runRenderGoldenProps :: IO ()
 runRenderGoldenProps = do
   result <- quickCheckWithResult stdArgs {chatty = False, maxSuccess = 1200} propLegalRender
-  unless (isSuccess result) (fail ("Phase-13 render property failed: " <> show result))
+  unless (isSuccess result) (fail ("Phase-33 render property failed: " <> show result))
   putStrLn "render-properties: TESTED sampled (9 capability arms and 2 shapes, each >=4%)"
 
 propLegalRender :: GeneratedRenderCase -> Property

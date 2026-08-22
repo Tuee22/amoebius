@@ -24,6 +24,8 @@ import toolchain
 
 ROOT = Path(__file__).resolve().parent.parent
 ARM_ORACLE = ROOT / "test/oracle/capability_bind/arm_cases.tsv"
+SHAPE_SEMANTICS = ROOT / "test/oracle/capability_bind/bound_shape_semantics.tsv"
+CALCULUS_PROJECTION = ROOT / "test/oracle/capability_bind/calculus_projection.tsv"
 DHALL_TYPECHECK = ROOT / "test/oracle/capability_bind/dhall_typecheck_cases.tsv"
 GADT_DECODE = ROOT / "test/oracle/capability_bind/gadt_decode_cases.tsv"
 MUTANT_CAPABILITY = "capability_bind"
@@ -66,6 +68,19 @@ def read_tsv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle, delimiter="\t"))
 
 
+def read_surface_map(path: Path) -> dict[str, str]:
+    mapping: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line or line.startswith("#"):
+            continue
+        fields = line.split("\t")
+        if len(fields) != 3:
+            raise GateFailure(f"malformed surface row: {line}")
+        surface, _owner, ids = fields
+        mapping[surface] = ids
+    return mapping
+
+
 def verify_pins() -> tuple[Path, Path, str]:
     pins = toolchain.resolve(["cabal", "dhall", "ghc"])
     cabal = Path(pins["cabal"]["path"])
@@ -89,6 +104,8 @@ def verify_pins() -> tuple[Path, Path, str]:
 
 def verify_oracles(dhall: Path) -> list[dict[str, str]]:
     arms = read_tsv(ARM_ORACLE)
+    shape_semantics = read_tsv(SHAPE_SEMANTICS)
+    calculus_projection = read_tsv(CALCULUS_PROJECTION)
     dhall_typecheck = read_tsv(DHALL_TYPECHECK)
     gadt_decode = read_tsv(GADT_DECODE)
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
@@ -105,16 +122,26 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         "InferenceEngine",
     }
     if len(arms) != 9 or {row["arm"] for row in arms} != required_arms:
-        raise GateFailure("Phase-11 arm oracle must enumerate the exact closed nine-arm union")
+        raise GateFailure("Phase-30 arm oracle must enumerate the exact closed nine-arm union")
     if len({row["slug"] for row in arms}) != 9 or len({row["resource"] for row in arms}) != 9:
-        raise GateFailure("Phase-11 arm oracle slugs and resource names must be unique")
+        raise GateFailure("Phase-30 arm oracle slugs and resource names must be unique")
+    if len(shape_semantics) != 9 or [row["slug"] for row in shape_semantics] != [row["slug"] for row in arms]:
+        raise GateFailure("Phase-30 semantic shape oracle must cover the pinned arm order exactly")
+    expected_calculus = {
+        "calculus-kinds": "artifact,budget,lift,workflow,evidence",
+        "component-names": "capability-arms,bound-service-shapes,boundary-negatives,bind-property,mutant-evidence",
+        "projection-counts": "9,18,7,1,4",
+        "resource-vector": "5,39,0,0",
+    }
+    if {row["metric"]: row["value"] for row in calculus_projection} != expected_calculus:
+        raise GateFailure("Phase-30 independently authored five-calculus projection drifted")
     if len(dhall_typecheck) != 3 or {row["case"] for row in dhall_typecheck} != {"product-in-app", "engine-by-url", "shape-in-app"}:
-        raise GateFailure("Phase-11 Gate-1 oracle must contain the three required negatives")
+        raise GateFailure("Phase-30 Gate-1 oracle must contain the three required negatives")
     expected_gadt_decode = {"UnbuiltProviderArm", "UnboundCapability", "CyclicExtension", "ShadowingExtension"}
     if len(gadt_decode) != 4 or {row["expected"] for row in gadt_decode} != expected_gadt_decode:
-        raise GateFailure("Phase-11 Gate-2 oracle must preserve all four specific error tags")
+        raise GateFailure("Phase-30 Gate-2 oracle must preserve all four specific error tags")
     if len(mutants) != 4 or len({row["mutant"] for row in mutants}) != 4:
-        raise GateFailure("Phase-11 mutant manifest must contain four unique mutants")
+        raise GateFailure("Phase-30 mutant manifest must contain four unique mutants")
     positive_names = {
         f"legal_{row['slug']}_{shape}"
         for row in arms
@@ -131,13 +158,12 @@ def verify_oracles(dhall: Path) -> list[dict[str, str]]:
         *(row["mutant"] for row in mutants),
     }
     if {row["entry"] for row in locus} != expected_locus or len(locus) != len(expected_locus):
-        raise GateFailure("Phase-11 validation-locus ledger has incomplete or duplicate coverage")
+        raise GateFailure("Phase-30 validation-locus ledger has incomplete or duplicate coverage")
     for row in arms:
         for shape in ("singlenode", "distributed"):
             fixture = ROOT / f"dhall/examples/legal_{row['slug']}_{shape}.dhall"
-            golden = ROOT / f"test/golden/capability/golden_servicespec_{row['slug']}_{shape}.golden"
-            if not fixture.is_file() or not golden.is_file():
-                raise GateFailure(f"missing per-arm fixture or golden for {row['slug']} {shape}")
+            if not fixture.is_file():
+                raise GateFailure(f"missing per-arm fixture for {row['slug']} {shape}")
     for row in dhall_typecheck:
         legal = run([str(dhall), "type", "--file", row["legal"], "--quiet"], require_success=False)
         negative = run([str(dhall), "type", "--file", row["negative"], "--quiet"], require_success=False)
@@ -188,11 +214,16 @@ def run_green_suite(cabal: Path) -> str:
             "--test-show-details=direct",
         ]
     )
-    token = "capability-bind-spec: PASS (9 arms, 18 shape goldens, 3 Gate-1, 4 Gate-2, 4 mutants, 1 covered property)"
+    token = "capability-bind-spec: PASS (9 arms, 18 semantic shapes, 3 Gate-1, 4 Gate-2, 4 mutants, 1 covered property)"
     if token not in result.stdout:
-        raise GateFailure(f"Phase-11 acceptance token is absent:\n{result.stdout}")
+        raise GateFailure(f"Phase-30 acceptance token is absent:\n{result.stdout}")
+    if "capability-bind-calculus: PASS (5 kinds, 39 projected units)" not in result.stdout:
+        raise GateFailure("Phase-30 five-calculus projection token is absent")
+    invariant_token = "capability-bind-invariants: PASS (18 execution inventories, 3 unresolved references, 2 registry shapes, 2 extension-totality cases, 29 locus rows)"
+    if invariant_token not in result.stdout:
+        raise GateFailure("Phase-30 structural invariant token is absent")
     if "each of nine constructors >=8%" not in result.stdout:
-        raise GateFailure("Phase-11 property coverage token is absent")
+        raise GateFailure("Phase-30 property coverage token is absent")
     return result.stdout
 
 
@@ -223,14 +254,23 @@ def verify_mutants(cabal: Path, mutants: list[dict[str, str]]) -> str:
 def write_results(mutants: list[dict[str, str]]) -> None:
     metrics = {
         "capability-arms": "9/9-two-shape-green",
-        "shape-goldens": "18/18-exact",
+        "semantic-shape-oracle": "18/18-exact-object-controller-intent-projection",
         "app-byte-invariance": "9/9-distinct-composed-files-equal-normal-form",
         "structural-shape-oracle": "9/9-object-node-multiset-different",
         "dhall-typecheck-negatives": "3/3-specific-locus-red",
         "gadt-decode-negatives": "4/4-specific-tag-red",
         "quickcheck-properties": "1/1-green-nine-arms-at-least-8-percent",
         "mutants": f"{len(mutants)}/{len(mutants)}-red",
+        "controller-child-source-expansion": "18/18-execution-inventories-exact",
+        "unresolved-transition-references": "3/3-exact-and-unresolved",
+        "registry-storage-bound-intent": "2/2-shapes-exact",
+        "extension-totality": "2/2-unbound-required-red-and-closed-green",
+        "validation-locus-entries": "29/29-exact",
         "acceptance-token": "binding-composition-proven",
+        "calculus-kinds": "5/5-artifact-budget-lift-workflow-evidence",
+        "calculus-components": "capability-arms,bound-service-shapes,boundary-negatives,bind-property,mutant-evidence",
+        "calculus-projection-counts": "9,18,7,1,4",
+        "calculus-resource-vector": "5,39,0,0",
         "live-provider-realization": "UNVERIFIED",
         "live-engine-resolution": "UNVERIFIED",
         "runtime-correspondence": "UNVERIFIED",
@@ -272,9 +312,31 @@ CHECKS = {
 
 SIDES = ("toolchain", "oracle", "suite", "mutant", "results")
 
-EXPECTED_RESULTS = {'capability-arms': '9/9-two-shape-green', 'shape-goldens': '18/18-exact', 'app-byte-invariance': '9/9-distinct-composed-files-equal-normal-form', 'structural-shape-oracle': '9/9-object-node-multiset-different', 'dhall-typecheck-negatives': '3/3-specific-locus-red', 'gadt-decode-negatives': '4/4-specific-tag-red', 'quickcheck-properties': '1/1-green-nine-arms-at-least-8-percent', 'mutants': '4/4-red', 'acceptance-token': 'binding-composition-proven', 'live-provider-realization': 'UNVERIFIED', 'live-engine-resolution': 'UNVERIFIED', 'runtime-correspondence': 'UNVERIFIED'}
+EXPECTED_RESULTS = {
+    "capability-arms": "9/9-two-shape-green",
+    "semantic-shape-oracle": "18/18-exact-object-controller-intent-projection",
+    "app-byte-invariance": "9/9-distinct-composed-files-equal-normal-form",
+    "structural-shape-oracle": "9/9-object-node-multiset-different",
+    "dhall-typecheck-negatives": "3/3-specific-locus-red",
+    "gadt-decode-negatives": "4/4-specific-tag-red",
+    "quickcheck-properties": "1/1-green-nine-arms-at-least-8-percent",
+    "mutants": "4/4-red",
+    "controller-child-source-expansion": "18/18-execution-inventories-exact",
+    "unresolved-transition-references": "3/3-exact-and-unresolved",
+    "registry-storage-bound-intent": "2/2-shapes-exact",
+    "extension-totality": "2/2-unbound-required-red-and-closed-green",
+    "validation-locus-entries": "29/29-exact",
+    "acceptance-token": "binding-composition-proven",
+    "calculus-kinds": "5/5-artifact-budget-lift-workflow-evidence",
+    "calculus-components": "capability-arms,bound-service-shapes,boundary-negatives,bind-property,mutant-evidence",
+    "calculus-projection-counts": "9,18,7,1,4",
+    "calculus-resource-vector": "5,39,0,0",
+    "live-provider-realization": "UNVERIFIED",
+    "live-engine-resolution": "UNVERIFIED",
+    "runtime-correspondence": "UNVERIFIED",
+}
 
-SURFACE_MAP = {'closed-nine-arm-capability-union': 'objectstore,secretstore,messagebus,sql,identity,observability,registry,edge,inferenceengine', 'url-free-engine-runtime': 'engine-by-url', 'app-surface-capability-needs': 'unbound-capability', 'canonical-provider-union': 'unbuilt-provider', 'typed-service-shapes': 'shape-in-app', 'total-representational-bind': 'product-in-app', 'explicit-provider-object-graphs': 'mutant_catchall_arm,mutant_shared_app_import', 'structural-object-node-multiset-oracle': 'mutant_copy_shape_tag', 'normalized-app-byte-invariance': 'app-byte-invariance', 'kind-indexed-bound-execution-set': 'acceptance-token', 'controller-child-source-expansion': '', 'unresolved-transition-references': '', 'bound-deployment-no-provisioned-values': 'mutant_provisioned_value_in_bound_deployment', 'registry-storage-bound-intent': '', 'extension-totality': '', 'extension-acyclicity': 'cyclic-extension', 'extension-no-shadowing': 'shadowing-extension', 'phase10-dhall-typecheck-corpus': 'dhall-typecheck-negatives', 'phase10-gadt-decode-corpus': 'gadt-decode-negatives', 'phase10-arm-exhaustiveness': 'capability-arms', 'phase10-golden-corpus': 'shape-goldens', 'phase10-property-coverage': 'quickcheck-properties', 'phase10-mutant-battery': 'mutants', 'phase10-validation-locus-ledger': '', 'capability-bind-compile-totality': 'structural-shape-oracle', 'live-provider-realization': 'live-provider-realization', 'live-engine-resolution': 'live-engine-resolution', 'runtime-model-correspondence': 'runtime-correspondence'}
+SURFACE_MAP = read_surface_map(ROOT / EXPECTATIONS)
 
 SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     surface: ((metric, EXPECTED_RESULTS[metric]) if metric and EXPECTED_RESULTS.get(metric) not in (None, "UNVERIFIED") else None)
@@ -299,6 +361,10 @@ def main() -> int:
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []
     item_names: set[str] = set()
+    arm_names: set[str] = set()
+    gate1_names: set[str] = set()
+    gate2_names: set[str] = set()
+    mutant_names: set[str] = set()
 
     try:
         resolved = toolchain.resolve(["cabal", "dhall", "ghc"])
@@ -318,7 +384,11 @@ def main() -> int:
         print("\noracle side — authored oracle shapes and loci\n")
         mutant_rows = verify_oracles(Path(resolved["dhall"]["path"]))
         verify_totality_sources()
-        item_names = arm_slugs() | case_names() | {row["mutant"] for row in mutant_rows}
+        arm_names = arm_slugs()
+        gate1_names = {row["case"] for row in read_tsv(DHALL_TYPECHECK)}
+        gate2_names = {row["case"] for row in read_tsv(GADT_DECODE)}
+        mutant_names = {row["mutant"] for row in mutant_rows}
+        item_names = arm_names | gate1_names | gate2_names | mutant_names
         print(f"  ok    {len(item_names)} enumerated items, {len(mutant_rows)} mutants, loci exact")
         results["oracle"] = True
 
@@ -358,25 +428,40 @@ def main() -> int:
         "Protocol": "UNVERIFIED",
         "Runtime": "UNVERIFIED",
     }
-    item_evidence = {
-        surface: ("acceptance-token", EXPECTED_RESULTS["acceptance-token"])
+    arm_evidence = {
+        surface: ("capability-arms", EXPECTED_RESULTS["capability-arms"])
         for surface, ids in SURFACE_MAP.items()
-        if ids and set(ids.split(",")) & item_names
+        if ids and set(ids.split(",")) & arm_names
+    }
+    gate1_evidence = {
+        surface: ("dhall-typecheck-negatives", EXPECTED_RESULTS["dhall-typecheck-negatives"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and set(ids.split(",")) & gate1_names
+    }
+    gate2_evidence = {
+        surface: ("gadt-decode-negatives", EXPECTED_RESULTS["gadt-decode-negatives"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and set(ids.split(",")) & gate2_names
+    }
+    mutant_evidence = {
+        surface: ("mutants", EXPECTED_RESULTS["mutants"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and set(ids.split(",")) & mutant_names
     }
     return gate.finish(
         results,
         implemented={"metrics": set(rows), "checks": set(CHECKS), "items": item_names},
         rows=rows,
-        evidence={**SURFACE_EVIDENCE, **item_evidence},
+        evidence={**SURFACE_EVIDENCE, **arm_evidence, **gate1_evidence, **gate2_evidence, **mutant_evidence},
         layers=layers,
         toolchain={
             name: {"version": record["version"], "requirement": record["requirement"]}
             for name, record in resolved.items()
             if name != "platform"
         },
-        dependencies={"battery": "cabal test"},
+        dependencies={"battery": "cabal test capability-bind-spec"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-11 mutants", "status": "unrun"}],
+        or [{"name": "phase-30 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

@@ -154,6 +154,7 @@ async function runBoundary() {
 
     const startup = [{ case: "canonical", ready: true }];
     for (const startupCase of [
+      ["unreferenced", ["--unreferenced-count", "1"]],
       ["missing", ["--registry-count", "0"]],
       ["duplicate", ["--registry-count", "2"]],
       ["contract-mismatch", ["--handler-contract", "mismatch"]],
@@ -222,7 +223,7 @@ function spawnServer(binary, options) {
     ...(options.extra ?? [])
   ];
   return spawn(binary, args, {
-    env: { ...process.env, AMOEBIUS_PHASE22_MUTANT: options.mutant ?? "" },
+    env: { ...process.env, AMOEBIUS_UI_SERVER_BOUNDARY_MUTANT: options.mutant ?? "" },
     stdio: ["ignore", "pipe", "pipe"]
   });
 }

@@ -152,14 +152,17 @@ role-binding rules, raw policy, or handler implementation details. The server pr
 claim merely because the matching client plan would normally emit it.
 
 [Phase 40](../../DEVELOPMENT_PLAN/phase_40_ui_plan_compiler.md) validates this projection boundary in Register
-1. One opaque bound value emits byte-pinned client, private server, public-contract, and content-manifest JSON;
-concrete SHA-256 identities include private authority and resolved-link sources, and reversed insertion order in
-fresh cache-disabled processes preserves every byte. Both runtime interpreters remain UNVERIFIED.
+1. One opaque bound value matches four independently stated logical projections and emits canonical client,
+private server, public-contract, and content-manifest JSON. Concrete SHA-256 identities include private
+authority and resolved-link sources; reversed insertion order in fresh cache-disabled processes preserves every
+byte; and the real five-calculus composition accounts for 32 units. The same-commit JSON files are regression
+fixtures, not independent semantic oracles. Both runtime interpreters remain UNVERIFIED.
 
 [Phase 42](../../DEVELOPMENT_PLAN/phase_42_ui_browser_interpreter.md) validates the client half in Register 2.
 One pinned generic PureScript bundle interprets two plan values in real Chrome; its transitions agree with an
 independent Haskell semantics, its DOM/focus/transport observations match authored pins, and CSP, artifact,
-fresh-challenge, OS-network, and nine mutant checks pass. The UI-server interpreter, real authority/provider
+fresh-challenge, OS-network, and nine mutant checks pass. The five real calculi project `9,5,45,4,9` units
+into resource vector `5,72,0,0`. The UI-server interpreter, real authority/provider
 enforcement, release behavior, and HA remain UNVERIFIED.
 
 ---
@@ -287,7 +290,8 @@ destination requires review of the trusted catalog; changing application Dhall c
 
 The authored subset is built and validated in
 [Phase 37](../../DEVELOPMENT_PLAN/phase_37_ui_program_schema.md). Its closed `UiSource` record admits named link
-requirements but no raw URL field; the Register-1 gate checks this representational boundary only.
+requirements but no raw URL field; the Register-1 gate's exact diagnostics and paired raw-URL mutant check
+this representational boundary only.
 
 ---
 
@@ -347,9 +351,10 @@ The PureScript runtime does not reproduce these proofs. It receives a compact pl
 possible only from the sealed Haskell value, validates its plan envelope and digest, and interprets the same
 closed instruction set defensively.
 
-Phase 37 implements the first checked graph with private `CheckedUiProgram` construction and total identity,
-reference, cycle, bound, port, event, and public-projection checks. Runtime interpretation, binding, scope, and
-authorization remain later-phase obligations.
+Phase 37 implements and validates the first checked graph with private `CheckedUiProgram` construction and
+total identity, reference, cycle, bound, port, event, and public-projection checks. Three authored program
+semantics and three graph rows constrain meaning; the generated normalized-wire bytes are not an oracle.
+Runtime interpretation, binding, scope, and authorization remain later-phase obligations.
 
 ---
 
@@ -490,8 +495,9 @@ inside the public input has no authority and is rejected when the contract forbi
 [Phase 39](../../DEVELOPMENT_PLAN/phase_39_ui_effect_binding.md) validates this pure binding seam. Seven closed
 effect arms exact-join independently authored handler, codec, scope, capability, retry, and audit tuples; named
 links independently exact-join two canonical fixed-HTTPS catalog entries. Provider coordinates and using a link
-as effect transport reject before `BoundUiProgram` exists. Browser, handler, and provider enforcement remains
-UNVERIFIED.
+as effect transport reject before `BoundUiProgram` exists. Nineteen exact refusals, thirteen generated classes,
+and seven paired mutants pass; the real five-calculus projection composes `7,2,19,13,7` to `5,48,0,0`. Browser,
+handler, and provider enforcement remains UNVERIFIED.
 
 ---
 
@@ -545,8 +551,10 @@ confers or removes authority.
 [Phase 38](../../DEVELOPMENT_PLAN/phase_38_ui_authorization_kernel.md) validates the pure kernel behind this
 rule. One constructor-private registry emits byte-equal client/server projections, and only current policy,
 membership, grant, and scope epochs plus a successful scope join can construct `AuthorizedAction`; the
-independent matrix includes hidden-but-invocable and absent-policy cases. Live edge, identity-provider,
-UI-server, and provider enforcement remains UNVERIFIED.
+independent matrix includes hidden-but-invocable and absent-policy cases. Its thirteen-sided natural-`arm64`
+gate matches all 15 metrics, joins 46 surfaces to 63 items, and projects the real five calculi to `5,30,0,0`;
+the `default_allow` and `visibility_is_authorization` mutants redden at distinct loci. Live edge,
+identity-provider, UI-server, and provider enforcement remains UNVERIFIED.
 
 [Phase 68](../../DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md) discharges the live provider-enforcement
 slice for scoped actions. A private Haskell adapter accepts verified Keycloak credential context and ignores
@@ -617,9 +625,11 @@ Confidentiality may be narrowed without new authority. Audience widening or cros
 closed named release/grant action with current authorization, declared purpose, target audience, audit class,
 and a server-issued result carrying the new label. There is no general declassification function.
 
-[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) builds and validates the pure scope and
-flow kernel behind this rule. Opaque identities, handles, labels, and witnesses match independent owner and flow
-tables; live identity-provider and provider-policy enforcement remains unverified.
+[Phase 8](../../DEVELOPMENT_PLAN/phase_08_scope_index.md) builds and validates the standalone pure kernel behind
+this rule. A rank-2 eliminator introduces one fresh request index; opaque scoped values, handles, labels, and
+witnesses match six owner joins, two exact swaps, four flow decisions, four exact graph diagnostics, five
+compiler-negative pairs, nine generated reject classes, and one real build-flag mutant. Persisted-value
+re-entry, identity-provider truth, provider policy, and live noninterference remain `UNVERIFIED`.
 
 Browser input and model output begin with untrusted integrity. They cannot flow to an authority-bearing sink,
 policy decision, provider coordinate, executable action identity, ownership field, or release decision until a
@@ -684,7 +694,10 @@ Phase 82's scoped result adds opaque tenant choices, current-membership selectio
 
 Phase 84's scoped result admits only three-zone hard-spread UI-server, projector, Redis, and Keycloak shapes; it also pins PDB, non-sticky, whole-zone fault, current-authority, and durable-repair rules. A three-role loopback process probe survives loss of one role with one durable effect. Real provider-zone failure and off-cluster identity/data/network observers remain UNVERIFIED, so this is not an HA claim.
 
-Phase 41 implements `OnlineOnly | Offline` and exact-key paired client/replay projections at Register 1. The closed compiler makes bounds and replay semantics mandatory, permits only the two initial ML start operations, and exposes no browser or Redis mechanism. Runtime behavior remains UNVERIFIED.
+Phase 41 implements `OnlineOnly | Offline` and exact queue, cached-projection, and local-blob key parity at
+Register 1. The closed compiler requires finite count/byte/age bounds and all six replay semantics, permits
+only the two initial ML start operations, retains two deterministic artifact commands, and exposes no private,
+browser, or Redis mechanism. Browser persistence and live replay authority remain UNVERIFIED.
 
 The client is one generic PureScript interpreter, versioned with the UI language and component catalog. It
 loads an immutable `ClientPlan`, verifies its envelope and digest, decodes public values, renders only trusted
@@ -723,7 +736,9 @@ because they are absent from that app's sealed dispatch table.
 The `serve-ui` responsibility derives request context from HMAC-signed credentials minted by a separate
 post-start authority process, refuses foreign/spoofed/revoked/origin/stale requests before a separate guarded
 handler sees bytes, and enforces startup exact-join, stable retry identity, fixed public headers/assets,
-private-plan non-disclosure, and scoped WebSocket admission. Keycloak, the live edge, provider policy,
+private-plan non-disclosure, and scoped WebSocket admission. A sixth startup case links an unreferenced handler,
+reaches readiness, and leaves that handler outside the plan's dispatch set. The real five-calculus projection
+accounts for 80 units. Keycloak, the live edge, provider policy,
 deployment, replica loss, and HA remain UNVERIFIED.
 
 [Phase 44](../../DEVELOPMENT_PLAN/phase_44_ui_local_composition.md) composes the client and server halves in
@@ -731,6 +746,8 @@ Register 2. Two Dhall-authored applications reuse one generic bundle and the sam
 real Chrome carries a fresh nonce through workflow start, ready receipt, an owner-paired artifact handle, and
 result rendering against separate infernix-/jitML-shaped fakes. Foreign users, copied/non-ready handles, and a
 direct browser/backend probe remain effect-free. Real domain adapters and all live layers remain UNVERIFIED.
+The composed real five-calculus projection accounts for 55 units, and the Darwin observer confines the
+browser/server processes to loopback while preserving Chromium's local IPC.
 
 [Phase 68](../../DEVELOPMENT_PLAN/phase_68_user_tenant_isolation_live.md) validates the downstream live
 request-context-to-provider boundary used by this responsibility: real Keycloak password credentials are
@@ -840,6 +857,14 @@ generated build/release artifacts and are never committed:
 
 Generation is deterministic for the same normalized source, linked binary, catalog, and contract inputs. Build
 or check commands regenerate and compare artifacts rather than accepting hand-edited output.
+
+[Phase 46](../../DEVELOPMENT_PLAN/phase_46_ui_contract_generation.md) supplies the pure generator instance.
+Its Haskell recipe enumerates the closed public `ValueType` boundary while excluding `ServerHandle`, then emits
+the public types, total field codecs, and `ui-client-v1` bundle entry point only into a caller-owned build root.
+The gate independently projects the actual `ValueType`, `ClientPlan` encoder, and PureScript `Transition`
+surface, requires two byte-identical renders, scans generated source and the strict bundle for six forbidden
+tokens, and records the bundle's content address at run time. This is Register-1 evidence; protocol use and
+runtime behavior remain UNVERIFIED.
 
 ---
 

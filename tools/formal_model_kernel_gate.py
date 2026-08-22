@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Phase-3 gate — the formal-model kernel and its explorer/TLC differential.
+"""The Phase-11 gate — the formal-model kernel and its explorer/TLC differential.
 
 The capability claim is unchanged from the pre-amendment gate: one reifiable `Model` value
 renders both ways, the in-process explorer and TLC agree on the safety verdict and on the
@@ -13,9 +13,10 @@ ledger against machine-derived results. It now resolves the toolchain from autho
 compatibility requirements, writes every observation into the run bundle, enumerates its
 surfaces at run time, and publishes an attestation bound to the source snapshot.
 
-The oracle side is untouched and is where the teeth are: `EXPECTED_RESULTS` below is the
-authored expectation the recorded suite results must equal, and the ledger is *derived*
-from those same recorded results — so a print-statement ledger still cannot pass.
+The oracle side combines authored semantic facts, hand-derived transition/invariant
+tables, and the expected run metrics below.  Generated TLA+ bytes are observations, never
+an acceptance oracle.  The ledger is *derived* from recorded results, so a print-statement
+ledger still cannot pass.
 
     python3 tools/formal_model_kernel_gate.py
 
@@ -54,7 +55,7 @@ CHECKS = {
 
 SIDES = ("toolchain", "suite", "oracle", "artifact")
 
-# The authored oracle. Every value here is read off the Phase-3 contract's Gate paragraph,
+# The authored oracle. Every value here is read off the Phase-11 contract's Gate paragraph,
 # which fixes the hand-derived distinct-state count, the mutation quotas, the differential
 # sample floor, and the per-constructor coverage floor.
 EXPECTED_RESULTS = {
@@ -66,8 +67,9 @@ EXPECTED_RESULTS = {
     "fairness-drop-liveness": "red",
     "model-safety-mutants-caught": "5/5",
     "spec-weakening-mutants-caught": "1/1",
-    "renderer-golden-mutants-caught": "2/2",
+    "renderer-semantic-mutants-caught": "2/2",
     "renderer-differential-mutants-caught": "2/2",
+    "calculus-composition-projection": "green",
     "case-count": "200",
     "safety-violating-count": "95",
     "constraint-boundary-count": "200",
@@ -91,7 +93,8 @@ SURFACE_EVIDENCE = {
     "toy-safety": ("toy-state-fingerprints-equal", "yes"),
     "toy-liveness-under-fairness": ("toy-liveness-under-fairness", "green"),
     "fairness-sensitivity": ("fairness-drop-liveness", "red"),
-    "tla-renderer-golden": ("renderer-golden-mutants-caught", "2/2"),
+    "tla-renderer-semantics": ("renderer-semantic-mutants-caught", "2/2"),
+    "phase-10-composition-projection": ("calculus-composition-projection", "green"),
     "mechanical-model-mutants": ("model-safety-mutants-caught", "5/5"),
     "renderer-mutants": ("renderer-differential-mutants-caught", "2/2"),
     "renderer-mutant-corpus": ("renderer-differential-mutants-caught", "2/2"),
@@ -277,7 +280,7 @@ def main() -> int:
         mutants=[
             {"name": "model safety mutants", "status": rows.get("model-safety-mutants-caught", "unrun")},
             {"name": "spec weakening mutants", "status": rows.get("spec-weakening-mutants-caught", "unrun")},
-            {"name": "renderer golden mutants", "status": rows.get("renderer-golden-mutants-caught", "unrun")},
+            {"name": "renderer semantic mutants", "status": rows.get("renderer-semantic-mutants-caught", "unrun")},
             {"name": "renderer differential mutants", "status": rows.get("renderer-differential-mutants-caught", "unrun")},
         ],
         observations={"results": "sha256:" + artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},

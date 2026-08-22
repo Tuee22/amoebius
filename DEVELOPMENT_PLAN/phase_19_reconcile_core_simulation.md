@@ -1,21 +1,21 @@
 # Phase 19: Reconcile decision core under deterministic simulation
 
-> **Purpose**: Build the reconcile decision core as pure code — `(observed inventory, desired index) → typed
-> action set` — and run it under `IOSim`/`IOSimPOR` against authored observed-inventory corpora and injected
-> fault schedules, so the core's fixed-point and convergence properties are established — and its token and
-> reservation behaviour shown consistent with a modelled store — **before** the first live phase rather than
-> inside it.
-> **Read this if**: phase 19 is next in the queue, or a later phase depends on what its gate establishes.
+> **Purpose**: Build a pure observed-inventory/desired-index planner and test its fixed-point, bounded
+> convergence, snapshot-token, reservation, and three-valued-observation behavior under deterministic
+> simulation before any live correspondence claim.
+> **Read this if**: the pure reconcile boundary, typed delete authority, modeled schedules, or the boundary
+> between simulated evidence and effectful runtime fidelity must change.
 
-Phase 19 delivers the reconcile decision core under deterministic simulation; its design is owned by [deterministic_simulation_doctrine.md](../documents/engineering/deterministic_simulation_doctrine.md), [cluster_lifecycle_doctrine.md](../documents/engineering/cluster_lifecycle_doctrine.md), [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md), and the plan for reaching it is owned here.
-Register 2: an in-process deterministic-replay battery, no cluster.
+This phase owns one pure reconcile library and a four-schedule `IOSim`/`IOSimPOR` battery. It consumes the
+Phase-16 simulation method and links four tested properties to Phase-18 model invariant names. It does not
+claim that a live driver captures fresh observations, enacts actions faithfully, or matches the modeled store.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_dsl_formal_model.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/resource_capacity_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -26,9 +26,9 @@ Register 2: an in-process deterministic-replay battery, no cluster.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 19.1: The decision core, separated 📋](#sprint-191-the-decision-core-separated-)
-- [Sprint 19.2: Replay under injected schedules 📋](#sprint-192-replay-under-injected-schedules-)
-- [Sprint 19.3: The token and reservation protocols under simulation 📋](#sprint-193-the-token-and-reservation-protocols-under-simulation-)
+- [Sprint 19.1: Pure typed decision core ✅](#sprint-191-pure-typed-decision-core-)
+- [Sprint 19.2: Four deterministic reconcile schedules ✅](#sprint-192-four-deterministic-reconcile-schedules-)
+- [Sprint 19.3: Protocol correspondence and sealed gate ✅](#sprint-193-protocol-correspondence-and-sealed-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -36,205 +36,221 @@ Register 2: an in-process deterministic-replay battery, no cluster.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-18 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-21. All thirteen gate sides passed on natural `arm64`, untranslated: all thirteen
+metrics matched and 21 surfaces joined to 23 run-time items. Attestation
+`sha256:1967ded20d6c6db55b1b75e074d021ff860b4a075d4d31909d93a23e03a4cf4c` binds source
+`sha256:1ab645d7ff28a43b…` over 2,208 files. Repository-conformance attestation
+`sha256:7d287969c51160585cffba08aad433a66798a0b80d626d292b81dae03bf090b4` and documentation attestation
+`sha256:0ab6555f2a0edfaa37c3b1398582647a74c2a46fc98658a60c03528a0ca2f33a` passed on that snapshot. The
+decision/protocol claims are tested only over the declared corpora and schedules; modeled-environment fidelity
+is ASSUMED and runtime fidelity is UNVERIFIED.
 
 ## Phase Summary
 
-[Phase 16](phase_16_deterministic_sim_substrate.md) builds a deterministic-simulation substrate and gates it
-on a **toy** reconcile loop, stating plainly that later phases must replay their own reconcilers. Until this
-phase existed, none did before the live band: the first simulation of amoebius's own reconciler sat inside the
-same phase as its live gate, which that phase concedes is *"not chronologically ahead of it."* This phase is
-the missing subject for the instrument Phase 16 builds.
+`lib:reconcile-core` separates the pure function
+`ObservedInventory -> DesiredIndex -> Either Refusal ActionSet` from every client and live driver. Nine
+authored cases cover converged, create, apply, delete, mixed, empty, unreachable, and missing-observation
+outcomes. Actual output must equal the authored row and a second flat textual planner that imports no
+production reconcile module. The two converged rows produce an empty action set; this is a fixed-point claim,
+not the ill-typed equation of applying an action-producing function to its own output.
 
-**The architectural cut this requires is one doctrine already makes.**
-[formal_model_doctrine.md](../documents/engineering/formal_model_doctrine.md) places the checked
-correspondence between the specification and the **decision core**, not the effectful daemon. So the decision
-core is separable, and this phase separates it: a pure total function
-`(observed inventory, desired index) -> Either Refusal ActionSet`, with the effectful driver — real client,
-real apiserver, real waits — left to the live band. The codomain carries `Refusal` because a three-valued
-observation must be able to decline rather than act, and a function that can only return actions has nowhere
-to put that. The diff is a fold over two values; nothing about it needs a cluster.
+Observations are indexed by `IsPresent`, `IsAbsent`, or `IsUnreachable`. `DeleteObject` accepts only an
+`Observation 'IsPresent`; the legal twin compiles and the unreachable mutation fails at the exact
+`IsUnreachable`/`IsPresent` mismatch. The planner fails closed for every unreachable entry and for a desired
+identity absent from the observation domain, returning no partial action set.
 
-**What this phase does not claim.** It does not claim the daemon captures its inputs with the right freshness
-or applies the decision faithfully; that is runtime fidelity, and it is UNVERIFIED here. It does not claim the
-modelled environment matches a real apiserver. Both belong to the live band, which re-runs *these* properties
-against built code instead of establishing them for the first time. Where the simulated loop and the live
-driver are different code, the live band establishes those properties anew rather than re-running them; the
-ledger must say which of the two it is doing.
+Four authored schedules—baseline, duplicate delivery, crash before apply, and stale snapshot—drive a
+three-action reconcile through the actual core and a modeled versioned store. Each reaches the exact final
+inventory within its bound. Two fresh same-seed executions encode identical trace bytes, a changed seed changes
+semantic action order, and bounded `IOSimPOR` replays all four. The store accepts one of two concurrent uses of
+one snapshot token and rejects the other. The actual scheduler reservation algebra admits one concurrent
+reservation and retains one debit while reaching `Bound` across crashes at `Reserved`, `BindingInFlight`, and
+`Bound`.
 
-**Phase scope:** one cohesive claim — *the reconcile decision core is idempotent, convergent, and protocol-safe
-under every injected schedule* — across three sprints and one acceptance command. The split trigger is a real
-client: the moment a property needs a live apiserver, it is not this phase's.
+Four correspondence rows bind tested properties to Phase-18 invariants: `NoTokenReuse`,
+`OneDebitPerReservation`, `RefuseOnUnreachable`, and `ConvergedIsStable`. This checks vocabulary and evidence
+alignment; it does not turn simulation into a refinement proof. Four behavioral mutants and the typed-delete
+mutant each redden one authored property.
 
-**Substrate:** `none` — no host, no cluster ([§L](development_plan_standards.md#l-one-substrate-discipline)).
-
-**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline)).
-
-**Register:** 2 — boundary integration with fakes, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
-
-**Depends on:** [Phase 16](phase_16_deterministic_sim_substrate.md) — the deterministic-simulation substrate the decision core is replayed on.
-
-**Gate:** `python3 tools/reconcile_core_simulation_gate.py` replays every authored schedule byte-identically
-from its seed, satisfies every property named in [Gate integrity](#gate-integrity), and reddens under every
-seeded mutant. Phase 20 does not open unless the ledger records Register 2 green with runtime fidelity and
-modelled-environment fidelity both UNVERIFIED.
+**Phase scope:** One nine-case pure planner corpus, one three-action scenario under four authored schedules,
+one concurrent token race, three reservation crash cuts, four formal-invariant links, and five mutants; add a
+new phase owner for an effectful driver, live service, larger state domain, or model-to-code refinement proof.
+**Substrate:** none
+**Lane:** none
+**Register:** 2 — boundary integration with modeled stores and deterministic schedules, no cluster.
+**Depends on:** [Phase 16](phase_16_deterministic_sim_substrate.md) — supplies the `io-classes`/`IOSim`
+method and determinism contract; [Phase 18](phase_18_dsl_formal_model.md) — supplies the named token,
+reservation, unreachable-refusal, and convergence invariants this suite links to.
+**Gate:** `python3 tools/run_phase_gate.py 19` passes thirteen exact metrics, the actual-core and
+independent-reference corpus, four schedule/POR runs, typed-delete negative, five exact mutants, complete
+surface join, architecture, containment, write guard, ledger, and source-bound attestation; [Gate
+integrity](#gate-integrity) owns the anti-tautology apparatus.
 
 ## Gate integrity
 
-The corpora are **authored, not generated from the implementation**: a set of observed-inventory values paired
-with a desired index and the typed action set a human says should follow
-([§M](development_plan_gate_integrity.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 3). The
-independent oracle is a reference action-planner written against
-[manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md) and sharing no
-code with the decision core — the same independence the live reconciler phase already requires of its own
-checker, pulled one band earlier.
-
-
-Properties, each with its own seeded mutant:
-
-**Established here, against the core itself:**
-
-- **Fixed point** — replaying a converged state produces the empty action set. This is *not* idempotence:
-  `f(f(x)) = f(x)` is not even type-correct when `f` returns actions rather than a state, and the idempotence
-  a reconciler reader cares about — applying the same action twice equals applying it once — is a property of
-  the driver and the apiserver, not of this fold. Mutant: an action that always re-emits.
-- **Convergence** — every corpus reaches a fixed point within its authored bound, under a modelled
-  environment transition (actions × inventory → inventory) that the corpus supplies. Mutant: an oscillating pair.
-
-**Established only as consistency with a modelled store, and UNVERIFIED against a real one:**
-
-- **Token no-reuse** — a snapshot token is not reusable after any observed transition. This is a property of
-  the *store's* compare-and-set across steps; the pure core has no memory of issued tokens, so what the gate
-  shows is that the core never *requests* a reuse the modelled store would have to refuse. Mutant: the guard
-  removed.
-- **Reservation safety** — no double debit across `Reserved → BindingInFlight → Bound`, and a crash between
-  any two steps recovers without dropping `Bound`. A pure function does not crash; the crash is the modelled
-  environment's, and the claim is that the core's decisions remain safe under it. Mutant: the crash-recovery
-  arm dropped.
-
-**Typed, not tested:** `Unreachable` must never be folded into `Absent` — the defect that deletes a live
-resource because a probe timed out. If a mutant conflating them can be *written*, the conflation is
-representable, and this project's doctrine says to close that in the type: the `Delete` action is indexed on
-a `Present` witness, so "delete on `Unreachable`" has no constructor. The corpus still carries an
-`Unreachable` row to prove the refusal path is reached, but the foreclosure is dhall-typecheck's, not a property here.
-
-Determinism is a precondition, not a property: the same seed must produce a byte-identical trace, and a
-schedule that replays differently fails before any property is evaluated.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+- **Representative set (§M.7):** `core_cases.tsv` names nine planner cases; four JSON fixtures name baseline,
+  duplicate, crash, and stale-snapshot schedules; the simulated scenario requires apply/create/delete; the
+  protocol set is one token race and reservation crashes at three exact transition cuts.
+- **Independent oracle (§M.1/§M.3):** authored expected results decide every core row. `ReferencePlanner`
+  independently parses the flat textual vocabulary and imports no production reconcile module. The schedule
+  table fixes verdict, accepted/rejected counts, and one required semantic event per schedule.
+- **No generated-output oracle:** no trace snapshot is committed. Same-seed bytes compare two fresh runs, a
+  changed seed must alter semantic order, and authored outcomes/counts/events decide meaning.
+- **Mutation quota (§M.2):** fixed-point re-emission, oscillating application, token-guard deletion,
+  reservation-loss-on-crash, and an unreachable delete witness redden `FixedPoint`, `Convergence`,
+  `NoTokenReuse`, `BoundRetainedAfterCrash`, and `DeleteRequiresPresentWitness` respectively.
+- **Positive and adjacent controls (§M.8):** two correct fixed points precede re-emission; correct convergence
+  precedes oscillation; the correct token race admits one/rejects one; all three correct reservation recoveries
+  reach `Bound`; and the Present delete twin compiles before the Unreachable twin is required to fail.
+- **Finite coverage honesty (§M.4):** the nine cases, one three-action world, four schedules, POR branching
+  bound 3/schedule bound 32, and three crash cuts are exact finite evidence. No unscheduled fault combination,
+  arbitrary inventory, or real-store behavior is inferred.
+- **External observation (§M.5/§M.10):** the independent textual planner observes actual semantic outputs;
+  the compiler observes the type negative; `IOSim` traces and store counters observe transitions. No component
+  self-reports compliance.
+- **Authority/bypass (§§M.11–M.12):** Delete requires a compiler-checked Present witness and unreachable input
+  returns `Refusal`. Live credentials, alternate clients, and effectful bypass paths do not exist in this
+  Register-2 boundary and remain UNVERIFIED.
+- **Fresh challenge (§M.9):** not applicable. No effectful service response is accepted; fresh snapshot
+  behavior is exercised as a modeled version/CAS transition and its fidelity to a real store is ASSUMED.
+- **Proof boundary:** all code correspondence here is tested. Phase-18 safety remains proven only for its
+  models; the four name links are not a refinement proof. Live driver and model-to-runtime fidelity remain
+  UNVERIFIED.
+- **Extension conformance (§M.13).** Not applicable. Phase 19 declares no extension or domain member.
 
 ## Doctrine adopted
 
-- [deterministic_simulation_doctrine.md](../documents/engineering/deterministic_simulation_doctrine.md): the
-  `io-classes` lift, the modelled environment, and the same-seed byte-identical replay contract.
-- [cluster_lifecycle_doctrine.md §9 — how bring-up and teardown are implemented](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine):
-  the `discover → diff → enact → re-observe` loop and its three-valued observation.
-- [manifest_generation_doctrine.md](../documents/engineering/manifest_generation_doctrine.md): desired state is
-  `renderAll` of a sealed spec, observed state is an inventory, and actions are typed — which is what makes
-  the diff a fold rather than a client.
+- [`deterministic_simulation_doctrine.md` §4](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits): same-seed replay and bounded POR are tested evidence over a modeled environment.
+- [`cluster_lifecycle_doctrine.md` §9](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine): the decision core consumes three-valued observation and fails closed on unreachable state.
+- [`formal_model_doctrine.md` §6](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not): linking tested code properties to invariant names does not prove runtime correspondence.
+- [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md): an active reservation remains one debit across binding and recovery.
 
 ## Sprints
 
-## Sprint 19.1: The decision core, separated 📋
+## Sprint 19.1: Pure typed decision core ✅
 
-**Status**: Planned
-**Implementation**: `src/Amoebius/Reconcile/Core.hs`, `test/fixture/reconcile_core/**`
-**Blocked by**: none within the phase.
-**Independent Validation**: a reference action-planner sharing no code with the core, authored from doctrine.
-**Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md`
-
-### Objective
-
-Extract the diff as a pure total function and give it an authored corpus. No client, no `IO`, no waits.
-
-### Deliverables
-- `(observed inventory, desired index) -> Either Refusal ActionSet`, total over both inputs.
-- An authored corpus pairing inputs with the expected action set.
-- The independent reference planner.
-
-### Validation
-1. **The core is run on every corpus row**, and its action set equals the row's authored expectation. A gate
-   that compared the corpus against the reference planner alone would pass with the core unimplemented, which
-   is the [§M](development_plan_gate_integrity.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-   stub failure this phase cites.
-2. The reference planner agrees with the authored corpus independently. Where planner and corpus disagree the
-   **corpus is authoritative** and the run is red: the corpus is the reviewed artifact, the planner is a
-   second opinion on it.
-3. A structural check confirms the core imports no client, process, or network module.
-
-### Remaining Work
-The whole sprint. Nothing in it is built; every deliverable above is outstanding.
-
-## Sprint 19.2: Replay under injected schedules 📋
-
-**Status**: Planned
-**Implementation**: `src/Amoebius/Reconcile/Sim.hs`, `test/spec/reconcile/CoreSimSpec.hs`
-**Blocked by**: Sprint 19.1
-**Independent Validation**: same seed, byte-identical trace, checked before any property is evaluated.
-**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md`
+**Status**: Done.
+**Implementation**: `src/reconcile-core/Amoebius/Reconcile/Core.hs`,
+`test/harness/reconcile_core/ReferencePlanner.hs`, `test/oracle/reconcile_core/core_cases.tsv`, and
+`test/negative/compile_fail/reconcile_core/DeleteWitnessCompile.hs`.
+**Blocked by**: None.
+**Independent Validation**: actual output, authored output, and a production-independent textual planner must
+agree; the compiler checks the Present/Unreachable boundary.
+**Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md` and
+`DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 
-Run the core under `IOSim`/`IOSimPOR` against the Phase-16 substrate with partition, redelivery, reorder, and
-crash schedules injected, and establish idempotence, convergence, and three-valued refusal.
+Make the planner pure and total over its declared observed/desired inputs, with deletion authority carried by
+the observation type rather than a runtime flag.
 
 ### Deliverables
-- The lifted loop and its schedule set.
-- The three properties above, each with its mutant.
+
+- Standalone `reconcile-core` library with desired, observation, refusal, and typed action vocabulary.
+- Nine-case actual/reference corpus with two exact fixed points.
+- Present legal twin and Unreachable compile negative for deletion.
 
 ### Validation
-1. Byte-identical replay per seed.
-2. Each of the three mutants reddens its own property and no other.
+
+1. Match every actual and independent-reference result to the authored semantic row.
+2. Require both converged cases to produce exactly the empty action set.
+3. Require the illegal delete to fail at the exact presence-index mismatch.
+4. Exclude effect/client/process/network imports from the pure core.
 
 ### Remaining Work
-The whole sprint. Nothing in it is built; every deliverable above is outstanding.
 
-## Sprint 19.3: The token and reservation protocols under simulation 📋
+None.
 
-**Status**: Planned
-**Implementation**: `test/spec/reconcile/ProtocolSimSpec.hs`
-**Blocked by**: Sprint 19.2
-**Independent Validation**: the properties are the ones
-[Phase 18](phase_18_dsl_formal_model.md) states formally; agreement between the model and the simulation is
-itself reported, and a disagreement fails.
-**Docs to update**: `documents/engineering/resource_capacity_doctrine.md`
+## Sprint 19.2: Four deterministic reconcile schedules ✅
+
+**Status**: Done.
+**Implementation**: `src/reconcile-core/Amoebius/Reconcile/Sim.hs`,
+`test/spec/reconcile/ReconcileCoreSimulationSpec.hs`, and
+`test/{fixture,oracle}/reconcile_core/{schedules,schedule_outcomes.tsv}`.
+**Blocked by**: Sprint 19.1's planner and action semantics.
+**Independent Validation**: authored verdict/count/event rows and exact final inventory are distinct from the
+actual trace; changed-seed sensitivity prevents a constant trace from satisfying determinism.
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md`.
 
 ### Objective
 
-Exercise the snapshot-token/CAS and reservation state machines in code under the same injected schedules,
-against the invariants Phase 18 model-checks.
+Run the actual core against a bounded versioned store under four named schedules and retain deterministic,
+convergent semantic evidence without committing trace bytes.
 
 ### Deliverables
-- The two protocol batteries and their mutants.
-- A reported comparison between each simulated property and its Phase-18 model invariant.
+
+- Baseline, duplicate, crash-before-apply, and stale-snapshot fixtures.
+- Exact modeled final inventory and accepted/rejected transition counts.
+- Four same-seed controls, one changed-seed control, and four bounded POR runs.
 
 ### Validation
-1. No injected schedule reuses a token after an observed transition, and none double-debits.
-2. A crash between any two reservation steps recovers without dropping `Bound`.
-3. Each protocol mutant reddens its own property.
+
+1. Require all four schedules to converge to the exact three-object inventory within their authored bound.
+2. Compare only two fresh same-seed encodings; retain no committed generated trace.
+3. Require a changed seed to change semantic action order.
+4. Require every bounded POR replay to converge.
 
 ### Remaining Work
-The whole sprint. Nothing in it is built; every deliverable above is outstanding. Runtime fidelity against a real apiserver, and the modelled environment's fidelity to real
-infrastructure, are UNVERIFIED here and owned by the live band.
+
+None.
+
+## Sprint 19.3: Protocol correspondence and sealed gate ✅
+
+**Status**: Done.
+**Implementation**: `test/spec/reconcile/ReconcileCoreSimulationSpec.hs`,
+`test/mutant/reconcile_core/ReconcileCoreMutants.hs`,
+`test/oracle/reconcile_core/{formal_correspondence,mutation_catalog}.tsv`,
+`test/oracle/reconcile_core_simulation_surfaces.tsv`, and `tools/reconcile_core_simulation_gate.py`.
+**Blocked by**: Sprint 19.2's modeled store and schedules.
+**Independent Validation**: concurrent token/reservation outcomes, actual scheduler transitions, Phase-18
+model structure, and exact mutant loci are separate readings.
+**Docs to update**: `documents/engineering/{resource_capacity,deterministic_simulation}_doctrine.md` and
+`DEVELOPMENT_PLAN/{README,overview,legacy_tracking_for_deletion,system_components}.md`.
+
+### Objective
+
+Exercise one-use and one-debit protocol behavior in code, link it honestly to the formal vocabulary, and seal
+the bounded result with mutation and repository-hygiene evidence.
+
+### Deliverables
+
+- One concurrent token race and one concurrent reservation CAS.
+- Three actual scheduler recovery cuts reaching `Bound` with one retained debit.
+- Four formal-invariant links and five exact mutants.
+- Thirteen metrics, 21-surface/23-item join, ledger, containment, write guard, and attestation.
+
+### Validation
+
+1. Require exactly one accepted token use and exactly one reuse rejection.
+2. Require one reservation debit and `Bound` recovery across all three crash cuts.
+3. Resolve all four correspondence rows against actual Phase-18 model/invariant names.
+4. Require every mutant to redden its authored property and no generic failure token.
+
+### Remaining Work
+
+None.
 
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
-- `cluster_lifecycle_doctrine.md` — the reconcile loop gains a decision-core/driver split (Sprint 19.1).
-- `deterministic_simulation_doctrine.md` — the substrate gains its first amoebius-owned subject (Sprint 19.2).
-- `resource_capacity_doctrine.md` — the two protocols gain a pre-cluster home (Sprint 19.3).
+- `cluster_lifecycle_doctrine.md` — record the pure core, typed delete witness, and exact tested boundary.
+- `deterministic_simulation_doctrine.md` — record the four Phase-19 schedules and dynamic trace control.
+- `resource_capacity_doctrine.md` — record the one-debit/three-crash-cut reservation evidence.
 
 **Cross-references to add:**
-- `DEVELOPMENT_PLAN/README.md` Phase Overview links its Phase 19 row to this document.
-- The live-band reconciler and scheduler phases cite this phase as where their properties were established.
+- `DEVELOPMENT_PLAN/README.md`, `overview.md`, `system_components.md`, and
+  `legacy_tracking_for_deletion.md` — reconcile order, evidence, implementation paths, and retired byte-golden
+  debt.
 
 ## Related Documents
 
-- [README.md](README.md) — the live tracker; its Phase 19 row is the source for this phase's objective and gate.
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys.
-- [phase_16_deterministic_sim_substrate.md](phase_16_deterministic_sim_substrate.md) — the substrate this
-  phase is the first amoebius-owned subject for.
-- [phase_18_dsl_formal_model.md](phase_18_dsl_formal_model.md) — the Register-1 half; the invariants this
-  phase exercises in code.
-- [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) — the
-  replay contract.
-- [`cluster_lifecycle_doctrine.md`](../documents/engineering/cluster_lifecycle_doctrine.md) — the reconcile loop.
+- [Development Plan Tracker](README.md) — numeric order and current phase status.
+- [Development Plan Standards](development_plan_standards.md) — phase shape, honesty, and artifact rules.
+- [Gate Integrity Standard](development_plan_gate_integrity.md) — independent oracle, mutation, and bounded-honesty requirements.
+- [Phase 16](phase_16_deterministic_sim_substrate.md) — deterministic-simulation method and substrate.
+- [Phase 18](phase_18_dsl_formal_model.md) — named formal invariants linked here.
+- [Phase 20](phase_20_extension_declaration.md) — next numeric contract.
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — modeled schedule contract.
+- [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — reconcile semantics.
+- [Formal Model Doctrine](../documents/engineering/formal_model_doctrine.md) — proof/correspondence boundary.
+- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — reservation debit semantics.

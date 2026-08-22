@@ -6,19 +6,13 @@
 
 Phase 44 delivers the UI local composition; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), [app_vs_deployment_doctrine.md](../documents/engineering/app_vs_deployment_doctrine.md), [testing_doctrine.md](../documents/engineering/testing_doctrine.md), and the plan for reaching it is owned here.
 Register 2: a real boundary against fake tools.
-Gate passed on 2026-08-09 with ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
 
 <details>
 <summary>Link-graph metadata</summary>
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/phase_45_encrypted_browser_runtime.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 </details>
@@ -29,7 +23,7 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 44.1: Single-/multi-tenant workflow-to-artifact composition gate 📋](#sprint-441-single-multi-tenant-workflow-to-artifact-composition-gate-)
+- [Sprint 44.1: Single-/multi-tenant workflow-to-artifact composition gate ✅](#sprint-441-single-multi-tenant-workflow-to-artifact-composition-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,55 +31,15 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-43 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
-
-**Pre-natural-architecture status record (invalidated where it claims completion):**
-
-Done (invalidated) — resealed 2026-08-15. `python3 tools/local_ui_composition_gate.py` passed all thirteen sides in
-resolved Chrome: two Dhall-typed applications, five interactions, four exact visible states, four ordered
-effects, three access rows, five zero-leak denials, loopback-only OS observation, all five mutants, and all
-seventeen metrics pass; 58 surfaces join to 71 run-time items. The final legacy `tests/` root is normalized
-into `test/{fixture,oracle,mutant}/**`; bundle workspace, build/test scratch, generated evidence, and tool state
-remain beneath `.build/**`; the outside-host inventory is unchanged; Phase 44 owns no migration deferral. The
-project-contained attestation is
-`sha256:ce0760e84c49139141af398ca54f1b85beeb6407440c2f068650bda4ac37feee`, bound to source snapshot
-`sha256:6ad71f3725a0c4db…`.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:d08a350888547a54…`
-(1946 non-ignored files) and published a verified pre-containment external attestation
-`sha256:363ae0c7c14e334f0455a1ffb67c9ce14eae0f33c736ca555187b076f596bc1a`.
-
-**Observed progress — 2026-08-13:** **Policy-conformant.** Two Dhall-typed applications drive one generic
-browser bundle against the real `serve-ui` boundary and two separately started domain-shaped fake processes:
-five interactions join the generated action set, four visible states and the ordered three-step effect
-sequence match their pins with the fresh nonce reaching both the DOM and the raw effect log, four denials
-return their pinned status and tag with zero private bytes, the direct-to-backend probe is refused at the
-network, and all five mutants redden. Evidence and the ledger move into `.build/runs/phase_38/<run-id>/`, and 58
-surfaces join two-way to 71 run-time enumerated items.
-
-**The composition only became runnable when Phase 43's ABI landed.** `use-artifact` had no row in the closed
-action table, so the third step of the workflow returned the non-enumerating refusal and the artifact result
-never appeared. The table now carries one row per Phase-39 port effect.
-
-**One mutant detector was looking for the wrong success code.** `M-drop-handle-tenant` reports the foreign
-tenant's copied handle being accepted, and the harness tested for status 200 exactly. `use-artifact` is a
-mutation, so the boundary answers 202 — the attack landed and the detector called it a miss. It now tests for
-any 2xx, which is what "accepted" means.
-
-**The suite stopped naming one machine.** It resolved the amoebius binary through an absolute
-`~/.ghcup/bin/cabal-3.16.1.0` and typechecked its Dhall through an absolute `~/.local/bin/dhall`. Both now
-come from the gate's resolution, with PATH as the fallback.
-
-**Invalidated historical record:**
-
-Done (invalidated). Two Dhall-authored applications reuse one generic bundle and the `serve-ui` boundary in real Chrome.
-Five interactions join all three generated workflow surfaces; four visible pins, four ordered-effect rows,
-three access rows, five denials, a fresh workflow-to-artifact nonce, 36 loopback network syscalls, and all five
-mutants pass. This is Register-2 evidence with separate infernix-/jitML-shaped fakes, not live adapters,
-Keycloak, provider storage, release, replica-loss, or HA evidence. See the
-Phase-44 ledger.
+✅ Done — sealed 2026-08-22. `python3 tools/local_ui_composition_gate.py` passes all fourteen sides on
+natural `arm64`, untranslated. Two applications, five interactions, four visible-state rows, four ordered
+effect rows, three access rows, five denials, the post-ready workflow challenge, and all five production
+mutants pass. Real Chrome and the Darwin loopback-only observer recover the challenge without permitting a
+browser/backend bypass. The real five-calculus projection accounts for 55 units, all 20 metrics match, and 65
+surfaces join to 78 run-time items. Attestation
+`sha256:b459d8ef68ad02e09c56731b1ab0423c28b02ef22cda8ef7db559140c15b8812` binds source
+`sha256:08324edd25df15c0…` over 2,269 files. Live infernix/jitML adapters, Keycloak/Envoy, provider storage,
+release rollout, replica loss, and HA remain UNVERIFIED.
 
 ## Phase Summary
 
@@ -100,22 +54,18 @@ data/workflow/artifact ports that the later real lift phases consume. This gate 
 amoebius contracts and runtimes, not ML semantics. Application-authored expectations travel with the app;
 replica counts, topology, fault schedules, and failover remain absent from app logic.
 
-**Session scope:** one local end-to-end composition harness over the already built browser and server seams;
-acceptance command `python3 tools/local_ui_composition_gate.py`; split immediately if work requires a production
+**Phase scope:** one local end-to-end composition harness over the already built browser and server seams,
+accepted by `python3 tools/local_ui_composition_gate.py`; split immediately if work requires a production
 domain adapter, live identity/provider/cluster, deployment/HA, a second register, or a substrate.
-**Dependencies:** Phase 42 — generic browser interpreter; Phase 43 — authenticated scoped UI-server boundary.
-**Phase scope:** one cohesive claim — *composition through the two runtimes preserves authorization and tenant scope*. Local execution is deliberate: this phase tests the composition, not the infrastructure.
-
 **Substrate:** none — local browser, authority, server, and fake data/workflow/artifact processes only.
 **Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
-
 **Register:** 2 — boundary integration with fakes.
-**Gate:** `python3 tools/local_ui_composition_gate.py` passes the Phase-0-pinned apps, authored interactions,
+**Depends on:** [Phase 42](phase_42_ui_browser_interpreter.md) — the generic browser interpreter;
+[Phase 43](phase_43_ui_server_boundary.md) — the authenticated scoped UI-server boundary.
+**Gate:** `python3 tools/run_phase_gate.py 44` passes the Phase-0-pinned apps, authored interactions,
 generated-surface join, fresh challenge, scope pairs, external observations, bypass probes, and seeded mutants
-of [Gate integrity](#gate-integrity). Phase 45 does not open unless it emits a green Register-2 ledger with all
-live/domain/HA layers UNVERIFIED.
-
-**Depends on:** [Phase 43](phase_43_ui_server_boundary.md) — the UI-server boundary, composed here with the browser interpreter it dispatches to.
+of [Gate integrity](#gate-integrity). It emits a green Register-2 ledger with all live/domain/HA layers
+UNVERIFIED.
 
 ## Gate integrity
 
@@ -133,8 +83,9 @@ expected story is not generated from either plan or interpreter.
   `expected_effect_sequence.tsv` owns the ordered typed port calls; and `expected_denials.tsv` owns exact
   sanitized responses. Every generated event/route/port must join one authored expectation or fail UNVERIFIED.
 - **Independent observation:** Playwright reads DOM/accessibility state. Separate fake data/workflow/artifact
-  processes write raw requests and state transitions to harness-owned append-only descriptors, while `strace`
-  records browser/server/backend `connect`/`sendto` calls. Runtime self-reports are not an
+  processes write raw requests and state transitions to harness-owned append-only descriptors, while the OS
+  boundary records browser/server/backend network access (`sandbox-exec` on Darwin and `strace` on Linux).
+  Runtime self-reports are not an
   oracle.
 - **Fresh challenge:** after every process reports ready, the harness creates an unpredictable nonce as tenant
   A's fake workflow input. The browser starts the workflow, the server dispatches it, the fake workflow emits a
@@ -164,20 +115,13 @@ isolation, live ingress/identity, release rollout, replica failure, and HA remai
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+## Sprint 44.1: Single-/multi-tenant workflow-to-artifact composition gate ✅
 
-## Sprint 44.1: Single-/multi-tenant workflow-to-artifact composition gate 📋
-**Status**: Planned
+**Status**: Done
 **Implementation**: `test/spec/ui/LocalCompositionSpec.hs`,
 `test/harness/local_ui_composition/composition.mjs`, `test/fixture/ui_local_composition/`, and
 `tools/local_ui_composition_gate.py`
-**Blocked by**: None.
+**Blocked by**: [Phase 43](phase_43_ui_server_boundary.md) gate
 **Independent Validation**: `python3 tools/local_ui_composition_gate.py` drives authored Playwright
 interactions, joins every generated surface, reads raw fake-process/network observations, and requires every
 named mutant to fail.
@@ -235,6 +179,7 @@ and HA remain explicitly UNVERIFIED for their owning later phases.
 
 ## Related Documents
 
+- [Development Plan Tracker](README.md) — numeric order and current status.
 - [Phase 42](phase_42_ui_browser_interpreter.md) — the required generic browser runtime.
 - [Phase 43](phase_43_ui_server_boundary.md) — the required authenticated scoped server boundary.
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — composition, workflow/artifact, tenancy, and honesty contract.

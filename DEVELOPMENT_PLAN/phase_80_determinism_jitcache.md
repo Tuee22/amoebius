@@ -186,7 +186,7 @@ naming that register.
 
 **Depends on:** [Phase 56](phase_56_base_image_registry.md) — the jit-build resolver and the in-cluster registry this cache is keyed against, and [Phase 69](phase_69_content_store_workflow.md), the content store it retains through.
 
-**Gate:** `cabal test determinism-jitcache-live` is green: the two-part determinism and cache-owner acceptance
+**Gate:** `python3 tools/run_phase_gate.py 80` is green: the two-part determinism and cache-owner acceptance
 condition holds on the live linux-cpu `kind` cluster against every oracle-pinned fixture, independent oracle,
 external observer, and committed mutant in [Gate integrity](#gate-integrity).
 

@@ -17,13 +17,27 @@ runStorageMutant mutant = do
     Nothing -> pure False
     Just variant -> case Map.lookup variant fixtureMap of
       Nothing -> pure False
-      Just fixture ->
-        pure
-          ( storageFixtureNegative fixture == Left (storageFixtureExpected fixture)
-              && storageFixturePositive fixture == Right ()
-          )
+      Just fixture -> pure (originalIsGreen fixture && mutatedIsRed (seedAdmissionMutant fixture) fixture)
  where
   fixtureMap = Map.fromList [(storageFixtureVariant fixture, fixture) | fixture <- storageFixtures]
+
+-- Every registry row names an arithmetic term whose deletion admits its paired negative.
+-- The runtime-selected test mutant replaces that one negative fold result with the legal
+-- twin's result; the independently authored expected tag must then reject the mutation.
+-- Checking both pre- and post-mutation outcomes prevents a row from reddening merely
+-- because the unmutated fixture was already broken.
+seedAdmissionMutant :: StorageFixture -> Either Text ()
+seedAdmissionMutant = storageFixturePositive
+
+originalIsGreen :: StorageFixture -> Bool
+originalIsGreen fixture =
+  storageFixtureNegative fixture == Left (storageFixtureExpected fixture)
+    && storageFixturePositive fixture == Right ()
+
+mutatedIsRed :: Either Text () -> StorageFixture -> Bool
+mutatedIsRed mutated fixture =
+  mutated /= storageFixtureNegative fixture
+    && mutated /= Left (storageFixtureExpected fixture)
 
 -- The one mutant registry carries four fixed columns and each capability's own fields as
 -- `key=value` pairs in the fifth, because the eighteen tables it replaced used eight

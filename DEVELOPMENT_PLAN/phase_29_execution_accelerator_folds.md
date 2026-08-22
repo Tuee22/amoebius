@@ -33,11 +33,11 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra 📋](#sprint-291-execution-epoch-expansion--scheduler-reservation-algebra-)
-- [Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting 📋](#sprint-292-kubeletcri-runtime-metadata--node-local-oci-contentsnapshotimage--physical-disk-parent-accounting-)
-- [Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute 📋](#sprint-293-accelerator-residencynet-allocatable-vram--provider-root-disk-template--enginebuildetcdmonitoring-compute-)
-- [Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants 📋](#sprint-294-the-composed-full-resource-vector-place-witness--properties--independent-validator--per-axis-mutants-)
-- [Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate 📋](#sprint-295-the-executionacceleratorprovider-root-fold-negative-corpus--the-composed-gate-)
+- [Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ✅](#sprint-291-execution-epoch-expansion--scheduler-reservation-algebra-)
+- [Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ✅](#sprint-292-kubeletcri-runtime-metadata--node-local-oci-contentsnapshotimage--physical-disk-parent-accounting-)
+- [Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ✅](#sprint-293-accelerator-residencynet-allocatable-vram--provider-root-disk-template--enginebuildetcdmonitoring-compute-)
+- [Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ✅](#sprint-294-the-composed-full-resource-vector-place-witness--properties--independent-validator--per-axis-mutants-)
+- [Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ✅](#sprint-295-the-executionacceleratorprovider-root-fold-negative-corpus--the-composed-gate-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -45,7 +45,22 @@ Gate passed 2026-08-09; ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-28 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-21. `python3 tools/execution_accelerator_gate.py` passed all eleven sides on natural
+`arm64`, untranslated. The bounded suite rejects 37 direct variants beside 37 legal twins, admits two decoded
+composed positives, retains the accelerator-owner Gate-1 pair, and composes 128 observed units through all five
+calculus kinds. All 45 mutants redden, all 17 metrics match, both Phase-29 registry rows discharge, and 57
+surfaces join to 103 items. The project-contained attestation is
+`sha256:105c9db46ad2cd0d081120819eb8a23c4b0537211010542f37af0ff461e661cf`, bound to source snapshot
+`sha256:6a074c77a1af3f3a…` over 2,267 files. Repository conformance and documentation support gates pass; Phase
+29 owns no remaining migration deferral.
+
+**The amended run closed the stale boundaries it exposed.** The gate now runs only the bounded
+`execution-accelerator-spec`, reconciles current Phase-29 registry ownership, and composes the 37 negatives,
+37 twins, two positives, seven properties and 45 mutants through all five Phase-10 calculus kinds. Direct
+one-axis cases now exercise the accelerator peer graph, build cache budget, engine storage reserve, monitoring
+volume budget and Pulumi executor concurrency, so none of those five contract surfaces remains empty. The
+result-only mutant wrapper now seeds a paired-result admission mutation and proves it changes a previously
+green fixture before accepting the expected red observation.
 
 **Opened 2026-08-17** when the preceding phase resealed.
 [§S](development_plan_gate_integrity.md#s-universal-artifact-hygiene-gate) clause 15 requires a run to record
@@ -75,15 +90,16 @@ exact locus beside a green twin, seven QuickCheck properties hold with coverage 
 45 seeded mutants redden at their own loci. Evidence and the ledger move into
 `.build/runs/phase_17/<run-id>/`.
 
-**The surface join partitions 77 run-time items across 37 claim surfaces, and found five surfaces with nothing
+**Historical surface finding (closed by the current seal):** the earlier join partitioned 77 run-time items across 37 claim surfaces and found five surfaces with nothing
 behind them.** The 32 oracle variants and 45 mutants are claimed exactly once each, so an item nobody claims or
 one claimed twice fails the gate. What that exercise exposed is that `accelerator-interconnect`,
 `build-execution-envelope`, `engine-system-reserve`, `monitoring-work-budget`, and
 `pulumi-execution-envelope` have no oracle case, no mutant, and no metric of their own — the pre-amendment
 ledger reported all five `tested` by naming them in a hand-maintained set, which is an assertion, not
-evidence. The ledger now carries them UNVERIFIED alongside the five live surfaces this register cannot reach,
-and the gap is recorded against Phase 29 in
-[`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md).
+evidence. The current seal adds a direct negative/twin for every one while the genuinely live-only surfaces
+remain UNVERIFIED, and records the closure in
+the active [legacy register](legacy_tracking_for_deletion.md)'s
+[`legacy_tracking_for_deletion_archive.md`](legacy_tracking_for_deletion_archive.md).
 
 **Invalidated historical record:**
 
@@ -183,7 +199,7 @@ analogous to the Phase 26 decode battery, the Phase 27 property suite, and the s
 
 **Depends on:** [Phase 28](phase_28_storage_geometry_folds.md) — logical→physical storage geometry folds, which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/execution_accelerator_gate.py` passes the composed positives, the eighteen fold negatives with their specific
+**Gate:** `python3 tools/run_phase_gate.py 29` passes the composed positives, the eighteen fold negatives with their specific
 committed tags, the coverage floors, the totality scan, and the seeded mutants of
 [Gate integrity](#gate-integrity). The ledger must record Register 1 green and the live residue UNVERIFIED.
 
@@ -217,7 +233,7 @@ flowchart LR
 ```
 *Orientation. The seams Phase 29 built and sealed in order; [Gate integrity](#gate-integrity) owns the validated apparatus.*
 
-The single acceptance run is `cabal test dsl-spec`, and it has four legs. Its positive leg places
+The single acceptance run is `cabal test execution-accelerator-spec`, and it has five legs. Its positive leg places
 `legal_multisubstrate_cluster` and `legal_managed_eks` feasibly across CPU/memory, pod-CNI and CSI slots,
 logical and physical node storage, OCI content/snapshots/workspace, durable/cache demand, accelerator devices
 plus every owner residency epoch, every execution/admission envelope, and provider-root VM/root-EBS; the
@@ -225,8 +241,9 @@ returned witness must additionally be accepted by the independent composed witne
 Its negative leg applies the folds directly to the hand-authored demand/capacity fixture that isolates each
 negative's insufficient axis, and requires that fixture's own committed tag rather than merely some `Left`;
 the bind, infrastructure-plan, context, and provision path around those folds belongs to Phase 31 and is no
-part of this condition. The remaining two legs are the totality scan and the seeded-mutant battery, both
-stated below. Every fixture, golden, and expected `Left`-tag the run checks against is pinned in this phase's
+part of this condition. The remaining legs are the totality scan, the seeded-mutant battery, and the authored
+five-calculus projection over the observed negative, twin, positive, property, and mutant counts, all stated
+below. Every fixture, golden, and expected `Left`-tag the run checks against is pinned in this phase's
 oracle-pinning sprint, ahead of the folds that consume them (§M.1), and the whole run is Register 1 and in
 process: it stands up no host and no cluster.
 
@@ -409,7 +426,7 @@ durable/cache (Phase 28), accelerator net-allocatable VRAM, execution/admission 
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
+> **Current validation record.** Every sprint is covered by the 2026-08-21 reseal. Historical dates,
 > pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
 > the pre-amendment capability record only; they do not override current status. Functional and validation
 > outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
@@ -417,8 +434,8 @@ durable/cache (Phase 28), accelerator net-allocatable VRAM, execution/admission 
 > enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
 > established by the current phase gate plus universal artifact hygiene.
 
-## Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra 📋
-**Status**: Planned
+## Sprint 29.1: Execution-epoch expansion + scheduler-reservation algebra ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Capacity/Execution.hs` owns the closed controller bodies, exact prior
 reference, identity-keyed materialization, empty-capable epochs, and componentwise peak;
 `src/Amoebius/Capacity/Scheduler.hs` owns reservation projection, aggregate snapshot/root-version guard,
@@ -527,8 +544,8 @@ numbers only — the pure expansion fold Phase 31's `provision` seal later invok
 ### Remaining Work
 None.
 
-## Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting 📋
-**Status**: Planned
+## Sprint 29.2: kubelet/CRI runtime-metadata + node-local OCI content/snapshot/image + physical-disk parent accounting ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Capacity/NodeLocalStorage.hs`, `src/Amoebius/Capacity/RuntimeStorage.hs`,
 and the runtime-metadata / node-local / physical-disk extensions to `src/Amoebius/Capacity/Types.hs`.
 **Blocked by**: None.
@@ -650,8 +667,8 @@ structure, route them through `KubeletNodefs | CriRuntimeRoot` and the selected
 ### Remaining Work
 None.
 
-## Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute 📋
-**Status**: Planned
+## Sprint 29.3: Accelerator residency/net-allocatable-VRAM + provider-root disk template + engine/build/etcd/monitoring compute ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Capacity/Accelerator.hs` (family/profile/device ownership, complete
 coexistence epochs, unsharded/replicated/sharded placement, interconnect, and net VRAM);
 `src/Amoebius/Capacity/ProviderRoot.hs` (private VM/root-EBS
@@ -750,15 +767,15 @@ derivations as pure, checked `provision-seal` operations that feed the composed 
 ### Remaining Work
 None.
 
-## Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants 📋
-**Status**: Planned
+## Sprint 29.4: The composed full-resource-vector place-witness — properties + independent validator + per-axis mutants ✅
+**Status**: Done
 **Implementation**: `src/Amoebius/Capacity/Composed.hs` retains the Phase-9 placement, Phase-28 storage, and
 Phase-29 execution/runtime/accelerator/provider-root witnesses; `test/spec/dsl/ExecutionAcceleratorProps.hs`
 contains seven sampled properties and the implementation-independent composed witness validator;
 `test/spec/dsl/ExecutionAcceleratorFixtures.hs` carries deterministic controller, scheduler-state, observed-UID,
 host-only compute, replicated-residency/interconnect, and cover-slot identity checks.
 **Blocked by**: None.
-**Independent Validation**: `cabal test dsl-spec` runs the composed-placement soundness, totality,
+**Independent Validation**: `cabal test execution-accelerator-spec` runs the composed-placement soundness, totality,
 execution-epoch equality, runtime-metadata grouping, accelerator-residency, and provider-root properties
 green over generated inputs at their committed coverage floors, and the seeded-mutant battery of
 [Gate integrity](#gate-integrity) reddens the suite one mutant at a time (§M.2).
@@ -848,20 +865,21 @@ may reject a packable one) for the composed compute `place`, and never claim com
 ### Remaining Work
 None.
 
-## Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate 📋
-**Status**: Planned
-**Implementation**: `test/oracle/execution_accelerator/execution_accelerator_cases.tsv` pins 32 direct fold variants across
-the exact eighteen named families and a distinct legal twin for each; `test/oracle/execution_accelerator/dhall_typecheck_cases.tsv`
+## Sprint 29.5: The execution/accelerator/provider-root fold-negative corpus + the composed gate ✅
+**Status**: Done
+**Implementation**: `test/oracle/execution_accelerator/execution_accelerator_cases.tsv` pins 37 variants across
+eighteen families and one legal twin each; `test/oracle/execution_accelerator/dhall_typecheck_cases.tsv`
 and `dhall/examples/execution_accelerator/*` pin the accelerator-owner editor barrier;
 `test/spec/dsl/ExecutionAccelerator{Fixtures,Props,Gate,Mutants,Spec}.hs` implements the dedicated and integrated
-battery; the `execution_accelerator` rows of `test/mutant/registry.tsv` pins 45 individually selected mutants; and
-`tools/execution_accelerator_gate.py` seals the suite, ownership ledger, totality scan, evidence, and result ledger.
+battery; `test/oracle/execution_accelerator/calculus_projection.tsv` pins the independent five-calculus
+projection; the `execution_accelerator` rows of `test/mutant/registry.tsv` pin 45 individually selected mutants;
+and `tools/execution_accelerator_gate.py` seals the bounded suite, ownership ledger, totality scan, evidence, and result ledger.
 **Blocked by**: None.
 **Independent Validation**: the gate applies the Phase-29 folds (the execution expansion, scheduler-reservation algebra,
 runtime-metadata/node-local, accelerator-residency, provider-root, and engine/etcd/build/monitoring helper
 folds, composed with the Phase-9 base `fits`/`podFits`/`carve`/`place` and the Phase-28 storage folds)
 **directly to each hand-authored demand/capacity fixture**. The higher-level bind, infrastructure-plan,
-context, and provision path is outside this phase and covered by phases 17–18. The composed positives place
+context, and provision path is outside this phase and covered by phases 30–31. The composed positives place
 feasibly across every axis and each negative returns the fold's structured `ProvisionError`/`Left` on its
 isolated insufficient axis — **each negative asserting its specific expected tag** (e.g.
 `illegal_filesystem_layout_swapped` → `Left FilesystemLayoutMismatch`, `illegal_image_content_join_missing`
@@ -936,7 +954,7 @@ axis — and emit the per-entry validation-locus ledger that names the honest fo
   arithmetic generalizes prodbox's teardown push-back soundness, not an amoebius result.
 
 ### Validation
-1. `cabal test dsl-spec` is green — every one of the eighteen execution/accelerator/provider-root/runtime-metadata
+1. `cabal test execution-accelerator-spec` is green — every one of the eighteen execution/accelerator/provider-root/runtime-metadata
    fold negatives ([Gate integrity](#gate-integrity) representative set) returns its **specific committed** tagged
    `Left`, both composed positives place feasibly across every axis, the QuickCheck battery holds at its coverage
    minima, and the committed per-fold seeded-mutant battery ([Gate integrity](#gate-integrity)) turns the suite

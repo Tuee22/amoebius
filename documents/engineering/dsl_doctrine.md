@@ -74,8 +74,8 @@ Phase order and status live only in [../../DEVELOPMENT_PLAN/README.md](../../DEV
 
 > **Validated boundary (Phase 34, Registers 1/2).** The opaque counted `Step`, whole-deployment `chain`, pure
 > descent, canonical plan renderer, absolute-path tool seam, and extension-astcheck checked-source seal pass under
-> `tools/chain_boundary_gate.py` (ledger `external-run-reference`). Live apply and checked-source runtime behavior
-> remain UNVERIFIED.
+> `tools/chain_boundary_gate.py` (2026-08-21 attestation `sha256:c7da6c817733030e…`; 29 exact metrics, seven red
+> mutants, and 45 surfaces joined to 58 items). Live apply and checked-source runtime behavior remain UNVERIFIED.
 
 The amoebius DSL is not a scripting language, and it does not contain the deployment logic. Templating
 puts the *how* in the config — loops, conditionals, string-built commands — placing untyped control flow
@@ -113,8 +113,9 @@ interprets the sealed client projection. The complete boundary is owned by
 [low_code_ui_runtime_doctrine.md §3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans).
 
 [Phase 37](../../DEVELOPMENT_PLAN/phase_37_ui_program_schema.md) builds this specialization: authored Dhall
-decodes into the closed UI wire, and the total Haskell checker alone can construct `CheckedUiProgram`. The gate
-does not claim browser, handler, authorization, or provider enforcement.
+decodes into the closed UI wire, and the total Haskell checker alone can construct `CheckedUiProgram`. Its
+semantic oracle constrains tenant/module/node/link meaning rather than copying normalized bytes. The gate does
+not claim browser, handler, authorization, or provider enforcement.
 
 That split is load-bearing in three ways:
 
@@ -499,13 +500,15 @@ authoring time, in the operator's editor, in `dhall type`, in CI. A union with n
 ingress" gives the author no syntax to request insecure ingress; a record that requires a PV reference for
 every PVC gives no way to omit it. The schema is the boundary, and the boundary is mechanical.
 
-**amoebius validation status.** Phase 25 supplies this dhall-typecheck boundary as fourteen authored Dhall modules,
-four wired positive surfaces, eight catalog negatives, three image/process negatives, import-policy checks,
-and independent closed-union/required-field/nested-type oracles with seeded mutations. The Register-1 gate
-passed on 2026-08-09 with `python3 tools/dhall_typecheck_schema_gate.py`; ledger
-`dynamically-resolved`. That result establishes only the
-recorded structural spec-composition claims. gadt-decode is separately validated below; bind/provision arithmetic
-and live runtime enforcement remain **UNVERIFIED** here.
+**amoebius validation status.** Phase 25 supplies this dhall-typecheck boundary as eighteen authored Dhall
+modules, four wired positive surfaces, eight catalog negatives, three image/process negatives, one
+secret-policy negative, two import-policy negatives, and independent closed-union/required-field/nested-type
+oracles with seeded mutations. Its 2026-08-21 Register-1 gate records twenty exact metrics. It also consumes
+the Phase-24 generator for one bounded `dhall-schema` declaration: all nineteen derived L/C/compile/S
+obligations match an independently authored projection, all remain explicitly `UNVERIFIED`, and the test
+must receive `CasesFailed 19` rather than a conformance verdict. This establishes the recorded structural
+spec-composition claims only. gadt-decode is separately validated below; extension-law semantics,
+bind/provision arithmetic, and live runtime enforcement remain **UNVERIFIED** here.
 
 ### gadt-decode — the Haskell typed decoder
 
@@ -525,16 +528,18 @@ things happen here:
   decide whole-deployment placement, storage peaks, live target compatibility, or inventory sufficiency.
 
 **amoebius validation status.** Phase 26 implements the `dsl-core` library and fail-closed decoder. Its
-Register-1 gate passed on 2026-08-09 with `python3 tools/gadt_decode_ir_gate.py`; ledger
-`dynamically-resolved`. Five independently semantic-hash-pinned
-positive surfaces retain 5,527 normalized structural rows, the three named gadt-decode classes reach distinct
-constructors after a dhall-typecheck-green precondition, and tenant/state/owner compile pairs reject at their pinned
-indices. The decoder rejects direct and nested environment/remote imports, catches thrown failures, and
-deeply forces the accepted IR. Phase 27 then exhausts the reached catalog seam: every entry and subcase
-reconciles, the Phase-25/12/13-owned subcases discharge through the dhall-typecheck and gadt-decode cases, five compile-fail
-pairs, and four coverage-checked properties, while all three finite `Rke2Servers` arms are exhausted (ledger
-`dynamically-resolved`). The remaining 73 subcases are
-deferred to their exact owners. Arithmetic (Phases 14–16), binding/provisioning (Phases 17–18), rendered
+bounded Register-1 `gadt-decode-spec` gate decodes five independently semantic-hash-pinned positive surfaces
+while retaining 5,527 normalized structural rows; four named gadt-decode classes reach distinct constructors
+after a dhall-typecheck-green precondition; and tenant/state/owner compile pairs reject at their pinned
+indices. The five decoded positives also enter an independently authored Phase-10 calculus projection in
+artifact/budget/lift/workflow/evidence order without changing the retained-row total. The decoder rejects
+direct and nested environment/remote imports, catches thrown failures, and deeply forces the accepted IR.
+The shared `dsl-spec` remains the later umbrella and is not Phase-26 evidence. Phase 27 then exhausts the
+reached catalog seam through its own bounded suite: all 97 entries reconcile to 121 subcases; 43 reached
+Dhall/GADT rows discharge through 17 typecheck negatives, 13 decode negatives, five local compiler pairs,
+and seven explicit Phase-8/9 predecessor joins. Four coverage-checked properties pass, all three finite
+`Rke2Servers` arms are exhausted, and the actual five-calculus corpus/ledger projection matches its authored
+oracle. The remaining 78 subcases are deferred to their exact owners. Capacity feasibility, binding/provisioning, rendered
 outputs, and runtime enforcement remain UNVERIFIED.
 
 ### extension-astcheck — the extension AST checker
@@ -857,6 +862,14 @@ links back for status.
 > outside the explicitly validated slices as the contract amoebius
 > intends to satisfy, never as a tested amoebius result
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
+
+Phase 18 adds a deliberately bounded semantic reading, not a claim that the whole DSL has been model-checked.
+It runs five positive and four negative decoder fixtures, all 6,561 demand/capacity pairs in the declared
+four-axis `0..2` domain, and two provision/render/chain fixtures through actual code. Acceptance uses decoded
+surface and structure, exact error tags, componentwise capacity semantics, and rendered object/step identity
+and activation frames. Generated normalization hashes and fingerprints are excluded because they detect byte
+change rather than explain DSL meaning. Lease, reservation, node-observation, and temporal-model evidence is
+bounded separately by the phase contract; live daemon correspondence remains UNVERIFIED.
 
 ---
 

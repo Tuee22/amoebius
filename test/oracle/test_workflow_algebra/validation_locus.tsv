@@ -1,0 +1,24 @@
+entry	class	locus	status
+suggest-core	suggestion	core positive projection	tested
+suggest-registry	suggestion	registry positive projection	tested
+suggest-provider	suggestion	provider positive projection	tested
+suggest-migration	suggestion	migration positive projection	tested
+reject-unflagged	suggestion	flagged credential boundary	tested
+reject-empty-secret	suggestion	named secret boundary	tested
+short-cpu	suggestion	CPU supply fold	tested
+short-memory	suggestion	memory supply fold	tested
+short-ephemeral	suggestion	ephemeral supply fold	tested
+short-durable	suggestion	durable supply fold	tested
+short-cache	suggestion	cache supply fold	tested
+short-pods	suggestion	pod-slot supply fold	tested
+short-ips	suggestion	IP-slot supply fold	tested
+short-csi	suggestion	CSI-slot supply fold	tested
+short-quota	suggestion	provider-quota supply fold	tested
+compile-legal	compile	teardown-carrying workflow compiles	tested
+compile-illegal	compile	missing-teardown workflow has no seal	tested
+render-one	determinism	first pure suggestion rendering	tested
+render-two	determinism	second pure suggestion rendering	tested
+mutant-skip-teardown	mutant	missing-teardown type barrier	tested
+mutant-tag-query	mutant	CPU supply fold bypass	tested
+mutant-all-tested	mutant	evidence honesty overclaim	tested
+mutant-wrong-subscription	mutant	delegated subscription identity	tested

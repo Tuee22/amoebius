@@ -13,7 +13,7 @@ port_type_mismatch	negative	PortTypeMismatch	tested
 non_exhaustive_event	negative	NonExhaustiveEvent	tested
 private_value_projection	negative	PrivateValueProjection	tested
 graph_reference	oracle	three-row-join	tested
-normalized_wire	oracle	byte-golden	tested
+program_semantics	oracle	three-row-semantic-join	tested
 checked_ui_illegal	compile-fail	opaque-seal	tested
 duplicate_generated	property	coverage-floor	tested
 missing_generated	property	coverage-floor	tested

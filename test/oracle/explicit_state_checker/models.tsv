@@ -1,0 +1,8 @@
+model	bound	status	distinct_states	violation	trace_length
+toy-safe	8	safe	8	-	0
+toy-too-small	7	bound-exceeded	7	-	0
+safe-counter	3	safe	3	-	0
+unsafe-counter	3	unsafe-invariant	3	BelowTwo	2
+deadlock	1	unsafe-deadlock	1	deadlock	0
+constraint	4	safe	2	-	0
+branching	3	safe	3	-	0

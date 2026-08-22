@@ -4,8 +4,35 @@ module StorageGeometryGate
   ( runStorageGeometryGate
   ) where
 
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
 import Amoebius.Dsl.Decode (decodeCluster)
-import Control.Monad (forM_, unless)
+import Amoebius.Scope.Index
+  ( activeMembership
+  , trustedSubject
+  , trustedTenant
+  , withRequestScope
+  )
+import Control.Monad (forM, forM_, unless)
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
 import Data.Text (Text)
@@ -33,7 +60,7 @@ data OracleRow = OracleRow
 runStorageGeometryGate :: IO ()
 runStorageGeometryGate = do
   rows <- loadOracle "test/oracle/storage_geometry/storage_cases.tsv"
-  assert (length rows == 27) "Phase-8 storage oracle must contain 27 variant rows"
+  assert (length rows == 30) "Phase-28 storage oracle must contain 30 variant rows"
   let fixturesByVariant = Map.fromList [(storageFixtureVariant fixture, fixture) | fixture <- storageFixtures]
   assert (Map.keysSet fixturesByVariant == Set.fromList (fmap oracleVariant rows)) "storage fixture/oracle variant sets diverged"
   forM_ rows $ \row -> case Map.lookup (oracleVariant row) fixturesByVariant of
@@ -49,12 +76,26 @@ runStorageGeometryGate = do
   forM_ storagePositiveRows $ \(name, result) -> do
     decoded <- decodeCluster ("dhall/examples/" <> Text.unpack name <> ".dhall")
     case decoded of
-      Left problem -> fail (Text.unpack name <> " failed Gate 2 before Phase-8 geometry: " <> show problem)
+      Left problem -> fail (Text.unpack name <> " failed Gate 2 before Phase-28 geometry: " <> show problem)
       Right _ -> pure ()
     assert (result == Right ()) (Text.unpack name <> " storage rows rejected: " <> show result)
-  checkGate1
-  runStorageGeometryProps
-  putStrLn "storage-geometry-spec: PASS (5 named negatives, 27 variants, 27 twins, 2 positives, 2 Gate-1, 6 properties)"
+  gate1Count <- checkGate1
+  propertyCount <- runStorageGeometryProps
+  mutantCount <- countStorageMutants
+  checkStorageCalculusProjection (length rows) (length storagePositiveRows) propertyCount mutantCount
+  putStrLn
+    ( "storage-geometry-spec: PASS (5 named negatives, "
+        <> show (length rows)
+        <> " variants, "
+        <> show (length rows)
+        <> " twins, "
+        <> show (length storagePositiveRows)
+        <> " positives, "
+        <> show gate1Count
+        <> " Gate-1, "
+        <> show propertyCount
+        <> " properties)"
+    )
 
 loadOracle :: FilePath -> IO [OracleRow]
 loadOracle path = do
@@ -69,14 +110,14 @@ loadOracle path = do
     [variant, family, operation, expected, twin, catalog] -> pure (OracleRow variant family operation expected twin catalog)
     _ -> fail (path <> " malformed row: " <> Text.unpack row)
 
-checkGate1 :: IO ()
+checkGate1 :: IO Int
 checkGate1 = do
   contents <- Text.readFile "test/oracle/storage_geometry/dhall_typecheck_cases.tsv"
   case Text.lines contents of
-    [] -> fail "Phase-8 Gate-1 oracle is empty"
+    [] -> fail "Phase-28 Gate-1 oracle is empty"
     header : rows -> do
-      assert (header == "entry\tnegative\tlegal\trequired") "Phase-8 Gate-1 oracle header drifted"
-      assert (length rows == 2) "Phase-8 Gate-1 oracle must contain two rows"
+      assert (header == "entry\tnegative\tlegal\trequired") "Phase-28 Gate-1 oracle header drifted"
+      assert (length rows == 2) "Phase-28 Gate-1 oracle must contain two rows"
       forM_ rows $ \row -> case Text.splitOn "\t" row of
         [_, negative, legal, required] -> do
           dhall <- resolvedDhall
@@ -85,7 +126,55 @@ checkGate1 = do
           (negativeExit, negativeOut, negativeError) <- readCreateProcessWithExitCode (proc dhall ["type", "--file", Text.unpack negative, "--quiet"]) ""
           let observed = Text.pack (negativeOut <> negativeError)
           assert (negativeExit /= ExitSuccess && required `Text.isInfixOf` observed) (Text.unpack negative <> " missed exact Gate-1 locus")
-        _ -> fail ("malformed Phase-8 Gate-1 row: " <> Text.unpack row)
+        _ -> fail ("malformed Phase-28 Gate-1 row: " <> Text.unpack row)
+      pure (length rows)
+
+countStorageMutants :: IO Int
+countStorageMutants = do
+  contents <- Text.readFile "test/mutant/registry.tsv"
+  let isStorage row = case Text.splitOn "\t" row of
+        capability : _ -> capability == "storage_geometry"
+        [] -> False
+      count = length (filter isStorage (Text.lines contents))
+  assert (count == 31) "Phase-28 mutant registry must contain 31 rows"
+  pure count
+
+checkStorageCalculusProjection :: Int -> Int -> Int -> Int -> IO ()
+checkStorageCalculusProjection variants positives properties mutants = do
+  expected <- loadMetricOracle "test/oracle/storage_geometry/calculus_projection.tsv"
+  tenant <- either (fail . show) pure (trustedTenant "storage-geometry-tenant")
+  subject <- either (fail . show) pure (trustedSubject tenant "storage-geometry-subject")
+  membership <- either (fail . show) pure (activeMembership tenant subject)
+  action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+    let resources count = ResourceVector 1 (fromIntegral count) 0 0
+        artifact = artifactComponent scope "storage-negatives" (resources variants) (RecipeId "storage-geometry-corpus" 1)
+        budget = budgetComponent scope "storage-twins" (resources variants) (allowance (Bytes (fromIntegral variants)) (Slots 1) (Bytes (fromIntegral variants)))
+        lift = liftComponent scope "positive-specs" (resources positives) OnHost
+        workflow = workflowComponent scope "envelope-properties" (resources properties) emptyLedger
+        evidence = evidenceComponent scope "mutant-evidence" (resources mutants) PureRegister
+        composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+        ResourceVector cpu memory ephemeral pods = compositionResource composition
+        actual =
+          [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
+          , ("component-names", Text.intercalate "," (compositionNames composition))
+          , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [variants, variants, positives, properties, mutants]))
+          , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
+          ]
+    assert (compositionKinds composition == everyCalculus) "storage projection omitted or reordered a calculus"
+    assert (actual == expected) ("storage calculus projection changed: " <> show actual)
+  action
+  putStrLn
+    ( "storage-geometry-calculus: PASS (5 kinds, "
+        <> show (variants + variants + positives + properties + mutants)
+        <> " projected units)"
+    )
+
+loadMetricOracle :: FilePath -> IO [(Text, Text)]
+loadMetricOracle path = do
+  contents <- Text.readFile path
+  forM (drop 1 (Text.lines contents)) $ \row -> case Text.splitOn "\t" row of
+    [metric, value] -> pure (metric, value)
+    _ -> fail ("malformed calculus metric row: " <> Text.unpack row)
 
 
 drift :: OracleRow -> String -> String

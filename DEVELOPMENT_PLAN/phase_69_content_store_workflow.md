@@ -126,7 +126,7 @@ protocol and worker failover are substrate-agnostic in design but validated only
 
 **Depends on:** [Phase 68](phase_68_user_tenant_isolation_live.md) — live subject/tenant isolation, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test content-store-workflow-live` is green: the `round_trip_failover.dhall` topology passes
+**Gate:** `python3 tools/run_phase_gate.py 69` is green: the `round_trip_failover.dhall` topology passes
 the round trip, critical-window failover, capacity drill, terminal-Job protocol, leak-free teardown, and
 seeded mutants of [Gate integrity](#gate-integrity), on the linux-cpu kind cluster at Register 3.
 

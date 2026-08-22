@@ -42,8 +42,9 @@ does not own the cluster engine that runs on it, owned by
 
 **Pure inventory read-side status.** The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md)
 validates closed kubelet filesystem layouts, OCI/runtime metadata routing, provider-root template identities,
-accelerator family/profile ownership, and raw/reserved/allocatable VRAM arithmetic in Register 1. Detection,
-materialization, attachment, and observed readback remain unverified; ledger `external-run-reference`.
+accelerator family/profile ownership, peer-graph requirements, and raw/reserved/allocatable VRAM arithmetic in
+Register 1. The 2026-08-21 reseal adds a direct missing-peer/exact-connected twin. Detection, materialization,
+attachment, and observed readback remain unverified; ledger `external-run-reference`.
 
 ## 1. The substrate is a fact about the host, not a knob
 

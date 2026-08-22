@@ -27,12 +27,14 @@ quickcheck-composition-wellformedness	checks	property-composition-wellformedness
 quickcheck-property-coverage	metrics	quickcheck-properties
 rke2-server-arms-finite-domain	metrics	rke2-arms
 validation-locus-ledger	metrics	discharged-subcases,deferred-subcases
+predecessor-gadt-coverage	metrics	predecessor-gadt-coverage
 catalog-registry-mutants	metrics	registry-mutants
 union-arm-addition-mutant	metrics	union-arm-mutant
 resource-normalization-mutant	metrics	normalization-mutant
 gadt-index-weakening-mutant	metrics	gadt-index-mutant
 broken-decision-mutant	metrics	decision-mutant
 illegal-state-spec-composition	metrics	acceptance-token
+illegal-state-calculus-composition	metrics	calculus-composition-projection
 capacity-feasibility	metrics	capacity-feasibility
 binding-feasibility	checks
 render-fidelity	metrics	render-fidelity

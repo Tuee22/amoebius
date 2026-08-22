@@ -37,6 +37,7 @@ FIXTURES = ROOT / "test/fixture/ui_local_composition"
 MUTANT_CAPABILITY = "local_ui_composition"
 MUTANTS = ROOT / "test/mutant/registry.tsv"
 LOCUS = ROOT / "test/oracle/local_ui_composition/validation_locus.tsv"
+CALCULUS = ROOT / "test/oracle/local_ui_composition/calculus_projection.tsv"
 ENTRY_POINT = ROOT / "app/amoebius/Amoebius/Entry/ServeUi.hs"
 HARNESS = ROOT / "test/harness/local_ui_composition/composition.mjs"
 RESULTS = ROOT / ".build/dsl/local-ui-composition/phase-results.tsv"
@@ -58,6 +59,9 @@ CHECKS = {
     "browser-edge-source-scan": "the browser reaches no storage, evaluator, or provider coordinate",
     "ready-handle-boundary-present": "the server still issues and owner-checks the ready handle",
     "harness-observers-present": "the composition harness keeps both domain fakes and the bypass probe",
+    "semantic-oracles-complete": "composition tables, custody, five-calculus projection, and mutants are exact",
+    "totality-options": "the composition suite compiles with project totality warnings",
+    "credential-environment-scrub": "the gate removes ambient provider and cluster credentials",
     "emitted-results-untracked": "the battery's generated output stays outside the source snapshot",
     "toolchain-satisfies-requirements": "the resolved cabal, ghc, dhall, and browser satisfy the authored ranges",
     "recorded-results-match-oracle": "every recorded metric equals its authored expected value",
@@ -76,6 +80,10 @@ EXPECTED_RESULTS = {
     "fresh-challenge": "browser-server-workflow-artifact-dom",
     "mutants": "5/5-red",
     "network-observer": "loopback-only",
+    "calculus-kinds": "5/5",
+    "calculus-components": "5/5",
+    "calculus-projection-counts": "1,3,42,4,5",
+    "calculus-resource-vector": "5,55,0,0",
     "live-infernix-adapter": "UNVERIFIED",
     "live-jitml-adapter": "UNVERIFIED",
     "live-keycloak-edge": "UNVERIFIED",
@@ -135,6 +143,9 @@ CHECK_SIDE = {
     "browser-edge-source-scan": "source",
     "ready-handle-boundary-present": "source",
     "harness-observers-present": "source",
+    "semantic-oracles-complete": "oracle",
+    "totality-options": "source",
+    "credential-environment-scrub": "source",
     "emitted-results-untracked": "results",
     "recorded-results-match-oracle": "results",
     "toolchain-satisfies-requirements": "toolchain",
@@ -144,6 +155,8 @@ ACCEPTANCE_TOKEN = (
     "ui-local-composition-spec: PASS "
     "(2 apps, 5 interactions, 4 visible pins, 4 effect rows, 3 access rows, 5 denials, 5 mutants)"
 )
+
+CALCULUS_TOKEN = "ui-local-composition-calculus: PASS (5 kinds, 55 projected units)"
 
 
 class GateFailure(RuntimeError):
@@ -211,19 +224,40 @@ def verify_oracles() -> tuple[list[dict[str, str]], dict[str, int]]:
     for name in ("single_tenant_workflow.dhall", "multi_tenant_workflow.dhall"):
         if not (FIXTURES / name).is_file():
             raise GateFailure(f"authored application source is absent: {name}")
+    calculus = read_tsv(CALCULUS)
+    expected_calculus = [
+        {"metric": "calculus-kinds", "value": "artifact,budget,lift,workflow,evidence"},
+        {"metric": "component-names", "value": "generic-composition-artifact,closed-scope-budget,local-composition-corpus,ordered-effect-workflow,mutant-evidence"},
+        {"metric": "projection-counts", "value": "1,3,42,4,5"},
+        {"metric": "resource-vector", "value": "5,55,0,0"},
+    ]
+    if calculus != expected_calculus:
+        raise GateFailure("local-composition five-calculus projection oracle drifted")
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
     if len(mutants) != 5 or len({row["mutant"] for row in mutants}) != 5:
-        raise GateFailure("Phase-27 mutant manifest must contain five unique rows")
+        raise GateFailure("Phase-44 mutant manifest must contain five unique rows")
     for row in mutants:
         fixture = ROOT / row["fixture"]
         if not fixture.is_file() or "operator=" not in fixture.read_text(encoding="utf-8"):
             raise GateFailure(f"mutant fixture is absent or malformed: {fixture}")
     locus = read_tsv(LOCUS)
     if len(locus) != 42 or len({row["entry"] for row in locus}) != 42:
-        raise GateFailure("Phase-27 validation locus must contain forty-two unique rows")
+        raise GateFailure("Phase-44 validation locus must contain forty-two unique rows")
     phase0_rows = read_tsv(ROOT / "test/oracle/preimplementation_artifacts.tsv")
-    if len([row for row in phase0_rows if row["# phase"] == "23"]) != 12:
-        raise GateFailure("Phase-0 manifest must pin twelve Phase-27 artifacts")
+    custody = [row for row in phase0_rows if row["# phase"] == "27"]
+    if len(custody) != 12:
+        raise GateFailure("Phase-0 manifest must pin twelve Phase-44 artifacts under custody phase 27")
+    missing = [row["path"] for row in custody if not (ROOT / row["path"]).is_file()]
+    if missing:
+        raise GateFailure(f"Phase-44 preimplementation artifacts are absent: {missing}")
+    mutant_descriptors = {
+        row["expected gate locus"] for row in custody if row["kind"] == "mutant"
+    }
+    expected_descriptors = {
+        f"gate-red:phase_27_{Path(row['fixture']).name}" for row in mutants
+    }
+    if mutant_descriptors != expected_descriptors:
+        raise GateFailure("Phase-44 mutant custody descriptors do not name custody phase 27 exactly")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_LEDGER.write_text(
         "# Register 2 with local Chrome/server/domain fakes; live layers UNVERIFIED\n"
@@ -245,6 +279,7 @@ def verify_source_boundaries() -> None:
     server = ENTRY_POINT.read_text(encoding="utf-8")
     dispatch = (ROOT / "src/Amoebius/Ui/Server/Dispatch.hs").read_text(encoding="utf-8")
     harness = HARNESS.read_text(encoding="utf-8")
+    cabal = (ROOT / "amoebius.cabal").read_text(encoding="utf-8")
     for event in ("start", "observe", "use-artifact"):
         if f'"{event}"' not in interpreter or event not in browser:
             raise GateFailure(f"generic-bundle-single-artifact: generic workflow event disappeared: {event}")
@@ -262,6 +297,24 @@ def verify_source_boundaries() -> None:
     for token in ("playwright-core", "infernix-shaped", "jitML-shaped", "rawDomainBypass"):
         if token not in harness:
             raise GateFailure(f"harness-observers-present: composition observer or fake disappeared: {token}")
+    suite_stanza = cabal.split("test-suite ui-local-composition-spec", 1)[1].split("\ntest-suite ", 1)[0]
+    for component in (
+        "artifact-calculus", "budget-calculus", "calculus-composition", "capacity-topology",
+        "evidence-calculus", "lift-calculus", "scope-index", "workflow-calculus",
+    ):
+        if f"amoebius:{component}" not in suite_stanza:
+            raise GateFailure(f"semantic-oracles-complete: suite lacks {component}")
+    for option in ("-Werror=missing-methods", "-Werror=incomplete-patterns"):
+        if option not in suite_stanza:
+            raise GateFailure(f"totality-options: composition suite lacks {option}")
+    scrubbed = environment()
+    leaked = [
+        name for name in scrubbed
+        if name in {"KUBECONFIG", "GOOGLE_APPLICATION_CREDENTIALS"}
+        or name.startswith(("AWS_", "AZURE_", "VAULT_", "KUBE_"))
+    ]
+    if leaked:
+        raise GateFailure(f"credential-environment-scrub: ambient credentials survived: {leaked}")
 
 
 def build_binaries(cabal: Path) -> tuple[Path, Path, str]:
@@ -269,7 +322,7 @@ def build_binaries(cabal: Path) -> tuple[Path, Path, str]:
     executable = Path(run([str(cabal), "list-bin", "exe:amoebius"]).stdout.strip())
     suite = Path(run([str(cabal), "list-bin", "test:ui-local-composition-spec"]).stdout.strip())
     if not executable.is_file() or not suite.is_file():
-        raise GateFailure("Phase-27 executable or suite binary is absent")
+        raise GateFailure("Phase-44 executable or suite binary is absent")
     return executable, suite, build.stdout
 
 
@@ -278,45 +331,70 @@ def run_green(cabal: Path, executable: Path) -> str:
         [str(cabal), "test", "ui-local-composition-spec", "--test-show-details=direct"],
         extra_env={"AMOEBIUS_BIN": str(executable)},
     )
-    if ACCEPTANCE_TOKEN not in result.stdout:
-        raise GateFailure("Phase-27 acceptance token is absent")
+    if ACCEPTANCE_TOKEN not in result.stdout or CALCULUS_TOKEN not in result.stdout:
+        raise GateFailure("Phase-44 acceptance or calculus token is absent")
     return result.stdout
 
 
 def observed_binary(executable: Path, suite: Path) -> tuple[str, str, int]:
     """Read the composition's network behaviour from the OS, not from the code under test."""
-    if shutil.which("strace") is None:
-        raise GateFailure("strace is required for the composition OS-network observer")
     TEMP_ROOT.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="network-", dir=TEMP_ROOT) as directory:
         trace = Path(directory) / "network.trace"
-        result = run([
-            "strace", "-f", "-qq", "-e", "trace=connect,sendto",
-            "-e", "status=successful,failed", "-e", "signal=none",
-            "-o", str(trace), str(suite),
-        ], extra_env={"AMOEBIUS_BIN": str(executable)})
-        forbidden = []
-        loopback = []
-        hard_failed = []
-        for line in trace.read_text(encoding="utf-8").splitlines():
-            if "AF_INET" not in line and "AF_INET6" not in line:
-                continue
-            if any(allowed in line for allowed in (
-                'inet_addr("127.', 'inet_pton(AF_INET6, "::1"', "sin_addr=htonl(INADDR_LOOPBACK)",
-            )):
-                loopback.append(line)
-                continue
-            if " = -1 ENETUNREACH " in line:
-                hard_failed.append(line)
-                continue
-            forbidden.append(line)
-        if forbidden:
-            raise GateFailure("local composition used a non-loopback network address:\n" + "\n".join(forbidden[:30]))
-        if len(loopback) < 10:
-            raise GateFailure("OS observer did not see browser/server/domain composition traffic")
-    if "ui-local-composition-spec: PASS" not in result.stdout:
-        raise GateFailure("observed Phase-27 binary missed its acceptance token")
-    return result.stdout, "loopback-only", len(loopback)
+        if sys.platform == "darwin" and shutil.which("sandbox-exec"):
+            profile = (
+                '(version 1) (allow default) '
+                '(deny network-outbound (remote ip "*:*")) '
+                '(allow network-outbound (remote ip "localhost:*"))'
+            )
+            control = run([
+                "sandbox-exec", "-p", profile, sys.executable, "-c",
+                "import socket,sys\n"
+                "server=socket.socket();server.bind(('127.0.0.1',0));server.listen()\n"
+                "client=socket.create_connection(server.getsockname());peer,_=server.accept()\n"
+                "client.send(b'x');assert peer.recv(1)==b'x'\n"
+                "external=socket.socket();external.settimeout(1)\n"
+                "try: external.connect(('1.1.1.1',80))\n"
+                "except PermissionError: sys.exit(0)\n"
+                "except OSError: sys.exit(3)\n"
+                "sys.exit(4)\n",
+            ], require_success=False)
+            if control.returncode != 0:
+                raise GateFailure(f"Darwin loopback-only control exited {control.returncode}: {control.stdout}")
+            result = run(
+                ["sandbox-exec", "-p", profile, str(suite)],
+                extra_env={"AMOEBIUS_BIN": str(executable)},
+            )
+            observed = 1
+        else:
+            if shutil.which("strace") is None:
+                raise GateFailure("neither Darwin sandbox-exec nor strace is available as an OS network observer")
+            result = run([
+                "strace", "-f", "-qq", "-e", "trace=connect,sendto",
+                "-e", "status=successful,failed", "-e", "signal=none",
+                "-o", str(trace), str(suite),
+            ], extra_env={"AMOEBIUS_BIN": str(executable)})
+            forbidden = []
+            loopback = []
+            for line in trace.read_text(encoding="utf-8").splitlines():
+                if "AF_INET" not in line and "AF_INET6" not in line:
+                    continue
+                if any(allowed in line for allowed in (
+                    'inet_addr("127.', 'inet_pton(AF_INET6, "::1"', "sin_addr=htonl(INADDR_LOOPBACK)",
+                )):
+                    loopback.append(line)
+                    continue
+                if " = -1 ENETUNREACH " in line:
+                    continue
+                forbidden.append(line)
+            if forbidden:
+                raise GateFailure("local composition used a non-loopback network address:\n" + "\n".join(forbidden[:30]))
+            if len(loopback) < 10:
+                raise GateFailure("OS observer did not see browser/server/domain composition traffic")
+            observed = len(loopback)
+    if ACCEPTANCE_TOKEN not in result.stdout or CALCULUS_TOKEN not in result.stdout:
+        raise GateFailure("observed Phase-44 binary missed its acceptance or calculus token")
+    return result.stdout, "loopback-only", observed
 
 
 def run_mutants(executable: Path, suite: Path, mutants: list[dict[str, str]]) -> tuple[str, int]:
@@ -349,6 +427,10 @@ def write_results(counts: Mapping[str, int], reddened: int, total: int, observer
         "fresh-challenge": "browser-server-workflow-artifact-dom",
         "mutants": f"{reddened}/{total}-red",
         "network-observer": observer,
+        "calculus-kinds": "5/5",
+        "calculus-components": "5/5",
+        "calculus-projection-counts": "1,3,42,4,5",
+        "calculus-resource-vector": "5,55,0,0",
         "live-infernix-adapter": "UNVERIFIED",
         "live-jitml-adapter": "UNVERIFIED",
         "live-keycloak-edge": "UNVERIFIED",
@@ -394,7 +476,7 @@ def surface_decisions(
 def main() -> int:
     gate = gate_common.PhaseGate(
         phase=44, contract=CONTRACT, command=GATE_COMMAND, expectations=EXPECTATIONS,
-        register="2", substrate="none", sides=SIDES,
+        register="2", substrate="none", lane="none", sides=SIDES,
     )
     gate.begin()
     results = dict.fromkeys(gate.sides, False)
@@ -420,14 +502,15 @@ def main() -> int:
                 shutil.rmtree(path)
         TEMP_ROOT.mkdir(parents=True, exist_ok=True)
         shutil.copytree(
-            ROOT / "ui-runtime", WORKSPACE_ROOT,
-            ignore=shutil.ignore_patterns(".spago", "output", "dist", "spago.lock"),
+            ROOT / "ui", WORKSPACE_ROOT,
+            ignore=shutil.ignore_patterns(".spago", "output", "dist", "spago.lock", "Offline"),
         )
         cabal = Path(resolved["cabal"]["path"])
 
         print("\noracle side — the interaction, visible, effect, access, and denial pins\n")
         mutant_rows, counts = verify_oracles()
         classes = item_classes()
+        print("  ok    semantic-oracles-complete          composition tables, custody, and calculus are exact")
         print(f"  ok    {len(classes)} enumerated items, {len(mutant_rows)} mutants")
         results["oracle"] = True
 
@@ -436,6 +519,7 @@ def main() -> int:
         for check in (
             "generic-bundle-single-artifact", "browser-edge-source-scan",
             "ready-handle-boundary-present", "harness-observers-present",
+            "totality-options", "credential-environment-scrub",
         ):
             print(f"  ok    {check}")
         results["source"] = True
@@ -455,7 +539,7 @@ def main() -> int:
         print("\nobserver side — the OS boundary decides what the composition reached\n")
         observed, observer, loopback = observed_binary(executable, suite)
         (gate.run_dir / "composition-observed.log").write_text(observed, encoding="utf-8")
-        print(f"  ok    loopback-only network use across {loopback} observed syscall(s)")
+        print(f"  ok    loopback-only network use; {loopback} OS-boundary observation(s)")
         results["observer"] = True
 
         print("\nmutant side — every seeded mutant red at its own locus\n")
@@ -504,7 +588,7 @@ def main() -> int:
         },
         dependencies={"ui-local-composition-spec": "cabal test", "amoebius": "cabal build exe"},
         mutants=[{"name": row["mutant"], "status": "red" if reddened else "unrun"} for row in mutant_rows]
-        or [{"name": "phase-27 mutants", "status": "unrun"}],
+        or [{"name": "phase-44 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))}
         if RESULTS.is_file()
         else {},

@@ -180,7 +180,7 @@ recorded *correct-by-class* and the elevated-harness durable-EBS *reclamation* m
 
 **Depends on:** [Phase 77](phase_77_provider_child_bringup.md) — hostless provider child + convergence + Lease handoff, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test provider-ebs-credential-live` is green: in one live cycle a routine cluster teardown
+**Gate:** `python3 tools/run_phase_gate.py 78` is green: in one live cycle a routine cluster teardown
 leaves the per-PV durable EBS intact, deleting it is refused at the cloud API, and the next bring-up
 reattaches it and reads its marker unchanged. Its apparatus is [Gate integrity](#gate-integrity).
 

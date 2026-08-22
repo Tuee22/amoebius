@@ -41,6 +41,8 @@ iosimpor-bounded-schedules	metrics	iosimpor-schedule-bound,iosimpor-agreement
 structural-fit-cutoff	metrics	cutoff-clause-delete-mutants
 cutoff-clause-mutants	checks	cutoff-mutants-red
 scope3-shared-resource-stress	metrics	scope3-shared-resource-mutant
+semantic-renderer-oracle	metrics	renderer-semantic-mutants
+gateway-calculus-composition	metrics	calculus-composition-projection
 decomposition-lemma	metrics	decomposition-lemma
 runtime-fidelity	checks
 generated-artifact-discipline	checks	emitted-spec-untracked,toolchain-satisfies-requirements,recorded-results-match-oracle

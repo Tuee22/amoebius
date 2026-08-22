@@ -64,6 +64,19 @@ def read_tsv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle, delimiter="\t"))
 
 
+def read_surface_map(path: Path) -> dict[str, str]:
+    mapping: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line or line.startswith("#"):
+            continue
+        fields = line.split("\t")
+        if len(fields) != 3:
+            raise GateFailure(f"malformed surface row: {line}")
+        surface, _owner, ids = fields
+        mapping[surface] = ids
+    return mapping
+
+
 def verify_pins() -> tuple[Path, Path, str]:
     pins = toolchain.resolve(["cabal", "dhall", "ghc"])
     cabal = Path(pins["cabal"]["path"])
@@ -89,10 +102,10 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
     rows = read_tsv(ORACLE)
     dhall_typecheck = read_tsv(DHALL_TYPECHECK)
     mutants = mutant_registry.capability(MUTANT_CAPABILITY)
-    if len(rows) != 32 or len({row["variant"] for row in rows}) != 32:
-        raise GateFailure("Phase-10 fold oracle must contain 32 unique variants")
-    if len({row["twin"] for row in rows}) != 32:
-        raise GateFailure("every Phase-10 variant must name a distinct legal twin")
+    if len(rows) != 37 or len({row["variant"] for row in rows}) != 37:
+        raise GateFailure("Phase-29 fold oracle must contain 37 unique variants")
+    if len({row["twin"] for row in rows}) != 37:
+        raise GateFailure("every Phase-29 variant must name a distinct legal twin")
     required_families = {
         "illegal_hard_ceiling_overcommit",
         "illegal_node_local_storage_over_backing",
@@ -114,11 +127,11 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
         "illegal_shared_accelerator_double_owner",
     }
     if {row["family"] for row in rows} != required_families:
-        raise GateFailure("Phase-10 oracle must preserve the exact eighteen negative families")
+        raise GateFailure("Phase-29 oracle must preserve the exact eighteen negative families")
     if len(dhall_typecheck) != 1 or {row["entry"] for row in dhall_typecheck} != {"3.28"}:
-        raise GateFailure("Phase-10 Gate-1 oracle must contain the accelerator-owner barrier")
+        raise GateFailure("Phase-29 Gate-1 oracle must contain the accelerator-owner barrier")
     if len(mutants) != 45 or len({row["mutant"] for row in mutants}) != 45:
-        raise GateFailure("Phase-10 mutant manifest must contain 45 unique mutants")
+        raise GateFailure("Phase-29 mutant manifest must contain 45 unique mutants")
     run([sys.executable, str(ROOT / "tools/locus_registry_lint.py")])
     for row in dhall_typecheck:
         legal = run([str(dhall), "type", "--file", row["legal"], "--quiet"], require_success=False)
@@ -133,18 +146,18 @@ def verify_oracles(dhall: Path) -> tuple[list[dict[str, str]], list[dict[str, st
 
 def verify_registry_coverage(rows: list[dict[str, str]], dhall_typecheck: list[dict[str, str]]) -> None:
     registry = read_tsv(ROOT / "dhall/examples/locus_registry.tsv")
-    owned = {(row["entry"], row["subcase"]) for row in registry if row["owner_phase"] == "Phase-10"}
+    owned = {(row["entry"], row["subcase"]) for row in registry if row["owner_phase"] == "Phase-29"}
     evidence_entries = {
         *(row["catalog"].split(":", 1)[0] for row in rows),
         *(row["entry"] for row in dhall_typecheck),
     }
     covered = {(entry, subcase) for entry, subcase in owned if entry in evidence_entries}
     if len(owned) != 2 or covered != owned:
-        raise GateFailure(f"Phase-10 registry coverage drifted: covered={sorted(covered)}, owned={sorted(owned)}")
+        raise GateFailure(f"Phase-29 registry coverage drifted: covered={sorted(covered)}, owned={sorted(owned)}")
     GENERATED_LEDGER.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# Register-1 only; runtime correspondence UNVERIFIED\n", "entry\tsubcase\tlocus\tstatus\n"]
     for row in registry:
-        if row["owner_phase"] == "Phase-10":
+        if row["owner_phase"] == "Phase-29":
             lines.append(f"{row['entry']}\t{row['subcase']}\t{row['validation_locus']}\tdischarged\n")
     GENERATED_LEDGER.write_text("".join(lines), encoding="utf-8")
 
@@ -181,18 +194,19 @@ def run_green_suite(cabal: Path) -> str:
         [
             str(cabal),
             "test",
-            "dsl-spec",
             "execution-accelerator-spec",
             "-f-illegal-state-mutant",
             "-f-resource-normalization-mutant",
             "--test-show-details=direct",
         ]
     )
-    token = "execution-accelerator-spec: PASS (18 named negatives, 32 variants, 32 twins, 2 positives, 1 Gate-1, 7 properties)"
+    token = "execution-accelerator-spec: PASS (18 named negatives, 37 variants, 37 twins, 2 positives, 1 Gate-1, 7 properties)"
     if token not in result.stdout:
-        raise GateFailure(f"Phase-10 acceptance token is absent:\n{result.stdout}")
+        raise GateFailure(f"Phase-29 acceptance token is absent:\n{result.stdout}")
+    if "execution-accelerator-calculus: PASS (5 kinds, 128 projected units)" not in result.stdout:
+        raise GateFailure("Phase-29 five-calculus projection token is absent")
     if ">=30% accept/reject coverage" not in result.stdout:
-        raise GateFailure("Phase-10 property coverage token is absent")
+        raise GateFailure("Phase-29 property coverage token is absent")
     return result.stdout
 
 
@@ -226,9 +240,13 @@ def write_results(rows: list[dict[str, str]], mutants: list[dict[str, str]]) -> 
         "dhall-typecheck-accelerator-owner": "1/1-exact-red-with-green-twin",
         "quickcheck-properties": "7/7-green-checkCoverage-30-percent-on-decision-folds",
         "mutants": f"{len(mutants)}/{len(mutants)}-red",
-        "registry-subcases": "2/2-Phase-10-owned-discharged",
-        "phase9-fold-totality": "compile-exhaustive-and-sampled-no-crash",
+        "registry-subcases": "2/2-Phase-29-owned-discharged",
+        "phase29-fold-totality": "compile-exhaustive-and-sampled-no-crash",
         "acceptance-token": "spec-composition-proven-full-resource-vector",
+        "calculus-kinds": "5/5-artifact-budget-lift-workflow-evidence",
+        "calculus-components": "execution-negatives,execution-twins,composed-positives,placement-properties,mutant-evidence",
+        "calculus-projection-counts": f"{len(rows)},{len(rows)},2,7,{len(mutants)}",
+        "calculus-resource-vector": f"5,{len(rows) + len(rows) + 2 + 7 + len(mutants)},0,0",
         "live-scheduler-and-storage": "UNVERIFIED",
         "live-accelerator-and-provider": "UNVERIFIED",
         "runtime-correspondence": "UNVERIFIED",
@@ -255,9 +273,27 @@ CHECKS = {
 
 SIDES = ("toolchain", "oracle", "suite", "mutant", "results")
 
-EXPECTED_RESULTS = {'named-negatives': '18/18-specific-tag-red', 'variant-rows': '32/32-specific-tag-red', 'legal-twins': '32/32-green', 'positive-specs': '2/2-decode-and-full-vector-place', 'dhall-typecheck-accelerator-owner': '1/1-exact-red-with-green-twin', 'quickcheck-properties': '7/7-green-checkCoverage-30-percent-on-decision-folds', 'mutants': '45/45-red', 'registry-subcases': '2/2-Phase-10-owned-discharged', 'phase9-fold-totality': 'compile-exhaustive-and-sampled-no-crash', 'acceptance-token': 'spec-composition-proven-full-resource-vector', 'live-scheduler-and-storage': 'UNVERIFIED', 'live-accelerator-and-provider': 'UNVERIFIED', 'runtime-correspondence': 'UNVERIFIED'}
+EXPECTED_RESULTS = {
+    "named-negatives": "18/18-specific-tag-red",
+    "variant-rows": "37/37-specific-tag-red",
+    "legal-twins": "37/37-green",
+    "positive-specs": "2/2-decode-and-full-vector-place",
+    "dhall-typecheck-accelerator-owner": "1/1-exact-red-with-green-twin",
+    "quickcheck-properties": "7/7-green-checkCoverage-30-percent-on-decision-folds",
+    "mutants": "45/45-red",
+    "registry-subcases": "2/2-Phase-29-owned-discharged",
+    "phase29-fold-totality": "compile-exhaustive-and-sampled-no-crash",
+    "acceptance-token": "spec-composition-proven-full-resource-vector",
+    "calculus-kinds": "5/5-artifact-budget-lift-workflow-evidence",
+    "calculus-components": "execution-negatives,execution-twins,composed-positives,placement-properties,mutant-evidence",
+    "calculus-projection-counts": "37,37,2,7,45",
+    "calculus-resource-vector": "5,128,0,0",
+    "live-scheduler-and-storage": "UNVERIFIED",
+    "live-accelerator-and-provider": "UNVERIFIED",
+    "runtime-correspondence": "UNVERIFIED",
+}
 
-SURFACE_MAP = {'execution-transition-source': 'copy-new-execution-as-old,drop-removed-execution', 'exact-prior-generation-resolution': 'execution-prior-old-revision,drop-execution-old-revision', 'kind-indexed-controller-expansion': 'execution-rollout-surge,drop-execution-surge', 'empty-capable-execution-epochs': 'invent-first-deploy-old,resolve-latest-execution', 'componentwise-execution-peak': 'execution-replica-peak,drop-execution-replica', 'scheduler-reservation-projection': 'scheduler-projection,scheduler-drop-pad', 'aggregate-root-ledger-cas': 'scheduler-aggregate-root,scheduler-per-record-cas', 'binding-inflight-retained-debit': 'scheduler-snapshot-cas,scheduler-timeout-release', 'ledger-only-absent-recovery': 'scheduler-binding-crash-release', 'zero-capable-host-release-partitions': 'partition-parent,partition-drop-system-reserve', 'kubelet-runtime-metadata-model': 'runtime-model,runtime-missing-model', 'planned-slot-observed-uid-separation': 'runtime-scope-domain,runtime-scope-confusion', 'runtime-component-role-routing': 'runtime-nodefs,runtime-swap-role', 'runtime-accounting-domain-equality': 'runtime-imagefs,runtime-drop-largest-metadata', 'node-image-content-join': 'image-content-join,image-manifest-join,image-drop-index', 'node-image-snapshot-join': 'image-snapshot-join,image-drop-snapshot', 'node-image-model-version': 'image-storage-model,image-ignore-model', 'node-image-pull-workspace': 'node-image-workspace,image-drop-workspace,image-drop-manifest', 'filesystem-layout-routing': 'split-image-containerd-v1,layout-enable-v1-split-image', 'alias-aware-backing-grouping': 'filesystem-layout-alias,layout-allow-alias,partition-carve-alias', 'physical-disk-parent-accounting': 'filesystem-layout-swapped,layout-ignore-observation,partition-double-debit-child', 'vm-usable-raw-unit-separation': 'partition-unit-mismatch,partition-mix-vm-usable,partition-use-vm-usable-as-raw', 'provider-instance-store-root': 'instance-store-root,provider-under-size-instance-store', 'provider-root-ebs-rounding': 'root-ebs-bytes-quota,provider-skip-allocation-rounding,provider-skip-presentation', 'provider-node-root-quota': 'root-ebs-volume-quota,provider-debit-durable', 'provider-cover-slot-identities': 'provider-reuse-template-id', 'accelerator-family-and-profile': 'cuda-family-absent,accelerator-treat-none-as-cuda', 'whole-accelerator-device-count': 'cuda-device-count,accelerator-drop-device-count', 'accelerator-source-workload-domains': 'accelerator-drop-source-domain', 'accelerator-coexistence-epochs': 'accelerator-favorable-epoch', 'accelerator-unsharded-residency': 'cuda-unsharded-fragmentation,accelerator-split-unsharded', 'accelerator-replicated-residency': 'metal-profile,accelerator-ignore-metal-profile', 'accelerator-sharded-residency': 'cuda-shard-byte-sum,accelerator-ignore-shard-sum', 'accelerator-interconnect': '', 'accelerator-net-allocatable-vram': 'cuda-vram-reserve,accelerator-spend-raw-vram', 'accelerator-exclusive-ownership': 'accelerator-shared-owner,accelerator-share-device', 'etcd-logical-transition': 'etcd-drop-preallocated-next,etcd-drop-wal', 'etcd-physical-transition': 'etcd-transition-physical,etcd-drop-snapshot-save,etcd-drop-defrag', 'build-execution-envelope': '', 'engine-system-reserve': '', 'monitoring-work-budget': '', 'pulumi-execution-envelope': '', 'composed-full-resource-vector': 'acceptance-token', 'independent-composed-validator': 'positive-specs', 'phase9-negative-corpus': 'named-negatives', 'phase9-dhall-typecheck-accelerator-owner': 'dhall-typecheck-accelerator-owner', 'phase9-property-battery': 'quickcheck-properties', 'phase9-mutant-battery': 'mutants', 'phase9-validation-locus-ledger': 'registry-subcases', 'phase9-fold-compile-totality': 'phase9-fold-totality', 'live-scheduler-binding': 'live-scheduler-and-storage', 'live-runtime-storage-observation': '', 'live-accelerator-observation': 'live-accelerator-and-provider', 'live-provider-root-materialization': '', 'runtime-model-correspondence': 'runtime-correspondence'}
+SURFACE_MAP = read_surface_map(ROOT / EXPECTATIONS)
 
 SURFACE_EVIDENCE: dict[str, tuple[str, str] | None] = {
     surface: ((metric, EXPECTED_RESULTS[metric]) if metric and EXPECTED_RESULTS.get(metric) not in (None, "UNVERIFIED") else None)
@@ -281,7 +317,8 @@ def main() -> int:
     rows: dict[str, str] = {}
     resolved: dict[str, Any] = {}
     mutant_rows: list[dict[str, str]] = []
-    item_names: set[str] = set()
+    case_names: set[str] = set()
+    mutant_names: set[str] = set()
 
     try:
         resolved = toolchain.resolve(["cabal", "dhall", "ghc"])
@@ -301,7 +338,8 @@ def main() -> int:
         print("\noracle side — authored oracle shapes and loci\n")
         primary, mutant_rows = verify_oracles(Path(resolved["dhall"]["path"]))
         verify_totality_sources()
-        item_names = {row["variant"] for row in primary} | {row["mutant"] for row in mutant_rows}
+        case_names = {row["variant"] for row in primary}
+        mutant_names = {row["mutant"] for row in mutant_rows}
         print(f"  ok    {len(primary)} oracle rows, {len(mutant_rows)} mutants, loci exact")
         results["oracle"] = True
 
@@ -341,25 +379,30 @@ def main() -> int:
         "Protocol": "UNVERIFIED",
         "Runtime": "UNVERIFIED",
     }
-    item_evidence = {
+    case_evidence = {
+        surface: ("variant-rows", EXPECTED_RESULTS["variant-rows"])
+        for surface, ids in SURFACE_MAP.items()
+        if ids and set(ids.split(",")) & case_names
+    }
+    mutant_evidence = {
         surface: ("mutants", EXPECTED_RESULTS["mutants"])
         for surface, ids in SURFACE_MAP.items()
-        if ids and set(ids.split(",")) & item_names
+        if ids and set(ids.split(",")) & mutant_names
     }
     return gate.finish(
         results,
-        implemented={"metrics": set(rows), "checks": set(CHECKS), "items": item_names},
+        implemented={"metrics": set(rows), "checks": set(CHECKS), "items": case_names | mutant_names},
         rows=rows,
-        evidence={**SURFACE_EVIDENCE, **item_evidence},
+        evidence={**SURFACE_EVIDENCE, **case_evidence, **mutant_evidence},
         layers=layers,
         toolchain={
             name: {"version": record["version"], "requirement": record["requirement"]}
             for name, record in resolved.items()
             if name != "platform"
         },
-        dependencies={"battery": "cabal test"},
+        dependencies={"battery": "cabal test execution-accelerator-spec"},
         mutants=[{"name": row["mutant"], "status": "red"} for row in mutant_rows]
-        or [{"name": "phase-10 mutants", "status": "unrun"}],
+        or [{"name": "phase-29 mutants", "status": "unrun"}],
         observations={"results": "sha256:" + gate_common.artifact_policy.digest(str(RESULTS))} if RESULTS.is_file() else {},
         extra_status={"generated-artifact-discipline": results["results"]},
     )

@@ -19,3 +19,4 @@ same_seed_trace	control	byte-identity	tested
 distinct_seed_trace	control	sensitivity	tested
 iosimpor_corpus	control	bounded-exploration	tested
 dropped_partition_handling	mutant	NoActOnStaleRead	tested
+calculus_composition_projection	composition	Phase-10 ordered names/resource fold	tested

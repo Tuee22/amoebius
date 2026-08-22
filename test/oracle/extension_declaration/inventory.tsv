@@ -1,0 +1,11 @@
+extension	calculus	component	cpu	memory	ephemeral	pods	descriptor	identity
+infernix	artifact	infernix-image	2	1024	20	1	RecipeId {recipeName = "infernix-image", recipeRevision = 3}	recipe|infernix-image|3
+infernix	budget	inference-budget	1	512	5	1	Allowance {allowanceCeiling = Bytes 4096, allowanceConcurrency = Slots 2, allowancePerItem = Bytes 2048}	allowance|4096|2|2048
+infernix	lift	inference-layer	0	0	0	0	InContainer	layer|in-container
+infernix	workflow	inference-workflow	1	256	1	1	Ledger {ledgerArms = [], ledgerProvisioned = [], ledgerReleased = []}	ledger|arms|0|provisioned|0|released|0
+infernix	evidence	inference-evidence	0	0	0	0	SimulationRegister	register|simulation
+jitml	artifact	jitml-model	4	2048	40	1	RecipeId {recipeName = "jitml-model", recipeRevision = 5}	recipe|jitml-model|5
+jitml	budget	training-budget	2	1024	10	1	Allowance {allowanceCeiling = Bytes 8192, allowanceConcurrency = Slots 3, allowancePerItem = Bytes 4096}	allowance|8192|3|4096
+jitml	lift	training-layer	0	0	0	0	InFrame	layer|in-frame
+jitml	workflow	training-workflow	1	512	2	1	Ledger {ledgerArms = [], ledgerProvisioned = [], ledgerReleased = []}	ledger|arms|0|provisioned|0|released|0
+jitml	evidence	training-evidence	0	0	0	0	BoundaryRegister	register|boundary

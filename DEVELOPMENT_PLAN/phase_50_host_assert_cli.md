@@ -26,10 +26,10 @@ fixes. Its one prerequisite is the target tree [Phase 2](phase_02_repository_lay
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 50.1: The Poetry distribution and its quality gate 📋](#sprint-501-the-poetry-distribution-and-its-quality-gate-)
-- [Sprint 50.2: The closed command topology 📋](#sprint-502-the-closed-command-topology-)
-- [Sprint 50.3: The idempotent host assertions 📋](#sprint-503-the-idempotent-host-assertions-)
-- [Sprint 50.4: Build and hand off 📋](#sprint-504-build-and-hand-off-)
+- [Sprint 50.1: The Poetry distribution and its quality gate ✅](#sprint-501-the-poetry-distribution-and-its-quality-gate-)
+- [Sprint 50.2: The closed command topology ✅](#sprint-502-the-closed-command-topology-)
+- [Sprint 50.3: The idempotent host assertions ✅](#sprint-503-the-idempotent-host-assertions-)
+- [Sprint 50.4: Build and hand off ✅](#sprint-504-build-and-hand-off-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,7 +37,17 @@ fixes. Its one prerequisite is the target tree [Phase 2](phase_02_repository_lay
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-49 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-22. The workflow-routed eleven-sided gate passes on natural `arm64`, untranslated:
+the Poetry/Click quality floor is green at 100% branch coverage; all 36 command, check and mutant surfaces
+join; the fake-host replay converges once and mutates nothing thereafter; all four seeded defects redden
+their exact checks; and the gate leaves both the authored tree and the outside-host inventory unchanged. Its
+fresh tool environment is contained beneath `.build/toolchain/host_assert_cli/`, including Poetry and pip
+caches. Attestation `sha256:452fc0ad35e56526c952558ff578a5fa175a00856f6af20b885630befda86ace`
+binds source `sha256:48c9e75353198eb4…` over 2,318 files. Phase 51 is now the sole open contract.
+
+Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi
+change what this phase's gate must cover, so any earlier seal is history and no longer presents completion
+evidence.
 
 The run found four defects in this phase's own work, each now fixed and covered: the escape-hatch scan
 decoded `.pyc` bytecode as UTF-8; it also reported prose that merely *named* a banned construct, which
@@ -75,7 +85,7 @@ assertions, and the handoff. It splits if a second acceptance register or a seco
 
 **Requires**: `host-floor`
 
-**Gate:** `python3 tools/host_assert_cli_gate.py` passes every check named in
+**Gate:** `python3 tools/run_phase_gate.py 50` passes every check named in
 [Gate integrity](#gate-integrity). Phase 51 does not open until it is green.
 
 ---
@@ -126,8 +136,8 @@ past a floor refusal.
 
 ## Sprints
 
-## Sprint 50.1: The Poetry distribution and its quality gate 📋
-**Status**: Planned
+## Sprint 50.1: The Poetry distribution and its quality gate ✅
+**Status**: Done
 **Implementation**: `pb/pyproject.toml`, `pb/poetry.toml`, `pb/pb/check_code.py`, `pb/pb/test_all.py`, `pb/pb/narrow.py`, `pb/stubs/`, `test/spec/pb/`
 **Blocked by**: none within the phase
 **Requires**: `host-floor`
@@ -160,8 +170,8 @@ give `pb` a distribution a consumer installs rather than a directory a consumer 
 
 None.
 
-## Sprint 50.2: The closed command topology 📋
-**Status**: Planned
+## Sprint 50.2: The closed command topology ✅
+**Status**: Done
 **Implementation**: `pb/pb/cli.py`
 **Blocked by**: Sprint 50.1
 **Independent Validation**: the parser's introspection joins to `test/oracle/host_assert_cli_surfaces.tsv` in both directions
@@ -191,8 +201,8 @@ guess.
 
 None.
 
-## Sprint 50.3: The idempotent host assertions 📋
-**Status**: Planned
+## Sprint 50.3: The idempotent host assertions ✅
+**Status**: Done
 **Implementation**: `pb/pb/prereqs.py`, `pb/pb/process.py`, `test/fixture/host_assert_cli/`, `test/harness/host_assert_cli/`
 **Blocked by**: Sprint 50.2
 **Independent Validation**: the absent → present → present replay converges once and mutates nothing thereafter
@@ -219,8 +229,8 @@ assert the floor and ensure the Haskell toolchain, and nothing beyond either.
 
 None.
 
-## Sprint 50.4: Build and hand off 📋
-**Status**: Planned
+## Sprint 50.4: Build and hand off ✅
+**Status**: Done
 **Implementation**: `pb/pb/bootstrap.py`
 **Blocked by**: Sprint 50.3
 **Independent Validation**: the built binary lands at one stable path and the program does not return

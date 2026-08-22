@@ -105,7 +105,7 @@ in-process fake.
 
 **Depends on:** [Phase 66](phase_66_app_tenancy.md) — tenant/provider provisioning, which this phase consumes rather than rebuilds.
 
-**Gate:** `cabal test pulsar-client-live` is green: the `InForceSpec` test topology satisfies every committed
+**Gate:** `python3 tools/run_phase_gate.py 67` is green: the `InForceSpec` test topology satisfies every committed
 oracle, negative, mutant, and external sweep named in [Gate integrity](#gate-integrity), and emits a Register-3
 proven/tested/assumed ledger with every layer outside Register 3 UNVERIFIED.
 

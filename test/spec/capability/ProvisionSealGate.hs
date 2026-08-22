@@ -7,9 +7,29 @@ module ProvisionSealGate
 import Amoebius.Capacity.Execution
   ( ProvisionedExecutionEpochs (..)
   )
+import Amoebius.Calculus.Artifact.Recipe (RecipeId (RecipeId))
+import Amoebius.Calculus.Budget.Grant (Bytes (Bytes), Slots (Slots), allowance)
+import Amoebius.Calculus.Composition
+  ( append
+  , artifactComponent
+  , budgetComponent
+  , calculusTag
+  , compose
+  , compositionKinds
+  , compositionNames
+  , compositionResource
+  , evidenceComponent
+  , everyCalculus
+  , liftComponent
+  , singleton
+  , workflowComponent
+  )
+import Amoebius.Calculus.Evidence.Register (Register (PureRegister))
+import Amoebius.Calculus.Lift.Layer (Layer (OnHost))
+import Amoebius.Calculus.Workflow.Ledger (emptyLedger)
 import Amoebius.Capacity.Provision
   ( ClusterBudget (ClusterBudget)
-  , InfrastructureActionLedger
+  , InfrastructureActionLedger (InfrastructureActionLedger)
   , InfrastructureDemand (..)
   , InfrastructurePlan (..)
   , InfrastructurePlanningResult (..)
@@ -26,6 +46,7 @@ import Amoebius.Capacity.Provision
   , emptyPriorProvisionCatalog
   , enactInfrastructurePlan
   , infrastructurePlanDemand
+  , materializationIsReceiptBound
   , mkProvisionContext
   , observationFromPlanningResult
   , planInfrastructure
@@ -56,18 +77,25 @@ import Amoebius.Capacity.RenderSource
 import Amoebius.Capacity.RuntimeStorage
   ( ProvisionedNodeRuntimeStorageAccounting (..)
   )
+import Amoebius.Capacity.Types (ResourceVector (ResourceVector))
 import Amoebius.Capability.Types
   ( BoundDeployment (..)
   , BoundServiceSpec (..)
   , ProviderObject (..)
   , ServiceShape (..)
   )
+import Amoebius.Scope.Index
+  ( activeMembership
+  , trustedSubject
+  , trustedTenant
+  , withRequestScope
+  )
 import BindFixtures
   ( CapabilityFixture (..)
   , capabilityFixtures
   , fixturePath
   )
-import Control.Monad (forM_, unless)
+import Control.Monad (forM, forM_, unless)
 import Data.List (find)
 import Data.Map.Strict qualified as Map
 import Data.Set (Set)
@@ -85,6 +113,7 @@ import ProvisionFixtures
   , provisionFixture
   , provisionNegatives
   )
+import ProvisionMutants (provisionMutants)
 import ProvisionProps (runProvisionProps)
 import RuntimeStorageBindingProps
   ( expectedDesiredInstances
@@ -95,23 +124,65 @@ import System.Environment (lookupEnv)
 import System.Exit (ExitCode (ExitSuccess))
 import System.Process (proc, readCreateProcessWithExitCode)
 
+data PlannerCounts = PlannerCounts
+  { plannerCreationBatches :: Int
+  , plannerPlanReplays :: Int
+  , plannerActionReplays :: Int
+  , plannerReceiptClassifications :: Int
+  , plannerPromisedIdentityRejections :: Int
+  }
+
 runProvisionSealGate :: IO ()
 runProvisionSealGate = do
   observability <- fixtureNamed "observability"
   cuda <- fixtureNamed "inferenceengine"
   objectStore <- fixtureNamed "objectstore"
   forM_ capabilityFixtures checkFixture
-  checkInfrastructurePlanner objectStore
-  checkNegativeCorpus observability cuda
-  checkRenderSourceSeal
+  plannerCounts <- checkInfrastructurePlanner objectStore
+  negativeCount <- checkNegativeCorpus observability cuda
+  activationCount <- checkRenderSourceSeal
   checkStructuralBoundary
-  runProvisionProps objectStore
-  runRuntimeStorageBindingProps cuda
-  putStrLn "provision-seal-spec: PASS (18 inherited positives, 2 planner paths, 10 specific negatives, 4 activation stages, 10 mutants, 2 covered properties)"
+  propertyCount <- runProvisionProps objectStore
+  runtimePropertyCount <- runRuntimeStorageBindingProps cuda
+  locusCount <- checkValidationLocus observability cuda
+  let inheritedPositiveCount = length capabilityFixtures * 2
+      mutantCount = length provisionMutants
+      totalPropertyCount = propertyCount + runtimePropertyCount
+  assert (inheritedPositiveCount == 18) "Phase-31 inherited positive count drifted"
+  assert (mutantCount == 10) "Phase-31 mutant count drifted"
+  checkProvisionCalculusProjection inheritedPositiveCount 2 negativeCount totalPropertyCount mutantCount
+  putStrLn
+    ( "provision-seal-invariants: PASS ("
+        <> show (plannerCreationBatches plannerCounts)
+        <> " creation batch, "
+        <> show (plannerPlanReplays plannerCounts)
+        <> " plan replay, "
+        <> show (plannerActionReplays plannerCounts)
+        <> " action replay, "
+        <> show (plannerReceiptClassifications plannerCounts)
+        <> " receipt classifications, "
+        <> show (plannerPromisedIdentityRejections plannerCounts)
+        <> " promised-identity rejections, "
+        <> show locusCount
+        <> " locus rows)"
+    )
+  putStrLn
+    ( "provision-seal-spec: PASS ("
+        <> show inheritedPositiveCount
+        <> " inherited positives, 2 planner paths, "
+        <> show negativeCount
+        <> " specific negatives, "
+        <> show activationCount
+        <> " activation stages, "
+        <> show mutantCount
+        <> " mutants, "
+        <> show totalPropertyCount
+        <> " covered properties)"
+    )
 
 fixtureNamed :: Text -> IO CapabilityFixture
 fixtureNamed slug = case find ((== slug) . fixtureSlug) capabilityFixtures of
-  Nothing -> fail ("missing Phase-10 fixture: " <> Text.unpack slug)
+  Nothing -> fail ("missing Phase-31 fixture: " <> Text.unpack slug)
   Just fixture -> pure fixture
 
 checkFixture :: CapabilityFixture -> IO ()
@@ -155,7 +226,7 @@ expectedOwner witness = case witness of
   ServiceWorkloadPart service -> CapabilityServiceOwner service
   ServicePolicyPart service -> CapabilityServiceOwner service
 
-checkInfrastructurePlanner :: CapabilityFixture -> IO ()
+checkInfrastructurePlanner :: CapabilityFixture -> IO PlannerCounts
 checkInfrastructurePlanner fixture = do
   deployment <- either (fail . show) pure (fixtureDeployment fixture SingleNode)
   topology <- either (fail . show) pure (fixedTopology baselineCapacity)
@@ -164,12 +235,13 @@ checkInfrastructurePlanner fixture = do
       present = TargetSupply InfrastructureAlreadyPresent baselineCapacity identities 11
       forest = ClusterBudget InfrastructureAlreadyPresent baselineCapacity identities 11
       create = TargetSupply InfrastructureCreationRequired baselineCapacity Set.empty 11
-  forM_ [StandaloneRoot present, ForestMember forest] $ \supply -> do
+  preexistingObservations <- forM [StandaloneRoot present, ForestMember forest] $ \supply -> do
     planned <- either (fail . show) pure (planInfrastructure supply deployment)
     case planned of
       NoInfrastructureRequired observed -> do
-        context <- either (fail . show) pure (mkProvisionContext "phase11" 2 baselinePolicy emptyPriorProvisionCatalog observed)
+        context <- either (fail . show) pure (mkProvisionContext "phase31" 2 baselinePolicy emptyPriorProvisionCatalog observed)
         assertRight (provision context topology deployment) "pre-existing infrastructure did not provision"
+        pure observed
       InfrastructureRequired _ -> fail "pre-existing infrastructure unexpectedly produced provider actions"
   planned <- either (fail . show) pure (planInfrastructure (StandaloneRoot create) deployment)
   plan <- case planned of
@@ -180,35 +252,48 @@ checkInfrastructurePlanner fixture = do
   validated <- either (fail . show) pure (validateInfrastructurePlan emptyInfrastructureActionLedger 11 plan)
   let readback = ObservedReadback identities baselineCapacity 11
   (ledger, observed) <- either (fail . show) pure (enactInfrastructurePlan emptyInfrastructureActionLedger validated readback)
-  context <- either (fail . show) pure (mkProvisionContext "phase11" 2 baselinePolicy emptyPriorProvisionCatalog observed)
+  context <- either (fail . show) pure (mkProvisionContext "phase31" 2 baselinePolicy emptyPriorProvisionCatalog observed)
   assertRight (provision context topology deployment) "observed creation readback did not provision"
   assertTag "InfrastructurePlanReplay" (validateInfrastructurePlan ledger 11 plan)
+  let actionOnlyLedger = InfrastructureActionLedger Set.empty (Set.singleton (providerActionToken (infrastructurePlanBatch plan)))
+  assertTag "InfrastructureActionReplay" (validateInfrastructurePlan actionOnlyLedger 11 plan)
   assertTag "InfrastructureSnapshotMismatch" (enactInfrastructurePlan emptyInfrastructureActionLedger validated (ObservedReadback identities baselineCapacity 12))
   case Set.lookupMin identities of
     Nothing -> fail "planner fixture has an empty execution identity domain"
     Just one -> assertTag "PromisedIdentityNotObserved" (enactInfrastructurePlan emptyInfrastructureActionLedger validated (ObservedReadback (Set.delete one identities) baselineCapacity 11))
   assertTag "PromisedIdentityNotObserved" (observationFromPlanningResult planned)
+  assert (all (not . materializationIsReceiptBound) preexistingObservations) "pre-existing observations unexpectedly carry provider receipts"
+  assert (materializationIsReceiptBound observed) "enacted creation readback is not receipt-bound"
+  pure
+    PlannerCounts
+      { plannerCreationBatches = 1
+      , plannerPlanReplays = 1
+      , plannerActionReplays = 1
+      , plannerReceiptClassifications = length preexistingObservations + 1
+      , plannerPromisedIdentityRejections = 2
+      }
 
-checkNegativeCorpus :: CapabilityFixture -> CapabilityFixture -> IO ()
+checkNegativeCorpus :: CapabilityFixture -> CapabilityFixture -> IO Int
 checkNegativeCorpus observability cuda = do
   oracle <- rowsOf "test/oracle/provision_seal/provision_cases.tsv"
   let cases = provisionNegatives observability cuda
       caseDomain = Set.fromList (fmap negativeName cases)
       oracleDomain = Set.fromList [name | [name, _expected, _twin] <- oracle]
-  assert (length cases == 10 && length oracle == 10 && caseDomain == oracleDomain) "Phase-11 negative oracle must cover exactly ten cases"
+  assert (length cases == 10 && length oracle == 10 && caseDomain == oracleDomain) "Phase-31 negative oracle must cover exactly ten cases"
   forM_ cases $ \negative -> do
     let matchingRows = [row | row@[name, _expected, _twin] <- oracle, name == negativeName negative]
     case matchingRows of
       [[_name, expected, twin]] -> do
-        assert (expected == negativeExpected negative) "Phase-11 negative expected-tag oracle drifted"
-        assert (twin == negativeTwin negative) "Phase-11 legal-twin oracle drifted"
-      _ -> fail "Phase-11 negative oracle row is missing or duplicated"
+        assert (expected == negativeExpected negative) "Phase-31 negative expected-tag oracle drifted"
+        assert (twin == negativeTwin negative) "Phase-31 legal-twin oracle drifted"
+      _ -> fail "Phase-31 negative oracle row is missing or duplicated"
     assertTag (negativeExpected negative) (negativeOutcome negative)
     assertRight (negativeTwinOutcome negative) ("legal twin rejected: " <> Text.unpack (negativeTwin negative))
     checkDhallGreen ("dhall/examples/" <> Text.unpack (negativeName negative) <> ".dhall")
     checkDhallGreen ("dhall/examples/" <> Text.unpack (negativeTwin negative) <> ".dhall")
+  pure (length cases)
 
-checkRenderSourceSeal :: IO ()
+checkRenderSourceSeal :: IO Int
 checkRenderSourceSeal = do
   let rows = globalCandidates
       candidates = fmap toCandidate rows
@@ -227,6 +312,7 @@ checkRenderSourceSeal = do
   assertRenderError isOwnerMismatch (provisionRenderSources (ProvisionedDeploymentParts domain (badOwner : remaining)))
   assertRenderError isActivationMismatch (provisionRenderSources (ProvisionedDeploymentParts domain (badStage : remaining)))
   assertRenderError isMissingStage (provisionRenderSources (ProvisionedDeploymentParts (Set.fromList (fmap candidateKey withoutManaged)) withoutManaged))
+  pure (length rows)
  where
   isDuplicate problem = case problem of DuplicateRenderSource {} -> True; _ -> False
   isMissingDomain problem = case problem of MissingRenderSourceDomain {} -> True; _ -> False
@@ -285,6 +371,60 @@ checkStructuralBoundary = do
   assert ("  , ProvisionedSpec\n" `Text.isInfixOf` exportHeader) "ProvisionedSpec opaque export is absent"
   assert (not ("ProvisionedSpec (.." `Text.isInfixOf` exportHeader)) "ProvisionedSpec constructor is exported"
   assert (Text.count "newtype ProvisionedRenderSourceSet" renderSource == 1) "render-source ownership is not centralized in one map type"
+
+checkValidationLocus :: CapabilityFixture -> CapabilityFixture -> IO Int
+checkValidationLocus observability cuda = do
+  rows <- rowsOf "test/oracle/provision_seal/validation_locus.tsv"
+  let observed = Set.fromList [entry | [entry, _className, _locus, _status] <- rows]
+      positives =
+        Set.fromList
+          [ "legal_" <> fixtureSlug fixture <> "_" <> shape
+          | fixture <- capabilityFixtures
+          , shape <- ["singlenode", "distributed"]
+          ]
+      planner = Set.fromList ["planner_preexisting", "planner_creation"]
+      negatives = Set.fromList (fmap negativeName (provisionNegatives observability cuda))
+      expected = positives <> planner <> negatives <> Set.fromList provisionMutants
+  assert (observed == expected) "Phase-31 validation-locus ledger does not cover every positive, planner path, negative, and mutant"
+  assert (length rows == 40) "Phase-31 validation-locus ledger must contain exactly 40 rows"
+  pure (length rows)
+
+checkProvisionCalculusProjection :: Int -> Int -> Int -> Int -> Int -> IO ()
+checkProvisionCalculusProjection positives planners negatives properties mutants = do
+  expected <- loadMetricOracle "test/oracle/provision_seal/calculus_projection.tsv"
+  tenant <- either (fail . show) pure (trustedTenant "provision-seal-tenant")
+  subject <- either (fail . show) pure (trustedSubject tenant "provision-seal-subject")
+  membership <- either (fail . show) pure (activeMembership tenant subject)
+  action <- either (fail . show) pure $ withRequestScope tenant subject membership $ \scope -> do
+    let resources count = ResourceVector 1 (fromIntegral count) 0 0
+        artifact = artifactComponent scope "inherited-positives" (resources positives) (RecipeId "provision-seal-corpus" 1)
+        budget = budgetComponent scope "planner-paths" (resources planners) (allowance (Bytes (fromIntegral planners)) (Slots 1) (Bytes (fromIntegral planners)))
+        lift = liftComponent scope "specific-negatives" (resources negatives) OnHost
+        workflow = workflowComponent scope "provision-properties" (resources properties) emptyLedger
+        evidence = evidenceComponent scope "mutant-evidence" (resources mutants) PureRegister
+        composition = append (compose artifact budget) (append (compose lift workflow) (singleton evidence))
+        ResourceVector cpu memory ephemeral pods = compositionResource composition
+        actual =
+          [ ("calculus-kinds", Text.intercalate "," (map calculusTag (compositionKinds composition)))
+          , ("component-names", Text.intercalate "," (compositionNames composition))
+          , ("projection-counts", Text.intercalate "," (map (Text.pack . show) [positives, planners, negatives, properties, mutants]))
+          , ("resource-vector", Text.intercalate "," (map (Text.pack . show) [cpu, memory, ephemeral, pods]))
+          ]
+    assert (compositionKinds composition == everyCalculus) "provision seal projection omitted or reordered a calculus"
+    assert (actual == expected) ("provision seal calculus projection changed: " <> show actual)
+  action
+  putStrLn
+    ( "provision-seal-calculus: PASS (5 kinds, "
+        <> show (positives + planners + negatives + properties + mutants)
+        <> " projected units)"
+    )
+
+loadMetricOracle :: FilePath -> IO [(Text, Text)]
+loadMetricOracle path = do
+  contents <- Text.readFile path
+  forM (drop 1 (Text.lines contents)) $ \row -> case Text.splitOn "\t" row of
+    [metric, value] -> pure (metric, value)
+    _ -> fail ("malformed calculus metric row: " <> Text.unpack row)
 
 checkDhallGreen :: FilePath -> IO ()
 checkDhallGreen path = do

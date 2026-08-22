@@ -1,0 +1,2 @@
+operator=drop-first-checker-declaration
+expected=checker-rule-missing

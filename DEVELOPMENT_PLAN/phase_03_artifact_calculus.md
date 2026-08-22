@@ -12,7 +12,7 @@ The rule behind the artifact calculus is owned by [`jit_artifact_doctrine.md`](.
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_10_calculus_composition.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_budget_calculus.md, DEVELOPMENT_PLAN/phase_05_lift_calculus.md, DEVELOPMENT_PLAN/phase_07_evidence_calculus.md, DEVELOPMENT_PLAN/phase_09_resource_index.md, DEVELOPMENT_PLAN/phase_47_tool_and_mutant_generation.md
 **Generated sections**: none
 
 </details>
@@ -59,7 +59,7 @@ Give every artifact amoebius emits a type, a recipe, and a name that is a total 
 **Lane:** `none`
 **Register:** 1
 **Depends on:** [Phase 2](phase_02_repository_layout_conformance.md) — the target tree, which fixes the paths a recipe renders into. This is the first of the five calculi and consumes no algebra beneath it.
-**Gate:** `python3 tools/artifact_calculus_gate.py` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
+**Gate:** `python3 tools/run_phase_gate.py 03` passes: the independent oracle agrees and every committed mutant reddens its named locus. See [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 

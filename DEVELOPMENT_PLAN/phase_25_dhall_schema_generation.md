@@ -19,7 +19,7 @@ The complete dhall-typecheck gate passed on 2026-08-09; gadt-decode semantics an
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_gadt_decode_ir.md, DEVELOPMENT_PLAN/phase_27_illegal_state_covering.md, DEVELOPMENT_PLAN/phase_28_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_37_ui_program_schema.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 </details>
@@ -30,10 +30,10 @@ The complete dhall-typecheck gate passed on 2026-08-09; gadt-decode semantics an
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 25.1: Dhall prelude + typed surfaces + smart constructors 📋](#sprint-251-dhall-prelude--typed-surfaces--smart-constructors-)
-- [Sprint 25.2: dhall-typecheck positive corpus 📋](#sprint-252-dhall-typecheck-positive-corpus-)
-- [Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger 📋](#sprint-253-dhall-typecheck-class-negative-corpus--partial-foreclosure-ledger-)
-- [Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative 📋](#sprint-254-the-shared-secretref-union-and-the-plaintext-secret-negative-)
+- [Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ✅](#sprint-251-dhall-prelude--typed-surfaces--smart-constructors-)
+- [Sprint 25.2: dhall-typecheck positive corpus ✅](#sprint-252-dhall-typecheck-positive-corpus-)
+- [Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ✅](#sprint-253-dhall-typecheck-class-negative-corpus--partial-foreclosure-ledger-)
+- [Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ✅](#sprint-254-the-shared-secretref-union-and-the-plaintext-secret-negative-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -41,7 +41,13 @@ The complete dhall-typecheck gate passed on 2026-08-09; gadt-decode semantics an
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-24 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-21. All eleven gate sides passed on natural `arm64`, untranslated: twenty exact
+metrics matched and 20 surfaces joined to 24 run-time items. Attestation
+`sha256:9fa9d64aa7942c0ede6cf6e183cc6f82f99dd347be9b9521bdfc75a3deb89a02` binds source
+`sha256:710489258c7b2768…` over 2,259 files. Repository-conformance attestation
+`sha256:db84b7328636385546c44909eea7f9efda56e024c948f4942ec9170f276ced68` and documentation lint passed on
+that snapshot. All nineteen Phase-24 obligations are projected; every one and the conformance verdict remain
+UNVERIFIED because Dhall typechecking does not observe extension-law semantics.
 
 **The rerun found a defect the previous seal could not have caught.** `tools/dhall_typecheck.py` read its oracle
 from `tests/oracle/dhall-typecheck/` — a directory this repository has never had under that name. Every oracle-backed
@@ -164,7 +170,11 @@ real teeth at the Haskell GADT decoder in Phase 26. This is a **Register 1** (pu
 cluster) gate, analogous to the Phase 0 documentation lint: it exercises the `dhall` typechecker over a text
 corpus and touches no infrastructure.
 
-**Phase scope:** one cohesive claim — *an illegal specification has no syntax*. The typechecker is the first foreclosure layer, and it runs before any amoebius binary exists to be trusted.
+**Phase scope:** one cohesive claim — *an illegal specification has no syntax*. The typechecker is the first
+foreclosure layer, and it runs before any amoebius binary exists to be trusted. For one bounded `dhall-schema`
+declaration and its self peer, the Phase-24 generator derives nineteen L/C/compile/S obligations; this register
+records every one as `UNVERIFIED` because schema typechecking does not observe those semantics and therefore
+mints no conformance verdict.
 
 **Substrate:** none — no host, no cluster; the gate is an in-process `dhall type` battery over the fixture
 corpus.
@@ -175,9 +185,9 @@ corpus.
 
 **Depends on:** [Phase 24](phase_24_conformance_gate_generator.md) — the generated conformance gate, which this phase consumes rather than rebuilds.
 
-**Gate:** `python3 tools/dhall_typecheck_schema_gate.py` over the dhall-typecheck corpus is green — every positive fixture type-checks and every
-dhall-typecheck-class negative fails at its committed error golden, with no amoebius binary run. The apparatus is
-[Gate integrity](#gate-integrity); a bare nonzero exit is not sufficient.
+**Gate:** `python3 tools/run_phase_gate.py 25` requires twenty exact metrics across eleven sides:
+positives, specific-reason negatives, independent inventories, mutants, and the authored nineteen-row
+Phase-24 projection, with no conformance verdict. [Gate integrity](#gate-integrity) owns the apparatus.
 
 ```mermaid
 flowchart LR
@@ -185,12 +195,16 @@ flowchart LR
   s0["Sprint 25.1: Dhall prelude + typed surfaces + smart constructors"]
   s1["Sprint 25.2: dhall-typecheck positive corpus"]
   s2["Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger"]
+  s3["Sprint 25.4: SecretRef and plaintext-secret rejection"]
+  projection["Phase-24 plan projection: 19 unresolved obligations"]
   gate["the phase 25 gate"]
   s0 -->|"produces what the next consumes"| s1
   s1 -->|"produces what the next consumes"| s2
-  s2 -->|"the last seam the gate closes over"| gate
+  s2 -->|"produces what the next consumes"| s3
+  s3 -->|"schema evidence"| gate
+  projection -->|"verdict remains UNVERIFIED"| gate
 ```
-*Orientation. The seams phase 25 builds, in order; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns the apparatus. Not run.*
+*Validated boundary. Phase 25 consumes Phase 24 without upgrading Dhall typechecking into semantic conformance; [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) owns the apparatus.*
 
 ## Gate integrity
 
@@ -461,7 +475,12 @@ output.
 This gate is Register 1 (pure/golden, in-process, no cluster). It still emits the [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)
 proven/tested/assumed ledger (below), marks binding/index (layer-2/3) foreclosures UNVERIFIED here, and
 carries the acceptance token *spec-composition proven*, never *runtime proven*.
-- **Extension conformance (§M.13).** Not applicable: this gate delivers no extension.
+- **Extension conformance (§M.13).** `test/spec/extension/DhallSchemaConformanceSpec.hs` constructs one scoped
+  `dhall-schema` declaration, derives the Phase-24 plan with its self peer, and compares all nineteen
+  L/C/compile/S rows with `test/oracle/dhall_typecheck_schema/conformance_projection.tsv`. Every observation is
+  explicitly failed as `not-observed-at-dhall-typecheck`; the gate requires `CasesFailed 19`, writes the
+  generated projection beneath `.build/`, and records `extension-conformance-verdict = UNVERIFIED`. A passing
+  verdict is a failure here because this register observes schema shape, not extension-law semantics.
 
 ## Doctrine adopted
 
@@ -497,16 +516,14 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure requires
-> the current phase gate plus universal artifact hygiene.
+> **Current validation record.** All four sprints are covered by the sealed 2026-08-21 amended gate. Historical dates,
+> pass/seal claims, and repository-resident evidence paths below remain diagnostic only. Any instruction to
+> commit generated output, freeze dependency resolution, retain a resolved version, path, or integrity hash,
+> or consume repository-resident evidence, ledgers, or enumerations is superseded by the current
+> generated-artifact and dynamic-resolution doctrine.
 
-## Sprint 25.1: Dhall prelude + typed surfaces + smart constructors 📋
-**Status**: Planned
+## Sprint 25.1: Dhall prelude + typed surfaces + smart constructors ✅
+**Status**: Done.
 **Implementation**:
 `dhall/amoebius/{prelude,Cluster,App,Deployment,Capability,Topology,Capacity,Resources,Storage,Retention,Image,Extension,Consistency,Backup}.dhall`
 — the typed surfaces and their smart constructors.
@@ -778,8 +795,8 @@ cache/registry/Vault storage cannot pass.
 None. The schema modules and independently authored union, required-field, and nested-type inventories agree;
 525 field deletions, 176 required-type substitutions, and the special resource mutants all turn the gate red.
 
-## Sprint 25.2: dhall-typecheck positive corpus 📋
-**Status**: Planned
+## Sprint 25.2: dhall-typecheck positive corpus ✅
+**Status**: Done.
 **Implementation**: `dhall/examples/legal_*.dhall` (worked-example cluster / app /
 deployment specs); `tools/dhall_typecheck.sh` (a `dhall type` corpus harness) — built.
 **Blocked by**: none within the phase.
@@ -830,8 +847,8 @@ the authoring-time demonstration that the schema *admits* every intended world.
 None. All four positives type-check after wiring the non-empty nested capacity, image, cache, registry, Vault,
 engine, transition, accelerator, and monitoring structures required above.
 
-## Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger 📋
-**Status**: Planned
+## Sprint 25.3: dhall-typecheck-class negative corpus + partial-foreclosure ledger ✅
+**Status**: Done.
 **Implementation**: `dhall/examples/illegal_*.dhall` (the dhall-typecheck subset);
 `tools/dhall_typecheck_negatives.sh` (an expect-fail `dhall type` harness) — built.
 **Blocked by**: none within the phase.
@@ -895,12 +912,13 @@ at gadt-decode.
    incomplete without it.
 
 ### Remaining Work
-Eight paired catalog negatives and two import-policy negatives must be red for their authored reasons, the
-capability-arm mutant must be caught, and the run-local ledger must record every deferred gadt-decode/runtime
-residue as UNVERIFIED. The historical repository-resident ledger must not be consumed.
 
-## Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative 📋
-**Status**: Planned
+None. Eight paired catalog negatives, two import-policy negatives, and the secret-policy negative are red for
+their authored reasons; the capability-arm and structural mutants are caught; and the run-local ledger records
+the gadt-decode/runtime residue as UNVERIFIED. The historical repository-resident ledger is not consumed.
+
+## Sprint 25.4: The shared `SecretRef` union and the plaintext-secret negative ✅
+**Status**: Done.
 **Implementation**: `dhall/amoebius/SecretRef.dhall`, `dhall/examples/legal_secret_reference.dhall`,
 `dhall/examples/illegal_plaintext_secret.dhall`, `tools/dhall_typecheck.py`, `tools/dhall_typecheck_schema_gate.py`
 **Blocked by**: Sprint 25.3

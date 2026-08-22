@@ -1,7 +1,21 @@
+let Operation =
+      < InfernixStart
+      | JitmlTrainingStart
+      | WorkflowProgress
+      | MlSignal
+      | WorkflowCancel
+      | ModelInvocation
+      >
+
+let Projection = { projectionId : Text }
+
+let BlobClass = { blobClassId : Text }
+
 let QueueContract =
       { maxCount : Natural
       , maxBytes : Natural
       , maxAgeSeconds : Natural
+      , localValidation : Text
       , idempotency : Text
       , conflict : Text
       , ordering : Text
@@ -9,14 +23,15 @@ let QueueContract =
       , authoritativeValidation : Text
       }
 
-let QueuedPort = { port : Text, contract : QueueContract }
+let QueuedPort = { operation : Operation, contract : QueueContract }
 
 let OfflineSource =
-      { projections : List Text
+      { projections : List Projection
       , queuedPorts : List QueuedPort
-      , localBlobs : List Text
+      , localBlobs : List BlobClass
+      , offlineView : Text
       }
 
 let Continuity = < OnlineOnly | Offline : OfflineSource >
 
-in  { QueueContract, QueuedPort, OfflineSource, Continuity }
+in  { Operation, Projection, BlobClass, QueueContract, QueuedPort, OfflineSource, Continuity }

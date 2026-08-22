@@ -1,17 +1,13 @@
 # Phase 38: UI authorization kernel
 
-> **Purpose**: Build the pure action-registry and current-authority transition that keeps client presentation,
-> server dispatch, policy, scope, audit, and plan freshness in exact agreement.
-> **Read this if**: phase 38 is next in the queue, or a later phase depends on what its gate establishes.
+> **Purpose**: Make one sealed action registry and current-authority transition decide whether a scoped UI
+> action may produce an effect.
+> **Read this if**: action declarations, client/server projection parity, authorization freshness, or the
+> `AuthorizedAction` boundary has to change.
 
-Phase 38 delivers the UI authorization kernel; its design is owned by [low_code_ui_runtime_doctrine.md](../documents/engineering/low_code_ui_runtime_doctrine.md), and the plan for reaching it is owned here.
-Register 1: an in-process battery, no cluster.
-Gate passed on 2026-08-09 with ledger `external-run-reference`.
-
-
-> **Historical result (invalidated).** Any pass, seal, validation, ledger, receipt, or implementation observation
-> in the orientation text above is diagnostic only. The Phase Status section and [tracker](README.md) own current state; the
-> target contract below remains normative.
+This phase owns the pure UI authorization decision. It does not authenticate a live identity, route HTTP,
+dispatch a handler, install provider policy, or prove tenant isolation. Those effects belong to later binding,
+server, identity-provider, and live-tenancy phases.
 
 <details>
 <summary>Link-graph metadata</summary>
@@ -29,7 +25,9 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 - [Gate integrity](#gate-integrity)
 - [Doctrine adopted](#doctrine-adopted)
 - [Sprints](#sprints)
-- [Sprint 38.1: Sealed action registry and authorized-action transition 📋](#sprint-381-sealed-action-registry-and-authorized-action-transition-)
+- [Sprint 38.1: Sealed registry and parity ✅](#sprint-381-sealed-registry-and-parity-)
+- [Sprint 38.2: Current-authority decision and negative controls ✅](#sprint-382-current-authority-decision-and-negative-controls-)
+- [Sprint 38.3: Calculus projection and phase seal ✅](#sprint-383-calculus-projection-and-phase-seal-)
 - [Documentation Requirements](#documentation-requirements)
 - [Related Documents](#related-documents)
 
@@ -37,184 +35,219 @@ Gate passed on 2026-08-09 with ledger `external-run-reference`.
 
 ## Phase Status
 
-⏸️ Blocked pending Phase-37 revalidation. Reopened 2026-08-19 by the generative re-baseline: the artifact, budget, lift, workflow and evidence calculi change what this phase's gate must cover, so any earlier seal is history and no longer presents completion evidence.
+✅ Done — sealed 2026-08-21. The complete thirteen-sided gate passes on natural `darwin/arm64`, untranslated.
+Five exact actions, six decisions, four parity errors, four stale-epoch refusals, nine coverage classes, and
+both paired mutants pass; the real five-calculus composition projects counts `5,6,8,9,2` to resource vector
+`5,30,0,0`. All 15 metrics match and 46 surfaces join to 63 enumerated items. Attestation
+`sha256:ab73be4f6ad8cf16be617c7f4681f880241612da3aa01d6bf56d4715a43bfd1f` binds source
+`sha256:43020e5e808f2ef4…` over 2,261 files. Live edge, identity-provider, UI-server, and provider-policy
+enforcement remains UNVERIFIED.
 
-**Pre-natural-architecture status record (invalidated where it claims completion):**
+**Activated 2026-08-21** when Phase 37 sealed. The generative re-baseline invalidated the earlier seal because
+it had no calculus projection or natural-architecture record.
 
-Done (invalidated) — resealed 2026-08-15. `python3 tools/ui_authorization_gate.py` passed all eleven sides: registry,
-access, parity, epoch, independent-reference, closed-union, constructor-privacy, network-isolation, both
-mutants, and all eleven metrics pass; 40 surfaces join to 57 enumerated items. The project-contained
-attestation is `sha256:713eaf822194a615813fc3a6416124ab04c3e8208ae43a6ddd160d61cab4ccc0`, bound to source snapshot
-`sha256:ff29cbf28bdb6886…`; Phase 38 owns no remaining migration deferral.
-
-**Pre-containment status record (invalidated where it claims completion):**
-
-Done (invalidated) — sealed 2026-08-13. The migrated gate passed against source snapshot `sha256:5397884a3bd5b8ad…`
-(1943 non-ignored files) and published a verified pre-containment external attestation
-`sha256:409c13f0c41aec877a4f3f72c3509fd1c17322523920e1deff0abac0b1cca88a`.
-
-**Observed progress — 2026-08-13:** **Policy-conformant.** The authorization result is unchanged and re-run:
-five registry rows normalize exactly, six matrix rows agree with a reference evaluator that does not import
-the module under test, four parity diagnostics and four authority-epoch refusals hold at their pinned tags
-with empty effect traces, nine generated classes clear their 5% floor, and both seeded mutants redden.
-Evidence and the ledger move into `.build/runs/phase_34/<run-id>/`, and 40 surfaces join two-way to 57 run-time
-enumerated items with every surface carrying at least one id.
-
-**The closed sums are now checked as sums, not implied by their rows.** `ActionEffect` and `Permission` each
-have a check that reads the declaration, compares the arms against the contract's list, and requires the
-`Bounded`/`Enum` deriving that makes the union enumerably closed. Five pinned registry rows say the five arms
-work; they say nothing about a sixth arm being added beside them.
-
-**The two mutants keep their own surfaces.** The pinned row proves the refusal happens and the mutant proves
-the check that refuses has teeth, so `default-allow-mutant` and `visibility-authorization-mutant` join to the
-mutants rather than riding inside `default-deny` and `hidden-action-invocable`. A reader can then see which of
-the two halves went missing.
-
-**Invalidated historical record:**
-
-Done (invalidated). The sealed five-action registry, independent authorization matrix, exact parity and stale-epoch errors,
-coverage floors, empty denial traces, and both authority mutants pass. This proves the closed authorization
-relation in process; it makes no claim that a live edge, identity provider, or UI-server deployment enforces
-the relation. See the Phase-38 ledger.
+---
 
 ## Phase Summary
 
-This phase implements one seam: checked action declarations form a sealed authorization registry, the
-independently checkable `CanRead`/`CanInvoke` relation, and the only `RequestContext` + current-policy transition
-that can construct `AuthorizedAction`. Client visibility is an advisory projection of that relation, never its
-input. A cached decision cannot cross a policy, membership, grant, or scope epoch before the pure effect
-interpreter records an effect.
+Five `ActionSpec` values form a sealed `BoundActionRegistry`. Each action fixes its closed effect arm,
+permission, presentation visibility, and idempotence bit. Client and server projections come from that same
+registry and must match an independently authored projection. Missing, unexpected, duplicate, and
+equal-cardinality permission-swapped registries retain distinct refusal constructors.
 
-**Session scope:** one pure authorization/action-registry algebra and reference test interpreter; acceptance
-command `cabal test ui-authorization-spec`; split on any HTTP server, browser runtime, live credential, second
-register, or substrate requirement.
-**Depends on:** [Phase 8](phase_08_scope_index.md) — scope-indexed request contexts, handles, audiences, and flow witnesses.
-**Phase scope:** one cohesive claim — *presentation, dispatch, policy and audit cannot disagree about what a subject may do*. One transition owns the answer, and everything else reads it.
+Authorization combines the sealed registry, a scoped request context, subject/tenant ownership, requested
+permission, and an `AuthoritySnapshot`. The snapshot and presented authority must agree on policy,
+membership, grant, and scope epochs. Only a current, matching decision creates private `CanRead`/`CanInvoke`
+witnesses inside a constructor-private `AuthorizedAction`; the pure effect interpreter accepts no weaker
+input. Client visibility never enters the authorization predicate.
 
-**Substrate:** none — the gate runs hermetically with credential variables scrubbed and network unavailable.
-**Lane:** none ([§L](development_plan_standards.md#l-one-substrate-discipline))
+**Phase scope:** one cohesive claim — presentation, client/server declaration, current policy, request scope,
+and effect admission have one pure decision boundary. Live identity truth, HTTP routing, handler binding,
+provider policy, or tenant-isolation observation splits out.
 
-**Register:** 1 — pure/golden.
-**Gate:** `python3 tools/ui_authorization_gate.py` passes the Phase-0-pinned action/access matrices, current-authority
-replay cases, coverage floors, isolated execution, and both seeded mutants in
-[Gate integrity](#gate-integrity). Live enforcement remains UNVERIFIED until its owning Register-3 phases.
+**Substrate:** `none` — registry construction, reference evaluation, QuickCheck coverage, epoch replay, and
+calculus composition are pure host processes with credentials scrubbed and networking denied
+([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
+
+**Lane:** `none` ([§L](development_plan_phase_model.md#l-one-substrate-discipline)).
+
+**Register:** 1 — pure/generative: independently authored rows and paired controls constrain the decision
+relation; identity-provider truth and runtime/provider enforcement remain UNVERIFIED
+([§K](development_plan_phase_model.md#k-honesty-proven--tested--assumed)).
+
+**Depends on:** [Phase 8](phase_08_scope_index.md) — trusted scoped identity and request contexts; [Phase
+10](phase_10_calculus_composition.md) — the actual five-calculus composition; [Phase
+37](phase_37_ui_program_schema.md) — the constructor-private checked program that is scoped before registry
+binding.
+
+**Gate:** `python3 tools/run_phase_gate.py 38` passes the exact registry, independent decision, parity,
+epoch, generated-coverage, five-calculus, paired-mutant, network-observer, natural-architecture, surface,
+containment, and attestation checks in [Gate integrity](#gate-integrity).
+
+---
 
 ## Gate integrity
 
-Phase 0 commits every expected decision and projection before `Amoebius.Ui.Security.Authorization` exists. The oracle
-side is hand-authored and cannot import the action binder, policy evaluator, plan-digest fold, or projection
-functions under test.
+`action_registry.tsv` names all five action/effect/permission/visibility/idempotence tuples. The suite builds
+the production registry and compares both projections with `AuthorizationReference`, which does not import the
+production module. Source checks enumerate the exact five `ActionEffect` arms and three `Permission` arms and
+prove the seven witness/registry/snapshot constructors remain private.
 
+`authorization_matrix.tsv` has two allows and four refusals, including the two required canaries. A hidden
+action remains invocable when current policy allows it; an action with no policy remains denied even when it
+is visible. Every refusal produces an empty effect trace. The independent evaluator reads explicit fields and
+does not call the production authorization transition.
 
-- **Representative set:** `ReadData`, `MutateData`, `StartWorkflow`, `ObserveWorkflow`, and `EndSession` ports,
-  with tenant-wide, role-shared, subject-owned, and grant-mediated policies. Each allow has a same-action denial
-  differing only in subject, tenant, role, grant, or authority epoch.
-- **Pinned oracles:** `test/fixture/ui_authorization/action_registry.tsv` owns the exact normalized action
-  tuples; `authorization_matrix.tsv` owns `CanRead`/`CanInvoke` allow/deny decisions, including explicit
-  hidden-but-invocable and default-deny rows; `stale_decision_cases.tsv` owns policy/membership/grant/scope
-  epoch outcomes; and `decode_errors.tsv` pins failures.
-- **Independent checks:** a small reference evaluator reads the matrix's explicit predicates and authority
-  version. A separate set comparison reads serialized sealed projections; neither reuses the production
-  evaluator or registry extractor.
-- **Specific negatives:** missing/extra/duplicate action, equal-cardinality permission swap, absent policy,
-  foreign scope, revoked grant, and stale membership/policy/scope epoch each assert a distinct committed
-  `AuthorizationError`.
-- **Generator coverage:** QuickCheck classifies every mismatch class and requires at least 5% denial coverage
-  for absent policy, wrong scope, wrong permission, and stale epoch, plus positive coverage for every effect arm.
-- **Effect discipline:** the pure reference interpreter records an effect only after `AuthorizedAction` exists;
-  every denial and stale replay has an empty trace. Fresh external challenges and real credentials are not
-  applicable in Register 1 and are deliberately deferred to Phases 68 and 81.
-- **Seeded mutants:** `default_allow` changes absent-policy refusal to allow, and
-  `visibility_is_authorization` substitutes the client visibility projection for current server policy. Both
-  are committed from the adopted authorization brief and must turn the matrix red.
+Four parity mutations retain exact `MissingAction`, `UnexpectedAction`, `DuplicateAction`, and
+`ProjectionMismatch` errors. Four replay rows change exactly one of policy, membership, grant, or scope epoch
+and retain distinct stale errors. QuickCheck selects those four refusal dimensions and all five effect arms at
+a 5% minimum per-class floor.
 
-Passing proves correspondence for the checked corpus and properties. It does not prove Keycloak identity truth,
-HTTP routing, handler implementation correctness, or provider-side isolation.
+The `default_allow` control must turn the absent-policy row red at `default-deny`. The
+`visibility_is_authorization` control must turn the hidden-allow and stale-visible decisions red at
+`hidden-invocable+stale`. The subject matches its oracle before mutation, each mutant runs in a separate
+process, and a generic non-zero exit does not satisfy the locus check.
 
-- **Extension conformance (§M.13).** `L1`–`L5`, `C1`–`C7`, `S1`–`S6`; negatives under `test/negative/ui_authorization_kernel/`.
+The artifact, budget, lift, workflow, and evidence components carry the `5,6,8,9,2`
+registry/decision/refusal/property/mutant counts and compose to resource vector `5,30,0,0`. Normal and
+network-denied executions must both report the calculus and authorization tokens. Generated records remain
+beneath `.build/**`.
+
+Passing proves the pure closed authorization relation for this bounded corpus. Identity-provider truth,
+HTTP/server enforcement, live policy updates, and provider-side tenant isolation remain UNVERIFIED.
+
+- **Extension conformance (§M.13).** Not applicable: this phase declares no extension and consumes no linked
+  extension set. Its authorization boundary follows the security-law shape, but it mints no Phase-24
+  extension-conformance verdict.
 
 ## Doctrine adopted
 
-- [`extension_conformance_security.md`](../documents/engineering/extension_conformance_security.md) — uI authorization kernel carries an identity boundary, and S1-S6 are what make crossing it unrepresentable.
-- [`low_code_ui_runtime_doctrine.md` §3 — one checked value, two runtime plans](../documents/engineering/low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans): both projections come from one private bound value.
-- [`low_code_ui_runtime_doctrine.md` §8 — effects are typed ports](../documents/engineering/low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations): the action registry is the sole effect owner.
-- [`low_code_ui_runtime_doctrine.md` §9 — routes, identity, authorization, and the edge](../documents/engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge): presentation never grants authority.
-- [`illegal_state_catalog.md` §3.79](../documents/illegal_state/illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration): default-deny and visibility-independence mutants are mandatory.
+- [`extension_conformance_security.md` §4 — S1–S6](../documents/engineering/extension_conformance_security.md#4-s1s6):
+  claimed identity, request scope, exact permissions, and current authority remain distinct inputs.
+- [`low_code_ui_runtime_doctrine.md` §8 — effects are typed ports, not network operations](../documents/engineering/low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations):
+  the registry owns action/effect meaning and the interpreter consumes only authorization evidence.
+- [`low_code_ui_runtime_doctrine.md` §9 — routes, identity, authorization, and the edge](../documents/engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge):
+  presentation never grants authority and stale decisions cannot execute.
+- [`illegal_state_security.md` §3.79 — a UI action whose server authorization does not match its declaration](../documents/illegal_state/illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration):
+  default-deny and visibility independence remain explicit negative controls.
+
+---
 
 ## Sprints
 
-> **Current validation record.** Every sprint is covered by the 2026-08-15 reseal. Historical dates,
-> pass/seal claims, repository-resident evidence paths, and `Remaining Work: None` statements below describe
-> the pre-amendment capability record only; they do not override current status. Functional and validation
-> outcomes remain target requirements. Any instruction to commit generated output, freeze dependency resolution,
-> retain a resolved version, path, or integrity hash, or consume repository-resident evidence, ledgers, or
-> enumerations is superseded by the current generated-artifact and dynamic-resolution doctrine. Closure was
-> established by the current phase gate plus universal artifact hygiene.
+## Sprint 38.1: Sealed registry and parity ✅
 
-## Sprint 38.1: Sealed action registry and authorized-action transition 📋
-**Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Security/Authorization.hs`,
-`test/spec/ui/AuthorizationSpec.hs`, `test/spec/ui/AuthorizationReference.hs`, and `tools/ui_authorization_gate.py`
-**Blocked by**: None.
-**Independent Validation**: `cabal test ui-authorization-spec` compares
-production results with Phase-0 pins and the separate reference evaluator, verifies empty denied traces, and
-requires each named mutant to fail. The full hermetic gate is
-`python3 tools/ui_authorization_gate.py`.
-**Docs to update**:
-`documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/illegal_state/illegal_state_security.md`, `documents/engineering/testing_doctrine.md`
+**Status**: Done
+**Implementation**: `src/Amoebius/Ui/Security/Authorization.hs`, `test/fixture/ui_authorization/{action_registry,decode_errors}.tsv`, `test/spec/ui/AuthorizationReference.hs`
+**Blocked by**: [Phase 37](phase_37_ui_program_schema.md) gate
+**Independent Validation**: five exact declarations produce equal client/server/reference projections and four one-dimension registry defects retain distinct errors
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/illegal_state/illegal_state_security.md`
 
 ### Objective
 
-Adopt the low-code runtime's single action-registry ownership and state-indexed authorization transition so no
-effect can be represented by a raw action id, client visibility decision, absent policy, mismatched projection,
-or stale authority snapshot.
+Adopt one closed action registry as the source for presentation, server dispatch, permission, and audit
+identity.
 
 ### Deliverables
 
-- Private `BoundActionRegistry`, current `AuthoritySnapshot`, and `AuthorizedAction` types with total bind,
-  projection-parity, policy-evaluation, and freshness checks returning stable structured errors.
-- A total `CanRead`/`CanInvoke` decision that requires current subject, scope, policy, membership, and grant
-  epochs and cannot be reconstructed from visibility state.
-- A tiny pure effect interpreter whose input requires `AuthorizedAction`, used only to establish zero trace on
-  denial and not as the independent decision oracle.
-- Matrix/golden readers, property coverage, stale replay corpus, mutant configurations, and a Register-1 ledger.
+- Five closed action/effect declarations and three closed permission arms.
+- Seven private identifiers, registries, snapshots, actions, and witnesses.
+- Equal client/server projections and four exact registry-parity refusals.
 
 ### Validation
 
-1. Run `cabal test ui-authorization-spec`; exact registry/projection sets and every allow/deny row match their
-   independent pins, including paired own/foreign scope and active/revoked grant cases.
-2. Evaluate under authority A, change one policy/membership/grant/scope epoch to B, and try to reuse A's
-   decision; the pinned cases require recomputation or precise denial and an empty pure effect trace.
-3. Run `default_allow` and `visibility_is_authorization`; the default-deny and hidden-but-invocable rows must
-   turn red respectively.
-4. Verify network and credential access are impossible in the gate process and the ledger marks runtime policy
-   and provider enforcement UNVERIFIED.
+1. Both production projections equal the independently parsed five-row table.
+2. Missing, extra, duplicate, and swapped-permission registries fail distinctly.
+3. Closed-union and constructor-export scans match every owned type.
 
 ### Remaining Work
 
-None in Phase 38. Live identity, UI-server, policy-provider, and tenant-isolation enforcement remains owned by
-the later Register-3 phases and is UNVERIFIED here.
+None.
+
+## Sprint 38.2: Current-authority decision and negative controls ✅
+
+**Status**: Done
+**Implementation**: `src/Amoebius/Ui/Security/Authorization.hs`, `test/fixture/ui_authorization/{authorization_matrix,stale_decision_cases}.tsv`, `test/spec/ui/AuthorizationSpec.hs`, `test/mutant/ui_authorization/**`
+**Blocked by**: Sprint 38.1
+**Independent Validation**: six decisions and four single-epoch replays match an independent evaluator with empty denial traces; nine generated classes and two paired mutants pass
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/testing_doctrine.md`, `documents/illegal_state/illegal_state_security.md`
+
+### Objective
+
+Adopt one current-authority transition whose successful result is the only representable input to the effect
+interpreter.
+
+### Deliverables
+
+- A total authorization transition over registry, policy, scope, owner, permission, and four epochs.
+- Hidden-but-invocable and visible-but-unauthorized canaries plus empty denial traces.
+- Nine generated coverage classes and two paired semantic mutants.
+
+### Validation
+
+1. All six matrix decisions agree with the independent evaluator and pinned verdict.
+2. Each single-epoch replay fails with its own constructor before an effect is recorded.
+3. Both mutants redden at their exact authored loci.
+
+### Remaining Work
+
+None.
+
+## Sprint 38.3: Calculus projection and phase seal ✅
+
+**Status**: Done
+**Implementation**: `test/oracle/ui_authorization/{calculus_projection,validation_locus}.tsv`, `test/oracle/ui_authorization_surfaces.tsv`, `tools/ui_authorization_gate.py`
+**Blocked by**: Sprint 38.2
+**Independent Validation**: the real five-calculus values match all four projection rows and normal/network-denied suite executions report both acceptance tokens
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/testing_doctrine.md`
+
+### Objective
+
+Seal the pure authorization claim with current calculus, architecture, surface, containment, and attestation
+evidence.
+
+### Deliverables
+
+- A real five-calculus composition over the phase's bounded sets.
+- Linux and Darwin network-denial observers plus a natural-architecture declaration.
+- A complete surface/ledger join with live identity/provider residues retained as UNVERIFIED.
+
+### Validation
+
+1. Calculus order, names, counts, and resource vector match the authored table.
+2. Normal and isolated runs pass and both explicit mutant processes fail exactly.
+3. All universal gate sides pass without changing an authored path.
+
+### Remaining Work
+
+None.
+
+---
 
 ## Documentation Requirements
 
-**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+**Engineering docs to update when the gate seals:**
 
-- `documents/engineering/low_code_ui_runtime_doctrine.md` — record pure action-registry and authorization
-  evidence without claiming live enforcement.
-- `documents/illegal_state/illegal_state_security.md` — attach §3.79 gadt-decode fixture and mutant evidence.
-- `documents/engineering/testing_doctrine.md` — register the independent authorization-matrix and stale-replay
-  oracle pattern.
+- `documents/engineering/low_code_ui_runtime_doctrine.md` — record pure registry/current-authority evidence
+  without claiming live enforcement.
+- `documents/illegal_state/illegal_state_security.md` — attach the exact default-deny, visibility, and stale
+  controls.
+- `documents/engineering/testing_doctrine.md` — record the independent authorization-reference pattern.
 
-**Cross-references to add:**
+**Cross-references to update:**
 
 - `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, and
-  `DEVELOPMENT_PLAN/system_components.md` — index the phase, gate, `none` substrate, and module ownership.
-- Later UI server/boundary phases — consume `AuthorizedAction`; do not reproduce the policy evaluator.
+  `DEVELOPMENT_PLAN/system_components.md` — record the seal and honest live residues.
+
+---
 
 ## Related Documents
 
-- [Phase 8](phase_08_scope_index.md) — the required scoped identity and flow kernel.
-- [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — action ownership, server authorization, and freshness contract.
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — independent authored expectations and evidence registers.
-- [Illegal-State Security Slice](../documents/illegal_state/illegal_state_security.md) — authorization parity and visibility-bypass failures.
+- [Development Plan Tracker](README.md) — phase order and current status.
+- [Development Plan Standards](development_plan_standards.md) — phase shape, register honesty, and gate integrity.
+- [Phase 8](phase_08_scope_index.md) — trusted scoped identity.
+- [Phase 10](phase_10_calculus_composition.md) — five-calculus composition.
+- [Phase 37](phase_37_ui_program_schema.md) — checked program admission.
+- [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — action ownership and authorization freshness.
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — independent authored expectations.
+- [Illegal-State Security Slice](../documents/illegal_state/illegal_state_security.md) — authorization-parity and visibility-bypass failures.

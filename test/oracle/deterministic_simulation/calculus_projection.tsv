@@ -1,0 +1,5 @@
+calculus-order	artifact,budget,lift,workflow,evidence
+component-names	artifact,budget,lift,workflow,evidence
+resource-total	15,150,1500,15
+published-commands	activate:artifact,activate:budget,activate:evidence,activate:lift,activate:workflow
+outcome	upheld

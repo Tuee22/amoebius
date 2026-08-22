@@ -37,8 +37,9 @@ between the parts, owned by [host_cluster_comms_doctrine.md](./host_cluster_comm
 
 **Pure scheduler read-side status.** The [Phase 29 gate](../../DEVELOPMENT_PLAN/phase_29_execution_accelerator_folds.md)
 validates the aggregate snapshot/root-version reservation guard, absent-Pod recovery debit, and the pure
-Reserved→BindingInFlight→Bound state algebra. Phase 59 subsequently delivered the same-binary live scheduler
-role and Kubernetes Binding effects; the earlier Phase-29 ledger is `external-run-reference`.
+Reserved→BindingInFlight→Bound state algebra. Its 2026-08-21 reseal uses only the bounded Phase-29 suite and
+retains exact execution source/epoch controls. Phase 59 subsequently delivered the same-binary live scheduler
+role and Kubernetes Binding effects; the pure Phase-29 ledger is `external-run-reference`.
 
 <a id="1-one-binary-three-contexts"></a>
 
@@ -87,7 +88,8 @@ named behaviours are libraries inside one binary, not separate products.
 
 [Phase 43](../../DEVELOPMENT_PLAN/phase_43_ui_server_boundary.md) supplies the local executable-boundary
 evidence: the existing `amoebius` artifact accepts the `serve-ui` responsibility and refuses readiness on
-missing, duplicate, contract-mismatched, or ABI-mismatched handler registries. This is Register-2 evidence
+missing, duplicate, contract-mismatched, or ABI-mismatched handler registries, while one additional
+unreferenced handler remains legal and unreachable. This is Register-2 evidence
 against local fakes; an in-cluster worker deployment and replica lifecycle remain UNVERIFIED.
 
 This document owns *which contexts exist and what each is for*. **How** the host daemon communicates — the

@@ -469,7 +469,16 @@ flowchart TD
   classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
 
-*Design intent. The loop's invariants are model-checked and its decision core is replayed under injected fault schedules before any live phase runs, so the shape below is an amoebius result rather than sibling evidence; the sibling prodbox project remains corroboration, never proof. Bounded-time convergence against real infrastructure stays runtime-checked.*
+*Validated boundary: the diagram mixes bounded Phase-18/19 results with later design intent.*
+
+Phase 18 checks a six-state reconcile-protocol model with four safety invariants and one fair-liveness
+property. Its actual-code projection distinguishes only the adjacent `Unreachable → RefuseOnUnreachable` and
+`Present → RemoveNode 1` decisions in `NodeProvisioner`. Phase 19 adds a standalone pure
+`ObservedInventory → DesiredIndex → Either Refusal ActionSet` core: nine actual/reference cases, two exact
+fixed points, four convergent modeled-store schedules, and a Delete constructor requiring an
+`Observation 'IsPresent`. Its snapshot-token race accepts one writer, and its actual scheduler reservation
+reading retains one debit across three crash cuts. The wider effectful loop and bounded-time convergence
+against real infrastructure remain UNVERIFIED; prodbox remains corroborating sibling evidence, not proof.
 
 - **`discover → diff → enact → re-observe`, idempotent by construction.** The loop runs until stable or it
   times out. Re-running a half-finished bring-up or teardown **converges** instead of erroring — crash
@@ -510,8 +519,10 @@ flowchart TD
   control-plane daemon (total cluster + secret authority), whose single-instance delegation and worker-role model
   are owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md).
 
-> **Honesty.** This reconciler model is *proven in prodbox* for AWS teardown; that is **evidence from a > sibling system, not proof in amoebius**, which has not built Phases 9–10/20–21. Read every prescriptive
-> statement here as design intent, never as a tested amoebius result
+> **Honesty.** Phase 18 proves only the bounded reconcile model; Phase 19 tests only the pure core and modeled
+> schedules named above. The whole effectful reconciler is not thereby proven in amoebius. AWS teardown results from
+> prodbox are evidence from a sibling system, not amoebius proof; read the remaining prescriptive statements
+> as design intent unless a later phase records its own gate
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---

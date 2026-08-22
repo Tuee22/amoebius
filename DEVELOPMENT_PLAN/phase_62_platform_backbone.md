@@ -136,7 +136,7 @@ on a real cluster, emitting a proven/tested/assumed ledger that names Register 3
 
 **Depends on:** [Phase 61](phase_61_vault_pki.md) — the root Vault and PKI, the secrets floor every backbone service reads its credentials through.
 
-**Gate:** `python3 tools/platform_backbone_gate.py --execute` passes: the backbone comes up HA from generated
+**Gate:** `python3 tools/run_phase_gate.py 62` passes: the backbone comes up HA from generated
 manifests, both data planes round-trip, and the hot tier holds under its offload cap. Its apparatus is
 [Gate integrity](#gate-integrity).
 

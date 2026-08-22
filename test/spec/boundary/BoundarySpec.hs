@@ -35,6 +35,7 @@ main = do
       ["--mutant=mB3_path_resolve"] -> reject "mB3_path_resolve" (boundaryPathCaught outcome)
       _ -> do
         assert (boundaryGreen outcome) "boundary transcript or byte oracle drifted"
+        putStrLn "boundary-invariants: PASS (1 exact byte relay, 1 hostile PATH canary)"
         putStrLn "boundary-spec: PASS (4 real-binary invocations, 3 invoked tools, 1 zero-invocation helm control, exact argv and bytes, absolute paths, 3 mutants)"
 
 data BoundaryOutcome = BoundaryOutcome
@@ -60,7 +61,7 @@ runBoundary runDirectory = do
           : ("AMOEBIUS_TRANSCRIPT_DIR", transcriptDirectory)
           : filter ((`notElem` ["PATH", "AMOEBIUS_TRANSCRIPT_DIR"]) . fst) inherited
       fake tool = fakeDirectory </> tool
-      manifest = root </> "test/golden/manifest/objectstore_singlenode.json.golden"
+      manifest = root </> "test/fixture/chain_boundary/boundary/apply_input.json"
       command =
         (proc binary ["dev", "boundary-fixture", fake "kubectl", fake "docker", fake "helm", fake "pulumi", manifest])
           { env = Just hostileEnvironment
@@ -68,6 +69,8 @@ runBoundary runDirectory = do
   (exitCode, _, stderrText) <- readCreateProcessWithExitCode command ""
   assert (exitCode == ExitSuccess) ("real binary failed against fakes: " <> stderrText)
   argvMatches <- and <$> mapM (checkArgv transcriptDirectory fake) expectedTranscripts
+  actualKubectlArguments <- drop 1 . lines <$> readFile (transcriptDirectory </> "kubectl.1.argv")
+  expectedKubectlArguments <- lines <$> readFile "test/golden/chain_boundary/argv/kubectl.1.argv.golden"
   manifestBytes <- ByteString.readFile manifest
   appliedBytes <- ByteString.readFile (transcriptDirectory </> "kubectl.1.stdin")
   emptyDocker1 <- ByteString.null <$> ByteString.readFile (transcriptDirectory </> "docker.1.stdin")
@@ -90,12 +93,16 @@ runBoundary runDirectory = do
           && pulumiPresent
           && not helmPresent
           && not sabotagePresent
+          && pathCanary
   pure
     BoundaryOutcome
       { boundaryGreen = green
-      , boundaryArgvCaught = argvMatches
-      , boundaryBytesCaught = appliedBytes /= flipFirstByte manifestBytes
-      , boundaryPathCaught = pathCanary
+      , boundaryArgvCaught =
+          argvMatches
+            && actualKubectlArguments == expectedKubectlArguments
+            && actualKubectlArguments /= dropLast expectedKubectlArguments
+      , boundaryBytesCaught = appliedBytes == manifestBytes && appliedBytes /= flipFirstByte manifestBytes
+      , boundaryPathCaught = not sabotagePresent && pathCanary
       }
 
 expectedTranscripts :: [(FilePath, FilePath)]
@@ -120,6 +127,11 @@ flipFirstByte :: ByteString.ByteString -> ByteString.ByteString
 flipFirstByte bytes = case ByteString.uncons bytes of
   Nothing -> "x"
   Just (first, remaining) -> ByteString.cons (first + 1) remaining
+
+dropLast :: [a] -> [a]
+dropLast values = case reverse values of
+  [] -> []
+  _ : remaining -> reverse remaining
 
 runPathCanary :: FilePath -> FilePath -> [(String, String)] -> IO Bool
 runPathCanary decoyDirectory sabotageMarker hostileEnvironment = do

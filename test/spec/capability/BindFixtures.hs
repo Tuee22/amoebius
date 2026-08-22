@@ -7,7 +7,6 @@ module BindFixtures
   , singleBinding
   , distributedBinding
   , fixturePath
-  , goldenPath
   ) where
 
 import Amoebius.Capability.Types
@@ -73,14 +72,6 @@ fixturePath fixture shape =
     <> "_"
     <> shapeSlug shape
     <> ".dhall"
-
-goldenPath :: CapabilityFixture -> ServiceShape -> FilePath
-goldenPath fixture shape =
-  "test/golden/capability/golden_servicespec_"
-    <> Text.unpack (fixtureSlug fixture)
-    <> "_"
-    <> shapeSlug shape
-    <> ".golden"
 
 shapeSlug :: ServiceShape -> String
 shapeSlug shape = case shape of
